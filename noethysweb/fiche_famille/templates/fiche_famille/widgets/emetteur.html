@@ -1,0 +1,38 @@
+{% load static %}
+{% load embed %}
+
+
+<select id="{{ id }}" name="{{ name }}" style="width: 100%;" data-minimum-input-length="0" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2" required {{ disabled }}>
+    {% for choix in choices %}
+        <option value="{{ choix.0 }}" {% if value == choix.0 %}selected{% endif %}>{{ choix.1 }}</option>
+    {% endfor %}
+</select>
+
+<script>
+
+    var dict_images = {};
+    {% for choix in choices %}
+        {% if choix.2 %}
+            dict_images["{{ choix.0 }}"] = "{{ choix.2 }}";
+        {% endif %}
+    {% endfor %}
+
+    function formate_emetteur (state) {
+        if (!state.id) {
+            return state.text;
+        }
+        if (state.element.value in dict_images) {
+            var $state = $("<span><img src='{% get_media_prefix %}" + dict_images[state.element.value] + "' class='img-flag rounded'' style='max-width: 80px;margin-right: 20px;'/> " + state.text + "</span>");
+        } else {
+            var $state = $("<span>" + state.text + "</span>");
+        }
+        return $state;
+    };
+
+    $(document).ready(function() {
+        $("#{{ id }}").select2({
+            templateResult: formate_emetteur
+        });
+    });
+</script>
+

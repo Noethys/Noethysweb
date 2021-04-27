@@ -1,0 +1,107 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+
+    <style type="text/css">
+        .widget-user-2 .widget-user-username, .widget-user-2 .widget-user-desc {
+            margin-left: 0px;
+        }
+    </style>
+
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card card-widget widget-user-2">
+
+                {# Nom de la famille #}
+                <div class="widget-user-header bg-lightblue">
+                    <h3 class="widget-user-username">{{ famille.nom }}</h3>
+                </div>
+
+                {# Onglets la famille #}
+{#                <div class="card-footer p-0 bg-white">#}
+{#                    <ul class="nav flex-column">#}
+{#                        {% for onglet in liste_onglets %}#}
+{#                            <li class="nav-item {% if onglet_actif == onglet.code %}active{% endif %}">#}
+{#                                <a class="nav-link" href="{% url onglet.url idfamille=famille.idfamille %}">#}
+{#                                    <i class="fa {{ onglet.icone }} text-light-blue fa-fw"></i> {{ onglet.label }}#}
+{#                                </a>#}
+{#                            </li>#}
+{#                        {% endfor %}#}
+{#                    </ul>#}
+{#                </div>#}
+
+                <div class="card-footer p-0 bg-white">
+                    <ul class="list-group list-group-flush">
+                        {% for onglet in liste_onglets %}
+                            <a class="list-group-item list-group-item-action {% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% url onglet.url idfamille=famille.idfamille %}">
+                                <i class="fa {{ onglet.icone }} text-light-blue fa-fw"></i> {{ onglet.label }}
+                            </a>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+            </div>
+
+            {# Box Informations sur la famille #}
+            <div class="card card-outline card-lightblue">
+                <div class="card-header">
+                    <h3 class="card-title">Informations</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <strong><i class="fa fa-users margin-r-5"></i> Membres</strong>
+                    <div>
+                        {% for num_categorie, nom_categorie in categories_utilisees %}
+                            <span class="text-muted" style="font-size: 11px;">{{ nom_categorie }}s</span>
+                            <ul class="list-unstyled" style="margin-bottom: 0px;margin-left: 10px;">
+                                {% for rattachement in rattachements %}
+                                    {% if rattachement.categorie == num_categorie %}
+                                        <li><a href="{% url 'individu_resume' idfamille=idfamille idindividu=rattachement.individu.idindividu %}"><i class="fa fa-angle-right"></i> {{ rattachement.individu.Get_nom }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% endfor %}
+                    </div>
+
+                    <hr>
+
+                    <strong><i class="fa fa-file-text-o margin-r-5"></i> Détails de la fiche</strong>
+                    <p class="text-muted">Créée le {{ famille.date_creation|date:"j F Y" }}<br>ID Famille : {{ famille.pk }}</p>
+                </div>
+            </div>
+
+        </div>
+
+        {% block detail_famille %}
+            <div class="col-md-9">
+                {% embed 'core/box.html' %}
+                    {% block box_theme %}card-outline card-lightblue{% endblock %}
+                    {% block box_titre %}{{ box_titre }}{% endblock %}
+                    {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+                    {% block box_contenu %}
+                    {% endblock %}
+
+                {% endembed %}
+            </div>
+        {% endblock %}
+
+    </div>
+
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+{% endblock scripts %}

@@ -1,0 +1,344 @@
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>
+{% endblock scripts %}
+
+
+<style>
+
+    #div_id_ventilation {
+        margin-bottom: 0px;
+    }
+    #table_ventilation {
+        cursor: pointer;
+        vertical-align: middle;
+        font-size: 13px;
+    }
+    #div_table_ventilation th, td {
+        padding: 6px !important;
+    }
+    #div_table_ventilation th {
+        font-size: 12px;
+        text-align: center;
+        vertical-align: middle;
+        height: 20px;
+    }
+    #table_ventilation .montant {
+        text-align: right;
+    }
+    .ligne_regroupement {
+        background-color: #f1f1f1;
+        font-weight: bold;
+    }
+    .ventilation_totale {
+        background-color: #00A65A;
+    }
+    .ventilation_partielle {
+        background-color: #FFC125;
+    }
+    .ventilation_nulle {
+        background-color: #fc1d1d;
+    }
+    .non_inclus {
+        background-color: #dcdcdc;
+    }
+    .inclus {
+        background-color: #ffffff;
+    }
+    .noselect {
+      -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+         -khtml-user-select: none; /* Konqueror HTML */
+           -moz-user-select: none; /* Old versions of Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+                user-select: none;} /* Non-prefixed version, currently
+
+
+</style>
+
+<script>
+    var dict_lignes = {};
+    var dict_regroupements = {};
+    var montant_prestation = 0.0;
+
+    class Regroupement {
+        constructor(data) {
+            this.key_regroupement = null;
+            this.mode_regroupement = 'mois';
+            this.total_ventilation = 0.0;
+
+            if (data) {
+                Object.assign(this, data);
+                this.case_titre = "#regroupement_" + this.key_regroupement + "_titre";
+                this.case_montant_prestation = "#regroupement_" + this.key_regroupement + "_montant_prestation";
+                this.case_reste_ventilation = "#regroupement_" + this.key_regroupement + "_reste_ventilation";
+                this.case_ventilation_reglement = "#regroupement_" + this.key_regroupement + "_ventilation_reglement";
+            };
+
+            // Affichage du titre du regroupement
+            var titre = this.key_regroupement;
+            if (this.mode_regroupement == 'mois') {
+                var periode = this.key_regroupement.split("_");
+                var liste_mois = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+                titre = liste_mois[periode[1]-1] + " " + periode[0];
+            };
+            if (this.mode_regroupement == 'facture') {
+                if (this.key_regroupement === "None") {titre = "Non facturé"};
+            };
+            $(this.case_titre).html(titre);
+            this.maj_affichage();
+        };
+
+        click() {
+            var self = this;
+            $.each(dict_lignes, function (key, ligne) {
+                if (this.ligne_regroupement == self) {
+                    if (self.total_ventilation > 0) {
+                        this.deventile();
+                    } else {
+                        this.ventile();
+                    }
+                    this.maj_affichage();
+                };
+            });
+            maj_statut_ventilation();
+            this.maj_affichage();
+        };
+
+        maj_affichage() {
+            var montant_prestation = 0.0;
+            var reste_ventilation = 0.0;
+            var ventilation_reglement = 0.0;
+            var self = this;
+            $.each(dict_lignes, function (key, ligne) {
+                if (this.ligne_regroupement == self) {
+                    montant_prestation += this.montant_prestation;
+                    reste_ventilation += this.reste_ventilation;
+                    ventilation_reglement += this.ventilation_reglement;
+                };
+            });
+            $(this.case_montant_prestation).html(format_montant(montant_prestation));
+            $(this.case_reste_ventilation).html(format_montant(reste_ventilation));
+            $(this.case_ventilation_reglement).html(format_montant(ventilation_reglement));
+            this.total_ventilation = ventilation_reglement;
+        };
+
+    };
+
+
+    class Ligne {
+        constructor(data) {
+            this.idprestation = null;
+            this.montant_prestation = null;
+            this.ventilation_initiale = 0.0;
+            this.reste_ventilation = 0.0;
+            this.ventilation_reglement = 0.0;
+            this.ligne_regroupement = null;
+
+            if (data) {
+                Object.assign(this, data);
+                this.case_reste_ventilation = "#prestation_" + this.idprestation + "_reste_ventilation";
+                this.case_ventilation_reglement = "#prestation_" + this.idprestation + "_ventilation_reglement";
+            };
+
+            this.maj_affichage();
+        };
+
+        ventile(forcer=false) {
+            var credit = get_credit();
+            var montant = this.reste_ventilation
+            if ((forcer === false) && (credit < this.reste_ventilation) && (credit >= 0)) {
+                montant = credit;
+            };
+            this.ventilation_reglement += montant;
+            this.reste_ventilation -= montant;
+            this.maj_affichage();
+            maj_statut_ventilation();
+            this.ligne_regroupement.maj_affichage();
+        }
+
+        deventile() {
+            this.reste_ventilation += this.ventilation_reglement;
+            this.ventilation_reglement = 0.0;
+            this.maj_affichage();
+            maj_statut_ventilation();
+            this.ligne_regroupement.maj_affichage();
+        }
+
+        click() {
+            if (this.ventilation_reglement > 0) {
+                this.deventile();
+            } else {
+                this.ventile();
+            };
+        };
+
+        maj_affichage() {
+            // MAJ case reste à ventiler
+            $(this.case_reste_ventilation).removeClass("ventilation_nulle ventilation_partielle ventilation_totale");
+            if (this.reste_ventilation === this.montant_prestation) {$(this.case_reste_ventilation).addClass("ventilation_nulle")};
+            if ((this.reste_ventilation < this.montant_prestation) && (this.reste_ventilation > 0)) {$(this.case_reste_ventilation).addClass("ventilation_partielle")};
+            if (this.reste_ventilation === 0.0) {$(this.case_reste_ventilation).addClass("ventilation_totale")};
+            $(this.case_reste_ventilation).html(format_montant(this.reste_ventilation));
+
+            // MAJ case ventilation règlement
+            $(this.case_ventilation_reglement).removeClass("non_inclus inclus");
+            if (this.ventilation_reglement === 0) {$(this.case_ventilation_reglement).addClass("non_inclus")};
+            if (this.ventilation_reglement > 0) {$(this.case_ventilation_reglement).addClass("inclus")};
+            $(this.case_ventilation_reglement).html(format_montant(this.ventilation_reglement));
+
+        };
+
+    };
+
+    function get_total_ventilation() {
+        var total = 0.0;
+        $.each(dict_lignes, function (key, ligne) {
+            total += ligne.ventilation_reglement;
+        });
+        return total;
+    };
+
+    function get_credit() {
+        return $("#id_montant").val() - get_total_ventilation();
+    };
+
+    function format_montant(montant) {
+        return montant.toFixed(2) + " €";
+    };
+
+    function maj_statut_ventilation() {
+        var credit = get_credit();
+        $("#statut_ventilation").removeClass("text-green text-red text-orange");
+        if ($("#id_montant").val() == 0.0) {
+                texte = "Vous devez saisir le montant du règlement";
+                $("#statut_ventilation").addClass("text-orange");
+                $("#icone_statut_ventilation").html("<i class='fa fa-exclamation-triangle text-orange'></i>");
+        } else {
+            if (credit > 0) {
+                texte = "Vous pouvez encore ventiler " + format_montant(credit);
+                $("#statut_ventilation").addClass("text-orange");
+                $("#icone_statut_ventilation").html("<i class='fa fa-exclamation-triangle text-orange'></i>");
+            }
+            ;
+            if (credit < 0) {
+                texte = "Vous avez ventilé " + format_montant(-credit) + " en trop !";
+                $("#statut_ventilation").addClass("text-red");
+                $("#icone_statut_ventilation").html("<i class='fa fa-times-circle text-red'></i>");
+            }
+            ;
+            if (credit === 0) {
+                texte = "Le règlement est correctement ventilé";
+                $("#statut_ventilation").addClass("text-green");
+                $("#icone_statut_ventilation").html("<i class='fa fa-check-circle-o text-green'></i>");
+            };
+        };
+        $("#statut_ventilation").val(texte);
+    };
+
+    function get_resultats_json() {
+        var resultats = [];
+        $.each(dict_lignes, function (key, ligne) {
+            if (this.ventilation_reglement > 0) {
+                resultats.push({"idprestation": this.idprestation, "montant": this.ventilation_reglement});
+            };
+        });
+        return resultats;
+    };
+
+    function initialisation() {
+
+        // Initialise le freezeTable
+        $('#div_table_ventilation').freezeTable({
+            'scrollable': true,
+        });
+
+        // MAJ le statut général
+        maj_statut_ventilation();
+
+        // Si click sur une ligne de regroupement
+        $("#table_ventilation tr[class*='ligne_regroupement']").click(function (e) {
+            dict_regroupements[this.id].click();
+        });
+
+        // Si click sur une ligne de prestation
+        $("#table_ventilation tr[class*='ligne_prestation']").click(function (e) {
+            dict_lignes[this.id].click();
+        });
+
+        // Bouton ventilation auto
+        $("#bouton_ventiler_auto").click(function (e) {
+            $.each(dict_lignes, function (key, ligne) {
+                ligne.ventile();
+            });
+        });
+
+        // Bouton ventilation tout
+        $("#bouton_ventiler_tout").click(function (e) {
+            $.each(dict_lignes, function (key, ligne) {
+                ligne.ventile(forcer=true);
+            });
+        });
+
+        // Bouton ventilation rien
+        $("#bouton_ventiler_rien").click(function (e) {
+            $.each(dict_lignes, function (key, ligne) {
+                ligne.deventile();
+            });
+        });
+
+        $('#id_montant').on("input",function(event){
+            maj_statut_ventilation();
+        });
+
+    };
+
+    function maj_table() {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_get_ventilation' %}",
+            data: {
+                regroupement: $("#id_mode_regroupement").val(),
+                idfamille: idfamille,
+                idreglement: idreglement,
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+            },
+            success: function (data) {
+                $("#table_ventilation tbody").html(data);
+                initialisation();
+            }
+        });
+    };
+
+    $(document).ready(function() {
+        // Lors de la sélection du mode de regroupement
+        $('#id_mode_regroupement').on("change",function(event){
+            maj_table();
+        });
+
+        // Validation du formulaire
+        $("#famille_reglements_form").submit(function( event ) {
+            // Validation de la ventilation
+            if (get_credit() < 0) {
+                toastr.error("Vous ne pouvez pas ventiler un montant supérieur au montant du règlement");
+                return false;
+            }
+            // Récupération des données de ventilation
+            var resultats = JSON.stringify(get_resultats_json());
+            $("#id_ventilation").val(resultats);
+            // event.preventDefault();
+            return;
+        });
+
+        maj_table();
+
+    });
+
+
+</script>
+
+{# Contrôle pour envoyer le résultat de la ventilation à python #}
+<input name="{{ name }}" id="{{ id }}" type="text" value="" hidden>
+

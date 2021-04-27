@@ -1,0 +1,61 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+{% endblock styles %}
+
+
+{% block contenu_page %}
+
+    <script>
+        var dict_options = JSON.parse('{{ data.options_json|escapejs }}');
+    </script>
+
+    <div class="row">
+        <div class="col-md-3" >
+
+            <!-- Sélection des paramètres -->
+            {% include "consommations/grille_parametres.html" %}
+
+            <!-- Box facturation -->
+            {% include "consommations/grille_facturation.html" %}
+
+            <!-- Box envoi Email -->
+            {% include 'outils/modal_editeur_emails.html' %}
+
+        </div>
+
+        <div class="col-md-9">
+
+            <!-- Grille -->
+            {% include "consommations/grille.html" %}
+
+        </div>
+
+    </div>
+
+
+{% endblock contenu_page %}
+
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        function Get_classes() {
+            return []
+        }
+        function Get_groupes() {
+            return [];
+        };
+    </script>
+
+{% endblock scripts %}
+
+
+

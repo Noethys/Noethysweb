@@ -1,0 +1,289 @@
+{% load static %}
+{% load embed %}
+
+<script src="{% static 'lib/css-element-queries/ResizeSensor.js' %}"></script>
+<script src="{% static 'lib/css-element-queries/ElementQueries.js' %}"></script>
+{#<script src="{% static "lib/jsplumb/jsplumb.min.js" %}"></script>#}
+
+<style>
+
+    .composition_famille {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        padding-left: 20px;
+        padding-right: 20px;
+        background-color: #e4e4e4;
+    }
+    .dark-mode .composition_famille {
+        background-color: #727272;
+    }
+
+    .nom_categorie {
+        text-align: center;
+        color: #ffffff;
+        font-size: 12px;
+        display: block;
+    }
+
+    .homme {
+        border-left: 5px solid #3c8dbc;
+    }
+    .femme {
+        border-left: 5px solid #ff96ff;
+    }
+    .vignette .card-header {
+        height: 5px;
+        padding: 0px;
+        border: 0px;
+    }
+    .vignette .card-body {
+        padding: 10px;
+        min-height: 85px;
+    }
+    .vignette .vignette-nom {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        font-size: 15px;
+        font-weight: 600;
+    }
+    .vignette-nom > a:hover {
+        color: #000000 !important;
+    }
+    .vignette .vignette-detail {
+        margin-top: 0px;
+        margin-bottom: 0px;
+        font-size: 12px;
+        font-weight: 200;
+        opacity: 0.7;
+    }
+    .vignette-contenu {
+        margin-top: 5px;
+        margin-left: 90px;
+    }
+    .vignette .vignette-image > img {
+        margin-left: 10px;
+        margin-top: 10px;
+        width: 65px;
+        height: auto;
+        float: left;
+    }
+    .vignette .card-footer {
+        padding: 0px;
+    }
+
+    .vertical-align-vertical {
+        display: block;
+    }
+    .vertical-align-horizontal {
+        display: flex;
+        align-items: center;
+    }
+
+    .cacher {
+        display: none;
+    }
+
+    .image_titulaire {
+        position:absolute;
+        margin-left: 6px;
+        font-size: 10px;
+        opacity: 0.2;
+    }
+
+    .bouton_actions {
+        margin: -8px;
+        padding-right: 3px;
+    }
+    .bouton_actions > a {
+        color: #ffffff3d;
+        padding: 1px 2px;
+    }
+
+</style>
+
+<div class="composition_famille">
+
+    <div class="row categories_horizontales">
+        {% for num_categorie, nom_categorie in categories_utilisees %}
+            <div class="col-sm-{% if categories_utilisees|length == 3 %}4{% elif categories_utilisees|length == 2 %}6{% else %}12{% endif %}" style="{% if num_categorie == 1 %}padding-left: 0px{% elif num_categorie == 3 %}padding-right: 0px{% endif %}">
+                <p class="nom_categorie">{{ nom_categorie }}s</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div id="row_composition" class="row">
+
+        {% for num_categorie, nom_categorie in categories_utilisees %}
+            <div class="colonne col-sm-{% if categories_utilisees|length == 3 %}4{% elif categories_utilisees|length == 2 %}6{% else %}12{% endif %}">
+
+                <div class="categories_verticales">
+                    <p class="nom_categorie">{{ nom_categorie }}s</p>
+                </div>
+
+                <div>
+                    {% for rattachement in rattachements %}
+                        {% if rattachement.categorie == num_categorie %}
+                        <div class="card card-widget vignette shadow {% if rattachement.individu.Get_sexe == "F" %}femme{% else %}homme{% endif %}" id="individu_{{ rattachement.individu_id }}">
+
+{% comment %}
+                            <div class="ribbon-wrapper">
+                                <div class="ribbon bg-lightblue">
+                                    Info
+                                </div>
+                            </div>
+{% endcomment %}
+
+                            <div class="card-header bg-light"></div>
+                            <div class="vignette-body bg-light">
+
+                                {% if rattachement.titulaire %}
+                                    <i class="fa fa-star image_titulaire" title="Titulaire du dossier"></i>
+                                {% endif %}
+
+                                <div class="vignette-image">
+                                    {% if rattachement.individu.Get_photo %}<img class="rounded-circle" src="{{ rattachement.individu.Get_photo }}">{% endif %}
+                                </div>
+
+                                <div class="vignette-contenu">
+
+                                    <h3 class="vignette-nom"><a href="{% url 'individu_resume' idfamille=idfamille idindividu=rattachement.individu.idindividu %}">{{ rattachement.individu.Get_nom }}</a></h3>
+                                    <h5 class="vignette-detail">
+                                        <ul class="list-unstyled" style="margin-bottom: 2px;">
+
+                                            {% if rattachement.individu.date_naiss %}
+                                                <li>Né{% if rattachement.individu.Get_sexe == "F" %}e{% endif %} le {{ rattachement.individu.date_naiss }} <span style="white-space: nowrap;">({{ rattachement.individu.Get_age }} ans)</span></li>
+                                            {% endif %}
+
+                                            <li><span style="white-space: nowrap;">{{ rattachement.individu.rue_resid|default:"" }}</span> <span style="white-space: nowrap;">{{ rattachement.individu.cp_resid|default:"" }} {{ rattachement.individu.ville_resid|default:"" }}</span></li>
+
+                                            {% if rattachement.individu.tel_domicile or rattachement.individu.tel_mobile %}
+                                                <li>
+                                                    {% if rattachement.individu.tel_domicile %}<span style="white-space: nowrap;"><i class="fa fa-phone"></i> {{ rattachement.individu.tel_domicile }}</span>{% endif %}
+                                                    {% if rattachement.individu.tel_mobile %}<span style="white-space: nowrap;"><i class="fa fa-mobile"></i> {{ rattachement.individu.tel_mobile }}</span>{% endif %}
+                                                </li>
+                                            {% endif %}
+
+                                        </ul>
+                                    </h5>
+                                </div>
+                            </div>
+
+                            <div class="card-footer bg-light">
+                                <div class="text-right">
+
+                                    <a type='button' class='btn btn-light btn-sm' title="Ouvrir la grille des consommations" href='{% url 'famille_consommations' idfamille=idfamille idindividu=rattachement.individu.idindividu %}'><i class="fa fa-calendar"></i></a>
+                                    <a type='button' class='btn btn-light btn-sm dropdown-toggle' title="Ouvrir le menu" data-toggle="dropdown" href='#'><i class="fa fa-bars"></i></a>
+                                    <ul class="dropdown-menu">
+                                        {# Accéder à la grille des conso #}
+                                        <li class="dropdown-item"><a href="{% url 'famille_consommations' idfamille=idfamille idindividu=rattachement.individu.idindividu %}"><i class="fa fa-calendar"></i> Grille des consommations</a></li>
+
+                                        {# Ouvrir et supprimr la fiche individuelle #}
+                                        <li class="dropdown-divider"></li>
+                                        <li class="dropdown-item"><a href="{% url 'individu_resume' idfamille=idfamille idindividu=rattachement.individu.idindividu %}"><i class="fa fa-pencil"></i> Ouvrir la fiche</a></li>
+                                        <li class="dropdown-item"><a href="{% url 'individu_supprimer' idfamille=idfamille idindividu=rattachement.individu.idindividu %}"><i class="fa fa-trash"></i> Supprimer la fiche</a></li>
+                                        <li class="dropdown-item"><a href="{% url 'individu_detacher' idfamille=idfamille idindividu=rattachement.individu.idindividu %}"><i class="fa fa-unlink"></i> Détacher la fiche</a></li>
+
+                                        {# Modifier titulaire #}
+                                        {% if rattachement.categorie == 1 %}
+                                            <li class="dropdown-divider"></li>
+                                            <li class="dropdown-item"><a class="definir_titulaire" href="#" id="titulaire_{{ rattachement.pk }}"><i class="fa fa-star"></i> {% if rattachement.titulaire == True %}Ne pas définir comme titulaire{% else %}Définir comme titulaire{% endif %}</a></li>
+                                        {% endif %}
+
+                                        {# Changer catégorie #}
+                                        <li class="dropdown-divider"></li>
+                                        {% if rattachement.categorie != 1 %}<li class="dropdown-item"><a class="changer_categorie" href="#" id="categorie_{{ rattachement.pk }}_1"><i class="fa fa-exchange"></i> Convertir en représentant</a></li>{% endif %}
+                                        {% if rattachement.categorie != 2 %}<li class="dropdown-item"><a class="changer_categorie" href="#" id="categorie_{{ rattachement.pk }}_2"><i class="fa fa-exchange"></i> Convertir en enfant</a></li>{% endif %}
+                                        {% if rattachement.categorie != 3 %}<li class="dropdown-item"><a class="changer_categorie" href="#" id="categorie_{{ rattachement.pk }}_3"><i class="fa fa-exchange"></i> Convertir en contact</a></li>{% endif %}
+                                    </ul>
+
+                                </div>
+                            </div>
+
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+<script>
+
+    {# Affichage responsive de la composition #}
+    new ResizeSensor(jQuery('#row_composition'), function(){
+        largeur = $('#row_composition').width();
+        if (largeur > 500) {
+            {# Affiche horizontal #}
+            $('.colonne').removeClass("col-sm-12").addClass("col-sm-{% if categories_utilisees|length == 3 %}4{% elif categories_utilisees|length == 2 %}6{% else %}12{% endif %}");
+            $('#row_composition').removeClass("vertical-align-vertical").addClass("vertical-align-horizontal");
+            $('.categories_horizontales').removeClass("cacher");
+            $('.categories_verticales').addClass("cacher");
+        }
+        else {
+            {# Affiche vertical #}
+            $('.colonne').removeClass("col-sm-{% if categories_utilisees|length == 3 %}4{% elif categories_utilisees|length == 2 %}6{% else %}12{% endif %}").addClass("col-sm-12");
+            $('#row_composition').removeClass("vertical-align-horizontal").addClass("vertical-align-vertical");
+             $('.categories_horizontales').addClass("cacher");
+             $('.categories_verticales').removeClass("cacher");
+        }
+    });
+
+$(document).ready(function(){
+    $('.definir_titulaire').on('click', function(){
+        idrattachement = $(this).attr('id').split("_")[1];
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_definir_titulaire' %}",
+            data: {'idrattachement': idrattachement},
+            success: function (data) {
+                window.location.href = "{% url 'famille_resume' idfamille=idfamille %}";
+            },
+        });
+    });
+});
+
+$(document).ready(function(){
+    $('.changer_categorie').on('click', function(){
+        idrattachement = $(this).attr('id').split("_")[1];
+        categorie = $(this).attr('id').split("_")[2];
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_changer_categorie' %}",
+            data: {'idrattachement': idrattachement, 'categorie': categorie},
+            success: function (data) {
+                window.location.href = "{% url 'famille_resume' idfamille=idfamille %}";
+            },
+        });
+    });
+
+
+
+});
+
+
+
+{% comment %}
+jsPlumb.ready(function() {
+
+    jsPlumb.Defaults.Endpoint = "Blank";
+    var container = document.getElementById("row_composition");
+    jsPlumb.setContainer(container);
+
+    var endpointOptions = {isSource: true, isTarget: true};
+    var d1 = jsPlumb.addEndpoint( $('#individu_1'), {anchor: "Bottom"}, endpointOptions);
+    var d2 = jsPlumb.addEndpoint( $('#individu_2'), {anchor: "LeftMiddle"}, endpointOptions);
+
+    jsPlumb.connect({
+        source: d1,
+        target: d2,
+        detachable: false,
+    });
+
+})
+{% endcomment %}
+
+</script>
+

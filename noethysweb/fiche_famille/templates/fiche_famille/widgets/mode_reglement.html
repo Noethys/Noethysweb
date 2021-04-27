@@ -1,0 +1,72 @@
+{% load static %}
+{% load embed %}
+
+<select id="{{ id }}" name="{{ name }}" data-minimum-input-length="0" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2" required {{ disabled }}>
+    {% for choix in choices %}
+        <option value="{{ choix.0 }}" data-image="{{ choix.2 }}" {% if value == choix.0 %}selected{% endif %}>{{ choix.1 }}</option>
+    {% endfor %}
+</select>
+
+<script>
+    function formate_mode (state) {
+        if (!state.id) {
+            return state.text;
+        }
+        if (state.element.dataset.image) {
+            var $state = $("<span><img src='{% get_media_prefix %}" + state.element.dataset.image + "' class='img-flag rounded'' style='max-width: 80px;margin-right: 20px;'/> " + state.text + "</span>");
+        } else {
+            var $state = $("<span>"+ state.text + "</span>");
+        }
+        return $state;
+    };
+
+    $(document).ready(function() {
+        $("#{{ id }}").select2({
+            templateResult: formate_mode,
+        });
+
+        $('#{{ id }}').on("change",function(event){
+            var idmode = $("#{{ id }}").val();
+            var idemetteur = $('#id_emetteur').val();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_on_selection_mode_reglement' %}",
+                data: {
+                    idmode: idmode,
+                },
+                datatype: "json",
+                success:function(data){
+                    // Remplit le select Emetteurs
+                    if (data.emetteurs.length > 0) {
+                        $('#id_emetteur').empty();
+                        $('#id_emetteur').select2({
+                            data: data.emetteurs
+                        });
+                        $("#id_emetteur").select2({
+                            templateResult: formate_emetteur
+                        });
+                        if (idemetteur) {
+                            $("#id_emetteur").val(idemetteur).trigger('change');
+                        }
+                        $("#div_id_emetteur").show();
+                    } else {
+                        $("#div_id_emetteur").hide();
+                    };
+                    // Affiche ou masque le champ numéro de pièce
+                    if (data.numero_piece) {
+                        $("#div_id_numero_piece").show();
+                    } else {
+                        $("#div_id_numero_piece").hide();
+                    };
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        });
+
+        $("#{{ id }}").trigger("change");
+
+    });
+</script>
+

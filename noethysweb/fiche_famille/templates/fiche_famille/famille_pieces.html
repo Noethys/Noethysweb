@@ -1,0 +1,23 @@
+{% extends "fiche_famille/famille_liste.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_famille %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+            {% block box_contenu %}
+                {% embed "individus/alerte.html" with items=pieces_fournir titre="Pièces à fournir"%}{% endembed %}
+                {% embed 'core/crud/liste.html' %}{% endembed %}
+            {% endblock box_contenu %}
+
+            {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+        {% endembed %}
+    </div>
+{% endblock %}
+

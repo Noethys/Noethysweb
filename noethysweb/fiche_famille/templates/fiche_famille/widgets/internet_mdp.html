@@ -1,0 +1,50 @@
+{% load static %}
+
+<div class="input-group">
+    <input id="{{ id }}" name="{{ name }}" value="{{ value }}" class="form-control"/>
+    <div class="input-group-append">
+        <button id="{{ id }}_generer_mdp" title="Générer un nouveau mot de passe" class="btn btn-default" type="button"><i class="fa fa-refresh"></i></button>
+    </div>
+</div>
+
+<script>
+
+    function verrouillage_ctrl() {
+        var mdp = $("#{{ id }}").val();
+        if (mdp.indexOf('custom') === 0) {
+            $("#{{ id }}").prop('type', 'password');
+            $("#{{ id }}").prop('readonly', true);
+        } else {
+            $("#{{ id }}").prop('type', 'text');
+            $("#{{ id }}").prop('readonly', false);
+        }
+    };
+
+    $(document).ready(function() {
+
+        verrouillage_ctrl()
+
+        $("#{{ id }}_generer_mdp").on('click', function(event) {
+            bootbox.dialog({
+                title: "Confirmation",
+                message: "Souhaitez-vous vraiment générer un nouveau mot de passe ?",
+                buttons: {
+                    ok: {
+                        label: "<i class='fa fa-check'></i> Valider",
+                        className: 'btn-primary',
+                        callback: function(){
+                            regenerer_mdp();
+                        }
+                    },
+                    cancel: {
+                        label: "<i class='fa fa-ban'></i> Annuler",
+                        className: 'btn-danger',
+                    }
+                }
+            });
+
+        });
+
+    });
+</script>
+

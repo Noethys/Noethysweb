@@ -1,0 +1,53 @@
+{% load static %}
+{% load embed %}
+
+
+{% group_by_mois prestations mode_regroupement as prestations %}
+
+{% for regroupement in prestations %}
+    <tr id="regroupement_{{ regroupement }}" class="ligne_regroupement">
+        <td id="regroupement_{{ regroupement }}_titre" colspan="4">{{ regroupement }}</td>
+        <td id="regroupement_{{ regroupement }}_montant_prestation" class="montant"></td>
+        <td id="regroupement_{{ regroupement }}_reste_ventilation" class="montant"></td>
+        <td id="regroupement_{{ regroupement }}_ventilation_reglement" class="montant"></td>
+    </tr>
+
+    <script>
+        var regroupement = new Regroupement({
+            key_regroupement: "{{ regroupement }}" ,
+            mode_regroupement: "{{ mode_regroupement }}",
+        });
+        dict_regroupements["regroupement_{{ regroupement }}"] = regroupement;
+    </script>
+
+    {% for prestation in prestations|get_item:regroupement %}
+        <tr id="prestation_{{ prestation.pk }}" class="ligne_prestation">
+            <td>{{ prestation.date|date:"l j F Y"|title }}</td>
+            <td>{{ prestation.individu.prenom|default:"" }}</td>
+            <td>{{ prestation.label }}</td>
+            <td style="text-align: center;">{{ prestation.facture.numero|default:"" }}</td>
+            <td id="prestation_{{ prestation.pk }}_montant_prestation" class="montant_prestation montant">{{ prestation.montant|montant }}</td>
+            <td id="prestation_{{ prestation.pk }}_reste_ventilation" class="reste_ventilation montant">{{ prestation.reste_ventilation|montant }}</td>
+            <td id="prestation_{{ prestation.pk }}_ventilation_reglement" class="ventilation_reglement montant">{{ prestation.ventilation_reglement|montant }}</td>
+        </tr>
+
+        <script>
+            var ligne = new Ligne({
+                idprestation: {{ prestation.pk }},
+                montant_prestation: parseFloat({{ prestation.montant|stringformat:".2f" }}),
+                ventilation_initiale: parseFloat({{ prestation.reste_ventilation|stringformat:".2f" }}),
+                reste_ventilation: parseFloat({{ prestation.reste_ventilation|stringformat:".2f" }}),
+                ventilation_reglement: parseFloat({{ prestation.ventilation_reglement|stringformat:".2f" }}),
+                ligne_regroupement: regroupement,
+            });
+            dict_lignes["prestation_{{ prestation.pk }}"] = ligne;
+        </script>
+
+    {% endfor %}
+
+    <script>
+        regroupement.maj_affichage();
+    </script>
+
+{% endfor %}
+

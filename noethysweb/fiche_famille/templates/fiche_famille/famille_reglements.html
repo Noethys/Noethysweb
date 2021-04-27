@@ -1,0 +1,71 @@
+{% extends "fiche_famille/famille_liste.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_famille %}
+    <div class="col-md-9">
+
+        {# Liste des règlements de la famille #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+            {% block box_contenu %}
+                {% embed 'core/crud/liste.html' %}{% endembed %}
+            {% endblock box_contenu %}
+
+            {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+        {% endembed %}
+
+        {# Liste des reçus de la famille #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Autres fonctions{% endblock %}
+            {% block box_introduction %}Accédez ici aux autres fonctions{% endblock %}
+
+            {% block box_contenu %}
+                 <a class="btn btn-default" href="{% url 'famille_recus_liste' idfamille=idfamille %}">Liste des reçus de règlements</a>
+            {% endblock box_contenu %}
+        {% endembed %}
+
+        {# Envoi des reçus par Email #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}{% if famille.email_recus %}box-success{% else %}box-danger{% endif %}{% endblock %}
+            {% block box_titre %}Envoi des reçus par Email{% endblock %}
+            {% block box_introduction %}Cliquez sur le bouton Modifier pour activer ou désactiver l'abonnement au service d'envoi des reçus par Email.{% endblock %}
+            {% block box_contenu %}
+                {% if famille.email_recus %}
+                    <span class='text-green'><i class='fa fa-check'></i> L'envoi des reçus par Email est activé.</span>
+                {% else %}
+                    <span class='text-red'><i class='fa fa-close'></i> L'envoi des reçus par Email n'est pas activé.</span>
+                {% endif %}
+                <div class="pull-right">
+                    <a type='button' class='btn btn-default btn-sm' href="{% url 'famille_abo_recus_email' idfamille=idfamille %}"><i class="fa fa-pencil"></i></a>
+                </div>
+            {% endblock box_contenu %}
+        {% endembed %}
+
+        {# Envoi des avis d'encaissement par Email #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}{% if famille.email_depots %}box-success{% else %}box-danger{% endif %}{% endblock %}
+            {% block box_titre %}Envoi des avis d'encaissement par Email{% endblock %}
+            {% block box_introduction %}Cliquez sur le bouton Modifier pour activer ou désactiver l'abonnement au service d'envoi des avis d'encaissement par Email.{% endblock %}
+            {% block box_contenu %}
+                {% if famille.email_depots %}
+                    <span class='text-green'><i class='fa fa-check'></i> L'envoi des avis d'encaissement par Email est activé.</span>
+                {% else %}
+                    <span class='text-red'><i class='fa fa-close'></i> L'envoi des avis d'encaissement par Email n'est pas activé.</span>
+                {% endif %}
+                <div class="pull-right">
+                    <a type='button' class='btn btn-default btn-sm' href="{% url 'famille_abo_depots_email' idfamille=idfamille %}"><i class="fa fa-pencil"></i></a>
+                </div>
+            {% endblock box_contenu %}
+        {% endembed %}
+
+
+    </div>
+{% endblock %}
+

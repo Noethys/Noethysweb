@@ -1,0 +1,39 @@
+{% extends "fiche_famille/famille.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_famille %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}box-danger{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+                {% if erreurs_protection %}
+
+                    <div class="alert alert-danger alert-dismissible">
+                        <h5><i class="icon fa fa-ban"></i> Détachement impossible</h5>
+                        Le détachement de {{ object }} est impossible car cet individu est rattaché à la famille par les données suivantes : {{ erreurs_protection }}.
+                    </div>
+                    <a class="btn btn-default float-right" href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{{ view.get_success_url }}{% endif %}"><i class='fa fa-reply margin-r-5'></i>Revenir à la page précédente</a>
+
+                {% else %}
+
+                    <form method="post">{% csrf_token %}
+                        <p>Voulez-vous vraiment détacher {{ object }} de cette famille ?</p><br>
+                        <div class="pull-right">
+                            <button type="submit" title="Détacher" class='btn btn-warning'><i class="fa fa-unlink margin-r-5"></i>Détacher</button>
+                            <input type='hidden' name='next' value='{{ request.GET.next }}'>
+                            <a class="btn btn-danger" href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{{ view.get_success_url }}{% endif %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                        </div>
+                    </form>
+
+                {% endif %}
+            {% endblock %}
+        {% endembed %}
+    </div>
+{% endblock %}
+
+

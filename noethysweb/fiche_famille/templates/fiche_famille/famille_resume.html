@@ -1,0 +1,130 @@
+{% extends "fiche_famille/famille.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+
+{% block detail_famille %}
+    <div class="col-md-9">
+
+        {# Caractéristiques #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Composition de la famille{% endblock %}
+            {% block box_outils %}
+                <a type="button" class="btn btn-success btn-xs" style="margin-right: 10px;" title="Ajouter un individu" href="{% url 'individu_ajouter' idfamille=idfamille %}"><i class="fa fa-plus"></i> Ajouter</a>
+            {% endblock %}
+            {% block card_body_classe %}
+                p-0
+            {% endblock %}
+            {% block box_contenu %}
+                {% embed 'fiche_famille/famille_composition.html' %}
+                {% endembed %}
+            {% endblock %}
+        {% endembed %}
+
+        {# Rubriques #}
+{% comment %}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Rubriques{% endblock %}
+            {% block box_contenu %}
+                {% for onglet in liste_onglets|slice:"1:" %}
+                    <a class="btn btn-app" href="{% url onglet.url idfamille=famille.idfamille %}" style="font-size: 12px !important;">
+                        <i class="fa {{ onglet.icone }}"></i> {{ onglet.label }}
+                    </a>
+                {% endfor %}
+            {% endblock %}
+        {% endembed %}
+{% endcomment %}
+
+        {# Widgets informations #}
+        <div class="row">
+
+            <div class="col-md-4">
+                <div class="info-box">
+                    <span class="info-box-icon bg-{% if solde > 0 %}red{% else %}lightblue{% endif %}"><i class="fa fa-euro"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Solde</span>
+                        <span class="info-box-number">{{ solde|montant }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="info-box">
+                    <span class="info-box-icon bg-{% if pieces_fournir|length %}orange{% else %}lightblue{% endif %}"><i class="fa fa-warning"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Alertes</span>
+                        <span class="info-box-number">{{ pieces_fournir|length }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="info-box">
+                    <span class="info-box-icon bg-{% if messages_famille|length %}orange{% else %}lightblue{% endif %}"><i class="fa fa-envelope-o"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Messages</span>
+                        <span class="info-box-number">{{ messages_famille|length }}</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {# Alertes #}
+        {% if pieces_fournir %}
+            {% embed 'core/box.html' %}
+                {% block box_theme %}box-warning{% endblock %}
+                {% block box_titre %}Alertes{% endblock %}
+                {% block box_contenu %}
+
+                    {# Pièces à fournir #}
+                    {% embed "individus/alerte.html" with items=pieces_fournir titre="Pièces à fournir"%}{% endembed %}
+
+                {% endblock %}
+            {% endembed %}
+        {% endif %}
+
+        {# Messages #}
+        <style>
+            .todo-list > li .text {
+                display: inline;
+                margin-left: 0px;
+                font-weight: 400;
+            }
+        </style>
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Messages{% endblock %}
+            {% block box_outils %}
+                <a type="button" class="btn btn-success btn-xs" style="margin-right: 10px;" title="Ajouter un message" href="{% url 'famille_messages_ajouter' idfamille=famille.idfamille %}"><i class="fa fa-plus"></i> Ajouter</a>
+            {% endblock %}
+            {% block box_contenu %}
+                <ul class="todo-list">
+                    {% for message in messages_famille %}
+                    <li>
+                        <div class="tools pull-right">
+                            <a type="button" class="btn btn-default btn-xs" title="Modifier" href="{% url 'famille_messages_modifier' idfamille=message.famille_id pk=message.pk %}"><i class="fa fa-pencil"></i></a>
+                            <a type="button" class="btn btn-default btn-xs" title="Supprimer" href="{% url 'famille_messages_supprimer' idfamille=message.famille_id pk=message.pk %}"><i class="fa fa-trash-o"></i></a>
+                        </div>
+                        <span class="text">
+                            {{ message.date_saisie|date:"d/m/Y" }} : {{ message.texte }}
+                        </span>
+                        {% if message.priorite == "HAUTE" %}
+                            <small class="badge badge-danger"><i class="fa fa-exclamation-triangle"></i> Important</small>
+                        {% endif %}
+                    </li>
+                    {% empty %}
+                        Aucun message
+                    {% endfor %}
+                </ul>
+            {% endblock %}
+        {% endembed %}
+
+    </div>
+{% endblock %}
+
+
