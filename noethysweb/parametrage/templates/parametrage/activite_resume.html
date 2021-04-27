@@ -1,0 +1,207 @@
+{% extends "parametrage/activite.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/chartjs/Chart.min.css' %}">
+{% endblock styles %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/chartjs/Chart.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/moment/moment.min.js' %}"></script>
+{% endblock scripts %}
+
+
+{% block detail_activite %}
+    <div class="col-md-9">
+
+        {# Caractéristiques #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Caractéristiques{% endblock %}
+            {% block box_contenu %}
+                <dl class="row caracteristiques">
+                    <dt class="col-sm-4">Nom de l'activité</dt><dd class="col-sm-8">{{ activite.nom }}</dd>
+                    <dt class="col-sm-4">Période de validité</dt>
+                    {% if activite.date_fin|date:"Y" == "2999" %}
+                        <dd class="col-sm-8">Illimitée</dd>
+                    {% elif activite.date_debut and activite.date_fin %}
+                        <dd class="col-sm-8">Du {{ activite.date_debut }} au {{ activite.date_fin }}</dd>
+                    {% endif %}
+                    <dt class="col-sm-4">Groupes d'activités</dt><dd class="col-sm-8">{{ activite.groupes_activites.all|join:", " }}</dd>
+                    <dt class="col-sm-4">Date de création</dt><dd class="col-sm-8">{{ activite.date_creation|date:"j F Y" }}</dd>
+                    <dt class="col-sm-4">ID Activité</dt><dd class="col-sm-8">{{ activite.pk }}</dd>
+                    <dt class="col-sm-4">Inscriptions</dt><dd class="col-sm-8">{{ stats_inscrits }} inscrits</dd>
+                </dl>
+            {% endblock %}
+        {% endembed %}
+
+        {# Rubriques #}
+{% comment %}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Rubriques{% endblock %}
+            {% block box_contenu %}
+                {% for onglet in liste_onglets|slice:"1:" %}
+                    <a class="btn btn-app" href="{% url onglet.url idactivite=activite.idactivite %}" style="font-size: 12px !important;">
+                        <i class="fa {{ onglet.icone }}"></i> {{ onglet.label }}
+                    </a>
+                {% endfor %}
+            {% endblock %}
+        {% endembed %}
+{% endcomment %}
+
+        {# Statistiques #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Inscriptions{% endblock %}
+            {% block box_contenu %}
+
+                {% if not stats_inscriptions %}
+                    Aucune inscription
+                {% else %}
+                    {# Chart Inscriptions #}
+                    <canvas id="chart_inscriptions" width="400" height="100"></canvas>
+                    <script>
+                        let data_inscriptions = {}
+                        data_inscriptions.labels = []
+                        data_inscriptions.valeurs = []
+                        {% for item in stats_inscriptions %}
+                            data_inscriptions.labels.push(moment().year({{ item.0 }}).month({{ item.1 }}).date(1).startOf('day'))
+                            data_inscriptions.valeurs.push({{ item.2 }})
+                        {% endfor %}
+
+                        var ctx_inscriptions = document.getElementById('chart_inscriptions').getContext('2d');
+                        var chart_inscriptions = new Chart(ctx_inscriptions, {
+                            type: 'line',
+                            data: {
+                                labels: data_inscriptions.labels,
+                                datasets: [{
+                                    label: data_inscriptions.labels,
+                                    data: data_inscriptions.valeurs,
+                                    backgroundColor: 'rgba(60, 141, 188, 0.5)',
+                                    pointRadius: 2,
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                title: {
+                                    display: false
+                                },
+                                legend: {
+                                    display: false
+                                },
+                                tooltips: {
+                                    callbacks: {
+                                        label: function (tooltipItem, data) {
+                                            return parseInt(tooltipItem.value)
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    xAxes: [{
+                                        type: 'time',
+                                        gridLines: {
+                                            display: true
+                                        },
+                                        time: {
+                                            minUnit: 'month',
+                                            displayFormats: {
+                                                month: 'MM/YYYY'
+                                            }
+                                        }
+                                    }]
+                                }
+                            }
+                        });
+                    </script>
+                {% endif %}
+
+{% comment %}
+                <div class="row">
+
+                    {# Chart des groupes #}
+                    <div class="col-md-6">
+                        <canvas id="chart_groupes"></canvas>
+                        <script>
+                            let data_groupes = {}
+                            data_groupes.labels = []
+                            data_groupes.valeurs = []
+                            {% for item in stats_groupes %}
+                                data_groupes.labels.push("{{ item.groupe__nom }}")
+                                data_groupes.valeurs.push({{ item.nbre }})
+                            {% endfor %}
+
+                            var ctx_groupes = document.getElementById('chart_groupes').getContext('2d');
+                            var chart_groupes = new Chart(ctx_groupes, {
+                                type: 'pie',
+                                data: {
+                                    datasets: [{
+                                        data: data_groupes.valeurs,
+                                        backgroundColor: [
+                                            'rgba(255, 99, 132, 0.5)',
+                                            'rgba(54, 162, 235, 0.5)',
+                                            'rgba(255, 206, 86, 0.5)',
+                                            'rgba(75, 192, 192, 0.5)',
+                                            'rgba(153, 102, 255, 0.5)',
+                                            'rgba(255, 159, 64, 0.5)'
+                                        ],
+                                    }],
+                                    labels: data_groupes.labels
+                                },
+                                options: {
+                                    responsive: true
+                                }
+                            });
+                        </script>
+                    </div>
+
+                    {# Chart des catégories #}
+                    <div class="col-md-6">
+                        <canvas id="chart_categories"></canvas>
+                        <script>
+                            let data_categories = {}
+                            data_categories.labels = []
+                            data_categories.valeurs = []
+                            {% for item in stats_categories %}
+                                data_categories.labels.push("{{ item.categorie_tarif__nom }}")
+                                data_categories.valeurs.push({{ item.nbre }})
+                            {% endfor %}
+
+                            var ctx_categories = document.getElementById('chart_categories').getContext('2d');
+                            var chart_categories = new Chart(ctx_categories, {
+                                type: 'pie',
+                                data: {
+                                    datasets: [{
+                                        data: data_categories.valeurs,
+                                        backgroundColor: [
+                                            'rgba(255, 99, 132, 0.5)',
+                                            'rgba(54, 162, 235, 0.5)',
+                                            'rgba(255, 206, 86, 0.5)',
+                                            'rgba(75, 192, 192, 0.5)',
+                                            'rgba(153, 102, 255, 0.5)',
+                                            'rgba(255, 159, 64, 0.5)'
+                                        ],
+                                    }],
+                                    labels: data_categories.labels
+                                },
+                                options: {
+                                    responsive: true
+                                }
+                            });
+                        </script>
+                    </div>
+
+                </div>
+{% endcomment %}
+
+            {% endblock %}
+        {% endembed %}
+
+    </div>
+{% endblock %}
+
+

@@ -1,0 +1,362 @@
+{% extends "parametrage/activite_edit.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+
+    #div_calendrier {
+        height: 450px !important;
+        overflow-y: scroll;
+        width: 100%;
+    }
+
+    .visible_header th {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background-color: #ffffff;
+    }
+
+    .calendrier_ouvertures>tbody>tr>td, .calendrier_ouvertures>tbody>tr>th, .calendrier_ouvertures>tfoot>tr>td, .calendrier_ouvertures>tfoot>tr>th, .calendrier_ouvertures>thead>tr>td, .calendrier_ouvertures>thead>tr>th {
+        padding: 5px;
+        vertical-align: middle;
+        text-align: center;
+    }
+    .ligne_date {
+        font-weight: bold;
+        text-align: center;
+        background-color: #ececec;
+        text-align: left !important;
+        padding: 0px !important;
+        vertical-align: middle;
+    }
+    .ligne_vacance {
+        background-color: #F3FD89;
+    }
+    .ligne_ferie {
+        background-color: #828282;
+    }
+    .bouton_copier, .bouton_coller, .bouton_effacer {
+        font-size: 11px;
+    }
+
+    /* Case de base */
+    .calendrier_ouvertures .case {
+        cursor: pointer;
+        height: 40px;
+        position: relative;
+        width: 60px;
+        overflow: hidden;
+        padding: 4px !important;
+    }
+
+    /* Etats des cases */
+    .ouvert {
+        background-color: #FF9E1E !important;
+    }
+    .fermeture {
+        background-color: #e7e7e7;
+    }
+    .infos {
+        font-size: 11px;
+        color: #ffffff;
+        opacity: 0.6;
+    }
+
+    .masquer {
+        display: none;
+    }
+</style>
+
+{% endblock styles %}
+
+
+
+{% block scripts %}
+    {{ block.super }}
+
+    <script>
+
+    var dict_cases = {};
+    var ouvertures_modifications = {};
+    var remplissages_modifications = {};
+    var ouvertures_initial = {};
+    var remplissages_initial = {};
+    var ouvertures_copier = {};
+    var remplissages_copier = {};
+
+
+    class Case_ouverture {
+        constructor(data) {
+            this.key = null;
+            this.ouvert = false;
+            this.nbre_conso = 0;
+            this.nbre_evenements = 0;
+
+            // Remplit à partir du dict data fourni
+            if (data) {Object.assign(this, data)};
+
+            // Dessine la case
+            $("#" + this.key).html("<span class='infos'></span>");
+            this.maj_affichage();
+        };
+
+        maj_affichage() {
+            // Affichage des informations
+            var texte_infos = "";
+            if (this.nbre_conso > 0) {
+                texte_infos += "<span title='Nombre de consommations associées'><i class='fa fa-user'></i> " + this.nbre_conso + "<span>";
+            }
+            if (this.nbre_evenements > 0) {
+                if (this.nbre_conso > 0) {texte_infos += ""};
+                texte_infos += "<span title='Nombre événements associés'><i class='fa fa-calendar-times-o'></i> " + this.nbre_evenements + "<span>";
+            }
+            $("#" + this.key + " .infos").html(texte_infos);
+
+            // Blocage
+            if (!$("#" + this.key).hasClass("verrouillage") && (this.nbre_conso > 0 || this.nbre_evenements > 0)) {
+                $("#" + this.key).addClass("verrouillage");
+            };
+
+            // Ouverture ou fermeture
+            if (this.ouvert === true) {
+                $("#" + this.key).removeClass("fermeture");
+                $("#" + this.key).addClass("ouvert");
+            } else {
+                if ($("#" + this.key).hasClass("ouvert")) {
+                    $("#" + this.key).removeClass("ouvert");
+                    $("#" + this.key).addClass("fermeture");
+                };
+            }
+        };
+
+        set_etat(statut) {
+            if (statut === true) {
+                this.ouvrir()
+            } else {
+                this.fermer()
+            };
+        };
+
+        ouvrir() {
+            this.ouvert = true;
+            ouvertures_modifications[this.key] = true;
+            this.maj_affichage();
+        };
+
+        fermer() {
+            if (this.nbre_conso > 0 || this.nbre_evenements > 0) {
+                toastr.error("Vous ne pouvez pas fermer une ouverture qui est déjà associée à une consommation ou un événement");
+                return false;
+            };
+            this.ouvert = false;
+            ouvertures_modifications[this.key] = false;
+            this.maj_affichage();
+        };
+
+    };
+
+    $(function () {
+
+        {% include 'core/csrftoken.html' %}
+
+        // Clic sur les cases
+        var isMouseDown = false, statut, ancienne_case;
+        $(document).on('mousedown', ".calendrier_ouvertures .case", function (e) {
+            // Si clic gauche de la souris
+            if (e.which === 1) {
+                isMouseDown = true;
+                var case_tableau = dict_cases[$(this).attr('id')];
+                statut = !case_tableau.ouvert;
+                case_tableau.set_etat(statut);
+                return false; // prevent text selection
+            }
+        });
+        $(document).on('mouseover', ".calendrier_ouvertures .case", function (e) {
+            var case_tableau = dict_cases[$(this).attr('id')];
+            if (isMouseDown && ancienne_case !== case_tableau) {
+                case_tableau.set_etat(statut);
+            }
+            ancienne_case = case_tableau;
+        });
+        $(document).mouseup(function () {
+            isMouseDown = false;
+        });
+
+        // Copier une date
+        $('#div_calendrier').on('click', '.bouton_copier', function (){
+            id = $(this)[0].parentElement.id;
+            date = id.split("_")[1];
+
+            // Vide la mémoire
+            ouvertures_copier = {};
+            remplissages_copier = {};
+
+            // Recherche les ouvertures à copier
+            $("td[id^='ouverture_" + date + "']").each(function( index ) {
+                id = $(this)[0].id
+                id = id.replace(date, "X");
+                ouvertures_copier[id] = $(this).hasClass("ouvert");
+            });
+
+            // Recherche les remplissages à copier
+            $("input[id^='remplissage_" + date + "']").each(function( index ) {
+                id = $(this)[0].id
+                id = id.replace(date, "X");
+                remplissages_copier[id] = $(this).val();
+            });
+        });
+
+        // Coller une date
+        $('#div_calendrier').on('click', '.bouton_coller', function (){
+            id = $(this)[0].parentElement.id;
+            date = id.split("_")[1];
+
+            // Colle les ouvertures
+            for (key in ouvertures_copier) {
+                newkey = key.replace("X", date);
+                case_tableau = dict_cases[newkey];
+                case_tableau.set_etat(ouvertures_copier[key]);
+            }
+
+            // Colle les remplissages
+            for (key in remplissages_copier) {
+                newkey = key.replace("X", date);
+                $("input[id='" + newkey + "']").val(remplissages_copier[key]);
+                remplissages_modifications[newkey] = parseInt(remplissages_copier[key]);
+            }
+        });
+
+        // Effacer une date
+        $('#div_calendrier').on('click', '.bouton_effacer', function (){
+            id = $(this)[0].parentElement.id;
+            date = id.split("_")[1];
+            // Efface les ouvertures
+            $("td[id^='ouverture_" + date + "']").each(function( index ) {
+                case_tableau = dict_cases[$(this)[0].id];
+                case_tableau.set_etat(false);
+            });
+
+            // Efface les remplissages
+            $("input[id^='remplissage_" + date + "']").each(function( index ) {
+                $(this).val('');
+                remplissages_modifications[$(this)[0].id] = '';
+            });
+        });
+
+        // choix_mois
+        $('.monthpickerwidget').on('changeDate', function (e) {
+            $('#in_progress').removeClass("masquer");
+            // $('.commandes').addClass("masquer");
+            $('#div_calendrier').addClass("masquer");
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_get_calendrier_ouvertures' %}",
+                data: {
+                    "mois": e.date.getMonth(),
+                    "annee": e.date.getFullYear(),
+                    "idactivite": {{ idactivite }},
+                    },
+                datatype: "json",
+                success:function(data){
+                    $('#in_progress').addClass("masquer");
+                    // $('.commandes').removeClass("masquer");
+                    $('#div_calendrier').removeClass("masquer");
+                    $("#id_calendrier").html(data);
+                }
+            })
+        });
+
+        // label_type
+        function On_change_action_type() {
+            $('#div_id_date_modele').hide();
+            if($(this).val() == 'COPIER_DATE') {
+                $('#div_id_date_modele').show();
+            }
+        }
+        $(document).ready(function() {
+            $('#id_action_type').change(On_change_action_type);
+            On_change_action_type.call($('#id_action_type').get(0));
+        });
+
+    });
+
+    </script>
+
+{% endblock scripts %}
+
+
+{% block detail_activite %}
+    {{ block.super }}
+
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_traitement_lot{% endblock %}
+        {% block modal_titre %}Saisie et suppression par lot{% endblock %}
+        {% block modal_body %}
+            <div id="modal_erreurs" class="text-red"></div>
+            <form method="post">
+                {% crispy form_lot %}
+            </form>
+        {% endblock %}
+    {% endembed %}
+
+    <script>
+
+        // Modal : Validation du traitement par lot
+        $(document).on('submit', 'div.modal-body form', function(e) {
+            e.preventDefault();
+            var data = $(this).serializeArray();
+            data.push({name: 'idactivite', value: {{ idactivite }} });
+            data.push({name: 'ouvertures_modifications', value: JSON.stringify(ouvertures_modifications) });
+            data.push({name: 'ouvertures_modifications', value: JSON.stringify(ouvertures_modifications) });
+            data.push({name: 'remplissages_modifications', value: JSON.stringify(remplissages_modifications) });
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_traitement_lot_ouvertures' %}",
+                data: data,
+                success: function(data) {
+                    ouvertures_modifications = data.ouvertures_modifications;
+                    remplissages_modifications = data.remplissages_modifications;
+                    date = $('.monthpickerwidget').datepicker("getDate");
+                    $('.monthpickerwidget').datepicker("setDate", date);
+                    $('#modal_traitement_lot').modal('hide');
+                },
+                error: function(data) {
+                    $("#modal_erreurs").html(data.responseJSON.erreur);
+                }
+            });
+        });
+
+        // Validation du form calendrier
+        $("#form_calendrier_ouvertures").on('submit', function(event) {
+            event.preventDefault();
+            var data = {
+                    "ouvertures_modifications" : JSON.stringify(ouvertures_modifications),
+                    "remplissages_modifications" : JSON.stringify(remplissages_modifications),
+                    "idactivite": {{ idactivite }},
+                };
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_valider_calendrier_ouvertures' %}",
+                data: data,
+                success: function (data) {
+                    window.location.href = "{% url 'activites_calendrier' idactivite=idactivite %}";
+                },
+                fail: function (data) {
+                    console.log("erreur :");
+                    console.log(data);
+                }
+            });
+        });
+
+    </script>
+
+{% endblock %}
+
+

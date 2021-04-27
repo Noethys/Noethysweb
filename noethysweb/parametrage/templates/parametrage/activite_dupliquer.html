@@ -1,0 +1,22 @@
+{% extends "parametrage/activite.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_activite %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+            {% block box_contenu %}
+                {% embed 'core/crud/dupliquer.html' %}{% endembed %}
+            {% endblock %}
+
+        {% endembed %}
+    </div>
+{% endblock %}
+
+

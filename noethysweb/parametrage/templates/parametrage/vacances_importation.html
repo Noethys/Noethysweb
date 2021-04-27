@@ -1,0 +1,70 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load embed %}
+
+{% block contenu_page %}
+{% embed 'core/box.html' %}
+    {% block box_theme %}card-outline card-lightblue{% endblock %}
+    {% block box_titre %}{{ box_titre }}{% endblock %}
+    {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+    {% block box_contenu %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            {# Commandes #}
+            <div style="margin-bottom: 20px;">
+                <button type="submit" class="btn btn-primary"><i class="fa fa-download margin-r-5"></i>Importer</button>
+                <a class="btn btn-danger" href="{% url 'vacances_liste' %}"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
+            </div>
+
+            {# Sélection de la zone #}
+            <div style="margin-bottom: 20px;">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="choix_zone" id="radio_A" value="A" {% if zone == 'A' %}checked{% endif %}>
+                    <label class="form-check-label" for="radio_A" >Zone A</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="choix_zone" id="radio_B" value="B" {% if zone == 'B' %}checked{% endif %}>
+                    <label class="form-check-label" for="radio_B">Zone B</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="choix_zone" id="radio_C" value="C" {% if zone == 'C' %}checked{% endif %}>
+                    <label class="form-check-label" for="radio_C">Zone C</label>
+                </div>
+            </div>
+
+            {# Liste des périodes à importer #}
+            <table class="table table-sm">
+                <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td><input type="checkbox" name="items" value={{ forloop.counter0 }} checked /></td>
+                            <td>{{ item.annee }}</td>
+                            <td>{{ item.nom }}</td>
+                            <td>{{ item.date_debut|date:"l j F Y"|title }}</td>
+                            <td>{{ item.date_fin|date:"l j F Y"|title }}</td>
+                        </tr>
+                    {% empty %}
+                        Aucune donnée à importer...
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </form>
+
+        <script>
+            $(document).ready(function() {
+                $('input[name=choix_zone]').on('change', function (event) {
+                    if ($(this).val() === "A") {window.location.href = "{% url 'vacances_importation' 'a' %}";}
+                    if ($(this).val() === "B") {window.location.href = "{% url 'vacances_importation' 'b' %}";}
+                    if ($(this).val() === "C") {window.location.href = "{% url 'vacances_importation' 'c' %}";}
+                });
+            });
+        </script>
+
+    {% endblock %}
+
+{% endembed %}
+{% endblock contenu_page %}

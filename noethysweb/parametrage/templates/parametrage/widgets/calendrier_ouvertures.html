@@ -1,0 +1,122 @@
+{% load static %}
+
+{% if not update %}
+<div id="div_calendrier" class="masquer">
+
+    <table class="table-bordered calendrier_ouvertures" id="id_calendrier">
+{% endif %}
+
+        <thead>
+            <tr>
+                <th style="min-width: 150px;"></th>
+                <th colspan="{{ unites.count }}">Ouvertures</th>
+                <th colspan="{{ unites_remplissage.count }}">Nombre de places</th>
+            </tr>
+
+            <tr class="visible_header">
+                <th style="min-width: 150px;"></th>
+                {% for unite in unites %}
+                    <th>{{ unite.abrege }}</th>
+                {% endfor %}
+                {% for unite_remplissage in unites_remplissage %}
+                    <th>{{ unite_remplissage.abrege }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <script>
+                dict_cases = {};
+            </script>
+
+            {% for dict_date in dates %}
+
+                {# Ligne date #}
+                <tr>
+                    <td colspan="{{ unites.count|add:unites_remplissage.count|add:1 }}" class="ligne_date"
+                        onmouseover="document.getElementById('boutons_{{ dict_date.date|date:"Y-m-d" }}').style.display = 'block';"
+                        onmouseout="document.getElementById('boutons_{{ dict_date.date|date:"Y-m-d" }}').style.display = 'none';"
+                    >
+                        &nbsp;&nbsp;{{ dict_date.date|date:"l j F Y" }}
+                        <div id="boutons_{{ dict_date.date|date:"Y-m-d" }}" class="btn-group pull-right boutons_date" style="display: none;">
+                            <a type='button' title="Copier" class='btn btn-default btn-xs bouton_copier'><i class="fa fa-copy"></i></a>
+                            <a type='button' title="Coller" class='btn btn-default btn-xs bouton_coller'><i class="fa fa-paste"></i></a>
+                            <a type='button' title="Effacer" class='btn btn-default btn-xs bouton_effacer'><i class="fa fa-trash-o"></i></a>
+                        </div>
+                    </td>
+                </tr>
+
+                {# Ligne groupe #}
+                {% for groupe in groupes %}
+                    <tr>
+                        <td class="{% if dict_date.ferie %}ligne_ferie{% elif dict_date.vacance %}ligne_vacance{% endif %}">{{ groupe.nom }}
+
+                        {# Case ouverture #}
+                        {% for unite in unites %}
+
+                            {% creation_string_key "ouverture" dict_date.date groupe unite as key %}
+                            {% with ouverture=ouvertures|get_item:key %}
+                            {% with nbre_consommations=dict_conso|get_item:key %}
+                            {% with nbre_evenements=dict_evenements|get_item:key %}
+
+                                {# Création de la case ouverture #}
+                                <td class="case fermeture" id="{{ key }}"></td>
+
+                                <script>
+                                    {# Mémorisation des infos de la case #}
+                                    var case_ouverture = new Case_ouverture({
+                                        key: "{{ key }}",
+                                        ouvert: {% if ouverture == True %}true{% else %}false{% endif %},
+                                        nbre_conso: {% if nbre_consommations %}{{ nbre_consommations }}{% else %}0{% endif %},
+                                        nbre_evenements: {% if nbre_evenements %}{{ nbre_evenements }}{% else %}0{% endif %},
+                                    });
+                                    dict_cases["{{ key }}"] = case_ouverture;
+
+                                    {# Vérifie si l'ouverture n'a pas été modifiée précédemment #}
+                                    if ("{{ key }}" in ouvertures_modifications) {
+                                        etat = ouvertures_modifications["{{ key }}"];
+                                        dict_cases["{{ key }}"].set_etat(etat);
+                                    }
+                                </script>
+
+                            {% endwith %}
+                            {% endwith %}
+                            {% endwith %}
+
+                        {% endfor %}
+
+                        {# Case remplissage #}
+                        {% for unite_remplissage in unites_remplissage %}
+                            <td>
+                                {% creation_string_key "remplissage" dict_date.date groupe unite_remplissage as key %}
+                                {% with remplissage=remplissages|get_item:key %}
+
+                                    <input type="number" class="case_remplissage" value="{% if remplissage %}{{ remplissage }}{% else %}{% endif %}" id="{{ key }}" style="width:60px;text-align: center;">
+
+                                    {# Vérifie si le nombre de places n'a pas été modifiée précédemment #}
+                                    <script>
+                                        if("{{ key }}" in remplissages_modifications) {
+                                            places = remplissages_modifications["{{ key }}"];
+                                            $("input[id='{{ key }}']").prop("value", places);
+                                        }
+                                        $('.case_remplissage').on('input', function() {
+                                            var key = $(this)[0].id;
+                                            var ctrl_etat = $(this).val();
+                                            remplissages_modifications[key] = parseInt(ctrl_etat);
+                                        });
+                                    </script>
+
+                                {% endwith %}
+                            </td>
+                        {% endfor %}
+
+                    </tr>
+                {% endfor %}
+
+            {% endfor %}
+        </tbody>
+{% if not update %}
+    </table>
+</div>
+{% endif %}

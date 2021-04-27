@@ -1,0 +1,129 @@
+{% load static %}
+
+
+{# jexcel et jsuite sont initialisé car sinon le mask de jexcel plante #}
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/jexcel/jexcel.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/jexcel/jsuites.css' %}">
+{% endblock styles %}
+
+{% block scripts %}
+    <script type="text/javascript" src="{% static 'lib/jexcel/jexcel.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/jexcel/jsuites.js' %}"></script>
+{% endblock scripts %}
+
+<style>
+    .spread {
+        display: inline-block;
+        vertical-align: top;
+        float: none;
+    }
+    .jexcel_pagination > div {
+        padding: 0px;
+    }
+    .jexcel_pagination > div:last-child {
+        padding-top: 0px;
+    }
+    .jexcel_content {
+        height: auto !important;
+    }
+    .clearfix {
+      overflow: auto;
+    }
+</style>
+
+{# Lignes de tarifs #}
+<div class="clearfix">
+    {% for dict_methode in liste_methodes_tarifs %}
+        <div id="div_{{ dict_methode.code }}_{{ id }}" class="div_spread_{{ id }} controls">
+            {% if dict_methode.champs|length > 0 %}
+                <div style="overflow-x:auto; white-space: nowrap;margin-bottom: 10px;">
+                    <div class="spread" id="spreadsheet_{{ dict_methode.code }}_{{ id }}"></div>
+                </div>
+
+                {% if dict_methode.nbre_lignes_max == None %}
+                    <div class="btn-group">
+                        <input type="button" class="btn btn-sm btn-primary" value="Ajouter une ligne" onclick="table_{{ dict_methode.code }}_{{ id }}.insertRow(1);" />
+                        <input type="button" class="btn btn-sm btn-primary" value="Supprimer la dernière ligne" onclick="table_{{ dict_methode.code }}_{{ id }}.deleteRow();" />
+                    </div>
+                {% endif %}
+                <p class="form-text {% if dict_methode.nbre_lignes_max == None %}pull-right{% endif %}" style="margin-top: 0px">
+                    <small>
+                        <i class="fa fa-info-circle"></i> Faites un clic droit sur le tableau pour accéder à d'autres commandes.
+                    </small>
+                </p>
+
+                <script>
+                var table_{{ dict_methode.code }}_{{ id }} = jexcel(document.getElementById('spreadsheet_{{ dict_methode.code }}_{{ id }}'), {
+                    data: {% if methode == dict_methode.code %}{{ tarifs_lignes_data }}{% else %}[[]]{% endif %},
+                    allowInsertColumn: false,
+                    allowRenameColumn: false,
+                    allowDeleteColumn: false,
+                    tableOverflow: true,
+                    allowInsertRow: {% if dict_methode.nbre_lignes_max == 1 %}false{% else %}true{% endif %},
+                    allowDeleteRow: {% if dict_methode.nbre_lignes_max == 1 %}false{% else %}true{% endif %},
+                    minDimensions: [{{ dict_methode.champs|length }}, 1],
+                    columns: [
+                        {% for nom_champ in dict_methode.champs %}
+                            {% with dict_colonne=dict_colonnes_tarifs|get_item:nom_champ %}
+                                {
+                                    {# stop ajouté ci-dessous pour désactiver le calendar qui fait planter l'affichage de la date #}
+                                    type: '{% if dict_colonne.editeur == 'decimal' or dict_colonne.editeur == 'decimal4' %}numeric{% elif dict_colonne.editeur == 'date_stop' %}calendar{% else %}text{% endif %}',
+                                    title:'{{ dict_colonne.label }}',
+                                    width:{{ dict_colonne.largeur }}*2,
+                                    mask:{% if dict_colonne.editeur == 'heure' %}'hh24:mi'{% elif dict_colonne.editeur == 'date' %}'dd/mm/yyyy'{% else %}null{% endif %}
+                                },
+                            {% endwith %}
+                        {% endfor %}
+                    ],
+                    text:{
+                        insertANewRowBefore:'Insérer une nouvelle ligne avant',
+                        insertANewRowAfter:'Insérer une nouvelle ligne après',
+                        deleteSelectedRows:'Supprimer les lignes sélectionnées',
+                        orderAscending:'Trier par ordre ascendant',
+                        orderDescending:'Trier par ordre descendant',
+                        copy:'Copier',
+                        paste:'Coller',
+                        saveAs:'Enregistrer sous',
+                        about:'A propos',
+                    },
+                });
+                </script>
+            {% else %}
+                Aucun paramètre à renseigner.
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+
+<script>
+
+    // Lecture du code de la méthode sélectionnée
+    function GetCodeMethode_{{ id }}() {
+        var e = document.getElementById("{{ id_ctrl_methode }}");
+        var code = e.options[e.selectedIndex].value;
+        return code;
+    }
+
+    // Envoi des données du tableau tarifs au hidden field tarifs_lignes_data lors du sumbit
+    $('#{{ id_form }}').submit(function() {
+        var tableau = $('#spreadsheet_' + GetCodeMethode_{{ id }}() + '_{{ id }}')[0]
+        if (tableau) {
+            data = tableau.jexcel.getData(false);
+            $('#{{ id_tarifs_lignes_data }}').val(JSON.stringify(data));
+        }
+    });
+
+    // Sélection de la méthode : Affichage du tableau correspondant à la méthode
+    function On_change_methode_{{ id }}() {
+        $('.div_spread_{{ id }}').hide();
+        $('#div_' + GetCodeMethode_{{ id }}() + '_{{ id }}').show();
+    }
+    $(document).ready(function() {
+        $('#{{ id_ctrl_methode }}').change(On_change_methode_{{ id }});
+        On_change_methode_{{ id }}.call($('#{{ id_ctrl_methode }}').get(0));
+    });
+
+</script>
+

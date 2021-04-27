@@ -1,0 +1,57 @@
+{% extends "parametrage/activite_edit.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_activite %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+            {% block box_contenu %}
+
+                {# Boutons de liste #}
+                <div class="btn-group">
+                    {% for bouton in boutons_liste %}
+                        <a class="{{ bouton.classe }}" href="{{ bouton.href }}"><i class="{{ bouton.icone }} margin-r-5"></i> {{ bouton.label }}</a>
+                    {% endfor %}
+                </div>
+
+                <script>
+                    var contenu_table = JSON.parse('{{ liste_lignes|escapejs }}');
+                    var tree_state = "collapsed";
+                    var affiche_pagination = false;
+                </script>
+
+                <table
+                    id="table"
+                    data-tree-show-field='col0'
+                    data-pagination='false'
+                >
+                    <thead>
+                        <tr>
+                            {% for colonne in liste_colonnes %}
+                                <th
+                                    data-field="col{{ forloop.counter0 }}"
+                                    data-halign="center"
+                                    {% if forloop.counter0 > 0 %}
+                                        data-align="center"
+                                    {% else %}
+                                        data-align="left"
+                                    {% endif %}
+                                class="collapsed">{{ colonne }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                </table>
+
+                {% include 'core/widgets/bootstrap-table.html' %}
+
+            {% endblock %}
+
+        {% endembed %}
+    </div>
+{% endblock %}

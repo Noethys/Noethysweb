@@ -1,0 +1,135 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+
+    <style>
+        .dynamic-form .form-group {
+            margin-bottom: 0px;
+            margin-left: 0px;
+            margin-right: 0px;
+        }
+        .dynamic-form .checkbox {
+            min-height: auto;
+        }
+        .select2 {
+            width: 100% !important;
+        }
+        .theformset td:last-child {
+            width: 30px;
+        }
+    </style>
+
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    {% if wizard.form.intro %}
+                        <div style="margin-bottom: 20px;">
+                            {{ wizard.form.intro|safe }}
+                        </div>
+                    {% endif %}
+
+                    <form id="form_assistant" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ wizard.form.media }}
+                        {{ wizard.management_form }}
+                        {% if wizard.form.forms %}
+
+                            {{ wizard.form.management_form }}
+                            <table class="table table-bordered theformset" style="margin-bottom: 0px;">
+{#                            {{ formset.management_form|crispy }}#}
+
+                                {% if wizard.form.non_form_errors %}
+                                    <div class="alert alert-danger alert-dismissible">
+                                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                        {{ wizard.form.non_form_errors }}
+                                    </div>
+                                {% endif %}
+
+                                {% for form in wizard.form.forms %}
+                                    {% if forloop.first %}
+                                    <tr>
+                                        {% for field in form.visible_fields %}
+                                            {% if field.name != "DELETE" %}
+                                                <th>{{ field.label }}</th>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% for form in wizard.form.forms %}
+                                    <tr class="{% cycle 'row1' 'row2' %} formset_row-{{ wizard.form.prefix }}">
+                                        {% for field in form.visible_fields %}
+                                        <td>
+                                            {# Include the hidden fields in the form #}
+                                            {% if forloop.first %}
+                                                {% for hidden in form.hidden_fields %}
+                                                    {{ hidden }}
+                                                {% endfor %}
+                                            {% endif %}
+                                            {{ field|as_crispy_field }}
+                                        </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+
+                            </table>
+
+                            <script src="{% static 'lib/django-dynamic-formset/jquery.formset.js' %}"></script>
+
+                            <script type="text/javascript">
+                                $('.formset_row-{{ wizard.form.prefix }}').formset({
+                                    addText: '<i class=\'fa fa-plus\'></i> Ajouter une ligne',
+                                    deleteText: "<i class='fa fa-trash-o'></i>",
+                                    prefix: '{{ wizard.form.prefix }}',
+                                    addCssClass: 'add-row-{{ wizard.form.prefix }}',
+                                    deleteCssClass: 'delete-row-{{ wizard.form.prefix }}',
+                                    added: function (row) {
+                                        // Applique le widget à la nouvelle ligne créée
+                                        row.find('.django-select2').djangoSelect2();
+                                        // Reset le Select2 après la création de la nouvelle ligne
+                                        row.find('select').val('');
+                                        row.find('select').trigger('change');
+                                    }
+                                });
+                            </script>
+
+                        {% else %}
+                            {% if wizard.form.helper %}
+                                {% crispy wizard.form wizard.form.helper %}
+                            {% else %}
+                                {{ wizard.form|crispy }}
+                            {% endif %}
+
+                        {% endif %}
+
+                        <div style="margin-top: 30px;">
+                            <a class="btn btn-danger" href="{% url 'activites_assistant_liste' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                            {% if wizard.steps.prev %}
+                                <button class="btn btn-primary" formnovalidate="formnovalidate" name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}"><i class="fa fa-home"></i>&nbsp; Début</button>
+                                <button class="btn btn-primary" formnovalidate="formnovalidate" name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}"><i class="fa fa-chevron-circle-left"></i>&nbsp; Précédent</button>
+                            {% endif %}
+                            <button class="btn btn-primary" id="bouton_submit" name="submit" type="submit">Suite &nbsp;<i class="fa fa-chevron-circle-right"></i></button>
+                        </div>
+
+                    </form>
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+    </div>
+
+
+{% endblock contenu_page %}
+
+
