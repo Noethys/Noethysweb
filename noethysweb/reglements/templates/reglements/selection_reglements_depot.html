@@ -1,0 +1,114 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+<script>
+    var contenu_table = JSON.parse('{{ resultats|escapejs }}');
+</script>
+
+
+<table
+    id="table" data-classes="table table-bordered table-hover table-sm"
+    data-fixed-columns="true" data-fixed-number="0"
+    data-sort-name="pk" data-sort-order="desc"
+    data-click-to-select="true"
+    data-height="600px"
+    data-row-style="rowStyle"
+    style="min-width: 1300px;"
+    >
+    <thead>
+        <tr>
+            <th data-checkbox="true" data-halign="center" data-align="center" {% if only_inclus == True %}data-formatter="stateFormatter"{% endif %}></th>
+            <th data-field="pk" data-halign="center" data-align="center" data-sortable="true" data-width="50">ID</th>
+            <th data-field="date" data-halign="center" data-align="center" data-sortable="true" data-width="90" data-formatter="formate_date">Date</th>
+            <th data-field="mode" data-halign="center" data-align="center" data-sortable="true">Mode</th>
+            <th data-field="emetteur" data-halign="center" data-align="center" data-sortable="true">Emetteur</th>
+            <th data-field="numero_piece" data-halign="center" data-align="center" data-sortable="true" data-width="80">Numéro</th>
+            <th data-field="payeur" data-halign="center" data-align="center" data-sortable="true">Payeur</th>
+            <th data-field="montant" data-halign="center" data-align="center" data-sortable="true" data-width="80" data-formatter="formate_montant">Montant</th>
+            <th data-field="date_differe" data-halign="center" data-align="center" data-sortable="true" data-width="90" data-formatter="formate_date">Différé</th>
+            <th data-field="avis_depot" data-halign="center" data-align="center" data-sortable="true" data-width="90" data-formatter="formate_date">Avis</th>
+            <th data-field="famille" data-halign="center" data-align="center" data-sortable="true">Famille</th>
+            <th data-field="compte" data-halign="center" data-align="center" data-sortable="true">Compte</th>
+            <th data-field="observations" data-halign="center" data-align="center" data-sortable="true">Observations</th>
+        </tr>
+    </thead>
+</table>
+
+<script>
+
+    function formate_montant(value, row, index) {
+        return value.toFixed(2) + " €";
+    };
+
+    function formate_date(value, row, index) {
+        try {
+            if (value !== null) {
+                var tabEN = value.split('-');
+                tabEN.reverse();
+                return tabEN.join('/');
+            }
+        } catch (error) {
+            return ""
+        };
+    };
+
+    function rowStyle(row, index) {
+        if (row.encaissement_autorise === false) {
+            return {css: {color: 'red'}}
+        }
+        return {}
+    }
+
+    function stateFormatter(value, row, index) {
+        return {
+            checked: true,
+            disabled: true
+        }
+    }
+
+    function afficher_total() {
+        var nbre = 0;
+        var total = 0.0;
+        $table.bootstrapTable('getSelections').forEach(function (row) {
+            nbre += 1;
+            total += row.montant;
+        });
+        if (nbre === 0) {
+            texte = "Cochez les règlements à inclure dans le dépôt"
+        } else {
+            texte = nbre + " règlements sélectionnés (" + total.toFixed(2) + " €)"
+        }
+        $(".pagination-info").html(texte)
+    }
+
+
+    var $table = $('#table')
+
+    $(function() {
+        $('#modal_selection_reglements').on('show.bs.modal', function () {
+            // Coche les règlements
+            var selections = JSON.parse('{{ selections|escapejs }}');
+            $table.bootstrapTable('uncheckAll');
+            $table.bootstrapTable('checkBy', {field: 'pk', values: selections})
+
+            // Met à jour la ligne de total
+            afficher_total()
+
+            // Ajuste la largeur des colonnes
+            $table.bootstrapTable('resetView')
+        })
+
+        $('#table').on('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table', function (e, row, element) {
+            afficher_total();
+        });
+
+    })
+
+</script>
+
+{% include 'core/widgets/bootstrap-table.html' %}
+
+
+

@@ -1,0 +1,117 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-3" >
+
+            <!-- Paramètres -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Paramètres</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% crispy form_parametres %}
+                    <button type="submit" form="form_parametres" class="btn btn-primary btn-block" name="type_submit" title="Actualiser les résultats"><i class="fa fa-refresh margin-r-5"></i> Actualiser les résultats</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-9">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-caret-square-o-right margin-r-5"></i> Résultats</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    <script>
+                        var contenu_table = JSON.parse('{{ liste_lignes|escapejs }}');
+                    </script>
+
+                    <style>
+                        .case_regroupement {
+                            background-color: #efefef;
+                            font-weight: bold;
+                        }
+                    </style>
+
+                    <table id="table" class="table-sm" data-show-footer='true' data-tree-show-field='label'>
+                        <thead>
+                            <tr>
+                                <th data-field="label" data-halign="center" data-align="left" data-footer-formatter="calcule_total" data-cell-style="formate_case">Activité/Prestation</th>
+                                {% if afficher_tarif_unitaire %}
+                                    <th data-field="tarif_unitaire" data-halign="center" data-align="center" data-footer-formatter="calcule_total" data-formatter="formate_montant" data-cell-style="formate_case">Tarif unitaire</th>
+                                {% endif %}
+                                <th data-field="quantite" data-halign="center" data-align="center" data-footer-formatter="calcule_nbre" data-cell-style="formate_case">Quantité</th>
+                                <th data-field="total" data-halign="center" data-align="center" data-footer-formatter="calcule_total" data-formatter="formate_montant" data-cell-style="formate_case">Total</th>
+                            </tr>
+                        </thead>
+                    </table>
+
+                    <script>
+                        function calcule_nbre(items) {
+                            {# Calcule le nbre de chaque colonne #}
+                            var colonne = this.field;
+                            var nbre = 0;
+                            items.forEach(function(item) {
+                                if (item.regroupement === false) {
+                                    nbre = nbre + item[colonne];
+                                }
+                            });
+                            return nbre;
+                        };
+
+                        function calcule_total(items) {
+                            {# Calcule le total de chaque colonne #}
+                            var colonne = this.field;
+                            if (colonne === "label") {return "Total"}
+                            var total = 0.0;
+                            items.forEach(function(item) {
+                                if (item.regroupement === false) {
+                                    total = total + item[colonne];
+                                }
+                            });
+                            return total.toFixed(2) + " €";
+                        };
+
+                        function formate_case(value, row, index) {
+                            if (row.regroupement === true) {
+                                return {classes: 'case_regroupement'};
+                            };
+                            return {};
+                        };
+
+                        function formate_montant(value, row, index) {
+                            try {
+                                return value.toFixed(2) + " €";
+                            } catch (error) {
+                                return ""
+                            };
+                        };
+
+                    </script>
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    {% include 'core/widgets/bootstrap-table.html' %}
+
+{% endblock contenu_page %}
+

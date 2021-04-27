@@ -1,0 +1,168 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+
+    <style>
+        .div_table_lignes {
+            display: inline-block;
+            height: 300px;
+            overflow-y: scroll;
+            width: 100%;
+            border: solid 1px #e5e5e5;
+        }
+        .table_lignes th, td{
+            /*font-size: 12px;*/
+            padding: 5px;
+        }
+        .table_lignes th {
+            background-color: #f1f1f1;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .montant {
+            text-align: right;
+        }
+
+    </style>
+{% endblock styles %}
+
+
+
+{% block contenu_page %}
+{% embed 'core/box.html' %}
+    {% block box_theme %}card-outline card-lightblue{% endblock %}
+    {% block box_titre %}{{ box_titre }}{% endblock %}
+    {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+    {% block box_contenu %}
+
+        <div class="buttonHolder commandes">
+            <button id="bouton_valider" type="button" class="btn btn-primary" name="bouton_valider" title="Ventilation automatique"><i class='fa fa-magic margin-r-5'></i>Ventiler automatiquement</button>
+            {% if request.GET.next %}
+                <a class="btn btn-danger" href="{{ request.GET.next }}?correction_ventilation=off"><i class='fa fa-ban margin-r-5'></i>Fermer</a>
+            {% else %}
+                <a class="btn btn-danger" href="{% url 'reglements_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+            {% endif %}
+            <button type="button" class="btn btn-default" onclick="tout_cocher()" ><i class="fa fa-check-square-o margin-r-5"></i> Tout cocher</button>
+            <button type="button" class="btn btn-default" onclick="tout_decocher()"><i class="fa fa-square-o margin-r-5"></i> Tout décocher</button>
+            <button type="button" class="btn btn-default" id="bouton_actualiser"><i class="fa fa-refresh margin-r-5"></i> Actualiser</button>
+
+        </div>
+
+        <form method="post" id="form-general">
+            {% csrf_token %}
+            <input type="text" name="selections" id="selections" value="" hidden/>
+            <input type="text" name="action" id="action" value="" hidden/>
+        </form>
+
+        <div id="div_table_lignes" class="div_table_lignes margin-bottom">
+            <table id="table_lignes" class="table table-bordered table_lignes">
+
+                <thead>
+                    <tr>
+                        <th>Famille</th>
+                        <th>Solde</th>
+                        <th>Prestations</th>
+                        <th>Règlements</th>
+                        <th>Ventilé</th>
+                        <th>A ventiler</th>
+                        <th width="80px;">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td>
+                                <div class="form-inline">
+                                    <input class="check_ligne" type="checkbox" name="selections" value="{{ item.famille.pk }}" checked>
+                                    <span style="margin-right:20px;">{{ item.famille.nom }}</span>
+                                </div>
+                            </td>
+                            <td class="montant">{{ item.valeurs.solde|montant }}</td>
+                            <td class="montant">{{ item.valeurs.total_prestations|montant }}</td>
+                            <td class="montant">{{ item.valeurs.total_reglements|montant }}</td>
+                            <td class="montant">{{ item.valeurs.total_ventilations|montant }}</td>
+                            <td class="montant text-blue"><b>{{ item.valeurs.reste_a_ventiler|montant }}</b></td>
+                            <td>
+                                <center>
+                                    <a type="button" class="btn btn-default btn-sm ventiler_famille" href="#" data-idfamille="{{ item.famille.pk }}" title="Ventiler automatiquement"><i class="fa fa-magic"></i></a>
+                                    <a type="button" class="btn btn-default btn-sm" href="{% url 'famille_reglements_liste' idfamille=item.famille.pk %}" target="_blank" title="Ouvrir la fiche famille"><i class="fa fa-users"></i></a>
+                                </center>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        {# Affichage des messages en mémoire #}
+        {% include 'core/messages.html' %}
+
+    {% endblock %}
+
+{% endembed %}
+
+{% endblock contenu_page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+
+    <script>
+        $(document).ready(function() {
+            $("#div_table_lignes").freezeTable({
+                'scrollable': true,
+            });
+            $("#bouton_valider").on("click",function(event) {
+                $("#action").val("valider");
+                $("#selections").val(JSON.stringify(get_lignes_cochees()));
+                $("#form-general").submit();
+            });
+            $("#bouton_actualiser").on("click",function(event) {
+                $("#action").val("actualiser");
+                $("#form-general").submit();
+            });
+            $(".ventiler_famille").on("click",function(event) {
+                $("#selections").val(JSON.stringify([$(this).data("idfamille"),]));
+                $("#action").val("valider");
+                $("#form-general").submit();
+            });
+
+
+        });
+
+        function tout_cocher() {
+            $(".check_ligne").each(function (index) {
+                $(this).prop("checked", true);
+            });
+        };
+        function tout_decocher() {
+            $(".check_ligne").each(function (index) {
+                $(this).prop("checked", false);
+            });
+        };
+        function get_lignes_cochees() {
+            var liste_lignes = [];
+            $(".check_ligne").each(function (index) {
+                var id = parseInt($(this).val());
+                if (($(this).prop("checked")) && (!(liste_lignes.includes(id)))) {
+                    liste_lignes.push(id);
+                }
+            });
+            return liste_lignes;
+        };
+    </script>
+
+{% endblock scripts %}
+
+
