@@ -1,0 +1,98 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+<script>
+    var contenu_table = JSON.parse('{{ resultats|escapejs }}');
+</script>
+
+
+<table
+    id="table" data-classes="table table-bordered table-hover table-sm"
+    data-fixed-columns="true" data-fixed-number="0"
+    data-sort-name="pk" data-sort-order="desc"
+    data-click-to-select="true"
+    data-height="600px"
+    style="min-width: 1300px;"
+    >
+    <thead>
+        <tr>
+            <th data-checkbox="true" data-halign="center" data-align="center" {% if only_inclus == True %}data-formatter="stateFormatter"{% endif %}></th>
+            <th data-field="pk" data-halign="center" data-align="center" data-sortable="true" data-width="50">ID</th>
+            <th data-field="date_debut" data-halign="center" data-align="center" data-sortable="true" data-width="90" data-formatter="formate_date">Date début</th>
+            <th data-field="date_fin" data-halign="center" data-align="center" data-sortable="true" data-width="90" data-formatter="formate_date">Date fin</th>
+            <th data-field="type_cotisation" data-halign="center" data-align="center" data-sortable="true">Type</th>
+            <th data-field="unite_cotisation" data-halign="center" data-align="center" data-sortable="true" data-width="80">Unité</th>
+            <th data-field="famille" data-halign="center" data-align="center" data-sortable="true">Famille</th>
+            <th data-field="individu" data-halign="center" data-align="center" data-sortable="true">Individu</th>
+            <th data-field="date_creation_carte" data-halign="center" data-align="center" data-sortable="true" data-width="90" data-formatter="formate_date">Date création carte</th>
+            <th data-field="observations" data-halign="center" data-align="center" data-sortable="true">Observations</th>
+        </tr>
+    </thead>
+</table>
+
+<script>
+
+    function formate_date(value, row, index) {
+        try {
+            if (value !== null) {
+                var tabEN = value.split('-');
+                tabEN.reverse();
+                return tabEN.join('/');
+            }
+        } catch (error) {
+            return ""
+        };
+    };
+
+    function stateFormatter(value, row, index) {
+        return {
+            checked: true,
+            disabled: true
+        }
+    }
+
+    function afficher_total() {
+        var nbre = 0;
+        var total = 0.0;
+        $table.bootstrapTable('getSelections').forEach(function (row) {
+            nbre += 1;
+        });
+        if (nbre === 0) {
+            texte = "Cochez les adhésions à inclure dans le dépôt"
+        } else {
+            texte = nbre + " adhésions sélectionnées"
+        }
+        $(".pagination-info").html(texte)
+    }
+
+
+    var $table = $('#table')
+
+    $(function() {
+        $('#modal_selection_cotisations').on('show.bs.modal', function () {
+            // Coche les cotisations
+            var selections = JSON.parse('{{ selections|escapejs }}');
+            $table.bootstrapTable('uncheckAll');
+            $table.bootstrapTable('checkBy', {field: 'pk', values: selections})
+
+            // Met à jour la ligne de total
+            afficher_total()
+
+            // Ajuste la largeur des colonnes
+            $table.bootstrapTable('resetView')
+        })
+
+        $('#table').on('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table', function (e, row, element) {
+            afficher_total();
+        });
+
+    })
+
+</script>
+
+{% include 'core/widgets/bootstrap-table.html' %}
+
+
+

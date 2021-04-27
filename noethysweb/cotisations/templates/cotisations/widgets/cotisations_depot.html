@@ -1,0 +1,90 @@
+{% load static %}
+{% load embed %}
+
+<div class="input-group">
+    <input id="stats_depot" type="text" class="form-control" value="{{ texte }}" readonly>
+    <div class="input-group-append">
+        <a type="button" class="btn btn-default" id="bouton_modifier_cotisations" title="Ajouter ou retirer des adhésions" onclick="modifier_cotisations(only_inclus=false)"><i class="fa fa-pencil margin-r-5"></i> Modifier</a>
+        <a type="button" class="btn btn-default" title="Visualiser la liste des adhésions incluse" onclick="modifier_cotisations(only_inclus=true)"><i class="fa fa-eye margin-r-5"></i> Visualiser</a>
+    </div>
+</div>
+<input name="{{ name }}" id="{{ id }}" type="text" style="display: none;" value="{{ value }}">
+
+{# Modal Sélectionner des cotisations #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_selection_cotisations{% endblock %}
+    {% block modal_classe %}modal-lg{% endblock %}
+    {% block modal_titre %}Sélectionner des adhésions{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+        <div id="div_selection_cotisations">
+        </div>
+    <div class="buttonHolder">
+        <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+            <input type="submit" value="Valider" class="btn btn-primary" id="{{ id }}_bouton_valider"/>
+            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+        </div>
+    </div>
+    {% endblock %}
+
+{% endembed %}
+
+<script>
+
+    function afficher_stats() {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_get_cotisations_stats' %}",
+            data: {
+                liste_cotisations: $("#{{ id }}").val(),
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+            },
+            success: function (data) {
+                $("#stats_depot").val(data.texte);
+            }
+        });
+    };
+
+    function modifier_cotisations(only_inclus=false) {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_modifier_cotisations_depot' %}",
+            data: {
+                only_inclus: only_inclus,
+                liste_cotisations: $("#{{ id }}").val(),
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+            },
+            success: function (data) {
+                $("#div_selection_cotisations").html(data);
+                $('#modal_selection_cotisations').modal('show');
+            }
+        });
+    };
+
+
+    $(document).ready(function() {
+
+        // Met à jour le cadre des stats
+        afficher_stats();
+
+        // Modal : Validation
+        $("#{{ id }}_bouton_valider").on('click', function(e) {
+            e.preventDefault();
+            var liste_idcotisations = [];
+            $table.bootstrapTable('getSelections').forEach(function (row) {
+                liste_idcotisations.push(row.pk);
+            });
+            $("#{{ id }}").val(liste_idcotisations.join(';'));
+            afficher_stats();
+            $('#modal_selection_cotisations').modal('hide');
+        });
+
+    });
+
+</script>
+
+
+
+
+
+

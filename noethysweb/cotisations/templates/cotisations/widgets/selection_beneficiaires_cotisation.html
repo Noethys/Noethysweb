@@ -1,0 +1,87 @@
+{% load static %}
+{% load embed %}
+
+<div class="input-group">
+    <input id="{{ id }}_stats" type="text" class="form-control" value="{{ texte }}" readonly>
+    <div class="input-group-append">
+        <a class="btn btn-default" title="Sélectionner des bénéficiaires" onclick="{{ id }}_selectionner_beneficiaires()"><i class="fa fa-pencil margin-r-5"></i> Sélectionner</a>
+        <input name="{{ name }}" id="{{ id }}" type="text" style="display: none;" value="{{ value }}">
+    </div>
+</div>
+
+{# Modal Sélectionner des bénéficiaires #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}{{ id }}_modal_selection_beneficiaires{% endblock %}
+    {% block modal_classe %}modal-lg{% endblock %}
+    {% block modal_titre %}Sélectionner des bénéficiaires{% endblock %}
+    {% block modal_body %}
+        <div id="{{ id }}_modal_erreurs" class="text-red"></div>
+        <div id="{{ id }}_div_selection_beneficiaires">
+        </div>
+    <div class="buttonHolder">
+        <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+            <input type="submit" value="Valider" class="btn btn-primary" id="{{ id }}_bouton_valider"/>
+            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+        </div>
+    </div>
+    {% endblock %}
+
+{% endembed %}
+
+<script>
+
+    function {{ id }}_afficher_stats() {
+        var liste_id = $("#{{ id }}").val();
+        var texte = "Aucune sélection";
+        if (liste_id !== '') {
+            texte = liste_id.split(";").length + " {{ categorie }}";
+        }
+        $("#{{ id }}_stats").val(texte);
+    };
+
+    function {{ id }}_selectionner_beneficiaires() {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_get_table_beneficiaires' %}",
+            data: {
+                liste_selections: $("#{{ id }}").val(),
+                categorie: "{{ categorie }}",
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+            },
+            success: function (data) {
+                $("#id_beneficiaires_individus_div_selection_beneficiaires").html("");
+                $("#id_beneficiaires_familles_div_selection_beneficiaires").html("");
+                $("#{{ id }}_div_selection_beneficiaires").html(data);
+                $("#{{ id }}_div_selection_beneficiaires").html(data);
+                $('#{{ id }}_modal_selection_beneficiaires').modal('show');
+            }
+        });
+    };
+
+
+    $(document).ready(function() {
+
+        // Met à jour le cadre des stats
+        {{ id }}_afficher_stats();
+
+        // Modal : Validation
+        $("#{{ id }}_bouton_valider").on('click', function(e) {
+            e.preventDefault();
+            var liste_id = [];
+            $table.bootstrapTable('getSelections').forEach(function (row) {
+                liste_id.push(row.pk);
+            });
+            $("#{{ id }}").val(liste_id.join(';'));
+            {{ id }}_afficher_stats();
+            $('#{{ id }}_modal_selection_beneficiaires').modal('hide');
+        });
+
+    });
+
+</script>
+
+
+
+
+
+

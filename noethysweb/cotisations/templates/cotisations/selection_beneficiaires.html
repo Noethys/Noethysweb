@@ -1,0 +1,75 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+<script>
+    var contenu_table = JSON.parse('{{ resultats|escapejs }}');
+</script>
+
+<table
+    id="table" data-classes="table table-bordered table-hover table-sm"
+    data-fixed-columns="true" data-fixed-number="0"
+    data-sort-name="pk" data-sort-order="desc"
+    data-click-to-select="true"
+    data-height="600px"
+    style="min-width: 500px;"
+    >
+    <thead>
+        <tr>
+            <th data-checkbox="true" data-halign="center" data-align="center"></th>
+            {% if categorie == "individus" %}
+                <th data-field="individu" data-halign="center" data-align="center" data-sortable="true">Individu</th>
+            {% endif %}
+            <th data-field="famille" data-halign="center" data-align="center" data-sortable="true">Famille</th>
+            <th data-field="rue_resid" data-halign="center" data-align="center" data-sortable="true" data-width="80">Rue</th>
+            <th data-field="cp_resid" data-halign="center" data-align="center" data-sortable="true">CP</th>
+            <th data-field="ville_resid" data-halign="center" data-align="center" data-sortable="true">Ville</th>
+        </tr>
+    </thead>
+</table>
+
+<script>
+
+    function afficher_total() {
+        var nbre = 0;
+        $('#table').bootstrapTable('getSelections').forEach(function (row) {
+            nbre += 1;
+        });
+        if (nbre === 0) {
+            texte = "Cochez les lignes souhaitées"
+        } else {
+            texte = nbre + " lignes sélectionnées"
+        }
+        $(".pagination-info").html(texte)
+    }
+
+
+    var $table = $('#table')
+
+    $(function() {
+        $('#id_beneficiaires_{{ categorie }}_modal_selection_beneficiaires').on('show.bs.modal', function () {
+            // Coche les sélections
+            var selections = JSON.parse('{{ selections|escapejs }}');
+            $table.bootstrapTable('uncheckAll');
+            $table.bootstrapTable('checkBy', {field: 'pk', values: selections})
+
+            // Met à jour la ligne de total
+            afficher_total()
+
+            // Ajuste la largeur des colonnes
+            $table.bootstrapTable('resetView')
+        })
+
+        $('#table').on('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table', function (e, row, element) {
+            afficher_total();
+        });
+
+    })
+
+</script>
+
+{% include 'core/widgets/bootstrap-table.html' %}
+
+
+
