@@ -1,0 +1,63 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Model Sélection de la période #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_selection_periode{% endblock %}
+    {% block modal_titre %}Définir la période de référence{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+
+        <div class="form-group">
+            <form class="text-center">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input choix_type_periode" type="radio" id="inlineRadio1" value="mois" name="choix_type_periode" checked>
+                    <label class="form-check-label" for="inlineRadio1">Mois</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input choix_type_periode" type="radio" id="inlineRadio2" value="vacances" name="choix_type_periode">
+                    <label class="form-check-label" for="inlineRadio2">Vacances</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input choix_type_periode" type="radio" id="inlineRadio3" value="dates" name="choix_type_periode">
+                    <label class="form-check-label" for="inlineRadio3">Dates</label>
+                </div>
+            </form>
+        </div>
+
+        {% include 'consommations/selecteur_periode.html' %}
+
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" id="definir_periode_valider"/><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+
+        </form>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+
+{#Set_periode();#}
+
+$(document).ready(function() {
+    $('.choix_type_periode').on('change', function (event) {
+        event.preventDefault();
+        Set_mode_periode($(this).val());
+    });
+
+    // Validation de la modal
+    $("#definir_periode_valider").on('click', function(e) {
+        var periode = Get_periode();
+        maj_affichage(update_parametres=true);
+        $('#modal_selection_periode').modal('hide');
+    });
+
+});
+
+</script>

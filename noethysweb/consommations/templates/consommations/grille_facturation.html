@@ -1,0 +1,46 @@
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block contenu_page %}
+
+    <!-- Box Facturation -->
+    <div class="card card-default">
+        <div class="card-header with-border">
+            <h3 class="card-title"><i class="fa fa-euro margin-r-5"></i>Facturation</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                </div>
+        </div>
+        <div class="card-body p-0">
+
+            <table id="table_facturation" class="table table-sm">
+
+                {% get_liste_individus_coches data as liste_individus_coches %}
+                {% for key_individu in liste_individus_coches %}
+                    <tr class="ligne_total">
+                        <th class='individu_prestation'>{{ key_individu.0.Get_nom }}</th>
+                        <th id="total_facturation_individu_{{ key_individu.0.pk }}_{{ key_individu.1 }}" class='montant_prestation'>0.00 €</th>
+                    </tr>
+                    <tbody id="detail_facturation_individu_{{ key_individu.0.pk }}_{{ key_individu.1 }}"></tbody>
+                {% endfor %}
+
+                {% if liste_individus_coches|length > 1 %}
+                    <tfoot>
+                        <tr class="ligne_total">
+                            <th class='individu_prestation'>Total</th>
+                            <th id="total_facturation_individus" class="montant_prestation">0.00 €</th>
+                        </tr>
+                    </tfoot>
+                {% endif %}
+
+            </table>
+
+        </div>
+
+        <div id="loader_facturation" class="masquer">
+            <i class="fa fa-2x fa-refresh fa-spin"></i>
+        </div>
+
+    </div>
+
+{% endblock contenu_page %}

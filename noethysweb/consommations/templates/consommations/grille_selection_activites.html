@@ -1,0 +1,147 @@
+{% load crispy_forms_tags %}
+{% load static %}
+
+
+{% block styles %}
+
+    <style type="text/css">
+
+        #box_selection_activites .activites {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          padding-left: 5px;
+        }
+
+        #box_selection_activites .checkbox {
+            margin-top: 0px;
+            margin-bottom: 5px;
+        }
+
+        #box_selection_activites .list-inline>li {
+            display: inline-block;
+            padding-right: 0px;
+            padding-left: 0px;
+        }
+
+        #box_selection_activites .well {
+            padding: 5px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        #box_selection_activites .groupe {
+            margin-bottom: 5px;
+        }
+
+</style>
+
+{% endblock styles %}
+
+
+{% block contenu_page %}
+
+    <!-- Sélection des activités -->
+    <div class="card card-default" id="box_selection_activites">
+        <div class="card-header with-border">
+            <h3 class="card-title"><i class="fa fa-user margin-r-5"></i> Activités</h3>
+            <div id="menu_options_activites" class="card-tools">
+                <a href="#" class="btn btn-box-tool" data-toggle="dropdown"><i class="fa fa-gear"></i></a>
+                <ul class="dropdown-menu">
+                    <li  class="dropdown-item" role="presentation"><a role="menuitem" tabindex="-1" href="#" id="option_cocher_auto_activites" onClick="toggle_option_cocher_auto_activites()"></a></li>
+                    <li  class="dropdown-item" role="presentation"><a role="menuitem" tabindex="-1" href="#" id="option_afficher_tous_inscrits" onClick="toggle_option_afficher_tous_inscrits()"></a></li>
+                </ul>
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <ul class="activites">
+
+                {% for activite in data.liste_activites %}
+                    <li>
+                        <ul class="list-inline">
+                            <li>
+                                <label for="check_activite_{{ activite.pk }}" class="checkbox">
+                                    <input type="checkbox" class="checkboxinput" id="check_activite_{{ activite.pk }}" data-idactivite="{{ activite.pk }}" {% if data.selection_activites == "__all__" or activite.pk in data.selection_activites.activites %}checked{% endif %}> {{ activite.nom }}
+                                </label>
+                            </li>
+                            <li class="pull-right">
+                                <a class="btn btn-sm" role="button" data-toggle="collapse" href="#collapse_activite_{{ activite.pk }}" aria-expanded="false" aria-controls="collapseExample">
+                                     <i class="fa fa-angle-down"></i>
+                                </a>
+                            </li>
+
+                            <div class="collapse" id="collapse_activite_{{ activite.pk }}">
+                                <div class="well">
+                                    <ul class="activites">
+                                        {% for groupe in activite.Get_groupes %}
+                                            <li>
+                                                <label for="check_groupe_{{ groupe.pk }}" class="checkbox">
+                                                    <input type="checkbox" class="checkboxinput" id="check_groupe_{{ groupe.pk }}" data-idactivite="{{ activite.pk }}" data-idgroupe="{{ groupe.pk }}" {% if data.selection_activites == "__all__" or groupe.pk in data.selection_activites.groupes %}checked{% endif %}> {{ groupe.nom}}
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            {# Bouton appel MAJ sur la grille #}
+            <button type="submit" form="form-maj" style="margin-top: 10px;" class="btn btn-default btn-block btn-flat btn-sm" name="type_submit" value="MAJ">Appliquer</button>
+
+        </div>
+    </div>
+
+
+{% endblock contenu_page %}
+
+{% block scripts %}
+    <script>
+        function Get_activites() {
+            // Recherche les activités et groupes cochés
+            var donnees = {"activites" : [], "groupes" : []};
+            $('[id^="check_activite_"]').each(function (index) {
+                if ($(this).is(':checked')) {
+                    donnees["activites"].push(parseInt($(this).attr("data-idactivite")));
+                };
+            });
+            $('[id^="check_groupe_"]').each(function (index) {
+                if ($(this).is(':checked')) {
+                    donnees["groupes"].push(parseInt($(this).attr("data-idgroupe")));
+                };
+            });
+            return donnees;
+        };
+
+        $('#menu_options_activites').on('show.bs.dropdown', function (event) {
+            if (dict_options.cocher_auto_activites === true) {
+                $("#option_cocher_auto_activites").html("Désactiver la sélection automatique des activités")
+            } else {
+                $("#option_cocher_auto_activites").html("Activer la sélection automatique des activités")
+            };
+            if (dict_options.afficher_tous_inscrits === true) {
+                $("#option_afficher_tous_inscrits").html("Désactiver l'affichage de tous les inscrits")
+            } else {
+                $("#option_afficher_tous_inscrits").html("Activer l'affichage de tous les inscrits")
+            };
+
+        });
+
+        function toggle_option_cocher_auto_activites () {
+            dict_options.cocher_auto_activites = !dict_options.cocher_auto_activites;
+        };
+        function toggle_option_afficher_tous_inscrits () {
+            dict_options.afficher_tous_inscrits = !dict_options.afficher_tous_inscrits;
+        };
+
+
+    </script>
+{% endblock scripts %}
+
+
+

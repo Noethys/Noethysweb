@@ -1,0 +1,41 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Model Ajouter un individu #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_ajouter_individu{% endblock %}
+    {% block modal_titre %}Ajouter un individu{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+
+        {% crispy form_ajouter_individu %}
+
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" id="ajouter_individu_valider"/><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+
+        </form>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+
+    // Modal : Validation de l'individu
+    $("#ajouter_individu_valider").on('click', function(e) {
+        var idindividu = $('#id_individu').val();
+        if (idindividu === "") {
+            toastr.error(("Vous devez sélectionner un individu dans la liste"));
+            return false;
+        }
+        $('#modal_ajouter_individu').modal('hide');
+        $('#donnees_ajouter_individu').val(idindividu);
+        $('#form-maj').submit();
+    });
+
+</script>

@@ -1,0 +1,151 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+
+    <style>
+        #accordeon_parametres {
+            margin-bottom: 0px;
+        }
+        #accordeon_parametres .card {
+            border-radius: 0px;
+            border: 0px;
+            margin-bottom: 0px;
+            margin-top: 0px;
+        }
+        #accordeon_parametres .card-header {
+            padding: 7px 5px 7px 10px;
+        }
+        #accordeon_parametres .card-title {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        #accordeon_parametres .form-control {
+            border-radius: 0px;
+        }
+    </style>
+
+    <!-- Box Paramètres -->
+    <div class="card card-default">
+
+        <div class="card-header">
+            <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i>Paramètres</h3>
+            <div class="card-tools">
+                <button type="submit" name="type_submit" form="form-maj" style="margin-right: 10px;" value="MAJ" class="btn btn-default btn-xs" title="Appliquer les paramètres sélectionnés">Appliquer</button>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div id="accordeon_parametres">
+
+                {# Panneau Date #}
+                <div class="card">
+                    <div class="card-header" id="head_1">
+                        <h4 class="card-title w-100">
+                            <a class="d-block w-100" data-toggle="collapse" data-target="#panneau_1" href="#panneau_1" aria-expanded="true" aria-controls="panneau_1">
+                                <i class="fa fa-angle-down margin-r-5"></i>Date
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="panneau_1" class="collapse show" aria-labelledby="head_1" data-parent="#accordeon_parametres">
+                        <div class="card-body p-0">
+                            {% include "consommations/grille_selection_date.html" %}
+                        </div>
+                    </div>
+                </div>
+
+
+                {# Panneau Activités #}
+                <div class="card">
+                    <div class="card-header" id="head_2">
+                        <h4 class="card-title w-100">
+                            <a class="d-block w-100" data-toggle="collapse" href="#panneau_2" aria-expanded="false" aria-controls="panneau_2">
+                                <i class="fa fa-angle-down margin-r-5"></i>Activité
+                                {% if data.liste_activites_possibles|length > 1 %}
+                                    <span class="badge badge-info pull-right" title="Activités disponibles">{{ data.liste_activites_possibles|length }}</span>
+                                {% endif %}
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="panneau_2" class="collapse" data-parent="#accordeon_parametres" aria-labelledby="head_2">
+                        <div class="card-body p-0">
+
+                            <select class="form-control" id="selection_activite">
+                                {% for activite in data.liste_activites_possibles %}
+                                    <option value="{{ activite.pk }}" {% if activite == data.selection_activite %}selected{% endif %}>{{ activite.nom }}</option>
+                                {% endfor %}
+                            </select>
+
+                        </div>
+                    </div>
+                </div>
+
+
+                {# Panneau Groupes #}
+                <div class="card">
+                    <div class="card-header" id="head_3">
+                        <h4 class="card-title w-100">
+                            <a class="d-block w-100" data-toggle="collapse" data-target="#panneau_3" href="#panneau_3" aria-expanded="false" aria-controls="panneau_3">
+                                <i class="fa fa-angle-down margin-r-5"></i>Groupes
+                                {% if data.liste_groupes|length > 1 %}
+                                    <span class="badge badge-info pull-right" title="Groupes disponibles">{{ data.liste_groupes|length }}</span>
+                                {% endif %}
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="panneau_3" class="collapse" data-parent="#accordeon_parametres" aria-labelledby="head_3">
+                        <div class="card-body p-0">
+                            <select multiple class="form-control" id="selection_groupes">
+                                {% for groupe in data.liste_groupes %}
+                                    <option value="{{ groupe.pk }}" {% if groupe.pk in data.selection_groupes %}selected{% endif %}>{{ groupe.nom }}</option>
+                                {% endfor %}
+                            </select>
+                            <script>
+                                function Get_groupes() {
+                                    return $('#selection_groupes').val();
+                                };
+                            </script>
+                        </div>
+                    </div>
+                </div>
+
+
+                {# Panneau Classes #}
+                <div class="card">
+                    <div class="card-header" id="head_4">
+                        <h4 class="card-title w-100">
+                            <a class="d-block w-100" data-toggle="collapse" data-target="#panneau_4" href="#panneau_4" aria-expanded="false" aria-controls="panneau_4">
+                                <i class="fa fa-angle-down margin-r-5"></i>Classes
+                                {% if data.liste_classes|length > 1 %}
+                                    <span class="badge badge-info pull-right" title="Classes disponibles">{{ data.liste_classes|length }}</span>
+                                {% endif %}
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="panneau_4" class="collapse" aria-labelledby="head_4" data-parent="#accordeon_parametres">
+                        <div class="card-body p-0">
+                            <select multiple class="form-control" id="selection_classes">
+                                {% for classe in data.liste_classes %}
+                                    <option value="{{ classe.pk }}" {% if classe.pk in data.selection_classes %}selected{% endif %}>{{ classe.ecole.nom|truncatechars:15 }} | {{ classe.nom }}</option>
+                                {% endfor %}
+                            </select>
+                            <script>
+                                function Get_classes() {
+                                    return $('#selection_classes').val();
+                                };
+                            </script>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+
+{% endblock contenu_page %}
+
+

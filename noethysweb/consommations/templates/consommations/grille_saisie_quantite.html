@@ -1,0 +1,90 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Model Saisir la quantité d'une conso #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_saisir_quantite{% endblock %}
+    {% block modal_titre %}Saisie de la quantité{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+
+        <form id="form_selection_quantite" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="saisie_quantite_key" value="">
+            <input type="hidden" id="saisie_quantite_action" value="">
+
+            <div class="form-group">
+                <div class="controls">
+                    <label for="saisie_quantite" class="col-form-label">Quantité</label>
+                    <input id="saisie_quantite" type="number" class="numberinput form-control form-control-lg" min="1">
+                </div>
+            </div>
+
+            <div class="buttonHolder">
+                <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                    <input type="submit" value="Supprimer" class="btn btn-danger pull-left" id="saisie_quantite_supprimer"/>
+                    <input type="submit" value="Valider" class="btn btn-primary" id="saisie_quantite_valider"/>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                </div>
+            </div>
+
+        </form>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+    $(document).ready(function() {
+        $('#modal_saisir_quantite').on('show.bs.modal', function () {
+            $('#saisie_quantite_supprimer').hide();
+
+            // Cache le bouton Supprimer s'il s'agit d'un ajout de conso
+            if ($('#saisie_quantite_action').val() === "modifier") {
+                $('#saisie_quantite_supprimer').show();
+            };
+            if ($('#saisie_quantite_action').val() === "ajouter") {
+                $('#saisie_quantite').val(1);
+            }
+        });
+
+        $('#modal_saisir_quantite').on('shown.bs.modal', function () {
+            $("#saisie_quantite").focus();
+        });
+
+        $('#modal_saisir_quantite').on('keypress', function(e) {
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                $('#saisie_quantite_valider').click();
+            };
+        });
+
+    });
+
+    $("#form_selection_quantite").on('click', '#saisie_quantite_supprimer', function(e) {
+        e.preventDefault();
+        var key = $('#saisie_quantite_key').val();
+        if (dict_cases[key].supprimer() === true) {
+            $('#modal_saisir_quantite').modal('hide');
+        };
+    });
+
+    // Modal : Validation de la quantité saisie
+    $("#form_selection_quantite").on('click', '#saisie_quantite_valider', function(e) {
+        e.preventDefault();
+        var quantite = parseInt($('#saisie_quantite').val());
+        if (quantite < 1) {
+            toastr.error(("La quantité doit être supérieure ou égale à 1"));
+            return false;
+        }
+
+        $('#modal_saisir_quantite').modal('hide');
+        var key = $('#saisie_quantite_key').val();
+        var action = $('#saisie_quantite_action').val();
+
+        if (action === "ajouter") {dict_cases[key].creer_conso({quantite: quantite})};
+        if (action === "modifier") {dict_cases[key].modifier_conso({quantite: quantite}, maj_facturation=true)};
+    });
+
+</script>

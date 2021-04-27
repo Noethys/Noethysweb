@@ -1,0 +1,119 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Modal Saisir les horaires d'une conso #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_saisir_horaires{% endblock %}
+    {% block modal_titre %}Saisie des horaires{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+
+        <form id="form_selection_horaires" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="saisie_heure_key" value="">
+            <input type="hidden" id="saisie_heure_action" value="">
+
+            <div class="form-group">
+                <div class="controls">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="saisie_heure_debut" class="col-form-label">Début</label>
+                            <div class="input-group date choix_horaires">
+                                <input id="saisie_heure_debut" type="time" class="form-control form-control-lg"/>
+                                <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="saisie_heure_fin" class="col-form-label">Fin</label>
+                            <div class="input-group date choix_horaires">
+                                <input id="saisie_heure_fin" type="time" class="form-control form-control-lg"/>
+                                <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="buttonHolder">
+                <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                    <input type="submit" name="submit_supprimer" value="Supprimer" class="btn btn-danger pull-left" id="saisie_horaires_supprimer"/>
+                    <input type="submit" name="submit_valider" value="Valider" class="btn btn-primary" id="saisie_horaires_valider"/>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                </div>
+            </div>
+        </form>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+    $(document).ready(function() {
+        $('#modal_saisir_horaires').on('show.bs.modal', function () {
+            $('#saisie_horaires_supprimer').hide();
+
+            // Cache le bouton Supprimer s'il s'agit d'un ajout de conso
+            if ($('#saisie_heure_action').val() === "modifier") {
+                $('#saisie_horaires_supprimer').show();
+            };
+
+            var case_tableau = dict_cases[$('#saisie_heure_key').val()];
+
+            // Vérifie si des heures sont fixes
+            $("#saisie_heure_debut").prop('disabled', dict_unites[case_tableau.unite].heure_debut_fixe);
+            $("#saisie_heure_fin").prop('disabled', dict_unites[case_tableau.unite].heure_fin_fixe);
+        });
+
+        $('#modal_saisir_horaires').on('shown.bs.modal', function () {
+            $("#saisie_heure_debut").focus();
+        });
+
+        $('#modal_saisir_horaires').on('keypress', function(e) {
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                $('#saisie_horaires_valider').click();
+            };
+        });
+    });
+
+    $("#form_selection_horaires").on('click', '#saisie_horaires_supprimer', function(e) {
+        e.preventDefault();
+        var key = $('#saisie_heure_key').val();
+        if (dict_cases[key].supprimer() === true) {
+            $('#modal_saisir_horaires').modal('hide');
+        };
+    });
+
+    // Modal : Validation des horaires saisis
+    $("#form_selection_horaires").on('click', '#saisie_horaires_valider', function(e) {
+        e.preventDefault();
+
+        // Vérification des heures saisies
+        var heure_debut = moment($('#saisie_heure_debut').val().slice(0, 5), "HH:mm", true);
+        if (!heure_debut.isValid()) {
+            toastr.error(("L'heure de début n'est pas valide"));
+            return false;
+        }
+        var heure_fin = moment($('#saisie_heure_fin').val().slice(0, 5), "HH:mm", true);
+        if (!heure_fin.isValid()) {
+            toastr.error(("L'heure de fin n'est pas valide"));
+            return false;
+        }
+        if (heure_debut >= heure_fin) {
+            toastr.error(("L'heure de fin doit être supérieure à l'heure de début"));
+            return false;
+        }
+
+        // Get variables
+        var key = $('#saisie_heure_key').val();
+        var action = $('#saisie_heure_action').val();
+
+        // Renvoie les heures à la page
+        $('#modal_saisir_horaires').modal('hide');
+
+        if (action === "ajouter") {dict_cases[key].creer_conso({heure_debut: heure_debut._i, heure_fin: heure_fin._i})};
+        if (action === "modifier") {dict_cases[key].modifier_conso({heure_debut: heure_debut._i, heure_fin: heure_fin._i}, maj_facturation=true)};
+
+    });
+
+</script>

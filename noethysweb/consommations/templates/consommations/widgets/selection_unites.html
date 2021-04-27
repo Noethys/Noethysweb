@@ -1,0 +1,79 @@
+{% load static %}
+{% load embed %}
+
+<input id="{{ id }}" name="{{ name }}" value="" type="hidden">
+
+<div id="div_{{ id }}">
+{% for activite in liste_activites %}
+    <div>
+        <div style="background-color: #d9d9d9;padding: 5px;margin-bottom: 8px;">{{ activite.nom }}</div>
+        <ul data-idactivite="{{ activite.pk }}" class="todo-list">
+            {% for unite in dict_unites|get_item:activite %}
+                <li id="{{ unite.categorie }}_{{ unite.pk }}">
+                    <span class="handle">
+                        <i class="fa fa-ellipsis-v"></i>
+                        <i class="fa fa-ellipsis-v"></i>
+                    </span>
+                    <span class="text">{{ unite.nom }}</span>
+                    {% if unite.categorie == "consommation" %}
+                        <small class="badge badge-warning">Unité de consommation</small>
+                    {% else %}
+                        <small class="badge badge-danger">Unité de remplissage</small>
+                    {% endif %}
+                    <div class="pull-right">
+                        <select class="select">
+                            <option value="afficher" {% if unite.affichage == "afficher" %}selected{% endif %}>Toujours afficher</option>
+                            <option value="ouvert" {% if unite.affichage == "ouvert" %}selected{% endif %}>Afficher si ouvert</option>
+                            <option value="masquer" {% if unite.affichage == "masquer" %}selected{% endif %}>Toujours masquer</option>
+                        </select>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endfor %}
+</div>
+
+<br>
+<span class="text-gray"><i class="fa fa-info-circle margin-r-5"></i> Cliquez sur <i class="fa fa-ellipsis-v"></i> <i class="fa fa-ellipsis-v"></i> pour modifier l'ordre des unités.</span>
+
+<script>
+
+    $(function () {
+
+        // Initialisation jQuery UI sortable
+        $("#div_{{ id }} .todo-list").sortable({
+            placeholder: "sort-highlight",
+            handle: ".handle",
+            forcePlaceholderSize: true,
+            zIndex: 999999,
+            stop: function(event, ui) {
+                create_value_{{ id }}();
+            }
+        });
+
+        // On change affichage
+        $("#div_{{ id }} select").change(function() {
+            create_value_{{ id }}();
+        });
+
+        function create_value_{{ id }}() {
+            var dict_resultats = {};
+            $("#div_{{ id }} ul").each(function (index) {
+                var liste_items = $(this).sortable("toArray");
+                var resultats = [];
+                liste_items.forEach(function (item) {
+                    var affichage = $("#" + item + " select").val();
+                    resultats.push(item + "_" + affichage);
+                });
+                dict_resultats[this.dataset.idactivite] = resultats;
+            });
+            $("#{{ id }}").val(JSON.stringify(dict_resultats));
+        }
+
+        // Initialisation de la valeur
+        create_value_{{ id }}();
+
+    });
+
+</script>

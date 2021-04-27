@@ -1,0 +1,133 @@
+{% load crispy_forms_tags %}
+{% load static %}
+
+
+{% block styles %}
+
+    <style type="text/css">
+
+        .individus {
+            list-style: none;
+            padding: 0;
+            margin: 5px;
+            padding-left: 5px;
+        }
+        .checkbox {
+            margin-top: 0px;
+            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: normal;
+        }
+        .list-inline>li {
+            display: inline-block;
+            padding-right: 0px;
+            padding-left: 0px;
+        }
+        .well {
+            padding: 5px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        .activite {
+            margin-bottom: 5px;
+        }
+
+</style>
+
+{% endblock styles %}
+
+
+{% block contenu_page %}
+
+    <!-- Sélection des individus -->
+    <ul class="individus">
+
+
+        {% for individu in data.liste_individus_possibles %}
+            <li>
+                <label for="check_individu_{{ individu.pk }}" class="checkbox">
+                    <input type="checkbox" class="checkboxinput" id="check_individu_{{ individu.pk }}" data-idindividu="{{ individu.pk }}" {% if individu.pk in data.selection_individus or data.selection_individus == "__all__" %}checked{% endif %}> {{ individu.Get_nom }}
+                </label>
+            </li>
+        {% endfor %}
+
+{% comment %}
+        {% for key_individu, inscriptions in data.dict_inscriptions_by_individu.items %}
+            <li>
+                <ul class="list-inline">
+                    <li>
+                        <label for="check_individu_{{ key_individu.0.pk }}" class="checkbox">
+                            <input type="checkbox" class="checkboxinput" id="check_individu_{{ key_individu.0.pk }}" data-idindividu="{{ key_individu.0.pk }}" {% if key_individu.0.pk in data.selection_individus or data.selection_individus == "__all__" %}checked{% endif %}> {{ key_individu.0.Get_nom }}
+                        </label>
+                    </li>
+
+                    <li class="pull-right">
+                        <a class="btn btn-sm" role="button" data-toggle="collapse" href="#collapse_individu_{{ key_individu.0.pk }}" aria-expanded="false" aria-controls="collapseExample">
+                             <i class="fa fa-angle-down"></i>
+                        </a>
+                    </li>
+
+                    <div class="collapse" id="collapse_individu_{{ key_individu.0.pk }}">
+                        <div class="well">
+                            <ul class="individus">
+                                {% for inscription in inscriptions %}
+                                    <li class="activite">
+                                        <label for="check_inscription_{{ inscription.pk }}" class="checkbox">
+                                            <input type="checkbox" class="checkboxinput" id="check_inscription_{{ inscription.pk }}" data-idindividu="{{ key_individu.0.pk }}" data-idactivite="{{ inscription.activite.pk }}" data-idinscription="{{ inscription.pk }}" {% if inscription.pk in data.selection_inscriptions or data.selection_inscriptions == "__all__" %}checked{% endif %}> {{ inscription.activite.nom}}
+                                        </label>
+                                        <select id="groupes_inscription_{{ inscription.pk }}" class="form-control">
+                                            {% for groupe in inscription.activite.Get_groupes %}
+                                                <option value="{{ groupe.pk }}" {% if data.selection_inscriptions|get_item:inscription.pk == groupe.pk %}selected{% endif %}>{{ groupe.nom }}{% if groupe == inscription.groupe %}*{% endif %}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </ul>
+            </li>
+        {% endfor %}
+        {% endcomment %}
+    </ul>
+
+
+{% endblock contenu_page %}
+
+{% block scripts %}
+    <script>
+
+        function Get_individus() {
+            // Recherche les individus cochés
+            var liste_individus = [];
+            $('[id^="check_individu_"]').each(function (index) {
+                if ($(this).is(':checked')) {
+                    let idindividu = $(this).attr("data-idindividu");
+                    liste_individus.push(idindividu);
+                }
+                ;
+            });
+            return liste_individus;
+        };
+
+{% comment %}
+        function Get_inscriptions() {
+            // Recherche les inscriptions cochées
+            var liste_inscriptions = [];
+            $('[id^="check_inscription_"]').each(function (index) {
+                if ($(this).is(':checked')) {
+                    let idinscription = $(this).attr("data-idinscription");
+                    let idactivite = $(this).attr("data-idactivite");
+                    let idgroupe = $('[id^="groupes_inscription_' + idinscription + '"]').val();
+                    liste_inscriptions.push({"inscription": idinscription, "activite": idactivite, "groupe": idgroupe});
+                };
+            });
+            return liste_inscriptions;
+        }
+{% endcomment %}
+
+    </script>
+{% endblock scripts %}
+
+
+

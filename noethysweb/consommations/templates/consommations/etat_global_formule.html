@@ -1,0 +1,87 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Modal Saisir une formule #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_saisir_formule{% endblock %}
+    {% block modal_titre %}Saisie d'une formule{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+
+        <form id="form_saisie_formule" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="saisie_formule_idunite" value="">
+            <div class="form-group">
+                <div class="controls">
+                    <label for="saisie_formule" class="col-form-label">Formule</label>
+                    <textarea id="saisie_formule" class="form-control" rows="6" maxlength="450"></textarea>
+                </div>
+            </div>
+
+            <div>
+                <p>Exemples de variables et de fonctions spéciales :
+                    <ul>
+                        <li>debut, fin, duree, HEURE(), SI(condition, alors, sinon), ET, OU</li>
+                        <li>unite1, unite1.debut, unite1.fin, unite1.duree</li>
+                    </ul>
+                </p>
+                <p>
+                Exemples de formule :
+                    <ul>
+                        <li>SI(debut <= HEURE("9h") ET fin >= HEURE("7h00"), HEURE("2h"))</li>
+                        <li>SI(debut <= HEURE("12h") ET fin >= HEURE("9h00"), HEURE("3h"), HEURE("2h"))</li>
+                        <li>SI(unite1, HEURE("5h30"), HEURE("4h30"))</li>
+                        <li>SI(unite24.duree > HEURE("9h"), HEURE("8h"))</li>
+                        <li>duree + HEURE("1h") + unite32.duree</li>
+                    </ul>
+                </p>
+            </div>
+
+            <div class="buttonHolder">
+                <div class="modal-footer dropup" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                    <a type="button" class="btn btn-default pull-left" data-toggle="dropdown">Insérer une unité</a>
+                    <ul class="dropdown-menu" role="menu">
+                        <h6 class="dropdown-header"><strong>Cliquez sur une unité pour l'insérer</strong></h6>
+                        <div id="liste_unites" style="margin: 10px;">
+                        </div>
+                    </ul>
+                    <input type="submit" value="Valider" class="btn btn-primary" id="saisie_formule_valider"/>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                </div>
+            </div>
+
+        </form>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+    $(document).ready(function() {
+        $('#modal_saisir_formule').on('shown.bs.modal', function () {
+            $("#saisie_formule").focus();
+        });
+
+    });
+
+    // Modal : Validation de la formule saisie
+    $("#form_saisie_formule").on('click', '#saisie_formule_valider', function(e) {
+        e.preventDefault();
+        var texte = $('#saisie_formule').val();
+        var idunite = $('#saisie_formule_idunite').val();
+        $('#modal_saisir_formule').modal('hide');
+        $("[name='ctrl_formule_" + idunite + "']").val(texte);
+    });
+
+    // Insérer l'unité choisie dans la formule
+    function inserer_unite(idunite) {
+        var texte = "unite" + idunite;
+        var cursorPos = $('#saisie_formule').prop('selectionStart');
+        var v = $('#saisie_formule').val();
+        var textBefore = v.substring(0, cursorPos);
+        var textAfter  = v.substring(cursorPos, v.length);
+        $('#saisie_formule').val(textBefore + texte + textAfter);
+    }
+
+</script>

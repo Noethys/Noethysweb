@@ -1,0 +1,141 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+
+    <style>
+        #accordeon_parametres {
+            margin-bottom: 0px;
+        }
+        #accordeon_parametres .card {
+            border-radius: 0px;
+            border: 0px;
+            margin-bottom: 0px;
+            margin-top: 0px;
+        }
+        #accordeon_parametres .card-header {
+            padding: 7px 5px 7px 10px;
+        }
+        #accordeon_parametres .card-title {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        #accordeon_parametres .form-control {
+            border-radius: 0px;
+        }
+    </style>
+
+    <!-- Box Paramètres -->
+    <div class="card card-default">
+
+        <div class="card-header">
+            <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i>Paramètres</h3>
+            <div class="card-tools">
+                <button type="submit" name="type_submit" form="form-maj" style="margin-right: 10px;" value="MAJ" class="btn btn-default btn-xs" title="Appliquer les paramètres sélectionnés">Appliquer</button>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div id="accordeon_parametres">
+
+                {# Panneau Individus #}
+                <div class="card">
+                    <div class="card-header" id="head_1">
+                        <h4 class="card-title w-100">
+                            <a class="d-block w-100" data-toggle="collapse" data-target="#panneau_1" href="#panneau_1" aria-expanded="{% if data.liste_individus_possibles %}true{% else %}false{% endif %}" aria-controls="panneau_1">
+                                <i class="fa fa-angle-down margin-r-5"></i>Individus
+                                {% if data.liste_individus_possibles|length > 1 %}
+                                    <span class="badge badge-info pull-right" title="Individus disponibles">{{ data.liste_individus_possibles|length }}</span>
+                                {% endif %}
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="panneau_1" class="collapse {% if data.liste_individus_possibles %}show{% endif %}" aria-labelledby="head_1" data-parent="#accordeon_parametres">
+                        <div class="card-body p-0">
+                            {% include "consommations/grille_selection_individus.html" %}
+                        </div>
+                    </div>
+                </div>
+
+                {# Panneau Activités #}
+                <div class="card">
+                    <div class="card-header" id="head_2">
+                        <h4 class="card-title w-100">
+                            <a class="d-block w-100" data-toggle="collapse" data-target="#panneau_2" href="#panneau_2" aria-expanded="false" aria-controls="panneau_2">
+                                <i class="fa fa-angle-down margin-r-5"></i>Activité
+                                {% if data.liste_activites_possibles|length > 1 %}
+                                    <span class="badge badge-info pull-right" title="Activités disponibles">{{ data.liste_activites_possibles|length }}</span>
+                                {% endif %}
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="panneau_2" class="collapse" aria-labelledby="head_2" data-parent="#accordeon_parametres">
+                        <div class="card-body p-0">
+
+                            <select class="form-control" id="selection_activite">
+                                {% for activite in data.liste_activites_possibles %}
+                                    <option value="{{ activite.pk }}" {% if activite == data.selection_activite %}selected{% endif %}>{{ activite.nom }}</option>
+                                {% endfor %}
+                            </select>
+
+                        </div>
+                    </div>
+                </div>
+
+                {# Panneau Période #}
+                <div class="card">
+                    <div class="card-header" id="head_3">
+                        <h4 class="card-title w-100">
+                            <a class="d-block w-100" data-toggle="collapse" data-target="#panneau_3" data-parent="#accordeon_parametres" href="#panneau_3" aria-expanded="false" aria-controls="panneau_3">
+                                <i class="fa fa-angle-down margin-r-5"></i>Période
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="panneau_3" class="collapse" aria-labelledby="head_3" data-parent="#accordeon_parametres">
+                        <div class="card-body p-0">
+
+                            <div style="padding: 5px;">
+                                <form class="text-center">
+
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input choix_type_periode" type="radio" id="inlineRadio1" value="mois" name="choix_type_periode" checked onClick="Set_mode_periode('mois')">
+                                        <label class="form-check-label" for="inlineRadio1">Mois</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input choix_type_periode" type="radio" id="inlineRadio2" value="vacances" name="choix_type_periode" onClick="Set_mode_periode('vacances')">
+                                        <label class="form-check-label" for="inlineRadio2">Vacances</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input choix_type_periode" type="radio" id="inlineRadio3" value="dates" name="choix_type_periode" onClick="Set_mode_periode('dates')">
+                                        <label class="form-check-label" for="inlineRadio3">Dates</label>
+                                    </div>
+
+                                </form>
+                            </div>
+
+                            {% include 'consommations/selecteur_periode.html' %}
+
+                            <script>
+                                Set_periode();
+                                $(document).ready(function() {
+                                    $('.choix_type_periode').on('change', function (event) {
+                                        event.preventDefault();
+                                        Set_mode_periode($(this).val());
+                                    });
+                                });
+                            </script>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+{% endblock contenu_page %}
+
+

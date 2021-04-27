@@ -1,0 +1,67 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Model Saisir la quantité d'un mémo #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_saisir_memo{% endblock %}
+    {% block modal_titre %}Saisie d'un mémo journalier{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+
+        <form id="form_selection_memo" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="saisie_memo_key" value="">
+            <div class="form-group">
+                <div class="controls">
+                    <label for="saisie_memo" class="col-form-label">Mémo</label>
+                    <textarea id="saisie_memo" class="form-control" rows="4" maxlength="450"></textarea>
+                </div>
+            </div>
+
+            <div class="buttonHolder">
+                <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                    <button type="submit" title="Supprimer" class='btn btn-default pull-left' id="saisie_memo_supprimer" value="Valider"><i class="fa fa-trash-o margin-r-5"></i>Supprimer</button>
+                    <button type="submit" title="Valider" class='btn btn-primary' id="saisie_memo_valider" value="Valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban margin-r-5"></i>Annuler</button>
+                </div>
+            </div>
+
+        </form>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+    $(document).ready(function() {
+        $('#modal_saisir_memo').on('shown.bs.modal', function () {
+            $("#saisie_memo").focus();
+        });
+
+        $('#modal_saisir_memo').on('keypress', function(e) {
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                $('#saisie_memo_valider').click();
+            };
+        });
+
+    });
+
+    $("#form_selection_memo").on('click', '#saisie_memo_supprimer', function(e) {
+        e.preventDefault();
+        var key = $('#saisie_memo_key').val();
+        $('#modal_saisir_memo').modal('hide');
+        dict_cases_memos[key].set_memo('');
+    });
+
+    // Modal : Validation du mémo saisi
+    $("#form_selection_memo").on('click', '#saisie_memo_valider', function(e) {
+        e.preventDefault();
+        var texte = $('#saisie_memo').val();
+        var key = $('#saisie_memo_key').val();
+        $('#modal_saisir_memo').modal('hide');
+        dict_cases_memos[key].set_memo(texte);
+    });
+
+</script>

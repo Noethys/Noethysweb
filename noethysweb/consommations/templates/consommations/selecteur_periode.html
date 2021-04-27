@@ -1,0 +1,213 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+<link rel="stylesheet" type="text/css" href="{% static 'lib/daterangepicker/daterangepicker.css' %}">
+<script src="{% static 'lib/moment/moment.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'lib/daterangepicker/daterangepicker.js' %}" type="text/javascript"></script>
+
+<div>
+    <div id="div_periode_annee">
+        <input type="number" name="annee" class="numberinput form-control" id="selection_annee" style="border-bottom: 0px;text-align: center;" value="{% now "Y" %}">
+    </div>
+    <div id="div_periode_mois">
+        <select multiple class="form-control" id="selection_mois">
+            <option value="1">Janvier</option>
+            <option value="2">Février</option>
+            <option value="3">Mars</option>
+            <option value="4">Avril</option>
+            <option value="5">Mai</option>
+            <option value="6">Juin</option>
+            <option value="7">Juillet</option>
+            <option value="8">Août</option>
+            <option value="9">Septembre</option>
+            <option value="10">Octobre</option>
+            <option value="11">Novembre</option>
+            <option value="12">Décembre</option>
+        </select>
+    </div>
+    <div id="div_periode_vacances">
+        <select multiple class="form-control" id="selection_vacances">
+        </select>
+    </div>
+    <div id="div_periode_dates">
+        <input type="text" id="selection_dates" class="form-control"/>
+    </div>
+
+</div>
+
+<script>
+
+    {% include 'core/csrftoken.html' %}
+
+    var mode_periode = "mois";
+
+    function Set_mode_periode(mode) {
+        $("input[name=choix_type_periode][value=" + mode + "]").prop('checked',true);
+        mode_periode = mode;
+        if (mode == null) {
+            mode = "mois"
+        }
+        $('#div_periode_annee').hide();
+        $('#div_periode_mois').hide();
+        $('#div_periode_vacances').hide();
+        $('#div_periode_dates').hide();
+
+        if (mode === "mois") {
+            $('#div_periode_annee').show();
+            $('#div_periode_mois').show();
+        };
+        if (mode === "vacances") {
+            $('#div_periode_annee').show();
+            $('#div_periode_vacances').show();
+            $("#selection_annee").trigger("change");
+        };
+        if (mode === "dates") {
+            $('#div_periode_dates').show();
+        };
+    }
+
+    function Get_periode() {
+        var periodes = [];
+        var selections = {};
+        if (mode_periode == "mois") {
+            annee = $('#selection_annee').val();
+            liste_mois = $('#selection_mois').val();
+            selections = {"annee": annee, "liste_mois": liste_mois};
+            if ((annee != null && annee != '' && liste_mois != null)) {
+                liste_mois.forEach(function (num_mois) {
+                    date_debut = moment(annee.toString() + "-" + num_mois.toString() + "-1", "YYYY-M-D");
+                    date_fin = moment(date_debut).endOf('month');
+                    periodes.push(date_debut.format('YYYY-MM-DD') + ";" + date_fin.format('YYYY-MM-DD'));
+                });
+            };
+        };
+        if (mode_periode == "vacances") {
+            annee = $('#selection_annee').val();
+            liste_vacances = $('#selection_vacances').val();
+            selections = {"annee": annee, "liste_vacances": liste_vacances};
+            if ((annee != null && annee != '' && liste_vacances != null)) {
+                periodes = liste_vacances;
+            };
+        };
+        if (mode_periode == "dates") {
+            var date_debut = $('#selection_dates').data('daterangepicker').startDate.format('YYYY-MM-DD');
+            var date_fin = $('#selection_dates').data('daterangepicker').endDate.format('YYYY-MM-DD')
+            periodes = [date_debut + ";" + date_fin];
+            selections = {"date_debut": date_debut, "date_fin": date_fin}
+        };
+        return {"mode": mode_periode, "selections": selections, "periodes": periodes};
+    };
+
+    function Set_periode(selection_periode) {
+        if (selection_periode) {
+            Set_mode_periode(selection_periode.mode);
+        } else {
+            Set_mode_periode("mois");
+            return;
+        }
+        if (mode_periode === "mois") {
+            $('#selection_annee').val(selection_periode.selections.annee).change();
+            $('#selection_mois').val(selection_periode.selections.liste_mois).change();
+        };
+        if (mode_periode === "vacances") {
+            $('#selection_annee').val(selection_periode.selections.annee).change();
+            init_vacances(selection_periode.selections.liste_vacances);
+        };
+        if (mode_periode === "dates") {
+            $("#selection_dates").data('daterangepicker').setStartDate(moment(selection_periode.selections.date_debut));
+            $("#selection_dates").data('daterangepicker').setEndDate(moment(selection_periode.selections.date_fin));
+        };
+
+    };
+
+    function init_vacances(selection) {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_get_vacances' %}",
+            data: {
+                "annee": $('#selection_annee').val(),
+            },
+            datatype: "json",
+            success:function(data){
+                $('#selection_vacances').empty();
+                $.each(data["vacances"], function(index, vacance) {
+                    $('#selection_vacances').append('<option value="' + vacance.date_debut + ';' + vacance.date_fin + '">' + vacance.nom + '</option>');
+                });
+                if (selection) {
+                    $('#selection_vacances').val(selection).change();
+                };
+            }
+        })
+    };
+
+    init_daterangepicker()
+
+    function init_daterangepicker() {
+        $("#selection_dates").daterangepicker({
+            autoApply: true,
+            showDropdowns: false,
+            alwaysShowCalendars: true,
+            applyButtonClasses: "btn-primary",
+
+            ranges: {
+                "Aujourd'hui": [moment(), moment()],
+                'Cette semaine': [moment().startOf('isoweek'), moment().endOf('isoweek')],
+                'Les 7 derniers jours': [moment().subtract(6, 'days'), moment()],
+                'Les 30 derniers jours': [moment().subtract(29, 'days'), moment()],
+                'Ce mois': [moment().startOf('month'), moment().endOf('month')],
+                'Le mois dernier': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            locale: {
+                "format": "DD/MM/YYYY",
+                "separator": " - ",
+                "applyLabel": "Valider",
+                "cancelLabel": "Annuler",
+                "fromLabel": "De",
+                "toLabel": "à",
+                "weekLabel": "N°",
+                "customRangeLabel": "Période personnalisée",
+                "daysOfWeek": [
+                    "Dim",
+                    "Lun",
+                    "Mar",
+                    "Mer",
+                    "Jeu",
+                    "Ven",
+                    "Sam"
+                ],
+                "monthNames": [
+                    "Janvier",
+                    "Février",
+                    "Mars",
+                    "Avril",
+                    "Mai",
+                    "Juin",
+                    "Juillet",
+                    "Août",
+                    "Septembre",
+                    "Octobre",
+                    "Novembre",
+                    "Décembre"
+                ],
+                "firstDay": 1
+            }
+        });
+    };
+
+    $(document).ready(function() {
+        $("#selection_annee").change( function() {
+            if (mode_periode == "vacances") {
+                selection_actuelle = $('#selection_vacances').val();
+                init_vacances(selection_actuelle);
+            };
+        });
+
+    });
+
+</script>
+
+
+
+

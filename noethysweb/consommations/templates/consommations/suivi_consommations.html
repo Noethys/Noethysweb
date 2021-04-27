@@ -1,0 +1,150 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/clusterize/clusterize.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'consommations/grille.css' %}">
+{% endblock styles %}
+
+{% block scripts %}
+    <script type="text/javascript" src="{% static 'lib/clusterize/clusterize.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    <div class="card card-outline card-lightblue">
+
+        <div class="card-header">
+            <h3 class="card-title"><i class="fa fa-calendar margin-r-5"></i> Suivi des consommations</h3>
+            <div class="card-tools">
+
+                <button type="button" id="bouton_maj_affichage" title="Actualiser l'affichage" class="btn btn-tool"><i class="fa fa-refresh"></i></button>
+
+                <div class="btn-group">
+                    <button href="#" class="btn btn-tool dropdown-toggle" title="Ajuster les options" data-toggle="dropdown"><i class="fa fa-gear"></i></button>
+                    <div class="dropdown-menu dropdown-menu-right" role="menu">
+                        <h6 class="dropdown-header"><strong>Données</strong></h6>
+                        <a class="dropdown-item" href="#" id="selection_periode" title="Définir la période de référence">Définir la période de référence</a>
+                        <a class="dropdown-item" href="#" id="selection_activites" title="Sélectionner les activités à afficher">Sélectionner les activités</a>
+                        <a class="dropdown-divider"></a>
+                        <h6 class="dropdown-header"><strong>Mode d'affichage</strong></h6>
+                        <a href="#" class="dropdown-item mode_affichage {% if suivi_consommations_parametres.mode == 'places_initiales' %}menu-checked{% endif %}" data-mode="places_initiales" title="Afficher les places maximales">Places maximales</a>
+                        <a href="#" class="dropdown-item mode_affichage {% if suivi_consommations_parametres.mode == 'places_prises' %}menu-checked{% endif %}" data-mode="places_prises" title="Afficher les places prises">Places prises</a>
+                        <a href="#" class="dropdown-item mode_affichage {% if suivi_consommations_parametres.mode == 'places_restantes' %}menu-checked{% endif %}" data-mode="places_restantes" title="Afficher les places disponibles">Places disponibles</a>
+                        <a class="dropdown-divider"></a>
+                        <h6 class="dropdown-header"><strong>Options</strong></h6>
+                        <a href="#" id="afficher_totaux" class="dropdown-item option_affichage {% if suivi_consommations_parametres.afficher_totaux %}menu-checked{% endif %}" title="Afficher les colonnes des totaux">Afficher les totaux</a>
+                        <a href="#" id="afficher_abreges_groupes" class="dropdown-item option_affichage {% if suivi_consommations_parametres.afficher_abreges_groupes %}menu-checked{% endif %}" title="Afficher les abrégés des groupes">Utiliser les noms de groupes abrégés</a>
+                        <a href="#" id="afficher_abreges_unites" class="dropdown-item option_affichage {% if suivi_consommations_parametres.afficher_abreges_unites %}menu-checked{% endif %}" title="Afficher les abrégés des unités">Utiliser les noms d'unités abrégés</a>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-tool" data-card-widget="maximize" title="Agrandir/Réduire"><i class="fa fa-expand"></i></button>
+
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table table-sm table-bordered noselect" id="table_suivi" draggable="false">
+                <table cellspacing="0" id="table-suivi" class="table" style="min-width: 200px;">
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    {# Ajout de la modal sélection de la période #}
+    {% include 'consommations/suivi_consommations_periode.html' %}
+
+    {# Ajout de la modal sélection des activités #}
+    <div id="div_modal_selection_activites"></div>
+
+<script>
+    $(document).ready(function() {
+
+        // Bouton MAJ affichage
+        $("#bouton_maj_affichage").on('click', function(event) {
+            event.preventDefault();
+            maj_affichage();
+        });
+
+        $("#selection_periode").on("click",function(event){
+            event.preventDefault();
+            Set_periode(periode_json);
+            $('#modal_selection_periode').modal('show');
+        });
+
+        $("#selection_activites").on("click",function(event){
+            event.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_get_activites' %}",
+                data: {
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                },
+                success: function (data) {
+                    $("#div_modal_selection_activites").html(data);
+                    $('#modal_selection_activites').modal('show');
+                }
+            });
+        });
+
+        // Click sur le choix d'un affichage
+        $(".mode_affichage").on("click",function(event){
+            event.preventDefault();
+            $(".mode_affichage").removeClass("menu-checked");
+            $(this).addClass("menu-checked");
+            maj_affichage(update_parametres=true);
+        });
+
+        // Click sur l'option Afficher les totaux
+        $(".option_affichage").on("click",function(event){
+            event.preventDefault();
+            if ($(this).hasClass("menu-checked")) {
+                $(this).removeClass("menu-checked");
+            } else {
+                $(this).addClass("menu-checked");
+            };
+            maj_affichage(update_parametres=true);
+        });
+
+        // MAJ de l'affichage au chargement de la page
+        maj_affichage();
+
+    });
+
+    function maj_affichage(update_parametres=false) {
+        var parametres = null;
+        if (update_parametres) {
+            parametres = {
+                mode: $(".mode_affichage.menu-checked").get(0).dataset.mode,
+                periode: Get_periode(),
+                activites: activites_json,
+                afficher_totaux: $("#afficher_totaux").hasClass("menu-checked"),
+                afficher_abreges_groupes: $("#afficher_abreges_groupes").hasClass("menu-checked"),
+                afficher_abreges_unites: $("#afficher_abreges_unites").hasClass("menu-checked"),
+            };
+        };
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_get_suivi_consommations' %}",
+            data: {
+                parametres: JSON.stringify(parametres),
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+            },
+            success: function (data) {
+                $("#table-suivi").html(data);
+                $("#table_suivi").freezeTable({
+                    'scrollBar': true,
+                });
+            }
+        });
+    };
+
+</script>
+
+{% endblock contenu_page %}

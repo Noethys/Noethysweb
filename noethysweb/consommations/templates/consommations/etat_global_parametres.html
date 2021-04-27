@@ -1,0 +1,121 @@
+{% for activite, unites in dict_unites.items %}
+
+    <tr>
+        <td colspan="9" style="background-color: #eaeaea;">{{ activite.nom }}</td>
+    </tr>
+
+    {% for unite in unites %}
+
+            <tr>
+                <td style="text-align: left !important;">
+                    <div>
+                        <input type="checkbox" id="check_unite_{{ unite.pk }}" name="check_unite" value="{{ unite.pk }}" checked>
+                        <label class="form-check-label" for="check_unite_{{ unite.pk }}">{{ unite.nom }}</label>
+                    </div>
+                </td>
+                <td>
+                    <select name="ctrl_type_{{ unite.pk }}" data-idunite="{{ unite.pk }}" class="select form-control" title="Sélectionnez le type de calcul à appliquer">
+                        <option value="0" selected>Nombre d'unités consommées</option>
+                        <option value="1">Temps réél de présence</option>
+                        <option value="2">Temps de présence facturé</option>
+                        <option value="3">Formule</option>
+                    </select>
+                </td>
+                <td>
+                    <input name="ctrl_coeff_{{ unite.pk }}" type="text" value="" class="form-control" title="Saisissez le coefficient à appliquer (Ex: 1, 2, 0.5, 1.5...)" placeholder="" style="width: 100px;">
+                </td>
+                <td>
+                    <div class="d-flex">
+                        <input name="ctrl_formule_{{ unite.pk }}" type="text" value="" class="form-control" placeholder="" title="Saisissez une formule" style="width: 100px;">
+                        <button name="bouton_formule_{{ unite.pk }}" type="button" title="Ouvrir la fenêtre de saisie" onclick="saisir_formule({{ unite.pk }})" class="btn btn-box-tool"><i class="fa fa-pencil-square-o"></i></button>
+                    </div>
+                </td>
+                <td>
+                    <select name="ctrl_arrondi_{{ unite.pk }}" class="select form-control" title="Sélectionnez un arrondi à appliquer à chaque consommation">
+                        <option value="" selected>Aucun</option>
+                        <option value="duree;5">Durée : 5 min. sup.</option>
+                        <option value="duree;10">Durée : 10 min. sup.</option>
+                        <option value="duree;15">Durée : 15 min. sup.</option>
+                        <option value="duree;30">Durée : 30 min. sup.</option>
+                        <option value="duree;60">Durée : 60 min. sup.</option>
+                        <option value="tranche_horaire;5">Horaire : 5 min.</option>
+                        <option value="tranche_horaire;10">Horaire : 10 min.</option>
+                        <option value="tranche_horaire;15">Horaire : 15 min.</option>
+                        <option value="tranche_horaire;30">Horaire : 30 min.</option>
+                        <option value="tranche_horaire;60">Horaire : 60 min.</option>
+                    </select>
+                </td>
+                <td>
+                    <input name="ctrl_duree_seuil_{{ unite.pk }}" type="text" value="" class="form-control" title="Saisissez une durée au format 'hh:mm'" placeholder="" style="width: 70px;">
+                </td>
+                <td>
+                    <input name="ctrl_duree_plafond_{{ unite.pk }}" type="text" value="" class="form-control" title="Saisissez une durée au format 'hh:mm'" placeholder="" style="width: 70px;">
+                </td>
+                <td>
+                    <input name="ctrl_heure_seuil_{{ unite.pk }}" type="text" value="" class="form-control" title="Saisissez une heure au format 'hh:mm'" placeholder="" style="width: 70px;">
+                </td>
+                <td>
+                    <input name="ctrl_heure_plafond_{{ unite.pk }}" type="text" value="" class="form-control" title="Saisissez une durée au format 'hh:mm'" placeholder="" style="width: 70px;">
+                </td>
+            </tr>
+
+    {% endfor %}
+
+{% endfor %}
+
+<input type="hidden" name="selection_periode" value="{{ periode }}">
+
+<script>
+
+    $(document).ready(function() {
+
+        $("[name='check_unite']").on('change', function () {
+            var idunite = $(this).val();
+            if ($(this).prop("checked")) {
+                var etat = false;
+            } else {
+                var etat = true;
+            };
+            $("[name='ctrl_type_" + idunite +"']").prop("disabled", etat);
+            $("[name='ctrl_coeff_" + idunite +"']").prop("disabled", etat);
+            $("[name='ctrl_formule_" + idunite +"']").prop("disabled", etat);
+            $("[name='bouton_formule_" + idunite +"']").prop("disabled", etat);
+            $("[name='ctrl_arrondi_" + idunite +"']").prop("disabled", etat);
+            $("[name='ctrl_duree_seuil_" + idunite +"']").prop("disabled", etat);
+            $("[name='ctrl_duree_plafond_" + idunite +"']").prop("disabled", etat);
+            $("[name='ctrl_heure_seuil_" + idunite +"']").prop("disabled", etat);
+            $("[name='ctrl_heure_plafond_" + idunite +"']").prop("disabled", etat);
+            if (etat === false) {
+                $("[name='ctrl_type_" + idunite +"']").trigger("change");
+            }
+        });
+
+        $("[name*='ctrl_type']").on('change', function () {
+            var idunite = this.dataset.idunite;
+            var valeur = $(this).val();
+            $("[name='ctrl_coeff_" + idunite +"']").prop("disabled", (valeur !== "0"));
+            $("[name='ctrl_formule_" + idunite +"']").prop("disabled", (valeur !== "3"));
+            $("[name='bouton_formule_" + idunite +"']").prop("disabled", (valeur !== "3"));
+            $("[name='ctrl_arrondi_" + idunite +"']").prop("disabled", (valeur !== "1"));
+            $("[name='ctrl_duree_seuil_" + idunite +"']").prop("disabled", (valeur !== "1"));
+            $("[name='ctrl_duree_plafond_" + idunite +"']").prop("disabled", (valeur !== "1"));
+            $("[name='ctrl_heure_seuil_" + idunite +"']").prop("disabled", (valeur !== "1"));
+            $("[name='ctrl_heure_plafond_" + idunite +"']").prop("disabled", (valeur !== "1"));
+        });
+
+        // Ajuste l'affichage
+        $("[name*='ctrl_type']").trigger("change");
+
+        // Envoie la liste des unités à la modal 'Insérer une unité'
+        var valeurs_unites = [];
+        {% for activite, unites in dict_unites.items %}
+            {% for unite in unites %}
+                valeurs_unites.push("<li><a href='#' onclick='inserer_unite({{ unite.pk }})'>unite{{ unite.pk }} : {{ unite.nom }} ({{ unite.activite.nom }})</a></li>");
+                {% endfor %}
+        {% endfor %}
+        $("#liste_unites").html(valeurs_unites);
+
+    });
+
+</script>
+

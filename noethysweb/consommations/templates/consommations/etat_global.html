@@ -1,0 +1,287 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+
+    <style>
+        #div_table_parametres th, #div_table_parametres td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        #div_id_profil {
+            margin-bottom: 0px;
+        }
+        .noselect {
+          -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+             -khtml-user-select: none; /* Konqueror HTML */
+               -moz-user-select: none; /* Old versions of Firefox */
+                -ms-user-select: none; /* Internet Explorer/Edge */
+                    user-select: none;} /* Non-prefixed version, currently
+
+    </style>
+
+
+    <div class="row">
+        <div class="col-md-3" >
+
+
+
+            <!-- Sélection de la période -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-calendar margin-r-5"></i> Période</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% crispy form_selection_periode %}
+                    <button class="btn btn-default btn-block btn-flat btn-sm" style="margin-top: -5px;" onclick="appliquer_parametres()" title="Appliquer">Appliquer</button>
+                </div>
+            </div>
+
+            <!-- Sélection des activités -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-calendar margin-r-5"></i> Activités</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% crispy form_selection_activites %}
+                    <button class="btn btn-default btn-block btn-flat btn-sm" style="margin-top: -10px;" onclick="appliquer_parametres()" title="Appliquer">Appliquer</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-9">
+
+{% comment %}
+            <!-- Profil de configuration -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-calendar margin-r-5"></i> Profil de configuration</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% crispy form_profil_configuration %}
+                </div>
+            </div>
+{% endcomment %}
+
+
+            <!-- Cadre principal -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-calendar margin-r-5"></i> Paramètres</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    <p>Veuillez sélectionner une période et des activités avant de renseigner les paramètres ci-dessous puis cliquez sur le bouton Générer le PDF.</p>
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder">
+                        <button class="btn btn-primary" onclick="generer_pdf()" title="Génération du PDF"><i class='fa fa-file-pdf-o margin-r-5'></i>Générer le PDF</button>
+                        <a class="btn btn-danger" href="{% url 'consommations_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#tab_1" data-toggle="tab">Paramètres de calcul</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#tab_2" data-toggle="tab">Options</a>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content">
+
+                            {# Paramètres de calcul #}
+                            <div class="tab-pane show active" id="tab_1">
+                                <div class="card-body p-2">
+                                    <form id="form_selection_parametres" method="post">
+                                        <div id="div_table_parametres" class="noselect">
+                                            <table id="table_parametres" class="table table-bordered freeze-table" style="min-width: 1300px;">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Unité de consommation</th>
+                                                        <th>Type de calcul</th>
+                                                        <th>Coefficient</th>
+                                                        <th>Formule</th>
+                                                        <th>Arrondi</th>
+                                                        <th>Durée seuil</th>
+                                                        <th>Durée plafond</th>
+                                                        <th>Heure seuil</th>
+                                                        <th>Heure plafond</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            {# Form Options #}
+                            <div class="tab-pane" id="tab_2">
+                                <div class="card-body">
+                                    {% crispy form_selection_options %}
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    {% include 'core/modal_pdf.html' %}
+    {% include 'consommations/etat_global_formule.html' %}
+
+
+{% endblock contenu_page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>
+
+    <script>
+
+{#        {% include 'core/csrftoken.html' %}#}
+
+        $(document).ready(function() {
+            $("#div_table_parametres").freezeTable({
+                'scrollBar': true,
+            });
+        });
+
+        // Modal saisir une formule
+        function saisir_formule(idunite) {
+            var texte = $("[name='ctrl_formule_" + idunite + "']").val();
+            $('#saisie_formule').val(texte);
+            $('#modal_saisir_formule').modal('show');
+            $('#saisie_formule_idunite').val(idunite);
+        };
+
+        // Bouton Appliquer
+        function appliquer_parametres() {
+            var parametres = get_parametres();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_etat_global_appliquer_parametres' %}",
+                data: {
+                    form_selection_periode: JSON.stringify($("#form_selection_periode").serializeObject()),
+                    form_selection_activites: JSON.stringify($('#form_selection_activites').serializeArray()),
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                datatype: "json",
+                success: function(data){
+                    $("#table_parametres tbody").html(data);
+                    $('#div_table_parametres').freezeTable('update');
+                    set_parametres(parametres);
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+        // Récupération des paramètres
+        function get_parametres() {
+            var parametres = {};
+            $("#table_parametres input[name='check_unite']").each(function() {
+                if ($(this).prop("checked")) {
+                    var idunite = $(this).val();
+                    parametres[idunite] = {
+                        type: $("[name='ctrl_type_" + idunite + "']").val(),
+                        coeff: $("[name='ctrl_coeff_" + idunite + "']").val(),
+                        formule: $("[name='ctrl_formule_" + idunite + "']").val(),
+                        arrondi: $("[name='ctrl_arrondi_" + idunite + "']").val(),
+                        duree_seuil: $("[name='ctrl_duree_seuil_" + idunite + "']").val(),
+                        duree_plafond: $("[name='ctrl_duree_plafond_" + idunite + "']").val(),
+                        heure_seuil: $("[name='ctrl_heure_seuil_" + idunite + "']").val(),
+                        heure_plafond: $("[name='ctrl_heure_plafond_" + idunite + "']").val(),
+                    };
+                };
+            });
+            return parametres;
+        };
+
+        // Set Paramètres
+        function set_parametres(parametres) {
+            $("#table_parametres input[name='check_unite']").each(function() {
+                var idunite = $(this).val();
+                if (idunite in parametres) {
+                    $("[name='ctrl_type_" + idunite + "']").val(parametres[idunite]["type"]);
+                    $("[name='ctrl_coeff_" + idunite + "']").val(parametres[idunite]["coeff"]);
+                    $("[name='ctrl_formule_" + idunite + "']").val(parametres[idunite]["formule"]);
+                    $("[name='ctrl_arrondi_" + idunite + "']").val(parametres[idunite]["arrondi"]);
+                    $("[name='ctrl_duree_seuil_" + idunite + "']").val(parametres[idunite]["duree_seuil"]);
+                    $("[name='ctrl_duree_plafond_" + idunite + "']").val(parametres[idunite]["duree_plafond"]);
+                    $("[name='ctrl_heure_seuil_" + idunite + "']").val(parametres[idunite]["heure_seuil"]);
+                    $("[name='ctrl_heure_plafond_" + idunite + "']").val(parametres[idunite]["heure_plafond"]);
+                    $("[name='ctrl_type_" + idunite +"']").trigger("change");
+                }
+            });
+        };
+
+        // Envoi les paramètres au profil de configuration
+{% comment %}
+        function get_parametres_profil() {
+            var donnees = {
+                parametres: get_parametres(),
+                options: $("#form_selection_options").serializeArray(),
+            }
+            donnees = JSON.stringify(donnees);
+        };
+{% endcomment %}
+
+        // Générer le PDF
+        function generer_pdf() {
+            var parametres = get_parametres()
+            parametres["periode"] = $("[name=selection_periode]").val();
+            $('input[name=liste_parametres]').val(JSON.stringify(parametres));
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_etat_global_generer_pdf' %}",
+                headers: {content_type: 'application/json', 'X-CSRFToken': "{{ csrf_token }}"},
+                data: JSON.stringify($("#form_selection_options").serialize()),
+                datatype: "json",
+                success: function(data){
+                    charge_pdf(data);
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+
+    </script>
+
+{% endblock scripts %}
+
+
+
+

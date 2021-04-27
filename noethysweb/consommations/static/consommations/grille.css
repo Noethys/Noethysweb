@@ -1,0 +1,336 @@
+.widget-user-2 .widget-user-username, .widget-user-2 .widget-user-desc {
+    margin-left: 0px;
+}
+
+.commandes_grille {
+    margin: 3px 5px 5px 5px;
+}
+.commandes_grille > .btn {
+    margin-top: 2px;
+}
+
+
+/* Menu contextuel */
+#contextMenu {
+    position: fixed;
+    display: none;
+}
+#contextMenu a {
+    color: #0a0a0a;
+}
+
+/* Case de base */
+#table-grille .case {
+    cursor: pointer;
+    height: 40px;
+    position: relative;
+    /*padding: 4px !important;*/
+}
+
+#table-suivi .case {
+    height: 30px;
+    vertical-align: middle;
+    text-align: center;
+    position: relative;
+    padding: 0px !important;
+}
+
+/* Case en fonction du type d'unité */
+
+.unitaire{
+    width: 40px;
+    overflow: hidden;
+    position: relative;
+    padding: 4px !important;
+}
+
+.horaire{
+    width: 60px;
+    overflow: hidden;
+    position: relative;
+    padding: 4px !important;
+}
+
+.quantite{
+    width: 60px;
+    overflow: hidden;
+    position: relative;
+    padding: 4px !important;
+}
+
+/* Multihoraires */
+
+.multihoraires{
+    width: 200px;
+    overflow: hidden;
+    position: relative;
+    padding: 0px !important;
+    background-color: #f5f5f5;
+}
+
+.table_multihoraires {
+    border-collapse: separate;
+    border-spacing: 4px 4px;
+    background-color: #f5f5f5 !important;
+}
+
+.multi_ajouter {
+    width: 12px;
+    text-align: right;
+    background-color: #f5f5f5;
+    color: #dfdfdf;
+    padding: 0px !important;
+}
+.multi_ajouter a {
+    color: #dfdfdf;
+}
+.multi_ajouter a:hover {
+    color: #FFFFFF;
+}
+
+/* Evénements */
+
+.evenement{
+    width: 250px;
+    overflow: hidden;
+    position: relative;
+    padding: 0px !important;
+    background-color: #f5f5f5;
+}
+
+.table_evenements {
+    border-collapse: separate;
+    border-spacing: 4px 4px;
+    background-color: #f5f5f5 !important;
+}
+
+.table_evenements td {
+    border: 1px solid #ffffff !important;
+}
+
+/* Elements des cases */
+
+.infos {
+    float: left;
+    left: 4px;
+    font-size: 11px;
+    position: absolute;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: calc(100% - 20px);
+}
+
+.icones {
+    font-size: 14px;
+    position: absolute;
+    top: 1px;
+    right: 3px;
+    color: #008d4c;
+}
+
+.groupe {
+    font-size: 11px;
+    text-align: left;
+    position: absolute;
+    left: 4px;
+    bottom: 2px;
+    opacity: 0.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: calc(100% - 10px);
+}
+
+/* Memo journalier */
+.memo {
+    font-size: 13px;
+    cursor: pointer;
+    width: 90px;
+}
+
+/* Etats de consommations */
+.reservation {
+    background-color: #FF9E1E !important;
+}
+.present {
+    background-color: #FF9E1E !important;
+}
+.absentj {
+    background-color: #FF9E1E !important;
+}
+.absenti {
+    background-color: #FF9E1E !important;
+}
+.attente {
+    background-color: #abcbff !important;
+}
+.refus {
+    background-color: #ff1904 !important;
+}
+
+/* Fonds de case (note: le td. devant permet de prioriser la règle devant le css '.ouvert') */
+td.disponible {
+    background-color: rgba(227, 254, 219, 0.73);
+}
+td.dernieresplaces {
+    background-color: #FEFCDB;
+}
+td.complet {
+    background-color: rgba(247, 172, 178, 0.36);
+}
+.ouvert {
+    background-color: #ffffff;
+}
+.ouvert:hover {
+    opacity: 0.8;
+}
+.fermeture {
+    background-color: #f5f5f5;
+}
+
+/* Tableau facturation */
+
+#table_facturation {
+    vertical-align: middle !important;
+    font-size: 13px;
+}
+#table_facturation tbody {
+    border-top: 0px solid;
+}
+#table_facturation td, #table_facturation th {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    text-align: left;
+}
+#table_facturation .individu_prestation {
+    overflow: hidden;
+    position: absolute;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-left: 3px !important;
+    width: calc(100% - 70px);
+}
+#table_facturation .date_prestation {
+    text-transform:capitalize;
+    /*border-top: 1px solid #f4f4f4;*/
+}
+#table_facturation .ligne_prestation td {
+    border-top: 0px solid #ffffff !important;
+    color: #b1b1b1;
+}
+#table_facturation .label_prestation {
+    padding-left: 20px;
+    overflow: hidden;
+    position: absolute;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: calc(100% - 70px);
+}
+#table_facturation .montant_prestation {
+    text-align: right;
+    padding-right: 3px !important;
+    width: 70px;
+}
+#table_facturation .ligne_total {
+    background-color: #f6f6f6;
+}
+.dark-mode #table_facturation .ligne_total {
+    background-color: #5a5a5a;
+}
+
+/* Tableau */
+.table {
+    margin-bottom: 0px;
+}
+
+.table th {
+    text-align: center;
+    vertical-align: middle !important;
+    padding: 0px !important;
+}
+
+#table_grille th {
+    /*line-height: 13px;*/
+    height: 40px;
+}
+
+.table thead th {
+    padding: 4px !important;
+}
+
+.table td {
+    padding: 2px !important;
+}
+
+.masquer {
+    display: none;
+}
+
+.vacances {
+    background-color: #faffc9;
+}
+
+.date_regroupement {
+    background-color: #d9d9d9;
+    padding: 2px !important;
+}
+.dark-mode .date_regroupement {
+    background-color: #5a5a5a;
+    padding: 2px !important;
+}
+
+.input-group .input-group-addon {
+    background-color: #f5f5f5;
+}
+
+.menu_item {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    float: left;
+}
+
+.exposant {
+    color: #e2e2e2;
+    position: relative;
+    bottom: 1px;
+    font-size: .8em;
+    line-height: .8em;
+    vertical-align: super;
+    text-decoration: none;
+}
+
+.infos_inscription {
+    color: #cecece;
+    font-size: 10px;
+    font-weight: normal;
+}
+#div_table_traitement_lot {
+    display: inline-block;
+    height:180px;
+    overflow-y: scroll;
+    width: 100%;
+}
+#table_traitement_lot th, td{
+    /*font-size: 12px;*/
+    padding: 5px;
+}
+#table_traitement_lot th {
+    background-color: #e0e0e0;
+    font-weight: bold;
+}
+
+.select2 {
+    width: 100% !important;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+}
+

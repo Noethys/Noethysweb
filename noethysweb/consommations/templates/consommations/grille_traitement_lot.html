@@ -1,0 +1,60 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Modal Grille Traitement par lot #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_traitement_lot{% endblock %}
+    {% block modal_titre %}Traitement par lot{% endblock %}
+    {% block modal_classe %}modal-lg{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+        <form id="form_traitement_lot" method="post">
+            {% csrf_token %}
+            {% crispy form_traitement_lot %}
+        </form>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+$(document).ready(function() {
+
+    $('#modal_traitement_lot').on('show.bs.modal', function () {
+        $("#id_date_debut").datepicker("setDate", "{{ data.date_min|date:'d/m/Y' }}");
+        $("#id_date_fin").datepicker("setDate", "{{ data.date_max|date:'d/m/Y' }}");
+    });
+
+    $("#form_traitement_lot").on('submit', function (event) {
+        event.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_traitement_lot' %}",
+            data: $("#form_traitement_lot").serialize(),
+            datatype: "json",
+            success: function(data){
+                console.log("data=", data)
+                $.each(dict_cases, function (key, case_tableau) {
+                    var parties_key = key.split("_");
+                    if ((data.dates.includes(parties_key[0])) && (Object.keys(data.unites).includes(parties_key[2]))) {
+                        if (data.action === "SAISIE") {
+                            case_tableau.ajouter(data.unites[parties_key[2]], maj_facturation = false);
+                        };
+                        if (data.action === "EFFACER") {
+                            case_tableau.supprimer(maj_facturation = false);
+                        };
+                        cases_touchees.push(key);
+                    };
+                });
+                $('#modal_traitement_lot').modal('hide');
+                ajax_facturer(cases_touchees);
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        });
+    });
+
+});
+</script>

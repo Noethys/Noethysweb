@@ -1,0 +1,95 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+<style>
+
+#div_table_liste_activites {
+    display: inline-block;
+    height:250px;
+    overflow-y: scroll;
+    width: 100%;
+    border: solid 1px #e5e5e5;
+}
+#table_liste_activites th, td{
+    /*font-size: 12px;*/
+    padding: 5px !important;
+}
+#table_liste_activites th {
+    background-color: #e0e0e0;
+    font-weight: bold;
+}
+
+</style>
+
+
+{# Model Sélection des activités #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_selection_activites{% endblock %}
+    {% block modal_titre %}Sélectionner les activités{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+
+        <div id="div_table_liste_activites">
+            <table cellspacing="0" id="table_liste_activites" class="table">
+                {% for activite in activites %}
+                    <tr>
+                        <td style="padding: 5px !important;">
+                            <div class="form-inline">
+                                <input name="activite_{{ activite.pk }}" type="checkbox" value="{{ activite.pk }}"/>
+                                <span style="margin-left: 5px;margin-right:20px;">{{ activite.nom }}</span>
+                            </div>
+                        </td>
+                        <td style="padding: 5px !important;">
+                            <span style="font-size: 12px; color: #cbcbcb;">{{ activite.Get_validite_str }}</span>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" id="selectionner_activites_valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+
+
+$(document).ready(function() {
+
+    // Définit les sélections initiales
+    $("#table_liste_activites input").each(function() {
+        if (activites_json.includes(parseInt($(this).val()))) {
+            $(this).prop("checked", true);
+        }
+    });
+
+    // Récupère les sélections
+    function Get_selection_activites() {
+        var selections = [];
+        $("#table_liste_activites input").each(function() {
+            if ($(this).prop("checked")) {
+                selections.push(parseInt($(this).val()));
+            };
+        });
+        return selections;
+    };
+
+    // Validation de la modal
+    $("#selectionner_activites_valider").on('click', function(e) {
+        var activites = Get_selection_activites();
+        activites_json = JSON.stringify(activites);
+        maj_affichage(update_parametres=true);
+        $('#modal_selection_activites').modal('hide');
+    });
+
+});
+
+</script>

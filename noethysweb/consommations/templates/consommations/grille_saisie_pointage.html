@@ -1,0 +1,74 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Model Saisir paramètres pointage par lot #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_saisir_pointage{% endblock %}
+    {% block modal_titre %}Pointage par lot{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+        <p>Vous pouvez effectuer ici un pointage par lot. Sélectionnez l'état des consommations à convertir et l'état souhaité.
+        Notez que vous pouvez également utiliser les touches raccourcis (a, p, i, j) pour convertir l'état d'une seule consommation.</p>
+
+        <form id="form_saisie_pointage" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <div class="controls">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="saisie_etat_avant" class="col-form-label">Etat avant</label>
+                            <select class="select form-control" id="saisie_etat_avant" title="Sélection de l'état avant">
+                                <option value="reservation" selected>Réservation</option>
+                                <option value="attente">Attente</option>
+                                <option value="refus">Refus</option>
+                                <option value="present">Présence</option>
+                                <option value="absentj">Absence justifiée</option>
+                                <option value="absenti">Absence injustifiée</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="saisie_etat_apres" class="col-form-label">Etat après</label>
+                            <select class="select form-control" id="saisie_etat_apres" title="Sélection de l'état après">
+                                <option value="reservation">Réservation</option>
+                                <option value="attente">Attente</option>
+                                <option value="refus">Refus</option>
+                                <option value="present" selected>Présence</option>
+                                <option value="absentj">Absence justifiée</option>
+                                <option value="absenti">Absence injustifiée</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="buttonHolder">
+                <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                    <button type="submit" title="Valider" class='btn btn-primary' id="saisie_pointage_valider" value="Valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                </div>
+            </div>
+        </form>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+
+    // Modal : Validation
+    $("#form_saisie_pointage").on('click', '#saisie_pointage_valider', function(e) {
+        e.preventDefault();
+        var etat_avant = $('#saisie_etat_avant').val();
+        var etat_apres = $('#saisie_etat_apres').val();
+
+        if (etat_avant === etat_apres) {
+            toastr.error(("Vous devez choisir deux états différents"));
+            return false;
+        }
+        $('#modal_saisir_pointage').modal('hide');
+        $("#table_grille td[class*='" + etat_avant + "']").each(function() {
+            dict_cases[this.id].set_etat(etat_apres);
+        });
+    });
+
+</script>

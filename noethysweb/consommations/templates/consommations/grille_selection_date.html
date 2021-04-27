@@ -1,0 +1,40 @@
+{% load crispy_forms_tags %}
+{% load static %}
+
+
+{% block styles %}
+    <style>
+        #div_id_date {
+            margin-bottom: 0px;
+            border-radius: 0px;
+        }
+    </style>
+{% endblock styles %}
+
+
+{% block contenu_page %}
+
+    <!-- Sélection de la date -->
+    {% crispy form_selection_date %}
+    <script>
+        var periode_json = JSON.parse('{{ data.periode_json|escapejs }}');
+        var date = new moment(periode_json.selections.jour);
+        $('#id_date').val(date.format('DD/MM/YYYY'));
+    </script>
+
+{% endblock contenu_page %}
+
+
+{% block scripts %}
+    <script>
+        function Get_periode() {
+            var date = moment($('#id_date').datepicker("getDate"));
+            if (!date.isValid()) {
+                toastr.error(("La date sélectionnée n'est pas valide"));
+                return false;
+            };
+            return {"mode": "jour", "selections": {"jour": date.format('YYYY-MM-DD')}, "periodes": [date.format('YYYY-MM-DD') + ";" + date.format('YYYY-MM-DD')]};
+        };
+    </script>
+
+{% endblock scripts %}
