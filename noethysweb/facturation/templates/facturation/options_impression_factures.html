@@ -1,0 +1,50 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+<div style="margin-top: 30px;">
+    <ul class="nav nav-tabs">
+        <li class="nav-item {% if not messages %}active{% endif %}">
+            <a class="nav-link {% if not messages %}active{% endif %}" href="#tab_1" data-toggle="tab">Modèle de document</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#tab_2" data-toggle="tab">Options d'impression</a>
+        </li>
+        <li  class="nav-item {% if messages %}active{% endif %}">
+            <a class="nav-link" href="#tab_3" data-toggle="tab">Messages</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane {% if not messages %}active{% endif %} p-2" id="tab_1">
+            {% crispy form_modele %}
+        </div>
+        <div class="tab-pane p-2" id="tab_2">
+            {% crispy form_parametres %}
+        </div>
+        <div class="tab-pane {% if messages %}active{% endif %} p-2" id="tab_3">
+            <div class="form-group">
+                {% if messages|length == 0 %}<span>Aucun message ne sera inséré dans les factures.</span>{% endif %}
+                {% if messages|length == 1 %}<span>Le message suivant sera inséré dans toutes les factures :</span>{% endif %}
+                {% if messages|length > 1 %}<span>Les {{ messages|length }} messages suivants seront intégrés dans toutes les factures :</span>{% endif %}
+                <a type="button" class="btn btn-success btn-sm pull-right" title="Ajouter un message" href="{% url 'messages_factures_ajouter' %}?next={{ request.path|urlencode }}"><i class="fa fa-plus"></i> Ajouter un message</a>
+            </div>
+
+            <ul class="todo-list">
+                {% for message in messages %}
+                    <li>
+                        <div class="tools pull-right">
+                            <a type="button" class="btn btn-default btn-sm" title="Modifier" href="{% url 'messages_factures_modifier' pk=message.pk %}?next={{ request.path|urlencode }}"><i class="fa fa-pencil"></i></a>
+                            <a type="button" class="btn btn-default btn-sm" title="Supprimer" href="{% url 'messages_factures_supprimer' pk=message.pk %}?next={{ request.path|urlencode }}"><i class="fa fa-trash-o"></i></a>
+                        </div>
+                        <span class="text">
+                            {{ message.titre }} : {{ message.texte }}
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+

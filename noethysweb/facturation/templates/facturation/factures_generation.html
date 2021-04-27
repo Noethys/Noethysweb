@@ -1,0 +1,224 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+
+    <style>
+        .div_table_factures {
+            display: inline-block;
+            height: 400px;
+            overflow-y: scroll;
+            width: 100%;
+            border: solid 1px #e5e5e5;
+        }
+        .table_factures th, td{
+            /*font-size: 12px;*/
+            padding: 5px;
+        }
+        .table_factures th {
+            background-color: #f1f1f1;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .montant {
+            text-align: right;
+        }
+
+    </style>
+{% endblock styles %}
+
+
+
+{% block contenu_page %}
+{% embed 'core/box.html' %}
+    {% block box_theme %}card-outline card-lightblue{% endblock %}
+    {% block box_titre %}{{ box_titre }}{% endblock %}
+    {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+    {% block box_contenu %}
+
+        <div id="div_form">
+            {% crispy form %}
+        </div>
+
+        <div id="div_loader_recherche" style="display: none;text-align: center;margin: 50px;" class="text-primary">
+            <h4><i class='fa fa-spinner fa-spin'></i> <strong>Recherche des factures en cours</strong></h4>
+            <p>Veuillez patienter...</p>
+        </div>
+
+        <div id="div_loader_generation" style="display: none;text-align: center;margin: 50px;" class="text-primary">
+            <h4><i class='fa fa-spinner fa-spin margin-r-5'></i> <strong>Génération des factures en cours</strong></h4>
+            <p>Veuillez patienter...</p>
+        </div>
+
+        <div id="div_selection_factures" style="display: none;">
+        </div>
+
+        <div id="div_actions_factures" style="display: none;">
+        </div>
+
+    {% endblock %}
+
+{% endembed %}
+
+{% endblock contenu_page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+
+    <script>
+    var maj_lot_checkboxes = false;
+
+        function init_page_parametres() {
+
+            $("#form_factures_generation").on('submit', function (event) {
+                event.preventDefault();
+                $("#div_form").hide();
+                $("#div_loader_recherche").show();
+                $("#box_introduction").html("")
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_recherche_factures' %}",
+                    data: $("#form_factures_generation").serialize(),
+                    datatype: "json",
+                    success: function(data){
+                        $("#div_selection_factures").html(data);
+                        $("#div_selection_factures").show();
+                        $("#div_loader_recherche").hide();
+                        maj_bouton_generer(get_factures_cochees().length);
+                        $("#box_introduction").html("Sélectionnez les factures à générer et cliquez sur le bouton Générer les factures.");
+                        init_page_selection();
+                    },
+                    error: function(data) {
+                        $("#div_form").html(data.html);
+                        $("#div_form").show();
+                        $("#div_loader_recherche").hide();
+                        $("#box_introduction").html("<span class='text-red'>" + data.responseJSON.erreur + "</span>");
+                        toastr.error(data.responseJSON.erreur);
+                    }
+                });
+            });
+
+        };
+
+        function init_page_selection() {
+            $("#div_table_factures").freezeTable({
+                'scrollable': true,
+            });
+
+            $('.check_facture').on('change', function () {
+                if (maj_lot_checkboxes == false) {
+                    maj_bouton_generer(get_factures_cochees().length);
+                };
+            });
+
+        };
+
+        function maj_bouton_generer(nbre_factures) {
+            $("#bouton_generer_factures").text("Générer les " + nbre_factures + " factures sélectionnées")
+        };
+        function tout_cocher() {
+            maj_lot_checkboxes = true;
+            $(".check_facture").each(function (index) {
+                $(this).prop("checked", true);
+            });
+            maj_lot_checkboxes = false;
+            maj_bouton_generer(get_factures_cochees().length);
+        };
+        function tout_decocher() {
+            maj_lot_checkboxes = true;
+            $(".check_facture").each(function (index) {
+                $(this).prop("checked", false);
+            });
+            maj_lot_checkboxes = false;
+            maj_bouton_generer(get_factures_cochees().length);
+        };
+        function cocher_montant() {
+            maj_lot_checkboxes = true;
+            $(".check_facture").each(function (index) {
+                $(this).prop("checked", false);
+                if (parseFloat(this.dataset.solde) >= parseFloat($("#id_montant").val())) {$(this).prop("checked")};
+            });
+            maj_lot_checkboxes = false;
+            maj_bouton_generer(get_factures_cochees().length);
+        };
+        function get_factures_cochees() {
+            var liste_factures = [];
+            $(".check_facture").each(function (index) {
+                var id = parseInt($(this).val());
+                if (($(this).prop("checked")) && (!(liste_factures.includes(id)))) {
+                    liste_factures.push(id);
+                }
+            });
+            return liste_factures;
+        };
+
+        function revenir_page_parametres() {
+            $("#div_selection_factures").hide();
+            $("#div_actions_factures").hide();
+            $("#div_form").show();
+            $("#box_introduction").html("{{ box_introduction|safe }}");
+        };
+
+        function generation_factures() {
+            bootbox.dialog({
+                title: "Confirmation",
+                message: "Confirmez-vous la génération des factures sélectionnées ?",
+                buttons: {
+                    ok: {
+                        label: "<i class='fa fa-check'></i> Valider",
+                        className: 'btn-primary',
+                        callback: function(){
+                            generer()
+                        }
+                    },
+                    cancel: {
+                        label: "<i class='fa fa-ban'></i> Annuler",
+                        className: 'btn-danger',
+                    }
+                }
+            });
+        };
+
+        function generer() {
+            $('input[name=liste_factures_json]').val(JSON.stringify(get_factures_cochees()));
+            $("#div_selection_factures").hide();
+            $("#div_loader_generation").show();
+            $("#box_introduction").html("")
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_generation_factures' %}",
+                data: $("#form_factures_generation").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $("#div_actions_factures").html(data);
+                    $("#div_actions_factures").show();
+                    $("#div_loader_generation").hide();
+                    $("#box_introduction").html("Les factures ont été générées avec succès.");
+                    init_page_selection();
+                },
+                error: function(data) {
+                    $("#box_introduction").html("Une erreur a été rencontrée durant la génération.");
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        };
+
+        $(document).ready(function() {
+            init_page_parametres();
+        });
+
+    </script>
+
+
+{% endblock scripts %}
+
+

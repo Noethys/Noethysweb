@@ -1,0 +1,25 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+<div style="margin-top: 30px;">
+    <ul class="nav nav-tabs">
+        <li class="nav-item active">
+            <a class="nav-link active" href="#tab_1" data-toggle="tab">Modèle de document</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#tab_2" data-toggle="tab">Options d'impression</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane p-2 {% if not messages %}active{% endif %}" id="tab_1">
+            {% crispy form_modele %}
+        </div>
+        <div class="tab-pane p-2" id="tab_2">
+            {% crispy form_parametres %}
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,75 @@
+{% load static %}
+
+
+<style>
+    .div_table_factures {
+        display: inline-block;
+        height: 300px;
+        overflow-y: scroll;
+        width: 100%;
+        border: solid 1px #e5e5e5;
+    }
+    .actions {
+        margin: 5px;
+    }
+</style>
+
+<div id="div_table_factures" class="div_table_factures margin-bottom">
+    <table id="table_factures" class="table table-bordered table_factures">
+
+        <thead>
+            <tr>
+                <th>Famille</th>
+                <th>Numéro</th>
+                <th>Total période</th>
+                <th>Déjà réglé</th>
+                <th>Dû période</th>
+                <th>Report impayés</th>
+                <th>Dû total</th>
+                <th>Envoi Email</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for facture in factures %}
+                <tr>
+                    <td>{{ facture.famille.nom }}</td>
+                    <td><center>{{ facture.numero }}</center></td>
+                    <td class="montant">{{ facture.total|montant }}</td>
+                    <td class="montant">{{ facture.ventilation|montant }}</td>
+                    <td class="montant">{{ facture.solde|montant }}</td>
+                    <td class="montant">{{ facture.total_reports|montant }}</td>
+                    <td class="montant">{{ facture.solde_avec_reports|montant }}</td>
+                    <td>{% if facture.famille.email_factures %}<i class='fa fa-envelope-o margin-r-5'></i> Oui{% endif %}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+
+
+<div>
+    Que souhaitez-vous faire maintenant ?
+</div>
+<div style="margin: 10px;">
+    <a class="btn btn-app actions" href="{% url 'factures_email' %}">{% if nbre_factures_email %}<span class="badge bg-blue">{{ nbre_factures_email }}</span>{% endif %}<i class="fa fa-envelope-o"></i> Envoyer par Email</a>
+    <i class="fa fa-caret-right actions"></i>
+    <a class="btn btn-app actions" href="{% url 'factures_impression' %}">{% if nbre_factures_impression %}<span class="badge bg-blue">{{ nbre_factures_impression }}</span>{% endif %}<i class="fa fa-print"></i> Imprimer</a>
+</div>
+<div style="font-size: 11px;color: #7a869d;">
+    <ul>
+        <li>Il est conseillé d'effectuer ces actions dans l'ordre indiqué par les flèches noires.</li>
+        <li>Ces actions sont également accessibles depuis le menu Facturation.</li>
+        <li>Les valeurs numériques affichées indiquent le nombre de factures potentiellement concernées par l'action.</li>
+        <li>Les factures qui viennent d'être générées sont automatiquement sélectionnées.</li>
+    </ul>
+</div>
+
+<div class="buttonHolder pull-right">
+    <a class="btn btn-default" href="{% url 'facturation_toc' %}">Revenir au menu Facturation</a>
+</div>
+
+
+{# Affichage des messages en mémoire #}
+{% include 'core/messages.html' %}

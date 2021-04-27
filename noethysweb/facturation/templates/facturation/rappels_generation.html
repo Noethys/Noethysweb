@@ -1,0 +1,227 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+
+    <style>
+        .div_table_rappels {
+            display: inline-block;
+            height: 400px;
+            overflow-y: scroll;
+            width: 100%;
+            border: solid 1px #e5e5e5;
+        }
+        .table_rappels th, td{
+            /*font-size: 12px;*/
+            padding: 5px;
+        }
+        .table_rappels th {
+            background-color: #f1f1f1;
+            font-weight: bold;
+            text-align: center;
+            vertical-align: middle;
+        }
+        #table_rappels td {
+            vertical-align: middle;
+        }
+        .montant {
+            text-align: right;
+        }
+
+    </style>
+{% endblock styles %}
+
+
+
+{% block contenu_page %}
+{% embed 'core/box.html' %}
+    {% block box_theme %}card-outline card-lightblue{% endblock %}
+    {% block box_titre %}{{ box_titre }}{% endblock %}
+    {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+    {% block box_contenu %}
+
+        <div id="div_form">
+            {% crispy form %}
+        </div>
+
+        <div id="div_loader_recherche" style="display: none;text-align: center;margin: 50px;" class="text-primary">
+            <h4><i class='fa fa-spinner fa-spin'></i> <strong>Recherche des rappels en cours</strong></h4>
+            <p>Veuillez patienter...</p>
+        </div>
+
+        <div id="div_loader_generation" style="display: none;text-align: center;margin: 50px;" class="text-primary">
+            <h4><i class='fa fa-spinner fa-spin margin-r-5'></i> <strong>Génération des rappels en cours</strong></h4>
+            <p>Veuillez patienter...</p>
+        </div>
+
+        <div id="div_selection_rappels" style="display: none;">
+        </div>
+
+        <div id="div_actions_rappels" style="display: none;">
+        </div>
+
+    {% endblock %}
+
+{% endembed %}
+{% endblock contenu_page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+
+    <script>
+    var maj_lot_checkboxes = false;
+
+        function init_page_parametres() {
+
+            $("#form_rappels_generation").on('submit', function (event) {
+                event.preventDefault();
+                $("#div_form").hide();
+                $("#div_loader_recherche").show();
+                $("#box_introduction").html("")
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_recherche_rappels' %}",
+                    data: $("#form_rappels_generation").serialize(),
+                    datatype: "json",
+                    success: function(data){
+                        $("#div_selection_rappels").html(data);
+                        $("#div_selection_rappels").show();
+                        $("#div_loader_recherche").hide();
+                        maj_bouton_generer(get_rappels_cochees().length);
+                        $("#box_introduction").html("Sélectionnez les lettres de rappel à générer et cliquez sur le bouton Générer les rappels.");
+                        init_page_selection();
+                    },
+                    error: function(data) {
+                        $("#div_form").html(data.html);
+                        $("#div_form").show();
+                        $("#div_loader_recherche").hide();
+                        $("#box_introduction").html("<span class='text-red'>" + data.responseJSON.erreur + "</span>");
+                        toastr.error(data.responseJSON.erreur);
+                    }
+                });
+            });
+
+        };
+
+        function init_page_selection() {
+            $("#div_table_rappels").freezeTable({
+                'scrollable': true,
+            });
+
+            $('.check_rappel').on('change', function () {
+                if (maj_lot_checkboxes == false) {
+                    maj_bouton_generer(get_rappels_cochees().length);
+                };
+            });
+
+        };
+
+        function maj_bouton_generer(nbre_rappels) {
+            $("#bouton_generer_rappels").text("Générer les " + nbre_rappels + " lettres de rappel sélectionnées")
+        };
+        function tout_cocher() {
+            maj_lot_checkboxes = true;
+            $(".check_rappel").each(function (index) {
+                $(this).prop("checked", true);
+            });
+            maj_lot_checkboxes = false;
+            maj_bouton_generer(get_rappels_cochees().length);
+        };
+        function tout_decocher() {
+            maj_lot_checkboxes = true;
+            $(".check_rappel").each(function (index) {
+                $(this).prop("checked", false);
+            });
+            maj_lot_checkboxes = false;
+            maj_bouton_generer(get_rappels_cochees().length);
+        };
+        function cocher_montant() {
+            maj_lot_checkboxes = true;
+            $(".check_rappel").each(function (index) {
+                $(this).prop("checked", false);
+                if (parseFloat(this.dataset.solde) >= parseFloat($("#id_montant").val())) {$(this).prop("checked", true)};
+            });
+            maj_lot_checkboxes = false;
+            maj_bouton_generer(get_rappels_cochees().length);
+        };
+        function get_rappels_cochees() {
+            var liste_rappels = [];
+            $(".check_rappel").each(function (index) {
+                var idfamille = parseInt($(this).val());
+                if (($(this).prop("checked")) && (!(liste_rappels.includes(idfamille)))) {
+                    var idtexte = $("#choix_modele_" + idfamille).val();
+                    liste_rappels.push([idfamille, idtexte]);
+                }
+            });
+            return liste_rappels;
+        };
+
+        function revenir_page_parametres() {
+            $("#div_selection_rappels").hide();
+            $("#div_actions_rappels").hide();
+            $("#div_form").show();
+            $("#box_introduction").html("{{ box_introduction|safe }}");
+        };
+
+        function generation_rappels() {
+            bootbox.dialog({
+                title: "Confirmation",
+                message: "Confirmez-vous la génération des rappels sélectionnés ?",
+                buttons: {
+                    ok: {
+                        label: "<i class='fa fa-check'></i> Valider",
+                        className: 'btn-primary',
+                        callback: function(){
+                            generer()
+                        }
+                    },
+                    cancel: {
+                        label: "<i class='fa fa-ban'></i> Annuler",
+                        className: 'btn-danger',
+                    }
+                }
+            });
+        };
+
+        function generer() {
+            $('input[name=liste_rappels_json]').val(JSON.stringify(get_rappels_cochees()));
+            $("#div_selection_rappels").hide();
+            $("#div_loader_generation").show();
+            $("#box_introduction").html("")
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_generation_rappels' %}",
+                data: $("#form_rappels_generation").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $("#div_actions_rappels").html(data);
+                    $("#div_actions_rappels").show();
+                    $("#div_loader_generation").hide();
+                    $("#box_introduction").html("Les lettres de rappel ont été générées avec succès.");
+                    init_page_selection();
+                },
+                error: function(data) {
+                    $("#box_introduction").html("Une erreur a été rencontrée durant la génération.");
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        };
+
+        $(document).ready(function() {
+            init_page_parametres();
+        });
+
+    </script>
+
+
+{% endblock scripts %}
+
+

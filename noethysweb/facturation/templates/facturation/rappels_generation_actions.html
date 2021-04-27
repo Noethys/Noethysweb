@@ -1,0 +1,64 @@
+{% load static %}
+
+
+<style>
+    .div_table_rappels {
+        display: inline-block;
+        height: 300px;
+        overflow-y: scroll;
+        width: 100%;
+        border: solid 1px #e5e5e5;
+    }
+    .actions {
+        margin: 5px;
+    }
+</style>
+
+<div id="div_table_rappels" class="div_table_rappels margin-bottom">
+    <table id="table_rappels" class="table table-bordered table_rappels">
+
+        <thead>
+            <tr>
+                <th>Famille</th>
+                <th>Numéro</th>
+                <th>Solde</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for rappel in rappels %}
+                <tr>
+                    <td>{{ rappel.famille.nom }}</td>
+                    <td><center>{{ rappel.numero }}</center></td>
+                    <td class="montant">{{ rappel.solde|montant }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+
+
+<div>
+    Que souhaitez-vous faire maintenant ?
+</div>
+<div style="margin: 10px;">
+    <a class="btn btn-app actions" href="{% url 'rappels_email' %}"><i class="fa fa-envelope-o"></i> Envoyer par Email</a>
+    <i class="fa fa-caret-right actions"></i>
+    <a class="btn btn-app actions" href="{% url 'rappels_impression' %}"><i class="fa fa-print"></i> Imprimer</a>
+</div>
+<div style="font-size: 11px;color: #7a869d;">
+    <ul>
+        <li>Il est conseillé d'effectuer ces actions dans l'ordre indiqué par les flèches noires.</li>
+        <li>Ces actions sont également accessibles depuis le menu Facturation.</li>
+        <li>Les rappels qui viennent d'être générés sont automatiquement sélectionnés.</li>
+    </ul>
+</div>
+
+<div class="buttonHolder pull-right">
+    <a class="btn btn-default" href="{% url 'facturation_toc' %}">Revenir au menu Facturation</a>
+</div>
+
+
+{# Affichage des messages en mémoire #}
+{% include 'core/messages.html' %}
