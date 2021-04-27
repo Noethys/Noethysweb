@@ -1,0 +1,92 @@
+{% extends "fiche_individu/individu.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+
+{% block detail_individu %}
+    <div class="col-md-9">
+
+        {# Caractéristiques #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Caractéristiques{% endblock %}
+            {% block box_contenu %}
+                <dl class="row caracteristiques">
+                    <dt class="col-sm-4">Nom</dt><dd class="col-sm-8">{{ individu.nom }}</dd>
+                    {% if individu.prenom %}<dt class="col-sm-4">Prénom</dt><dd class="col-sm-8">{{ individu.prenom|default:"" }}</dd>{% endif %}
+                    {% if individu.date_naiss %}<dt class="col-sm-4">Date de naissance</dt><dd class="col-sm-8">{{ individu.date_naiss }} ({{ individu.Get_age }} ans)</dd>{% endif %}
+                    {% if individu.Get_adresse_complete %}<dt class="col-sm-4">Adresse</dt><dd class="col-sm-8">{{ individu.Get_adresse_complete }}</dd>{% endif %}
+                    <dt class="col-sm-4">Date de création</dt><dd class="col-sm-8">{{ individu.date_creation|date:"j F Y" }}</dd>
+                    <dt class="col-sm-4">ID Individu</dt><dd class="col-sm-8">{{ individu.pk }}</dd>
+                </dl>
+            {% endblock %}
+        {% endembed %}
+
+        {# Rubriques #}
+{% comment %}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Rubriques{% endblock %}
+            {% block box_contenu %}
+                {% for onglet in liste_onglets|slice:"1:" %}
+                    <a class="btn btn-app" href="{% url onglet.url idfamille=idfamille idindividu=idindividu %}" style="font-size: 12px !important;">
+                        <i class="fa {{ onglet.icone }}"></i> {{ onglet.label }}
+                    </a>
+                {% endfor %}
+            {% endblock %}
+        {% endembed %}
+{% endcomment %}
+
+{% comment %}
+        {# Alertes #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Alertes{% endblock %}
+            {% block box_contenu %}
+                Alertes de l'individu...
+            {% endblock %}
+        {% endembed %}
+{% endcomment %}
+
+        {# Messages #}
+        <style>
+            .todo-list > li .text {
+                display: inline;
+                margin-left: 0px;
+                font-weight: 400;
+            }
+        </style>
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Messages{% endblock %}
+            {% block box_outils %}
+                <a type="button" class="btn btn-success btn-xs" title="Ajouter un message" style="margin-right: 10px;" href="{% url 'individu_messages_ajouter' idfamille=idfamille idindividu=idindividu %}"><i class="fa fa-plus"></i> Ajouter</a>
+            {% endblock %}
+            {% block box_contenu %}
+                <ul class="todo-list">
+                    {% for message in messages_individu %}
+                    <li>
+                        <div class="tools pull-right">
+                            <a type="button" class="btn btn-default btn-sm" title="Modifier" href="{% url 'individu_messages_modifier' idfamille=idfamille idindividu=message.individu_id pk=message.pk %}"><i class="fa fa-pencil"></i></a>
+                            <a type="button" class="btn btn-default btn-sm" title="Supprimer" href="{% url 'individu_messages_supprimer' idfamille=idfamille idindividu=message.individu_id pk=message.pk %}"><i class="fa fa-trash-o"></i></a>
+                        </div>
+                        <span class="text">
+                            {{ message.date_saisie|date:"d/m/Y" }} : {{ message.texte }}
+                        </span>
+                        {% if message.priorite == "HAUTE" %}
+                            <small class="badge badge-danger"><i class="fa fa-exclamation-triangle"></i> Important</small>
+                        {% endif %}
+                    </li>
+                    {% empty %}
+                        Aucun message
+                    {% endfor %}
+                </ul>
+            {% endblock %}
+        {% endembed %}
+
+    </div>
+{% endblock %}
+
+

@@ -1,0 +1,26 @@
+{% extends "fiche_individu/individu.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_individu %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}box-danger{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+            {% block box_contenu %}
+                {% if selection_multiple %}
+                    {% embed 'core/crud/delete_many.html' %}{% endembed %}
+                {% else %}
+                    {% embed 'core/crud/delete.html' %}{% endembed %}
+                {% endif %}
+            {% endblock %}
+
+        {% endembed %}
+    </div>
+{% endblock %}
+
+

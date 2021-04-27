@@ -1,0 +1,106 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+
+    <style type="text/css">
+        .widget-user-2 .widget-user-username, .widget-user-2 .widget-user-desc {
+            margin-left: 0px;
+        }
+    </style>
+
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-3">
+
+            <a type='button' title="Retour à la fiche famille" class='btn btn-block btn-warning' style="margin-bottom: 20px;" href="{% url 'famille_resume' idfamille=idfamille %}"><i class="fa fa-arrow-circle-o-left"></i> Retour à la fiche famille</a>
+
+            <div class="card card-widget widget-user-2">
+
+                {# Nom de l'individu #}
+                <div class="widget-user-header bg-lightblue">
+                    <h3 class="widget-user-username">{{ individu.nom }} {% if individu.prenom %}{{ individu.prenom }}{% endif %}</h3>
+                </div>
+
+                {# Onglets de l'individu #}
+                <div class="card-footer p-0 bg-white">
+                    <ul class="list-group list-group-flush">
+                        {% for onglet in liste_onglets %}
+                            <a class="list-group-item list-group-item-action {% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% url onglet.url idfamille=idfamille idindividu=idindividu %}">
+                                <i class="fa {{ onglet.icone }} text-light-blue fa-fw"></i> {{ onglet.label }}
+                            </a>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Box PHOTO -->
+            {% if individu.photo %}
+                <div class="card card-outline card-lightblue">
+                    <div class="card-header">
+                        <h3 class="card-title">Photo</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if individu.photo %}<center><img class="img-fluid img-thumbnail rounded-circle" src="{{ MEDIA_URL }}{{ individu.photo }}"></center>{% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {# Box Informations sur l'individu #}
+                <div class="card card-outline card-lightblue">
+                    <div class="card-header">
+                        <h3 class="card-title">Informations</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <strong><i class="fa fa-user margin-r-5"></i>Naissance</strong>
+                        <p class="text-muted">{% if individu.date_naiss %}{{ individu.date_naiss }} ({{ individu.Get_age }} ans){% endif %}</p>
+
+                        <hr>
+
+                        <strong><i class="fa fa-map-marker margin-r-5"></i>Adresse</strong>
+                        <p class="text-muted">{{ individu.Get_adresse_complete }}</p>
+
+                        <hr>
+
+                        <strong><i class="fa fa-file-text-o margin-r-5"></i>Détails de la fiche</strong>
+                        <p class="text-muted">Créée le {{ individu.date_creation|date:"j F Y" }}<br>ID Individu : {{ individu.pk }}</p>
+                    </div>
+                </div>
+
+        </div>
+
+        {% block detail_individu %}
+            <div class="col-md-9">
+                {% embed 'core/box.html' %}
+                    {% block box_theme %}card-outline card-lightblue{% endblock %}
+                    {% block box_titre %}{{ box_titre }}{% endblock %}
+                    {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+                    {% block box_contenu %}
+                    {% endblock %}
+
+                {% endembed %}
+            </div>
+        {% endblock %}
+
+    </div>
+
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+{% endblock scripts %}

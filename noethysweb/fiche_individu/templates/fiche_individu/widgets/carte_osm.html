@@ -1,0 +1,59 @@
+{% load static %}
+
+<a type='button' id="bouton_afficher_carte" class="btn btn-default btn-block btn-flat" href='#'><i class='fa fa-map-marker margin-r-5'></i> Afficher la localisation sur une carte</a>
+
+<div id="carte">
+</div>
+
+<script>
+
+    {% include 'core/csrftoken.html' %}
+
+    $(document).ready(function() {
+        $("#bouton_afficher_carte").on('click', function (event) {
+            event.preventDefault();
+            if ($("#bouton_afficher_carte").text().indexOf("Masquer") >= 0) {
+                document.getElementById('carte').innerHTML = "";
+                $("#bouton_afficher_carte").html("<i class='fa fa-map-marker margin-r-5'></i> Afficher la localisation sur une carte");
+            } else {
+                Afficher();
+            };
+        });
+    });
+
+    function Afficher() {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_get_coords_gps' %}",
+            data: {
+                rue: $("#id_rue_resid").val(),
+                cp: $("#id_cp_resid").val(),
+                ville: $("#id_ville_resid").val(),
+            },
+            datatype: "json",
+            success: function(data){
+                var coords = JSON.parse(data.coords);
+                // Supprime la carte si elle existe déjà
+                document.getElementById('carte').innerHTML = "<div id='map' style='width: 100%; height: 400px;'></div>";
+                // Initialisation Leaflet
+                var map = L.map('map');
+                map.setView(coords, 15);
+                // add the OpenStreetMap tiles
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+                }).addTo(map);
+                // show the scale bar on the lower left corner
+                L.control.scale().addTo(map);
+                // show a marker on the map
+                L.marker(coords).addTo(map);
+                // MAJ du text du bouton d'affichage
+                $("#bouton_afficher_carte").html("<i class='fa fa-eye-slash margin-r-5'></i> Masquer la carte");
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        })
+    };
+
+</script>

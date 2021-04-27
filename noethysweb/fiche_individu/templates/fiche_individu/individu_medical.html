@@ -1,0 +1,149 @@
+{% extends "fiche_individu/individu.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+    {% embed 'core/widgets/datatableview/styles.html' %}
+    {% endembed %}
+{% endblock styles %}
+
+{% block extra_head %}
+    {{ block.super }}
+    {% embed 'core/widgets/datatableview/extra_head.html' %}
+    {% endembed %}
+{% endblock %}
+
+
+{% block detail_individu %}
+    <div class="col-md-9">
+
+        {# Médecin traitant #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Médecin traitant{% endblock %}
+            {% block box_contenu %}
+                {% if individu.medecin %}
+
+                    <div class="float-right">
+                        <a type='button' class='btn btn-default btn-sm' data-toggle="modal" data-target="#modal_selection_medecin"><i class="fa fa-pencil"></i></a>
+                        <a type='button' class='btn btn-default btn-sm' href="#" onclick="SupprimerMedecin();"><i class="fa fa-times"></i></a>
+                    </div>
+
+                    <div class="user-block">
+                        <img class="rounded-circle" src="{% static "images/medecin.png" %}" alt="User Image">
+
+                        <span class="username">
+                            <span>
+                                {% if individu.medecin.nom %}{{ individu.medecin.nom }}{% endif %}
+                                {% if individu.medecin.prenom %}{{ individu.medecin.prenom }}{% endif %}
+                            </span>
+                        </span>
+                        <span class="description">
+                            {% if individu.medecin.rue_resid %}{{ individu.medecin.rue_resid }}{% endif %}
+                            {% if individu.medecin.cp_resid %}{{ individu.medecin.cp_resid }}{% endif %}
+                            {% if individu.medecin.ville_resid %}{{ individu.medecin.ville_resid }}{% endif %}
+                            {% if individu.medecin.tel_cabinet %}<br><i class="fa fa-phone"></i> {{ individu.medecin.tel_cabinet }}{% endif %}
+                            {% if individu.medecin.tel_mobile %}<br><i class="fa fa-mobile-phone"></i> {{ individu.medecin.tel_mobile }}{% endif %}
+                        </span>
+                    </div>
+                {% else %}
+                    <div class="btn-group">
+                        <a class="btn btn-success" data-toggle="modal" data-target="#modal_selection_medecin"><i class="fa fa-plus"></i> Ajouter</a>
+                    </div>
+                {% endif %}
+            {% endblock box_contenu %}
+        {% endembed %}
+
+        {# Informations médicales #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Informations médicales{% endblock %}
+            {% block box_introduction %}{% endblock %}
+            {% block box_contenu %}
+                <div class="btn-group">
+                    {% for bouton in boutons_liste_informations %}
+                        <a class="{{ bouton.classe }}" href="{{ bouton.href }}"><i class="{{ bouton.icone }}"></i> {{ bouton.label }}</a>
+                    {% endfor %}
+                </div>
+                {{ informations_datatable }}
+            {% endblock box_contenu %}
+        {% endembed %}
+
+        {# Vaccinations #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Vaccinations{% endblock %}
+
+            {% block box_contenu %}
+
+                {% embed "individus/alerte.html" with items=vaccins_obligatoires titre="Vaccinations obligatoires"%}
+                {% endembed %}
+
+                <div class="btn-group">
+                    {% for bouton in boutons_liste_vaccinations %}
+                        <a class="{{ bouton.classe }}" href="{{ bouton.href }}"><i class="{{ bouton.icone }}"></i> {{ bouton.label }}</a>
+                    {% endfor %}
+                </div>
+                {{ vaccins_datatable }}
+            {% endblock box_contenu %}
+        {% endembed %}
+
+    </div>
+
+    {# Modal Sélection du médecin #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_selection_medecin{% endblock %}
+        {% block modal_titre %}Sélection d'un médecin{% endblock %}
+        {% block modal_body %}
+            <div id="modal_erreurs" class="text-red"></div>
+            <form method="post">
+                <div class="largeur_pleine">
+                    {% crispy form_selection_medecin %}
+                </div>
+            </form>
+        {% endblock %}
+    {% endembed %}
+
+    <script>
+
+        // Modal : Sélection médecin
+        $(document).on('submit', 'div.modal-body form', function(e) {
+            e.preventDefault();
+            var data = $(this).serializeArray();
+            data.push({name: 'idindividu', value: {{ idindividu }} });
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_select_medecin' %}",
+                data: data,
+                success: function(data) {
+                    window.location.href = "{% url 'individu_medical_liste' idfamille=idfamille idindividu=idindividu %}";
+                },
+            });
+        });
+
+        function SupprimerMedecin() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_deselect_medecin' %}",
+                data: {
+                    "idindividu": {{ idindividu }}
+                },
+                success: function(data) {
+                    window.location.href = "{% url 'individu_medical_liste' idfamille=idfamille idindividu=idindividu %}";
+                },
+            });
+        };
+
+    </script>
+
+{% endblock %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    {% embed 'core/widgets/datatableview/scripts.html' %}
+    {% endembed %}
+{% endblock scripts %}
