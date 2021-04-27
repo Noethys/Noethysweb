@@ -1,0 +1,5 @@
+recursive-include */*/static *
+recursive-include */*/templates *
+recursive-include core/management *
+exclude */*/settings_production.py
+include */versions.txt
