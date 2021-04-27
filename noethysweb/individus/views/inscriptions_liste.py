@@ -1,0 +1,96 @@
+# -*- coding: utf-8 -*-
+
+#  Copyright (c) 2019-2021 Ivan LUCAS.
+#  Noethysweb, application de gestion multi-activités.
+#  Distribué sous licence GNU GPL.
+
+from django.urls import reverse_lazy, reverse
+from core.views.mydatatableview import MyDatatable, columns, helpers
+from core.views import crud
+from core.models import Inscription
+from fiche_individu.forms.individu_inscriptions import Formulaire
+
+
+class Page(crud.Page):
+    model = Inscription
+    url_liste = "inscriptions_liste"
+    url_modifier = "inscriptions_modifier"
+    url_supprimer = "inscriptions_supprimer"
+    url_supprimer_plusieurs = "inscriptions_supprimer_plusieurs"
+    description_liste = "Voici ci-dessous la liste des inscriptions."
+    description_saisie = "Saisissez toutes les informations concernant l'inscription à saisir et cliquez sur le bouton Enregistrer."
+    objet_singulier = "une inscription"
+    objet_pluriel = "des inscriptions"
+
+
+class Liste(Page, crud.Liste):
+    model = Inscription
+
+    def get_queryset(self):
+        return Inscription.objects.select_related("famille", "individu", "groupe", "categorie_tarif", "activite").filter(self.Get_filtres("Q"))
+
+    def get_context_data(self, **kwargs):
+        context = super(Liste, self).get_context_data(**kwargs)
+        context['impression_introduction'] = ""
+        context['impression_conclusion'] = ""
+        context['afficher_menu_brothers'] = True
+        context['active_checkbox'] = True
+        return context
+
+    class datatable_class(MyDatatable):
+        filtres = ["ipresent:individu", "fpresent:famille", 'idinscription', 'famille__nom', 'individu__nom', 'individu__prenom', 'date_debut', 'date_fin', 'activite__nom', 'groupe__nom', 'statut', 'categorie_tarif__nom']
+
+        check = columns.CheckBoxSelectColumn(label="")
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
+        activite = columns.TextColumn("Activité", sources=['activite__nom'])
+        groupe = columns.TextColumn("Groupe", sources=['groupe__nom'])
+        categorie_tarif = columns.TextColumn("Catégorie de tarif", sources=['categorie_tarif__nom'])
+
+        class Meta:
+            structure_template = MyDatatable.structure_template
+            columns = ["check", "idinscription", 'date_debut', 'date_fin', 'individu', 'famille', 'activite', 'groupe', 'categorie_tarif', 'statut']
+            #hidden_columns = = ["idinscription"]
+            processors = {
+                'date_debut': helpers.format_date('%d/%m/%Y'),
+                'date_fin': helpers.format_date('%d/%m/%Y'),
+                'statut': 'Formate_statut',
+            }
+            labels = {
+                "date_debut": "Début",
+                "date_fin": "Fin",
+            }
+            ordering = ['date_debut']
+
+        def Formate_statut(self, instance, *args, **kwargs):
+            if instance.statut == "attente":
+                return "<i class='fa fa-hourglass-2 text-yellow'></i> Attente"
+            elif instance.statut == "refus":
+                return "<i class='fa fa-times-circle text-red'></i> Refus"
+            else:
+                return "<i class='fa fa-check-circle-o text-green'></i> Valide"
+
+        def Get_actions_speciales(self, instance, *args, **kwargs):
+            """ Inclut l'idindividu dans les boutons d'actions """
+            view = kwargs["view"]
+            # Récupération idindividu et idfamille
+            kwargs = view.kwargs
+            # Ajoute l'id de la ligne
+            kwargs["pk"] = instance.pk
+            html = [
+                self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
+                self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
+            ]
+            return self.Create_boutons_actions(html)
+
+
+class Ajouter(Page, crud.Ajouter):
+    form_class = Formulaire
+
+class Modifier(Page, crud.Modifier):
+    form_class = Formulaire
+
+class Supprimer(Page, crud.Supprimer):
+    pass
+
+class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
+    pass

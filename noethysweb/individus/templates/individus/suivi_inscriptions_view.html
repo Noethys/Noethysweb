@@ -1,0 +1,10 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+    {% block box_contenu %}
+        {% include "individus/suivi_inscriptions.html" %}
+    {% endblock %}
+{% endblock contenu_page %}

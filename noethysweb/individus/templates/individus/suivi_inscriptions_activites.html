@@ -1,0 +1,50 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Model Sélection des activités #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_selection_activites_inscriptions{% endblock %}
+    {% block modal_titre %}Sélectionner les activités{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+
+        {% crispy form_activites %}
+
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" id="selectionner_activites_valider_inscriptions"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+
+$(document).ready(function() {
+
+    // Validation de la modal
+    $("#selectionner_activites_valider_inscriptions").on('click', function(e) {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_valider_form_activites' %}",
+            data: $("#form_selection_activites").serialize(),
+            datatype: "json",
+            success: function(data){
+                activites_inscriptions_json = JSON.parse(data.activites);
+                maj_affichage_inscriptions(update_parametres=true);
+                $('#modal_selection_activites_inscriptions').modal('hide');
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        })
+    });
+
+});
+
+</script>

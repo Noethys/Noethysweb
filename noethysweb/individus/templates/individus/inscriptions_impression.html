@@ -1,0 +1,71 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+    <div class="row">
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder">
+                        <button class="btn btn-primary" onclick="impression_pdf()" title="Aperçu PDF"><i class='fa fa-file-pdf-o margin-r-5'></i>Aperçu PDF</button>
+                        <a class="btn btn-danger" href="{% url 'individus_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                    </div>
+
+                    {# Liste des inscriptions générées #}
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+
+                    <br>
+
+                    {# Options d'impression #}
+                    {% crispy form_modele %}
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+
+        {# Insertion des modals #}
+        {% include 'core/modal_pdf.html' %}
+
+        <script>
+
+            // Impression du PDF
+            function impression_pdf() {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_inscriptions_impression_pdf' %}",
+                    data: {
+                        form_modele: JSON.stringify($("#choix_modele_form").serializeObject()),
+                        inscriptions_cochees: JSON.stringify(get_coches()),
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    },
+                    datatype: "json",
+                    success: function(data){
+                        charge_pdf(data);
+                    },
+                    error: function(data) {
+                        toastr.error(data.responseJSON.erreur);
+                    }
+                })
+            };
+
+        </script>
+
+    </div>
+
+{% endblock contenu_page %}
+

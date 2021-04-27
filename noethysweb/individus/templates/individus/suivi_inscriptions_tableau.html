@@ -1,0 +1,58 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+<thead>
+    <tr>
+        <th>Activité/Groupe</th>
+        <th>Inscrits</th>
+        <th>Max.</th>
+        <th>Dispo.</th>
+        <th>Attente</th>
+        <th>Refus</th>
+    </tr>
+</thead>
+<tbody>
+    {% for activite in data_suivi_inscriptions %}
+        <tr class="activite">
+            <td>{{ activite.activite.nom }}</td>
+            <td>{{ activite.nbre_inscrits|default:'' }}</td>
+            <td>{{ activite.nbre_max|default:'' }}</td>
+            <td>{{ activite.nbre_dispo|default:'' }}</td>
+            <td>{{ activite.nbre_attente|default:'' }}</td>
+            <td>{{ activite.nbre_refus|default:'' }}</td>
+        </tr>
+        {% for groupe in activite.groupes %}
+            <tr>
+                <td>{{ groupe.groupe.nom }}</td>
+                <td>{{ groupe.nbre_inscrits|default:'' }}</td>
+                <td>{{ groupe.nbre_max|default:'' }}</td>
+                <td>{{ groupe.nbre_dispo|default:'' }}</td>
+                <td>{{ groupe.nbre_attente|default:'' }}</td>
+                <td>{{ groupe.nbre_refus|default:'' }}</td>
+            </tr>
+        {% endfor %}
+    {% empty %}
+        Aucune activité
+    {% endfor %}
+
+</tbody>
+
+<script>
+    var activites_inscriptions_json = JSON.parse('{{ activites_inscriptions_json|escapejs }}');
+</script>
+
+<style>
+    #table_suivi_inscriptions td, #table_suivi_inscriptions th {
+        text-align: center;
+    }
+    #table_suivi_inscriptions .activite {
+        background-color: #efefef;
+        font-weight: bold;
+    }
+    .dark-mode #table_suivi_inscriptions .activite {
+        background-color: #5f5f5f;
+    }
+
+</style>

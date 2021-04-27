@@ -1,0 +1,139 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+
+
+<div class="row">
+    <div class="col-md-9">
+        {# Box sélection de l'image #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+                {% crispy form %}
+            {% endblock %}
+        {% endembed %}
+    </div>
+    <div class="col-md-3">
+        {# Box Affichage de l'image #}
+        <div class="card card-warning">
+            <div class="card-header with-border">
+                <h3 class="card-title">Analyse de la photo</h3>
+            </div>
+            <div class="card-body">
+                {% if resultats %}
+                    <center><img class="img-fluid" style="max-height: 150px;" src="{{ MEDIA_URL }}{{ resultats.image_originale }}"></center>
+                {% else %}
+                    Aucune photo sélectionnée.
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Affichage des résultats #}
+{% if resultats %}
+    {% embed 'core/box.html' %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}Attribution des photos{% endblock %}
+        {% block box_introduction %}
+            {% if resultats.portraits %}
+                {{ resultats.portraits|length }} visages ont été détectés. Veuillez cliquer sur chaque photo pour les associer à des individus et cliquez sur le bouton Enregistrer.
+                Les photos non associées seront ignorées lors de l'enregistrement.
+            {% else %}
+                Aucun visage n'a été détecté dans l'image.
+            {% endif %}
+        {% endblock %}
+        {% block box_contenu %}
+
+            {% if resultats.portraits %}
+                <ul class="users-list clearfix">
+                    {% for url in resultats.portraits %}
+                        <li>
+                            <a href="#" data-index="{{ forloop.counter0 }}" data-idindividu="" data-url="{{ url }}" class="lien_selection">
+                                <img class="img-fluid img-thumbnail" style="max-width: 150px;" src="{{ MEDIA_URL }}{{ url }}">
+                                <span class="users-list-name" data-index="{{ forloop.counter0 }}"></span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <div class="buttonHolder pull-right" style="margin-top: 20px;">
+                    <button id="bouton_enregistrer" type="button" class="btn btn-primary">Enregistrer les photos</button>
+                    <a class="btn btn-danger" href="{% url 'individus_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                </div>
+
+            {% endif %}
+
+        {% endblock %}
+    {% endembed %}
+{% endif %}
+
+
+{# Model Sélectionner un individu #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_selection_individu{% endblock %}
+    {% block modal_titre %}Associer à un individu{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+        <input type="hidden" id="index" name="index" value="">
+        <div class="largeur_pleine">
+            {% crispy form_selection_individu %}
+        </div>
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" id="selection_individu_valider"/><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+
+    $(document).ready(function() {
+        $(".lien_selection").on("click",function(event) {
+            event.preventDefault();
+            $('#index').val(this.dataset.index);
+            $("#id_individu").val('').trigger('change');
+            $('#modal_selection_individu').modal('show');
+        });
+
+        // Modal : Validation de l'individu
+        $("#selection_individu_valider").on('click', function (e) {
+            var index = $('#index').val();
+            var idindividu = $('#id_individu').val();
+            if (idindividu === "") {
+                toastr.error(("Vous devez sélectionner un individu dans la liste"));
+                return false;
+            }
+            $('#modal_selection_individu').modal('hide');
+            var data = $("#id_individu").select2('data')
+            $("span[data-index='" + index + "']").html(data[0].text)
+            $("a[data-index='" + index + "']").attr('data-idindividu', idindividu);
+        });
+
+        $("#bouton_enregistrer").on("click",function(event) {
+            var liste_photos = [];
+            $(".lien_selection").each(function() {
+                if (this.dataset.idindividu !== '') {
+                    liste_photos.push({"url": this.dataset.url, "idindividu": this.dataset.idindividu});
+                }
+            });
+            if (liste_photos.length === 0) {
+                toastr.error("Vous devez associer au moins un individu à une photo");
+                return false;
+            }
+            $("#id_data").val(JSON.stringify(liste_photos));
+            $('#form_importation_photos').submit();
+        });
+
+    });
+</script>
+
+{% endblock contenu_page %}

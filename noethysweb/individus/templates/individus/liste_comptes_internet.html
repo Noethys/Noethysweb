@@ -1,0 +1,56 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+    <div class="row">
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder">
+                        <button class="btn btn-primary" onclick="activer()" title="Activer les comptes cochés"><i class="fa fa-check margin-r-5"></i>Activer</button>
+                        <button class="btn btn-primary" onclick="desactiver()" title="Désactiver les comptes cochés"><i class="fa fa-remove margin-r-5"></i>Désactiver</button>
+                        <button class="btn btn-primary" onclick="envoyer_email()" title="Envoyer les codes internet par Email"><i class="fa fa-send-o margin-r-5"></i>Envoyer par Email</button>
+                        <button class="btn btn-primary" onclick="reinitialiser_mdp()" title="Réinitialiser les mots de passe des comptes cochés"><i class="fa fa-refresh margin-r-5"></i>Réinitialiser les mots de passe</button>
+                        <button class="btn btn-primary" onclick="reinitialiser_identifiant()" title="Réinitialiser les identifiants des comptes cochés"><i class="fa fa-refresh margin-r-5"></i>Réinitialiser les identifiants</button>
+                        <a class="btn btn-danger" href="{% url 'individus_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                    </div>
+
+                    {# Liste des comptes internet #}
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+
+        {# Insertion des modals #}
+        {% include 'core/modal_pdf.html' %}
+
+        {# Dialogbox Envoyer par Email #}
+        {% embed "core/dialogbox_confirm.html" with id="envoyer_email" titre="Envoyer les codes internet par Email" message="Confirmez-vous le transfert des codes internet vers l'éditeur d'emails ?" label_bouton="Transférer" url_exec="ajax_comptes_internet_email" %}{% endembed %}
+
+        {# Dialogbox Désactiver #}
+        {% embed "core/dialogbox_confirm.html" with id="desactiver" titre="Désactiver les comptes" message="Confirmez-vous la désactivation des comptes sélectionnés ?" label_bouton="Désactiver" url_exec="ajax_comptes_internet_desactiver" %}{% endembed %}
+
+        {# Dialogbox Activer #}
+        {% embed "core/dialogbox_confirm.html" with id="activer" titre="Activer les comptes" message="Confirmez-vous l'activation des comptes sélectionnés ?" label_bouton="Activer" url_exec="ajax_comptes_internet_activer" %}{% endembed %}
+
+        {# Dialogbox Réinitialisation mdp #}
+        {% embed "core/dialogbox_confirm.html" with id="reinitialiser_mdp" titre="Réinitialiser les mots de passe" message="Confirmez-vous la réinitialisation des mots de passe des comptes sélectionnés ?" label_bouton="Réinitialiser" url_exec="ajax_comptes_internet_reinitialiser_mdp" %}{% endembed %}
+
+        {# Dialogbox Réinitialisation identifiant #}
+        {% embed "core/dialogbox_confirm.html" with id="reinitialiser_identifiant" titre="Réinitialiser les identifiants" message="Confirmez-vous la réinitialisation des identifiants des comptes sélectionnés ?" label_bouton="Réinitialiser" url_exec="ajax_comptes_internet_reinitialiser_identifiant" %}{% endembed %}
+
+    </div>
+
+{% endblock contenu_page %}
+

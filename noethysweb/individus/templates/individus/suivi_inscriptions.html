@@ -1,0 +1,144 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/clusterize/clusterize.css' %}">
+{% endblock styles %}
+
+{% block scripts %}
+    <script type="text/javascript" src="{% static 'lib/clusterize/clusterize.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    <div class="card card-outline card-lightblue">
+
+        <div class="card-header">
+            <h3 class="card-title"><i class="fa fa-ticket margin-r-5"></i> Suivi des inscriptions</h3>
+            <div class="card-tools">
+
+                {# Rechercher une activité #}
+                <div class="btn-group">
+                    <form class="d-none d-sm-block" id="form_recherche_activite" method="POST">
+                        <div class="input-group input-group-sm" style="width: 150px;margin-right: 10px;">
+                            {% csrf_token %}
+                            <input type="text" id="champ_recherche_activite" class="form-control text-sm" title="Rechercher une activité" placeholder="Rechercher...">
+                            <div class="input-group-append">
+                                <button type="submit" class="input-group-text"><i class="fa fa-search"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <button type="button" id="bouton_maj_affichage_inscriptions" title="Actualiser l'affichage" class="btn btn-tool"><i class="fa fa-refresh"></i></button>
+
+                <div class="btn-group">
+                    <button href="#" class="btn btn-tool dropdown-toggle" title="Ajuster les options" data-toggle="dropdown"><i class="fa fa-gear"></i></button>
+                    <div class="dropdown-menu dropdown-menu-right" role="menu">
+                        <h6 class="dropdown-header"><strong>Données</strong></h6>
+                        <a class="dropdown-item" href="#" id="selection_activites_inscriptions" title="Sélectionner les activités à afficher">Sélectionner les activités</a>
+                        <li class="dropdown-divider"></li>
+                        <h6 class="dropdown-header"><strong>Options</strong></h6>
+                        <a href="#" id="masquer_activites_obsoletes" class="dropdown-item option_affichage_inscriptions {% if suivi_inscriptions_parametres.masquer_activites_obsoletes %}menu-checked{% endif %}" title="Masquer les activités obsolètes"> Masquer les activités obsolètes</a>
+                        <a href="#" id="masquer_individus_partis" class="dropdown-item option_affichage_inscriptions {% if suivi_inscriptions_parametres.masquer_individus_partis %}menu-checked{% endif %}" title="Masquer les individus partis"> Masquer les individus partis</a>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-tool" data-card-widget="maximize" title="Agrandir/Réduire"><i class="fa fa-expand"></i></button>
+
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table table-sm table-bordered noselect" id="table_suivi_inscriptions" draggable="false">
+                <table cellspacing="0" id="table-suivi_inscriptions" class="table" style="min-width: 200px;">
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    {# Ajout de la modal sélection des activités #}
+    <div id="div_modal_selection_activites_inscriptions"></div>
+
+<script>
+    $(document).ready(function() {
+
+        // Champ de recherche d'une activité
+        $("#form_recherche_activite").on('submit', function(event) {
+            event.preventDefault();
+            maj_affichage_inscriptions();
+        });
+
+        // Bouton MAJ affichage
+        $("#bouton_maj_affichage_inscriptions").on('click', function(event) {
+            event.preventDefault();
+            maj_affichage_inscriptions();
+        });
+
+        $("#selection_activites_inscriptions").on("click",function(event){
+            event.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_get_form_activites' %}",
+                data: {
+                    activites: JSON.stringify(activites_inscriptions_json),
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                },
+                success: function (data) {
+                    $("#div_modal_selection_activites_inscriptions").html(data);
+                    $('#modal_selection_activites_inscriptions').modal('show');
+                }
+            });
+        });
+
+        // Click sur les options
+        $(".option_affichage_inscriptions").on("click",function(event){
+            event.preventDefault();
+            if ($(this).hasClass("menu-checked")) {
+                $(this).removeClass("menu-checked");
+            } else {
+                $(this).addClass("menu-checked");
+            };
+            maj_affichage_inscriptions(update_parametres=true);
+        });
+
+        // MAJ de l'affichage au chargement de la page
+        maj_affichage_inscriptions();
+
+    });
+
+    function maj_affichage_inscriptions(update_parametres=false) {
+        var parametres = null;
+        if (update_parametres) {
+            parametres = {
+                activites: activites_inscriptions_json,
+                masquer_activites_obsoletes: $("#masquer_activites_obsoletes").hasClass("menu-checked"),
+                masquer_individus_partis: $("#masquer_individus_partis").hasClass("menu-checked"),
+            };
+        };
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_get_suivi_inscriptions' %}",
+            data: {
+                parametres: JSON.stringify(parametres),
+                filtre: $("#champ_recherche_activite").val(),
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+            },
+            success: function (data) {
+                $("#table-suivi_inscriptions").html(data);
+                $("#table_suivi_inscriptions").freezeTable({
+                    'shadow': true,
+                    'scrollBar': true,
+                });
+            }
+        });
+    };
+
+</script>
+
+{% endblock contenu_page %}
