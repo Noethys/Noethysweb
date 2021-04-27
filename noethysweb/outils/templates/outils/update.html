@@ -1,0 +1,47 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+
+    {% embed 'core/box.html' %}
+
+        {% block box_theme %}box-{% if not version_disponible %}success{% else %}warning{% endif %} box-solid{% endblock %}
+        {% block box_titre %}Mise à jour de l'application{% endblock %}
+        {% block box_contenu %}
+
+            {% if not version_disponible %}
+                <i class='fa fa-check text-green'></i> &nbsp;Vous disposez déjà de la dernière version.
+
+            {% else %}
+                <p>La version {{ version_disponible }} est disponible.</p>
+                <p>
+                    <textarea id="id_changelog" name="changelog" rows="10" class="textarea form-control" readonly>{{ changelog }}</textarea>
+                </p>
+                <p>
+                    <form id="id_form_update" method="post">
+                        {% csrf_token %}
+                        <div id="id_bouton_update">
+                            <button type="submit" class="btn btn-warning"><i class="fa fa-download"></i> &nbsp;&nbsp;Mettre à jour maintenant</button>
+                        </div>
+                    </form>
+
+                </p>
+
+            {% endif %}
+
+        {% endblock %}
+
+    {% endembed %}
+
+    <script type="text/javascript">
+        $('#id_form_update').submit(function() {
+            $("#id_bouton_update").html("<p class='text-yellow'><i class='fa fa-refresh fa-spin'></i> <strong>&nbsp;&nbsp;Installation en cours...</strong><p/>");
+            return true;
+        });
+    </script>
+
+{% endblock %}
+
+

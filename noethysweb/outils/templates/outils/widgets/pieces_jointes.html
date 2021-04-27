@@ -1,0 +1,48 @@
+{% load static %}
+
+<style>
+    .pieces {
+        background: #f4f4f4;
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
+    .pieces li {
+        display: inline;
+        white-space: nowrap;
+        margin-right: 20px;
+    }
+</style>
+
+
+<div>
+    <label>
+        <span class="btn btn-default" title="Ajouter une pièce jointe" >
+            <i class="fa fa-plus margin-r-5"></i> Ajouter<input name="{{ name }}" id="{{ id }}" type="file" style="display: none;" multiple>
+        </span>
+    </label>
+</div>
+
+{% if value %}
+    <ul class="list-unstyled pieces" style="margin-bottom: 2px;">
+        {% for piece in value %}
+            <li>
+                <a href="{{ piece.fichier.url }}" target="_blank" title="Visualiser cette pièce jointe"><i class="fa fa-paperclip margin-r-5"></i> {{ piece.nom }}</a>
+                <button type="submit" name="suppr_piece_jointe" title="Détacher cette pièce jointe" value="{{ piece.pk }}" class="btn btn-default btn-sm"><i class="fa fa-trash"></i></button>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+
+<script>
+    $(function() {
+        // Submit tout de suite après sélection fichier
+        $("#{{ id }}").on('change', function() {
+            $("#form_editeur_emails").submit();
+        });
+    });
+</script>
+
+
+
+

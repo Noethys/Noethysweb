@@ -1,0 +1,23 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+
+    {% embed 'core/box.html' %}
+
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}{{ box_titre }}{% endblock %}
+        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+        {% block box_contenu %}
+            <p>
+                <textarea id="id_changelog" name="changelog" rows="30" class="textarea form-control" readonly>{{ changelog }}</textarea>
+            </p>
+        {% endblock %}
+
+    {% endembed %}
+
+{% endblock %}
+
+

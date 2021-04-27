@@ -1,0 +1,71 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/select2/css/select2.min.css' %}">
+{% endblock styles %}
+
+
+{% block scripts %}
+    <script type="text/javascript" src="{% static 'django_select2/django_select2.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/select2/js/select2.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/select2/js/i18n/fr.js' %}"></script>
+{% endblock scripts %}
+
+{% crispy form %}
+
+<script>
+    $(document).ready(function() {
+
+        $("#bouton_envoyer").on('click', function(event) {
+            bootbox.dialog({
+                title: "Confirmation de l'envoi",
+                message: "Confirmez-vous l'envoi de ce mail ?",
+                buttons: {
+                    ok: {
+                        label: "<i class='fa fa-check'></i> Envoyer",
+                        className: 'btn-primary',
+                        callback: function(){
+{% comment %}
+                            var dialogbox = bootbox.dialog({
+                                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> L'envoi peut durer plusieurs minutes. Veuillez patienter...</p>",
+                                closeButton: false
+                            });
+{% endcomment %}
+                            envoyer_email_ajax();
+                        }
+                    },
+                    cancel: {
+                        label: "<i class='fa fa-ban'></i> Annuler",
+                        className: 'btn-danger',
+                    }
+                }
+            });
+        });
+
+        function envoyer_email_ajax(dialogbox) {
+            var formData = new FormData($("#form_editeur_emails")[0]);
+            // formData.append("pieces", $('#id_pieces_jointes')[0].files);
+            formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_envoyer_email_express' %}",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    {#dialogbox.modal('hide');#}
+                    toastr.success(data.message);
+                    $('#modal_editeur_emails').modal('hide');
+                },
+                error: function (data) {
+                    {#dialogbox.modal('hide');#}
+                    toastr.error(data.responseJSON.message);
+                }
+            });
+        };
+
+    });
+</script>

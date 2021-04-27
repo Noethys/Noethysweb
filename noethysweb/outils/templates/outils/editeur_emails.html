@@ -1,0 +1,176 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+    #div_id_html {
+        margin-bottom: 0px;
+    }
+    </style>
+{% endblock styles %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
+
+{% block contenu_page %}
+
+
+    <div class="row">
+        <div class="col-md-3">
+
+            <!-- Box Destinataires -->
+            <div class="card card-default">
+                <div class="card-header">
+                    <h3 class="card-title">Destinataires</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Diminuer">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+
+
+                <div class="card-footer p-0">
+                    {% if mail.verrouillage_destinataires %}
+                        <div style="padding-left: 8px;padding-top: 2px;padding-bottom: 2px;font-size: 12px;color: #acacac;background-color: #fafafa;">Sélection verrouillée</div>
+                    {% endif %}
+                    <ul class="list-group list-group-flush" {% if mail.verrouillage_destinataires %}style="background-color: #fafafa;"{% endif %}>
+                        {% if mail.verrouillage_destinataires %}
+                            {% if categories.individu %}<a class="list-group-item list-group-item-action"><i class="fa fa-user fa-fw margin-r-5"></i>Individus <span class="float-right badge bg-blue">{{ categories.individu }}</span></a>{% endif %}
+                            {% if categories.famille %}<a class="list-group-item list-group-item-action"><i class="fa fa-users fa-fw margin-r-5"></i>Familles <span class="float-right badge bg-blue">{{ categories.famille }}</span></a>{% endif %}
+                            {% if categories.contact %}<a class="list-group-item list-group-item-action"><i class="fa fa-phone-square fa-fw margin-r-5"></i>Contacts <span class="float-right badge bg-blue">{{ categories.contact }}</span></a>{% endif %}
+                            {% if categories.liste_diffusion %}<a class="list-group-item list-group-item-action"><i class="fa fa-list-ul fa-fw margin-r-5"></i>Listes de diffusion <span class="float-right badge bg-blue">{{ categories.liste_diffusion }}</span></a>{% endif %}
+                            {% if categories.saisie_libre %}<a class="list-group-item list-group-item-action"><i class="fa fa-edit fa-fw margin-r-5"></i>Saisie libre <span class="float-right badge bg-blue">{{ categories.saisie_libre }}</span></a>{% endif %}
+                        {% else %}
+                            <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_individus');$('#form_editeur_emails').submit();" title="Sélectionner des individus"><i class="fa fa-user fa-fw margin-r-5"></i>Individus <span class="float-right badge bg-blue">{{ categories.individu }}</span></a>
+                            <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_familles');$('#form_editeur_emails').submit();" title="Sélectionner des familles"><i class="fa fa-users fa-fw margin-r-5"></i>Familles <span class="float-right badge bg-blue">{{ categories.famille }}</span></a>
+                            <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_contacts');$('#form_editeur_emails').submit();" title="Sélectionner des contacts"><i class="fa fa-phone-square fa-fw margin-r-5"></i>Contacts <span class="float-right badge bg-blue">{{ categories.contact }}</span></a>
+                            <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_diffusion');$('#form_editeur_emails').submit();" title="Sélectionner des listes de diffusion"><i class="fa fa-list-ul fa-fw margin-r-5"></i>Listes de diffusion <span class="float-right badge bg-blue">{{ categories.liste_diffusion }}</span></a>
+                            <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_saisie_libre');$('#form_editeur_emails').submit();" title="Saisir des adresses mail"><i class="fa fa-edit fa-fw margin-r-5"></i>Saisie libre <span class="float-right badge bg-blue">{{ categories.saisie_libre }}</span></a>
+                        {% endif %}
+                    </ul>
+                </div>
+
+            </div>
+
+
+            <!-- Box Envois -->
+            <div class="card card-default">
+                <div class="card-header">
+                    <h3 class="card-title">Envois</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Diminuer">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-footer p-0">
+                    <div style="padding-left: 5px;padding-top: 2px;padding-bottom: 2px;font-size: 12px;color: #acacac;background-color: #fafafa;">{{ intro_envoi }}</div>
+                    <div {% if destinataires|length > 5 %}style="overflow: scroll;max-height: 300px;"{% endif %}>
+                        <table class="table m-0">
+                            {% for destinataire in destinataires %}
+                                <tr>
+                                    <td style="padding: 5px;">
+                                        <div {% if destinataire.date_envoi %}title="Envoyé le {{ destinataire.date_envoi|date:"l j F Y H:i:s" }} {% if destinataire.resultat_envoi != "ok" %}&#10;Erreur : {{ destinataire.resultat_envoi }}{% endif %}"{% endif %}>
+                                            {% if destinataire.date_envoi and destinataire.resultat_envoi == "ok" %}<i class='fa fa-check-circle margin-r-5 text-green'></i>{% endif %}
+                                            {% if destinataire.date_envoi and destinataire.resultat_envoi != "ok" %}<i class='fa fa-times-circle margin-r-5 text-red'></i>{% endif %}
+                                            {{ destinataire.adresse }}
+                                        </div>
+                                        <div><span style="color: #d2d2d2;font-size: 12px;">
+                                            {% if destinataire.famille %}{{ destinataire.famille.nom }}{% endif %}
+                                            {% if destinataire.individu %}{{ destinataire.individu.Get_nom }}{% endif %}
+                                            {% if destinataire.contact %}{{ destinataire.contact.Get_nom }}{% endif %}
+                                        </span></div>
+                                        {% for document in destinataire.documents.all %}
+                                            <div><a href="{{ document.fichier.url }}" target="_blank" title="Visualiser le document joint"><i class="fa fa-paperclip"></i> {{ document.nom }}</a></div>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+
+        <div class="col-md-9">
+
+            <!-- Box Message -->
+            {% embed 'core/box.html' %}
+                {% block box_theme %}card-outline card-lightblue{% endblock %}
+                {% block box_titre %}Message{% endblock %}
+                {% block box_contenu %}
+                    {% crispy form %}
+
+                    <script>
+                        $(document).ready(function() {
+
+                            $("#bouton_envoyer").on('click', function(event) {
+                                if ($('#id_selection').val() == "TOUS") {
+                                    var nbre_destinataires = {{ destinataires|length }};
+                                } else {
+                                    var nbre_destinataires = {{ nbre_envois_attente|add:nbre_envois_echec }};
+                                }
+                                if (nbre_destinataires === 0) {
+                                    toastr.error("Vous devez sélectionner au moins un destinataire");
+                                    return false;
+                                }
+                                if (nbre_destinataires === 1) {
+                                    var texte_message = "Confirmez-vous l'envoi de ce message à 1 destinataire ?";
+                                } else {
+                                    var texte_message = "Confirmez-vous l'envoi de ce message à " + nbre_destinataires + " destinataires ?";
+                                }
+
+                                bootbox.dialog({
+                                    title: "Confirmation de l'envoi",
+                                    message: texte_message,
+                                    buttons: {
+                                        ok: {
+                                            label: "<i class='fa fa-check'></i> Envoyer",
+                                            className: 'btn-primary',
+                                            callback: function(){
+                                                bootbox.dialog({
+                                                    message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> L'envoi peut durer plusieurs minutes. Veuillez patienter...</p>",
+                                                    closeButton: false
+                                                });
+                                                $('[name=action]').val('envoyer');
+                                                $('#form_editeur_emails').submit();
+                                            }
+                                        },
+                                        cancel: {
+                                            label: "<i class='fa fa-ban'></i> Annuler",
+                                            className: 'btn-danger',
+                                        }
+                                    }
+                                });
+
+                            });
+
+                        });
+                    </script>
+
+                {% endblock %}
+
+            {% endembed %}
+
+
+        </div>
+
+    </div>
+
+
+
+{% endblock contenu_page %}
+
+

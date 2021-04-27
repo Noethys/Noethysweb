@@ -1,0 +1,174 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/chartjs/Chart.min.css' %}">
+{% endblock styles %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/chartjs/Chart.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/moment/moment.min.js' %}"></script>
+{% endblock scripts %}
+
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-3" >
+
+            <!-- Paramètres -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Paramètres</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% crispy form_parametres %}
+                    <button type="submit" form="form_statistiques" class="btn btn-primary btn-block" name="type_submit" title="Actualiser les résultats"><i class="fa fa-refresh margin-r-5"></i> Actualiser les résultats</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-9">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-caret-square-o-right margin-r-5"></i> Résultats</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    {% for element in data %}
+
+                        {# texte #}
+                        {% if element.categorie == "texte" %}
+                            <p style="margin-bottom: 30px;">{{ element.texte }}</p>
+                        {% endif %}
+
+
+                        {# Tableau #}
+                        {% if element.categorie == "tableau" %}
+                            <table id="tableau_{{ element.id }}" class="table table-bordered" style="width:100%; margin-bottom: 30px;">
+                                <thead>
+                                    {% if element.titre %}
+                                        <tr>
+                                            <td colspan="{{ element.colonnes|length }}" style="text-align: center;font-size: small;color:#777777;"><strong>{{ element.titre }}</strong></td>
+                                        </tr>
+                                    {% endif %}
+                                    <tr style="background-color: #f9f9f9;">
+                                        {% for colonne in element.colonnes %}
+                                            <th style="text-align: center;">{{ colonne }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ligne in element.lignes %}
+                                        <tr>
+                                        {% for valeur in ligne %}
+                                            <td style="text-align: center;">{{ valeur|safe }}</td>
+                                        {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endif %}
+
+
+                        {# Camembert #}
+                        {% if element.categorie == "camembert" %}
+                            <canvas id="chart_{{ element.id }}" style="margin-bottom: 30px;" height="110"></canvas>
+                            <script>
+                                var data_camembert = {labels: [], valeurs: [], couleurs: []};
+                                {% for item in element.labels %}data_camembert.labels.push("{{ item }}");{% endfor %}
+                                {% for item in element.valeurs %}data_camembert.valeurs.push({{ item }});{% endfor %}
+                                {% for item in element.couleurs %}data_camembert.couleurs.push("{{ item }}");{% endfor %}
+
+                                var ctx = document.getElementById("chart_{{ element.id }}").getContext("2d");
+                                var chart = new Chart(ctx, {
+                                    type: "pie",
+                                    data: {
+                                        datasets: [{
+                                            data: data_camembert.valeurs,
+                                            backgroundColor: data_camembert.couleurs,
+                                        }],
+                                        labels: data_camembert.labels
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: {% if element.titre %}true{% else %}false{% endif %},
+                                            text: "{{ element.titre }}"
+                                        }
+                                    }
+                                });
+                            </script>
+                        {% endif %}
+
+
+                        {# Histogramme #}
+                        {% if element.categorie == "histogramme" %}
+                            <canvas id="chart_{{ element.id }}" style="margin-bottom: 30px;" height="100"></canvas>
+                            <script>
+                                var data_histogramme = {labels: [], valeurs: []};
+                                {% for item in element.labels %}data_histogramme.labels.push("{{ item }}");{% endfor %}
+                                {% for item in element.valeurs %}data_histogramme.valeurs.push({{ item }});{% endfor %}
+
+                                var ctx = document.getElementById("chart_{{ element.id }}").getContext("2d");
+                                var chart = new Chart(ctx, {
+                                    type: "{{ element.type_chart }}",
+                                    data: {
+                                        labels: data_histogramme.labels,
+                                        datasets: [{
+                                            label: data_histogramme.labels,
+                                            data: data_histogramme.valeurs,
+                                            backgroundColor: 'rgba(60, 141, 188, 0.5)',
+                                            pointRadius: 2,
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: {% if element.titre %}true{% else %}false{% endif %},
+                                            text: "{{ element.titre }}"
+                                        },
+                                        legend: {
+                                            display: false
+                                        },
+                                        tooltips: {
+                                            callbacks: {
+                                                label: function (tooltipItem, data) {
+                                                    return parseInt(tooltipItem.value)
+                                                }
+                                            }
+                                        },
+                                        scales: {
+                                            yAxes: [{
+                                                ticks: {
+                                                    min: 0,
+                                                }
+                                            }]
+                                        }
+                                    }
+                                });
+                            </script>
+                        {% endif %}
+
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock contenu_page %}
+

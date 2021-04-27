@@ -1,0 +1,31 @@
+{% load static %}
+
+
+<style>
+    .liste_documents {
+        border: 1px solid #ccc;
+        background: #f4f4f4;
+        padding: 6px;
+    }
+    .liste_documents li {
+        display: inline;
+        white-space: nowrap;
+        margin-right: 20px;
+    }
+</style>
+
+<div class="liste_documents">
+    <ul class="list-unstyled" style="margin-bottom: 2px;">
+        {% for document in documents.all %}
+            <li><a href="{{ document.fichier.url }}" target="_blank" title="Visualiser le document joint"><i class="fa fa-paperclip"></i> {{ document.nom }}</a></li>
+        {% empty %}
+            Aucun document joint
+        {% endfor %}
+    </ul>
+</div>
+
+
+
+
+
+
