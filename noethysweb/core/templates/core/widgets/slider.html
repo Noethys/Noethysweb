@@ -1,0 +1,14 @@
+
+<script>
+    $(document).ready(function() {
+        $('#{{ id }}').bootstrapSlider();
+        $('#{{ id }}').on("slide", function(slideEvt) {
+            $("#valeur_{{ id }}").text(slideEvt.value);
+        });
+        $('#{{ id }}').bootstrapSlider('setValue', '{{ value }}', true);
+    });
+</script>
+<div>
+    <input type="text" class="{{ class }} slider form-control" name="{{ name }}" id="{{ id }}" data-slider-selection="before" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="{{ value }}"/>
+    <span id="valeur_{{ id }}" style="margin-left: 10px;">0</span>
+</div>

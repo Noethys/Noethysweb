@@ -1,0 +1,13 @@
+<footer class="main-footer text-sm">
+    <div class="float-right d-none d-sm-inline">
+        {% block footer_right %}
+            <a href="https://www.noethysweb.com"><b>Noethys<sup>web</sup></b></a> {{ version_application }}
+        {% endblock %}
+    </div>
+
+    {% block footer_left %}
+        {% block legal %}
+            <strong>Copyright &copy; 2019-{% now "Y" %} </strong> Ivan LUCAS
+        {% endblock %}
+    {% endblock %}
+</footer>

@@ -1,0 +1,78 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'lib/datatables/css/dataTables.bootstrap4.min.css' %}"/>
+<link rel="stylesheet" type="text/css" href="{% static 'lib/datatables/css/buttons.bootstrap4.min.css' %}"/>
+<link rel="stylesheet" type="text/css" href="{% static 'lib/datatables/css/fixedHeader.bootstrap4.min.css' %}"/>
+<link rel="stylesheet" type="text/css" href="{% static 'lib/datatables/css/responsive.bootstrap4.min.css' %}"/>
+<link rel="stylesheet" type="text/css" href="{% static 'lib/datatables/css/rowReorder.bootstrap4.min.css' %}"/>
+<link rel="stylesheet" type="text/css" href="{% static 'lib/datatables/css/rowGroup.bootstrap4.min.css' %}"/>
+{#<link rel="stylesheet" type="text/css" href="{% static 'lib/datatables/css/searchPanes.bootstrap.min.css' %}"/>#}
+<link rel="stylesheet" type="text/css" href="{% static 'lib/datatables/css/select.bootstrap4.min.css' %}"/>
+
+
+<style type="text/css">
+    table.dataTable {
+        margin-top: 4px !important;
+        margin-bottom: 8px !important;
+    }
+    .dt-buttons-haut {
+        text-align: right;
+        margin-top: 10px;
+    }
+    .dataTables_filter {
+        {#text-align: right !important;#}
+        width: 100% !important;
+    }
+    .barre_menu_dt > * {
+        display: inline-block;
+        float: right;
+        margin-top: 6px;
+    }
+    .dataTables_filter input {
+        margin-top: 0px !important;
+        width: 150px !important;
+        border-radius: 4px;
+        margin-right: 10px;
+    }
+    .dataTables_info {
+        color: #c6c6c6;
+        margin-left: 10px;
+        font-size: 12px;
+    }
+    .datatable th[data-name="ordre"] {
+        width: 25px;
+    }
+    .datatable th[data-name="id"] {
+        width: 25px;
+    }
+    .datatable th[data-name="defaut"] {
+        width: 25px;
+    }
+    .datatable th[data-name="actions"] {
+        width: 100px;
+    }
+    .datatable td, .datatable th {
+        padding: 0.4rem;
+    }
+    @media screen and (max-width: 767px) {
+        .dataTables_filter {
+            text-align: center !important;
+        }
+        .dt-buttons {
+            width: auto !important;
+            text-align: center !important;
+        }
+        .dt-buttons-haut {
+            text-align: center;
+        }
+    }
+    table.dataTable tbody td {
+      vertical-align: middle;
+    }
+
+    table.dataTable tbody td.select-checkbox:before,table.dataTable tbody td.select-checkbox:after,table.dataTable tbody th.select-checkbox:before,table.dataTable tbody th.select-checkbox:after {
+        top: 50%;
+    }
+
+</style>
+

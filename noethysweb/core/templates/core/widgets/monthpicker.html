@@ -1,0 +1,46 @@
+<script>
+$(function () {
+    $('.monthpickerwidget').datepicker({
+        autoclose: true,
+        format: "MM yyyy",
+        viewMode : 'months',
+        minViewMode: 'months',
+        todayBtn: "linked",
+        language: "fr",
+        todayHighlight: true,
+    })});
+
+    $(document).ready(function() {
+
+        // Boutons changement de mois
+        function change_mois(valeur) {
+            var d = $("#{{ id }}").datepicker('getDate');
+            var d = new Date(d.getFullYear(), d.getMonth()+valeur, 1);
+            $("#{{ id }}").datepicker("setDate", d);
+        }
+        $("#datepicker_moins").click(function() {
+            change_mois(-1);
+        });
+        $("#datepicker_plus").click(function() {
+            change_mois(+1);
+        });
+
+        // Définit la date du jour par défaut
+        defaut = new Date();
+        defaut = new Date(defaut.getFullYear(), defaut.getMonth(), 1);
+        $('.monthpickerwidget').datepicker("setDate", defaut);
+    });
+
+</script>
+
+<div class="input-group date">
+    <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fa {% if icon %}{{ icon }}{% else %}fa-calendar{% endif %}"></i></span>
+    </div>
+    <input type="text" class="{{ class }}" data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}" value="{{ value|date:djformat }}" />
+    <div class="input-group-append">
+        <button id="datepicker_moins" class="btn btn-default" type="button"><i class="fa fa-chevron-left"></i></button>
+        <button id="datepicker_plus" class="btn btn-default" type="button"><i class="fa fa-chevron-right"></i></button>
+    </div>
+</div>
+

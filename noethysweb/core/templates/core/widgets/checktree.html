@@ -1,0 +1,94 @@
+{% load static %}
+
+{% block styles %}
+<style>
+
+    #div_table_{{ id }} {
+        display: inline-block;
+        height: {% if hauteur %}{{ hauteur }}{% else %}200px{% endif %};
+        overflow-y: scroll;
+        width: 100%;
+        border: solid 1px #e5e5e5;
+    }
+    .ligne_regroupement {
+        background-color: #eaeaea;
+    }
+    .dark-mode .ligne_regroupement {
+        background-color: #eaeaea;
+    }
+
+</style>
+{% endblock styles %}
+
+<div id="div_table_{{ id }}">
+    <table id="table_{{ id }}" class="table table-bordered">
+        {% for dict_branche1 in liste_branches1 %}
+            <tr>
+                <td class="ligne_regroupement">
+                    <div>
+                        <input type="checkbox" class="check_branche1" data-idbranche1="{{ dict_branche1.pk }}">
+                        <span style="margin-left: 2px;margin-right:20px;font-weight: bold;">{{ dict_branche1.label }}</span>
+                    </div>
+                </td>
+            </tr>
+            {% for dict_branche2 in dict_branches2|get_item:dict_branche1.pk %}
+                <tr>
+                    <td>
+                        <div style="padding-left:20px;">
+                            <input name="{{ name }}" type="checkbox" class="check_branche2" data-idbranche1="{{ dict_branche1.pk }}" value="{{ dict_branche2.pk }}" {% if dict_branche2.pk in selections or coche_tout %}checked{% endif %}>
+                            {% if dict_branche2.pk in selections or coche_tout %}
+                                <script>$("#div_table_{{ id }} .check_branche1[data-idbranche1='{{ dict_branche1.pk }}']").prop("checked", true);</script>
+                            {% endif %}
+                            <span style="margin-left: 2px;margin-right:20px;">{{ dict_branche2.label }}</span>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+    </table>
+</div>
+
+
+<script>
+
+$(document).ready(function() {
+
+    var check_branche1_off_{{ id }} = false;
+    var check_branche2_off_{{ id }} = false;
+
+    // On check branche 1
+    $("#div_table_{{ id }} .check_branche1").on('change', function () {
+        if (check_branche1_off_{{ id }}) {return};
+        check_branche2_off_{{ id }} = true;
+        var etat = $(this).prop("checked");
+        $("#div_table_{{ id }} .check_branche2[data-idbranche1='" + this.dataset.idbranche1 + "']").each(function (index) {
+            if (etat) {
+                $(this).prop("checked", true);
+            } else {
+                $(this).prop("checked", false);
+            }
+        });
+        check_branche2_off_{{ id }} = false;
+    });
+
+    // On check branche 2
+    $("#div_table_{{ id }} .check_branche2").on('change', function () {
+        if (check_branche2_off_{{ id }}) {return};
+        check_branche1_off_{{ id }} = true;
+        var check = false;
+        $("#div_table_{{ id }} .check_branche2[data-idbranche1='" + this.dataset.idbranche1 + "']").each(function (index) {
+            if ($(this).prop("checked")) {
+                check = true;
+            }
+        });
+        if (check) {
+            $("#div_table_{{ id }} .check_branche1[data-idbranche1='" + this.dataset.idbranche1 + "']").prop("checked", true);
+        } else {
+            $("#div_table_{{ id }} .check_branche1[data-idbranche1='" + this.dataset.idbranche1 + "']").prop("checked", false);
+        }
+        check_branche1_off_{{ id }} = false;
+    });
+
+});
+
+</script>

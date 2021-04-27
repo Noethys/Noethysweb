@@ -1,0 +1,11 @@
+{% if messages %}
+
+     <script>
+        toastr.options = {"progressBar": false, "preventDuplicates": true};
+        {% for message in messages %}
+            toastr.{{ message.tags }}("{{ message }}");
+        {% endfor %}
+    </script>
+
+
+{% endif %}

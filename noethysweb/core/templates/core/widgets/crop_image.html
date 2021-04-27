@@ -1,0 +1,165 @@
+{% load static %}
+{% load embed %}
+
+
+{% block javascript %}
+    <script>
+
+        $(function () {
+
+            {# Ouverture de la modal cropper #}
+            $("#id_{{ name }}").change(function () {
+                if (this.files && this.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $("#image").attr("src", e.target.result);
+                        $("#modal_crop_image").modal("show");
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            {# Règlages de la modal cropper #}
+            var $image = $("#image");
+            var cropBoxData;
+            var canvasData;
+            $("#modal_crop_image").on("shown.bs.modal", function () {
+                $image.cropper({
+                    viewMode: 1,
+                    aspectRatio: {{ ratio }},
+                    minCropBoxWidth: {{ largeur_min }},
+                    minCropBoxHeight: {{ hauteur_min }},
+                    ready: function () {
+                        $image.cropper("setCanvasData", canvasData);
+                        $image.cropper("setCropBoxData", cropBoxData);
+                    }
+                });
+            }).on("hidden.bs.modal", function () {
+                cropBoxData = $image.cropper("getCropBoxData");
+                canvasData = $image.cropper("getCanvasData");
+                $image.cropper("destroy");
+            });
+
+            $("#bouton_mode_move").click(function () {
+                $image.cropper("setDragMode", "move");
+            });
+
+            $("#bouton_mode_crop").click(function () {
+                $image.cropper("setDragMode", "crop");
+            });
+
+            $("#bouton_zoom_avant").click(function () {
+                $image.cropper("zoom", 0.1);
+            });
+
+            $("#bouton_zoom_arriere").click(function () {
+                $image.cropper("zoom", -0.1);
+            });
+
+            $("#bouton_rotation_gauche").click(function () {
+                $image.cropper("rotate", -90);
+            });
+
+            $("#bouton_rotation_droite").click(function () {
+                $image.cropper("rotate", 90);
+            });
+
+            {# Récupère et stocke la taille et position de l'image recadrée #}
+            $("#bouton_valider_image").click(function () {
+                var cropData = $image.cropper("getData");
+                cropData["largeur"] = {{ largeur_min }};
+                cropData["hauteur"] = {{ hauteur_min }};
+                cropData["ratio"] = {{ ratio }};
+                $("#id_cropper_data").val(JSON.stringify(cropData));
+                $('#modal_crop_image').modal('hide');
+            });
+
+        });
+    </script>
+{% endblock %}
+
+
+{# Modal Recadrer l'image #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_crop_image{% endblock %}
+    {% block modal_titre %}Recadrer l'image{% endblock %}
+    {% block modal_classe %}modal-lg{% endblock %}
+    {% block modal_body %}
+        <img src="" id="image" style="max-width: 100%;">
+    <div class="modal-footer d-flex" style="padding-bottom: 0px;padding-left: 0px;padding-right: 0px;">
+
+        <div class="btn-group mr-auto" role="group">
+            <button type="button" id="bouton_mode_move" class="btn btn-default" title="Mode déplacement">
+                <span class="fa fa-arrows"></span>
+            </button>
+            <button type="button" id="bouton_mode_crop" class="btn btn-default" title="Mode recadrage">
+                <span class="fa fa-crop"></span>
+            </button>
+
+            <button type="button" id="bouton_zoom_avant" class="btn btn-default" title="Zoom avant">
+                <span class="fa fa-search-plus"></span>
+            </button>
+            <button type="button" id="bouton_zoom_arriere" class="btn btn-default" title="Zoom arrière">
+                <span class="fa fa-search-minus"></span>
+            </button>
+
+            <button type="button" id="bouton_rotation_gauche" class="btn btn-default" title="Rotation vers la gauche">
+                <span class="fa fa-rotate-left"></span>
+            </button>
+            <button type="button" id="bouton_rotation_droite" class="btn btn-default" title="Rotation vers la droite">
+                <span class="fa fa-rotate-right"></span>
+            </button>
+        </div>
+        <button type="button" id="bouton_valider_image" class="btn btn-primary"><i class="fa fa-check margin-r-5"></i>Valider</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban margin-r-5"></i>Annuler</button>
+    </div>
+    {% endblock %}
+
+{% endembed %}
+
+
+{# Affichage de l'image et case à cocher supprimer #}
+{% if value %}
+    <div>
+        <img class="img-fluid img-thumbnail" style="max-width: 250px;" src="{{ MEDIA_URL }}{{ value.url }}">
+    </div>
+    <input type="checkbox" name="{{name}}-clear" id="{{name}}-clear_id">
+    <label for="{{name}}-clear_id" style="margin-top: 10px;margin-bottom: 20px;">Effacer l'image actuelle</label>
+{% endif %}
+
+
+{# Sélection de l'image #}
+<div class="input-group">
+    <input id="nom_fichier" type="text" class="form-control" style="height: calc(2.25rem - 1px);" readonly>
+    <label class="input-group-append">
+        <span class="btn btn-default text-sm" title="Sélectionner une image" >
+            <i class="fa fa-folder-open-o margin-r-5"></i> Sélectionner une image
+            <input name="{{ name }}" id="{{ id }}" type="file" accept="image/*" style="display: none;">
+        </span>
+    </label>
+</div>
+
+
+<script>
+    $(function() {
+        // Affiche la liste des fichiers
+        $("#{{ id }}").on('change', function() {
+            $('#nom_fichier').val(this.files[0].name + " (" + formatBytes(this.files[0].size) + ")");
+        });
+
+        // Formate la taille des fichiers
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        };
+    });
+</script>
+
+
+
+
+

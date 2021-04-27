@@ -1,0 +1,26 @@
+{% load static %}
+
+{% block box_contenu %}
+
+    {% if erreurs_protection %}
+
+        <div class="alert alert-danger alert-dismissible">
+            <h5><i class="icon fa fa-ban"></i> Suppression impossible</h5>
+            La suppression de l'élément '{{ object }}' est impossible car il est rattaché aux données suivantes : {{ erreurs_protection }}.
+        </div>
+        <a class="btn btn-default float-right" href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{{ view.get_success_url }}{% endif %}"><i class='fa fa-reply margin-r-5'></i>Revenir à la page précédente</a>
+
+    {% else %}
+
+        <form method="post">{% csrf_token %}
+            <p>Voulez-vous vraiment supprimer l'élément '{{ object }}' ?</p><br>
+            <div class="pull-right">
+                <button type="submit" title="Supprimer" class='btn btn-warning'><i class="fa fa-trash margin-r-5"></i>Supprimer</button>
+                <input type='hidden' name='next' value='{{ request.GET.next }}'>
+                <a class="btn btn-danger" href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{{ view.get_success_url }}{% endif %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+            </div>
+        </form>
+
+    {% endif %}
+
+{% endblock %}

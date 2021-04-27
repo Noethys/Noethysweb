@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    {% block meta %}
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Noethys">
+    {% endblock meta %}
+
+    <title>Noethysweb | Accès interdit</title>
+
+    {% block styles %}
+        {% include 'core/styles.html' %}
+    {% endblock %}
+
+    {% block scripts %}
+        {% include 'core/scripts.html' %}
+    {% endblock %}
+
+    {% block extra_head %}
+    {% endblock %}
+
+</head>
+
+<body class="hold-transition login-page">
+
+    <section class="content">
+        <div class="error-page">
+            <h2 class="headline text-red" style="font-size: 90px;"> 500</h2>
+            <div class="error-content">
+                <h3><i class="fa fa-warning text-red"></i> Erreur.</h3>
+                <p>
+                    L'application a rencontré une erreur 500.
+                    <br>Vous pouvez signaler cette erreur à l'administrateur.
+                </p>
+                <p>
+                    Cliquez sur le bouton Retour pour revenir à la page précédente.
+                </p>
+            </div>
+        </div>
+    </section>
+
+</body>
+
+</html>

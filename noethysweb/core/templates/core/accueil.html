@@ -1,0 +1,173 @@
+{% extends "core/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+    .info-box-text {
+        font-weight: bold;
+    }
+    .info-box-number {
+        font-size: 12px;
+        font-weight: 400 !important;
+    }
+    .info-box .info-box-icon {
+        width: 80px;
+    }
+    </style>
+{% endblock styles %}
+
+{% block page %}
+
+    <div class="content-wrapper">
+
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0 text-dark">
+                            Tableau de bord
+                        </h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="{% url 'accueil' %}"><i class="fa fa-home"></i> Accueil</a></li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="content connectedSortable">
+            <div class="container-fluid">
+
+                {% block messages %}
+                    {% include 'core/messages.html' %}
+                {% endblock %}
+
+                {% block contenu_page %}
+
+                    <!-- Info boxes -->
+                    <div class="row">
+
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-red"><i class="fa fa-quote-right"></i></span>
+
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Citation</span>
+                                    <span class="info-box-number">{{ citation_texte }} &nbsp;<span style="font-size: 10px;color: grey;">{{ citation_auteur }}</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- fix for small devices only -->
+                        <div class="clearfix visible-sm-block"></div>
+
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-green"><i class="fa fa-smile-o"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Célébrations</span>
+                                    <span class="info-box-number">{{ celebrations }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-yellow"><i class="fa fa-birthday-cake"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Anniversaires du jour</span>
+                                    <span class="info-box-number">{{ anniversaires_aujourdhui }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-info"><i class="fa fa-birthday-cake"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Anniversaires de demain</span>
+                                    <span class="info-box-number">{{ anniversaires_demain }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {# Nouvelle version disponible #}
+                    {% if nouvelle_version %}
+                        <div class="alert alert-warning">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
+                            <h5><i class="icon fa fa-download"></i> Mise à jour</h5>
+                            Une nouvelle version de Noethysweb est disponible. <a href='{% url 'update' %}'>Cliquez ici pour l'installer maintenant.</a>
+                        </div>
+                    {% endif %}
+
+                    {# Mode démo #}
+                    {% if mode_demo %}
+                        <div class="card card-outline card-warning">
+                            <div class="ribbon-wrapper ribbon-lg">
+                                <div class="ribbon bg-warning">Démo</div>
+                            </div>
+                            <div class="card-header">
+                                <h3 class="card-title">Version démo de Noethysweb</h3>
+                            </div>
+                            <div class="card-body">
+                                Vous utilisez actuellement une version de démonstration de Noethysweb destinée à découvrir les fonctionnalités de l'application et à débusquer les bugs restants. Remarques :
+                                <ul>
+                                    <li>Seules les fonctionnalités de base sont actuellement disponibles ; de nouvelles fonctionnalités seront développées une fois la base stabilisée.</li>
+                                    <li>Toutes les données de ce fichier sont fictives. Ne saisissez aucune donnée personnelle, elle serait visible par les autres testeurs.</li>
+                                    <li>Merci de signaler les bugs rencontrés et suggestions sur le portail <a href="https://assisthys.noethysweb.com/" target="_blank">Assisthys</a>.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Suivi des consommations -->
+                    {% include "consommations/suivi_consommations.html" %}
+
+                    <!-- Suivi des inscriptions -->
+                    {% include "individus/suivi_inscriptions.html" %}
+
+
+                {% endblock contenu_page %}
+            </div>
+        </section>
+
+    </div>
+{% endblock page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/jquery-slimscroll/jquery.slimscroll.min.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+
+            // Active la slimscroll sur les petits cadres
+            $('.info-box-number').slimScroll({
+                height: '55px'
+            });
+
+            // Make the dashboard widgets sortable Using jquery UI
+            $('.connectedSortable').sortable({
+                containment         : $('section.content'),
+                placeholder         : 'sort-highlight',
+                connectWith         : '.connectedSortable',
+                handle              : '.box-header, .nav-tabs',
+                forcePlaceholderSize: true,
+                zIndex              : 999999
+            });
+            $('.connectedSortable .box-header, .connectedSortable .nav-tabs-custom').css('cursor', 'move');
+
+
+        });
+    </script>
+
+{% endblock scripts %}

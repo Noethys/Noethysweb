@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    {% block meta %}
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Noethys">
+    {% endblock meta %}
+
+    <link rel="shortcut icon" href="{% static 'images/icone.png' %}"/>
+
+    <title>Noethysweb | {% block page_titre %}{% endblock %}</title>
+
+    {% block styles %}
+        {% include 'core/styles.html' %}
+    {% endblock %}
+
+    {% block scripts %}
+        {% include 'core/scripts.html' %}
+    {% endblock %}
+
+    {% block extra_head %}
+    {% endblock %}
+
+</head>
+
+{% get_item_defaut options_interface "dark-mode" False as dark_mode %}
+{% get_item_defaut options_interface "masquer-sidebar" False as masquer_sidebar %}
+{% get_item_defaut options_interface "text-sm" True as text_sm %}
+
+<body class="sidebar-mini sidebar-mini-xs accent-lightblue border-bottom-0 control-sidebar-push-slide layout-fixed
+    {% if text_sm %}text-sm{% endif %}
+    {% if masquer_sidebar %}sidebar-collapse{% endif %}
+    {% if dark_mode %}dark-mode{% endif %}
+    " style="height: auto;"
+>
+
+{% block body %}
+    <div class="wrapper">
+
+        {% block nav_header %}
+            {% include 'core/header.html' %}
+        {% endblock %}
+
+        {% block nav_sidebar %}
+            {% include 'core/sidebar.html' %}
+        {% endblock %}
+
+        {% block page %}
+        {% endblock page %}
+
+        {% block nav_footer %}
+            {% include 'core/footer.html' %}
+        {% endblock %}
+
+        {% block nav_control-sidebar %}
+            {% include 'core/control-sidebar.html' %}
+        {% endblock %}
+
+    </div>
+{% endblock body %}
+
+{% block extra_foot %}
+{% endblock %}
+
+
+<script>
+
+    $(document).ready(function() {
+
+        // Enregistre le masquage du sidebar
+        $(".sidebar-toggle").on('click', function(e) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_memorise_option' %}",
+                data: {
+                    nom: "masquer-sidebar",
+                    valeur: !$("body").hasClass("sidebar-collapse"),
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                },
+                datatype: "json",
+            });
+        });
+    });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,823 @@
+[
+    {
+        "pk": 1,
+        "model": "core.CategorieMedicale",
+        "fields": {
+            "idcategorie": 1,
+            "nom": "Maladie"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "core.CategorieMedicale",
+        "fields": {
+            "idcategorie": 2,
+            "nom": "Alimentation"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "core.CategorieMedicale",
+        "fields": {
+            "idcategorie": 3,
+            "nom": "M\u00e9dicamentation"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "core.CategorieMedicale",
+        "fields": {
+            "idcategorie": 4,
+            "nom": "Allergie"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "core.CategorieMedicale",
+        "fields": {
+            "idcategorie": 5,
+            "nom": "Accident"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "core.CategorieMedicale",
+        "fields": {
+            "idcategorie": 6,
+            "nom": "Hospitalisation"
+        }
+    },
+    {
+        "pk": 7,
+        "model": "core.CategorieMedicale",
+        "fields": {
+            "idcategorie": 7,
+            "nom": "Op\u00e9ration"
+        }
+    },
+    {
+        "pk": 8,
+        "model": "core.CategorieMedicale",
+        "fields": {
+            "idcategorie": 8,
+            "nom": "Autre"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 1,
+            "nom": "Parent au foyer"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 2,
+            "nom": "Demandeur d'emploi"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 3,
+            "nom": "Profession lib\u00e9rale"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 4,
+            "nom": "Salari\u00e9 agricole"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 5,
+            "nom": "Ouvrier"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 6,
+            "nom": "Enseignant"
+        }
+    },
+    {
+        "pk": 7,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 7,
+            "nom": "Fonctionnaire territorial"
+        }
+    },
+    {
+        "pk": 8,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 8,
+            "nom": "Employ\u00e9"
+        }
+    },
+    {
+        "pk": 9,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 9,
+            "nom": "Commer\u00e7ant"
+        }
+    },
+    {
+        "pk": 10,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 10,
+            "nom": "Retrait\u00e9"
+        }
+    },
+    {
+        "pk": 11,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 11,
+            "nom": "Cadre"
+        }
+    },
+    {
+        "pk": 12,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 12,
+            "nom": "Exploitant agricole"
+        }
+    },
+    {
+        "pk": 13,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 13,
+            "nom": "Etudiant"
+        }
+    },
+    {
+        "pk": 14,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 14,
+            "nom": "Fonctionnaire d'\u00e9tat"
+        }
+    },
+    {
+        "pk": 15,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 15,
+            "nom": "Fonctionnaire hospitalier"
+        }
+    },
+    {
+        "pk": 16,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 16,
+            "nom": "Artisan"
+        }
+    },
+    {
+        "pk": 17,
+        "model": "core.CategorieTravail",
+        "fields": {
+            "idcategorie": 17,
+            "nom": "Chef d'entreprise"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "core.ModeReglement",
+        "fields": {
+            "idmode": 1,
+            "label": "Esp\u00e8ces",
+            "image": "modes_reglements/13d6374e-5f4c-4663-9e7e-1042de9dae32.jpeg",
+            "numero_piece": null,
+            "nbre_chiffres": null,
+            "frais_gestion": null,
+            "frais_montant": null,
+            "frais_pourcentage": null,
+            "frais_arrondi": null,
+            "frais_label": null,
+            "type_comptable": "caisse",
+            "code_compta": null
+        }
+    },
+    {
+        "pk": 2,
+        "model": "core.ModeReglement",
+        "fields": {
+            "idmode": 2,
+            "label": "Ch\u00e8que",
+            "image": "modes_reglements/af034d79-8ac5-452a-b05d-31ba7a65dbc0.jpeg",
+            "numero_piece": "NUM",
+            "nbre_chiffres": 7,
+            "frais_gestion": null,
+            "frais_montant": null,
+            "frais_pourcentage": null,
+            "frais_arrondi": null,
+            "frais_label": null,
+            "type_comptable": "banque",
+            "code_compta": null
+        }
+    },
+    {
+        "pk": 3,
+        "model": "core.ModeReglement",
+        "fields": {
+            "idmode": 3,
+            "label": "Ch\u00e8que vacances",
+            "image": "modes_reglements/811c61b5-555e-443e-9ca3-ca1e60e94e64.jpeg",
+            "numero_piece": null,
+            "nbre_chiffres": null,
+            "frais_gestion": "PRORATA",
+            "frais_montant": null,
+            "frais_pourcentage": 3.0,
+            "frais_arrondi": "centimesup",
+            "frais_label": "Frais de gestion Ch\u00e8ques Vacances",
+            "type_comptable": "banque",
+            "code_compta": null
+        }
+    },
+    {
+        "pk": 4,
+        "model": "core.ModeReglement",
+        "fields": {
+            "idmode": 4,
+            "label": "Bon CESU",
+            "image": "modes_reglements/2adec32a-2999-4a9b-9b7b-e69f123e69ec.jpeg",
+            "numero_piece": null,
+            "nbre_chiffres": null,
+            "frais_gestion": "PRORATA",
+            "frais_montant": null,
+            "frais_pourcentage": 5.0,
+            "frais_arrondi": "centimesup",
+            "frais_label": "Frais de gestion Bons CESU",
+            "type_comptable": "banque",
+            "code_compta": null
+        }
+    },
+    {
+        "pk": 5,
+        "model": "core.ModeReglement",
+        "fields": {
+            "idmode": 5,
+            "label": "Pr\u00e9l\u00e8vement automatique",
+            "image": "modes_reglements/3e2ee431-1248-486e-96fd-fe7de4b255cc.jpeg",
+            "numero_piece": null,
+            "nbre_chiffres": null,
+            "frais_gestion": null,
+            "frais_montant": null,
+            "frais_pourcentage": null,
+            "frais_arrondi": null,
+            "frais_label": null,
+            "type_comptable": "banque",
+            "code_compta": null
+        }
+    },
+    {
+        "pk": 1,
+        "model": "core.Emetteur",
+        "fields": {
+            "idemetteur": 1,
+            "mode": 2,
+            "nom": "Cr\u00e9dit Agricole",
+            "image": "emetteurs/d6dce9cc-a468-480d-b4a6-234539ccd644.jpeg"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "core.Emetteur",
+        "fields": {
+            "idemetteur": 2,
+            "mode": 2,
+            "nom": "Caisse d'\u00e9pargne",
+            "image": "emetteurs/77ee25cb-14ef-4e01-8f89-f472b7837edc.jpeg"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "core.Emetteur",
+        "fields": {
+            "idemetteur": 3,
+            "mode": 2,
+            "nom": "Banque C.I.O.",
+            "image": "emetteurs/a1550238-d76c-4680-b084-000d4582ddc0.jpeg"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "core.Emetteur",
+        "fields": {
+            "idemetteur": 4,
+            "mode": 2,
+            "nom": "Cr\u00e9dit Maritime",
+            "image": "emetteurs/08827858-b7e4-4a55-b3ea-9d4996c9d681.jpeg"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "core.Emetteur",
+        "fields": {
+            "idemetteur": 5,
+            "mode": 2,
+            "nom": "La Poste",
+            "image": "emetteurs/9f4269cf-da1c-4e5d-88f3-bc73316afbc2.jpeg"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "core.Emetteur",
+        "fields": {
+            "idemetteur": 6,
+            "mode": 2,
+            "nom": "Cr\u00e9dit Mutuel de Bretagne",
+            "image": "emetteurs/b512a2b5-e2ea-4553-a899-ca59580f8bb4.jpeg"
+        }
+    },
+    {
+        "pk": 7,
+        "model": "core.Emetteur",
+        "fields": {
+            "idemetteur": 7,
+            "mode": 2,
+            "nom": "Soci\u00e9t\u00e9 G\u00e9n\u00e9rale",
+            "image": "emetteurs/1ce956a2-0257-4cfc-9405-6b6d0759acad.jpeg"
+        }
+    },
+    {
+        "pk": 8,
+        "model": "core.Emetteur",
+        "fields": {
+            "idemetteur": 8,
+            "mode": 2,
+            "nom": "Tr\u00e9sor Public",
+            "image": "emetteurs/ede988e8-dcf4-41c3-bbe6-09e062f0ee7a.jpeg"
+        }
+    },
+    {
+        "pk": 9,
+        "model": "core.Emetteur",
+        "fields": {
+            "idemetteur": 9,
+            "mode": 2,
+            "nom": "BNP Paribas",
+            "image": "emetteurs/480c1070-051f-44be-9dcc-4ec85953ce44.jpeg"
+        }
+    },
+    {
+        "pk": 10,
+        "model": "core.Emetteur",
+        "fields": {
+            "idemetteur": 10,
+            "mode": 2,
+            "nom": "Banque Populaire",
+            "image": "emetteurs/17d09f74-49d6-47ae-9bcd-d733c062cac3.jpeg"
+        }
+    },
+    {
+        "pk": 11,
+        "model": "core.Emetteur",
+        "fields": {
+            "idemetteur": 11,
+            "mode": 2,
+            "nom": "L.C.L.",
+            "image": "emetteurs/22413446-b065-4e41-b227-5279b4219df8.jpeg"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 1,
+            "ordre": 1,
+            "nom": "Toute Petite Section",
+            "abrege": "TPS"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 2,
+            "ordre": 2,
+            "nom": "Petite Section",
+            "abrege": "PS"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 3,
+            "ordre": 3,
+            "nom": "Moyenne Section",
+            "abrege": "MS"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 4,
+            "ordre": 4,
+            "nom": "Grande Section",
+            "abrege": "GS"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 5,
+            "ordre": 5,
+            "nom": "Cours Pr\u00e9paratoire",
+            "abrege": "CP"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 6,
+            "ordre": 6,
+            "nom": "Cours El\u00e9mentaire 1\u00e8re ann\u00e9e",
+            "abrege": "CE1"
+        }
+    },
+    {
+        "pk": 7,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 7,
+            "ordre": 7,
+            "nom": "Cours El\u00e9mentaire 2\u00e8me ann\u00e9e",
+            "abrege": "CE2"
+        }
+    },
+    {
+        "pk": 8,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 8,
+            "ordre": 8,
+            "nom": "Cours Moyen 1\u00e8re ann\u00e9e",
+            "abrege": "CM1"
+        }
+    },
+    {
+        "pk": 9,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 9,
+            "ordre": 9,
+            "nom": "Cours Moyen 2\u00e8me ann\u00e9e",
+            "abrege": "CM2"
+        }
+    },
+    {
+        "pk": 10,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 10,
+            "ordre": 10,
+            "nom": "6\u00e8me",
+            "abrege": "6\u00e8me"
+        }
+    },
+    {
+        "pk": 11,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 11,
+            "ordre": 11,
+            "nom": "5\u00e8me",
+            "abrege": "5\u00e8me"
+        }
+    },
+    {
+        "pk": 12,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 12,
+            "ordre": 12,
+            "nom": "4\u00e8me",
+            "abrege": "4\u00e8me"
+        }
+    },
+    {
+        "pk": 13,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 13,
+            "ordre": 13,
+            "nom": "3\u00e8me",
+            "abrege": "3\u00e8me"
+        }
+    },
+    {
+        "pk": 14,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 14,
+            "ordre": 14,
+            "nom": "2nde",
+            "abrege": "2nde"
+        }
+    },
+    {
+        "pk": 15,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 15,
+            "ordre": 15,
+            "nom": "1\u00e8re",
+            "abrege": "1\u00e8re"
+        }
+    },
+    {
+        "pk": 16,
+        "model": "core.NiveauScolaire",
+        "fields": {
+            "idniveau": 16,
+            "ordre": 16,
+            "nom": "Terminale",
+            "abrege": "TERM"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "core.Regime",
+        "fields": {
+            "idregime": 1,
+            "nom": "R\u00e9gime g\u00e9n\u00e9ral"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "core.Regime",
+        "fields": {
+            "idregime": 2,
+            "nom": "R\u00e9gime agricole"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "core.Caisse",
+        "fields": {
+            "idcaisse": 1,
+            "nom": "CAF",
+            "regime": 1
+        }
+    },
+    {
+        "pk": 2,
+        "model": "core.Caisse",
+        "fields": {
+            "idcaisse": 2,
+            "nom": "MSA",
+            "regime": 2
+        }
+    },
+    {
+        "pk": 1,
+        "model": "core.TypeQuotient",
+        "fields": {
+            "idtype_quotient": 1,
+            "nom": "CAF"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "core.Ferie",
+        "fields": {
+            "idferie": 1,
+            "type": "fixe",
+            "nom": "No\u00ebl",
+            "jour": 25,
+            "mois": 12,
+            "annee": 0
+        }
+    },
+    {
+        "pk": 2,
+        "model": "core.Ferie",
+        "fields": {
+            "idferie": 2,
+            "type": "fixe",
+            "nom": "L'Armistice 1918",
+            "jour": 11,
+            "mois": 11,
+            "annee": 0
+        }
+    },
+    {
+        "pk": 3,
+        "model": "core.Ferie",
+        "fields": {
+            "idferie": 3,
+            "type": "fixe",
+            "nom": "La Toussaint",
+            "jour": 1,
+            "mois": 11,
+            "annee": 0
+        }
+    },
+    {
+        "pk": 4,
+        "model": "core.Ferie",
+        "fields": {
+            "idferie": 4,
+            "type": "fixe",
+            "nom": "L'Assomption",
+            "jour": 15,
+            "mois": 8,
+            "annee": 0
+        }
+    },
+    {
+        "pk": 5,
+        "model": "core.Ferie",
+        "fields": {
+            "idferie": 5,
+            "type": "fixe",
+            "nom": "F\u00eate Nationale",
+            "jour": 14,
+            "mois": 7,
+            "annee": 0
+        }
+    },
+    {
+        "pk": 6,
+        "model": "core.Ferie",
+        "fields": {
+            "idferie": 6,
+            "type": "fixe",
+            "nom": "Victoire 1945",
+            "jour": 8,
+            "mois": 5,
+            "annee": 0
+        }
+    },
+    {
+        "pk": 7,
+        "model": "core.Ferie",
+        "fields": {
+            "idferie": 7,
+            "type": "fixe",
+            "nom": "F\u00eate du Travail",
+            "jour": 1,
+            "mois": 5,
+            "annee": 0
+        }
+    },
+    {
+        "pk": 8,
+        "model": "core.Ferie",
+        "fields": {
+            "idferie": 8,
+            "type": "fixe",
+            "nom": "Jour de l'an",
+            "jour": 1,
+            "mois": 1,
+            "annee": 0
+        }
+    },
+    {
+        "pk": 1,
+        "model": "core.TypeMaladie",
+        "fields": {
+            "idtype_maladie": 1,
+            "nom": "Dipht\u00e9rie",
+            "vaccin_obligatoire": 1
+        }
+    },
+    {
+        "pk": 2,
+        "model": "core.TypeMaladie",
+        "fields": {
+            "idtype_maladie": 2,
+            "nom": "T\u00e9tanos",
+            "vaccin_obligatoire": 1
+        }
+    },
+    {
+        "pk": 3,
+        "model": "core.TypeMaladie",
+        "fields": {
+            "idtype_maladie": 3,
+            "nom": "Polyomy\u00e9lite",
+            "vaccin_obligatoire": 1
+        }
+    },
+    {
+        "pk": 4,
+        "model": "core.TypeMaladie",
+        "fields": {
+            "idtype_maladie": 4,
+            "nom": "Coqueluche",
+            "vaccin_obligatoire": 0
+        }
+    },
+    {
+        "pk": 5,
+        "model": "core.TypeMaladie",
+        "fields": {
+            "idtype_maladie": 5,
+            "nom": "H\u00e9patite B",
+            "vaccin_obligatoire": 0
+        }
+    },
+    {
+        "pk": 1,
+        "model": "core.TypeSieste",
+        "fields": {
+            "idtype_sieste": 1,
+            "nom": "Fait la sieste"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "core.TypeSieste",
+        "fields": {
+            "idtype_sieste": 2,
+            "nom": "Fait un temps calme"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "core.TypeSieste",
+        "fields": {
+            "idtype_sieste": 3,
+            "nom": "Fait la sieste uniquement si fatigue"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "core.TypeVaccin",
+        "fields": {
+            "idtype_vaccin": 1,
+            "nom": "1. DTpolio - 1\u00e8re injection (\u00e0 2 mois)",
+            "duree_validite": "j0-m2-a0"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "core.TypeVaccin",
+        "fields": {
+            "idtype_vaccin": 2,
+            "nom": "2. DTpolio - 2\u00e8me injection (\u00e0 3 mois)",
+            "duree_validite": "j0-m2-a0"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "core.TypeVaccin",
+        "fields": {
+            "idtype_vaccin": 3,
+            "nom": "3. DTpolio - 3\u00e8me injection (\u00e0 6 mois)",
+            "duree_validite": "j0-m22-a0"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "core.TypeVaccin",
+        "fields": {
+            "idtype_vaccin": 4,
+            "nom": "4. DTpolio - 1er rappel (\u00e0 1 an et demi)",
+            "duree_validite": "j0-m0-a5"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "core.TypeVaccin",
+        "fields": {
+            "idtype_vaccin": 5,
+            "nom": "5. DTpolio - 2\u00e8me rappel (\u00e0 6 ans)",
+            "duree_validite": "j0-m0-a6"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "core.TypeVaccin",
+        "fields": {
+            "idtype_vaccin": 6,
+            "nom": "6. DTpolio - 3\u00e8me rappel avec Coq. (\u00e0 11 ans)",
+            "duree_validite": "j0-m0-a7"
+        }
+    }
+]

@@ -1,0 +1,16 @@
+{% load static %}
+
+{% block box_contenu %}
+    <form method="post">{% csrf_token %}
+        <p>Voulez-vous vraiment dupliquer l'élément '{{ object }}' ?</p>
+
+        <br>
+
+        <div class="pull-right">
+            <button type="submit" class='btn btn-primary' name="dupliquer"><i class="fa fa-copy margin-r-5"></i>Dupliquer</button>
+            <button type="submit" class='btn btn-primary' name="dupliquer_ouvrir"><i class="fa fa-copy margin-r-5"></i>Dupliquer & ouvrir</button>
+            <a type="button" class="btn btn-danger" href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{{ view.get_success_url }}{% endif %}"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
+        </div>
+
+    </form>
+{% endblock %}

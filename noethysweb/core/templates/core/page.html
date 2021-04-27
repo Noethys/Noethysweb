@@ -1,0 +1,97 @@
+{% extends "core/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+{% endblock styles %}
+
+{% block page %}
+
+    <div class="content-wrapper">
+
+        {% block content_header %}
+
+            <div class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1 class="m-0 text-dark">
+                                {{ page_titre }}
+                                <small>{% block page_description %}{% endblock %}</small>
+                            </h1>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <li class="breadcrumb-item"><a href="{% url 'accueil' %}"><i class="fa fa-home"></i> Accueil</a></li>
+                                {% for item in breadcrumb %}
+                                    {% if item.code %}
+                                        <li class="breadcrumb-item"><a href="{{ item.GetUrl }}">{{ item.titre }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {% endblock %}
+
+        <section class="content">
+            <div class="container-fluid">
+
+                {% block messages %}
+                    {% include 'core/messages.html' %}
+                {% endblock %}
+
+                {% block contenu_page %}
+                {% endblock contenu_page %}
+
+                {% if afficher_menu_brothers and menu_brothers %}
+
+                    <style>
+                        .menu_brothers {
+                            background: #f4f4f4;
+                            padding: 10px;
+                        }
+                        .dark-mode .menu_brothers {
+                            background: #343a40;
+                        }
+                        .menu_brothers ul {
+                            margin-bottom: 0px;
+                        }
+                        .menu_brothers li {
+                            display: inline;
+                            white-space: nowrap;
+                            margin-right: 20px;
+                        }
+                    </style>
+
+                    <div class="card card-solid">
+                        <div class="card-body menu_brothers">
+                            <div style="color: #b4b4b4;margin-bottom: 5px;">
+                                <i class="fa fa-link"></i> Rubriques associées
+                            </div>
+                            <div>
+                                <ul class="list-unstyled">
+                                    {% for item in menu_brothers %}
+                                        <li><a href="{{ item.GetUrl }}"><i class="fa fa-{{ item.icone }}"></i> {{ item.titre }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+            </div>
+        </section>
+
+    </div>
+{% endblock page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+{% endblock scripts %}

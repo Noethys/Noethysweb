@@ -1,0 +1,143 @@
+{% load static %}
+{% load embed %}
+
+<div class="input-group">
+    {% if icon %}
+        <div class="input-group-prepend">
+            <i class="fa {{ icon }} input-group-text"></i>
+        </div>
+    {% endif %}
+    <select id="{{ id }}" name="{{ name }}" data-minimum-input-length="0" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2">
+        {% for choix in choices %}
+            <option value="{{ choix.0 }}" {% if value == choix.0 %}selected{% endif %}>{{ choix.1 }}</option>
+        {% endfor %}
+    </select>
+    <div class="input-group-append">
+        <button id="{{ id }}_bouton_ajouter" title="Ajouter" class="btn btn-default input-group-text" type="button"><i class="fa fa-plus"></i></button>
+        <button id="{{ id }}_bouton_modifier" title="Modifier" class="btn btn-default input-group-text" type="button"><i class="fa fa-pencil"></i></button>
+        <button id="{{ id }}_bouton_supprimer" title="Supprimer" class="btn btn-default input-group-text" type="button"><i class="fa fa-trash"></i></button>
+    </div>
+</div>
+
+
+{# Modal de modification d'un élément #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}{{ id }}_modal_modification{% endblock %}
+    {% block modal_titre %}{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+        <input type="hidden" id="{{ id }}_hidden_id" value=""/>
+
+        <div class="controls">
+            <label for="{{ id }}_champ_saisie" class="col-form-label">{{ textes.champ }}</label>
+            <input id="{{ id }}_champ_saisie" class="form-control" maxlength="300">
+        </div>
+
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <input type="submit" value="Valider" class="btn btn-primary" id="{{ id }}_bouton_valider"/>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+
+    {% endblock %}
+{% endembed %}
+
+<script>
+
+    $(document).ready(function() {
+        $('#{{ id }}_modal_modification').on('shown.bs.modal', function () {
+            $("#{{ id }}_champ_saisie").focus();
+        });
+
+        $('#{{ id }}_modal_modification').on('keypress', function(e) {
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                $('#{{ id }}_bouton_valider').click();
+            };
+        });
+
+        // Ajouter un élément
+        $("#{{ id }}_bouton_ajouter").on("click",function(event){
+            $('#{{ id }}_champ_saisie').val("");
+            $('#{{ id }}_hidden_id').val("");
+            $('#{{ id }}_modal_modification .modal-title').html('{{ textes.ajouter }}');
+            $('#{{ id }}_modal_modification').modal('show');
+        });
+
+        // Modifier un élément
+        $("#{{ id }}_bouton_modifier").on("click",function(event){
+            var selection = $('#{{ id }}').find('option:selected');
+            if (selection.val() === '') {
+                toastr.error("Vous n'avez sélectionné aucun élément à modifier");
+                return false;
+            }
+            $('#{{ id }}_champ_saisie').val(selection.text());
+            $('#{{ id }}_hidden_id').val(selection.val());
+            $('#{{ id }}_modal_modification .modal-title').html('{{ textes.modifier }}');
+            $('#{{ id }}_modal_modification').modal('show');
+        });
+
+        // Supprimer un élément
+        $("#{{ id }}_bouton_supprimer").on("click",function(event){
+            var selection = $('#{{ id }}').find('option:selected');
+            if (selection.val() === '') {
+                toastr.error("Vous n'avez sélectionné aucun élément à supprimer");
+                return false;
+            }
+            appel_ajax("supprimer", selection.val(), null);
+        });
+
+        // Modal : Validation
+        $("#{{ id }}_bouton_valider").on('click', function(e) {
+            e.preventDefault();
+            var action = null;
+            valeur = $('#{{ id }}_champ_saisie').val();
+            id = $('#{{ id }}_hidden_id').val();
+            if (valeur === '') {
+                toastr.error("Veuillez saisir un nom valide");
+                return false;
+            }
+            if (id === '') {
+                action = "ajouter";
+            } else {
+                action = "modifier";
+            }
+            appel_ajax(action, id, valeur);
+        });
+
+        function appel_ajax(action="ajouter", id=null, valeur=null) {
+            $.ajax({
+                type: "POST",
+                url: "{% url url_ajax %}",
+                data: {
+                    action: action,
+                    id: id,
+                    valeur: valeur,
+                    donnees_extra: '{{ donnees_extra|escapejs }}',
+                },
+                datatype: "json",
+                success:function(data){
+                    if (data.action === "ajouter") {
+                        $("#{{ id }}").append("<option value='" + data.id + "'>" + data.valeur + "</option>");
+                        $("#{{ id }}").val(data.id);
+                    };
+                    if (data.action === "modifier") {
+                        $('#{{ id }}').find('option:selected').text(data.valeur);
+                        $("#{{ id }}").select2().trigger('change');
+                    };
+                    if (data.action === "supprimer") {
+                        $("#{{ id }} option[value='" + data.id + "']").remove();
+                    };
+                    $('#{{ id }}_modal_modification').modal('hide');
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+    });
+
+</script>
+

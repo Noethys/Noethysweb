@@ -1,0 +1,42 @@
+{% load static %}
+
+<input type="text" autocomplete="off" class="{{ class }}" data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}" value="{{ value }}" />
+
+<script>
+    var TabSpec = {"à":"a","á":"a","â":"a","ã":"a","ä":"a","å":"a","ò":"o","ó":"o","ô":"o","õ":"o","ö":"o","ø":"o","è":"e","é":"e","ê":"e","ë":"e","ç":"c","ì":"i","í":"i","î":"i","ï":"i","ù":"u","ú":"u","û":"u","ü":"u","ÿ":"y","ñ":"n"};
+    function replaceSpec(Texte){
+        var reg=/[àáäâèéêëçìíîïòóôõöøùúûüÿñ]/gi;
+        return Texte.replace(reg,function(){ return TabSpec[arguments[0].toLowerCase()];}).toLowerCase();
+        }
+
+    $(function () {
+        $("#{{ id }}").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "https://api-adresse.data.gouv.fr/search/?postcode="+$("input[id='{{ id }}']").val()+"&limit=7",
+                    data: { q: request.term },
+                    dataType: "json",
+                    success: function (data) {
+                        var postcodes = [];
+                        response($.map(data.features, function (item) {
+                            // Ici on est obligé d'ajouter les CP dans un array pour ne pas avoir plusieurs fois le même
+                            var nom_ville = replaceSpec(item.properties.city).toUpperCase();
+                            var label = item.properties.postcode + " - " + nom_ville;
+                            if ($.inArray(label, postcodes) == -1) {
+                                postcodes.push(label);
+                                return { label: label,
+                                         city: nom_ville,
+                                         value: item.properties.postcode
+                                };
+                            }
+                        }));
+                    }
+                });
+            },
+            // On remplit aussi la ville
+            select: function(event, ui) {
+                $('#{{ id_ville }}').val(ui.item.city.toUpperCase());
+            }
+        });
+});
+</script>

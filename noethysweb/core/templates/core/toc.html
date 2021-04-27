@@ -1,0 +1,44 @@
+{% extends "core/page.html" %}
+{% load static %}
+{% load embed %}
+
+{% block titre_page %}{{ titre_page }}{% endblock titre_page %}
+
+{% block styles %}
+    {{ block.super }}
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    <div class="row">
+    {% for liste in menu_actif.GetChildrenParts %}
+        <div class="col-md-6">
+            {% for submenu in liste %}
+                {% if submenu.HasChildren %}
+                    <div class="card card-solid">
+                        {% if submenu.titre %}
+                            <div class="card-header">
+                                <h3 class="card-title">{{ submenu.titre }}</h3>
+                            </div>
+                        {% endif %}
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                {% for item in submenu.GetChildren %}
+                                    <a class="list-group-item list-group-item-action {% if mode_demo and not item.compatible_demo %}disabled{% endif %}" href="{{ item.GetUrl }}">
+                                        <i class="fa fa-{{ item.icone }} mr-1"></i> {{ item.titre }} {% if mode_demo and not item.compatible_demo %}<small class="badge badge-warning"><i class="fa fa-lock"></i> Mode démo</small>{% endif %}
+                                    </a>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+    </div>
+
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+{% endblock scripts %}

@@ -1,0 +1,235 @@
+{% load static %}
+
+{% block styles %}
+{#<link rel="stylesheet" type="text/css" href="{% static 'lib/bootstrap3/css/bootstrap.min.css' %}">#}
+<link rel="stylesheet" type="text/css" href="{% static 'lib/font-awesome/css/font-awesome.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'lib/adminlte3/css/adminlte.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'lib/conflicts/conflicts.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'lib/toastr/toastr.min.css' %}" >
+{#<link rel="stylesheet" type="text/css" href="{% static 'lib/bootstrap4/css/custom.css' %}">#}
+{#<link rel="stylesheet" type="text/css" href="{% static 'lib/bootstrap4/css/custom3.min.css' %}">#}
+
+{{ form.media.css }}
+
+
+<style type="text/css">
+    fieldset legend {
+        display: block;
+        width: 100%;
+        padding: 5px;
+        margin-bottom: 20px;
+        font-size: 12px;
+        line-height: inherit;
+        color: #333;
+        border: 0;
+        background-color: #f1f0f0;
+        text-transform: uppercase;
+    }
+    .largeur_pleine .select2-container {
+        width: 100% !important;
+    }
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #ccc !important;
+        border-radius: 0px !important;
+        padding-left: 10px !important;
+    }
+    .select2-container .select2-selection--single {
+        height: 35px !important;
+    }
+    .select2-container--default .select2-selection--multiple {
+        border: 1px solid #ccc !important;
+        border-radius: 0px !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #3c8dbc !important;
+        border-color: #367fa9!important;
+        padding: 1px 10px!important;
+        color: #fff!important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        margin-right: 5px !important;
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .checkbox label, .radio label {
+        padding-left: 0px;
+    }
+
+
+    {# Affichage des inline radios #}
+    .radio-inline {
+        padding-left: 0px;
+    }
+    .iradio_minimal-blue {
+        margin-right: 5px;
+    }
+
+    {# Affichage des inline checkbox #}
+    .checkbox-inline.checkbox-inline, .radio-inline.radio-inline {
+        margin-left: 0px;
+        margin-right: 5px;
+    }
+    .checkbox-inline {
+        padding-left: 0px;
+    }
+    .icheckbox_minimal-blue {
+        margin-right: 5px;
+    }
+
+    {# Affiche correctement le sous-titre d'un menu #}
+    .dropdown-header {
+        margin-top: 0px;
+        margin-bottom: 0px;
+        margin-left: 0px;
+        text-align: left;
+    }
+
+    {# Affichage d'une coche dans les menus popup #}
+    .menu-checked::before {
+        position: absolute;
+        left: .2rem;
+        content: '✓';
+        font-weight: 600;
+    }
+
+    .datatable th.select-checkbox {
+        width: 8%;
+    }
+    .datatable th {
+        text-align: center;
+    }
+
+    .form-horizontal .checkbox, .form-horizontal .checkbox-inline, .form-horizontal .radio, .form-horizontal .radio-inline {
+        padding-top: 0px;
+    }
+
+    .commandes {
+        margin-bottom: 25px;
+        margin-top: -2px;
+    }
+    .commandes > .btn {
+        margin-top: 2px;
+    }
+    .margin-r-5 {
+        margin-right: 5px;
+    }
+
+    .breadcrumb {
+        font-size: .775rem !important;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    .card-header {
+        padding: 12px;
+    }
+    .card-body {
+        padding: 12px;
+    }
+    a {
+        color: #3c8dbc;
+    }
+
+    {# liste de commandes #}
+    .dark-mode .widget-user-2 .nav li {
+        background-color: #343a40;
+    }
+    .dark-mode .widget-user-2 .nav li a {
+        color: #fff;
+    }
+    .widget-user-2 .nav li {
+        background-color: #fff;
+        color: #0a0a0a;
+    }
+    .widget-user-2 .nav a:hover {
+        text-decoration: none;
+    }
+    .widget-user-2 .nav a:hover {
+        text-decoration: none;
+    }
+    .widget-user-2 .nav > li > a {
+        border-left: 3px solid transparent;
+        color: #0a0a0a;
+    }
+    .widget-user-2 .nav > li > a > i {
+        color: #3c8dbc;
+    }
+    .widget-user-2 .nav > li.active > a  {
+        border-left-color: #3c8dbc;
+        font-weight: 600;
+    }
+
+    .form-control {
+        font-size: 0.875rem;
+    }
+
+    .caracteristiques {
+        margin: 0px;
+    }
+
+    @media (min-width: 768px) {
+        .col-form-label {
+            text-align: right;
+        }
+    }
+
+    label {
+        font-weight: 500 !important;
+    }
+    .datepicker {
+        z-index: 99999 !important;
+    }
+
+    {# Listes de commandes #}
+    .list-group a {
+        padding: 8px 12px;
+        color: #0a0a0a !important;
+    }
+    .dark-mode .list-group a {
+        color: #b5b5b5 !important;
+    }
+    .list-group a > i {
+        color: #3c8dbc;
+    }
+
+    {# Commandes onglet #}
+    .widget-user-2 .list-group a {
+        padding: 6px 12px;
+        border-left: 3px solid transparent;
+    }
+    .widget-user-2 .item_actif  {
+        border-left: 3px solid #3c8dbc !important;
+        font-weight: 600 !important;
+    }
+    .widget-user-2 .list-group a > i {
+        color: #3c8dbc;
+    }
+
+    .list-unstyled {
+        margin-bottom: 0px;
+    }
+
+    .dropdown-menu a {
+        color: #0a0a0a !important;
+    }
+    .dark-mode .dropdown-menu a {
+        color: #ffffff !important;
+    }
+    .navbar-nav>.user-menu .user-image {
+        height: 1.8rem;
+        margin-top: -5px;
+        width: 1.8rem;
+    }
+
+    .error-page {
+        margin: 50px auto 0;
+    }
+
+</style>
+
+
+
+{% endblock %}

@@ -1,0 +1,19 @@
+<table id="table_exemple" class="display custom-datatable table table-striped table-bordered" style="width:100%">
+    <thead>
+        <tr>
+            {% for colonne in datatable.colonnes %}
+                <th>{{ colonne.label }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for ligne in datatable.lignes %}
+            <tr>
+            {% for valeur in ligne %}
+                <td>{{ valeur|safe }}</td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+

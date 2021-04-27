@@ -1,0 +1,27 @@
+{% load static %}
+
+{% block scripts %}
+<script src="{% static "lib/jquery/jquery.min.js" %}"></script>
+<script src="{% static "lib/jqueryui/jquery-ui.min.js" %}"></script>
+
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+{% comment %}<script>
+    $.widget.bridge('uibutton', $.ui.button);
+</script>{% endcomment %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="{% static "lib/bootstrap4/js/bootstrap.min.js" %}"></script>
+<script src="{% static "lib/adminlte3/js/adminlte.min.js" %}"></script>
+{#<script src="{% static 'lib/icheck/icheck.min.js' %}"></script>#}
+<script src="{% static 'lib/toastr/toastr.min.js' %}"></script>
+
+<script>
+// Ajuste les options de toastr
+toastr.options = {
+    "preventDuplicates": true,
+};
+</script>
+
+{{ form.media.js }}
+
+{% endblock %}

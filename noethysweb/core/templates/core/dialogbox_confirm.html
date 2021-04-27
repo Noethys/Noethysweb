@@ -1,0 +1,59 @@
+{% load static %}
+{% load embed %}
+
+
+{% comment %}
+{# Exemple d'utilisation : #}
+{% embed "core/dialogbox_confirm.html" with id="envoyer_email" titre="Envoyer les codes internet par Email" message="Confirmez-vous le transfert des codes internet vers l'éditeur d'emails ?" label_bouton="Transférer" url_exec="ajax_comptes_internet_email" %}{% endembed %}
+{% endcomment %}
+
+<script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+
+<script>
+
+    function {{ id }}() {
+        var dialog_{{ id }} = bootbox.dialog({
+            title: "{{ titre }}",
+            message: "{{ message }}",
+            buttons: {
+                ok: {
+                    label: "<i class='fa fa-check'></i> {{ label_bouton }}",
+                    className: 'btn-primary',
+                    callback: function(){
+                        bootbox.dialog({
+                            message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> L'opération peut durer plusieurs minutes. Veuillez patienter...</p>",
+                            closeButton: false
+                        });
+                        exec_{{ id }}(dialog_{{ id }});
+                    }
+                },
+                cancel: {
+                    label: "<i class='fa fa-ban'></i> Annuler",
+                    className: 'btn-danger',
+                }
+            }
+        });
+
+    };
+
+    // Envoyer email
+    function exec_{{ id }}(dialogbox) {
+        $.ajax({
+            type: "POST",
+            url: "{% url url_exec %}",
+            data: {
+                coches: JSON.stringify(get_coches()),
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+            datatype: "json",
+            success: function(data){
+                window.location.href = data.url;
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+                dialogbox.modal('hide');
+            }
+        })
+    };
+
+</script>

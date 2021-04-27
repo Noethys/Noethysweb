@@ -1,0 +1,171 @@
+<script>
+
+var multidate = {% if multidate %}true{% else %}false{% endif %};
+
+function init_datepicker() {
+
+    {% include 'core/csrftoken.html' %}
+
+    $.ajax({
+        type: "POST",
+        url: "{% url 'ajax_get_calendrier' %}",
+        datatype: "json",
+        success:function(data){
+            maj_datepicker(data);
+            {% if dates %}
+                var dates = [];
+                {% for date in dates %}
+                    dates.push(new Date("{{ date }}"));
+                {% endfor %}
+                $('.datepickerwidget').datepicker('setDates', dates);
+            {% endif %}
+        }
+    })
+}
+
+$(function () {
+
+    // Initialisation du datepicker
+    init_datepicker()
+
+    // Boutons changement de date
+    function change_jour(valeur) {
+        var d = $("#{{ id }}").datepicker('getDate');
+        d.setDate(d.getDate() + valeur);
+        $("#{{ id }}").datepicker("setDate", d);
+    }
+    $("#datepicker_moins_{{ id }}").click(function() {
+        change_jour(-1);
+    });
+    $("#datepicker_plus_{{ id }}").click(function() {
+        change_jour(+1);
+    });
+
+    {% if afficher_check %}
+        // On radio change
+        $('#checkbox_{{ id }}').on('change', function(){
+            if ($("#checkbox_{{ id }}").prop("checked")) {
+                $("#{{ id }}").prop('disabled', false);
+                $('input[name=checkbox_{{ name }}]').val("false");
+            } else {
+                $("#{{ id }}").prop('disabled', true);
+                $('input[name=checkbox_{{ name }}]').val("true");
+            };
+        });
+        $('#checkbox_{{ id }}').trigger('change');
+    {% endif %}
+
+});
+
+function maj_datepicker(data){
+    $('.datepickerwidget').datepicker({
+        autoclose: true,
+        todayBtn: "linked",
+        language: "fr",
+        todayHighlight: true,
+        multidate: multidate,
+        multidateSeparator: ";",
+        beforeShowDay: function (date) {
+            var date_fixe = moment(date).format('YYYY-MM-DD'); // jQuery.datepicker.formatDate('yy-mm-dd', date);
+            var date_variable = moment(date).format('0-MM-DD'); // jQuery.datepicker.formatDate('0-mm-dd', date);
+
+            // Jours fériés
+            if ((data.feries.hasOwnProperty(date_fixe)) || (data.feries.hasOwnProperty(date_variable))) {
+                return "calendrier_feries";
+            }
+            // Week-ends
+            if (date.getDay() == 0 || date.getDay() == 6) {
+                return "calendrier_weekends";
+            }
+
+            // Vacances
+            for (var idvacance in data.vacances) {
+                var date_debut = new Date(data.vacances[idvacance].date_debut);
+                date_debut.setHours(0,0,0,0)
+                var date_fin = new Date(data.vacances[idvacance].date_fin);
+                date_fin.setHours(0,0,0,0)
+                if ((date >= date_debut) && (date <= date_fin)) {
+                    return "calendrier_vacances";
+                }
+            }
+        }
+
+    })};
+</script>
+
+<style>
+{% comment %}
+    .calendrier_vacances, .calendrier_feries, .calendrier_weekends {
+        border: solid !important;
+        border-width: 2px !important;
+        border-color: transparent !important;
+    }
+{% endcomment %}
+    .datepicker-inline {
+        width: 100%;
+    }
+    .datepickerwidget table {
+        width: 100%;
+    }
+    .datepickerwidget tr td {
+        border-radius: 0px !important;
+    }
+    .calendrier_vacances {
+        background-color: #fbffb8;
+    }
+    .dark-mode .calendrier_vacances {
+        background-color: #585a4b;
+    }
+    .calendrier_feries {
+        background-color: lightgrey;
+    }
+    .calendrier_weekends{
+        background-color: #f4f4f4;
+    }
+    .dark-mode .calendrier_weekends{
+        background-color: #414141;
+    }
+</style>
+
+{% if affichage_inline %}
+
+    <div class="datepickerwidget"></div>
+    <input type="text" name="{{ name }}" id="{{ id }}" value="" hidden/>
+    <script>
+    $(function () {
+        $('.datepickerwidget').on('changeDate', function (e) {
+            var dates = $('.datepickerwidget').datepicker("getDates");
+            var liste_dates = [];
+            dates.forEach(function(date) {
+                liste_dates.push(moment(date).format('YYYY-MM-DD'))
+            });
+            $("#{{ id }}").val(liste_dates.join(";"));
+        });
+    });
+    </script>
+
+{% else %}
+
+    <div class="input-group date">
+        <div class="input-group-prepend">
+            {% if afficher_check %}
+                <span class="input-group-text">
+                    <input name="checkbox_{{ name }}" type="text" value="{% if value %}true{% else %}false{% endif %}" hidden>
+                    <input id="checkbox_{{ id }}" type="checkbox" {% if value %}checked{% endif %}>
+                    {% if label_checkbox %}
+                        <span style="vertical-align: middle;margin-left: 5px;">{{ label_checkbox }}</span>
+                    {% endif %}
+                </span>
+            {% endif %}
+            <span class="input-group-text"><i class="fa {% if icon %}{{ icon }}{% else %}fa-calendar{% endif %}"></i></span>
+        </div>
+        <input type="text" autocomplete="off" placeholder="Sélectionner une date" class="{{ class }}" data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}" value="{{ value|date:djformat }}" {% if disabled %}disabled="disabled"{% endif %} {% if required %}required{% endif %}/>
+        {% if afficher_fleches %}
+            <div class="input-group-append">
+                <button id="datepicker_moins_{{ id }}" title="Sélectionner la veille" class="btn btn-default" type="button"><i class="fa fa-chevron-left"></i></button>
+                <button id="datepicker_plus_{{ id }}" title="Sélectionner le lendemain" class="btn btn-default" type="button"><i class="fa fa-chevron-right"></i></button>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+

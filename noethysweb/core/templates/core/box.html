@@ -1,0 +1,38 @@
+{% load static %}
+
+<div class="card {% block box_theme %}card-outline card-lightblue{% endblock %}">
+    {% if box_titre %}
+    <div class="card-header">
+        <h3 class="card-title">{% block box_titre %}{% endblock %}</h3>
+        <div class="card-tools">
+            {% block box_outils %}
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Diminuer">
+                    <i class="fa fa-minus"></i>
+                </button>
+            {% endblock %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card-body {% block card_body_classe %}{% endblock %}">
+
+        {% if box_introduction %}
+            <p id="box_introduction" style="margin-bottom: 16px;">
+                {% block box_introduction %}
+                {% endblock %}
+            </p>
+        {% endif %}
+
+        {% block box_contenu %}
+        {% endblock %}
+
+    </div>
+
+    {% if box_conclusion %}
+        <div class="card-footer">
+            {% block box_conclusion %}
+            {% endblock %}
+        </div>
+    {% endif %}
+</div>
+

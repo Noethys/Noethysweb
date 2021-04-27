@@ -1,0 +1,164 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .surlignage {
+            background-color: #ffffcf;
+        }
+        .dark-mode .surlignage {
+            background-color: #545454;
+        }
+
+        .table-hover th {
+            font-size: 12px;
+            font-weight: normal;
+            padding: 0px;
+            vertical-align: middle;
+            text-align: left;
+            color: #b1b1b1;
+            padding-left: 10px;
+            padding-bottom: 0px !important;
+            padding-top: 0px !important;
+            padding-right: 0px !important;
+        }
+        .table-hover td {
+            vertical-align: middle;
+        }
+    </style>
+{% endblock %}
+
+
+{% block contenu_page %}
+
+{# Commandes #}
+{% if data.commandes %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Commandes</h3><small class="text-gray" style="margin-left: 5px;">({{ data.commandes|length }} résultat{{ data.commandes|length|pluralize }})</small>
+        </div>
+        <div class="card-body table-responsive p-0">
+            <table class="table table-hover" style="cursor: pointer;">
+                <thead>
+                    <tr>
+                        <th>Commande</th>
+                        <th>Menu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data.commandes %}
+                        <tr data-url="{{ item.url }}" data-idfamille="">
+                            <td><i class="fa fa-{{ item.icone }}"></i> {{ item.titre|surligner:data.texte }}</td>
+                            <td>{% for menu in item.GetBreadcrumb|slice:":2" %} <i class="fa fa-caret-right text-gray"></i> &nbsp;{{ menu.titre }} &nbsp;{% endfor %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endif %}
+
+
+{# Individus #}
+{% if data.rattachements %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Individus</h3><small class="text-gray" style="margin-left: 5px;">({% if data.rattachements|length == 50 %}Limité à {% endif %}{{ data.rattachements|length }} résultat{{ data.rattachements|length|pluralize }})</small>
+        </div>
+        <div class="card-body table-responsive p-0">
+            <table class="table table-sm table-hover" style="cursor: pointer;">
+                <thead>
+                    <tr>
+                        <th>Individu</th>
+                        <th>Famille</th>
+                        <th>Profil</th>
+                        <th>Adresse</th>
+                        <th>Email</th>
+                        <th width="100px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data.rattachements %}
+                        <tr title="Cliquez pour ouvrir la fiche famille" data-url="{% url 'famille_resume' idfamille=item.famille_id %}" data-idfamille="{{ item.famille_id }}" data-nomfamille="{{ item.famille.nom }}">
+                            <td>{{ item.individu.Get_nom|surligner:data.texte }}</td>
+                            <td>{{ item.famille.nom|surligner:data.texte }}</td>
+                            <td>{% if item.categorie == 1 %}Responsable{% endif %}{% if item.titulaire %} titulaire{% endif %}{% if item.categorie == 2 %}Enfant{% endif %}{% if item.categorie == 3 %}Contact{% endif %}</td>
+                            <td>{{ item.individu.rue_resid|default:""|surligner:data.texte }} {{ item.individu.cp_resid|default:""|surligner:data.texte }} {{ item.individu.ville_resid|default:""|surligner:data.texte }}</td>
+                            <td>{{ item.individu.mail|default:""|surligner:data.texte }}</td>
+                            <td>
+                                <a type='button' title="Ouvrir la grille des consommations de {{ item.individu.prenom }}" class='btn btn-default btn-xs' href="{% url 'famille_consommations' item.famille.pk item.individu.pk %}"><i class="fa fa-fw fa-calendar"></i></a>
+                                <a type='button' title="Ouvrir la fiche individuelle de {{ item.individu.prenom }}" class='btn btn-default btn-xs' href="{% url 'individu_resume' item.famille.pk item.individu.pk %}"><i class="fa fa-fw fa-user"></i></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endif %}
+
+
+{# Payeurs #}
+{% if data.payeurs %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Payeurs</h3><small class="text-gray" style="margin-left: 5px;">({% if data.payeurs|length == 50 %}Limité à {% endif %}{{ data.payeurs|length }} résultat{{ data.payeurs|length|pluralize }})</small>
+        </div>
+        <div class="card-body table-responsive p-0">
+            <table class="table table-hover" style="cursor: pointer;">
+                <thead>
+                    <tr>
+                        <th>Payeur</th>
+                        <th>Famille</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data.payeurs %}
+                        <tr data-url="{% url 'famille_resume' idfamille=item.famille_id %}" data-idfamille="{{ item.famille_id }}" data-nomfamille="{{ item.famille.nom }}">
+                            <td>{{ item.nom|surligner:data.texte }}</td>
+                            <td>{{ item.famille.nom|surligner:data.texte }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endif %}
+
+{# Si recherche infructueuse #}
+{% if not data.rattachements and not data.payeurs and not data.commandes %}
+    Aucun résultat pour cette recherche.
+{% endif %}
+
+<script>
+$(document).ready(function() {
+    $('.table-hover tbody tr').click(function() {
+        var idfamille = $(this).data('idfamille');
+
+        {% include 'core/csrftoken.html' %}
+
+        // Mémorise la recherche dans l'historique
+        if(idfamille) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_memoriser_recherche' %}",
+                data: {
+                    "idfamille": idfamille,
+                    "url": $(this).data('url'),
+                    "nom_famille": $(this).data('nomfamille'),
+                },
+                datatype: "json",
+            });
+        };
+        // Redirige vers la page recherchée
+        window.location = $(this).data('url');
+    });
+});
+</script>
+
+{% endblock contenu_page %}

@@ -1,0 +1,17 @@
+<script>
+$(function () {
+    $(".timepickerwidget").timepicker({
+        showMeridian: false,
+        defaultTime: false
+    });
+});
+</script>
+
+<div class="bootstrap-timepicker">
+    <div class="input-group">
+        <div class="input-group-addon">
+            <i class="fa {% if icon %}{{ icon }}{% else %}fa-clock-o{% endif %}"></i>
+        </div>
+            <input type="text" class="{{ class }}" name="{{ name }}" format="{{format}}" id="{{ id }}" value="{{ value|date:djformat }}">
+    </div>
+</div>

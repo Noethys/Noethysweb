@@ -1,0 +1,16 @@
+{% load static %}
+
+<script type="text/javascript">
+    // Envoi des infos au datatable
+    var impression_titre = "{{ impression_titre }}";
+    var impression_introduction = "{{ impression_introduction }}";
+    var impression_conclusion = "{{ impression_conclusion }}";
+    var active_deplacements = {% if active_deplacements %}true{% else %}false{% endif %};
+    var colonne_regroupement = {% if colonne_regroupement %}{dataSrc: {{ colonne_regroupement }}}{% else %}false{% endif %};
+    var hauteur_table = "{{ hauteur_table }}";
+    var active_checkbox = {% if active_checkbox %}true{% else %}false{% endif %};
+    var bouton_supprimer = {% if bouton_supprimer == False %}false{% else %}true{% endif %};
+    var url_supprimer_plusieurs = "{% if url_supprimer_plusieurs %}{{ url_supprimer_plusieurs }}{% endif %}";
+    var liste_coches = {% if liste_coches %}{{ liste_coches }}{% else %}[]{% endif %};
+</script>
+

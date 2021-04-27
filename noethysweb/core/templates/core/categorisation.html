@@ -1,0 +1,25 @@
+{% load static %}
+
+
+{# Sélection de la catégorie #}
+<p>
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <span class="input-group-text">{{ label_categorie }}</span>
+        </div>
+        <select id="choix_categorie" class="form-control">
+            {% for code, label in liste_categories %}
+                <option {% if code == categorie %}selected{% endif %} value="{% url url_liste idactivite=idactivite categorie=code %}">{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</p>
+
+<script>
+    function On_change_categorie() {
+        window.location.href=$(this).val();
+    }
+    $(document).ready(function() {
+        $('#choix_categorie').change(On_change_categorie);
+    });
+</script>

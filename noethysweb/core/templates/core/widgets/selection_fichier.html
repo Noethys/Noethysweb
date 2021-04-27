@@ -1,0 +1,35 @@
+{% load static %}
+
+<div class="input-group">
+    <input id="nom_fichier" type="text" class="form-control" value="{{ value }}" style="height: calc(2.25rem - 1px);" readonly>
+    <label class="input-group-append">
+        <span class="btn btn-default" title="Sélectionner un fichier">
+            <i class="fa fa-folder-open-o margin-r-5"></i> Sélectionner un fichier
+            <input name="{{ name }}" id="{{ id }}" type="file" {% if accept %}accept="{{ accept }}"{% endif %} style="display: none;">
+        </span>
+    </label>
+</div>
+
+<script>
+    $(function() {
+        // Affiche la liste des fichiers
+        $("#{{ id }}").on('change', function() {
+            $('#nom_fichier').val(this.files[0].name + " (" + formatBytes(this.files[0].size) + ")");
+        });
+
+        // Formate la taille des fichiers
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        };
+    });
+</script>
+
+
+
+
+

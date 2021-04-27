@@ -1,0 +1,83 @@
+<aside class="control-sidebar control-sidebar-dark">
+    <div class="p-3 control-sidebar-content">
+
+        <h5>Options</h5>
+        <hr class="mb-2">
+
+{#        <h6>Affichage</h6>#}
+
+        {# Case Dark-mode #}
+        <div class="mb-4">
+            <input id="check_dark_mode" type="checkbox" value="1" class="mr-1">
+            <span>Dark mode</span>
+        </div>
+
+        {# Case text-sm #}
+        <div class="mb-4">
+            <input id="check_text_sm" type="checkbox" value="1" class="mr-1">
+            <span>Petite police de caractères</span>
+        </div>
+
+        {# Case sidebar-no-expand #}
+        <div class="mb-4">
+            <input id="check_sidebar_no_expand" type="checkbox" value="1" class="mr-1">
+            <span>Désactive l'agrandissement du menu latéral gauche lors du survol</span>
+        </div>
+
+
+        <script>
+        $(document).ready(function() {
+
+            function memorise_option(nom, valeur) {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_memorise_option' %}",
+                    data: {
+                        nom: nom,
+                        valeur: valeur,
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                    },
+                    datatype: "json",
+                });
+            }
+
+            {# Coche la case dark-mode #}
+            $("#check_dark_mode").prop('checked', $('body').hasClass('dark-mode'));
+            $("#check_dark_mode").on('click', function () {
+                if ($(this).is(':checked')) {
+                    $('body').addClass('dark-mode');
+                } else {
+                    $('body').removeClass('dark-mode');
+                };
+                memorise_option("dark-mode", $('body').hasClass('dark-mode'));
+            });
+
+            {# Coche la case text-sm #}
+            $("#check_text_sm").prop('checked', $('body').hasClass('text-sm'));
+            $("#check_text_sm").on('click', function () {
+                if ($(this).is(':checked')) {
+                    $('body').addClass('text-sm');
+                } else {
+                    $('body').removeClass('text-sm');
+                };
+                memorise_option("text-sm", $('body').hasClass('text-sm'));
+            });
+
+            {# Coche la case sidebar-no-expand #}
+            $("#check_sidebar_no_expand").prop('checked', $('.main-sidebar').hasClass('sidebar-no-expand'));
+            $("#check_sidebar_no_expand").on('click', function () {
+                if ($(this).is(':checked')) {
+                    $('.main-sidebar').addClass('sidebar-no-expand');
+                } else {
+                    $('.main-sidebar').removeClass('sidebar-no-expand');
+                };
+                memorise_option("sidebar-no-expand", $('.main-sidebar').hasClass('sidebar-no-expand'));
+            });
+
+        });
+        </script>
+
+
+    </div>
+</aside>
+

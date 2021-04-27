@@ -1,0 +1,31 @@
+{% load static %}
+
+{% block styles %}
+<style>
+
+    #div_table_{{ id }} {
+        display: inline-block;
+        height: 200px;
+        overflow-y: scroll;
+        width: 100%;
+        border: solid 1px #e5e5e5;
+    }
+
+</style>
+{% endblock styles %}
+
+
+<div id="div_table_{{ id }}">
+    <table id="table_{{ id }}" class="table table-bordered">
+        {% for item in items %}
+            <tr>
+                <td>
+                    <div>
+                        <input name="{{ name }}" type="checkbox" class="check_item" value="{{ item.pk }}" {% if item.pk in selections or coche_tout %}checked{% endif %}>
+                        <span style="margin-left: 4px;margin-right:20px;">{{ item.label }}</span>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>

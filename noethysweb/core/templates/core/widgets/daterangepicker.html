@@ -1,0 +1,83 @@
+<script>
+
+    $(document).ready(function() {
+        $("#{{ id }}").daterangepicker({
+            autoApply: true,
+            showDropdowns: false,
+            alwaysShowCalendars: true,
+            applyButtonClasses: "btn-primary",
+
+            ranges: {
+                "Aujourd'hui": [moment(), moment()],
+                'Cette semaine': [moment().startOf('isoweek'), moment().endOf('isoweek')],
+                'Les 7 derniers jours': [moment().subtract(6, 'days'), moment()],
+                'Les 30 derniers jours': [moment().subtract(29, 'days'), moment()],
+                'Ce mois': [moment().startOf('month'), moment().endOf('month')],
+                'Le mois dernier': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            locale: {
+                "format": "DD/MM/YYYY",
+                "separator": " - ",
+                "applyLabel": "Valider",
+                "cancelLabel": "Annuler",
+                "fromLabel": "De",
+                "toLabel": "à",
+                "weekLabel": "N°",
+                "customRangeLabel": "Période personnalisée",
+                "daysOfWeek": [
+                    "Dim",
+                    "Lun",
+                    "Mar",
+                    "Mer",
+                    "Jeu",
+                    "Ven",
+                    "Sam"
+                ],
+                "monthNames": [
+                    "Janvier",
+                    "Février",
+                    "Mars",
+                    "Avril",
+                    "Mai",
+                    "Juin",
+                    "Juillet",
+                    "Août",
+                    "Septembre",
+                    "Octobre",
+                    "Novembre",
+                    "Décembre"
+                ],
+                "firstDay": 1
+                }
+        });
+
+        {% if afficher_check %}
+            // On radio change
+            $('#checkbox_{{ id }}').on('change', function(){
+                if ($("#checkbox_{{ id }}").prop("checked")) {
+                    $("#{{ id }}").prop('disabled', false);
+                    $('input[name=checkbox_{{ name }}]').val("false");
+                } else {
+                    $("#{{ id }}").prop('disabled', true);
+                    $('input[name=checkbox_{{ name }}]').val("true");
+                };
+            });
+            $('#checkbox_{{ id }}').trigger('change');
+        {% endif %}
+
+    });
+
+</script>
+
+<div class="input-group">
+    <div class="input-group-prepend">
+        {% if afficher_check %}
+            <span class="input-group-text">
+                <input name="checkbox_{{ name }}" type="text" value="{% if value %}true{% else %}false{% endif %}" hidden>
+                <input id="checkbox_{{ id }}" type="checkbox" {% if value %}checked{% endif %}><span style="vertical-align: middle">{{ label_checkbox }}</span>
+            </span>
+        {% endif %}
+        <i class="fa {% if icon %}{{ icon }}{% else %}fa-calendar{% endif %} input-group-text"></i>
+    </div>
+    <input type="text" autocomplete="off" class="{{ class }}" name="{{ name }}" id="{{ id }}" value="{{ value }}" />
+</div>

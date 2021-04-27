@@ -1,0 +1,43 @@
+{% load static %}
+
+{% if value and not masquer_image %}
+    <div>
+        <img class="img-fluid img-thumbnail" style="max-width: 250px;" src="{{ MEDIA_URL }}{{ value.url }}">
+    </div>
+    <input type="checkbox" name="{{name}}-clear" id="{{name}}-clear_id">
+    <label for="{{name}}-clear_id" style="margin-top: 10px;margin-bottom: 20px;">Effacer l'image actuelle</label>
+{% endif %}
+
+<div class="input-group">
+    <input id="nom_fichier" type="text" class="form-control" style="height: calc(2.25rem - 1px);" value="{{ value }}" readonly>
+    <label class="input-group-append">
+        <span class="btn btn-default text-sm" title="Sélectionner une image">
+            <i class="fa fa-folder-open-o margin-r-5"></i> Sélectionner une image
+            <input name="{{ name }}" id="{{ id }}" type="file" accept="image/*" style="display: none;">
+        </span>
+    </label>
+</div>
+
+<script>
+    $(function() {
+        // Affiche la liste des fichiers
+        $("#{{ id }}").on('change', function() {
+            $('#nom_fichier').val(this.files[0].name + " (" + formatBytes(this.files[0].size) + ")");
+        });
+
+        // Formate la taille des fichiers
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        };
+    });
+</script>
+
+
+
+
+

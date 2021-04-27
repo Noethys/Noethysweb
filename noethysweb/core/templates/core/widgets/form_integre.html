@@ -1,0 +1,16 @@
+{% load static %}
+{% load crispy_forms_tags %}
+
+<style>
+    #div_form_integre_{{ id }} {
+        display: inline-block;
+        height: 200px;
+        overflow-y: scroll;
+        width: 100%;
+        border: solid 1px #e5e5e5;
+    }
+</style>
+
+<div id="div_form_integre_{{ id }}">
+    {% crispy form %}
+</div>

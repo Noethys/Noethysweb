@@ -1,0 +1,141 @@
+{% load static %}
+
+{% block styles %}
+
+<style>
+
+    .div_table_activites {
+        display: inline-block;
+        height: 180px;
+        overflow-y: scroll;
+        width: 100%;
+        border: solid 1px #e5e5e5;
+    }
+    .table_activites th, td{
+        /*font-size: 12px;*/
+        padding: 5px;
+    }
+    .table_activites th {
+        background-color: #e0e0e0;
+        font-weight: bold;
+    }
+
+    .boutons_radios {
+        margin-bottom: 8px;
+        margin-left: 5px;
+    }
+
+    .masquer {
+        display: none;
+    }
+
+</style>
+
+{% endblock styles %}
+
+<div class="boutons_radios">
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="choix_activites" id="radio_choix_groupes_activites" title="Sélectionner des groupes d'activités" value="groupes_activites" checked>
+        <label class="form-check-label" for="radio_choix_groupes_activites" >Groupes d'activités</label>
+    </div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="choix_activites" id="radio_choix_activites" title="Sélectionner des activités" value="activites" {% if selection.type == "activites" %}checked{% endif %}>
+        <label class="form-check-label" for="radio_choix_activites">Activités</label>
+    </div>
+    {% if afficher_groupes %}
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="choix_activites" id="radio_choix_groupes" title="Sélectionner des groupes" value="groupes" {% if selection.type == "groupes" %}checked{% endif %}>
+        <label class="form-check-label" for="radio_choix_groupes">Groupes</label>
+    </div>
+    {% endif %}
+
+</div>
+
+<div id="div_table_groupes_activites" class="div_table_activites {% if selection.type != "groupes_activites" %}masquer{% endif %}">
+    <table id="table_groupes_activites" class="table table-bordered table_activites">
+        {% for groupe in groupes_activites %}
+            <tr>
+                <td style="padding: 5px !important;">
+                    <div class="form-inline">
+                        <input name="liste_groupes_activites" type="checkbox" value="{{ groupe.pk }}" {% if selection.type == "groupes_activites" and groupe.pk in selection.ids %}checked{% endif %}>
+                        <span style="margin-left: 5px;margin-right:20px;">{{ groupe.nom }}</span>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div id="div_table_activites" class="div_table_activites {% if selection.type != "activites" %}masquer{% endif %}">
+    <table id="table_activites" class="table table-bordered table_activites">
+        {% for activite in activites %}
+            <tr>
+                <td style="padding: 5px !important;">
+                    <div class="form-inline">
+                        <input name="liste_activites" type="checkbox" value="{{ activite.pk }}" {% if selection.type == "activites" and activite.pk in selection.ids %}checked{% endif %}>
+                        <span style="margin-left: 5px;margin-right:20px;">{{ activite.nom }}</span>
+                    </div>
+                </td>
+                {% if afficher_colonne_detail %}
+                    <td style="padding: 5px !important;">
+                        <span style="font-size: 12px; color: #cbcbcb;">{{ activite.Get_validite_str }}</span>
+                    </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% if afficher_groupes %}
+
+    <div id="div_table_groupes" class="div_table_activites {% if selection.type != "groupes" %}masquer{% endif %}">
+        <table id="table_groupes" class="table table-bordered table_activites">
+            {% for activite in activites %}
+                {% for groupe in groupes|get_item:activite %}
+                    <tr>
+                        <td>
+                            <div class="form-inline">
+                                <input name="liste_groupes" type="checkbox" value="{{ groupe.pk }}" {% if selection.type == "groupes" and groupe.pk in selection.ids %}checked{% endif %}>
+                                <span style="margin-left: 5px;margin-right:20px;">{{ groupe.nom }}</span>
+                            </div>
+                        </td>
+                        {% if afficher_colonne_detail %}
+                            <td>
+                                <span style="margin-left: 5px;margin-right:20px;">{{ activite.nom }}</span>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </table>
+    </div>
+
+{% endif %}
+
+<script>
+
+$(document).ready(function() {
+
+    // On radio change
+    $('input[name=choix_activites]').on('change', function(){
+        $("#div_table_groupes_activites").addClass("masquer");
+        $("#div_table_activites").addClass("masquer");
+        {% if afficher_groupes %}
+            $("#div_table_groupes").addClass("masquer");
+        {% endif %}
+        if ($("#radio_choix_groupes_activites").prop("checked")) {
+            $("#div_table_groupes_activites").removeClass("masquer");
+        };
+        if ($("#radio_choix_activites").prop("checked")) {
+            $("#div_table_activites").removeClass("masquer");
+        };
+            {% if afficher_groupes %}
+            if ($("#radio_choix_groupes").prop("checked")) {
+                $("#div_table_groupes").removeClass("masquer");
+            };
+        {% endif %}
+    });
+
+});
+
+</script>

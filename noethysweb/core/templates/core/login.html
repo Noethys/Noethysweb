@@ -1,0 +1,43 @@
+{% extends "core/base_login.html" %}
+{% load static %}
+
+{% block titre_contenu %}
+    Connexion
+{% endblock titre_contenu %}
+
+{% block contenu_page %}
+
+    <form name="LoginForm" method="post">
+        {% csrf_token %}
+
+        {% if form.errors %}
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <strong>{{ error|escape }}</strong>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="form-group has-feedback">
+            {{ form.username }}
+        </div>
+
+        <div class="form-group has-feedback">
+            {{ form.password }}
+        </div>
+
+        {% if form.captcha.errors %}
+            <div class="alert alert-danger">
+                Vous devez cocher la case ci-dessous
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            {{ form.captcha }}
+        </div>
+
+        <button name="login" id="login" class="btn btn-block btn-primary login-btn mb-4" type="submit">Se connecter</button>
+
+    </form>
+
+{% endblock contenu_page %}
