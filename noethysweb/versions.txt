@@ -1,0 +1,88 @@
+Version 0.0.3.3 (25/04/2021) :
+
+- Ajout du favicon
+- Ajout de l'affichage de l'intro démo sur la page d'accueil
+- Ajout du champ titre dans les pièces
+- Ajout de l'affichage des unités de remplissage dans les totaux du gestionnaire des consommations
+- Fix affichage des noms dans l'historique
+- Fix affichage modal Ajouter un individu dans gestionnaire des consommations
+- Fix suppression des filtres de liste
+- Fix affichage des images dans les PDF
+- Fix bulk_delete avec MySQL
+
+Version 0.0.2.5 (14/04/2021) :
+
+- Ajout de l'affichage de la disponibilité d'une mise à jour sur la page d'accueil
+- Amélioration du champ de recherche de la page d'accueil
+- Correction de l'horodatage last_login
+
+Version 0.0.2.4 (11/04/2021) :
+
+- Correction des résultats du suivi des consommations
+
+Version 0.0.2.2 (06/04/2021) :
+
+- Modification affichage du suivi des consommations
+- Correction de l'affichage des heures dans la liste des consommations PDF
+
+Version 0.0.1.9 (05/04/2021) :
+
+- Ajout du détachement des individus
+- Ajout de la liste des individus détachés
+- Upgrade des librairies : bootstrap 4, adminlte 3, opencv-python
+- Changement de source pour l'importation des périodes de vacances
+
+Version 0.0.1.7 (13/03/2021) :
+
+- Ajout de la gestion des droits des utilisateurs
+- Ajout de la page de connexion au portail famille
+- Ajout de la réinitialisation du mot de passe du portail famille
+- Ajout de la barre de commandes standardisée
+- Ajout de la prise en charge des inscriptions simultanées
+- Ajout du système d'inscriptions multiples
+- Suppression du champ parti de la table Inscriptions
+- Finalisation de la liste des individus du menu Individus
+- Finalisation de la grille des conso et du gestionnaire des conso
+- Correction de l'affichage des PDF (changement de src du embed)
+
+Version 0.0.1.6 (31/01/2021) :
+
+- Ajout du paramétrage des événements
+- Ajout de la page des notes de versions
+- Ajout du calendrier récapitulatif des ouvertures dans le paramétrage de l'activité
+- Amélioration du calendrier des ouvertures (scrolling, suppression des toggles)
+- Correction de l'application des tarifs avancés des événements dans la grille des conso
+- Correction du masque dans les champs de saisie d'heures
+
+Version 0.0.1.5 (24/01/2021) :
+
+- Ajout de la duplication des tarifs, des modèles de documents, des modèles d'emails et des modèles de lettres de rappel
+- Correction de la suggestion des codes postaux et des villes (Blocage CSP)
+- Correction de l'affichage des PDF (Blocage CSP et pb sur le nom de fichier)
+- Correction de la sélection des groupes dans le paramétrage des unités de consommation
+- Correction de la sélection de la zone dans l'importation des périodes de vacances
+- Correction du mask dans le tableau des lignes de tarifs
+
+Version 0.0.1.4 (01/11/2020) :
+
+- Ajout du recaptcha
+
+Version 0.0.1.2 (08/10/2020) :
+
+- Ajout du CSP et de Axes
+
+Version 0.0.0.7 (06/10/2020) :
+
+- Fix float TVA dans grille des conso
+
+Version 0.0.0.6 (05/10/2020) :
+
+- Première version beta privée
+
+Version 0.0.0.5 (29/04/2020) :
+
+- Ajout du système de mise à jour
+
+Version 0.0.0.1 (25/07/2019) :
+
+- Version initiale
