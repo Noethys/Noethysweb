@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    {% block meta %}
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Noethysweb">
+    {% endblock meta %}
+
+    <title>Noethysweb | {% block page_titre %}{% endblock %}</title>
+
+    {% block styles %}
+        {% include 'portail/styles.html' %}
+    {% endblock %}
+
+    {% block scripts %}
+        {% include 'portail/scripts.html' %}
+    {% endblock %}
+
+    {% block extra_head %}
+    {% endblock %}
+
+</head>
+
+<body class="skin-blue sidebar-mini sidebar-mini-xs{% if masquer_sidebar %}sidebar-collapse{% endif %}{% block body_class %}{% endblock body_class %}">
+
+{% block body %}
+    <div class="wrapper">
+        {% block nav_header %}
+            {% include 'portail/header.html' %}
+        {% endblock %}
+
+        {% block nav_sidebar %}
+            {% include 'portail/sidebar.html' %}
+        {% endblock %}
+
+        {% block page %}
+        {% endblock page %}
+
+        {% block nav_footer %}
+            {% include 'core/footer.html' %}
+        {% endblock %}
+
+    </div>
+{% endblock body %}
+
+{% block extra_foot %}
+{% endblock %}
+
+{# Initialisation de iCheck #}
+<script>
+    $(document).ready(function() {
+
+        // Enregistre le masquage du sidebar
+        $(".sidebar-toggle").on('click', function(e) {
+            if ($("body").hasClass("sidebar-collapse")) {
+                $("#div_form_recherche").hide();
+            } else {
+                $("#div_form_recherche").show();
+            };
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_set_masquer_sidebar' %}",
+                data: {
+                    masquer_sidebar: $("body").hasClass("sidebar-collapse"),
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                },
+                datatype: "json",
+            });
+        });
+    });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,116 @@
+{% load static %}
+
+{% block styles %}
+{#<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">#}
+<link rel="stylesheet" type="text/css" href="{% static 'lib/bootstrap3/css/bootstrap.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'lib/font-awesome/css/font-awesome.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'lib/adminlte2/css/adminLTE.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'lib/adminlte2/css/skins/_all-skins.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'lib/conflicts/conflicts.css' %}">
+{#<link rel="stylesheet" type="text/css" href="{% static 'lib/datetimepicker/css/bootstrap-datetimepicker.min.css' %}">#}
+<link rel="stylesheet" type="text/css" href="{% static 'lib/icheck/skins/minimal/blue.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'lib/toastr/toastr.min.css' %}" >
+
+{{ form.media.css }}
+
+<style type="text/css">
+    fieldset legend {
+        display: block;
+        width: 100%;
+        padding: 5px;
+        margin-bottom: 20px;
+        font-size: 12px;
+        line-height: inherit;
+        color: #333;
+        border: 0;
+        background-color: #f1f0f0;
+        text-transform: uppercase;
+    }
+
+    .select2-container {
+        width: 100% !important;
+    }
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #ccc !important;
+        border-radius: 0px !important;
+        padding-left: 10px !important;
+    }
+    .select2-container .select2-selection--single {
+        height: 34px !important;
+    }
+    .select2-container--default .select2-selection--multiple {
+        border: 1px solid #ccc !important;
+        border-radius: 0px !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #3c8dbc !important;
+        border-color: #367fa9!important;
+        padding: 1px 10px!important;
+        color: #fff!important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        margin-right: 5px !important;
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .checkbox label, .radio label {
+        padding-left: 0px;
+    }
+
+
+    {# Affichage des inline radios #}
+    .radio-inline {
+        padding-left: 0px;
+    }
+    .iradio_minimal-blue {
+        margin-right: 5px;
+    }
+
+    {# Affichage des inline checkbox #}
+    .checkbox-inline.checkbox-inline, .radio-inline.radio-inline {
+        margin-left: 0px;
+        margin-right: 5px;
+    }
+    .checkbox-inline {
+        padding-left: 0px;
+    }
+    .icheckbox_minimal-blue {
+        margin-right: 5px;
+    }
+
+    {# Affiche correctement le sous-titre d'un menu #}
+    .dropdown-header {
+        margin-top: 0px;
+        margin-bottom: 0px;
+        margin-left: -10px;
+    }
+
+    {# Affichage d'une coche dans les menus popup #}
+    .menu-checked::before {
+        position: absolute;
+        left: .4rem;
+        content: '✓';
+        font-weight: 600;
+    }
+
+    .datatable th.select-checkbox {
+        width: 8%;
+    }
+
+    .form-horizontal .checkbox, .form-horizontal .checkbox-inline, .form-horizontal .radio, .form-horizontal .radio-inline {
+        padding-top: 0px;
+    }
+
+    .commandes {
+        margin-bottom: 25px;
+        margin-top: -2px;
+    }
+    .commandes > .btn {
+        margin-top: 2px;
+    }
+
+</style>
+
+
+
+{% endblock %}

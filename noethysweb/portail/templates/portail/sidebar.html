@@ -1,0 +1,104 @@
+{% load static %}
+
+<style>
+	.organisateur {
+		position: relative;
+		width: 100%;
+		padding: 15px 10px 5px 10px;
+		overflow: hidden;
+	}
+	.organisateur > .image > img {
+		display: block;
+		width: 100%;
+		max-width: 140px;
+		height: auto;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	.organisateur > .info {
+		padding: 15px 5px 10px 5px;
+        margin-bottom: 0px !important;
+		line-height: 1.2;
+		position: relative;
+		left: 0px;
+		text-align: center;
+		color: #ffffff;
+		font-size: 14px;
+		word-wrap : break-word;
+		white-space: normal;
+	}
+
+</style>
+
+<aside class="main-sidebar">
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+
+        <!-- Logo de l'organisateur -->
+        <div class="user-panel organisateur">
+            <div class="image">
+                {% if organisateur.logo %}
+                    <img src="{{ organisateur.logo.url }}" class="img-rounded" alt="Logo organisateur">
+                {% endif %}
+            </div>
+            <div class="info">
+                <span>{{ organisateur.nom }}</span>
+            </div>
+        </div>
+
+{% comment %}
+        <!-- search form -->
+        <form id="form_recherche" action="{% url 'rechercher' %}" method="GET" class="sidebar-form">
+            {% csrf_token %}
+            <div class="input-group">
+                <input id="champ_recherche" type="text" title="Recherchez une commande, un individu, une famille, un payeur, une adresse..." name="champ_recherche" class="form-control" placeholder="Rechercher...">
+                <span class="input-group-btn">
+                    <button type="submit" id="search-btn" class="btn btn-flat">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </span>
+            </div>
+        </form>
+        <!-- /.search form -->
+{% endcomment %}
+
+        <ul class="sidebar-menu">
+            <li class="header">{{ menu_principal.titre|upper }}</li>
+            {% for child in menu_principal.GetChildren %}
+                {% if child.toujours_afficher or child.HasChildren %}
+                    <li {% if child in breadcrumb %}class="active"{% endif %}>
+                        <a {% if child.code %}href="{% url child.code %}"{% endif %}>
+                            <i class="fa fa-{{ child.icone }}"></i>
+                            <span>{{ child.titre }}</span>
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+
+    </section>
+    <!-- /.sidebar -->
+</aside>
+
+
+{% block scripts %}
+    <script>
+        $(document).ready(function() {
+
+            $("#form_recherche1").on('submit', function(event) {
+                if ($("#navbar-search-input").val().length < 3) {
+                    event.preventDefault();
+                    toastr.error("Une recherche doit effectuée sur un minimum de 3 caractères");
+                };
+            });
+            $("#form_recherche2").on('submit', function(event) {
+                if ($("#champ-recherche2").val().length < 3) {
+                    event.preventDefault();
+                    toastr.error("Une recherche doit effectuée sur un minimum de 3 caractères");
+                };
+            });
+
+
+        });
+    </script>
+{% endblock scripts %}

@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+{% endblock styles %}
+
+
+{% block page %}
+
+    <div class="content-wrapper">
+
+        <section class="content-header">
+            <h1>Tableau de bord</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-home"></i> Accueil</a></li>
+        </ol>
+        </section>
+
+        <section class="content connectedSortable">
+
+            Ceci est la page d'accueil du portail
+
+        </section>
+
+    </div>
+{% endblock page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+{% endblock scripts %}
