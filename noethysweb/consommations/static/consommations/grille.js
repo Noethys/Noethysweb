@@ -634,7 +634,7 @@ class Case_multihoraires extends Case_base {
 
         // Dessine la case multihoraires
         var html = "<table class='table table_multihoraires'><tbody><tr>";
-        html += "<td class='case multi_ajouter'><a data-key='" + this.key + "' class='bouton_ajouter_multi' title='Ajouter une consommation' href='#'><i class='fa fa-plus-circle'></i></a></td>";
+        html += "<td class='case multi_ajouter' style='border: 0px;'><a data-key='" + this.key + "' class='bouton_ajouter_multi' title='Ajouter une consommation' href='#'><i class='fa fa-plus-circle'></i></a></td>";
         html += "</tr></tbody></table>";
         $("#" + this.key).html(html);
 
