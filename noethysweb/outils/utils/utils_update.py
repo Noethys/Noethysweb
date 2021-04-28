@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -12,15 +11,11 @@ from noethysweb import version
 from django.core.management import call_command
 from django.conf import settings
 from django.core.cache import cache
-from core.utils import utils_cryptage_fichier
-
-
-URL_SOURCE = ""
 
 
 def Recherche_update():
     # Lecture de la version disponible en ligne
-    fichier = urlopen(URL_SOURCE + "/versions.txt", timeout=5)
+    fichier = urlopen("https://raw.githubusercontent.com/Noethys/Noethysweb/master/noethysweb/versions.txt", timeout=5)
     changelog = fichier.read().decode('utf-8')
     fichier.close()
 
@@ -51,22 +46,21 @@ def Update():
         return False
 
     # Téléchargement du zip
-    nom_fichier = "noethysweb-%s.crypt" % version_online_txt
+    nom_fichier = "Noethysweb-%s.zip" % version_online_txt
+    if not os.path.isdir(settings.MEDIA_ROOT):
+        os.mkdir(settings.MEDIA_ROOT)
     rep_temp = settings.MEDIA_ROOT + "/temp"
     if not os.path.isdir(rep_temp):
         os.mkdir(rep_temp)
     chemin_fichier = os.path.join(rep_temp, nom_fichier)
     try:
         logger.debug("Telechargement de la version %s..." % version_online_txt)
-        url_telechargement = URL_SOURCE + "/" + nom_fichier
+        url_telechargement = "https://github.com/Noethys/Noethysweb/archive/%s.zip" % version_online_txt
         urlretrieve(url_telechargement, chemin_fichier)
     except Exception as err:
         logger.debug("La nouvelle version '%s' n'a pas pu etre telechargee." % version_online_txt)
         logger.debug(err)
         return False
-
-    # Décryptage
-    utils_cryptage_fichier.DecrypterFichier(chemin_fichier, chemin_fichier, "")
 
     # Dezippage
     logger.debug("Dezippage du zip...")
@@ -74,7 +68,7 @@ def Update():
     liste_fichiers = zfile.namelist()
 
     # Remplacement des fichiers
-    prefixe = "noethysweb-%s/noethysweb/" % version_online_txt
+    prefixe = "Noethysweb-%s/noethysweb/" % version_online_txt
     chemin_dest = os.path.join(settings.BASE_DIR, "")
 
     logger.debug("Installation des nouveaux fichiers...")
