@@ -11,7 +11,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.units import mm
-from core.utils import utils_modeles_documents, utils_infos_individus, utils_impression
+from core.utils import utils_modeles_documents, utils_infos_individus, utils_impression, utils_fichiers
 
 
 def Impression(dict_options={}):
@@ -36,6 +36,9 @@ def Impression(dict_options={}):
                     y -= modele_doc.modele.hauteur * mm
                     canvas.line(x1, y, x2, y)
                     y -= dict_options["espace_vertical"] * mm
+
+    # Créé le répertoire temp s'il n'existe pas
+    rep_temp = utils_fichiers.GetTempRep()
 
     # Initialisation du fichier
     nom_fichier = "/temp/%s.pdf" % uuid4()

@@ -8,7 +8,7 @@ from core.models import Famille, Piece, Cotisation, Prestation, Consommation, Fa
 from xml.dom.minidom import Document
 from django.db.models import Sum
 from decimal import Decimal
-from core.utils import utils_infos_individus, utils_dates, utils_preferences
+from core.utils import utils_infos_individus, utils_dates, utils_preferences, utils_fichiers
 from django.conf import settings
 from uuid import uuid4
 
@@ -396,6 +396,9 @@ class Export():
 
     def Enregistrer(self):
         """ Enregistre le fichier XML """
+        # Créé le répertoire temp s'il n'existe pas
+        rep_temp = utils_fichiers.GetTempRep()
+
         # Création du nom de fichier
         self.nom_fichier = "/temp/%s.xml" % uuid4()
         self.chemin_fichier = settings.MEDIA_ROOT + self.nom_fichier

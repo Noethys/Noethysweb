@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -13,7 +12,7 @@ from django.core.management.base import CommandError
 from django.core.serializers.base import DeserializationError
 from django.db import IntegrityError
 from django.core.management import call_command
-from core.utils import utils_cryptage_fichier
+from core.utils import utils_cryptage_fichier, utils_fichiers
 
 
 def Nettoyer(rep_destination):
@@ -23,6 +22,8 @@ def Nettoyer(rep_destination):
         pass
 
 def Restauration(form=None, nom_fichier=None, mdp=None):
+    # Créé le répertoire temp s'il n'existe pas
+    rep_temp = utils_fichiers.GetTempRep()
 
     # Création du répertoire de travail
     rep_destination = settings.MEDIA_ROOT + "/temp/restauration"

@@ -10,7 +10,7 @@ from core.views.base import CustomView
 from django.views.generic import TemplateView
 from outils.forms.sauvegarde_creer import Formulaire
 from django.conf import settings
-from core.utils import utils_cryptage_fichier
+from core.utils import utils_cryptage_fichier, utils_fichiers
 from django.contrib import messages
 from django.core.management import call_command
 import os, shutil
@@ -47,6 +47,9 @@ class View(CustomView, TemplateView):
         if not self.request.user.is_superuser:
             messages.add_message(request, messages.ERROR, "Vous n'êtes pas autorisé à effectuer cette opération. La sauvegarde est réservée au superutilisateurs")
             return self.render_to_response(self.get_context_data(form=form))
+
+        # Créé le répertoire temp s'il n'existe pas
+        rep_temp = utils_fichiers.GetTempRep()
 
         # Création du répertoire de travail
         rep_destination = settings.MEDIA_ROOT + "/temp/sauvegarde"

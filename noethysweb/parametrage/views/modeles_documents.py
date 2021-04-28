@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -13,7 +12,7 @@ from django.http import JsonResponse
 from django.http import HttpResponseRedirect
 from reportlab.pdfgen.canvas import Canvas as CanvasPDF
 from django.conf import settings
-from core.utils import utils_modeles_documents
+from core.utils import utils_modeles_documents, utils_fichiers
 import json
 from uuid import uuid4
 from django.db.models import Q
@@ -30,6 +29,9 @@ def Export_svg(request, *args, **kwargs):
 
     if not largeur or not hauteur:
         return JsonResponse({"erreur": "Veuillez saisir une largeur et une hauteur valide pour ce modèle."}, status=401)
+
+    # Créé le répertoire temp s'il n'existe pas
+    rep_temp = utils_fichiers.GetTempRep()
 
     # Initialisation du fichier
     nom_fichier = "/temp/%s.pdf" % uuid4()

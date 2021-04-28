@@ -7,7 +7,7 @@
 import logging
 logger = logging.getLogger(__name__)
 import datetime
-from core.utils import utils_dates, utils_modeles_documents, utils_preferences
+from core.utils import utils_dates, utils_modeles_documents, utils_preferences, utils_fichiers
 from core.models import Organisateur
 from core.data import data_modeles_emails
 from django.core.cache import cache
@@ -198,6 +198,9 @@ class Impression():
         for key, valeurs in self.dict_donnees.items():
             if isinstance(key, int):
                 self.dict_donnees[key].update(motscles_defaut)
+
+        # Créé le répertoire temp s'il n'existe pas
+        rep_temp = utils_fichiers.GetTempRep()
 
         # Initialisation du document
         self.nom_fichier = "/temp/%s.pdf" % uuid4()
