@@ -1,3 +1,7 @@
+Version 0.0.3.5 (28/04/2021) :
+
+- Recherche des mises à jour sur Github
+
 Version 0.0.3.4 (28/04/2021) :
 
 - Publication sous licence GNU GPL
