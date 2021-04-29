@@ -7,8 +7,12 @@
 }
 .commandes_grille > .btn {
     margin-top: 2px;
+    margin-right: 3px;
 }
-
+.commandes_grille > div {
+    margin-top: 2px;
+    margin-right: 3px;
+}
 
 /* Menu contextuel */
 #contextMenu {

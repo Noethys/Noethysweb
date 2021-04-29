@@ -83,31 +83,6 @@
 
         <div class="card-header with-border">
             <h3 class="card-title">{{ data.titre_grille }}</h3>
-            <div class="card-tools">
-
-                <div class="pull-right">
-                    <div class="input-group input-group-sm" style="width: 140px;margin-right: 10px;">
-                        <div class="input-group-prepend">
-                            <button type="submit" class="input-group-text"><i class="fa fa-search"></i></button>
-                        </div>
-                        <input type="text" id="rechercher" class="form-control form-control-sm text-sm" title="Rechercher une date ou un individu" placeholder="Rechercher...">
-                    </div>
-                </div>
-
-                <div class="pull-right">
-                    <div class="input-group input-group-sm" style="width: 140px;margin-right: 10px;">
-                        <div class="input-group-prepend">
-                            <button type="submit" class="input-group-text"><i class="fa fa-pencil"></i></button>
-                        </div>
-                        <select class="select form-control form-control-sm text-sm" id="mode_saisie" title="Sélection du mode de saisie">
-                            <option value="reservation">Réservation</option>
-                            <option value="attente">Attente</option>
-                            <option value="refus">Refus</option>
-                        </select>
-                    </div>
-                </div>
-
-            </div>
         </div>
 
     <div id="in_progress" class="overlay">
@@ -116,7 +91,7 @@
 
     <div class="card-body p-0">
 
-        <div class="commandes_grille">
+        <div class="commandes_grille d-flex flex-wrap">
             <button type="submit" title="Enregistrer" form="form-maj" class='btn btn-primary btn-sm' value="Sauvegarde"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
             {% if data.mode == "date" %}
                 <a type='button' title="Annuler" class='btn btn-danger btn-sm' href="{% url 'consommations_toc' %}"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
@@ -126,12 +101,34 @@
                 <a type='button' title="Annuler" class='btn btn-danger btn-sm' href="{% url 'famille_resume' idfamille=idfamille %}"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
                 <button type="button" id="traitement_par_lot" class="btn btn-default btn-sm" onclick="$('#modal_traitement_lot').modal('show');" title="Traitement par lot"><i class="fa fa-magic margin-r-5"></i>Traitement par lot</button>
             {% endif %}
-            <button type="button" id="saisie_pointage" class="btn btn-default btn-sm" onclick="$('#modal_saisir_pointage').modal('show');" title="Pointage par lot"><i class="fa fa-check-square-o margin-r-5"></i>Pointage</button>
-            <button type="button" id="tout_recalculer" class="btn btn-default btn-sm" onclick="tout_recalculer()" title="Tout recalculer"><i class="fa fa-refresh margin-r-5"></i>Recalculer</button>
             {% if data.mode == "individu" %}
                 <button type="button" id="pdf" class="btn btn-default btn-sm" onclick="impression_pdf()" title="Aperçu PDF"><i class="fa fa-file-pdf-o margin-r-5"></i>Imprimer</button>
-                <button type="button" id="email" class="btn btn-default btn-sm" onclick="impression_pdf(true)" title="Envoyer par email"><i class="fa fa-send-o margin-r-5"></i>Envoyer par email</button>
+                <button type="button" id="email" class="btn btn-default btn-sm" onclick="impression_pdf(true)" title="Envoyer par email"><i class="fa fa-send-o margin-r-5"></i>Email</button>
             {% endif %}
+            <button type="button" id="saisie_pointage" class="btn btn-default btn-sm" onclick="$('#modal_saisir_pointage').modal('show');" title="Pointage par lot"><i class="fa fa-check-square-o margin-r-5"></i>Pointage</button>
+            <button type="button" id="tout_recalculer" class="btn btn-default btn-sm mr-auto" onclick="tout_recalculer()" title="Tout recalculer"><i class="fa fa-refresh margin-r-5"></i>Recalculer</button>
+
+            <div>
+                <div class="input-group input-group-sm " style="width: 140px;">
+                    <div class="input-group-prepend">
+                        <button type="submit" class="input-group-text"><i class="fa fa-search"></i></button>
+                    </div>
+                    <input type="text" id="rechercher" class="form-control form-control-sm text-sm" title="Rechercher une date ou un individu" placeholder="Rechercher...">
+                </div>
+            </div>
+
+            <div>
+                <div class="input-group input-group-sm" style="width: 140px;">
+                    <div class="input-group-prepend">
+                        <button type="submit" class="input-group-text"><i class="fa fa-pencil"></i></button>
+                    </div>
+                    <select class="select form-control form-control-sm text-sm" id="mode_saisie" title="Sélection du mode de saisie">
+                        <option value="reservation">Réservation</option>
+                        <option value="attente">Attente</option>
+                        <option value="refus">Refus</option>
+                    </select>
+                </div>
+            </div>
 
         </div>
 
