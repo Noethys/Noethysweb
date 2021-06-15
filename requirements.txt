@@ -17,3 +17,4 @@ opencv-python
 pycryptodome
 python-dateutil
 reportlab
+bleach
