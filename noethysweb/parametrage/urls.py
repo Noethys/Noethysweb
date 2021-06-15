@@ -6,7 +6,7 @@ from django.urls import include, path
 
 from core.views import toc
 from core.decorators import secure_ajax
-from parametrage.views import organisateur, \
+from parametrage.views import organisateur, structures, \
     vacances, calendrier, vacances_importation, feries_fixes, feries_variables, feries_generation, \
     comptes_bancaires, modes_reglements, emetteurs, \
     lots_factures, prefixes_factures, regies, messages_factures, \
@@ -19,11 +19,13 @@ from parametrage.views import organisateur, \
     types_groupes_activites, \
     activites, activites_generalites, activites_responsables, activites_agrements, activites_groupes, \
     activites_renseignements, activites_unites_conso, activites_unites_remplissage, activites_calendrier, \
-    activites_ouvertures, activites_evenements, activites_evenements_tarifs, \
-    activites_categories_tarifs, activites_noms_tarifs, activites_tarifs, \
+    activites_ouvertures, activites_evenements, activites_evenements_tarifs, activites_categories_tarifs, activites_noms_tarifs, \
+    activites_tarifs, activites_portail_parametres, activites_portail_periodes, \
     modeles_documents, modeles_emails, modeles_rappels, \
     questionnaires, adresses_mail, activites_assistant, activites_assistant_sejour, activites_assistant_cantine, \
-    activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle
+    activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
+    portail_parametres, types_regimes_alimentaires, assureurs, \
+    categories_compte_internet
 
 
 urlpatterns = [
@@ -34,6 +36,12 @@ urlpatterns = [
     # Organisateur
     path('parametrage/organisateur/ajouter', organisateur.Ajouter.as_view(), name='organisateur_ajouter'),
     path('parametrage/organisateur/modifier/<int:pk>', organisateur.Modifier.as_view(), name='organisateur_modifier'),
+
+    # Structures
+    path('parametrage/structures/liste', structures.Liste.as_view(), name='structures_liste'),
+    path('parametrage/structures/ajouter', structures.Ajouter.as_view(), name='structures_ajouter'),
+    path('parametrage/structures/modifier/<int:pk>', structures.Modifier.as_view(), name='structures_modifier'),
+    path('parametrage/structures/supprimer/<int:pk>', structures.Supprimer.as_view(), name='structures_supprimer'),
 
     # Groupes d'activités
     path('parametrage/types_groupes_activites/liste', types_groupes_activites.Liste.as_view(), name='types_groupes_activites_liste'),
@@ -47,7 +55,8 @@ urlpatterns = [
     path('parametrage/activites/supprimer/<int:idactivite>', activites.Supprimer.as_view(), name='activites_supprimer'),
     path('parametrage/activites/resume/<int:idactivite>', activites.Resume.as_view(), name='activites_resume'),
 
-    path('parametrage/activites/generalites/<int:idactivite>', activites_generalites.Modifier.as_view(), name='activites_generalites'),
+    path('parametrage/activites/generalites/<int:idactivite>', activites_generalites.Consulter.as_view(), name='activites_generalites'),
+    path('parametrage/activites/generalites/modifier/<int:idactivite>', activites_generalites.Modifier.as_view(), name='activites_generalites_modifier'),
 
     path('parametrage/activites/responsables/liste/<int:idactivite>', activites_responsables.Liste.as_view(), name='activites_responsables_liste'),
     path('parametrage/activites/responsables/ajouter/<int:idactivite>', activites_responsables.Ajouter.as_view(), name='activites_responsables_ajouter'),
@@ -64,7 +73,8 @@ urlpatterns = [
     path('parametrage/activites/groupes/modifier/<int:idactivite>/<int:pk>', activites_groupes.Modifier.as_view(), name='activites_groupes_modifier'),
     path('parametrage/activites/groupes/supprimer/<int:idactivite>/<int:pk>', activites_groupes.Supprimer.as_view(), name='activites_groupes_supprimer'),
 
-    path('parametrage/activites/renseignements/<int:idactivite>', activites_renseignements.Modifier.as_view(), name='activites_renseignements'),
+    path('parametrage/activites/renseignements/<int:idactivite>', activites_renseignements.Consulter.as_view(), name='activites_renseignements'),
+    path('parametrage/activites/renseignements/modifier/<int:idactivite>', activites_renseignements.Modifier.as_view(), name='activites_renseignements_modifier'),
 
     path('parametrage/activites/unites_conso/liste/<int:idactivite>', activites_unites_conso.Liste.as_view(), name='activites_unites_conso_liste'),
     path('parametrage/activites/unites_conso/ajouter/<int:idactivite>', activites_unites_conso.Ajouter.as_view(), name='activites_unites_conso_ajouter'),
@@ -106,6 +116,19 @@ urlpatterns = [
     path('parametrage/activites/tarifs/modifier/<int:idactivite>/<int:categorie>/<int:pk>', activites_tarifs.Modifier.as_view(), name='activites_tarifs_modifier'),
     path('parametrage/activites/tarifs/supprimer/<int:idactivite>/<int:categorie>/<int:pk>', activites_tarifs.Supprimer.as_view(), name='activites_tarifs_supprimer'),
     path('parametrage/activites/tarifs/dupliquer/<int:idactivite>/<int:categorie>/<int:pk>', activites_tarifs.Dupliquer.as_view(), name='activites_tarifs_dupliquer'),
+
+    path('parametrage/activites/portail_parametres/<int:idactivite>', activites_portail_parametres.Consulter.as_view(), name='activites_portail_parametres'),
+    path('parametrage/activites/portail_parametres/modifier/<int:idactivite>', activites_portail_parametres.Modifier.as_view(), name='activites_portail_parametres_modifier'),
+
+    # path('parametrage/activites/portail_unites/liste/<int:idactivite>', activites_portail_unites.Liste.as_view(), name='activites_portail_unites_liste'),
+    # path('parametrage/activites/portail_unites/ajouter/<int:idactivite>', activites_portail_unites.Ajouter.as_view(), name='activites_portail_unites_ajouter'),
+    # path('parametrage/activites/portail_unites/modifier/<int:idactivite>/<int:pk>', activites_portail_unites.Modifier.as_view(), name='activites_portail_unites_modifier'),
+    # path('parametrage/activites/portail_unites/supprimer/<int:idactivite>/<int:pk>', activites_portail_unites.Supprimer.as_view(), name='activites_portail_unites_supprimer'),
+
+    path('parametrage/activites/portail_periodes/liste/<int:idactivite>', activites_portail_periodes.Liste.as_view(), name='activites_portail_periodes_liste'),
+    path('parametrage/activites/portail_periodes/ajouter/<int:idactivite>', activites_portail_periodes.Ajouter.as_view(), name='activites_portail_periodes_ajouter'),
+    path('parametrage/activites/portail_periodes/modifier/<int:idactivite>/<int:pk>', activites_portail_periodes.Modifier.as_view(), name='activites_portail_periodes_modifier'),
+    path('parametrage/activites/portail_periodes/supprimer/<int:idactivite>/<int:pk>', activites_portail_periodes.Supprimer.as_view(), name='activites_portail_periodes_supprimer'),
 
     # Assistant de paramétrage
     path('parametrage/activites/assistant/liste', activites_assistant.Liste.as_view(), name='activites_assistant_liste'),
@@ -211,6 +234,12 @@ urlpatterns = [
     path('parametrage/types_sieste/ajouter', types_sieste.Ajouter.as_view(), name='types_sieste_ajouter'),
     path('parametrage/types_sieste/modifier/<int:pk>', types_sieste.Modifier.as_view(), name='types_sieste_modifier'),
     path('parametrage/types_sieste/supprimer/<int:pk>', types_sieste.Supprimer.as_view(), name='types_sieste_supprimer'),
+
+    # Types de régimes alimentaires
+    path('parametrage/types_regimes_alimentaires/liste', types_regimes_alimentaires.Liste.as_view(), name='types_regimes_alimentaires_liste'),
+    path('parametrage/types_regimes_alimentaires/ajouter', types_regimes_alimentaires.Ajouter.as_view(), name='types_regimes_alimentaires_ajouter'),
+    path('parametrage/types_regimes_alimentaires/modifier/<int:pk>', types_regimes_alimentaires.Modifier.as_view(), name='types_regimes_alimentaires_modifier'),
+    path('parametrage/types_regimes_alimentaires/supprimer/<int:pk>', types_regimes_alimentaires.Supprimer.as_view(), name='types_regimes_alimentaires_supprimer'),
 
     # Catégories médicales
     path('parametrage/categories_medicales/liste', categories_medicales.Liste.as_view(), name='categories_medicales_liste'),
@@ -343,6 +372,21 @@ urlpatterns = [
     path('parametrage/adresses_mail/modifier/<int:pk>', adresses_mail.Modifier.as_view(), name='adresses_mail_modifier'),
     path('parametrage/adresses_mail/supprimer/<int:pk>', adresses_mail.Supprimer.as_view(), name='adresses_mail_supprimer'),
 
+    # Assureurs
+    path('parametrage/assureurs/liste', assureurs.Liste.as_view(), name='assureurs_liste'),
+    path('parametrage/assureurs/ajouter', assureurs.Ajouter.as_view(), name='assureurs_ajouter'),
+    path('parametrage/assureurs/modifier/<int:pk>', assureurs.Modifier.as_view(), name='assureurs_modifier'),
+    path('parametrage/assureurs/supprimer/<int:pk>', assureurs.Supprimer.as_view(), name='assureurs_supprimer'),
+
+    # Catégorie professionnelles
+    path('parametrage/categories_compte_internet/liste', categories_compte_internet.Liste.as_view(), name='categories_compte_internet_liste'),
+    path('parametrage/categories_compte_internet/ajouter', categories_compte_internet.Ajouter.as_view(), name='categories_compte_internet_ajouter'),
+    path('parametrage/categories_compte_internet/modifier/<int:pk>', categories_compte_internet.Modifier.as_view(), name='categories_compte_internet_modifier'),
+    path('parametrage/categories_compte_internet/supprimer/<int:pk>', categories_compte_internet.Supprimer.as_view(), name='categories_compte_internet_supprimer'),
+
+    # Portail
+    path('parametrage/portail_parametres/modifier', portail_parametres.Modifier.as_view(), name='portail_parametres_modifier'),
+
 
 
     # AJAX
@@ -352,6 +396,7 @@ urlpatterns = [
     path('parametrage/activites/groupes/liste/deplacer_lignes', secure_ajax(activites_groupes.Deplacer.as_view()), name='ajax_deplacer_lignes_activites_groupes'),
     path('parametrage/activites/unites_conso/liste/deplacer_lignes', secure_ajax(activites_unites_conso.Deplacer.as_view()), name='ajax_deplacer_lignes_activites_unites_conso'),
     path('parametrage/activites/unites_remplissage/liste/deplacer_lignes', secure_ajax(activites_unites_remplissage.Deplacer.as_view()), name='ajax_deplacer_lignes_activites_unites_remplissage'),
+    # path('parametrage/activites/portail_unites/liste/deplacer_lignes', secure_ajax(activites_portail_unites.Deplacer.as_view()), name='ajax_deplacer_lignes_activites_portail_unites'),
     path('parametrage/get_calendrier_ouvertures', secure_ajax(activites_ouvertures.Get_calendrier_ouvertures), name='ajax_get_calendrier_ouvertures'),
     path('parametrage/traitement_lot_ouvertures', secure_ajax(activites_ouvertures.Traitement_lot_ouvertures), name='ajax_traitement_lot_ouvertures'),
     path('parametrage/valider_calendrier_ouvertures', secure_ajax(activites_ouvertures.Valider_calendrier_ouvertures), name='ajax_valider_calendrier_ouvertures'),

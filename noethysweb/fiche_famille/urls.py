@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -9,7 +8,7 @@ from core.decorators import secure_ajax
 from fiche_famille.views import famille, famille_questionnaire, famille_messages, famille_ajouter, famille_pieces, famille_cotisations, famille_caisse, famille_aides, famille_quotients, famille_divers, \
                             famille_prestations, famille_reglements, famille_consommations, famille_factures, famille_voir_facture, famille_voir_cotisation, famille_abo_factures_email, \
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, \
-                            famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu
+                            famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail
 
 urlpatterns = [
 
@@ -24,7 +23,8 @@ urlpatterns = [
     path('individus/familles/supprimer/<int:idfamille>', famille.Supprimer_famille.as_view(), name='famille_supprimer'),
     path('individus/familles/resume/<int:idfamille>', famille.Resume.as_view(), name='famille_resume'),
 
-    path('individus/familles/questionnaire/<int:idfamille>', famille_questionnaire.Modifier.as_view(), name='famille_questionnaire'),
+    path('individus/familles/questionnaire/<int:idfamille>', famille_questionnaire.Consulter.as_view(), name='famille_questionnaire'),
+    path('individus/familles/questionnaire/modifier/<int:idfamille>', famille_questionnaire.Modifier.as_view(), name='famille_questionnaire_modifier'),
 
     path('individus/familles/messages/ajouter/<int:idfamille>', famille_messages.Ajouter.as_view(), name='famille_messages_ajouter'),
     path('individus/familles/messages/modifier/<int:idfamille>/<int:pk>', famille_messages.Modifier.as_view(), name='famille_messages_modifier'),
@@ -44,7 +44,8 @@ urlpatterns = [
     path('individus/familles/cotisations/supprimer_plusieurs/<int:idfamille>/<str:listepk>', famille_cotisations.Supprimer_plusieurs.as_view(), name='famille_cotisations_supprimer_plusieurs'),
     path('individus/familles/cotisations/voir/<int:idfamille>/<int:idcotisation>', famille_voir_cotisation.View.as_view(), name='famille_voir_cotisation'),
 
-    path('individus/familles/caisse/<int:idfamille>', famille_caisse.Modifier.as_view(), name='famille_caisse'),
+    path('individus/familles/caisse/<int:idfamille>', famille_caisse.Consulter.as_view(), name='famille_caisse'),
+    path('individus/familles/caisse/modifier/<int:idfamille>', famille_caisse.Modifier.as_view(), name='famille_caisse_modifier'),
 
     path('individus/familles/aides/liste/<int:idfamille>', famille_aides.Liste.as_view(), name='famille_aides_liste'),
     path('individus/familles/aides/selection_activite/<int:idfamille>', famille_aides.Selection_activite.as_view(), name='famille_aides_ajouter'),
@@ -96,9 +97,11 @@ urlpatterns = [
     path('individus/familles/rappels/liste/<int:idfamille>', famille_rappels.Liste.as_view(), name='famille_rappels_liste'),
     path('individus/familles/rappels/voir/<int:idfamille>/<int:idrappel>', famille_voir_rappel.View.as_view(), name='famille_voir_rappel'),
 
-    path('individus/familles/portail/<int:idfamille>', famille_portail.Modifier.as_view(), name='famille_portail'),
+    path('individus/familles/portail/<int:idfamille>', famille_portail.Consulter.as_view(), name='famille_portail'),
+    path('individus/familles/portail/modifier/<int:idfamille>', famille_portail.Modifier.as_view(), name='famille_portail_modifier'),
 
-    path('individus/familles/divers/<int:idfamille>', famille_divers.Modifier.as_view(), name='famille_divers'),
+    path('individus/familles/divers/<int:idfamille>', famille_divers.Consulter.as_view(), name='famille_divers'),
+    path('individus/familles/divers/modifier/<int:idfamille>', famille_divers.Modifier.as_view(), name='famille_divers_modifier'),
 
     # Grille des consommations
     path('individus/grille/<int:idfamille>', famille_consommations.Modifier.as_view(), name='famille_consommations'),
@@ -112,7 +115,9 @@ urlpatterns = [
     # Emails
     path('individus/familles/emails/ajouter/<int:idfamille>', famille_emails.Ajouter.as_view(), name='famille_emails_ajouter'),
 
-
+    # Messagerie du portail
+    path('individus/familles/messagerie/<int:idfamille>', famille_messagerie_portail.Ajouter.as_view(), name='famille_messagerie_portail'),
+    path('individus/familles/messagerie/ajouter/<int:idfamille>/<int:idstructure>', famille_messagerie_portail.Ajouter.as_view(), name='famille_messagerie_portail'),
 
     # AJAX
     path('individus/get_individus_existants', secure_ajax(famille_ajouter.Get_individus_existants), name='ajax_get_individus_existants'),

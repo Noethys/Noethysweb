@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -25,6 +24,7 @@ class MyPasswordChangeView(ClassCommuneLogin, auth_views.PasswordChangeView):
 
         # Enregistre le champ force_reset_password de l'utilisateur
         utilisateur.force_reset_password = False
+        utilisateur.famille.internet_mdp = "*****"
         utilisateur.save()
 
         return super().form_valid(form)

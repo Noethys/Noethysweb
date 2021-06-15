@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -12,9 +11,10 @@ from core.utils.utils_commandes import Commandes
 from core.models import Ecole, Classe, NiveauScolaire
 from django.db.models import Q, Count
 from individus.widgets import SelectionElevesWidget
+from core.forms.base import FormulaireBase
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     ecole = forms.ModelChoiceField(label="Ecole", queryset=Ecole.objects.all(), required=False)
     periode = forms.ChoiceField(label="Période", choices=[], required=False)
     classe = forms.ModelChoiceField(label="Classe", queryset=Classe.objects.all(), required=False)

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
 from django.forms import ModelForm, HiddenInput
-from django.utils.translation import ugettext as _
+from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, ButtonHolder, Div, Button
 from crispy_forms.bootstrap import Field, StrictButton
@@ -24,7 +23,7 @@ from core.utils.utils_commandes import Commandes
 #         return instance.individu.Get_nom()
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     objet = forms.CharField(label="Objet", required=False)
     html = forms.CharField(label="Texte", widget=SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '200px'}}), required=False)
     documents = forms.CharField(label="Documents", required=False, widget=Documents_joints())

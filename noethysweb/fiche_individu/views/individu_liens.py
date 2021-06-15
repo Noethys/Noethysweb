@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -13,19 +12,29 @@ from core.models import Lien
 from core.data.data_liens import DICT_TYPES_LIENS
 
 
-class Modifier(Onglet, TemplateView):
+class Consulter(Onglet, TemplateView):
     template_name = "fiche_individu/individu_edit.html"
+    mode = "CONSULTATION"
+
+    def get_context_data(self, **kwargs):
+        context = super(Consulter, self).get_context_data(**kwargs)
+        context['box_titre'] = "Liens"
+        context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
+        context['onglet_actif'] = "liens"
+        context['form'] = Formulaire(idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], request=self.request, mode=self.mode)
+        return context
+
+
+class Modifier(Consulter):
+    mode = "EDITION"
 
     def get_context_data(self, **kwargs):
         context = super(Modifier, self).get_context_data(**kwargs)
-        context['box_titre'] = "Liens"
         context['box_introduction'] = "Renseignez les liens de l'individu avec les autres membres de la famille."
-        context['onglet_actif'] = "liens"
-        context['form'] = Formulaire(idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'])
         return context
 
     def post(self, request, **kwargs):
-        form = Formulaire(request.POST, idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'])
+        form = Formulaire(request.POST, idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], request=self.request, mode=self.mode)
         if form.is_valid() == False:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -56,4 +65,4 @@ class Modifier(Onglet, TemplateView):
                 defaults={"idtype_lien": lien_inverse, "autorisation": None}
             )
 
-        return HttpResponseRedirect(reverse_lazy("individu_resume", args=(self.kwargs['idfamille'], self.kwargs['idindividu'])))
+        return HttpResponseRedirect(reverse_lazy("individu_liens", args=(self.kwargs['idfamille'], self.kwargs['idindividu'])))

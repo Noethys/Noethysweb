@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -13,7 +12,7 @@ from fiche_famille.views.famille import Onglet
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.db.models import Q
-
+from django.contrib import messages
 
 
 class Page(Onglet):
@@ -30,7 +29,8 @@ class Page(Onglet):
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """
         context = super(Page, self).get_context_data(**kwargs)
-        context['box_titre'] = "Aides"
+        if not hasattr(self, "verbe_action"):
+            context['box_titre'] = "Aides"
         context['onglet_actif'] = "aides"
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
@@ -58,7 +58,7 @@ class Liste(Page, crud.Liste):
     template_name = "fiche_famille/famille_liste.html"
 
     def get_queryset(self):
-        return Aide.objects.filter(Q(famille=self.Get_idfamille()) & self.Get_filtres("Q"))
+        return Aide.objects.select_related("activite", "activite__structure").filter(Q(famille=self.Get_idfamille()) & self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -90,14 +90,17 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
-            # Récupération idindividu et idfamille
             kwargs = view.kwargs
-            # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
-            html = [
-                self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
-                self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
-            ]
+            if instance.activite.structure in view.request.user.structures.all():
+                # Affiche les boutons d'action si l'utilisateur est associé à l'aide
+                html = [
+                    self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
+                    self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
+                ]
+            else:
+                # Afficher que l'accès est interdit
+                html = ["<span class='text-red'><i class='fa fa-minus-circle margin-r-5' title='Accès non autorisé'></i>Accès interdit</span>",]
             return self.Create_boutons_actions(html)
 
 
@@ -145,7 +148,7 @@ class ClasseCommune(Page):
                     instance.save()
                     formline.save_m2m()
 
-        return HttpResponseRedirect(self.get_success_url())
+        return super().form_valid(form)
 
 
 
@@ -168,10 +171,11 @@ class Selection_activite(Onglet, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(Selection_activite, self).get_context_data(**kwargs)
-        context['box_titre'] = "Aides"
+        if not hasattr(self, "verbe_action"):
+            context['box_titre'] = "Aides"
         context['box_introduction'] = "Vous devez commencer par sélectionner l'activité associée à l'aide que vous souhaitez créer."
         context['onglet_actif'] = "aides"
-        context['form'] = Formulaire_selection_activite
+        context['form'] = Formulaire_selection_activite(request=self.request)
         return context
 
     def post(self, request, **kwargs):

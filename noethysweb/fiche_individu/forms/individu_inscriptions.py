@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder
@@ -18,8 +18,8 @@ import datetime
 
 
 
-class Formulaire(ModelForm):
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr"}), queryset=Activite.objects.all(), required=True)
+class Formulaire(FormulaireBase, ModelForm):
+    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr"}), queryset=Activite.objects.none(), required=True)
     date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
     date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(), help_text="Laissez vide la date de fin si vous ne connaissez pas la durée de l'inscription.")
 
@@ -39,11 +39,14 @@ class Formulaire(ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
-        # Définit l'activité associée
+        # Définit l'individu associé
         if hasattr(self.instance, "individu") == False:
             individu = Individu.objects.get(pk=idindividu)
         else:
             individu = self.instance.individu
+
+        # Liste les activités liées à la structure actuelle
+        self.fields['activite'].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_debut")
 
         # Si modification
         if self.instance.idinscription != None:

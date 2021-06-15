@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
@@ -16,7 +16,7 @@ from core.utils import utils_parametres
 import copy
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     memoriser_parametres = forms.BooleanField(label="Mémoriser les paramètres", initial=False, required=False)
 
     affichage_solde = forms.ChoiceField(label="Afficher le solde", choices=[("0", "Actuel"), ("1", "Initial")], initial="actuel", required=False)

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
 from crispy_forms.bootstrap import Field, StrictButton
@@ -18,7 +18,7 @@ from facturation.forms.devis_options_impression import Formulaire as Form_option
 from core.utils import utils_dates
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
     individus = forms.MultipleChoiceField(label="Individus", widget=Select2MultipleWidget({"lang": "fr"}), choices=[], required=True)
@@ -48,7 +48,7 @@ class Formulaire(ModelForm):
         self.fields["date_edition"].initial = datetime.date.today()
 
         # Recherche les inscriptions de la famille
-        inscriptions = Inscription.objects.select_related("activite", "individu").filter(famille_id=idfamille)
+        inscriptions = Inscription.objects.select_related("activite", "individu").filter(famille_id=idfamille, activite__structure__in=utilisateur.structures.all())
 
         # Individus
         liste_individus = list({(inscription.individu_id, inscription.individu.prenom): None for inscription in inscriptions}.keys())

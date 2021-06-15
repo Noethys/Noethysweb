@@ -4,13 +4,14 @@
 	.organisateur {
 		position: relative;
 		width: 100%;
-		padding: 15px 10px 5px 10px;
+		padding: 15px 0px 10px 0px;
 		overflow: hidden;
+        border-bottom: 1px solid #5f5f5f;
 	}
 	.organisateur > .image > img {
 		display: block;
 		width: 100%;
-		max-width: 140px;
+		max-width: 180px;
 		height: auto;
 		margin-left: auto;
 		margin-right: auto;
@@ -26,19 +27,58 @@
 		font-size: 14px;
 		word-wrap : break-word;
 		white-space: normal;
+        display: block;
 	}
+    .sidebar-collapse > .organisateur > .info {
+          animation-name: fadeOut;
+          animation-fill-mode: both;
+          visibility: hidden;
+        }
+    .sidebar-collapse .organisateur .info{
+        display: none;
+    }
+    .brand-text {
+        FONT-WEIGHT: 500;
+        display: block;
+        {#font-size: 1.4rem;#}
+        {#line-height: 0.5;#}
+        margin-left: 10px;
+        transition: width .3s ease-in-out;
+        white-space: nowrap;
+        letter-spacing: 3px;
+    }
+    .sidebar-no-expand .brand-link .brand-image {
+        margin-left: 2.9rem;
+        transition: width .3s ease-in-out;
+    }
+    .sidebar-collapse .brand-link .brand-image {
+        margin-left: .95rem;
+        transition: width .3s ease-in-out;
+    }
+
 
 </style>
 
-<aside class="main-sidebar">
+{% get_item_defaut options_interface "sidebar-no-expand" True as sidebar_no_expand %}
+
+<aside class="main-sidebar sidebar-dark-lightblue
+    {% if sidebar_no_expand %}sidebar-no-expand{% endif %}
+">
+
+    <!-- Logo -->
+    <a href="{% url 'accueil' %}" class="brand-link navbar-lightblue">
+      <img src="{% static "images/logo_blanc.png" %}" alt="Logo Noethysweb" class="brand-image" style="opacity: .4">
+      <span class="brand-text font-weight-light" style="opacity: .6">Noethysweb</span>
+    </a>
+
     <!-- sidebar: style can be found in sidebar.less -->
-    <section class="sidebar">
+    <div class="sidebar">
 
         <!-- Logo de l'organisateur -->
-        <div class="user-panel organisateur">
+        <div class="organisateur">
             <div class="image">
                 {% if organisateur.logo %}
-                    <img src="{{ organisateur.logo.url }}" class="img-rounded" alt="Logo organisateur">
+                    <img src="{{ organisateur.logo.url }}" class="rounded" alt="Logo organisateur">
                 {% endif %}
             </div>
             <div class="info">
@@ -46,59 +86,23 @@
             </div>
         </div>
 
-{% comment %}
-        <!-- search form -->
-        <form id="form_recherche" action="{% url 'rechercher' %}" method="GET" class="sidebar-form">
-            {% csrf_token %}
-            <div class="input-group">
-                <input id="champ_recherche" type="text" title="Recherchez une commande, un individu, une famille, un payeur, une adresse..." name="champ_recherche" class="form-control" placeholder="Rechercher...">
-                <span class="input-group-btn">
-                    <button type="submit" id="search-btn" class="btn btn-flat">
-                        <i class="fa fa-search"></i>
-                    </button>
-                </span>
-            </div>
-        </form>
-        <!-- /.search form -->
-{% endcomment %}
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <li class="nav-header">{{ menu_principal.titre|upper }}</li>
+                {% for child in menu_principal.GetChildren %}
+                    {% if child.toujours_afficher or child.HasChildren %}
+                        <li class="nav-item" title="{{ child.titre }}">
+                            <a class="nav-link {% if child in breadcrumb %} active{% endif %}" {% if child.code %}href="{% url child.code %}"{% endif %}>
+                                <i class="nav-icon fa fa-{{ child.icone }}"></i>
+                                <p>{{ child.titre }}</p>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
 
-        <ul class="sidebar-menu">
-            <li class="header">{{ menu_principal.titre|upper }}</li>
-            {% for child in menu_principal.GetChildren %}
-                {% if child.toujours_afficher or child.HasChildren %}
-                    <li {% if child in breadcrumb %}class="active"{% endif %}>
-                        <a {% if child.code %}href="{% url child.code %}"{% endif %}>
-                            <i class="fa fa-{{ child.icone }}"></i>
-                            <span>{{ child.titre }}</span>
-                        </a>
-                    </li>
-                {% endif %}
-            {% endfor %}
-        </ul>
+            </ul>
+        </nav>
 
-    </section>
+    </div>
     <!-- /.sidebar -->
 </aside>
-
-
-{% block scripts %}
-    <script>
-        $(document).ready(function() {
-
-            $("#form_recherche1").on('submit', function(event) {
-                if ($("#navbar-search-input").val().length < 3) {
-                    event.preventDefault();
-                    toastr.error("Une recherche doit effectuée sur un minimum de 3 caractères");
-                };
-            });
-            $("#form_recherche2").on('submit', function(event) {
-                if ($("#champ-recherche2").val().length < 3) {
-                    event.preventDefault();
-                    toastr.error("Une recherche doit effectuée sur un minimum de 3 caractères");
-                };
-            });
-
-
-        });
-    </script>
-{% endblock scripts %}

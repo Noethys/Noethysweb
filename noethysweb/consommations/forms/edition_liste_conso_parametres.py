@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -12,6 +11,7 @@ from core.widgets import SelectionActivitesWidget, ColorPickerWidget, Profil_con
 from consommations.widgets import SelectionGroupesWidget, SelectionUnitesWidget, ColonnesPersoWidget, SelectionEcolesWidget, SelectionClassesWidget, SelectionEvenementsWidget
 from core.models import Parametre
 from core.utils.utils_commandes import Commandes
+from core.forms.base import FormulaireBase
 
 
 class Form_profil_configuration(forms.Form):
@@ -29,7 +29,7 @@ class Form_profil_configuration(forms.Form):
         )
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     profil = forms.ModelChoiceField(label="Profil de configuration", queryset=Parametre.objects.none(), widget=Profil_configuration({"categorie": "edition_liste_conso", "module": "consommations.views.edition_liste_conso"}), required=False)
 
     # Activités
@@ -88,7 +88,6 @@ class Formulaire(forms.Form):
     largeur_colonne_informations = forms.ChoiceField(label="Largeur de la colonne", choices=liste_choix_largeur, initial="automatique", required=False)
 
 
-
     def __init__(self, *args, **kwargs):
         dates = kwargs.pop("dates", [])
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -106,6 +105,7 @@ class Formulaire(forms.Form):
         # Groupes
         self.fields['groupes'].label = False
         self.fields['groupes'].widget.attrs.update({'dates': dates})
+        self.fields["groupes"].widget.request = self.request
 
         # Scolarité
         self.fields['regroupement_scolarite'].label = False
@@ -120,6 +120,7 @@ class Formulaire(forms.Form):
         # Unités
         self.fields['unites'].label = False
         self.fields['unites'].widget.attrs.update({'dates': dates})
+        self.fields["unites"].widget.request = self.request
 
         # Colonnes personnalisées
         self.fields['colonnes_perso'].label = False

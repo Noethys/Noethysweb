@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -32,9 +31,10 @@ class Page(Onglet):
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """
         context = super(Page, self).get_context_data(**kwargs)
-        context['box_titre'] = "Pièces"
+        if not hasattr(self, "verbe_action"):
+            context['box_titre'] = "Pièces"
         context['onglet_actif'] = "pieces"
-        context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(famille=context['famille'])
+        context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(famille=context['famille'], utilisateur=self.request.user)
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
         ]

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -92,7 +91,7 @@ class Page(crud.Page):
         context['box_titre'] = "Scolarité"
         context['onglet_actif'] = "scolarite"
         if "form_parametres" not in kwargs:
-            context['form_parametres'] = Formulaire(idclasse=self.Get_idclasse())
+            context['form_parametres'] = Formulaire(idclasse=self.Get_idclasse(), request=self.request)
         return context
 
     def get_success_url(self):
@@ -114,7 +113,7 @@ class Liste(Page, crud.Liste):
     template_name = "individus/inscriptions_scolaires.html"
 
     def post(self, request, **kwargs):
-        form = Formulaire(request.POST)
+        form = Formulaire(request.POST, request=self.request)
         if not form.is_valid():
             return HttpResponseRedirect(reverse_lazy(self.url_liste))
         if not form.cleaned_data.get("ecole") or not form.cleaned_data.get("periode") or not form.cleaned_data.get("classe"):

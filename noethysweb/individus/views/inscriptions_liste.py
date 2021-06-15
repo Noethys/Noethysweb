@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -9,6 +8,7 @@ from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Inscription
 from fiche_individu.forms.individu_inscriptions import Formulaire
+from django.db.models import Q
 
 
 class Page(crud.Page):
@@ -17,7 +17,7 @@ class Page(crud.Page):
     url_modifier = "inscriptions_modifier"
     url_supprimer = "inscriptions_supprimer"
     url_supprimer_plusieurs = "inscriptions_supprimer_plusieurs"
-    description_liste = "Voici ci-dessous la liste des inscriptions."
+    description_liste = "Voici ci-dessous la liste des inscriptions. Vous ne pouvez accéder qu'aux inscriptions associées à vos structures."
     description_saisie = "Saisissez toutes les informations concernant l'inscription à saisir et cliquez sur le bouton Enregistrer."
     objet_singulier = "une inscription"
     objet_pluriel = "des inscriptions"
@@ -27,7 +27,8 @@ class Liste(Page, crud.Liste):
     model = Inscription
 
     def get_queryset(self):
-        return Inscription.objects.select_related("famille", "individu", "groupe", "categorie_tarif", "activite").filter(self.Get_filtres("Q"))
+        condition = Q(activite__structure__in=self.request.user.structures.all())
+        return Inscription.objects.select_related("famille", "individu", "groupe", "categorie_tarif", "activite", "activite__structure").filter(self.Get_filtres("Q"), condition)
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

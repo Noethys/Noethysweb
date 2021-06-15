@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -7,7 +6,8 @@
 from django.urls import include, path
 from core.decorators import secure_ajax
 from fiche_individu.views import individu, individu_identite, individu_coords, individu_questionnaire, individu_scolarite, individu_inscriptions, \
-                                individu_medical, individu_messages, individu_liens, individu_appliquer_forfait_date
+                                individu_medical, individu_messages, individu_liens, individu_appliquer_forfait_date, individu_contacts, \
+                                individu_regimes_alimentaires, individu_assurances
 
 urlpatterns = [
 
@@ -17,13 +17,17 @@ urlpatterns = [
     # path('individus/individus/supprimer/<int:idfamille>/<int:idindividu>', famille_ajouter.Supprimer_individu.as_view(), name='individu_supprimer'),
     path('individus/individus/resume/<int:idfamille>/<int:idindividu>', individu.Resume.as_view(), name='individu_resume'),
 
-    path('individus/individus/identite/<int:idfamille>/<int:idindividu>', individu_identite.Modifier.as_view(), name='individu_identite'),
+    path('individus/individus/identite/<int:idfamille>/<int:idindividu>', individu_identite.Consulter.as_view(), name='individu_identite'),
+    path('individus/individus/identite/modifier/<int:idfamille>/<int:idindividu>', individu_identite.Modifier.as_view(), name='individu_identite_modifier'),
 
-    path('individus/individus/coords/<int:idfamille>/<int:idindividu>', individu_coords.Modifier.as_view(), name='individu_coords'),
+    path('individus/individus/coords/<int:idfamille>/<int:idindividu>', individu_coords.Consulter.as_view(), name='individu_coords'),
+    path('individus/individus/coords/modifier/<int:idfamille>/<int:idindividu>', individu_coords.Modifier.as_view(), name='individu_coords_modifier'),
 
-    path('individus/individus/questionnaire/<int:idfamille>/<int:idindividu>', individu_questionnaire.Modifier.as_view(), name='individu_questionnaire'),
+    path('individus/individus/questionnaire/<int:idfamille>/<int:idindividu>', individu_questionnaire.Consulter.as_view(), name='individu_questionnaire'),
+    path('individus/individus/questionnaire/modifier/<int:idfamille>/<int:idindividu>', individu_questionnaire.Modifier.as_view(), name='individu_questionnaire_modifier'),
 
-    path('individus/individus/liens/<int:idfamille>/<int:idindividu>', individu_liens.Modifier.as_view(), name='individu_liens'),
+    path('individus/individus/liens/<int:idfamille>/<int:idindividu>', individu_liens.Consulter.as_view(), name='individu_liens'),
+    path('individus/individus/liens/modifier/<int:idfamille>/<int:idindividu>', individu_liens.Modifier.as_view(), name='individu_liens_modifier'),
 
     path('individus/individus/scolarite/liste/<int:idfamille>/<int:idindividu>', individu_scolarite.Liste.as_view(), name='individu_scolarite_liste'),
     path('individus/individus/scolarite/ajouter/<int:idfamille>/<int:idindividu>', individu_scolarite.Ajouter.as_view(), name='individu_scolarite_ajouter'),
@@ -36,6 +40,9 @@ urlpatterns = [
     path('individus/individus/inscriptions/supprimer/<int:idfamille>/<int:idindividu>/<int:pk>', individu_inscriptions.Supprimer.as_view(), name='individu_inscriptions_supprimer'),
     path('individus/individus/inscriptions/appliquer_forfait_date/<int:idfamille>/<int:idindividu>', individu_appliquer_forfait_date.View.as_view(), name='individu_appliquer_forfait_date'),
 
+    path('individus/individus/regimes_alimentaires/<int:idfamille>/<int:idindividu>', individu_regimes_alimentaires.Consulter.as_view(), name='individu_regimes_alimentaires'),
+    path('individus/individus/regimes_alimentaires/modifier/<int:idfamille>/<int:idindividu>', individu_regimes_alimentaires.Modifier.as_view(), name='individu_regimes_alimentaires_modifier'),
+
     path('individus/individus/medical/liste/<int:idfamille>/<int:idindividu>', individu_medical.Liste.as_view(), name='individu_medical_liste'),
 
     path('individus/individus/medical/ajouter_info/<int:idfamille>/<int:idindividu>', individu_medical.Ajouter_infomedicale.as_view(), name='individu_infosmedicales_ajouter'),
@@ -45,6 +52,17 @@ urlpatterns = [
     path('individus/individus/medical/ajouter_vaccin/<int:idfamille>/<int:idindividu>', individu_medical.Ajouter_vaccin.as_view(), name='individu_vaccins_ajouter'),
     path('individus/individus/medical/modifier_vaccin/<int:idfamille>/<int:idindividu>/<int:pk>', individu_medical.Modifier_vaccin.as_view(), name='individu_vaccins_modifier'),
     path('individus/individus/medical/supprimer_vaccin/<int:idfamille>/<int:idindividu>/<int:pk>', individu_medical.Supprimer_vaccin.as_view(), name='individu_vaccins_supprimer'),
+
+    path('individus/individus/contacts/liste/<int:idfamille>/<int:idindividu>', individu_contacts.Liste.as_view(), name='individu_contacts_liste'),
+    path('individus/individus/contacts/ajouter/<int:idfamille>/<int:idindividu>', individu_contacts.Ajouter.as_view(), name='individu_contacts_ajouter'),
+    path('individus/individus/contacts/modifier/<int:idfamille>/<int:idindividu>/<int:pk>', individu_contacts.Modifier.as_view(), name='individu_contacts_modifier'),
+    path('individus/individus/contacts/supprimer/<int:idfamille>/<int:idindividu>/<int:pk>', individu_contacts.Supprimer.as_view(), name='individu_contacts_supprimer'),
+
+    path('individus/individus/assurances/liste/<int:idfamille>/<int:idindividu>', individu_assurances.Liste.as_view(), name='individu_assurances_liste'),
+    path('individus/individus/assurances/ajouter/<int:idfamille>/<int:idindividu>', individu_assurances.Ajouter.as_view(), name='individu_assurances_ajouter'),
+    path('individus/individus/assurances/modifier/<int:idfamille>/<int:idindividu>/<int:pk>', individu_assurances.Modifier.as_view(), name='individu_assurances_modifier'),
+    path('individus/individus/assurances/supprimer/<int:idfamille>/<int:idindividu>/<int:pk>', individu_assurances.Supprimer.as_view(), name='individu_assurances_supprimer'),
+
 
     path('individus/individus/messages/ajouter/<int:idfamille>/<int:idindividu>', individu_messages.Ajouter.as_view(), name='individu_messages_ajouter'),
     path('individus/individus/messages/modifier/<int:idfamille>/<int:idindividu>/<int:pk>', individu_messages.Modifier.as_view(), name='individu_messages_modifier'),

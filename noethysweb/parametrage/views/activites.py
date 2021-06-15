@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -35,8 +34,8 @@ class Liste(Page, crud.Liste):
     model = Activite
 
     def get_queryset(self):
-        return Activite.objects.prefetch_related("groupes_activites").filter(self.Get_filtres("Q"))
-
+        # return Activite.objects.prefetch_related("groupes_activites").filter(self.Get_filtres("Q"), structure=self.request.user.structure_actuelle)
+        return Activite.objects.prefetch_related("groupes_activites").filter(self.Get_filtres("Q"), structure__in=self.request.user.structures.all())
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
         context['impression_introduction'] = ""
@@ -93,18 +92,26 @@ class Onglet(CustomView):
     menu_code = "activites_liste"
     liste_onglets = [
         {"code": "resume", "label": "Résumé", "icone": "fa-home", "url": "activites_resume"},
+        {"rubrique": "Généralités"},
         {"code": "generalites", "label": "Généralités", "icone": "fa-info-circle", "url": "activites_generalites"},
         {"code": "responsables", "label": "Responsables", "icone": "fa-user", "url": "activites_responsables_liste"},
         {"code": "agrements", "label": "Agréments", "icone": "fa-file-text-o", "url": "activites_agrements_liste"},
         {"code": "groupes", "label": "Groupes", "icone": "fa-users", "url": "activites_groupes_liste"},
         {"code": "renseignements", "label": "Renseignements", "icone": "fa-check-circle-o", "url": "activites_renseignements"},
+        {"rubrique": "Unités"},
         {"code": "unites_conso", "label": "Unités de consommation", "icone": "fa-table", "url": "activites_unites_conso_liste"},
         {"code": "unites_remplissage", "label": "Unités de remplissage", "icone": "fa-table", "url": "activites_unites_remplissage_liste"},
+        {"rubrique": "Calendrier"},
         {"code": "calendrier", "label": "Calendrier", "icone": "fa-calendar", "url": "activites_calendrier"},
         {"code": "evenements", "label": "Evénements", "icone": "fa-calendar-times-o", "url": "activites_evenements_liste"},
+        {"rubrique": "Tarifs"},
         {"code": "categories_tarifs", "label": "Catégories de tarifs", "icone": "fa-euro", "url": "activites_categories_tarifs_liste"},
         {"code": "noms_tarifs", "label": "Noms de tarifs", "icone": "fa-euro", "url": "activites_noms_tarifs_liste"},
         {"code": "tarifs", "label": "Tarifs", "icone": "fa-euro", "url": "activites_tarifs_liste"},
+        {"rubrique": "Portail"},
+        {"code": "portail_parametres", "label": "Paramètres", "icone": "fa-gear", "url": "activites_portail_parametres"},
+        # {"code": "portail_unites", "label": "Unités de réservation", "icone": "fa-table", "url": "activites_portail_unites_liste"},
+        {"code": "portail_periodes", "label": "Périodes de réservation", "icone": "fa-calendar", "url": "activites_portail_periodes_liste"},
     ]
 
     def get_context_data(self, **kwargs):
@@ -116,6 +123,8 @@ class Onglet(CustomView):
 
     def Get_idactivite(self):
         return self.kwargs.get('idactivite', None)
+
+
 
 
 

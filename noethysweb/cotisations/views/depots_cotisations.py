@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -48,8 +47,11 @@ def Modifier_cotisations(request):
     else:
         condition = (Q(pk__in=liste_cotisations) | Q(depot_cotisation__isnull=True))
 
+    # Sélectionne uniquement les structures accessibles par l'utilisateur
+    condition &= (Q(type_cotisation__structure__in=request.user.structures.all()) | Q(type_cotisation__structure__isnull=True))
+
     lignes = []
-    for cotisation in Cotisation.objects.select_related("type_cotisation", "unite_cotisation", "famille", "individu").filter(condition):
+    for cotisation in Cotisation.objects.select_related("type_cotisation", "type_cotisation__structure", "unite_cotisation", "famille", "individu").filter(condition):
         lignes.append({
             "pk": cotisation.pk,
             "date_debut": str(cotisation.date_debut) if cotisation.date_debut else None,

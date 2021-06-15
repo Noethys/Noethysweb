@@ -40,7 +40,7 @@
                     <form id="form_recherche1" action="{% url 'rechercher' %}" method="GET" class="form-inline" role="search">
                         {% csrf_token %}
                         <div class="input-group input-group-sm">
-                            <input id="form-control form-control-navbar" type="text" title="Rechercher une commande, un individu, une famille, un payeur, une adresse..." name="champ_recherche" class="form-control form-control-navbar champ-recherche" placeholder="Rechercher...">
+                            <input id="champ-recherche1" type="text" title="Rechercher une commande, un individu, une famille, un payeur, une adresse..." name="champ_recherche" class="form-control form-control-navbar champ-recherche" placeholder="Rechercher...">
                             <div class="input-group-append">
                                 <button class="btn btn-navbar" type="submit">
                                     <i class="fa fa-search"></i>
@@ -104,6 +104,44 @@
                 </ul>
             </li>
 
+
+            {# Messagerie #}
+            {% if liste_messages_non_lus %}
+                <li class="nav-item dropdown">
+
+                    <a class="nav-link" data-toggle="dropdown" href="#" title="Vous avez {{ liste_messages_non_lus|length }} message{{ liste_messages_non_lus|length|pluralize }}">
+                        <i class="fa fa-comments"></i>
+                        <span class="badge badge-danger navbar-badge">{{ liste_messages_non_lus|length }}</span>
+                    </a>
+
+                    <div class="dropdown-menu dropdown-menu-xl dropdown-menu-left">
+                        <span class="dropdown-item dropdown-header text-center">{{ liste_messages_non_lus|length }} nouveau{{ liste_messages_non_lus|length|pluralize:"x" }} message{{ liste_messages_non_lus|length|pluralize }}</span>
+                        <div class="dropdown-divider"></div>
+
+                        {% for message in liste_messages_non_lus %}
+                            <a href="{% url 'messagerie_portail' idfamille=message.famille_id idstructure=message.structure_id %}" class="dropdown-item">
+                                <div class="media">
+                                    <div class="media-body">
+                                        <h3 class="dropdown-item-title">
+                                            <i class="fa fa-envelope text-danger mr-1"></i> {{ message.famille.nom }}
+                                        </h3>
+                                        <p class="text-xs">{{ message.texte|striptags|truncatechars:55 }}</p>
+                                        <p class="text-xs text-muted"><i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }} | <i class="fa fa-home mr-1"></i>{{ message.structure }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                        {% endfor %}
+
+                        <a href="{% url 'messagerie_portail' %}" class="dropdown-item dropdown-footer">
+                            Voir tous les nouveaux messages
+                        </a>
+
+                    </div>
+                </li>
+            {% endif %}
+
+
         </ul>
 
         <ul class="navbar-nav ml-auto">
@@ -117,39 +155,6 @@
             </div>
 {% endcomment %}
 
-            {# Recherche #}
-{% comment %}
-            <li class="dropdown messages-menu" id="recherche_collapse">
-                <a href="#" class="nav-link" data-toggle="dropdown">
-                    <i class="fa fa-search"></i>
-                </a>
-                <ul class="dropdown-menu">
-                    <li class="dropdown-item" class="header bg-lightblue">
-                        <form id="form_recherche2" action="{% url 'rechercher' %}" method="GET" class="">
-                            {% csrf_token %}
-                            <div class="input-group">
-                                <input id="champ-recherche2" type="text" title="Recherchez une commande, un individu, une famille, un payeur, une adresse..." name="champ_recherche" class="form-control champ-recherche" placeholder="Rechercher...">
-                                <span class="input-group-btn">
-                                    <button type="submit" class="btn btn-primary bouton-recherche" aria-label="Rechercher">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </span>
-                            </div>
-                        </form>
-                    </li>
-                    <li>
-                        <ul class="menu">
-                            {% for item in request.session.historique_recherche %}
-                                <li class="dropdown-item"><a href="{{ item.url }}" style="color: #444;">{{ item.label }}</a></li>
-                            {% empty %}
-                                <li class="dropdown-item"><a>Historique vide</a></li>
-                            {% endfor %}
-                        </ul>
-                    </li>
-                    <li class="dropdown-footer"><a href="{% url 'historique' %}">Ouvrir l'historique complet</a></li>
-                </ul>
-            </li>
-{% endcomment %}
 
             {# Utilisateur en cours #}
             <li class="dropdown user user-menu">
@@ -170,7 +175,7 @@
                     <!-- Menu Footer-->
                     <li class="user-footer">
                         <div class="pull-left">
-                            <a href="#" class="btn btn-default">Profil</a>
+                            <a href="{% url 'profil_utilisateur' %}" class="btn btn-default">Profil</a>
                         </div>
                         <div class="pull-right">
                             <a href="{% url 'deconnexion' %}" class="btn btn-danger"><i class="fa fa-power-off margin-r-5"></i>Déconnexion</a>

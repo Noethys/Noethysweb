@@ -1,0 +1,76 @@
+{% extends "portail/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+{% endblock %}
+
+{% block contenu_page %}
+
+    {# Texte d'introduction #}
+    {% if parametres_portail.reglements_intro %}
+        <div style="margin-bottom: 20px;">
+            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.reglements_intro }}
+        </div>
+    {% endif %}
+
+    {# Liste des factures #}
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}Liste des règlements{% endblock %}
+        {% block box_contenu %}
+
+            {# Liste des règlements #}
+            <div class="">
+                {% if liste_reglements %}
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr class="text-center">
+                                <th>Date</th>
+                                <th>Mode</th>
+                                <th>N°</th>
+                                <th>Montant</th>
+                                {% if parametres_portail.reglements_afficher_encaissement %}
+                                    <th>Encaissé</th>
+                                {% endif %}
+                                {% if parametres_portail.reglements_autoriser_telechargement_recu %}
+                                    <th style="width: 90px;">Actions</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reglement in liste_reglements %}
+                                <tr class="text-center">
+                                    <td>{{ reglement.date|date:'d/m/Y' }}</td>
+                                    <td>{{ reglement.mode }}</td>
+                                    <td>{% if reglement.numero_piece %}****{{ reglement.numero_piece|slice:"-3:" }}{% endif %}</td>
+                                    <td>{{ reglement.montant|montant }}</td>
+                                    {% if parametres_portail.reglements_afficher_encaissement %}
+                                        <td>
+                                            {% if reglement.depot %}
+                                                <span class="badge badge-pill bg-success">{{ reglement.depot.date|date:'d/m/Y' }}</span>
+                                            {% else %}
+                                                <span class="badge badge-pill bg-danger">Non</span>
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
+                                    {% if parametres_portail.reglements_autoriser_telechargement_recu %}
+                                        <td><a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_accueil' %}" title="Télécharger le reçu"><i class="fa fa-fw fa-download"></i></a></td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <b>Aucun règlement.</b>
+                {% endif %}
+            </div>
+
+        {% endblock box_contenu %}
+        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+    {% endembed %}
+
+{% endblock contenu_page %}

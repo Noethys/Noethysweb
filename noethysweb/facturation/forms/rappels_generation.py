@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -14,10 +13,10 @@ from core.models import LotRappels, Famille, LotFactures
 from django_select2.forms import Select2MultipleWidget, Select2Widget
 import datetime
 from django.contrib import messages
+from core.forms.base import FormulaireBase
 
 
-
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     date_reference = forms.DateField(label="Date de référence", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
     lot_rappels = forms.ModelChoiceField(label="Lot de rappels", queryset=LotRappels.objects.all(), required=False, widget=Select_avec_commandes({
             "donnees_extra": {}, "url_ajax": "ajax_modifier_lot_rappels",

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -16,7 +15,7 @@ import json
 
 def Generer_pdf(request):
     # Récupération des options
-    form = Formulaire(request.POST)
+    form = Formulaire(request.POST, request=self.request)
     if not form.is_valid():
         return JsonResponse({"erreur": "Veuillez compléter les paramètres"}, status=401)
     options = form.cleaned_data
@@ -54,6 +53,6 @@ class View(CustomView, TemplateView):
         context['box_titre'] = "Liste des anniversaires"
         context['box_introduction'] = "Renseignez les paramètres et cliquez sur le bouton Générer le PDF."
         if "form" not in kwargs:
-            context['form'] = Formulaire()
+            context['form'] = Formulaire(request=self.request)
         return context
 

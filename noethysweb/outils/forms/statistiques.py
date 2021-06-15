@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -11,10 +10,11 @@ from crispy_forms.bootstrap import Field
 from core.widgets import SelectionActivitesWidget, DateRangePickerWidget, DatePickerWidget, MonthPickerWidget
 from core.models import Vacance, LISTE_VACANCES, LISTE_MOIS
 from django_select2.forms import Select2Widget
+from core.forms.base import FormulaireBase
 import datetime
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     choix_rubrique = [
         ("Individus", (
             ("individus_nombre", "Nombre d'individus"),

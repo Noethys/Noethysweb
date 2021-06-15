@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
 from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
@@ -15,7 +15,7 @@ from core.models import Facture, LotFactures
 from core.widgets import DatePickerWidget, Select_avec_commandes
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     date_edition = forms.DateField(label="Date d'émission", required=True, widget=DatePickerWidget())
     date_echeance = forms.DateField(label="Date d'échéance", required=False, widget=DatePickerWidget())
     lot = forms.ModelChoiceField(label="Lot de factures", queryset=LotFactures.objects.all(), required=False, widget=Select_avec_commandes(

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -12,10 +11,10 @@ from core.widgets import DateRangePickerWidget, SelectionActivitesWidget, Profil
 from core.utils import utils_parametres, utils_questionnaires
 from core.models import Activite
 from django_select2.forms import Select2Widget, Select2MultipleWidget
+from core.forms.base import FormulaireBase
 
 
-
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr"}), queryset=Activite.objects.all().order_by("-date_fin"), required=True)
     afficher_detail_groupe = forms.BooleanField(label="Afficher détail par groupe", initial=False, required=False)

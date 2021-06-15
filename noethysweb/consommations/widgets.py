@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -14,6 +13,7 @@ import json
 
 class SelectionGroupesWidget(Widget):
     template_name = 'core/widgets/checktree.html'
+    request = None
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())
@@ -30,7 +30,7 @@ class SelectionGroupesWidget(Widget):
         liste_dates = context.get("dates", [])
 
         # Branches 1
-        liste_activites = Activite.objects.filter(ouverture__date__in=liste_dates).order_by("-date_fin").distinct()
+        liste_activites = Activite.objects.filter(ouverture__date__in=liste_dates, structure__in=self.request.user.structures.all()).order_by("-date_fin").distinct()
         context['liste_branches1'] = [{"pk": activite.pk, "label": activite.nom} for activite in liste_activites]
 
         # Branches 2
@@ -53,6 +53,7 @@ class SelectionGroupesWidget(Widget):
 
 class SelectionUnitesWidget(Widget):
     template_name = 'consommations/widgets/selection_unites.html'
+    request = None
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())
@@ -74,7 +75,7 @@ class SelectionUnitesWidget(Widget):
         liste_dates = context.get("dates", [])
 
         # Importation des activités
-        liste_activites = Activite.objects.filter(ouverture__date__in=liste_dates).order_by("-date_fin").distinct()
+        liste_activites = Activite.objects.filter(ouverture__date__in=liste_dates, structure__in=self.request.user.structures.all()).order_by("-date_fin").distinct()
 
         # Importation des unités
         dict_unites = {}

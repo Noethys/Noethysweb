@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -92,7 +91,8 @@ class Page(Onglet):
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """
         context = super(Page, self).get_context_data(**kwargs)
-        context['box_titre'] = "Adhésions"
+        if not hasattr(self, "verbe_action"):
+            context['box_titre'] = "Adhésions"
         context['onglet_actif'] = "cotisations"
         # context['cotisations_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(famille=context['famille'])
         context['boutons_liste'] = [
@@ -160,7 +160,7 @@ class Liste(Page, crud.Liste):
     template_name = "fiche_famille/famille_pieces.html"
 
     def get_queryset(self):
-        return Cotisation.objects.filter(Q(famille=self.Get_idfamille()) & self.Get_filtres("Q"))
+        return Cotisation.objects.select_related("type_cotisation", "type_cotisation__structure").filter(Q(famille=self.Get_idfamille()) & self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -203,15 +203,18 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
-            # Récupération idindividu et idfamille
             kwargs = view.kwargs
-            # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
-            html = [
-                self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
-                self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
-                self.Create_bouton_imprimer(url=reverse("famille_voir_cotisation", kwargs={"idfamille": kwargs["idfamille"], "idcotisation": instance.pk}), title="Imprimer ou envoyer par email l'adhésion"),
-            ]
+            if instance.type_cotisation.structure in view.request.user.structures.all():
+                # Affiche les boutons d'action si l'utilisateur est associé à ce type de cotisation
+                html = [
+                    self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
+                    self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
+                    self.Create_bouton_imprimer(url=reverse("famille_voir_cotisation", kwargs={"idfamille": kwargs["idfamille"], "idcotisation": instance.pk}), title="Imprimer ou envoyer par email l'adhésion"),
+                ]
+            else:
+                # Afficher que l'accès est interdit
+                html = ["<span class='text-red'><i class='fa fa-minus-circle margin-r-5' title='Accès non autorisé'></i>Accès interdit</span>",]
             return self.Create_boutons_actions(html)
 
         def Get_date_depot(self, instance, *args, **kwargs):

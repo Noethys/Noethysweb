@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -14,6 +13,7 @@ from cotisations.forms.cotisations_choix_modele import Formulaire as Form_modele
 from core.models import Mail, DocumentJoint, Cotisation, Destinataire, AdresseMail, ModeleEmail
 from django.http import JsonResponse
 from django.contrib import messages
+from django.db.models import Q
 import json
 
 
@@ -85,7 +85,8 @@ class Liste(Page, crud.Liste):
     model = Cotisation
 
     def get_queryset(self):
-        return Cotisation.objects.select_related('famille', 'individu', 'type_cotisation', 'unite_cotisation', 'depot_cotisation').filter(self.Get_filtres("Q"))
+        condition = (Q(type_cotisation__structure__in=self.request.user.structures.all()) | Q(type_cotisation__structure__isnull=True))
+        return Cotisation.objects.select_related('famille', 'individu', 'type_cotisation', 'unite_cotisation', 'depot_cotisation').filter(self.Get_filtres("Q"), condition)
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

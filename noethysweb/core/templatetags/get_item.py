@@ -11,6 +11,8 @@ import os, re
 
 @register.filter
 def get_item(dictionary, key):
+    if key not in dictionary:
+        return None
     return dictionary.get(key)
 
 @register.filter
@@ -27,6 +29,10 @@ def is_in_list(valeur, liste_str):
 def montant(valeur):
     if not valeur: valeur = 0.0
     return "%0.2f %s" % (valeur, utils_preferences.Get_symbole_monnaie())
+
+@register.filter
+def somme(liste):
+    return sum(liste)
 
 @register.filter
 def basename(nom_fichier):

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -22,7 +21,8 @@ class Page(Onglet):
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """
         context = super(Page, self).get_context_data(**kwargs)
-        context['box_titre'] = "Message"
+        if not hasattr(self, "verbe_action"):
+            context['box_titre'] = "Message"
         context['onglet_actif'] = "resume"
         return context
 

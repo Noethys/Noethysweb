@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Div, ButtonHolder, Fieldset
@@ -15,7 +15,7 @@ from core.models import AdresseMail
 
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     cle_api = forms.CharField(label="Clé API", required=False, help_text="Saisissez la clé API associée à votre compte Mailjet.")
     cle_secrete = forms.CharField(label="Clé secrète", required=False, help_text="Saisissez la clé secrète associée à votre compte Mailjet.")
     accuse = forms.BooleanField(label="Accusé de réception", required=False, initial=False, help_text="Compatible uniquement avec Microsoft Outlook.")
@@ -63,6 +63,7 @@ class Formulaire(ModelForm):
             ]),
             Fieldset('Généralités',
                 Field('moteur'),
+                Field('structure'),
                 Field('defaut'),
             ),
             Fieldset('Paramètres',

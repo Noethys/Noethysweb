@@ -57,7 +57,6 @@ $.ajaxQueue = function( ajaxOpts ) {
     // run the actual query
     function doRequest( next ) {
         console.log("Lancement de l'ajax suivant...");
-        console.log("sur cases touchées :", ajaxOpts.data.cases_touchees);
         ajaxOpts.data.donnees = JSON.stringify(get_donnees_for_facturation(ajaxOpts.data.keys_cases_touchees));
         jqXHR = $.ajax( ajaxOpts )
             .done( dfd.resolve )
@@ -170,13 +169,25 @@ class Case_base {
 
     creer_conso(data={}, maj_facturation=true) {
         // Message si jour complet
-        if ($("#" + this.key).hasClass("complet")) {
-            toastr.warning("Attention, il n'y a plus de place sur cette date !")
-        };
+        var is_complet = $("#" + this.key).hasClass("complet");
+
+        // Sélection du mode de saisie
+        if (mode === "portail") {
+            var mode_saisie = "reservation";
+            if (is_complet) {
+                toastr.warning("Attention, il n'y a plus de place sur cette date ! Une place a été réservée sur la liste d'attente.");
+                var mode_saisie = "attente";
+            };
+        } else {
+            var mode_saisie = $("#mode_saisie").val();
+            if (is_complet) {
+                toastr.warning("Attention, il n'y a plus de place sur cette date !");
+            };
+        }
 
         // Création de la nouvelle conso
         var conso = new Conso({fields:{
-            etat: $("#mode_saisie").val(),
+            etat: mode_saisie,
             individu: this.individu,
             groupe : this.groupe,
             inscription: this.inscription,
@@ -266,7 +277,7 @@ class Case_base {
         if (liste_seuils.length > 0) {seuil_alerte = Math.min.apply(null, liste_seuils)};
 
         // Envoie les valeurs à l'affichage de la case
-        if (nbre_places_restantes !== null) {
+        if (nbre_places_restantes !== null && (!$("#" + this.key).hasClass("fermeture"))) {
             var klass = null;
             if (nbre_places_restantes > seuil_alerte) {klass = "disponible"};
             if ((nbre_places_restantes > 0) && (nbre_places_restantes <= seuil_alerte)) {klass = "dernieresplaces"};
@@ -323,7 +334,7 @@ class Case_standard extends Case_base {
             $("#" + this.key + " .groupe").html(dict_groupes[conso.groupe].nom);
             // Dessine les icones
             var texte_icones = "";
-            if (conso.prestation === null) {texte_icones += " <i class='fa fa-exclamation-triangle text-orange' title='Aucune prestation'></i>"};
+            if ((conso.prestation === null) && (mode !== "portail")) {texte_icones += " <i class='fa fa-exclamation-triangle text-orange' title='Aucune prestation'></i>"};
             if (conso.etat === "present") {texte_icones += " <i class='fa fa-check-circle-o text-green' title='Présent'></i>"};
             if (conso.etat === "absenti") {texte_icones += " <i class='fa fa-times-circle-o text-red' title='Absence injustifiée'></i>"};
             if (conso.etat === "absentj") {texte_icones += " <i class='fa fa-times-circle-o text-green' title='Absence justifiée'></i>"};
@@ -820,10 +831,10 @@ $(function () {
     });
 
     function action_sur_clic(case_tableau, statut) {
-        if (touche_clavier === 65) {case_tableau.set_etat("reservation")}
-        else if (touche_clavier === 80) {case_tableau.set_etat("present")}
-        else if (touche_clavier === 74) {case_tableau.set_etat("absentj")}
-        else if (touche_clavier === 73) {case_tableau.set_etat("absenti")}
+        if (touche_clavier === 65 && mode !== "portail") {case_tableau.set_etat("reservation")}
+        else if (touche_clavier === 80 && mode !== "portail") {case_tableau.set_etat("present")}
+        else if (touche_clavier === 74 && mode !== "portail") {case_tableau.set_etat("absentj")}
+        else if (touche_clavier === 73 && mode !== "portail") {case_tableau.set_etat("absenti")}
         else if (touche_clavier === 67) {case_tableau.copier()}
         else if (touche_clavier === 83) {case_tableau.supprimer()}
         else {
@@ -976,10 +987,6 @@ function maj_remplissage(date) {
 // Actions au chargement de la page
 $(document).ready(function() {
 
-    function Get_activite() {
-        return $('#selection_activite').val();
-    };
-
     // Importe les conso en mémoire
     $.each(dict_conso, function (key, liste_conso) {
         if (key in dict_cases) {
@@ -1030,55 +1037,78 @@ $(document).ready(function() {
         'scrollBar': true,
     });
 
+    $("#enregistrer").on('click', function(event) {
+        // Si mode portail, on générer la facturation avant le submit
+        var box = bootbox.dialog({
+            message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> Enregistrement des données<br>Veuillez patienter...</p>",
+            closeButton: false
+        });
+        tout_recalculer();
+    });
+
     // Envoi des paramètres au format json vers le form de maj
     $("#form-maj").on('submit', function(event) {
+
         // Vérifie qu'il n'y a pas un calcul de facturation en cours
-        if (!($("#loader_facturation").hasClass("masquer"))) {
-            event.preventDefault();
-            toastr.error("Vous devez attendre la fin du calcul de la facturation avant de pouvoir quitter");
-            return false;
+        if (mode !== "portail") {
+            if (!($("#loader_facturation").hasClass("masquer"))) {
+                event.preventDefault();
+                toastr.error("Vous devez attendre la fin du calcul de la facturation avant de pouvoir quitter");
+                return false;
+            };
         };
 
-        // Mémorise les conso
-        $.each(dict_cases, function (key, case_tableau) {
-            if (!(case_tableau.type_case === "evenement") && !(case_tableau.type_case === "multi")) {
-                dict_conso[key] = case_tableau.consommations;
-            };
-        });
-
-        // Mémorise les mémos
-        $.each(dict_cases_memos, function (key, case_memo) {
-            dict_memos[key] = {
-                "pk": case_memo.pk, "texte": case_memo.texte, "inscription": case_memo.inscription,
-                "date": case_memo.date, "dirty": case_memo.dirty
-            };
-        });
-
-        // Validation des données
-        if (Get_periode() === false) {
-            event.preventDefault();
-            return false;
-        };
-
-        // Envoi des données à django
-        var donnees = JSON.stringify({
-            "individus": Get_individus(),
-            // "inscriptions": Get_inscriptions(),
-            "periode": Get_periode(),
-            "activite": Get_activite(),
-            "groupes": Get_groupes(),
-            "classes": Get_classes(),
-            "consommations": dict_conso,
-            "memos": dict_memos,
-            "options": dict_options,
-            "suppressions": dict_suppressions,
-            "prestations": dict_prestations,
-        });
-        $('#donnees').val(donnees);
-        return true;
+        // Validation du formulaire
+        return validation_form(event);
     });
 
 });
+
+function Get_activite() {
+    return $('#selection_activite').val();
+};
+
+
+function validation_form(event) {
+
+    // Mémorise les conso
+    $.each(dict_cases, function (key, case_tableau) {
+        if (!(case_tableau.type_case === "evenement") && !(case_tableau.type_case === "multi")) {
+            dict_conso[key] = case_tableau.consommations;
+        }
+        ;
+    });
+
+    // Mémorise les mémos
+    $.each(dict_cases_memos, function (key, case_memo) {
+        dict_memos[key] = {
+            "pk": case_memo.pk, "texte": case_memo.texte, "inscription": case_memo.inscription,
+            "date": case_memo.date, "dirty": case_memo.dirty
+        };
+    });
+
+    // Validation des données
+    if (Get_periode() === false) {
+        event.preventDefault();
+        return false;
+    };
+
+    // Envoi des données à django
+    var donnees = JSON.stringify({
+        "individus": Get_individus(),
+        "periode": Get_periode(),
+        "activite": Get_activite(),
+        "groupes": Get_groupes(),
+        "classes": Get_classes(),
+        "consommations": dict_conso,
+        "memos": dict_memos,
+        "options": dict_options,
+        "suppressions": dict_suppressions,
+        "prestations": dict_prestations,
+    });
+    $('#donnees').val(donnees);
+    return true;
+};
 
 
 function afficher_loader_facturation(etat) {
@@ -1092,6 +1122,10 @@ function afficher_loader_facturation(etat) {
 };
 
 function facturer(case_tableau) {
+    // Si mode portail, on évite le calcul de la facturation
+    if (mode === "portail") {
+        return false;
+    }
     afficher_loader_facturation(true);
     cases_touchees.push(case_tableau.key);
     clearTimeout(chrono);
@@ -1186,10 +1220,18 @@ function ajax_facturer(cases_touchees_temp) {
 
             // Masque loader du box facturation
             afficher_loader_facturation(false);
-            console.log("fin de l'ajax")
+
+            // Si mode portail, on déclenche le submit
+            if (mode === "portail") {
+                $('#form-maj').submit();
+            };
+
         },
         error: function(data) {
             console.log("Erreur de facturation !");
+            if (mode === "portail") {
+                box.modal("hide");
+            };
         }
     });
 };

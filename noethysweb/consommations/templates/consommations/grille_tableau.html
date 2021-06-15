@@ -1,0 +1,193 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/clusterize/clusterize.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'consommations/grille.css' %}">
+{% endblock styles %}
+
+{% block scripts %}
+    <script type="text/javascript" src="{% static 'lib/clusterize/clusterize.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+    <script type="text/javascript" src="{% static "consommations/grille.js" %}"></script>
+{% endblock scripts %}
+
+
+{% block contenu_page %}
+
+    <script>
+        {# Récupération des données json #}
+        var mode = '{{ data.mode }}';
+        var selection_activite = {% if data.selection_activite %}{{ data.selection_activite.pk }}{% else %}null{% endif %};
+        var selection_groupes = {% if data.selection_groupes %}{{ data.selection_groupes }}{% else %}null{% endif %};
+        var selection_classes = {% if data.selection_classes %}{{ data.selection_classes }}{% else %}null{% endif %};
+        var idfamille = {% if idfamille %}{{ idfamille }}{% else %}null{% endif %};
+        var dict_conso = JSON.parse('{{ data.consommations_json|escapejs }}');
+        var dict_memos = JSON.parse('{{ data.memos_json|escapejs }}');
+        var dict_prestations = JSON.parse('{{ data.dict_prestations_json|escapejs }}');
+        var liste_conso_existantes = JSON.parse('{{ data.liste_conso_json|escapejs }}');
+        var liste_memos_existants = JSON.parse('{{ data.liste_memos_json|escapejs }}');
+        var liste_unites = JSON.parse('{{ data.liste_unites_json|escapejs }}');
+        var liste_evenements = JSON.parse('{{ data.liste_evenements_json|escapejs }}');
+        var liste_groupes = JSON.parse('{{ data.liste_groupes_json|escapejs }}');
+        var dict_places = JSON.parse('{{ data.dict_places_json|escapejs }}');
+        var dict_capacite = JSON.parse('{{ data.dict_capacite_json|escapejs }}');
+        var dict_unites_remplissage = JSON.parse('{{ data.dict_unites_remplissage_json|escapejs }}');
+        var dict_suppressions = JSON.parse('{{ data.dict_suppressions_json|escapejs }}');
+        // var liste_idindividus = JSON.parse('{{ data.liste_idindividus_json|escapejs }}');
+        var liste_vacances = JSON.parse('{{ data.liste_vacances_json|escapejs }}');
+        var liste_key_individus = JSON.parse('{{ data.liste_key_individus_json|escapejs }}');
+        var periode_json = JSON.parse('{{ data.periode_json|escapejs }}');
+        if (mode === "individu") {
+            Set_periode(periode_json);
+        };
+
+        {# Variables générales #}
+        var url_facturer = "{% if data.mode == "portail" %}{% url 'portail_ajax_facturer' %}{% else %}{% url 'ajax_facturer' %}{% endif %}";
+        var url_impression_pdf = "{% url 'ajax_grille_impression_pdf' %}";
+        var url_editeur_email = "{% url 'ajax_get_view_editeur_email' %}";
+        var csrf_token = "{{ csrf_token }}";
+
+        {# Tranformation de la liste des groupes en dict #}
+        var dict_groupes = {};
+        liste_groupes.forEach(function(groupe) {
+            dict_groupes[groupe.pk] = groupe.fields;
+        });
+
+        {# Transformation de la liste des événements en dict #}
+        var dict_evenements = {};
+        liste_evenements.forEach(function(evenement) {
+            var key_evenement = evenement.fields.date + "_" + evenement.fields.unite;
+            if (!(key_evenement in dict_evenements)) {dict_evenements[key_evenement] = []};
+            evenement.fields['pk'] = evenement.pk;
+            dict_evenements[key_evenement].push(evenement.fields);
+        });
+
+        {# Transformation de la liste des unités en dict #}
+        var dict_unites = {};
+        var dict_touches_raccourcis = {};
+        liste_unites.forEach(function(unite) {
+            dict_unites[unite.pk] = unite.fields;
+            if (unite.fields.touche_raccourci === "WXK_SHIFT") {dict_touches_raccourcis[16] = unite.pk};
+            if (unite.fields.touche_raccourci === "WXK_ALT") {dict_touches_raccourcis[18] = unite.pk};
+            if (unite.fields.touche_raccourci === "WXK_CONTROL") {dict_touches_raccourcis[17] = unite.pk};
+        });
+
+    </script>
+
+    <div class="table noselect masquer" id="table_grille" draggable="false">
+        <table cellspacing="0" id="table-grille" class="table table-bordered" style="min-width: 400px;">
+            <thead>
+                <tr>
+                    <th style="width:100px">Date</th>
+                    {% for unite in data.liste_unites %}
+                        <th>{{ unite.nom }}</th>
+                    {% endfor %}
+                    {% if data.mode != "portail" %}
+                        <th>Mémo journalier</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for date in data.liste_dates %}
+
+                    {# Vérifie si la date est modifiable #}
+                    {% with date|is_modif_allowed:data as modif_allowed %}
+
+                    {# Regroupement par date #}
+                    {% if data.liste_inscriptions|length > 1 and data.mode == "individu" %}
+                        <tr>
+                            <th class="date_regroupement">{{ date|date:"l j F Y"|title }} {% if not modif_allowed %}<i class='fa fa-lock text-red' title="Date non modifiable"></i>{% endif %}</th>
+                                {% for unite in data.liste_unites %}
+                                    <td class="date_regroupement"></td>
+                                {% endfor %}
+                            <td class="date_regroupement"></td>
+                        </tr>
+                    {% endif %}
+
+                    {# Ligne par date ou par individu #}
+                    {% for inscription in data.liste_inscriptions %}
+
+                        <tr>
+                            <th class="{% if date|est_en_vacances:data.liste_vacances and data.mode == 'individu' %}vacances{% endif %}">
+                                {% if data.mode == 'date' %}
+                                    <div>{{ inscription.individu.nom }} {{ inscription.individu.prenom }}</div><div class='infos_inscription'>{% if inscription.infos_diffentes %}{{ inscription.infos_diffentes }}{% endif %}</div>
+                                {% else %}
+                                    {% if data.liste_inscriptions|length > 1 %}
+                                        <div>{{ inscription.individu.prenom }}</div><div class='infos_inscription'>{% if inscription.infos_diffentes %}{{ inscription.infos_diffentes }}{% endif %}</div>
+                                    {% else %}
+                                        {{ date|date:"l j F Y"|title }} {% if not modif_allowed %}<i class='fa fa-lock text-red' title="Date non modifiable"></i>{% endif %}
+                                    {% endif %}
+                                {% endif %}
+                            </th>
+                            {% for unite in data.liste_unites %}
+                                {# Recherche le groupe actif de l'individu #}
+                                {% get_groupe data.selection_inscriptions inscription as selection_groupe %}
+
+                                {# Génération de la key d'ouverture #}
+                                {% creation_string_key date selection_groupe unite.pk as key_ouverture %}
+
+                                {% if inscription and key_ouverture in data.liste_ouvertures and inscription|is_date_in_inscription:date %}
+
+                                    {# Génération d'une key pour la case #}
+                                    {% creation_string_key date inscription.pk unite.pk as key_case %}
+
+                                    {# Création de la case #}
+                                    <td
+                                        class="case {{ unite.type|lower }} {% if not modif_allowed %}fermeture{% else %}{% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}ouvert{% endif %}{% endif %}"
+                                        id="{{ key_case }}"
+                                    ></td>
+
+                                    {# Mémorisation des infos de la case #}
+                                    <script>
+                                        var case_tableau = new Case_{{ unite.type|lower }}({
+                                            key: "{{ key_case }}",
+                                            individu: {{ inscription.individu_id }},
+                                            famille: {{ inscription.famille_id }},
+                                            date: "{{ date|date:'Y-m-d' }}",
+                                            unite: {{ unite.pk }},
+                                            activite: {{ inscription.activite_id }},
+                                            inscription: {{ inscription.pk }},
+                                            groupe: {{ selection_groupe }},
+                                            categorie_tarif: {{ inscription.categorie_tarif_id }}
+                                        });
+                                        dict_cases["{{ key_case }}"] = case_tableau;
+                                    </script>
+                                {% else %}
+                                    <td class="case {{ unite.type|lower }} fermeture"></td>
+                                {% endif %}
+
+                            {% endfor %}
+
+                            {# Création de la case mémo #}
+                            {% if data.mode != "portail" %}
+                                {% creation_string_key date inscription.pk as key_memo %}
+                                <td class="memo" id="{{ key_memo }}"></td>
+                                <script>
+                                    var case_memo = new Case_memo({
+                                        key: "{{ key_memo }}",
+                                        inscription: {{ inscription.pk }},
+                                        date: "{{ date|date:'Y-m-d' }}",
+                                    });
+                                    dict_cases_memos["{{ key_memo }}"] = case_memo;
+                                </script>
+                            {% endif %}
+
+                        </tr>
+                    {% endfor %}
+                    {% endwith %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# MAJ de la page #}
+    <form method="post" id="form-maj">
+        {% csrf_token %}
+        <input type="hidden" id="donnees" name="donnees" value="">
+        <input type="hidden" id="donnees_ajouter_individu" name="donnees_ajouter_individu" value="">
+    </form>
+
+{% endblock contenu_page %}

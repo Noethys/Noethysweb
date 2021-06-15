@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -12,10 +11,11 @@ from core.utils.utils_commandes import Commandes
 from core.models import Individu, Famille, Rattachement, Lien, CATEGORIES_RATTACHEMENT, CHOIX_AUTORISATIONS
 from core.data.data_liens import DICT_TYPES_LIENS
 from core.data import data_civilites
+from core.forms.base import FormulaireBase
 import operator
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     def __init__(self, *args, **kwargs):
         self.idfamille = kwargs.pop("idfamille")
         self.idindividu = kwargs.pop("idindividu")
@@ -31,9 +31,11 @@ class Formulaire(forms.Form):
         dict_liens = {lien.individu_objet_id: {"lien": lien.idtype_lien, "autorisation": lien.autorisation} for lien in liens}
 
         # Initialisation de l'affichage du formulaire
-        self.helper.layout = Layout(
-            Commandes(annuler_url="{% url 'individu_resume' idfamille=idfamille idindividu=idindividu %}", ajouter=False),
-        )
+        if self.mode == "CONSULTATION":
+            commandes = Commandes(modifier_url="individu_liens_modifier", modifier_args="idfamille=idfamille idindividu=idindividu", modifier=True, enregistrer=False, annuler=False, ajouter=False)
+        else:
+            commandes = Commandes(annuler_url="{% url 'individu_liens' idfamille=idfamille idindividu=idindividu %}", ajouter=False)
+        self.helper.layout = Layout(commandes)
 
         # Si aucun autre membre dans cette famille
         if not rattachements:
@@ -86,3 +88,6 @@ class Formulaire(forms.Form):
                 if liste_ctrl:
                     item = Fieldset(nom_categorie + "s", *liste_ctrl)
                     self.helper.layout.append(item)
+
+            if self.mode == "CONSULTATION":
+                self.Set_mode_consultation()

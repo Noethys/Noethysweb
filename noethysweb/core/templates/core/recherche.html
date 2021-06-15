@@ -52,7 +52,7 @@
                 </thead>
                 <tbody>
                     {% for item in data.commandes %}
-                        <tr data-url="{{ item.url }}" data-idfamille="">
+                        <tr data-url="{{ item.GetUrl }}" data-idfamille="">
                             <td><i class="fa fa-{{ item.icone }}"></i> {{ item.titre|surligner:data.texte }}</td>
                             <td>{% for menu in item.GetBreadcrumb|slice:":2" %} <i class="fa fa-caret-right text-gray"></i> &nbsp;{{ menu.titre }} &nbsp;{% endfor %}</td>
                         </tr>

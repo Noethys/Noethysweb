@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -11,9 +10,10 @@ from crispy_forms.layout import Layout, Hidden, Submit, HTML, ButtonHolder, Fiel
 from crispy_forms.bootstrap import Field, StrictButton
 from core.utils.utils_commandes import Commandes
 from core.widgets import Selection_fichier
+from core.forms.base import FormulaireBase
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     fichier = forms.FileField(label="Fichier à restaurer", help_text="Sélectionnez le fichier de sauvegarde à restaurer (Avec extension .nweb).", required=True, widget=Selection_fichier(attrs={"accept": ".nweb"}))
     mdp = forms.CharField(label="Mot de passe", help_text="Saisissez le mot de passe utilisé pour crypter la sauvegarde.", widget=forms.PasswordInput, required=True)
     confirmation1 = forms.BooleanField(label="J'ai bien noté que cette opération de restauration peut durer plusieurs heures", required=True)

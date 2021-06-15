@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -79,7 +78,7 @@ class Modifier(Onglet, TemplateView):
         dict_inscriptions = {}
         data["liste_individus_possibles"] = []
         data['liste_activites_possibles'] = []
-        for inscription in Inscription.objects.select_related('individu', 'activite', 'groupe', 'famille', 'categorie_tarif').filter(famille__pk=self.IDfamille).order_by("individu__prenom"):
+        for inscription in Inscription.objects.select_related('individu', 'activite', 'groupe', 'famille', 'categorie_tarif').filter(famille__pk=self.IDfamille, activite__structure__in=self.request.user.structures.all()).order_by("individu__prenom"):
             if inscription.Is_inscription_in_periode(data["date_min"], data["date_max"]):
                 # Conserve les inscriptions disponibles
                 if data["selection_individus"] == "__all__" or inscription.individu_id in data["selection_individus"]:

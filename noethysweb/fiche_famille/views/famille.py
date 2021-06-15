@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -142,6 +141,7 @@ class Supprimer_famille(Page, crud.Supprimer):
 
 class Onglet(CustomView):
     menu_code = "individus_toc"
+    objet_singulier = "une famille"
     liste_onglets = LISTE_ONGLETS
 
     def get_context_data(self, **kwargs):
@@ -180,7 +180,7 @@ class Resume(Onglet, DetailView):
         context['box_introduction'] = ""
         context['onglet_actif'] = "resume"
         context['messages_famille'] = Message.objects.filter(famille_id=idfamille).order_by("date_saisie")
-        context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(famille=context['famille'], only_invalides=True)
+        context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(famille=context['famille'], only_invalides=True, utilisateur=self.request.user)
 
         # Calcul du solde
         total_prestations = Prestation.objects.values('famille_id').filter(famille_id=idfamille).aggregate(total=Sum("montant"))

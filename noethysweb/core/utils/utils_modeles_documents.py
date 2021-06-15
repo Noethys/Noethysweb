@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -1060,17 +1059,19 @@ class ObjetPDF():
                     url = self.src
 
                 # Chargement de l'image
-                img = ImageReader(url)
-                self.canvas.translate(0, self.top * 2)
-                self.canvas.scale(1, -1)
+                try:
+                    img = ImageReader(url)
+                    self.canvas.translate(0, self.top * 2)
+                    self.canvas.scale(1, -1)
 
-                # Ajustement du ratio du logo
-                if self.categorie == "logo":
-                    self.width = img._image.size[0] / img._image.size[1] * self.height
+                    # Ajustement du ratio du logo
+                    if self.categorie == "logo":
+                        self.width = img._image.size[0] / img._image.size[1] * self.height
 
-                # Dessin de l'image
-                self.canvas.drawImage(img, self.left, self.top, self.width, -self.height, mask="auto")
-
+                    # Dessin de l'image
+                    self.canvas.drawImage(img, self.left, self.top, self.width, -self.height, mask="auto")
+                except:
+                    pass
 
             # ------- BARCODE ------
             if self.categorie == "barcode":

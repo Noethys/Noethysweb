@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, ButtonHolder, Fieldset
@@ -21,38 +21,38 @@ def Get_controle(question=None):
     nom_controle = "question_%d" % question.pk
 
     if question.controle == "ligne_texte":
-        ctrl = forms.CharField(label=question.label, required=False)
+        ctrl = forms.CharField(label=question.label, required=False, help_text=question.texte_aide)
     elif question.controle == "bloc_texte":
-        ctrl = forms.CharField(label=question.label, widget=forms.Textarea(attrs={'rows': 4}), required=False)
+        ctrl = forms.CharField(label=question.label, widget=forms.Textarea(attrs={'rows': 4}), required=False, help_text=question.texte_aide)
     elif question.controle == "entier":
-        ctrl = forms.IntegerField(label=question.label, required=False)
+        ctrl = forms.IntegerField(label=question.label, required=False, help_text=question.texte_aide)
     elif question.controle == "decimal":
-        ctrl = forms.DecimalField(label=question.label, max_digits=10, decimal_places=2, initial=0.0, required=False)
+        ctrl = forms.DecimalField(label=question.label, max_digits=10, decimal_places=2, initial=0.0, required=False, help_text=question.texte_aide)
     elif question.controle == "montant":
-        ctrl = forms.DecimalField(label=question.label, max_digits=10, decimal_places=2, initial=0.0, required=False)
+        ctrl = forms.DecimalField(label=question.label, max_digits=10, decimal_places=2, initial=0.0, required=False, help_text=question.texte_aide)
     elif question.controle == "liste_deroulante":
         liste_choix = [(None, "---------")]
         liste_choix.extend([(choix, choix) for choix in question.choix.split(";")])
-        ctrl = forms.TypedChoiceField(label=question.label, choices=liste_choix, initial=None, required=False)
+        ctrl = forms.TypedChoiceField(label=question.label, choices=liste_choix, initial=None, required=False, help_text=question.texte_aide)
     elif question.controle == "liste_coches":
         liste_choix = [(choix, choix) for choix in question.choix.split(";")]
-        ctrl = forms.TypedMultipleChoiceField(label=question.label, choices=liste_choix, widget=Select2MultipleWidget({"lang":"fr"}), required=False)
+        ctrl = forms.TypedMultipleChoiceField(label=question.label, choices=liste_choix, widget=Select2MultipleWidget({"lang":"fr"}), required=False, help_text=question.texte_aide)
     elif question.controle == "case_coche":
-        ctrl = forms.BooleanField(label=question.label, required=False)
+        ctrl = forms.BooleanField(label=question.label, required=False, help_text=question.texte_aide)
     elif question.controle == "date":
-        ctrl = forms.DateField(label=question.label, required=False, widget=DatePickerWidget())
+        ctrl = forms.DateField(label=question.label, required=False, widget=DatePickerWidget(), help_text=question.texte_aide)
     elif question.controle == "slider":
-        ctrl = forms.IntegerField(label=question.label, required=False, widget=SliderWidget())
+        ctrl = forms.IntegerField(label=question.label, required=False, widget=SliderWidget(), help_text=question.texte_aide)
     elif question.controle == "couleur":
-        ctrl = forms.CharField(label=question.label, required=False, widget=ColorPickerWidget())
+        ctrl = forms.CharField(label=question.label, required=False, widget=ColorPickerWidget(), help_text=question.texte_aide)
     elif question.controle == "codebarres":
-        ctrl = forms.CharField(label=question.label, required=False)
+        ctrl = forms.CharField(label=question.label, required=False, help_text=question.texte_aide)
     else:
         ctrl = None
 
     return (nom_controle, ctrl)
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = QuestionnaireQuestion
         fields = "__all__"
@@ -85,7 +85,10 @@ class Formulaire(ModelForm):
             Field('label'),
             Field('controle'),
             Field('choix'),
+            Field('texte_aide'),
+            Field('structure'),
             Field('visible'),
+            Field('visible_portail'),
             HTML(EXTRA_SCRIPT),
         )
 
@@ -93,7 +96,6 @@ class Formulaire(ModelForm):
         # Individu
         if self.cleaned_data["controle"] in ("liste_deroulante", "liste_coches") and not self.cleaned_data["choix"]:
             self.add_error("choix", "Vous devez saisir au moins un choix")
-            print("oui")
             return
 
         return self.cleaned_data

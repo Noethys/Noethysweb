@@ -9,6 +9,6 @@
     });
 </script>
 <div>
-    <input type="text" class="{{ class }} slider form-control" name="{{ name }}" id="{{ id }}" data-slider-selection="before" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="{{ value }}"/>
+    <input type="text" class="{{ class }} slider form-control" name="{{ name }}" id="{{ id }}" data-slider-selection="before" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="{{ value }}" {% if disabled %}data-slider-enabled="false"{% endif %}/>
     <span id="valeur_{{ id }}" style="margin-left: 10px;">0</span>
 </div>

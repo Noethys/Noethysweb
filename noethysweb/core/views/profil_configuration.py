@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -44,7 +43,7 @@ def Modifier_profil_configuration(request):
 
         # Récupération des paramètres à sauvegarder dans le profil
         module = importlib.import_module(module)
-        data = module.get_data_profil(donnees)
+        data = module.get_data_profil(donnees, request=request)
 
         # Enregistrement des paramètres
         parametre = Parametre.objects.get(idparametre=int(idprofil))

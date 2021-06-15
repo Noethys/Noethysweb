@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
+from django.db.models import Q
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
@@ -79,7 +80,7 @@ FORMSET_COMBI = inlineformset_factory(Aide, CombiAide, form=CombiAideForm, fk_na
 
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     montant_max = forms.DecimalField(label="Montant plafond", max_digits=6, decimal_places=2, initial=0.0, required=False)
     jours_scolaires = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
     jours_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
@@ -163,13 +164,18 @@ class Formulaire(ModelForm):
 
 
 
-class Formulaire_selection_activite(forms.Form):
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang":"fr"}), queryset=Activite.objects.all(), required=True)
+class Formulaire_selection_activite(FormulaireBase, forms.Form):
+    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr"}), queryset=Activite.objects.none(), required=True)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire_selection_activite, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'
+
+        # Liste les
+        condition_structure = Q(structure__in=self.request.user.structures.all())
+        self.fields['activite'].queryset = Activite.objects.filter(condition_structure).order_by("-date_debut")
+
         self.helper.layout = Layout(
             Field('activite'),
             ButtonHolder(

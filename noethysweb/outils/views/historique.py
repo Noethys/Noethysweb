@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -36,7 +35,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['idaction', 'titre', 'detail', 'famille__nom', 'individu__nom', "utilisateur__username"]
+        filtres = ['idaction', 'titre', 'detail', 'famille__nom', 'individu__nom', "utilisateur__username", "idobjet", "objet"]
 
         utilisateur = columns.TextColumn("Utilisateur", sources=["utilisateur__username"], processor='Formate_utilisateur')
         famille = columns.TextColumn("Famille", sources=["famille__nom"])
@@ -44,15 +43,18 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idaction', 'horodatage', 'utilisateur', 'titre', 'detail', 'famille', 'individu']
+            columns = ['idaction', 'horodatage', 'utilisateur', 'titre', 'detail', 'famille', 'individu', "objet", "idobjet"]
             #hidden_columns = = ["idaction"]
             processors = {
                 'horodatage': helpers.format_date('%d/%m/%Y %H:%M'),
             }
-            ordering = ['horodatage']
+            ordering = ['-idaction']
 
         def Formate_individu(self, instance, **kwargs):
             return instance.individu.Get_nom() if instance.individu else ""
 
         def Formate_utilisateur(self, instance, **kwargs):
-            return instance.utilisateur.username if instance.utilisateur else ""
+            if instance.utilisateur.categorie == "utilisateur":
+                return instance.utilisateur.username if instance.utilisateur else ""
+            else:
+                return instance.utilisateur.famille

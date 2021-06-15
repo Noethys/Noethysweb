@@ -1,0 +1,52 @@
+{% extends "portail/fiche.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_fiche %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+
+                <div class="">
+                    {% if liste_contacts %}
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="text-center">
+                                    <th>Nom</th>
+                                    <th>Prénom</th>
+                                    <th>Lien</th>
+                                    <th>Autorisations</th>
+                                    <th style="width: 90px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contact in liste_contacts %}
+                                    <tr class="text-center">
+                                        <td>{{ contact.nom }}</td>
+                                        <td>{{ contact.prenom }}</td>
+                                        <td>{{ contact.lien }}</td>
+                                        <td>{{ contact.Get_autorisations|safe }}</td>
+                                        <td>
+                                            <a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_individu_contacts_modifier' idrattachement=rattachement.pk idcontact=contact.pk %}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
+                                            <a type="button" class="btn btn-danger btn-xs" href="{% url 'portail_individu_contacts_supprimer' idrattachement=rattachement.pk idcontact=contact.pk %}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <b>Aucun contact enregistré.</b>
+                    {% endif %}
+                </div>
+                <a class="btn btn-primary pull-right" href="{% url 'portail_individu_contacts_ajouter' idrattachement=rattachement.pk %}" title="Ajouter un contact"><i class="fa fa-plus margin-r-5"></i>Ajouter un contact</a>
+
+            {% endblock box_contenu %}
+            {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+        {% endembed %}
+    </div>
+{% endblock %}

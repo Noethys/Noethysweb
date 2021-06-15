@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -17,12 +16,13 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # ------------------------------------ Paramétrage ------------------------------------
     menu_parametrage = menu.Add(code="parametrage_toc", titre="Paramétrage", icone="gear")
 
-    menu_structure = menu_parametrage.Add(titre="Structure")
+    menu_structure = menu_parametrage.Add(titre="Généralités")
     # organisateur = cache.get_or_set('organisateur', Organisateur.objects.filter(pk=1).first())
     if organisateur:
         menu_structure.Add(code="organisateur_modifier", titre="Organisateur", icone="file-text-o", compatible_demo=False, args="1") #, url=reverse_lazy("organisateur_modifier", args="1"))
     else:
         menu_structure.Add(code="organisateur_ajouter", titre="Organisateur", icone="file-text-o", compatible_demo=False) #, url=reverse_lazy("organisateur_ajouter"))
+    menu_structure.Add(code="structures_liste", titre="Structures", icone="file-text-o")
 
     # Activités
     menu_activites = menu_parametrage.Add(titre="Activités")
@@ -66,10 +66,12 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_renseignements.Add(code="categories_travail_liste", titre="Catégories socio-professionnelles", icone="file-text-o")
     menu_renseignements.Add(code="secteurs_liste", titre="Secteurs géographiques", icone="file-text-o")
     menu_renseignements.Add(code="types_sieste_liste", titre="Types de sieste", icone="file-text-o")
+    menu_renseignements.Add(code="types_regimes_alimentaires_liste", titre="Types de régimes alimentaires", icone="file-text-o")
     menu_renseignements.Add(code="categories_medicales_liste", titre="Catégories médicales", icone="file-text-o")
     menu_renseignements.Add(code="types_maladies_liste", titre="Types de maladies", icone="file-text-o")
     menu_renseignements.Add(code="types_vaccins_liste", titre="Types de vaccins", icone="file-text-o")
     menu_renseignements.Add(code="medecins_liste", titre="Médecins", icone="file-text-o")
+    menu_renseignements.Add(code="assureurs_liste", titre="Assureurs", icone="file-text-o")
 
     # Scolarité
     menu_scolarite = menu_parametrage.Add(titre="Scolarité")
@@ -97,6 +99,11 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_calendrier.Add(code="vacances_liste", titre="Périodes de vacances", icone="file-text-o")
     menu_calendrier.Add(code="feries_fixes_liste", titre="Jours fériés fixes", icone="file-text-o")
     menu_calendrier.Add(code="feries_variables_liste", titre="Jours fériés variables", icone="file-text-o")
+
+    # Portail
+    menu_portail = menu_parametrage.Add(titre="Portail")
+    menu_portail.Add(code="portail_parametres_modifier", titre="Paramètres", icone="file-text-o", compatible_demo=False)
+    menu_portail.Add(code="categories_compte_internet_liste", titre="Catégories de compte internet", icone="file-text-o")
 
 
     # ------------------------------------ Outils ------------------------------------
@@ -126,6 +133,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_sauvegarde.Add(code="sauvegarde_creer", titre="Créer une sauvegarde", icone="file-text-o", compatible_demo=False)
     menu_sauvegarde.Add(code="sauvegarde_restaurer", titre="Restaurer une sauvegarde", icone="file-text-o", compatible_demo=False)
 
+    # Portail
+    menu_portail = menu_outils.Add(titre="Portail")
+    menu_portail.Add(code="messagerie_portail", titre="Messages non lus à traiter", icone="file-text-o")
+    menu_portail.Add(code="messages_portail_liste", titre="Messages du portail", icone="file-text-o")
 
     # ------------------------------------ Individus ------------------------------------
     menu_individus = menu.Add(code="individus_toc", titre="Individus", icone="user")

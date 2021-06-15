@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -16,10 +15,10 @@ from django_select2.forms import Select2MultipleWidget, Select2Widget
 import datetime, json
 from django.contrib import messages
 from django.db.models import Max
+from core.forms.base import FormulaireBase
 
 
-
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     lot_factures = forms.ModelChoiceField(label="Lot de factures", queryset=LotFactures.objects.all(), required=False, widget=Select_avec_commandes({
             "donnees_extra": {}, "url_ajax": "ajax_modifier_lot_factures",

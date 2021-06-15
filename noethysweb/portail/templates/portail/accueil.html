@@ -1,35 +1,43 @@
-{% extends "core/base.html" %}
+{% extends "portail/page.html" %}
 {% load crispy_forms_tags %}
 {% load static %}
-
-{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
-
-{% block styles %}
-    {{ block.super }}
-{% endblock styles %}
+{% load embed %}
 
 
-{% block page %}
+{% block contenu_page %}
 
-    <div class="content-wrapper">
+    {# Texte bienvenue #}
+    {% if parametres_portail.accueil_texte_bienvenue %}
+        <h5 class="page-header">
+            {{ parametres_portail.accueil_texte_bienvenue }}
+        </h5>
+        <br>
+    {% endif %}
 
-        <section class="content-header">
-            <h1>Tableau de bord</h1>
-        <ol class="breadcrumb">
-            <li><a href="/"><i class="fa fa-home"></i> Accueil</a></li>
-        </ol>
-        </section>
+    {# Pièces manquantes #}
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_titre %}Pièces manquantes{% endblock %}
+        {% block box_contenu %}
+            <ul>
+                {% for piece_manquante in pieces_manquantes %}
+                    <li>{{ piece_manquante.label }}</li>
+                {% endfor %}
+            </ul>
+        {% endblock box_contenu %}
+    {% endembed %}
 
-        <section class="content connectedSortable">
+    {# Messages non lus #}
+    {% if liste_messages_non_lus %}
+        {% embed 'core/box.html' with box_titre=True %}
+            {% block box_titre %}Messages non lus{% endblock %}
+            {% block box_contenu %}
+                Vous avez {{ liste_messages_non_lus|length }} message{{ liste_messages_non_lus|length|pluralize }} non lu{{ liste_messages_non_lus|length|pluralize }}.
+                <a href="{% url 'portail_contact' %}">Cliquez ici pour accéder à la messagerie.</a>
+            {% endblock box_contenu %}
+        {% endembed %}
+    {% endif %}
 
-            Ceci est la page d'accueil du portail
-
-        </section>
-
-    </div>
-{% endblock page %}
 
 
-{% block scripts %}
-    {{ block.super }}
-{% endblock scripts %}
+
+{% endblock contenu_page %}

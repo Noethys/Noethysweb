@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
 from django.forms import ModelForm
-from django.utils.translation import ugettext as _
+from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
 from crispy_forms.bootstrap import Field, StrictButton, PrependedText, InlineField
@@ -18,7 +17,7 @@ from core.utils import utils_preferences, utils_dates
 import datetime
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     date = forms.DateField(label="Date", required=True, widget=DatePickerWidget())
     mode = forms.ModelChoiceField(label="Mode de règlement", queryset=ModeReglement.objects.all(), widget=Selection_mode_reglement(), required=True)
     emetteur = forms.ModelChoiceField(label="Emetteur", queryset=Emetteur.objects.all(), widget=Selection_emetteur(), required=False)

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -35,6 +34,12 @@ class Page(CustomView):
 
 class Liste_commun():
     template_name = "core/crud/liste_in_box.html"
+
+    def Get_condition_structure(self):
+        """ Retourne une condition sql pour sélectionner les données associées à une structure ou toutes les structures """
+        # condition = Q(structure=self.request.user.structure_actuelle) | Q(structure__isnull=True)
+        condition = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
+        return condition
 
     def Get_filtres(self, mode=None):
         # Importe la liste des filtres
@@ -100,7 +105,6 @@ class Liste_commun():
                 pass
         return conditions
 
-
     def get_context_data(self, **kwargs):
         context = super(Liste_commun, self).get_context_data(**kwargs)
         context['box_introduction'] = getattr(self, "description_liste", "")
@@ -124,29 +128,20 @@ class CustomListe(Liste_commun, TemplateView):
 
 
 
-
-class Ajouter(CreateView):
-    template_name = "core/crud/edit.html"
+class BaseView():
 
     def get_context_data(self, **kwargs):
-        context = super(Ajouter, self).get_context_data(**kwargs)
-        context['box_titre'] = "Ajouter %s" % getattr(self, "objet_singulier", "")
+        context = super(BaseView, self).get_context_data(**kwargs)
+        context['box_titre'] = "%s %s" % (self.verbe_action, getattr(self, "objet_singulier", ""))
         context['box_introduction'] = getattr(self, "description_saisie", "")
         return context
 
-    def form_valid(self, form):
-        # Affiche un message de réussite
-        messages.add_message(self.request, messages.SUCCESS, 'Ajout enregistré')
-
-        # Mémorisation dans l'historique
-        titre = "Ajouter %s" % getattr(self, "objet_singulier", "")
-        detail = None #getattr(self, "format_historique", "ID{0.pk}").format(form.instance)
-        utilisateur = self.request.user
-        famille = getattr(form.instance, "famille_id", None)
-        individu = getattr(form.instance, "individu_id", None)
-        utils_historique.Ajouter(titre=titre, detail=detail, utilisateur=utilisateur, famille=famille, individu=individu)
-
-        return super(Ajouter, self).form_valid(form)
+    def get_form_kwargs(self, **kwargs):
+        """ Ajoute le request pour pouvoir accéder à la structure actuelle de l'utilisateur en cours """
+        form_kwargs = super(BaseView, self).get_form_kwargs(**kwargs)
+        form_kwargs['request'] = getattr(self, "request", None)
+        form_kwargs["mode"] = getattr(self, "mode", None)
+        return form_kwargs
 
     def get_success_url(self):
         if "SaveAndNew" in self.request.POST:
@@ -156,48 +151,88 @@ class Ajouter(CreateView):
             return next
         return reverse_lazy(self.url_liste)
 
+    def save_historique(self, instance=None, titre=None, detail=None, form=None):
+        # Titre
+        if not titre:
+            if hasattr(self, "Get_titre_historique"):
+                titre = self.Get_titre_historique(instance)
+            elif hasattr(self, "titre_historique"):
+                titre = getattr(self, "titre_historique")
+            else:
+                titre = "%s %s" % (self.verbe_action, getattr(self, "objet_singulier", ""))
+
+        # Détail
+        if not detail:
+            if hasattr(self, "Get_detail_historique"):
+                detail = self.Get_detail_historique(instance)
+            elif hasattr(self, "detail_historique"):
+                detail = getattr(self, "detail_historique", str(instance)).format(instance)
+            else:
+                details = []
+                for nom_champ in form.changed_data:
+                    try:
+                        label_champ = form.instance._meta.get_field(nom_champ).verbose_name
+                        valeur_champ = getattr(form.instance, nom_champ)
+                        details.append("%s=%s" % (label_champ, valeur_champ))
+                    except:
+                        pass
+                detail = " ".join(details)
+
+        utilisateur = self.request.user
+        objet = instance._meta.verbose_name.capitalize()
+        idobjet = instance.pk
+        classe = instance._meta.object_name
+        famille = getattr(instance, "famille_id", None)
+        if classe == "Famille":
+            famille = instance.pk
+        individu = getattr(instance, "individu_id", None)
+        if classe == "Individu":
+            individu = instance.pk
+        utils_historique.Ajouter(titre=titre, detail=detail, utilisateur=utilisateur, famille=famille, individu=individu, objet=objet, idobjet=idobjet, classe=classe)
+
+
+class Ajouter(BaseView, CreateView):
+    template_name = "core/crud/edit.html"
+    texte_confirmation = 'Ajout enregistré'
+    verbe_action = "Ajouter"
+
+    def form_valid(self, form):
+        # Enregistre l'objet
+        self.object = form.save()
+
+        # Affiche un message de réussite
+        messages.add_message(self.request, messages.SUCCESS, self.texte_confirmation)
+
+        # Mémorisation dans l'historique
+        self.save_historique(instance=self.object, form=form)
+
+        return HttpResponseRedirect(self.get_success_url())
+
     def Supprimer_defaut_autres_objets(self, form):
         """ Supprime le défaut des autres objects """
         if form.instance.defaut == True:
             self.model.objects.filter(defaut=True).update(defaut=False)
 
 
-class Modifier(UpdateView):
+class Modifier(BaseView, UpdateView):
     template_name = "core/crud/edit.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(Modifier, self).get_context_data(**kwargs)
-        context['box_titre'] = "Modifier %s" % getattr(self, "objet_singulier", "")
-        context['box_introduction'] = getattr(self, "description_saisie", "")
-        return context
+    texte_confirmation = "Modification enregistrée"
+    verbe_action = "Modifier"
 
     def form_valid(self, form):
         # Affiche un message de réussite
-        messages.add_message(self.request, messages.SUCCESS, 'Modification enregistrée')
+        messages.add_message(self.request, messages.SUCCESS, self.texte_confirmation)
 
         # Mémorisation dans l'historique
-        titre = "Modifier %s" % getattr(self, "objet_singulier", "")
-        detail = getattr(self, "format_historique", "ID{0.pk}").format(form.instance)
-        utilisateur = self.request.user
-        famille = getattr(form.instance, "famille_id", None)
-        individu = getattr(form.instance, "individu_id", None)
-        utils_historique.Ajouter(titre=titre, detail=detail, utilisateur=utilisateur, famille=famille, individu=individu)
+        if form.changed_data:
+            self.save_historique(instance=form.instance, form=form)
 
         return super(Modifier, self).form_valid(form)
 
-    def get_success_url(self):
-        if "SaveAndNew" in self.request.POST:
-            return reverse_lazy(self.url_ajouter)
-        next = self.request.POST.get('next')
-        if next:
-            return next
-        return reverse_lazy(self.url_liste)
-
     def Supprimer_defaut_autres_objets(self, form):
         """ Supprime le défaut des autres objects """
         if form.instance.defaut == True:
             self.model.objects.filter(defaut=True).update(defaut=False)
-
 
 
 
@@ -223,12 +258,13 @@ def Formate_liste_objets(objets=[]):
     return texte_resultats
 
 
-class Supprimer(DeleteView):
+class Supprimer(BaseView, DeleteView):
     template_name = "core/crud/confirm_delete_in_box.html"
+    verbe_action = "Supprimer"
 
     def get_context_data(self, **kwargs):
         context = super(Supprimer, self).get_context_data(**kwargs)
-        context['box_titre'] = "Supprimer %s" % self.objet_singulier
+        context['box_introduction'] = None
 
         # Recherche si des protections existent
         collector = NestedObjects(using='default')
@@ -238,27 +274,17 @@ class Supprimer(DeleteView):
 
         return context
 
-    def get_success_url(self):
-        next = self.request.POST.get('next')
-        if next:
-            return next
-        return reverse_lazy(self.url_liste)
-
     def delete(self, request, *args, **kwargs):
-        # Préparation de la mémorisation dans l'historique
-        titre = "Supprimer %s" % getattr(self, "objet_singulier", "")
-        detail = getattr(self, "format_historique", "ID{0.pk}").format(self.get_object())
-        utilisateur = self.request.user
-        famille = getattr(self.get_object(), "famille_id", None)
-        individu = getattr(self.get_object(), "individu_id", None)
+        instance = self.get_object()
+        pk = instance.pk
 
         # Fonction bonus
         if hasattr(self, "Avant_suppression"):
-            self.Avant_suppression(objet=self.get_object())
+            self.Avant_suppression(objet=instance)
 
         # Suppression
         try:
-            message_erreur = self.get_object().delete()
+            message_erreur = instance.delete()
             if isinstance(message_erreur, str):
                 messages.add_message(request, messages.ERROR, message_erreur)
                 return HttpResponseRedirect(self.get_success_url(), status=303)
@@ -268,11 +294,12 @@ class Supprimer(DeleteView):
             messages.add_message(request, messages.ERROR, "La suppression est impossible car cet élément est rattaché aux données suivantes : %s." % texte_resultats)
             return HttpResponseRedirect(self.get_success_url(), status=303)
 
+        # Enregistrement dans l'historique
+        instance.pk = pk
+        self.save_historique(instance)
+
         # Confirmation de la suppression
         messages.add_message(self.request, messages.SUCCESS, 'Suppression effectuée avec succès')
-
-        # Enregistrement dans l'historique
-        utils_historique.Ajouter(titre=titre, detail=detail, utilisateur=utilisateur, famille=famille, individu=individu)
 
         return HttpResponseRedirect(self.get_success_url())
 
@@ -288,24 +315,23 @@ class Supprimer(DeleteView):
     def Reordonner(self, champ_ordre="ordre"):
         """ Attribuer un numéro d'ordre à chaque ligne après suppression """
         # On ajuste l'ordre de chaque ligne
-        liste_objects = self.model.objects.all().order_by(champ_ordre)
-        ordre = 1
-        for objet in liste_objects:
+        for ordre, objet in enumerate(self.model.objects.all().order_by(champ_ordre), start=1):
             if objet.ordre != ordre:
                 objet.ordre = ordre
                 objet.save()
-            ordre += 1
 
 
 
 
 
-class Supprimer_plusieurs(CustomView, TemplateView):
+class Supprimer_plusieurs(BaseView, CustomView, TemplateView):
     template_name = "core/crud/confirm_delete_in_box.html"
+    verbe_action = "Supprimer"
 
     def get_context_data(self, **kwargs):
         context = super(Supprimer_plusieurs, self).get_context_data(**kwargs)
         context['box_titre'] = "Supprimer %s" % self.objet_pluriel
+        context['box_introduction'] = None
         context['selection_multiple'] = True
         context['liste_objets'] = self.get_objets()
         context['model'] = self.model
@@ -323,20 +349,9 @@ class Supprimer_plusieurs(CustomView, TemplateView):
         liste_objets = self.model.objects.filter(pk__in=listepk)
         return liste_objets
 
-    def get_success_url(self):
-        next = self.request.POST.get('next')
-        if next:
-            return next
-        return reverse_lazy(self.url_liste)
-
     def post(self, request, **kwargs):
         for objet in self.get_objets():
-            # Préparation de la mémorisation dans l'historique
-            titre = "Supprimer %s" % getattr(self, "objet_singulier", "")
-            detail = getattr(self, "format_historique", "ID{0.pk}").format(objet)
-            utilisateur = self.request.user
-            famille = getattr(objet, "famille_id", None)
-            individu = getattr(objet, "individu_id", None)
+            pk = objet.pk
 
             # Suppression de l'objet
             try:
@@ -350,7 +365,8 @@ class Supprimer_plusieurs(CustomView, TemplateView):
                 return HttpResponseRedirect(self.get_success_url(), status=303)
 
             # Enregistrement dans l'historique
-            utils_historique.Ajouter(titre=titre, detail=detail, utilisateur=utilisateur, famille=famille, individu=individu)
+            objet.pk = pk
+            self.save_historique(objet)
 
         # Confirmation de la suppression
         messages.add_message(self.request, messages.SUCCESS, 'Suppressions effectuées avec succès')

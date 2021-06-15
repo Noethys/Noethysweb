@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -10,6 +9,7 @@ from noethysweb.version import GetVersion
 from core.models import Organisateur
 from django.core.cache import cache
 from django.contrib.auth.models import update_last_login
+from core.utils import utils_portail
 
 
 class ClassCommuneLogin:
@@ -28,6 +28,13 @@ class ClassCommuneLogin:
             organisateur = Organisateur.objects.filter(pk=1).first()
             cache.set('organisateur', organisateur)
         context['organisateur'] = organisateur
+
+        # Paramètres du portail
+        parametres_portail = cache.get('parametres_portail')
+        if not parametres_portail:
+            parametres_portail = utils_portail.Get_dict_parametres()
+            cache.set('parametres_portail', parametres_portail)
+        context['parametres_portail'] = parametres_portail
 
         return context
 

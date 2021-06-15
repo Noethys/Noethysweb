@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django.forms import ModelForm
-from django.utils.translation import ugettext as _
+from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML
 from crispy_forms.bootstrap import Field, StrictButton
@@ -13,7 +12,7 @@ from core.utils.utils_commandes import Commandes
 from core.models import LotFactures
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = LotFactures
         fields = "__all__"

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -97,9 +96,9 @@ class View(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Etat global des consommations"
-        context['form_selection_periode'] = Form_selection_periode()
-        context['form_profil_configuration'] = Form_profil_configuration()
-        context['form_selection_activites'] = Form_selection_activites()
-        context['form_selection_options'] = Form_selection_options()
+        context['form_selection_periode'] = Form_selection_periode(request=self.request)
+        context['form_profil_configuration'] = Form_profil_configuration(request=self.request)
+        context['form_selection_activites'] = Form_selection_activites(request=self.request)
+        context['form_selection_options'] = Form_selection_options(request=self.request)
         return context
 

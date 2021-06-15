@@ -173,6 +173,18 @@
     background-color: #ff1904 !important;
 }
 
+@media print{
+    td.reservation {
+        background-color: #FF9E1E !important;
+        -webkit-print-color-adjust: exact;
+    }
+    td.attente {
+        background-color: #abcbff !important;
+        -webkit-print-color-adjust: exact;
+    }
+}
+
+
 /* Fonds de case (note: le td. devant permet de prioriser la règle devant le css '.ouvert') */
 td.disponible {
     background-color: rgba(227, 254, 219, 0.73);

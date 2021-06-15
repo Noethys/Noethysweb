@@ -1,0 +1,41 @@
+{% extends "portail/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+{% endblock %}
+
+{% block contenu_page %}
+
+    {# Texte d'introduction #}
+    {% if parametres_portail.mentions_intro %}
+        <div style="margin-bottom: 20px;">
+            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.mentions_intro }}
+        </div>
+    {% endif %}
+
+    {# Conditions générales d'utilisation #}
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}Conditions générales d'utilisation{% endblock %}
+        {% block box_contenu %}
+            {{ texte_conditions|safe }}
+        {% endblock box_contenu %}
+        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+    {% endembed %}
+
+    {# Copyright #}
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}Copyright logiciel{% endblock %}
+        {% block box_contenu %}
+            <p>Ce portail est un composant de Noethysweb, l'application libre et gratuite de gestion multi-activités. Pour en savoir davantage, consultez le site <a href="http://www.noethysweb.com" title="Découvrir Noethysweb">www.noethysweb.com</a>.</p>
+            <p>Copyright © 2019-{% now "Y" %} Ivan LUCAS</p>
+        {% endblock box_contenu %}
+        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+    {% endembed %}
+
+{% endblock contenu_page %}

@@ -1,0 +1,89 @@
+{% extends "portail/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+{% endblock %}
+
+{% block contenu_page %}
+
+    {# Texte d'introduction #}
+    {% if parametres_portail.messagerie_intro %}
+        <div style="margin-bottom: 20px;">
+            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.messagerie_intro }}
+        </div>
+    {% endif %}
+
+    {# Lien de retour vers la page contact #}
+	<div class="d-print-none" style="margin-bottom: 10px;">
+        <a href="{% url 'portail_contact' %}"><i class="fa fa-arrow-circle-o-left"></i> Revenir à la page contact</a>
+	</div>
+
+    {# Messagerie #}
+    {% embed 'core/box.html' with box_titre=True box_conclusion=True %}
+        {% block box_theme %}card-outline card-lightblue direct-chat direct-chat-primary{% endblock %}
+        {% block box_titre %}
+            Discussion avec '{{ structure }}'
+            {% if liste_messages_non_lus %}
+                <span class="badge bg-danger"><i class="fa fa-envelope margin-r-5"></i>{{ liste_messages_non_lus|length }} nouveau{{ liste_messages_non_lus|length|pluralize:"x" }} message{{ liste_messages_non_lus|length|pluralize }}</span>
+            {% endif %}
+        {% endblock %}
+        {% block box_contenu %}
+
+            {% if not liste_messages %}
+                <div style="padding:20px;">
+                    Aucun message récent.
+                </div>
+            {% else %}
+                <div id="div_messages" class="direct-chat-messages" style="height: 300px; padding: 20px;">
+                    {% for message in liste_messages %}
+
+                        {% if message.utilisateur %}
+
+                            {# Si c'est un message de l'administrateur #}
+                            <div class="direct-chat-msg right">
+                                <div class="direct-chat-infos clearfix">
+                                    <span class="direct-chat-name float-right">{{ message.utilisateur }}</span>
+                                    <span class="direct-chat-timestamp float-left">{{ message.date_creation|date:"l j F Y H:i" }}</span>
+                                    {% if message in liste_messages_non_lus %}<span class="badge bg-danger ml-md-2">Nouveau</span>{% endif %}
+                                </div>
+                                <img class="direct-chat-img" src="{% static "images/user.png" %}">
+                                <div class="direct-chat-text">
+                                    {{ message.texte|safe }}
+                                </div>
+                            </div>
+
+                        {% else %}
+
+                            {# Si c'est un message de la famille #}
+                            <div class="direct-chat-msg">
+                                <div class="direct-chat-infos clearfix">
+                                    <span class="direct-chat-name float-left">{{ message.famille }}</span>
+                                    <span class="direct-chat-timestamp float-right">{{ message.date_creation|date:"l j F Y H:i" }}</span>
+                                </div>
+                                <img class="direct-chat-img" src="{% static "images/user.png" %}">
+                                <div class="direct-chat-text">
+                                    {{ message.texte|safe }}
+                                </div>
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+        {% endblock box_contenu %}
+        {% block box_conclusion %}
+            {% crispy form %}
+        {% endblock %}
+    {% endembed %}
+
+    <script>
+        {# Scroll jusqu'en bas de la liste des messages #}
+        $("#div_messages").scrollTop($("#div_messages").get(0).scrollHeight);
+    </script>
+
+{% endblock contenu_page %}

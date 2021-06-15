@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -9,6 +8,7 @@ from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Cotisation
 from core.utils import utils_dates
+from django.db.models import Q
 
 
 class Page(crud.Page):
@@ -26,7 +26,8 @@ class Liste(Page, crud.Liste):
     model = Cotisation
 
     def get_queryset(self):
-        return Cotisation.objects.select_related('famille', 'individu', 'type_cotisation', 'unite_cotisation', 'depot_cotisation').filter(self.Get_filtres("Q"))
+        condition = (Q(type_cotisation__structure__in=self.request.user.structures.all()) | Q(type_cotisation__structure__isnull=True))
+        return Cotisation.objects.select_related('famille', 'individu', 'type_cotisation', 'type_cotisation__structure', 'unite_cotisation', 'depot_cotisation').filter(self.Get_filtres("Q"), condition)
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

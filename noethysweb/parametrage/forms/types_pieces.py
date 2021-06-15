@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, HTML, Row, Column, Fieldset, ButtonHolder
@@ -16,7 +16,7 @@ from core.widgets import DatePickerWidget
 from django.utils.dateparse import parse_date
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     # Modification du label de la checkbox
     valide_rattachement = forms.BooleanField(label="La pièce est également valable pour les familles rattachées à l'individu.", required=False)
 
@@ -63,6 +63,7 @@ class Formulaire(ModelForm):
             Commandes(annuler_url="{% url 'types_pieces_liste' %}"),
             Fieldset('Généralités',
                 Field('nom'),
+                Field('structure'),
                 Field('public'),
                 Field('valide_rattachement'),
             ),

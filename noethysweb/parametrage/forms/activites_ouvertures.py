@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -14,9 +13,10 @@ from core.utils.utils_commandes import Commandes
 from core.widgets import MonthPickerWidget, DatePickerWidget
 from parametrage.widgets import CalendrierOuvertures
 from core.models import JOURS_SEMAINE
+from core.forms.base import FormulaireBase
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     choix_mois = forms.DateField(label="Sélection du mois", required=False, widget=MonthPickerWidget())
     calendrier = forms.CharField(label="Calendrier des ouvertures", required=False, widget=CalendrierOuvertures())
 

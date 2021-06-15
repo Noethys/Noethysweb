@@ -109,6 +109,15 @@
                         </div>
                     {% endif %}
 
+                    {# Si aucune structure associée à cet utilisateur #}
+                    {% if not request.user.structures.all %}
+                        <div class="alert alert-warning">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
+                            <h5><i class="icon fa fa-exclamation-triangle"></i> Droits de l'utilisateur</h5>
+                            Aucune structure n'est associée à votre profil. Demandez à l'administrateur de modifier votre compte utilisateur. A défaut, il vous sera impossible d'accéder aux activités.
+                        </div>
+                    {% endif %}
+
                     {# Mode démo #}
                     {% if mode_demo %}
                         <div class="card card-outline card-warning">

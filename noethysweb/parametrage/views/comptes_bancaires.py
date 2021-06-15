@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -31,7 +30,7 @@ class Liste(Page, crud.Liste):
     model = CompteBancaire
 
     def get_queryset(self):
-        return CompteBancaire.objects.filter(self.Get_filtres("Q"))
+        return CompteBancaire.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure())
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

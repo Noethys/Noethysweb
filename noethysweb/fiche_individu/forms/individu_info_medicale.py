@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
@@ -16,8 +16,7 @@ from core.widgets import DatePickerWidget
 from django_select2.forms import Select2Widget
 
 
-
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     # Durée de validité
     choix_validite = [("ILLIMITEE", "Durée illimitée"), ("LIMITEE", "Durée limitée")]
     validite_type = forms.TypedChoiceField(label="Validité", choices=choix_validite, initial='ILLIMITEE', required=False)

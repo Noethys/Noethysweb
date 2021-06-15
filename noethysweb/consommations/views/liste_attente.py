@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -27,13 +26,13 @@ class View(CustomView, TemplateView):
         else:
             context['page_titre'] = "Liste des places refusées"
         if "form_parametres" not in kwargs:
-            context['form_parametres'] = Formulaire()
+            context['form_parametres'] = Formulaire(request=self.request)
             parametres = {"donnees": "periode_reference"}
             context['resultats'] = json.dumps(self.Get_resultats(parametres=parametres))
         return context
 
     def post(self, request, **kwargs):
-        form = Formulaire(request.POST)
+        form = Formulaire(request.POST, request=self.request)
         if form.is_valid() == False:
             return self.render_to_response(self.get_context_data(form_parametres=form))
         context = {
@@ -66,7 +65,8 @@ class View(CustomView, TemplateView):
                 listes_dates.extend([d, d])
 
             # Récupération des dates extrêmes
-            date_min, date_max = min(listes_dates), max(listes_dates)
+            if listes_dates:
+                date_min, date_max = min(listes_dates), max(listes_dates)
 
         # Utiliser des paramètres définis
         if parametres["donnees"] == "periode_definie":

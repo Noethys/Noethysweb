@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -7,7 +6,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from core.views.menu import GetMenuPrincipal
 from noethysweb.version import GetVersion
-from core.models import Organisateur, Parametre
+from core.models import Organisateur, Parametre, Utilisateur, PortailMessage
 from django.core.cache import cache
 from core.utils import utils_parametres
 from django.http import JsonResponse
@@ -21,6 +20,14 @@ def Memorise_option(request):
     valeur = json.loads(request.POST.get("valeur"))
     utils_parametres.Set(nom=nom, categorie="options_interface", utilisateur=request.user, valeur=valeur)
     cache.delete('options_interface')
+    return JsonResponse({"success": True})
+
+
+def Memorise_structure(request):
+    """ Mémorise dans la DB la structure actuelle de l'utilisateur """
+    idstructure = request.POST.get("idstructure")
+    request.user.structure_actuelle_id = idstructure
+    request.user.save()
     return JsonResponse({"success": True})
 
 
@@ -98,6 +105,9 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
         # Mémorise le fil d'ariane
         if context['menu_actif'] != None:
             context['breadcrumb'] = context['menu_actif'].GetBreadcrumb()
+
+        # Messages du portail non lus
+        context["liste_messages_non_lus"] = PortailMessage.objects.select_related("famille", "structure").filter(structure__in=self.request.user.structures.all(), utilisateur__isnull=True, date_lecture__isnull=True).order_by("date_creation")
 
         return context
 

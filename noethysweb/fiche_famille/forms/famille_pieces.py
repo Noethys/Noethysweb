@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder
@@ -20,7 +20,7 @@ import datetime
 import json
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     # Type de pièce
     mode_piece = forms.ChoiceField(label="Choisir dans", widget=forms.RadioSelect, choices=[("AFOURNIR", "Les pièces à fournir"), ("TOUTES", "Toutes les pièces")], initial="AFOURNIR", required=False)
     pieces_fournir = forms.TypedChoiceField(label="Pièce", choices=[], required=False)
@@ -57,7 +57,7 @@ class Formulaire(ModelForm):
         self.fields['pieces_fournir'].initial = None
 
         # Toutes les pièces possibles
-        rattachements = Rattachement.objects.filter(famille=famille)
+        rattachements = Rattachement.objects.select_related("individu").filter(famille=famille)
         self.pieces_toutes = []
         for type_piece in TypePiece.objects.all().order_by("nom"):
             if type_piece.public == "famille":

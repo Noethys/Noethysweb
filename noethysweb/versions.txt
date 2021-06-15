@@ -1,3 +1,13 @@
+Version 0.0.3.7 (15/06/2021) :
+
+- Ajout des structures
+- Finalisation de l'historique
+- Sécurisation des requetes ajax
+- Correction de bugs divers
+- Ajout de la réinitialisaton des mots de passe
+- Ajout des régimes alimentaires
+- Ajout des contacts d'urgence
+
 Version 0.0.3.6 (28/04/2021) :
 
 - Corrections cosmétiques diverses

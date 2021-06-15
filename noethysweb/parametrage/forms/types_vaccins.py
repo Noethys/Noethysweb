@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, ButtonHolder, Div, Submit, HTML, Row, Column, Fieldset
@@ -16,7 +16,7 @@ from django_select2.forms import Select2MultipleWidget
 
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     types_maladies = forms.ModelMultipleChoiceField(label="Types de maladies associées", widget=Select2MultipleWidget({"lang":"fr"}), queryset=TypeMaladie.objects.all())
 
     # Champs libres pour la durée de validité

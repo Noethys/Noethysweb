@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -41,12 +40,12 @@ class Liste(Page, crud.CustomListe):
         context['impression_conclusion'] = ""
         context["hauteur_table"] = "400px"
         if "form_parametres" not in kwargs:
-            context['form_parametres'] = Formulaire()
+            context['form_parametres'] = Formulaire(request=self.request)
             context["datatable"] = self.Get_customdatatable()
         return context
 
     def post(self, request, **kwargs):
-        form = Formulaire(request.POST)
+        form = Formulaire(request.POST, request=self.request)
         if form.is_valid() == False:
             return self.render_to_response(self.get_context_data(form_parametres=form))
         context = {

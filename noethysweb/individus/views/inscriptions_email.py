@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -9,7 +8,7 @@ logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.utils import utils_dates
+from django.db.models import Q
 from individus.forms.inscriptions_choix_modele import Formulaire as Form_modele
 from core.models import Mail, DocumentJoint, Inscription, Destinataire, AdresseMail, ModeleEmail
 from django.http import JsonResponse
@@ -85,7 +84,8 @@ class Liste(Page, crud.Liste):
     model = Inscription
 
     def get_queryset(self):
-        return Inscription.objects.select_related("famille", "individu", "groupe", "categorie_tarif", "activite").filter(self.Get_filtres("Q"))
+        condition = Q(activite__structure__in=self.request.user.structures.all())
+        return Inscription.objects.select_related("famille", "individu", "groupe", "categorie_tarif", "activite").filter(self.Get_filtres("Q"), condition)
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

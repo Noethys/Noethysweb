@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
-from django.utils.translation import ugettext as _
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, ButtonHolder
-from crispy_forms.bootstrap import Field, FormActions, PrependedText
+from crispy_forms.layout import Layout, Fieldset
+from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.models import Activite, TypePiece, TypeCotisation
 from django_select2.forms import Select2MultipleWidget
 
-class Formulaire(ModelForm):
+
+class Formulaire(FormulaireBase, ModelForm):
     # Pièces à fournir
     pieces = forms.ModelMultipleChoiceField(label="Pièces à fournir", widget=Select2MultipleWidget({"lang":"fr"}), queryset=TypePiece.objects.all(), required=False)
 
@@ -35,9 +35,16 @@ class Formulaire(ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
+        # Création des boutons de commande
+        if self.mode == "CONSULTATION":
+            commandes = Commandes(modifier_url="activites_renseignements_modifier", modifier_args="idactivite=activite.idactivite", modifier=True, enregistrer=False, annuler=False, ajouter=False)
+            self.Set_mode_consultation()
+        else:
+            commandes = Commandes(annuler_url="{% url 'activites_renseignements' idactivite=activite.idactivite %}", ajouter=False)
+
         # Affichage
         self.helper.layout = Layout(
-            Commandes(ajouter=False, annuler_url="{% url 'activites_resume' idactivite=activite.idactivite %}"),
+            commandes,
             Fieldset("Pièces à fournir",
                 Field("pieces"),
             ),

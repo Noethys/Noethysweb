@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
 from django.forms import ModelForm
-from django.utils.translation import ugettext as _
+from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, ButtonHolder, Fieldset, Div
 from crispy_forms.bootstrap import Field, StrictButton
@@ -16,7 +15,7 @@ from django_summernote.widgets import SummernoteInplaceWidget
 from core.data import data_modeles_emails
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     html = forms.CharField(label="Texte", widget=SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '300px'}}))
 
     class Meta:
@@ -50,6 +49,7 @@ class Formulaire(ModelForm):
             Fieldset("Généralités",
                 Field('nom'),
                 Field('description'),
+                Field('structure'),
                 Field('defaut'),
             ),
             Fieldset("Email",

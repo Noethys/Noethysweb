@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
-from django.utils.translation import ugettext as _
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
 from crispy_forms.bootstrap import Field, StrictButton, PrependedText
@@ -14,13 +13,13 @@ from core.utils.utils_commandes import Commandes
 from core.models import Famille, Cotisation, Activite, Rattachement, TypeCotisation, UniteCotisation, Prestation, ModeleDocument
 from core.widgets import DatePickerWidget
 from django_select2.forms import Select2MultipleWidget
-from django.db.models import Max
+from django.db.models import Q, Max
 import datetime
 from core.utils import utils_preferences
 from cotisations.widgets import Selection_beneficiaires_cotisation
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     # Carte
     carte = forms.BooleanField(label="Créer", initial=False, required=False)
 
@@ -31,7 +30,7 @@ class Formulaire(ModelForm):
     montant = forms.DecimalField(label="Montant", max_digits=6, decimal_places=2, initial=0.0, required=False)
 
     # Activités
-    activites = forms.ModelMultipleChoiceField(label="Activités", widget=Select2MultipleWidget({"lang":"fr"}), queryset=Activite.objects.all(), required=False)
+    activites = forms.ModelMultipleChoiceField(label="Activités", widget=Select2MultipleWidget({"lang": "fr"}), queryset=Activite.objects.all(), required=False)
 
     # Bénéficiaires pour la saisie par lot
     beneficiaires_familles = forms.CharField(label="Familles", required=False, widget=Selection_beneficiaires_cotisation(attrs={"categorie": "familles"}))
@@ -66,6 +65,10 @@ class Formulaire(ModelForm):
         # Définit la famille associée
         if idfamille:
             famille = Famille.objects.get(pk=idfamille)
+
+        # Liste les types de cotisation
+        condition_structure = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
+        self.fields['type_cotisation'].queryset = TypeCotisation.objects.filter(condition_structure)
 
         # Type et unité par défaut
         if not self.instance.idcotisation:

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -12,25 +11,34 @@ from fiche_famille.views.famille import Onglet
 
 
 
-class Modifier(Onglet, crud.Modifier):
+class Consulter(Onglet, crud.Modifier):
     form_class = Formulaire
     template_name = "fiche_famille/famille_edit.html"
+    mode = "CONSULTATION"
 
     def get_context_data(self, **kwargs):
-        context = super(Modifier, self).get_context_data(**kwargs)
+        context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Paramètres"
-        context['box_introduction'] = "Vous pouvez modifier ici divers paramètres concernant la famille."
+        context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
         context['onglet_actif'] = "divers"
         return context
-
-    def get_success_url(self):
-        return reverse_lazy("famille_resume", kwargs={'idfamille': self.kwargs.get('idfamille', None)})
 
     def get_object(self):
         return Famille.objects.get(pk=self.kwargs['idfamille'])
 
     def get_form_kwargs(self, **kwargs):
-        """ Envoie l'idindividu au formulaire """
-        form_kwargs = super(Modifier, self).get_form_kwargs(**kwargs)
+        form_kwargs = super(Consulter, self).get_form_kwargs(**kwargs)
         form_kwargs["idfamille"] = self.Get_idfamille()
         return form_kwargs
+
+
+class Modifier(Consulter):
+    mode = "EDITION"
+
+    def get_context_data(self, **kwargs):
+        context = super(Modifier, self).get_context_data(**kwargs)
+        context['box_introduction'] = "Vous pouvez modifier ici divers paramètres concernant la famille."
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy("famille_divers", kwargs={'idfamille': self.kwargs.get('idfamille', None)})

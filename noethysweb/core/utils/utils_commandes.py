@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -12,6 +11,7 @@ def Commandes(enregistrer=True, enregistrer_label="<i class='fa fa-check margin-
               commandes_principales=[],
               ajouter=True,
               annuler=True, annuler_url=None,
+              modifier=False, modifier_url=None, modifier_args="",
               aide=True, aide_url="{% url 'aide_toc' %}",
               autres_commandes=[], css_class="commandes"):
 
@@ -20,6 +20,10 @@ def Commandes(enregistrer=True, enregistrer_label="<i class='fa fa-check margin-
     # Enregistrer
     if enregistrer:
         liste_commandes.append(StrictButton(enregistrer_label, title="Enregistrer", name=enregistrer_name, type="submit", css_class="btn-primary", id=enregistrer_id))
+
+    # Modifier page
+    if modifier:
+        liste_commandes.append(HTML("""<a class="btn btn-primary" href="{% url '""" + modifier_url + """' """ + modifier_args + """ %}" title="Modifier"><i class="fa fa-pencil margin-r-5"></i>Modifier cette page</a> """))
 
     # Autres commandes principales
     if commandes_principales:

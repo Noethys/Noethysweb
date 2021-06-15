@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -106,7 +105,8 @@ class Page(Onglet):
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """
         context = super(Page, self).get_context_data(**kwargs)
-        context['box_titre'] = "Règlements"
+        if not hasattr(self, "verbe_action"):
+            context['box_titre'] = "Règlements"
         context['onglet_actif'] = "reglements"
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
@@ -170,6 +170,8 @@ class Liste(Page, crud.Liste):
             return utils_texte.Formate_montant(instance.montant)
 
         def Formate_ventile(self, instance, **kwargs):
+            if not instance.ventile:
+                instance.ventile = Decimal(0)
             if instance.ventile == Decimal(0):
                 classe = "text-red"
             elif instance.ventile == instance.montant:
@@ -229,7 +231,7 @@ class ClasseCommune(Page):
             if ventilation.prestation_id not in liste_IDtraitees:
                 ventilation.delete()
 
-        return super().form_valid(form) # return HttpResponseRedirect(self.get_success_url())
+        return super().form_valid(form)
 
 
 

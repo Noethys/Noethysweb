@@ -4,7 +4,7 @@
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
-from core.models import Utilisateur
+from core.models import Utilisateur, Structure
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import Permission, Group
 from django import forms
@@ -14,13 +14,13 @@ from django import forms
 # --------------------------- Groupes d'utilisateurs ----------------------------
 
 class GroupAdminForm(forms.ModelForm):
-    class Meta:
-        model = Group
-        exclude = ()
-
     permissions = forms.ModelMultipleChoiceField(
         queryset=Permission.objects.exclude(name__startswith='Can').order_by("name"), label="Permissions",
         widget=admin.widgets.FilteredSelectMultiple('permissions', False))
+
+    class Meta:
+        model = Group
+        exclude = ()
 
 
 class MyGroupAdmin(admin.ModelAdmin):
@@ -34,13 +34,17 @@ admin.site.register(Group, MyGroupAdmin)
 # --------------------------- Modification du formulaire (permissions)  ----------------------------
 
 class UserEditForm(UserChangeForm):
+    user_permissions = forms.ModelMultipleChoiceField(
+        queryset=Permission.objects.exclude(name__startswith='Can').order_by("name"), label="Permissions",
+        widget=admin.widgets.FilteredSelectMultiple('permissions', False), required=False)
+
+    structures = forms.ModelMultipleChoiceField(
+        queryset=Structure.objects.all().order_by("nom"), label="Structures",
+        widget=admin.widgets.FilteredSelectMultiple('structures', False), required=False)
+
     class Meta:
         model = Utilisateur
-        exclude = ()
-
-    user_permissions = forms.ModelMultipleChoiceField(
-        Permission.objects.exclude(name__startswith='Can').order_by("name"), label="Permissions",
-        widget=admin.widgets.FilteredSelectMultiple('permissions', False))
+        exclude = []
 
 
 # --------------------------- Utilisateurs ----------------------------
@@ -50,6 +54,16 @@ class UtilisateurAdmin(UserAdmin):
 
     # Ajoute la colonne is_active dans la liste des utilisateurs
     list_display = UserAdmin.list_display + ('is_active',)
+
+    # Affichage des champs
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        ('Informations personnelles', {'fields': ('first_name', 'last_name', 'email')}),
+        ('Activation du compte', {'fields': ('is_active',)}),
+        ('Permissions accordées', {'fields': ('is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Structures accessibles', {'fields': ('structures',), 'description': "Sélectionnez les structures accessibles par cet utilisateur."}),
+        ('Dates importantes', {'fields': ('last_login', 'date_joined')})
+    )
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -9,7 +8,7 @@ from core.views import toc
 from core.decorators import secure_ajax
 from outils.views import editeur_emails, editeur_emails_express, historique, update, sauvegarde_creer, sauvegarde_restaurer, statistiques, contacts, \
                         editeur_emails_familles, editeur_emails_individus, editeur_emails_contacts, editeur_emails_listes_diffusion, \
-                        editeur_emails_saisie_libre, emails, notes_versions
+                        editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail
 
 urlpatterns = [
 
@@ -47,6 +46,12 @@ urlpatterns = [
     path('outils/sauvegarde/creer', sauvegarde_creer.View.as_view(), name='sauvegarde_creer'),
     path('outils/sauvegarde/restaurer', sauvegarde_restaurer.View.as_view(), name='sauvegarde_restaurer'),
 
+    # Portail
+    path('outils/portail/messages/liste', messages_portail.Liste.as_view(), name='messages_portail_liste'),
+    path('outils/portail/messages/supprimer/<int:pk>', messages_portail.Supprimer.as_view(), name='messages_portail_supprimer'),
+
+    path('outils/portail/messagerie', messagerie_portail.Ajouter.as_view(), name='messagerie_portail'),
+    path('outils/portail/messagerie/<int:idstructure>/<int:idfamille>', messagerie_portail.Ajouter.as_view(), name='messagerie_portail'),
 
 
     # AJAX

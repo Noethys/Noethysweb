@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -88,6 +87,7 @@ class Liste(Page, crud.Liste):
 
 class Onglet(CustomView):
     menu_code = "individus_toc"
+    objet_singulier = "un individu"
     liste_onglets = LISTE_ONGLETS
 
     def get_context_data(self, **kwargs):
@@ -122,6 +122,7 @@ class Onglet(CustomView):
         rattachements = Rattachement.objects.select_related('famille').filter(individu_id=self.Get_idindividu())
         for rattachement in rattachements:
             rattachement.famille.Maj_infos()
+
 
 
 class Resume(Onglet, DetailView):

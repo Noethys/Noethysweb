@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -10,9 +9,10 @@ from crispy_forms.layout import Layout, Fieldset, Submit, HTML, ButtonHolder
 from crispy_forms.bootstrap import Field, InlineCheckboxes, Div
 from core.widgets import DatePickerWidget
 from core.models import JOURS_SEMAINE
+from core.forms.base import FormulaireBase
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     # Action
     choix_action = [("SAISIE", "Ajouter"), ("EFFACER", "Effacer")]
     action_type = forms.TypedChoiceField(label="Action à réaliser", choices=choix_action, initial='SAISIE', required=False)

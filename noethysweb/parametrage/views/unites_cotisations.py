@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -28,7 +27,7 @@ class Page(crud.Page):
         context = super(Page, self).get_context_data(**kwargs)
         context['categorie'] = self.Get_categorie()
         context['label_categorie'] = "Type d'adhésion"
-        context['liste_categories'] = [(item.pk, item.nom) for item in TypeCotisation.objects.all().order_by("nom")]
+        context['liste_categories'] = [(item.pk, item.nom) for item in TypeCotisation.objects.filter(structure__in=self.request.user.structures.all()).order_by("nom")]
         if context['liste_categories']:
             # Si au moins un type de cotisation existe
             context['boutons_liste'] = [

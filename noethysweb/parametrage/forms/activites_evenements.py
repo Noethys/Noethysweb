@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder
@@ -15,7 +15,7 @@ from core.models import Unite, Groupe, Activite, Evenement, Tarif
 from core.widgets import DatePickerWidget, TimePickerWidget
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     date = forms.DateField(label="Date", required=True, widget=DatePickerWidget())
     unite = forms.ModelChoiceField(label="Unité", queryset=Unite.objects.none(), required=True)
     groupe = forms.ModelChoiceField(label="Groupe", queryset=Groupe.objects.none(), required=True)

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -11,11 +10,11 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Row, Column
 from crispy_forms.bootstrap import Field, FormActions, StrictButton
 from core.utils.utils_commandes import Commandes
-from core.models import Ferie
+from core.forms.base import FormulaireBase
 import datetime
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     nombre = forms.IntegerField(min_value=1, max_value=50, initial=10)
     annee = forms.IntegerField(label="Année", initial=datetime.date.today().year)
     paques = forms.BooleanField(label="Lundi de Pâques", required=False, initial=True)

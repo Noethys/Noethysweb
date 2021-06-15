@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -13,10 +12,9 @@ from django.utils.html import strip_tags
 from django.core.mail import EmailMultiAlternatives
 from email.mime.image import MIMEImage
 from core.models import Mail
-from core.utils import utils_dates
+from core.utils import utils_dates, utils_historique
 from django.db.models import Q
 from django.contrib import messages
-
 
 
 def Textify(html):
@@ -179,6 +177,10 @@ def Envoyer_model_mail(idmail=None, request=None):
 
         if resultat == 1:
             liste_envois_succes.append(destinataire)
+
+            # Mémorise l'envoi dans l'historique
+            utils_historique.Ajouter(titre="Envoi d'un email", detail=mail.objet, utilisateur=request.user, famille=mail.famille,
+                                     individu=mail.individu, objet="Email", idobjet=mail.pk, classe="Mail")
 
     connection.close()
     return liste_envois_succes

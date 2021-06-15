@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
@@ -18,7 +18,7 @@ import datetime
 from core.widgets import Telephone, CodePostal, Ville, Selection_image
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     # Durée de validité
     choix_validite = [("ILLIMITEE", "Durée illimitée"), ("LIMITEE", "Durée limitée")]
     validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='ILLIMITEE', required=True)
@@ -42,8 +42,8 @@ class Formulaire(ModelForm):
 
     class Meta:
         model = Activite
-        fields = ["nom", "abrege", "coords_org", "rue", "cp", "ville", "tel", "fax", "mail", "site", "logo_org", "logo",
-                  "date_debut", "date_fin", "groupes_activites", "nbre_inscrits_max", "inscriptions_multiples", "regie", "code_comptable"]
+        fields = ["nom", "abrege", "coords_org", "rue", "cp", "ville", "tel", "fax", "mail", "site", "logo_org", "logo", "code_produit_local",
+                  "date_debut", "date_fin", "groupes_activites", "nbre_inscrits_max", "inscriptions_multiples", "regie", "code_comptable", "structure"]
         widgets = {
             'tel': Telephone(),
             'fax': Telephone(),
@@ -51,6 +51,11 @@ class Formulaire(ModelForm):
             'cp': CodePostal(attrs={"id_ville": "id_ville"}),
             'ville': Ville(attrs={"id_codepostal": "id_cp"}),
             'logo': Selection_image(),
+        }
+        help_texts = {
+            "nom": "Saisissez le nom complet de l'activité.",
+            "abrege": "Saisissez le nom abrégé de l'activité (quelques caractères en majuscules).",
+            "structure": "Sélectionnez la structure associée à cette activité.",
         }
 
     def __init__(self, *args, **kwargs):
@@ -90,12 +95,20 @@ class Formulaire(ModelForm):
         else:
             self.fields['type_coords'].initial = "SPECIFIQUE"
 
+        # Création des boutons de commande
+        if self.mode == "CONSULTATION":
+            commandes = Commandes(modifier_url="activites_generalites_modifier", modifier_args="idactivite=activite.idactivite", modifier=True, enregistrer=False, annuler=False, ajouter=False)
+            self.Set_mode_consultation()
+        else:
+            commandes = Commandes(annuler_url="{% url 'activites_generalites' idactivite=activite.idactivite %}", ajouter=False)
+
         # Affichage
         self.helper.layout = Layout(
-            Commandes(ajouter=False, annuler_url="{% url 'activites_resume' idactivite=activite.idactivite %}"),
-            Fieldset("Nom de l'activité",
+            commandes,
+            Fieldset("Généralités",
                 Field("nom"),
                 Field("abrege"),
+                Field("structure"),
             ),
             Fieldset("Durée de validité",
                 Field("validite_type"),

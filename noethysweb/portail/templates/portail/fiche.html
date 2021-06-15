@@ -1,0 +1,70 @@
+{% extends "portail/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+
+    <style type="text/css">
+        .widget-user-2 .widget-user-username, .widget-user-2 .widget-user-desc {
+            margin-left: 0px;
+        }
+    </style>
+
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    {# Lien de retour vers la page des renseignements #}
+	<div class="d-print-none" style="margin-bottom: 10px;">
+        <a id="retour_renseignements" href="{% url 'portail_renseignements' %}"><i class="fa fa-arrow-circle-o-left"></i> Revenir à la page des renseignements</a>
+	</div>
+
+    <div class="row">
+        <div class="col-md-3">
+
+            <div class="card card-primary widget-user-2 card-outline bg-lightblue">
+
+                <div class="card-body box-profile" style="border-bottom: 1px solid rgba(0,0,0,.125);">
+                    <div class="text-center">
+                        <img class="img-fluid img-circle elevation-2" src="{% if rattachement %}{{ rattachement.individu.Get_photo }}{% else %}{% static 'images/personne.png' %}{% endif %}" style="max-height: 80px">
+                    </div>
+                    <h3 class="profile-username text-center">{% if rattachement %}{{ rattachement.individu.Get_nom }}{% else %}Famille de {{ famille }}{% endif %}</h3>
+{#                    <p class="text-muted text-center">{{ rattachement.get_categorie_display }}</p>#}
+                </div>
+
+                {# Onglets #}
+                <div class="card-footer p-0 bg-white">
+                    <ul class="list-group list-group-flush">
+                        {% for onglet in liste_onglets %}
+                            <a class="list-group-item list-group-item-action {% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% if rattachement %}{% url onglet.url idrattachement=rattachement.pk %}{% else %}{% url onglet.url %}{% endif %}">
+                                <i class="fa {{ onglet.icone }} text-light-blue fa-fw"></i> {{ onglet.label }}
+                            </a>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        {% block detail_fiche %}
+            <div class="col-md-9">
+                {% embed 'core/box.html' %}
+                    {% block box_theme %}card-outline card-lightblue{% endblock %}
+                    {% block box_titre %}{{ box_titre }}{% endblock %}
+                    {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                    {% block box_contenu %}{% endblock %}
+                {% endembed %}
+            </div>
+        {% endblock %}
+
+    </div>
+
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+{% endblock scripts %}

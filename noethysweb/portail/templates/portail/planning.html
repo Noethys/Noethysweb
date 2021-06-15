@@ -1,0 +1,134 @@
+{% extends "portail/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .legende_grille {
+            padding: 2px;
+        }
+        .legende_grille ul {
+            margin-bottom: 0px;
+        }
+        .legende_grille li {
+            display: inline;
+            white-space: nowrap;
+            margin-right: 20px;
+        }
+    </style>
+{% endblock styles %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+    <script>
+        var dict_options = null;
+        function Get_periode() {return null;};
+        function Get_individus() {return null;};
+        function Get_groupes() {return null;};
+        function Get_classes() {return null;};
+    </script>
+{% endblock scripts %}
+
+
+{% block contenu_page %}
+
+    {# Texte d'introduction #}
+    {% if parametres_portail.reservations_intro_planning %}
+        <div class="d-print-none" style="margin-bottom: 20px;">
+            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.reservations_intro_planning }}
+        </div>
+    {% endif %}
+
+    {# Lien de retour vers liste des périodes #}
+	<div class="d-print-none" style="margin-bottom: 10px;">
+        <a id="retour_reservations" href="{% url 'portail_reservations' %}"><i class="fa fa-arrow-circle-o-left"></i> Revenir à la liste des périodes</a>
+	</div>
+
+    {# Entête de l'individu #}
+    <div class="card card-widget widget-user">
+        <div class="widget-user-header bg-lightblue" style="height: 110px;">
+            <h3 class="widget-user-username">{{ data.individu.prenom }}</h3>
+        </div>
+        <div class="widget-user-image" style="top: 60px;">
+            <img class="img-circle elevation-1" src="{{ data.individu.Get_photo }}" alt="Photo">
+        </div>
+        <div class="card-footer" style="padding-top: 40px;">
+            <div class="row">
+                <div class="col-sm-4 border-right">
+                    <div class="description-block">
+                        <h5 class="description-header"><small>Activité</small></h5>
+                        <span class="description-text text-lightblue">{{ data.periode_reservation.activite.nom }}</span>
+                    </div>
+                </div>
+                <div class="col-sm-4 border-right">
+                    <div class="description-block">
+                        <h5 class="description-header"><small>Période</small></h5>
+                        <span class="description-text text-lightblue">{{ data.periode_reservation.nom }}</span>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="description-block">
+                        <h5 class="description-header"><small>Dates</small></h5>
+                        <span class="description-text text-lightblue">Du {{ data.periode_reservation.date_debut|date:"d/m/Y" }} au {{ data.periode_reservation.date_fin|date:"d/m/Y" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {# Grilles des réservations #}
+    <div class="row">
+        <div class="col-md-12" >
+            <div class="card">
+
+                {# Grille des consommations #}
+                <div class="card-body">
+
+                    {# Texte d'introduction de la période #}
+                    {% if data.periode_reservation.introduction %}
+                        <div class="d-print-none" style="margin-bottom: 10px;">
+                            <i class="fa fa-info-circle margin-r-5"></i>{{ data.periode_reservation.introduction }}
+                        </div>
+                    {% endif %}
+
+                    {# Tableau de la grille #}
+                    {% include "consommations/grille_tableau.html" %}
+
+                    {# Légende de la grille #}
+                    <div class="legende_grille"><small>
+                        <ul class="list-unstyled">
+                            <li><i class="fa fa-square margin-r-5" style="color: #FF9E1E;"></i>Réservation</li>
+                            <li><i class="fa fa-square margin-r-5" style="color: #abcbff;"></i>Attente</li>
+                            <li><i class="fa fa-square margin-r-5" style="color: rgba(227, 254, 219, 0.73);"></i>Disponible</li>
+                            <li><i class="fa fa-square margin-r-5" style="color: #FEFCDB;"></i>Dernières places</li>
+                            <li><i class="fa fa-square margin-r-5" style="color: rgba(247, 172, 178, 0.36);"></i>Complet</li>
+                            <li><i class="fa fa-check-circle-o text-green margin-r-5"></i>Présent</li>
+                            <li><i class="fa fa-lock text-red margin-r-5"></i>Non modifiable</li>
+                        </ul>
+                    </small></div>
+
+                </div>
+
+                {# Commandes #}
+                <div class="d-print-none d-flex flex-wrap justify-content-between" style="padding: 0px 12px 12px 12px;">
+                    <a id="imprimer" onclick="window.print();" target="_blank" class="btn btn-default" style="margin-right: 5px;"><i class="fa fa-print margin-r-5"></i>Imprimer</a>
+                    <button type="button" id="traitement_par_lot" class="btn btn-default btn-sm" onclick="$('#modal_traitement_lot').modal('show');" title="Traitement par lot" style="margin-right: 5px;"><i class="fa fa-magic margin-r-5"></i>Traitement par lot</button>
+                    <button type="button" id="appliquer_semaine_type" class="btn btn-default mr-auto" data-toggle="modal" data-target="#modal_appliquer_semaine_type"><i class="fa fa-calendar-check-o"></i> Appliquer une semaine-type</button>
+                    <button type="button" id="enregistrer" title="Enregistrer" class='btn btn-primary btn-sm' style="margin-right: 5px;"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
+                    <a type="button" id="annuler" class="btn btn-danger" href="{% url 'portail_reservations' %}"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {% include 'consommations/grille_saisie_horaires.html' %}
+    {% include 'consommations/grille_saisie_quantite.html' %}
+    {% include 'consommations/grille_traitement_lot.html' %}
+
+{% endblock contenu_page %}

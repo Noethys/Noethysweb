@@ -1,0 +1,55 @@
+{% extends "portail/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+{% endblock %}
+
+{% block contenu_page %}
+
+    {# Texte d'introduction #}
+    {% if parametres_portail.contact_intro %}
+        <div style="margin-bottom: 20px;">
+            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.contact_intro }}
+        </div>
+    {% endif %}
+
+    {# Messagerie #}
+    {% embed 'core/box.html' with box_titre=True box_introduction=True %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}Messagerie{% endblock %}
+        {% block box_introduction %}Cliquez ci-dessous sur la structure ou le service avec lequel vous souhaitez converser.{% endblock %}
+        {% block box_contenu %}
+            {% for structure in liste_structures %}
+
+                {% with dict_messages_non_lus|get_item:structure.pk as nbre_messages_non_lus %}
+                <a class="btn btn-app" href="{% url 'portail_messagerie' idstructure=structure.pk %}">
+                    {% if nbre_messages_non_lus %}
+                        <span class="badge bg-danger">{{ nbre_messages_non_lus }} non lu{{ nbre_messages_non_lus|pluralize }}</span>
+                    {% endif %}
+                    <i class="fa fa-comments"></i>{{ structure.nom }}
+                </a>
+                {% endwith %}
+
+            {% endfor %}
+        {% endblock box_contenu %}
+        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+    {% endembed %}
+
+    {# Coordonnées #}
+    {% embed 'core/box.html' with box_titre=True box_introduction=True %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}Coordonnées{% endblock %}
+        {% block box_introduction %}Retrouvez ci-dessous les coordonnées de l'organisateur.{% endblock %}
+        {% block box_contenu %}
+            <div><strong>{{ organisateur.nom }}</strong></div>
+            <div><i class='fa fa-map-marker margin-r-5'></i>{{ organisateur.rue }} {{ organisateur.cp }} {{ organisateur.ville }}</div>
+            <div><i class='fa fa-phone margin-r-5'></i>{{ organisateur.tel }}</div>
+        {% endblock box_contenu %}
+        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+    {% endembed %}
+
+{% endblock contenu_page %}

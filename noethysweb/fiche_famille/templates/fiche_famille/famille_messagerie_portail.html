@@ -1,0 +1,110 @@
+{% extends "fiche_famille/famille.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_famille %}
+    <div class="col-md-9">
+
+        <div class="row">
+
+            <div class="col-md-12">
+
+                {% if not liste_structures %}
+                    Aucune structure disponible
+                {% endif %}
+
+                {# Liste des structures disponibles #}
+                {% if liste_structures|length > 1 %}
+                    {% embed 'core/box.html' with box_titre=True %}
+                        {% block box_theme %}card-outline card-lightblue{% endblock %}
+                        {% block box_titre %}Sélection de la structure{% endblock %}
+                        {% block box_contenu %}
+                            {% for structure in liste_structures %}
+
+                                {% with dict_messages_par_structure|get_item:structure.pk as nbre_messages %}
+                                <a class="btn btn-app" href="{% url 'famille_messagerie_portail' idfamille=idfamille idstructure=structure.pk %}">
+                                    {% if nbre_messages %}
+                                        <span class="badge bg-info">{{ nbre_messages }} message{{ nbre_messages|pluralize }}</span>
+                                    {% endif %}
+                                    <i class="fa fa-comments"></i>{{ structure.nom }}
+                                </a>
+                                {% endwith %}
+
+                            {% endfor %}
+                        {% endblock box_contenu %}
+                        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+                    {% endembed %}
+                {% endif %}
+
+                {# Discussion #}
+                {% if structure %}
+                    {% embed 'core/box.html' with box_titre=True box_conclusion=True %}
+                        {% block box_theme %}card-outline card-lightblue direct-chat direct-chat-primary{% endblock %}
+                        {% block box_titre %}
+                            Discussion avec la structure {{ structure.nom }}
+                        {% endblock %}
+                        {% block box_contenu %}
+
+                            {% if not liste_messages_discussion %}
+                                <div style="padding:20px;">
+                                    Aucun message.
+                                </div>
+                            {% else %}
+                                <div id="div_messages" class="direct-chat-messages" style="height: 300px; padding: 20px;">
+                                    {% for message in liste_messages_discussion %}
+
+                                        {% if message.utilisateur %}
+
+                                            {# Si c'est un message de l'administrateur #}
+                                            <div class="direct-chat-msg right">
+                                                <div class="direct-chat-infos clearfix">
+                                                    <span class="direct-chat-name float-right">{{ message.utilisateur }}</span>
+                                                    <span class="direct-chat-timestamp float-left">{{ message.date_creation|date:"l j F Y H:i" }}</span>
+                                                </div>
+                                                <img class="direct-chat-img" src="{% static "images/user.png" %}">
+                                                <div class="direct-chat-text">
+                                                    {{ message.texte|safe }}
+                                                </div>
+                                            </div>
+
+                                        {% else %}
+
+                                            {# Si c'est un message de la famille #}
+                                            <div class="direct-chat-msg">
+                                                <div class="direct-chat-infos clearfix">
+                                                    <span class="direct-chat-name float-left">{{ message.famille }}</span>
+                                                    <span class="direct-chat-timestamp float-right">{{ message.date_creation|date:"l j F Y H:i" }}</span>
+                                                    {% if not message.date_lecture %}<span class="badge bg-danger ml-md-2">Nouveau</span>{% endif %}
+                                                </div>
+                                                <img class="direct-chat-img" src="{% static "images/user.png" %}">
+                                                <div class="direct-chat-text">
+                                                    {{ message.texte|safe }}
+                                                </div>
+                                            </div>
+
+                                        {% endif %}
+
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                        {% endblock box_contenu %}
+                        {% block box_conclusion %}
+                            {% crispy form %}
+                        {% endblock %}
+                    {% endembed %}
+
+                    <script>
+                        {# Scroll jusqu'en bas de la liste des messages #}
+                        $("#div_messages").scrollTop($("#div_messages").get(0).scrollHeight);
+                    </script>
+
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

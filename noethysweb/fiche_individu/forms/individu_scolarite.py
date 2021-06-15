@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder
@@ -16,7 +16,7 @@ from core.widgets import DatePickerWidget
 from django_select2.forms import ModelSelect2Widget
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
     date_fin = forms.DateField(label="Date de fin", required=True, widget=DatePickerWidget())
 

@@ -1,0 +1,116 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+{% endblock %}
+
+{% block contenu_page %}
+
+    <div class="row">
+
+        {# Liste des messages non lus #}
+        <div class="col-md-{% if famille %}3{% else %}12{% endif %}">
+
+            {% embed 'core/box.html' with box_titre=True %}
+                {% block box_theme %}card-outline card-lightblue{% endblock %}
+                {% block box_titre %}Messages non lus{% endblock %}
+                {% block card_body_classe %}p-0{% endblock %}
+                {% block box_contenu %}
+
+                    <div class="">
+                        {% for message in messagerie_liste_messages_non_lus %}
+                            <div class="p-2 {% if message.structure == structure and message.famille == famille %}bg-primary{% endif %}">
+                                <a href="{% url 'messagerie_portail' idfamille=message.famille_id idstructure=message.structure_id %}">
+                                    <div class="media">
+                                        <div class="media-body">
+                                            <h3 class="dropdown-item-title">
+                                                <i class="fa fa-envelope text-danger mr-1"></i> {{ message.famille.nom }}
+                                            </h3>
+                                            <p class="text-xs m-0">{{ message.texte|striptags|truncatechars:50 }}</p>
+                                            <p class="text-xs m-0 text-muted"><i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }} | <i class="fa fa-home mr-1"></i>{{ message.structure }}</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="dropdown-divider m-0"></div>
+                        {% endfor %}
+                    </div>
+
+                {% endblock box_contenu %}
+            {% endembed %}
+        </div>
+
+        {# Messagerie #}
+        {% if famille %}
+            <div class="col-md-9">
+
+                {% embed 'core/box.html' with box_titre=True box_conclusion=True %}
+                    {% block box_theme %}card-outline card-lightblue direct-chat direct-chat-primary{% endblock %}
+                    {% block box_titre %}
+                        Discussion avec la famille {{ famille.nom }} pour la structure {{ structure.nom }}
+                    {% endblock %}
+                    {% block box_contenu %}
+
+                        {% if not liste_messages_discussion %}
+                            <div style="padding:20px;">
+                                Aucun message récent.
+                            </div>
+                        {% else %}
+                            <div id="div_messages" class="direct-chat-messages" style="height: 300px; padding: 20px;">
+                                {% for message in liste_messages_discussion %}
+
+                                    {% if message.utilisateur %}
+
+                                        {# Si c'est un message de l'administrateur #}
+                                        <div class="direct-chat-msg right">
+                                            <div class="direct-chat-infos clearfix">
+                                                <span class="direct-chat-name float-right">{{ message.utilisateur }}</span>
+                                                <span class="direct-chat-timestamp float-left">{{ message.date_creation|date:"l j F Y H:i" }}</span>
+                                            </div>
+                                            <img class="direct-chat-img" src="{% static "images/user.png" %}">
+                                            <div class="direct-chat-text">
+                                                {{ message.texte|safe }}
+                                            </div>
+                                        </div>
+
+                                    {% else %}
+
+                                        {# Si c'est un message de la famille #}
+                                        <div class="direct-chat-msg">
+                                            <div class="direct-chat-infos clearfix">
+                                                <span class="direct-chat-name float-left">{{ message.famille }}</span>
+                                                <span class="direct-chat-timestamp float-right">{{ message.date_creation|date:"l j F Y H:i" }}</span>
+                                                {% if not message.date_lecture %}<span class="badge bg-danger ml-md-2">Nouveau</span>{% endif %}
+                                            </div>
+                                            <img class="direct-chat-img" src="{% static "images/user.png" %}">
+                                            <div class="direct-chat-text">
+                                                {{ message.texte|safe }}
+                                            </div>
+                                        </div>
+
+                                    {% endif %}
+
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    {% endblock box_contenu %}
+                    {% block box_conclusion %}
+                        {% crispy form %}
+                    {% endblock %}
+                {% endembed %}
+
+                <script>
+                    {# Scroll jusqu'en bas de la liste des messages #}
+                    $("#div_messages").scrollTop($("#div_messages").get(0).scrollHeight);
+                </script>
+
+            </div>
+        {% endif %}
+
+    </div>
+
+{% endblock contenu_page %}

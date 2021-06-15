@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -73,12 +72,16 @@ def ConvertDateENGtoDate(date=None):
     if date == None:
         return None
     try:
-        # return ConvertDatetimeToDate(dateutil.parser.parse(date, dayfirst=True))
         if isinstance(date, str) and "-" in date:
             date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
         return ConvertDatetimeToDate(date)
     except:
-        return None
+        pass
+    try:
+        return ConvertDatetimeToDate(dateutil.parser.parse(date, dayfirst=False))
+    except:
+        pass
+    return None
 
 def ConvertDateENGtoFR(date=None):
     date = ConvertDateENGtoDate(date)

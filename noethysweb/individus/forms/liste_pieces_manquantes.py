@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -8,12 +7,12 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
 from crispy_forms.bootstrap import Field
-from core.utils.utils_commandes import Commandes
+from core.forms.base import FormulaireBase
 from core.widgets import SelectionActivitesWidget, DateRangePickerWidget, DatePickerWidget
 import datetime
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     date = forms.DateField(label="Date de référence", required=True, widget=DatePickerWidget())
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
     presents = forms.CharField(label="Uniquement les présents", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))

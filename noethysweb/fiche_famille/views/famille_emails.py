@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -20,7 +19,7 @@ class Ajouter(Onglet, DetailView):
         context['box_titre'] = "Envoyer un Email"
         context['box_introduction'] = "Vous pouvez ici envoyer un Email à la famille."
         context['onglet_actif'] = "outils"
-        context['form'] = Formulaire(instance=self.Get_nouveau_mail())
+        context['form'] = Formulaire(instance=self.Get_nouveau_mail(), request=self.request)
         context['modeles'] = ModeleEmail.objects.filter(categorie="saisie_libre")
         return context
 

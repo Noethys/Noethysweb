@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -52,23 +51,26 @@ def Get_suivi_inscriptions(request):
 
     # Importation des paramètres
     parametres = Get_parametres()
-    context = {"data_suivi_inscriptions": Get_data(parametres=parametres, filtre=filtre)}
+    context = {"data_suivi_inscriptions": Get_data(parametres=parametres, filtre=filtre, request=request)}
     context.update(parametres)
     return render(request, "individus/suivi_inscriptions_tableau.html", context)
 
 
 
-def Get_data(parametres={}, filtre=None):
+def Get_data(parametres={}, filtre=None, request=None):
     """ Création des valeurs pour le suivi des consommations """
     # Importation des activités
     activites = parametres.get("activites", {"type": None, "ids": []})
     if "type" not in activites:
         return {}
 
+    # vérifie que l'activité est bien accessible pour l'utilisateur
+    conditions = Q(structure__in=request.user.structures.all())
+
     if activites["type"] == "groupes_activites":
-        conditions = Q(groupes_activites__in=activites["ids"])
+        conditions &= Q(groupes_activites__in=activites["ids"])
     if activites["type"] == "activites":
-        conditions = Q(pk__in=activites["ids"])
+        conditions &= Q(pk__in=activites["ids"])
 
     if parametres["masquer_activites_obsoletes"]:
         conditions &= Q(date_fin__gte=datetime.date.today())

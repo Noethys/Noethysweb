@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -31,7 +30,7 @@ class View(CustomView, TemplateView):
 
     def post(self, request, **kwargs):
         # Validation du form
-        form = Formulaire(request.POST, request.FILES)
+        form = Formulaire(request.POST, request.FILES, request=self.request)
         if form.is_valid() == False:
             return self.render_to_response(self.get_context_data(form=form))
 

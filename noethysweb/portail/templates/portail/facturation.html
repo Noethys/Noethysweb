@@ -1,0 +1,77 @@
+{% extends "portail/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+{% endblock %}
+
+{% block contenu_page %}
+
+    {# Texte d'introduction #}
+    {% if parametres_portail.facturation_intro %}
+        <div style="margin-bottom: 20px;">
+            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.facturation_intro }}
+        </div>
+    {% endif %}
+
+    {# Liste des factures #}
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}Liste des factures{% endblock %}
+        {% block box_contenu %}
+
+            {# Récapitulatif des factures impayées #}
+            {% if liste_factures_impayees and parametres_portail.facturation_afficher_solde_facture %}
+                <div class="alert alert-danger">
+                    <i class='fa fa-exclamation-triangle margin-r-5'></i>Il reste {{ liste_factures_impayees|length }} facture{{ liste_factures_impayees|length|pluralize }} à régler pour un total de {{ liste_factures_impayees|somme|montant }}
+                </div>
+            {% endif %}
+
+            {# Liste des factures #}
+            <div class="">
+                {% if liste_factures %}
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr class="text-center">
+                                <th>Du</th>
+                                <th>Au</th>
+                                <th>N°</th>
+                                <th>Montant</th>
+                                {% if parametres_portail.facturation_afficher_solde_facture %}
+                                    <th>Reste à régler</th>
+                                {% endif %}
+                                {% if parametres_portail.facturation_autoriser_telechargement_facture %}
+                                    <th style="width: 90px;">Actions</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for facture in liste_factures %}
+                                <tr class="text-center">
+                                    <td>{{ facture.date_debut|date:'d/m/Y' }}</td>
+                                    <td>{{ facture.date_fin|date:'d/m/Y' }}</td>
+                                    <td>{{ facture.numero }}</td>
+                                    <td>{{ facture.total|montant }}</td>
+                                    {% if parametres_portail.facturation_afficher_solde_facture %}
+                                        <td><span class="badge-pill bg-{% if facture.solde_actuel %}danger{% else %}success{% endif %}">{{ facture.solde_actuel|montant }}</span></td>
+                                    {% endif %}
+                                    {% if parametres_portail.facturation_autoriser_telechargement_facture %}
+                                        <td><a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_accueil' %}" title="Télécharger la facture"><i class="fa fa-fw fa-download"></i></a></td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <b>Aucune facture.</b>
+                {% endif %}
+            </div>
+
+        {% endblock box_contenu %}
+        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+    {% endembed %}
+
+{% endblock contenu_page %}

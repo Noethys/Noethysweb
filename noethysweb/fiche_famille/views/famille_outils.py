@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -38,6 +37,9 @@ class View(Onglet, DetailView):
                 ]},
                 {"titre": "Email", "items": [
                     {"titre": "Envoyer un Email", "url": reverse_lazy("famille_emails_ajouter", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+                ]},
+                {"titre": "Portail", "items": [
+                    {"titre": "Messagerie", "url": reverse_lazy("famille_messagerie_portail", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                 ]},
             ],
 

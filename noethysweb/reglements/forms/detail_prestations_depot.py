@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -10,10 +9,10 @@ from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Field
 from crispy_forms.bootstrap import Field
 from core.models import Depot
 from django_select2.forms import Select2Widget
+from core.forms.base import FormulaireBase
 
 
-
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     depot = forms.ModelChoiceField(label="Dépôt", widget=Select2Widget({"lang": "fr"}), queryset=Depot.objects.all().order_by("-date"), required=True)
     afficher_tarif_unitaire = forms.BooleanField(label="Afficher détail par tarif unitaire", initial=True, required=False)
 

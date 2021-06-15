@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Row, Column, Fieldset, Hidden, Div
@@ -15,8 +15,8 @@ from core.models import ModeleDocument
 from django_select2.forms import Select2Widget
 
 
-class Formulaire(ModelForm):
-    champs = forms.ModelChoiceField(label="Champs", widget=Select2Widget({"lang":"fr"}), queryset=ModeleDocument.objects.all(), required=False)
+class Formulaire(FormulaireBase, ModelForm):
+    champs = forms.ModelChoiceField(label="Champs", widget=Select2Widget({"lang": "fr"}), queryset=ModeleDocument.objects.all(), required=False)
     objets = forms.CharField(required=False)
 
     class Meta:
@@ -40,6 +40,7 @@ class Formulaire(ModelForm):
         self.fields["largeur"].label = False
         self.fields["hauteur"].label = False
         self.fields["fond"].label = False
+        self.fields["structure"].label = False
 
         # Liste des fonds disponibles
         self.fields["fond"].choices = [(None, "Aucun calque de fond")] + [(modele.pk, modele.nom) for modele in ModeleDocument.objects.filter(categorie="fond")]
@@ -66,6 +67,7 @@ class Formulaire(ModelForm):
             PrependedText('hauteur', 'Hauteur (mm)'),
             # PrependedText('observations', 'Notes'),
             PrependedText('fond', "Fond"),
+            PrependedText('structure', "Structure"),
             Field('defaut'),
             Field('objets', type="hidden"),
             ButtonHolder(
@@ -77,11 +79,11 @@ class Formulaire(ModelForm):
 
 
 
-class Formulaire_creation(ModelForm):
+class Formulaire_creation(FormulaireBase, ModelForm):
 
     class Meta:
         model = ModeleDocument
-        fields = ["nom", "categorie"]
+        fields = ["nom", "categorie", "structure"]
 
     def __init__(self, *args, **kwargs):
         nom = kwargs.pop("nom", "")
@@ -91,7 +93,12 @@ class Formulaire_creation(ModelForm):
         self.helper.form_method = 'post'
         self.helper.layout = Layout(
             Commandes(ajouter=False, annuler_url="{{ view.get_success_url }}"),
-            Field('nom'),
+            Fieldset('Généralités',
+                Field('nom'),
+            ),
+            Fieldset('Structure associée',
+                Field('structure'),
+            ),
             Hidden('categorie', value=categorie),
         )
 

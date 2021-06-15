@@ -12,7 +12,7 @@ from core.data import data_civilites
 from core.utils import utils_texte, utils_dates
 from core.data.data_modeles_emails import CATEGORIES as CATEGORIES_MODELES_EMAILS
 # from django.contrib.auth.models import User
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django_resized import ResizedImageField
 import datetime, decimal, uuid, os
 from django.conf import settings
@@ -220,16 +220,56 @@ def get_uuid_path(instance, filename):
 
 
 
+class Structure(models.Model):
+    idstructure = models.AutoField(verbose_name="ID", db_column="IDstructure", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    rue = models.CharField(verbose_name="Rue", max_length=200, blank=True)
+    cp = models.CharField(verbose_name="Code postal", max_length=50, blank=True)
+    ville = models.CharField(verbose_name="Ville", max_length=200, blank=True)
+    tel = models.CharField(verbose_name="Téléphone", max_length=200, blank=True)
+    fax = models.CharField(verbose_name="Fax", max_length=200, blank=True)
+    mail = models.EmailField(verbose_name="Email", max_length=300, blank=True)
+    site = models.CharField(verbose_name="Site internet", max_length=200, blank=True)
+    logo = ResizedImageField(verbose_name="Logo", upload_to=get_uuid_path, blank=True, null=True)
+    gps = models.CharField(verbose_name="GPS", max_length=200, blank=True, null=True)
+    logo_update = models.DateTimeField(verbose_name="Date MAJ Logo", max_length=200, blank=True, null=True)
+
+    class Meta:
+        db_table = 'structures'
+        verbose_name = "structure"
+        verbose_name_plural = "structures"
+
+    def __str__(self):
+        return self.nom
+
+
+class CustomUserManager(UserManager):
+    """ Permet d'ajouter au user le prefetch_related sur la table structures """
+    def get(self, *args, **kwargs):
+        return super().prefetch_related("structures").get(*args, **kwargs)
+
 class Utilisateur(AbstractUser):
     categorie = models.CharField(verbose_name="Catégorie", max_length=50, blank=True, null=True, default="utilisateur")
     force_reset_password = models.BooleanField(verbose_name="Force la mise à jour du mot de passe", default=False)
+    structures = models.ManyToManyField(Structure, verbose_name="Structures", related_name="utilisateur_structures", blank=True)
+    # structure_actuelle = models.ForeignKey(Structure, verbose_name="Structure actuelle", on_delete=models.PROTECT, blank=True, null=True)
+    objects = CustomUserManager()
 
     class Meta:
         permissions = utils_permissions.GetPermissionsPossibles()
 
 
+class Assureur(models.Model):
+    idassureur = models.AutoField(verbose_name="ID", db_column='IDassureur', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=300)
 
+    class Meta:
+        db_table = 'assureurs'
+        verbose_name = "assureur"
+        verbose_name_plural = "assureurs"
 
+    def __str__(self):
+        return self.nom
 
 
 class CategorieMedicale(models.Model):
@@ -274,6 +314,7 @@ class CompteBancaire(models.Model):
     code_ics = models.CharField(verbose_name="Code ICS", max_length=200, blank=True, null=True)
     dft_titulaire = models.CharField(verbose_name="Titulaire DFT", max_length=400, blank=True, null=True)
     dft_iban = models.CharField(verbose_name="IBAN DFT", max_length=400, blank=True, null=True)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'comptes_bancaires'
@@ -323,7 +364,7 @@ class ModeReglement(models.Model):
 
 class Emetteur(models.Model):
     idemetteur = models.AutoField(verbose_name="ID", db_column='IDemetteur', primary_key=True)
-    mode = models.ForeignKey(ModeReglement, verbose_name="Mode de règlement", on_delete=models.CASCADE)
+    mode = models.ForeignKey(ModeReglement, verbose_name="Mode de règlement", on_delete=models.PROTECT)
     nom = models.CharField(verbose_name="Nom", max_length=200)
     image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
 
@@ -429,7 +470,7 @@ class Regime(models.Model):
 class Caisse(models.Model):
     idcaisse = models.AutoField(verbose_name="ID", db_column='IDcaisse', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=200)
-    regime = models.ForeignKey(Regime, verbose_name="Régime social", on_delete=models.CASCADE)
+    regime = models.ForeignKey(Regime, verbose_name="Régime social", on_delete=models.PROTECT)
 
     class Meta:
         db_table = 'caisses'
@@ -447,6 +488,7 @@ class TypePiece(models.Model):
     public = models.CharField(verbose_name="Public", max_length=50, choices=public_choix)
     duree_validite = models.CharField(verbose_name="Durée de validité", max_length=100, blank=True, null=True)
     valide_rattachement = models.BooleanField(verbose_name="Rattachement valide", default=False)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'types_pieces'
@@ -600,7 +642,7 @@ class Ecole(models.Model):
 
 class Classe(models.Model):
     idclasse = models.AutoField(verbose_name="ID", db_column='IDclasse', primary_key=True)
-    ecole = models.ForeignKey(Ecole, verbose_name="Ecole", on_delete=models.CASCADE)
+    ecole = models.ForeignKey(Ecole, verbose_name="Ecole", on_delete=models.PROTECT)
     nom = models.CharField(verbose_name="Nom", max_length=300)
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin")
@@ -624,6 +666,7 @@ class TypeCotisation(models.Model):
     code_comptable = models.CharField(verbose_name="Code comptable", max_length=200, blank=True, null=True)
     code_produit_local = models.CharField(verbose_name="Code produit local", max_length=200, blank=True, null=True)
     defaut = models.BooleanField(verbose_name="Type par défaut", default=False)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'types_cotisations'
@@ -636,7 +679,7 @@ class TypeCotisation(models.Model):
 
 class UniteCotisation(models.Model):
     idunite_cotisation = models.AutoField(verbose_name="ID", db_column='IDunite_cotisation', primary_key=True)
-    type_cotisation = models.ForeignKey(TypeCotisation, verbose_name="Type d'adhésion", on_delete=models.CASCADE)
+    type_cotisation = models.ForeignKey(TypeCotisation, verbose_name="Type d'adhésion", on_delete=models.PROTECT)
     nom = models.CharField(verbose_name="Nom", max_length=200)
     date_debut = models.DateField(verbose_name="Date de début", blank=True, null=True)
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
@@ -705,6 +748,19 @@ class ListeDiffusion(models.Model):
         return self.nom
 
 
+class RegimeAlimentaire(models.Model):
+    idtype_regime = models.AutoField(verbose_name="ID", db_column='IDtype_regime', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=300)
+
+    class Meta:
+        db_table = 'regimes_alimentaires'
+        verbose_name = "régime alimentaire"
+        verbose_name_plural = "régimes alimentaires"
+
+    def __str__(self):
+        return self.nom
+
+
 class Restaurateur(models.Model):
     idrestaurateur = models.AutoField(verbose_name="ID", db_column='IDrestaurateur', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=300)
@@ -768,6 +824,7 @@ class TypeGroupeActivite(models.Model):
     idtype_groupe_activite = models.AutoField(verbose_name="ID", db_column='IDtype_groupe_activite', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=200)
     observations = models.CharField(verbose_name="Observations", max_length=300, blank=True, null=True)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT)
 
     class Meta:
         db_table = 'types_groupes_activites'
@@ -828,19 +885,24 @@ class Activite(models.Model):
     # psu_unite_presence = models.IntegerField(blank=True, null=True)
     # psu_tarif_forfait = models.IntegerField(blank=True, null=True)
     # psu_etiquette_rtt = models.IntegerField(blank=True, null=True)
-    portail_inscriptions_affichage = models.BooleanField(verbose_name="Inscriptions autorisées sur le portail", default=False)
+    choix_affichage_inscriptions = [("JAMAIS", "Ne pas autoriser"), ("TOUJOURS", "Autoriser"), ("PERIODE", "Autoriser sur la période suivante")]
+    portail_inscriptions_affichage = models.CharField(verbose_name="Inscriptions autorisées", max_length=100, choices=choix_affichage_inscriptions, default="JAMAIS")
     portail_inscriptions_date_debut = models.DateTimeField(verbose_name="Date de début d'affichage", blank=True, null=True)
     portail_inscriptions_date_fin = models.DateTimeField(verbose_name="Date de fin d'affichage", blank=True, null=True)
-    portail_reservations_affichage = models.BooleanField(verbose_name="Réservations autorisées sur le portail", default=False)
+    choix_affichage_reservations = [("JAMAIS", "Ne pas autoriser"), ("TOUJOURS", "Autoriser")]
+    portail_reservations_affichage = models.CharField(verbose_name="Réservations autorisées", max_length=100, choices=choix_affichage_reservations, default="JAMAIS")
     portail_reservations_limite = models.CharField(verbose_name="Date limite de modification d'une réservation", max_length=200, blank=True, null=True)
-    portail_reservations_absenti = models.CharField(verbose_name="Application d'une absence injustifiée", max_length=200, blank=True, null=True)
-    portail_unites_multiples = models.BooleanField(verbose_name="Sélection multiple d'unités autorisée", default=False)
-    regie = models.ForeignKey(FactureRegie, verbose_name="Régie de facturation", on_delete=models.CASCADE, blank=True, null=True)
+    # portail_reservations_absenti = models.CharField(verbose_name="Application d'une absence injustifiée", max_length=200, blank=True, null=True)
+    # portail_unites_multiples = models.BooleanField(verbose_name="Sélection multiple d'unités autorisée", default=False)
+    choix_affichage_dates_passees = [("0", "Jamais"), ("2", "Deux jours"), ("3", "Trois jours"), ("7", "Une semaine"), ("14", "Deux semaines"), ("30", "Un mois"), ("61", "Deux mois"), ("92", "Trois mois"), ("9999", "Toujours")]
+    portail_afficher_dates_passees = models.CharField(verbose_name="Afficher les dates passées", max_length=100, choices=choix_affichage_dates_passees, default="14")
+    regie = models.ForeignKey(FactureRegie, verbose_name="Régie de facturation", on_delete=models.PROTECT, blank=True, null=True)
     groupes_activites = models.ManyToManyField(TypeGroupeActivite)
     pieces = models.ManyToManyField(TypePiece)
     cotisations = models.ManyToManyField(TypeCotisation)
     inscriptions_multiples = models.BooleanField(verbose_name="Autoriser plusieurs inscriptions simultanées pour chaque individu", default=False)
     code_produit_local = models.CharField(verbose_name="Code produit local", max_length=200, blank=True, null=True)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT)
 
     class Meta:
         db_table = 'activites'
@@ -1048,7 +1110,7 @@ class Evenement(models.Model):
         verbose_name_plural = "événements"
 
     def __str__(self):
-        return "<Evenement ID%d>" % self.idevenement
+        return "Evenement ID%d" % self.idevenement
 
 
 class CategorieTarif(models.Model):
@@ -1126,7 +1188,7 @@ class Tarif(models.Model):
         verbose_name_plural = "tarifs"
 
     def __str__(self):
-        return "<Tarif ID%d>" % self.idtarif if self.idtarif else "Nouveau tarif"
+        return "Tarif ID%d" % self.idtarif if self.idtarif else "Nouveau tarif"
 
 
 
@@ -1176,7 +1238,7 @@ class TarifLigne(models.Model):
         verbose_name_plural = "lignes de tarif"
 
     def __str__(self):
-        return "<Tarif %s - IDligne %d>" % (self.tarif.nom_tarif, self.idligne)
+        return "Tarif %s - IDligne %d" % (self.tarif.nom_tarif, self.idligne)
 
 
 class CombiTarif(models.Model):
@@ -1194,7 +1256,7 @@ class CombiTarif(models.Model):
         verbose_name_plural = "combinaisons de tarif"
 
     def __str__(self):
-        return "<CombiTarif %d>" % self.idcombi_tarif if self.idcombi_tarif else "Nouvelle combinaison"
+        return "CombiTarif %d" % self.idcombi_tarif if self.idcombi_tarif else "Nouvelle combinaison"
 
 
 
@@ -1211,7 +1273,7 @@ class Ouverture(models.Model):
         verbose_name_plural = "ouvertures"
 
     def __str__(self):
-        return "<Ouverture ID%d>" % self.idouverture
+        return "Ouverture ID%d" % self.idouverture
 
 
 class Remplissage(models.Model):
@@ -1228,7 +1290,7 @@ class Remplissage(models.Model):
         verbose_name_plural = "remplissages"
 
     def __str__(self):
-        return "<Remplissage ID%d>" % self.idremplissage
+        return "Remplissage ID%d" % self.idremplissage if self.idremplissage else "Nouveau"
 
 
 
@@ -1250,8 +1312,8 @@ class Individu(models.Model):
     rue_resid = models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True)
     cp_resid = models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True)
     ville_resid = models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True)
-    secteur = models.ForeignKey(Secteur, verbose_name="Secteur", on_delete=models.CASCADE, blank=True, null=True)
-    categorie_travail = models.ForeignKey(CategorieTravail, verbose_name="Catégorie socio-professionnelle", on_delete=models.CASCADE, blank=True, null=True)
+    secteur = models.ForeignKey(Secteur, verbose_name="Secteur", on_delete=models.PROTECT, blank=True, null=True)
+    categorie_travail = models.ForeignKey(CategorieTravail, verbose_name="Catégorie socio-professionnelle", on_delete=models.PROTECT, blank=True, null=True)
     profession = models.CharField(verbose_name="Profession", max_length=200, blank=True, null=True)
     employeur = models.CharField(verbose_name="Employeur", max_length=200, blank=True, null=True)
     travail_tel = models.CharField(verbose_name="Téléphone pro.", max_length=100, blank=True, null=True)
@@ -1261,9 +1323,9 @@ class Individu(models.Model):
     tel_mobile = models.CharField(verbose_name="Tél portable", max_length=100, blank=True, null=True)
     tel_fax = models.CharField(verbose_name="Fax personnel", max_length=100, blank=True, null=True)
     mail = models.EmailField(verbose_name="Email personnel", max_length=300, blank=True, null=True)
-    medecin = models.ForeignKey(Medecin, verbose_name="Médecin", on_delete=models.CASCADE, blank=True, null=True)
+    medecin = models.ForeignKey(Medecin, verbose_name="Médecin", on_delete=models.PROTECT, blank=True, null=True)
     memo = models.TextField(verbose_name="Mémo", blank=True, null=True)
-    type_sieste = models.ForeignKey(TypeSieste, verbose_name="Sieste", on_delete=models.CASCADE, blank=True, null=True)
+    type_sieste = models.ForeignKey(TypeSieste, verbose_name="Sieste", on_delete=models.PROTECT, blank=True, null=True)
     date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
     travail_tel_sms = models.BooleanField(verbose_name="Autoriser l'envoi de SMS vers le téléphone pro.", default=False)
     tel_domicile_sms = models.BooleanField(verbose_name="Autoriser l'envoi de SMS vers le téléphone du domicile", default=False)
@@ -1271,6 +1333,7 @@ class Individu(models.Model):
     etat = models.CharField(verbose_name="Etat", max_length=50, blank=True, null=True)
     photo = models.ImageField(verbose_name="Photo", upload_to=get_uuid_path, blank=True, null=True)
     listes_diffusion = models.ManyToManyField(ListeDiffusion)
+    regimes_alimentaires = models.ManyToManyField(RegimeAlimentaire, verbose_name="Régimes alimentaires", related_name="individu_regimes_alimentaires", blank=True)
 
     class Meta:
         db_table = 'individus'
@@ -1340,9 +1403,9 @@ class Scolarite(models.Model):
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE)
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin")
-    ecole = models.ForeignKey(Ecole, verbose_name="Ecole", on_delete=models.CASCADE)
-    classe = models.ForeignKey(Classe, verbose_name="Classe", on_delete=models.CASCADE, blank=True, null=True)
-    niveau = models.ForeignKey(NiveauScolaire, verbose_name="Niveau", on_delete=models.CASCADE, blank=True, null=True)
+    ecole = models.ForeignKey(Ecole, verbose_name="Ecole", on_delete=models.PROTECT)
+    classe = models.ForeignKey(Classe, verbose_name="Classe", on_delete=models.PROTECT, blank=True, null=True)
+    niveau = models.ForeignKey(NiveauScolaire, verbose_name="Niveau", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'scolarite'
@@ -1353,18 +1416,31 @@ class Scolarite(models.Model):
         return "Etape de scolarité du %s au %s" % (self.date_debut.strftime('%d/%m/%Y'), self.date_fin.strftime('%d/%m/%Y'))
 
 
+class CategorieCompteInternet(models.Model):
+    idcategorie = models.AutoField(verbose_name="ID", db_column='IDcategorie', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+
+    class Meta:
+        db_table = 'categories_compte_internet'
+        verbose_name = "catégorie de compte internet"
+        verbose_name_plural = "catégories de compte internet"
+
+    def __str__(self):
+        return self.nom
+
 
 class Famille(models.Model):
     idfamille = models.AutoField(verbose_name="ID", db_column='IDfamille', primary_key=True)
     date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
     # idcompte_payeur = models.IntegerField(db_column='IDcompte_payeur', blank=True, null=True)  # Field name made lowercase.
-    caisse = models.ForeignKey(Caisse, verbose_name="Caisse", blank=True, null=True, on_delete=models.CASCADE)
+    caisse = models.ForeignKey(Caisse, verbose_name="Caisse", blank=True, null=True, on_delete=models.PROTECT)
     num_allocataire = models.CharField(verbose_name="Numéro d'allocataire", max_length=100, blank=True, null=True)
     allocataire = models.ForeignKey(Individu, verbose_name="Titulaire", on_delete=models.CASCADE, blank=True, null=True)
     autorisation_cafpro = models.BooleanField(verbose_name="Autorisation accès CAF-CDAP", default=False)
     internet_actif = models.BooleanField(verbose_name="Compte internet activé", default=True)
     internet_identifiant = models.CharField(verbose_name="Identifiant", max_length=200, blank=True, null=True)
     internet_mdp = models.CharField(verbose_name="Mot de passe", max_length=200, blank=True, null=True)
+    internet_categorie = models.ForeignKey(CategorieCompteInternet, verbose_name="Catégorie", related_name="internet_categorie", on_delete=models.PROTECT, blank=True, null=True)
     memo = models.TextField(verbose_name="Mémo", blank=True, null=True)
     # prelevement_activation = models.IntegerField(blank=True, null=True)
     # prelevement_etab = models.CharField(blank=True, null=True)
@@ -1402,7 +1478,7 @@ class Famille(models.Model):
     rue_resid = models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True)
     cp_resid = models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True)
     ville_resid = models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True)
-    secteur = models.ForeignKey(Secteur, verbose_name="Secteur", on_delete=models.CASCADE, blank=True, null=True)
+    secteur = models.ForeignKey(Secteur, verbose_name="Secteur", on_delete=models.PROTECT, blank=True, null=True)
     mail = models.EmailField(verbose_name="Email favori", max_length=300, blank=True, null=True)
     utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, null=True)
 
@@ -1508,7 +1584,7 @@ class Inscription(models.Model):
 class ProblemeSante(models.Model):
     idprobleme = models.AutoField(verbose_name="ID", db_column='IDprobleme', primary_key=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE)
-    categorie = models.ForeignKey(CategorieMedicale, verbose_name="Catégorie", on_delete=models.CASCADE)
+    categorie = models.ForeignKey(CategorieMedicale, verbose_name="Catégorie", on_delete=models.PROTECT)
     intitule = models.CharField(verbose_name="Intitulé", max_length=200)
     date_debut = models.DateField(verbose_name="Date de début", blank=True, null=True)
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
@@ -1536,7 +1612,7 @@ class ProblemeSante(models.Model):
 class Vaccin(models.Model):
     idvaccin = models.AutoField(verbose_name="ID", db_column='IDvaccin', primary_key=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE)
-    type_vaccin = models.ForeignKey(TypeVaccin, verbose_name="Type de vaccin", on_delete=models.CASCADE)
+    type_vaccin = models.ForeignKey(TypeVaccin, verbose_name="Type de vaccin", on_delete=models.PROTECT)
     date = models.DateField(verbose_name="Date de vaccination")
 
     class Meta:
@@ -1551,7 +1627,7 @@ class Message(models.Model):
     idmessage = models.AutoField(verbose_name="ID", db_column='IDmessage', primary_key=True)
     type_choix = [("INSTANTANE", "Instantané"), ("PROGRAMME", "Programmé")]
     type = models.CharField(verbose_name="Priorité", max_length=100, choices=type_choix, default="INSTANTANE")
-    categorie = models.ForeignKey(MessageCategorie, verbose_name="Catégorie", on_delete=models.CASCADE, blank=True, null=True)
+    categorie = models.ForeignKey(MessageCategorie, verbose_name="Catégorie", on_delete=models.PROTECT, blank=True, null=True)
     date_saisie = models.DateTimeField(verbose_name="Date de saisie", auto_now_add=True)
     # idutilisateur = models.IntegerField(db_column='IDutilisateur', blank=True, null=True)  # Field name made lowercase.
     date_parution = models.DateField(verbose_name="Date de parution", blank=True, null=True)
@@ -1769,10 +1845,7 @@ class Consommation(models.Model):
         verbose_name_plural = "consommations"
 
     def __str__(self):
-        if self.idconso:
-            return "<Consommation ID%d>" % self.idconso
-        else:
-            return "<Nouvelle consommation>"
+        return "Consommation ID%d" % self.idconso if self.idconso else "Nouveau"
 
 
 class DepotCotisations(models.Model):
@@ -1850,7 +1923,7 @@ class Aide(models.Model):
         verbose_name_plural = "aides"
 
     def __str__(self):
-        return "Aide ID%d" % self.idaide if self.idaide else "?"
+        return self.nom
 
 
 class CombiAide(models.Model):
@@ -1865,7 +1938,7 @@ class CombiAide(models.Model):
         verbose_name_plural = "combinaisons d'aide"
 
     def __str__(self):
-        return "<CombiAide ID%d>" % self.idcombi_aide
+        return "CombiAide ID%d" % self.idcombi_aide
 
 
 class Quotient(models.Model):
@@ -1884,7 +1957,7 @@ class Quotient(models.Model):
         verbose_name_plural = "quotients"
 
     def __str__(self):
-        return "<Quotient ID%d>" % self.idquotient
+        return "Quotient ID%d" % self.idquotient
 
 
 class Deduction(models.Model):
@@ -1903,7 +1976,7 @@ class Deduction(models.Model):
         verbose_name_plural = "déductions"
 
     def __str__(self):
-        return "<Déduction ID%d>" % self.iddeduction
+        return "Déduction ID%d" % self.iddeduction
 
 
 
@@ -1919,6 +1992,7 @@ class ModeleDocument(models.Model):
     defaut = models.BooleanField(verbose_name="Modèle par défaut", default=False)
     objets = models.TextField(verbose_name="Objets", blank=True, null=True)
     #iddonnee = models.IntegerField(db_column='IDdonnee', blank=True, null=True)  # Field name made lowercase.
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'documents_modeles'
@@ -1939,6 +2013,9 @@ class QuestionnaireQuestion(models.Model):
     controle = models.CharField(verbose_name="contrôle", max_length=200, choices=[(ctrl["code"], ctrl["label"]) for ctrl in LISTE_CONTROLES_QUESTIONNAIRES])
     choix = models.CharField(verbose_name="Choix", max_length=500, blank=True, null=True, help_text="Saisissez les choix possibles séparés par un point-virgule. Exemple : 'Bananes;Pommes;Poires'")
     options = models.CharField(verbose_name="Options", max_length=250, blank=True, null=True)
+    visible_portail = models.BooleanField(verbose_name="Visible sur le portail", default=False)
+    texte_aide = models.CharField(verbose_name="Texte d'aide", max_length=500, blank=True, null=True, help_text="Vous pouvez saisir un texte d'aide qui apparaîtra sous le champ de saisie.")
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'questionnaire_questions'
@@ -2020,7 +2097,7 @@ class MemoJournee(models.Model):
         verbose_name_plural = "mémos journaliers"
 
     def __str__(self):
-        return "<MemoJournee ID%d>" % self.idmemo
+        return "MemoJournee ID%d" % self.idmemo
 
 
 class ModeleEmail(models.Model):
@@ -2031,6 +2108,7 @@ class ModeleEmail(models.Model):
     objet = models.CharField(verbose_name="Objet", max_length=300)
     html = models.TextField(verbose_name="Texte", blank=True, null=True)
     defaut = models.BooleanField(verbose_name="Modèle par défaut", default=False)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'modeles_emails'
@@ -2064,7 +2142,7 @@ class Parametre(models.Model):
         verbose_name_plural = "Paramètres"
 
     def __str__(self):
-        return self.nom if self.nom else "<Nouveau Paramètre>"
+        return self.nom if self.nom else "Nouveau Paramètre"
 
 
 class Payeur(models.Model):
@@ -2153,7 +2231,7 @@ class Ventilation(models.Model):
         verbose_name_plural = "Ventilations"
 
     def __str__(self):
-        return "<Ventilation ID%d>" % self.idventilation if self.idventilation else "Nouveau"
+        return "Ventilation ID%d" % self.idventilation if self.idventilation else "Nouveau"
 
 
 class Recu(models.Model):
@@ -2170,7 +2248,7 @@ class Recu(models.Model):
         verbose_name_plural = "Reçus de règlements"
 
     def __str__(self):
-        return "<Reçu ID%d>" % self.idrecu if self.idrecu else "Nouveau"
+        return "Reçu ID%d" % self.idrecu if self.idrecu else "Nouveau"
 
 
 class Attestation(models.Model):
@@ -2227,6 +2305,9 @@ class Historique(models.Model):
     individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.CASCADE)
     titre = models.CharField(verbose_name="Action", max_length=300, blank=True, null=True)
     detail = models.TextField(verbose_name="Détail", blank=True, null=True)
+    objet = models.CharField(verbose_name="Objet", max_length=300, blank=True, null=True)
+    idobjet = models.IntegerField(verbose_name="ID objet", blank=True, null=True)
+    classe = models.CharField(verbose_name="Classe objet", max_length=300, blank=True, null=True)
 
     class Meta:
         db_table = 'historique'
@@ -2248,7 +2329,7 @@ class FiltreListe(models.Model):
         verbose_name_plural = "Filtres de listes"
 
     def __str__(self):
-        return "<Filtre de liste ID%d>" % self.idfiltre if self.idfiltre else "Nouveau"
+        return "Filtre de liste ID%d" % self.idfiltre if self.idfiltre else "Nouveau"
 
 
 class LotRappels(models.Model):
@@ -2337,6 +2418,7 @@ class AdresseMail(models.Model):
     nom_adresse = models.CharField(verbose_name="Adresse affichée", max_length=300, blank=True, null=True, help_text="Saisissez le nom ou l'adresse que vous souhaitez voir apparaître dans le client de messagerie du destinataire.")
     moteur = models.CharField(verbose_name="Moteur", max_length=200, choices=[("smtp", "SMTP"), ("mailjet", "Mailjet")], help_text="Sélectionnez un moteur d'expédition (Smtp ou Mailjet).")
     parametres = models.CharField(verbose_name="Paramètres", max_length=500, blank=True, null=True)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True, help_text="Choisissez si cette adresse est accessible par une structure spécifique ou par toutes les structures.")
 
     class Meta:
         db_table = 'adresses_mail'
@@ -2394,7 +2476,7 @@ class PieceJointe(models.Model):
         verbose_name_plural = "pièces jointes"
 
     def __str__(self):
-        return "<Pièce jointe id%d>" % self.idpiece_jointe
+        return "Pièce jointe ID%d" % self.idpiece_jointe
 
 
 class DocumentJoint(models.Model):
@@ -2408,7 +2490,7 @@ class DocumentJoint(models.Model):
         verbose_name_plural = "document joints"
 
     def __str__(self):
-        return "<Document joint id%d>" % self.iddocument
+        return "Document joint ID%d" % self.iddocument
 
 
 class Destinataire(models.Model):
@@ -2430,7 +2512,7 @@ class Destinataire(models.Model):
         verbose_name_plural = "destinataires"
 
     def __str__(self):
-        return "<Destinataire id%d>" % self.iddestinataire if self.iddestinataire else "Nouveau"
+        return "Destinataire ID%d" % self.iddestinataire if self.iddestinataire else "Nouveau"
 
 
 class Mail(models.Model):
@@ -2439,7 +2521,7 @@ class Mail(models.Model):
     objet = models.CharField(verbose_name="Objet", max_length=300)
     html = models.TextField(verbose_name="Texte", blank=True, null=True)
     utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.CASCADE)
-    adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Expéditeur", blank=True, null=True, on_delete=models.CASCADE)
+    adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Expéditeur", blank=True, null=True, on_delete=models.SET_NULL)
     pieces_jointes = models.ManyToManyField(PieceJointe, verbose_name="Pièces jointes", blank=True)
     destinataires = models.ManyToManyField(Destinataire, verbose_name="Destinataires", blank=True)
     date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
@@ -2454,3 +2536,188 @@ class Mail(models.Model):
     def __str__(self):
         return "Email du %s : %s" % (self.date_creation.strftime('%d/%m/%Y %H:%m') if self.date_creation else "X", self.objet if self.objet else "Sans objet")
 
+
+# class PortailUnite(models.Model):
+#     idunite = models.AutoField(verbose_name='ID', db_column='IDunite', primary_key=True)
+#     activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.PROTECT)
+#     nom = models.CharField(verbose_name="Nom", max_length=200)
+#     unites_principales = models.ManyToManyField(Unite, verbose_name="Unités principales", related_name="unites_principales", blank=True)
+#     unites_secondaires = models.ManyToManyField(Unite, verbose_name="Unités secondaires", related_name="unites_secondaires", blank=True)
+#     ordre = models.IntegerField(verbose_name="Ordre")
+#
+#     class Meta:
+#         db_table = 'portail_unites'
+#         verbose_name = "unité de réservation"
+#         verbose_name_plural = "unités de réservation"
+#
+#     def __str__(self):
+#         return "Unité de réservation %s" % self.nom if self.nom else "Nouveau"
+#
+#     def delete(self, *args, **kwargs):
+#         # Après la suppression, on rectifie l'ordre des unités
+#         super().delete(*args, **kwargs)
+#         for ordre, objet in enumerate(PortailUnite.objects.filter(activite=self.activite).order_by("ordre"), start=1):
+#             if objet.ordre != ordre:
+#                 objet.ordre = ordre
+#                 objet.save()
+
+
+class PortailPeriode(models.Model):
+    idperiode = models.AutoField(verbose_name='ID', db_column='IDperiode', primary_key=True)
+    activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.PROTECT)
+    nom = models.CharField(verbose_name="Nom de la période", max_length=200)
+    date_debut = models.DateField(verbose_name="Date de début")
+    date_fin = models.DateField(verbose_name="Date de fin")
+    choix_affichage = [("TOUJOURS", "Toujours afficher"), ("JAMAIS", "Ne pas afficher"), ("PERIODE", "Afficher sur la période suivante")]
+    affichage = models.CharField(verbose_name="Affichage", max_length=100, choices=choix_affichage, default="TOUJOURS")
+    affichage_date_debut = models.DateTimeField(verbose_name="Début", blank=True, null=True)
+    affichage_date_fin = models.DateTimeField(verbose_name="Fin", blank=True, null=True)
+    modele = models.ForeignKey(ModeleEmail, verbose_name="Modèle d'Email", blank=True, null=True, on_delete=models.PROTECT)
+    introduction = models.TextField(verbose_name="Introduction", blank=True, null=True)
+    prefacturation = models.BooleanField(verbose_name="Activer la préfacturation pour cette période", default=False)
+    choix_categories = [("TOUTES", "Toutes les catégories de compte internet"), ("AUCUNE", "Uniquement les catégories de compte internet non renseignées"), ("SELECTION", "Uniquement les catégories suivantes")]
+    types_categories = models.CharField(verbose_name="Catégories", max_length=100, choices=choix_categories, default="TOUTES")
+    categories = models.ManyToManyField(CategorieCompteInternet, verbose_name="Sélection de catégories", related_name="categories_periode", blank=True)
+
+    class Meta:
+        db_table = 'portail_periodes'
+        verbose_name = "période de réservation"
+        verbose_name_plural = "périodes de réservation"
+
+    def __str__(self):
+        return "Période de réservation %s" % self.nom if self.nom else "Nouveau"
+
+    def Is_active_today(self):
+        """ Vérifie si la période est active ce jour """
+        return self.affichage == "TOUJOURS" or (datetime.datetime.now() >= self.affichage_date_debut and datetime.datetime.now() <= self.affichage_date_fin)
+
+
+class PortailParametre(models.Model):
+    idparametre = models.AutoField(verbose_name="ID", db_column='IDparametre', primary_key=True)
+    code = models.CharField(verbose_name="Code", max_length=200, blank=True, null=True)
+    valeur = models.TextField(verbose_name="Valeur", blank=True, null=True)
+
+    class Meta:
+        db_table = 'portail_parametres'
+        verbose_name = "paramètre de portail"
+        verbose_name_plural = "paramètres de portail"
+
+    def __str__(self):
+        return "Paramètre de portail ID%d" % self.idparametre if self.idparametre else "Nouveau"
+
+
+class PortailRenseignement(models.Model):
+    idrenseignement = models.AutoField(verbose_name="ID", db_column='IDrenseignement', primary_key=True)
+    date = models.DateTimeField(verbose_name="Date de modification", auto_now_add=True)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
+    individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.PROTECT)
+    categorie = models.CharField(verbose_name="Catégorie", max_length=200)
+    code = models.CharField(verbose_name="Code", max_length=200)
+    valeur = models.TextField(verbose_name="Valeur", blank=True, null=True)
+    choix_etat = [("ATTENTE", "En attente de validation"), ("VALIDE", "Validé"), ("REFUS", "Refusé")]
+    etat = models.CharField(verbose_name="Etat", max_length=100, choices=choix_etat, default="ATTENTE")
+    traitement_utilisateur = models.ForeignKey(Utilisateur, verbose_name="Traité par", blank=True, null=True, on_delete=models.PROTECT)
+    traitement_date = models.DateTimeField(verbose_name="Date du traitement", blank=True, null=True)
+
+    class Meta:
+        db_table = 'portail_renseignements'
+        verbose_name = "renseignement de portail"
+        verbose_name_plural = "renseignements de portail"
+
+    def __str__(self):
+        return "Renseignement de portail ID%d" % self.idrenseignement if self.idrenseignement else "Nouveau"
+
+
+class PortailChamp(models.Model):
+    ichamp = models.AutoField(verbose_name="ID", db_column='IDchamp', primary_key=True)
+    page = models.CharField(verbose_name="Page", max_length=200, blank=True, null=True)
+    code = models.CharField(verbose_name="Code", max_length=200, blank=True, null=True)
+    choix_etat = [("AFFICHER", "Afficher"), ("MASQUER", "Masquer")]
+    representant = models.CharField(verbose_name="Représentant", max_length=100, choices=choix_etat, default="AFFICHER")
+    enfant = models.CharField(verbose_name="Enfant", max_length=100, choices=choix_etat, default="AFFICHER")
+    contact = models.CharField(verbose_name="Contact", max_length=100, choices=choix_etat, default="AFFICHER")
+
+    class Meta:
+        db_table = 'portail_champs'
+        verbose_name = "champ de portail"
+        verbose_name_plural = "champs de portail"
+
+    def __str__(self):
+        return "Champ de portail ID%d" % self.ichamp if self.ichamp else "Nouveau"
+
+
+class PortailMessage(models.Model):
+    idmessage = models.AutoField(verbose_name="ID", db_column='IDmessage', primary_key=True)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT)
+    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.PROTECT)
+    texte = models.TextField(verbose_name="Texte")
+    date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
+    date_lecture = models.DateTimeField(verbose_name="Date de lecture", max_length=200, blank=True, null=True)
+
+    class Meta:
+        db_table = 'portail_messages'
+        verbose_name = "message"
+        verbose_name_plural = "messages"
+
+    def __str__(self):
+        return "<Message ID%d>" % self.idmessage if self.idmessage else "Nouveau message"
+
+
+class ContactUrgence(models.Model):
+    idcontact = models.AutoField(verbose_name="ID", db_column='IDcontact', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    prenom = models.CharField(verbose_name="Prénom", max_length=200)
+    rue_resid = models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True)
+    cp_resid = models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True)
+    ville_resid = models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True)
+    tel_domicile = models.CharField(verbose_name="Tél domicile", max_length=100, blank=True, null=True)
+    tel_mobile = models.CharField(verbose_name="Tél portable", max_length=100, blank=True, null=True)
+    tel_travail = models.CharField(verbose_name="Tél travail", max_length=100, blank=True, null=True)
+    mail = models.EmailField(verbose_name="Email", max_length=300, blank=True, null=True)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    lien = models.CharField(verbose_name="Lien avec l'individu", max_length=200)
+    autorisation_sortie = models.BooleanField(verbose_name="Autorisé à récupérer l'individu", default=True)
+    autorisation_appel = models.BooleanField(verbose_name="A contacter en cas d'urgence", default=True)
+    individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.PROTECT)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = 'contacts_urgence'
+        verbose_name = "contact d'urgence et de sortie"
+        verbose_name_plural = "contacts d'urgence et de sortie"
+
+    def __str__(self):
+        return "%s %s" % (self.nom, self.prenom if self.prenom else "")
+
+    def Get_nom(self):
+        texte = self.nom
+        if self.prenom:
+            texte += " " + self.prenom
+        return texte
+
+    def Get_autorisations(self):
+        autorisations = []
+        if self.autorisation_sortie:
+            autorisations.append("""<span class='badge badge-success' title="Autorisé à récupérer l'individu"><i class='fa fa-sign-out margin-r-5'></i>Sortie</span>""")
+        if self.autorisation_appel:
+            autorisations.append("""<span class='badge badge-success' title="Contacter en cas d'urgence"><i class='fa fa-phone margin-r-5'></i>Urgence</span>""")
+        return " ".join(autorisations)
+
+
+class Assurance(models.Model):
+    idassurance = models.AutoField(verbose_name="ID", db_column='IDassurance', primary_key=True)
+    individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.PROTECT)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
+    assureur = models.ForeignKey(Assureur, verbose_name="Assureur", on_delete=models.PROTECT)
+    num_contrat = models.CharField(verbose_name="N° de contrat", max_length=200)
+    date_debut = models.DateField(verbose_name="Date de début")
+    date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
+
+    class Meta:
+        db_table = 'assurances'
+        verbose_name = "assurance"
+        verbose_name_plural = "assurances"
+
+    def __str__(self):
+        return "Assurance %s à partir du %s" % (self.assureur, utils_dates.ConvertDateToFR(self.date_debut))

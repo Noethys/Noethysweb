@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
-from core.views.menu import GetMenuPrincipal
+from portail.views.menu import GetMenuPrincipal
 from noethysweb.version import GetVersion
 from core.models import Organisateur, Parametre
 from django.core.cache import cache
-from core.utils import utils_parametres
+from core.utils import utils_parametres, utils_portail
 from django.http import JsonResponse
+import json
 
 
+# def Memorise_option(request):
+#     """ Mémorise dans la DB et le cache une option d'interface pour l'utilisateur"""
+#     nom = request.POST.get("nom")
+#     valeur = json.loads(request.POST.get("valeur"))
+#     utils_parametres.Set(nom=nom, categorie="options_interface", utilisateur=request.user, valeur=valeur)
+#     cache.delete('options_interface')
+#     return JsonResponse({"success": True})
 
-def Set_masquer_sidebar(request):
-    """ Mémorise dans la DB et le cache le choix sidebar_collapse pour l'utilisateur"""
-    masquer_sidebar = False if request.POST.get("masquer_sidebar") == "true" else True
-    utils_parametres.Set(categorie="interface", nom="masquer_sidebar", utilisateur=request.user, valeur=masquer_sidebar)
-    cache.set('masquer_sidebar', masquer_sidebar)
-    return JsonResponse({"success": True})
 
 
 class CustomView(LoginRequiredMixin, UserPassesTestMixin):
@@ -57,33 +58,45 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin):
             cache.set('organisateur', organisateur)
         context['organisateur'] = organisateur
 
-        # Sidebar
-        if cache.get('masquer_sidebar', None) != None:
-            context['masquer_sidebar'] = cache.get('masquer_sidebar', None)
+        # Paramètres du portail
+        parametres_portail = cache.get('parametres_portail')
+        if not parametres_portail:
+            parametres_portail = utils_portail.Get_dict_parametres()
+            cache.set('parametres_portail', parametres_portail)
+        context['parametres_portail'] = parametres_portail
+
+        # Options d'interface
+        if cache.get('options_interface', None) != None:
+            context['options_interface'] = cache.get('options_interface', {})
         else:
-            parametre = utils_parametres.Get(categorie="interface", nom="masquer_sidebar", utilisateur=self.request.user, valeur=False)
-            context['masquer_sidebar'] = parametre
-            cache.set('masquer_sidebar', parametre)
+            defaut = {
+                "dark-mode": False,
+                "masquer-sidebar": False,
+                "text-sm": True,
+                "sidebar-no-expand": True,
+            }
+            parametres = utils_parametres.Get_categorie(categorie='options_interface', utilisateur=self.request.user, parametres=defaut)
+            context['options_interface'] = parametres
+            cache.set('options_interface', parametres)
 
+        # Mémorise le menu principal
+        menu_principal = GetMenuPrincipal(parametres_portail=parametres_portail, user=self.request.user)
+        context['menu_principal'] = menu_principal
 
-        # # Mémorise le menu principal
-        # menu_principal = GetMenuPrincipal(organisateur=organisateur, user=self.request.user)
-        # context['menu_principal'] = menu_principal
-        #
-        # # Si la page est un crud, on récupère l'url de la liste en tant que menu_code
-        # if not self.menu_code and hasattr(self, "url_liste"):
-        #     self.menu_code = self.url_liste
-        #
-        # # Mémorise le menu actif
-        # menu_actif = menu_principal.Find(code=self.menu_code)
-        # context['menu_actif'] = menu_actif
+        # Si la page est un crud, on récupère l'url de la liste en tant que menu_code
+        if not self.menu_code and hasattr(self, "url_liste"):
+            self.menu_code = self.url_liste
+
+        # Mémorise le menu actif
+        menu_actif = menu_principal.Find(code=self.menu_code)
+        context['menu_actif'] = menu_actif
         # if menu_actif:
         #     context['menu_brothers'] = menu_actif.GetBrothers()
         # context['afficher_menu_brothers'] = False
-        #
-        # # Mémorise le fil d'ariane
-        # if context['menu_actif'] != None:
-        #     context['breadcrumb'] = context['menu_actif'].GetBreadcrumb()
+
+        # Mémorise le fil d'ariane
+        if context['menu_actif'] != None:
+            context['breadcrumb'] = context['menu_actif'].GetBreadcrumb()
 
         return context
 

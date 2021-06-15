@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Div, ButtonHolder, Fieldset
@@ -16,7 +16,7 @@ from core.widgets import Crop_image
 from core.utils import utils_images
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     cropper_data = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     class Meta:

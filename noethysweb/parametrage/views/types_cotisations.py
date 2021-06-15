@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -30,7 +29,7 @@ class Liste(Page, crud.Liste):
     model = TypeCotisation
 
     def get_queryset(self):
-        return TypeCotisation.objects.filter(self.Get_filtres("Q"))
+        return TypeCotisation.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure())
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

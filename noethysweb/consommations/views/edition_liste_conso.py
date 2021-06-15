@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -17,9 +16,9 @@ from core.models import Parametre
 
 
 
-def get_data_profil(donnees=None):
+def get_data_profil(donnees=None, request=None):
     """ Récupère les données à sauvegarder dans le profil de configuration """
-    form = Form_parametres(donnees)
+    form = Form_parametres(donnees, request=request)
 
     # Validation des paramètres
     if not form.is_valid():
@@ -38,7 +37,7 @@ def get_data_profil(donnees=None):
 def Generer_pdf(request):
     # Récupération des paramètres
     form_date = Form_date(request.POST)
-    form_parametres = Form_parametres(request.POST)
+    form_parametres = Form_parametres(request.POST, request=request)
 
     # Validation du form date
     if form_date.is_valid() == False:
@@ -95,15 +94,15 @@ class View(CustomView, TemplateView):
         # Intégration des formulaires
         if "form_date" in kwargs:
             context['form_date'] = Form_date(request_post, dates=dates)
-            context['form_parametres'] = Form_parametres(request_post, dates=dates)
+            context['form_parametres'] = Form_parametres(request_post, dates=dates, request=self.request)
         else:
             context['form_date'] = Form_date(dates=dates)
-            context['form_parametres'] = Form_parametres(dates=dates)
+            context['form_parametres'] = Form_parametres(dates=dates, request=self.request)
         return context
 
     def post(self, request, **kwargs):
         form_date = Form_date(request.POST)
-        form_parametres = Form_parametres(request.POST)
+        form_parametres = Form_parametres(request.POST, request=self.request)
 
         # Validation du form date
         if form_date.is_valid() == False:

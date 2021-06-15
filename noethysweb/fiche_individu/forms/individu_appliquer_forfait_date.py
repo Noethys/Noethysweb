@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -12,9 +11,10 @@ from core.utils.utils_commandes import Commandes
 from fiche_individu.widgets import SelectionForfaitsDatesWidget
 from individus.utils import utils_forfaits
 from core.models import Inscription
+from core.forms.base import FormulaireBase
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     action = forms.CharField(label="Action", required=False)
     forfaits = forms.CharField(label="Forfaits disponibles", required=False, widget=SelectionForfaitsDatesWidget(attrs={"coche_tout": False}))
     afficher_forfaits_obsoletes = forms.BooleanField(label="Afficher les forfaits obsolètes", required=False, initial=False)

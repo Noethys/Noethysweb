@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -17,7 +16,7 @@ import json
 def Envoyer_mail_test(request):
     # Récupère les paramètres de l'adresse d'expédition
     valeurs_form_adresse = json.loads(request.POST.get("form_adresse"))
-    form_adresse = Formulaire(valeurs_form_adresse)
+    form_adresse = Formulaire(valeurs_form_adresse, request=self.request)
     if form_adresse.is_valid() == False:
         return JsonResponse({"erreur": "Veuillez compléter les paramètres de l'adresse d'expédition"}, status=401)
 
@@ -56,7 +55,7 @@ class Liste(Page, crud.Liste):
     model = AdresseMail
 
     def get_queryset(self):
-        return AdresseMail.objects.filter(self.Get_filtres("Q"))
+        return AdresseMail.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure())
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

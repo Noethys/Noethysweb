@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -15,7 +14,7 @@ from django.shortcuts import render
 
 def Get_activites(request):
     """ Renvoie une liste d'activités """
-    activites = Activite.objects.all().order_by("-date_fin")
+    activites = Activite.objects.filter(structure__in=request.user.structures.all()).order_by("-date_fin")
     context = {"activites": activites}
     return render(request, "consommations/suivi_consommations_activites.html", context)
 
@@ -45,7 +44,7 @@ def Get_suivi_consommations(request):
 
     # Importation des paramètres
     parametres = Get_parametres()
-    context = {"data_suivi_consommations": Get_data(parametres=parametres)}
+    context = {"data_suivi_consommations": Get_data(parametres=parametres, request=request)}
     context.update(parametres)
     return render(request, "consommations/suivi_consommations_tableau.html", context)
 
@@ -56,7 +55,7 @@ class Total():
         self.nom = "Total"
 
 
-def Get_data(parametres={}):
+def Get_data(parametres={}, request=None):
     """ Création des valeurs pour le suivi des consommations """
     # Récupération des paramètres
     mode = parametres.get("mode", "places_prises")
@@ -65,14 +64,17 @@ def Get_data(parametres={}):
     activites = parametres.get("activites", [])
 
     # Apporté par la view liste d'attente
-    liste_activites = parametres.get("liste_activites", [])
+    liste_activites_temp = parametres.get("liste_activites", [])
     conditions_periodes = parametres.get("condition_periodes", [])
     date_min = parametres.get("date_min", None)
     date_max = parametres.get("date_max", None)
 
     # Importation des activités
-    if not liste_activites:
-        liste_activites = Activite.objects.filter(idactivite__in=activites)
+    if not liste_activites_temp:
+        liste_activites_temp = Activite.objects.select_related("structure").filter(idactivite__in=activites)
+
+    # Vérifie que l'activité est bien accessible pour cet utilisateur
+    liste_activites = [activite for activite in liste_activites_temp if activite.structure in request.user.structures.all()]
 
     # Récupération de la période
     if not conditions_periodes:
@@ -153,12 +155,12 @@ def Get_data(parametres={}):
     # Colonnes
     dict_colonnes = {"activites": [], "groupes": [], "unites": []}
     for activite in liste_activites:
-        nbre_colonnes = len(dict_groupes[activite]) * len(dict_unites_remplissage[activite])
+        nbre_colonnes = len(dict_groupes.get(activite, [])) * len(dict_unites_remplissage.get(activite, []))
         dict_colonnes["activites"].append({"activite": activite, "nbre_colonnes": nbre_colonnes})
-        for groupe in dict_groupes[activite]:
-            nbre_colonnes = len(dict_unites_remplissage[activite])
+        for groupe in dict_groupes.get(activite, []):
+            nbre_colonnes = len(dict_unites_remplissage.get(activite, []))
             dict_colonnes["groupes"].append({"groupe": groupe, "nbre_colonnes": nbre_colonnes})
-            for unite in dict_unites_remplissage[activite]:
+            for unite in dict_unites_remplissage.get(activite, []):
                 dict_colonnes["unites"].append({"unite": unite, "groupe": groupe, "activite": activite})
 
     # Importation des événements

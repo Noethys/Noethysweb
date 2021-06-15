@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -122,6 +121,7 @@ def Generation_factures(request):
                 total=dict_facture["total"],
                 regle=dict_facture["ventilation"],
                 solde=dict_facture["solde"],
+                solde_actuel=dict_facture["solde"],
                 lot=form.cleaned_data["lot_factures"],
                 prestations=";".join(form.cleaned_data["categories"]),
                 regie=None, #todo: régie à ajouter

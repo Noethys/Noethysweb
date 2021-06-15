@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
@@ -16,7 +16,7 @@ from django_select2.forms import Select2MultipleWidget
 import re
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     email_factures = forms.BooleanField(label="Activer l'envoi des factures par Email", required=False, initial=False)
     adresses_individus = forms.MultipleChoiceField(label="Adresses existantes", help_text="Sélectionnez une ou plusieurs adresses parmi la liste des adresses de la famille.", widget=Select2MultipleWidget({"lang": "fr"}), choices=[], required=False)
     adresses_autres = forms.CharField(label="Autres adresses", help_text="Saisissez une ou plusieurs autres adresses en les séparant par des points-virgules.", required=False)

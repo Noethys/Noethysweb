@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError, HiddenInput
-from django.utils.translation import ugettext as _
+from django.forms import ModelForm, HiddenInput
+from core.forms.base import FormulaireBase
 from django.forms.models import inlineformset_factory, BaseInlineFormSet
 from django.utils.dateparse import parse_time, parse_date
 from django_select2.forms import Select2MultipleWidget
@@ -123,7 +122,7 @@ FORMSET_UNITES_CREDIT = inlineformset_factory(Tarif, CombiTarif, form=CombiTarif
 
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     # Dates de validité
     date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
     date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget())

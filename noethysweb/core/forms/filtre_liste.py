@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -10,6 +9,7 @@ from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Field
 from crispy_forms.bootstrap import Field, StrictButton
 from django.http import JsonResponse
 from django.template import Template, RequestContext
+from core.forms.base import FormulaireBase
 import json
 from django.utils.html import escapejs
 from core.widgets import DatePickerWidget, SelectionActivitesWidget
@@ -42,7 +42,7 @@ def Get_form_filtres(request):
 
     # Création du formulaire
     if filtres or colonnes:
-        form = Formulaire(model=model, filtres=filtres, colonnes=colonnes, nom_liste=nom_view, idfiltre=idfiltre)
+        form = Formulaire(model=model, filtres=filtres, colonnes=colonnes, nom_liste=nom_view, idfiltre=idfiltre, request=request)
         html = "{% load crispy_forms_tags %} {% crispy form %}"
         data = Template(html).render(RequestContext(request, {"form": form}))
     else:
@@ -114,7 +114,7 @@ def Supprimer_filtre(request, idfiltre=None):
     return redirect(request.META["HTTP_REFERER"])
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     condition1 = forms.ChoiceField(label="Condition", choices=[("EGAL", "Est égal à"), ("DIFFERENT", "Est différent de"), ("CONTIENT", "Contient"), ("NE_CONTIENT_PAS", "Ne contient pas"), ("EST_VIDE", "Est vide"), ("EST_PAS_VIDE", "N'est pas vide")], required=False)
     condition2 = forms.ChoiceField(label="Condition", choices=[("EGAL", "Est égal à"), ("DIFFERENT", "Est différent de"), ("SUPERIEUR", "Est supérieur à"), ("SUPERIEUR_EGAL", "Est supérieur ou égal à"), ("INFERIEUR", "Est inférieur à"), ("INFERIEUR_EGAL", "Est inférieur ou égal à"), ("COMPRIS", "Est compris entre")], required=False)
     condition3 = forms.ChoiceField(label="Condition", choices=[("VRAI", "Est vrai"), ("FAUX", "Est faux")], required=False)
@@ -162,6 +162,9 @@ class Formulaire(forms.Form):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
+
+        # Liste uniquement les activités accessibles pour l'utilisateur
+        self.fields["critere_activites"].widget.request = self.request
 
         # Choix du champ à filtrer
         choix_champs = []

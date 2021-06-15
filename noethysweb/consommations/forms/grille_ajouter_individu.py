@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -9,9 +8,10 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from crispy_forms.bootstrap import Field
 from django_select2.forms import HeavySelect2Widget
+from core.forms.base import FormulaireBase
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     individu = forms.ChoiceField(label="Recherchez l'individu à ajouter", widget=HeavySelect2Widget({"lang": "fr", "data-ajax--type": "GET"}, data_url="get_individus"), required=False)
 
     def __init__(self, *args, **kwargs):

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -80,7 +79,7 @@ class Page(crud.Page):
 
     def post(self, request, *args, **kwargs):
         # Validation du formulaire
-        form = Formulaire(request.POST)
+        form = Formulaire(request.POST, request=self.request)
         if form.is_valid() == False:
             return self.render_to_response(self.get_context_data(form=form))
 

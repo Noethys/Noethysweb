@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
-from django.utils.translation import ugettext as _
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Row, Column, Fieldset
 from crispy_forms.bootstrap import Field, FormActions, StrictButton
 from core.utils.utils_commandes import Commandes
-from core.models import CompteBancaire
+from core.models import CompteBancaire, Structure
 
 
-class Formulaire(ModelForm):
+
+class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = CompteBancaire
         fields = ['nom', 'numero', 'defaut', 'raison', 'code_etab', 'code_guichet',
-                  'cle_rib', 'cle_iban', 'iban', 'bic', 'code_ics', 'code_nne']
+                  'cle_rib', 'cle_iban', 'iban', 'bic', 'code_ics', 'code_nne', 'structure']
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -54,6 +54,9 @@ class Formulaire(ModelForm):
                 Field('bic'),
                 Field('code_ics'),
                 Field('code_nne'),
+            ),
+            Fieldset('Structure associée',
+                Field('structure'),
             ),
         )
 

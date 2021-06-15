@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -23,14 +22,14 @@ class View(Onglet, TemplateView):
         context['box_introduction'] = "Cochez un ou plusieurs forfaits datés et cliquez sur le bouton Appliquer."
         context['onglet_actif'] = "inscriptions"
         if "form" in kwargs:
-            context['form'] = Formulaire(self.request.POST.copy(), idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'])
+            context['form'] = Formulaire(self.request.POST.copy(), idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], request=self.request)
         else:
-            context['form'] = Formulaire(idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'])
+            context['form'] = Formulaire(idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], request=self.request)
         return context
 
     def post(self, request, **kwargs):
         # Validation du form
-        form = Formulaire(request.POST, idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'])
+        form = Formulaire(request.POST, idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], request=self.request)
         if form.is_valid() == False:
             return self.render_to_response(self.get_context_data(form=form))
 

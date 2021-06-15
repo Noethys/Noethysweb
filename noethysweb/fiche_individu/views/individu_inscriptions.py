@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -68,7 +67,8 @@ class Page(Onglet):
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """
         context = super(Page, self).get_context_data(**kwargs)
-        context['box_titre'] = "Inscriptions"
+        if not hasattr(self, "verbe_action"):
+            context['box_titre'] = "Inscriptions"
         context['onglet_actif'] = "inscriptions"
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
@@ -111,7 +111,7 @@ class Liste(Page, crud.Liste):
     template_name = "fiche_individu/individu_liste.html"
 
     def get_queryset(self):
-        return Inscription.objects.select_related("activite", "groupe", "categorie_tarif", "famille").filter(Q(individu=self.Get_idindividu()) & self.Get_filtres("Q"))
+        return Inscription.objects.select_related("activite", "groupe", "categorie_tarif", "famille", "activite__structure").filter(Q(individu=self.Get_idindividu()) & self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -151,14 +151,17 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
-            # Récupération idindividu et idfamille
             kwargs = view.kwargs
-            # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
-            html = [
-                self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
-                self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
-            ]
+            if instance.activite.structure in view.request.user.structures.all():
+                # Affiche les boutons d'action si l'utilisateur est associé à l'activité
+                html = [
+                    self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
+                    self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
+                ]
+            else:
+                # Afficher que l'accès est interdit
+                html = ["<span class='text-red'><i class='fa fa-minus-circle margin-r-5' title='Accès non autorisé'></i>Accès interdit</span>",]
             return self.Create_boutons_actions(html)
 
 
@@ -180,12 +183,24 @@ class Ajouter(Page, crud.Ajouter):
         f = utils_forfaits.Forfaits(request=self.request, famille=self.object.famille_id, activites=[self.object.activite_id], individus=[self.object.individu_id])
         f.Applique_forfait(mode_inscription=True, selection_activite=self.object.activite_id)
 
+        # Mémorisation dans l'historique
+        self.save_historique(instance=self.object, form=form)
+
         return HttpResponseRedirect(self.get_success_url())
 
 
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire
     template_name = "fiche_individu/individu_edit.html"
+
+    def test_func(self):
+        """ Vérifie que l'utilisateur peut se connecter à cette page """
+        if not super(Modifier, self).test_func():
+            return False
+        inscription = Inscription.objects.select_related("activite", "activite__structure").get(pk=self.kwargs["pk"])
+        if inscription.activite.structure not in self.request.user.structures.all():
+            return False
+        return True
 
     def form_valid(self, form):
         # On vérifie si l'individu est déjà inscrit à cette activité sur cette famille
@@ -202,15 +217,20 @@ class Modifier(Page, crud.Modifier):
             messages.add_message(self.request, messages.ERROR, "Modification impossible : %d consommations existent déjà hors de la période d'inscription sélectionnée")
             return self.render_to_response(self.get_context_data(form=form))
 
-        # Sauvegarde
-        form.instance.save()
-        messages.add_message(self.request, messages.SUCCESS, "L'inscription a bien été modifiée")
-
-        return HttpResponseRedirect(self.get_success_url())
+        return super(Modifier, self).form_valid(form)
 
 
 class Supprimer(Page, crud.Supprimer):
     template_name = "fiche_individu/individu_delete.html"
+
+    def test_func(self):
+        """ Vérifie que l'utilisateur peut se connecter à cette page """
+        if not super(Supprimer, self).test_func():
+            return False
+        inscription = Inscription.objects.select_related("activite", "activite__structure").get(pk=self.kwargs["pk"])
+        if inscription.activite.structure not in self.request.user.structures.all():
+            return False
+        return True
 
     def Avant_suppression(self, objet=None):
         """ Suppression des conso forfait supprimables """

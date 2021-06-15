@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -12,10 +11,10 @@ from core.widgets import DateRangePickerWidget, SelectionActivitesWidget, Profil
 from core.utils import utils_parametres, utils_questionnaires
 from core.widgets import ColorPickerWidget
 from core.models import Regime, JOURS_SEMAINE, Parametre
-from core.utils.utils_commandes import Commandes
+from core.forms.base import FormulaireBase
 
 
-class Form_selection_periode(forms.Form):
+class Form_selection_periode(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
 
     def __init__(self, *args, **kwargs):
@@ -29,7 +28,7 @@ class Form_selection_periode(forms.Form):
         )
 
 
-class Form_profil_configuration(forms.Form):
+class Form_profil_configuration(FormulaireBase, forms.Form):
     profil = forms.ModelChoiceField(label="Profil", queryset=Parametre.objects.none(), widget=Profil_configuration({"categorie": "etat_global"}), required=True)
 
     def __init__(self, *args, **kwargs):
@@ -44,7 +43,7 @@ class Form_profil_configuration(forms.Form):
         )
 
 
-class Form_selection_activites(forms.Form):
+class Form_selection_activites(FormulaireBase, forms.Form):
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
 
     def __init__(self, *args, **kwargs):
@@ -59,7 +58,7 @@ class Form_selection_activites(forms.Form):
 
 
 
-class Form_selection_options(forms.Form):
+class Form_selection_options(FormulaireBase, forms.Form):
     # Regroupements
     liste_regroupements = [("aucun", "Aucun"), ("jour", "Jour"), ("mois", "Mois"), ("annee", "Année"),
         ("activite", "Activité"), ("groupe", "Groupe"), ("evenement", "Evènement"),

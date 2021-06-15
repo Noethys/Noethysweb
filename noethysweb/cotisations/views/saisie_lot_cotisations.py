@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -63,11 +62,11 @@ class View(CustomView, TemplateView):
         context['box_titre'] = "Saisir un lot d'adhésions"
         context['box_introduction'] = "Renseignez les paramètres des cotisations à générer et sélectionnez les familles ou individus concernés."
         if "form" not in kwargs:
-            context['form'] = Formulaire()
+            context['form'] = Formulaire(request=self.request)
         return context
 
     def post(self, request, **kwargs):
-        form = Formulaire(request.POST)
+        form = Formulaire(request.POST, request=self.request)
         if form.is_valid() == False:
             if len(form.errors.as_data().keys()) > 1:
                 return self.render_to_response(self.get_context_data(form=form))

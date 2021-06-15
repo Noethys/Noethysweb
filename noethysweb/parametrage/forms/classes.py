@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Row, Column, Fieldset
@@ -16,7 +16,7 @@ from core.models import Classe, NiveauScolaire
 from django_select2.forms import Select2MultipleWidget
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     niveaux = forms.ModelMultipleChoiceField(label="Niveaux scolaires", widget=Select2MultipleWidget({"lang":"fr"}), queryset=NiveauScolaire.objects.all(), required=False)
 
     class Meta:

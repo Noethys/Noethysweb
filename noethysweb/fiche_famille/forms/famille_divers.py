@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
@@ -14,7 +14,7 @@ from core.utils.utils_commandes import Commandes
 from core.models import Famille, Rattachement
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     mail = forms.ChoiceField(label="Mail favori", choices=[], required=False)
 
     class Meta:
@@ -40,9 +40,16 @@ class Formulaire(ModelForm):
         # Titulaire hélios
         self.fields["titulaire_helios"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
 
+        # Création des boutons de commande
+        if self.mode == "CONSULTATION":
+            commandes = Commandes(modifier_url="famille_divers_modifier", modifier_args="idfamille=idfamille", modifier=True, enregistrer=False, annuler=False, ajouter=False)
+            self.Set_mode_consultation()
+        else:
+            commandes = Commandes(annuler_url="{% url 'famille_divers' idfamille=idfamille %}", ajouter=False)
+
         # Affichage
         self.helper.layout = Layout(
-            Commandes(annuler_url="{% url 'famille_resume' idfamille=idfamille %}", ajouter=False),
+            commandes,
             Fieldset("Email",
                 Field("mail"),
             ),

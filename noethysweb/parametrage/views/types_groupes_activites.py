@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -30,7 +29,9 @@ class Liste(Page, crud.Liste):
     model = TypeGroupeActivite
 
     def get_queryset(self):
-        return TypeGroupeActivite.objects.filter(self.Get_filtres("Q"))
+        # return TypeGroupeActivite.objects.select_related("structure").filter(self.Get_filtres("Q"), structure=self.request.user.structure_actuelle)
+        return TypeGroupeActivite.objects.select_related("structure").filter(self.Get_filtres("Q"), structure__in=self.request.user.structures.all())
+
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

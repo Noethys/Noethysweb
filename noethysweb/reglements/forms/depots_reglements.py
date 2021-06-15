@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Row, Column, Fieldset, Div
@@ -17,7 +17,7 @@ from reglements.widgets import Reglements_depot
 import datetime
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     nom = forms.CharField(label="Nom du dépôt", required=True)
     date = forms.DateField(label="Date de dépôt", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
     verrouillage = forms.BooleanField(label="Verrouillage du dépôt", initial=False, required=False)

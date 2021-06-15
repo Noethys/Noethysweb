@@ -34,3 +34,20 @@ def secure_ajax(function):
             return HttpResponseForbidden()
         return function(request, *args, **kwargs)
     return _function
+
+
+def secure_ajax_portail(function):
+    """ A associer aux requêtes AJAX """
+    def _function(request, *args, **kwargs):
+        # Vérifie que c'est une requête AJAX
+        if not request.is_ajax():
+            return HttpResponseBadRequest()
+        # Vérifie que l'utilisateur est authentifié
+        if not request.user.is_authenticated:
+            return HttpResponseForbidden()
+        # Vérifie que c'est un user de type utilisateur
+        if request.user.categorie != "famille":
+            return HttpResponseForbidden()
+        return function(request, *args, **kwargs)
+    return _function
+

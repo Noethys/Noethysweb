@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -9,11 +8,11 @@ from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, ButtonHolder, Fieldset, Div, Button
 from crispy_forms.bootstrap import Field, StrictButton
-from core.utils.utils_commandes import Commandes
+from core.forms.base import FormulaireBase
 from core.widgets import Selection_image
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     photo = forms.ImageField(label="Photo", required=True, widget=Selection_image(attrs={"masquer_image": True}))
     data = forms.CharField(widget=forms.HiddenInput(), required=False)
 

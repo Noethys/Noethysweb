@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -10,13 +9,12 @@ from django.http import JsonResponse
 from django.contrib import messages
 from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite, Consommation, MemoJournee, Evenement, Groupe, Individu, \
                         Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Ferie, Individu, Activite, Classe
-from core.utils import utils_dates, utils_dictionnaires, utils_db, utils_texte, utils_decimal
+from core.utils import utils_dates, utils_dictionnaires, utils_db, utils_texte, utils_decimal, utils_historique
 from django.utils.safestring import mark_safe
 from django.db.models import Q, Count
 from django.core import serializers
 import json, datetime, time, decimal, math, re, copy
 from uuid import uuid4
-from core.data import data_modeles_emails
 
 
 def Get_individus(request):
@@ -109,7 +107,7 @@ def Get_generic_data(data={}):
 
     # Importation des prestations
     conditions = data["conditions_periodes"]
-    if data["mode"] == "individu":
+    if data["mode"] in ("individu", "portail"):
         conditions &= Q(famille_id=data["idfamille"]) & Q(individu__in=data["liste_individus"])
     liste_prestations = Prestation.objects.filter(conditions)
     for p in liste_prestations:
@@ -227,6 +225,8 @@ def Save_grille(request=None, donnees={}):
     logger.debug("suppressions" + str(donnees["suppressions"]))
     chrono = time.time()
 
+    liste_historique = []
+
     # ----------------------------------- PRESTATIONS --------------------------------------
 
     # Enregistrement des nouvelles prestations
@@ -244,15 +244,21 @@ def Save_grille(request=None, donnees={}):
                 tva=dict_prestation["tva"], code_compta=dict_prestation["code_compta"],
             )
 
+            liste_historique.append({"titre": "Ajout d'une prestation", "detail": "%s du %s" % (dict_prestation["label"], utils_dates.ConvertDateToFR(dict_prestation["date"])), "utilisateur": request.user,
+                                     "famille_id": dict_prestation["famille"], "individu_id": dict_prestation["individu"], "objet": "Prestation", "idobjet": prestation.pk, "classe": "Prestation"})
+
             # Mémorise la correspondante du nouvel IDprestation avec l'ancien IDprestation
             dict_idprestation[IDprestation] = prestation.pk
 
             # Enregistrement des aides
             for dict_aide in dict_prestation["aides"]:
-                Deduction.objects.create(date=dict_prestation["date"], label=dict_aide["label"], aide_id=dict_aide["aide"], famille_id=dict_prestation["famille"], prestation=prestation, montant=dict_aide["montant"])
-
+                deduction = Deduction.objects.create(date=dict_prestation["date"], label=dict_aide["label"], aide_id=dict_aide["aide"], famille_id=dict_prestation["famille"], prestation=prestation, montant=dict_aide["montant"])
+                liste_historique.append({"titre": "Ajout d'une déduction", "detail": "%s du %s" % (dict_aide["label"], utils_dates.ConvertDateToFR(dict_prestation["date"])), "utilisateur": request.user,
+                                         "famille_id": dict_prestation["famille"], "individu_id": dict_prestation["individu"], "objet": "Déduction", "idobjet": deduction.pk, "classe": "Deduction"})
 
     # ---------------------------------- CONSOMMATIONS -------------------------------------
+
+    dict_unites = dict_unites = {unite.pk: unite for unite in Unite.objects.filter(activite_id=donnees["activite"])}
 
     # Analyse et préparation des consommations
     liste_ajouts = []
@@ -270,9 +276,14 @@ def Save_grille(request=None, donnees={}):
                     evenement_id=dict_conso["evenement"], badgeage_debut=dict_conso["badgeage_debut"], badgeage_fin=dict_conso["badgeage_fin"],
                 ))
                 logger.debug("Consommation à ajouter : " + str(dict_conso))
+                liste_historique.append({"titre": "Ajout d'une consommation", "detail": "%s du %s (%s)" % (dict_unites[dict_conso["unite"]].nom, utils_dates.ConvertDateToFR(dict_conso["date"]), dict_conso["etat"]), "utilisateur": request.user,
+                                         "famille_id": dict_conso["famille"], "individu_id": dict_conso["individu"], "objet": "Consommation", "idobjet": None, "classe": "Consommation"})
+
             elif dict_conso["dirty"]:
                 dict_modifications[dict_conso["pk"]] = dict_conso
                 logger.debug("Consommation à modifier : " + str(dict_conso))
+                liste_historique.append({"titre": "Modification d'une consommation", "detail": "%s du %s (%s)" % (dict_unites[dict_conso["unite"]].nom, utils_dates.ConvertDateToFR(dict_conso["date"]), dict_conso["etat"]), "utilisateur": request.user,
+                                         "famille_id": dict_conso["famille"], "individu_id": dict_conso["individu"], "objet": "Consommation", "idobjet": dict_conso["pk"], "classe": "Consommation"})
 
     # Récupère la liste des conso à modifier
     liste_modifications = []
@@ -296,8 +307,12 @@ def Save_grille(request=None, donnees={}):
         texte_notification.append("%s modification%s" % (len(liste_modifications), "s" if len(liste_modifications) > 1 else ""))
     if donnees["suppressions"]["consommations"]:
         logger.debug("Consommations à supprimer : " + str(donnees["suppressions"]["consommations"]))
+        liste_conso_suppr = list(Consommation.objects.select_related("unite", "inscription").filter(pk__in=donnees["suppressions"]["consommations"]))
         utils_db.bulk_delete(listeID=donnees["suppressions"]["consommations"], nom_table="consommations", nom_id="IDconso")
         texte_notification.append("%s suppression%s" % (len(donnees["suppressions"]["consommations"]), "s" if len(donnees["suppressions"]["consommations"]) > 1 else ""))
+        for conso in liste_conso_suppr:
+            liste_historique.append({"titre": "Suppression d'une consommation", "detail": "%s du %s (%s)" % (conso.unite.nom, utils_dates.ConvertDateToFR(conso.date), conso.etat),
+                                     "utilisateur": request.user, "famille_id": conso.inscription.famille_id, "individu_id": conso.individu_id, "objet": "Consommation", "idobjet": conso.pk, "classe": "Consommation"})
 
     # Notification d'enregistrement des consommations
     if texte_notification:
@@ -305,9 +320,13 @@ def Save_grille(request=None, donnees={}):
 
     # Suppression des prestations obsolètes (après la suppression des consommations associées)
     logger.debug("Prestations à supprimer : " + str(donnees["suppressions"]["prestations"]))
-    utils_db.bulk_delete(listeID=donnees["suppressions"]["prestations"], nom_table="deductions", nom_id="prestation_id")
-    utils_db.bulk_delete(listeID=donnees["suppressions"]["prestations"], nom_table="prestations", nom_id="IDprestation")
-
+    if donnees["suppressions"]["prestations"]:
+        liste_prestations_suppr = list(Prestation.objects.filter(pk__in=donnees["suppressions"]["prestations"]))
+        utils_db.bulk_delete(listeID=donnees["suppressions"]["prestations"], nom_table="deductions", nom_id="prestation_id")
+        utils_db.bulk_delete(listeID=donnees["suppressions"]["prestations"], nom_table="prestations", nom_id="IDprestation")
+        for prestation in liste_prestations_suppr:
+            liste_historique.append({"titre": "Suppression d'une prestation", "detail": "%s du %s" % (prestation.label, utils_dates.ConvertDateToFR(prestation.date)),
+                                     "utilisateur": request.user, "famille_id": prestation.famille_id, "individu_id": prestation.individu_id, "objet": "Prestation", "idobjet": prestation.pk, "classe": "Prestation"})
 
     # ---------------------------------- MEMOS JOURNALIERS -------------------------------------
 
@@ -331,6 +350,9 @@ def Save_grille(request=None, donnees={}):
     if liste_ajouts: MemoJournee.objects.bulk_create(liste_ajouts)
     if liste_modifications: MemoJournee.objects.bulk_update(liste_modifications, ["texte"])
     if donnees["suppressions"]["memos"]: utils_db.bulk_delete(listeID=donnees["suppressions"]["memos"], nom_table="memo_journee", nom_id="IDmemo")
+
+    # Sauvegarde de l'historique
+    utils_historique.Ajouter_plusieurs(liste_historique)
 
     # Affiche le chrono
     logger.debug("Temps d'enregistrement de la grille : " + str(time.time() - chrono))

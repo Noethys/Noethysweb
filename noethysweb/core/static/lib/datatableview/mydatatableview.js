@@ -35,7 +35,7 @@ $(document).ready(function() {
         // dom: "<'row'<'col-sm-6'i><'col-sm-6'<\"dt-buttons-haut\"B>>>" +
         //     "<'row'<'col-sm-12'tr>>" +
         //     "<'row'<'col-sm-2'f><'col-sm-10'p>>",
-        dom: "<'d-flex flex-wrap justify-content-end dt-buttons-haut'<f><B>>" +
+        dom: "<'barre_menu_dt_gauche'> <'d-flex flex-wrap justify-content-end dt-buttons-haut'<f><B>>" +
         "<'row'<'col-sm-12'tr>>" +
         "<'d-flex flex-wrap justify-content-between'<i><p>>",
 
@@ -201,8 +201,9 @@ $(document).ready(function() {
         var deplacements = {};
         for ( var i=0, ien=diff.length ; i<ien ; i++ ) {
             var rowData = table.row( diff[i].node ).data();
-            deplacements[rowData["DT_RowId"]] = diff[i].newData;
+            deplacements[rowData["DT_RowId"]] = diff[i].newPosition + 1;
         }
+        console.log("deplacements=", deplacements)
         $.ajax({
             type: "POST",
             url: "deplacer_lignes",
@@ -276,7 +277,7 @@ $(document).ready(function() {
     $('.datatable').on('select.dt deselect.dt',  function (evtObj) {
         if(bouton_supprimer) {
             var bouton = "<button id='bouton_supprimer_plusieurs' class='btn btn-danger pull-left' onclick='supprimer_selections()' title='Supprimer les lignes sélectionnées' tabindex='0' aria-controls='DataTables_Table_0' type='button'><span><i class='fa fa-level-down fa-flip-horizontal margin-r-5'></i> Supprimer</span></button>"
-            if (!($("#bouton_supprimer_plusieurs").length) && (table.rows(".selected").nodes().length)) {$(".barre_menu_dt").append(bouton)};
+            if (!($("#bouton_supprimer_plusieurs").length) && (table.rows(".selected").nodes().length)) {$(".barre_menu_dt_gauche").append(bouton)};
             if (($("#bouton_supprimer_plusieurs").length) && !(table.rows(".selected").nodes().length)) {$("#bouton_supprimer_plusieurs").remove()};
         }
     });

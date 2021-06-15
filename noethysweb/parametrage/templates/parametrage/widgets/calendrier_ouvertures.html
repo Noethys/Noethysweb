@@ -37,6 +37,7 @@
                     <td colspan="{{ unites.count|add:unites_remplissage.count|add:1 }}" class="ligne_date"
                         onmouseover="document.getElementById('boutons_{{ dict_date.date|date:"Y-m-d" }}').style.display = 'block';"
                         onmouseout="document.getElementById('boutons_{{ dict_date.date|date:"Y-m-d" }}').style.display = 'none';"
+                        style="margin: 10px;"
                     >
                         &nbsp;&nbsp;{{ dict_date.date|date:"l j F Y" }}
                         <div id="boutons_{{ dict_date.date|date:"Y-m-d" }}" class="btn-group pull-right boutons_date" style="display: none;">

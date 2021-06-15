@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -113,8 +112,11 @@ class TimePickerWidget(Widget):
 
 
 class DateTimePickerWidget(Widget):
-
     template_name = 'core/widgets/datetimepicker.html'
+
+    class Media:
+        css = {"all": ("lib/datetimepicker/css/bootstrap-datetimepicker.min.css",)}
+        js = ("lib/datetimepicker/js/bootstrap-datetimepicker.min.js", "lib/datetimepicker/js/locales/bootstrap-datetimepicker.fr.js")
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())
@@ -125,7 +127,7 @@ class DateTimePickerWidget(Widget):
             context['value'] = value
 
         if 'format' not in context:
-            context['format'] = 'mm/dd/yyyy hh:ii:ss'
+            context['format'] = 'dd/mm/yyyy hh:ii'
         context['djformat'] = settings.DATETIME_FORMAT
 
         return context
@@ -334,6 +336,7 @@ class DateRangePickerWidget(Widget):
 
 class SelectionActivitesWidget(Widget):
     template_name = 'core/widgets/selection_activites.html'
+    request = None
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())
@@ -352,8 +355,8 @@ class SelectionActivitesWidget(Widget):
                     type_selection, valeurs = value.split(":")
                     context['selection'] = {"type": type_selection, "ids": [int(x) for x in valeurs.split(";")]}
 
-        context['groupes_activites'] = TypeGroupeActivite.objects.all().order_by("nom")
-        context['activites'] = Activite.objects.all().order_by("-date_fin")
+        context['groupes_activites'] = TypeGroupeActivite.objects.filter(structure__in=self.request.user.structures.all()).order_by("nom")
+        context['activites'] = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin")
         if context.get("afficher_groupes", False):
             context['groupes'] = {}
             for groupe in Groupe.objects.select_related('activite').all().order_by("ordre"):

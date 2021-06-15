@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
+from core.forms.base import FormulaireBase
 from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, Div, ButtonHolder
@@ -17,7 +17,7 @@ from core.widgets import Telephone, CodePostal, Ville
 from fiche_individu.widgets import CarteOSM
 
 
-class Formulaire(ModelForm):
+class Formulaire(FormulaireBase, ModelForm):
     type_adresse = forms.ChoiceField(label="Type d'adresse", widget=forms.RadioSelect, choices=[("RATTACHEE", "Adresse rattachée"), ("PROPRE", "Adresse propre")], required=False)
     adresse_auto = forms.ModelChoiceField(label="Adresse rattachée", widget=Select2Widget({"lang": "fr"}), queryset=Rattachement.objects.none(), required=False)
     listes_diffusion = forms.ModelMultipleChoiceField(label="Listes de diffusion", widget=Select2MultipleWidget({"lang": "fr"}), queryset=ListeDiffusion.objects.all(), required=False)
@@ -41,6 +41,23 @@ class Formulaire(ModelForm):
             'cp_resid': CodePostal(attrs={"id_ville": "id_ville_resid"}),
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
         }
+        help_texts = {
+            "type_adresse": "Sélectionnez 'rattachée' pour faire le lien avec l'adresse d'un autre membre de la famille ou sélectionnez 'propre' pour saisir une adresse pour cet individu.",
+            "adresse_auto": "Sélectionnez l'individu dont vous souhaitez récupérer l'adresse.",
+            "rue_resid": "Saisissez le numéro et le nom de la voie. Exemple : 12 Rue des acacias.",
+            "cp_resid": "Saisissez le code postal de la ville de résidence, attendez une seconde et sélectionnez la ville dans la liste déroulante.",
+            "ville_resid": "Saisissez le nom de la ville en majuscules.",
+            "secteur": "Sélectionnez un secteur dans la liste déroulante.",
+            "tel_domicile": "Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx.",
+            "tel_mobile": "Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx.",
+            "mail": "Saisissez une adresse Email valide.",
+            "categorie_travail": "Sélectionnez une catégorie socio-professionnelle dans la liste déroulante.",
+            "profession": "Saisissez une profession.",
+            "employeur": "Saisissez le nom de l'employeur.",
+            "travail_tel": "Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx.",
+            "travail_mail": "Saisissez une adresse Email valide.",
+        }
+
 
     def __init__(self, *args, **kwargs):
         self.idfamille = kwargs.pop("idfamille")
@@ -65,9 +82,16 @@ class Formulaire(ModelForm):
         else:
             self.fields['type_adresse'].initial = "PROPRE"
 
+        # Création des boutons de commande
+        if self.mode == "CONSULTATION":
+            commandes = Commandes(modifier_url="individu_coords_modifier", modifier_args="idfamille=idfamille idindividu=idindividu", modifier=True, enregistrer=False, annuler=False, ajouter=False)
+            self.Set_mode_consultation()
+        else:
+            commandes = Commandes(annuler_url="{% url 'individu_coords' idfamille=idfamille idindividu=idindividu %}", ajouter=False)
+
         # Affichage
         self.helper.layout = Layout(
-            Commandes(annuler_url="{% url 'individu_resume' idfamille=idfamille idindividu=idindividu %}", ajouter=False),
+            commandes,
             Fieldset("Adresse de résidence",
                 InlineRadios("type_adresse"),
                 Field("adresse_auto"),

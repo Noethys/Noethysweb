@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -10,10 +9,11 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, ButtonHolder, Fieldset, Div, Button
 from crispy_forms.bootstrap import Field, StrictButton
 from core.utils.utils_commandes import Commandes
+from core.forms.base import FormulaireBase
 import datetime
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     nom = forms.CharField(label="Nom du fichier", help_text="Modifiez si besoin le nom du fichier de destination. L'extension nweb sera ajoutée automatiquement.", required=True)
     mdp1 = forms.CharField(label="Mot de passe", help_text="Saisissez un mot de passe qui servira au cryptage du fichier.", widget=forms.PasswordInput, required=True)
     mdp2 = forms.CharField(label="Confirmation", help_text="Confirmez le mot de passe en le saisissant une deuxième fois.", widget=forms.PasswordInput, required=True)

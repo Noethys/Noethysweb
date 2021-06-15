@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -12,6 +11,7 @@ from core.utils.utils_commandes import Commandes
 from core.widgets import DateRangePickerWidget, SelectionActivitesWidget
 from django_select2.forms import Select2MultipleWidget
 from core.utils import utils_questionnaires
+from core.forms.base import FormulaireBase
 
 
 def Get_regroupements():
@@ -50,7 +50,7 @@ def Get_modes():
     return liste_modes
 
 
-class Formulaire(forms.Form):
+class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
     donnees = forms.MultipleChoiceField(label="Type de prestation", required=True, widget=Select2MultipleWidget({"lang": "fr"}), choices=[("cotisation", "Cotisations"), ("consommation", "Consommations"), ("location", "Locations"), ("autre", "Autres")], initial=["cotisation", "consommation", "location", "autre"])

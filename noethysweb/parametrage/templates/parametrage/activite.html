@@ -34,9 +34,13 @@
                 <div class="card-footer p-0">
                     <ul class="list-group list-group-flush">
                         {% for onglet in liste_onglets %}
-                            <a class="list-group-item list-group-item-action {% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% url onglet.url idactivite=activite.idactivite %}">
-                                <i class="fa {{ onglet.icone }} text-light-blue fa-fw"></i> {{ onglet.label }}
-                            </a>
+                            {% if onglet.rubrique %}
+                                <li class="list-group-item small bg-gray-light" style="color: #adadad !important;padding-bottom: 0px; padding-top: 0px;">{{ onglet.rubrique }}</li>
+                            {% else %}
+                                <a class="list-group-item list-group-item-action {% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% url onglet.url idactivite=activite.idactivite %}">
+                                    <i class="fa {{ onglet.icone }} text-light-blue fa-fw"></i> {{ onglet.label }}
+                                </a>
+                            {% endif %}
                         {% endfor %}
                     </ul>
                 </div>

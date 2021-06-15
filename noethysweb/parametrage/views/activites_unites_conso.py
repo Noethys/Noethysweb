@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -21,8 +20,8 @@ class Page(Onglet):
     url_supprimer = "activites_unites_conso_supprimer"
     description_liste = "Vous pouvez saisir ici une unité de consommation pour l'activité."
     description_saisie = "Saisissez toutes les informations concernant l'unité de consommation à saisir et cliquez sur le bouton Enregistrer."
-    objet_singulier = "un groupe"
-    objet_pluriel = "des groupe"
+    objet_singulier = "une unité de consommation"
+    objet_pluriel = "des unités de consommation"
 
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """
