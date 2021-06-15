@@ -14,7 +14,8 @@ Installation
 - Allez dans le répertoire *noethysweb/noethysweb* et renommez le fichier *settings_production_modele.py* en *settings_production.py*.
 - Personnalisez le fichier *settings_production.py* selon vos besoins.
 - Exécutez les commandes suivantes depuis le répertoire *noethysweb* :
-    - `python3 manage.py migrate`
+    - `python3 manage.py makemigrations`
+	- `python3 manage.py migrate`
     - `python3 manage.py collectstatic`
     - `python3 manage.py createsuperuser`
     - `python3 manage.py update_permissions`
