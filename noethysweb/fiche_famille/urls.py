@@ -8,7 +8,7 @@ from core.decorators import secure_ajax
 from fiche_famille.views import famille, famille_questionnaire, famille_messages, famille_ajouter, famille_pieces, famille_cotisations, famille_caisse, famille_aides, famille_quotients, famille_divers, \
                             famille_prestations, famille_reglements, famille_consommations, famille_factures, famille_voir_facture, famille_voir_cotisation, famille_abo_factures_email, \
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, \
-                            famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail
+                            famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats
 
 urlpatterns = [
 
@@ -83,6 +83,11 @@ urlpatterns = [
     path('individus/familles/recus_reglements/ajouter/<int:idfamille>/<int:idreglement>', reglement_recu.Ajouter.as_view(), name='famille_recus_ajouter'),
     path('individus/familles/recus_reglements/modifier/<int:idfamille>/<int:pk>', reglement_recu.Modifier.as_view(), name='famille_recus_modifier'),
     path('individus/familles/recus_reglements/supprimer/<int:idfamille>/<int:pk>', reglement_recu.Supprimer.as_view(), name='famille_recus_supprimer'),
+
+    path('individus/familles/mandats/liste/<int:idfamille>', famille_mandats.Liste.as_view(), name='famille_mandats_liste'),
+    path('individus/familles/mandats/ajouter/<int:idfamille>', famille_mandats.Ajouter.as_view(), name='famille_mandats_ajouter'),
+    path('individus/familles/mandats/modifier/<int:idfamille>/<int:pk>', famille_mandats.Modifier.as_view(), name='famille_mandats_modifier'),
+    path('individus/familles/mandats/supprimer/<int:idfamille>/<int:pk>', famille_mandats.Supprimer.as_view(), name='famille_mandats_supprimer'),
 
     path('individus/familles/attestations/liste/<int:idfamille>', famille_attestations.Liste.as_view(), name='famille_attestations_liste'),
     path('individus/familles/attestations/ajouter/<int:idfamille>', famille_attestations.Ajouter.as_view(), name='famille_attestations_ajouter'),

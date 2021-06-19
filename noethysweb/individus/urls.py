@@ -9,7 +9,7 @@ from core.decorators import secure_ajax
 from individus.views import liste_pieces_manquantes, liste_pieces_fournies, liste_regimes_caisses, liste_codes_comptables, liste_inscriptions_attente, suivi_inscriptions, \
                             importation_photos, liste_anniversaires, liste_quotients, etiquettes, etiquettes_familles, etiquettes_individus, \
                             inscriptions_scolaires, scolarites, inscriptions_liste, inscriptions_impression, inscriptions_email, liste_comptes_internet, \
-                            individus_detaches_liste
+                            individus_detaches_liste, liste_mandats
 
 urlpatterns = [
 
@@ -63,6 +63,14 @@ urlpatterns = [
     path('individus/liste_regimes_caisses', liste_regimes_caisses.Liste.as_view(), name='liste_regimes_caisses'),
     path('individus/liste_quotients', liste_quotients.Liste.as_view(), name='liste_quotients'),
     path('individus/liste_codes_comptables', liste_codes_comptables.Liste.as_view(), name='liste_codes_comptables'),
+
+    path('individus/mandats/liste', liste_mandats.Liste.as_view(), name='mandats_liste'),
+    path('individus/mandats/creer', liste_mandats.Creer.as_view(), name='mandats_creer'),
+    path('individus/mandats/ajouter/<int:idfamille>', liste_mandats.Ajouter.as_view(), name='mandats_ajouter'),
+    path('individus/mandats/modifier/<int:pk>', liste_mandats.Modifier.as_view(), name='mandats_modifier'),
+    path('individus/mandats/supprimer/<int:pk>', liste_mandats.Supprimer.as_view(), name='mandats_supprimer'),
+
+
     path('individus/importation_photos', importation_photos.View.as_view(), name='importation_photos'),
     path('individus/liste_comptes_internet', liste_comptes_internet.Liste.as_view(), name='liste_comptes_internet'),
 

@@ -9,7 +9,7 @@ from crispy_forms.layout import Layout, Fieldset, Submit, HTML, ButtonHolder, Hi
 from crispy_forms.bootstrap import Field, StrictButton
 from core.utils.utils_commandes import Commandes
 from core.widgets import DatePickerWidget, DateRangePickerWidget, Select_avec_commandes, SelectionActivitesWidget, CheckDateWidget
-from facturation.widgets import ProchainNumeroWidget
+from facturation.widgets import ChampAutomatiqueWidget
 from core.models import LotFactures, PrefixeFacture, Facture, Famille
 from django_select2.forms import Select2MultipleWidget, Select2Widget
 import datetime, json
@@ -24,7 +24,7 @@ class Formulaire(FormulaireBase, forms.Form):
             "donnees_extra": {}, "url_ajax": "ajax_modifier_lot_factures",
             "textes": {"champ": "Nom du lot", "ajouter": "Saisir un lot de factures", "modifier": "Modifier un lot de factures"}}))
     prefixe = forms.ModelChoiceField(label="Préfixe de numéro", queryset=PrefixeFacture.objects.all(), required=False)
-    prochain_numero = forms.CharField(label="Prochain numéro", required=True, widget=ProchainNumeroWidget({"label_checkbox": "Automatique"}))
+    prochain_numero = forms.CharField(label="Prochain numéro", required=True, widget=ChampAutomatiqueWidget({"label_checkbox": "Automatique", "title": "Attribuez ici le prochain numéro de facture. Les factures suivantes seront incrémentées automatiquement.", "type": "number"}))
     date_emission = forms.DateField(label="Date d'émission", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
     date_echeance = forms.DateField(label="Date d'échéance", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
     choix_categories = [("consommation", "Consommations"), ("cotisation", "Adhésions"), ("location", "Locations"), ("autre", "Autres"), ]

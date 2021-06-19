@@ -20,47 +20,47 @@
             {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
         {% endembed %}
 
-        {# Liste des reçus de la famille #}
-        {% embed 'core/box.html' %}
-            {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}Autres fonctions{% endblock %}
-            {% block box_introduction %}Accédez ici aux autres fonctions{% endblock %}
-
+        {# Autres outils #}
+        {% embed 'core/box.html' with box_introduction=False box_titre=False %}
+            {% block box_theme %}card-outline{% endblock %}
             {% block box_contenu %}
-                 <a class="btn btn-default" href="{% url 'famille_recus_liste' idfamille=idfamille %}">Liste des reçus de règlements</a>
-            {% endblock box_contenu %}
-        {% endembed %}
+                <div class="mt-2">
 
-        {# Envoi des reçus par Email #}
-        {% embed 'core/box.html' %}
-            {% block box_theme %}{% if famille.email_recus %}box-success{% else %}box-danger{% endif %}{% endblock %}
-            {% block box_titre %}Envoi des reçus par Email{% endblock %}
-            {% block box_introduction %}Cliquez sur le bouton Modifier pour activer ou désactiver l'abonnement au service d'envoi des reçus par Email.{% endblock %}
-            {% block box_contenu %}
-                {% if famille.email_recus %}
-                    <span class='text-green'><i class='fa fa-check'></i> L'envoi des reçus par Email est activé.</span>
-                {% else %}
-                    <span class='text-red'><i class='fa fa-close'></i> L'envoi des reçus par Email n'est pas activé.</span>
-                {% endif %}
-                <div class="pull-right">
-                    <a type='button' class='btn btn-default btn-sm' href="{% url 'famille_abo_recus_email' idfamille=idfamille %}"><i class="fa fa-pencil"></i></a>
-                </div>
-            {% endblock box_contenu %}
-        {% endembed %}
+                    {# Liste des reçus #}
+                    <a class="btn btn-app" href="{% url 'famille_recus_liste' idfamille=idfamille %}" title="Liste des reçus de règlements" style="font-size: 12px !important;">
+                        <i class="fa fa-file-text-o"></i>Liste des reçus
+                    </a>
 
-        {# Envoi des avis d'encaissement par Email #}
-        {% embed 'core/box.html' %}
-            {% block box_theme %}{% if famille.email_depots %}box-success{% else %}box-danger{% endif %}{% endblock %}
-            {% block box_titre %}Envoi des avis d'encaissement par Email{% endblock %}
-            {% block box_introduction %}Cliquez sur le bouton Modifier pour activer ou désactiver l'abonnement au service d'envoi des avis d'encaissement par Email.{% endblock %}
-            {% block box_contenu %}
-                {% if famille.email_depots %}
-                    <span class='text-green'><i class='fa fa-check'></i> L'envoi des avis d'encaissement par Email est activé.</span>
-                {% else %}
-                    <span class='text-red'><i class='fa fa-close'></i> L'envoi des avis d'encaissement par Email n'est pas activé.</span>
-                {% endif %}
-                <div class="pull-right">
-                    <a type='button' class='btn btn-default btn-sm' href="{% url 'famille_abo_depots_email' idfamille=idfamille %}"><i class="fa fa-pencil"></i></a>
+                    {# Abonnement à l'envoi des reçus par Email #}
+                    <a class="btn btn-app" href="{% url 'famille_abo_recus_email' idfamille=idfamille %}" title="Cliquez ici pour activer ou désactiver l'abonnement au service d'envoi des reçus par Email" style="font-size: 12px !important;">
+                        {% if famille.email_recus %}
+                            <span class="badge bg-success">Activé</span>
+                        {% else %}
+                            <span class="badge bg-danger">Désactivé</span>
+                        {% endif %}
+                        <i class="fa fa-envelope"></i>Reçus par Email
+                    </a>
+
+                    {# Abonnement à l'envoi des avis de dépôt par Email #}
+                    <a class="btn btn-app" href="{% url 'famille_abo_depots_email' idfamille=idfamille %}" title="Cliquez ici pour activer ou désactiver l'abonnement au service d'envoi des avis d'encaissement par Email" style="font-size: 12px !important;">
+                        {% if famille.email_depots %}
+                            <span class="badge bg-success">Activé</span>
+                        {% else %}
+                            <span class="badge bg-danger">Désactivé</span>
+                        {% endif %}
+                        <i class="fa fa-envelope"></i>Avis de dépôt par Email
+                    </a>
+
+                    {# Prélèvements #}
+                    <a class="btn btn-app" href="{% url 'famille_mandats_liste' idfamille=idfamille %}" title="Cliquez ici pour accéder aux paramètres de prélèvement de la famille" style="font-size: 12px !important;">
+                        {% if nbre_mandats_actifs %}
+                            <span class="badge bg-success">Activé</span>
+                        {% else %}
+                            <span class="badge bg-danger">Désactivé</span>
+                        {% endif %}
+                        <i class="fa fa-euro"></i>Prélèvement
+                    </a>
+
                 </div>
             {% endblock box_contenu %}
         {% endembed %}
@@ -68,4 +68,3 @@
 
     </div>
 {% endblock %}
-

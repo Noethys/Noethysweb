@@ -1442,7 +1442,7 @@ class Famille(models.Model):
     internet_mdp = models.CharField(verbose_name="Mot de passe", max_length=200, blank=True, null=True)
     internet_categorie = models.ForeignKey(CategorieCompteInternet, verbose_name="Catégorie", related_name="internet_categorie", on_delete=models.PROTECT, blank=True, null=True)
     memo = models.TextField(verbose_name="Mémo", blank=True, null=True)
-    # prelevement_activation = models.IntegerField(blank=True, null=True)
+    # prelevement_activation = models.BooleanField(verbose_name="Activation du prélèvement", default=False)
     # prelevement_etab = models.CharField(blank=True, null=True)
     # prelevement_guichet = models.CharField(blank=True, null=True)
     # prelevement_numero = models.CharField(blank=True, null=True)
@@ -2186,7 +2186,7 @@ class Reglement(models.Model):
     date = models.DateField(verbose_name="Date")
     mode = models.ForeignKey(ModeReglement, verbose_name="Mode de règlement", on_delete=models.PROTECT)
     emetteur = models.ForeignKey(Emetteur, verbose_name="Emetteur", blank=True, null=True, on_delete=models.PROTECT)
-    numero_piece = models.CharField(verbose_name="Numéro de pièce", max_length=200, blank=True, null=True)
+    numero_piece = models.CharField(verbose_name="N° pièce", max_length=200, blank=True, null=True)
     montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0)
     payeur = models.ForeignKey(Payeur, verbose_name="Payeur", on_delete=models.PROTECT)
     observations = models.TextField(verbose_name="Observations", blank=True, null=True)
@@ -2661,7 +2661,7 @@ class PortailMessage(models.Model):
         verbose_name_plural = "messages"
 
     def __str__(self):
-        return "<Message ID%d>" % self.idmessage if self.idmessage else "Nouveau message"
+        return "Message ID%d" % self.idmessage if self.idmessage else "Nouveau message"
 
 
 class ContactUrgence(models.Model):
@@ -2721,3 +2721,34 @@ class Assurance(models.Model):
 
     def __str__(self):
         return "Assurance %s à partir du %s" % (self.assureur, utils_dates.ConvertDateToFR(self.date_debut))
+
+
+class Mandat(models.Model):
+    idmandat = models.AutoField(verbose_name="ID", db_column='IDmandat', primary_key=True)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
+    rum = models.CharField(verbose_name="RUM", max_length=100, help_text="Référence Unique du Mandat.")
+    choix_type = [("RECURRENT", "Récurrent"), ("PONCTUEL", "Ponctuel")]
+    type = models.CharField(verbose_name="Type", max_length=100, choices=choix_type, default="RECURRENT", help_text="Le mandat est généralement de type récurrent.")
+    date = models.DateField(verbose_name="Date", help_text="Date de signature du mandat.")
+    individu = models.ForeignKey(Individu, verbose_name="Titulaire", on_delete=models.PROTECT, blank=True, null=True, help_text="Titulaire du compte bancaire. Sélectionnez 'Autre individu' si le titulaire n'est pas dans la liste proposée.")
+    individu_nom = models.CharField(verbose_name="Nom", max_length=200, blank=True, null=True)
+    individu_rue = models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True)
+    individu_cp = models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True)
+    individu_ville = models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True)
+    iban = models.CharField(verbose_name="IBAN", max_length=27, help_text="La cohérence de l'IBAN est vérifié lors de l'enregistrement du mandat.")
+    bic = models.CharField(verbose_name="BIC", max_length=11, help_text="La cohérence du BIC est vérifié lors de l'enregistrement du mandat.")
+    memo = models.TextField(verbose_name="Observations", blank=True, null=True)
+    choix_sequences = [
+        ("AUTO", "Automatique"), ("OOFF", "Prélèvement ponctuel (OOFF)"), ("FRST", "Premier prélèvement d'une série (FRST)"),
+        ("RCUR", "Prélèvement suivant d'une série (RCUR)"), ("FNAL", "Dernier prélèvement d'une série (FNAL)")
+    ]
+    sequence = models.CharField(verbose_name="Séquence", max_length=100, choices=choix_sequences, default="AUTO", help_text="La séquence est généralement définie sur Automatique.")
+    actif = models.BooleanField(verbose_name="Mandat actif", default=True, help_text="Décochez la case pour désactiver ce mandat.")
+
+    class Meta:
+        db_table = 'mandats'
+        verbose_name = "mandat"
+        verbose_name_plural = "mandats"
+
+    def __str__(self):
+        return "Mandat n°%s" % self.rum if self.idmandat else "<nouveau>"

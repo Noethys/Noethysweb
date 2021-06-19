@@ -6,7 +6,7 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Reglement, Payeur, Emetteur, ModeReglement, Prestation, Ventilation
+from core.models import Famille, Reglement, Payeur, Emetteur, ModeReglement, Prestation, Ventilation, Mandat
 from fiche_famille.forms.famille_reglements import Formulaire
 from fiche_famille.views.famille import Onglet
 from django.http import JsonResponse, HttpResponseRedirect
@@ -113,6 +113,8 @@ class Page(Onglet):
         ]
         # Ajout l'idfamille à l'URL de suppression groupée
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={'idfamille': self.kwargs.get('idfamille', None), "listepk": "xxx"})
+        # Vérifie si le prélèvement est actif
+        context['nbre_mandats_actifs'] = Mandat.objects.filter(famille_id=self.kwargs['idfamille'], actif=True).count()
         return context
 
     def get_form_kwargs(self, **kwargs):
@@ -150,7 +152,7 @@ class Liste(Page, crud.Liste):
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         mode = columns.TextColumn("Mode", sources=['mode__label'])
-        emetteur = columns.TextColumn("Emetteur", sources=['emetteur__nom'])
+        # emetteur = columns.TextColumn("Emetteur", sources=['emetteur__nom'])
         payeur = columns.TextColumn("Payeur", sources=['payeur__nom'])
         depot = columns.TextColumn("Dépôt", sources=['depot__date'], processor='Get_date_depot')
         montant = columns.TextColumn("Montant", sources=['montant'], processor='Formate_montant')
@@ -158,8 +160,7 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idreglement', 'date', 'mode', 'emetteur', 'numero_piece', 'payeur', 'montant', 'ventile', 'depot']
-            #hidden_columns = = ["idreglement"]
+            columns = ['check', 'idreglement', 'date', 'mode', 'numero_piece', 'payeur', 'montant', 'ventile', 'depot']
             processors = {
                 'date': helpers.format_date('%d/%m/%Y'),
                 'depot': helpers.format_date('%d/%m/%Y'),

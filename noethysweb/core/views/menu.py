@@ -172,6 +172,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_infos_individus.Add(code="liste_regimes_caisses", titre="Liste des régimes et des caisses", icone="file-text-o")
     menu_infos_individus.Add(code="liste_quotients", titre="Liste des quotients familiaux/revenus", icone="file-text-o")
     menu_infos_individus.Add(code="liste_codes_comptables", titre="Liste des codes comptables", icone="file-text-o")
+    menu_infos_individus.Add(code="mandats_liste", titre="Liste des mandats SEPA", icone="file-text-o")
     menu_infos_individus.Add(code="liste_comptes_internet", titre="Liste des comptes internet", icone="file-text-o")
 
     # Photos
