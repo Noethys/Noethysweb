@@ -198,8 +198,8 @@ class Telephone(Widget):
 class Ville(Widget):
     template_name = 'core/widgets/ville.html'
 
-    class Media:
-        js = ("lib/jqueryui/jquery-ui.min.js",)
+    # class Media:
+    #     js = ("lib/jqueryui/jquery-ui.min.js",)
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())
@@ -218,8 +218,8 @@ class Ville(Widget):
 class CodePostal(Widget):
     template_name = 'core/widgets/codepostal.html'
 
-    class Media:
-        js = ("lib/jqueryui/jquery-ui.min.js",)
+    # class Media:
+    #     js = ("lib/jqueryui/jquery-ui.min.js",)
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())

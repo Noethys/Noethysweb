@@ -10,7 +10,6 @@ from django.contrib.auth.models import Permission, Group
 from django import forms
 
 
-
 # --------------------------- Groupes d'utilisateurs ----------------------------
 
 class GroupAdminForm(forms.ModelForm):

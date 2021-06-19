@@ -169,13 +169,16 @@ class BaseView():
                 detail = getattr(self, "detail_historique", str(instance)).format(instance)
             else:
                 details = []
-                for nom_champ in form.changed_data:
-                    try:
-                        label_champ = form.instance._meta.get_field(nom_champ).verbose_name
-                        valeur_champ = getattr(form.instance, nom_champ)
-                        details.append("%s=%s" % (label_champ, valeur_champ))
-                    except:
-                        pass
+                if form:
+                    for nom_champ in form.changed_data:
+                        try:
+                            label_champ = form.instance._meta.get_field(nom_champ).verbose_name
+                            valeur_champ = getattr(form.instance, nom_champ)
+                            details.append("%s=%s" % (label_champ, valeur_champ))
+                        except:
+                            pass
+                else:
+                    details.append(str(instance))
                 detail = " ".join(details)
 
         utilisateur = self.request.user
