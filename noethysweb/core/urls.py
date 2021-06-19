@@ -28,7 +28,7 @@ urlpatterns = [
     path('core/supprimer_filtre_liste/<int:idfiltre>', filtre_liste.Supprimer_filtre, name='ajax_supprimer_filtre_liste'),
     path('core/memoriser_recherche', secure_ajax(recherche.Memoriser_recherche), name='ajax_memoriser_recherche'),
     path('core/memorise_option', secure_ajax(base.Memorise_option), name='ajax_memorise_option'),
-    path('core/memorise_structure', secure_ajax(base.Memorise_structure), name='ajax_memorise_structure'),
+    # path('core/memorise_structure', secure_ajax(base.Memorise_structure), name='ajax_memorise_structure'),
     path('core/modifier_profil_configuration', secure_ajax(profil_configuration.Modifier_profil_configuration), name='ajax_modifier_profil_configuration'),
 
 

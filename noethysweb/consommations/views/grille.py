@@ -258,7 +258,7 @@ def Save_grille(request=None, donnees={}):
 
     # ---------------------------------- CONSOMMATIONS -------------------------------------
 
-    dict_unites = dict_unites = {unite.pk: unite for unite in Unite.objects.filter(activite_id=donnees["activite"])}
+    dict_unites = {unite.pk: unite for unite in Unite.objects.filter(activite_id=donnees["activite"])}
 
     # Analyse et préparation des consommations
     liste_ajouts = []

@@ -23,12 +23,12 @@ def Memorise_option(request):
     return JsonResponse({"success": True})
 
 
-def Memorise_structure(request):
-    """ Mémorise dans la DB la structure actuelle de l'utilisateur """
-    idstructure = request.POST.get("idstructure")
-    request.user.structure_actuelle_id = idstructure
-    request.user.save()
-    return JsonResponse({"success": True})
+# def Memorise_structure(request):
+#     """ Mémorise dans la DB la structure actuelle de l'utilisateur """
+#     idstructure = request.POST.get("idstructure")
+#     request.user.structure_actuelle_id = idstructure
+#     request.user.save()
+#     return JsonResponse({"success": True})
 
 
 
