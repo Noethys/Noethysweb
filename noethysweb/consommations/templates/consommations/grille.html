@@ -58,13 +58,8 @@
 
         </div>
 
-        {% if data.selection_activite %}
-            {% include "consommations/grille_tableau.html" %}
-        {% else %}
-            <div class="text-center" style="padding: 30px;">
-                Aucune activité sélectionnée.
-            </div>
-        {% endif %}
+        {% include "consommations/grille_tableau.html" %}
+
     </div>
 
     {# Importation des modals #}
