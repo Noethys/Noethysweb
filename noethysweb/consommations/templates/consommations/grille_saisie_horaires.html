@@ -22,14 +22,18 @@
                             <label for="saisie_heure_debut" class="col-form-label">Début</label>
                             <div class="input-group date choix_horaires">
                                 <input id="saisie_heure_debut" type="time" class="form-control form-control-lg"/>
-                                <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                                <div class="input-group-append">
+                                    <button id="bouton_heure_debut" class="btn btn-primary" type="button" title="Insérer l'heure actuelle"><i class="fa fa-bell"></i></button>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <label for="saisie_heure_fin" class="col-form-label">Fin</label>
                             <div class="input-group date choix_horaires">
                                 <input id="saisie_heure_fin" type="time" class="form-control form-control-lg"/>
-                                <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                                <div class="input-group-append">
+                                    <button id="bouton_heure_fin" class="btn btn-primary" type="button" title="Insérer l'heure actuelle"><i class="fa fa-bell"></i></button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -61,7 +65,17 @@
 
             // Vérifie si des heures sont fixes
             $("#saisie_heure_debut").prop('disabled', dict_unites[case_tableau.unite].heure_debut_fixe);
+            $("#bouton_heure_debut").prop('disabled', dict_unites[case_tableau.unite].heure_debut_fixe);
             $("#saisie_heure_fin").prop('disabled', dict_unites[case_tableau.unite].heure_fin_fixe);
+            $("#bouton_heure_fin").prop('disabled', dict_unites[case_tableau.unite].heure_fin_fixe);
+        });
+
+        $("#bouton_heure_debut").on('click', function(e) {
+            $('#saisie_heure_debut').val(moment().format('HH:mm'));
+        });
+
+        $("#bouton_heure_fin").on('click', function(e) {
+            $('#saisie_heure_fin').val(moment().format('HH:mm'));
         });
 
         $('#modal_saisir_horaires').on('shown.bs.modal', function () {
