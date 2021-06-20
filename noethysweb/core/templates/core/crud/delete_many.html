@@ -6,7 +6,12 @@
 
         <div class="alert alert-danger alert-dismissible">
             <h5><i class="icon fa fa-ban"></i> Suppression impossible</h5>
-            La suppression de ces {{ liste_objets|length }} {{ model|verbose_name_plural }} est impossible car ces éléments sont rattachés aux données suivantes : {{ erreurs_protection }}.
+            <div class="p-1">La suppression de ces {{ liste_objets|length }} {{ model|verbose_name_plural }} est impossible :</div>
+            <ul>
+                {% for erreur in erreurs_protection %}
+                    <li class="p-1">{{ erreur }}</li>
+                {% endfor %}
+            </ul>
         </div>
         <a class="btn btn-default float-right" href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{{ view.get_success_url }}{% endif %}"><i class='fa fa-reply margin-r-5'></i>Revenir à la page précédente</a>
 

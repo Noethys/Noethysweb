@@ -237,7 +237,10 @@ $(document).ready(function(){
         $.ajax({
             type: "POST",
             url: "{% url 'ajax_definir_titulaire' %}",
-            data: {'idrattachement': idrattachement},
+            data: {
+                'idrattachement': idrattachement,
+                'csrfmiddlewaretoken': "{{ csrf_token }}"
+            },
             success: function (data) {
                 window.location.href = "{% url 'famille_resume' idfamille=idfamille %}";
             },
@@ -252,7 +255,11 @@ $(document).ready(function(){
         $.ajax({
             type: "POST",
             url: "{% url 'ajax_changer_categorie' %}",
-            data: {'idrattachement': idrattachement, 'categorie': categorie},
+            data: {
+                'idrattachement': idrattachement,
+                'categorie': categorie,
+                'csrfmiddlewaretoken': "{{ csrf_token }}"
+            },
             success: function (data) {
                 window.location.href = "{% url 'famille_resume' idfamille=idfamille %}";
             },

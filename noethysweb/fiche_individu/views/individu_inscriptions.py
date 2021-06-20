@@ -244,3 +244,5 @@ class Supprimer(Page, crud.Supprimer):
         if nbre_conso_forfait == len(liste_conso):
             for conso in liste_conso:
                 conso.delete()
+
+        return True

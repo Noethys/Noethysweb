@@ -197,11 +197,33 @@ class Supprimer_individu(Page, crud.Supprimer):
         context = super(Page, self).get_context_data(**kwargs)
         context['box_titre'] = "Supprimer un individu"
         context['onglet_actif'] = "resume"
+        context['erreurs_protection'] += self.Recherche_protections()
         return context
+
+    def Recherche_protections(self):
+        erreurs_protection = []
+
+        famille = self.get_famille()
+        individu = self.get_object()
+
+        # Recherche si l'individu à supprimer est le dernier titulaire de la famille
+        rattachements = Rattachement.objects.filter(famille=famille, titulaire=True).exclude(individu=individu)
+        if not rattachements:
+            # S'il reste un autre membre, on empêche la suppression du dernier titulaire
+            if Rattachement.objects.filter(famille=famille).exclude(individu=individu).exists():
+                erreurs_protection.append("Il est impossible de %s le dernier titulaire s'il reste au moins un autre membre dans la famille." % self.mode)
+
+            # Si c'est le dernier membre, on essaye de supprimer la fiche famille
+            collector = NestedObjects(using='default')
+            collector.collect([famille])
+            if collector.protected:
+                erreurs_protection.append("Il est impossible de supprimer la fiche famille car elle est associée aux données suivantes : %s." % crud.Formate_liste_objets(objets=collector.protected))
+
+        return erreurs_protection
 
     def delete(self, request, *args, **kwargs):
         """ Empêche la suppression du dernier individu si la famille ne peut être supprimée """
-        famille = Famille.objects.get(pk=self.Get_idfamille())
+        famille = self.get_famille()
         individu = self.get_object()
 
         # Supprime la famille si besoin
@@ -211,7 +233,7 @@ class Supprimer_individu(Page, crud.Supprimer):
 
         # Suppression de l'individu
         reponse = super(Supprimer_individu, self).delete(request, *args, **kwargs)
-
+        
         # MAJ des infos de la famille
         try:
             famille.Maj_infos()
@@ -254,13 +276,20 @@ class Supprimer_individu(Page, crud.Supprimer):
         return None
 
     def get_object(self):
-        return Individu.objects.get(pk=self.kwargs['idindividu'])
+        if not hasattr(self, "objet"):
+            self.objet = Individu.objects.get(pk=self.kwargs['idindividu'])
+        return self.objet
+
+    def get_famille(self):
+        if not hasattr(self, "famille"):
+            self.famille = Famille.objects.get(pk=self.Get_idfamille())
+        return self.famille
 
     def get_success_url(self):
         """ Renvoie vers la fiche famille après la suppression """
         try:
-            famille = Famille.objects.get(pk=self.Get_idfamille())
-            famille.Maj_infos()
+            self.famille = self.get_famille()
+            self.famille.Maj_infos()
             return reverse_lazy("famille_resume", kwargs={'idfamille': self.Get_idfamille()})
         except:
             # Renvoie vers la liste des familles si la fiche famille a été supprimée
@@ -275,29 +304,13 @@ class Detacher_individu(Supprimer_individu):
 
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """
-        context = super(Page, self).get_context_data(**kwargs)
+        context = super(Detacher_individu, self).get_context_data(**kwargs)
         context['box_titre'] = "Détacher un individu"
-        context['onglet_actif'] = "resume"
-        context['erreurs_protection'] = crud.Formate_liste_objets(objets=self.Recherche_protections())
         return context
-
-    def Recherche_protections(self):
-        idfamille = self.Get_idfamille()
-        individu = self.get_object()
-
-        # Recherche si des protections existent
-        collector = NestedObjects(using='default')
-        collector.collect([individu])
-        liste_protections = []
-        for objet in collector.protected:
-            if getattr(objet, "famille_id", None) == idfamille:
-                liste_protections.append(objet)
-
-        return liste_protections
 
     def delete(self, request, *args, **kwargs):
         """ Supprime le rattachement de l'individu """
-        famille = Famille.objects.get(pk=self.Get_idfamille())
+        famille = self.get_famille()
         individu = self.get_object()
 
         # Supprime la famille si besoin
@@ -309,6 +322,6 @@ class Detacher_individu(Supprimer_individu):
         rattachement = Rattachement.objects.filter(famille=famille, individu=individu).first()
         if rattachement:
             rattachement.delete()
-        messages.add_message(self.request, messages.SUCCESS, 'Détachement effectué avec succès')
+        messages.add_message(self.request, messages.SUCCESS, "Détachement effectué avec succès")
         utils_historique.Ajouter(titre="Détachement d'un individu", detail="Détachement de %s" % individu.Get_nom(), utilisateur=self.request.user, famille=famille.pk)
         return HttpResponseRedirect(self.get_success_url())

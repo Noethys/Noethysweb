@@ -268,12 +268,13 @@ class Supprimer(BaseView, DeleteView):
     def get_context_data(self, **kwargs):
         context = super(Supprimer, self).get_context_data(**kwargs)
         context['box_introduction'] = None
+        context['erreurs_protection'] = []
 
         # Recherche si des protections existent
         collector = NestedObjects(using='default')
         collector.collect([self.get_object()])
         if collector.protected:
-            context['erreurs_protection'] = Formate_liste_objets(objets=collector.protected)
+            context['erreurs_protection'].append("Il est rattaché aux données suivantes : %s." % Formate_liste_objets(objets=collector.protected))
 
         return context
 
@@ -283,7 +284,8 @@ class Supprimer(BaseView, DeleteView):
 
         # Fonction bonus
         if hasattr(self, "Avant_suppression"):
-            self.Avant_suppression(objet=instance)
+            if not self.Avant_suppression(objet=instance):
+                return HttpResponseRedirect(self.get_success_url(), status=303)
 
         # Suppression
         try:
@@ -338,12 +340,13 @@ class Supprimer_plusieurs(BaseView, CustomView, TemplateView):
         context['selection_multiple'] = True
         context['liste_objets'] = self.get_objets()
         context['model'] = self.model
+        context['erreurs_protection'] = []
 
         # Recherche si des protections existent
         collector = NestedObjects(using='default')
         collector.collect(self.get_objets())
         if collector.protected:
-            context['erreurs_protection'] = Formate_liste_objets(objets=collector.protected)
+            context['erreurs_protection'].append("Ils sont rattachés aux données suivantes : %s." % Formate_liste_objets(objets=collector.protected))
 
         return context
 
