@@ -6,20 +6,20 @@
 from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
+from crispy_forms.layout import Layout, Hidden, Fieldset
+from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
-from core.models import Message, Individu
+from core.models import Note, Individu
 from core.widgets import DatePickerWidget
+import datetime
 
 
 class Formulaire(FormulaireBase, ModelForm):
     date_parution = forms.DateField(label="Date de parution", required=False, widget=DatePickerWidget())
 
     class Meta:
-        model = Message
+        model = Note
         fields = "__all__"
         widgets = {
             'texte': forms.Textarea(attrs={'rows': 4}),
@@ -30,29 +30,26 @@ class Formulaire(FormulaireBase, ModelForm):
 
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_id = 'individu_message_form'
+        self.helper.form_id = 'individu_notes_form'
         self.helper.form_method = 'post'
 
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
-        # Définit l'activité associée
-        if self.instance.idmessage== None:
-            individu = Individu.objects.get(pk=idindividu)
-        else:
-            individu = self.instance.individu
-
         # Focus
         self.fields['texte'].widget.attrs.update({'autofocus': 'autofocus'})
+
+        # Date de parution
+        if not self.instance.pk:
+            self.fields['date_parution'].initial = datetime.date.today()
 
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'individu_resume' idfamille=idfamille idindividu=idindividu %}"),
-            Hidden('individu', value=individu.idindividu),
-            Hidden('nom', value=individu),
+            Hidden('individu', value=idindividu),
             Hidden('type', value="INSTANTANE"),
-            Fieldset("Message",
+            Fieldset("Note",
                 Field("categorie"),
                 Field("texte"),
             ),
@@ -67,4 +64,3 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("rappel"),
             ),
         )
-

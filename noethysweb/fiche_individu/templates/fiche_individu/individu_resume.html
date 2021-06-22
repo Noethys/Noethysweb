@@ -50,7 +50,7 @@
         {% endembed %}
 {% endcomment %}
 
-        {# Messages #}
+        {# Notes #}
         <style>
             .todo-list > li .text {
                 display: inline;
@@ -60,29 +60,14 @@
         </style>
         {% embed 'core/box.html' %}
             {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}Messages{% endblock %}
+            {% block box_titre %}Notes{% endblock %}
             {% block box_outils %}
-                <a type="button" class="btn btn-success btn-xs" title="Ajouter un message" style="margin-right: 10px;" href="{% url 'individu_messages_ajouter' idfamille=idfamille idindividu=idindividu %}"><i class="fa fa-plus"></i> Ajouter</a>
+                <a type="button" class="btn btn-success btn-xs" title="Ajouter une note" style="margin-right: 10px;" href="{% url 'individu_notes_ajouter' idfamille=idfamille idindividu=idindividu %}"><i class="fa fa-plus"></i> Ajouter</a>
             {% endblock %}
+            {% block card_body_classe %}p-0{% endblock %}
             {% block box_contenu %}
-                <ul class="todo-list">
-                    {% for message in messages_individu %}
-                    <li>
-                        <div class="tools pull-right">
-                            <a type="button" class="btn btn-default btn-sm" title="Modifier" href="{% url 'individu_messages_modifier' idfamille=idfamille idindividu=message.individu_id pk=message.pk %}"><i class="fa fa-pencil"></i></a>
-                            <a type="button" class="btn btn-default btn-sm" title="Supprimer" href="{% url 'individu_messages_supprimer' idfamille=idfamille idindividu=message.individu_id pk=message.pk %}"><i class="fa fa-trash-o"></i></a>
-                        </div>
-                        <span class="text">
-                            {{ message.date_saisie|date:"d/m/Y" }} : {{ message.texte }}
-                        </span>
-                        {% if message.priorite == "HAUTE" %}
-                            <small class="badge badge-danger"><i class="fa fa-exclamation-triangle"></i> Important</small>
-                        {% endif %}
-                    </li>
-                    {% empty %}
-                        Aucun message
-                    {% endfor %}
-                </ul>
+                    {% embed "outils/notes.html" with mode_notes='individu' %}
+                    {% endembed %}
             {% endblock %}
         {% endembed %}
 

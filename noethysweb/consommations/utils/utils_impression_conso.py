@@ -14,7 +14,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
 from reportlab.graphics.barcode import code39
-from core.models import Activite, Ouverture, Unite, UniteRemplissage, Consommation, MemoJournee, Message, ProblemeSante, Individu, Inscription, Scolarite, Classe, Ecole, Evenement
+from core.models import Activite, Ouverture, Unite, UniteRemplissage, Consommation, MemoJournee, Note, ProblemeSante, Individu, Inscription, Scolarite, Classe, Ecole, Evenement
 import json, operator, datetime
 from django.db.models import Q
 from django.conf import settings
@@ -223,18 +223,18 @@ class Impression(utils_impression.Impression):
         if self.dict_donnees["afficher_photos"] == "moyenne": tailleImageFinal = 32
         if self.dict_donnees["afficher_photos"] == "grande": tailleImageFinal = 64
 
-        # Récupération des messages
-        messages = Message.objects.filter(afficher_liste=True)
+        # Récupération des notes
+        notes = Note.objects.filter(afficher_liste=True)
 
         dictMessagesFamilles = {}
         dictMessagesIndividus = {}
-        for message in messages:
-            if message.individu:
-                dictMessagesIndividus.setdefault(message.individu_id, [])
-                dictMessagesIndividus[message.individu_id].append(message)
-            if message.famille:
-                dictMessagesFamilles.setdefault(message.famille_id, [])
-                dictMessagesFamilles[message.famille_id].append(message)
+        for note in notes:
+            if note.individu:
+                dictMessagesIndividus.setdefault(note.individu_id, [])
+                dictMessagesIndividus[note.individu_id].append(note)
+            if note.famille:
+                dictMessagesFamilles.setdefault(note.famille_id, [])
+                dictMessagesFamilles[note.famille_id].append(note)
 
         # Récupération de la liste des cotisations manquantes
         if self.dict_donnees["afficher_cotisations_manquantes"]:
@@ -818,8 +818,8 @@ class Impression(utils_impression.Impression):
 
                                     # Messages individuels
                                     if inscription.individu_id in dictMessagesIndividus:
-                                        for message in dictMessagesIndividus[inscription.individu_id]:
-                                            listeInfos.append(ParagraphAndImage(Paragraph(message.texte, paraStyle), Image(settings.STATIC_ROOT + "/images/mail.png", width=8, height=8), xpad=1, ypad=0, side="left"))
+                                        for note in dictMessagesIndividus[inscription.individu_id]:
+                                            listeInfos.append(ParagraphAndImage(Paragraph(note.texte, paraStyle), Image(settings.STATIC_ROOT + "/images/mail.png", width=8, height=8), xpad=1, ypad=0, side="left"))
 
                                     # Récupère la liste des familles rattachées à cet individu
                                     listeIDfamille = []
@@ -832,8 +832,8 @@ class Impression(utils_impression.Impression):
                                     # Messages familiaux
                                     for IDfamille in listeIDfamille:
                                         if IDfamille in dictMessagesFamilles:
-                                            for message in dictMessagesFamilles[IDfamille]:
-                                                listeInfos.append(ParagraphAndImage(Paragraph(message.texte, paraStyle), Image(settings.STATIC_ROOT + "/images/mail.png", width=8, height=8), xpad=1, ypad=0, side="left"))
+                                            for note in dictMessagesFamilles[IDfamille]:
+                                                listeInfos.append(ParagraphAndImage(Paragraph(note.texte, paraStyle), Image(settings.STATIC_ROOT + "/images/mail.png", width=8, height=8), xpad=1, ypad=0, side="left"))
 
                                     # Cotisations manquantes
                                     if self.dict_donnees["afficher_cotisations_manquantes"]:

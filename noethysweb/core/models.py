@@ -718,7 +718,7 @@ class UniteCotisation(models.Model):
                 objet.save()
 
 
-class MessageCategorie(models.Model):
+class NoteCategorie(models.Model):
     idcategorie = models.AutoField(verbose_name="ID", db_column='IDcategorie', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=200)
     choix_priorite = [("NORMALE", "Normale"), ("HAUTE", "Haute")]
@@ -727,9 +727,9 @@ class MessageCategorie(models.Model):
     afficher_liste = models.BooleanField(verbose_name="Afficher sur la liste des consommations", default=False)
 
     class Meta:
-        db_table = 'messages_categories'
-        verbose_name = "catégorie de message"
-        verbose_name_plural = "catégories de message"
+        db_table = 'notes_categories'
+        verbose_name = "catégorie de note"
+        verbose_name_plural = "catégories de note"
 
     def __str__(self):
         return self.nom
@@ -1623,14 +1623,13 @@ class Vaccin(models.Model):
     def __str__(self):
         return "Vaccin du %s" % self.date.strftime('%d/%m/%Y')
 
-class Message(models.Model):
-    idmessage = models.AutoField(verbose_name="ID", db_column='IDmessage', primary_key=True)
+class Note(models.Model):
+    idnote = models.AutoField(verbose_name="ID", db_column='IDnote', primary_key=True)
     type_choix = [("INSTANTANE", "Instantané"), ("PROGRAMME", "Programmé")]
     type = models.CharField(verbose_name="Priorité", max_length=100, choices=type_choix, default="INSTANTANE")
-    categorie = models.ForeignKey(MessageCategorie, verbose_name="Catégorie", on_delete=models.PROTECT, blank=True, null=True)
+    categorie = models.ForeignKey(NoteCategorie, verbose_name="Catégorie", on_delete=models.PROTECT, blank=True, null=True, help_text="Vous pouvez sélectionner une catégorie de note (optionnel).")
     date_saisie = models.DateTimeField(verbose_name="Date de saisie", auto_now_add=True)
-    # idutilisateur = models.IntegerField(db_column='IDutilisateur', blank=True, null=True)  # Field name made lowercase.
-    date_parution = models.DateField(verbose_name="Date de parution", blank=True, null=True)
+    date_parution = models.DateField(verbose_name="Date de parution", help_text="Cette option permet de différer la parution de la note. Par défaut la date du jour.")
     priorite_choix = [("NORMALE", "Normale"), ("HAUTE", "Haute")]
     priorite = models.CharField(verbose_name="Priorité", max_length=100, choices=priorite_choix, default="NORMALE")
     afficher_accueil = models.BooleanField(verbose_name="Afficher sur la page d'accueil", default=False)
@@ -1638,19 +1637,18 @@ class Message(models.Model):
     rappel = models.BooleanField(verbose_name="Rappel à l'ouverture de Noethys", default=False)
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE, blank=True, null=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE, blank=True, null=True)
-    nom = models.CharField(verbose_name="Nom", max_length=250, blank=True, null=True)
-    texte = models.TextField(verbose_name="Texte")
+    texte = models.TextField(verbose_name="Texte", help_text="Saisissez ici le texte de la note.")
     afficher_facture = models.BooleanField(verbose_name="Afficher sur la facture", default=False)
     rappel_famille = models.BooleanField(verbose_name="Rappel à l'ouverture de la fiche famille", default=False)
     afficher_commande = models.BooleanField(verbose_name="Afficher sur la commande des repas", default=False)
 
     class Meta:
-        db_table = 'messages'
-        verbose_name = "message"
-        verbose_name_plural = "messages"
+        db_table = 'notes'
+        verbose_name = "note"
+        verbose_name_plural = "notes"
 
     def __str__(self):
-        return "Message du %s" % self.date_saisie.strftime('%d/%m/%Y')
+        return "Note du %s" % self.date_saisie.strftime('%d/%m/%Y')
 
 
 

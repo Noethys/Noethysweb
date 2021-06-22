@@ -6,7 +6,7 @@
 from django.urls import include, path
 from core.decorators import secure_ajax
 from fiche_individu.views import individu, individu_identite, individu_coords, individu_questionnaire, individu_scolarite, individu_inscriptions, \
-                                individu_medical, individu_messages, individu_liens, individu_appliquer_forfait_date, individu_contacts, \
+                                individu_medical, individu_notes, individu_liens, individu_appliquer_forfait_date, individu_contacts, \
                                 individu_regimes_alimentaires, individu_assurances
 
 urlpatterns = [
@@ -64,9 +64,9 @@ urlpatterns = [
     path('individus/individus/assurances/supprimer/<int:idfamille>/<int:idindividu>/<int:pk>', individu_assurances.Supprimer.as_view(), name='individu_assurances_supprimer'),
 
 
-    path('individus/individus/messages/ajouter/<int:idfamille>/<int:idindividu>', individu_messages.Ajouter.as_view(), name='individu_messages_ajouter'),
-    path('individus/individus/messages/modifier/<int:idfamille>/<int:idindividu>/<int:pk>', individu_messages.Modifier.as_view(), name='individu_messages_modifier'),
-    path('individus/individus/messages/supprimer/<int:idfamille>/<int:idindividu>/<int:pk>', individu_messages.Supprimer.as_view(), name='individu_messages_supprimer'),
+    path('individus/individus/notes/ajouter/<int:idfamille>/<int:idindividu>', individu_notes.Ajouter.as_view(), name='individu_notes_ajouter'),
+    path('individus/individus/notes/modifier/<int:idfamille>/<int:idindividu>/<int:pk>', individu_notes.Modifier.as_view(), name='individu_notes_modifier'),
+    path('individus/individus/notes/supprimer/<int:idfamille>/<int:idindividu>/<int:pk>', individu_notes.Supprimer.as_view(), name='individu_notes_supprimer'),
 
 
 

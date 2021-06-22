@@ -64,10 +64,10 @@
 
             <div class="col-md-4">
                 <div class="info-box">
-                    <span class="info-box-icon bg-{% if messages_famille|length %}orange{% else %}lightblue{% endif %}"><i class="fa fa-envelope-o"></i></span>
+                    <span class="info-box-icon bg-{% if notes|length %}orange{% else %}lightblue{% endif %}"><i class="fa fa-envelope-o"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Messages</span>
-                        <span class="info-box-number">{{ messages_famille|length }}</span>
+                        <span class="info-box-number">{{ notes|length }}</span>
                     </div>
                 </div>
             </div>
@@ -88,39 +88,17 @@
             {% endembed %}
         {% endif %}
 
-        {# Messages #}
-        <style>
-            .todo-list > li .text {
-                display: inline;
-                margin-left: 0px;
-                font-weight: 400;
-            }
-        </style>
+        {# Notes #}
         {% embed 'core/box.html' %}
             {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}Messages{% endblock %}
+            {% block box_titre %}Notes{% endblock %}
             {% block box_outils %}
-                <a type="button" class="btn btn-success btn-xs" style="margin-right: 10px;" title="Ajouter un message" href="{% url 'famille_messages_ajouter' idfamille=famille.idfamille %}"><i class="fa fa-plus"></i> Ajouter</a>
+                <a type="button" class="btn btn-success btn-xs" style="margin-right: 10px;" title="Ajouter une note" href="{% url 'famille_notes_ajouter' idfamille=famille.idfamille %}"><i class="fa fa-plus"></i> Ajouter</a>
             {% endblock %}
+            {% block card_body_classe %}p-0{% endblock %}
             {% block box_contenu %}
-                <ul class="todo-list">
-                    {% for message in messages_famille %}
-                    <li>
-                        <div class="tools pull-right">
-                            <a type="button" class="btn btn-default btn-xs" title="Modifier" href="{% url 'famille_messages_modifier' idfamille=message.famille_id pk=message.pk %}"><i class="fa fa-pencil"></i></a>
-                            <a type="button" class="btn btn-default btn-xs" title="Supprimer" href="{% url 'famille_messages_supprimer' idfamille=message.famille_id pk=message.pk %}"><i class="fa fa-trash-o"></i></a>
-                        </div>
-                        <span class="text">
-                            {{ message.date_saisie|date:"d/m/Y" }} : {{ message.texte }}
-                        </span>
-                        {% if message.priorite == "HAUTE" %}
-                            <small class="badge badge-danger"><i class="fa fa-exclamation-triangle"></i> Important</small>
-                        {% endif %}
-                    </li>
-                    {% empty %}
-                        Aucun message
-                    {% endfor %}
-                </ul>
+                    {% embed "outils/notes.html" with mode_notes='famille' %}
+                    {% endembed %}
             {% endblock %}
         {% endembed %}
 

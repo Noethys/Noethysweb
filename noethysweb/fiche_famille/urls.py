@@ -5,7 +5,7 @@
 
 from django.urls import include, path
 from core.decorators import secure_ajax
-from fiche_famille.views import famille, famille_questionnaire, famille_messages, famille_ajouter, famille_pieces, famille_cotisations, famille_caisse, famille_aides, famille_quotients, famille_divers, \
+from fiche_famille.views import famille, famille_questionnaire, famille_notes, famille_ajouter, famille_pieces, famille_cotisations, famille_caisse, famille_aides, famille_quotients, famille_divers, \
                             famille_prestations, famille_reglements, famille_consommations, famille_factures, famille_voir_facture, famille_voir_cotisation, famille_abo_factures_email, \
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, \
                             famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats
@@ -26,9 +26,9 @@ urlpatterns = [
     path('individus/familles/questionnaire/<int:idfamille>', famille_questionnaire.Consulter.as_view(), name='famille_questionnaire'),
     path('individus/familles/questionnaire/modifier/<int:idfamille>', famille_questionnaire.Modifier.as_view(), name='famille_questionnaire_modifier'),
 
-    path('individus/familles/messages/ajouter/<int:idfamille>', famille_messages.Ajouter.as_view(), name='famille_messages_ajouter'),
-    path('individus/familles/messages/modifier/<int:idfamille>/<int:pk>', famille_messages.Modifier.as_view(), name='famille_messages_modifier'),
-    path('individus/familles/messages/supprimer/<int:idfamille>/<int:pk>', famille_messages.Supprimer.as_view(), name='famille_messages_supprimer'),
+    path('individus/familles/notes/ajouter/<int:idfamille>', famille_notes.Ajouter.as_view(), name='famille_notes_ajouter'),
+    path('individus/familles/notes/modifier/<int:idfamille>/<int:pk>', famille_notes.Modifier.as_view(), name='famille_notes_modifier'),
+    path('individus/familles/notes/supprimer/<int:idfamille>/<int:pk>', famille_notes.Supprimer.as_view(), name='famille_notes_supprimer'),
 
     path('individus/familles/pieces/liste/<int:idfamille>', famille_pieces.Liste.as_view(), name='famille_pieces_liste'),
     path('individus/familles/pieces/ajouter/<int:idfamille>', famille_pieces.Ajouter.as_view(), name='famille_pieces_ajouter'),

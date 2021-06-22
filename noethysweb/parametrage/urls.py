@@ -15,7 +15,7 @@ from parametrage.views import organisateur, structures, \
     niveaux_scolaires, ecoles, classes, \
     types_cotisations, unites_cotisations, \
     restaurateurs, menus_categories, menus_legendes, \
-    messages_categories, listes_diffusion, \
+    notes_categories, listes_diffusion, \
     types_groupes_activites, \
     activites, activites_generalites, activites_responsables, activites_agrements, activites_groupes, \
     activites_renseignements, activites_unites_conso, activites_unites_remplissage, activites_calendrier, \
@@ -301,11 +301,11 @@ urlpatterns = [
     path('parametrage/menus_legendes/modifier/<int:pk>', menus_legendes.Modifier.as_view(), name='menus_legendes_modifier'),
     path('parametrage/menus_legendes/supprimer/<int:pk>', menus_legendes.Supprimer.as_view(), name='menus_legendes_supprimer'),
 
-    # Catégories de messages
-    path('parametrage/messages_categories/liste', messages_categories.Liste.as_view(), name='messages_categories_liste'),
-    path('parametrage/messages_categories/ajouter', messages_categories.Ajouter.as_view(), name='messages_categories_ajouter'),
-    path('parametrage/messages_categories/modifier/<int:pk>', messages_categories.Modifier.as_view(), name='messages_categories_modifier'),
-    path('parametrage/messages_categories/supprimer/<int:pk>', messages_categories.Supprimer.as_view(), name='messages_categories_supprimer'),
+    # Catégories de notes
+    path('parametrage/notes_categories/liste', notes_categories.Liste.as_view(), name='notes_categories_liste'),
+    path('parametrage/notes_categories/ajouter', notes_categories.Ajouter.as_view(), name='notes_categories_ajouter'),
+    path('parametrage/notes_categories/modifier/<int:pk>', notes_categories.Modifier.as_view(), name='notes_categories_modifier'),
+    path('parametrage/notes_categories/supprimer/<int:pk>', notes_categories.Supprimer.as_view(), name='notes_categories_supprimer'),
 
     # Listes de diffusion
     path('parametrage/listes_diffusion/liste', listes_diffusion.Liste.as_view(), name='listes_diffusion_liste'),

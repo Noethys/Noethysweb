@@ -6,7 +6,7 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Message, Rattachement, CATEGORIES_RATTACHEMENT, Prestation, Reglement
+from core.models import Famille, Note, Rattachement, CATEGORIES_RATTACHEMENT, Prestation, Reglement
 from django.views.generic.detail import DetailView
 from fiche_individu.forms.individu import Formulaire
 from core.views.base import CustomView
@@ -179,7 +179,7 @@ class Resume(Onglet, DetailView):
         context['page_titre'] = "Fiche famille"
         context['box_introduction'] = ""
         context['onglet_actif'] = "resume"
-        context['messages_famille'] = Message.objects.filter(famille_id=idfamille).order_by("date_saisie")
+        context['notes'] = Note.objects.filter(famille_id=idfamille).order_by("date_saisie")
         context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(famille=context['famille'], only_invalides=True, utilisateur=self.request.user)
 
         # Calcul du solde

@@ -85,9 +85,9 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_restauration.Add(code="menus_categories_liste", titre="Catégories de menus", icone="file-text-o")
     menu_restauration.Add(code="menus_legendes_liste", titre="Légendes de menus", icone="file-text-o")
 
-    # Messages
-    menu_messages = menu_parametrage.Add(titre="Messages")
-    menu_messages.Add(code="messages_categories_liste", titre="Catégories de messages", icone="file-text-o")
+    # Notes
+    menu_notes = menu_parametrage.Add(titre="Notes")
+    menu_notes.Add(code="notes_categories_liste", titre="Catégories de notes", icone="file-text-o")
 
     # Emails
     menu_emails = menu_parametrage.Add(titre="Emails")
@@ -122,6 +122,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Outils
     menu_historique = menu_outils.Add(titre="Historique")
     menu_historique.Add(code="historique", titre="Historique", icone="file-text-o")
+    menu_historique.Add(code="notes_liste", titre="Notes", icone="file-text-o")
 
     # Maintenance
     menu_maintenance = menu_outils.Add(titre="Maintenance")

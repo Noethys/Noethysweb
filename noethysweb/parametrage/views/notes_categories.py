@@ -6,30 +6,30 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import MessageCategorie
-from parametrage.forms.messages_categories import Formulaire
+from core.models import NoteCategorie
+from parametrage.forms.notes_categories import Formulaire
 
 
 class Page(crud.Page):
-    model = MessageCategorie
-    url_liste = "messages_categories_liste"
-    url_ajouter = "messages_categories_ajouter"
-    url_modifier = "messages_categories_modifier"
-    url_supprimer = "messages_categories_supprimer"
-    description_liste = "Voici ci-dessous la liste des catégories de messages."
-    description_saisie = "Saisissez toutes les informations concernant la catégorie de message à saisir et cliquez sur le bouton Enregistrer."
-    objet_singulier = "une catégorie de message"
-    objet_pluriel = "des catégories de messages"
+    model = NoteCategorie
+    url_liste = "notes_categories_liste"
+    url_ajouter = "notes_categories_ajouter"
+    url_modifier = "notes_categories_modifier"
+    url_supprimer = "notes_categories_supprimer"
+    description_liste = "Voici ci-dessous la liste des catégories de notes."
+    description_saisie = "Saisissez toutes les informations concernant la catégorie de note à saisir et cliquez sur le bouton Enregistrer."
+    objet_singulier = "une catégorie de note"
+    objet_pluriel = "des catégories de notes"
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
     ]
 
 
 class Liste(Page, crud.Liste):
-    model = MessageCategorie
+    model = NoteCategorie
 
     def get_queryset(self):
-        return MessageCategorie.objects.filter(self.Get_filtres("Q"))
+        return NoteCategorie.objects.filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

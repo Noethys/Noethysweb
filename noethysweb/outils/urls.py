@@ -8,7 +8,7 @@ from core.views import toc
 from core.decorators import secure_ajax
 from outils.views import editeur_emails, editeur_emails_express, historique, update, sauvegarde_creer, sauvegarde_restaurer, statistiques, contacts, \
                         editeur_emails_familles, editeur_emails_individus, editeur_emails_contacts, editeur_emails_listes_diffusion, \
-                        editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail
+                        editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes
 
 urlpatterns = [
 
@@ -41,6 +41,12 @@ urlpatterns = [
     path('outils/historique', historique.Liste.as_view(), name='historique'),
     path('outils/update', update.View.as_view(), name='update'),
     path('outils/notes_versions', notes_versions.View.as_view(), name='notes_versions'),
+
+    # Notes
+    path('outils/notes/liste', notes.Liste.as_view(), name='notes_liste'),
+    path('outils/notes/ajouter', notes.Ajouter.as_view(), name='notes_ajouter'),
+    path('outils/notes/modifier/<int:pk>', notes.Modifier.as_view(), name='notes_modifier'),
+    path('outils/notes/supprimer/<int:pk>', notes.Supprimer.as_view(), name='notes_supprimer'),
 
     # Sauvegarde
     path('outils/sauvegarde/creer', sauvegarde_creer.View.as_view(), name='sauvegarde_creer'),

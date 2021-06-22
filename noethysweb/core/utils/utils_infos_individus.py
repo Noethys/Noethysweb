@@ -7,7 +7,7 @@ from django.utils.translation import ugettext as _
 import datetime
 from core.utils import utils_dates, utils_questionnaires
 from core.data import data_civilites
-from core.models import Individu, Famille, Rattachement, Quotient, Inscription, Message, ProblemeSante, Scolarite, Cotisation, Lien, CHOIX_AUTORISATIONS
+from core.models import Individu, Famille, Rattachement, Quotient, Inscription, Note, ProblemeSante, Scolarite, Cotisation, Lien, CHOIX_AUTORISATIONS
 from individus.utils import utils_pieces_manquantes
 from core.data.data_liens import DICT_TYPES_LIENS
 from django.db.models import Q
@@ -612,9 +612,9 @@ class Informations():
 
     def RechercheMessages(self):
         """ Recherche les messages des familles et des individus """
-        messages = Message.objects.select_related('categorie').all()
-        for message in messages:
-            for ID, dictCible in [(message.individu_id, self.dictIndividus), (message.famille_id, self.dictFamilles)]:
+        notes = Note.objects.select_related('categorie').all()
+        for note in notes:
+            for ID, dictCible in [(note.individu_id, self.dictIndividus), (note.famille_id, self.dictFamilles)]:
                 if ID:
                     if ID in dictCible:
                         if "messages" not in dictCible[ID]:
@@ -624,19 +624,19 @@ class Informations():
                         # Mémorise l'information médicale au format texte
                         index = dictCible[ID]["messages"]["nombre"]
                         code = "MESSAGE_%d_" % index
-                        dictCible[ID][code + "DATE_SAISIE"] = utils_dates.ConvertDateToFR(message.date_saisie)
-                        dictCible[ID][code + "DATE_PARUTION"] = utils_dates.ConvertDateToFR(message.date_parution)
-                        dictCible[ID][code + "TEXTE"] = message.texte
-                        dictCible[ID][code + "NOM"] = message.nom
-                        dictCible[ID][code + "CATEGORIE"] = message.categorie.nom if message.categorie else ""
+                        dictCible[ID][code + "DATE_SAISIE"] = utils_dates.ConvertDateToFR(note.date_saisie)
+                        dictCible[ID][code + "DATE_PARUTION"] = utils_dates.ConvertDateToFR(note.date_parution)
+                        dictCible[ID][code + "TEXTE"] = note.texte
+                        dictCible[ID][code + "NOM"] = note.nom
+                        dictCible[ID][code + "CATEGORIE"] = note.categorie.nom if note.categorie else ""
 
                         # Mémorise l'information médicale au format liste
                         dictCible[ID]["messages"]["liste"].append(
-                            {"IDmessage": str(message.pk), "type": message.type, "IDcategorie": message.categorie_id,
-                             "date_saisie": utils_dates.ConvertDateToFR(message.date_saisie), "date_parution": utils_dates.ConvertDateToFR(message.date_parution),
-                             "priorite": message.priorite,  "afficher_accueil": message.afficher_accueil,
-                             "afficher_liste": message.afficher_liste, "texte": message.texte, "nom": message.nom,
-                             "categorie_nom": message.categorie.nom if message.categorie else "",
+                            {"IDmessage": str(note.pk), "type": note.type, "IDcategorie": note.categorie_id,
+                             "date_saisie": utils_dates.ConvertDateToFR(note.date_saisie), "date_parution": utils_dates.ConvertDateToFR(note.date_parution),
+                             "priorite": note.priorite,  "afficher_accueil": note.afficher_accueil,
+                             "afficher_liste": note.afficher_liste, "texte": note.texte, "nom": note.nom,
+                             "categorie_nom": note.categorie.nom if note.categorie else "",
                              })
 
     def RechercheCotisationsManquantes(self):

@@ -6,7 +6,7 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Individu, Famille, Message, Rattachement
+from core.models import Individu, Famille, Note, Rattachement
 from django.views.generic.detail import DetailView
 from fiche_individu.forms.individu import Formulaire
 from core.views.base import CustomView
@@ -133,7 +133,7 @@ class Resume(Onglet, DetailView):
         context['box_titre'] = self.object.nom
         context['box_introduction'] = ""
         context['onglet_actif'] = "resume"
-        context['messages_individu'] = Message.objects.filter(individu_id=self.kwargs['idindividu']).order_by("date_saisie")
+        context['notes'] = Note.objects.filter(individu_id=self.kwargs['idindividu']).order_by("date_saisie")
         return context
 
     def get_object(self):

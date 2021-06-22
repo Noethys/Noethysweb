@@ -15,7 +15,7 @@ from core.utils import utils_parametres, utils_texte
 from outils.utils import utils_update
 from core.data.data_citations import LISTE_CITATIONS
 from core.data.data_celebrations import DICT_FETES, DICT_CELEBRATIONS
-from core.models import Individu
+from core.models import Individu, Note
 import random, datetime
 
 
@@ -34,6 +34,7 @@ class Accueil(CustomView, TemplateView):
         context['anniversaires_demain'] = self.Get_anniversaires(demain=True)
         context['nouvelle_version'] = self.Get_update()
         context['mode_demo'] = settings.MODE_DEMO
+        context['notes'] = Note.objects.select_related('famille', 'individu').filter(afficher_accueil=True).order_by("date_parution")
         return context
 
     def Get_update(self):
