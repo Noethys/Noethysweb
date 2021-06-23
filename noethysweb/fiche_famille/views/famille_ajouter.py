@@ -233,7 +233,7 @@ class Supprimer_individu(Page, crud.Supprimer):
 
         # Suppression de l'individu
         reponse = super(Supprimer_individu, self).delete(request, *args, **kwargs)
-        
+
         # MAJ des infos de la famille
         try:
             famille.Maj_infos()
