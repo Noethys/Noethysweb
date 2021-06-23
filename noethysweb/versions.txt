@@ -1,3 +1,11 @@
+Version 0.0.3.8 (23/06/2021) :
+
+- Ajout de la gestion des mandats SEPA
+- Conversion des messages en notes
+- Fix init gestionnaires des conso
+- Fix suppression d'un individu
+- Divers correctifs
+
 Version 0.0.3.7 (15/06/2021) :
 
 - Ajout des structures
