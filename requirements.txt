@@ -2,6 +2,7 @@ Django
 Pillow
 django-anymail
 django-axes
+django-cryptography
 django-crispy-forms
 django-csp
 django-datatable-view
