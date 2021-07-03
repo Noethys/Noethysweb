@@ -109,7 +109,7 @@ class Liste(Page, crud.Liste):
     template_name = "fiche_individu/individu_liste.html"
 
     def get_queryset(self):
-        return Scolarite.objects.filter(Q(individu=self.Get_idindividu()) & self.Get_filtres("Q"))
+        return Scolarite.objects.select_related("ecole", "classe").prefetch_related("niveau").filter(Q(individu=self.Get_idindividu()) & self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

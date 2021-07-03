@@ -12,13 +12,14 @@ from core.models import Famille
 class Page(crud.Page):
     model = Famille
     description_liste = "Voici ci-dessous la liste des régimes et des caisses des familles."
+    menu_code = "liste_regimes_caisses"
 
 
 class Liste(Page, crud.Liste):
     model = Famille
 
     def get_queryset(self):
-        return Famille.objects.filter(self.Get_filtres("Q"))
+        return Famille.objects.select_related("caisse", "allocataire", "caisse__regime").filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

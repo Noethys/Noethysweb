@@ -24,8 +24,9 @@ class MyPasswordChangeView(ClassCommuneLogin, auth_views.PasswordChangeView):
 
         # Enregistre le champ force_reset_password de l'utilisateur
         utilisateur.force_reset_password = False
-        utilisateur.famille.internet_mdp = "*****"
         utilisateur.save()
+        utilisateur.famille.internet_mdp = "*****"
+        utilisateur.famille.save()
 
         return super().form_valid(form)
 

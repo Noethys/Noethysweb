@@ -28,52 +28,65 @@
     {% endif %}
 
 
-{% for individu in liste_individus %}
-    <div class="card card-widget widget-user-2">
+    {% for individu in liste_individus %}
+        <div class="card card-widget widget-user-2">
 
-        <!-- Nom de l'individu -->
-        <div class="widget-user-header bg-lightblue">
-            <div class="widget-user-image">
-                <img class="img-circle elevation-2" src="{{ individu.Get_photo }}" alt="Photo">
-            </div>
-            <h3 class="widget-user-username">{{ individu.prenom }}</h3>
-            {% if individu.Get_age %}<h5 class="widget-user-desc">{{ individu.Get_age }} ans</h5>{% endif %}
-        </div>
-
-        <!-- Liste des périodes -->
-        <div class="card-footer p-0">
-            <div>
-
-                <ul class="nav nav-tabs">
-                    {% for activite in individu.activites %}
-                        <li class="nav-item">
-                            <a class="nav-link {% if forloop.first %}active{% endif %}" href="#tab_{{ individu.pk }}_{{ activite.pk }}" data-toggle="tab" role="tab">{{ activite.nom }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-
-                <div class="tab-content p-0">
-                    {% for activite in individu.activites %}
-                        <div class="tab-pane {% if forloop.first %}show active{% endif %}" id="tab_{{ individu.pk }}_{{ activite.pk }}">
-                            <div class="list-group list-group-flush">
-                                {% for periode in dict_periodes|get_item:activite %}
-                                    <a href="{% url 'portail_planning' idindividu=individu.pk idperiode=periode.pk %}" class="list-group-item list-group-item-action">
-                                        <i class="fa fa-calendar margin-r-5"></i>
-                                        {{ periode.nom }}
-                                        <small class="pull-right">Du {{ periode.date_debut }} au {{ periode.date_fin }}</small>
-                                    </a>
-                                {% empty %}
-                                    <div class="bg-white" style="padding: 10px";>Aucun période disponible</div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endfor %}
+            <!-- Nom de l'individu -->
+            <div class="widget-user-header bg-lightblue">
+                <div class="widget-user-image">
+                    <img class="img-circle elevation-2" src="{{ individu.Get_photo }}" alt="Photo">
                 </div>
-
+                <h3 class="widget-user-username">{{ individu.prenom }}</h3>
+                {% if individu.Get_age %}<h6 class="widget-user-desc">{{ individu.Get_age }} ans</h6>{% endif %}
             </div>
+
+            <!-- Liste des périodes -->
+            <div class="card-footer p-0">
+                <div>
+
+                    <ul class="nav nav-tabs">
+                        {% for activite in individu.activites %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if forloop.first %}active{% endif %}" href="#tab_{{ individu.pk }}_{{ activite.pk }}" data-toggle="tab" role="tab">{{ activite.nom }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="tab-content p-0">
+                        {% for activite in individu.activites %}
+                            <div class="tab-pane {% if forloop.first %}show active{% endif %}" id="tab_{{ individu.pk }}_{{ activite.pk }}">
+                                <div class="list-group list-group-flush">
+                                    {% for periode in dict_periodes|get_item:activite %}
+                                        <a href="{% url 'portail_planning' idindividu=individu.pk idperiode=periode.pk %}" class="list-group-item list-group-item-action">
+                                            <i class="fa fa-calendar margin-r-5"></i>
+                                            {{ periode.nom }}
+                                            <small class="pull-right">Du {{ periode.date_debut }} au {{ periode.date_fin }}</small>
+                                        </a>
+                                    {% empty %}
+                                        <div class="bg-white" style="padding: 10px";>Aucun période disponible</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                </div>
+            </div>
+
         </div>
 
-    </div>
-{% endfor %}
+    {% empty %}
+
+        {% embed 'core/box.html' with box_titre=True %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Liste des périodes de réservations{% endblock %}
+            {% block box_contenu %}
+                <div>
+                    <b>Aucune période de réservation disponible.</b>
+                </div>
+            {% endblock box_contenu %}
+        {% endembed %}
+
+    {% endfor %}
 
 {% endblock contenu_page %}

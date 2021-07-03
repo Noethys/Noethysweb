@@ -15,7 +15,7 @@ from fiche_famille.widgets import Internet_identifiant, Internet_mdp
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    internet_identifiant = forms.CharField(label="Identifiant", required=False, widget=Internet_identifiant())
+    internet_identifiant = forms.CharField(label="Identifiant", required=False, widget=Internet_identifiant(), help_text="Cet identifiant est généré automatiquement, il est conseillé de ne pas le modifier.")
     internet_mdp = forms.CharField(label="Mot de passe", required=False, widget=Internet_mdp(), help_text="Des étoiles ***** apparaissent lorsque le mot de passe a été personnalisé par l'utilisateur lors de la première connexion au portail. Dans ce cas, il vous est impossible de récupérer le mot de passe personnalisé, vous devez en générer un nouveau.")
 
     class Meta:

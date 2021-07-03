@@ -6,12 +6,14 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Individu, Famille, Note, Rattachement
+from core.models import Individu, Famille, Note, Rattachement, Inscription
 from django.views.generic.detail import DetailView
 from fiche_individu.forms.individu import Formulaire
 from core.views.base import CustomView
 from django.db.models import Q
 from fiche_individu.utils.utils_individu import LISTE_ONGLETS
+from core.utils import utils_texte
+import datetime
 
 
 class Page(crud.Page):
@@ -49,6 +51,7 @@ class Liste(Page, crud.Liste):
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         profil = columns.TextColumn("Profil", processor='Get_profil')
         date_naiss = columns.TextColumn("Date naiss.", sources=['individu__date_naiss'], processor=helpers.format_date('%d/%m/%Y'))
+        age = columns.TextColumn("Age", sources=['individu__date_naiss'], processor="Get_age")
         rue_resid = columns.TextColumn("Rue", sources=['individu__rue_resid'])
         cp_resid = columns.TextColumn("CP", sources=['individu__cp_resid'])
         ville_resid = columns.TextColumn("Ville", sources=['individu__ville_resid'])
@@ -56,7 +59,7 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idrattachement', 'idindividu', "nom", "prenom", "profil", "famille", "date_naiss", "rue_resid", "cp_resid", "ville_resid"]
+            columns = ['idrattachement', 'idindividu', "nom", "prenom", "profil", "famille", "age", "date_naiss", "rue_resid", "cp_resid", "ville_resid"]
             hidden_columns = ["idrattachement"]
             ordering = ["nom", "prenom"]
 
@@ -74,6 +77,8 @@ class Liste(Page, crud.Liste):
             ]
             return self.Create_boutons_actions(html)
 
+        def Get_age(self, instance, *args, **kwargs):
+            return instance.individu.Get_age()
 
 
 # class Supprimer(Page, crud.Supprimer):
@@ -133,10 +138,16 @@ class Resume(Onglet, DetailView):
         context['box_titre'] = self.object.nom
         context['box_introduction'] = ""
         context['onglet_actif'] = "resume"
+
+        # Notes de l'individu
         context['notes'] = Note.objects.filter(individu_id=self.kwargs['idindividu']).order_by("date_saisie")
+
+        # Activités actuelles
+        conditions = Q(individu_id=self.Get_idindividu()) & Q(date_debut__lte=datetime.date.today()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
+        liste_activites = {inscription.activite.nom: True for inscription in Inscription.objects.select_related("activite").filter(conditions).order_by("date_debut")}
+        context['inscriptions'] = utils_texte.Convert_liste_to_texte_virgules(list(liste_activites.keys()))
+
         return context
 
     def get_object(self):
         return Individu.objects.get(pk=self.kwargs['idindividu'])
-
-

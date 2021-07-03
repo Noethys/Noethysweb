@@ -82,7 +82,7 @@ def Ajouter_filtre(request):
     traductions_criteres = {
         "EGAL": "est égal à", "DIFFERENT": "est différent de", "CONTIENT": "contient", "NE_CONTIENT_PAS": "ne contient pas",
         "SUPERIEUR": "est supérieur à", "SUPERIEUR_EGAL": "est supérieur ou égal à", "INFERIEUR": "est inférieur à", "INFERIEUR_EGAL": "est inférieur ou égal à",
-        "VRAI": "est vrai", "FAUX": "est faux", "COMPRIS": "est compris entre", "INSCRIT": "est inscrit sur des activités", "PRESENT": "est présent sur des activités entre",
+        "VRAI": "est vrai", "FAUX": "est faux", "COMPRIS": "est compris entre", "INSCRIT": "est inscrit sur une sélection d'activités", "PRESENT": "est présent sur une sélection d'activités entre",
     }
 
     if valeurs["champ"].startswith("ipresent"): valeurs["label_champ"] = "L'individu"

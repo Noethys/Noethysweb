@@ -20,6 +20,9 @@
                     {% if individu.Get_adresse_complete %}<dt class="col-sm-4">Adresse</dt><dd class="col-sm-8">{{ individu.Get_adresse_complete }}</dd>{% endif %}
                     <dt class="col-sm-4">Date de création</dt><dd class="col-sm-8">{{ individu.date_creation|date:"j F Y" }}</dd>
                     <dt class="col-sm-4">ID Individu</dt><dd class="col-sm-8">{{ individu.pk }}</dd>
+                    {% if inscriptions %}
+                        <dt class="col-sm-4">Inscriptions actuelles</dt><dd class="col-sm-8">{{ inscriptions }}</dd>
+                    {% endif %}
                 </dl>
             {% endblock %}
         {% endembed %}

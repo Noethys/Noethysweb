@@ -29,7 +29,7 @@ class Liste(Page, crud.Liste):
     model = Scolarite
 
     def get_queryset(self):
-        return Scolarite.objects.filter(self.Get_filtres("Q"))
+        return Scolarite.objects.select_related("individu").prefetch_related("niveau").filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

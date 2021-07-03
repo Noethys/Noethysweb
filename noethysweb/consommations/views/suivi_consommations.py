@@ -74,7 +74,10 @@ def Get_data(parametres={}, request=None):
         liste_activites_temp = Activite.objects.select_related("structure").filter(idactivite__in=activites)
 
     # Vérifie que l'activité est bien accessible pour cet utilisateur
-    liste_activites = [activite for activite in liste_activites_temp if activite.structure in request.user.structures.all()]
+    if request:
+        liste_activites = [activite for activite in liste_activites_temp if activite.structure in request.user.structures.all()]
+    else:
+        liste_activites = liste_activites_temp
 
     # Récupération de la période
     if not conditions_periodes:

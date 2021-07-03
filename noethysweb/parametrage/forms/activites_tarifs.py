@@ -16,6 +16,7 @@ from core.utils.utils_commandes import Commandes
 from core.models import Tarif, CategorieTarif, Activite, Groupe, TypeCotisation, Caisse, NomTarif, TarifLigne, \
                                 LISTE_METHODES_TARIFS, DICT_COLONNES_TARIFS, CombiTarif, Unite, Evenement
 from core.widgets import DatePickerWidget, Formset
+from django.forms import ValidationError
 from parametrage.widgets import ParametresTarifs
 from django.utils.safestring import mark_safe
 from django.forms.models import model_to_dict
@@ -287,7 +288,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Etats conditionnels
         if not self.instance.pk:
-            self.fields['etats'].initial = "reservation,present,absenti"
+            self.fields['etats'].initial = ["reservation", "present", "absenti"]
 
         # Paramètres du tarif
         if self.instance.methode:

@@ -120,6 +120,7 @@ def Envoyer_model_mail(idmail=None, request=None):
     liste_envois_succes = []
     for destinataire in mail.destinataires.filter(condition):
         html = mail.html
+        objet = mail.objet
 
         # Remplacement des mots-clés
         try:
@@ -129,6 +130,7 @@ def Envoyer_model_mail(idmail=None, request=None):
         valeurs.update(valeurs_defaut)
         for motcle, valeur in valeurs.items():
             html = html.replace(motcle, valeur)
+            objet = objet.replace(motcle, valeur)
 
         # Recherche les images intégrées
         images = re.findall('src="([^"]+)"', html)
@@ -140,7 +142,7 @@ def Envoyer_model_mail(idmail=None, request=None):
             index += 1
 
         # Création du message
-        message = EmailMultiAlternatives(subject=mail.objet, body=Textify(html), from_email=mail.adresse_exp.adresse, to=[destinataire.adresse], connection=connection)
+        message = EmailMultiAlternatives(subject=objet, body=Textify(html), from_email=mail.adresse_exp.adresse, to=[destinataire.adresse], connection=connection)
         message.mixed_subtype = 'related'
         message.attach_alternative(html, "text/html")
 
@@ -179,7 +181,7 @@ def Envoyer_model_mail(idmail=None, request=None):
             liste_envois_succes.append(destinataire)
 
             # Mémorise l'envoi dans l'historique
-            utils_historique.Ajouter(titre="Envoi d'un email", detail=mail.objet, utilisateur=request.user, famille=mail.famille,
+            utils_historique.Ajouter(titre="Envoi d'un email", detail=objet, utilisateur=request.user, famille=mail.famille,
                                      individu=mail.individu, objet="Email", idobjet=mail.pk, classe="Mail")
 
     connection.close()

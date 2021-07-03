@@ -65,8 +65,9 @@ def Get_data(parametres={}, filtre=None, request=None):
         return {}
 
     # vérifie que l'activité est bien accessible pour l'utilisateur
-    conditions = Q(structure__in=request.user.structures.all())
-
+    conditions = Q()
+    if request:
+        conditions &= Q(structure__in=request.user.structures.all())
     if activites["type"] == "groupes_activites":
         conditions &= Q(groupes_activites__in=activites["ids"])
     if activites["type"] == "activites":

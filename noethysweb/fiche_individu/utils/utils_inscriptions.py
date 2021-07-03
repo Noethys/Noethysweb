@@ -10,7 +10,7 @@ from core.utils import utils_infos_individus, utils_texte, utils_conversion, uti
 from core.models import Inscription
 from django.db.models import Sum
 from decimal import Decimal
-from individus.utils import utils_impression_inscription
+from fiche_individu.utils import utils_impression_inscription
 
 
 class Inscriptions():
@@ -41,8 +41,8 @@ class Inscriptions():
             # Mémorisation des données
             dictDonnee = {
                 "{IDINSCRIPTION}": str(inscription.pk),
-                "{DATE_INSCRIPTION}": utils_dates.ConvertDateToFR(inscription.date_debut),
-                "{EST_PARTI}": "Vrai" if inscription.parti else "Faux",
+                "{DATE_DEBUT}": utils_dates.ConvertDateToFR(inscription.date_debut),
+                "{DATE_FIN}": utils_dates.ConvertDateToFR(inscription.date_fin),
 
                 "{IDINDIVIDU}": inscription.individu_id,
                 "{INDIVIDU_NOM}":  inscription.individu.nom,

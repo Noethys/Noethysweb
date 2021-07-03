@@ -28,7 +28,7 @@ def Impression_pdf(request):
     dict_options = form_modele.cleaned_data
 
     # Création du PDF
-    from individus.utils import utils_inscriptions
+    from fiche_individu.utils import utils_inscriptions
     inscription = utils_inscriptions.Inscriptions()
     resultat = inscription.Impression(liste_inscriptions=inscriptions_cochees, dict_options=dict_options)
     if not resultat:
