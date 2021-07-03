@@ -320,9 +320,10 @@ class Case_standard extends Case_base {
 
             // Dessine la couleur de fond
             $("#" + this.key).addClass(conso.etat);
+
             // Dessine les infos
             var infos = "";
-            if (this.type_case === "horaire" || this.type_case === "multi") {
+            if ((this.type_case === "horaire" || this.type_case === "multi") && (mode !== "portail")) {
                 infos = conso.heure_debut.substring(0,5).replace(":", "h") + "-" + conso.heure_fin.substring(0,5).replace(":", "h");
                 $("#" + this.key + " .infos").html(infos);
             };
@@ -330,8 +331,17 @@ class Case_standard extends Case_base {
                 if (conso.quantite) {infos = conso.quantite} else {infos = 1};
                 $("#" + this.key + " .infos").html(infos);
             };
+
             // Dessine le nom du groupe
             $("#" + this.key + " .groupe").html(dict_groupes[conso.groupe].nom);
+            if (mode === "portail") {
+                if (conso.etat === "reservation") {$("#" + this.key + " .groupe").html("Réservé");}
+                if (conso.etat === "attente") {$("#" + this.key + " .groupe").html("Attente");}
+                if (conso.etat === "present") {$("#" + this.key + " .groupe").html("Présent");}
+                if (conso.etat === "refus") {$("#" + this.key + " .groupe").html("Refus");}
+                if ((conso.etat === "absenti") || (conso.etat === "absentj")) {$("#" + this.key + " .groupe").html("Absent");}
+            }
+
             // Dessine les icones
             var texte_icones = "";
             if ((conso.prestation === null) && (mode !== "portail")) {texte_icones += " <i class='fa fa-exclamation-triangle text-orange' title='Aucune prestation'></i>"};
@@ -340,6 +350,7 @@ class Case_standard extends Case_base {
             if (conso.etat === "absentj") {texte_icones += " <i class='fa fa-times-circle-o text-green' title='Absence justifiée'></i>"};
             if (conso.forfait === 2) {texte_icones += " <i class='fa fa-lock text-red' title='Cette consommation est non supprimable car elle est associée à un forfait daté'></i>"};
             $("#" + this.key + " .icones").html(texte_icones);
+
             // Pour les tests, affiche l'id de la prestation
             // $("#" + this.key + " .groupe").html(conso.prestation);
         };
@@ -457,6 +468,14 @@ class Case_horaire extends Case_standard {
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
 
+        // Si saisie en mode portail
+        if (mode === "portail") {
+            data = {
+                heure_debut: dict_unites[this.unite].heure_debut,
+                heure_fin: dict_unites[this.unite].heure_fin,
+            }
+        };
+
         // Saisie directe si data donnée
         if (Object.keys(data).length > 0) {
             this.creer_conso(data, maj_facturation);
@@ -487,7 +506,11 @@ class Case_horaire extends Case_standard {
     // Toggle une conso
     toggle() {
         if (this.has_conso()) {
-            this.modifier();
+            if (mode === "portail") {
+                this.supprimer();
+            } else {
+                this.modifier();
+            };
         } else {
             this.ajouter();
         };
@@ -1065,6 +1088,7 @@ $(document).ready(function() {
 });
 
 function Get_activite() {
+    // return selection_activite;
     return $('#selection_activite').val();
 };
 
@@ -1194,12 +1218,12 @@ function ajax_facturer(cases_touchees_temp) {
             },
         datatype: "json",
         success: function(data){
-            console.log("==== Retour Facturation ok ====");
-            console.log("anciennes prestations=", data.anciennes_prestations);
-            console.log("nouvelles prestations=", data.nouvelles_prestations);
-            console.log("modifications_cases=", data.modifications_cases);
+            // console.log("==== Retour Facturation ok ====");
+            // console.log("anciennes prestations=", data.anciennes_prestations);
+            // console.log("nouvelles prestations=", data.nouvelles_prestations);
+            // console.log("modifications_cases=", data.modifications_cases);
 
-            // Envoi les nouvelles prestations au dict_prestations
+            // Envoie les nouvelles prestations au dict_prestations
             $.each(data.nouvelles_prestations, function (idprestation, dict_prestation) {
                 dict_prestations[idprestation] = dict_prestation;
             });

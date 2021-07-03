@@ -3,7 +3,7 @@
 }
 
 .commandes_grille {
-    margin: 3px 5px 5px 5px;
+    margin: 0px 0px 0px 0px;
 }
 .commandes_grille > .btn {
     margin-top: 2px;
@@ -158,13 +158,13 @@
     background-color: #FF9E1E !important;
 }
 .present {
-    background-color: #FF9E1E !important;
+    background-color: #ad3 !important;
 }
 .absentj {
-    background-color: #FF9E1E !important;
+    background-color: #e83e8c !important;
 }
 .absenti {
-    background-color: #FF9E1E !important;
+    background-color: #e83e8c !important;
 }
 .attente {
     background-color: #abcbff !important;

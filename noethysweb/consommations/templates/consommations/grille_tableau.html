@@ -80,6 +80,19 @@
     <div class="table noselect masquer" id="table_grille" draggable="false">
         <table cellspacing="0" id="table-grille" class="table table-bordered" style="min-width: 400px;">
             <thead>
+
+                <tr>
+                    {% if data.mode == "portail" %}
+                        <th colspan="{{ data.liste_unites|length|add:1 }}" style="padding: 5px 0px 10px 0px !important; border-top: solid transparent; border-left: solid transparent; border-right: solid transparent;">
+                            {% include "portail/planning_commandes.html" %}
+                        </th>
+                    {% else %}
+                        <th colspan="{{ data.liste_unites|length|add:2 }}" style="padding: 2px 0px 10px 0px !important; border-top: solid transparent; border-left: solid transparent; border-right: solid transparent;">
+                            {% include "consommations/grille_commandes.html" %}
+                        </th>
+                    {% endif %}
+                </tr>
+
                 <tr>
                     <th style="width:100px">Date</th>
                     {% for unite in data.liste_unites %}

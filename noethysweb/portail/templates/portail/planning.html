@@ -113,16 +113,7 @@
                     </small></div>
 
                 </div>
-
-                {# Commandes #}
-                <div class="d-print-none d-flex flex-wrap justify-content-between" style="padding: 0px 12px 12px 12px;">
-                    <a id="imprimer" onclick="window.print();" target="_blank" class="btn btn-default" style="margin-right: 5px;"><i class="fa fa-print margin-r-5"></i>Imprimer</a>
-                    <button type="button" id="traitement_par_lot" class="btn btn-default btn-sm" onclick="$('#modal_traitement_lot').modal('show');" title="Traitement par lot" style="margin-right: 5px;"><i class="fa fa-magic margin-r-5"></i>Traitement par lot</button>
-                    <button type="button" id="appliquer_semaine_type" class="btn btn-default mr-auto" data-toggle="modal" data-target="#modal_appliquer_semaine_type"><i class="fa fa-calendar-check-o"></i> Appliquer une semaine-type</button>
-                    <button type="button" id="enregistrer" title="Enregistrer" class='btn btn-primary btn-sm' style="margin-right: 5px;"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
-                    <a type="button" id="annuler" class="btn btn-danger" href="{% url 'portail_reservations' %}"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
-                </div>
-
+            
             </div>
         </div>
     </div>
