@@ -333,7 +333,9 @@ class Case_standard extends Case_base {
             };
 
             // Dessine le nom du groupe
-            $("#" + this.key + " .groupe").html(dict_groupes[conso.groupe].nom);
+            if (dict_groupes.length > 1) {
+                $("#" + this.key + " .groupe").html(dict_groupes[conso.groupe].nom);
+            };
             if (mode === "portail") {
                 if (conso.etat === "reservation") {$("#" + this.key + " .groupe").html("Réservé");}
                 if (conso.etat === "attente") {$("#" + this.key + " .groupe").html("Attente");}
