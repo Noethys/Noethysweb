@@ -25,6 +25,7 @@ CATEGORIES = [
     ("portail_demande_facture", "Portail - Demande d'une facture"),
     ("portail_demande_recu_reglement", "Portail - Demande d'un reçu de règlement"),
     ("portail_demande_location", "Portail - Demande d'une location"),
+    ("portail_places_disponibles", "Portail - Attribution de places disponibles"),
     ("location", "Location"),
     ("location_demande", "Demande de location"),
     ("commande_repas", "Commande de repas"),
@@ -202,6 +203,13 @@ MOTSCLES = {
         ("{TOTAL}", "Total des prestations de la période"),
         ("{REGLE}", "Total déjà réglé pour la période"),
         ("{SOLDE}", "Solde de la période"),
+    ],
+
+    "portail_places_disponibles": [
+        ("{DETAIL_PLACES}", "Détail des places disponibles"),
+        ("{INDIVIDU_NOM_COMPLET}", "Nom complet de l'individu"),
+        ("{INDIVIDU_NOM}", "Nom de famille de l'individu"),
+        ("{INDIVIDU_PRENOM}", "Prénom de l'individu"),
     ],
 
     "portail_demande_facture": [

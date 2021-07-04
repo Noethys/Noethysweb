@@ -36,6 +36,10 @@
                 </div>
                 <div class="card-body">
 
+                    <div class="buttonHolder">
+                        <a class="btn btn-default" href="{% url 'liste_attente_traitement_automatique' %}" title="L'application va réattribuer les places disponibles et envoyer des emails de notification aux familles concernées"><i class='fa fa-magic margin-r-5'></i>Traiter automatiquement les places en attente</a>
+                    </div>
+
                     <script>
                         var contenu_table = JSON.parse('{{ resultats|escapejs }}');
                     </script>
