@@ -92,7 +92,8 @@ def Get_generic_data(data={}):
         liste_inscriptions = []
         # for key_individu, inscriptions in data['dict_inscriptions_by_individu'].items():
         #     liste_inscriptions.extend(inscriptions)
-        liste_conso = Consommation.objects.filter(data["conditions_periodes"] & Q(inscription__in=data["liste_inscriptions"]))
+        liste_conso = Consommation.objects.select_related("inscription").filter(data["conditions_periodes"] & Q(inscription__in=data["liste_inscriptions"]))
+        data["liste_conso"] = liste_conso
         data["liste_conso_json"] = serializers.serialize('json', liste_conso)
 
     # Importation des mémos journaliers
@@ -203,7 +204,7 @@ def Get_generic_data(data={}):
     data["periode_json"] = mark_safe(json.dumps(data["periode"]))
     data["consommations_json"] = mark_safe(json.dumps(data["consommations"]))
     data["memos_json"] = mark_safe(json.dumps(data["memos"]))
-    data["options_json"] = mark_safe(json.dumps(data["options"]))
+    data["options_json"] = mark_safe(json.dumps(data.get("options", {})))
     data["dict_suppressions_json"] = mark_safe(json.dumps(data["dict_suppressions"]))
     # data["liste_idindividus_json"] = mark_safe(json.dumps(data["liste_idindividus"]))
     data["liste_key_individus_json"] = mark_safe(json.dumps(data["liste_key_individus"]))
@@ -244,7 +245,7 @@ def Save_grille(request=None, donnees={}):
                 tva=dict_prestation["tva"], code_compta=dict_prestation["code_compta"],
             )
 
-            liste_historique.append({"titre": "Ajout d'une prestation", "detail": "%s du %s" % (dict_prestation["label"], utils_dates.ConvertDateToFR(dict_prestation["date"])), "utilisateur": request.user,
+            liste_historique.append({"titre": "Ajout d'une prestation", "detail": "%s du %s" % (dict_prestation["label"], utils_dates.ConvertDateToFR(dict_prestation["date"])), "utilisateur": request.user if request else None,
                                      "famille_id": dict_prestation["famille"], "individu_id": dict_prestation["individu"], "objet": "Prestation", "idobjet": prestation.pk, "classe": "Prestation"})
 
             # Mémorise la correspondante du nouvel IDprestation avec l'ancien IDprestation
@@ -253,12 +254,12 @@ def Save_grille(request=None, donnees={}):
             # Enregistrement des aides
             for dict_aide in dict_prestation["aides"]:
                 deduction = Deduction.objects.create(date=dict_prestation["date"], label=dict_aide["label"], aide_id=dict_aide["aide"], famille_id=dict_prestation["famille"], prestation=prestation, montant=dict_aide["montant"])
-                liste_historique.append({"titre": "Ajout d'une déduction", "detail": "%s du %s" % (dict_aide["label"], utils_dates.ConvertDateToFR(dict_prestation["date"])), "utilisateur": request.user,
+                liste_historique.append({"titre": "Ajout d'une déduction", "detail": "%s du %s" % (dict_aide["label"], utils_dates.ConvertDateToFR(dict_prestation["date"])), "utilisateur": request.user if request else None,
                                          "famille_id": dict_prestation["famille"], "individu_id": dict_prestation["individu"], "objet": "Déduction", "idobjet": deduction.pk, "classe": "Deduction"})
 
     # ---------------------------------- CONSOMMATIONS -------------------------------------
 
-    dict_unites = {unite.pk: unite for unite in Unite.objects.filter(activite_id=donnees["activite"])}
+    dict_unites = {unite.pk: unite for unite in Unite.objects.all()}
 
     # Analyse et préparation des consommations
     liste_ajouts = []
@@ -276,13 +277,13 @@ def Save_grille(request=None, donnees={}):
                     evenement_id=dict_conso["evenement"], badgeage_debut=dict_conso["badgeage_debut"], badgeage_fin=dict_conso["badgeage_fin"],
                 ))
                 logger.debug("Consommation à ajouter : " + str(dict_conso))
-                liste_historique.append({"titre": "Ajout d'une consommation", "detail": "%s du %s (%s)" % (dict_unites[dict_conso["unite"]].nom, utils_dates.ConvertDateToFR(dict_conso["date"]), dict_conso["etat"]), "utilisateur": request.user,
+                liste_historique.append({"titre": "Ajout d'une consommation", "detail": "%s du %s (%s)" % (dict_unites[dict_conso["unite"]].nom, utils_dates.ConvertDateToFR(dict_conso["date"]), dict_conso["etat"]), "utilisateur": request.user if request else None,
                                          "famille_id": dict_conso["famille"], "individu_id": dict_conso["individu"], "objet": "Consommation", "idobjet": None, "classe": "Consommation"})
 
             elif dict_conso["dirty"]:
                 dict_modifications[dict_conso["pk"]] = dict_conso
                 logger.debug("Consommation à modifier : " + str(dict_conso))
-                liste_historique.append({"titre": "Modification d'une consommation", "detail": "%s du %s (%s)" % (dict_unites[dict_conso["unite"]].nom, utils_dates.ConvertDateToFR(dict_conso["date"]), dict_conso["etat"]), "utilisateur": request.user,
+                liste_historique.append({"titre": "Modification d'une consommation", "detail": "%s du %s (%s)" % (dict_unites[dict_conso["unite"]].nom, utils_dates.ConvertDateToFR(dict_conso["date"]), dict_conso["etat"]), "utilisateur": request.user if request else None,
                                          "famille_id": dict_conso["famille"], "individu_id": dict_conso["individu"], "objet": "Consommation", "idobjet": dict_conso["pk"], "classe": "Consommation"})
 
     # Récupère la liste des conso à modifier
@@ -312,10 +313,10 @@ def Save_grille(request=None, donnees={}):
         texte_notification.append("%s suppression%s" % (len(donnees["suppressions"]["consommations"]), "s" if len(donnees["suppressions"]["consommations"]) > 1 else ""))
         for conso in liste_conso_suppr:
             liste_historique.append({"titre": "Suppression d'une consommation", "detail": "%s du %s (%s)" % (conso.unite.nom, utils_dates.ConvertDateToFR(conso.date), conso.etat),
-                                     "utilisateur": request.user, "famille_id": conso.inscription.famille_id, "individu_id": conso.individu_id, "objet": "Consommation", "idobjet": conso.pk, "classe": "Consommation"})
+                                     "utilisateur": request.user if request else None, "famille_id": conso.inscription.famille_id, "individu_id": conso.individu_id, "objet": "Consommation", "idobjet": conso.pk, "classe": "Consommation"})
 
     # Notification d'enregistrement des consommations
-    if texte_notification:
+    if texte_notification and request:
         messages.add_message(request, messages.SUCCESS, "Consommations enregistrées : %s" % utils_texte.Convert_liste_to_texte_virgules(texte_notification))
 
     # Suppression des prestations obsolètes (après la suppression des consommations associées)
@@ -326,30 +327,32 @@ def Save_grille(request=None, donnees={}):
         utils_db.bulk_delete(listeID=donnees["suppressions"]["prestations"], nom_table="prestations", nom_id="IDprestation")
         for prestation in liste_prestations_suppr:
             liste_historique.append({"titre": "Suppression d'une prestation", "detail": "%s du %s" % (prestation.label, utils_dates.ConvertDateToFR(prestation.date)),
-                                     "utilisateur": request.user, "famille_id": prestation.famille_id, "individu_id": prestation.individu_id, "objet": "Prestation", "idobjet": prestation.pk, "classe": "Prestation"})
+                                     "utilisateur": request.user if request else None, "famille_id": prestation.famille_id, "individu_id": prestation.individu_id, "objet": "Prestation", "idobjet": prestation.pk, "classe": "Prestation"})
 
     # ---------------------------------- MEMOS JOURNALIERS -------------------------------------
 
-    # Analyse et préparation des mémos
-    liste_ajouts = []
-    dict_modifications = {}
-    for key_case, dict_memo in donnees["memos"].items():
-        if dict_memo["texte"]:
-            if not dict_memo["pk"]:
-                liste_ajouts.append(MemoJournee(date=dict_memo["date"], inscription_id=dict_memo["inscription"], texte=dict_memo["texte"]))
-            elif dict_memo["dirty"]:
-                dict_modifications[dict_memo["pk"]] = dict_memo
+    if "memos" in donnees:
 
-    # Récupère la liste des mémos à modifier
-    liste_modifications = []
-    for memo in MemoJournee.objects.filter(pk__in=dict_modifications.keys()):
-        memo.texte = dict_modifications[memo.pk]["texte"]
-        liste_modifications.append(memo)
+        # Analyse et préparation des mémos
+        liste_ajouts = []
+        dict_modifications = {}
+        for key_case, dict_memo in donnees["memos"].items():
+            if dict_memo["texte"]:
+                if not dict_memo["pk"]:
+                    liste_ajouts.append(MemoJournee(date=dict_memo["date"], inscription_id=dict_memo["inscription"], texte=dict_memo["texte"]))
+                elif dict_memo["dirty"]:
+                    dict_modifications[dict_memo["pk"]] = dict_memo
 
-    # Traitement dans la base
-    if liste_ajouts: MemoJournee.objects.bulk_create(liste_ajouts)
-    if liste_modifications: MemoJournee.objects.bulk_update(liste_modifications, ["texte"])
-    if donnees["suppressions"]["memos"]: utils_db.bulk_delete(listeID=donnees["suppressions"]["memos"], nom_table="memo_journee", nom_id="IDmemo")
+        # Récupère la liste des mémos à modifier
+        liste_modifications = []
+        for memo in MemoJournee.objects.filter(pk__in=dict_modifications.keys()):
+            memo.texte = dict_modifications[memo.pk]["texte"]
+            liste_modifications.append(memo)
+
+        # Traitement dans la base
+        if liste_ajouts: MemoJournee.objects.bulk_create(liste_ajouts)
+        if liste_modifications: MemoJournee.objects.bulk_update(liste_modifications, ["texte"])
+        if donnees["suppressions"]["memos"]: utils_db.bulk_delete(listeID=donnees["suppressions"]["memos"], nom_table="memo_journee", nom_id="IDmemo")
 
     # Sauvegarde de l'historique
     utils_historique.Ajouter_plusieurs(liste_historique)
@@ -393,7 +396,7 @@ class Facturation():
 
     def Facturer(self):
         for key_case, case_tableau in self.donnees["cases_touchees"].items():
-            logger.debug("Case étudiée : " + str(case_tableau["key"]))
+            logger.debug("Case étudiée : " + str(key_case))
 
             if key_case not in self.dict_modif_cases:
 
@@ -483,7 +486,7 @@ class Facturation():
                         # Recherche les évènements pour lesquels une conso est saisie
                         liste_evenements = []
                         for conso in self.donnees["consommations"].get("%s_%s" % (case_tableau["date"], case_tableau["inscription"]), []):
-                            if conso["evenement"]:
+                            if conso["evenement"] and conso["etat"] not in ("attente", "refus"):
                                 idevenement = conso["evenement"]
                                 evenement = Evenement.objects.filter(pk=idevenement).first()
                                 liste_evenements.append(evenement)

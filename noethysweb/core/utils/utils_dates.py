@@ -141,6 +141,7 @@ def TimeEnDelta(heureTime):
 
 def HeureStrEnDelta(heureStr):
     if heureStr == None or heureStr == "": return datetime.timedelta(hours=0, minutes=0)
+    if type(heureStr) == datetime.time: return datetime.timedelta(hours=heureStr.hour, minutes=heureStr.minute)
     if "h" in heureStr:
         heureStr = heureStr.replace("h", ":")
     if ":" not in heureStr:
@@ -167,6 +168,7 @@ def AdditionHeures(heure1, heure2):
 
 def Additionne_intervalles_temps(intervals=[]):
     def tparse(timestring):
+        if type(timestring) == datetime.time: return datetime.datetime(year=1900, month=1, day=1, hour=timestring.hour, minute=timestring.minute)
         if len(timestring.split(":")) == 2: return datetime.datetime.strptime(timestring, '%H:%M')
         if len(timestring.split(":")) == 3: return datetime.datetime.strptime(timestring, '%H:%M:%S')
     START, END = range(2)

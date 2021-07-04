@@ -109,9 +109,9 @@ def Envoyer_model_mail(idmail=None, request=None):
 
     # Valeurs de fusion par défaut
     valeurs_defaut = {
-            "{UTILISATEUR_NOM_COMPLET}": request.user.get_full_name(),
-            "{UTILISATEUR_NOM}": request.user.last_name,
-            "{UTILISATEUR_PRENOM}": request.user.first_name,
+            "{UTILISATEUR_NOM_COMPLET}": request.user.get_full_name() if request else "",
+            "{UTILISATEUR_NOM}": request.user.last_name if request else "",
+            "{UTILISATEUR_PRENOM}": request.user.first_name if request else "",
             "{DATE_COURTE}": utils_dates.DateComplete(datetime.date.today()),
             "{DATE_LONGUE}": utils_dates.ConvertDateToFR(datetime.date.today()),
         }
@@ -181,8 +181,8 @@ def Envoyer_model_mail(idmail=None, request=None):
             liste_envois_succes.append(destinataire)
 
             # Mémorise l'envoi dans l'historique
-            utils_historique.Ajouter(titre="Envoi d'un email", detail=objet, utilisateur=request.user, famille=mail.famille,
-                                     individu=mail.individu, objet="Email", idobjet=mail.pk, classe="Mail")
+            utils_historique.Ajouter(titre="Envoi d'un email", detail=objet, utilisateur=request.user if request else None, famille=destinataire.famille_id,
+                                     individu=destinataire.individu_id, objet="Email", idobjet=mail.pk, classe="Mail")
 
     connection.close()
     return liste_envois_succes

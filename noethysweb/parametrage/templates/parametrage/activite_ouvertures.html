@@ -113,11 +113,11 @@
             // Affichage des informations
             var texte_infos = "";
             if (this.nbre_conso > 0) {
-                texte_infos += "<span title='Nombre de consommations associées'><i class='fa fa-user'></i> " + this.nbre_conso + "<span>";
+                texte_infos += " <span title='Nombre de consommations associées'><i class='fa fa-user'></i> " + this.nbre_conso + "<span>";
             }
             if (this.nbre_evenements > 0) {
                 if (this.nbre_conso > 0) {texte_infos += ""};
-                texte_infos += "<span title='Nombre événements associés'><i class='fa fa-calendar-times-o'></i> " + this.nbre_evenements + "<span>";
+                texte_infos += " <span title='Nombre événements associés'><i class='fa fa-calendar-times-o'></i> " + this.nbre_evenements + "<span>";
             }
             $("#" + this.key + " .infos").html(texte_infos);
 
