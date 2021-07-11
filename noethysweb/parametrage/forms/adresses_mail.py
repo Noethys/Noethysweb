@@ -89,10 +89,6 @@ class Formulaire(FormulaireBase, ModelForm):
             self.add_error('adresse', "Vous devez renseigner l'adresse d'expédition")
             return
 
-        if not self.cleaned_data["nom_adresse"]:
-            self.add_error('nom_adresse', "Vous devez renseigner l'adresse affichée")
-            return
-
         if self.cleaned_data["moteur"] == "smtp":
 
             if not self.cleaned_data["nom_adresse"]:
@@ -178,7 +174,11 @@ function On_change_moteur() {
         $('#div_id_cle_api').show();
         $('#div_id_cle_secrete').show();
     }
-    
+
+    if($(this).val() == 'console') {
+        $('#div_id_adresse').show();
+    }
+
 }
 $(document).ready(function() {
     $('#id_moteur').change(On_change_moteur);

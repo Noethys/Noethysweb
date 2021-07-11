@@ -5,7 +5,9 @@
 
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
-import io
+from django.conf import settings
+from distutils.dir_util import copy_tree
+import io, os
 
 
 class Command(BaseCommand):
@@ -13,6 +15,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         nom_fichier = "core/static/defaut/core.json"
+
+        # Copie les images dans le répertoire media
+        copy_tree("core/static/defaut/media", os.path.join(settings.BASE_DIR, "media"))
+
         # Fermeture de toutes les connexions à la base
         from django import db
         db.connections.close_all()
