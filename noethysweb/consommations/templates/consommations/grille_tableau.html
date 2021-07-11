@@ -86,6 +86,10 @@
                         <th colspan="{{ data.liste_unites|length|add:1 }}" style="padding: 5px 0px 10px 0px !important; border-top: solid transparent; border-left: solid transparent; border-right: solid transparent;">
                             {% include "portail/planning_commandes.html" %}
                         </th>
+                    {% elif data.mode == "pointeuse" %}
+                        <th colspan="{{ data.liste_unites|length|add:3 }}" style="padding: 2px 0px 10px 0px !important; border-top: solid transparent; border-left: solid transparent; border-right: solid transparent;">
+                            {% include "consommations/grille_commandes.html" %}
+                        </th>
                     {% else %}
                         <th colspan="{{ data.liste_unites|length|add:2 }}" style="padding: 2px 0px 10px 0px !important; border-top: solid transparent; border-left: solid transparent; border-right: solid transparent;">
                             {% include "consommations/grille_commandes.html" %}
@@ -94,7 +98,12 @@
                 </tr>
 
                 <tr>
-                    <th style="width:100px">Date</th>
+                    {% if data.mode == 'pointeuse' %}
+                        <th style="width:40px">Photo</th>
+                    {% endif %}
+                    <th style="width:100px">
+                        {% if data.mode == 'jour' or data.mode == 'pointeuse' %}Individu{% else %}Date{% endif %}
+                    </th>
                     {% for unite in data.liste_unites %}
                         <th>{{ unite.nom }}</th>
                     {% endfor %}
@@ -124,9 +133,20 @@
                     {% for inscription in data.liste_inscriptions %}
 
                         <tr>
+                            {% if data.mode == 'pointeuse' %}
+                                <th>
+                                    <img src="{{ inscription.individu.Get_photo }}" alt="photo-individu" class="img-circle img-fluid" style="max-width: 40px">
+                                </th>
+                            {% endif %}
+
                             <th class="{% if date|est_en_vacances:data.liste_vacances and data.mode == 'individu' %}vacances{% endif %}">
-                                {% if data.mode == 'date' %}
-                                    <div>{{ inscription.individu.nom }} {{ inscription.individu.prenom }}</div><div class='infos_inscription'>{% if inscription.infos_diffentes %}{{ inscription.infos_diffentes }}{% endif %}</div>
+                                {% if data.mode == 'date' or data.mode == 'pointeuse' %}
+                                    <div>
+                                        {{ inscription.individu.nom }} {{ inscription.individu.prenom }}
+                                    </div>
+                                    <div class='infos_inscription'>
+                                        {% if inscription.infos_diffentes %}{{ inscription.infos_diffentes }}{% endif %}
+                                    </div>
                                 {% else %}
                                     {% if data.liste_inscriptions|length > 1 %}
                                         <div>{{ inscription.individu.prenom }}</div><div class='infos_inscription'>{% if inscription.infos_diffentes %}{{ inscription.infos_diffentes }}{% endif %}</div>

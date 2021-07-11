@@ -1,0 +1,206 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Modal détail d'une conso #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_saisir_detail{% endblock %}
+    {% block modal_titre %}Détail d'une consommation{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+
+        <form id="form_selection_details" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="saisie_detail_key" value="">
+            <input type="hidden" id="saisie_detail_action" value="">
+
+            <div>
+                <div class="controls">
+
+                    {# Sélection des horaires #}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="saisie_heure_debut" class="col-form-label">Début</label>
+                            <div class="input-group date choix_horaires">
+                                <input id="saisie_heure_debut" type="time" class="form-control"/>
+                                <div class="input-group-append">
+                                    <button id="bouton_heure_debut" class="btn btn-primary" type="button" title="Insérer l'heure actuelle"><i class="fa fa-bell"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="saisie_heure_fin" class="col-form-label">Fin</label>
+                            <div class="input-group date choix_horaires">
+                                <input id="saisie_heure_fin" type="time" class="form-control"/>
+                                <div class="input-group-append">
+                                    <button id="bouton_heure_fin" class="btn btn-primary" type="button" title="Insérer l'heure actuelle"><i class="fa fa-bell"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        {# Sélection de la quantité #}
+                        <div class="col-md-6">
+                            <div class="controls">
+                                <label for="saisie_quantite" class="col-form-label">Quantité</label>
+                                <input id="saisie_quantite" type="number" class="numberinput form-control" min="1">
+                            </div>
+                        </div>
+                        {# Sélection du groupe #}
+                        <div class="col-md-6">
+                            <label for="saisie_groupe" class="col-form-label">Groupe</label>
+                            <select class="select form-control" id="saisie_groupe">
+                                {% for groupe in data.liste_groupes %}
+                                    <option value="{{ groupe.pk }}" selected>{{ groupe.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    {# Sélection de l'état #}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="controls">
+                                <label for="boutons_etat" class="col-form-label">Etat</label>
+                                <div data-toggle="buttons">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label class="btn btn-default btn-block"><input type="radio" name="saisie_etat" value="reservation" checked> Réservation</label>
+                                            <label class="btn btn-default btn-block"><input type="radio" name="saisie_etat" value="present"> Présent</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="btn btn-default btn-block"><input type="radio" name="saisie_etat" value="attente"> Attente</label>
+                                            <label class="btn btn-default btn-block"><input type="radio" name="saisie_etat" value="absentj"> Abs. justifiée</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="btn btn-default btn-block"><input type="radio" name="saisie_etat" value="refus"> Refus</label>
+                                            <label class="btn btn-default btn-block"><input type="radio" name="saisie_etat" value="absenti"> Abs. injustifiée</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="buttonHolder">
+                <div class="modal-footer d-flex" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                    <button type="submit" class="btn btn-warning mr-auto p-2" name="submit_supprimer" title="Supprimer" id="saisie_detail_supprimer" value="Supprimer"><i class="fa fa-trash margin-r-5"></i>Supprimer</button>
+                    <button type="submit" class="btn btn-primary p-2" name="submit_valider" title="Valider" id="saisie_detail_valider" value="Valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                    <button type="button" class="btn btn-danger p-2" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                </div>
+            </div>
+
+        </form>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+    $(document).ready(function() {
+
+        // Sur affichage de la modal
+        $('#modal_saisir_detail').on('show.bs.modal', function () {
+            $("#saisie_heure_debut").focus();
+
+            // Cache le bouton Supprimer s'il s'agit d'un ajout de conso
+            $('#saisie_detail_supprimer').hide();
+            if ($('#saisie_detail_action').val() === "modifier") {
+                $('#saisie_detail_supprimer').show();
+            };
+
+            // Vérifie si des heures sont fixes
+            var case_tableau = dict_cases[$('#saisie_detail_key').val()];
+            $("#saisie_heure_debut").prop('disabled', dict_unites[case_tableau.unite].heure_debut_fixe);
+            $("#bouton_heure_debut").prop('disabled', dict_unites[case_tableau.unite].heure_debut_fixe);
+            $("#saisie_heure_fin").prop('disabled', dict_unites[case_tableau.unite].heure_fin_fixe);
+            $("#bouton_heure_fin").prop('disabled', dict_unites[case_tableau.unite].heure_fin_fixe);
+        });
+
+        // Bouton heure actuelle
+        $("#bouton_heure_debut").on('click', function(e) {
+            $('#saisie_heure_debut').val(moment().format('HH:mm'));
+        });
+        $("#bouton_heure_fin").on('click', function(e) {
+            $('#saisie_heure_fin').val(moment().format('HH:mm'));
+        });
+
+        // Validation de la modal sur touche Entrée
+        $('#modal_saisir_detail').on('keypress', function(e) {
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                $('#saisie_detail_valider').click();
+            };
+        });
+    });
+
+    // Bouton Supprimer conso
+    $("#form_selection_details").on('click', '#saisie_detail_supprimer', function(e) {
+        e.preventDefault();
+        var key = $('#saisie_detail_key').val();
+        if (dict_cases[key].supprimer() === true) {
+            $('#modal_saisir_detail').modal('hide');
+        };
+    });
+
+    // Modal : Validation
+    $("#form_selection_details").on('click', '#saisie_detail_valider', function(e) {
+        e.preventDefault();
+
+        // Vérification des heures saisies
+        var case_tableau = dict_cases[$('#saisie_detail_key').val()];
+        if ((case_tableau.type_case === 'horaire') || ($('#saisie_heure_debut').val() != '') || ($('#saisie_heure_fin').val() != '')) {
+            var heure_debut = moment($('#saisie_heure_debut').val().slice(0, 5), "HH:mm", true);
+            if (!heure_debut.isValid()) {
+                toastr.error(("L'heure de début n'est pas valide"));
+                return false;
+            }
+            var heure_fin = moment($('#saisie_heure_fin').val().slice(0, 5), "HH:mm", true);
+            if (!heure_fin.isValid()) {
+                toastr.error(("L'heure de fin n'est pas valide"));
+                return false;
+            }
+            if (heure_debut >= heure_fin) {
+                toastr.error(("L'heure de fin doit être supérieure à l'heure de début"));
+                return false;
+            }
+            var heure_debut = heure_debut._i;
+            var heure_fin = heure_fin._i;
+        } else {
+            var heure_debut = null;
+            var heure_fin = null;
+        };
+
+        var quantite = $('#saisie_quantite').val();
+        if ((quantite == null) || (quantite === '') || (parseInt(quantite) < 1)) {
+            toastr.error(("La quantité saisie n'est pas valide"));
+            return false;
+        }
+
+        // Get autres variables
+        var key = $('#saisie_detail_key').val();
+        var action = $('#saisie_detail_action').val();
+        var groupe = $('#saisie_groupe').val();
+        var etat = $("input[name='saisie_etat']:checked").val();
+
+        // Renvoie les données à la page
+        $('#modal_saisir_detail').modal('hide');
+
+        var infos = {
+            heure_debut: heure_debut,
+            heure_fin: heure_fin,
+            quantite: parseInt(quantite),
+            groupe: parseInt(groupe),
+            etat: etat,
+        };
+        console.log("infos=", infos)
+        if (action === "ajouter") {dict_cases[key].creer_conso(infos)};
+        if (action === "modifier") {dict_cases[key].modifier_conso(infos, maj_facturation=true)};
+
+    });
+
+</script>

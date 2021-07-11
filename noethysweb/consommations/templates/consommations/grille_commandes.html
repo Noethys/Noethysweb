@@ -1,8 +1,15 @@
 
     <div class="commandes_grille d-flex flex-wrap">
-        <button type="submit" title="Enregistrer" form="form-maj" class='btn btn-primary btn-sm' value="Sauvegarde"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
+        {% if data.mode != "pointeuse" %}
+            <button type="submit" title="Enregistrer" form="form-maj" class='btn btn-primary btn-sm' value="Sauvegarde"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
+        {% endif %}
         {% if data.mode == "date" %}
             <a type='button' title="Annuler" class='btn btn-danger btn-sm' href="{% url 'consommations_toc' %}"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
+        {% endif %}
+        {% if data.mode == "pointeuse" %}
+            <a type='button' title="Fermer" class='btn btn-danger btn-sm' href="{% url 'consommations_toc' %}"><i class="fa fa-times margin-r-5"></i>Fermer</a>
+        {% endif %}
+        {% if data.mode == "date" or data.mode == "pointeuse" %}
             <button type="button" id="ajouter_individu" class="btn btn-default btn-sm" onclick="$('#modal_ajouter_individu').modal('show');" title="Ajouter un individu"><i class="fa fa-plus margin-r-5"></i>Individu</button>
         {% endif %}
         {% if data.mode == "individu" %}
@@ -34,6 +41,9 @@
                     <option value="reservation">Réservation</option>
                     <option value="attente">Attente</option>
                     <option value="refus">Refus</option>
+                    <option value="present">Présent</option>
+                    <option value="absentj">Absence justifiée</option>
+                    <option value="absenti">Absence injustifiée</option>
                 </select>
             </div>
         </div>

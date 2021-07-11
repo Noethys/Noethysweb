@@ -26,6 +26,12 @@
 
 <script>
 
+    $(document).ready(function() {
+        $('#modal_ajouter_individu').on('show.bs.modal', function () {
+            $("#id_individu").select2('focus');
+        });
+    });
+
     // Modal : Validation de l'individu
     $("#ajouter_individu_valider").on('click', function(e) {
         var idindividu = $('#id_individu').val();

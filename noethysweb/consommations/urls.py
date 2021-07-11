@@ -6,7 +6,7 @@
 from django.urls import include, path
 from core.views import toc
 from parametrage.views import calendrier
-from consommations.views import grille, gestionnaire, suivi_consommations, etat_global, synthese_consommations, liste_attente, liste_absences, edition_liste_conso
+from consommations.views import grille, gestionnaire, suivi_consommations, etat_global, synthese_consommations, liste_attente, liste_absences, edition_liste_conso, pointeuse
 from core.decorators import secure_ajax
 
 
@@ -18,6 +18,7 @@ urlpatterns = [
     # Gestion des consommations
     path('consommations/edition_liste_conso', edition_liste_conso.View.as_view(), name='edition_liste_conso'),
     path('consommations/gestionnaire_consommations', gestionnaire.View.as_view(), name='gestionnaire_conso'),
+    path('consommations/pointeuse_consommations', pointeuse.View.as_view(), name='pointeuse_conso'),
     path('consommations/suivi_consommations', suivi_consommations.View.as_view(), name='suivi_consommations'),
 
     # Listes par état

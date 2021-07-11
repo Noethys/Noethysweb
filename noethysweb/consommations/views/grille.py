@@ -184,7 +184,7 @@ def Get_generic_data(data={}):
     data['liste_groupes_json'] = serializers.serialize('json', data['liste_groupes'])
 
     # Sélection des groupes
-    if data["mode"] == "date" and not data['selection_groupes']:
+    if data["mode"] in ("date", "pointeuse") and not data['selection_groupes']:
         data['selection_groupes'] = [groupe.pk for groupe in data['liste_groupes']]
 
     # Importation des unités de conso
@@ -221,9 +221,9 @@ def Get_generic_data(data={}):
 
 
 def Save_grille(request=None, donnees={}):
-    logger.debug("Sauvegarde de la grille")
-    logger.debug("prestations" + str(donnees["prestations"]))
-    logger.debug("suppressions" + str(donnees["suppressions"]))
+    logger.debug("Sauvegarde de la grille...")
+    logger.debug("prestations : " + str(donnees["prestations"]))
+    logger.debug("suppressions : " + str(donnees["suppressions"]))
     chrono = time.time()
 
     liste_historique = []
@@ -235,7 +235,7 @@ def Save_grille(request=None, donnees={}):
     for IDprestation, dict_prestation in donnees["prestations"].items():
 
         if "-" in IDprestation:
-            logger.debug("Prestation à ajouter : " + str(IDprestation) + " > " + str(dict_prestation))
+            logger.debug("Prestation à ajouter : ID" + str(IDprestation) + " > " + str(dict_prestation))
 
             # Enregistre la prestation
             prestation = Prestation.objects.create(
@@ -264,12 +264,13 @@ def Save_grille(request=None, donnees={}):
     # Analyse et préparation des consommations
     liste_ajouts = []
     dict_modifications = {}
+    dict_idconso = {}
     for key_case, consommations in donnees["consommations"].items():
         for dict_conso in consommations:
             # Recherche du nouvel IDprestation
             dict_conso["prestation"] = dict_idprestation.get(dict_conso["prestation"], dict_conso["prestation"])
 
-            if "pk" not in dict_conso or not dict_conso["pk"]:
+            if "-" in str(dict_conso["pk"]):
                 liste_ajouts.append(Consommation(
                     individu_id=dict_conso["individu"], inscription_id=dict_conso["inscription"], activite_id=dict_conso["activite"], date=dict_conso["date"],
                     unite_id=dict_conso["unite"], groupe_id=dict_conso["groupe"], heure_debut=dict_conso["heure_debut"], heure_fin=dict_conso["heure_fin"],
@@ -279,6 +280,12 @@ def Save_grille(request=None, donnees={}):
                 logger.debug("Consommation à ajouter : " + str(dict_conso))
                 liste_historique.append({"titre": "Ajout d'une consommation", "detail": "%s du %s (%s)" % (dict_unites[dict_conso["unite"]].nom, utils_dates.ConvertDateToFR(dict_conso["date"]), dict_conso["etat"]), "utilisateur": request.user if request else None,
                                          "famille_id": dict_conso["famille"], "individu_id": dict_conso["individu"], "objet": "Consommation", "idobjet": None, "classe": "Consommation"})
+
+                # Mode pointeuse pour récupérer l'idconso
+                if donnees.get("mode", None) == "pointeuse":
+                    liste_ajouts[0].save()
+                    dict_idconso[dict_conso["pk"]] = liste_ajouts[0].pk
+                    liste_ajouts = []
 
             elif dict_conso["dirty"]:
                 dict_modifications[dict_conso["pk"]] = dict_conso
@@ -296,6 +303,10 @@ def Save_grille(request=None, donnees={}):
         conso.categorie_tarif_id = dict_modifications[conso.pk]["categorie_tarif"]
         conso.prestation_id = dict_modifications[conso.pk]["prestation"]
         conso.quantite = dict_modifications[conso.pk]["quantite"]
+
+        if conso.prestation_id in dict_idprestation:
+            conso.prestation_id = dict_idprestation[conso.prestation_id]
+
         liste_modifications.append(conso)
 
     # Traitement dans la base
@@ -360,6 +371,8 @@ def Save_grille(request=None, donnees={}):
     # Affiche le chrono
     logger.debug("Temps d'enregistrement de la grille : " + str(time.time() - chrono))
 
+    return dict_idprestation, dict_idconso
+
 
 def CompareDict(dict1={}, dict2={}, keys=[]):
     """ Compare les valeurs de 2 dictionnaires selon les clés données """
@@ -370,12 +383,46 @@ def CompareDict(dict1={}, dict2={}, keys=[]):
 
 
 def Facturer(request=None):
-    donnees = json.loads(request.POST.get("donnees", {}))
-    logger.debug("Facturation")
-    logger.debug("données aller : " + str(donnees))
-    facturation = Facturation(donnees=donnees)
+    donnees_aller = json.loads(request.POST.get("donnees", {}))
+    logger.debug("============== Facturation ================")
+    logger.debug("données aller : " + str(donnees_aller))
+    facturation = Facturation(donnees=donnees_aller)
     donnees_retour = facturation.Facturer()
     logger.debug("données retour : " + str(donnees_retour))
+
+    # Si mode pointage, sauvegarde les données
+    if donnees_aller.get("mode", None) == "pointeuse":
+
+        # Attribue les nouvelles prestations aux consommations
+        for key_case, idprestation in donnees_retour["modifications_idprestation"].items():
+            for key_conso, liste_conso in donnees_aller["consommations"].items():
+                for dict_conso in liste_conso:
+                    if dict_conso["key_case"] == key_case:
+                        dict_conso["prestation"] = idprestation
+
+        # Ajouter les nouvelles prestations pour la sauvegarde
+        donnees_aller["prestations"].update(donnees_retour["nouvelles_prestations"])
+        donnees_save = {
+            "mode": donnees_aller.get("mode", None),
+            "consommations": donnees_aller["consommations"],
+            "prestations": donnees_aller["prestations"],
+            "suppressions": {
+                "consommations": donnees_aller["dict_suppressions"]["consommations"],
+                "prestations": [int(idprestation) for idprestation in donnees_retour["anciennes_prestations"] if "-" not in str(idprestation)],
+                "memos": [],
+            },
+        }
+        dict_idprestation, dict_idconso = Save_grille(request=request, donnees=donnees_save)
+        donnees_retour["modifications_idconso"] = dict_idconso
+
+        # Remplacement des anciens idprestation par les nouveaux idprestation
+        for idprestation in list(donnees_retour["nouvelles_prestations"].keys()):
+            if idprestation in dict_idprestation:
+                nouvel_idprestation = dict_idprestation[idprestation]
+                donnees_retour["nouvelles_prestations"][nouvel_idprestation] = donnees_retour["nouvelles_prestations"][idprestation]
+                donnees_retour["nouvelles_prestations"][nouvel_idprestation]["prestation"] = nouvel_idprestation
+                del donnees_retour["nouvelles_prestations"][idprestation]
+
     return JsonResponse(donnees_retour)
 
 
@@ -673,7 +720,7 @@ class Facturation():
         donnees_retour = {
             "anciennes_prestations": self.liste_anciennes_prestations,
             "nouvelles_prestations": self.dict_nouvelles_prestations,
-            "modifications_cases": self.dict_modif_cases,
+            "modifications_idprestation": self.dict_modif_cases,
         }
         return donnees_retour
 

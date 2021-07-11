@@ -7,8 +7,12 @@ $.expr[':'].icontains = $.expr.createPseudo(function(text) {
     }
 });
 
-
-
+// CRéaiton d'un UUID
+function uuid() {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  );
+}
 
 /*
 * jQuery.ajaxQueue - A queue for ajax requests
@@ -56,7 +60,6 @@ $.ajaxQueue = function( ajaxOpts ) {
 
     // run the actual query
     function doRequest( next ) {
-        console.log("Lancement de l'ajax suivant...");
         ajaxOpts.data.donnees = JSON.stringify(get_donnees_for_facturation(ajaxOpts.data.keys_cases_touchees));
         jqXHR = $.ajax( ajaxOpts )
             .done( dfd.resolve )
@@ -187,6 +190,7 @@ class Case_base {
 
         // Création de la nouvelle conso
         var conso = new Conso({fields:{
+            pk: uuid(),
             etat: mode_saisie,
             individu: this.individu,
             groupe : this.groupe,
@@ -197,7 +201,6 @@ class Case_base {
             famille: this.famille,
             categorie_tarif: this.categorie_tarif,
         }});
-
         // Assigne des valeurs si un dict data est donné
         if (data) {
             Object.assign(conso, data);
@@ -237,6 +240,28 @@ class Case_base {
             facturer(this);
         }
         return true;
+    };
+
+    detail(action="modifier") {
+        // Envoie les infos de la conso vers le modal
+        if (this.consommations.length > 0) {
+            if (this.consommations[0].heure_debut) {$('#saisie_heure_debut').val(this.consommations[0].heure_debut)};
+            if (this.consommations[0].heure_fin) {$('#saisie_heure_fin').val(this.consommations[0].heure_fin)};
+            if (this.consommations[0].quantite) {$('#saisie_quantite').val(this.consommations[0].quantite)};
+            $('#saisie_groupe').val(this.consommations[0].groupe);
+            $("input[name='saisie_etat'][value='" + this.consommations[0].etat + "']").prop("checked",true);
+        } else {
+            // Envoie les infos par défaut si ajout
+            if (dict_unites[this.unite].heure_debut) {$('#saisie_heure_debut').val(dict_unites[this.unite].heure_debut)};
+            if (dict_unites[this.unite].heure_fin) {$('#saisie_heure_fin').val(dict_unites[this.unite].heure_fin)};
+            $('#saisie_quantite').val(1);
+            $('#saisie_groupe').val(this.groupe);
+            $("input[name='saisie_etat'][value='" + $("#mode_saisie").val() + "']").prop("checked",true);
+        };
+
+        $('#saisie_detail_key').val(this.key);
+        $('#saisie_detail_action').val(action);
+        $('#modal_saisir_detail').modal('show');
     };
 
     // Calcule le remplissage
@@ -333,7 +358,7 @@ class Case_standard extends Case_base {
             };
 
             // Dessine le nom du groupe
-            if (dict_groupes.length > 1) {
+            if (Object.keys(dict_groupes).length > 1) {
                 $("#" + this.key + " .groupe").html(dict_groupes[conso.groupe].nom);
             };
             if (mode === "portail") {
@@ -361,8 +386,9 @@ class Case_standard extends Case_base {
     // Supprimer une conso
     supprimer(maj_facturation=true) {
         if (this.is_locked()) {return false}
+
         // Mémorisation de la suppression
-        if ((this.consommations.length > 0) && (this.consommations[0].pk)) {
+        if (this.consommations.length > 0) {
             dict_suppressions.consommations.push(this.consommations[0].pk)
         };
         this.consommations = [];
@@ -420,6 +446,14 @@ class Case_standard extends Case_base {
         };
     };
 
+    // Attribue un idconso à la conso
+    set_idconso(idconso) {
+        if (this.has_conso()) {
+            this.modifier_conso({pk: idconso});
+            return true;
+        };
+    };
+
     // Vérifie si la conso est verrouillée
     is_locked() {
         if ((this.consommations.length > 0) && (jQuery.inArray(this.consommations[0].etat, ["present", "absentj", "absenti"]) !== -1)) {
@@ -445,6 +479,9 @@ class Case_unitaire extends Case_standard {
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
 
+        // Mode pointeuse
+        if (mode === 'pointeuse') {this.detail("ajouter"); return false};
+
         // Créer conso
         this.creer_conso(data, maj_facturation);
     };
@@ -452,7 +489,11 @@ class Case_unitaire extends Case_standard {
     // Toggle une conso
     toggle() {
         if (this.has_conso()) {
-            this.supprimer();
+            if (mode === 'pointeuse') {
+                this.detail("modifier");
+            } else {
+                this.supprimer();
+            };
         } else {
             this.ajouter();
         };
@@ -484,6 +525,9 @@ class Case_horaire extends Case_standard {
             return true;
         };
 
+        // Mode pointeuse
+        if (mode === 'pointeuse') {this.detail("ajouter"); return false};
+
         // Envoie les heures par défaut de l'unité vers le modal
         if (dict_unites[this.unite].heure_debut) {$('#saisie_heure_debut').val(dict_unites[this.unite].heure_debut)};
         if (dict_unites[this.unite].heure_fin) {$('#saisie_heure_fin').val(dict_unites[this.unite].heure_fin)};
@@ -494,6 +538,10 @@ class Case_horaire extends Case_standard {
     };
 
     modifier () {
+        // Mode pointeuse
+        if (mode === 'pointeuse') {this.detail("modifier"); return false};
+
+        // Vérifie si verrouillage
         if (this.is_locked()) {return false};
 
         // Envoie les heures de la conso vers le modal
@@ -537,12 +585,19 @@ class Case_quantite extends Case_standard {
             return true;
         };
 
+        // Mode pointeuse
+        if (mode === 'pointeuse') {this.detail("ajouter"); return false};
+
         $('#saisie_quantite_key').val(this.key);
         $('#saisie_quantite_action').val("ajouter");
         $('#modal_saisir_quantite').modal('show');
     };
 
     modifier () {
+        // Mode pointeuse
+        if (mode === 'pointeuse') {this.detail("modifier"); return false};
+
+        // Vérifie si verrouillage
         if (this.is_locked()) {return false};
 
         // Envoie la quantité de la conso vers le modal
@@ -617,7 +672,11 @@ class Case_event extends Case_standard {
     // Toggle une conso
     toggle() {
         if (this.has_conso()) {
-            this.supprimer();
+            if (mode === 'pointeuse') {
+                this.detail("modifier");
+            } else {
+                this.supprimer();
+            };
         } else {
             this.ajouter();
         };
@@ -758,7 +817,7 @@ class Case_multi extends Case_horaire {
     supprimer() {
         if (this.is_locked()) {return false}
         // Mémorisation de la suppression
-        if (this.consommations[0].pk) {dict_suppressions.consommations.push(this.consommations[0].pk)};
+        dict_suppressions.consommations.push(this.consommations[0].pk);
         // Supprime également la conso dans la case parente
         dict_cases[this.key_case_parente].supprimer(this.consommations[0]);
         this.consommations = [];
@@ -796,7 +855,7 @@ class Conso {
         this.prestation = null;
         this.forfait = null;
         this.facture = null;
-        this.quantite = null;
+        this.quantite = 1;
         this.statut = null;
         this.case = null;
         this.etiquettes = [];
@@ -809,12 +868,17 @@ class Conso {
         if (conso) {
             if ("fields" in conso) {
                 Object.assign(this, conso.fields);
+                if (conso.fields.pk) {
+                    this.pk = conso.fields.pk;
+                } else {
+                    this.pk = conso.pk;
+                }
+
             } else {
                 Object.assign(this, conso);
+                this.pk = conso.pk;
             }
-            this.pk = conso.pk;
         };
-
 
     }
 };
@@ -1205,6 +1269,7 @@ function get_donnees_for_facturation(keys_cases_touchees) {
         cases_touchees: dict_cases_touchees_temp,
         liste_vacances: liste_vacances,
         dict_suppressions: dict_suppressions,
+        mode: mode,
     };
 };
 
@@ -1220,11 +1285,6 @@ function ajax_facturer(cases_touchees_temp) {
             },
         datatype: "json",
         success: function(data){
-            // console.log("==== Retour Facturation ok ====");
-            // console.log("anciennes prestations=", data.anciennes_prestations);
-            // console.log("nouvelles prestations=", data.nouvelles_prestations);
-            // console.log("modifications_cases=", data.modifications_cases);
-
             // Envoie les nouvelles prestations au dict_prestations
             $.each(data.nouvelles_prestations, function (idprestation, dict_prestation) {
                 dict_prestations[idprestation] = dict_prestation;
@@ -1238,9 +1298,22 @@ function ajax_facturer(cases_touchees_temp) {
             }
 
             // Met à jour les conso
-            $.each(data.modifications_cases, function (key, idprestation) {
+            $.each(data.modifications_idprestation, function (key, idprestation) {
                 dict_cases[key].set_prestation(idprestation);
             });
+
+            if (data.modifications_idconso) {
+                $.each(data.modifications_idconso, function (ancien_idconso, nouvel_idconso) {
+                    $.each(dict_cases, function(key_case, valeurs) {
+                        for (var conso of valeurs.consommations) {
+                            if (conso.pk === ancien_idconso) {
+                                dict_cases[key_case].set_idconso(nouvel_idconso);
+                            };
+                        };
+                    });
+                });
+            };
+
             // MAJ du box facturation
             maj_box_facturation();
 

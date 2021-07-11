@@ -21,6 +21,7 @@ from django.core import serializers
 class View(CustomView, TemplateView):
     menu_code = "gestionnaire_conso"
     template_name = "consommations/gestionnaire.html"
+    mode_grille = "date"
 
     def post(self, request, *args, **kwargs):
         # Si requête de MAJ
@@ -41,7 +42,7 @@ class View(CustomView, TemplateView):
         return context
 
     def Get_data_grille(self):
-        data = {"mode": "date", "consommations": {}, "prestations": {}, "memos": {}}
+        data = {"mode": self.mode_grille, "consommations": {}, "prestations": {}, "memos": {}}
 
         # Sélections par défaut
         if self.request.POST:
