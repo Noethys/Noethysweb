@@ -86,16 +86,18 @@ class Accueil(CustomView, TemplateView):
 
     def Get_anniversaires(self, demain=False):
         """ Récupère les anniversaires """
-        date_jour = datetime.date.today()
-        if demain:
-            date_jour += datetime.timedelta(days=1)
-        individus = Individu.objects.filter(date_naiss__month=date_jour.month, date_naiss__day=date_jour.day, inscription__isnull=False).distinct()
-        liste_textes = []
-        for individu in individus:
-            liste_textes.append("%s %s (%d ans)" % (individu.prenom, individu.nom, individu.Get_age()))
-        if liste_textes:
-            texte_anniversaires = "Joyeux anniversaire à %s." % utils_texte.Convert_liste_to_texte_virgules(liste_textes)
-        else:
-            texte_anniversaires = "Aucun anniversaire à fêter."
-        cache.set('texte_anniversaires', texte_anniversaires)
+        texte_anniversaires = cache.get("texte_anniversaires_demain" if demain else "texte_anniversaires")
+        if not texte_anniversaires:
+            date_jour = datetime.date.today()
+            if demain:
+                date_jour += datetime.timedelta(days=1)
+            individus = Individu.objects.filter(date_naiss__month=date_jour.month, date_naiss__day=date_jour.day, inscription__isnull=False).distinct()
+            liste_textes = []
+            for individu in individus:
+                liste_textes.append("%s %s (%d ans)" % (individu.prenom, individu.nom, individu.Get_age()))
+            if liste_textes:
+                texte_anniversaires = "Joyeux anniversaire à %s." % utils_texte.Convert_liste_to_texte_virgules(liste_textes)
+            else:
+                texte_anniversaires = "Aucun anniversaire à fêter."
+            cache.set("texte_anniversaires_demain" if demain else "texte_anniversaires", texte_anniversaires, timeout=30)
         return texte_anniversaires

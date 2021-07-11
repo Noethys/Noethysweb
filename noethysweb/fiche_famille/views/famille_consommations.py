@@ -13,6 +13,7 @@ from django.shortcuts import render
 import json
 from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
 from consommations.forms.grille_traitement_lot import Formulaire as form_traitement_lot
+from django.core.cache import cache
 
 
 class Onglet(CustomView):
@@ -90,6 +91,13 @@ class Modifier(Onglet, TemplateView):
                 # Conserve les individus possibles
                 if inscription.individu not in data["liste_individus_possibles"]:
                     data["liste_individus_possibles"].append(inscription.individu)
+
+        # Mémorise l'activité favorite
+        if data["selection_activite"]:
+            cache.set("activite_favorite", data["selection_activite"])
+        activite_favorite = cache.get("activite_favorite", None)
+        if not data["selection_activite"] and activite_favorite in data['liste_activites_possibles']:
+            data['selection_activite'] = activite_favorite
 
         # Sélection de l'activité à afficher
         if data['liste_activites_possibles'] and not data["selection_activite"]:
