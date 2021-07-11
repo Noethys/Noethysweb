@@ -22,7 +22,7 @@ def Traitement_automatique(request):
         raise PermissionDenied()
 
     from consommations.utils import utils_traitement_attentes
-    utils_traitement_attentes.Traiter_attentes()
+    utils_traitement_attentes.Traiter_attentes(request=request)
     return HttpResponseRedirect(reverse_lazy("liste_attente"))
 
 

@@ -20,7 +20,8 @@ class Grille_virtuelle():
     grille.Supprimer(criteres={"unite": 1})
     grille.Enregistrer()
     """
-    def __init__(self, idfamille=None, idindividu=None, idactivite=None, date_min=None, date_max=None):
+    def __init__(self, request=None, idfamille=None, idindividu=None, idactivite=None, date_min=None, date_max=None):
+        self.request = request
         self.chrono = time.time()
         self.conso_supprimees = []
 
@@ -147,6 +148,12 @@ class Grille_virtuelle():
                     if str(dict_conso.get(champ, None)) != str(valeur):
                         valide = False
 
+                # Vérifie que la conso n'est pas facturée
+                if str(dict_conso["prestation"]) in self.data_initial["prestations"]:
+                    if self.data_initial["prestations"][str(dict_conso["prestation"])]["facture"]:
+                        logger.debug("La prestation du %s ne peut pas être modifiée car elle est déjà facturée." % dict_conso["date"])
+                        valide = False
+
                 if valide:
                     dict_conso["dirty"] = True
 
@@ -171,9 +178,15 @@ class Grille_virtuelle():
                         valide = False
 
                 # Vérifie que la conso n'est pas déjà pointée
-                if dict_conso["etat"] in ("present", "absencej", "absencei"):
+                if dict_conso["etat"] in ("present", "absentj", "absenti"):
                     logger.debug("Impossible de supprimer une conso déjà pointée : %s" % dict_conso["date"])
                     valide = False
+
+                # Vérifie que la conso n'est pas facturée
+                if str(dict_conso["prestation"]) in self.data_initial["prestations"]:
+                    if self.data_initial["prestations"][str(dict_conso["prestation"])]["facture"]:
+                        logger.debug("La prestation du %s ne peut pas être supprimée car elle est déjà facturée." % dict_conso["date"])
+                        valide = False
 
                 if valide:
                     self.conso_supprimees.append(dict_conso["pk"])
@@ -192,7 +205,7 @@ class Grille_virtuelle():
         donnees_retour = facturation.Facturer()
 
         # Modifie le IDprestation des consommations
-        for key_case, idprestation in donnees_retour["modifications_cases"].items():
+        for key_case, idprestation in donnees_retour["modifications_idprestation"].items():
             for key_conso, liste_conso in self.data_initial["consommations"].items():
                 for dict_conso in liste_conso:
                     if dict_conso["key_case"] == key_case:
@@ -210,5 +223,5 @@ class Grille_virtuelle():
                 "memos": []
             },
         }
-        Save_grille(request=None, donnees=donnees_save)
+        Save_grille(request=self.request, donnees=donnees_save)
         logger.debug("Temps d'enregistrement de la grille virtuelle : " + str(time.time() - self.chrono))

@@ -92,9 +92,9 @@ def Traiter_attentes(request=None):
         for idindividu, dict_dates in dict_individus.items():
             for date, liste_temp in dict_dates.items():
                 for dict_temp in liste_temp:
-                    grille = Grille_virtuelle(idfamille=idfamille, idindividu=idindividu, idactivite=dict_temp["idactivite"], date_min=date, date_max=date)
+                    grille = Grille_virtuelle(request=request, idfamille=idfamille, idindividu=idindividu, idactivite=dict_temp["idactivite"], date_min=date, date_max=date)
                     for idconso in dict_temp["consommations"]:
-                        grille.Modifier(criteres={"idconso": idconso}, modifications={"etat": "reservation"})
+                        grille.Modifier(criteres={"idconso": idconso, "etat": "attente"}, modifications={"etat": "reservation"})
                     grille.Enregistrer()
 
     logger.debug("Fin de la procédure de réattribution des places en attente.")
