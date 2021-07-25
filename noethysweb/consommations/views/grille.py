@@ -117,7 +117,7 @@ def Get_generic_data(data={}):
                 "date": str(p.date), "categorie": p.categorie, "label": p.label, "montant_initial": float(p.montant_initial),
                 "montant": float(p.montant), "activite": p.activite_id, "tarif": p.tarif_id, "facture": p.facture_id,
                 "famille": p.famille_id, "individu": p.individu_id, "categorie_tarif": p.categorie_tarif_id, "temps_facture": utils_dates.DeltaEnStr(p.temps_facture, separateur=":"),
-                "tva": float(p.tva) if p.tva else None, "code_compta": p.code_compta, "aides": [],
+                "quantite": p.quantite, "tva": float(p.tva) if p.tva else None, "code_compta": p.code_compta, "aides": [],
             }
             if p.pk in dict_deductions:
                 data["prestations"][p.pk]["aides"] = dict_deductions[p.pk]
@@ -242,7 +242,7 @@ def Save_grille(request=None, donnees={}):
                 date=dict_prestation["date"], categorie="consommation", label=dict_prestation["label"], montant_initial=dict_prestation["montant_initial"],
                 montant=dict_prestation["montant"], activite_id=dict_prestation["activite"], tarif_id=dict_prestation["tarif"], famille_id=dict_prestation["famille"],
                 individu_id=dict_prestation["individu"], temps_facture=utils_dates.HeureStrEnDelta(dict_prestation["temps_facture"]), categorie_tarif_id=dict_prestation["categorie_tarif"],
-                tva=dict_prestation["tva"], code_compta=dict_prestation["code_compta"],
+                quantite=dict_prestation["quantite"], tva=dict_prestation["tva"], code_compta=dict_prestation["code_compta"],
             )
 
             liste_historique.append({"titre": "Ajout d'une prestation", "detail": "%s du %s" % (dict_prestation["label"], utils_dates.ConvertDateToFR(dict_prestation["date"])), "utilisateur": request.user if request else None,
@@ -576,8 +576,6 @@ class Facturation():
                             if idunite in dictQuantites:
                                 if dictQuantites[idunite]:
                                     quantite += dictQuantites[idunite]
-                        if quantite == 0:
-                            quantite = None
 
                         # Calcul du tarif
                         resultat = self.Calcule_tarif(tarif, tarif_base.combi_retenue, case_tableau, temps_facture, quantite, evenement, modeSilencieux, action)
@@ -588,7 +586,7 @@ class Facturation():
                         else:
                             montant_tarif, nom_tarif, temps_facture = resultat
 
-                        logger.debug("Montant trouvé : %s %s %s" % (montant_tarif, nom_tarif, temps_facture))
+                        logger.debug("Montant trouvé : %s %s %s %d" % (montant_tarif, nom_tarif, temps_facture, quantite))
 
                         # -------------------------------------------------------------------------
                         # ------------------- Déduction d'une aide journalière --------------------
@@ -680,7 +678,7 @@ class Facturation():
                                 temps_facture = time.strftime("%H:%M", time.gmtime(temps_facture.seconds))
 
                             # -------------------------Mémorisation de la prestation ---------------------------------------------
-                            dict_resultat = self.Memorise_prestation(case_tableau, tarif, nom_tarif, montant_initial, montant_final, liste_aides=liste_aide_retenues, temps_facture=temps_facture, evenement=evenement)
+                            dict_resultat = self.Memorise_prestation(case_tableau, tarif, nom_tarif, montant_initial, montant_final, liste_aides=liste_aide_retenues, temps_facture=temps_facture, evenement=evenement, quantite=quantite)
                             IDprestation = dict_resultat["IDprestation"]
                             if dict_resultat["nouveau"]:
                                 self.dict_nouvelles_prestations[IDprestation] = dict_resultat["dictPrestation"]
@@ -728,7 +726,7 @@ class Facturation():
 
 
     def Memorise_prestation(self, case_tableau, tarif, nom_tarif, montant_initial, montant_final, liste_aides=[],
-                           temps_facture=None, forfait_date_debut=None, forfait_date_fin=None, evenement=None):
+                           temps_facture=None, forfait_date_debut=None, forfait_date_fin=None, evenement=None, quantite=1):
         """ Mémorisation de la prestation """
         # Préparation des valeurs à mémoriser
         dictPrestation = {
@@ -737,6 +735,7 @@ class Facturation():
             "famille": case_tableau["famille"], "individu": case_tableau["individu"], "temps_facture": temps_facture,
             "categorie_tarif": case_tableau["categorie_tarif"], "forfait_date_debut": forfait_date_debut,
             "forfait_date_fin": forfait_date_fin, "code_compta": tarif.code_compta, "tva": tarif.tva, "forfait": None, "aides": [],
+            "quantite": quantite,
         }
 
         # Recherche si une prestation identique existe déjà en mémoire
@@ -753,7 +752,7 @@ class Facturation():
                     return {"IDprestation": IDprestation, "dictPrestation": dict_prestation_2, "nouveau": False}
 
                 # Renvoie prestation existante si la prestation semble identique avec montants identiques
-                keys = ["date", "individu", "tarif", "montant_initial", "montant", "categorie_tarif", "famille", "label", "temps_facture"]
+                keys = ["date", "individu", "tarif", "montant_initial", "montant", "categorie_tarif", "famille", "label", "temps_facture", "quantite"]
                 if CompareDict(dictPrestation, dict_prestation_2, keys=keys) == True:
                     logger.debug("Récupération d'un IDprestation existant : " + str(IDprestation))
                     return {"IDprestation": IDprestation, "dictPrestation": dict_prestation_2, "nouveau": False}
@@ -1282,7 +1281,7 @@ class Facturation():
         # Si unité de type QUANTITE
         if quantite and quantite > 1:
             montant_tarif = montant_tarif * quantite
-            nom_tarif = "%d %s" % (quantite, nom_tarif)
+            # nom_tarif = "%d %s" % (quantite, nom_tarif)
 
         # Arrondit le montant à pour enlever les décimales en trop. Ex : 3.05678 -> 3.05
         montant_tarif = utils_decimal.FloatToDecimal(montant_tarif, plusProche=True)

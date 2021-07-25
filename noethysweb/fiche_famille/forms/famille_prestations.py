@@ -63,6 +63,7 @@ FORMSET_DEDUCTIONS = inlineformset_factory(Prestation, Deduction, form=Deduction
 
 
 class Formulaire(FormulaireBase, ModelForm):
+    quantite = forms.IntegerField(label="Quantité", min_value=1, required=True)
 
     class Meta:
         model = Prestation
@@ -96,6 +97,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Field('activite'),
             Field('categorie_tarif'),
             Field('tarif'),
+            Field('quantite'),
             Field('code_compta'),
             Field('code_produit_local'),
             PrependedText('montant_initial', utils_preferences.Get_symbole_monnaie()),

@@ -585,7 +585,7 @@ class Facturation():
 
         # # Infos PES ORMC
         # req = """SELECT
-        # pes_pieces.IDlot, pes_pieces.IDfacture, pes_lots.nom, pes_lots.exercice, pes_lots.mois, pes_lots.objet_dette, pes_lots.id_bordereau, pes_lots.code_prodloc,
+        # pes_pieces.IDlot, pes_pieces.IDfacture, pes_lots.nom, pes_lots.exercice, pes_lots.mois, pes_lots.objet_piece, pes_lots.id_bordereau, pes_lots.code_prodloc,
         # pes_lots.code_collectivite, pes_lots.id_collectivite, pes_lots.id_poste
         # FROM pes_pieces
         # LEFT JOIN pes_lots ON pes_lots.IDlot = pes_pieces.IDlot

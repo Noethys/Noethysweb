@@ -16,7 +16,7 @@ from django.contrib.auth.models import AbstractUser, UserManager
 from django_resized import ResizedImageField
 import datetime, decimal, uuid, os
 from django.conf import settings
-#from django_cryptography.fields import encrypt
+from django_cryptography.fields import encrypt
 from core.utils import utils_permissions
 
 
@@ -212,6 +212,13 @@ CHOIX_CATEGORIE_MODELE_DOCUMENT = [("fond", "Calque de fond"), ("facture", "Fact
                                    ("devis", "Devis"), ("location", "Location"),
                                    ("location_demande", "Demande de location")]
 
+CHOIX_FORMAT_EXPORT_TRESOR = [
+    ("pes", "PES v2 ORMC Recette"),
+    ("magnus", "Gestion financière/Magnus Berger-Levrault"),
+    ("jvs", "Millesime Online JVS"),
+]
+
+
 
 def get_uuid_path(instance, filename):
     """ Renvoie un nom de fichier uuid """
@@ -309,11 +316,11 @@ class CompteBancaire(models.Model):
     code_nne = models.CharField(verbose_name="Code NNE", max_length=200, blank=True, null=True)
     cle_rib = models.CharField(verbose_name="Clé RIB", max_length=200, blank=True, null=True)
     cle_iban = models.CharField(verbose_name="Clé IBAN", max_length=200, blank=True, null=True)
-    iban = models.CharField(verbose_name="Numéro IBAN", max_length=200, blank=True, null=True)
-    bic = models.CharField(verbose_name="BIC", max_length=200, blank=True, null=True)
+    iban = encrypt(models.CharField(verbose_name="Numéro IBAN", max_length=200, blank=True, null=True))
+    bic = encrypt(models.CharField(verbose_name="BIC", max_length=200, blank=True, null=True))
     code_ics = models.CharField(verbose_name="Code ICS", max_length=200, blank=True, null=True)
     dft_titulaire = models.CharField(verbose_name="Titulaire DFT", max_length=400, blank=True, null=True)
-    dft_iban = models.CharField(verbose_name="IBAN DFT", max_length=400, blank=True, null=True)
+    dft_iban = encrypt(models.CharField(verbose_name="IBAN DFT", max_length=400, blank=True, null=True))
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
@@ -1343,6 +1350,9 @@ class Individu(models.Model):
     def __str__(self):
         return self.Get_nom()
 
+    def Get_abrege_civilite(self):
+        return data_civilites.Get_abrege(self)
+
     def Get_nom(self, avec_civilite=False):
         texte = ""
         if avec_civilite:
@@ -1438,33 +1448,16 @@ class Famille(models.Model):
     allocataire = models.ForeignKey(Individu, verbose_name="Titulaire", on_delete=models.CASCADE, blank=True, null=True)
     autorisation_cafpro = models.BooleanField(verbose_name="Autorisation accès CAF-CDAP", default=False)
     internet_actif = models.BooleanField(verbose_name="Compte internet activé", default=True)
-    internet_identifiant = models.CharField(verbose_name="Identifiant", max_length=200, blank=True, null=True)
-    internet_mdp = models.CharField(verbose_name="Mot de passe", max_length=200, blank=True, null=True)
+    internet_identifiant = encrypt(models.CharField(verbose_name="Identifiant", max_length=200, blank=True, null=True))
+    internet_mdp = encrypt(models.CharField(verbose_name="Mot de passe", max_length=200, blank=True, null=True))
     internet_categorie = models.ForeignKey(CategorieCompteInternet, verbose_name="Catégorie", related_name="internet_categorie", on_delete=models.PROTECT, blank=True, null=True)
     memo = models.TextField(verbose_name="Mémo", blank=True, null=True)
-    # prelevement_activation = models.BooleanField(verbose_name="Activation du prélèvement", default=False)
-    # prelevement_etab = models.CharField(blank=True, null=True)
-    # prelevement_guichet = models.CharField(blank=True, null=True)
-    # prelevement_numero = models.CharField(blank=True, null=True)
-    # prelevement_cle = models.CharField(blank=True, null=True)
-    # prelevement_banque = models.IntegerField(blank=True, null=True)
-    # prelevement_individu = models.IntegerField(blank=True, null=True)
-    # prelevement_nom = models.CharField(blank=True, null=True)
-    # prelevement_rue = models.CharField(blank=True, null=True)
-    # prelevement_cp = models.CharField(blank=True, null=True)
-    # prelevement_ville = models.CharField(blank=True, null=True)
     email_factures = models.BooleanField(verbose_name="Activation de l'envoi des factures par Email", default=False)
     email_factures_adresses = models.CharField(verbose_name="Adresses pour l'envoi des factures par Email", max_length=400, blank=True, null=True)
     email_recus = models.BooleanField(verbose_name="Activation de l'envoi des reçus par Email", default=False)
     email_recus_adresses = models.CharField(verbose_name="Adresses pour l'envoi des reçus par Email", max_length=400, blank=True, null=True)
     email_depots = models.BooleanField(verbose_name="Activation de l'envoi des avis d'encaissement par Email", default=False)
     email_depots_adresses = models.CharField(verbose_name="Adresses pour l'envoi des avis d'encaissement par Email", max_length=400, blank=True, null=True)
-    # prelevement_cle_iban = models.CharField(blank=True, null=True)
-    # prelevement_iban = models.CharField(blank=True, null=True)
-    # prelevement_bic = models.CharField(blank=True, null=True)
-    # prelevement_reference_mandat = models.CharField(blank=True, null=True)
-    # prelevement_date_mandat = models.DateField(blank=True, null=True)
-    # prelevement_memo = models.CharField(blank=True, null=True)
     code_compta = models.CharField(verbose_name="Code comptable", max_length=200, blank=True, null=True)
     titulaire_helios = models.ForeignKey(Individu, verbose_name="Titulaire Hélios", related_name="titulaire_helios", on_delete=models.SET_NULL, blank=True, null=True)
     idtiers_helios = models.CharField(verbose_name="Identifiant national", max_length=300, blank=True, null=True, help_text="Saisissez l'identifiant national (SIRET ou SIREN ou FINESS ou NIR)")
@@ -1496,13 +1489,14 @@ class Famille(models.Model):
 
         # Adresse de la famille
         self.nom = dict_infos["nom"]
-        self.rue_resid = dict_infos["rue"]
-        self.cp_resid = dict_infos["cp"]
-        self.ville_resid = dict_infos["ville"]
-        self.secteur = dict_infos["secteur"]
+        self.rue_resid = dict_infos.get("rue", None)
+        self.cp_resid = dict_infos.get("cp", None)
+        self.ville_resid = dict_infos.get("ville", None)
+        self.secteur = dict_infos.get("secteur", None)
+
+        rattachements = Rattachement.objects.prefetch_related('individu').filter(famille=self, categorie=1, titulaire=True).order_by("pk")
 
         # Mail favori
-        rattachements = Rattachement.objects.prefetch_related('individu').filter(famille=self, categorie=1, titulaire=True)
         if self.mail:
             # recherche si l'adresse est toujours celle d'un titulaire de la famille
             found = False
@@ -1517,6 +1511,21 @@ class Famille(models.Model):
                 if rattachement.individu.mail:
                     self.mail = rattachement.individu.mail
                     break
+
+        # Titulaire Hélios
+        if self.titulaire_helios:
+            # recherche si le titulaire est toujours dans la famille
+            found = False
+            for rattachement in rattachements:
+                if rattachement.individu == self.titulaire_helios:
+                    found = True
+            if not found:
+                self.titulaire_helios = None
+        if not self.titulaire_helios:
+            # Recherche un individu valide parmi les titulaires de la famille
+            if rattachements:
+                self.titulaire_helios = rattachements.first().individu
+
         self.save()
 
     def Get_infos(self, avec_civilite=False):
@@ -1585,12 +1594,12 @@ class ProblemeSante(models.Model):
     idprobleme = models.AutoField(verbose_name="ID", db_column='IDprobleme', primary_key=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE)
     categorie = models.ForeignKey(CategorieMedicale, verbose_name="Catégorie", on_delete=models.PROTECT)
-    intitule = models.CharField(verbose_name="Intitulé", max_length=200)
+    intitule = encrypt(models.CharField(verbose_name="Intitulé", max_length=200))
     date_debut = models.DateField(verbose_name="Date de début", blank=True, null=True)
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
-    description = models.TextField(verbose_name="Description", blank=True, null=True)
+    description = encrypt(models.TextField(verbose_name="Description", blank=True, null=True))
     traitement_medical = models.BooleanField(verbose_name="Traitement médical", default=False)
-    description_traitement = models.TextField(verbose_name="Traitement", blank=True, null=True)
+    description_traitement = encrypt(models.TextField(verbose_name="Traitement", blank=True, null=True))
     date_debut_traitement = models.DateField(verbose_name="Date de début du traitement", blank=True, null=True)
     date_fin_traitement = models.DateField(verbose_name="Date de fin du traitement", blank=True, null=True)
     eviction = models.BooleanField(verbose_name="Eviction", default=False)
@@ -1792,6 +1801,7 @@ class Prestation(models.Model):
     forfait = models.IntegerField(verbose_name="Type de forfait", blank=True, null=True)
     temps_facture = models.DurationField(verbose_name="Temps facturé", blank=True, null=True)
     categorie_tarif = models.ForeignKey(CategorieTarif, verbose_name="Catégorie de tarif", on_delete=models.PROTECT, blank=True, null=True)
+    quantite = models.PositiveIntegerField(verbose_name="Quantité", default=1, validators=[MinValueValidator(1)])
     # forfait_date_debut = models.CharField(blank=True, null=True)
     # forfait_date_fin = models.CharField(blank=True, null=True)
     # reglement_frais = models.IntegerField(blank=True, null=True)
@@ -1831,7 +1841,7 @@ class Consommation(models.Model):
     # idcompte_payeur = models.IntegerField(db_column='IDcompte_payeur', blank=True, null=True)  # Field name made lowercase.
     prestation = models.ForeignKey(Prestation, verbose_name="Prestation", on_delete=models.PROTECT, blank=True, null=True)
     forfait = models.IntegerField(verbose_name="Type de forfait", blank=True, null=True)
-    quantite = models.IntegerField(verbose_name="Quantité", blank=True, null=True)
+    quantite = models.IntegerField(verbose_name="Quantité", blank=True, null=True, default=1)
     # etiquettes = models.CharField(blank=True, null=True)
     evenement = models.ForeignKey(Evenement, verbose_name="Evénement", blank=True, null=True, on_delete=models.PROTECT)
     badgeage_debut = models.DateTimeField(verbose_name="Badgeage début", blank=True, null=True)
@@ -2414,7 +2424,7 @@ class AdresseMail(models.Model):
     use_tls = models.BooleanField(verbose_name="TLS", default=False, help_text="Cochez cette case si la messagerie exige le protocole TLS.")
     utilisateur = models.CharField(verbose_name="Utilisateur", max_length=300, blank=True, null=True, help_text="Saisissez le nom d'utilisateur (Souvent identique à l'adresse mail).")
     nom_adresse = models.CharField(verbose_name="Adresse affichée", max_length=300, blank=True, null=True, help_text="Saisissez le nom ou l'adresse que vous souhaitez voir apparaître dans le client de messagerie du destinataire.")
-    moteur = models.CharField(verbose_name="Moteur", max_length=200, choices=[("smtp", "SMTP"), ("mailjet", "Mailjet")], help_text="Sélectionnez un moteur d'expédition (Smtp ou Mailjet).")
+    moteur = models.CharField(verbose_name="Moteur", max_length=200, choices=[("smtp", "SMTP"), ("mailjet", "Mailjet"), ("console", "Console")], help_text="Sélectionnez un moteur d'expédition (Smtp ou Mailjet).")
     parametres = models.CharField(verbose_name="Paramètres", max_length=500, blank=True, null=True)
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True, help_text="Choisissez si cette adresse est accessible par une structure spécifique ou par toutes les structures.")
 
@@ -2723,7 +2733,7 @@ class Assurance(models.Model):
 
 class Mandat(models.Model):
     idmandat = models.AutoField(verbose_name="ID", db_column='IDmandat', primary_key=True)
-    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", related_name="mandats", on_delete=models.PROTECT)
     rum = models.CharField(verbose_name="RUM", max_length=100, help_text="Référence Unique du Mandat.")
     choix_type = [("RECURRENT", "Récurrent"), ("PONCTUEL", "Ponctuel")]
     type = models.CharField(verbose_name="Type", max_length=100, choices=choix_type, default="RECURRENT", help_text="Le mandat est généralement de type récurrent.")
@@ -2733,14 +2743,14 @@ class Mandat(models.Model):
     individu_rue = models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True)
     individu_cp = models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True)
     individu_ville = models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True)
-    iban = models.CharField(verbose_name="IBAN", max_length=27, help_text="La cohérence de l'IBAN est vérifié lors de l'enregistrement du mandat.")
-    bic = models.CharField(verbose_name="BIC", max_length=11, help_text="La cohérence du BIC est vérifié lors de l'enregistrement du mandat.")
+    iban = encrypt(models.CharField(verbose_name="IBAN", max_length=27, help_text="La cohérence de l'IBAN est vérifié lors de l'enregistrement du mandat."))
+    bic = encrypt(models.CharField(verbose_name="BIC", max_length=11, help_text="La cohérence du BIC est vérifié lors de l'enregistrement du mandat."))
     memo = models.TextField(verbose_name="Observations", blank=True, null=True)
     choix_sequences = [
-        ("AUTO", "Automatique"), ("OOFF", "Prélèvement ponctuel (OOFF)"), ("FRST", "Premier prélèvement d'une série (FRST)"),
+        ("OOFF", "Prélèvement ponctuel (OOFF)"), ("FRST", "Premier prélèvement d'une série (FRST)"),
         ("RCUR", "Prélèvement suivant d'une série (RCUR)"), ("FNAL", "Dernier prélèvement d'une série (FNAL)")
     ]
-    sequence = models.CharField(verbose_name="Séquence", max_length=100, choices=choix_sequences, default="AUTO", help_text="La séquence est généralement définie sur Automatique.")
+    sequence = models.CharField(verbose_name="Séquence", max_length=100, choices=choix_sequences, default="FRST", help_text="La prochaine séquence est généralement définie sur FRST lors de la création du mandat.")
     actif = models.BooleanField(verbose_name="Mandat actif", default=True, help_text="Décochez la case pour désactiver ce mandat.")
 
     class Meta:
@@ -2750,3 +2760,113 @@ class Mandat(models.Model):
 
     def __str__(self):
         return "Mandat n°%s" % self.rum if self.idmandat else "<nouveau>"
+
+    def Actualiser(self, ajouter=False):
+        """ ajouter : si ajout de prélèvement """
+        if ajouter:
+            if self.sequence == "FRST":
+                self.sequence = "RCUR"
+                self.save()
+            if self.sequence == "OOFF":
+                self.actif = False
+                self.save()
+        else:
+            # Recherche les prélèvements pes existants avec ce mandat
+            nbre_prelevements_pes = PesPiece.objects.filter(prelevement_mandat=self).count()
+            if self.sequence == "RCUR" and not nbre_prelevements_pes:
+                self.sequence = "FRST"
+                self.save()
+
+
+class PesModele(models.Model):
+    idmodele = models.AutoField(verbose_name="ID", db_column="IDmodele", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    format = models.CharField(verbose_name="Format", max_length=100, choices=CHOIX_FORMAT_EXPORT_TRESOR)
+    compte = models.ForeignKey(CompteBancaire, verbose_name="Compte à créditer", on_delete=models.PROTECT, help_text="Sélectionnez le compte bancaire à créditer dans le cadre du règlement automatique.")
+    id_poste = models.CharField(verbose_name="Poste comptable par défaut", max_length=200, blank=True, null=True)
+    id_collectivite = models.CharField(verbose_name="ID budget collectivité", max_length=200, blank=True, null=True)
+    code_collectivite = models.CharField(verbose_name="Code collectivité", max_length=200, blank=True, null=True)
+    code_budget = models.CharField(verbose_name="Code budget", max_length=10, blank=True, null=True)
+    code_prodloc = models.CharField(verbose_name="Code produit local par défaut", max_length=4, blank=True, null=True)
+    code_etab = models.CharField(verbose_name="Code établissement", max_length=200, blank=True, null=True)
+    service1 = models.CharField(verbose_name="Service axe 1", max_length=15, blank=True, null=True, help_text="Premier axe analytique.")
+    service2 = models.CharField(verbose_name="Service axe 2", max_length=10, blank=True, null=True, help_text="Second axe analytique.")
+    operation = models.CharField(verbose_name="Opération comptable", max_length=10, blank=True, null=True)
+    fonction = models.CharField(verbose_name="Fonction comptable", max_length=10, blank=True, null=True)
+    prelevement_libelle = models.CharField(verbose_name="Libellé du prélèvement", max_length=450, default="{NOM_ORGANISATEUR} - Facture {NUM_FACTURE}", help_text="Saisissez le libellé du prélèvement qui apparaîtra sur le relevé de compte de la famille. Vous pouvez personnaliser ce libellé grâce aux mots-clés suivants : {NOM_ORGANISATEUR}, {NUM_FACTURE}, {MOIS}, {MOIS_LETTRES}, {ANNEE}.")
+    objet_piece = models.CharField(verbose_name="Libellé de la pièce", max_length=450, default="Facture {NUM_FACTURE} - {MOIS_LETTRES} {ANNEE}", help_text="Saisissez l'objet de la pièce par défaut. Vous pouvez personnaliser ce libellé grâce aux mots-clés suivants : {NOM_ORGANISATEUR}, {NUM_FACTURE}, {MOIS}, {MOIS_LETTRES}, {ANNEE}.")
+    prestation_libelle = models.CharField(verbose_name="Libellé de la prestation", max_length=450, default="{INDIVIDU_PRENOM} - {PRESTATION_LABEL}", help_text="Saisissez le libellé de la prestation par défaut. Vous pouvez personnaliser ce libellé grâce aux mots-clés suivants : {ACTIVITE_NOM}, {ACTIVITE_ABREGE}, {PRESTATION_LABEL}, {PRESTATION_QUANTITE}, {PRESTATION_MOIS}, {PRESTATION_ANNEE}, {INDIVIDU_NOM}, {INDIVIDU_PRENOM}, {MOIS}, {MOIS_LETTRES}, {ANNEE}.")
+    reglement_auto = models.BooleanField(verbose_name="Règlement automatique", default=False, help_text="Cochez cette case si vous souhaitez que Noethys créé un règlement automatiquement pour les prélèvements.")
+    mode = models.ForeignKey(ModeReglement, verbose_name="Mode de règlement", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez le mode de règlement à utiliser dans le cadre du règlement automatique.")
+    payable_internet = models.BooleanField(verbose_name="Titre payable par internet", default=True, help_text="Cochez cette case si l'usager peut payer sur internet avec PayFip.")
+    choix_edition_asap = [
+        ("", "ASAP non dématérialisé"),
+        ("01", "01-ASAP dématérialisé à éditer par le centre éditique"),
+        ("02", "02-ASAP dématérialisé à destination d'une entité publique référencée dans Chorus Pro"),
+        ("03", "03-ASAP ORMC Chorus Pro"),
+        ("04", "04-ASAP sans traitement DGFIP"),
+    ]
+    edition_asap = models.CharField(verbose_name="Edition ASAP", max_length=100, choices=choix_edition_asap, default="01", help_text="Indiquez si l'ASAP doit être édité ou non par le centre éditique (Balise Edition dans bloc pièce du PES Titre).")
+    nom_tribunal = models.CharField(verbose_name="Nom du tribunal", max_length=400, blank=True, null=True, default="le tribunal administratif", help_text="Saisissez le nom du tribunal administratif de recours.")
+    inclure_detail = models.BooleanField(verbose_name="Inclure le détail des factures", default=True, help_text="Cochez cette case si vous souhaitez que Noethys intègre le détail des prestations de chaque facture.")
+    inclure_pieces_jointes = models.BooleanField(verbose_name="Inclure les factures au format PDF", default=True, help_text="Cochez cette case si vous souhaitez que Noethys intègre les factures au format PDF.")
+    code_compta_as_alias = models.BooleanField(verbose_name="Utiliser le code comptable familial comme code tiers", default=True, help_text="Utiliser le code comptable de la famille (Fiche famille > Onglet Divers) comme code tiers (ou alias). Sinon un code de type FAM000001 sera généré automatiquement.")
+    modele_document = models.ForeignKey(ModeleDocument, verbose_name="Modèle de document", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = 'pes_modeles'
+        verbose_name = "modèle d'export"
+        verbose_name_plural = "modèles d'export"
+
+    def __str__(self):
+        return self.nom if self.nom else "Nouveau modèle"
+
+
+
+class PesLot(models.Model):
+    idlot = models.AutoField(verbose_name="ID", db_column='IDlot', primary_key=True)
+    modele = models.ForeignKey(PesModele, verbose_name="Modèle d'export", on_delete=models.PROTECT)
+    nom = models.CharField(verbose_name="Nom de l'export", max_length=200, help_text="Nom interne à l'application. Exemple : Restauration - Janvier 2021.")
+    # verrouillage = models.BooleanField(verbose_name="Verrouillage", default=False)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    exercice = models.IntegerField(verbose_name="Exercice")
+    mois = models.IntegerField(verbose_name="Mois", choices=LISTE_MOIS)
+    # objet_piece = models.CharField(verbose_name="Objet de l'écriture", max_length=450, help_text="Ce texte est utilisé comme libellé de l'écriture. Exemple : Restauration - Janvier 2021. Vous pouvez personnaliser ce libellé grâce aux mots-clés suivants : {NOM_ORGANISATEUR}, {NUM_FACTURE}, {MOIS}, {MOIS_LETTRES}, {ANNEE}.")
+    # prestation_libelle = models.CharField(verbose_name="Libellé de la prestation", max_length=450, default="{INDIVIDU_PRENOM} - {PRESTATION_LABEL}", help_text="Saisissez le libellé de la prestation. Vous pouvez personnaliser ce libellé grâce aux mots-clés suivants : {ACTIVITE_NOM}, {ACTIVITE_ABREGE}, {PRESTATION_LABEL}, {PRESTATION_QUANTITE}, {PRESTATION_MOIS}, {PRESTATION_ANNEE}, {INDIVIDU_NOM}, {INDIVIDU_PRENOM}, {MOIS}, {MOIS_LETTRES}, {ANNEE}.")
+    date_emission = models.DateField(verbose_name="Date d'émission")
+    date_prelevement = models.DateField(verbose_name="Date de prélèvement")
+    date_envoi = models.DateField(verbose_name="Date d'envoi")
+    id_bordereau = models.CharField(verbose_name="Identifiant du bordereau", max_length=200, blank=True, null=True)
+
+    class Meta:
+        db_table = 'pes_lots'
+        verbose_name = "lot"
+        verbose_name_plural = "lots"
+
+    def __str__(self):
+        return self.nom if self.nom else "Nouvel export"
+
+
+class PesPiece(models.Model):
+    idpiece = models.AutoField(verbose_name="ID", db_column='IDpiece', primary_key=True)
+    lot = models.ForeignKey(PesLot, verbose_name="Lot", on_delete=models.PROTECT)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
+    prelevement = models.BooleanField(verbose_name="Prélèvement", default=False)
+    prelevement_mandat = models.ForeignKey(Mandat, verbose_name="Mandat", blank=True, null=True, on_delete=models.PROTECT)
+    prelevement_sequence = models.CharField(verbose_name="Séquence", blank=True, null=True, choices=[("OOFF", "Prélèvement ponctuel (OOFF)"), ("FRST", "Premier prélèvement d'une série (FRST)"), ("RCUR", "Prélèvement suivant d'une série (RCUR)"), ('FNAL', "Dernier prélèvement d'une série (FNAL)")], max_length=100)
+    prelevement_statut = models.CharField(verbose_name="Statut du prélèvement", choices=[("valide", "Valide"), ("refus", "Refus"), ("attente", "Attente")], default="attente", max_length=100)
+    titulaire_helios = models.ForeignKey(Individu, verbose_name="Titulaire Hélios", on_delete=models.PROTECT)
+    type = models.CharField(verbose_name="Type de pièce", choices=[("facture", "Facture"), ("manuel", "Manuel")], max_length=100, default="facture")
+    facture = models.ForeignKey(Facture, verbose_name="Facture", on_delete=models.PROTECT, blank=True, null=True)
+    # numero = models.IntegerField(blank=True, null=True)
+    # libelle = models.CharField(verbose_name="Libellé de la pièce", max_length=400, blank=True, null=True)
+    montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2)
+
+    class Meta:
+        db_table = 'pes_pieces'
+        verbose_name = "pièce"
+        verbose_name_plural = "pièces"
+
+    def __str__(self):
+        return "Pièce ID%d" % self.idpiece if self.idpiece else "Nouvelle pièce"

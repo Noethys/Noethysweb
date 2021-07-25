@@ -9,7 +9,7 @@ from core.decorators import Verifie_ventilation
 from core.decorators import secure_ajax
 from facturation.views import factures_generation, liste_prestations, liste_factures, liste_deductions, liste_soldes, synthese_impayes, \
                                 synthese_prestations, liste_tarifs, rappels_generation, liste_rappels, factures_impression, factures_email, \
-                                rappels_impression, rappels_email
+                                rappels_impression, rappels_email, lots_pes, lots_pes_factures
 
 urlpatterns = [
 
@@ -29,6 +29,19 @@ urlpatterns = [
     path('facturation/liste_rappels', liste_rappels.Liste.as_view(), name='liste_rappels'),
     path('facturation/rappels_impression', Verifie_ventilation(rappels_impression.Liste.as_view()), name='rappels_impression'),
     path('facturation/rappels_email', Verifie_ventilation(rappels_email.Liste.as_view()), name='rappels_email'),
+
+    # Lots PES
+    path('facturation/lots_pes/liste', lots_pes.Liste.as_view(), name='lots_pes_liste'),
+    path('facturation/lots_pes/creer', lots_pes.Creer.as_view(), name='lots_pes_creer'),
+    path('facturation/lots_pes/ajouter/<int:idmodele>/<int:assistant>', lots_pes.Ajouter.as_view(), name='lots_pes_ajouter'),
+    path('facturation/lots_pes/modifier/<int:pk>', lots_pes.Modifier.as_view(), name='lots_pes_modifier'),
+    path('facturation/lots_pes/supprimer/<int:pk>', lots_pes.Supprimer.as_view(), name='lots_pes_supprimer'),
+    path('facturation/lots_pes/consulter/<int:pk>', lots_pes.Consulter.as_view(), name='lots_pes_consulter'),
+    path('facturation/lots_pes/pieces/ajouter/<int:idlot>', lots_pes_factures.Liste.as_view(), name='lots_pes_ajouter_piece'),
+    path('facturation/lots_pes/pieces/modifier/<int:idlot>/<int:pk>', lots_pes.Modifier_piece.as_view(), name='lots_pes_modifier_piece'),
+    path('facturation/lots_pes/pieces/supprimer/<int:idlot>/<int:pk>', lots_pes.Supprimer_piece.as_view(), name='lots_pes_supprimer_piece'),
+    path('facturation/lots_pes/pieces/supprimer_plusieurs/<int:idlot>/<str:listepk>', lots_pes.Supprimer_plusieurs_pieces.as_view(), name='lots_pes_supprimer_plusieurs_pieces'),
+
 
     # Tarifs
     path('facturation/liste_tarifs', liste_tarifs.View.as_view(), name='liste_tarifs'),
@@ -54,5 +67,6 @@ urlpatterns = [
     path('facturation/factures_email_pdf', secure_ajax(factures_email.Impression_pdf), name='ajax_factures_email_pdf'),
     path('facturation/rappels_impression_pdf', secure_ajax(rappels_impression.Impression_pdf), name='ajax_rappels_impression_pdf'),
     path('facturation/rappels_email_pdf', secure_ajax(rappels_email.Impression_pdf), name='ajax_rappels_email_pdf'),
+    path('facturation/lots_pes_exporter', secure_ajax(lots_pes.Exporter), name='ajax_lots_pes_exporter'),
 
 ]

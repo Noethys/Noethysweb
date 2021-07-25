@@ -25,7 +25,7 @@ from parametrage.views import organisateur, structures, \
     questionnaires, adresses_mail, activites_assistant, activites_assistant_sejour, activites_assistant_cantine, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
     portail_parametres, types_regimes_alimentaires, assureurs, \
-    categories_compte_internet
+    categories_compte_internet, modeles_pes
 
 
 urlpatterns = [
@@ -192,6 +192,13 @@ urlpatterns = [
     path('parametrage/regies/ajouter', regies.Ajouter.as_view(), name='regies_ajouter'),
     path('parametrage/regies/modifier/<int:pk>', regies.Modifier.as_view(), name='regies_modifier'),
     path('parametrage/regies/supprimer/<int:pk>', regies.Supprimer.as_view(), name='regies_supprimer'),
+
+    # Modèles de lots PES
+    path('parametrage/modeles_pes/liste', modeles_pes.Liste.as_view(), name='modeles_pes_liste'),
+    path('parametrage/modeles_pes/creer', modeles_pes.Creer.as_view(), name='modeles_pes_creer'),
+    path('parametrage/modeles_pes/ajouter/<str:format>', modeles_pes.Ajouter.as_view(), name='modeles_pes_ajouter'),
+    path('parametrage/modeles_pes/modifier/<int:pk>', modeles_pes.Modifier.as_view(), name='modeles_pes_modifier'),
+    path('parametrage/modeles_pes/supprimer/<int:pk>', modeles_pes.Supprimer.as_view(), name='modeles_pes_supprimer'),
 
     # Types de pièces
     path('parametrage/types_pieces/liste', types_pieces.Liste.as_view(), name='types_pieces_liste'),

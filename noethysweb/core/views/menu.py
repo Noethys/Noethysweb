@@ -43,6 +43,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_modeles.Add(code="modeles_documents_liste", titre="Modèles de documents", icone="file-text-o")
     menu_modeles.Add(code="modeles_emails_liste", titre="Modèles d'emails", icone="file-text-o")
     menu_modeles.Add(code="modeles_rappels_liste", titre="Modèles de lettres de rappel", icone="file-text-o")
+    menu_modeles.Add(code="modeles_pes_liste", titre="Modèles d'exports vers le Trésor Public", icone="file-text-o")
 
     # Comptabilité
     menu_comptabilite = menu_parametrage.Add(titre="Comptabilité")
@@ -235,9 +236,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Factures
     menu_factures = menu_facturation.Add(titre="Factures")
     menu_factures.Add(code="factures_generation", titre="Génération des factures", icone="file-text-o")
-    menu_factures.Add(code="liste_factures", titre="Liste des factures", icone="file-text-o")
+    menu_factures.Add(code="lots_pes_liste", titre="Exports vers le Trésor Public", icone="file-text-o")
     menu_factures.Add(code="factures_impression", titre="Imprimer des factures", icone="file-text-o")
     menu_factures.Add(code="factures_email", titre="Envoyer des factures par Email", icone="file-text-o")
+    menu_factures.Add(code="liste_factures", titre="Liste des factures", icone="file-text-o")
 
     # Rappels
     menu_rappels = menu_facturation.Add(titre="Rappels")

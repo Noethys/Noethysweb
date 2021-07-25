@@ -41,10 +41,11 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "idmandat", "date", "rum", "iban", "bic", "actif", "famille__nom", "sequence"]
-
+        filtres = ["fpresent:famille", "idmandat", "date", "rum", "actif", "famille__nom", "sequence"]
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
+        iban = columns.TextColumn("IBAN", sources=[], processor='Get_iban')
+        bic = columns.TextColumn("BIC", sources=[], processor='Get_bic')
         actif = columns.TextColumn("Etat", sources=["actif"], processor='Get_actif')
 
         class Meta:
@@ -57,6 +58,12 @@ class Liste(Page, crud.Liste):
 
         def Get_actif(self, instance, *args, **kwargs):
             return "<small class='badge badge-success'>Activé</small>" if instance.actif else "<small class='badge badge-danger'>Désactivé</small>"
+
+        def Get_iban(self, instance, *args, **kwargs):
+            return instance.iban
+
+        def Get_bic(self, instance, *args, **kwargs):
+            return instance.bic
 
 
 class Creer(Page, crud.Ajouter):

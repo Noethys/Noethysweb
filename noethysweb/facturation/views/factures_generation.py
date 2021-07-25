@@ -143,6 +143,11 @@ def Generation_factures(request):
     nbre_factures_email = len([facture for facture in factures if facture.famille.email_factures])
     nbre_factures_impression = len(factures) - nbre_factures_email
 
+    # Enregistre le filtre pour l'export vers le Trésor Public
+    FiltreListe.objects.filter(nom="facturation.views.lots_pes_factures").delete()
+    parametres = """{"champ": "idfacture", "criteres": ["%d", "%d"], "condition": "COMPRIS", "label_filtre": "Facture : Dernières factures générées"}""" % (id_min, id_max)
+    FiltreListe.objects.create(nom="facturation.views.lots_pes_factures", parametres=parametres)
+
     # Enregistre le filtre pour l'impression
     FiltreListe.objects.filter(nom="facturation.views.factures_impression").delete()
     parametres = """{"champ": "idfacture", "criteres": ["%d", "%d"], "condition": "COMPRIS", "label_filtre": "Facture : Dernières factures générées"}""" % (id_min, id_max)

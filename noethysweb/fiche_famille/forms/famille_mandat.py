@@ -33,7 +33,7 @@ class Formulaire(FormulaireBase, ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        idfamille = kwargs.pop("idfamille")
+        idfamille = kwargs.pop("idfamille", None)
         if kwargs.get("instance", None):
             idfamille = kwargs["instance"].famille_id
         super(Formulaire, self).__init__(*args, **kwargs)

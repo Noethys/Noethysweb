@@ -1,0 +1,113 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+    <div class="row">
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder">
+                        <a class="btn btn-danger" href="{% url 'lots_pes_liste' %}"><i class='fa fa-times margin-r-5'></i>Fermer</a>
+                        <a class="btn btn-default" href="{% url 'lots_pes_ajouter_piece' idlot=lot.pk %}"><i class='fa fa-plus margin-r-5'></i>Ajouter des pièces</a>
+                        <a class="btn btn-default" href="{% url 'lots_pes_modifier' pk=lot.pk %}"><i class="fa fa-pencil margin-r-5"></i>Modifier les paramètres</a>
+                        <button class="btn btn-default" id="bouton_exporter"><i class='fa fa-bolt margin-r-5'></i>Générer le fichier d'export</button>
+                        <a class="btn btn-default" href="#" target="_blank" title="Consulter l'aide"><i class="fa fa-life-saver margin-r-5"></i>Aide</a>
+                    </div>
+
+                    {# Paramètres du lot #}
+                    <div class="card bg-light d-flex flex-fill mb-0 mt-3">
+                        <div class="card-body pt-0 p-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <h2 class="lead"><b>{{ lot.nom }}</b></h2>
+                                    {% if lot.observations %}
+                                        <div class="text-muted border-bottom-0">
+                                            <div class="mt-1"><span><i class="fa fa-xs fa-info-circle"></i></span> Observations : {{ lot.observations }}</div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-3">
+                                    <ul class="ml-4 mb-0 fa-ul text-muted">
+                                        <li class="small"><span><i class="fa fa-xs fa-calendar"></i></span> Période : {{ lot.get_mois_display }} {{ lot.exercice }}</li>
+                                        <li class="small"><span><i class="fa fa-xs fa-tag"></i></span> Modèle : {{ lot.modele.nom }}</li>
+                                        <li class="small"><span><i class="fa fa-xs fa-gear"></i></span> Format : {{ lot.modele.get_format_display }}</li>
+                                    </ul>
+                                </div>
+                                <div class="col-3">
+                                    <ul class="ml-4 mb-0 fa-ul text-muted">
+                                        <li class="small"><span><i class="fa fa-xs fa-calendar-times-o"></i></span> Emission : {{ lot.date_emission }}</li>
+                                        <li class="small"><span><i class="fa fa-xs fa-calendar-times-o"></i></span> Prélèvement : {{ lot.date_prelevement }}</li>
+                                        <li class="small"><span><i class="fa fa-xs fa-calendar-times-o"></i></span> Envoi : {{ lot.date_envoi }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row text-center">
+                                <div class="col-4">Total : <b>{{ stats.total|montant }} ({{ stats.nbre }})</b></div>
+                                <div class="col-4">Total prélevé : <b>{{ stats.total_preleve|montant }} ({{ stats.nbre_preleve }})</b></div>
+                                <div class="col-4">Total non-prélevé : <b>{{ stats.total_non_preleve|montant }} ({{ stats.nbre_non_preleve }})</b></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Liste des pièces #}
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+
+                    {# Lien de téléchargement du fichier d'export #}
+                    <a id="download"></a>
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+
+    </div>
+
+    {# Modal de résultat de la génération #}
+    {% embed 'core/modal.html' with mode_static=True %}
+        {% block modal_id %}modal_resultat{% endblock %}
+        {% block modal_titre %}Génération du fichier d'export{% endblock %}
+        {% block modal_body %}
+            <div id="modal_texte"></div>
+        {% endblock %}
+    {% endembed %}
+
+    <script>
+
+        $("#bouton_exporter").on('click', function(e) {
+            $("#modal_texte").html("<i class='fa fa-spinner fa-spin margin-r-5'></i> Génération en cours...");
+            $("#modal_resultat").modal('show');
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_lots_pes_exporter' %}",
+                data: {
+                    idlot: {{ lot.pk }},
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                },
+                success: function (data) {
+                    $("#modal_texte").html("Génération terminée.");
+                    // Fermeture de la modal
+                    $("#modal_resultat").modal("hide");
+                    // Lancement du téléchargement
+                    $("#download").attr("href", data.nom_fichier);
+                    document.getElementById("download").click();
+                },
+                error: function(data) {
+                    $("#modal_texte").html(data.responseJSON.erreurs);
+                }
+            });
+        });
+
+    </script>
+
+{% endblock contenu_page %}
