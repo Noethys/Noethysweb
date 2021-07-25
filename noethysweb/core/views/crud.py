@@ -306,6 +306,10 @@ class Supprimer(BaseView, DeleteView):
         # Confirmation de la suppression
         messages.add_message(self.request, messages.SUCCESS, 'Suppression effectuée avec succès')
 
+        # Fonction bonus
+        if hasattr(self, "Apres_suppression"):
+            self.Apres_suppression(objet=instance)
+
         return HttpResponseRedirect(self.get_success_url())
 
     def Attribuer_defaut(self):
@@ -356,7 +360,9 @@ class Supprimer_plusieurs(BaseView, CustomView, TemplateView):
         return liste_objets
 
     def post(self, request, **kwargs):
+        liste_objets = []
         for objet in self.get_objets():
+            liste_objets.append(objet)
             pk = objet.pk
 
             # Suppression de l'objet
@@ -376,6 +382,10 @@ class Supprimer_plusieurs(BaseView, CustomView, TemplateView):
 
         # Confirmation de la suppression
         messages.add_message(self.request, messages.SUCCESS, 'Suppressions effectuées avec succès')
+
+        # Fonction bonus
+        if hasattr(self, "Apres_suppression"):
+            self.Apres_suppression(objets=liste_objets)
 
         return HttpResponseRedirect(self.get_success_url())
 

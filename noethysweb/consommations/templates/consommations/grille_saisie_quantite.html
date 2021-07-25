@@ -51,6 +51,7 @@
 
         $('#modal_saisir_quantite').on('shown.bs.modal', function () {
             $("#saisie_quantite").focus();
+            $("#saisie_quantite").select();
         });
 
         $('#modal_saisir_quantite').on('keypress', function(e) {

@@ -1,20 +1,29 @@
 {% load static %}
 
-<div class="modal fade" id="{% block modal_id %}{% endblock %}" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="{% block modal_id %}{% endblock %}" role="dialog" aria-labelledby="myModalLabel" {% if mode_static %}data-backdrop="static" data-keyboard="false"{% endif %}>
     <div class="modal-dialog {% block modal_classe %}{% endblock %}" role="document">
         <div class="modal-content">
 
             <div class="modal-header {% block modal_theme %}bg-lightblue{% endblock %}">
                 <h5 class="modal-title" id="myModalLabel"><strong>{% block modal_titre %}{% endblock %}</strong></h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                {% if not mode_static %}
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                {% endif %}
             </div>
 
             <div class="modal-body">
                 {% block modal_body %}
                 {% endblock %}
             </div>
+
+            {% if modal_footer %}
+                <div class="modal-footer">
+                    {% block modal_footer %}
+                    {% endblock %}
+                </div>
+            {% endif %}
 
         </div>
     </div>

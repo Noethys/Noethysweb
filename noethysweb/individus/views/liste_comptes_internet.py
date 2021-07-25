@@ -159,13 +159,12 @@ class Liste(Page, crud.Liste):
 
         check = columns.CheckBoxSelectColumn(label="")
         internet_actif = columns.TextColumn("Activation", sources=["internet_actif"], processor='Get_internet_actif')
-        internet_mdp = columns.TextColumn("Mot de passe", sources=["internet_mdp"], processor='Get_internet_mdp')
+        internet_mdp = columns.TextColumn("Mot de passe", sources=[], processor='Get_internet_mdp')
         derniere_action = columns.TextColumn("Dernière action", sources=["derniere_action"], processor=helpers.format_date('%d/%m/%Y'))
 
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['check', 'idfamille', 'nom', "internet_actif", "internet_identifiant", "internet_mdp", "derniere_action"]
-            #hidden_columns = = ["idfamille"]
             ordering = ["nom"]
 
         def Get_internet_actif(self, instance, *args, **kwargs):

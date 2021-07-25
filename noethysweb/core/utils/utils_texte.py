@@ -32,6 +32,7 @@ def Fusionner_motscles(texte, dict_motscles={}):
     return texte
 
 def Formate_montant(montant=0.0):
+    if not montant: montant = 0.0
     return "%.02f %s" % (montant, utils_preferences.Get_symbole_monnaie())
 
 

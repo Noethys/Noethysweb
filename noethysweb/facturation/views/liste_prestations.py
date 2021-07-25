@@ -25,7 +25,7 @@ class Liste(Page, crud.Liste):
     model = Prestation
 
     def get_queryset(self):
-        return Prestation.objects.select_related('activite').filter(self.Get_filtres("Q"))
+        return Prestation.objects.select_related('activite', 'famille', 'individu').filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

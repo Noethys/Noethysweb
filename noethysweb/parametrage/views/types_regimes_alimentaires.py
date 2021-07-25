@@ -32,7 +32,6 @@ class Liste(Page, crud.Liste):
     model = RegimeAlimentaire
 
     def get_queryset(self):
-        from django.db.models import Q, Count
         return RegimeAlimentaire.objects.filter(self.Get_filtres("Q")).annotate(nbre_individus=Count('individu_regimes_alimentaires'))
 
     def get_context_data(self, **kwargs):
