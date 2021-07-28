@@ -13,8 +13,9 @@
         {% crispy form_ajouter_individu %}
 
         <div class="buttonHolder">
-            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
-                <button type="button" class="btn btn-primary" id="ajouter_individu_valider"/><i class="fa fa-check margin-r-5"></i>Valider</button>
+            <div class="modal-footer d-flex" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-default mr-auto" id="ajouter_tous_inscrits"><i class="fa fa-users margin-r-5"></i>Tous les inscrits</button>
+                <button type="button" class="btn btn-primary" id="ajouter_individu_valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
             </div>
         </div>
@@ -41,6 +42,13 @@
         }
         $('#modal_ajouter_individu').modal('hide');
         $('#donnees_ajouter_individu').val(idindividu);
+        $('#form-maj').submit();
+    });
+
+    // Modal : Tous les inscrits
+    $("#ajouter_tous_inscrits").on('click', function(e) {
+        $('#modal_ajouter_individu').modal('hide');
+        $('#donnees_ajouter_individu').val(999999);
         $('#form-maj').submit();
     });
 
