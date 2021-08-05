@@ -155,7 +155,6 @@ class Liste(Page, crud.Liste):
         # emetteur = columns.TextColumn("Emetteur", sources=['emetteur__nom'])
         payeur = columns.TextColumn("Payeur", sources=['payeur__nom'])
         depot = columns.TextColumn("Dépôt", sources=['depot__date'], processor='Get_date_depot')
-        montant = columns.TextColumn("Montant", sources=['montant'], processor='Formate_montant')
         ventile = columns.TextColumn("Ventilé", sources=['ventile'], processor='Formate_ventile')
 
         class Meta:
@@ -164,11 +163,9 @@ class Liste(Page, crud.Liste):
             processors = {
                 'date': helpers.format_date('%d/%m/%Y'),
                 'depot': helpers.format_date('%d/%m/%Y'),
+                'montant': "Formate_montant_standard",
             }
             ordering = ['date']
-
-        def Formate_montant(self, instance, **kwargs):
-            return utils_texte.Formate_montant(instance.montant)
 
         def Formate_ventile(self, instance, **kwargs):
             if not instance.ventile:

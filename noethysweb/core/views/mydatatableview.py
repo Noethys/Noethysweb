@@ -2,16 +2,16 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
 from django.utils.html import format_html
 from django.urls import reverse_lazy, reverse
-from datatableview import Datatable, columns, helpers
-from datatableview.views import DatatableView, MultipleDatatableView, XEditableDatatableView
 from django.views import View
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-import json
-
+from datatableview import Datatable, columns, helpers
+from datatableview.views import DatatableView, MultipleDatatableView, XEditableDatatableView
+from core.utils import utils_texte
 
 
 class MyDatatableView(DatatableView):
@@ -68,3 +68,6 @@ class MyDatatable(Datatable):
             self.Create_bouton_supprimer(url=reverse(view.url_supprimer, args=[instance.pk])),
         ]
         return self.Create_boutons_actions(html)
+
+    def Formate_montant_standard(self, instance, **kwargs):
+        return utils_texte.Formate_montant(kwargs.get("default_value", 0.0))

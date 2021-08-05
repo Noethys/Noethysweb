@@ -78,6 +78,8 @@ class Liste(Page, crud.Liste):
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
                 'date_echeance': helpers.format_date('%d/%m/%Y'),
+                'total': "Formate_montant_standard",
+                'solde': "Formate_montant_standard",
             }
             ordering = ['date_debut']
 
