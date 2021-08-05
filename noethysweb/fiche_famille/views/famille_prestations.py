@@ -4,14 +4,52 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.db.models import Q
+from django.template import Template, RequestContext
+from django.http import HttpResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Prestation
+from core.models import Famille, Prestation, Tarif, Inscription
 from fiche_famille.forms.famille_prestations import Formulaire, FORMSET_DEDUCTIONS
 from fiche_famille.views.famille import Onglet
-from django.http import HttpResponseRedirect
-from django.db.models import Q
-from django.contrib import messages
+
+
+def Get_activites(request):
+    """ Renvoie la liste des activités pour un individu donné """
+    idindividu = request.POST.get('idindividu')
+    idfamille = request.POST.get('idfamille')
+    if not idindividu or not idfamille:
+        resultat = ""
+    else:
+        activites = list({inscription.activite: True for inscription in Inscription.objects.select_related("activite").filter(individu_id=idindividu, famille_id=idfamille).order_by("date_debut")}.keys())
+        html = """
+        <option value="">---------</option>
+        {% for activite in activites %}
+            <option value="{{ activite.pk }}">{{ activite.nom }}</option>
+        {% endfor %}
+        """
+        context = {'activites': activites}
+        resultat = Template(html).render(RequestContext(request, context))
+    return HttpResponse(resultat)
+
+
+def Get_tarifs(request):
+    """ Renvoie la liste des tarifs pour une activité donnée """
+    idactivite = request.POST.get('idactivite')
+    idcategorie_tarif = request.POST.get('idcategorie_tarif')
+    if not idactivite or not idcategorie_tarif:
+        resultat = ""
+    else:
+        tarifs = Tarif.objects.select_related('nom_tarif').filter(activite_id=idactivite, categories_tarifs=idcategorie_tarif).order_by("date_debut")
+        html = """
+        <option value="">---------</option>
+        {% for tarif in tarifs %}
+            <option value="{{ tarif.pk }}">{{ tarif }} - {{ tarif.nom_tarif.nom }} - à partir du {{ tarif.date_debut|date:'d/m/Y' }}</option>
+        {% endfor %}
+        """
+        context = {'tarifs': tarifs}
+        resultat = Template(html).render(RequestContext(request, context))
+    return HttpResponse(resultat)
 
 
 class Page(Onglet):
@@ -21,7 +59,7 @@ class Page(Onglet):
     url_modifier = "famille_prestations_modifier"
     url_supprimer = "famille_prestations_supprimer"
     url_supprimer_plusieurs = "famille_prestations_supprimer_plusieurs"
-    description_liste = "Saisissez ici les prestations de la famille."
+    description_liste = "Vous pouvez consulter ici les prestations de la famille. Il s'agit généralement de prestations générées automatiquement mais vous pouvez également cliquer sur le bouton Ajouter pour créer une prestation manuelle."
     description_saisie = "Saisissez toutes les informations concernant la prestation et cliquez sur le bouton Enregistrer."
     objet_singulier = "une prestation"
     objet_pluriel = "des prestations"
@@ -59,7 +97,7 @@ class Liste(Page, crud.Liste):
     template_name = "fiche_famille/famille_liste.html"
 
     def get_queryset(self):
-        return Prestation.objects.select_related("individu", "activite", "activite__structure").filter(Q(famille__pk=self.Get_idfamille()) & self.Get_filtres("Q"))
+        return Prestation.objects.select_related("individu", "activite", "activite__structure", "facture").filter(Q(famille__pk=self.Get_idfamille()) & self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -70,16 +108,16 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ['idprestation', 'date', 'individu__nom', 'activite__nom', 'label', 'montant']
-
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
+        facture = columns.TextColumn("Facture", sources=["facture__numero"])
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idprestation', 'date', 'individu', 'activite', 'label', 'montant']
-            #hidden_columns = = ["idprestation"]
+            columns = ['check', 'idprestation', 'date', 'individu', 'activite', 'label', 'montant', 'facture']
             processors = {
                 'date': helpers.format_date('%d/%m/%Y'),
+                'montant': "Formate_montant_standard",
             }
             ordering = ['date']
 
@@ -128,7 +166,7 @@ class ClasseCommune(Page):
         # Sauvegarde des combi
         if formset_combi.is_valid():
             for formline in formset_combi.forms:
-                if formline.cleaned_data.get('DELETE') and form.instance.pk:
+                if formline.cleaned_data.get('DELETE') and form.instance.pk and formline.instance.pk :
                     formline.instance.delete()
                 if formline.cleaned_data.get('DELETE') == False:
                     instance = formline.save(commit=False)

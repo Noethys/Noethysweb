@@ -1,0 +1,12 @@
+{% load static %}
+
+<input id="{{ id }}" name="{{ name }}" value="{{ value }}" class="form-control" hidden>
+
+<div class="input-group">
+    <input value="{{ texte }}" class="form-control" readonly>
+    {% if facture %}
+        <div class="input-group-append">
+            <a type="button" class="btn btn-default" target="_blank" href="{% url 'famille_voir_facture' idfamille=facture.famille_id idfacture=facture.pk %}" title="Imprimer ou envoyer la facture par email"><i class="fa fa-fw fa-file-pdf-o"></i></a>
+        </div>
+    {% endif %}
+</div>

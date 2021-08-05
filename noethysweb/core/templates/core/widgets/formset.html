@@ -29,8 +29,9 @@
 </style>
 
 <div id="formset_{{ formset.prefix }}">
-    <table class="table theformset" style="margin-bottom: 0px;">
     {{ formset.management_form|crispy }}
+
+    <table class="table theformset" style="margin-bottom: 0px;">
 
         {% if formset.non_form_errors %}
             <div class="alert alert-danger alert-dismissible">
@@ -79,12 +80,24 @@
         prefix: '{{ formset.prefix }}',
         addCssClass: 'add-row-{{ formset.prefix }}',
         deleteCssClass: 'delete-row-{{ formset.prefix }}',
+        // hideLastAddForm: true,
         added: function (row) {
-            // Applique le widget à la nouvelle ligne créée
-            row.find('.django-select2').djangoSelect2();
-            // Reset le Select2 après la création de la nouvelle ligne
-            row.find('select').val('');
-            row.find('select').trigger('change');
+            try {
+                // Applique le widget à la nouvelle ligne créée
+                row.find('.django-select2').djangoSelect2();
+                // Reset le Select2 après la création de la nouvelle ligne
+                row.find('select').val('');
+                row.find('select').trigger('change');
+            } catch (error) {};
+            if (typeof formset_apres_ajout == 'function') {
+                formset_apres_ajout(row);
+            }
+        },
+        removed: function (row) {
+            if (typeof formset_apres_suppression == 'function') {
+                formset_apres_suppression(row);
+            }
         }
     });
+
 </script>

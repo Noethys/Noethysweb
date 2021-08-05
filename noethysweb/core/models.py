@@ -1970,8 +1970,7 @@ class Quotient(models.Model):
 
 class Deduction(models.Model):
     iddeduction = models.AutoField(verbose_name="ID", db_column='IDdeduction', primary_key=True)
-    prestation = models.ForeignKey(Prestation, verbose_name="Prestation", on_delete=models.PROTECT)
-    #idcompte_payeur = models.IntegerField(db_column='IDcompte_payeur', blank=True, null=True)  # Field name made lowercase.
+    prestation = models.ForeignKey(Prestation, verbose_name="Prestation", on_delete=models.CASCADE)
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
     date = models.DateField(verbose_name="Date")
     montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0)

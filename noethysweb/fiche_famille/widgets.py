@@ -6,6 +6,7 @@
 from django.forms.widgets import Widget
 from django.template import loader
 from django.utils.safestring import mark_safe
+from core.models import Facture
 from core.utils import utils_dates
 
 
@@ -104,6 +105,29 @@ class Internet_mdp(Widget):
         if attrs is not None:
             context.update(attrs)
         context['name'] = name
+        if value is not None:
+            context['value'] = value
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
+
+
+class Facture_prestation(Widget):
+    template_name = 'fiche_famille/widgets/facture_prestation.html'
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        context['name'] = name
+        facture = Facture.objects.get(pk=value) if value else None
+        if facture:
+            context['texte'] = "Facture n°%d du %s" % (facture.numero, utils_dates.ConvertDateToFR(facture.date_edition))
+        else:
+            context['texte'] = "Aucune facture associée"
+        context['facture'] = facture
         if value is not None:
             context['value'] = value
         return context

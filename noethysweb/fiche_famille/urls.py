@@ -142,5 +142,7 @@ urlpatterns = [
     path('individus/regenerer_identifiant', secure_ajax(famille_portail.Regenerer_identifiant), name='ajax_regenerer_identifiant'),
     path('individus/regenerer_mdp', secure_ajax(famille_portail.Regenerer_mdp), name='ajax_regenerer_mdp'),
     path('individus/codes_internet_impression_pdf', secure_ajax(famille_portail.Impression_pdf), name='ajax_codes_internet_impression_pdf'),
+    path('individus/ajax_get_tarifs_prestation', secure_ajax(famille_prestations.Get_tarifs), name='ajax_get_tarifs_prestation'),
+    path('individus/ajax_get_activites_prestation', secure_ajax(famille_prestations.Get_activites), name='ajax_get_activites_prestation'),
 
 ]
