@@ -236,6 +236,11 @@ class Case_base {
         this.consommations[0] = conso;
         this.maj_affichage();
         maj_remplissage(this.date);
+        if (conso.facture) {
+            // Par sécurité, pour éviter un recalcul d'une prestation facturée
+            toastr.warning("La prestation de la consommation " + dict_unites[this.unite].nom + " ne sera pas recalculée car elle a déjà été facturée.");
+            maj_facturation = false;
+        };
         if (maj_facturation === true) {
             facturer(this);
         }
@@ -376,6 +381,7 @@ class Case_standard extends Case_base {
             if (conso.etat === "absenti") {texte_icones += " <i class='fa fa-times-circle-o text-red' title='Absence injustifiée'></i>"};
             if (conso.etat === "absentj") {texte_icones += " <i class='fa fa-times-circle-o text-green' title='Absence justifiée'></i>"};
             if (conso.forfait === 2) {texte_icones += " <i class='fa fa-lock text-red' title='Cette consommation est non supprimable car elle est associée à un forfait daté'></i>"};
+            if (conso.facture) {texte_icones += " <i class='fa fa-file-text-o text-black-50' title='La prestation associée apparaît sur une facture'></i>"};
             $("#" + this.key + " .icones").html(texte_icones);
 
             // Pour les tests, affiche l'id de la prestation
@@ -421,6 +427,11 @@ class Case_standard extends Case_base {
                 return false;
             };
 
+            if ((this.consommations[0].facture) && (jQuery.inArray(etat, ["attente", "refus"]) !== -1)) {
+                toastr.error("Vous ne pouvez pas sélectionner cet état car la prestation est déjà facturée");
+                return false;
+            };
+
             // Vérifie la compatibilité avec les autres unités
             if ((etat === "reservation" || etat === "present") && this.check_compatilites_unites() === false) {return false};
 
@@ -462,6 +473,10 @@ class Case_standard extends Case_base {
         }
         if ((this.consommations.length > 0) && (this.consommations[0].forfait === 2)) {
             toastr.error("Vous ne pouvez pas supprimer cette consommation car elle est associée à un forfait daté");
+            return true;
+        }
+        if (this.consommations[0].facture) {
+            toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation dont la prestation associée apparaît sur une facture");
             return true;
         }
         return false;
@@ -851,7 +866,6 @@ class Conso {
         this.utilisateur = null;
         this.categorie_tarif = null;
         this.famille = null;
-        this.compte_payeur = null;
         this.prestation = null;
         this.forfait = null;
         this.facture = null;
@@ -878,6 +892,11 @@ class Conso {
                 Object.assign(this, conso);
                 this.pk = conso.pk;
             }
+        };
+
+        // Importation des données de la prestation associée
+        if (this.prestation in dict_prestations) {
+            this.facture = dict_prestations[this.prestation].facture
         };
 
     }
@@ -950,10 +969,11 @@ $(function () {
                 };
             });
 
-            // Met en gras l'état et le groupe de la conso
+            // Met en évidence l'état et le groupe de la conso
             $("#contextMenu a").css('font-weight', 'normal');
-            $("#contextMenu a[data-etat='" + case_contextmenu.consommations[0].etat + "']").css('font-weight', 'bold');
-            $("#contextMenu a[data-groupe='" + case_contextmenu.consommations[0].groupe + "']").css('font-weight', 'bold');
+            $("#contextMenu a").removeClass("menu-checked");
+            $("#contextMenu a[data-etat='" + case_contextmenu.consommations[0].etat + "']").css('font-weight', 'bold').addClass("menu-checked");
+            $("#contextMenu a[data-groupe='" + case_contextmenu.consommations[0].groupe + "']").css('font-weight', 'bold').addClass("menu-checked");
 
             // Affiche le menu
             $("#contextMenu").css({
