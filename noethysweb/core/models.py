@@ -135,6 +135,14 @@ LISTE_CATEGORIES_QUESTIONNAIRES = [
     ("inscription", "Inscription"),
     ]
 
+LISTE_ETATS_CONSO = [
+    ("reservation", "Réservation"),
+    ("present", "Présent"),
+    ("absenti", "Absence injustifiée"),
+    ("absentj", "Absence justifiée"),
+    ("attente", "Attente"),
+    ("refus", "Refus"),
+]
 
 LISTE_CONTROLES_QUESTIONNAIRES = [
     {"code": "ligne_texte", "label": _(u"Ligne de texte"), "image": "Texte_ligne.png", "filtre": "texte"},
@@ -1178,8 +1186,7 @@ class Tarif(models.Model):
     code_compta = models.CharField(verbose_name="Code comptable", max_length=200, blank=True, null=True)
     date_facturation = models.CharField(verbose_name="Date de facturation", max_length=200, blank=True, null=True)
     # etiquettes = models.CharField(blank=True, null=True)
-    etats_choix = [("reservation", "Réservation"), ("present", "Présent"), ("absenti", "Absence injustifiée"), ("absentj", "Absence justifiée"), ("attente", "Attente"), ("refus", "Refus")]
-    etats = MultiSelectField(verbose_name="Etats conditionnels", max_length=200, choices=etats_choix, blank=True, null=True)
+    etats = MultiSelectField(verbose_name="Etats conditionnels", max_length=200, choices=LISTE_ETATS_CONSO, blank=True, null=True)
     label_prestation = models.CharField(verbose_name="Label de la prestation", max_length=300, blank=True, null=True)
     evenement = models.ForeignKey(Evenement, verbose_name="Evénement", blank=True, null=True, on_delete=models.CASCADE)
     # idproduit = models.IntegerField(db_column='IDproduit', blank=True, null=True)  # Field name made lowercase.
@@ -1833,7 +1840,7 @@ class Consommation(models.Model):
     groupe = models.ForeignKey(Groupe, verbose_name="Groupe", blank=True, null=True, on_delete=models.PROTECT)
     heure_debut = models.TimeField(verbose_name="Heure de début", blank=True, null=True)
     heure_fin = models.TimeField(verbose_name="Heure de fin", blank=True, null=True)
-    etat = models.CharField(verbose_name="Etat", max_length=100, blank=True, null=True)
+    etat = models.CharField(verbose_name="Etat", max_length=100, choices=LISTE_ETATS_CONSO, blank=True, null=True)
     # verrouillage = models.IntegerField(blank=True, null=True)
     date_saisie = models.DateTimeField(verbose_name="Date de saisie", auto_now_add=True)
     # idutilisateur = models.IntegerField(db_column='IDutilisateur', blank=True, null=True)  # Field name made lowercase.
