@@ -15,7 +15,7 @@ from core.models import Famille, Prestation, Deduction, Individu, Rattachement, 
 from core.widgets import DatePickerWidget, Formset
 from django.forms.models import inlineformset_factory, BaseInlineFormSet
 from core.utils import utils_preferences
-from fiche_famille.widgets import Facture_prestation
+from fiche_famille.widgets import Facture_prestation, Consommations_prestation
 
 
 
@@ -67,6 +67,7 @@ FORMSET_DEDUCTIONS = inlineformset_factory(Prestation, Deduction, form=Deduction
 class Formulaire(FormulaireBase, ModelForm):
     quantite = forms.IntegerField(label="Quantité", initial=1, min_value=1, required=True)
     montant_unitaire = forms.DecimalField(label="Montant unitaire", max_digits=6, decimal_places=2, initial=0.0, required=True)
+    consommations = forms.CharField(label="Consommations", widget=Consommations_prestation(), required=False)
 
     class Meta:
         model = Prestation
@@ -113,6 +114,9 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.fields[champ].disabled = True
                 self.fields[champ].help_text = "Ce champ n'est pas modifiable car la prestation est déjà facturée."
 
+        self.fields["consommations"].initial = self.instance.pk
+
+
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{{ view.get_success_url }}"),
@@ -142,6 +146,10 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Facturation",
                 Field('facture'),
+            ),
+            Fieldset("Consommations associées",
+                Field('consommations'),
+                id="fieldset_consommations",
             ),
             Fieldset("Déductions",
                 Div(

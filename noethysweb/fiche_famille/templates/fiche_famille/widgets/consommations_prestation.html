@@ -1,0 +1,42 @@
+{% load static %}
+
+<style>
+    #table_consommations th, td {
+        text-align: center;
+    };
+
+</style>
+
+{% if consommations %}
+
+    <table id="table_consommations" class="table table-bordered">
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Unité</th>
+                <th>Heure début</th>
+                <th>Heure fin</th>
+                <th>Etat</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for conso in consommations %}
+                <tr>
+                    <td>{{ conso.pk }}</td>
+                    <td>{{ conso.date|date:"l j F Y" }}</td>
+                    <td>{{ conso.unite.nom }}</td>
+                    <td>{{ conso.heure_debut|default:'' }}</td>
+                    <td>{{ conso.heure_fin|default:'' }}</td>
+                    <td>{{ conso.get_etat_display }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+{% else %}
+    <div style="vertical-align: middle;margin-top: 7px;">Aucune consommation associée.</div>
+{% endif %}

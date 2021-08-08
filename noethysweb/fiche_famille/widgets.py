@@ -6,7 +6,7 @@
 from django.forms.widgets import Widget
 from django.template import loader
 from django.utils.safestring import mark_safe
-from core.models import Facture
+from core.models import Facture, Consommation
 from core.utils import utils_dates
 
 
@@ -130,6 +130,22 @@ class Facture_prestation(Widget):
         context['facture'] = facture
         if value is not None:
             context['value'] = value
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
+
+
+class Consommations_prestation(Widget):
+    template_name = 'fiche_famille/widgets/consommations_prestation.html'
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        consommations = Consommation.objects.select_related("unite").filter(prestation_id=value) if value else None
+        context['consommations'] = consommations
         return context
 
     def render(self, name, value, attrs=None, renderer=None):
