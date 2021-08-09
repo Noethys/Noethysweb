@@ -90,7 +90,6 @@ class BaseCombiTarifFormSet(BaseInlineFormSet):
 
                 # Vérification de la validité de la ligne
                 if form.is_valid() == False or len(form.cleaned_data) == 0:
-                    print(">>>", form.errors.as_data())
                     message = form.errors.as_data()["__all__"][0].message
                     raise forms.ValidationError("La ligne %d n'est pas valide : %s." % (index_ligne+1, message))
 

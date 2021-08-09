@@ -49,7 +49,7 @@ class Liste(Page, crud.Liste):
         nom = columns.TextColumn("Nom", sources=['individu__nom'])
         prenom = columns.TextColumn("Prénom", sources=['individu__prenom'])
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
-        profil = columns.TextColumn("Profil", processor='Get_profil')
+        profil = columns.TextColumn("Profil", sources=['Get_profil'])
         date_naiss = columns.TextColumn("Date naiss.", sources=['individu__date_naiss'], processor=helpers.format_date('%d/%m/%Y'))
         age = columns.TextColumn("Age", sources=['individu__date_naiss'], processor="Get_age")
         rue_resid = columns.TextColumn("Rue", sources=['individu__rue_resid'])
@@ -62,12 +62,6 @@ class Liste(Page, crud.Liste):
             columns = ['idrattachement', 'idindividu', "nom", "prenom", "profil", "famille", "age", "date_naiss", "rue_resid", "cp_resid", "ville_resid"]
             hidden_columns = ["idrattachement"]
             ordering = ["nom", "prenom"]
-
-        def Get_profil(self, instance, **kwargs):
-            if instance.categorie == 1: return "Responsable" + " titulaire" if instance.titulaire else ""
-            if instance.categorie == 2: return "Enfant"
-            if instance.categorie == 3: return "Contact"
-            return ""
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             html = [
