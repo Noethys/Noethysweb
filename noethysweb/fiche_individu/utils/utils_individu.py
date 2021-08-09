@@ -12,6 +12,7 @@ LISTE_ONGLETS = [
     {"code": "scolarite", "label": "Scolarité", "icone": "fa-graduation-cap", "url": "individu_scolarite_liste"},
     {"code": "inscriptions", "label": "Inscriptions", "icone": "fa-ticket", "url": "individu_inscriptions_liste"},
     {"code": "regimes_alimentaires", "label": "Régimes alimentaires", "icone": "fa-cutlery", "url": "individu_regimes_alimentaires"},
+    {"code": "maladies", "label": "Maladies", "icone": "fa-stethoscope", "url": "individu_maladies"},
     {"code": "medical", "label": "Médical", "icone": "fa-heartbeat", "url": "individu_medical_liste"},
     {"code": "assurances", "label": "Assurances", "icone": "fa-shield", "url": "individu_assurances_liste"},
     {"code": "contacts", "label": "Contacts", "icone": "fa-users", "url": "individu_contacts_liste"},

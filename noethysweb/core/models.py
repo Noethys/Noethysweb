@@ -595,7 +595,8 @@ class Secteur(models.Model):
 class TypeMaladie(models.Model):
     idtype_maladie = models.AutoField(verbose_name="ID", db_column='IDtype_maladie', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=200)
-    vaccin_obligatoire = models.BooleanField(verbose_name="Vaccin obligatoire", default=False)
+    vaccin_obligatoire = models.BooleanField(verbose_name="Vaccination obligatoire", default=False, help_text="Cochez cette case si la vaccination est obligatoire pour cette maladie.")
+    vaccin_date_naiss_min = models.DateField(verbose_name="Date de naissance min.", blank=True, null=True, help_text="Si la vaccination n'est obligatoire que pour les individus nés à partir d'une date donnée, saisissez-là ici.")
 
     class Meta:
         db_table = 'types_maladies'
@@ -623,7 +624,7 @@ class TypeVaccin(models.Model):
     idtype_vaccin = models.AutoField(verbose_name="ID", db_column='IDtype_vaccin', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=200)
     duree_validite = models.CharField(verbose_name="Durée de validité", max_length=100, blank=True, null=True)
-    types_maladies = models.ManyToManyField(TypeMaladie)
+    types_maladies = models.ManyToManyField(TypeMaladie, related_name="vaccin_maladies")
 
     class Meta:
         db_table = 'types_vaccins'
@@ -1348,6 +1349,7 @@ class Individu(models.Model):
     photo = models.ImageField(verbose_name="Photo", upload_to=get_uuid_path, blank=True, null=True)
     listes_diffusion = models.ManyToManyField(ListeDiffusion)
     regimes_alimentaires = models.ManyToManyField(RegimeAlimentaire, verbose_name="Régimes alimentaires", related_name="individu_regimes_alimentaires", blank=True)
+    maladies = models.ManyToManyField(TypeMaladie, verbose_name="Maladies contractées", related_name="individu_maladies", blank=True)
 
     class Meta:
         db_table = 'individus'
@@ -1639,6 +1641,7 @@ class Vaccin(models.Model):
     def __str__(self):
         return "Vaccin du %s" % self.date.strftime('%d/%m/%Y')
 
+
 class Note(models.Model):
     idnote = models.AutoField(verbose_name="ID", db_column='IDnote', primary_key=True)
     type_choix = [("INSTANTANE", "Instantané"), ("PROGRAMME", "Programmé")]
@@ -1667,7 +1670,6 @@ class Note(models.Model):
         return "Note du %s" % self.date_saisie.strftime('%d/%m/%Y')
 
 
-
 class Rattachement(models.Model):
     idrattachement = models.AutoField(verbose_name="ID", db_column='IDrattachement', primary_key=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE, blank=True, null=True)
@@ -1682,6 +1684,12 @@ class Rattachement(models.Model):
 
     def __str__(self):
         return "Rattachement ID%d" % self.idrattachement
+
+    def Get_profil(self):
+        if self.categorie == 1: return "Responsable" + " titulaire" if self.titulaire else ""
+        if self.categorie == 2: return "Enfant"
+        if self.categorie == 3: return "Contact"
+        return ""
 
 
 class Piece(models.Model):

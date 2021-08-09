@@ -7,7 +7,7 @@ from django.urls import include, path
 from core.decorators import secure_ajax
 from fiche_individu.views import individu, individu_identite, individu_coords, individu_questionnaire, individu_scolarite, individu_inscriptions, \
                                 individu_medical, individu_notes, individu_liens, individu_appliquer_forfait_date, individu_contacts, \
-                                individu_regimes_alimentaires, individu_assurances
+                                individu_regimes_alimentaires, individu_assurances, individu_maladies
 
 urlpatterns = [
 
@@ -42,6 +42,9 @@ urlpatterns = [
 
     path('individus/individus/regimes_alimentaires/<int:idfamille>/<int:idindividu>', individu_regimes_alimentaires.Consulter.as_view(), name='individu_regimes_alimentaires'),
     path('individus/individus/regimes_alimentaires/modifier/<int:idfamille>/<int:idindividu>', individu_regimes_alimentaires.Modifier.as_view(), name='individu_regimes_alimentaires_modifier'),
+
+    path('individus/individus/maladies/<int:idfamille>/<int:idindividu>', individu_maladies.Consulter.as_view(), name='individu_maladies'),
+    path('individus/individus/maladies/modifier/<int:idfamille>/<int:idindividu>', individu_maladies.Modifier.as_view(), name='individu_maladies_modifier'),
 
     path('individus/individus/medical/liste/<int:idfamille>/<int:idindividu>', individu_medical.Liste.as_view(), name='individu_medical_liste'),
 
