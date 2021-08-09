@@ -29,7 +29,7 @@ class Liste(Page, crud.Liste):
     model = TypeVaccin
 
     def get_queryset(self):
-        return TypeVaccin.objects.filter(self.Get_filtres("Q"))
+        return TypeVaccin.objects.prefetch_related("types_maladies").filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -39,16 +39,18 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["idtype", "nom"]
-
+        filtres = ["idtype_vaccin", "nom"]
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         duree_validite = columns.DisplayColumn("Validité", sources="duree_validite", processor='Get_validite')
+        types_maladies = columns.TextColumn("Maladies associées", sources=None, processor='Get_types_maladies')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idtype", "nom", "duree_validite"]
-            #hidden_columns = = ["idtype"]
+            columns = ["idtype_vaccin", "nom", "duree_validite", "types_maladies"]
             ordering = ["nom"]
+
+        def Get_types_maladies(self, instance, *args, **kwargs):
+            return ", ".join([type_maladie.nom for type_maladie in instance.types_maladies.all().order_by("nom")])
 
         def Get_validite(self, instance, **kwargs):
             if instance.duree_validite == None:
