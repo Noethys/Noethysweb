@@ -10,6 +10,7 @@ from django.contrib import messages
 from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite, Consommation, MemoJournee, Evenement, Groupe, Individu, \
                         Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Ferie, Individu, Activite, Classe
 from core.utils import utils_dates, utils_dictionnaires, utils_db, utils_texte, utils_decimal, utils_historique
+from consommations.utils import utils_consommations
 from django.utils.safestring import mark_safe
 from django.db.models import Q, Count
 from django.core import serializers
@@ -278,7 +279,7 @@ def Save_grille(request=None, donnees={}):
                     evenement_id=dict_conso["evenement"], badgeage_debut=dict_conso["badgeage_debut"], badgeage_fin=dict_conso["badgeage_fin"],
                 ))
                 logger.debug("Consommation à ajouter : " + str(dict_conso))
-                liste_historique.append({"titre": "Ajout d'une consommation", "detail": "%s du %s (%s)" % (dict_unites[dict_conso["unite"]].nom, utils_dates.ConvertDateToFR(dict_conso["date"]), dict_conso["etat"]), "utilisateur": request.user if request else None,
+                liste_historique.append({"titre": "Ajout d'une consommation", "detail": "%s du %s (%s)" % (dict_unites[dict_conso["unite"]].nom, utils_dates.ConvertDateToFR(dict_conso["date"]), utils_consommations.Get_label_etat(dict_conso["etat"])), "utilisateur": request.user if request else None,
                                          "famille_id": dict_conso["famille"], "individu_id": dict_conso["individu"], "objet": "Consommation", "idobjet": None, "classe": "Consommation"})
 
                 # Mode pointeuse pour récupérer l'idconso
@@ -290,7 +291,7 @@ def Save_grille(request=None, donnees={}):
             elif dict_conso["dirty"]:
                 dict_modifications[dict_conso["pk"]] = dict_conso
                 logger.debug("Consommation à modifier : " + str(dict_conso))
-                liste_historique.append({"titre": "Modification d'une consommation", "detail": "%s du %s (%s)" % (dict_unites[dict_conso["unite"]].nom, utils_dates.ConvertDateToFR(dict_conso["date"]), dict_conso["etat"]), "utilisateur": request.user if request else None,
+                liste_historique.append({"titre": "Modification d'une consommation", "detail": "%s du %s (%s)" % (dict_unites[dict_conso["unite"]].nom, utils_dates.ConvertDateToFR(dict_conso["date"]), utils_consommations.Get_label_etat(dict_conso["etat"])), "utilisateur": request.user if request else None,
                                          "famille_id": dict_conso["famille"], "individu_id": dict_conso["individu"], "objet": "Consommation", "idobjet": dict_conso["pk"], "classe": "Consommation"})
 
     # Récupère la liste des conso à modifier
@@ -323,7 +324,7 @@ def Save_grille(request=None, donnees={}):
         utils_db.bulk_delete(listeID=donnees["suppressions"]["consommations"], nom_table="consommations", nom_id="IDconso")
         texte_notification.append("%s suppression%s" % (len(donnees["suppressions"]["consommations"]), "s" if len(donnees["suppressions"]["consommations"]) > 1 else ""))
         for conso in liste_conso_suppr:
-            liste_historique.append({"titre": "Suppression d'une consommation", "detail": "%s du %s (%s)" % (conso.unite.nom, utils_dates.ConvertDateToFR(conso.date), conso.etat),
+            liste_historique.append({"titre": "Suppression d'une consommation", "detail": "%s du %s (%s)" % (conso.unite.nom, utils_dates.ConvertDateToFR(conso.date), conso.get_etat_display()),
                                      "utilisateur": request.user if request else None, "famille_id": conso.inscription.famille_id, "individu_id": conso.individu_id, "objet": "Consommation", "idobjet": conso.pk, "classe": "Consommation"})
 
     # Notification d'enregistrement des consommations

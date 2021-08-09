@@ -26,7 +26,7 @@ class Liste(Page, crud.Liste):
     template_name = "fiche_famille/famille_liste.html"
 
     def get_queryset(self):
-        return Historique.objects.filter(Q(famille_id=self.Get_idfamille()) & self.Get_filtres("Q"))
+        return Historique.objects.select_related("individu", "utilisateur").filter(Q(famille_id=self.Get_idfamille()) & self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -51,5 +51,5 @@ class Liste(Page, crud.Liste):
 
         def Formate_utilisateur(self, instance, **kwargs):
             if instance.utilisateur:
-                return instance.utilisateur.get_full_name()
+                return instance.utilisateur.get_full_name() or instance.utilisateur.get_short_name() or instance.utilisateur
             return ""
