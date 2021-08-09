@@ -4,9 +4,13 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.db.models import Q, Count
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import TypeMaladie
+from core.utils import utils_dates
+from core.models import TypeMaladie, TypeVaccin
 from parametrage.forms.types_maladies import Formulaire
 
 
@@ -19,7 +23,7 @@ class Page(crud.Page):
     description_liste = "Voici ci-dessous la liste des types de maladies."
     description_saisie = "Saisissez toutes les informations concernant la maladie à saisir et cliquez sur le bouton Enregistrer."
     objet_singulier = "un type de maladie"
-    objet_pluriel = "des types de maladie"
+    objet_pluriel = "des types de maladies"
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
     ]
@@ -40,18 +44,25 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idtype_maladie", "nom", "vaccin_obligatoire"]
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
-        defaut = columns.TextColumn("Défaut", sources="defaut", processor='Get_default')
+        vaccin_obligatoire = columns.TextColumn("Vaccin obligatoire", sources=["vaccin_obligatoire"], processor='Get_vaccin_obligatoire')
 
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ["idtype_maladie", "nom", "vaccin_obligatoire"]
-            #hidden_columns = = ["idtype_maladie"]
             ordering = ["nom"]
+            processors = {
+                'vaccin_date_naiss_min': helpers.format_date('%d/%m/%Y'),
+            }
 
-        def Get_default(self, instance, **kwargs):
-            return "<i class='fa fa-check text-success'></i>" if instance.defaut else ""
+        def Get_vaccin_obligatoire(self, instance, *args, **kwargs):
+            if instance.vaccin_obligatoire:
+                if instance.vaccin_date_naiss_min:
+                    texte_date_naiss_min = " (à partir du %s)" % utils_dates.ConvertDateToFR(instance.vaccin_date_naiss_min)
+                else:
+                    texte_date_naiss_min = ""
+                return "<small class='badge badge-success'>Oui%s</small>" % texte_date_naiss_min
+            return ""
 
 
 class Ajouter(Page, crud.Ajouter):
@@ -61,4 +72,17 @@ class Modifier(Page, crud.Modifier):
     form_class = Formulaire
 
 class Supprimer(Page, crud.Supprimer):
-    pass
+    def delete(self, request, *args, **kwargs):
+        # Empêche la suppression si déjà associée à au moins un individu
+        resultat = TypeMaladie.objects.filter(pk=self.get_object().pk).aggregate(nbre_individus=Count('individu_maladies'))
+        if resultat["nbre_individus"] > 0:
+            messages.add_message(request, messages.ERROR, "Il est impossible de supprimer cette maladie car elle est déjà associée à %d individu(s) !" % resultat["nbre_individus"])
+            return HttpResponseRedirect(self.get_success_url(), status=303)
+
+        # Empêche la suppression si déjà associée à un vaccin
+        resultat = TypeMaladie.objects.filter(pk=self.get_object().pk).aggregate(nbre_vaccins=Count('vaccin_maladies'))
+        if resultat["nbre_vaccins"] > 0:
+            messages.add_message(request, messages.ERROR, "Il est impossible de supprimer cette maladie car elle est déjà associée à %d vaccin(s) !" % resultat["nbre_vaccins"])
+            return HttpResponseRedirect(self.get_success_url(), status=303)
+
+        return super(Supprimer, self).delete(request, *args, **kwargs)
