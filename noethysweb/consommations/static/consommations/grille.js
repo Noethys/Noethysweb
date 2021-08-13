@@ -392,9 +392,8 @@ class Case_standard extends Case_base {
     // Supprimer une conso
     supprimer(maj_facturation=true) {
         if (this.is_locked()) {return false}
-
         // Mémorisation de la suppression
-        if (this.consommations.length > 0) {
+        if ((this.consommations.length > 0) && (!(this.consommations[0].pk.includes("-")))) {
             dict_suppressions.consommations.push(this.consommations[0].pk)
         };
         this.consommations = [];
@@ -832,7 +831,9 @@ class Case_multi extends Case_horaire {
     supprimer() {
         if (this.is_locked()) {return false}
         // Mémorisation de la suppression
-        dict_suppressions.consommations.push(this.consommations[0].pk);
+        if (!(this.consommations[0].pk.includes("-"))) {
+            dict_suppressions.consommations.push(this.consommations[0].pk);
+        };
         // Supprime également la conso dans la case parente
         dict_cases[this.key_case_parente].supprimer(this.consommations[0]);
         this.consommations = [];

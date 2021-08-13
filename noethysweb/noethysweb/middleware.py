@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 
-class ForcePasswordChangeMiddleware:
+class CustomMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 

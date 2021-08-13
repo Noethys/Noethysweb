@@ -87,7 +87,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'csp.middleware.CSPMiddleware',
     'axes.middleware.AxesMiddleware',
-    'noethysweb.middleware.ForcePasswordChangeMiddleware',
+    'noethysweb.middleware.CustomMiddleware',
 ]
 
 ROOT_URLCONF = 'noethysweb.urls'
