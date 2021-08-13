@@ -9,7 +9,7 @@ from django.contrib.auth import views as auth_views
 from consommations.views import grille
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
                             individu_regimes_alimentaires, individu_coords, individu_medecin, individu_infos_medicales, individu_assurances, \
-                            famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie
+                            famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies
 from core.decorators import secure_ajax_portail
 
 
@@ -43,11 +43,6 @@ urlpatterns = [
     path('renseignements/famille/caisse', famille_caisse.Consulter.as_view(), name='portail_famille_caisse'),
     path('renseignements/famille/caisse/modifier', famille_caisse.Modifier.as_view(), name='portail_famille_caisse_modifier'),
 
-
-
-
-
-
     path('renseignements/individu/identite/<int:idrattachement>', individu_identite.Consulter.as_view(), name='portail_individu_identite'),
     path('renseignements/individu/identite/modifier/<int:idrattachement>', individu_identite.Modifier.as_view(), name='portail_individu_identite_modifier'),
 
@@ -59,6 +54,9 @@ urlpatterns = [
 
     path('renseignements/individu/regimes_alimentaires/<int:idrattachement>', individu_regimes_alimentaires.Consulter.as_view(), name='portail_individu_regimes_alimentaires'),
     path('renseignements/individu/regimes_alimentaires/modifier/<int:idrattachement>', individu_regimes_alimentaires.Modifier.as_view(), name='portail_individu_regimes_alimentaires_modifier'),
+
+    path('renseignements/individu/maladies/<int:idrattachement>', individu_maladies.Consulter.as_view(), name='portail_individu_maladies'),
+    path('renseignements/individu/maladies/modifier/<int:idrattachement>', individu_maladies.Modifier.as_view(), name='portail_individu_maladies_modifier'),
 
     path('renseignements/individu/medecin/<int:idrattachement>', individu_medecin.Consulter.as_view(), name='portail_individu_medecin'),
     path('renseignements/individu/medecin/modifier/<int:idrattachement>', individu_medecin.Modifier.as_view(), name='portail_individu_medecin_modifier'),
@@ -80,7 +78,7 @@ urlpatterns = [
 
     # Réservations
     path('reservations', reservations.View.as_view(), name='portail_reservations'),
-    path('planning/<int:idindividu>/<int:idperiode>', planning.View.as_view(), name='portail_planning'),
+    path('planning/<int:idindividu>/<int:idactivite>/<int:idperiode>', planning.View.as_view(), name='portail_planning'),
 
     # Facturation
     path('facturation', facturation.View.as_view(), name='portail_facturation'),

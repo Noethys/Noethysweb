@@ -45,7 +45,7 @@ class Liste(Page, crud.Liste):
     class datatable_class(MyDatatable):
         filtres = ["idtype_maladie", "nom", "vaccin_obligatoire"]
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
-        vaccin_obligatoire = columns.TextColumn("Vaccin obligatoire", sources=["vaccin_obligatoire"], processor='Get_vaccin_obligatoire')
+        vaccin_obligatoire = columns.TextColumn("Vaccination obligatoire", sources=["vaccin_obligatoire"], processor='Get_vaccin_obligatoire')
 
         class Meta:
             structure_template = MyDatatable.structure_template
