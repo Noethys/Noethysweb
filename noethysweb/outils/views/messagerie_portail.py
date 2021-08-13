@@ -21,7 +21,8 @@ class Page(crud.Page):
         context['page_titre'] = "Messagerie"
         liste_messages_discussion = PortailMessage.objects.select_related("famille", "structure", "utilisateur").filter(famille_id=self.get_idfamille(), structure_id=self.get_idstructure()).order_by("date_creation")
         context['liste_messages_discussion'] = list(liste_messages_discussion)
-        context['messagerie_liste_messages_non_lus'] = list(PortailMessage.objects.select_related("famille", "structure").filter(utilisateur__isnull=True, date_lecture__isnull=True))
+        messages_non_lus = PortailMessage.objects.select_related("famille", "structure").filter(utilisateur__isnull=True, date_lecture__isnull=True)
+        context['messagerie_liste_messages_non_lus'] = list(messages_non_lus)
 
         if self.get_idstructure():
             context["structure"] = Structure.objects.get(pk=self.get_idstructure())
@@ -29,8 +30,8 @@ class Page(crud.Page):
             context["famille"] = Famille.objects.get(pk=self.get_idfamille())
 
         # Indiquer que les messages de la discussion ouverte sont lus
-        if liste_messages_discussion:
-            liste_messages_discussion.update(date_lecture=datetime.datetime.now())
+        if messages_non_lus:
+            messages_non_lus.update(date_lecture=datetime.datetime.now())
 
         return context
 

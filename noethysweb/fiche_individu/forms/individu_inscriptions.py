@@ -74,6 +74,7 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Paramètres",
                 Field("statut"),
+                Field("internet_reservations"),
             ),
             HTML(EXTRA_SCRIPT),
         )

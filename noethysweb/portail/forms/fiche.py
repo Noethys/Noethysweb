@@ -16,7 +16,8 @@ import json
 class FormulaireBase():
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
-        self.mode = kwargs.pop("mode", None)
+        if not hasattr(self, "mode"):
+            self.mode = kwargs.pop("mode", None)
         super(FormulaireBase, self).__init__(*args, **kwargs)
 
     def Set_layout(self):

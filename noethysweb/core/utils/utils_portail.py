@@ -47,7 +47,11 @@ class Parametre():
 
 LISTE_PARAMETRES = [
     # Accueil
-    Parametre(code="accueil_texte_bienvenue", label="Texte de bienvenue", type="char", valeur="Bienvenue sur le portail Famille"),
+    Parametre(code="accueil_texte_bienvenue", label="Texte de bienvenue", type="html", valeur="Bienvenue sur le portail Famille"),
+
+    # Renseignements
+    Parametre(code="renseignements_afficher_page", label="Afficher la page", type="boolean", valeur=True),
+    Parametre(code="renseignements_intro", label="Texte d'introduction", type="char", valeur="Cliquez sur l'une des fiches listées ci-dessous pour consulter les renseignements et les modifier si besoin."),
 
     # Réservations
     Parametre(code="reservations_afficher_page", label="Afficher la page", type="boolean", valeur=True),

@@ -9,18 +9,6 @@ from noethysweb.version import GetVersion
 from core.models import Organisateur, Parametre
 from django.core.cache import cache
 from core.utils import utils_parametres, utils_portail
-from django.http import JsonResponse
-import json
-
-
-# def Memorise_option(request):
-#     """ Mémorise dans la DB et le cache une option d'interface pour l'utilisateur"""
-#     nom = request.POST.get("nom")
-#     valeur = json.loads(request.POST.get("valeur"))
-#     utils_parametres.Set(nom=nom, categorie="options_interface", utilisateur=request.user, valeur=valeur)
-#     cache.delete('options_interface')
-#     return JsonResponse({"success": True})
-
 
 
 class CustomView(LoginRequiredMixin, UserPassesTestMixin):
@@ -62,7 +50,7 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin):
         parametres_portail = cache.get('parametres_portail')
         if not parametres_portail:
             parametres_portail = utils_portail.Get_dict_parametres()
-            cache.set('parametres_portail', parametres_portail)
+            cache.set('parametres_portail', parametres_portail, 30)
         context['parametres_portail'] = parametres_portail
 
         # Options d'interface
@@ -90,13 +78,9 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin):
         # Mémorise le menu actif
         menu_actif = menu_principal.Find(code=self.menu_code)
         context['menu_actif'] = menu_actif
-        # if menu_actif:
-        #     context['menu_brothers'] = menu_actif.GetBrothers()
-        # context['afficher_menu_brothers'] = False
 
         # Mémorise le fil d'ariane
         if context['menu_actif'] != None:
             context['breadcrumb'] = context['menu_actif'].GetBreadcrumb()
 
         return context
-

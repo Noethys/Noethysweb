@@ -20,9 +20,15 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Réservations"
 
+        # Vérifie que la famille est autorisée à faire des réservations
+        if not self.request.user.famille.internet_reservations:
+            context['liste_individus'] = []
+            return context
+
         # Importation des inscriptions
         conditions = Q(famille=self.request.user.famille) & Q(statut="ok") & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
         conditions &= Q(activite__portail_reservations_affichage="TOUJOURS") & (Q(activite__date_fin__isnull=True) | Q(activite__date_fin__gte=datetime.date.today()))
+        conditions &= Q(internet_reservations=True)
         inscriptions = Inscription.objects.select_related("activite", "individu").filter(conditions)
 
         # Récupération des individus

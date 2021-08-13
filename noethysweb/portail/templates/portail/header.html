@@ -1,6 +1,5 @@
 {% load static i18n %}
 
-
 <nav class="main-header navbar navbar-expand navbar-dark navbar-lightblue border-bottom-0">
 
         <!-- Sidebar toggle button-->
@@ -16,7 +15,7 @@
 
             {# Utilisateur en cours #}
             <li class="dropdown user user-menu">
-                <a href="#" class="nav-link" data-toggle="dropdown">
+                <a href="#" class="nav-link" data-toggle="dropdown" title="Paramètres du compte">
                     <img src="{% static "images/user.png" %}" class="user-image" alt="User Image">
                     <span class="d-none d-sm-inline">{{ request.user.famille }}</span>
                 </a>
@@ -25,28 +24,22 @@
                         <img src="{% static "images/user.png" %}" class="rounded-circle" alt="User Image">
                         <p>
                             {{ request.user.famille }}
-                            <small>Dernière connexion le {{ request.user.last_login }}</small>
-                            <small>Utilisateur depuis {{ request.user.date_joined|date:"j F Y" }}</small>
                         </p>
                     </li>
 
-                    <!-- Menu Footer-->
                     <li class="user-footer">
-                        <div class="pull-left">
-                            <a href="{% url 'portail_profil' %}" class="btn btn-default">Profil</a>
-                        </div>
-                        <div class="pull-right">
-                            <a href="{% url 'portail_deconnexion' %}" class="btn btn-danger"><i class="fa fa-power-off margin-r-5"></i>Déconnexion</a>
+                        <div>
+                            <a href="{% url 'portail_profil' %}" class="btn btn-block btn-default">Paramètres du compte</a>
                         </div>
                     </li>
 
                 </ul>
             </li>
 
-            {# Panneau latéral #}
+            {# Bouton de déconnexion #}
             <li class="nav-item">
-                <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button" title="Options">
-                    <i class="fa fa-gears"></i>
+                <a href="{% url 'portail_deconnexion' %}" class="nav-link btn btn-danger" title="Déconnexion">
+                    <i class="fa fa-power-off"></i>
                 </a>
             </li>
 
