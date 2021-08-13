@@ -57,7 +57,7 @@
                             <div class="tab-pane {% if forloop.first %}show active{% endif %}" id="tab_{{ individu.pk }}_{{ activite.pk }}">
                                 <div class="list-group list-group-flush">
                                     {% for periode in dict_periodes|get_item:activite %}
-                                        <a href="{% url 'portail_planning' idindividu=individu.pk idperiode=periode.pk %}" class="list-group-item list-group-item-action">
+                                        <a href="{% url 'portail_planning' idindividu=individu.pk idactivite=activite.pk idperiode=periode.pk %}" class="list-group-item list-group-item-action">
                                             <i class="fa fa-calendar margin-r-5"></i>
                                             {{ periode.nom }}
                                             <small class="pull-right">Du {{ periode.date_debut }} au {{ periode.date_fin }}</small>

@@ -25,7 +25,8 @@ from parametrage.views import organisateur, structures, \
     questionnaires, adresses_mail, activites_assistant, activites_assistant_sejour, activites_assistant_cantine, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
     portail_parametres, types_regimes_alimentaires, assureurs, \
-    categories_compte_internet, modeles_pes
+    categories_compte_internet, modeles_pes, \
+    types_consentements, unites_consentements, articles
 
 
 urlpatterns = [
@@ -393,6 +394,25 @@ urlpatterns = [
 
     # Portail
     path('parametrage/portail_parametres/modifier', portail_parametres.Modifier.as_view(), name='portail_parametres_modifier'),
+
+    # Types de consentements
+    path('parametrage/types_consentements/liste', types_consentements.Liste.as_view(), name='types_consentements_liste'),
+    path('parametrage/types_consentements/ajouter', types_consentements.Ajouter.as_view(), name='types_consentements_ajouter'),
+    path('parametrage/types_consentements/modifier/<int:pk>', types_consentements.Modifier.as_view(), name='types_consentements_modifier'),
+    path('parametrage/types_consentements/supprimer/<int:pk>', types_consentements.Supprimer.as_view(), name='types_consentements_supprimer'),
+
+    # Unités de consentements
+    path('parametrage/unites_consentements/liste', unites_consentements.Liste.as_view(), name='unites_consentements_liste'),
+    path('parametrage/unites_consentements/liste/<int:categorie>', unites_consentements.Liste.as_view(), name='unites_consentements_liste'),
+    path('parametrage/unites_consentements/ajouter/<int:categorie>', unites_consentements.Ajouter.as_view(), name='unites_consentements_ajouter'),
+    path('parametrage/unites_consentements/modifier/<int:categorie>/<int:pk>', unites_consentements.Modifier.as_view(), name='unites_consentements_modifier'),
+    path('parametrage/unites_consentements/supprimer/<int:categorie>/<int:pk>', unites_consentements.Supprimer.as_view(), name='unites_consentements_supprimer'),
+
+    # Articles
+    path('parametrage/articles/liste', articles.Liste.as_view(), name='articles_liste'),
+    path('parametrage/articles/ajouter', articles.Ajouter.as_view(), name='articles_ajouter'),
+    path('parametrage/articles/modifier/<int:pk>', articles.Modifier.as_view(), name='articles_modifier'),
+    path('parametrage/articles/supprimer/<int:pk>', articles.Supprimer.as_view(), name='articles_supprimer'),
 
 
 

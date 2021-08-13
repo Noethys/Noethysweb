@@ -26,6 +26,8 @@ LISTE_CHAMPS = [
     Champ(page="famille_caisse", code="allocataire", famille="AFFICHER"),
     Champ(page="famille_caisse", code="autorisation_cafpro", famille="AFFICHER"),
 
+    Champ(page="famille_consentements", code="consentements", famille="AFFICHER"),
+
     Champ(page="individu_identite", code="nom", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
     Champ(page="individu_identite", code="civilite", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
     Champ(page="individu_identite", code="prenom", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
@@ -52,6 +54,8 @@ LISTE_CHAMPS = [
     Champ(page="individu_questionnaire", code="questionnaire", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 
     Champ(page="individu_regimes_alimentaires", code="regimes_alimentaires", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
+
+    Champ(page="individu_maladies", code="maladies", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 
     Champ(page="individu_medecin", code="medecin", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 

@@ -123,4 +123,13 @@ class ConsulterBase(crud.Modifier):
                 for code in form.changed_data:
                     PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code=code, valeur=valeurs[code])
                 messages.add_message(self.request, messages.SUCCESS, "Votre modification a été enregistrée et transmise à l'administrateur")
+
+            # Demande une nouvelle certification
+            if self.onglet_actif.startswith("individu_"):
+                objet = self.get_rattachement()
+            else:
+                objet = self.get_famille()
+            objet.certification_date = None
+            objet.save()
+
         return HttpResponseRedirect(self.get_success_url())

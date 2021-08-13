@@ -11,96 +11,99 @@
 {% block contenu_page %}
 
     {# Texte d'introduction #}
-    {% if parametres_portail.reservations_intro %}
+    {% if parametres_portail.renseignements_intro %}
         <div style="margin-bottom: 20px;">
-            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.reservations_intro }}
+            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.renseignements_intro }}
         </div>
     {% endif %}
 
+    {# Approbations en attente #}
+    {% if form.fields %}
+        {% embed 'core/box.html' with box_introduction=True %}
+            {% block box_theme %}card-outline card-danger{% endblock %}
+            {% block box_titre %}Approbations en attente{% endblock %}
+            {% block box_introduction %}L'accès aux réservations nécessite les approbations suivantes. Cochez la case pour chaque ligne souhaitée et cliquez sur le bouton Valider.{% endblock %}
+            {% block box_contenu %}
+                {% crispy form %}
+            {% endblock %}
+        {% endembed %}
+    {% endif %}
 
-<div class="card card-solid">
-    <div class="card-body pb-0">
-        <div class="row">
 
-            {# Fiche famille #}
-            <div class="col-12 col-sm-6 col-md-4 d-flex align-items-stretch flex-column">
-                <div class="card bg-light d-flex flex-fill">
+    {# Liste des fiches de renseignements #}
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}Fiches de renseignements{% endblock %}
+         {% block card_body_classe %}p-0{% endblock %}
+        {% block box_contenu %}
 
-                    {# Ruban d'état #}
-                    <div class="ribbon-wrapper ribbon-lg">
-                        <div class="ribbon bg-warning">Incomplet</div>
-                    </div>
+            <table class="table table-hover projects" style="cursor: pointer;">
+                <tbody>
 
-                    <div class="card-header text-muted border-bottom-0">
-                        Fiche famille
-                    </div>
-                    <div class="card-body pt-0">
-                        <div class="row">
-                            <div class="col-6">
-                                <h2 class="lead"><b>Données de la famille</b></h2>
-                            </div>
-                            <div class="col-6 text-center">
-                                <img src="{% static 'images/personne.png' %}" alt="user-avatar" class="img-circle img-fluid" style="max-height: 80px">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="small text-warning"><i class="fa fa-lg fa-exclamation-triangle"></i> Fiche incomplète</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <div class="text-right">
-                            <a href="{% url 'portail_famille_caisse' %}" class="btn btn-xs btn-primary" title="Ouvrir">
-                                <i class="fa fa-search margin-r-5"></i> Accéder à la fiche
+                    {# Fiche famille #}
+                    <tr data-url="{% url 'portail_famille_caisse' %}">
+                        <td>
+                            <img src="{% static 'images/personne.png' %}" alt="user-avatar" class="img-circle img-fluid table-avatar" style="max-height: 80px">
+                            <span class="ml-2"><strong>Données de la famille</strong></span>
+                        </td>
+                        <td>
+                            Fiche famille
+                        </td>
+                        <td class="project-state">
+                            <small>
+                                {% if request.user.famille.certification_date %}
+                                    <span><i class="fa fa-check text-success margin-r-5"></i>Fiche certifiée exacte le {{ request.user.famille.certification_date|date:'d/m/Y' }}</span>
+                                {% else %}
+                                    <span><i class="fa fa-remove text-red margin-r-5"></i>Fiche en attente de certification</span>
+                                {% endif %}
+                            </small>
+                        </td>
+                        <td class="text-right">
+                            <a href="{% url 'portail_famille_caisse' %}" class="btn btn-sm btn-primary" title="Ouvrir la fiche">
+                                <i class="fa fa-pencil"></i>
                             </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        </td>
+                    </tr>
 
-
-            {# Fiches individuelles #}
-            {% for rattachement in rattachements %}
-                <div class="col-12 col-sm-6 col-md-4 d-flex align-items-stretch flex-column">
-                    <div class="card bg-light d-flex flex-fill">
-
-                        {# Ruban d'état #}
-                        <div class="ribbon-wrapper ribbon-lg">
-                            <div class="ribbon bg-success">Complet</div>
-                        </div>
-
-                        <div class="card-header text-muted border-bottom-0">
-                            Fiche {{ rattachement.get_categorie_display|lower }}
-                        </div>
-                        <div class="card-body pt-0">
-                            <div class="row">
-                                <div class="col-6">
-                                    <h2 class="lead"><b>{{ rattachement.individu.Get_nom }}</b></h2>
-                                </div>
-                                <div class="col-6 text-center">
-                                    <img src="{{ rattachement.individu.Get_photo }}" alt="user-avatar" class="img-circle img-fluid" style="max-height: 80px">
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="small text-success"><i class="fa fa-lg fa-check-circle"></i> Fiche complétée</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <div class="text-right">
-                                <a href="{% url 'portail_individu_identite' idrattachement=rattachement.pk %}" class="btn btn-xs btn-primary" title="Ouvrir">
-                                    <i class="fa fa-search margin-r-5"></i> Accéder à la fiche
+                    {# Fiches individuelles #}
+                    {% for rattachement in rattachements %}
+                        <tr data-url="{% url 'portail_individu_identite' idrattachement=rattachement.pk %}">
+                            <td>
+                                <img src="{{ rattachement.individu.Get_photo }}" alt="user-avatar" class="img-circle img-fluid table-avatar" style="max-height: 80px">
+                                <span class="ml-2"><strong>{{ rattachement.individu.Get_nom }}</strong></span>
+                            </td>
+                            <td>
+                                Fiche {{ rattachement.get_categorie_display|lower }}
+                            </td>
+                            <td class="project-state">
+                                <small>
+                                    {% if rattachement.certification_date %}
+                                        <span><i class="fa fa-check text-success margin-r-5"></i>Fiche certifiée exacte le {{ rattachement.certification_date|date:'d/m/Y' }}</span>
+                                    {% else %}
+                                        <span><i class="fa fa-remove text-red margin-r-5"></i>Fiche en attente de certification</span>
+                                    {% endif %}
+                                </small>
+                            </td>
+                            <td class="text-right">
+                                <a href="{% url 'portail_individu_identite' idrattachement=rattachement.pk %}" class="btn btn-sm btn-primary" title="Ouvrir la fiche">
+                                    <i class="fa fa-pencil"></i>
                                 </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
 
-        </div>
-    </div>
-</div>
+                </tbody>
+            </table>
+
+        {% endblock box_contenu %}
+    {% endembed %}
+
+    <script>
+        $(document).ready(function() {
+            $('.table-hover tbody tr').click(function() {
+                window.location = $(this).data('url');
+            });
+        });
+    </script>
 
 {% endblock contenu_page %}

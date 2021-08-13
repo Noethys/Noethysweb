@@ -3,22 +3,33 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, json, datetime
 logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
-from portail.views.base import CustomView
 from django.views.generic import TemplateView
-from core.models import Individu, Inscription, PortailPeriode, Ouverture, Unite, Vacance, Ferie
+from django.shortcuts import redirect
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-import json, datetime
+from django.contrib import messages
+from core.models import Individu, Inscription, PortailPeriode, Ouverture, Unite, Vacance, Ferie, Activite
 from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
 from consommations.forms.grille_traitement_lot import Formulaire as form_traitement_lot
+from portail.utils import utils_approbations
+from portail.views.base import CustomView
 
 
 class View(CustomView, TemplateView):
     menu_code = "portail_reservations"
     template_name = "portail/planning.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        """ Vérifie si des approbations sont requises """
+        activite = Activite.objects.prefetch_related("types_consentements").get(pk=kwargs["idactivite"])
+        approbations_requises = utils_approbations.Get_approbations_requises(famille=request.user.famille, activites=[activite,], idindividu=kwargs["idindividu"])
+        if approbations_requises["nbre_total"] > 0:
+            messages.add_message(request, messages.ERROR, "L'accès à ces réservations nécessite au moins une approbation. Veuillez valider les approbations en attente.")
+            return redirect("portail_renseignements")
+        return super(View, self).dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """ Sauvegarde de la grille """
@@ -29,7 +40,12 @@ class View(CustomView, TemplateView):
         """ Vérifie que l'utilisateur peut se connecter à cette page """
         if not super(View, self).test_func():
             return False
-        if not Inscription.objects.filter(famille=self.request.user.famille, individu_id=self.kwargs.get('idindividu')):
+        inscription = Inscription.objects.filter(famille=self.request.user.famille, individu_id=self.kwargs.get('idindividu'))
+        if not inscription:
+            return False
+        if not inscription.first().internet_reservations:
+            return False
+        if not self.request.user.famille.internet_reservations:
             return False
         periode = PortailPeriode.objects.select_related("activite").prefetch_related("categories").get(pk=self.kwargs.get('idperiode'))
         if not periode or not periode.Is_active_today():

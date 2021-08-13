@@ -874,6 +874,35 @@ class FactureRegie(models.Model):
         return self.nom
 
 
+class TypeConsentement(models.Model):
+    idtype_consentement = models.AutoField(verbose_name="ID", db_column='IDtype_consentement', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200, help_text="Il s'agit généralement d'un nom du document. Exemple : Règlement intérieur de la structure...")
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = 'types_consentements'
+        verbose_name = "type de consentement"
+        verbose_name_plural = "types de consentements"
+
+    def __str__(self):
+        return self.nom
+
+
+class UniteConsentement(models.Model):
+    idunite_consentement = models.AutoField(verbose_name="ID", db_column='IDunite_consentement', primary_key=True)
+    type_consentement = models.ForeignKey(TypeConsentement, verbose_name="type de consentement", on_delete=models.PROTECT)
+    date_debut = models.DateField(verbose_name="Date de début", help_text="Saisissez la date de début d'application de cette unité. Par défaut la date du jour.")
+    date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True, help_text="La date de fin n'est généralement pas utilisée sauf si le document n'est applicable que sur une période donnée.")
+    document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, blank=True, null=True, help_text="Privilégiez un document au format PDF.")
+
+    class Meta:
+        db_table = 'unites_consentements'
+        verbose_name = "unité de consentement"
+        verbose_name_plural = "unités de consentements"
+
+    def __str__(self):
+        return "Unité de consentement ID%s" % self.idunite_consentement
+
 
 class Activite(models.Model):
     idactivite = models.AutoField(verbose_name="ID", db_column='IDactivite', primary_key=True)
@@ -914,8 +943,9 @@ class Activite(models.Model):
     portail_afficher_dates_passees = models.CharField(verbose_name="Afficher les dates passées", max_length=100, choices=choix_affichage_dates_passees, default="14")
     regie = models.ForeignKey(FactureRegie, verbose_name="Régie de facturation", on_delete=models.PROTECT, blank=True, null=True)
     groupes_activites = models.ManyToManyField(TypeGroupeActivite)
-    pieces = models.ManyToManyField(TypePiece)
-    cotisations = models.ManyToManyField(TypeCotisation)
+    pieces = models.ManyToManyField(TypePiece, verbose_name="Types de pièces", related_name="activite_types_pieces", blank=True, help_text="Sélectionnez dans la liste les types de pièces qui doivent être à jour.")
+    cotisations = models.ManyToManyField(TypeCotisation, verbose_name="Types d'adhésions", related_name="activite_types_cotisations", blank=True, help_text="Sélectionnez dans la liste des types d'adhésions qui doivent être à jour.")
+    types_consentements = models.ManyToManyField(TypeConsentement, verbose_name="Types de consentements", related_name="activite_types_consentements", blank=True, help_text="Sélectionnez dans la liste les types de consentements internet nécessaires.")
     inscriptions_multiples = models.BooleanField(verbose_name="Autoriser plusieurs inscriptions simultanées pour chaque individu", default=False)
     code_produit_local = models.CharField(verbose_name="Code produit local", max_length=200, blank=True, null=True)
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT)
@@ -1460,6 +1490,7 @@ class Famille(models.Model):
     internet_identifiant = encrypt(models.CharField(verbose_name="Identifiant", max_length=200, blank=True, null=True))
     internet_mdp = encrypt(models.CharField(verbose_name="Mot de passe", max_length=200, blank=True, null=True))
     internet_categorie = models.ForeignKey(CategorieCompteInternet, verbose_name="Catégorie", related_name="internet_categorie", on_delete=models.PROTECT, blank=True, null=True)
+    internet_reservations = models.BooleanField(verbose_name="Autoriser les réservations sur le portail", default=True)
     memo = models.TextField(verbose_name="Mémo", blank=True, null=True)
     email_factures = models.BooleanField(verbose_name="Activation de l'envoi des factures par Email", default=False)
     email_factures_adresses = models.CharField(verbose_name="Adresses pour l'envoi des factures par Email", max_length=400, blank=True, null=True)
@@ -1483,6 +1514,7 @@ class Famille(models.Model):
     secteur = models.ForeignKey(Secteur, verbose_name="Secteur", on_delete=models.PROTECT, blank=True, null=True)
     mail = models.EmailField(verbose_name="Email favori", max_length=300, blank=True, null=True)
     utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, null=True)
+    certification_date = models.DateTimeField(verbose_name="Date de certification", blank=True, null=True)
 
     class Meta:
         db_table = 'familles'
@@ -1573,6 +1605,7 @@ class Inscription(models.Model):
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
     statut_choix = [("ok", "Inscription validée"), ("attente", "Inscription en attente"), ("refus", "Inscription refusée")]
     statut = models.CharField(verbose_name="Statut", max_length=100, choices=statut_choix, default="ok")
+    internet_reservations = models.BooleanField(verbose_name="Autoriser les réservations sur le portail", default=True)
 
     class Meta:
         db_table = 'inscriptions'
@@ -1676,6 +1709,7 @@ class Rattachement(models.Model):
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE, blank=True, null=True)
     categorie = models.IntegerField(db_column='Catégorie', choices=CATEGORIES_RATTACHEMENT, default=1)
     titulaire = models.BooleanField(verbose_name="Titulaire du dossier", default=False)
+    certification_date = models.DateTimeField(verbose_name="Date de certification", blank=True, null=True)
 
     class Meta:
         db_table = 'rattachements'
@@ -2884,3 +2918,47 @@ class PesPiece(models.Model):
 
     def __str__(self):
         return "Pièce ID%d" % self.idpiece if self.idpiece else "Nouvelle pièce"
+
+
+class Consentement(models.Model):
+    idconsentement = models.AutoField(verbose_name="ID", db_column='IDconsentement', primary_key=True)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT, blank=True, null=True)
+    unite_consentement = models.ForeignKey(UniteConsentement, verbose_name="Unité de consentement", on_delete=models.PROTECT)
+    horodatage = models.DateTimeField(verbose_name="Date", auto_now_add=True)
+
+    class Meta:
+        db_table = 'consentements'
+        verbose_name = "consentement"
+        verbose_name_plural = "consentements"
+
+    def __str__(self):
+        return "Consentement ID%d" % self.idconsentement
+
+
+class Article(models.Model):
+    idarticle = models.AutoField(verbose_name="ID", db_column='IDarticle', primary_key=True)
+    titre = models.CharField(verbose_name="Titre", max_length=300)
+    texte = models.TextField(verbose_name="Texte")
+    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True, help_text="Vous pouvez associer une image d'illustration à l'article.")
+    auteur = models.ForeignKey(Utilisateur, verbose_name="Auteur", blank=True, null=True, on_delete=models.CASCADE)
+    date_debut = models.DateTimeField(verbose_name="Début de publication", help_text="Saisissez la date de début de publication. Par défaut, la date du jour de la création de l'article.")
+    date_fin = models.DateTimeField(verbose_name="Fin de publication", blank=True, null=True, help_text="Laissez vide pour ne pas définir de date de fin de publication.")
+    choix_couleur = [(None, "Par défaut"), ("primary", "Bleu foncé"), ("info", "Bleu clair"), ("success", "Vert"), ("warning", "Jaune"), ("danger", "Rouge"), ("gray", "Gris")]
+    couleur_fond = models.CharField(verbose_name="Couleur de fond", max_length=100, choices=choix_couleur, default=None, blank=True, null=True, help_text="Couleur de fond du cadre de l'article. Blanc par défaut.")
+    choix_statut = [("publie", "Publié"), ("non_publie", "Non publié")]
+    statut = models.CharField(verbose_name="Statut", max_length=100, choices=choix_statut, default="publie", help_text="Sélectionnez Non publié pour interrompre la publication quelque soit la date de fin de publication prévue.")
+    document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, blank=True, null=True, help_text="Privilégiez un document au format PDF.")
+    document_titre = models.CharField(verbose_name="Titre", max_length=300, default="Document", help_text="Saisissez un nom de document.")
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = 'articles'
+        verbose_name = "article"
+        verbose_name_plural = "articles"
+
+    def __str__(self):
+        return self.titre if self.idarticle else "Nouvel article"
+
+    def Get_anciennete(self):
+        return (datetime.datetime.now().date() - self.date_debut.date()).days
+
