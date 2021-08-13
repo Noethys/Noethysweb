@@ -6,38 +6,107 @@
 
 {% block contenu_page %}
 
+    <style>
+        {# Désactive l'agrandissement de l'icône car ça fait clignoter certains articles #}
+        .small-box:hover .icon > i, .small-box:hover .icon > i.fa {
+            -webkit-transform: none !important;
+            transform: none !important;
+        }
+    </style>
+
     {# Texte bienvenue #}
     {% if parametres_portail.accueil_texte_bienvenue %}
-        <h5 class="page-header">
-            {{ parametres_portail.accueil_texte_bienvenue }}
-        </h5>
-        <br>
-    {% endif %}
-
-    {# Pièces manquantes #}
-    {% embed 'core/box.html' with box_titre=True %}
-        {% block box_titre %}Pièces manquantes{% endblock %}
-        {% block box_contenu %}
-            <ul>
-                {% for piece_manquante in pieces_manquantes %}
-                    <li>{{ piece_manquante.label }}</li>
-                {% endfor %}
-            </ul>
-        {% endblock box_contenu %}
-    {% endembed %}
-
-    {# Messages non lus #}
-    {% if liste_messages_non_lus %}
-        {% embed 'core/box.html' with box_titre=True %}
-            {% block box_titre %}Messages non lus{% endblock %}
-            {% block box_contenu %}
-                Vous avez {{ liste_messages_non_lus|length }} message{{ liste_messages_non_lus|length|pluralize }} non lu{{ liste_messages_non_lus|length|pluralize }}.
-                <a href="{% url 'portail_contact' %}">Cliquez ici pour accéder à la messagerie.</a>
-            {% endblock box_contenu %}
-        {% endembed %}
+        <h5 class="mb-2 text-secondary">Bienvenue</h5>
+        <div class="card mb-4">
+            <div class="card-body p-3">
+                {{ parametres_portail.accueil_texte_bienvenue|safe }}
+            </div>
+        </div>
     {% endif %}
 
 
+    {# En attente #}
+    {% if nbre_approbations_requises or nbre_messages_non_lus or nbre_pieces_manquantes %}
+        <h5 class="mb-2 text-secondary">En attente</h5>
+        <div class="row mb-2">
+
+            {# Approbations #}
+            {% if nbre_approbations_requises %}
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ nbre_approbations_requises }}</h3>
+                            <p>Approbation{{ nbre_approbations_requises|pluralize }} en attente</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fa fa-edit"></i>
+                        </div>
+                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">Corriger <i class="fa fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            {% endif %}
+
+            {# Messages #}
+            {% if nbre_messages_non_lus %}
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{ nbre_messages_non_lus }}</h3>
+                            <p>Nouveau{{ nbre_messages_non_lus|pluralize:"x" }} message{{ nbre_messages_non_lus|pluralize }}</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fa fa-comments"></i>
+                        </div>
+                        <a href="{% url 'portail_contact' %}" class="small-box-footer">Consulter <i class="fa fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            {% endif %}
+
+            {# Pièces manquantes #}
+            {% if nbre_pieces_manquantes %}
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{ pieces_manquantes|length }}</h3>
+                            <p>Pièce{{ nbre_pieces_manquantes|pluralize }} manquante{{ nbre_pieces_manquantes|pluralize }}</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fa fa-comments"></i>
+                        </div>
+                        <a href="{% url 'portail_contact' %}" class="small-box-footer">Consulter <i class="fa fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+
+    {# Actualités #}
+    {% if articles %}
+        <h5 class="mb-2 text-secondary">Actualités</h5>
+        <div class="card-columns">
+            {% for article in articles %}
+                <div class="card mb-4 {% if article.couleur_fond %}bg-{{ article.couleur_fond }}{% endif %}">
+                    {% if article.Get_anciennete <= 3 %}
+                        <div class="ribbon-wrapper ribbon-lg">
+                            <div class="ribbon bg-warning">Nouveau</div>
+                        </div>
+                    {% endif %}
+                    {% if article.image %}
+                        <img class="card-img-top" src="{{ article.image.url }}"/>
+                    {% endif %}
+                    <div class="card-body p-3">
+                        <h5 class="card-title">{{ article.titre }}</h5>
+                        <p class="card-text">{{ article.texte|safe }}</p>
+                        {% if article.document %}
+                            <p class="mb-1"><small><a href="{{ article.document.url }}" style="text-decoration: none;" target="_blank" title="Cliquez ici pour ouvrir le document dans un nouvel onglet"><i class="fa fa-link margin-r-5"></i>{{ article.document_titre }}</a></small></p>
+                        {% endif %}
+                        <p class="card-text"><small class="text-muted">Publié le {{ article.date_debut|date:'d/m/Y' }} par {% firstof article.auteur.get_short_name article.auteur %}</small></p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
 
 {% endblock contenu_page %}
