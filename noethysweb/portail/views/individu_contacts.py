@@ -7,7 +7,7 @@ from django.urls import reverse_lazy
 from core.views import crud
 from core.models import PortailRenseignement, ContactUrgence
 from portail.forms.individu_contacts import Formulaire
-from portail.views.fiche import Onglet, ConsulterBase
+from portail.views.fiche import Onglet
 from django.views.generic import TemplateView
 
 
@@ -23,7 +23,6 @@ class Page(Onglet):
     objet_pluriel = "des contacts d'urgence et de sortie"
     onglet_actif = "individu_contacts"
     categorie = "individu_contacts"
-
 
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """
@@ -64,7 +63,6 @@ class Ajouter(Page, crud.Ajouter):
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire
     template_name = "portail/fiche_edit.html"
-
 
 class Supprimer(Page, crud.Supprimer):
     template_name = "portail/fiche_delete.html"

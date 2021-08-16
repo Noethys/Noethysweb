@@ -3,6 +3,8 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import logging, json
+logger = logging.getLogger(__name__)
 from django.db import models
 from core.models import Rattachement
 from portail.views.base import CustomView
@@ -13,8 +15,6 @@ from django.http import HttpResponseRedirect
 from core.models import PortailRenseignement
 from django.db.models.query import QuerySet
 from django.core.serializers.json import DjangoJSONEncoder
-import json
-
 
 
 class Onglet(CustomView):
@@ -72,24 +72,23 @@ class Onglet(CustomView):
             form_kwargs["rattachement"] = self.get_rattachement()
         else:
             form_kwargs["famille"] = self.get_famille()
-        return form_kwargs
-
-
-
-
-class ConsulterBase(crud.Modifier):
-    template_name = "portail/fiche_edit.html"
-    mode = None
-
-    def get_form_kwargs(self, **kwargs):
-        form_kwargs = super(ConsulterBase, self).get_form_kwargs(**kwargs)
-        form_kwargs["mode"] = self.mode
+        form_kwargs["mode"] = getattr(self, "mode", None)
         return form_kwargs
 
     def form_save(self, form=None):
         """ Pour enregistrement direct des données """
         # super().form_valid(form)
         form.save()
+
+    def Demande_nouvelle_certification(self):
+        """ Demande une nouvelle certification de la fiche """
+        logger.debug("%s : Demande une nouvelle certification de la fiche..." % self.request.user)
+        if self.onglet_actif.startswith("individu_"):
+            objet = self.get_rattachement()
+        else:
+            objet = self.get_famille()
+        objet.certification_date = None
+        objet.save()
 
     def Get_valeurs(self, valeurs={}):
         """ Pour modifier des valeurs à la volée """
@@ -116,20 +115,34 @@ class ConsulterBase(crud.Modifier):
             if self.get_dict_onglet_actif().validation_auto:
                 # Sans validation par l'admin
                 self.form_save(form)
-                messages.add_message(self.request, messages.SUCCESS, "Votre modification a été enregistrée")
+                if self.verbe_action == "Ajouter":
+                    messages.add_message(self.request, messages.SUCCESS, "Votre ajout a été enregistré")
+                else:
+                    messages.add_message(self.request, messages.SUCCESS, "Votre modification a été enregistrée")
             else:
                 # Avec validation par l'admin
                 valeurs = self.Get_valeurs(form.cleaned_data)
                 for code in form.changed_data:
                     PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code=code, valeur=valeurs[code])
-                messages.add_message(self.request, messages.SUCCESS, "Votre modification a été enregistrée et transmise à l'administrateur")
+                if self.verbe_action == "Ajouter":
+                    messages.add_message(self.request, messages.SUCCESS, "Votre ajout a été enregistré et transmis à l'administrateur")
+                else:
+                    messages.add_message(self.request, messages.SUCCESS, "Votre modification a été enregistrée et transmise à l'administrateur")
+
+            # Affichage dans logger
+            if self.verbe_action == "Modifier":
+                logger.debug("%s : Modification des champs %s." % (self.request.user, ", ".join(form.changed_data)))
 
             # Demande une nouvelle certification
-            if self.onglet_actif.startswith("individu_"):
-                objet = self.get_rattachement()
-            else:
-                objet = self.get_famille()
-            objet.certification_date = None
-            objet.save()
+            self.Demande_nouvelle_certification()
 
         return HttpResponseRedirect(self.get_success_url())
+
+    def Apres_suppression(self, objet=None):
+        # Demande une nouvelle certification de la fiche
+        self.Demande_nouvelle_certification()
+
+
+class ConsulterBase(crud.Modifier):
+    template_name = "portail/fiche_edit.html"
+    mode = None
