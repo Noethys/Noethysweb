@@ -108,6 +108,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_portail.Add(code="types_consentements_liste", titre="Types de consentements", icone="file-text-o")
     menu_portail.Add(code="unites_consentements_liste", titre="Unités de consentements", icone="file-text-o")
     menu_portail.Add(code="articles_liste", titre="Articles", icone="file-text-o")
+    menu_portail.Add(code="images_articles_liste", titre="Banque d'images des articles", icone="file-text-o")
 
 
     # ------------------------------------ Outils ------------------------------------

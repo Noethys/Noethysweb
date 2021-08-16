@@ -1,0 +1,30 @@
+{% load static %}
+{% load embed %}
+
+
+<select id="{{ id }}" name="{{ name }}" data-minimum-input-length="0" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2" {{ disabled }}>
+    {% for choix in choices %}
+        <option value="{{ choix.0 }}" data-image="{{ choix.2 }}" {% if value == choix.0 %}selected{% endif %}>{{ choix.1 }}</option>
+    {% endfor %}
+</select>
+
+
+<script>
+    function formate_image (state) {
+        if (!state.id) {
+            return state.text;
+        }
+        if (state.element.dataset.image) {
+            var $state = $("<span><img src='{% get_media_prefix %}" + state.element.dataset.image + "' class='img-flag rounded'' style='max-width: 80px;margin-right: 20px;'/> " + state.text + "</span>");
+        } else {
+            var $state = $("<span>"+ state.text + "</span>");
+        }
+        return $state;
+    };
+
+    $(document).ready(function() {
+        $("#{{ id }}").select2({
+            templateResult: formate_image,
+        });
+    });
+</script>

@@ -2935,11 +2935,27 @@ class Consentement(models.Model):
         return "Consentement ID%d" % self.idconsentement
 
 
+class ImageArticle(models.Model):
+    idimage = models.AutoField(verbose_name="ID", db_column='IDimage', primary_key=True)
+    titre = models.CharField(verbose_name="Titre", max_length=300)
+    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = 'images_articles'
+        verbose_name = "image"
+        verbose_name_plural = "images"
+
+    def __str__(self):
+        return self.titre if self.idimage else "Nouvelle image"
+
+
 class Article(models.Model):
     idarticle = models.AutoField(verbose_name="ID", db_column='IDarticle', primary_key=True)
     titre = models.CharField(verbose_name="Titre", max_length=300)
     texte = models.TextField(verbose_name="Texte")
-    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True, help_text="Vous pouvez associer une image d'illustration à l'article.")
+    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
+    image_article = models.ForeignKey(ImageArticle, verbose_name="Image", blank=True, null=True, on_delete=models.SET_NULL)
     auteur = models.ForeignKey(Utilisateur, verbose_name="Auteur", blank=True, null=True, on_delete=models.CASCADE)
     date_debut = models.DateTimeField(verbose_name="Début de publication", help_text="Saisissez la date de début de publication. Par défaut, la date du jour de la création de l'article.")
     date_fin = models.DateTimeField(verbose_name="Fin de publication", blank=True, null=True, help_text="Laissez vide pour ne pas définir de date de fin de publication.")
@@ -2950,6 +2966,9 @@ class Article(models.Model):
     document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, blank=True, null=True, help_text="Privilégiez un document au format PDF.")
     document_titre = models.CharField(verbose_name="Titre", max_length=300, default="Document", help_text="Saisissez un nom de document.")
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+    choix_public = [("toutes", "Toutes les familles"), ("inscrits", "Les familles dont un membre est inscrit à l'une des activités suivantes")]
+    public = models.CharField(verbose_name="Public", max_length=100, choices=choix_public, default="toutes", help_text="Sélectionnez le public qui pourra consulter cet article.")
+    activites = models.ManyToManyField(Activite, verbose_name="Activités", related_name="article_activites", blank=True, null=True)
 
     class Meta:
         db_table = 'articles'

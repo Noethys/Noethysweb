@@ -26,7 +26,7 @@ from parametrage.views import organisateur, structures, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
     portail_parametres, types_regimes_alimentaires, assureurs, \
     categories_compte_internet, modeles_pes, \
-    types_consentements, unites_consentements, articles
+    types_consentements, unites_consentements, articles, images_articles
 
 
 urlpatterns = [
@@ -414,6 +414,11 @@ urlpatterns = [
     path('parametrage/articles/modifier/<int:pk>', articles.Modifier.as_view(), name='articles_modifier'),
     path('parametrage/articles/supprimer/<int:pk>', articles.Supprimer.as_view(), name='articles_supprimer'),
 
+    # Images d'articles
+    path('parametrage/images_articles/liste', images_articles.Liste.as_view(), name='images_articles_liste'),
+    path('parametrage/images_articles/ajouter', images_articles.Ajouter.as_view(), name='images_articles_ajouter'),
+    path('parametrage/images_articles/modifier/<int:pk>', images_articles.Modifier.as_view(), name='images_articles_modifier'),
+    path('parametrage/images_articles/supprimer/<int:pk>', images_articles.Supprimer.as_view(), name='images_articles_supprimer'),
 
 
     # AJAX
