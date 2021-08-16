@@ -13,10 +13,10 @@ from core.utils import utils_dates
 class Selection_emetteur(Widget):
     template_name = 'fiche_famille/widgets/emetteur.html'
 
-    class Media:
-        css = {"all": ("//cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/css/select2.min.css",)}
-        js = ("django_select2/django_select2.js", "//cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/js/select2.min.js",
-              "//cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/js/i18n/fr.js")
+    # class Media:
+    #     css = {"all": ("//cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/css/select2.min.css",)}
+    #     js = ("django_select2/django_select2.js", "//cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/js/select2.min.js",
+    #           "//cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/js/i18n/fr.js")
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())
@@ -36,10 +36,10 @@ class Selection_emetteur(Widget):
 class Selection_mode_reglement(Widget):
     template_name = 'fiche_famille/widgets/mode_reglement.html'
 
-    class Media:
-        css = {"all": ("//cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/css/select2.min.css",)}
-        js = ("django_select2/django_select2.js", "//cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/js/select2.min.js",
-              "//cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/js/i18n/fr.js")
+    # class Media:
+    #     css = {"all": ("//cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/css/select2.min.css",)}
+    #     js = ("django_select2/django_select2.js", "//cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/js/select2.min.js",
+    #           "//cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/js/i18n/fr.js")
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())

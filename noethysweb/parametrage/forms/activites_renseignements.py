@@ -10,20 +10,19 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset
 from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
-from core.models import Activite, TypePiece, TypeCotisation
+from core.models import Activite, TypePiece, TypeCotisation, TypeConsentement
 from django_select2.forms import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    # Pièces à fournir
-    pieces = forms.ModelMultipleChoiceField(label="Pièces à fournir", widget=Select2MultipleWidget({"lang":"fr"}), queryset=TypePiece.objects.all(), required=False)
-
-    # Cotisations à fournir
-    cotisations = forms.ModelMultipleChoiceField(label="Adhésions à jour", widget=Select2MultipleWidget({"lang":"fr"}), queryset=TypeCotisation.objects.all(), required=False)
-
     class Meta:
         model = Activite
-        fields = ["pieces", "cotisations", "vaccins_obligatoires"]
+        fields = ["pieces", "cotisations", "vaccins_obligatoires", "types_consentements"]
+        widgets = {
+            "pieces": Select2MultipleWidget({"lang": "fr"}),
+            "cotisations": Select2MultipleWidget({"lang": "fr"}),
+            "types_consentements": Select2MultipleWidget({"lang": "fr"}),
+         }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -48,11 +47,13 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Pièces à fournir",
                 Field("pieces"),
             ),
-            Fieldset("Cotisations",
+            Fieldset("Cotisations à jour",
                 Field("cotisations"),
+            ),
+            Fieldset("Consentements internet nécessaires",
+                Field("types_consentements"),
             ),
             Fieldset("Vaccinations",
                 Field("vaccins_obligatoires"),
             ),
         )
-

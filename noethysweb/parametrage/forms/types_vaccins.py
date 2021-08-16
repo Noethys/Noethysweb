@@ -6,14 +6,12 @@
 from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, ButtonHolder, Div, Submit, HTML, Row, Column, Fieldset
-from crispy_forms.bootstrap import Field, FormActions, PrependedText, StrictButton
+from crispy_forms.layout import Layout, Div, HTML, Fieldset
+from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.models import TypeVaccin, TypeMaladie
 from django_select2.forms import Select2MultipleWidget
-
 
 
 class Formulaire(FormulaireBase, ModelForm):
