@@ -10,10 +10,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Secret Key : Saisissez une clé aléatoire de votre choix
 SECRET_KEY = 'cle_secrete_a_modifier_imperativement'
 
-# Recaptcha : Saisissez vos codes Recaptcha
-RECAPTCHA_PUBLIC_KEY = "renseignez_votre_cle_publique"
-RECAPTCHA_PRIVATE_KEY = "renseignez_votre_cle_privee"
-
 # Mode démo
 MODE_DEMO = False
 

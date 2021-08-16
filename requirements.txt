@@ -8,7 +8,7 @@ django-csp
 django-datatable-view
 django-formtools
 django-multipleselectfield
-django-recaptcha
+django-simple-captcha
 django-resized
 django-select2
 django-summernote

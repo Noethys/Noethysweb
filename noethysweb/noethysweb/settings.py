@@ -27,8 +27,13 @@ LOGIN_URL = "connexion"
 LOGOUT_REDIRECT_URL = "connexion"
 
 # AXES
-AXES_FAILURE_LIMIT = 3
+AXES_FAILURE_LIMIT = 5
 AXES_COOLOFF_TIME = 24
+
+# CAPTCHA
+CAPTCHA_FONT_SIZE = 35
+CAPTCHA_IMAGE_SIZE = (90, 40)
+CAPTCHA_CHALLENGE_FUNCT = "core.utils.utils_captcha.random_digit_challenge"
 
 # DIVERS
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
@@ -237,13 +242,10 @@ CSP_SCRIPT_SRC = (
     "'unsafe-inline'",
     "https://ajax.googleapis.com",
     "https://cdnjs.cloudflare.com",
-    "https://www.google.com/recaptcha/",
-    "https://www.gstatic.com/recaptcha/",
 )
 
 CSP_FRAME_SRC = (
     "'self'",
-    "https://www.google.com/recaptcha/",
 )
 
 CSP_FRAME_ANCESTORS = (

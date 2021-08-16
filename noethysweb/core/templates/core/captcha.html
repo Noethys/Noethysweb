@@ -1,0 +1,27 @@
+{% load i18n %}
+
+<style>
+    .captcha {
+        max-height: 45px;
+        margin-right: 10px;
+        border: 1px solid #bdbdbd;
+        border-radius: 5%;
+    }
+</style>
+
+{% spaceless %}
+    <div class="form-group">
+      <div class="form-group">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            {% if audio %}
+                <a title="{% trans "Play CAPTCHA as audio file" %}" href="{{ audio }}">
+            {% endif %}
+            <img src="{{ image }}" alt="captcha" class="captcha" />
+            {% if audio %}</a>{% endif %}
+          </div>
+          {% include "django/forms/widgets/multiwidget.html" %}
+        </div>
+      </div>
+    </div>
+{% endspaceless %}

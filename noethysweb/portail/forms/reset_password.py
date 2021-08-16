@@ -5,9 +5,6 @@
 
 from django import forms
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
-from captcha.fields import ReCaptchaField
-from captcha.widgets import ReCaptchaV2Checkbox
-from django.conf import settings
 from django.forms import ValidationError
 from django.core.validators import validate_email
 from core.models import Utilisateur, AdresseMail
@@ -18,7 +15,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-
+from core.utils.utils_captcha import CaptchaField, CustomCaptchaTextInput
 
 
 class MySetPasswordForm(SetPasswordForm):
@@ -32,12 +29,10 @@ class MySetPasswordForm(SetPasswordForm):
         self.fields['new_password2'].widget.attrs['placeholder'] = "Saisissez le nouveau mot de passe une nouvelle fois"
 
 
-
 class MyPasswordResetForm(PasswordResetForm):
     identifiant = forms.CharField(label="Identifiant", max_length=20)
     email = forms.CharField(label="Email", max_length=254, widget=forms.EmailInput(attrs={'autocomplete': 'email'}))
-    if hasattr(settings, 'RECAPTCHA_PUBLIC_KEY'):
-        captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox(attrs={'data-theme': 'light', 'data-size': 'normal'}))
+    captcha = CaptchaField(widget=CustomCaptchaTextInput)
 
     def __init__(self, *args, **kwargs):
         super(MyPasswordResetForm, self).__init__(*args, **kwargs)
@@ -47,6 +42,8 @@ class MyPasswordResetForm(PasswordResetForm):
         self.fields['email'].widget.attrs['class'] = "form-control"
         self.fields['email'].widget.attrs['title'] = "Saisissez votre adresse Email"
         self.fields['email'].widget.attrs['placeholder'] = "Saisissez votre adresse Email"
+        self.fields['captcha'].widget.attrs['class'] = "form-control"
+        self.fields['captcha'].widget.attrs['placeholder'] = "Recopiez le code de sécurité ci-contre"
 
     def clean(self):
         identifiant = self.cleaned_data['identifiant']

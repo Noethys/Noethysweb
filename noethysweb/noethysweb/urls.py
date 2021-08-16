@@ -24,6 +24,7 @@ urlpatterns = [
     path(settings.URL_BUREAU, include('aide.urls')),
     path('select2/', include('django_select2.urls')),
     path('summernote/', include('django_summernote.urls')),
+    path('captcha/', include('captcha.urls')),
 ]
 
 # Ajout de l'URL du portail
