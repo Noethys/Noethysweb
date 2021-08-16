@@ -3,6 +3,8 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import logging, json
+logger = logging.getLogger(__name__)
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, TemplateView
 from django.urls import reverse_lazy, reverse
@@ -13,7 +15,6 @@ from django.db.models import ProtectedError
 from django.http import HttpResponseRedirect
 from core.utils import utils_texte, utils_historique
 from core.models import FiltreListe, Consommation, Inscription
-import json
 from django.db.models import Q, Count
 from django.contrib.admin.utils import NestedObjects
 
@@ -192,6 +193,11 @@ class BaseView():
         if classe == "Individu":
             individu = instance.pk
         utils_historique.Ajouter(titre=titre, detail=detail, utilisateur=utilisateur, famille=famille, individu=individu, objet=objet, idobjet=idobjet, classe=classe)
+
+        # Ecriture dans le log
+        if famille:
+            detail += " Famille=%s" % famille
+        logger.debug("%s : %s (%s)" % (utilisateur, titre, detail))
 
 
 class Ajouter(BaseView, CreateView):

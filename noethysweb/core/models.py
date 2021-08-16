@@ -2968,7 +2968,7 @@ class Article(models.Model):
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
     choix_public = [("toutes", "Toutes les familles"), ("inscrits", "Les familles dont un membre est inscrit à l'une des activités suivantes")]
     public = models.CharField(verbose_name="Public", max_length=100, choices=choix_public, default="toutes", help_text="Sélectionnez le public qui pourra consulter cet article.")
-    activites = models.ManyToManyField(Activite, verbose_name="Activités", related_name="article_activites", blank=True, null=True)
+    activites = models.ManyToManyField(Activite, verbose_name="Activités", related_name="article_activites", blank=True)
 
     class Meta:
         db_table = 'articles'

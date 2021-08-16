@@ -3,6 +3,8 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import logging
+logger = logging.getLogger(__name__)
 from django.contrib.auth.views import LoginView
 from portail.forms.login import FormLoginFamille
 from noethysweb.version import GetVersion
@@ -46,5 +48,8 @@ class LoginViewFamille(ClassCommuneLogin, LoginView):
     redirect_field_name = 'portail_accueil'
 
     def form_valid(self, form):
+        # Enregistre la date de la dernière connexion
         update_last_login(None, form.get_user())
+        # Enregistre la connexion dans le log
+        logger.debug("Connexion portail de la famille %s" % form.get_user())
         return super(LoginViewFamille, self).form_valid(form)
