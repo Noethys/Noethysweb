@@ -125,16 +125,21 @@ class DateTimePickerWidget(Widget):
         context['name'] = name
         if value is not None:
             context['value'] = value
-
         if 'format' not in context:
             context['format'] = 'dd/mm/yyyy hh:ii'
         context['djformat'] = settings.DATETIME_FORMAT
-
         return context
 
     def render(self, name, value, attrs=None, renderer=None):
         context = self.get_context(name, value, attrs)
         return mark_safe(loader.render_to_string(self.template_name, context))
+
+    def value_from_datadict(self, data, files, name):
+        date = data.get(name, None)
+        if not date:
+            return None
+        date = datetime.datetime.strptime(date, "%d/%m/%Y %H:%M")
+        return date
 
 
 class ColorPickerWidget(Widget):

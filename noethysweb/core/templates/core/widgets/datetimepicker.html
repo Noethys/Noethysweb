@@ -1,7 +1,7 @@
 <script>
 $(function () {
     $('.datetimepickerwidget').datetimepicker({
-        language: 'fr'
+        language: 'fr',
     });
 });
 </script>
@@ -9,5 +9,5 @@ $(function () {
     <div class="input-group-prepend">
         <i class="fa {% if icon %}{{ icon }}{% else %}fa-calendar{% endif %} input-group-text"></i>
     </div>
-    <input type="text" class="{{ class }}" data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}" value="{{ value|date:"d/m/Y H:i" }}" />
+    <input type="text" class="{{ class }}" data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}" value="{{ value|date:'d/m/Y H:i' }}" />
 </div>
