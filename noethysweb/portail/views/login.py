@@ -6,11 +6,12 @@
 import logging
 logger = logging.getLogger(__name__)
 from django.contrib.auth.views import LoginView
-from portail.forms.login import FormLoginFamille
-from noethysweb.version import GetVersion
-from core.models import Organisateur
+from django.urls import reverse_lazy
 from django.core.cache import cache
 from django.contrib.auth.models import update_last_login
+from noethysweb.version import GetVersion
+from portail.forms.login import FormLoginFamille
+from core.models import Organisateur
 from core.utils import utils_portail
 
 
@@ -53,3 +54,6 @@ class LoginViewFamille(ClassCommuneLogin, LoginView):
         # Enregistre la connexion dans le log
         logger.debug("Connexion portail de la famille %s" % form.get_user())
         return super(LoginViewFamille, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("portail_accueil")
