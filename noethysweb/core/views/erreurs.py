@@ -13,3 +13,6 @@ def erreur_404(request, exception=None):
 
 def erreur_500(request, exception=None):
     return render(request, "core/erreur_500.html")
+
+def erreur_axes(request, exception=None):
+    return render(request, "core/erreur_axes.html")

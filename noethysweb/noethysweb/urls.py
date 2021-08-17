@@ -25,6 +25,7 @@ urlpatterns = [
     path('select2/', include('django_select2.urls')),
     path('summernote/', include('django_summernote.urls')),
     path('captcha/', include('captcha.urls')),
+    path('locked/', erreurs.erreur_axes, name="locked_out"),
 ]
 
 # Ajout de l'URL du portail
