@@ -8,7 +8,7 @@ from portail.views import accueil, login
 from django.contrib.auth import views as auth_views
 from consommations.views import grille
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
-                            individu_regimes_alimentaires, individu_coords, individu_medecin, individu_infos_medicales, individu_assurances, \
+                            individu_regimes_alimentaires, individu_coords, individu_medecin, individu_infos_medicales, individu_assurances, individu_vaccinations, \
                             famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies
 from core.decorators import secure_ajax_portail
 
@@ -60,6 +60,11 @@ urlpatterns = [
 
     path('renseignements/individu/medecin/<int:idrattachement>', individu_medecin.Consulter.as_view(), name='portail_individu_medecin'),
     path('renseignements/individu/medecin/modifier/<int:idrattachement>', individu_medecin.Modifier.as_view(), name='portail_individu_medecin_modifier'),
+
+    path('renseignements/individu/vaccinations/liste/<int:idrattachement>', individu_vaccinations.Liste.as_view(), name='portail_individu_vaccinations'),
+    path('renseignements/individu/vaccinations/ajouter/<int:idrattachement>', individu_vaccinations.Ajouter.as_view(), name='portail_individu_vaccinations_ajouter'),
+    path('renseignements/individu/vaccinations/modifier/<int:idrattachement>/<int:idvaccin>', individu_vaccinations.Modifier.as_view(), name='portail_individu_vaccinations_modifier'),
+    path('renseignements/individu/vaccinations/supprimer/<int:idrattachement>/<int:idvaccin>', individu_vaccinations.Supprimer.as_view(), name='portail_individu_vaccinations_supprimer'),
 
     path('renseignements/individu/infos_medicales/liste/<int:idrattachement>', individu_infos_medicales.Liste.as_view(), name='portail_individu_infos_medicales'),
     path('renseignements/individu/infos_medicales/ajouter/<int:idrattachement>', individu_infos_medicales.Ajouter.as_view(), name='portail_individu_infos_medicales_ajouter'),

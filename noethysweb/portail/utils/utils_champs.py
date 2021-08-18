@@ -59,6 +59,8 @@ LISTE_CHAMPS = [
 
     Champ(page="individu_medecin", code="medecin", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 
+    Champ(page="individu_vaccinations", code="vaccinations", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
+
     Champ(page="individu_infos_medicales", code="infos_medicales", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 
     Champ(page="individu_assurances", code="assurances", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),

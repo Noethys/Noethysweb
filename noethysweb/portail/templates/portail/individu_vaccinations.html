@@ -1,0 +1,51 @@
+{% extends "portail/fiche.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_fiche %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+
+                {% embed "individus/alerte.html" with items=vaccins_obligatoires titre="Vaccinations obligatoires"%}
+                {% endembed %}
+
+                <div class="">
+                    {% if liste_vaccinations %}
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="text-center">
+                                    <th>Type de vaccin</th>
+                                    <th>Date</th>
+                                    <th style="width: 90px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vaccin in liste_vaccinations %}
+                                    <tr class="text-center">
+                                        <td>{{ vaccin.type_vaccin }}</td>
+                                        <td>{{ vaccin.date|date:'d/m/Y' }}</td>
+                                        <td>
+                                            <a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_individu_vaccinations_modifier' idrattachement=rattachement.pk idvaccin=vaccin.pk %}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
+                                            <a type="button" class="btn btn-danger btn-xs" href="{% url 'portail_individu_vaccinations_supprimer' idrattachement=rattachement.pk idvaccin=vaccin.pk %}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <b>Aucune vaccination enregistrée.</b>
+                    {% endif %}
+                </div>
+                <a class="btn btn-primary pull-right" href="{% url 'portail_individu_vaccinations_ajouter' idrattachement=rattachement.pk %}" title="Ajouter une vaccination"><i class="fa fa-plus margin-r-5"></i>Ajouter une vaccination</a>
+
+            {% endblock box_contenu %}
+            {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+        {% endembed %}
+    </div>
+{% endblock %}

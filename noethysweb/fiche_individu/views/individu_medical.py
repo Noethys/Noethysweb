@@ -45,18 +45,22 @@ def Deselect_medecin(request):
 
     return JsonResponse({"success": True})
 
-def RechercherVaccinsObligatoires(idindividu=None, nonvalides_only=False):
+def RechercherVaccinsObligatoires(individu=None, nonvalides_only=False):
     liste_resultats = []
-    vaccins = Vaccin.objects.filter(individu_id=idindividu)
-    for maladie in TypeMaladie.objects.filter(vaccin_obligatoire=True):
-        valide = False
-        for vaccin in vaccins:
-            if maladie in vaccin.type_vaccin.types_maladies.all():
-                date_fin_validite = vaccin.date + utils_dates.ConvertDureeStrToDuree(vaccin.type_vaccin.duree_validite)
-                if date_fin_validite >= datetime.date.today():
-                    valide = True
-        if nonvalides_only == False or (nonvalides_only and valide == False):
-            liste_resultats.append({"label": maladie.nom, "valide": valide})
+    vaccins = Vaccin.objects.select_related("type_vaccin").prefetch_related("type_vaccin__types_maladies").filter(individu=individu)
+    for maladie in TypeMaladie.objects.filter(vaccin_obligatoire=True).order_by("nom"):
+        if not individu.date_naiss or not maladie.vaccin_date_naiss_min or (maladie.vaccin_date_naiss_min and individu.date_naiss >= maladie.vaccin_date_naiss_min):
+            valide = False
+            for vaccin in vaccins:
+                if maladie in vaccin.type_vaccin.types_maladies.all():
+                    if vaccin.type_vaccin.duree_validite:
+                        date_fin_validite = vaccin.date + utils_dates.ConvertDureeStrToDuree(vaccin.type_vaccin.duree_validite)
+                        if date_fin_validite >= datetime.date.today():
+                            valide = True
+                    else:
+                        valide = True
+            if not nonvalides_only or (nonvalides_only and not valide):
+                liste_resultats.append({"label": maladie.nom, "valide": valide})
     return liste_resultats
 
 
@@ -78,7 +82,7 @@ class Page(Onglet):
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_vaccins_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
         ]
         context['form_selection_medecin'] = Formulaire_medecin(idindividu=self.Get_idindividu())
-        context['vaccins_obligatoires'] = RechercherVaccinsObligatoires(idindividu=self.Get_idindividu())
+        context['vaccins_obligatoires'] = RechercherVaccinsObligatoires(individu=context["individu"])
         context['pieces_manquantes'] = [{"label": "Fiche sanitaire", "valide": True}, {"label": "Fiche famille", "valide": False}]
         return context
 

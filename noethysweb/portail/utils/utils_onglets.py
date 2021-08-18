@@ -28,6 +28,7 @@ LISTE_ONGLETS_INDIVIDU = [
     Onglet(code="individu_regimes_alimentaires", label="Régimes alimentaires", icone="fa-cutlery", url="portail_individu_regimes_alimentaires", validation_auto=True),
     Onglet(code="individu_maladies", label="Maladies", icone="fa-stethoscope", url="portail_individu_maladies", validation_auto=True),
     Onglet(code="individu_medecin", label="Médecin", icone="fa-user-md", url="portail_individu_medecin", validation_auto=True),
+    Onglet(code="individu_vaccinations", label="Vaccinations", icone="fa-medkit", url="portail_individu_vaccinations", validation_auto=True),
     Onglet(code="individu_infos_medicales", label="Informations médicales", icone="fa-heartbeat", url="portail_individu_infos_medicales", validation_auto=True),
     Onglet(code="individu_assurances", label="Assurances", icone="fa-shield", url="portail_individu_assurances", validation_auto=True),
     Onglet(code="individu_contacts", label="Contacts", icone="fa-phone", url="portail_individu_contacts", validation_auto=True),
