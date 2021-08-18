@@ -42,7 +42,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "caisse": "Sélectionnez une caisse d'allocation dans la liste déroulante.",
             "num_allocataire": "Saisissez le numéro d'allocataire.",
             "allocataire": "Sélectionnez le titulaire du dossier auprès de la caisse d'allocation.",
-            "autorisation_cafpro": "Cochez la case pour autoriser la récupération du quotient familial auprès de la CAF par l'administrateur. Uniquement pour les famille allocataires de la CAF.",
+            "autorisation_cafpro": "Cochez la case pour autoriser la récupération du quotient familial auprès de la CAF par l'administrateur. Uniquement pour les familles allocataires de la CAF.",
         }
 
         # Champs affichables

@@ -31,7 +31,7 @@
                             <ol class="breadcrumb float-sm-right">
                                 <li class="breadcrumb-item"><a href="{% url 'portail_accueil' %}"><i class="fa fa-home"></i> Accueil</a></li>
                                 {% for item in breadcrumb %}
-                                    {% if item.code %}
+                                    {% if item.code and item.code != "portail_accueil" %}
                                         <li class="breadcrumb-item"><a href="{{ item.GetUrl }}">{{ item.titre }}</a></li>
                                     {% endif %}
                                 {% endfor %}

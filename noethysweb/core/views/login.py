@@ -3,12 +3,15 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import logging
+logger = logging.getLogger(__name__)
 from django.contrib.auth.views import LoginView
-from core.forms.login import FormLoginUtilisateur
-from noethysweb.version import GetVersion
-from core.models import Organisateur
+from django.urls import reverse_lazy
 from django.core.cache import cache
 from django.contrib.auth.models import update_last_login
+from noethysweb.version import GetVersion
+from core.forms.login import FormLoginUtilisateur
+from core.models import Organisateur
 
 
 class ClassCommuneLogin:
@@ -39,4 +42,9 @@ class LoginViewUtilisateur(ClassCommuneLogin, LoginView):
 
     def form_valid(self, form):
         update_last_login(None, form.get_user())
+        # Enregistre la connexion dans le log
+        logger.debug("Connexion de l'utilisateur %s" % form.get_user())
         return super(LoginViewUtilisateur, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("accueil")

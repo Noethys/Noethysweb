@@ -2064,7 +2064,7 @@ class QuestionnaireQuestion(models.Model):
     idquestion = models.AutoField(verbose_name="ID", db_column='IDquestion', primary_key=True)
     categorie = models.CharField(verbose_name="Catégorie", max_length=200, choices=LISTE_CATEGORIES_QUESTIONNAIRES)
     ordre = models.IntegerField(verbose_name="Ordre")
-    visible = models.BooleanField(verbose_name="Visible", default=True)
+    visible = models.BooleanField(verbose_name="Visible sur le bureau", default=True)
     label = models.CharField(verbose_name="Label", max_length=250)
     controle = models.CharField(verbose_name="contrôle", max_length=200, choices=[(ctrl["code"], ctrl["label"]) for ctrl in LISTE_CONTROLES_QUESTIONNAIRES])
     choix = models.CharField(verbose_name="Choix", max_length=500, blank=True, null=True, help_text="Saisissez les choix possibles séparés par un point-virgule. Exemple : 'Bananes;Pommes;Poires'")

@@ -72,7 +72,7 @@ LISTE_PARAMETRES = [
 
     # Contact
     Parametre(code="contact_afficher_page", label="Afficher la page", type="boolean", valeur=True),
-    Parametre(code="contact_intro", label="Texte d'introduction", type="char", valeur="Vous pouvez découvrir ici les moyens de correspondre avec l'organisateur."),
+    Parametre(code="contact_intro", label="Texte d'introduction", type="char", valeur="Vous pouvez trouver ici les moyens de correspondre avec l'organisateur."),
     Parametre(code="messagerie_intro", label="Texte d'introduction de la messagerie", type="char", valeur="Saisissez un message et cliquez sur le bouton Envoyer."),
 
     # Mentions
