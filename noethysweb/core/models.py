@@ -227,10 +227,12 @@ CHOIX_FORMAT_EXPORT_TRESOR = [
 ]
 
 
+def get_uuid():
+    return uuid.uuid4()
 
 def get_uuid_path(instance, filename):
     """ Renvoie un nom de fichier uuid """
-    return os.path.join(instance._meta.db_table, "%s.%s" % (uuid.uuid4(), filename.split('.')[-1]))
+    return os.path.join(instance._meta.db_table, "%s.%s" % (get_uuid(), filename.split('.')[-1]))
 
 
 
@@ -2935,6 +2937,40 @@ class Consentement(models.Model):
         return "Consentement ID%d" % self.idconsentement
 
 
+class Album(models.Model):
+    idalbum = models.AutoField(verbose_name="ID", db_column='IDalbum', primary_key=True)
+    titre = models.CharField(verbose_name="Titre de l'album", max_length=300, help_text="Le titre est visible pour les familles visible sur le portail.")
+    description = models.TextField(verbose_name="Description", blank=True, null=True, help_text="La description est visible pour les familles sur le portail.")
+    auteur = models.ForeignKey(Utilisateur, verbose_name="Auteur", blank=True, null=True, on_delete=models.CASCADE)
+    date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
+    code = models.CharField(verbose_name="Code de l'album", max_length=300, default=get_uuid)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = 'albums'
+        verbose_name = "album"
+        verbose_name_plural = "albums"
+
+    def __str__(self):
+        return self.titre if self.titre else "Nouvel album"
+
+
+class Photo(models.Model):
+    idphoto = models.AutoField(verbose_name="ID", db_column='IDphoto', primary_key=True)
+    album = models.ForeignKey(Album, verbose_name="Album", on_delete=models.PROTECT)
+    fichier = models.FileField(verbose_name="Fichier", upload_to=get_uuid_path)
+    titre = models.CharField(verbose_name="Titre de la photo", max_length=300, blank=True, null=True, help_text="Le titre est visible pour les familles visible sur le portail.")
+    date_creation = models.DateTimeField(verbose_name="Date de création", blank=True, null=True, help_text="Cette date est utilisée pour trier les photos.")
+
+    class Meta:
+        db_table = 'photos'
+        verbose_name = "photo"
+        verbose_name_plural = "photos"
+
+    def __str__(self):
+        return "Photo ID%d" % self.idphoto if self.idphoto else "Nouvelle photo"
+
+
 class ImageArticle(models.Model):
     idimage = models.AutoField(verbose_name="ID", db_column='IDimage', primary_key=True)
     titre = models.CharField(verbose_name="Titre", max_length=300)
@@ -2966,9 +3002,17 @@ class Article(models.Model):
     document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, blank=True, null=True, help_text="Privilégiez un document au format PDF.")
     document_titre = models.CharField(verbose_name="Titre", max_length=300, default="Document", help_text="Saisissez un nom de document.")
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
-    choix_public = [("toutes", "Toutes les familles"), ("inscrits", "Les familles dont un membre est inscrit à l'une des activités suivantes")]
-    public = models.CharField(verbose_name="Public", max_length=100, choices=choix_public, default="toutes", help_text="Sélectionnez le public qui pourra consulter cet article.")
-    activites = models.ManyToManyField(Activite, verbose_name="Activités", related_name="article_activites", blank=True)
+    choix_public = [("toutes", "Toutes les familles"),
+                    ("inscrits", "Les familles dont un membre est inscrit à l'une des activités suivantes"),
+                    ("presents", "Les familles dont un membre est présent sur l'une des activités suivantes et sur la période suivante"),
+                    ("presents_groupes", "Les familles dont un membre est présent sur l'un des groupes suivants et sur la période suivante"),
+                    ]
+    public = models.CharField(verbose_name="Public", max_length=100, choices=choix_public, help_text="Sélectionnez le public qui pourra consulter cet article.")
+    activites = models.ManyToManyField(Activite, verbose_name="Activités", related_name="article_activites", blank=True, help_text="Sélectionnez une ou plusieurs activités dans la liste.")
+    groupes = models.ManyToManyField(Groupe, verbose_name="Groupes", related_name="article_groupes", blank=True, help_text="Sélectionnez un ou plusieurs groupes dans la liste.")
+    present_debut = models.DateField(verbose_name="Date de début", blank=True, null=True)
+    present_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
+    album = models.ForeignKey(Album, verbose_name="Album photos", blank=True, null=True, on_delete=models.SET_NULL, help_text="Sélectionnez un album photos existant à joindre à cet article.")
 
     class Meta:
         db_table = 'articles'
@@ -2980,4 +3024,3 @@ class Article(models.Model):
 
     def Get_anciennete(self):
         return (datetime.datetime.now().date() - self.date_debut.date()).days
-
