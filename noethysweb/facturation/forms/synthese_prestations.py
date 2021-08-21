@@ -53,7 +53,7 @@ def Get_modes():
 class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
-    donnees = forms.MultipleChoiceField(label="Type de prestation", required=True, widget=Select2MultipleWidget({"lang": "fr"}), choices=[("cotisation", "Cotisations"), ("consommation", "Consommations"), ("location", "Locations"), ("autre", "Autres")], initial=["cotisation", "consommation", "location", "autre"])
+    donnees = forms.MultipleChoiceField(label="Type de prestation", required=True, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[("cotisation", "Cotisations"), ("consommation", "Consommations"), ("location", "Locations"), ("autre", "Autres")], initial=["cotisation", "consommation", "location", "autre"])
     filtre_reglements_saisis = forms.CharField(label="Règlements saisis sur une période", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
     filtre_reglements_deposes = forms.CharField(label="Règlements déposés sur une période", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
     donnee_ligne = forms.ChoiceField(label="Ligne", choices=Get_regroupements(), initial="activite", required=False)

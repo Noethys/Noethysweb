@@ -15,7 +15,7 @@ from django_select2.forms import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    maladies = forms.ModelMultipleChoiceField(label="Maladies", widget=Select2MultipleWidget({"lang": "fr"}), queryset=TypeMaladie.objects.all().order_by("nom"), required=False)
+    maladies = forms.ModelMultipleChoiceField(label="Maladies", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeMaladie.objects.all().order_by("nom"), required=False)
 
     class Meta:
         model = Individu

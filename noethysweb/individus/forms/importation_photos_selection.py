@@ -12,7 +12,7 @@ from core.forms.base import FormulaireBase
 
 
 class Formulaire(FormulaireBase, forms.Form):
-    individu = forms.ChoiceField(label="Recherchez un individu dans la liste", widget=HeavySelect2Widget({"lang": "fr", "data-ajax--type": "GET"}, data_url="importation_photos_get_individus"), required=False)
+    individu = forms.ChoiceField(label="Recherchez un individu dans la liste", widget=HeavySelect2Widget({"lang": "fr", "data-width": "100%", "data-ajax--type": "GET"}, data_url="importation_photos_get_individus"), required=False)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

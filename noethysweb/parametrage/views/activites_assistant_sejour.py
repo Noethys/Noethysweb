@@ -22,7 +22,7 @@ class Page_generalites(forms.Form):
     date_fin = forms.DateField(label="Quelle est la date de fin ?", required=True, widget=DatePickerWidget(), help_text="Saisissez la date de fin du séjour.")
     agrement = forms.CharField(label="Quel est le numéro d'agrément du séjour ?", required=False, max_length=200, help_text="Exemple: 0123CL00125. S'il n'y a pas d'agrément, laisser vide.")
     nbre_inscrits_max = forms.IntegerField(label="Quel est le nombre maximal d'inscrits ?", initial=0, min_value=0, required=False, help_text="S'il n'existe aucune limitation du nombre d'inscrits, laisser la valeur à 0.")
-    groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à ce séjour", widget=Select2MultipleWidget({"lang": "fr"}), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
+    groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à ce séjour", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
 
     def clean(self):
         if self.cleaned_data["date_debut"] > self.cleaned_data["date_fin"]:

@@ -14,7 +14,7 @@ from portail.forms.fiche import FormulaireBase
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    regimes_alimentaires = forms.ModelMultipleChoiceField(label="Régimes alimentaires", widget=Select2MultipleWidget({"lang": "fr"}), queryset=RegimeAlimentaire.objects.all(), required=False)
+    regimes_alimentaires = forms.ModelMultipleChoiceField(label="Régimes alimentaires", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%", "data-width": "100%"}), queryset=RegimeAlimentaire.objects.all(), required=False)
 
     class Meta:
         model = Individu

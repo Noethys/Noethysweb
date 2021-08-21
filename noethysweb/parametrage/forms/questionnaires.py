@@ -36,7 +36,7 @@ def Get_controle(question=None):
         ctrl = forms.TypedChoiceField(label=question.label, choices=liste_choix, initial=None, required=False, help_text=question.texte_aide)
     elif question.controle == "liste_coches":
         liste_choix = [(choix, choix) for choix in question.choix.split(";")]
-        ctrl = forms.TypedMultipleChoiceField(label=question.label, choices=liste_choix, widget=Select2MultipleWidget({"lang":"fr"}), required=False, help_text=question.texte_aide)
+        ctrl = forms.TypedMultipleChoiceField(label=question.label, choices=liste_choix, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), required=False, help_text=question.texte_aide)
     elif question.controle == "case_coche":
         ctrl = forms.BooleanField(label=question.label, required=False, help_text=question.texte_aide)
     elif question.controle == "date":

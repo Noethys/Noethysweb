@@ -24,7 +24,7 @@ import json, decimal
 
 
 class CombiTarifForm(forms.ModelForm):
-    unites = forms.ModelMultipleChoiceField(label="", widget=Select2MultipleWidget({"lang": "fr"}), queryset=Unite.objects.none(), required=False)
+    unites = forms.ModelMultipleChoiceField(label="", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(), required=False)
 
     class Meta:
         model = CombiTarif
@@ -128,7 +128,7 @@ class Formulaire(FormulaireBase, ModelForm):
     date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget())
 
     # Catégories de tarifs
-    categories_tarifs = forms.ModelMultipleChoiceField(label="Catégories de tarifs", widget=Select2MultipleWidget({"lang": "fr"}), queryset=CategorieTarif.objects.none(), required=True)
+    categories_tarifs = forms.ModelMultipleChoiceField(label="Catégories de tarifs", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=CategorieTarif.objects.none(), required=True)
 
     # Label prestation
     choix_label = [("NOM_TARIF", "Nom du tarif"), ("DESCRIPTION", "Description du tarif"), ("PERSO", "Un label personnalisé")]
@@ -138,15 +138,15 @@ class Formulaire(FormulaireBase, ModelForm):
     # Conditions
     choix_groupes = [("TOUS", "Tous les groupes"), ("SELECTION", "Uniquement certains groupes")]
     groupes_type = forms.TypedChoiceField(label="Groupes associés", choices=choix_groupes, initial='TOUS', required=False)
-    groupes = forms.ModelMultipleChoiceField(label="Sélection des groupes", widget=Select2MultipleWidget({"lang": "fr"}), queryset=Groupe.objects.none(), required=False)
+    groupes = forms.ModelMultipleChoiceField(label="Sélection des groupes", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Groupe.objects.none(), required=False)
 
     choix_cotisations = [("TOUS", "Toutes les adhésions"), ("SELECTION", "Uniquement certaines adhésions")]
     cotisations_type = forms.TypedChoiceField(label="Adhésions associées", choices=choix_cotisations, initial='TOUS', required=False)
-    cotisations = forms.ModelMultipleChoiceField(label="Sélection des adhésions", widget=Select2MultipleWidget({"lang": "fr"}), queryset=TypeCotisation.objects.all(), required=False)
+    cotisations = forms.ModelMultipleChoiceField(label="Sélection des adhésions", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeCotisation.objects.all(), required=False)
 
     choix_caisses = [("TOUS", "Toutes les caisses"), ("SELECTION", "Uniquement certaines caisses")]
     caisses_type = forms.TypedChoiceField(label="Caisses associées", choices=choix_caisses, initial='TOUS', required=False)
-    caisses = forms.ModelMultipleChoiceField(label="Sélection des caisses", widget=Select2MultipleWidget({"lang": "fr"}), queryset=Caisse.objects.all(), required=False)
+    caisses = forms.ModelMultipleChoiceField(label="Sélection des caisses", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Caisse.objects.all(), required=False)
 
     choix_periodes = [("TOUS", "Toutes les périodes"), ("SELECTION", "Uniquement certaines périodes")]
     periodes_type = forms.TypedChoiceField(label="Périodes", choices=choix_periodes, initial='TOUS', required=False)

@@ -16,7 +16,7 @@ from core.forms.base import FormulaireBase
 
 class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr"}), queryset=Activite.objects.all().order_by("-date_fin"), required=True)
+    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Activite.objects.all().order_by("-date_fin"), required=True)
     afficher_detail_groupe = forms.BooleanField(label="Afficher détail par groupe", initial=False, required=False)
 
     donnees = forms.ChoiceField(label="Données", choices=[("quantite", "Quantité"), ("temps_presence", "Temps de présence"), ("temps_facture", "Temps facturé")], initial="quantite", required=False)
@@ -36,9 +36,9 @@ class Formulaire(FormulaireBase, forms.Form):
             label = "Question %s. : %s" % (public[:3], dictTemp["label"])
             code = "question_%s_%d" % (public, dictTemp["IDquestion"])
             choix_regroupement.append((code, label))
-    regroupement = forms.ChoiceField(label="Regroupement", widget=Select2Widget({"lang": "fr"}), choices=choix_regroupement, required=True)
+    regroupement = forms.ChoiceField(label="Regroupement", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), choices=choix_regroupement, required=True)
 
-    etats = forms.MultipleChoiceField(required=True, widget=Select2MultipleWidget({"lang": "fr"}), choices=[("reservation", "Pointage en attente"), ("present", "Présent"), ("attente", "Attente"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present"])
+    etats = forms.MultipleChoiceField(required=True, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[("reservation", "Pointage en attente"), ("present", "Présent"), ("attente", "Attente"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present"])
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

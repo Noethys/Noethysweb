@@ -26,7 +26,7 @@ class Formulaire(FormulaireBase, ModelForm):
     validite_date_fin = forms.DateField(label="Date de fin*", required=False, widget=DatePickerWidget())
 
     # Unités
-    unites = forms.ModelMultipleChoiceField(label="Unités de consommation associées", widget=Select2MultipleWidget({"lang":"fr"}), queryset=Unite.objects.none(), required=True)
+    unites = forms.ModelMultipleChoiceField(label="Unités de consommation associées", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(), required=True)
 
     # Plage horaire
     heure_min = forms.TimeField(label="Heure min", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))

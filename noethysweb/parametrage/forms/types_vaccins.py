@@ -15,7 +15,7 @@ from django_select2.forms import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    types_maladies = forms.ModelMultipleChoiceField(label="Types de maladies associées", widget=Select2MultipleWidget({"lang":"fr"}), queryset=TypeMaladie.objects.all())
+    types_maladies = forms.ModelMultipleChoiceField(label="Types de maladies associées", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeMaladie.objects.all())
 
     # Champs libres pour la durée de validité
     choix_validite = [("ILLIMITEE", "Validité illimitée"), ("DUREE", "Une durée")]

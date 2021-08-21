@@ -30,7 +30,7 @@ class Formulaire(FormulaireBase, forms.Form):
             ("familles_composition", "Composition des familles"),
         )),
     ]
-    rubrique = forms.ChoiceField(label="Rubrique", widget=Select2Widget({"lang": "fr"}), choices=choix_rubrique, required=True)
+    rubrique = forms.ChoiceField(label="Rubrique", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), choices=choix_rubrique, required=True)
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
     choix_donnees = [("INSCRITS", "Inscrits"), ("ANNEE", "Présents sur une année"), ("MOIS", "Présents sur un mois"),
                      ("VACANCES", "Présents sur une période de vacances"), ("PERIODE", "Présents sur une période de dates")]

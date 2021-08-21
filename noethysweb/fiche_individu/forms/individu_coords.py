@@ -19,8 +19,8 @@ from fiche_individu.widgets import CarteOSM
 
 class Formulaire(FormulaireBase, ModelForm):
     type_adresse = forms.ChoiceField(label="Type d'adresse", widget=forms.RadioSelect, choices=[("RATTACHEE", "Adresse rattachée"), ("PROPRE", "Adresse propre")], required=False)
-    adresse_auto = forms.ModelChoiceField(label="Adresse rattachée", widget=Select2Widget({"lang": "fr"}), queryset=Rattachement.objects.none(), required=False)
-    listes_diffusion = forms.ModelMultipleChoiceField(label="Listes de diffusion", widget=Select2MultipleWidget({"lang": "fr"}), queryset=ListeDiffusion.objects.all(), required=False)
+    adresse_auto = forms.ModelChoiceField(label="Adresse rattachée", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Rattachement.objects.none(), required=False)
+    listes_diffusion = forms.ModelMultipleChoiceField(label="Listes de diffusion", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=ListeDiffusion.objects.all(), required=False)
     carte = forms.ChoiceField(label="Localisation", widget=CarteOSM(), required=False)
 
     class Meta:

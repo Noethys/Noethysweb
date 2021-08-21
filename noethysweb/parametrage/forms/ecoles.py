@@ -17,7 +17,7 @@ from django_select2.forms import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    secteurs = forms.ModelMultipleChoiceField(label="Secteurs géographiques associés", widget=Select2MultipleWidget({"lang":"fr"}), queryset=Secteur.objects.all(), required=False)
+    secteurs = forms.ModelMultipleChoiceField(label="Secteurs géographiques associés", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Secteur.objects.all(), required=False)
 
     class Meta:
         model = Ecole

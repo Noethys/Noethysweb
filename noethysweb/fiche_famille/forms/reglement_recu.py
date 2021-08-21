@@ -19,7 +19,7 @@ import datetime
 
 class Formulaire(FormulaireBase, ModelForm):
     date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
-    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget({"lang": "fr"}), queryset=ModeleDocument.objects.filter(categorie="reglement").order_by("nom"), required=True)
+    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=ModeleDocument.objects.filter(categorie="reglement").order_by("nom"), required=True)
     signataire = forms.CharField(label="Signataire", required=True)
     intro = forms.CharField(label="Introduction", widget=forms.Textarea(attrs={'rows': 4}), required=True)
     afficher_prestations = forms.BooleanField(label="Inclure la liste des prestations payées avec ce règlement", required=False)

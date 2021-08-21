@@ -15,7 +15,7 @@ from django_select2.forms import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    regimes_alimentaires = forms.ModelMultipleChoiceField(label="Régimes alimentaires", widget=Select2MultipleWidget({"lang": "fr"}), queryset=RegimeAlimentaire.objects.all(), required=False)
+    regimes_alimentaires = forms.ModelMultipleChoiceField(label="Régimes alimentaires", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=RegimeAlimentaire.objects.all(), required=False)
 
     class Meta:
         model = Individu

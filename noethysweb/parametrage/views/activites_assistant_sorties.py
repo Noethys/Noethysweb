@@ -15,7 +15,7 @@ class Page_introduction(forms.Form):
 
 class Page_generalites(forms.Form):
     nom_activite = forms.CharField(label="Quel est le nom de l'activité ?", required=True, max_length=300, help_text="Exemple: 'Sorties familiales'.")
-    groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à cette activité", widget=Select2MultipleWidget({"lang": "fr"}), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
+    groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à cette activité", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
 
 class Page_conclusion(forms.Form):
     intro = "Vous avez terminé de renseigner les paramètres de l'activité.<br><br>Cliquez maintenant sur le bouton Suite pour finaliser la création de l'activité."

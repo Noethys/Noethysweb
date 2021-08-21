@@ -22,7 +22,7 @@ class Formulaire(FormulaireBase, ModelForm):
     affichage_date_debut = forms.DateTimeField(label="Date de début*", required=False, widget=DateTimePickerWidget())
     affichage_date_fin = forms.DateTimeField(label="Date de fin*", required=False, widget=DateTimePickerWidget())
     modele = forms.ModelChoiceField(label="Modèle d'Email", queryset=ModeleEmail.objects.filter(categorie="portail_demande_reservation"), required=False, help_text="Laissez vide si vous souhaitez que le modèle par défaut soit automatiquement sélectionné.")
-    categories = forms.ModelMultipleChoiceField(label="Sélection de catégories", widget=Select2MultipleWidget({"lang": "fr"}),
+    categories = forms.ModelMultipleChoiceField(label="Sélection de catégories", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
                                                 queryset=CategorieCompteInternet.objects.all().order_by("nom"), required=False,
                                                 help_text="Sélectionnez une ou plusieurs catégories de compte internet.")
     class Meta:

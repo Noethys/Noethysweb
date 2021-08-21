@@ -38,8 +38,8 @@ class Page_responsable(forms.Form):
             self.fields["sexe"].initial = responsable.sexe
 
 class Page_renseignements(forms.Form):
-    pieces = forms.ModelMultipleChoiceField(label="Pièces à fournir", widget=Select2MultipleWidget({"lang": "fr"}), queryset=TypePiece.objects.all(), required=False)
-    cotisations = forms.ModelMultipleChoiceField(label="Adhésions à jour", widget=Select2MultipleWidget({"lang": "fr"}), queryset=TypeCotisation.objects.all(), required=False)
+    pieces = forms.ModelMultipleChoiceField(label="Pièces à fournir", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypePiece.objects.all(), required=False)
+    cotisations = forms.ModelMultipleChoiceField(label="Adhésions à jour", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeCotisation.objects.all(), required=False)
 
 class Page_groupes(forms.Form):
     has_groupes = forms.ChoiceField(label="L'activité est-elle constituée de groupes distincts ?", choices=[("oui", "Oui"), ("non", "Non")], widget=forms.RadioSelect, initial="non", help_text="Exemple : Les maternels et les primaires. Si vous n'êtes pas sûr, laissez non.")

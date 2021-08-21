@@ -21,7 +21,7 @@ class Formulaire(FormulaireBase, ModelForm):
     titulaire = forms.BooleanField(label="Titulaire du dossier", initial=True, required=False)
     nom = forms.CharField(label="Nom*", required=False)
     prenom = forms.CharField(label="Prénom*", required=False)
-    individu = forms.ModelChoiceField(label="Individu*", widget=Select2Widget({"lang":"fr"}), queryset=Individu.objects.all().order_by("nom", "prenom"), required=False)
+    individu = forms.ModelChoiceField(label="Individu*", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Individu.objects.all().order_by("nom", "prenom"), required=False)
 
     class Meta:
         model = Individu

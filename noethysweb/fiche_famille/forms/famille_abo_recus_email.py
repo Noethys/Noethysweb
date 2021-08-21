@@ -18,7 +18,7 @@ import re
 
 class Formulaire(FormulaireBase, ModelForm):
     email_recus = forms.BooleanField(label="Activer l'envoi des reçus de règlements par Email", required=False, initial=False)
-    adresses_individus = forms.MultipleChoiceField(label="Adresses existantes", help_text="Sélectionnez une ou plusieurs adresses parmi la liste des adresses de la famille.", widget=Select2MultipleWidget({"lang": "fr"}), choices=[], required=False)
+    adresses_individus = forms.MultipleChoiceField(label="Adresses existantes", help_text="Sélectionnez une ou plusieurs adresses parmi la liste des adresses de la famille.", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=False)
     adresses_autres = forms.CharField(label="Autres adresses", help_text="Saisissez une ou plusieurs autres adresses en les séparant par des points-virgules.", required=False)
 
     class Meta:

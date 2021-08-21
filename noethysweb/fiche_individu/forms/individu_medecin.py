@@ -16,7 +16,7 @@ from django_select2.forms import Select2Widget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    medecin = forms.ModelChoiceField(label="Sélectionnez un médecin", widget=Select2Widget({"lang": "fr"}), queryset=Medecin.objects.all(), required=False)
+    medecin = forms.ModelChoiceField(label="Sélectionnez un médecin", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Medecin.objects.all(), required=False)
 
     class Meta:
         model = Individu

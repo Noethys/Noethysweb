@@ -22,7 +22,7 @@ class Page_generalites(forms.Form):
     date_debut = forms.DateField(label="Quelle est la date de début de l'activité ?", required=True, widget=DatePickerWidget(), help_text="Saisissez la date de début.")
     date_fin = forms.DateField(label="Quelle est la date de fin de l'activité ?", required=True, widget=DatePickerWidget(), help_text="Saisissez la date de fin.")
     nbre_inscrits_max = forms.IntegerField(label="Quel est le nombre maximal d'inscrits ?", initial=0, min_value=0, required=False, help_text="S'il n'existe aucune limitation du nombre d'inscrits, laisser la valeur à 0.")
-    groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à cette activité", widget=Select2MultipleWidget({"lang": "fr"}), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
+    groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à cette activité", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
 
     def clean(self):
         if self.cleaned_data["date_debut"] > self.cleaned_data["date_fin"]:
@@ -59,7 +59,7 @@ class Page_groupes_noms(forms.Form):
                     ("VACS_6", "Semaine de vacances : Dimanche"),
                 ]
                 label = "La séance n°%d a lieu quel(s) jour(s) de la semaine ?" % index if nbre_groupes > 1 else "La séance a lieu quel(s) jour(s) de la semaine ?"
-                self.fields["jours_groupe_%d" % index] = forms.MultipleChoiceField(label=label, widget=Select2MultipleWidget({"lang": "fr"}), choices=choix_jours, required=True, help_text="Noethysweb va créer des consommations sur chaque jour d'ouverture de la séance durant toute la durée de l'activité.")
+                self.fields["jours_groupe_%d" % index] = forms.MultipleChoiceField(label=label, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=choix_jours, required=True, help_text="Noethysweb va créer des consommations sur chaque jour d'ouverture de la séance durant toute la durée de l'activité.")
 
 
 

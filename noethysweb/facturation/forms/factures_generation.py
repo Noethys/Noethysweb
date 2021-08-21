@@ -28,13 +28,13 @@ class Formulaire(FormulaireBase, forms.Form):
     date_emission = forms.DateField(label="Date d'émission", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
     date_echeance = forms.DateField(label="Date d'échéance", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
     choix_categories = [("consommation", "Consommations"), ("cotisation", "Adhésions"), ("location", "Locations"), ("autre", "Autres"), ]
-    categories = forms.MultipleChoiceField(label="Catégories de prestations", widget=Select2MultipleWidget({"lang":"fr"}), choices=choix_categories, required=True)
+    categories = forms.MultipleChoiceField(label="Catégories de prestations", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=choix_categories, required=True)
     activites = forms.CharField(label="Activités", required=False, widget=SelectionActivitesWidget())
     # prestations_anterieures = forms.DateField(label="Prestations antérieures", required=False, widget=CheckDateWidget({"label_checkbox": "Inclure les prestations antérieures non facturées depuis le"}))
     prestations_anterieures = forms.DateField(label="Prestations antérieures", required=False, widget=DatePickerWidget({"afficher_check": True, "label_checkbox": "Inclure les prestations antérieures non facturées depuis le"}))
     choix_selection_familles = [("TOUTES", "Toutes les familles"), ("FAMILLE", "Uniquement la famille sélectionnée")]
     selection_familles = forms.TypedChoiceField(label="Sélection des familles", choices=choix_selection_familles, initial="TOUTES", required=False)
-    famille = forms.ModelChoiceField(label="Famille", widget=Select2Widget({"lang": "fr"}), queryset=Famille.objects.all().order_by("nom"), required=False)
+    famille = forms.ModelChoiceField(label="Famille", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Famille.objects.all().order_by("nom"), required=False)
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)

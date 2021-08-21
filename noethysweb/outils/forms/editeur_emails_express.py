@@ -27,8 +27,8 @@ class Formulaire(FormulaireBase, ModelForm):
     objet = forms.CharField(label="Objet", required=False)
     html = forms.CharField(label="Texte", widget=SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '200px'}}), required=False)
     documents = forms.CharField(label="Documents", required=False, widget=Documents_joints())
-    # dest = forms.ModelMultipleChoiceField(label="Destinataires", required=False, widget=MyWidget(model=Rattachement, search_fields=['individu__nom__icontains', 'individu__prenom__icontains'], attrs={"lang": "fr", "data-minimum-input-length": 0}), queryset=Rattachement.objects.none().order_by("individu__nom", "individu__prenom"))
-    dest = forms.MultipleChoiceField(label="Destinataires", required=False, widget=Select2TagWidget(attrs={"lang": "fr", "data-minimum-input-length": 0, "title": "Sélectionnez une adresse dans la liste ou tapez-la directement"}), choices=[])
+    # dest = forms.ModelMultipleChoiceField(label="Destinataires", required=False, widget=MyWidget(model=Rattachement, search_fields=['individu__nom__icontains', 'individu__prenom__icontains'], attrs={"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=Rattachement.objects.none().order_by("individu__nom", "individu__prenom"))
+    dest = forms.MultipleChoiceField(label="Destinataires", required=False, widget=Select2TagWidget(attrs={"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0, "title": "Sélectionnez une adresse dans la liste ou tapez-la directement"}), choices=[])
 
 
     class Meta:

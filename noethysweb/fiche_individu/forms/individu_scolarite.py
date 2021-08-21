@@ -38,7 +38,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Individu
         if not idindividu:
-            self.fields["individu"] = forms.ModelChoiceField(label="Individu", widget=ModelSelect2Widget(model=Individu, search_fields=['nom__icontains', 'prenom__icontains'], attrs={"lang": "fr"}), queryset=Individu.objects.all().order_by("nom", "prenom"), required=True)
+            self.fields["individu"] = forms.ModelChoiceField(label="Individu", widget=ModelSelect2Widget(model=Individu, search_fields=['nom__icontains', 'prenom__icontains'], attrs={"lang": "fr", "data-width": "100%"}), queryset=Individu.objects.all().order_by("nom", "prenom"), required=True)
 
         # Récupération de l'école et des dates de la dernière classe saisie
         if self.instance.date_debut == None:

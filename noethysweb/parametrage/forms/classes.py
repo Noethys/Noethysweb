@@ -17,7 +17,7 @@ from django_select2.forms import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    niveaux = forms.ModelMultipleChoiceField(label="Niveaux scolaires", widget=Select2MultipleWidget({"lang":"fr"}), queryset=NiveauScolaire.objects.all(), required=False)
+    niveaux = forms.ModelMultipleChoiceField(label="Niveaux scolaires", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=NiveauScolaire.objects.all(), required=False)
 
     class Meta:
         model = Classe

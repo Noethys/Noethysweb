@@ -23,15 +23,15 @@ class Formulaire(FormulaireBase, forms.Form):
             "textes": {"champ": "Nom du lot", "ajouter": "Saisir un lot de rappels", "modifier": "Modifier un lot de rappels"}}))
     date_emission = forms.DateField(label="Date d'émission", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
     choix_categories = [("consommation", "Consommations"), ("cotisation", "Adhésions"), ("location", "Locations"), ("autre", "Autres"), ]
-    categories = forms.MultipleChoiceField(label="Catégories de prestations", widget=Select2MultipleWidget({"lang":"fr"}), choices=choix_categories, required=True)
+    categories = forms.MultipleChoiceField(label="Catégories de prestations", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=choix_categories, required=True)
     activites = forms.CharField(label="Activités", required=False, widget=SelectionActivitesWidget())
     choix_selection_familles = [("TOUTES", "Toutes les familles"), ("FAMILLE", "Uniquement la famille sélectionnée"),
                                 ("SANS_PRESTATION", "Uniquement les familles qui n'ont pas de prestations sur une période donnée"),
                                 ("ABSENT_LOT_FACTURES", "Uniquement les familles qui n'ont aucune facture dans un lot de factures donné")]
     selection_familles = forms.TypedChoiceField(label="Sélection des familles", choices=choix_selection_familles, initial="TOUTES", required=False)
-    famille = forms.ModelChoiceField(label="Famille", widget=Select2Widget({"lang": "fr"}), queryset=Famille.objects.all().order_by("nom"), required=False)
+    famille = forms.ModelChoiceField(label="Famille", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Famille.objects.all().order_by("nom"), required=False)
     periode = forms.CharField(label="Période", required=False, widget=DateRangePickerWidget())
-    lot_factures = forms.ModelChoiceField(label="Lot de factures", widget=Select2Widget({"lang": "fr"}), queryset=LotFactures.objects.all(), required=False)
+    lot_factures = forms.ModelChoiceField(label="Lot de factures", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=LotFactures.objects.all(), required=False)
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)

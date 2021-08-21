@@ -22,10 +22,10 @@ from core.utils import utils_dates
 class Formulaire(FormulaireBase, ModelForm):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
-    individus = forms.MultipleChoiceField(label="Individus", widget=Select2MultipleWidget({"lang": "fr"}), choices=[], required=True)
-    activites = forms.MultipleChoiceField(label="Activités", widget=Select2MultipleWidget({"lang": "fr"}), choices=[], required=True)
+    individus = forms.MultipleChoiceField(label="Individus", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=True)
+    activites = forms.MultipleChoiceField(label="Activités", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=True)
     numero = forms.IntegerField(label="Numéro", required=True)
-    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget({"lang": "fr"}), queryset=ModeleDocument.objects.filter(categorie="attestation").order_by("nom"), required=True)
+    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=ModeleDocument.objects.filter(categorie="attestation").order_by("nom"), required=True)
     signataire = forms.CharField(label="Signataire", required=True)
     options_impression = forms.CharField(label="Options d'impression", required=False, widget=FormIntegreWidget(attrs={"form": Form_options_impression()}))
 

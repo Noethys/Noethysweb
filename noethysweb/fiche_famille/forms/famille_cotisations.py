@@ -30,7 +30,7 @@ class Formulaire(FormulaireBase, ModelForm):
     montant = forms.DecimalField(label="Montant", max_digits=6, decimal_places=2, initial=0.0, required=False)
 
     # Activités
-    activites = forms.ModelMultipleChoiceField(label="Activités", widget=Select2MultipleWidget({"lang": "fr"}), queryset=Activite.objects.all(), required=False)
+    activites = forms.ModelMultipleChoiceField(label="Activités", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Activite.objects.all(), required=False)
 
     # Bénéficiaires pour la saisie par lot
     beneficiaires_familles = forms.CharField(label="Familles", required=False, widget=Selection_beneficiaires_cotisation(attrs={"categorie": "familles"}))

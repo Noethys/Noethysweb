@@ -17,7 +17,7 @@ class Formulaire(FormulaireBase, forms.Form):
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
     regroupement_lignes = forms.ChoiceField(label="Lignes", choices=[("activites", "Activité"), ("familles", "Famille")], initial="activites", required=False)
     regroupement_colonnes = forms.ChoiceField(label="Colonnes", choices=[("mois", "Mois"), ("annee", "Année")], initial="mois", required=False)
-    donnees = forms.MultipleChoiceField(label="Type de prestation", required=True, widget=Select2MultipleWidget({"lang": "fr"}), choices=[("cotisation", "Cotisations"), ("consommation", "Consommations"), ("location", "Locations"), ("autre", "Autres")], initial=["cotisation", "consommation", "location", "autre"])
+    donnees = forms.MultipleChoiceField(label="Type de prestation", required=True, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[("cotisation", "Cotisations"), ("consommation", "Consommations"), ("location", "Locations"), ("autre", "Autres")], initial=["cotisation", "consommation", "location", "autre"])
     filtre_reglements_saisis = forms.CharField(label="Règlements saisis sur une période", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
     filtre_reglements_deposes = forms.CharField(label="Règlements déposés sur une période", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
 

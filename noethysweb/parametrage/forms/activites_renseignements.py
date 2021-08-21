@@ -19,9 +19,9 @@ class Formulaire(FormulaireBase, ModelForm):
         model = Activite
         fields = ["pieces", "cotisations", "vaccins_obligatoires", "types_consentements"]
         widgets = {
-            "pieces": Select2MultipleWidget({"lang": "fr"}),
-            "cotisations": Select2MultipleWidget({"lang": "fr"}),
-            "types_consentements": Select2MultipleWidget({"lang": "fr"}),
+            "pieces": Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
+            "cotisations": Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
+            "types_consentements": Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
          }
 
     def __init__(self, *args, **kwargs):

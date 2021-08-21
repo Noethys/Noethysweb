@@ -31,10 +31,10 @@ class Formulaire(FormulaireBase, ModelForm):
     # Groupes
     choix_groupes = [("TOUS", "Tous les groupes"), ("SELECTION", "Uniquement certains groupes")]
     groupes_type = forms.TypedChoiceField(label="Groupes associés", choices=choix_groupes, initial='TOUS', required=True)
-    groupes = forms.ModelMultipleChoiceField(label="Sélection des groupes", widget=Select2MultipleWidget({"lang":"fr"}), queryset=Groupe.objects.none(), required=False)
+    groupes = forms.ModelMultipleChoiceField(label="Sélection des groupes", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Groupe.objects.none(), required=False)
 
     # Incompatibilités
-    incompatibilites = forms.ModelMultipleChoiceField(label="Incompatibilités", widget=Select2MultipleWidget({"lang":"fr"}), queryset=Unite.objects.none(), required=False)
+    incompatibilites = forms.ModelMultipleChoiceField(label="Incompatibilités", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(), required=False)
 
     class Meta:
         model = Unite

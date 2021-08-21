@@ -16,7 +16,7 @@ class Formulaire(FormulaireBase, forms.Form):
     type_reglements = forms.ChoiceField(label="Type de règlements", choices=[("saisis", "Saisis"), ("deposes", "Déposés"), ("non_deposes", "Non déposés")], initial="saisis", required=False)
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
-    types_prestations = forms.MultipleChoiceField(label="Type de prestation", required=True, widget=Select2MultipleWidget({"lang": "fr"}), choices=[("cotisation", "Cotisations"), ("consommation", "Consommations"), ("location", "Locations"), ("autre", "Autres"), ("avoir", "Avoirs")], initial=["cotisation", "consommation", "location", "autre", "avoir"])
+    types_prestations = forms.MultipleChoiceField(label="Type de prestation", required=True, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[("cotisation", "Cotisations"), ("consommation", "Consommations"), ("location", "Locations"), ("autre", "Autres"), ("avoir", "Avoirs")], initial=["cotisation", "consommation", "location", "autre", "avoir"])
     ventilation = forms.CharField(label="Les prestations ventilés sur une période", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
 
     def __init__(self, *args, **kwargs):

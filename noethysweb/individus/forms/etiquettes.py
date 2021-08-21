@@ -34,7 +34,7 @@ class Formulaire_categorie(forms.Form):
 
 
 class Formulaire_parametres(forms.Form):
-    modele = forms.ModelChoiceField(label="Modèle", widget=Select2Widget({"lang": "fr"}), queryset=ModeleDocument.objects.all(), required=False)
+    modele = forms.ModelChoiceField(label="Modèle", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=ModeleDocument.objects.all(), required=False)
     largeur = forms.IntegerField(label="Largeur de la page", initial=210, min_value=0, required=True)
     hauteur = forms.IntegerField(label="Hauteur de la page", initial=297, min_value=0, required=True)
     espace_vertical = forms.IntegerField(label="Espace vertical", initial=5, min_value=0, required=True)

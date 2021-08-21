@@ -16,7 +16,7 @@ from django_select2.forms import Select2Widget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    champs = forms.ModelChoiceField(label="Champs", widget=Select2Widget({"lang": "fr"}), queryset=ModeleDocument.objects.all(), required=False)
+    champs = forms.ModelChoiceField(label="Champs", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=ModeleDocument.objects.all(), required=False)
     objets = forms.CharField(required=False)
 
     class Meta:
@@ -104,7 +104,7 @@ class Formulaire_creation(FormulaireBase, ModelForm):
 
 
 class Formulaire_champs(forms.Form):
-    champs = forms.ChoiceField(label="Sélectionnez le champ à insérer", widget=Select2Widget({"lang":"fr"}), choices=[(1, "item 1"), (2, "item 2")], required=True)
+    champs = forms.ChoiceField(label="Sélectionnez le champ à insérer", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), choices=[(1, "item 1"), (2, "item 2")], required=True)
 
     def __init__(self, *args, **kwargs):
         # categorie = kwargs.pop("categorie")

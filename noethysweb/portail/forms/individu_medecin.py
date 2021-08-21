@@ -22,7 +22,7 @@ class Widget_medecin(ModelSelect2Widget):
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    medecin = forms.ModelChoiceField(label="Médecin", widget=Widget_medecin(attrs={"lang": "fr", "data-minimum-input-length": 0}), queryset=Medecin.objects.all().order_by("nom", "prenom"), required=False)
+    medecin = forms.ModelChoiceField(label="Médecin", widget=Widget_medecin(attrs={"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=Medecin.objects.all().order_by("nom", "prenom"), required=False)
 
     class Meta:
         model = Individu

@@ -139,7 +139,7 @@ EXTRA_HTML = """
 """
 
 class Formulaire_creation(FormulaireBase, forms.Form):
-    famille = forms.ModelChoiceField(label="Famille", widget=Select2Widget({"lang": "fr"}), queryset=Famille.objects.all().order_by("nom"), required=True)
+    famille = forms.ModelChoiceField(label="Famille", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Famille.objects.all().order_by("nom"), required=True)
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.pop("instance")

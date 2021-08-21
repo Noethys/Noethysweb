@@ -12,7 +12,7 @@ from core.models import ModeleDocument
 from core.forms.base import FormulaireBase
 
 class Formulaire(FormulaireBase, forms.Form):
-    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget({"lang": "fr"}), queryset=ModeleDocument.objects.filter(categorie="rappel").order_by("nom"), required=True)
+    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=ModeleDocument.objects.filter(categorie="rappel").order_by("nom"), required=True)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

@@ -16,9 +16,9 @@ from django_select2.forms import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    unites_principales = forms.ModelMultipleChoiceField(label="Unités principales", widget=Select2MultipleWidget({"lang": "fr"}), queryset=Unite.objects.none(),
+    unites_principales = forms.ModelMultipleChoiceField(label="Unités principales", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(),
                                                         required=True, help_text="L'unité de réservation est affichée sur une date donnée uniquement si toutes les unités principales associées sont ouvertes.")
-    unites_secondaires = forms.ModelMultipleChoiceField(label="Unités secondaires", widget=Select2MultipleWidget({"lang": "fr"}), queryset=Unite.objects.none(),
+    unites_secondaires = forms.ModelMultipleChoiceField(label="Unités secondaires", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(),
                                                         required=False, help_text="Les unités secondaires ne conditionnent pas l'affichage de l'unité de réservation.")
 
     class Meta:

@@ -16,7 +16,7 @@ class Page_introduction(forms.Form):
 
 class Page_generalites(forms.Form):
     nom_activite = forms.CharField(label="Quel est le nom de la cantine ?", required=True, max_length=300, help_text="Exemple: 'Cantine scolaire'.")
-    groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à cette activité", widget=Select2MultipleWidget({"lang": "fr"}), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
+    groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à cette activité", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
 
 class Page_groupes(forms.Form):
     has_groupes = forms.ChoiceField(label="Le temps de cantine est-il constitué de plusieurs services ?", choices=[("oui", "Oui"), ("non", "Non")], widget=forms.RadioSelect, initial="non", help_text="Exemple : Service 1 et service 2.")

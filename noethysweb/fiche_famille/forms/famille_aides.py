@@ -21,7 +21,7 @@ from core.utils import utils_preferences
 
 
 class CombiAideForm(forms.ModelForm):
-    unites = forms.ModelMultipleChoiceField(label="Combinaison conditionnelle d'unités", widget=Select2MultipleWidget({"lang":"fr"}), queryset=Unite.objects.none(), required=False)
+    unites = forms.ModelMultipleChoiceField(label="Combinaison conditionnelle d'unités", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(), required=False)
 
     class Meta:
         model = CombiAide
@@ -84,7 +84,7 @@ class Formulaire(FormulaireBase, ModelForm):
     montant_max = forms.DecimalField(label="Montant plafond", max_digits=6, decimal_places=2, initial=0.0, required=False)
     jours_scolaires = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
     jours_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
-    individus = forms.ModelMultipleChoiceField(label="Bénéficiaires", widget=Select2MultipleWidget({"lang":"fr"}), queryset=Individu.objects.none(), required=True)
+    individus = forms.ModelMultipleChoiceField(label="Bénéficiaires", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Individu.objects.none(), required=True)
 
     class Meta:
         model = Aide
@@ -165,7 +165,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
 
 class Formulaire_selection_activite(FormulaireBase, forms.Form):
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr"}), queryset=Activite.objects.none(), required=True)
+    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Activite.objects.none(), required=True)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire_selection_activite, self).__init__(*args, **kwargs)

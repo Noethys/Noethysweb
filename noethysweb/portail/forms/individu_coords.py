@@ -16,7 +16,7 @@ from portail.forms.fiche import FormulaireBase
 
 class Formulaire(FormulaireBase, ModelForm):
     type_adresse = forms.ChoiceField(label="Type d'adresse", widget=forms.RadioSelect, choices=[("RATTACHEE", "Adresse rattachée"), ("PROPRE", "Adresse propre")], required=False)
-    adresse_auto = forms.ModelChoiceField(label="Adresse rattachée", widget=Select2Widget({"lang": "fr"}), queryset=Rattachement.objects.none(), required=False)
+    adresse_auto = forms.ModelChoiceField(label="Adresse rattachée", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Rattachement.objects.none(), required=False)
 
     class Meta:
         model = Individu
