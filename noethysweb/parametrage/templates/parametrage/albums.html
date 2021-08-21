@@ -1,0 +1,102 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'lib/lightbox/ekko-lightbox.css' %}">
+{% endblock styles %}
+
+
+{% block contenu_page %}
+    <div class="row">
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder">
+                        <a class="btn btn-danger" href="{% url 'albums_liste' %}"><i class='fa fa-times margin-r-5'></i>Fermer</a>
+                        <a class="btn btn-default" href="{% url 'albums_modifier' pk=album.pk %}"><i class="fa fa-pencil margin-r-5"></i>Modifier les paramètres</a>
+                        <a class="btn btn-default" href="#" target="_blank" title="Consulter l'aide"><i class="fa fa-life-saver margin-r-5"></i>Aide</a>
+                    </div>
+
+                    {# Paramètres de l'album #}
+                    <div class="card bg-light d-flex flex-fill mb-0 mt-3">
+                        <div class="card-body pt-0 p-3">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h2 class="lead"><b>{{ album.titre }}</b></h2>
+                                    {% if album.description %}
+                                        <div class="text-muted border-bottom-0">
+                                            <div class="mt-1">{{ album.description|safe }}</div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <style>
+                        .uploadform_drop_area {
+                            padding: 0px;
+                            background-color: #f8f9fa !important;
+                            border-radius: 10px;
+                        }
+                        .uploadform_drop_area label img {
+                            height: 30px;
+                            color: #444 !important;
+                        }
+                        .uploadform_drop_area label p {
+                            font-size: 12px;
+                            margin-bottom: 0px;
+                        }
+                        .uploadform_drop_area .file_list_input label {
+                            width: 95%;
+                            padding: 10px;
+                            font-size: 1.8em;
+                            background-color: #eaeaea;
+                            border-radius: 10px;
+                        }
+                        .file_list_wrapper {
+                            margin-bottom: 15px;
+                        }
+                    </style>
+
+                    {# Zone d'envoi des fichiers #}
+                    <div id="form-container" class="mt-3 mb-0">
+                        {{ formulaire_upload_as_html }}
+                    </div>
+
+                    {# Liste des photos #}
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+
+    </div>
+
+{% endblock contenu_page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    {{ formulaire_upload.media }}
+
+    <script src="{% static 'lib/lightbox/ekko-lightbox.min.js' %}"></script>
+
+    <script>
+        $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+            event.preventDefault();
+            $(this).ekkoLightbox();
+        });
+    </script>
+
+{% endblock scripts %}

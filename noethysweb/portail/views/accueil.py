@@ -9,7 +9,7 @@ from django.db.models import Q
 from portail.views.base import CustomView
 from portail.utils import utils_approbations
 from individus.utils import utils_pieces_manquantes
-from core.models import PortailMessage, Article, Inscription
+from core.models import PortailMessage, Article, Inscription, Consommation
 
 
 class Accueil(CustomView, TemplateView):
@@ -31,11 +31,28 @@ class Accueil(CustomView, TemplateView):
         context['nbre_approbations_requises'] = approbations_requises["nbre_total"]
 
         # Récupération des activités de la famille
-        inscriptions = Inscription.objects.select_related("activite").filter(famille=self.request.user.famille)
+        conditions = Q(famille=self.request.user.famille) & (Q(date_fin__isnull=False) | Q(date_fin__gte=datetime.date.today()))
+        inscriptions = Inscription.objects.select_related("activite").filter(conditions)
         activites = list({inscription.activite: True for inscription in inscriptions}.keys())
 
         # Articles
         conditions = Q(statut="publie") & Q(date_debut__lte=datetime.datetime.now()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.datetime.now()))
-        conditions &= (Q(public="toutes") | (Q(public="inscrits") & Q(activites__in=activites)))
-        context['articles'] = Article.objects.select_related("image_article").filter(conditions).distinct().order_by("-date_debut")
+        conditions &= (Q(public__in=("toutes", "presents", "presents_groupes")) | (Q(public="inscrits") & Q(activites__in=activites)))
+        articles = Article.objects.select_related("image_article", "album", "auteur").filter(conditions).distinct().order_by("-date_debut")
+        selection_articles = []
+        for article in articles:
+            # Filtre les présents si besoin
+            if article.public in ("presents", "presents_groupes"):
+                conditions = Q(inscription__famille=self.request.user.famille, date__gte=article.present_debut, date__lte=article.present_fin, etat__in=("reservation", "present"))
+                if article.public == "presents":
+                    conditions &= Q(activite__in=article.activites.all())
+                if article.public == "presents_groupes":
+                    conditions &= Q(groupe__in=article.groupes.all())
+                valide = Consommation.objects.filter(conditions).exists()
+            else:
+                valide = True
+            if valide:
+                selection_articles.append(article)
+        context['articles'] = selection_articles
+
         return context

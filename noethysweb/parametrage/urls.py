@@ -26,7 +26,7 @@ from parametrage.views import organisateur, structures, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
     portail_parametres, types_regimes_alimentaires, assureurs, \
     categories_compte_internet, modeles_pes, \
-    types_consentements, unites_consentements, articles, images_articles
+    types_consentements, unites_consentements, articles, images_articles, albums
 
 
 urlpatterns = [
@@ -420,6 +420,15 @@ urlpatterns = [
     path('parametrage/images_articles/modifier/<int:pk>', images_articles.Modifier.as_view(), name='images_articles_modifier'),
     path('parametrage/images_articles/supprimer/<int:pk>', images_articles.Supprimer.as_view(), name='images_articles_supprimer'),
 
+    # Albums photos
+    path('parametrage/albums/liste', albums.Liste.as_view(), name='albums_liste'),
+    path('parametrage/albums/ajouter', albums.Ajouter.as_view(), name='albums_ajouter'),
+    path('parametrage/albums/modifier/<int:pk>', albums.Modifier.as_view(), name='albums_modifier'),
+    path('parametrage/albums/supprimer/<int:pk>', albums.Supprimer.as_view(), name='albums_supprimer'),
+    path('parametrage/albums/consulter/<int:pk>', albums.Consulter.as_view(), name='albums_consulter'),
+    path('parametrage/albums/photos/modifier/<int:idalbum>/<int:pk>', albums.Modifier_photo.as_view(), name='albums_modifier_photo'),
+    path('parametrage/albums/photos/supprimer/<int:idalbum>/<int:pk>', albums.Supprimer_photo.as_view(), name='albums_supprimer_photo'),
+    path('parametrage/albums/photos/supprimer_plusieurs/<int:idalbum>/<str:listepk>', albums.Supprimer_plusieurs_photos.as_view(), name='albums_supprimer_plusieurs_photos'),
 
     # AJAX
     path('parametrage/get_calendrier', secure_ajax(calendrier.Get_calendrier), name='ajax_get_calendrier'),
@@ -428,7 +437,6 @@ urlpatterns = [
     path('parametrage/activites/groupes/liste/deplacer_lignes', secure_ajax(activites_groupes.Deplacer.as_view()), name='ajax_deplacer_lignes_activites_groupes'),
     path('parametrage/activites/unites_conso/liste/deplacer_lignes', secure_ajax(activites_unites_conso.Deplacer.as_view()), name='ajax_deplacer_lignes_activites_unites_conso'),
     path('parametrage/activites/unites_remplissage/liste/deplacer_lignes', secure_ajax(activites_unites_remplissage.Deplacer.as_view()), name='ajax_deplacer_lignes_activites_unites_remplissage'),
-    # path('parametrage/activites/portail_unites/liste/deplacer_lignes', secure_ajax(activites_portail_unites.Deplacer.as_view()), name='ajax_deplacer_lignes_activites_portail_unites'),
     path('parametrage/get_calendrier_ouvertures', secure_ajax(activites_ouvertures.Get_calendrier_ouvertures), name='ajax_get_calendrier_ouvertures'),
     path('parametrage/traitement_lot_ouvertures', secure_ajax(activites_ouvertures.Traitement_lot_ouvertures), name='ajax_traitement_lot_ouvertures'),
     path('parametrage/valider_calendrier_ouvertures', secure_ajax(activites_ouvertures.Valider_calendrier_ouvertures), name='ajax_valider_calendrier_ouvertures'),
@@ -436,6 +444,6 @@ urlpatterns = [
     path('parametrage/export_svg', secure_ajax(modeles_documents.Export_svg), name='ajax_export_svg'),
     path('parametrage/questions/deplacer_lignes', secure_ajax(questionnaires.Deplacer.as_view()), name='ajax_deplacer_lignes_questionnaires'),
     path('parametrage/adresses_mail/envoyer_mail_test', secure_ajax(adresses_mail.Envoyer_mail_test), name='ajax_envoyer_mail_test'),
-
+    path('parametrage/albums/importer_photos_album', secure_ajax(albums.Importer_photos_album), name="ajax_importer_photos_album"),
 
 ]

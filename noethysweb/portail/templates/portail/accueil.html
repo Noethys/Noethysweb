@@ -104,12 +104,14 @@
                         {% if article.document %}
                             <p class="mb-1"><small><a href="{{ article.document.url }}" style="text-decoration: none;" target="_blank" title="Cliquez ici pour ouvrir le document dans un nouvel onglet"><i class="fa fa-link margin-r-5"></i>{{ article.document_titre }}</a></small></p>
                         {% endif %}
+                        {% if article.album %}
+                            <p class="mb-1"><small><a href="{% url 'portail_album' code=article.album.code %}" style="text-decoration: none;" title="Cliquez ici pour accéder à l'album"><i class="fa fa-photo margin-r-5"></i>Accéder à l'album '{{ article.album.titre }}'</a></small></p>
+                        {% endif %}
                         <p class="card-text"><small class="text-muted">Publié le {{ article.date_debut|date:'d/m/Y' }} par {% firstof article.auteur.get_short_name article.auteur %}</small></p>
                     </div>
                 </div>
             {% endfor %}
         </div>
     {% endif %}
-
 
 {% endblock contenu_page %}

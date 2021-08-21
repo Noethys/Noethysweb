@@ -6,23 +6,25 @@
 import datetime
 from django import forms
 from django.forms import ModelForm
+from django.db.models import Q
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML
 from crispy_forms.bootstrap import Field
 from django_summernote.widgets import SummernoteInplaceWidget
 from core.forms.base import FormulaireBase
-from core.models import Article, ImageArticle
+from core.models import Article, ImageArticle, Album, Activite, Groupe
 from core.utils.utils_commandes import Commandes
-from core.widgets import DateTimePickerWidget
+from core.widgets import DateTimePickerWidget, DateRangePickerWidget
 from core.widgets import Crop_image
-from core.utils import utils_images
+from core.utils import utils_images, utils_dates
 from portail.widgets import Selection_image_article
-from django_select2.forms import Select2MultipleWidget
+from django_select2.forms import Select2MultipleWidget, Select2Widget
 
 
 class Formulaire(FormulaireBase, ModelForm):
     cropper_data = forms.CharField(widget=forms.HiddenInput(), required=False)
     type_image = forms.ChoiceField(label="Image", choices=[("aucune", "Aucune image"), ("importer", "Importation d'une image"), ("banque_images", "Sélection dans la banque d'images")], initial="aucune", required=False)
+    periode = forms.CharField(label="Période", required=False, widget=DateRangePickerWidget(), help_text="Renseignez une période de présence.")
 
     class Meta:
         model = Article
@@ -33,7 +35,9 @@ class Formulaire(FormulaireBase, ModelForm):
             "texte": SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '220px'}}),
             "image": Crop_image(attrs={"largeur_min": 447, "hauteur_min": 251, "ratio": "16/9"}),
             "image_article": Selection_image_article(),
-            "activites": Select2MultipleWidget(),
+            "activites": Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
+            "groupes": Select2MultipleWidget({"lang": "fr", "data-minimum-input-length": 0, "data-width": "100%"}),
+            "album": Select2Widget({"lang": "fr", "data-width": "100%"}),
         }
         labels = {
             "image": "Image à importer",
@@ -63,6 +67,21 @@ class Formulaire(FormulaireBase, ModelForm):
         if self.instance.image_article:
             self.fields["type_image"].initial = "banque_images"
 
+        # Activité
+        self.fields["activites"].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("date_fin")
+
+        # Groupe
+        groupes = Groupe.objects.select_related("activite").filter(activite__structure__in=self.request.user.structures.all()).order_by("activite", "ordre")
+        self.fields["groupes"].choices = [(groupe.pk, "%s : %s" % (groupe.activite.nom, groupe.nom)) for groupe in groupes]
+
+        # Période de présence
+        if self.instance.present_debut:
+            self.fields["periode"].initial = "%s - %s" % (utils_dates.ConvertDateToFR(self.instance.present_debut), utils_dates.ConvertDateToFR(self.instance.present_fin))
+
+        # Album
+        condition = (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
+        self.fields["album"].queryset = Album.objects.filter(condition).order_by("date_creation")
+
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'articles_liste' %}"),
@@ -87,9 +106,14 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("document"),
                 Field("document_titre"),
             ),
+            Fieldset("Album photos joint",
+                Field("album"),
+            ),
             Fieldset("Public destinataire",
                 Field("public"),
                 Field("activites"),
+                Field("groupes"),
+                Field("periode"),
             ),
             Fieldset("Structure associée",
                 Field("structure"),
@@ -119,6 +143,14 @@ class Formulaire(FormulaireBase, ModelForm):
         if self.cleaned_data.get("public") == "inscrits" and not self.cleaned_data["activites"]:
             self.add_error("public", "Vous devez sélectionner au moins une activité ci-dessous")
 
+        if self.cleaned_data.get("public") == "presents_groupes" and not self.cleaned_data["groupes"]:
+            self.add_error("public", "Vous devez sélectionner au moins un groupe ci-dessous")
+
+        # Présents sur une période
+        if self.cleaned_data.get("public") in ("presents", "presents_groupes"):
+            self.cleaned_data["present_debut"] = self.cleaned_data["periode"].split(";")[0]
+            self.cleaned_data["present_fin"] = self.cleaned_data["periode"].split(";")[1]
+
         return self.cleaned_data
 
 
@@ -144,15 +176,24 @@ $(document).ready(function() {
 // Sur sélection du public
 function On_selection_public() {
     $('#div_id_activites').hide();
+    $('#div_id_groupes').hide();
+    $('#div_id_periode').hide();
     if ($("#id_public").val() == 'inscrits') {
         $('#div_id_activites').show();
+    };
+    if ($("#id_public").val() == 'presents') {
+        $('#div_id_activites').show();
+        $('#div_id_periode').show();
+    };
+    if ($("#id_public").val() == 'presents_groupes') {
+        $('#div_id_groupes').show();
+        $('#div_id_periode').show();
     };
 }
 $(document).ready(function() {
     $('#id_public').on('change', On_selection_public);
     On_selection_public.call($('#id_public').get(0));
 });
-
 
 </script>
 """

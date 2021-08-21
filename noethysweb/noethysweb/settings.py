@@ -36,6 +36,13 @@ CAPTCHA_FONT_SIZE = 35
 CAPTCHA_IMAGE_SIZE = (90, 40)
 CAPTCHA_CHALLENGE_FUNCT = "core.utils.utils_captcha.random_digit_challenge"
 
+# UPLOAD PHOTOS
+UPLOAD_FORM_PARALLEL_UPLOAD = False
+UPLOAD_FORM_MAX_FILE_SIZE_MB = 10
+UPLOAD_FORM_ALLOWED_FILE_TYPES = ".jpg .jpeg .png .gif .bmp .tif .tiff .pic .doc .docx .odt .dot .xls .xlsx .pdf .dwg .dxf .txt .mp4"
+MY_UPLOAD_FORM_ACCEPT = "image/*"
+MY_UPLOAD_FORM_MAX_IMAGE_SIZE = 1920
+
 # DIVERS
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 AUTH_USER_MODEL = 'core.Utilisateur'
@@ -75,6 +82,7 @@ INSTALLED_APPS = [
     'axes',
     'captcha',
     'django_extensions',
+    'upload_form',
 ]
 
 # Ajouté pour permettre l'affichage de la debugtoolbar

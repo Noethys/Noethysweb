@@ -1,0 +1,54 @@
+{% extends "portail/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'lib/lightbox/ekko-lightbox.css' %}">
+{% endblock styles %}
+
+
+{% block contenu_page %}
+
+    {# Texte d'introduction #}
+    <div style="margin-bottom: 20px;">
+        <i class="fa fa-info-circle margin-r-5"></i>Cliquez sur les photos pour les agrandir.
+    </div>
+
+    {# Album #}
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}{{ album.titre }}{% endblock %}
+        {% block box_contenu %}
+            {{ album.description|safe }}
+
+            <div class="d-flex flex-wrap">
+                {% for photo in photos %}
+                    <div class="p-1">
+                        <a href="{{ photo.fichier.url }}" data-toggle="lightbox" data-title="{{ photo.titre|default:'Sans titre' }}" data-gallery="gallery">
+                            <img class="img-fluid img-thumbnail" style="max-height: 150px;" src="{{ photo.fichier.url }}">
+                        </a>
+                    </div>
+                {% empty %}
+                    Album vide
+                {% endfor %}
+            </div>
+
+        {% endblock box_contenu %}
+    {% endembed %}
+
+{% endblock contenu_page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static 'lib/lightbox/ekko-lightbox.min.js' %}"></script>
+    <script>
+        $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+            event.preventDefault();
+            $(this).ekkoLightbox();
+        });
+    </script>
+{% endblock scripts %}

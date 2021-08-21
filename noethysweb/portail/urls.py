@@ -9,7 +9,7 @@ from django.contrib.auth import views as auth_views
 from consommations.views import grille
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
                             individu_regimes_alimentaires, individu_coords, individu_medecin, individu_infos_medicales, individu_assurances, individu_vaccinations, \
-                            famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies
+                            famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album
 from core.decorators import secure_ajax_portail
 
 
@@ -36,6 +36,9 @@ urlpatterns = [
     # Profil
     path('profil', profil.View.as_view(), name='portail_profil'),
     path('profil_password_change', profil_password_change.View.as_view(), name='portail_profil_password_change'),
+
+    # Album photos
+    path('album/<str:code>', album.View.as_view(), name='portail_album'),
 
     # Renseignements
     path('renseignements', renseignements.View.as_view(), name='portail_renseignements'),
