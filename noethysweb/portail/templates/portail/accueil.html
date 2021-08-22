@@ -98,7 +98,7 @@
                     {% if article.image_article %}
                         <img class="card-img-top" src="{{ article.image_article.image.url }}"/>
                     {% endif %}
-                    <div class="card-body p-3">
+                    <div class="card-body pl-3 pr-3 pt-3 pb-1">
                         <h5 class="card-title">{{ article.titre }}</h5>
                         <p class="card-text">{{ article.texte|safe }}</p>
                         {% if article.document %}
@@ -107,7 +107,9 @@
                         {% if article.album %}
                             <p class="mb-1"><small><a href="{% url 'portail_album' code=article.album.code %}" style="text-decoration: none;" title="Cliquez ici pour accéder à l'album"><i class="fa fa-photo margin-r-5"></i>Accéder à l'album '{{ article.album.titre }}'</a></small></p>
                         {% endif %}
-                        <p class="card-text"><small class="text-muted">Publié le {{ article.date_debut|date:'d/m/Y' }} par {% firstof article.auteur.get_short_name article.auteur %}</small></p>
+                    </div>
+                    <div class="card-footer pl-3 pr-3 pb-1 pt-0 text-right">
+                        <span style="color: #cecece;font-size: 70%;">Publié le {{ article.date_debut|date:'d/m/Y' }} par {% firstof article.auteur.get_short_name article.auteur %}</span>
                     </div>
                 </div>
             {% endfor %}
