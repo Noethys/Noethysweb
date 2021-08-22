@@ -1379,7 +1379,7 @@ class Individu(models.Model):
     tel_mobile_sms = models.BooleanField(verbose_name="Autoriser l'envoi de SMS vers le téléphone portable", default=False)
     etat = models.CharField(verbose_name="Etat", max_length=50, blank=True, null=True)
     photo = models.ImageField(verbose_name="Photo", upload_to=get_uuid_path, blank=True, null=True)
-    listes_diffusion = models.ManyToManyField(ListeDiffusion)
+    listes_diffusion = models.ManyToManyField(ListeDiffusion, blank=True)
     regimes_alimentaires = models.ManyToManyField(RegimeAlimentaire, verbose_name="Régimes alimentaires", related_name="individu_regimes_alimentaires", blank=True)
     maladies = models.ManyToManyField(TypeMaladie, verbose_name="Maladies contractées", related_name="individu_maladies", blank=True)
 
