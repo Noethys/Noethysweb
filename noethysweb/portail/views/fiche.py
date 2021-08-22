@@ -62,6 +62,9 @@ class Onglet(CustomView):
         """ Vérifie que l'utilisateur peut se connecter à cette page """
         if not super(Onglet, self).test_func():
             return False
+        rattachement = self.get_rattachement()
+        if rattachement and rattachement.famille != self.request.user.famille:
+            return False
         if self.get_famille() != self.request.user.famille:
             return False
         return True
