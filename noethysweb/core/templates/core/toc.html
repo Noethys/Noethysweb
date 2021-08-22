@@ -6,35 +6,43 @@
 
 {% block styles %}
     {{ block.super }}
+    <style>
+        @media (max-width: 1200px) {
+            .card-columns {
+                column-count: 2;
+            }
+        }
+        @media (max-width: 650px) {
+            .card-columns {
+                column-count: 1;
+            }
+        }
+    </style>
 {% endblock styles %}
 
 {% block contenu_page %}
 
-    <div class="row">
-    {% for liste in menu_actif.GetChildrenParts %}
-        <div class="col-md-6">
-            {% for submenu in liste %}
-                {% if submenu.HasChildren %}
-                    <div class="card card-solid">
-                        {% if submenu.titre %}
-                            <div class="card-header">
-                                <h3 class="card-title">{{ submenu.titre }}</h3>
-                            </div>
-                        {% endif %}
-                        <div class="card-body p-0">
-                            <ul class="list-group list-group-flush">
-                                {% for item in submenu.GetChildren %}
-                                    <a class="list-group-item list-group-item-action {% if mode_demo and not item.compatible_demo %}disabled{% endif %}" href="{{ item.GetUrl }}">
-                                        <i class="fa fa-{{ item.icone }} mr-1"></i> {{ item.titre }} {% if mode_demo and not item.compatible_demo %}<small class="badge badge-warning"><i class="fa fa-lock"></i> Mode démo</small>{% endif %}
-                                    </a>
-                                {% endfor %}
-                            </ul>
+    <div class="card-columns">
+        {% for submenu in menu_actif.GetChildren %}
+            {% if submenu.HasChildren %}
+                <div class="card card-solid m-2">
+                    {% if submenu.titre %}
+                        <div class="card-header">
+                            <h3 class="card-title">{{ submenu.titre }}</h3>
                         </div>
+                    {% endif %}
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            {% for item in submenu.GetChildren %}
+                                <a class="list-group-item list-group-item-action {% if mode_demo and not item.compatible_demo %}disabled{% endif %}" href="{{ item.GetUrl }}">
+                                    <i class="fa fa-{{ item.icone }} mr-1"></i> {{ item.titre }} {% if mode_demo and not item.compatible_demo %}<small class="badge badge-warning"><i class="fa fa-lock"></i> Mode démo</small>{% endif %}
+                                </a>
+                            {% endfor %}
+                        </ul>
                     </div>
-                {% endif %}
-            {% endfor %}
-        </div>
-    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
     </div>
 
 {% endblock contenu_page %}
