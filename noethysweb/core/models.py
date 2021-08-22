@@ -647,7 +647,7 @@ class Ecole(models.Model):
     tel = models.CharField(verbose_name="Téléphone", max_length=200, blank=True, null=True)
     fax = models.CharField(verbose_name="Fax", max_length=200, blank=True, null=True)
     mail = models.EmailField(verbose_name="Email", max_length=300, blank=True, null=True)
-    secteurs = models.ManyToManyField(Secteur)
+    secteurs = models.ManyToManyField(Secteur, blank=True)
 
     class Meta:
         db_table = 'ecoles'
@@ -944,7 +944,7 @@ class Activite(models.Model):
     choix_affichage_dates_passees = [("0", "Jamais"), ("2", "Deux jours"), ("3", "Trois jours"), ("7", "Une semaine"), ("14", "Deux semaines"), ("30", "Un mois"), ("61", "Deux mois"), ("92", "Trois mois"), ("9999", "Toujours")]
     portail_afficher_dates_passees = models.CharField(verbose_name="Afficher les dates passées", max_length=100, choices=choix_affichage_dates_passees, default="14")
     regie = models.ForeignKey(FactureRegie, verbose_name="Régie de facturation", on_delete=models.PROTECT, blank=True, null=True)
-    groupes_activites = models.ManyToManyField(TypeGroupeActivite)
+    groupes_activites = models.ManyToManyField(TypeGroupeActivite, blank=True)
     pieces = models.ManyToManyField(TypePiece, verbose_name="Types de pièces", related_name="activite_types_pieces", blank=True, help_text="Sélectionnez dans la liste les types de pièces qui doivent être à jour.")
     cotisations = models.ManyToManyField(TypeCotisation, verbose_name="Types d'adhésions", related_name="activite_types_cotisations", blank=True, help_text="Sélectionnez dans la liste des types d'adhésions qui doivent être à jour.")
     types_consentements = models.ManyToManyField(TypeConsentement, verbose_name="Types de consentements", related_name="activite_types_consentements", blank=True, help_text="Sélectionnez dans la liste les types de consentements internet nécessaires.")
@@ -1076,7 +1076,7 @@ class Unite(models.Model):
     autogen_active = models.BooleanField(verbose_name="Activer l'auto-génération", default=False)
     autogen_conditions = models.CharField(verbose_name="Conditions de la génération", max_length=400, blank=True, null=True)
     autogen_parametres = models.CharField(verbose_name="Paramètres de la génération", max_length=400, blank=True, null=True)
-    groupes = models.ManyToManyField(Groupe)
+    groupes = models.ManyToManyField(Groupe, blank=True)
     incompatibilites = models.ManyToManyField("self", verbose_name="Incompatibilités", blank=True)
 
     class Meta:
@@ -1224,9 +1224,9 @@ class Tarif(models.Model):
     evenement = models.ForeignKey(Evenement, verbose_name="Evénement", blank=True, null=True, on_delete=models.CASCADE)
     # idproduit = models.IntegerField(db_column='IDproduit', blank=True, null=True)  # Field name made lowercase.
     categories_tarifs = models.ManyToManyField(CategorieTarif, verbose_name="Catégories de tarifs")
-    groupes = models.ManyToManyField(Groupe, verbose_name="Groupes")
-    cotisations = models.ManyToManyField(TypeCotisation, verbose_name="Cotisations")
-    caisses = models.ManyToManyField(Caisse, verbose_name="Caisses")
+    groupes = models.ManyToManyField(Groupe, verbose_name="Groupes", blank=True)
+    cotisations = models.ManyToManyField(TypeCotisation, verbose_name="Cotisations", blank=True)
+    caisses = models.ManyToManyField(Caisse, verbose_name="Caisses", blank=True)
     type_quotient = models.ForeignKey(TypeQuotient, verbose_name="Type de QF", blank=True, null=True, on_delete=models.CASCADE, help_text="Sélectionnez un type de quotient familial ou laissez le champ vide pour tenir compte de tous les types de quotients.")
 
     class Meta:
