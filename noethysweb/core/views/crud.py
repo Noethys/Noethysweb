@@ -91,7 +91,6 @@ class Liste_commun():
 
                     # Création de la condition
                     conditions &= Q(**{champ + "__in": resultats})
-
             return conditions
         else:
             return self.filtres_liste

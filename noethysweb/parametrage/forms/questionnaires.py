@@ -77,6 +77,10 @@ class Formulaire(FormulaireBase, ModelForm):
         else:
             self.fields['ordre'].initial = self.instance.ordre
 
+        # Empêche la modification de contrôle
+        if self.instance.pk:
+            self.fields["controle"].disabled = True
+
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{{ view.get_success_url }}"),

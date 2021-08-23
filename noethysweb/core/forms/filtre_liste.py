@@ -57,6 +57,8 @@ def Ajouter_filtre(request):
         "champ": valeurs["champ"],
         "criteres": [],
     }
+    if "options" in valeurs:
+        dict_resultat["options"] = valeurs["options"]
     liste_labels_criteres = []
     for key, valeur in valeurs.items():
 

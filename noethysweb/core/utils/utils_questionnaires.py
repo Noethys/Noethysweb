@@ -3,12 +3,53 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.utils.translation import ugettext as _
+import logging
+logger = logging.getLogger(__name__)
 import datetime
 from core.utils import utils_dates
 from core.data import data_civilites
 from core.models import LISTE_CONTROLES_QUESTIONNAIRES, QuestionnaireQuestion, QuestionnaireReponse
 from django.db.models import Q
+
+
+def Creation_reponses(categorie="famille", liste_instances=[], question=None):
+    """ Création des réponses par défaut pour les questionnaires """
+    """ à utiliser à la création de fiches familles ou individuelles, et de nouvelles questions """
+    logger.debug("Création des réponses des questionnaires de type %s" % categorie)
+    logger.debug("Recherche sur %d %ss..." % (len(liste_instances), categorie))
+
+    # Importation des questions
+    condition = Q(categorie=categorie)
+    if question:
+        condition &= Q(pk=question.pk)
+    questions = QuestionnaireQuestion.objects.filter(condition)
+
+    # Importation des réponses existantes
+    condition = Q(**{categorie + "__in": liste_instances}) if liste_instances else Q()
+    if question:
+        condition &= Q(question=question)
+    reponses_existantes = [(getattr(reponse, categorie + "_id"), reponse.question_id) for reponse in QuestionnaireReponse.objects.filter(condition)]
+
+    # Création des questions
+    liste_ajouts = []
+    for instance in liste_instances:
+        for question in questions:
+            if (instance.pk, question.pk) not in reponses_existantes:
+                reponse = None
+                if question.controle in ("liste_deroulante", "liste_coches"):
+                    reponse = ""
+                if question.controle == "case_coche":
+                    reponse = "False"
+                donnees = {categorie: instance, "question": question, "reponse": reponse}
+                liste_ajouts.append(QuestionnaireReponse(**donnees))
+
+    # Enregistrement dans la base
+    if liste_ajouts:
+        QuestionnaireReponse.objects.bulk_create(liste_ajouts)
+
+    logger.debug("%d réponses créées" % len(liste_ajouts))
+
+
 
 
 def FormateStr(valeur=u""):

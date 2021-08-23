@@ -18,11 +18,12 @@
                     </div>
                     <select id="choix_categorie" class="form-control">
                         {% for code, label in liste_categories %}
-                            <option {% if code == categorie %}selected{% endif %} value="{% url url_liste categorie=code %}">{{ label }}</option>
+                            <option {% if code == categorie %}selected{% endif %} value="{% if not code %}{% url url_liste %}{% else %}{% url url_liste categorie=code %}{% endif %}">{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
             </p>
+
             <script>
                 function On_change_categorie() {
                     window.location.href=$(this).val();
@@ -34,6 +35,7 @@
 
             {% embed 'core/crud/liste.html' %}
             {% endembed %}
+
         {% endblock box_contenu %}
         {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
     {% endembed %}

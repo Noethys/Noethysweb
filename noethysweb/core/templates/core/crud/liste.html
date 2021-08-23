@@ -115,6 +115,7 @@
             "nom_liste": $('input[name=nom_liste]').val(),
             "idfiltre": $('input[name=idfiltre]').val(),
             "label_champ": dict_champs[nom_champ].label,
+            {% if options_filtre %}"options": "{{ options_filtre }}",{% endif %}
         };
         $("#filtres_form :input:visible").each(function() {
             if (this.name.includes("liste_")) {

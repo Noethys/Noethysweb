@@ -2,7 +2,7 @@
     <thead>
         <tr>
             {% for colonne in datatable.colonnes %}
-                <th>{{ colonne.label }}</th>
+                <th class="text-center">{{ colonne.label }}</th>
             {% endfor %}
         </tr>
     </thead>
@@ -10,7 +10,7 @@
         {% for ligne in datatable.lignes %}
             <tr>
             {% for valeur in ligne %}
-                <td>{{ valeur|safe }}</td>
+                <td class="text-center">{{ valeur|safe }}</td>
             {% endfor %}
             </tr>
         {% endfor %}

@@ -2125,6 +2125,19 @@ class QuestionnaireReponse(models.Model):
             return decimal.Decimal(self.reponse)
         return self.reponse
 
+    def Get_reponse_fr(self):
+        if self.question.controle in ("liste_deroulante", "liste_coches"):
+            return ", ".join(self.reponse.split(";"))
+        if self.question.controle in ("entier", "slider") and self.reponse:
+            return str(self.reponse)
+        if self.question.controle == "case_coche":
+            return "oui" if self.reponse == "True" else "non"
+        if self.question.controle in ("decimal", "montant"):
+            return float(decimal.Decimal(self.reponse))
+        return ""
+
+
+
 # class QuestionnaireFiltre(models.Model):
 #     idfiltre = models.AutoField(verbose_name="ID", db_column='IDfiltre', primary_key=True)
 #     idquestion = models.IntegerField(db_column='IDquestion', blank=True, null=True)  # Field name made lowercase.

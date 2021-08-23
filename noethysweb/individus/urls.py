@@ -9,7 +9,7 @@ from core.decorators import secure_ajax
 from individus.views import liste_pieces_manquantes, liste_pieces_fournies, liste_regimes_caisses, liste_codes_comptables, liste_inscriptions_attente, suivi_inscriptions, \
                             importation_photos, liste_anniversaires, liste_quotients, etiquettes, etiquettes_familles, etiquettes_individus, \
                             inscriptions_scolaires, scolarites, inscriptions_liste, inscriptions_impression, inscriptions_email, liste_comptes_internet, \
-                            individus_detaches_liste, liste_mandats
+                            individus_detaches_liste, liste_mandats, liste_questionnaires_familles, liste_questionnaires_individus
 
 urlpatterns = [
 
@@ -70,9 +70,13 @@ urlpatterns = [
     path('individus/mandats/modifier/<int:pk>', liste_mandats.Modifier.as_view(), name='mandats_modifier'),
     path('individus/mandats/supprimer/<int:pk>', liste_mandats.Supprimer.as_view(), name='mandats_supprimer'),
 
-
     path('individus/importation_photos', importation_photos.View.as_view(), name='importation_photos'),
     path('individus/liste_comptes_internet', liste_comptes_internet.Liste.as_view(), name='liste_comptes_internet'),
+
+    path('individus/questionnaires/familles/liste', liste_questionnaires_familles.Liste.as_view(), name='questionnaires_familles_liste'),
+    path('individus/questionnaires/familles/liste/<str:categorie>', liste_questionnaires_familles.Liste.as_view(), name='questionnaires_familles_liste'),
+    path('individus/questionnaires/individus/liste', liste_questionnaires_individus.Liste.as_view(), name='questionnaires_individus_liste'),
+    path('individus/questionnaires/individus/liste/<str:categorie>', liste_questionnaires_individus.Liste.as_view(), name='questionnaires_individus_liste'),
 
     # Impression
     path('individus/etiquettes_individus', etiquettes_individus.Liste.as_view(), name='etiquettes_individus'),

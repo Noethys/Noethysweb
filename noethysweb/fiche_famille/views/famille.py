@@ -188,6 +188,7 @@ class Resume(Onglet, DetailView):
         total_du = total_prestations["total"] if total_prestations["total"] else Decimal(0)
         total_regle = total_reglements["total"] if total_reglements["total"] else Decimal(0)
         context['solde'] = total_du - total_regle
+
         return context
 
     def get_object(self):

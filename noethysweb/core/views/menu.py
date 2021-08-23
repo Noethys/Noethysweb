@@ -51,13 +51,6 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_comptabilite.Add(code="modes_reglements_liste", titre="Modes de règlements", icone="file-text-o")
     menu_comptabilite.Add(code="emetteurs_liste", titre="Emetteurs de règlements", icone="file-text-o")
 
-    # Facturation
-    menu_facturation = menu_parametrage.Add(titre="Facturation")
-    menu_facturation.Add(code="lots_factures_liste", titre="Lots de factures", icone="file-text-o")
-    menu_facturation.Add(code="prefixes_factures_liste", titre="Préfixes de factures", icone="file-text-o")
-    menu_facturation.Add(code="messages_factures_liste", titre="Messages de factures", icone="file-text-o")
-    menu_facturation.Add(code="regies_liste", titre="Régies", icone="file-text-o")
-
     # Renseignements
     menu_renseignements = menu_parametrage.Add(titre="Renseignements")
     menu_renseignements.Add(code="types_pieces_liste", titre="Types de pièces", icone="file-text-o")
@@ -73,6 +66,13 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_renseignements.Add(code="types_vaccins_liste", titre="Types de vaccins", icone="file-text-o")
     menu_renseignements.Add(code="medecins_liste", titre="Médecins", icone="file-text-o")
     menu_renseignements.Add(code="assureurs_liste", titre="Assureurs", icone="file-text-o")
+
+    # Facturation
+    menu_facturation = menu_parametrage.Add(titre="Facturation")
+    menu_facturation.Add(code="lots_factures_liste", titre="Lots de factures", icone="file-text-o")
+    menu_facturation.Add(code="prefixes_factures_liste", titre="Préfixes de factures", icone="file-text-o")
+    menu_facturation.Add(code="messages_factures_liste", titre="Messages de factures", icone="file-text-o")
+    menu_facturation.Add(code="regies_liste", titre="Régies", icone="file-text-o")
 
     # Scolarité
     menu_scolarite = menu_parametrage.Add(titre="Scolarité")
@@ -173,6 +173,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_pieces_individus.Add(code="liste_pieces_manquantes", titre="Liste des pièces manquantes", icone="file-text-o")
     menu_pieces_individus.Add(code="liste_pieces_fournies", titre="Liste des pièces fournies", icone="file-text-o")
 
+    # Photos
+    menu_photos_individus = menu_individus.Add(titre="Photos")
+    menu_photos_individus.Add(code="importation_photos", titre="Importer des photos individuelles", icone="file-text-o")
+
     # Informations
     menu_infos_individus = menu_individus.Add(titre="Informations")
     menu_infos_individus.Add(code="liste_anniversaires", titre="Liste des anniversaires", icone="file-text-o")
@@ -182,9 +186,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_infos_individus.Add(code="mandats_liste", titre="Liste des mandats SEPA", icone="file-text-o")
     menu_infos_individus.Add(code="liste_comptes_internet", titre="Liste des comptes internet", icone="file-text-o")
 
-    # Photos
-    menu_photos_individus = menu_individus.Add(titre="Photos")
-    menu_photos_individus.Add(code="importation_photos", titre="Importer des photos individuelles", icone="file-text-o")
+    # Questionnaires
+    menu_infos_questionnaires = menu_individus.Add(titre="Questionnaires")
+    menu_infos_questionnaires.Add(code="questionnaires_familles_liste", titre="Liste des questionnaires familiaux", icone="file-text-o")
+    menu_infos_questionnaires.Add(code="questionnaires_individus_liste", titre="Liste des questionnaires individuels", icone="file-text-o")
 
     # Impression
     menu_impression_individus = menu_individus.Add(titre="Impression")

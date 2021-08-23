@@ -4,11 +4,13 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.db.models import Q
 from core.views.mydatatableview import MyDatatable, columns, helpers, Deplacer_lignes
 from core.views import crud
-from core.models import LISTE_CATEGORIES_QUESTIONNAIRES, QuestionnaireQuestion
+from core.models import LISTE_CATEGORIES_QUESTIONNAIRES, QuestionnaireQuestion, Famille, Individu
+from core.utils import utils_questionnaires
 from parametrage.forms.questionnaires import Formulaire
-from django.db.models import Q
+
 
 
 class Page(crud.Page):
@@ -95,6 +97,19 @@ class Liste(Page, crud.Liste):
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
+
+    def form_valid(self, form):
+        redirect = super(Ajouter, self).form_valid(form)
+        # Création des réponses pour tous (familles ou individus)
+        if self.object.categorie == "famille":
+            liste_instances = Famille.objects.all()
+        elif self.object.categorie == "individu":
+            liste_instances = Individu.objects.all()
+        else:
+            liste_instances = []
+        if liste_instances:
+            utils_questionnaires.Creation_reponses(categorie=self.object.categorie, liste_instances=liste_instances, question=self.object)
+        return redirect
 
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire

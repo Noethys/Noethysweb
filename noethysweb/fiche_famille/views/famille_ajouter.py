@@ -8,16 +8,15 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import Template, RequestContext
 from django.contrib import messages
 from django.db.models import ProtectedError
+from django.db import transaction
+from django.contrib.admin.utils import NestedObjects
 from core.views import crud
 from core.models import Individu, Famille, Rattachement, Utilisateur
-from core.utils import utils_historique
+from core.utils import utils_historique, utils_questionnaires
 from fiche_individu.forms.individu import Formulaire
 from fiche_individu.views import individu as INDIVIDU
 from fiche_famille.views.famille import Onglet
 from fiche_famille.utils import utils_internet
-from django.db import transaction
-from django.contrib.admin.utils import NestedObjects
-
 
 
 def Get_individus_existants(request):
@@ -120,6 +119,9 @@ class Ajouter(crud.Ajouter):
             # Sauvegarde de l'individu à créer
             self.object = form.save()
 
+            # Création des questionnaires de type individu
+            utils_questionnaires.Creation_reponses(categorie="individu", liste_instances=[self.object])
+
             # Recherche d'une adresse à rattacher
             if categorie in (1, 2):
                 rattachements = Rattachement.objects.prefetch_related('individu').filter(famille=famille)
@@ -153,6 +155,9 @@ class Ajouter(crud.Ajouter):
     def Creation_famille(self):
         """ Le transaction.atomic permet de faire que les enregistrements suivants soient tous effectués en même temps dans la db """
         famille = Famille.objects.create()
+
+        # Création des questionnaires de type famille
+        utils_questionnaires.Creation_reponses(categorie="famille", liste_instances=[famille])
 
         # Création et enregistrement des codes pour le portail
         internet_identifiant = utils_internet.CreationIdentifiant(IDfamille=famille.pk)
