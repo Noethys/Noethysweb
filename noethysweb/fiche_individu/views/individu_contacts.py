@@ -95,10 +95,12 @@ class Liste(Page, crud.Liste):
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
     template_name = "fiche_individu/individu_edit.html"
+    mode = "fiche_individu"
 
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire
     template_name = "fiche_individu/individu_edit.html"
+    mode = "fiche_individu"
 
 class Supprimer(Page, crud.Supprimer):
     template_name = "fiche_individu/individu_delete.html"

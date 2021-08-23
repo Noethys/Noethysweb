@@ -1,0 +1,59 @@
+# -*- coding: utf-8 -*-
+#  Copyright (c) 2019-2021 Ivan LUCAS.
+#  Noethysweb, application de gestion multi-activités.
+#  Distribué sous licence GNU GPL.
+
+from django.urls import reverse_lazy
+from django.http import HttpResponseRedirect
+from core.views.mydatatableview import MyDatatable, columns, helpers
+from core.views import crud
+from core.models import ContactUrgence
+from fiche_individu.forms.individu_contacts import Formulaire
+
+
+class Page(crud.Page):
+    model = ContactUrgence
+    url_liste = "contacts_urgence_liste"
+    url_modifier = "contacts_urgence_modifier"
+    url_supprimer = "contacts_urgence_supprimer"
+    description_liste = "Voici ci-dessous la liste des contacts d'urgence et de sortie des individus."
+    description_saisie = "Saisissez toutes les informations concernant le contact à saisir et cliquez sur le bouton Enregistrer."
+    objet_singulier = "un contact d'urgence et de sortie"
+    objet_pluriel = "des contacts d'urgence et de sortie"
+
+
+class Liste(Page, crud.Liste):
+    model = ContactUrgence
+
+    def get_queryset(self):
+        return ContactUrgence.objects.select_related("famille", "individu").filter(self.Get_filtres("Q"))
+
+    def get_context_data(self, **kwargs):
+        context = super(Liste, self).get_context_data(**kwargs)
+        context['impression_introduction'] = ""
+        context['impression_conclusion'] = ""
+        context['page_titre'] = "Contacts"
+        context['box_titre'] = "Liste des contacts d'urgence et de sortie"
+        return context
+
+    class datatable_class(MyDatatable):
+        filtres = ["idcontact", "fpresent:famille", "ipresent:individu", "famille__nom", "individu__nom", "individu__prenom", "nom", "prenom", "rue_resid", "tel_domicile", "tel_mobile", "tel_travail", "autorisation_sortie", "autorisation_appel"]
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
+        famille = columns.TextColumn("Famille", sources=['famille__nom'])
+        individu = columns.CompoundColumn("Individu", sources=['individu__nom', 'individu__prenom'])
+        autorisations = columns.TextColumn("Autorisations", sources=["autorisation_sortie", "autorisation_appel"], processor='Get_autorisations')
+
+        class Meta:
+            structure_template = MyDatatable.structure_template
+            columns = ["idcontact", "famille", "individu", "nom", "prenom", "tel_domicile", "tel_mobile", "tel_travail", "autorisations", "actions"]
+            ordering = ["famille", "individu"]
+
+        def Get_autorisations(self, instance, *args, **kwargs):
+            return instance.Get_autorisations()
+
+
+class Modifier(Page, crud.Modifier):
+    form_class = Formulaire
+
+class Supprimer(Page, crud.Supprimer):
+    form_class = Formulaire

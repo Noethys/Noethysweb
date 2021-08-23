@@ -32,8 +32,12 @@ class Formulaire(FormulaireBase, ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        self.idfamille = kwargs.pop("idfamille")
-        self.idindividu = kwargs.pop("idindividu")
+        self.idfamille = kwargs.pop("idfamille", None)
+        if kwargs.get("instance", None):
+            self.idfamille = kwargs["instance"].famille_id
+        self.idindividu = kwargs.pop("idindividu", None)
+        if kwargs.get("instance", None):
+            self.idindividu = kwargs["instance"].individu_id
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'individu_contacts_form'
@@ -43,11 +47,17 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2 col-form-label'
         self.helper.field_class = 'col-md-10'
 
+        # Bouton Annuler
+        if self.mode == "fiche_individu":
+            annuler_url = "{% url 'individu_contacts_liste' idfamille=idfamille idindividu=idindividu %}"
+        else:
+            annuler_url = "{% url 'contacts_urgence_liste' %}"
+
         # Affichage
         self.helper.layout = Layout(
             Hidden('famille', value=self.idfamille),
             Hidden('individu', value=self.idindividu),
-            Commandes(annuler_url="{% url 'individu_contacts_liste' idfamille=idfamille idindividu=idindividu %}"),
+            Commandes(annuler_url=annuler_url),
             Fieldset("Identité",
                 Field("nom"),
                 Field("prenom"),
