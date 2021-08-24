@@ -9,7 +9,8 @@ from core.decorators import secure_ajax
 from individus.views import liste_pieces_manquantes, liste_pieces_fournies, liste_regimes_caisses, liste_codes_comptables, liste_inscriptions_attente, suivi_inscriptions, \
                             importation_photos, liste_anniversaires, liste_quotients, etiquettes, etiquettes_familles, etiquettes_individus, \
                             inscriptions_scolaires, scolarites, inscriptions_liste, inscriptions_impression, inscriptions_email, liste_comptes_internet, \
-                            individus_detaches_liste, liste_mandats, liste_questionnaires_familles, liste_questionnaires_individus, liste_contacts_urgence
+                            individus_detaches_liste, liste_mandats, liste_questionnaires_familles, liste_questionnaires_individus, liste_contacts_urgence, \
+                            liste_regimes_alimentaires
 
 urlpatterns = [
 
@@ -73,6 +74,9 @@ urlpatterns = [
     path('individus/contacts/liste', liste_contacts_urgence.Liste.as_view(), name='contacts_urgence_liste'),
     path('individus/contacts/modifier/<int:pk>', liste_contacts_urgence.Modifier.as_view(), name='contacts_urgence_modifier'),
     path('individus/contacts/supprimer/<int:pk>', liste_contacts_urgence.Supprimer.as_view(), name='contacts_urgence_supprimer'),
+
+    path('individus/regimes_alimentaires/liste', liste_regimes_alimentaires.Liste.as_view(), name='regimes_alimentaires_liste'),
+    path('individus/regimes_alimentaires/modifier/<int:pk>', liste_regimes_alimentaires.Modifier.as_view(), name='regimes_alimentaires_modifier'),
 
     path('individus/importation_photos', importation_photos.View.as_view(), name='importation_photos'),
     path('individus/liste_comptes_internet', liste_comptes_internet.Liste.as_view(), name='liste_comptes_internet'),

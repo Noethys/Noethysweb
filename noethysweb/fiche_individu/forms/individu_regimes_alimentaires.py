@@ -36,8 +36,10 @@ class Formulaire(FormulaireBase, ModelForm):
         if self.mode == "CONSULTATION":
             commandes = Commandes(modifier_url="individu_regimes_alimentaires_modifier", modifier_args="idfamille=idfamille idindividu=idindividu", modifier=True, enregistrer=False, annuler=False, ajouter=False)
             self.Set_mode_consultation()
-        else:
+        elif self.mode == "EDITION":
             commandes = Commandes(annuler_url="{% url 'individu_regimes_alimentaires' idfamille=idfamille idindividu=idindividu %}", ajouter=False)
+        else:
+            commandes = Commandes(annuler_url="{% url 'regimes_alimentaires_liste' %}", ajouter=False)
 
         # Affichage
         self.helper.layout = Layout(
