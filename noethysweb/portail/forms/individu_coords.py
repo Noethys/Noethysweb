@@ -43,7 +43,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.nom_page = "individu_coords"
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_id = 'individu_identite_form'
+        self.helper.form_id = 'individu_coords_form'
         self.helper.form_method = 'post'
 
         self.helper.form_class = 'form-horizontal'
