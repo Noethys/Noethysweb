@@ -186,6 +186,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_infos_individus.Add(code="mandats_liste", titre="Liste des mandats SEPA", icone="file-text-o")
     menu_infos_individus.Add(code="contacts_urgence_liste", titre="Liste des contacts d'urgence et de sortie", icone="file-text-o")
     menu_infos_individus.Add(code="regimes_alimentaires_liste", titre="Liste des régimes alimentaires", icone="file-text-o")
+    menu_infos_individus.Add(code="maladies_liste", titre="Liste des maladies", icone="file-text-o")
     menu_infos_individus.Add(code="liste_comptes_internet", titre="Liste des comptes internet", icone="file-text-o")
 
     # Questionnaires

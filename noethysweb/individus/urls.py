@@ -10,7 +10,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             importation_photos, liste_anniversaires, liste_quotients, etiquettes, etiquettes_familles, etiquettes_individus, \
                             inscriptions_scolaires, scolarites, inscriptions_liste, inscriptions_impression, inscriptions_email, liste_comptes_internet, \
                             individus_detaches_liste, liste_mandats, liste_questionnaires_familles, liste_questionnaires_individus, liste_contacts_urgence, \
-                            liste_regimes_alimentaires
+                            liste_regimes_alimentaires, liste_maladies
 
 urlpatterns = [
 
@@ -77,6 +77,9 @@ urlpatterns = [
 
     path('individus/regimes_alimentaires/liste', liste_regimes_alimentaires.Liste.as_view(), name='regimes_alimentaires_liste'),
     path('individus/regimes_alimentaires/modifier/<int:pk>', liste_regimes_alimentaires.Modifier.as_view(), name='regimes_alimentaires_modifier'),
+
+    path('individus/maladies/liste', liste_maladies.Liste.as_view(), name='maladies_liste'),
+    path('individus/maladies/modifier/<int:pk>', liste_maladies.Modifier.as_view(), name='maladies_modifier'),
 
     path('individus/importation_photos', importation_photos.View.as_view(), name='importation_photos'),
     path('individus/liste_comptes_internet', liste_comptes_internet.Liste.as_view(), name='liste_comptes_internet'),
