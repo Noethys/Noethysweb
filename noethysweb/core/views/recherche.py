@@ -3,26 +3,31 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy
-from core.views.base import CustomView
-from django.views.generic import TemplateView
-from core.models import Famille, Individu, Payeur, Rattachement
-from django.db.models import Q, Value
 from functools import reduce
 from operator import or_
+from django.urls import reverse_lazy
+from django.shortcuts import redirect
+from django.views.generic import TemplateView
+from django.db.models import Q, Value
 from django.db.models.functions import Concat
+from django.http import JsonResponse
+from core.views.base import CustomView
+from core.models import Famille, Individu, Payeur, Rattachement
 from core.views.menu import GetMenuPrincipal
 from core.utils import utils_historique
-from django.http import JsonResponse
-
 
 
 def Memoriser_recherche(request):
-    """ Mémorise l'ouverture de la fiche famille dans l'historique """
+    """ AJAX : Mémorise l'ouverture de la fiche famille dans l'historique """
     idfamille = int(request.POST.get("idfamille"))
     nom_famille = request.POST.get("nom_famille")
     url = request.POST.get("url")
+    Memorise_famille(request=request, idfamille=idfamille, nom_famille=nom_famille, url=url)
+    return JsonResponse({"resultat": True})
 
+
+def Memorise_famille(request=None, idfamille=None, nom_famille=None, url=None):
+    """ Mémorisation d'une famille """
     # Mémorisation dans historique
     utils_historique.Ajouter(titre="Ouverture d'une fiche famille", detail="", utilisateur=request.user, famille=idfamille)
 
@@ -36,10 +41,6 @@ def Memoriser_recherche(request):
             request.session["historique_recherche"].pop(0)
         request.session.modified = True
 
-    return JsonResponse({"resultat": True})
-
-
-
 
 class View(CustomView, TemplateView):
     menu_code = None
@@ -48,8 +49,18 @@ class View(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Résultats de la recherche"
-        context['data'] = self.Get_resultats()
+        context['data'] = self.resultats
         return context
+
+    def dispatch(self, request, *args, **kwargs):
+        """ Affichage direct de la fiche famille en cas de réponse unique """
+        self.resultats = self.Get_resultats()
+        if "reponse_unique" in self.resultats:
+            rattachement = self.resultats["reponse_unique"]
+            url = str(reverse_lazy("famille_resume", kwargs={'idfamille': rattachement.famille_id}))
+            Memorise_famille(request=request, idfamille=rattachement.famille_id, nom_famille=rattachement.famille.nom, url=url)
+            return redirect(url)
+        return super(View, self).dispatch(request, *args, **kwargs)
 
     def Get_resultats(self):
         texte = self.request.GET.get("champ_recherche")
@@ -72,5 +83,11 @@ class View(CustomView, TemplateView):
                 for commande in sous_menu.GetChildren():
                     if texte.lower() in commande.titre.lower():
                         resultats["commandes"].append(commande)
+
+        # Si une seule famille trouvée :
+        if resultats["rattachements"] and not resultats["payeurs"] and not resultats["commandes"]:
+            familles = {rattachement.famille_id: True for rattachement in resultats["rattachements"]}
+            if len(familles) == 1:
+                resultats["reponse_unique"] = resultats["rattachements"].first()
 
         return resultats
