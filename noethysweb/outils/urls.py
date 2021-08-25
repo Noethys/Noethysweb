@@ -8,7 +8,7 @@ from core.views import toc
 from core.decorators import secure_ajax
 from outils.views import editeur_emails, editeur_emails_express, historique, update, sauvegarde_creer, sauvegarde_restaurer, statistiques, contacts, \
                         editeur_emails_familles, editeur_emails_individus, editeur_emails_contacts, editeur_emails_listes_diffusion, \
-                        editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes
+                        editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel
 
 urlpatterns = [
 
@@ -41,6 +41,7 @@ urlpatterns = [
     path('outils/historique', historique.Liste.as_view(), name='historique'),
     path('outils/update', update.View.as_view(), name='update'),
     path('outils/notes_versions', notes_versions.View.as_view(), name='notes_versions'),
+    path('outils/calendrier_annuel', calendrier_annuel.View.as_view(), name='calendrier_annuel'),
 
     # Notes
     path('outils/notes/liste', notes.Liste.as_view(), name='notes_liste'),
@@ -64,5 +65,6 @@ urlpatterns = [
     path('outils/get_modele_email', secure_ajax(editeur_emails.Get_modele_email), name='ajax_get_modele_email'),
     path('outils/get_view_editeur_email', secure_ajax(editeur_emails_express.Get_view_editeur_email), name='ajax_get_view_editeur_email'),
     path('outils/envoyer_email_express', secure_ajax(editeur_emails_express.Envoyer_email), name='ajax_envoyer_email_express'),
+    path('outils/get_calendrier_annuel', secure_ajax(calendrier_annuel.Get_calendrier_annuel), name='ajax_get_calendrier_annuel'),
 
 ]
