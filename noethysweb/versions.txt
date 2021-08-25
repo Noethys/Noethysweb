@@ -1,3 +1,22 @@
+Version 0.0.3.9 (25/08/2021) :
+
+- Ajout du cryptage des données personnelles
+- Ajout du traitement automatique des places en attente
+- Ajout de la pointeuse en temps réel
+- Ajout de l'export ves Magnus
+- Ajout des maladies
+- Ajout des approbations sur le portail
+- Ajout des articles sur le portail
+- Ajout de la banque d'images des articles
+- Ajout des albums photos sur le portail
+- Ajout de la liste des questionnaires dans le menu Individus
+- Ajout de la liste des contacts d'urgence et de sortie dans le menu Individus
+- Ajout de la liste des régimes alimentaires dans le menu Individus
+- Ajout du calendrier mensuel dans le menu Outils
+- Remplacement du captcha dans les pages de connexion
+- Nombreuses améliorations et optimisations
+- Correction de divers bugs
+
 Version 0.0.3.8 (23/06/2021) :
 
 - Ajout de la gestion des mandats SEPA
@@ -12,7 +31,7 @@ Version 0.0.3.7 (15/06/2021) :
 - Finalisation de l'historique
 - Sécurisation des requetes ajax
 - Correction de bugs divers
-- Ajout de la réinitialisaton des mots de passe
+- Ajout de la réinitialisation des mots de passe
 - Ajout des régimes alimentaires
 - Ajout des contacts d'urgence
 
