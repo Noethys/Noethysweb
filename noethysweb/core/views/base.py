@@ -74,8 +74,9 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
         context['organisateur'] = organisateur
 
         # Options d'interface
-        if cache.get('options_interface', None) != None:
-            context['options_interface'] = cache.get('options_interface', {})
+        key_cache = "options_interface_user%d" % self.request.user.pk
+        if cache.get(key_cache, None) != None:
+            context['options_interface'] = cache.get(key_cache, {})
         else:
             defaut = {
                 "dark-mode": False,
@@ -85,7 +86,7 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
             }
             parametres = utils_parametres.Get_categorie(categorie='options_interface', utilisateur=self.request.user, parametres=defaut)
             context['options_interface'] = parametres
-            cache.set('options_interface', parametres)
+            cache.set(key_cache, parametres)
 
         # Mémorise le menu principal
         menu_principal = GetMenuPrincipal(organisateur=organisateur, user=self.request.user)

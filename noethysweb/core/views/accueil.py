@@ -39,7 +39,8 @@ class Accueil(CustomView, TemplateView):
 
     def Get_update(self):
         """ Recherche si une nouvelle version est disponible """
-        last_check_update = cache.get('last_check_update')
+        key_cache = "last_check_update_user%d" % self.request.user.pk
+        last_check_update = cache.get(key_cache)
         if last_check_update:
             nouvelle_version = last_check_update["nouvelle_version"]
             # Si la dernière recherche date de plus d'un jour, on cherche une nouvelle version
@@ -48,7 +49,7 @@ class Accueil(CustomView, TemplateView):
         if not last_check_update:
             logger.debug("Recherche d'une nouvelle version...")
             nouvelle_version, changelog = utils_update.Recherche_update()
-            cache.set('last_check_update', {"date": datetime.datetime.now(), "nouvelle_version": nouvelle_version})
+            cache.set(key_cache, {"date": datetime.datetime.now(), "nouvelle_version": nouvelle_version})
         return nouvelle_version
 
     def Get_citation(self):

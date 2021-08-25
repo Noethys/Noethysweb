@@ -93,9 +93,10 @@ class Modifier(Onglet, TemplateView):
                     data["liste_individus_possibles"].append(inscription.individu)
 
         # Mémorise l'activité favorite
+        key_cache = "activite_favorite_user%d" % self.request.user.pk
         if data["selection_activite"]:
-            cache.set("activite_favorite", data["selection_activite"])
-        activite_favorite = cache.get("activite_favorite", None)
+            cache.set(key_cache, data["selection_activite"])
+        activite_favorite = cache.get(key_cache, None)
         if not data["selection_activite"] and activite_favorite in data['liste_activites_possibles']:
             data['selection_activite'] = activite_favorite
 
