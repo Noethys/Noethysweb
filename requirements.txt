@@ -13,6 +13,7 @@ django-resized
 django-select2
 django-summernote
 django-extensions
+django-upload-form
 numpy
 opencv-python
 pycryptodome
