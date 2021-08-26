@@ -104,14 +104,17 @@ def Update():
     logger.debug("AutoReloadWSGI...")
     AutoReloadWSGI()
 
-    # Collectstatic
+    # Mise à jour du répertoire Static
     logger.debug("Collectstatic...")
-    call_command('collectstatic', verbosity=0, interactive=False)
+    call_command("collectstatic", verbosity=0, interactive=False)
 
     # Mise à jour de la DB
     logger.debug("Migration DB...")
-    #call_command('makemigrations')
-    call_command('migrate')
+    call_command("migrate")
+
+    # Mise à jour des permissions
+    logger.debug("Mise à jour des permissions...")
+    call_command("update_permissions")
 
     logger.debug("Mise a jour terminee.")
     return True
