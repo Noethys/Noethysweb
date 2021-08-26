@@ -2952,7 +2952,7 @@ class Consentement(models.Model):
 
 class Album(models.Model):
     idalbum = models.AutoField(verbose_name="ID", db_column='IDalbum', primary_key=True)
-    titre = models.CharField(verbose_name="Titre de l'album", max_length=300, help_text="Le titre est visible pour les familles visible sur le portail.")
+    titre = models.CharField(verbose_name="Titre de l'album", max_length=300, help_text="Le titre est visible pour les familles sur le portail.")
     description = models.TextField(verbose_name="Description", blank=True, null=True, help_text="La description est visible pour les familles sur le portail.")
     auteur = models.ForeignKey(Utilisateur, verbose_name="Auteur", blank=True, null=True, on_delete=models.CASCADE)
     date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
@@ -2972,7 +2972,7 @@ class Photo(models.Model):
     idphoto = models.AutoField(verbose_name="ID", db_column='IDphoto', primary_key=True)
     album = models.ForeignKey(Album, verbose_name="Album", on_delete=models.PROTECT)
     fichier = models.FileField(verbose_name="Fichier", upload_to=get_uuid_path)
-    titre = models.CharField(verbose_name="Titre de la photo", max_length=300, blank=True, null=True, help_text="Le titre est visible pour les familles visible sur le portail.")
+    titre = models.CharField(verbose_name="Titre de la photo", max_length=300, blank=True, null=True, help_text="Le titre est visible pour les familles sur le portail.")
     date_creation = models.DateTimeField(verbose_name="Date de création", blank=True, null=True, help_text="Cette date est utilisée pour trier les photos.")
 
     class Meta:

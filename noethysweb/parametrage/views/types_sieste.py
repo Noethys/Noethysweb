@@ -40,13 +40,11 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idtype", "nom"]
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idtype", "nom"]
-            #hidden_columns = = ["idtype"]
+            columns = ["idtype_sieste", "nom"]
             ordering = ["nom"]
 
 
