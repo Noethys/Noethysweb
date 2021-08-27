@@ -17,7 +17,7 @@ class Command(BaseCommand):
         nom_fichier = "core/static/defaut/core.json"
 
         # Copie les images dans le répertoire media
-        copy_tree("core/static/defaut/media", os.path.join(settings.BASE_DIR, "media"))
+        copy_tree("core/static/defaut/to_media", os.path.join(settings.BASE_DIR, "media"))
 
         # Fermeture de toutes les connexions à la base
         from django import db

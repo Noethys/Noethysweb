@@ -819,5 +819,422 @@
             "nom": "6. DTpolio - 3\u00e8me rappel avec Coq. (\u00e0 11 ans)",
             "duree_validite": "j0-m0-a7"
         }
+    },
+	{
+        "pk": 1, 
+        "model": "core.ModeleDocument", 
+        "fields": {
+            "nom": "Fond par d\u00e9faut", 
+            "largeur": 210, 
+            "categorie": "fond", 
+            "fond": null, 
+            "defaut": true, 
+            "objets": "[{\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{ORGANISATEUR_NOM}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(80,132,228,1)\", \"top\": 271, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 9, \"type\": \"textbox\", \"left\": 10}, {\"strokeDashArray\": null, \"nom\": \"Ligne\", \"strokeWidth\": 0.25, \"categorie\": \"ligne\", \"top\": 277, \"y2\": 277, \"height\": 277, \"x2\": 200.0, \"width\": 190.0, \"stroke\": \"rgba(0,0,0,1)\", \"champ\": null, \"y1\": 277, \"fill\": null, \"type\": \"line\", \"x1\": 10.0, \"left\": 10}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{ORGANISATEUR_RUE} {ORGANISATEUR_CP} {ORGANISATEUR_VILLE}\\n[[SI {ORGANISATEUR_TEL}<>->T\\u00e9l : {ORGANISATEUR_TEL}]][[SI {ORGANISATEUR_FAX}<>-> | Fax : {ORGANISATEUR_FAX}]]\\n[[SI {ORGANISATEUR_MAIL}<>->Email : {ORGANISATEUR_MAIL}]]\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 279, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 8, \"type\": \"textbox\", \"left\": 10}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{ORGANISATEUR_SITE}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 279, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 8, \"type\": \"textbox\", \"left\": 162}]", 
+            "hauteur": 297, 
+            "idmodele": 1
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "core.ModeleDocument", 
+        "fields": {
+            "nom": "Badge de pointage", 
+            "largeur": 80, 
+            "categorie": "individu", 
+            "fond": null, 
+            "defaut": true, 
+            "objets": "[{\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{INDIVIDU_NOM}\\n{INDIVIDU_PRENOM}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 18, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 11, \"type\": \"textbox\", \"left\": 32}, {\"opacity\": 1, \"strokeMiterLimit\": 4, \"paintFirst\": \"fill\", \"height\": 120.0, \"visible\": true, \"stroke\": \"rgba(0,0,0,0)\", \"cropX\": 0, \"champ\": \"{CODEBARRES_ID_INDIVIDU}\", \"filters\": [], \"fill\": \"rgb(0,0,0)\", \"angle\": 0, \"fillRule\": \"nonzero\", \"flipX\": false, \"flipY\": false, \"top\": 2, \"scaleX\": 0.09, \"scaleY\": 0.05, \"strokeLineJoin\": \"miter\", \"width\": 311.11111111111114, \"version\": \"3.4.0\", \"backgroundColor\": \"\", \"cb_affiche_numero\": false, \"clipTo\": null, \"type\": \"image\", \"strokeLineCap\": \"butt\", \"strokeDashArray\": null, \"nom\": \"Code-barres - ID de l'individu\", \"cropY\": 0, \"strokeWidth\": 0, \"categorie\": \"barcode\", \"cb_norme\": \"Extended39\", \"originY\": \"top\", \"originX\": \"left\", \"globalCompositeOperation\": \"source-over\", \"strokeDashOffset\": 0, \"skewY\": 0, \"skewX\": 0, \"shadow\": null, \"crossOrigin\": \"\", \"src\": \"/static/images/codebarres.png\", \"transformMatrix\": null, \"left\": 32}, {\"opacity\": 1, \"strokeMiterLimit\": 4, \"paintFirst\": \"fill\", \"height\": 128, \"visible\": true, \"stroke\": null, \"cropX\": 0, \"filters\": [], \"fill\": null, \"angle\": 0, \"fillRule\": \"nonzero\", \"flipX\": false, \"flipY\": false, \"top\": 0.0, \"scaleX\": 0.234375, \"scaleY\": 0.234375, \"strokeLineJoin\": \"miter\", \"width\": 128, \"version\": \"3.4.0\", \"backgroundColor\": \"\", \"clipTo\": null, \"type\": \"image\", \"strokeLineCap\": \"butt\", \"strokeDashArray\": null, \"nom\": \"Photo individuelle\", \"cropY\": 0, \"strokeWidth\": null, \"categorie\": \"photo\", \"originY\": \"top\", \"originX\": \"left\", \"globalCompositeOperation\": \"source-over\", \"strokeDashOffset\": 0, \"skewY\": 0, \"skewX\": 0, \"shadow\": null, \"crossOrigin\": \"\", \"src\": \"/static/images/femme.png\", \"transformMatrix\": null, \"left\": 0}]", 
+            "hauteur": 30, 
+            "idmodele": 2
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "core.ModeleDocument", 
+        "fields": {
+            "nom": "Attestation par d\u00e9faut", 
+            "largeur": 210, 
+            "categorie": "attestation", 
+            "fond": 1, 
+            "defaut": true, 
+            "objets": "[{\"strokeDashArray\": null, \"nom\": \"Cadre principal\", \"strokeWidth\": null, \"categorie\": \"special\", \"height\": 193, \"stroke\": null, \"champ\": \"cadre_principal\", \"fill\": \"rgba(250,250,50,1)\", \"top\": 76, \"width\": 141, \"type\": \"rect\", \"left\": 50}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Attestation de pr\\u00e9sence n\\u00b0{NUM_ATTESTATION}\\n[[SI {ORGANISATEUR_SIRET}<>->Num\\u00e9ro SIRET : {ORGANISATEUR_SIRET}]]\\n[[SI {ORGANISATEUR_APE}<>->Code APE : {ORGANISATEUR_APE}]]\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 55, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 8, \"type\": \"textbox\", \"left\": 12}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Le {DATE_EDITION}[[SI {ORGANISATEUR_VILLE}<>->, \\u00e0 {ORGANISATEUR_VILLE}.]]\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 14, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 8, \"type\": \"textbox\", \"left\": 108}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{DESTINATAIRE_NOM}\\n{DESTINATAIRE_RUE}\\n{DESTINATAIRE_VILLE}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 49, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 10, \"type\": \"textbox\", \"left\": 108}]", 
+            "hauteur": 297, 
+            "idmodele": 3
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "core.ModeleDocument", 
+        "fields": {
+            "nom": "Re\u00e7u par d\u00e9faut", 
+            "largeur": 210, 
+            "categorie": "reglement", 
+            "fond": 1, 
+            "defaut": true, 
+            "objets": "[{\"strokeDashArray\": null, \"nom\": \"Cadre principal\", \"strokeWidth\": null, \"categorie\": \"special\", \"height\": 193, \"stroke\": null, \"champ\": \"cadre_principal\", \"fill\": \"rgba(250,250,50,1)\", \"top\": 76, \"width\": 141, \"type\": \"rect\", \"left\": 50}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Le {DATE_EDITION}[[SI {ORGANISATEUR_VILLE}<>->, \\u00e0 {ORGANISATEUR_VILLE}.]]\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 14, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 8, \"type\": \"textbox\", \"left\": 108}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{DESTINATAIRE_NOM}\\n{DESTINATAIRE_RUE}\\n{DESTINATAIRE_VILLE}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 49, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 10, \"type\": \"textbox\", \"left\": 108}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Num\\u00e9ro de re\\u00e7u : {NUM_RECU}\\n[[SI {ORGANISATEUR_SIRET}<>->Num\\u00e9ro SIRET : {ORGANISATEUR_SIRET}]]\\n[[SI {ORGANISATEUR_APE}<>->Code APE : {ORGANISATEUR_APE}]]\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 55, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 8, \"type\": \"textbox\", \"left\": 12}]", 
+            "hauteur": 297, 
+            "idmodele": 4
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "core.ModeleDocument", 
+        "fields": {
+            "nom": "Facture par d\u00e9faut", 
+            "largeur": 210, 
+            "categorie": "facture", 
+            "fond": 1, 
+            "defaut": true, 
+            "objets": "[{\"strokeDashArray\": null, \"nom\": \"Cadre principal\", \"strokeWidth\": null, \"categorie\": \"special\", \"height\": 193, \"stroke\": null, \"champ\": \"cadre_principal\", \"fill\": \"rgba(250,250,50,1)\", \"top\": 76, \"width\": 141, \"type\": \"rect\", \"left\": 50}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Le {DATE_EDITION_COURT}[[SI {ORGANISATEUR_VILLE}<>->, \\u00e0 {ORGANISATEUR_VILLE}.]]\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 14, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 8, \"type\": \"textbox\", \"left\": 108}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{FAMILLE_NOM}\\n{FAMILLE_RUE}\\n{FAMILLE_CP} {FAMILLE_VILLE}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 49, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 10, \"type\": \"textbox\", \"left\": 108}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Num\\u00e9ro de facture : {NUM_FACTURE}\\n[[SI {DATE_ECHEANCE_COURT}<>->Ech\\u00e9ance du paiement : {DATE_ECHEANCE_COURT}]]\\n[[SI {ORGANISATEUR_SIRET}<>->Num\\u00e9ro SIRET : {ORGANISATEUR_SIRET}]]\\n[[SI {ORGANISATEUR_APE}<>->Code APE : {ORGANISATEUR_APE}]]\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 55, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 8, \"type\": \"textbox\", \"left\": 12}, {\"strokeDashArray\": null, \"nom\": \"Coupon-r\\u00e9ponse vertical\", \"strokeWidth\": null, \"categorie\": \"special\", \"height\": 70, \"stroke\": null, \"champ\": \"coupon_vertical\", \"fill\": \"rgba(250,250,50,1)\", \"top\": 182, \"width\": 15, \"type\": \"rect\", \"left\": 10}, {\"opacity\": 1, \"strokeMiterLimit\": 4, \"paintFirst\": \"fill\", \"height\": 100.0, \"visible\": true, \"stroke\": \"rgba(0,0,0,0)\", \"cropX\": 0, \"champ\": \"{CODEBARRES_NUM_FACTURE}\", \"filters\": [], \"fill\": \"rgb(0,0,0)\", \"angle\": 0, \"fillRule\": \"nonzero\", \"flipX\": false, \"flipY\": false, \"top\": 8, \"scaleX\": 0.09, \"scaleY\": 0.05, \"strokeLineJoin\": \"miter\", \"width\": 311.11111111111114, \"version\": \"3.4.0\", \"backgroundColor\": \"\", \"cb_affiche_numero\": false, \"clipTo\": null, \"type\": \"image\", \"strokeLineCap\": \"butt\", \"strokeDashArray\": null, \"nom\": \"Code-barres - Num\\u00e9ro de facture\", \"cropY\": 0, \"strokeWidth\": 0, \"categorie\": \"barcode\", \"cb_norme\": \"Extended39\", \"originY\": \"top\", \"originX\": \"left\", \"globalCompositeOperation\": \"source-over\", \"strokeDashOffset\": 0, \"skewY\": 0, \"skewX\": 0, \"shadow\": null, \"crossOrigin\": \"\", \"src\": \"/static/images/codebarres.png\", \"transformMatrix\": null, \"left\": 108}]", 
+            "hauteur": 297, 
+            "idmodele": 5
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "core.ModeleDocument", 
+        "fields": {
+            "nom": "Rappel par d\u00e9faut", 
+            "largeur": 210, 
+            "categorie": "rappel", 
+            "fond": 1, 
+            "defaut": true, 
+            "objets": "[{\"strokeDashArray\": null, \"nom\": \"Cadre principal\", \"strokeWidth\": null, \"categorie\": \"special\", \"height\": 193, \"stroke\": null, \"champ\": \"cadre_principal\", \"fill\": \"rgba(250,250,50,1)\", \"top\": 76, \"width\": 141, \"type\": \"rect\", \"left\": 50}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Le {DATE_EDITION_COURT}[[SI {ORGANISATEUR_VILLE}<>->, \\u00e0 {ORGANISATEUR_VILLE}.]]\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 14, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 8, \"type\": \"textbox\", \"left\": 108}, {\"opacity\": 1, \"strokeMiterLimit\": 4, \"paintFirst\": \"fill\", \"height\": 100.0, \"visible\": true, \"stroke\": \"rgba(0,0,0,0)\", \"cropX\": 0, \"champ\": \"{CODEBARRES_NUM_RAPPEL}\", \"filters\": [], \"fill\": \"rgb(0,0,0)\", \"angle\": 0, \"fillRule\": \"nonzero\", \"flipX\": false, \"flipY\": false, \"top\": 8, \"scaleX\": 0.09, \"scaleY\": 0.05, \"strokeLineJoin\": \"miter\", \"width\": 311.11111111111114, \"version\": \"3.4.0\", \"backgroundColor\": \"\", \"cb_affiche_numero\": false, \"clipTo\": null, \"type\": \"image\", \"strokeLineCap\": \"butt\", \"strokeDashArray\": null, \"nom\": \"Code-barres - Num\\u00e9ro de rappel\", \"cropY\": 0, \"strokeWidth\": 0, \"categorie\": \"barcode\", \"cb_norme\": \"Extended39\", \"originY\": \"top\", \"originX\": \"left\", \"globalCompositeOperation\": \"source-over\", \"strokeDashOffset\": 0, \"skewY\": 0, \"skewX\": 0, \"shadow\": null, \"crossOrigin\": \"\", \"src\": \"/static/images/codebarres.png\", \"transformMatrix\": null, \"left\": 108}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{FAMILLE_NOM}\\n{FAMILLE_RUE}\\n{FAMILLE_CP} {FAMILLE_VILLE}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 49, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 10, \"type\": \"textbox\", \"left\": 108}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Num\\u00e9ro du rappel : {NUM_RAPPEL}\\n[[SI {ORGANISATEUR_SIRET}<>->Num\\u00e9ro SIRET : {ORGANISATEUR_SIRET}]]\\n[[SI {ORGANISATEUR_APE}<>->Code APE : {ORGANISATEUR_APE}]]\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 55, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 8, \"type\": \"textbox\", \"left\": 12}, {\"strokeDashArray\": null, \"nom\": \"Coupon-r\\u00e9ponse vertical\", \"strokeWidth\": null, \"categorie\": \"special\", \"height\": 70, \"stroke\": null, \"champ\": \"coupon_vertical\", \"fill\": \"rgba(250,250,50,1)\", \"top\": 182, \"width\": 15, \"type\": \"rect\", \"left\": 10}]", 
+            "hauteur": 297, 
+            "idmodele": 6
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "core.ModeleDocument", 
+        "fields": {
+            "nom": "Adresses pour enveloppes", 
+            "largeur": 60, 
+            "categorie": "famille", 
+            "fond": null, 
+            "defaut": true, 
+            "objets": "[{\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{FAMILLE_NOM}\\n{FAMILLE_RUE}\\n{FAMILLE_CP} {FAMILLE_VILLE}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 13, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 9, \"type\": \"textbox\", \"left\": 3}, {\"opacity\": 1, \"strokeMiterLimit\": 4, \"paintFirst\": \"fill\", \"height\": 100.0, \"visible\": true, \"stroke\": \"rgba(0,0,0,0)\", \"cropX\": 0, \"champ\": \"{CODEBARRES_ID_FAMILLE}\", \"filters\": [], \"fill\": \"rgb(0,0,0)\", \"angle\": 0, \"fillRule\": \"nonzero\", \"flipX\": false, \"flipY\": false, \"top\": 3, \"scaleX\": 0.09, \"scaleY\": 0.05, \"strokeLineJoin\": \"miter\", \"width\": 311.11111111111114, \"version\": \"3.4.0\", \"backgroundColor\": \"\", \"cb_affiche_numero\": false, \"clipTo\": null, \"type\": \"image\", \"strokeLineCap\": \"butt\", \"strokeDashArray\": null, \"nom\": \"Code-barres - ID de la famille\", \"cropY\": 0, \"strokeWidth\": 0, \"categorie\": \"barcode\", \"cb_norme\": \"Extended39\", \"originY\": \"top\", \"originX\": \"left\", \"globalCompositeOperation\": \"source-over\", \"strokeDashOffset\": 0, \"skewY\": 0, \"skewX\": 0, \"shadow\": null, \"crossOrigin\": \"\", \"src\": \"/static/images/codebarres.png\", \"transformMatrix\": null, \"left\": 3}]", 
+            "hauteur": 30, 
+            "idmodele": 7
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "core.ModeleDocument", 
+        "fields": {
+            "nom": "Etiquette fantaisiste", 
+            "largeur": 80, 
+            "categorie": "individu", 
+            "fond": null, 
+            "defaut": false, 
+            "objets": "[{\"strokeDashArray\": null, \"nom\": \"Rectangle\", \"strokeWidth\": 0.25, \"categorie\": \"rectangle\", \"height\": 27, \"stroke\": null, \"fill\": \"rgba(219,255,183,1)\", \"top\": -1, \"width\": 30, \"type\": \"rect\", \"left\": 0}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{INDIVIDU_NOM}\\n{INDIVIDU_PRENOM}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 28, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 12, \"type\": \"textbox\", \"left\": 14}, {\"opacity\": 1, \"strokeMiterLimit\": 4, \"paintFirst\": \"fill\", \"height\": 128, \"visible\": true, \"stroke\": null, \"cropX\": 0, \"filters\": [], \"fill\": null, \"angle\": 0, \"fillRule\": \"nonzero\", \"flipX\": false, \"flipY\": false, \"top\": 4.0, \"scaleX\": 0.15625, \"scaleY\": 0.15625, \"strokeLineJoin\": \"miter\", \"width\": 128, \"version\": \"3.4.0\", \"backgroundColor\": \"\", \"clipTo\": null, \"type\": \"image\", \"strokeLineCap\": \"butt\", \"strokeDashArray\": null, \"nom\": \"Photo individuelle\", \"cropY\": 0, \"strokeWidth\": null, \"categorie\": \"photo\", \"originY\": \"top\", \"originX\": \"left\", \"globalCompositeOperation\": \"source-over\", \"strokeDashOffset\": 0, \"skewY\": 0, \"skewX\": 0, \"shadow\": null, \"crossOrigin\": \"\", \"src\": \"/static/images/femme.png\", \"transformMatrix\": null, \"left\": 5}]", 
+            "hauteur": 40, 
+            "idmodele": 8
+        }
+    }, 
+    {
+        "pk": 9, 
+        "model": "core.ModeleDocument", 
+        "fields": {
+            "nom": "Enveloppes imprim\u00e9es", 
+            "largeur": 190, 
+            "categorie": "famille", 
+            "fond": null, 
+            "defaut": false, 
+            "objets": "[{\"strokeDashArray\": null, \"nom\": \"Rectangle\", \"strokeWidth\": 0.25, \"categorie\": \"rectangle\", \"height\": 20, \"stroke\": null, \"fill\": \"rgba(227,248,201,1)\", \"top\": 35, \"width\": 63, \"type\": \"rect\", \"left\": 105}, {\"strokeDashArray\": null, \"nom\": \"Ligne\", \"strokeWidth\": 0.25, \"categorie\": \"ligne\", \"top\": 74, \"y2\": 74, \"height\": 74, \"x2\": 180.0, \"width\": 170.0, \"stroke\": \"rgba(0,0,0,1)\", \"champ\": null, \"y1\": 74, \"fill\": null, \"type\": \"line\", \"x1\": 10.0, \"left\": 10}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{ORGANISATEUR_NOM}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(52,122,239,1)\", \"top\": 69, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 9, \"type\": \"textbox\", \"left\": 11}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{ORGANISATEUR_RUE} {ORGANISATEUR_CP} {ORGANISATEUR_VILLE}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 75, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 7, \"type\": \"textbox\", \"left\": 11}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{FAMILLE_NOM}\\n{FAMILLE_RUE}\\n{FAMILLE_CP} {FAMILLE_VILLE}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 39, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 10, \"type\": \"textbox\", \"left\": 108}]", 
+            "hauteur": 85, 
+            "idmodele": 9
+        }
+    }, 
+    {
+        "pk": 10, 
+        "model": "core.ModeleDocument", 
+        "fields": {
+            "nom": "Carton d'invitation", 
+            "largeur": 85, 
+            "categorie": "individu", 
+            "fond": null, 
+            "defaut": false, 
+            "objets": "[{\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"[[SI {INDIVIDU_GENRE}=M->Cher {INDIVIDU_PRENOM},]][[SI {INDIVIDU_GENRE}=F->Ch\\u00e8re {INDIVIDU_PRENOM},]]\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 35, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 10, \"type\": \"textbox\", \"left\": 10}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"INVITATION\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(122,113,240,1)\", \"top\": 15, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 23, \"type\": \"textbox\", \"left\": 6}, {\"strokeDashArray\": null, \"nom\": \"Ligne\", \"strokeWidth\": 0.25, \"categorie\": \"ligne\", \"top\": 24, \"y2\": 24, \"height\": 24, \"x2\": 53.0, \"width\": 53.0, \"stroke\": \"rgba(0,0,0,1)\", \"champ\": null, \"y1\": 24, \"fill\": null, \"type\": \"line\", \"x1\": 0.0, \"left\": 0}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Nous avons le plaisir de t'inviter \\u00e0 nous\\nretrouver lors d'une journ\\u00e9e festive qui\\naura lieu le mercredi 12 d\\u00e9cembre 2011.\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 45, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 10, \"type\": \"textbox\", \"left\": 10}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"L'\\u00e9quipe d'animation\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 64, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 9, \"type\": \"textbox\", \"left\": 39}]", 
+            "hauteur": 80, 
+            "idmodele": 10
+        }
+    }, 
+    {
+        "pk": 11, 
+        "model": "core.ModeleDocument", 
+        "fields": {
+            "nom": "Test", 
+            "largeur": 210, 
+            "categorie": "inscription", 
+            "fond": null, 
+            "defaut": true, 
+            "objets": "[{\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"ceci est un test !\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 152, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 12, \"type\": \"textbox\", \"left\": 90}]", 
+            "hauteur": 297, 
+            "idmodele": 11
+        }
+    }, 
+    {
+        "pk": 12, 
+        "model": "core.ModeleDocument", 
+        "fields": {
+            "nom": "Re\u00e7u dons aux oeuvres", 
+            "largeur": 210, 
+            "categorie": "cotisation", 
+            "fond": null, 
+            "defaut": true, 
+            "objets": "[{\"strokeDashArray\": null, \"nom\": \"Rectangle\", \"strokeWidth\": 0.25, \"categorie\": \"rectangle\", \"height\": 12, \"stroke\": \"rgba(0,0,0,1)\", \"fill\": \"rgba(255,255,255,1)\", \"top\": 21, \"width\": 68, \"type\": \"rect\", \"left\": 122}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Re\\u00e7u dons aux oeuvres\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 20, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 18, \"type\": \"textbox\", \"left\": 30}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"(Article 200-5 du Code G\\u00e9n\\u00e9ral des imp\\u00f4ts)\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 28, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 10, \"type\": \"textbox\", \"left\": 32}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Num\\u00e9ro d'ordre du re\\u00e7u\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 16, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 10, \"type\": \"textbox\", \"left\": 137}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{NUMERO_CARTE}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 24, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 16, \"type\": \"textbox\", \"left\": 141}, {\"strokeDashArray\": null, \"nom\": \"Rectangle\", \"strokeWidth\": 0.25, \"categorie\": \"rectangle\", \"height\": 63, \"stroke\": \"rgba(0,0,0,1)\", \"fill\": \"rgba(255,255,255,1)\", \"top\": 42, \"width\": 170, \"type\": \"rect\", \"left\": 20}, {\"strokeDashArray\": null, \"nom\": \"Rectangle\", \"strokeWidth\": 0.25, \"categorie\": \"rectangle\", \"height\": 8, \"stroke\": \"rgba(0,0,0,1)\", \"fill\": \"rgba(212,212,212,1)\", \"top\": 42, \"width\": 170, \"type\": \"rect\", \"left\": 20}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"B\\u00e9n\\u00e9ficiaire des versements\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 44, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 10, \"type\": \"textbox\", \"left\": 81}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Nom ou d\\u00e9nomination : {ORGANISATEUR_NOM}\\n\\nAdresse : {ORGANISATEUR_RUE}\\nCode postal : {ORGANISATEUR_CP}\\nVille : {ORGANISATEUR_VILLE}\\n\\nObjet : Grouper les familles vivant en milieu rural et assurer la d\\u00e9fense de leurs int\\u00e9r\\u00eats\\nmat\\u00e9riels et moraux.\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 55, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 11, \"type\": \"textbox\", \"left\": 29}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Oeuvre ou organisme d'int\\u00e9r\\u00eat g\\u00e9n\\u00e9ral\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 94, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 12, \"type\": \"textbox\", \"left\": 29}, {\"strokeDashArray\": null, \"nom\": \"Rectangle\", \"strokeWidth\": 0.25, \"categorie\": \"rectangle\", \"height\": 41, \"stroke\": \"rgba(0,0,0,1)\", \"fill\": \"rgba(255,255,255,1)\", \"top\": 113, \"width\": 170, \"type\": \"rect\", \"left\": 20}, {\"strokeDashArray\": null, \"nom\": \"Rectangle\", \"strokeWidth\": 0.25, \"categorie\": \"rectangle\", \"height\": 8, \"stroke\": \"rgba(0,0,0,1)\", \"fill\": \"rgba(212,212,212,1)\", \"top\": 113, \"width\": 170, \"type\": \"rect\", \"left\": 20}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Donateur\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 115, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 10, \"type\": \"textbox\", \"left\": 97}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Nom : {FAMILLE_NOM}\\n\\nAdresse : {FAMILLE_RUE}\\nCode postal : {FAMILLE_CP}\\nVille : {FAMILLE_VILLE}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 126, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 11, \"type\": \"textbox\", \"left\": 29}, {\"strokeDashArray\": null, \"nom\": \"Rectangle\", \"strokeWidth\": 0.25, \"categorie\": \"rectangle\", \"height\": 109, \"stroke\": \"rgba(0,0,0,1)\", \"fill\": \"rgba(255,255,255,1)\", \"top\": 162, \"width\": 170, \"type\": \"rect\", \"left\": 20}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Le b\\u00e9n\\u00e9ficiaire reconna\\u00eet avoir re\\u00e7u au titre des versements ouvrant droit \\u00e0 r\\u00e9duction\\nd'imp\\u00f4t, la somme de :\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 169, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 11, \"type\": \"textbox\", \"left\": 28}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{MONTANT_FACTURE}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 181, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 12, \"type\": \"textbox\", \"left\": 92}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Intitul\\u00e9 du versement : {NOM_TYPE_COTISATION} - {NOM_UNITE_COTISATION}\\n\\nSomme en toutes lettres : {MONTANT_FACTURE_LETTRES}\\n\\nDate du paiement : {DATE_REGLEMENT}\\n\\nMode de versement : {MODE_REGLEMENT}\\n\\n\\nFait en double exemplaire le {DATE_EDITION_COURT}\\n(Un pour le donateur - un pour l'association)\\n\\n\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 195, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 11, \"type\": \"textbox\", \"left\": 28}]", 
+            "hauteur": 297, 
+            "idmodele": 12
+        }
+    }, 
+    {
+        "pk": 13, 
+        "model": "core.ModeleDocument", 
+        "fields": {
+            "nom": "Attestation fiscale par d\u00e9faut", 
+            "largeur": 210, 
+            "categorie": "attestation_fiscale", 
+            "fond": 1, 
+            "defaut": true, 
+            "objets": "[{\"strokeDashArray\": null, \"nom\": \"Cadre principal\", \"strokeWidth\": null, \"categorie\": \"special\", \"height\": 193, \"stroke\": null, \"champ\": \"cadre_principal\", \"fill\": \"rgba(250,250,50,1)\", \"top\": 76, \"width\": 141, \"type\": \"rect\", \"left\": 50}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Le {DATE_EDITION_COURT}[[SI {ORGANISATEUR_VILLE}<>->, \\u00e0 {ORGANISATEUR_VILLE}.]]\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 14, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 8, \"type\": \"textbox\", \"left\": 108}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{FAMILLE_NOM}\\n{FAMILLE_RUE}\\n{FAMILLE_CP} {FAMILLE_VILLE}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 49, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 10, \"type\": \"textbox\", \"left\": 108}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"[[SI {ORGANISATEUR_SIRET}<>->Num\\u00e9ro SIRET : {ORGANISATEUR_SIRET}]]\\n[[SI {ORGANISATEUR_APE}<>->Code APE : {ORGANISATEUR_APE}]]\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 55, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 8, \"type\": \"textbox\", \"left\": 12}]", 
+            "hauteur": 297, 
+            "idmodele": 13
+        }
+    }, 
+    {
+        "pk": 14, 
+        "model": "core.ModeleDocument", 
+        "fields": {
+            "nom": "Devis par d\u00e9faut", 
+            "largeur": 210, 
+            "categorie": "devis", 
+            "fond": 1, 
+            "defaut": true, 
+            "objets": "[{\"strokeDashArray\": null, \"nom\": \"Cadre principal\", \"strokeWidth\": null, \"categorie\": \"special\", \"height\": 193, \"stroke\": null, \"champ\": \"cadre_principal\", \"fill\": \"rgba(250,250,50,1)\", \"top\": 76, \"width\": 141, \"type\": \"rect\", \"left\": 50}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Devis n\\u00b0{NUM_DEVIS}\\n[[SI {ORGANISATEUR_SIRET}<>->Num\\u00e9ro SIRET : {ORGANISATEUR_SIRET}]]\\n[[SI {ORGANISATEUR_APE}<>->Code APE : {ORGANISATEUR_APE}]]\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 55, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 8, \"type\": \"textbox\", \"left\": 12}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"Le {DATE_EDITION}[[SI {ORGANISATEUR_VILLE}<>->, \\u00e0 {ORGANISATEUR_VILLE}.]]\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 14, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 8, \"type\": \"textbox\", \"left\": 108}, {\"nom\": \"Bloc de texte\", \"categorie\": \"texte\", \"text\": \"{DESTINATAIRE_NOM}\\n{DESTINATAIRE_RUE}\\n{DESTINATAIRE_VILLE}\", \"height\": null, \"fontFamily\": \"Arial\", \"fill\": \"rgba(0,0,0,1)\", \"top\": 49, \"scaleX\": 0.33, \"scaleY\": 0.33, \"width\": 500, \"fontSize\": 10, \"type\": \"textbox\", \"left\": 108}]", 
+            "hauteur": 297, 
+            "idmodele": 14
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Invitation \u00e0 s\u00e9ance d'inscription", 
+            "categorie": "saisie_libre", 
+            "description": "Invitation aux familles", 
+            "objet": "Invitation \u00e0 la prochaine s\u00e9ance d'inscription", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">J'ai le plaisir de vous inviter \u00e0 la prochaine s\u00e9ance d'inscription qui aura lieu le ...</p><p align=\"left\"></p><p align=\"left\">A bient\u00f4t !</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}<br>Association Exemple</p>", 
+            "defaut": true, 
+            "idmodele": 1
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Envoi du relev\u00e9 \u00e0 la famille", 
+            "categorie": "releve_prestations", 
+            "description": "Envoi par d\u00e9faut", 
+            "objet": "Votre relev\u00e9 des prestations", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Vous trouverez ci-joint votre dernier relev\u00e9 des prestations. Celui-ci indique qu'il vous reste {RESTE_DU} \u00e0 r\u00e9gler aupr\u00e8s de nos services.<br><br>A bient\u00f4t,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}<br>Association Exemple</p>", 
+            "defaut": true, 
+            "idmodele": 2
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Pour re\u00e7u de r\u00e8glement", 
+            "categorie": "recu_reglement", 
+            "description": "Par d\u00e9faut", 
+            "objet": "Votre re\u00e7u de r\u00e8glement", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Vous trouverez ci-joint le re\u00e7u pour le r\u00e8glement de {MONTANT_REGLEMENT} pay\u00e9 par {NOM_PAYEUR} en {MODE_REGLEMENT} que vous avez adress\u00e9 \u00e0 nos services.<br><br>Bonne r\u00e9ception,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}<br>Association Exemple</p>", 
+            "defaut": true, 
+            "idmodele": 3
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Envoi d'une facture \u00e0 la famille", 
+            "categorie": "facture", 
+            "description": "Par d\u00e9faut", 
+            "objet": "Votre derni\u00e8re facture !", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Vous trouverez ci-joint votre derni\u00e8re facture d'un montant de {SOLDE}.</p><p align=\"left\"><br>A bient\u00f4t,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}<br>Association Exemple</p>", 
+            "defaut": true, 
+            "idmodele": 4
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Envoi d'une attestation \u00e0 la famille", 
+            "categorie": "attestation_presence", 
+            "description": "Par d\u00e9faut", 
+            "objet": "Voici votre attestation", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Suite \u00e0 votre demande, vous trouverez ci-joint l'attestation de pr\u00e9sence que vous avez r\u00e9clam\u00e9 aupr\u00e8s de nos services.</p><p align=\"left\"><br>A bient\u00f4t,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}<br>Association Exemple</p>", 
+            "defaut": true, 
+            "idmodele": 5
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Envoi des r\u00e9servation \u00e0 la famille", 
+            "categorie": "reservations", 
+            "description": "Par d\u00e9faut", 
+            "objet": "Vos derni\u00e8res r\u00e9servations", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Vous trouverez ci-joint les derni\u00e8res r\u00e9servations que vous avez enregistr\u00e9 aupr\u00e8s de nos services pour un montant total de {SOLDE}.</p><p align=\"left\"><br>A bient\u00f4t,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}<br>Association Exemple</p>", 
+            "defaut": true, 
+            "idmodele": 6
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Re\u00e7u dons aux oeuvres par d\u00e9faut", 
+            "categorie": "recu_don_oeuvres", 
+            "description": "", 
+            "objet": "Votre re\u00e7u dons aux oeuvres", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Veuillez trouver ci-joint votre re\u00e7u dons aux oeuvres n\u00b0{NUMERO_RECU} d'un montant de {MONTANT_CHIFFRES}.</p><p align=\"left\"></p><p align=\"left\">Bonne r\u00e9ception,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}</p>", 
+            "defaut": true, 
+            "idmodele": 7
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Rappel par d\u00e9faut", 
+            "categorie": "rappel", 
+            "description": "", 
+            "objet": "Rappel d'impay\u00e9s", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Veuillez trouver ci-joint un rappel d'impay\u00e9s d'un montant de {SOLDE_CHIFFRES}. Merci de r\u00e9gulariser votre situation dans les plus brefs d\u00e9lais.</p><p align=\"left\"></p><p align=\"left\">Bonne r\u00e9ception,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}</p>", 
+            "defaut": true, 
+            "idmodele": 8
+        }
+    }, 
+    {
+        "pk": 9, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Attestation fiscale par d\u00e9faut", 
+            "categorie": "attestation_fiscale", 
+            "description": "", 
+            "objet": "Votre attestation fiscale", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Veuillez trouver ci-joint votre attestation fiscale pour la p\u00e9riode du {DATE_DEBUT} au {DATE_FIN}.</p><p align=\"left\"></p><p align=\"left\">Bonne r\u00e9ception,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}</p>", 
+            "defaut": true, 
+            "idmodele": 9
+        }
+    }, 
+    {
+        "pk": 10, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Rappel par d\u00e9faut", 
+            "categorie": "rappel_pieces_manquantes", 
+            "description": "", 
+            "objet": "Rappel de pi\u00e8ces manquantes", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Apr\u00e8s \u00e9tude de votre dossier, il appara\u00eet qu'il manque les pi\u00e8ces suivantes : <b>{LISTE_PIECES_MANQUANTES}</b>.</p><p align=\"left\"></p><p align=\"left\">Merci de bien vouloir nous retourner ces pi\u00e8ces prochainement.</p><p align=\"left\"></p><p align=\"left\">Cordialement,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}</p>", 
+            "defaut": true, 
+            "idmodele": 10
+        }
+    }, 
+    {
+        "pk": 11, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Rappel codes internet par d\u00e9faut", 
+            "categorie": "portail", 
+            "description": "", 
+            "objet": "Vos codes d'acc\u00e8s au portail famille", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Veuillez trouver ci-dessous vos codes d'acc\u00e8s personnels au portail famille :</p><p align=\"left\"></p><p align=\"left\">Identifiant : <b>{IDENTIFIANT_INTERNET}<br></b>Mot de passe : <b>{MOTDEPASSE_INTERNET}</b></p><p align=\"left\"></p><p align=\"left\">Bonne r\u00e9ception,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}</p>", 
+            "defaut": true, 
+            "idmodele": 11
+        }
+    }, 
+    {
+        "pk": 12, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Demande inscription par d\u00e9faut", 
+            "categorie": "portail_demande_inscription", 
+            "description": "", 
+            "objet": "Votre demande d'inscription", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Votre demande d'inscription du {DEMANDE_HORODATAGE} a \u00e9t\u00e9 trait\u00e9e le {DEMANDE_TRAITEMENT_DATE}.</p><p align=\"left\"></p><p align=\"left\">Demande : {DEMANDE_DESCRIPTION}<br>R\u00e9ponse : <b>{DEMANDE_REPONSE}</b></p><p align=\"left\"></p><p align=\"left\">Cordialement,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}</p>", 
+            "defaut": true, 
+            "idmodele": 12
+        }
+    }, 
+    {
+        "pk": 13, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Demande de r\u00e9servations par d\u00e9faut", 
+            "categorie": "portail_demande_reservation", 
+            "description": "", 
+            "objet": "Votre demande de r\u00e9servations", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Votre demande de r\u00e9servations du {DEMANDE_HORODATAGE} a \u00e9t\u00e9 trait\u00e9e le {DEMANDE_TRAITEMENT_DATE}.</p><p align=\"left\"></p><p align=\"left\">Demande : {DEMANDE_DESCRIPTION}<br>R\u00e9ponse : <b>{DEMANDE_REPONSE}</b></p><p align=\"left\"></p><p align=\"left\">Vous trouverez en pi\u00e8ce jointe la liste des r\u00e9servations pour la p\u00e9riode du {PERIODE_DATE_DEBUT} au {PERIODE_DATE_FIN}. Vous pouvez \u00e9galement consulter le d\u00e9tail sur le portail famille.</p><p align=\"left\"></p><p align=\"left\">Bonne r\u00e9ception,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}</p>", 
+            "defaut": true, 
+            "idmodele": 13
+        }
+    }, 
+    {
+        "pk": 14, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Demande de facture par d\u00e9faut", 
+            "categorie": "portail_demande_facture", 
+            "description": "", 
+            "objet": "Votre demande de facture", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Votre demande de facture du {DEMANDE_HORODATAGE} a \u00e9t\u00e9 trait\u00e9e le {DEMANDE_TRAITEMENT_DATE}.</p><p align=\"left\"></p><p align=\"left\">Demande : {DEMANDE_DESCRIPTION}<br>R\u00e9ponse : <b>{DEMANDE_REPONSE}</b></p><p align=\"left\"></p><p align=\"left\">Bonne r\u00e9ception,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}</p>", 
+            "defaut": true, 
+            "idmodele": 14
+        }
+    }, 
+    {
+        "pk": 15, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Demande de re\u00e7u par d\u00e9faut", 
+            "categorie": "portail_demande_recu_reglement", 
+            "description": "", 
+            "objet": "Votre re\u00e7u de r\u00e8glement", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Votre demande de re\u00e7u de r\u00e8glement du {DEMANDE_HORODATAGE} a \u00e9t\u00e9 trait\u00e9e le {DEMANDE_TRAITEMENT_DATE}.</p><p align=\"left\"></p><p align=\"left\">Demande : {DEMANDE_DESCRIPTION}<br>R\u00e9ponse : <b>{DEMANDE_REPONSE}</b></p><p align=\"left\"></p><p align=\"left\">Bonne r\u00e9ception,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}</p>", 
+            "defaut": true, 
+            "idmodele": 15
+        }
+    }, 
+    {
+        "pk": 16, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Commande de repas par d\u00e9faut", 
+            "categorie": "commande_repas", 
+            "description": "", 
+            "objet": "Commande de repas", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Veuillez trouver ci-joint notre commande des repas pour la p\u00e9riode du {DATE_DEBUT} au {DATE_FIN}.</p><p align=\"left\"></p><p align=\"left\">Cordialement,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}</p>", 
+            "defaut": true, 
+            "idmodele": 16
+        }
+    }, 
+    {
+        "pk": 17, 
+        "model": "core.ModeleEmail", 
+        "fields": {
+            "nom": "Demande d'une location par d\u00e9faut", 
+            "categorie": "portail_demande_location", 
+            "description": "", 
+            "objet": "Votre demande de locations", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Votre demande de r\u00e9servations du {DEMANDE_HORODATAGE} a \u00e9t\u00e9 trait\u00e9e le {DEMANDE_TRAITEMENT_DATE}.</p><p align=\"left\"></p><p align=\"left\">Demande : {DEMANDE_DESCRIPTION}<br>R\u00e9ponse : <b>{DEMANDE_REPONSE}</b></p><p align=\"left\"></p><p align=\"left\">Vous pouvez consulter le d\u00e9tail sur le portail famille.</p><p align=\"left\"></p><p align=\"left\">Bonne r\u00e9ception,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}</p>", 
+            "defaut": true, 
+            "idmodele": 17
+        }
     }
 ]
