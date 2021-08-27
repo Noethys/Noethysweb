@@ -74,7 +74,7 @@ def Update():
     logger.debug("Installation des nouveaux fichiers...")
     for i in liste_fichiers:
         d = i.replace(prefixe, "")
-        if len(d) > 1 and not d.startswith("noethysweb-%s" % version_online_txt):
+        if len(d) > 1 and not d.startswith("Noethysweb-%s" % version_online_txt):
             if i.endswith('/'):
                 try:
                     os.makedirs(os.path.join(chemin_dest, d))
