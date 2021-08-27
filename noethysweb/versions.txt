@@ -1,3 +1,7 @@
+Version 0.0.4.2 (27/08/2021) :
+
+- Correction de l'update
+
 Version 0.0.4.1 (27/08/2021) :
 
 - Correction de l'installation des données par défaut
