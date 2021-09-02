@@ -27,8 +27,8 @@ class Formulaire(FormulaireBase, forms.Form):
 
         # Importation
         rattachements = Rattachement.objects.prefetch_related('individu').filter(famille_id=self.idfamille).exclude(individu_id=self.idindividu).order_by("individu__civilite")
-        liens = Lien.objects.filter(famille_id=self.idfamille, individu_sujet_id=self.idindividu)
-        dict_liens = {lien.individu_objet_id: {"lien": lien.idtype_lien, "autorisation": lien.autorisation} for lien in liens}
+        liens = Lien.objects.filter(famille_id=self.idfamille, individu_objet_id=self.idindividu)
+        dict_liens = {lien.individu_sujet_id: {"lien": lien.idtype_lien, "autorisation": lien.autorisation} for lien in liens}
 
         # Initialisation de l'affichage du formulaire
         if self.mode == "CONSULTATION":
