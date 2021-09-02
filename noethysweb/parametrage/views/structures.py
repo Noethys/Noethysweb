@@ -24,6 +24,7 @@ class Page(crud.Page):
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
     ]
+    compatible_demo = False
 
 
 class Liste(Page, crud.Liste):
