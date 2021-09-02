@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
+from django.db.models import Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Famille, Historique
@@ -26,7 +26,8 @@ class Liste(Page, crud.Liste):
     model = Historique
 
     def get_queryset(self):
-        return Historique.objects.select_related("famille", "individu", "utilisateur").filter(self.Get_filtres("Q"))
+        conditions = (Q(utilisateur__in=self.request.user.structures.all()) | Q(utilisateur__categorie="famille"))
+        return Historique.objects.select_related("famille", "individu", "utilisateur").filter(conditions, self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

@@ -179,7 +179,7 @@ class BaseView():
                             pass
                 else:
                     details.append(str(instance))
-                detail = " ".join(details)
+                detail = ", ".join(details)
 
         utilisateur = self.request.user
         objet = instance._meta.verbose_name.capitalize()
