@@ -57,4 +57,4 @@ class Modifier(Page, crud.Modifier):
     form_class = Formulaire
 
 class Supprimer(Page, crud.Supprimer):
-    pass
+    manytomany_associes = [("individu(s)", "individu_listes_diffusion")]

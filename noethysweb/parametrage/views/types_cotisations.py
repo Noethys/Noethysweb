@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import TypeCotisation
@@ -79,12 +79,16 @@ class Modifier(Page, crud.Modifier):
 
 
 class Supprimer(Page, crud.Supprimer):
-    pass
+    manytomany_associes = [
+        ("activité(s)", "activite_types_cotisations"),
+        ("tarif(s)", "tarif_cotisations"),
+    ]
 
     def delete(self, request, *args, **kwargs):
         reponse = super(Supprimer, self).delete(request, *args, **kwargs)
+
+        # Si le défaut a été supprimé, on le réattribue à un autre type
         if reponse.status_code != 303:
-            # Si le défaut a été supprimé, on le réattribue à un autre type
             if len(self.model.objects.filter(defaut=True)) == 0:
                 objet = self.model.objects.all().first()
                 if objet:

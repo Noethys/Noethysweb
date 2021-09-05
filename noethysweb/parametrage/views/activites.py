@@ -81,6 +81,7 @@ class Ajouter(Page, crud.Ajouter):
 
 class Supprimer(Page, crud.Supprimer):
     form_class = Formulaire
+    manytomany_associes = [("article(s)", "article_activites")]
 
     def get_object(self):
         return Activite.objects.get(pk=self.kwargs['idactivite'])

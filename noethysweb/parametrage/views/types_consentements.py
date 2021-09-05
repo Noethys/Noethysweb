@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import TypeConsentement
@@ -55,4 +55,4 @@ class Modifier(Page, crud.Modifier):
     form_class = Formulaire
 
 class Supprimer(Page, crud.Supprimer):
-    pass
+    manytomany_associes = [("activité(s)", "activite_types_consentements")]

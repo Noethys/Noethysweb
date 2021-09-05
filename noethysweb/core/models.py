@@ -647,7 +647,7 @@ class Ecole(models.Model):
     tel = models.CharField(verbose_name="Téléphone", max_length=200, blank=True, null=True)
     fax = models.CharField(verbose_name="Fax", max_length=200, blank=True, null=True)
     mail = models.EmailField(verbose_name="Email", max_length=300, blank=True, null=True)
-    secteurs = models.ManyToManyField(Secteur, blank=True)
+    secteurs = models.ManyToManyField(Secteur, blank=True, related_name="ecole_secteurs")
 
     class Meta:
         db_table = 'ecoles'
@@ -664,7 +664,7 @@ class Classe(models.Model):
     nom = models.CharField(verbose_name="Nom", max_length=300)
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin")
-    niveaux = models.ManyToManyField(NiveauScolaire)
+    niveaux = models.ManyToManyField(NiveauScolaire, related_name="classe_niveaux")
 
     class Meta:
         db_table = 'classes'
@@ -944,7 +944,7 @@ class Activite(models.Model):
     choix_affichage_dates_passees = [("0", "Jamais"), ("2", "Deux jours"), ("3", "Trois jours"), ("7", "Une semaine"), ("14", "Deux semaines"), ("30", "Un mois"), ("61", "Deux mois"), ("92", "Trois mois"), ("9999", "Toujours")]
     portail_afficher_dates_passees = models.CharField(verbose_name="Afficher les dates passées", max_length=100, choices=choix_affichage_dates_passees, default="14")
     regie = models.ForeignKey(FactureRegie, verbose_name="Régie de facturation", on_delete=models.PROTECT, blank=True, null=True)
-    groupes_activites = models.ManyToManyField(TypeGroupeActivite, blank=True)
+    groupes_activites = models.ManyToManyField(TypeGroupeActivite, blank=True, related_name="activite_groupes_activites")
     pieces = models.ManyToManyField(TypePiece, verbose_name="Types de pièces", related_name="activite_types_pieces", blank=True, help_text="Sélectionnez dans la liste les types de pièces qui doivent être à jour.")
     cotisations = models.ManyToManyField(TypeCotisation, verbose_name="Types d'adhésions", related_name="activite_types_cotisations", blank=True, help_text="Sélectionnez dans la liste des types d'adhésions qui doivent être à jour.")
     types_consentements = models.ManyToManyField(TypeConsentement, verbose_name="Types de consentements", related_name="activite_types_consentements", blank=True, help_text="Sélectionnez dans la liste les types de consentements internet nécessaires.")
@@ -1116,7 +1116,7 @@ class UniteRemplissage(models.Model):
     afficher_grille_conso = models.BooleanField(verbose_name="Afficher dans la grille des consommations", default=True)
     # etiquettes = models.CharField(blank=True, null=True)
     largeur = models.IntegerField(verbose_name="Largeur de la colonne", blank=True, null=True)
-    unites = models.ManyToManyField(Unite, verbose_name="Unités associées")
+    unites = models.ManyToManyField(Unite, verbose_name="Unités associées", related_name="unite_remplissage_unites")
 
     class Meta:
         db_table = 'unites_remplissage'
@@ -1223,10 +1223,10 @@ class Tarif(models.Model):
     label_prestation = models.CharField(verbose_name="Label de la prestation", max_length=300, blank=True, null=True)
     evenement = models.ForeignKey(Evenement, verbose_name="Evénement", blank=True, null=True, on_delete=models.CASCADE)
     # idproduit = models.IntegerField(db_column='IDproduit', blank=True, null=True)  # Field name made lowercase.
-    categories_tarifs = models.ManyToManyField(CategorieTarif, verbose_name="Catégories de tarifs")
-    groupes = models.ManyToManyField(Groupe, verbose_name="Groupes", blank=True)
-    cotisations = models.ManyToManyField(TypeCotisation, verbose_name="Cotisations", blank=True)
-    caisses = models.ManyToManyField(Caisse, verbose_name="Caisses", blank=True)
+    categories_tarifs = models.ManyToManyField(CategorieTarif, verbose_name="Catégories de tarifs", related_name="tarif_categories_tarifs")
+    groupes = models.ManyToManyField(Groupe, verbose_name="Groupes", blank=True, related_name="tarif_groupes")
+    cotisations = models.ManyToManyField(TypeCotisation, verbose_name="Cotisations", blank=True, related_name="tarif_cotisations")
+    caisses = models.ManyToManyField(Caisse, verbose_name="Caisses", blank=True, related_name="tarif_caisses")
     type_quotient = models.ForeignKey(TypeQuotient, verbose_name="Type de QF", blank=True, null=True, on_delete=models.CASCADE, help_text="Sélectionnez un type de quotient familial ou laissez le champ vide pour tenir compte de tous les types de quotients.")
 
     class Meta:
@@ -1295,7 +1295,7 @@ class CombiTarif(models.Model):
     date = models.DateField(verbose_name="Date", blank=True, null=True)
     quantite_max = models.IntegerField(verbose_name="Quantité maximale", blank=True, null=True)
     groupe = models.ForeignKey(Groupe, verbose_name="Groupe", on_delete=models.CASCADE, blank=True, null=True)
-    unites = models.ManyToManyField(Unite)
+    unites = models.ManyToManyField(Unite, related_name="combi_tarif_unites")
 
     class Meta:
         db_table = 'combi_tarifs'
@@ -1379,7 +1379,7 @@ class Individu(models.Model):
     tel_mobile_sms = models.BooleanField(verbose_name="Autoriser l'envoi de SMS vers le téléphone portable", default=False)
     etat = models.CharField(verbose_name="Etat", max_length=50, blank=True, null=True)
     photo = models.ImageField(verbose_name="Photo", upload_to=get_uuid_path, blank=True, null=True)
-    listes_diffusion = models.ManyToManyField(ListeDiffusion, blank=True)
+    listes_diffusion = models.ManyToManyField(ListeDiffusion, blank=True, related_name="individu_listes_diffusion")
     regimes_alimentaires = models.ManyToManyField(RegimeAlimentaire, verbose_name="Régimes alimentaires", related_name="individu_regimes_alimentaires", blank=True)
     maladies = models.ManyToManyField(TypeMaladie, verbose_name="Maladies contractées", related_name="individu_maladies", blank=True)
 
@@ -2648,7 +2648,7 @@ class PortailPeriode(models.Model):
     prefacturation = models.BooleanField(verbose_name="Activer la préfacturation pour cette période", default=False)
     choix_categories = [("TOUTES", "Toutes les catégories de compte internet"), ("AUCUNE", "Uniquement les catégories de compte internet non renseignées"), ("SELECTION", "Uniquement les catégories suivantes")]
     types_categories = models.CharField(verbose_name="Catégories", max_length=100, choices=choix_categories, default="TOUTES")
-    categories = models.ManyToManyField(CategorieCompteInternet, verbose_name="Sélection de catégories", related_name="categories_periode", blank=True)
+    categories = models.ManyToManyField(CategorieCompteInternet, verbose_name="Sélection de catégories", related_name="periode_categories", blank=True)
 
     class Meta:
         db_table = 'portail_periodes'

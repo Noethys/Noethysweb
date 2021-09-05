@@ -269,6 +269,7 @@ def Formate_liste_objets(objets=[]):
 class Supprimer(BaseView, DeleteView):
     template_name = "core/crud/confirm_delete_in_box.html"
     verbe_action = "Supprimer"
+    manytomany_associes = []
 
     def get_context_data(self, **kwargs):
         context = super(Supprimer, self).get_context_data(**kwargs)
@@ -280,6 +281,12 @@ class Supprimer(BaseView, DeleteView):
         collector.collect([self.get_object()])
         if collector.protected:
             context['erreurs_protection'].append("Il est rattaché aux données suivantes : %s." % Formate_liste_objets(objets=collector.protected))
+
+        # Vérifie si des champs ManyToMany ne sont pas associés
+        for label, related_name in self.manytomany_associes:
+            resultat = self.model.objects.filter(pk=self.get_object().pk).aggregate(nbre=Count(related_name))
+            if resultat["nbre"] > 0:
+                context['erreurs_protection'].append("Il est rattaché aux données suivantes : %d %s." % (resultat["nbre"], label))
 
         return context
 

@@ -86,3 +86,4 @@ class Modifier(Page, crud.Modifier):
 
 class Supprimer(Page, crud.Supprimer):
     template_name = "parametrage/activite_delete.html"
+    manytomany_associes = [("tarif(s)", "tarif_categories_tarifs")]

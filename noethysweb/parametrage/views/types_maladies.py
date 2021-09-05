@@ -4,9 +4,6 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
-from django.db.models import Q, Count
-from django.contrib import messages
-from django.http import HttpResponseRedirect
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.utils import utils_dates
@@ -72,17 +69,7 @@ class Modifier(Page, crud.Modifier):
     form_class = Formulaire
 
 class Supprimer(Page, crud.Supprimer):
-    def delete(self, request, *args, **kwargs):
-        # Empêche la suppression si déjà associée à au moins un individu
-        resultat = TypeMaladie.objects.filter(pk=self.get_object().pk).aggregate(nbre_individus=Count('individu_maladies'))
-        if resultat["nbre_individus"] > 0:
-            messages.add_message(request, messages.ERROR, "Il est impossible de supprimer cette maladie car elle est déjà associée à %d individu(s) !" % resultat["nbre_individus"])
-            return HttpResponseRedirect(self.get_success_url(), status=303)
-
-        # Empêche la suppression si déjà associée à un vaccin
-        resultat = TypeMaladie.objects.filter(pk=self.get_object().pk).aggregate(nbre_vaccins=Count('vaccin_maladies'))
-        if resultat["nbre_vaccins"] > 0:
-            messages.add_message(request, messages.ERROR, "Il est impossible de supprimer cette maladie car elle est déjà associée à %d vaccin(s) !" % resultat["nbre_vaccins"])
-            return HttpResponseRedirect(self.get_success_url(), status=303)
-
-        return super(Supprimer, self).delete(request, *args, **kwargs)
+    manytomany_associes = [
+        ("individu(s)", "individu_maladies"),
+        ("vaccin(s)", "vaccin_maladies")
+    ]

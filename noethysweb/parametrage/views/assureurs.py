@@ -65,11 +65,3 @@ class Modifier(Page, crud.Modifier):
 
 class Supprimer(Page, crud.Supprimer):
     pass
-
-    # def delete(self, request, *args, **kwargs):
-    #     """ Empêche la suppression du type de régime s'il est déjà associé à au moins un individu """
-    #     resultat = RegimeAlimentaire.objects.filter(pk=self.get_object().pk).aggregate(nbre_individus=Count('individu_regimes_alimentaires'))
-    #     if resultat["nbre_individus"] > 0:
-    #         messages.add_message(request, messages.ERROR, "Il est impossible de supprimer ce régime car il est déjà associé à %d individu(s) !" % resultat["nbre_individus"])
-    #         return HttpResponseRedirect(self.get_success_url(), status=303)
-    #     return super(Supprimer, self).delete(request, *args, **kwargs)

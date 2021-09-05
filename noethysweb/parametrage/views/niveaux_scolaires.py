@@ -3,12 +3,11 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from core.views.mydatatableview import MyDatatable, columns, helpers, Deplacer_lignes
 from core.views import crud
 from core.models import NiveauScolaire
 from parametrage.forms.niveaux_scolaires import Formulaire
-
 
 
 class Page(crud.Page):
@@ -61,10 +60,4 @@ class Modifier(Page, crud.Modifier):
     form_class = Formulaire
 
 class Supprimer(Page, crud.Supprimer):
-    pass
-
-    # def delete(self, request, *args, **kwargs):
-    #     reponse = super(Supprimer, self).delete(request, *args, **kwargs)
-    #     if reponse.status_code != 303:
-    #         self.Reordonner()
-    #     return reponse
+    manytomany_associes = [("classe(s)", "classe_niveaux")]

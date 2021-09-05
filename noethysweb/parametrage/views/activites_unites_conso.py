@@ -95,6 +95,10 @@ class Modifier(Page, crud.Modifier):
 
 class Supprimer(Page, crud.Supprimer):
     template_name = "parametrage/activite_delete.html"
+    manytomany_associes = [
+        ("unité(s) de remplissage", "unite_remplissage_unites"),
+        ("combinaison(s) de tarif", "combi_tarif_unites")
+    ]
 
     # def delete(self, request, *args, **kwargs):
     #     reponse = super(Supprimer, self).delete(request, *args, **kwargs)
@@ -107,5 +111,3 @@ class Supprimer(Page, crud.Supprimer):
     #                 objet.save()
     #             ordre += 1
     #     return reponse
-
-
