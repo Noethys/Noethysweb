@@ -393,7 +393,7 @@ class Case_standard extends Case_base {
     supprimer(maj_facturation=true) {
         if (this.is_locked()) {return false}
         // Mémorisation de la suppression
-        if ((this.consommations.length > 0) && (!(this.consommations[0].pk.includes("-")))) {
+        if ((this.consommations.length > 0) && (!(this.consommations[0].pk.toString().includes("-")))) {
             dict_suppressions.consommations.push(this.consommations[0].pk)
         };
         this.consommations = [];
@@ -831,7 +831,7 @@ class Case_multi extends Case_horaire {
     supprimer() {
         if (this.is_locked()) {return false}
         // Mémorisation de la suppression
-        if (!(this.consommations[0].pk.includes("-"))) {
+        if (!(this.consommations[0].pk.toString().includes("-"))) {
             dict_suppressions.consommations.push(this.consommations[0].pk);
         };
         // Supprime également la conso dans la case parente
@@ -1312,7 +1312,7 @@ function ajax_facturer(cases_touchees_temp) {
             });
 
             for (var idprestation of data.anciennes_prestations) {
-                if (!(idprestation.includes("-"))) {
+                if (!(idprestation.toString().includes("-"))) {
                     dict_suppressions.prestations.push(parseInt(idprestation));
                 }
                 delete dict_prestations[idprestation];
