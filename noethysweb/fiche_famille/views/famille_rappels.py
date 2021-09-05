@@ -47,7 +47,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['idrappel', 'date_edition', 'numero', 'solde', 'date_max', 'lot']
-            #hidden_columns = = ["idrappel"]
             processors = {
                 'date_edition': helpers.format_date('%d/%m/%Y'),
                 'date_max': helpers.format_date('%d/%m/%Y'),

@@ -80,7 +80,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ["idquestion", 'ordre', 'label', 'controle']
-            #hidden_columns = = ["idquestion"]
             ordering = ['ordre']
 
         def Get_controle(self, instance, **kwargs):

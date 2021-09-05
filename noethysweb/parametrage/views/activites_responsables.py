@@ -70,7 +70,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['idresponsable', 'nom', 'fonction', 'defaut']
-            #hidden_columns = = ["idresponsable"]
             ordering = ['nom']
 
         def Get_actions_speciales(self, instance, *args, **kwargs):

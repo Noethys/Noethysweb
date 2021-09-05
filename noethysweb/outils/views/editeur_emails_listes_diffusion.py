@@ -38,7 +38,6 @@ class Liste(Page_destinataires, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['check', "idliste", "nom"]
-            #hidden_columns = = ["idliste"]
             ordering = ["nom"]
 
     def post(self, request, **kwargs):

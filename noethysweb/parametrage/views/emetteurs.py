@@ -49,7 +49,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['idemetteur', 'nom', 'mode', 'image']
-            #hidden_columns = = ["idemetteur"]
             ordering = ['nom']
 
         def Get_image(self, instance, **kwargs):

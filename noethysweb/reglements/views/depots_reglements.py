@@ -156,7 +156,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['iddepot', 'verrouillage', 'date', 'nom', 'montant', 'compte', 'observations']
-            #hidden_columns = = ["iddepot"]
             processors = {
                 'date': helpers.format_date('%d/%m/%Y'),
             }

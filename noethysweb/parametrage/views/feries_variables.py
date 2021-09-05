@@ -50,7 +50,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ["idferie", 'nom', 'jour', 'mois', 'annee', 'actions']
-            #hidden_columns = = ["idferie"]
             ordering = ['annee', 'mois', 'jour']
 
         def Get_nom_mois(self, instance, **kwargs):

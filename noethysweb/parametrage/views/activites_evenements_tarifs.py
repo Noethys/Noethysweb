@@ -84,7 +84,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['idtarif', 'description', 'categories', 'methode']
-            #hidden_columns = ['idtarif']
 
         def Get_methode(self, instance, *args, **kwargs):
             return instance.get_methode_display()

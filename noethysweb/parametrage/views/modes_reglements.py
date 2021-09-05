@@ -48,7 +48,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['idmode', 'label']
-            #hidden_columns = = ["idmode"]
             ordering = ['label']
 
         def Get_image(self, instance, **kwargs):

@@ -70,7 +70,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['idevenement', 'date', 'nom', 'groupe', 'tarification']
-            #hidden_columns = ["idevenement"]
             ordering = ['date']
             processors = {
                 'date': helpers.format_date('%d/%m/%Y'),

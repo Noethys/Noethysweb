@@ -48,7 +48,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['idtype_cotisation', 'nom', 'type', 'carte', 'defaut']
-            #hidden_columns = = ["idtype_cotisation"]
             ordering = ['nom']
 
         def Get_carte(self, instance, **kwargs):

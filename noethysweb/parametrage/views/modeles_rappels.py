@@ -48,7 +48,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['idtexte', 'label', 'retard_min', 'retard_max']
-            #hidden_columns = ["idtexte"]
             ordering = ['label']
 
         def Get_actions_speciales(self, instance, *args, **kwargs):

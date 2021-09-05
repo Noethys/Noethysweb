@@ -48,7 +48,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['idtype_piece', 'nom', 'public', 'duree_validite']
-            #hidden_columns = = ["idtype_piece"]
             ordering = ['nom']
 
         def Get_validite(self, instance, **kwargs):

@@ -48,7 +48,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['idcompte', 'nom', 'numero', 'defaut']
-            #hidden_columns = = ["idcompte"]
             ordering = ['nom']
 
         def Get_default(self, instance, **kwargs):

@@ -130,7 +130,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ["idmodele", "nom", "categorie", "dimensions", 'defaut']
-            #hidden_columns = ["idmodele"]
             ordering = ["nom"]
 
         def Get_categorie(self, instance, **kwargs):

@@ -45,7 +45,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['idaction', 'horodatage', 'utilisateur', 'titre', 'detail', 'famille', 'individu', "objet", "idobjet"]
-            #hidden_columns = = ["idaction"]
             processors = {
                 'horodatage': helpers.format_date('%d/%m/%Y %H:%M'),
             }
