@@ -73,7 +73,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['idadresse', 'adresse', 'moteur', 'defaut']
-            #hidden_columns = = ["idadresse"]
             ordering = ['adresse']
 
         def Get_default(self, instance, **kwargs):

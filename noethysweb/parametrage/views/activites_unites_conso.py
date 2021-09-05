@@ -72,7 +72,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['idunite', 'ordre', 'nom', 'abrege', 'type']
-            #hidden_columns = = ["idunite"]
             ordering = ['ordre']
 
         def Get_actions_speciales(self, instance, *args, **kwargs):

@@ -49,7 +49,6 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ["idregie", "nom", "numclitipi", "compte_bancaire"]
-            #hidden_columns = = ["idregie"]
             ordering = ['nom']
 
 
