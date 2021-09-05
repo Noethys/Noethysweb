@@ -5,6 +5,7 @@ les accueils de loisirs, crèches, garderies périscolaires, cantines, TAP ou NA
 
 Plus d'infos sur www.noethys.com
 
+###### Développement en cours : Ne pas utiliser en production.
 
 Installation
 ------------------------
@@ -15,9 +16,10 @@ Installation
 - Personnalisez le fichier *settings_production.py* selon vos besoins.
 - Exécutez les commandes suivantes depuis le répertoire *noethysweb* :
     - `python3 manage.py makemigrations`
-	- `python3 manage.py migrate`
+    - `python3 manage.py migrate`
     - `python3 manage.py collectstatic`
     - `python3 manage.py createsuperuser`
     - `python3 manage.py update_permissions`
+    - `python3 manage.py import_defaut` (Uniquement si vous souhaitez importer les données par défaut : jours fériés, modèles, documents...)
     - `python3 manage.py runserver`
 - Consultez le site www.djangoproject.com pour en savoir davantage sur les options et le déploiement.
