@@ -17,12 +17,11 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_parametrage = menu.Add(code="parametrage_toc", titre="Paramétrage", icone="gear")
 
     menu_structure = menu_parametrage.Add(titre="Généralités")
-    # organisateur = cache.get_or_set('organisateur', Organisateur.objects.filter(pk=1).first())
     if organisateur:
-        menu_structure.Add(code="organisateur_modifier", titre="Organisateur", icone="file-text-o", compatible_demo=False, args="1") #, url=reverse_lazy("organisateur_modifier", args="1"))
+        menu_structure.Add(code="organisateur_modifier", titre="Organisateur", icone="file-text-o", compatible_demo=False, args="1")
     else:
-        menu_structure.Add(code="organisateur_ajouter", titre="Organisateur", icone="file-text-o", compatible_demo=False) #, url=reverse_lazy("organisateur_ajouter"))
-    menu_structure.Add(code="structures_liste", titre="Structures", icone="file-text-o")
+        menu_structure.Add(code="organisateur_ajouter", titre="Organisateur", icone="file-text-o", compatible_demo=False)
+    menu_structure.Add(code="structures_liste", titre="Structures", icone="file-text-o", compatible_demo=False)
 
     # Activités
     menu_activites = menu_parametrage.Add(titre="Activités")
