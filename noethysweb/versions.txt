@@ -1,3 +1,9 @@
+Version 0.0.4.5 (06/09/2021) :
+
+- Ajout de la protection des champs ManyToMany
+- Correction de la sélection de la période dans la grille
+- Correction de la suppression des conso dans la grille
+
 Version 0.0.4.4 (02/09/2021) :
 
 - Correction de l'affichage des liens dans la fiche individuelle
