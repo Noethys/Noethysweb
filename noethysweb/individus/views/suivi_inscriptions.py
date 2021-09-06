@@ -17,7 +17,7 @@ from django.http import JsonResponse
 def Get_form_activites(request):
     """ Renvoie une liste d'activités """
     activites = json.loads(request.POST.get("activites", None))
-    context = {"form_activites": Form_activites(defaut=activites)}
+    context = {"form_activites": Form_activites(defaut=activites, request=request)}
     return render(request, "individus/suivi_inscriptions_activites.html", context)
 
 
