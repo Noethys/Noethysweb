@@ -12,7 +12,7 @@
         <input type="number" name="annee" class="numberinput form-control" id="selection_annee" style="border-bottom: 0px;text-align: center;" value="{% now "Y" %}">
     </div>
     <div id="div_periode_mois">
-        <select multiple class="form-control" id="selection_mois">
+        <select multiple class="form-control" id="selection_mois" style="height: 150px;">
             <option value="1">Janvier</option>
             <option value="2">Février</option>
             <option value="3">Mars</option>
@@ -28,7 +28,7 @@
         </select>
     </div>
     <div id="div_periode_vacances">
-        <select multiple class="form-control" id="selection_vacances">
+        <select multiple class="form-control" id="selection_vacances" style="height: 115px;">
         </select>
     </div>
     <div id="div_periode_dates">
@@ -45,10 +45,10 @@
 
     function Set_mode_periode(mode) {
         $("input[name=choix_type_periode][value=" + mode + "]").prop('checked',true);
-        mode_periode = mode;
         if (mode == null) {
             mode = "mois"
-        }
+        };
+        mode_periode = mode;
         $('#div_periode_annee').hide();
         $('#div_periode_mois').hide();
         $('#div_periode_vacances').hide();
@@ -107,7 +107,7 @@
             Set_mode_periode("mois");
             return;
         }
-        if (mode_periode === "mois") {
+        if ((mode_periode === "mois") && (selection_periode.selections)) {
             $('#selection_annee').val(selection_periode.selections.annee).change();
             $('#selection_mois').val(selection_periode.selections.liste_mois).change();
         };

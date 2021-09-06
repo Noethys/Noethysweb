@@ -3,17 +3,18 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import logging, json
+logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
-from core.models import Inscription, Activite
-from core.views.base import CustomView
 from django.views.generic import TemplateView
-from core.utils import utils_parametres
+from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-import json
+from core.utils import utils_parametres
+from core.models import Inscription, Activite
+from core.views.base import CustomView
 from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
 from consommations.forms.grille_traitement_lot import Formulaire as form_traitement_lot
-from django.core.cache import cache
 
 
 class Onglet(CustomView):
@@ -74,6 +75,7 @@ class Modifier(Onglet, TemplateView):
 
         # Récupération de la période
         data = Get_periode(data)
+        logger.debug("Période de la grille =", data)
 
         # Importation de toutes les inscriptions de la famille sur la période sélectionnée
         dict_inscriptions = {}
