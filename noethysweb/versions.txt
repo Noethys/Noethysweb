@@ -1,3 +1,7 @@
+Version 0.0.4.6 (06/09/2021) :
+
+- Correction de l'affichage du suivi des inscriptions sur la page d'accueil
+
 Version 0.0.4.5 (06/09/2021) :
 
 - Ajout de la protection des champs ManyToMany
