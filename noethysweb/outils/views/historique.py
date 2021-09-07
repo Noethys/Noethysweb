@@ -26,7 +26,7 @@ class Liste(Page, crud.Liste):
     model = Historique
 
     def get_queryset(self):
-        conditions = (Q(utilisateur__in=self.request.user.structures.all()) | Q(utilisateur__categorie="famille"))
+        conditions = (Q(utilisateur__structures__in=self.request.user.structures.all()) | Q(utilisateur__categorie="famille"))
         return Historique.objects.select_related("famille", "individu", "utilisateur").filter(conditions, self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
