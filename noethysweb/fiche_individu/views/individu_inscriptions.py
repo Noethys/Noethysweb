@@ -211,9 +211,9 @@ class Modifier(Page, crud.Modifier):
             condition = Q(inscription=self.object) & (Q(date__lt=form.cleaned_data["date_debut"]) | Q(date__gt=form.cleaned_data["date_fin"]))
         else:
             condition = Q(inscription=self.object, date__lte=form.cleaned_data["date_debut"])
-        liste_conso = Consommation.objects.filter(condition).count()
-        if liste_conso:
-            messages.add_message(self.request, messages.ERROR, "Modification impossible : %d consommations existent déjà hors de la période d'inscription sélectionnée")
+        nbre_conso = Consommation.objects.filter(condition).count()
+        if nbre_conso:
+            messages.add_message(self.request, messages.ERROR, "Modification impossible : %d consommations existent déjà hors de la période d'inscription sélectionnée" % nbre_conso)
             return self.render_to_response(self.get_context_data(form=form))
 
         return super(Modifier, self).form_valid(form)

@@ -587,7 +587,7 @@ class Facturation():
                         else:
                             montant_tarif, nom_tarif, temps_facture = resultat
 
-                        logger.debug("Montant trouvé : %s %s %s %d" % (montant_tarif, nom_tarif, temps_facture, quantite))
+                        logger.debug("Montant trouvé : Montant=%s (tarif=%s temps_facturé=%s Quantité=%d)" % (montant_tarif, nom_tarif, temps_facture, quantite))
 
                         # -------------------------------------------------------------------------
                         # ------------------- Déduction d'une aide journalière --------------------
