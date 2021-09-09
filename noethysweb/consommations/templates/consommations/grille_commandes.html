@@ -1,3 +1,4 @@
+{% load embed %}
 
     <div class="commandes_grille d-flex flex-wrap">
         {% if data.mode != "pointeuse" %}
@@ -14,14 +15,9 @@
         {% endif %}
         {% if data.mode == "individu" %}
             <a type='button' title="Annuler" class='btn btn-danger btn-sm' href="{% url 'famille_resume' idfamille=idfamille %}"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
-            <button type="button" id="traitement_par_lot" class="btn btn-default btn-sm" onclick="$('#modal_traitement_lot').modal('show');" title="Traitement par lot"><i class="fa fa-magic margin-r-5"></i>Traitement par lot</button>
         {% endif %}
-        {% if data.mode == "individu" %}
-            <button type="button" id="pdf" class="btn btn-default btn-sm" onclick="impression_pdf()" title="Aperçu PDF"><i class="fa fa-file-pdf-o margin-r-5"></i>Imprimer</button>
-            <button type="button" id="email" class="btn btn-default btn-sm" onclick="impression_pdf(true)" title="Envoyer par email"><i class="fa fa-send-o margin-r-5"></i>Email</button>
-        {% endif %}
-        <button type="button" id="saisie_pointage" class="btn btn-default btn-sm" onclick="$('#modal_saisir_pointage').modal('show');" title="Pointage par lot"><i class="fa fa-check-square-o margin-r-5"></i>Pointage</button>
-        <button type="button" id="tout_recalculer" class="btn btn-default btn-sm" onclick="tout_recalculer()" title="Tout recalculer"><i class="fa fa-refresh margin-r-5"></i>Recalculer</button>
+
+        <button type="button" id="outils" class="btn btn-default btn-sm" onclick="$('#modal_outils').modal('show');" title="Accéder aux outils"><i class="fa fa-wrench margin-r-5"></i>Outils</button>
 
         <div>
             <div class="input-group input-group-sm " style="width: 140px;">
@@ -49,3 +45,24 @@
         </div>
 
     </div>
+
+    {# Modal Outils #}
+    {% embed 'core/modal.html' with modal_footer=True %}
+        {% block modal_id %}modal_outils{% endblock %}
+        {% block modal_titre %}Outils{% endblock %}
+        {% block modal_body %}
+            <p>Cliquez sur l'outil souhaité.</p>
+            <div>
+                {% if data.mode == "individu" %}
+                    <a class="btn btn-app" onclick="$('#modal_outils').modal('hide');$('#modal_traitement_lot').modal('show');"><i class="fa fa-magic"></i> Traitement par lot</a>
+                    <a class="btn btn-app" onclick="$('#modal_outils').modal('hide');impression_pdf();"><i class="fa fa-file-pdf-o"></i> Imprimer</a>
+                    <a class="btn btn-app" onclick="$('#modal_outils').modal('hide');impression_pdf(true);"><i class="fa fa-send-o"></i> Envoyer par email</a>
+                {% endif %}
+                <a class="btn btn-app" onclick="$('#modal_outils').modal('hide');$('#modal_saisir_pointage').modal('show');"><i class="fa fa-check-square-o"></i> Pointage par lot</a>
+                <a class="btn btn-app" onclick="$('#modal_outils').modal('hide');tout_recalculer();"><i class="fa fa-refresh"></i> Recalculer les prestations</a>
+            </div>
+        {% endblock %}
+        {% block modal_footer %}
+            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+        {% endblock %}
+    {% endembed %}
