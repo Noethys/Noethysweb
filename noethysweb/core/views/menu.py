@@ -274,6 +274,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_prestations.Add(code="liste_deductions", titre="Liste des déductions", icone="file-text-o")
     menu_prestations.Add(code="liste_soldes", titre="Liste des soldes", icone="file-text-o")
     menu_prestations.Add(code="synthese_prestations", titre="Synthèse des prestations", icone="file-text-o")
+    menu_prestations.Add(code="recalculer_prestations", titre="Recalculer des prestations", icone="file-text-o")
 
     # Impayés
     menu_impayes = menu_facturation.Add(titre="Impayés")
