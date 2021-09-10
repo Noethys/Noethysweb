@@ -40,10 +40,15 @@
 
     </form>
 
-    <a class="forgot-password-link" href="{% url 'reset_password' %}">Mot de passe oublié ?</a>
+    {# Mot de passe oublié #}
+    {% if parametres_portail.connexion_adresse_exp %}
+        <a class="forgot-password-link" href="{% url 'reset_password' %}">Mot de passe oublié ?</a>
+    {% endif %}
+
+    {# Pas de codes d'accès #}
     <p class="login-card-footer-text"><a href="#" class="forgot-password-link" data-toggle="modal" data-target="#model_pas_codes">Pas de codes d'accès ?</a></p>
 
-    <!-- Modal : Pas de codes -->
+    {# Modal : Pas de codes d'accès #}
     <div class="modal" id="model_pas_codes">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">

@@ -236,6 +236,34 @@ def get_uuid_path(instance, filename):
 
 
 
+class AdresseMail(models.Model):
+    idadresse = models.AutoField(verbose_name="ID", db_column='IDadresse', primary_key=True)
+    adresse = models.EmailField(verbose_name="Adresse d'envoi", max_length=300, help_text="Saisissez l'adresse mail utilisée.")
+    motdepasse = models.CharField(verbose_name="Mot de passe", max_length=300, blank=True, null=True, help_text="Saisissez le mot de passe de la messagerie.")
+    hote = models.CharField(verbose_name="Hôte", max_length=300, blank=True, null=True, help_text="Saisissez le nom de l'hôte de la messagerie (Ex: smtp.orange.fr, smtp.gmail.com...).")
+    port = models.IntegerField(verbose_name="Port", blank=True, null=True, help_text="Saisissez le numéro de port (Ex: 995, 465...)")
+    use_ssl = models.BooleanField(verbose_name="SSL", default=False, help_text="Cochez cette case si la messagerie exige le protocole SSL.")
+    use_tls = models.BooleanField(verbose_name="TLS", default=False, help_text="Cochez cette case si la messagerie exige le protocole TLS.")
+    utilisateur = models.CharField(verbose_name="Utilisateur", max_length=300, blank=True, null=True, help_text="Saisissez le nom d'utilisateur (Souvent identique à l'adresse mail).")
+    nom_adresse = models.CharField(verbose_name="Adresse affichée", max_length=300, blank=True, null=True, help_text="Saisissez le nom ou l'adresse que vous souhaitez voir apparaître dans le client de messagerie du destinataire.")
+    moteur = models.CharField(verbose_name="Moteur", max_length=200, choices=[("smtp", "SMTP"), ("mailjet", "Mailjet"), ("console", "Console")], help_text="Sélectionnez un moteur d'expédition (Smtp ou Mailjet).")
+    parametres = models.CharField(verbose_name="Paramètres", max_length=500, blank=True, null=True)
+
+    class Meta:
+        db_table = 'adresses_mail'
+        verbose_name = "adresse Mail"
+        verbose_name_plural = "adresses Mail"
+
+    def __str__(self):
+        return self.adresse if self.adresse else "Adresse mail"
+
+    def Get_parametre(self, nom=""):
+        try:
+            dict_parametres = {param.split("==")[0]: param.split("==")[1] for param in self.parametres.split("##")}
+            return dict_parametres[nom]
+        except:
+            return None
+
 
 class Structure(models.Model):
     idstructure = models.AutoField(verbose_name="ID", db_column="IDstructure", primary_key=True)
@@ -250,6 +278,7 @@ class Structure(models.Model):
     logo = ResizedImageField(verbose_name="Logo", upload_to=get_uuid_path, blank=True, null=True)
     gps = models.CharField(verbose_name="GPS", max_length=200, blank=True, null=True)
     logo_update = models.DateTimeField(verbose_name="Date MAJ Logo", max_length=200, blank=True, null=True)
+    adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Adresse d'expédition", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez une des adresses d'expédition d'emails dans la liste. Il est possible de créer de nouvelles adresses depuis le menu Paramétrage > Adresses d'expédition.")
 
     class Meta:
         db_table = 'structures'
@@ -269,11 +298,30 @@ class Utilisateur(AbstractUser):
     categorie = models.CharField(verbose_name="Catégorie", max_length=50, blank=True, null=True, default="utilisateur")
     force_reset_password = models.BooleanField(verbose_name="Force la mise à jour du mot de passe", default=False)
     structures = models.ManyToManyField(Structure, verbose_name="Structures", related_name="utilisateur_structures", blank=True)
-    # structure_actuelle = models.ForeignKey(Structure, verbose_name="Structure actuelle", on_delete=models.PROTECT, blank=True, null=True)
+    adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Adresse d'expédition d'emails", related_name="utilisateur_adresse_exp", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez une adresse d'expédition d'emails favorite dans la liste. Il est possible de créer de nouvelles adresses depuis le menu Paramétrage > Adresses d'expédition.")
     objects = CustomUserManager()
 
     class Meta:
         permissions = utils_permissions.GetPermissionsPossibles()
+
+    def Get_adresse_exp_defaut(self):
+        # Renvoie l'adresse favorite
+        if self.adresse_exp:
+            return self.adresse_exp
+        # Recherche une adresse parmi celles des structures
+        for structure in self.structures.all():
+            if structure.adresse_exp:
+                return structure.adresse_exp
+        return None
+
+    def Get_adresses_exp_possibles(self):
+        liste_adresses_possibles = []
+        if self.adresse_exp:
+            liste_adresses_possibles.append(self.adresse_exp_id)
+        for structure in self.structures.all():
+            if structure.adresse_exp and structure.adresse_exp_id not in liste_adresses_possibles:
+                liste_adresses_possibles.append(structure.adresse_exp_id)
+        return liste_adresses_possibles
 
 
 class Assureur(models.Model):
@@ -2476,37 +2524,6 @@ class Lien(models.Model):
         return "Lien ID%d" % self.idlien
 
 
-class AdresseMail(models.Model):
-    idadresse = models.AutoField(verbose_name="ID", db_column='IDadresse', primary_key=True)
-    adresse = models.EmailField(verbose_name="Adresse d'envoi", max_length=300, help_text="Saisissez l'adresse mail utilisée.")
-    motdepasse = models.CharField(verbose_name="Mot de passe", max_length=300, blank=True, null=True, help_text="Saisissez le mot de passe de la messagerie.")
-    hote = models.CharField(verbose_name="Hôte", max_length=300, blank=True, null=True, help_text="Saisissez le nom de l'hôte de la messagerie (Ex: smtp.orange.fr, smtp.gmail.com...).")
-    port = models.IntegerField(verbose_name="Port", blank=True, null=True, help_text="Saisissez le numéro de port (Ex: 995, 465...)")
-    use_ssl = models.BooleanField(verbose_name="SSL", default=False, help_text="Cochez cette case si la messagerie exige le protocole SSL.")
-    defaut = models.BooleanField(verbose_name="Adresse par défaut", default=False)
-    use_tls = models.BooleanField(verbose_name="TLS", default=False, help_text="Cochez cette case si la messagerie exige le protocole TLS.")
-    utilisateur = models.CharField(verbose_name="Utilisateur", max_length=300, blank=True, null=True, help_text="Saisissez le nom d'utilisateur (Souvent identique à l'adresse mail).")
-    nom_adresse = models.CharField(verbose_name="Adresse affichée", max_length=300, blank=True, null=True, help_text="Saisissez le nom ou l'adresse que vous souhaitez voir apparaître dans le client de messagerie du destinataire.")
-    moteur = models.CharField(verbose_name="Moteur", max_length=200, choices=[("smtp", "SMTP"), ("mailjet", "Mailjet"), ("console", "Console")], help_text="Sélectionnez un moteur d'expédition (Smtp ou Mailjet).")
-    parametres = models.CharField(verbose_name="Paramètres", max_length=500, blank=True, null=True)
-    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True, help_text="Choisissez si cette adresse est accessible par une structure spécifique ou par toutes les structures.")
-
-    class Meta:
-        db_table = 'adresses_mail'
-        verbose_name = "adresse Mail"
-        verbose_name_plural = "adresses Mail"
-
-    def __str__(self):
-        return self.adresse if self.adresse else "Adresse mail"
-
-    def Get_parametre(self, nom=""):
-        try:
-            dict_parametres = {param.split("==")[0]: param.split("==")[1] for param in self.parametres.split("##")}
-            return dict_parametres[nom]
-        except:
-            return None
-
-
 class Contact(models.Model):
     idcontact = models.AutoField(verbose_name="ID", db_column='IDcontact', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=200)
@@ -2700,7 +2717,7 @@ class PortailRenseignement(models.Model):
 
 
 class PortailChamp(models.Model):
-    ichamp = models.AutoField(verbose_name="ID", db_column='IDchamp', primary_key=True)
+    idchamp = models.AutoField(verbose_name="ID", db_column='IDchamp', primary_key=True)
     page = models.CharField(verbose_name="Page", max_length=200, blank=True, null=True)
     code = models.CharField(verbose_name="Code", max_length=200, blank=True, null=True)
     choix_etat = [("AFFICHER", "Afficher"), ("MASQUER", "Masquer")]
@@ -2714,7 +2731,7 @@ class PortailChamp(models.Model):
         verbose_name_plural = "champs de portail"
 
     def __str__(self):
-        return "Champ de portail ID%d" % self.ichamp if self.ichamp else "Nouveau"
+        return "Champ de portail ID%d" % self.idchamp if self.idchamp else "Nouveau"
 
 
 class PortailMessage(models.Model):

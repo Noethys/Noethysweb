@@ -38,11 +38,10 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
-        # Sélectionne l'adresse d'expédition par défaut
+        # Sélectionne l'adresse d'expédition
+        self.fields["adresse_exp"].queryset = AdresseMail.objects.filter(pk__in=self.request.user.Get_adresses_exp_possibles()).order_by("adresse")
         if not idmail:
-            adresse_exp_defaut = AdresseMail.objects.filter(defaut=True).first()
-            if adresse_exp_defaut:
-                self.fields['adresse_exp'].initial = adresse_exp_defaut
+            self.fields['adresse_exp'].initial = self.request.user.Get_adresse_exp_defaut()
 
         self.fields['selection'].required = False
 

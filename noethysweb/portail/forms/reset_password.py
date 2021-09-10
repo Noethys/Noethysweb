@@ -16,6 +16,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from core.utils.utils_captcha import CaptchaField, CustomCaptchaTextInput
+from core.utils import utils_portail
 
 
 class MySetPasswordForm(SetPasswordForm):
@@ -71,7 +72,7 @@ class MyPasswordResetForm(PasswordResetForm):
         email = self.cleaned_data["email"]
 
         # Recherche l'utilisateur
-        utilisateur = Utilisateur.objects.filter(email__iexact=email, username__iexact=identifiant, is_active=True, categorie="famille").first()
+        utilisateur = Utilisateur.objects.filter(famille__mail__iexact=email, username__iexact=identifiant, is_active=True, categorie="famille").first()
         if not utilisateur:
             return "Il n'existe pas de compte actif correspondant à cet identifiant et cette adresse Email."
 
@@ -93,9 +94,11 @@ class MyPasswordResetForm(PasswordResetForm):
         }
 
         # Importation de l'adresse d'expédition d'emails
-        adresse_exp = AdresseMail.objects.filter(defaut=True).first()
-        if not adresse_exp:
-            return "L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisme."
+        idadresse_exp = utils_portail.Get_parametre(code="connexion_adresse_exp")
+        if idadresse_exp:
+            adresse_exp = AdresseMail.objects.get(pk=idadresse_exp)
+        else:
+            return "L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur."
 
         # Backend CONSOLE (Par défaut)
         backend = 'django.core.mail.backends.console.EmailBackend'

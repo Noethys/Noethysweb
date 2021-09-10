@@ -61,6 +61,7 @@ class UtilisateurAdmin(UserAdmin):
         ('Activation du compte', {'fields': ('is_active',)}),
         ('Permissions accordées', {'fields': ('is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Structures accessibles', {'fields': ('structures',), 'description': "Sélectionnez les structures accessibles par cet utilisateur."}),
+        ('Options', {'fields': ('adresse_exp',)}),
         ('Dates importantes', {'fields': ('last_login', 'date_joined')})
     )
 

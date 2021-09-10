@@ -6,13 +6,11 @@
 from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Div, ButtonHolder, Fieldset
-from crispy_forms.bootstrap import Field, FormActions, PrependedText, StrictButton
+from crispy_forms.layout import Layout, HTML, Fieldset
+from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.models import AdresseMail
-
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -34,12 +32,6 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
-
-        # Définir comme valeur par défaut
-        self.fields['defaut'].label = "Définir comme adresse d'expédition par défaut"
-        if len(AdresseMail.objects.all()) == 0 or self.instance.defaut == True:
-            self.fields['defaut'].initial = True
-            self.fields['defaut'].disabled = True
 
         # Paramètres
         parametres = {}
@@ -63,8 +55,6 @@ class Formulaire(FormulaireBase, ModelForm):
             ]),
             Fieldset('Généralités',
                 Field('moteur'),
-                Field('structure'),
-                Field('defaut'),
             ),
             Fieldset('Paramètres',
                 Field('adresse'),
@@ -75,7 +65,6 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field('nom_adresse'),
                 Field('cle_api'),
                 Field('cle_secrete'),
-                # Field('use_ssl'),
                 Field('use_tls'),
                 Field('accuse'),
             ),

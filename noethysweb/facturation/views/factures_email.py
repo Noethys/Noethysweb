@@ -52,7 +52,7 @@ def Impression_pdf(request):
         categorie="facture",
         objet=modele_email.objet if modele_email else "",
         html=modele_email.html if modele_email else "",
-        adresse_exp=AdresseMail.objects.filter(defaut=True).first(),
+        adresse_exp=request.user.Get_adresse_exp_defaut(),
         selection="NON_ENVOYE",
         verrouillage_destinataires=True,
         utilisateur=request.user,

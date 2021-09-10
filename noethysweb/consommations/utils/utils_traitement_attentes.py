@@ -3,14 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, datetime, json
 logger = logging.getLogger(__name__)
 from core.models import Activite, Famille, Individu, Mail, ModeleEmail, Destinataire, AdresseMail, Consommation, Prestation, Vacance
-from core.utils import utils_dates
+from core.utils import utils_dates, utils_portail
 from outils.utils import utils_email
 from consommations.views.liste_attente import Get_resultats
 from consommations.utils.utils_grille_virtuelle import Grille_virtuelle
-import datetime, json
 
 
 def Traiter_attentes(request=None):
@@ -50,6 +49,14 @@ def Traiter_attentes(request=None):
     if not len(dict_resultats_familles):
         return
 
+    # Recherche de l'adresse d'expédition du mail
+    idadresse_exp = utils_portail.Get_parametre(code="connexion_adresse_exp")
+    if idadresse_exp:
+        adresse_exp = AdresseMail.objects.get(pk=idadresse_exp)
+    else:
+        logger.debug("Aucune adresse d'expédition paramétrée pour l'envoi des places disponibles.")
+        return
+
     # Création du mail
     logger.debug("Création du mail des places en attente à réattribuer...")
     modele_email = ModeleEmail.objects.filter(categorie="portail_places_disponibles", defaut=True).first()
@@ -57,7 +64,7 @@ def Traiter_attentes(request=None):
         categorie="portail_places_disponibles",
         objet=modele_email.objet if modele_email else "",
         html=modele_email.html if modele_email else "",
-        adresse_exp=AdresseMail.objects.filter(defaut=True).first(),
+        adresse_exp=adresse_exp,
         selection="NON_ENVOYE",
         utilisateur=request.user if request else None,
     )
@@ -86,7 +93,7 @@ def Traiter_attentes(request=None):
     logger.debug("Envoi du mail de réattribution des places en attente.")
     utils_email.Envoyer_model_mail(idmail=mail.pk, request=request)
 
-    # Transormation des consommations attente en Réservation
+    # Transformation des consommations Attente en Réservation
     logger.debug("Tranformation des consommation attente en réservation...")
     for idfamille, dict_individus in dict_resultats_familles.items():
         for idindividu, dict_dates in dict_individus.items():

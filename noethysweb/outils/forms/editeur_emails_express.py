@@ -30,7 +30,6 @@ class Formulaire(FormulaireBase, ModelForm):
     # dest = forms.ModelMultipleChoiceField(label="Destinataires", required=False, widget=MyWidget(model=Rattachement, search_fields=['individu__nom__icontains', 'individu__prenom__icontains'], attrs={"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=Rattachement.objects.none().order_by("individu__nom", "individu__prenom"))
     dest = forms.MultipleChoiceField(label="Destinataires", required=False, widget=Select2TagWidget(attrs={"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0, "title": "Sélectionnez une adresse dans la liste ou tapez-la directement"}), choices=[])
 
-
     class Meta:
         model = Mail
         fields = ["objet", "html", "adresse_exp"]
@@ -46,11 +45,10 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
-        # Sélectionne l'adresse d'expédition par défaut
+        # Sélectionne l'adresse d'expédition
+        self.fields["adresse_exp"].queryset = AdresseMail.objects.filter(pk__in=self.request.user.Get_adresses_exp_possibles()).order_by("adresse")
         if not self.instance:
-            adresse_exp_defaut = AdresseMail.objects.filter(defaut=True).first()
-            if adresse_exp_defaut:
-                self.fields['adresse_exp'].initial = adresse_exp_defaut
+            self.fields['adresse_exp'].initial = self.request.user.Get_adresse_exp_defaut()
 
         # Sélection des destinataires
         if self.instance:

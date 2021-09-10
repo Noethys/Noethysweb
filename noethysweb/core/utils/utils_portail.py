@@ -4,7 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from core.models import PortailParametre
+from core.models import PortailParametre, AdresseMail
 from django_summernote.widgets import SummernoteInplaceWidget
 from django.template.loader import render_to_string
 
@@ -23,6 +23,8 @@ class Parametre():
             return forms.BooleanField(label=self.label, required=self.required, help_text=self.help_text)
         if self.type == "char":
             return forms.CharField(label=self.label, required=self.required, help_text=self.help_text, widget=forms.Textarea(attrs={'rows': 2}))
+        if self.type == "adresse_exp":
+            return forms.ChoiceField(label=self.label, choices=[(None, "Aucune")] + [(adresse_exp.pk, adresse_exp.adresse) for adresse_exp in AdresseMail.objects.all()], required=self.required, help_text=self.help_text)
         if self.type == "html":
             return forms.CharField(label=self.label, required=self.required, help_text=self.help_text, widget=SummernoteInplaceWidget(
                 attrs={'summernote': {'width': '100%', 'height': '200px', 'toolbar': [
@@ -46,6 +48,9 @@ class Parametre():
 
 
 LISTE_PARAMETRES = [
+    # Connexion
+    Parametre(code="connexion_adresse_exp", label="Adresse d'expédition", type="adresse_exp", valeur=None, help_text="Cette adresse mail est utilisée pour envoyer des mails de réinitialisation de mots de passe. A défaut de sélection, la fonction mot de passe oublié sera désactivée."),
+
     # Accueil
     Parametre(code="accueil_texte_bienvenue", label="Texte de bienvenue", type="html", valeur="Bienvenue sur le portail Famille"),
 
@@ -89,3 +94,7 @@ def Get_dict_parametres():
     for parametre_db in PortailParametre.objects.all():
         dict_parametres[parametre_db.code].From_db(parametre_db.valeur)
     return {code: parametre.valeur for code, parametre in dict_parametres.items()}
+
+def Get_parametre(code=""):
+    parametres = Get_dict_parametres()
+    return parametres.get(code, None)

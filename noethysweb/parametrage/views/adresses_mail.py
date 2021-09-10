@@ -16,7 +16,7 @@ import json
 def Envoyer_mail_test(request):
     # Récupère les paramètres de l'adresse d'expédition
     valeurs_form_adresse = json.loads(request.POST.get("form_adresse"))
-    form_adresse = Formulaire(valeurs_form_adresse, request=self.request)
+    form_adresse = Formulaire(valeurs_form_adresse, request=request)
     if form_adresse.is_valid() == False:
         return JsonResponse({"erreur": "Veuillez compléter les paramètres de l'adresse d'expédition"}, status=401)
 
@@ -65,14 +65,12 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['idadresse', 'adresse', 'moteur', 'defaut']
-
+        filtres = ['idadresse', 'adresse', 'moteur']
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
-        defaut = columns.TextColumn("Défaut", sources="defaut", processor='Get_default')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idadresse', 'adresse', 'moteur', 'defaut']
+            columns = ['idadresse', 'adresse', 'moteur']
             ordering = ['adresse']
 
         def Get_default(self, instance, **kwargs):
@@ -82,33 +80,8 @@ class Liste(Page, crud.Liste):
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
 
-    def form_valid(self, form):
-        # Si le Défaut a été coché, on supprime le Défaut des autres types
-        if form.instance.defaut:
-            self.model.objects.filter(defaut=True).update(defaut=False)
-        return super().form_valid(form)
-
-
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire
 
-    def form_valid(self, form):
-        # Si le Défaut a été coché, on supprime le Défaut des autres types
-        if form.instance.defaut:
-            self.model.objects.filter(defaut=True).update(defaut=False)
-        return super().form_valid(form)
-
-
 class Supprimer(Page, crud.Supprimer):
     pass
-
-    def delete(self, request, *args, **kwargs):
-        reponse = super(Supprimer, self).delete(request, *args, **kwargs)
-        if reponse.status_code != 303:
-            # Si le défaut a été supprimé, on le réattribue à un autre type
-            if len(self.model.objects.filter(defaut=True)) == 0:
-                objet = self.model.objects.all().first()
-                if objet:
-                    objet.defaut = True
-                    objet.save()
-        return reponse
