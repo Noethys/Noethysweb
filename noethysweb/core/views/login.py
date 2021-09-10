@@ -9,6 +9,7 @@ from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.core.cache import cache
 from django.contrib.auth.models import update_last_login
+from django.templatetags.static import static
 from noethysweb.version import GetVersion
 from core.forms.login import FormLoginUtilisateur
 from core.models import Organisateur
@@ -30,6 +31,9 @@ class ClassCommuneLogin:
             organisateur = Organisateur.objects.filter(pk=1).first()
             cache.set('organisateur', organisateur)
         context['organisateur'] = organisateur
+
+        # Recherche de l'image de fond
+        context['url_image_fond'] = static("images/bureau.jpg")
 
         return context
 

@@ -12,21 +12,17 @@ from parametrage.views import organisateur, structures, \
     lots_factures, prefixes_factures, regies, messages_factures, \
     types_pieces, regimes, caisses, types_quotients, categories_travail, secteurs, types_sieste, \
     categories_medicales, types_maladies, types_vaccins, medecins, \
-    niveaux_scolaires, ecoles, classes, \
-    types_cotisations, unites_cotisations, \
-    restaurateurs, menus_categories, menus_legendes, \
-    notes_categories, listes_diffusion, \
-    types_groupes_activites, \
-    activites, activites_generalites, activites_responsables, activites_agrements, activites_groupes, \
+    niveaux_scolaires, ecoles, classes, types_cotisations, unites_cotisations, \
+    restaurateurs, menus_categories, menus_legendes, notes_categories, listes_diffusion, \
+    types_groupes_activites, activites, activites_generalites, activites_responsables, activites_agrements, activites_groupes, \
     activites_renseignements, activites_unites_conso, activites_unites_remplissage, activites_calendrier, \
     activites_ouvertures, activites_evenements, activites_evenements_tarifs, activites_categories_tarifs, activites_noms_tarifs, \
     activites_tarifs, activites_portail_parametres, activites_portail_periodes, \
     modeles_documents, modeles_emails, modeles_rappels, \
     questionnaires, adresses_mail, activites_assistant, activites_assistant_sejour, activites_assistant_cantine, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
-    portail_parametres, types_regimes_alimentaires, assureurs, \
-    categories_compte_internet, modeles_pes, \
-    types_consentements, unites_consentements, articles, images_articles, albums
+    portail_parametres, types_regimes_alimentaires, assureurs, categories_compte_internet, modeles_pes, \
+    types_consentements, unites_consentements, articles, images_articles, albums, images_fond
 
 
 urlpatterns = [
@@ -429,6 +425,14 @@ urlpatterns = [
     path('parametrage/albums/photos/modifier/<int:idalbum>/<int:pk>', albums.Modifier_photo.as_view(), name='albums_modifier_photo'),
     path('parametrage/albums/photos/supprimer/<int:idalbum>/<int:pk>', albums.Supprimer_photo.as_view(), name='albums_supprimer_photo'),
     path('parametrage/albums/photos/supprimer_plusieurs/<int:idalbum>/<str:listepk>', albums.Supprimer_plusieurs_photos.as_view(), name='albums_supprimer_plusieurs_photos'),
+
+    # Images de fond
+    path('parametrage/images_fond/liste', images_fond.Liste.as_view(), name='images_fond_liste'),
+    path('parametrage/images_fond/ajouter', images_fond.Ajouter.as_view(), name='images_fond_ajouter'),
+    path('parametrage/images_fond/modifier/<int:pk>', images_fond.Modifier.as_view(), name='images_fond_modifier'),
+    path('parametrage/images_fond/supprimer/<int:pk>', images_fond.Supprimer.as_view(), name='images_fond_supprimer'),
+
+
 
     # AJAX
     path('parametrage/get_calendrier', secure_ajax(calendrier.Get_calendrier), name='ajax_get_calendrier'),

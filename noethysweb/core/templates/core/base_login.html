@@ -27,7 +27,6 @@
                 background-color: #d0d0ce;
                 min-height: 100vh;
             }
-
             .brand-wrapper {
                 margin-bottom: 0px;
                 text-align: center;
@@ -35,11 +34,10 @@
             .brand-wrapper .logo {
                 height: 100px;
             }
-
             .login-card {
                 border: 0;
                 border-radius: 27.5px;
-                box-shadow: 0 10px 30px 0 rgba(172, 168, 168, 0.43);
+                box-shadow: 0 20px 30px 0 rgba(0, 0, 0, 0.43);
                 overflow: hidden;
             }
             .login-card-img {
@@ -53,7 +51,6 @@
             .login-card .card-body {
                 padding: 40px 60px 40px;
             }
-
             @media (max-width: 422px) {
                 .login-card .card-body {
                     padding: 35px 24px;
@@ -65,7 +62,6 @@
                 font-weight: normal;
                 margin-bottom: 50px;
                 text-align: center;
-
             }
             .titre_contenu {
                 color: #000;
@@ -129,8 +125,22 @@
             .modal-backdrop {
                 opacity:0.5 !important;
             }
+            .bg-image {
+                background-image: url("{{ url_image_fond }}");
+                filter: blur(10px);
+                -webkit-filter: blur(8px);
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: cover;
+                position: fixed;
+                top: -10px;
+                left: -10px;
+                width: 110%;
+                height: 110%;
+                box-shadow:inset 0 0 0 2000px rgba(0, 0, 0, 0.4);
+            }
 
-            </style>
+        </style>
     {% endblock %}
 
     {% block scripts %}
@@ -145,17 +155,15 @@
 
 
 <body>
+
+    <div class="bg-image"></div>
+
     <main class="d-flex align-items-center min-vh-100 py-3 py-md-0">
         <div class="container">
             <div class="card login-card">
                 <div class="row no-gutters">
                     <div class="col-md-5">
-                        <img src="
-                            {% if public == "famille" %}
-                                {% static 'images/paysage.jpg' %}
-                            {% else %}
-                                {% static 'images/bureau2.jpg' %}
-                            {% endif %}"
+                        <img src="{{ url_image_fond }}"
                          alt="login" class="login-card-img">
                     </div>
                     <div class="col-md-7">

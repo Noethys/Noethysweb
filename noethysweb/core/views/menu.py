@@ -109,6 +109,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_portail.Add(code="albums_liste", titre="Albums photos", icone="file-text-o")
     menu_portail.Add(code="images_articles_liste", titre="Banque d'images des articles", icone="file-text-o")
     menu_portail.Add(code="articles_liste", titre="Articles", icone="file-text-o")
+    menu_portail.Add(code="images_fond_liste", titre="Banque d'images de fond", icone="file-text-o")
 
 
     # ------------------------------------ Outils ------------------------------------

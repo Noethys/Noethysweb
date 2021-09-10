@@ -8,10 +8,11 @@ logger = logging.getLogger(__name__)
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.core.cache import cache
+from django.templatetags.static import static
 from django.contrib.auth.models import update_last_login
 from noethysweb.version import GetVersion
 from portail.forms.login import FormLoginFamille
-from core.models import Organisateur
+from core.models import Organisateur, ImageFond
 from core.utils import utils_portail
 
 
@@ -39,8 +40,14 @@ class ClassCommuneLogin:
             cache.set('parametres_portail', parametres_portail)
         context['parametres_portail'] = parametres_portail
 
-        return context
+        # Recherche de l'image de fond
+        idimage_fond = parametres_portail.get("connexion_image_fond", None)
+        if idimage_fond:
+            context['url_image_fond'] = ImageFond.objects.filter(pk=idimage_fond).first().image.url
+        else:
+            context['url_image_fond'] = static("images/portail.jpg")
 
+        return context
 
 
 class LoginViewFamille(ClassCommuneLogin, LoginView):

@@ -14,7 +14,7 @@ from core.utils.utils_portail import LISTE_PARAMETRES
 
 
 LISTE_RUBRIQUES = [
-    ("Page de connexion", ["connexion_adresse_exp", ]),
+    ("Page de connexion", ["connexion_image_fond", "connexion_adresse_exp", ]),
     ("Page d'accueil", ["accueil_texte_bienvenue", ]),
     ("Page des renseignements", ["renseignements_afficher_page", "renseignements_intro"]),
     ("Page des réservations", ["reservations_afficher_page", "reservations_intro", "reservations_intro_planning"]),

@@ -3054,3 +3054,18 @@ class Article(models.Model):
 
     def Get_anciennete(self):
         return (datetime.datetime.now().date() - self.date_debut.date()).days
+
+
+class ImageFond(models.Model):
+    idimage = models.AutoField(verbose_name="ID", db_column='IDimage', primary_key=True)
+    titre = models.CharField(verbose_name="Titre", max_length=300)
+    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path)
+
+    class Meta:
+        db_table = 'images_fond'
+        verbose_name = "image de fond"
+        verbose_name_plural = "images de fond"
+
+    def __str__(self):
+        return self.titre if self.idimage else "Nouvelle image de fond"
+

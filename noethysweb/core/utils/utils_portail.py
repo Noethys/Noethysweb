@@ -4,7 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from core.models import PortailParametre, AdresseMail
+from core.models import PortailParametre, AdresseMail, ImageFond
 from django_summernote.widgets import SummernoteInplaceWidget
 from django.template.loader import render_to_string
 
@@ -24,7 +24,9 @@ class Parametre():
         if self.type == "char":
             return forms.CharField(label=self.label, required=self.required, help_text=self.help_text, widget=forms.Textarea(attrs={'rows': 2}))
         if self.type == "adresse_exp":
-            return forms.ChoiceField(label=self.label, choices=[(None, "Aucune")] + [(adresse_exp.pk, adresse_exp.adresse) for adresse_exp in AdresseMail.objects.all()], required=self.required, help_text=self.help_text)
+            return forms.ChoiceField(label=self.label, choices=[(None, "Aucune")] + [(adresse_exp.pk, adresse_exp.adresse) for adresse_exp in AdresseMail.objects.all().order_by("adresse")], required=self.required, help_text=self.help_text)
+        if self.type == "image_fond":
+            return forms.ChoiceField(label=self.label, choices=[(None, "Image par défaut")] + [(image.pk, image.titre) for image in ImageFond.objects.all().order_by("titre")], required=self.required, help_text=self.help_text)
         if self.type == "html":
             return forms.CharField(label=self.label, required=self.required, help_text=self.help_text, widget=SummernoteInplaceWidget(
                 attrs={'summernote': {'width': '100%', 'height': '200px', 'toolbar': [
@@ -49,6 +51,7 @@ class Parametre():
 
 LISTE_PARAMETRES = [
     # Connexion
+    Parametre(code="connexion_image_fond", label="Image de fond", type="image_fond", valeur=None, help_text="Sélectionnez une image de fond dans la liste. Vous pouvez ajouter de nouvelles images depuis le menu Paramétrage > Images de fond."),
     Parametre(code="connexion_adresse_exp", label="Adresse d'expédition", type="adresse_exp", valeur=None, help_text="Cette adresse mail est utilisée pour envoyer des mails de réinitialisation de mots de passe. A défaut de sélection, la fonction mot de passe oublié sera désactivée."),
 
     # Accueil

@@ -4,11 +4,12 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy
+from django.core.cache import cache
+from django.views.generic import TemplateView
+from django.http import HttpResponseRedirect
 from parametrage.forms.portail_parametres import Formulaire
 from core.views.base import CustomView
 from core.models import PortailParametre
-from django.views.generic import TemplateView
-from django.http import HttpResponseRedirect
 
 
 class Modifier(CustomView, TemplateView):
@@ -32,5 +33,8 @@ class Modifier(CustomView, TemplateView):
         # Enregistrement
         for code, valeur in form.cleaned_data.items():
             objet, created = PortailParametre.objects.update_or_create(code=code, defaults={'valeur': str(valeur)})
+
+        # Nettoyage du cache
+        cache.delete("parametres_portail")
 
         return HttpResponseRedirect(reverse_lazy("parametrage_toc"))
