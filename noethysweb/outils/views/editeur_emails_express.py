@@ -102,7 +102,7 @@ def Get_view_editeur_email(request):
     # Prépare le context
     context = {
         "page_titre": "Editeur d'emails",
-        "form": Formulaire(instance=mail),
+        "form": Formulaire(instance=mail, request=request),
         "modeles": ModeleEmail.objects.filter(categorie=request.POST.get("categorie", donnees["categorie"])),
     }
     return render(request, 'outils/editeur_emails_express.html', context)
