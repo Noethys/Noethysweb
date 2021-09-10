@@ -1,3 +1,12 @@
+Version 0.0.4.7 (10/09/2021) :
+
+- Ajout de la gestion des images de fond des pages de login
+- Ajout du menu Outils dans la grille des conso
+- Ajout du recalcul des prestations dans le menu Facturation
+- Affichage des conditions d'utilisation dans la page de login du portail
+- Attribution des adresses d'expédition aux utilisateurs et aux structures
+- Petites corrections diverses
+
 Version 0.0.4.6 (06/09/2021) :
 
 - Correction de l'affichage du suivi des inscriptions sur la page d'accueil
