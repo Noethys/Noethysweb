@@ -177,7 +177,7 @@ class Impression(utils_impression.Impression):
         if self.dict_donnees["afficher_inscrits"]:
 
             conditions = Q(activite__in=liste_activites) & Q(statut="ok") #& (Q(date_fin__isnull=False) | Q(date_fin__gte=max(self.dict_donnees["dates"])))
-            inscriptions = Inscription.objects.select_related('individu', 'individu__type_sieste').filter(conditions)
+            inscriptions = Inscription.objects.select_related('individu', 'individu__type_sieste', 'individu_regimes_alimentaires').filter(conditions)
 
             for inscription in inscriptions:
 
@@ -772,6 +772,7 @@ class Impression(utils_impression.Impression):
                                                 if dictColonnePerso["code"] == "tel_mobile": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_TEL_MOBILE"]
                                                 if dictColonnePerso["code"] == "tel_domicile": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_TEL_DOMICILE"]
                                                 if dictColonnePerso["code"] == "mail": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_MAIL"]
+                                                if dictColonnePerso["code"] == "regimes_alimentaires": donnee = ", ".join([regime.nom for regime in inscription.individu.regimes_alimentaires.all()])
 
                                                 if dictColonnePerso["code"] == "adresse_residence":
                                                     rue = dictInfosIndividus[inscription.individu_id]["INDIVIDU_RUE"]
@@ -881,6 +882,10 @@ class Impression(utils_impression.Impression):
                                                     texteDatesTraitement = " jusqu'au %s" % utils_dates.ConvertDateToFR(info.date_fin_traitement)
                                                 texte += "Traitement%s : %s." % (texteDatesTraitement, info.description_traitement)
                                             listeInfos.append(ParagraphAndImage(Paragraph(texte, paraStyle), Image(settings.STATIC_ROOT + "/images/medical.png", width=8, height=8), xpad=1, ypad=0, side="left"))
+
+                                    # Régimes alimentaires
+                                    if self.dict_donnees["afficher_regimes_alimentaires"] and inscription.individu.regimes_alimentaires.exists():
+                                        listeInfos.append(ParagraphAndImage(Paragraph(", ".join([regime.nom for regime in inscription.individu.regimes_alimentaires.all()]), paraStyle), Image(settings.STATIC_ROOT + "/images/repas.png", width=8, height=8), xpad=1, ypad=0, side="left"))
 
                                     if self.dict_donnees["afficher_informations"]:
                                         if not self.dict_donnees["masquer_informations"]:

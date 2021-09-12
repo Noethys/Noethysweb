@@ -20,6 +20,7 @@ class Formulaire(FormulaireBase, forms.Form):
         ("ville_residence", "Ville de résidence"), ("adresse_residence", "Adresse complète de résidence"),
         ("secteur", "Secteur géographique"), ("nom_ecole", "Ecole"), ("nom_classe", "Classe"),
         ("nom_niveau_scolaire", "Niveau scolaire"), ("famille", "Famille"), ("regime", "Régime social"),
+        ("regimes_alimentaires", "Régimes alimentaires"),
         ("caisse", "Caisse d'allocations"), ("codebarres_individu", "Code-barres de l'individu")]
 
     # Intégration des questionnaires
