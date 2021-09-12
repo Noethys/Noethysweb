@@ -29,9 +29,9 @@ def Valider_form_activites(request):
     return JsonResponse({"activites": form.cleaned_data["activites"]})
 
 
-def Get_parametres():
+def Get_parametres(request=None):
     """ Renvoie les paramètres d'affichage """
-    parametres = utils_parametres.Get_categorie(categorie="suivi_inscriptions", parametres={
+    parametres = utils_parametres.Get_categorie(categorie="suivi_inscriptions", utilisateur=request.user, parametres={
         "activites": {},
         "masquer_activites_obsoletes": True,
         "masquer_individus_partis": True,
@@ -47,10 +47,10 @@ def Get_suivi_inscriptions(request):
 
     # Si demande de modification des paramètres
     if parametres:
-        utils_parametres.Set_categorie(categorie="suivi_inscriptions", parametres=parametres)
+        utils_parametres.Set_categorie(categorie="suivi_inscriptions", utilisateur=request.user, parametres=parametres)
 
     # Importation des paramètres
-    parametres = Get_parametres()
+    parametres = Get_parametres(request=request)
     context = {"data_suivi_inscriptions": Get_data(parametres=parametres, filtre=filtre, request=request)}
     context.update(parametres)
     return render(request, "individus/suivi_inscriptions_tableau.html", context)
@@ -128,6 +128,6 @@ class View(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Suivi des inscriptions"
-        context['suivi_inscriptions_parametres'] = Get_parametres()
+        context['suivi_inscriptions_parametres'] = Get_parametres(request=self.request)
         return context
 

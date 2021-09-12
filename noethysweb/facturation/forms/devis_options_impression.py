@@ -49,7 +49,7 @@ class Formulaire(FormulaireBase, forms.Form):
     taille_texte_montants_totaux = forms.IntegerField(label="Taille de texte des montants totaux", initial=10, required=True)
 
     taille_texte_prestations_anterieures = forms.IntegerField(label="Taille de texte du commentaire", initial=5, required=True)
-    texte_prestations_anterieures = forms.CharField(label="Texte d'information", initial="Des prestations antérieures ont été reportées sur ce de vis.", required=True)
+    texte_prestations_anterieures = forms.CharField(label="Texte d'information", initial="Des prestations antérieures ont été reportées sur ce devis.", required=True)
 
     texte_introduction = forms.CharField(label="Texte d'introduction", initial="", required=False)
     taille_texte_introduction = forms.IntegerField(label="Taille de texte d'introduction", initial=9, required=True)
@@ -65,7 +65,6 @@ class Formulaire(FormulaireBase, forms.Form):
     couleur_bord_conclusion = forms.CharField(label="Couleur de bord conclusion", required=True, widget=ColorPickerWidget(), initial="#FFFFFF")
     alignement_texte_conclusion = forms.ChoiceField(label="Alignement du texte de conclusion", choices=[("0", "Gauche"), ("1", "Centre"), ("2", "Droite")], initial="0", required=True)
 
-
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
@@ -79,7 +78,7 @@ class Formulaire(FormulaireBase, forms.Form):
         # Importation des paramètres
         parametres = {nom: field.initial for nom, field in self.fields.items()}
         del parametres["memoriser_parametres"]
-        parametres = utils_parametres.Get_categorie(categorie="impression_devis", parametres=parametres)
+        parametres = utils_parametres.Get_categorie(categorie="impression_devis", utilisateur=self.request.user, parametres=parametres)
         for nom, valeur in parametres.items():
             self.fields[nom].initial = valeur
 
@@ -149,5 +148,4 @@ class Formulaire(FormulaireBase, forms.Form):
         if self.cleaned_data["memoriser_parametres"]:
             parametres = copy.copy(self.cleaned_data)
             del parametres["memoriser_parametres"]
-            utils_parametres.Set_categorie(categorie="impression_devis", parametres=parametres)
-            print("save options")
+            utils_parametres.Set_categorie(categorie="impression_devis", utilisateur=self.request.user, parametres=parametres)

@@ -67,7 +67,7 @@ class Modifier(Onglet, TemplateView):
             data["selection_activite"] = Activite.objects.get(pk=donnees_post.get("activite")) if donnees_post.get("activite") else None
         else:
             # Si c'est un chargement initial de la page
-            data["periode"] = utils_parametres.Get(nom="periode", categorie="suivi_consommations", valeur={})
+            data["periode"] = utils_parametres.Get(nom="periode", categorie="suivi_consommations", utilisateur=self.request.user, valeur={})
             data["options"] = {} # todo : options préparées pour plus tard
             data["selection_individus"] = [self.IDindividu,] if self.IDindividu != None else "__all__"
             data["selection_activite"] = None

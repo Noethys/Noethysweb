@@ -26,7 +26,7 @@ class Formulaire(FormulaireBase, ModelForm):
     numero = forms.IntegerField(label="Numéro", required=True)
     modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=ModeleDocument.objects.filter(categorie="devis").order_by("nom"), required=True)
     signataire = forms.CharField(label="Signataire", required=True)
-    options_impression = forms.CharField(label="Options d'impression", required=False, widget=FormIntegreWidget(attrs={"form": Form_options_impression()}))
+    options_impression = forms.CharField(label="Options d'impression", required=False, widget=FormIntegreWidget())
 
     class Meta:
         model = Devis
@@ -44,7 +44,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
-        # # Date d'édition
+        # Date d'édition
         self.fields["date_edition"].initial = datetime.date.today()
 
         # Recherche les inscriptions de la famille
@@ -84,7 +84,10 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields["activites"].initial = [int(idindividu) for idindividu in self.instance.activites.split(";")] if self.instance.activites else []
             self.fields["periode"].initial = "%s - %s" % (utils_dates.ConvertDateToFR(self.instance.date_debut), utils_dates.ConvertDateToFR(self.instance.date_fin))
 
-            # Affichage
+        # Options : Ajoute le request au form
+        self.fields['options_impression'].widget.attrs.update({"form": Form_options_impression(request=self.request)})
+
+        # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'famille_devis_liste' idfamille=idfamille %}", enregistrer=False, ajouter=False,
                 commandes_principales=[
@@ -114,7 +117,7 @@ class Formulaire(FormulaireBase, ModelForm):
             self.cleaned_data["infos"] = json.loads(self.data.get("infos"))
 
         # Vérification du formulaire des options d'impression
-        form_options = Form_options_impression(self.data)
+        form_options = Form_options_impression(self.data, request=self.request)
         if form_options.is_valid() == False:
             liste_erreurs = form_options.errors.as_data().keys()
             self.add_error("options_impression", "Veuillez renseigner les champs manquants : %s." % ", ".join(liste_erreurs))

@@ -12,16 +12,16 @@ from django.db.models import Q, Count
 from django.shortcuts import render
 
 
-def Get_activites(request):
+def Get_activites(request=None):
     """ Renvoie une liste d'activités """
     activites = Activite.objects.filter(structure__in=request.user.structures.all()).order_by("-date_fin")
     context = {"activites": activites}
     return render(request, "consommations/suivi_consommations_activites.html", context)
 
 
-def Get_parametres():
+def Get_parametres(request=None):
     """ Renvoie les paramètres d'affichage """
-    parametres = utils_parametres.Get_categorie(categorie="suivi_consommations", parametres={
+    parametres = utils_parametres.Get_categorie(categorie="suivi_consommations", utilisateur=request.user, parametres={
         "mode": "places_prises",
         "periode": {},
         "activites": [],
@@ -40,10 +40,10 @@ def Get_suivi_consommations(request):
 
     # Si demande de modification des paramètres
     if parametres:
-        utils_parametres.Set_categorie(categorie="suivi_consommations", parametres=parametres)
+        utils_parametres.Set_categorie(categorie="suivi_consommations", utilisateur=request.user, parametres=parametres)
 
     # Importation des paramètres
-    parametres = Get_parametres()
+    parametres = Get_parametres(request=request)
     context = {"data_suivi_consommations": Get_data(parametres=parametres, request=request)}
     context.update(parametres)
     return render(request, "consommations/suivi_consommations_tableau.html", context)
@@ -254,6 +254,6 @@ class View(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Suivi des consommations"
-        context['suivi_consommations_parametres'] = Get_parametres()
+        context['suivi_consommations_parametres'] = Get_parametres(request=self.request)
         return context
 

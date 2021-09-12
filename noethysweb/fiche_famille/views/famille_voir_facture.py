@@ -27,7 +27,7 @@ def Impression_pdf(request):
         return JsonResponse({"erreur": "Veuillez sélectionner un modèle de document"}, status=401)
 
     # Récupération des options d'impression
-    form_parametres = Form_parametres(valeurs_form_parametres)
+    form_parametres = Form_parametres(valeurs_form_parametres, request=request)
     if not form_parametres.is_valid():
         return JsonResponse({"erreur": "Veuillez compléter les options d'impression"}, status=401)
 
@@ -54,7 +54,7 @@ class View(Onglet, TemplateView):
         context['box_introduction'] = "Ajustez si besoin les options d'impression et cliquez sur Aperçu PDF ou Envoyer par Email."
         context['onglet_actif'] = "factures"
         context['form_modele'] = Form_modele()
-        context['form_parametres'] = Form_parametres()
+        context['form_parametres'] = Form_parametres(request=self.request)
         context["messages"] = MessageFacture.objects.all().order_by("titre")
         return context
 

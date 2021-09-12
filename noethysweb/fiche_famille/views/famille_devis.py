@@ -20,7 +20,7 @@ from core.data import data_modeles_emails
 
 def Impression_pdf(request):
     # Récupération des données
-    form_parametres = Form_parametres(request.POST, idfamille=int(request.POST.get("famille")), utilisateur=request.user)
+    form_parametres = Form_parametres(request.POST, idfamille=int(request.POST.get("famille")), utilisateur=request.user, request=request)
     if form_parametres.is_valid() == False:
         liste_erreurs = form_parametres.errors.as_data().keys()
         return JsonResponse({"erreur": "Veuillez renseigner les champs manquants : %s." % ", ".join(liste_erreurs)}, status=401)

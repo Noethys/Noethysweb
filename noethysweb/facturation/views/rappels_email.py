@@ -31,7 +31,7 @@ def Impression_pdf(request):
 
     # Récupération des options d'impression
     valeurs_form_parametres = json.loads(request.POST.get("form_parametres"))
-    form_parametres = Form_parametres(valeurs_form_parametres)
+    form_parametres = Form_parametres(valeurs_form_parametres, request=request)
     if not form_parametres.is_valid():
         return JsonResponse({"erreur": "Veuillez compléter les options d'impression"}, status=401)
 
@@ -106,7 +106,7 @@ class Liste(Page, crud.Liste):
         context['bouton_supprimer'] = False
         context["hauteur_table"] = "400px"
         context['form_modele'] = Form_modele()
-        context['form_parametres'] = Form_parametres()
+        context['form_parametres'] = Form_parametres(request=self.request)
         context['afficher_menu_brothers'] = True
         return context
 

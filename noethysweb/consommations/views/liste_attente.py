@@ -57,7 +57,7 @@ class View(CustomView, TemplateView):
 def Get_resultats(parametres={}, etat="attente", request=None):
     # Utiliser la période de référence
     if parametres["donnees"] == "periode_reference":
-        periode_reference = suivi_consommations.Get_parametres()
+        periode_reference = suivi_consommations.Get_parametres(request=request)
 
         # Importation des activités
         condition_activites = Q(activite__in=periode_reference["activites"])

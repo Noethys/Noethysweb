@@ -26,8 +26,8 @@ class Accueil(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(Accueil, self).get_context_data(**kwargs)
         context['page_titre'] = "Accueil"
-        context['suivi_consommations_parametres'] = suivi_consommations.Get_parametres()
-        context['suivi_inscriptions_parametres'] = suivi_inscriptions.Get_parametres()
+        context['suivi_consommations_parametres'] = suivi_consommations.Get_parametres(request=self.request)
+        context['suivi_inscriptions_parametres'] = suivi_inscriptions.Get_parametres(request=self.request)
         context['citation_texte'], context['citation_auteur'] = self.Get_citation()
         context['celebrations'] = self.Get_celebrations()
         context['anniversaires_aujourdhui'] = self.Get_anniversaires()
