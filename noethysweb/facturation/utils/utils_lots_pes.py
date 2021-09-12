@@ -15,8 +15,9 @@ def ConvertToTexte(valeur):
 
 
 class Exporter():
-    def __init__(self, idlot=None):
+    def __init__(self, idlot=None, request=None):
         self.idlot = idlot
+        self.request = request
         self.organisateur = Organisateur.objects.filter(pk=1).first()
         self.erreurs = []
 
@@ -126,7 +127,7 @@ class Exporter():
 
         # Récupération des options d'impression
         from facturation.forms.factures_options_impression import VALEURS_DEFAUT
-        dict_options = utils_parametres.Get_categorie(categorie="impression_facture", parametres=VALEURS_DEFAUT)
+        dict_options = utils_parametres.Get_categorie(categorie="impression_facture", utilisateur=self.request.user, parametres=VALEURS_DEFAUT)
         dict_options["modele"] = self.lot.modele.modele_document
 
         # Génération des factures du format PDF

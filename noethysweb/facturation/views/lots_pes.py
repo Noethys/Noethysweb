@@ -232,7 +232,7 @@ class Supprimer_plusieurs_pieces(Page, crud.Supprimer_plusieurs):
 def Exporter(request):
     """ Générer le fichier d'export """
     from facturation.utils import utils_lots_pes
-    export = utils_lots_pes.Exporter(idlot=int(request.POST["idlot"]))
+    export = utils_lots_pes.Exporter(idlot=int(request.POST["idlot"]), request=request)
     resultat = export.Generer()
     if not resultat:
         return JsonResponse({"erreurs": export.Get_erreurs_html()}, status=401)
