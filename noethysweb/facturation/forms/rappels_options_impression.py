@@ -34,7 +34,7 @@ class Formulaire(FormulaireBase, forms.Form):
         # Importation des paramètres
         parametres = {nom: field.initial for nom, field in self.fields.items()}
         del parametres["memoriser_parametres"]
-        parametres = utils_parametres.Get_categorie(categorie="impression_rappel", parametres=parametres)
+        parametres = utils_parametres.Get_categorie(categorie="impression_rappel", utilisateur=self.request.user, parametres=parametres)
         for nom, valeur in parametres.items():
             self.fields[nom].initial = valeur
 
@@ -53,4 +53,4 @@ class Formulaire(FormulaireBase, forms.Form):
         if self.cleaned_data["memoriser_parametres"]:
             parametres = copy.copy(self.cleaned_data)
             del parametres["memoriser_parametres"]
-            utils_parametres.Set_categorie(categorie="impression_rappel", parametres=parametres)
+            utils_parametres.Set_categorie(categorie="impression_rappel", utilisateur=self.request.user, parametres=parametres)
