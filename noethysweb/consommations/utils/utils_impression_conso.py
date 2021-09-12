@@ -3,21 +3,21 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, json, operator, datetime
 logger = logging.getLogger(__name__)
-from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires
-from individus.utils import utils_pieces_manquantes
-from cotisations.utils import utils_cotisations_manquantes
+from django.db.models import Q
+from django.conf import settings
+from django.templatetags.static import static
 from reportlab.platypus import Paragraph, Spacer, Table, TableStyle, PageBreak
 from reportlab.platypus.flowables import ParagraphAndImage, Image
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
 from reportlab.graphics.barcode import code39
+from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires
 from core.models import Activite, Ouverture, Unite, UniteRemplissage, Consommation, MemoJournee, Note, ProblemeSante, Individu, Inscription, Scolarite, Classe, Ecole, Evenement
-import json, operator, datetime
-from django.db.models import Q
-from django.conf import settings
+from individus.utils import utils_pieces_manquantes
+from cotisations.utils import utils_cotisations_manquantes
 
 
 class Impression(utils_impression.Impression):

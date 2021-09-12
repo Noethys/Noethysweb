@@ -2254,6 +2254,7 @@ class Parametre(models.Model):
     nom = models.CharField(verbose_name="Nom", max_length=200)
     parametre = models.TextField(verbose_name="Paramètre", blank=True, null=True)
     utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.CASCADE)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", blank=True, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         db_table = 'parametres'

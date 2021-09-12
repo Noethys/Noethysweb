@@ -3,17 +3,16 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
-from core.views.base import CustomView
-from django.views.generic import TemplateView
-from core.utils import utils_dates, utils_infos_individus, utils_dictionnaires
-from consommations.forms.edition_liste_conso_date import Formulaire as Form_date
-from consommations.forms.edition_liste_conso_parametres import Formulaire as Form_parametres
-from django.contrib import messages
 import datetime, json
+from django.views.generic import TemplateView
+from django.contrib import messages
 from django.http import JsonResponse
 from core.models import Parametre
-
+from core.views.base import CustomView
+from core.utils import utils_dates, utils_infos_individus, utils_dictionnaires
+from core.views import profil_configuration
+from consommations.forms.edition_liste_conso_date import Formulaire as Form_date
+from consommations.forms.edition_liste_conso_parametres import Formulaire as Form_parametres
 
 
 def get_data_profil(donnees=None, request=None):
@@ -28,10 +27,9 @@ def get_data_profil(donnees=None, request=None):
 
     # Suppression des données inutiles
     data = form.cleaned_data
-    [data.pop(key) for key in ["profil", "groupes", "ecoles", "classes", "evenements"]]
+    [data.pop(key) for key in ["profil",]]# "groupes", "ecoles", "classes", "evenements"]]
 
     return data
-
 
 
 def Generer_pdf(request):
@@ -72,8 +70,6 @@ def Generer_pdf(request):
     return JsonResponse({"nom_fichier": nom_fichier})
 
 
-
-
 class View(CustomView, TemplateView):
     menu_code = "edition_liste_conso"
     template_name = "consommations/edition_liste_conso.html"
@@ -83,21 +79,26 @@ class View(CustomView, TemplateView):
         context['page_titre'] = "Edition de la liste des consommations"
         dates = kwargs.get("dates", [datetime.date.today()])
 
-        # Application du profil de configuration
+        # Copie le request_post pour préparer l'application du profil de configuration
         request_post = self.request.POST.copy()
-        if request_post.get("application_profil"):
-            parametre = Parametre.objects.get(idparametre=int(self.request.POST.get("profil")))
-            initial_data = json.loads(parametre.parametre)
+
+        # Sélection du profil de configuration
+        if request_post.get("profil"):
+            profil = Parametre.objects.filter(idparametre=int(request_post.get("profil"))).first()
+        else:
+            profil = profil_configuration.Get_profil_defaut(request=self.request, categorie="edition_liste_conso")
+            request_post["application_profil"] = True
+
+        # Application du profil de configuration
+        if profil and request_post.get("application_profil"):
+            request_post["profil"] = profil.pk
+            initial_data = json.loads(profil.parametre)
             [request_post.pop(key) for key in initial_data.keys() if key in request_post]
             request_post.update(initial_data)
 
         # Intégration des formulaires
-        if "form_date" in kwargs:
-            context['form_date'] = Form_date(request_post, dates=dates)
-            context['form_parametres'] = Form_parametres(request_post, dates=dates, request=self.request)
-        else:
-            context['form_date'] = Form_date(dates=dates)
-            context['form_parametres'] = Form_parametres(dates=dates, request=self.request)
+        context['form_date'] = Form_date(data=request_post if "form_date" in kwargs else None, dates=dates)
+        context['form_parametres'] = Form_parametres(data=request_post if "form_date" in kwargs or profil else None, dates=dates, request=self.request)
         return context
 
     def post(self, request, **kwargs):
@@ -118,10 +119,10 @@ class View(CustomView, TemplateView):
         # Validation du form paramètres
         if form_parametres.is_valid() == False:
             if "appliquer_date" not in request.POST:
-                liste_erreurs = [erreur[0].message for field, erreur in form_parametres.errors.as_data().items()]
+                liste_erreurs = [str(erreur[0].message) for field, erreur in form_parametres.errors.as_data().items()]
+                print("liste_erreurs=", liste_erreurs)
                 messages.add_message(request, messages.ERROR, "Veuillez corriger les erreurs suivantes : %s" % ", ".join(liste_erreurs))
             return self.render_to_response(self.get_context_data(dates=dates))
 
         context = {"form_parametres": form_parametres, "form_date": form_date, "dates": dates}
         return self.render_to_response(self.get_context_data(**context))
-

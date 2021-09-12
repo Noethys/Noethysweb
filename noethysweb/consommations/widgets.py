@@ -92,10 +92,10 @@ class SelectionUnitesWidget(Widget):
                 unite.ordre = dict_valeur["ordre"]
             dict_unites[unite.activite].append(unite)
 
-        for unite in Unite.objects.filter(activite__in=liste_activites).order_by("ordre"):
+        for unite in Unite.objects.select_related("activite").filter(activite__in=liste_activites).order_by("ordre"):
             save_unite(unite, categorie="consommation", affichage="afficher")
 
-        for unite in UniteRemplissage.objects.filter(activite__in=liste_activites).order_by("ordre"):
+        for unite in UniteRemplissage.objects.select_related("activite").filter(activite__in=liste_activites).order_by("ordre"):
             save_unite(unite, categorie="remplissage", affichage="masquer")
 
         # Tri par ordre

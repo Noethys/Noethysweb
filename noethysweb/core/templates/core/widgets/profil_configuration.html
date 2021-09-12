@@ -1,5 +1,6 @@
 {% load static %}
 {% load embed %}
+{% load crispy_forms_tags %}
 
 <div class="input-group">
     <div class="input-group-prepend">
@@ -7,7 +8,8 @@
     </div>
 
     <input type="hidden" id="{{ id }}_application_profil" name="application_profil" value="">
-    <select id="{{ id }}" name="{{ name }}" data-minimum-input-length="0" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2">
+
+    <select id="{{ id }}" name="{{ name }}" class="form-control">
         {% for choix in choices %}
             <option value="{{ choix.0 }}" {% if value == choix.0 %}selected{% endif %}>{{ choix.1 }}</option>
         {% endfor %}
@@ -20,7 +22,7 @@
         <ul class="dropdown-menu">
             <li class="dropdown-item"><a href="#" id="{{ id }}_ajouter_profil">Ajouter un nouveau profil</a></li>
             <li class="dropdown-divider"></li>
-            <li class="dropdown-item"><a href="#" id="{{ id }}_modifier_profil">Modifier le nom du profil sélectionné</a></li>
+            <li class="dropdown-item"><a href="#" id="{{ id }}_modifier_profil">Modifier le profil sélectionné</a></li>
             <li class="dropdown-item"><a href="#" id="{{ id }}_supprimer_profil">Supprimer le profil sélectionné</a></li>
         </ul>
     </div>
@@ -34,16 +36,13 @@
     {% block modal_titre %}{% endblock %}
     {% block modal_body %}
         <div id="modal_erreurs" class="text-red"></div>
-        <input type="hidden" id="{{ id }}_hidden_id" value=""/>
+        <input type="hidden" id="profil_id" value=""/>
 
-        <div class="controls">
-            <label for="{{ id }}_champ_saisie" class="col-form-label">{{ textes.champ }}</label>
-            <input id="{{ id }}_champ_saisie" class="form-control" maxlength="300">
-        </div>
+        {% crispy form_profil %}
 
         <div class="buttonHolder">
             <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
-                <input type="submit" value="Valider" class="btn btn-primary" id="{{ id }}_bouton_valider"/>
+                <button type="submit" class='btn btn-primary' value="Valider" id="{{ id }}_bouton_valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
             </div>
         </div>
@@ -55,7 +54,7 @@
 
     $(document).ready(function() {
         $('#{{ id }}_modal_modification').on('shown.bs.modal', function () {
-            $("#{{ id }}_champ_saisie").focus();
+            $("#id_profil_nom").focus();
         });
 
         $('#{{ id }}_modal_modification').on('keypress', function(e) {
@@ -67,8 +66,10 @@
 
         // Ajouter un profil
         $("#{{ id }}_ajouter_profil").on("click",function(event){
-            $('#{{ id }}_champ_saisie').val("");
-            $('#{{ id }}_hidden_id').val("");
+            $('#id_profil_nom').val("");
+            $('#id_profil_utilisateurs').val("moi");
+            $("#id_profil_utilisateurs").trigger('change');
+            $('#profil_id').val("");
             $('#{{ id }}_modal_modification .modal-title').html("Ajouter un profil");
             $('#{{ id }}_modal_modification').modal('show');
         });
@@ -80,10 +81,9 @@
                 toastr.error("Vous n'avez sélectionné aucun profil à modifier");
                 return false;
             }
-            $('#{{ id }}_champ_saisie').val(selection.text());
-            $('#{{ id }}_hidden_id').val(selection.val());
+            $('#profil_id').val(selection.val());
             $('#{{ id }}_modal_modification .modal-title').html("Modifier un profil");
-            $('#{{ id }}_modal_modification').modal('show');
+            appel_ajax("ouvrir", selection.val(), null);
         });
 
         // Supprimer un profil
@@ -121,10 +121,13 @@
         $("#{{ id }}_bouton_valider").on('click', function(e) {
             e.preventDefault();
             var action = null;
-            valeur = $('#{{ id }}_champ_saisie').val();
-            id = $('#{{ id }}_hidden_id').val();
-            if (valeur === '') {
+            id = $('#profil_id').val();
+            if ($('#id_profil_nom').val() === '') {
                 toastr.error("Veuillez saisir un nom valide");
+                return false;
+            }
+            if (($('#id_profil_utilisateurs').val() === 'structure' && ($('#id_profil_structure').val() === ''))) {
+                toastr.error("Veuillez sélectionner une structure dans la liste proposée");
                 return false;
             }
             if (id === '') {
@@ -132,10 +135,15 @@
             } else {
                 action = "modifier";
             }
-            appel_ajax(action, id, valeur);
+            appel_ajax(action, id);
         });
 
-        function appel_ajax(action="ajouter", id=null, valeur=null) {
+        function appel_ajax(action="ajouter", id=null) {
+            var donnees_profil = {
+                profil_nom: $('#id_profil_nom').val(),
+                profil_utilisateurs: $('#id_profil_utilisateurs').val(),
+                profil_structure: $('#id_profil_structure').val(),
+            };
             var donnees = get_parametres_profil();
             $.ajax({
                 type: "POST",
@@ -145,19 +153,26 @@
                     categorie: '{{ categorie }}',
                     module: '{{ module }}',
                     id: id,
-                    valeur: valeur,
+                    donnees_profil: JSON.stringify(donnees_profil),
                     donnees: donnees,
                 },
                 datatype: "json",
                 success:function(data){
+                    if (data.action === "ouvrir") {
+                        $('#id_profil_nom').val(data.profil_nom);
+                        $('#id_profil_utilisateurs').val(data.profil_utilisateurs);
+                        $("#id_profil_utilisateurs").trigger('change');
+                        $('#id_profil_structure').val(data.profil_structure);
+                        $('#{{ id }}_modal_modification').modal('show');
+                    };
                     if (data.action === "ajouter") {
-                        $("#{{ id }}").append("<option value='" + data.id + "'>" + data.valeur + "</option>");
+                        $("#{{ id }}").append("<option value='" + data.id + "'>" + data.profil_nom + "</option>");
                         $("#{{ id }}").val(data.id);
                         toastr.success("Le nouveau profil a bien été créé")
                     };
                     if (data.action === "modifier") {
-                        $('#{{ id }}').find('option:selected').text(data.valeur);
-                        $("#{{ id }}").select2().trigger('change');
+                        $('#{{ id }}').find('option:selected').text(data.profil_nom);
+                        $("#{{ id }}").trigger('change');
                         toastr.success("Le profil a bien été modifié")
                     };
                     if (data.action === "supprimer") {
@@ -175,8 +190,6 @@
             })
         };
 
-
     });
 
 </script>
-

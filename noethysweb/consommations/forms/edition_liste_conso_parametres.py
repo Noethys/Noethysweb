@@ -4,29 +4,15 @@
 #  Distribué sous licence GNU GPL.
 
 from django import forms
+from django.db.models import Q
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
+from crispy_forms.layout import Layout, HTML, Fieldset
 from crispy_forms.bootstrap import Field, TabHolder, Tab, InlineRadios
 from core.widgets import SelectionActivitesWidget, ColorPickerWidget, Profil_configuration
 from consommations.widgets import SelectionGroupesWidget, SelectionUnitesWidget, ColonnesPersoWidget, SelectionEcolesWidget, SelectionClassesWidget, SelectionEvenementsWidget
-from core.models import Parametre
+from core.models import Parametre, Unite
 from core.utils.utils_commandes import Commandes
 from core.forms.base import FormulaireBase
-
-
-class Form_profil_configuration(forms.Form):
-    profil = forms.ModelChoiceField(label="Profil de configuration", queryset=Parametre.objects.none(), widget=Profil_configuration({"categorie": "edition_liste_conso", "module": "consommations.views.edition_liste_conso"}), required=False)
-
-    def __init__(self, *args, **kwargs):
-        super(Form_profil_configuration, self).__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_id = 'form_profil_configuration'
-        self.helper.form_method = 'post'
-        # self.helper.form_show_labels = False
-        self.fields['profil'].queryset = Parametre.objects.filter(categorie="edition_liste_conso").order_by("nom")
-        self.helper.layout = Layout(
-            Field('profil'),
-        )
 
 
 class Formulaire(FormulaireBase, forms.Form):
@@ -99,7 +85,11 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.form_tag = False
 
         # Profil
-        self.fields['profil'].queryset = Parametre.objects.filter(categorie="edition_liste_conso").order_by("nom")
+        conditions = Q(categorie="edition_liste_conso")
+        conditions &= (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True))
+        conditions &= (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
+        self.fields['profil'].queryset = Parametre.objects.filter(conditions).order_by("nom")
+        self.fields["profil"].widget.request = self.request
         self.fields['profil'].label = False
 
         # Groupes
@@ -258,7 +248,6 @@ EXTRA_HTML = """
     };
     
     function appliquer_profil(idprofil) {
-        console.log("idprofil=", idprofil);
         $("#form_general").submit();
     };
 

@@ -473,10 +473,7 @@ class FormIntegreWidget(Widget):
 
 class Profil_configuration(Widget):
     template_name = 'core/widgets/profil_configuration.html'
-
-    class Media:
-        css = {"all": ("lib/select2/css/select2.min.css",)}
-        js = ("django_select2/django_select2.js", "lib/select2/js/select2.min.js", "lib/select2/js/i18n/fr.js")
+    request = None
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())
@@ -489,12 +486,14 @@ class Profil_configuration(Widget):
         if "donnees_extra" not in context:
             context['donnees_extra'] = {}
         context['donnees_extra'] = json.dumps(context['donnees_extra'])
+        context['structures'] = self.request.user.structures.all().order_by("nom")
+        from core.forms.profil_configuration import Formulaire as Form_profil
+        context['form_profil'] = Form_profil(request=self.request)
         return context
 
     def render(self, name, value, attrs=None, renderer=None):
         context = self.get_context(name, value, attrs)
         return mark_safe(loader.render_to_string(self.template_name, context))
-
 
 
 class Selection_image(ClearableFileInput):
