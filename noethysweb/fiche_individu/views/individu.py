@@ -3,17 +3,17 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from django.urls import reverse_lazy, reverse
+from django.db.models import Q
+from django.views.generic.detail import DetailView
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Individu, Famille, Note, Rattachement, Inscription
-from django.views.generic.detail import DetailView
-from fiche_individu.forms.individu import Formulaire
 from core.views.base import CustomView
-from django.db.models import Q
-from fiche_individu.utils.utils_individu import LISTE_ONGLETS
+from core.models import Individu, Famille, Note, Rattachement, Inscription
 from core.utils import utils_texte
-import datetime
+from fiche_individu.utils.utils_individu import LISTE_ONGLETS
+from fiche_individu.forms.individu import Formulaire
 
 
 class Page(crud.Page):
@@ -134,7 +134,8 @@ class Resume(Onglet, DetailView):
         context['onglet_actif'] = "resume"
 
         # Notes de l'individu
-        context['notes'] = Note.objects.filter(individu_id=self.kwargs['idindividu']).order_by("date_saisie")
+        conditions = (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
+        context['notes'] = Note.objects.filter(conditions, individu_id=self.kwargs['idindividu']).order_by("date_saisie")
 
         # Activités actuelles
         conditions = Q(individu_id=self.Get_idindividu()) & Q(date_debut__lte=datetime.date.today()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))

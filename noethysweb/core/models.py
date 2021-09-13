@@ -1743,6 +1743,8 @@ class Note(models.Model):
     afficher_facture = models.BooleanField(verbose_name="Afficher sur la facture", default=False)
     rappel_famille = models.BooleanField(verbose_name="Rappel à l'ouverture de la fiche famille", default=False)
     afficher_commande = models.BooleanField(verbose_name="Afficher sur la commande des repas", default=False)
+    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.CASCADE)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", blank=True, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         db_table = 'notes'

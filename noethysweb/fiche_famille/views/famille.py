@@ -3,18 +3,18 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+from decimal import Decimal
 from django.urls import reverse_lazy, reverse
+from django.db.models import Sum, Q
+from django.http import JsonResponse
+from django.contrib import messages
+from django.views.generic.detail import DetailView
+from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Famille, Note, Rattachement, CATEGORIES_RATTACHEMENT, Prestation, Reglement
-from django.views.generic.detail import DetailView
-from fiche_individu.forms.individu import Formulaire
-from core.views.base import CustomView
-from django.http import JsonResponse
-from django.contrib import messages
 from individus.utils import utils_pieces_manquantes
-from django.db.models import Sum
-from decimal import Decimal
+from fiche_individu.forms.individu import Formulaire
 from fiche_famille.utils.utils_famille import LISTE_ONGLETS
 
 
@@ -101,7 +101,8 @@ class Liste(Page, crud.Liste):
     model = Famille
 
     def get_queryset(self):
-        return Famille.objects.filter(self.Get_filtres("Q"))
+        conditions = (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
+        return Famille.objects.filter(conditions, self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -179,8 +180,11 @@ class Resume(Onglet, DetailView):
         context['page_titre'] = "Fiche famille"
         context['box_introduction'] = ""
         context['onglet_actif'] = "resume"
-        context['notes'] = Note.objects.filter(famille_id=idfamille).order_by("date_saisie")
         context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(famille=context['famille'], only_invalides=True, utilisateur=self.request.user)
+
+        # Notes
+        conditions = (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
+        context['notes'] = Note.objects.filter(conditions, famille_id=idfamille).order_by("date_saisie")
 
         # Calcul du solde
         total_prestations = Prestation.objects.values('famille_id').filter(famille_id=idfamille).aggregate(total=Sum("montant"))
