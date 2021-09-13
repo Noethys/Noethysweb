@@ -68,7 +68,7 @@
                             <ul class="list-unstyled" style="margin-bottom: 0px;margin-left: 10px;">
                                 {% for rattachement in rattachements %}
                                     {% if rattachement.categorie == num_categorie %}
-                                        <li><a href="{% url 'individu_resume' idfamille=idfamille idindividu=rattachement.individu.idindividu %}"><i class="fa fa-angle-right"></i> {{ rattachement.individu.Get_nom }}</a></li>
+                                        <li><a href="{% url 'individu_resume' idfamille=idfamille idindividu=rattachement.individu.idindividu %}" title="Cliquez ici pour ouvrir la fiche individuelle"><i class="fa fa-angle-right"></i> {{ rattachement.individu.Get_nom }}</a></li>
                                     {% endif %}
                                 {% endfor %}
                             </ul>

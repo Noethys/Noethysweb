@@ -138,15 +138,9 @@
                         </div>
                     {% endif %}
 
-                    <!-- Suivi des consommations -->
-                    {% include "consommations/suivi_consommations.html" %}
-
-                    <!-- Suivi des inscriptions -->
-                    {% include "individus/suivi_inscriptions.html" %}
-
                     {# Notes #}
                     {% embed 'core/box.html' with box_titre=True %}
-                        {% block box_theme %}card-outline card-lightblue{% endblock %}
+                        {% block box_theme %}card-outline{% endblock %}
                         {% block box_titre %}<i class="fa fa-sticky-note-o margin-r-5"></i> Notes{% endblock %}
                         {% block box_outils %}
                             <a type="button" class="btn btn-success btn-xs" style="margin-right: 10px;" title="Ajouter une note" href="{% url 'notes_ajouter' %}?next={{ request.path|urlencode }}"><i class="fa fa-plus"></i> Ajouter</a>
@@ -157,6 +151,12 @@
                             {% endembed %}
                         {% endblock %}
                     {% endembed %}
+
+                    <!-- Suivi des consommations -->
+                    {% include "consommations/suivi_consommations.html" %}
+
+                    <!-- Suivi des inscriptions -->
+                    {% include "individus/suivi_inscriptions.html" %}
 
                 {% endblock contenu_page %}
             </div>
