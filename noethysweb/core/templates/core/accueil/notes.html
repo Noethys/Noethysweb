@@ -1,0 +1,20 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline{% endblock %}
+        {% block box_titre %}<i class="fa fa-sticky-note-o margin-r-5"></i> Notes{% endblock %}
+        {% block box_outils %}
+            <a type="button" class="btn btn-success btn-xs" style="margin-right: 10px;" title="Ajouter une note" href="{% url 'notes_ajouter' %}?next={{ request.path|urlencode }}"><i class="fa fa-plus"></i> Ajouter</a>
+        {% endblock %}
+        {% block card_body_classe %}p-0{% endblock %}
+        {% block box_contenu %}
+            {% embed "outils/notes.html" with mode_notes='accueil' %}
+            {% endembed %}
+        {% endblock %}
+    {% endembed %}
+
+{% endblock contenu_page %}

@@ -77,7 +77,7 @@ class Core(Classe_commune):
     def test_accueil_not_authenticated_user(self):
         response = self.client.get(reverse("accueil"))
         # L'utilisateur non authentifié n'est pas renvoyé vers la page d'accueil ?
-        self.assertTemplateNotUsed(response, "core/accueil.html")
+        self.assertTemplateNotUsed(response, "core/accueil/accueil.html")
         # Un code 302 est renvoyé lorsque l'authentification n'est pas ok
         self.failUnlessEqual(response.status_code, 302)
 
@@ -89,7 +89,7 @@ class Core(Classe_commune):
         # Un code 200 est bien renvoyé ?
         self.failUnlessEqual(response.status_code, 200)
         # L'utilisateur authentifié est bien renvoyé vers la page d'accueil ?
-        self.assertTemplateUsed(response, "core/accueil.html")
+        self.assertTemplateUsed(response, "core/accueil/accueil.html")
         # Déconnexion de l'utilisateur
         self.Deconnexion_utilisateur()
 
