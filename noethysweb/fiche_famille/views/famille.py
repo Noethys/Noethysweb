@@ -101,8 +101,7 @@ class Liste(Page, crud.Liste):
     model = Famille
 
     def get_queryset(self):
-        conditions = (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
-        return Famille.objects.filter(conditions, self.Get_filtres("Q"))
+        return Famille.objects.filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
