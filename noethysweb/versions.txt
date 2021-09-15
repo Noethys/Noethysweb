@@ -1,3 +1,12 @@
+Version 0.0.4.8 (15/09/2021) :
+
+- Ajout du graphique des individus sur le page d'accueil
+- Ajout des messages du portail sur la page d'accueil
+- Finalisation du profil de configuration dans l'éditeur de la liste des consommations
+- Intégration des régimes alimentaires dans la liste des consommations
+- Attribution des paramètres aux utilisateurs
+- Petites corrections diverses
+
 Version 0.0.4.7 (10/09/2021) :
 
 - Ajout de la gestion des images de fond des pages de login
