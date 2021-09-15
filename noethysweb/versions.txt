@@ -1,4 +1,4 @@
-Version 0.0.4.8 (15/09/2021) :
+Version 0.0.4.9 (15/09/2021) :
 
 - Ajout du graphique des individus sur le page d'accueil
 - Ajout des messages du portail sur la page d'accueil
