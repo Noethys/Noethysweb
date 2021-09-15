@@ -6,13 +6,13 @@
 from django.shortcuts import render
 
 def erreur_403(request, exception=None):
-    return render(request, "core/erreur_403.html")
+    return render(request, "core/erreurs/erreur_403.html")
 
 def erreur_404(request, exception=None):
-    return render(request, "core/erreur_404.html")
+    return render(request, "core/erreurs/erreur_404.html")
 
 def erreur_500(request, exception=None):
-    return render(request, "core/erreur_500.html")
+    return render(request, "core/erreurs/erreur_500.html")
 
 def erreur_axes(request, exception=None):
-    return render(request, "core/erreur_axes.html")
+    return render(request, "core/erreurs/erreur_axes.html")
