@@ -3,11 +3,11 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import include, path
-from core.views import accueil, recherche, base, profil_configuration, profil_utilisateur, change_password_utilisateur
 from django.contrib.auth import views as auth_views
+from core.views import login, accueil, recherche, base, profil_configuration, profil_utilisateur, change_password_utilisateur
 from core.forms import filtre_liste
-from core.views import login
 from core.decorators import secure_ajax
+from core.utils import utils_graphique_individus
 
 
 urlpatterns = [
@@ -30,7 +30,8 @@ urlpatterns = [
     path('core/memorise_option', secure_ajax(base.Memorise_option), name='ajax_memorise_option'),
     # path('core/memorise_structure', secure_ajax(base.Memorise_structure), name='ajax_memorise_structure'),
     path('core/modifier_profil_configuration', secure_ajax(profil_configuration.Modifier_profil_configuration), name='ajax_modifier_profil_configuration'),
-
+    path('core/graphique_individus_get_parametres', secure_ajax(utils_graphique_individus.Get_parametres), name='ajax_graphique_individus_get_parametres'),
+    path('core/graphique_individus_set_parametres', secure_ajax(utils_graphique_individus.Set_parametres), name='ajax_graphique_individus_set_parametres'),
 
 ]
 

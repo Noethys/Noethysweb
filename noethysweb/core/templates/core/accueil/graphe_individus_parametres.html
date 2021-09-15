@@ -1,0 +1,53 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Modal Paramètres du graphique #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_graphique_individus_parametres{% endblock %}
+    {% block modal_titre %}Paramètres du graphique{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+
+        <div>
+            <label for="graphique_choix_activite" class="col-form-label">Activité</label>
+            <select id="graphique_choix_activite" class="form-control">
+                {% for activite in activites %}
+                    <option {% if graphique_individus_activite == categorie %}selected{% endif %} value="{{ activite.pk }}">{{ activite.nom }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" id="graphique_individus_valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+
+    {% endblock %}
+{% endembed %}
+
+<script>
+    $(document).ready(function() {
+
+        $("#graphique_individus_valider").on("click",function(event){
+            event.preventDefault();
+            var idactivite = $("#graphique_choix_activite").val();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_graphique_individus_set_parametres' %}",
+                data: {
+                    idactivite: idactivite,
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                },
+                success: function (data) {
+                    toastr.success("Les paramètres du graphique ont bien été mis à jour")
+                    location.reload();
+                }
+            });
+        });
+
+    });
+</script>

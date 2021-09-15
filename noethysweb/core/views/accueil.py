@@ -3,24 +3,24 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, random, datetime, json
 logger = logging.getLogger(__name__)
 from django.views.generic import TemplateView
-from core.views.base import CustomView
-from consommations.views import suivi_consommations
-from individus.views import suivi_inscriptions
 from django.core.cache import cache
 from django.conf import settings
-from core.utils import utils_parametres, utils_texte
-from outils.utils import utils_update
+from django.db.models import Count, Q
+from core.views.base import CustomView
 from core.data.data_citations import LISTE_CITATIONS
 from core.data.data_celebrations import DICT_FETES, DICT_CELEBRATIONS
-from core.models import Individu, Note
-import random, datetime
+from core.models import Individu, Note, Consommation, Ouverture, Activite
+from core.utils import utils_parametres, utils_texte
+from consommations.views import suivi_consommations
+from individus.views import suivi_inscriptions
+from outils.utils import utils_update
 
 
 class Accueil(CustomView, TemplateView):
-    template_name = "core/accueil.html"
+    template_name = "core/accueil/accueil.html"
     menu_code = "accueil"
 
     def get_context_data(self, **kwargs):
@@ -33,6 +33,8 @@ class Accueil(CustomView, TemplateView):
         context['anniversaires_aujourdhui'] = self.Get_anniversaires()
         context['anniversaires_demain'] = self.Get_anniversaires(demain=True)
         context['nouvelle_version'] = self.Get_update()
+        context['graphique_individus_activite'] = utils_parametres.Get(nom="activite", categorie="graphique_individus", utilisateur=self.request.user, valeur=0)
+        context['graphique_individus'] = self.Get_graphique_individu(idactivite=context['graphique_individus_activite'])
         context['mode_demo'] = settings.MODE_DEMO
         context['notes'] = Note.objects.select_related('famille', 'individu').filter(afficher_accueil=True).order_by("date_parution")
         return context
@@ -102,3 +104,13 @@ class Accueil(CustomView, TemplateView):
                 texte_anniversaires = "Aucun anniversaire à fêter."
             cache.set("texte_anniversaires_demain" if demain else "texte_anniversaires", texte_anniversaires, timeout=30)
         return texte_anniversaires
+
+    def Get_graphique_individu(self, idactivite=0):
+        conditions = Q(activite_id=idactivite) & Q(date__gte=datetime.date.today() - datetime.timedelta(days=15)) & Q(date__lte=datetime.date.today() + datetime.timedelta(days=30))
+        liste_ouvertures = Ouverture.objects.values("date").filter(conditions).distinct().order_by("date")
+        consommations = {item["date"]: item["nbre"] for item in Consommation.objects.values("date").filter(conditions, etat__in=("reservation", "present")).annotate(nbre=Count("individu_id"))}
+        liste_labels, liste_valeurs = [], []
+        for ouverture in liste_ouvertures:
+            liste_labels.append(str(ouverture["date"]))
+            liste_valeurs.append(consommations.get(ouverture["date"], 0))
+        return {"labels": json.dumps(liste_labels), "valeurs": json.dumps(liste_valeurs)}

@@ -1,0 +1,152 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/chartjs/Chart.min.css' %}">
+{% endblock styles %}
+
+{% block page %}
+
+    <div class="card bg-gradient-info">
+        <div class="card-header border-0">
+            <h3 class="card-title">
+                <i class="fa fa-user"></i>
+                Nombre d'individus
+            </h3>
+            <div class="card-tools mr-0">
+                <button id="graphique_individus_options" type="button" class="btn bg-info btn-sm" title="Options du graphique">
+                    <i class="fa fa-gear"></i>
+                </button>
+                <button type="button" class="btn bg-info btn-sm" title="Ce graphique présente le nombre d'individus prévus ou présents pour chaque date d'ouverture">
+                    <i class="fa fa-question"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <canvas class="chart" id="id_graphique_individus" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+        </div>
+    </div>
+
+    {# Modal paramètres du graphique #}
+    <div id="div_modal_graphique_individus_parametres"></div>
+
+{% endblock page %}
+
+
+{% block scripts %}
+    <script type="text/javascript" src="{% static 'lib/chartjs/Chart.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/chartjs/chartjs-plugin-annotation.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/moment/moment.min.js' %}"></script>
+
+    <script>
+        $(document).ready(function() {
+
+            $("#graphique_individus_options").on("click", function(event){
+                event.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_graphique_individus_get_parametres' %}",
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                    },
+                    success: function (data) {
+                        $("#div_modal_graphique_individus_parametres").html(data);
+                        $('#modal_graphique_individus_parametres').modal('show');
+                    }
+                });
+            });
+
+            // Graphique individus
+            var graphique_individus_canvas = $('#id_graphique_individus').get(0).getContext('2d')
+
+            var graphique_individus_data = {
+                labels: JSON.parse('{{ graphique_individus.labels|escapejs }}'),
+                datasets: [
+                    {
+                        label: "Nbre d'individus",
+                        fill: false,
+                        borderWidth: 2,
+                        spanGaps: true,
+                        borderColor: '#efefef',
+                        pointRadius: 3,
+                        pointHoverRadius: 7,
+                        pointColor: '#efefef',
+                        pointBackgroundColor: '#efefef',
+                        lineTension: 0,
+                        data: {{ graphique_individus.valeurs }}
+                    }
+                ]
+            }
+
+            var graphique_individus_options = {
+                locale: "fr",
+                maintainAspectRatio: false,
+                responsive: true,
+                legend: {
+                    display: false
+                },
+                annotation: {
+                    annotations: [
+                        {
+                            drawTime: "afterDatasetsDraw",
+                            type: "line",
+                            mode: "vertical",
+                            scaleID: "x-axis-0",
+                            value: "{% now "Y-m-d" %}",
+                            borderWidth: 0.2,
+                            borderColor: "white",
+                            borderDash: [5, 5],
+                            label: {
+                                content: "TODAY",
+                                enabled: false,
+                                position: "top"
+                            }
+                        }
+                    ]
+                },
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            unit: 'day',
+                            tooltipFormat: 'D MMM, YYYY',
+                            displayFormats: {
+                                day: 'D MMM'
+                            },
+                            distribution: 'series'
+                        },
+                        ticks: {
+                            fontColor: '#efefef'
+                        },
+                        gridLines: {
+                            display: false,
+                            color: '#efefef',
+                            drawBorder: false
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            stepSize: 10,
+                            fontColor: '#efefef'
+                        },
+                        gridLines: {
+                            display: true,
+                            color: '#efefef',
+                            drawBorder: false
+                        }
+                    }]
+                }
+            };
+
+            var graphique_individus = new Chart(graphique_individus_canvas, {
+                type: 'line',
+                data: graphique_individus_data,
+                options: graphique_individus_options
+            })
+
+        });
+    </script>
+
+{% endblock scripts %}
