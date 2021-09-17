@@ -23,3 +23,10 @@ Installation
     - `python3 manage.py import_defaut` (Uniquement si vous souhaitez importer les données par défaut : jours fériés, modèles, documents...)
     - `python3 manage.py runserver`
 - Consultez le site www.djangoproject.com pour en savoir davantage sur les options et le déploiement.
+
+Utilisation
+------------------------
+
+1. Allez sur le portail utilisateur (par défaut : http://127.0.0.1:8000/utilisateur/) pour paramétrer l'organisateur, les structures, les activités, les jours fériés, les périodes de vacances, etc... puis créez les familles et les individus.
+2. Allez sur le portail administrateur (par défaut : http://127.0.0.1:8000/administrateur/) pour créer de nouveaux utilisateurs et leur attribuer les droits d'accès et les associer aux structures.
+3. Communiquez l'url du portail aux familles (par défaut : http://127.0.0.1:8000/).
