@@ -4,12 +4,12 @@
     }
 </style>
 
-<table class="table tableau_notes">
+<table class="tableau_notes table">
     <tbody>
         {% for note in notes %}
-            <tr class="text-center">
-                <td style="width: 90px;color: #9c9c9c;padding-left: 6px;">{{ note.date_saisie|date:"d/m/Y" }}</td>
-                <td style="text-align: left;">
+            <tr class="text-center" style="padding: 10px !important;">
+                <td style="width: 90px;color: #9c9c9c;padding: 6px !important;">{{ note.date_saisie|date:"d/m/Y" }}</td>
+                <td style="text-align: left;padding: 6px !important;">
                     {% if note.priorite == "HAUTE" %}
                         <i class="fa fa-exclamation-triangle text-danger"></i>
                     {% endif %}
@@ -19,18 +19,18 @@
                     {% endif %}
                     {{ note.texte }}
                 </td>
-                <td style="width: 90px;text-align: right;padding-right: 6px;">
+                <td style="width: 90px;text-align: right;padding: 6px !important;">
                     {% if mode_notes == 'accueil' %}
-                        <a type="button" class="btn btn-default btn-xs" href="{% url 'notes_modifier' pk=note.pk %}?next={{ request.path|urlencode }}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
-                        <a type="button" class="btn btn-default btn-xs" href="{% url 'notes_supprimer' pk=note.pk %}?next={{ request.path|urlencode }}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
+                        <a type="button" class="btn-xs" href="{% url 'notes_modifier' pk=note.pk %}?next={{ request.path|urlencode }}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
+                        <a type="button" class="btn-xs" href="{% url 'notes_supprimer' pk=note.pk %}?next={{ request.path|urlencode }}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
                     {% endif %}
                     {% if mode_notes == 'famille' %}
-                        <a type="button" class="btn btn-default btn-xs" href="{% url 'famille_notes_modifier' idfamille=note.famille_id pk=note.pk %}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
-                        <a type="button" class="btn btn-default btn-xs" href="{% url 'famille_notes_supprimer' idfamille=note.famille_id pk=note.pk %}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
+                        <a type="button" class="btn-xs" href="{% url 'famille_notes_modifier' idfamille=note.famille_id pk=note.pk %}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
+                        <a type="button" class="btn-xs" href="{% url 'famille_notes_supprimer' idfamille=note.famille_id pk=note.pk %}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
                     {% endif %}
                     {% if mode_notes == 'individu' %}
-                        <a type="button" class="btn btn-default btn-xs" href="{% url 'individu_notes_modifier' idfamille=idfamille idindividu=note.individu_id pk=note.pk %}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
-                        <a type="button" class="btn btn-default btn-xs" href="{% url 'individu_notes_supprimer' idfamille=idfamille idindividu=note.individu_id pk=note.pk %}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
+                        <a type="button" class="btn-xs" href="{% url 'individu_notes_modifier' idfamille=idfamille idindividu=note.individu_id pk=note.pk %}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
+                        <a type="button" class="btn-xs" href="{% url 'individu_notes_supprimer' idfamille=idfamille idindividu=note.individu_id pk=note.pk %}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
                     {% endif %}
                 </td>
             </tr>
