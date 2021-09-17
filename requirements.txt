@@ -6,12 +6,13 @@ django-cryptography
 django-crispy-forms
 django-csp
 django-datatable-view
+django-debug-toolbar
 django-formtools
-django-multipleselectfield
+django-multiselectfield
 django-simple-captcha
 django-resized
 django-select2
-django-summernote
+django-sn
 django-extensions
 django-upload-form
 numpy
