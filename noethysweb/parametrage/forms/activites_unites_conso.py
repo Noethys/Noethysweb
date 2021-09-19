@@ -39,7 +39,7 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Unite
         fields = ["ordre", "activite", "nom", "abrege", "type", "heure_debut", "heure_fin", "heure_debut_fixe", "heure_fin_fixe",
-                  "repas", "restaurateur", "touche_raccourci", "date_debut", "date_fin", "groupes", "incompatibilites"]
+                  "repas", "restaurateur", "touche_raccourci", "date_debut", "date_fin", "groupes", "incompatibilites", "visible_portail"]
 
     def __init__(self, *args, **kwargs):
         idactivite = kwargs.pop("idactivite")
@@ -103,6 +103,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("repas"),
                 Field("restaurateur"),
                 Field("touche_raccourci"),
+                Field("visible_portail"),
             ),
             Fieldset("Durée de validité",
                 Field("validite_type"),

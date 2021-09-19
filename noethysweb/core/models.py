@@ -20,8 +20,7 @@ from django_cryptography.fields import encrypt
 from core.utils import utils_permissions
 
 
-
-JOURS_SEMAINE = [(0, "Lundi"), (1, "Mardi"), (2, "Mercredi"), (3, "Jeudi"), (4, "Vendredi"), (5, "Samedi"), (6, "Dimanche")]
+JOURS_SEMAINE = [(0, "L"), (1, "M"), (2, "M"), (3, "J"), (4, "V"), (5, "S"), (6, "D")]
 
 LISTE_MOIS = [(1, "Janvier"), (2, "Février"), (3, "Mars"), (4, "Avril"),
               (5, "Mai"), (6, "Juin"), (7, "Juillet"), (8, "Août"),
@@ -232,7 +231,10 @@ def get_uuid():
 
 def get_uuid_path(instance, filename):
     """ Renvoie un nom de fichier uuid """
-    return os.path.join(instance._meta.db_table, "%s.%s" % (get_uuid(), filename.split('.')[-1]))
+    base_chemin = instance._meta.db_table
+    if hasattr(instance, "get_upload_path"):
+        base_chemin = os.path.join(base_chemin, instance.get_upload_path())
+    return os.path.join(base_chemin, "%s.%s" % (get_uuid(), filename.split('.')[-1]))
 
 
 
@@ -953,6 +955,9 @@ class UniteConsentement(models.Model):
     def __str__(self):
         return "Unité de consentement ID%s" % self.idunite_consentement
 
+    def get_upload_path(self):
+        return str(self.type_consentement_id)
+
 
 class Activite(models.Model):
     idactivite = models.AutoField(verbose_name="ID", db_column='IDactivite', primary_key=True)
@@ -1126,6 +1131,7 @@ class Unite(models.Model):
     autogen_parametres = models.CharField(verbose_name="Paramètres de la génération", max_length=400, blank=True, null=True)
     groupes = models.ManyToManyField(Groupe, blank=True)
     incompatibilites = models.ManyToManyField("self", verbose_name="Incompatibilités", blank=True)
+    visible_portail = models.BooleanField(verbose_name="Visible sur le portail", default=True)
 
     class Meta:
         db_table = 'unites'
@@ -1395,7 +1401,6 @@ class Individu(models.Model):
     nom = models.CharField(verbose_name="Nom", max_length=200)
     nom_jfille = models.CharField(verbose_name="Nom de naissance", max_length=200, blank=True, null=True)
     prenom = models.CharField(verbose_name="Prénom", max_length=200, blank=True, null=True)
-    # num_secu = models.CharField(verbose_name="Num. sécurité sociale", max_length=200, blank=True, null=True)
     idnationalite = models.IntegerField(verbose_name="Nationalité", db_column='IDnationalite', blank=True, null=True)
     date_naiss = models.DateField(verbose_name="Date de naissance", blank=True, null=True)
     idpays_naiss = models.IntegerField(verbose_name="Pays de naissance", db_column='IDpays_naiss', blank=True, null=True)
@@ -3002,6 +3007,9 @@ class Photo(models.Model):
 
     def __str__(self):
         return "Photo ID%d" % self.idphoto if self.idphoto else "Nouvelle photo"
+
+    def get_upload_path(self):
+        return str(self.album_id)
 
 
 class ImageArticle(models.Model):

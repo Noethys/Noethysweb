@@ -189,7 +189,12 @@ def Get_generic_data(data={}):
         data['selection_groupes'] = [groupe.pk for groupe in data['liste_groupes']]
 
     # Importation des unités de conso
-    data["liste_unites"] = Unite.objects.select_related('activite').prefetch_related('groupes', 'incompatibilites').filter(activite=data['selection_activite']).order_by("ordre")
+    groupes_utilises = list({inscription.groupe: True for inscription in data['liste_inscriptions']}.keys()) + data.get("selection_groupes", [])
+    conditions = (Q(groupes__in=groupes_utilises) | Q(groupes__isnull=True))
+    data["liste_unites"] = Unite.objects.select_related('activite').prefetch_related('groupes', 'incompatibilites').filter(conditions, activite=data['selection_activite']).distinct().order_by("ordre")
+
+    # Sélection des unités visibles
+    data["liste_unites_visibles"] = [unite for unite in data["liste_unites"] if unite.visible_portail or data["mode"] != "portail"]
 
     # Conversion des unités de conso en JSON
     liste_unites_json = []
@@ -198,7 +203,7 @@ def Get_generic_data(data={}):
                 "heure_debut": str(unite.heure_debut), "heure_fin": str(unite.heure_fin), "heure_debut_fixe": unite.heure_debut_fixe,
                 "heure_fin_fixe": unite.heure_fin_fixe, "touche_raccourci": unite.touche_raccourci, "largeur": unite.largeur,
                 "groupes": [groupe.pk for groupe in unite.groupes.all()], "incompatibilites": [u.pk for u in unite.incompatibilites.all()],
-                "unites_remplissage": dict_unites_remplissage_unites.get(unite.pk, [])}})
+                "visible_portail": unite.visible_portail, "unites_remplissage": dict_unites_remplissage_unites.get(unite.pk, [])}})
     data['liste_unites_json'] = json.dumps(liste_unites_json)
 
     # Conversion au format json
@@ -328,8 +333,8 @@ def Save_grille(request=None, donnees={}):
                                      "utilisateur": request.user if request else None, "famille_id": conso.inscription.famille_id, "individu_id": conso.individu_id, "objet": "Consommation", "idobjet": conso.pk, "classe": "Consommation"})
 
     # Notification d'enregistrement des consommations
-    if texte_notification and request:
-        messages.add_message(request, messages.SUCCESS, "Consommations enregistrées : %s" % utils_texte.Convert_liste_to_texte_virgules(texte_notification))
+    # if texte_notification and request:
+    #     messages.add_message(request, messages.SUCCESS, "Consommations enregistrées : %s" % utils_texte.Convert_liste_to_texte_virgules(texte_notification))
 
     # Suppression des prestations obsolètes (après la suppression des consommations associées)
     logger.debug("Prestations à supprimer : " + str(donnees["suppressions"]["prestations"]))
@@ -572,11 +577,16 @@ class Facturation():
                             temps_facture = utils_dates.Additionne_intervalles_temps(liste_temps)
 
                         # Recherche de la quantité
+                        # quantite = 0
+                        # for idunite in tarif_base.combi_retenue:
+                        #     if idunite in dictQuantites:
+                        #         if dictQuantites[idunite]:
+                        #             quantite += dictQuantites[idunite]
                         quantite = 0
                         for idunite in tarif_base.combi_retenue:
                             if idunite in dictQuantites:
-                                if dictQuantites[idunite]:
-                                    quantite += dictQuantites[idunite]
+                                if dictQuantites[idunite] and dictQuantites[idunite] > quantite:
+                                    quantite = dictQuantites[idunite]
 
                         # Calcul du tarif
                         resultat = self.Calcule_tarif(tarif, tarif_base.combi_retenue, case_tableau, temps_facture, quantite, evenement, modeSilencieux, action)

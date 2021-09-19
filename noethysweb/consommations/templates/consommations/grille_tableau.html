@@ -50,6 +50,11 @@
         var url_editeur_email = "{% url 'ajax_get_view_editeur_email' %}";
         var csrf_token = "{{ csrf_token }}";
 
+        {# Bouton Annuler #}
+        {% if data.mode == "portail" %}var url_annuler = "{% url 'portail_reservations' %}";{% endif %}
+        {% if data.mode == "date" or data.mode == "pointeuse" %}var url_annuler = "{% url 'consommations_toc' %}";{% endif %}
+        {% if data.mode == "individu" %}var url_annuler = "{% url 'famille_resume' idfamille=idfamille %}";{% endif %}
+
         {# Tranformation de la liste des groupes en dict #}
         var dict_groupes = {};
         liste_groupes.forEach(function(groupe) {
@@ -83,15 +88,15 @@
 
                 <tr>
                     {% if data.mode == "portail" %}
-                        <th colspan="{{ data.liste_unites|length|add:1 }}" style="padding: 5px 0px 10px 0px !important; border-top: solid transparent; border-left: solid transparent; border-right: solid transparent;">
+                        <th colspan="{{ data.liste_unites_visibles|length|add:1 }}" style="padding: 5px 0px 10px 0px !important; border-top: solid transparent; border-left: solid transparent; border-right: solid transparent;">
                             {% include "portail/planning_commandes.html" %}
                         </th>
                     {% elif data.mode == "pointeuse" %}
-                        <th colspan="{{ data.liste_unites|length|add:3 }}" style="padding: 2px 0px 10px 0px !important; border-top: solid transparent; border-left: solid transparent; border-right: solid transparent;">
+                        <th colspan="{{ data.liste_unites_visibles|length|add:3 }}" style="padding: 2px 0px 10px 0px !important; border-top: solid transparent; border-left: solid transparent; border-right: solid transparent;">
                             {% include "consommations/grille_commandes.html" %}
                         </th>
                     {% else %}
-                        <th colspan="{{ data.liste_unites|length|add:2 }}" style="padding: 2px 0px 10px 0px !important; border-top: solid transparent; border-left: solid transparent; border-right: solid transparent;">
+                        <th colspan="{{ data.liste_unites_visibles|length|add:2 }}" style="padding: 2px 0px 10px 0px !important; border-top: solid transparent; border-left: solid transparent; border-right: solid transparent;">
                             {% include "consommations/grille_commandes.html" %}
                         </th>
                     {% endif %}
@@ -104,7 +109,7 @@
                     <th style="width:100px">
                         {% if data.mode == 'jour' or data.mode == 'pointeuse' %}Individu{% else %}Date{% endif %}
                     </th>
-                    {% for unite in data.liste_unites %}
+                    {% for unite in data.liste_unites_visibles %}
                         <th>{{ unite.nom }}</th>
                     {% endfor %}
                     {% if data.mode != "portail" %}
@@ -122,7 +127,7 @@
                     {% if data.liste_inscriptions|length > 1 and data.mode == "individu" %}
                         <tr>
                             <th class="date_regroupement">{{ date|date:"l j F Y"|title }} {% if not modif_allowed %}<i class='fa fa-lock text-red' title="Date non modifiable"></i>{% endif %}</th>
-                                {% for unite in data.liste_unites %}
+                                {% for unite in data.liste_unites_visibles %}
                                     <td class="date_regroupement"></td>
                                 {% endfor %}
                             <td class="date_regroupement"></td>
@@ -168,10 +173,12 @@
                                     {% creation_string_key date inscription.pk unite.pk as key_case %}
 
                                     {# Création de la case #}
-                                    <td
-                                        class="case {{ unite.type|lower }} {% if not modif_allowed %}fermeture{% else %}{% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}ouvert{% endif %}{% endif %}"
-                                        id="{{ key_case }}"
-                                    ></td>
+                                    {% if unite in data.liste_unites_visibles %}
+                                        <td
+                                            class="case {{ unite.type|lower }} {% if not modif_allowed %}fermeture{% else %}{% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}ouvert{% endif %}{% endif %}"
+                                            id="{{ key_case }}"
+                                        ></td>
+                                    {% endif %}
 
                                     {# Mémorisation des infos de la case #}
                                     <script>
@@ -189,7 +196,9 @@
                                         dict_cases["{{ key_case }}"] = case_tableau;
                                     </script>
                                 {% else %}
-                                    <td class="case {{ unite.type|lower }} fermeture"></td>
+                                    {% if unite in data.liste_unites_visibles %}
+                                        <td class="case {{ unite.type|lower }} fermeture"></td>
+                                    {% endif %}
                                 {% endif %}
 
                             {% endfor %}
