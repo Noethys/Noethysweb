@@ -22,8 +22,8 @@
 $(document).ready(function() {
 
     $('#modal_traitement_lot').on('show.bs.modal', function () {
-        $("#id_date_debut").datepicker("setDate", "{{ data.date_min|date:'d/m/Y' }}");
-        $("#id_date_fin").datepicker("setDate", "{{ data.date_max|date:'d/m/Y' }}");
+        $("#traitement_lot_debut").datepicker("setDate", "{{ data.date_min|date:'d/m/Y' }}");
+        $("#traitement_lot_fin").datepicker("setDate", "{{ data.date_max|date:'d/m/Y' }}");
     });
 
     $("#form_traitement_lot").on('submit', function (event) {
@@ -34,7 +34,6 @@ $(document).ready(function() {
             data: $("#form_traitement_lot").serialize(),
             datatype: "json",
             success: function(data){
-                console.log("data=", data)
                 $.each(dict_cases, function (key, case_tableau) {
                     var parties_key = key.split("_");
                     if ((data.dates.includes(parties_key[0])) && (Object.keys(data.unites).includes(parties_key[2]))) {

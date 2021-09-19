@@ -324,7 +324,7 @@ td.complet {
 }
 #div_table_traitement_lot {
     display: inline-block;
-    height:180px;
+    height: 130px;
     overflow-y: scroll;
     width: 100%;
 }

@@ -14,7 +14,7 @@ from core.forms.base import FormulaireBase
 
 class Formulaire(FormulaireBase, forms.Form):
     # Action
-    choix_action = [("SAISIE", "Ajouter"), ("EFFACER", "Effacer")]
+    choix_action = [("SAISIE", "Ajouter"), ("EFFACER", "Supprimer")]
     action_type = forms.TypedChoiceField(label="Action à réaliser", choices=choix_action, initial='SAISIE', required=False)
 
     # Période
@@ -24,7 +24,7 @@ class Formulaire(FormulaireBase, forms.Form):
 
     # Jours
     jours_scolaires = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
-    jours_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
+    jours_vacances = forms.MultipleChoiceField(label="Jours de vacances", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
     choix_frequence = [(1, "Toutes les semaines"), (2, "Une semaine sur deux"),
                         (3, "Une semaine sur trois"), (4, "Une semaine sur quatre"),
                         (5, "Les semaines paires"), (6, "Les semaines impaires")]
@@ -40,11 +40,17 @@ class Formulaire(FormulaireBase, forms.Form):
         self.fields["jours_vacances"].initial = [0, 1, 2, 3, 4]
 
         self.helper.layout = Layout(
-            Field('action_type', id="traitement_lot_action"),
-            Field('date_debut', id="traitement_lot_debut"),
-            Field('date_fin', id="traitement_lot_fin"),
-            InlineCheckboxes("jours_scolaires", id="traitement_lot_scolaires"),
-            InlineCheckboxes("jours_vacances", id="traitement_lot_vacances"),
+            Div(
+                Field('action_type', id="traitement_lot_action", wrapper_class="col-md-4"),
+                Field('date_debut', id="traitement_lot_debut", wrapper_class="col-md-4"),
+                Field('date_fin', id="traitement_lot_fin", wrapper_class="col-md-4"),
+                css_class="form-row",
+            ),
+            Div(
+                InlineCheckboxes("jours_scolaires", id="traitement_lot_scolaires", wrapper_class="col-md-6"),
+                InlineCheckboxes("jours_vacances", id="traitement_lot_vacances", wrapper_class="col-md-6"),
+                css_class="form-row",
+            ),
             Field("frequence_type", id="traitement_lot_frequence"),
             Field("inclure_feries", id="traitement_lot_feries"),
             HTML(EXTRA_HTML),
