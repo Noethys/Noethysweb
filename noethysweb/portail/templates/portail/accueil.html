@@ -63,11 +63,12 @@
             {% endif %}
 
             {# Pièces manquantes #}
+{% comment %}
             {% if nbre_pieces_manquantes %}
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-success">
                         <div class="inner">
-                            <h3>{{ pieces_manquantes|length }}</h3>
+                            <h3>{{ nbre_pieces_manquantes }}</h3>
                             <p>Pièce{{ nbre_pieces_manquantes|pluralize }} manquante{{ nbre_pieces_manquantes|pluralize }}</p>
                         </div>
                         <div class="icon">
@@ -77,6 +78,8 @@
                     </div>
                 </div>
             {% endif %}
+{% endcomment %}
+
         </div>
     {% endif %}
 
