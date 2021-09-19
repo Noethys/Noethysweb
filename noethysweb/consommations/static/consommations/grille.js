@@ -1147,13 +1147,33 @@ $(document).ready(function() {
         'scrollBar': true,
     });
 
-    $("#enregistrer").on('click', function(event) {
+    $('[name=bouton_enregistrer]').on('click', function(event) {
         // Si mode portail, on générer la facturation avant le submit
         var box = bootbox.dialog({
             message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> Enregistrement des données<br>Veuillez patienter...</p>",
             closeButton: false
         });
         tout_recalculer();
+    });
+
+    $('[name=bouton_annuler]').on('click', function(event) {
+        var box = bootbox.dialog({
+            title: "Fermer le planning",
+            message: "Souhaitez-vous vraiment fermer le planning ? <br>Les éventuelles modifications effectuées seront perdues...",
+            buttons: {
+                ok: {
+                    label: "<i class='fa fa-check'></i> Oui, je veux fermer",
+                    className: 'btn-primary',
+                    callback: function(){
+                        window.location.href = url_annuler;
+                    }
+                },
+                cancel: {
+                    label: "<i class='fa fa-ban'></i> Non, je veux rester",
+                    className: 'btn-danger',
+                }
+            }
+        });
     });
 
     // Envoi des paramètres au format json vers le form de maj

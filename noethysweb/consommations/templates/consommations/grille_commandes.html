@@ -5,16 +5,16 @@
             <button type="submit" title="Enregistrer" form="form-maj" class='btn btn-primary btn-sm' value="Sauvegarde"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
         {% endif %}
         {% if data.mode == "date" %}
-            <a type='button' title="Annuler" class='btn btn-danger btn-sm' href="{% url 'consommations_toc' %}"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
+            <button type='button' id="annuler" name="bouton_annuler" title="Annuler" class='btn btn-danger btn-sm'><i class="fa fa-ban margin-r-5"></i>Annuler</button>
         {% endif %}
         {% if data.mode == "pointeuse" %}
-            <a type='button' title="Fermer" class='btn btn-danger btn-sm' href="{% url 'consommations_toc' %}"><i class="fa fa-times margin-r-5"></i>Fermer</a>
+            <button type='button' id="annuler" name="bouton_annuler" title="Fermer" class='btn btn-danger btn-sm'><i class="fa fa-times margin-r-5"></i>Fermer</button>
         {% endif %}
         {% if data.mode == "date" or data.mode == "pointeuse" %}
             <button type="button" id="ajouter_individu" class="btn btn-default btn-sm" onclick="$('#modal_ajouter_individu').modal('show');" title="Ajouter un individu"><i class="fa fa-plus margin-r-5"></i>Individu</button>
         {% endif %}
         {% if data.mode == "individu" %}
-            <a type='button' title="Annuler" class='btn btn-danger btn-sm' href="{% url 'famille_resume' idfamille=idfamille %}"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
+            <button type='button' id="annuler" name="bouton_annuler" title="Annuler" class='btn btn-danger btn-sm'><i class="fa fa-ban margin-r-5"></i>Annuler</button>
         {% endif %}
 
         <button type="button" id="outils" class="btn btn-default btn-sm" onclick="$('#modal_outils').modal('show');" title="Accéder aux outils"><i class="fa fa-wrench margin-r-5"></i>Outils</button>
