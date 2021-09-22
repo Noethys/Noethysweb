@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.db.models import Count
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.utils import utils_dates
@@ -30,7 +31,7 @@ class Liste(Page, crud.Liste):
     model = TypeMaladie
 
     def get_queryset(self):
-        return TypeMaladie.objects.filter(self.Get_filtres("Q"))
+        return TypeMaladie.objects.filter(self.Get_filtres("Q")).annotate(nbre_individus=Count('individu_maladies')).annotate(nbre_vaccins=Count('vaccin_maladies'))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -43,10 +44,12 @@ class Liste(Page, crud.Liste):
         filtres = ["idtype_maladie", "nom", "vaccin_obligatoire"]
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         vaccin_obligatoire = columns.TextColumn("Vaccination obligatoire", sources=["vaccin_obligatoire"], processor='Get_vaccin_obligatoire')
+        nbre_individus = columns.TextColumn("Individus associés", sources="nbre_individus")
+        nbre_vaccins = columns.TextColumn("Vaccins associés", sources="nbre_vaccins")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idtype_maladie", "nom", "vaccin_obligatoire"]
+            columns = ["idtype_maladie", "nom", "vaccin_obligatoire", "nbre_individus", "nbre_vaccins"]
             ordering = ["nom"]
             processors = {
                 'vaccin_date_naiss_min': helpers.format_date('%d/%m/%Y'),

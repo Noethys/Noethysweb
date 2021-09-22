@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.db.models import Count
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import TypeVaccin
@@ -29,7 +30,7 @@ class Liste(Page, crud.Liste):
     model = TypeVaccin
 
     def get_queryset(self):
-        return TypeVaccin.objects.prefetch_related("types_maladies").filter(self.Get_filtres("Q"))
+        return TypeVaccin.objects.prefetch_related("types_maladies").filter(self.Get_filtres("Q")).annotate(nbre_vaccins=Count("vaccin"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -43,10 +44,11 @@ class Liste(Page, crud.Liste):
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         duree_validite = columns.DisplayColumn("Validité", sources="duree_validite", processor='Get_validite')
         types_maladies = columns.TextColumn("Maladies associées", sources=None, processor='Get_types_maladies')
+        nbre_vaccins = columns.TextColumn("Vaccins associés", sources="nbre_vaccins")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idtype_vaccin", "nom", "duree_validite", "types_maladies"]
+            columns = ["idtype_vaccin", "nom", "duree_validite", "types_maladies", "nbre_vaccins"]
             ordering = ["nom"]
 
         def Get_types_maladies(self, instance, *args, **kwargs):

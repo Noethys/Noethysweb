@@ -28,6 +28,7 @@ class Formulaire(FormulaireBase, ModelForm):
             'rue_resid': forms.Textarea(attrs={'rows': 2}),
             'cp_resid': CodePostal(attrs={"id_ville": "id_ville_resid"}),
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
+            "memo": forms.Textarea(attrs={'rows': 3}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -54,5 +55,8 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("carte"),
                 Field('tel_cabinet'),
                 Field('tel_mobile'),
+            ),
+            Fieldset("Divers",
+                Field('memo'),
             ),
         )

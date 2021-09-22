@@ -329,6 +329,11 @@ class Utilisateur(AbstractUser):
 class Assureur(models.Model):
     idassureur = models.AutoField(verbose_name="ID", db_column='IDassureur', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=300)
+    rue_resid = models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True)
+    cp_resid = models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True)
+    ville_resid = models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True)
+    telephone = models.CharField(verbose_name="Téléphone", max_length=200, blank=True, null=True)
+    memo = models.TextField(verbose_name="Mémo", blank=True, null=True)
 
     class Meta:
         db_table = 'assureurs'
@@ -454,6 +459,7 @@ class Medecin(models.Model):
     ville_resid = models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True)
     tel_cabinet = models.CharField(verbose_name="Téléphone fixe", max_length=200, blank=True, null=True)
     tel_mobile = models.CharField(verbose_name="Téléphone mobile", max_length=200, blank=True, null=True)
+    memo = models.TextField(verbose_name="Mémo", blank=True, null=True)
 
     class Meta:
         db_table = 'medecins'

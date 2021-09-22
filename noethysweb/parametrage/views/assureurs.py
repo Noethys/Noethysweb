@@ -4,13 +4,11 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.db.models import Count
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Assureur
 from parametrage.forms.assureurs import Formulaire
-from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.db.models import Q, Count
 
 
 class Page(crud.Page):
@@ -33,7 +31,7 @@ class Liste(Page, crud.Liste):
 
     def get_queryset(self):
         from django.db.models import Q, Count
-        return Assureur.objects.filter(self.Get_filtres("Q"))
+        return Assureur.objects.filter(self.Get_filtres("Q")).annotate(nbre_assurances=Count("assurance"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -43,18 +41,14 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["idassureur", "nom"]
-
+        filtres = ["idassureur", "nom", "rue_resid", "cp_resid", "ville_resid", "telephone"]
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
-        # nbre_individus = columns.TextColumn("Nbre individus", sources="nbre_individus", processor='Formate_nbre_individus')
+        nbre_assurances = columns.TextColumn("Assurances associées", sources="nbre_assurances")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idassureur", "nom"]#, "nbre_individus"]
+            columns = ["idassureur", "nom", "rue_resid", "cp_resid", "ville_resid", "telephone", "nbre_assurances"]
             ordering = ["nom"]
-
-        # def Formate_nbre_individus(self, instance, **kwargs):
-        #     return instance.nbre_individus
 
 
 class Ajouter(Page, crud.Ajouter):

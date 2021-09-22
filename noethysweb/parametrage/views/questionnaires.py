@@ -4,7 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
-from django.db.models import Q
+from django.db.models import Q, Count
 from core.views.mydatatableview import MyDatatable, columns, helpers, Deplacer_lignes
 from core.views import crud
 from core.models import LISTE_CATEGORIES_QUESTIONNAIRES, QuestionnaireQuestion, Famille, Individu
@@ -61,7 +61,7 @@ class Liste(Page, crud.Liste):
     template_name = "core/crud/liste_avec_categorie.html"
 
     def get_queryset(self):
-        return QuestionnaireQuestion.objects.filter(Q(categorie=self.Get_categorie()) & self.Get_filtres("Q"), self.Get_condition_structure())
+        return QuestionnaireQuestion.objects.filter(Q(categorie=self.Get_categorie()) & self.Get_filtres("Q"), self.Get_condition_structure()).annotate(nbre_reponses=Count("questionnairereponse"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -73,13 +73,13 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idquestion", 'label']
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         controle = columns.TextColumn("Contrôle", sources="controle", processor='Get_controle')
+        nbre_reponses = columns.TextColumn("Réponses associées", sources="nbre_reponses")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idquestion", 'ordre', 'label', 'controle']
+            columns = ["idquestion", 'ordre', 'label', 'controle', 'nbre_reponses']
             ordering = ['ordre']
 
         def Get_controle(self, instance, **kwargs):

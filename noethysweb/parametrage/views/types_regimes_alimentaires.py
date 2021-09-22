@@ -8,9 +8,7 @@ from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import RegimeAlimentaire, Individu
 from parametrage.forms.types_regimes_alimentaires import Formulaire
-from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.db.models import Q, Count
+from django.db.models import Count
 
 
 class Page(crud.Page):
@@ -43,7 +41,6 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idtype_regime", "nom"]
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         nbre_individus = columns.TextColumn("Individus associés", sources="nbre_individus")
 
