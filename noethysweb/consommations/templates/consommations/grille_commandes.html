@@ -17,7 +17,7 @@
             <button type='button' id="annuler" name="bouton_annuler" title="Annuler" class='btn btn-danger btn-sm'><i class="fa fa-ban margin-r-5"></i>Annuler</button>
         {% endif %}
 
-        <button type="button" id="outils" class="btn btn-default btn-sm" onclick="$('#modal_outils').modal('show');" title="Accéder aux outils"><i class="fa fa-wrench margin-r-5"></i>Outils</button>
+        <button type="button" id="outils" name="bouton_outils" class="btn btn-default btn-sm" title="Accéder aux outils"><i class="fa fa-wrench margin-r-5"></i>Outils</button>
 
         <div>
             <div class="input-group input-group-sm " style="width: 140px;">
@@ -45,24 +45,3 @@
         </div>
 
     </div>
-
-    {# Modal Outils #}
-    {% embed 'core/modal.html' with modal_footer=True %}
-        {% block modal_id %}modal_outils{% endblock %}
-        {% block modal_titre %}Outils{% endblock %}
-        {% block modal_body %}
-            <p>Cliquez sur l'outil souhaité.</p>
-            <div>
-                {% if data.mode == "individu" %}
-                    <a class="btn btn-app" onclick="$('#modal_outils').modal('hide');$('#modal_traitement_lot').modal('show');"><i class="fa fa-magic"></i> Traitement par lot</a>
-                    <a class="btn btn-app" onclick="$('#modal_outils').modal('hide');impression_pdf();"><i class="fa fa-file-pdf-o"></i> Imprimer</a>
-                    <a class="btn btn-app" onclick="$('#modal_outils').modal('hide');impression_pdf(true);"><i class="fa fa-send-o"></i> Envoyer par email</a>
-                {% endif %}
-                <a class="btn btn-app" onclick="$('#modal_outils').modal('hide');$('#modal_saisir_pointage').modal('show');"><i class="fa fa-check-square-o"></i> Pointage par lot</a>
-                <a class="btn btn-app" onclick="$('#modal_outils').modal('hide');tout_recalculer();"><i class="fa fa-refresh"></i> Recalculer les prestations</a>
-            </div>
-        {% endblock %}
-        {% block modal_footer %}
-            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
-        {% endblock %}
-    {% endembed %}
