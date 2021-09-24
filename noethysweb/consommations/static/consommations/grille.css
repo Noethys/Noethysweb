@@ -23,6 +23,16 @@
     color: #0a0a0a;
 }
 
+/* Panneau de commandes */
+#panneau_commandes {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: white;
+    padding: 5px 0px 10px 0px;
+}
+
+
 /* Case de base */
 #table-grille .case {
     cursor: pointer;

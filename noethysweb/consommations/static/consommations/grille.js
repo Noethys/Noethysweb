@@ -1143,8 +1143,8 @@ $(document).ready(function() {
 
     // Initialise la librairie FreezeTable
     $("#table_grille").freezeTable({
-        // 'shadow': true,
         'scrollBar': true,
+        'fixedNavbar': "#panneau_commandes"
     });
 
     $('[name=bouton_enregistrer]').on('click', function(event) {
