@@ -627,7 +627,7 @@ class Informations():
                         dictCible[ID][code + "DATE_SAISIE"] = utils_dates.ConvertDateToFR(note.date_saisie)
                         dictCible[ID][code + "DATE_PARUTION"] = utils_dates.ConvertDateToFR(note.date_parution)
                         dictCible[ID][code + "TEXTE"] = note.texte
-                        dictCible[ID][code + "NOM"] = note.nom
+                        #dictCible[ID][code + "NOM"] = note.nom
                         dictCible[ID][code + "CATEGORIE"] = note.categorie.nom if note.categorie else ""
 
                         # Mémorise l'information médicale au format liste
@@ -635,7 +635,7 @@ class Informations():
                             {"IDmessage": str(note.pk), "type": note.type, "IDcategorie": note.categorie_id,
                              "date_saisie": utils_dates.ConvertDateToFR(note.date_saisie), "date_parution": utils_dates.ConvertDateToFR(note.date_parution),
                              "priorite": note.priorite,  "afficher_accueil": note.afficher_accueil,
-                             "afficher_liste": note.afficher_liste, "texte": note.texte, "nom": note.nom,
+                             "afficher_liste": note.afficher_liste, "texte": note.texte, #"nom": note.nom,
                              "categorie_nom": note.categorie.nom if note.categorie else "",
                              })
 
