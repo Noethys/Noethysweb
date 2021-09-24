@@ -19,6 +19,7 @@ upload.py
 dist/
 media/
 settings_production.py
+TODO.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
