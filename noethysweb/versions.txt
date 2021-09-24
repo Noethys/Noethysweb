@@ -1,10 +1,14 @@
+Version 0.0.5.1 (24/09/2021) :
+
+- Correction du responsive de la grille des conso
+
 Version 0.0.5.0 (22/09/2021) :
 
 - Ajout des unités visibles sur le portail
 - Amélioration des commandes de la grille des conso
 - Amélioration du traitement par lot dans la grille des conso
 - Modification des boutons des notes
-- Diveres corrections
+- Diverses corrections
 
 Version 0.0.4.9 (15/09/2021) :
 
