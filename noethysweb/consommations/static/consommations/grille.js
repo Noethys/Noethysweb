@@ -1021,8 +1021,8 @@ $(function () {
 
     // Barre de recherche
     $('#rechercher').on('input',function(e){
-        $("tr[class*='masquer']").removeClass("masquer");
-        $("tbody th:not(:icontains('" + $(this).val() + "')):not('.date_regroupement')").closest("tr").addClass("masquer");
+        $(".table-grille tr[class*='masquer']").removeClass("masquer");
+        $(".table-grille tbody th:not(:icontains('" + $(this).val() + "')):not('.date_regroupement')").closest("tr").addClass("masquer");
     });
 
 });
@@ -1142,9 +1142,13 @@ $(document).ready(function() {
     $("#in_progress").removeClass("overlay");
 
     // Initialise la librairie FreezeTable
-    $("#table_grille").freezeTable({
-        'scrollBar': true,
-        'fixedNavbar': "#panneau_commandes"
+    // $("#table_grille").freezeTable({
+    //     'scrollBar': true,
+    //     'fixedNavbar': "#panneau_commandes"
+    // });
+
+    $('[name=bouton_outils]').on('click', function(event) {
+        $('#modal_outils').modal('show');
     });
 
     $('[name=bouton_enregistrer]').on('click', function(event) {

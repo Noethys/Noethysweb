@@ -11,45 +11,49 @@
                 <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
             </div>
         </div>
-        <div class="card-body p-0">
+        <div class="card-body p-0" style="display: block;overflow-x: auto;white-space: nowrap;">
 
-            <table id="table_totaux" class="table table-sm table-responsive">
-                <tr style="background-color: #f6f6f6;">
-                    <th></th>
-                    {% for groupe in data.liste_groupes %}
-                        <th>{% firstof groupe.abrege groupe.nom %}</th>
-                    {% endfor %}
-                </tr>
-                {% for unite in data.liste_unites %}
-                    <tr>
-                        <td style="text-align: center;" title="Unité de consommation : {{ unite.nom }}">{% firstof unite.abrege unite.nom %}</td>
+            <table id="table_totaux" class="table table-sm">
+                <thead>
+                    <tr style="background-color: #f6f6f6;">
+                        <th></th>
                         {% for groupe in data.liste_groupes %}
-                            <td id="total_{{ unite.pk }}_{{ groupe.pk }}" title="Unité de consommation : {{ unite.nom }} / {{ groupe.nom }}" style="text-align: center;">0</td>
+                            <th>{% firstof groupe.abrege groupe.nom %}</th>
                         {% endfor %}
                     </tr>
-                {% endfor %}
-                {% for evenement in data.liste_evenements %}
-                    {% if evenement.activite_id == activite.pk %}
+                </thead>
+                <tbody>
+                    {% for unite in data.liste_unites %}
                         <tr>
-                            <td style="text-align: center;">{{ evenement.nom }}</td>
+                            <td style="text-align: center;" title="Unité de consommation : {{ unite.nom }}">{% firstof unite.abrege unite.nom %}</td>
                             {% for groupe in data.liste_groupes %}
-                                {% if groupe.pk == evenement.groupe_id %}
-                                    <td id="total_{{ evenement.unite_id }}_{{ groupe.pk }}_{{ evenement.pk }}" style="text-align: center;">0</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
+                                <td id="total_{{ unite.pk }}_{{ groupe.pk }}" title="Unité de consommation : {{ unite.nom }} / {{ groupe.nom }}" style="text-align: center;">0</td>
                             {% endfor %}
                         </tr>
-                    {% endif %}
-                {% endfor %}
-                {% for unite_remplissage in data.liste_unites_remplissage %}
-                    <tr style="background-color: #f6f6f6;">
-                        <td style="text-align: center;" title="Unité de remplissage : {{ unite_remplissage.nom }}">{% firstof unite_remplissage.abrege unite_remplissage.nom %}</td>
-                        {% for groupe in data.liste_groupes %}
-                            <td id="total_remplissage_{{ unite_remplissage.pk }}_{{ groupe.pk }}" style="text-align: center;" title="Unité de remplissage : {{ unite_remplissage.nom }} / {{ groupe.nom }}" data-idunite="{{ unite_remplissage.pk }}" data-idgroupe="{{ groupe.pk }}">0</td>
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
+                    {% endfor %}
+                    {% for evenement in data.liste_evenements %}
+                        {% if evenement.activite_id == activite.pk %}
+                            <tr>
+                                <td style="text-align: center;">{{ evenement.nom }}</td>
+                                {% for groupe in data.liste_groupes %}
+                                    {% if groupe.pk == evenement.groupe_id %}
+                                        <td id="total_{{ evenement.unite_id }}_{{ groupe.pk }}_{{ evenement.pk }}" style="text-align: center;">0</td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    {% for unite_remplissage in data.liste_unites_remplissage %}
+                        <tr style="background-color: #f6f6f6;">
+                            <td style="text-align: center;" title="Unité de remplissage : {{ unite_remplissage.nom }}">{% firstof unite_remplissage.abrege unite_remplissage.nom %}</td>
+                            {% for groupe in data.liste_groupes %}
+                                <td id="total_remplissage_{{ unite_remplissage.pk }}_{{ groupe.pk }}" style="text-align: center;" title="Unité de remplissage : {{ unite_remplissage.nom }} / {{ groupe.nom }}" data-idunite="{{ unite_remplissage.pk }}" data-idgroupe="{{ groupe.pk }}">0</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
             </table>
 
         </div>

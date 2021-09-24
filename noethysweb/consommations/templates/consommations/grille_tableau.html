@@ -9,7 +9,7 @@
 
 {% block scripts %}
     <script type="text/javascript" src="{% static 'lib/clusterize/clusterize.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>
+{#    <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>#}
     <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
     <script type="text/javascript" src="{% static "consommations/grille.js" %}"></script>
 {% endblock scripts %}
@@ -94,7 +94,7 @@
     </div>
 
     <div class="table noselect masquer" id="table_grille" draggable="false">
-        <table cellspacing="0" id="table-grille" class="table table-bordered" style="min-width: 400px;">
+        <table cellspacing="0" id="table-grille" class="table table-bordered table-grille" style="min-width: 400px;">
             <thead>
                 <tr>
                     {% if data.mode == 'pointeuse' %}
