@@ -20,7 +20,7 @@
     {# Liste des factures #}
     {% embed 'core/box.html' with box_titre=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}Liste des factures{% endblock %}
+        {% block box_titre %}Liste des dernières factures{% endblock %}
         {% block box_contenu %}
 
             {# Récapitulatif des factures impayées #}
@@ -38,12 +38,14 @@
                             <tr class="text-center">
                                 <th>Du</th>
                                 <th>Au</th>
-                                <th>N°</th>
+                                {% if parametres_portail.facturation_afficher_numero_facture %}
+                                    <th>N°</th>
+                                {% endif %}
                                 <th>Montant</th>
                                 {% if parametres_portail.facturation_afficher_solde_facture %}
                                     <th>Reste à régler</th>
                                 {% endif %}
-                                {% if parametres_portail.facturation_autoriser_telechargement_facture %}
+                                {% if parametres_portail.facturation_autoriser_telechargement_facture or parametres_portail.facturation_autoriser_detail_facture %}
                                     <th style="width: 90px;">Actions</th>
                                 {% endif %}
                             </tr>
@@ -53,13 +55,22 @@
                                 <tr class="text-center">
                                     <td>{{ facture.date_debut|date:'d/m/Y' }}</td>
                                     <td>{{ facture.date_fin|date:'d/m/Y' }}</td>
-                                    <td>{{ facture.numero }}</td>
+                                    {% if parametres_portail.facturation_afficher_numero_facture %}
+                                        <td>{{ facture.numero }}</td>
+                                    {% endif %}
                                     <td>{{ facture.total|montant }}</td>
                                     {% if parametres_portail.facturation_afficher_solde_facture %}
                                         <td><span class="badge-pill bg-{% if facture.solde_actuel %}danger{% else %}success{% endif %}">{{ facture.solde_actuel|montant }}</span></td>
                                     {% endif %}
-                                    {% if parametres_portail.facturation_autoriser_telechargement_facture %}
-                                        <td><a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_accueil' %}" title="Télécharger la facture"><i class="fa fa-fw fa-download"></i></a></td>
+                                    {% if parametres_portail.facturation_autoriser_telechargement_facture or parametres_portail.facturation_autoriser_detail_facture %}
+                                        <td>
+                                            {% if parametres_portail.facturation_autoriser_detail_facture %}
+                                                <button id="bouton_detail_facture" data-idfacture="{{ facture.pk }}" class="btn btn-primary btn-xs" title="Afficher le détail de la facture"><i class="fa fa-fw fa-search"></i></button>
+                                            {% endif %}
+                                            {% if parametres_portail.facturation_autoriser_telechargement_facture %}
+                                                <a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_accueil' %}" title="Télécharger la facture"><i class="fa fa-fw fa-download"></i></a>
+                                            {% endif %}
+                                        </td>
                                     {% endif %}
                                 </tr>
                             {% endfor %}
@@ -73,5 +84,37 @@
         {% endblock box_contenu %}
         {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
     {% endembed %}
+
+
+    {# Modal Détail d'une facture #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_detail_facture{% endblock %}
+        {% block modal_classe %}modal-xl modal-dialog-scrollable{% endblock %}
+        {% block modal_titre %}Détail d'une facture{% endblock %}
+        {% block modal_body %}
+            <div id="texte_detail_facture"></div>
+        {% endblock %}
+    {% endembed %}
+
+    <script>
+        $(document).ready(function() {
+
+            // Affiche le détail d'une facture
+            $("#bouton_detail_facture").on('click', function(e) {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'portail_ajax_get_detail_facture' %}",
+                    data: {
+                        idfacture: $(this).data("idfacture"),
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                    },
+                    success: function (data) {
+                        $("#texte_detail_facture").html(data);
+                        $('#modal_detail_facture').modal('show');
+                    }
+                });
+            });
+        });
+    </script>
 
 {% endblock contenu_page %}

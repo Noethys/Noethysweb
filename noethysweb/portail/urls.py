@@ -103,5 +103,6 @@ urlpatterns = [
 
     # AJAX
     path('facturer', secure_ajax_portail(grille.Facturer), name='portail_ajax_facturer'),
+    path('facturation/get_detail_facture', secure_ajax_portail(facturation.get_detail_facture), name='portail_ajax_get_detail_facture'),
 
 ]

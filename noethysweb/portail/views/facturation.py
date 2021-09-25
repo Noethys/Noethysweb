@@ -5,9 +5,34 @@
 
 import logging
 logger = logging.getLogger(__name__)
-from portail.views.base import CustomView
+from django.http import JsonResponse
 from django.views.generic import TemplateView
-from core.models import Facture
+from django.shortcuts import render
+from portail.views.base import CustomView
+from core.models import Facture, Prestation
+from core.utils import utils_portail
+
+
+def get_detail_facture(request):
+    """ Génére un texte HTML contenant le détail d'une facture """
+    idfacture = int(request.POST.get("idfacture", 0))
+
+    # Importation de la facture
+    facture = Facture.objects.get(pk=idfacture)
+    if facture.famille != request.user.famille:
+        return JsonResponse({"texte": "Accès interdit"}, status=401)
+
+    # Importation des prestations
+    prestations = Prestation.objects.select_related("individu", "activite").filter(facture=facture).order_by("date")
+
+    # Création du texte HTML
+    context = {
+        "facture": facture,
+        "prestations": prestations,
+        "parametres_portail": utils_portail.Get_dict_parametres(),
+    }
+    return render(request, 'portail/detail_facture.html', context)
+
 
 
 class View(CustomView, TemplateView):
