@@ -1,3 +1,9 @@
+Version 0.0.5.2 (25/09/2021) :
+
+- Ajout du détail des factures sur le portail
+- Ajout de la saisie de documents pour les assurances, infos médicales et quotients
+- Ajustements pour affichage sur smartphone
+
 Version 0.0.5.1 (24/09/2021) :
 
 - Correction du responsive de la grille des conso
