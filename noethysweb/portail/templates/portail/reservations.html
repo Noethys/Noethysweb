@@ -60,7 +60,7 @@
                                         <a href="{% url 'portail_planning' idindividu=individu.pk idactivite=activite.pk idperiode=periode.pk %}" class="list-group-item list-group-item-action">
                                             <i class="fa fa-calendar margin-r-5"></i>
                                             {{ periode.nom }}
-                                            <small class="pull-right">Du {{ periode.date_debut }} au {{ periode.date_fin }}</small>
+                                            <small class="pull-right d-none d-md-block">Du {{ periode.date_debut }} au {{ periode.date_fin }}</small>
                                         </a>
                                     {% empty %}
                                         <div class="bg-white" style="padding: 10px";>Aucun période disponible</div>

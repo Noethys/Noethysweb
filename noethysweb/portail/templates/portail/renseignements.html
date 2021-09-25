@@ -6,6 +6,18 @@
 
 {% block styles %}
     {{ block.super }}
+    <style>
+        @media only screen and (max-width: 800px) {
+            #table-fiches td:nth-child(2) {
+                display: none;
+            }
+        }
+        @media only screen and (max-width: 600px) {
+            #table-fiches td:nth-child(3) {
+                display: none;
+            }
+        }
+    </style>
 {% endblock %}
 
 {% block contenu_page %}
@@ -37,7 +49,7 @@
          {% block card_body_classe %}p-0{% endblock %}
         {% block box_contenu %}
 
-            <table class="table table-hover projects" style="cursor: pointer;">
+            <table id="table-fiches" class="table table-hover projects" style="cursor: pointer;">
                 <tbody>
 
                     {# Fiche famille #}
