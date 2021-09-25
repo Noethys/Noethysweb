@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django import forms
+import datetime
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
@@ -36,13 +36,23 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2 col-form-label'
         self.helper.field_class = 'col-md-10'
 
+        # Date de début
+        self.fields["date_debut"].initial = datetime.date.today()
+
         # Affichage
         self.helper.layout = Layout(
             Hidden('famille', value=self.idfamille),
             Hidden('individu', value=self.idindividu),
             Commandes(annuler_url="{% url 'individu_assurances_liste' idfamille=idfamille idindividu=idindividu %}"),
-            Field("assureur"),
-            Field("num_contrat"),
-            Field("date_debut"),
-            Field("date_fin"),
+            Fieldset("Généralités",
+                Field("assureur"),
+                Field("num_contrat"),
+            ),
+            Fieldset("Période de validité",
+                Field("date_debut"),
+                Field("date_fin"),
+            ),
+            Fieldset("Document numérisé",
+                Field('document'),
+            ),
         )

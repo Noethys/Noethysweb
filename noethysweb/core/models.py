@@ -1711,6 +1711,7 @@ class ProblemeSante(models.Model):
     diffusion_listing_enfants = models.BooleanField(verbose_name="Afficher sur la liste des informations médicales", default=False)
     diffusion_listing_conso = models.BooleanField(verbose_name="Afficher sur la liste des consommations", default=False)
     diffusion_listing_repas = models.BooleanField(verbose_name="Afficher sur la commande des repas", default=False)
+    document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, blank=True, null=True, help_text="Vous pouvez ajouter un document.")
 
     class Meta:
         db_table = 'problemes_sante'
@@ -1719,6 +1720,9 @@ class ProblemeSante(models.Model):
 
     def __str__(self):
         return self.intitule
+
+    def get_upload_path(self):
+        return str(self.individu_id)
 
 
 class Vaccin(models.Model):
@@ -2070,6 +2074,7 @@ class Quotient(models.Model):
     revenu = models.DecimalField(verbose_name="Revenu", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
     observations = models.TextField(verbose_name="Observations", blank=True, null=True)
     type_quotient = models.ForeignKey(TypeQuotient, verbose_name="Type de quotient", on_delete=models.PROTECT)
+    document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, blank=True, null=True)
 
     class Meta:
         db_table = 'quotients'
@@ -2078,6 +2083,9 @@ class Quotient(models.Model):
 
     def __str__(self):
         return "Quotient ID%d" % self.idquotient
+
+    def get_upload_path(self):
+        return str(self.famille_id)
 
 
 class Deduction(models.Model):
@@ -2815,6 +2823,7 @@ class Assurance(models.Model):
     num_contrat = models.CharField(verbose_name="N° de contrat", max_length=200)
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
+    document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, blank=True, null=True, help_text="Vous pouvez ajouter un document (PDF ou image).")
 
     class Meta:
         db_table = 'assurances'
@@ -2823,6 +2832,9 @@ class Assurance(models.Model):
 
     def __str__(self):
         return "Assurance %s à partir du %s" % (self.assureur, utils_dates.ConvertDateToFR(self.date_debut))
+
+    def get_upload_path(self):
+        return str(self.individu_id)
 
 
 class Mandat(models.Model):

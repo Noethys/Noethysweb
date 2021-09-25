@@ -25,6 +25,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "categorie": "Sélectionnez une catégorie dans la liste proposée.",
             "intitule": "Saisissez l'intitulé de l'information. Exemple : Allergie aux oeufs.",
             "description": "Précisez si besoin une description détaillée.",
+            "document": "Vous pouvez ajouter un document si besoin (PDF ou image).",
         }
 
     def __init__(self, *args, **kwargs):
@@ -47,6 +48,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("categorie"),
                 Field("intitule"),
                 Field("description"),
+                Field("document"),
             ),
             Commandes(annuler_url="{% url 'portail_individu_infos_medicales' idrattachement=rattachement.pk %}", aide=False, css_class="pull-right"),
         )

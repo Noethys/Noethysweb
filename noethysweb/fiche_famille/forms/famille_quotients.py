@@ -56,6 +56,9 @@ class Formulaire(FormulaireBase, ModelForm):
                 PrependedText('revenu', utils_preferences.Get_symbole_monnaie()),
                 Field('observations'),
             ),
+            Fieldset("Document numérisé",
+                Field('document'),
+            ),
         )
 
     def clean(self):

@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django import forms
+import datetime
 from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Fieldset, Div, ButtonHolder
@@ -28,6 +28,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "num_contrat": "Saisissez le numéro de contrat.",
             "date_debut": "Saisissez la date de début d'effet du contrat.",
             "date_fin": "[Optionnel] Saisissez la date de fin du contrat.",
+            "document": "Vous pouvez ajouter l'attestation d'assurance au format PDF ou image.",
         }
 
     def __init__(self, *args, **kwargs):
@@ -43,6 +44,9 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.field_class = 'col-md-10'
         # self.helper.use_custom_control = False
 
+        # Date de début
+        self.fields["date_debut"].initial = datetime.date.today()
+
         # Affichage
         self.helper.layout = Layout(
             Hidden('famille', value=rattachement.famille_id),
@@ -51,5 +55,6 @@ class Formulaire(FormulaireBase, ModelForm):
             Field("num_contrat"),
             Field("date_debut"),
             Field("date_fin"),
+            Field("document"),
             Commandes(annuler_url="{% url 'portail_individu_assurances' idrattachement=rattachement.pk %}", aide=False, css_class="pull-right"),
         )
