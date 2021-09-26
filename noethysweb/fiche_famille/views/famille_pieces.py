@@ -74,7 +74,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['idpiece', 'date_debut', 'date_fin']
+        filtres = ['idpiece', 'date_debut', 'date_fin', "auteur"]
 
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
@@ -83,7 +83,7 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idpiece', 'date_debut', 'date_fin', 'nom']
+            columns = ['check', 'idpiece', 'date_debut', 'date_fin', 'nom', "auteur"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
             }
