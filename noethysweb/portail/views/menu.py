@@ -12,6 +12,7 @@ def GetMenuPrincipal(parametres_portail=None, user=None):
 
     menu.Add(code="portail_accueil", titre="Accueil", icone="home", toujours_afficher=True)
     menu.Add(code="portail_renseignements", titre="Renseignements", icone="folder-open-o", toujours_afficher=True)
+    menu.Add(code="portail_documents", titre="Documents", icone="file-text-o", toujours_afficher=True)
     menu.Add(code="portail_reservations", titre="Réservations", icone="calendar", toujours_afficher=True)
     menu.Add(code="portail_facturation", titre="Facturation", icone="euro", toujours_afficher=True)
     menu.Add(code="portail_reglements", titre="Règlements", icone="money", toujours_afficher=True)

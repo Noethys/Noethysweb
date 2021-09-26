@@ -1,0 +1,94 @@
+{% extends "portail/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .mailbox-attachment-icon {
+            color: #666;
+            font-size: 40px;
+            max-height: 132.5px;
+            padding: 10px 10px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+    </style>
+{% endblock %}
+
+{% block contenu_page %}
+
+    {# Texte d'introduction #}
+    {% if parametres_portail.documents_intro %}
+        <div style="margin-bottom: 20px;">
+            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.documents_intro }}
+        </div>
+    {% endif %}
+
+    {# Liste des pièces à fournir #}
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}Pièces à fournir{% endblock %}
+        {% block box_contenu %}
+            {% if pieces_fournir %}
+                <p>Les pièces suivantes marquées d'une croix rouge sont à nous transmettre :</p>
+                <ul class="list-unstyled">
+                    {% for piece in pieces_fournir %}
+                        <li>{% if piece.valide %}<i class='fa fa-check fa-fw text-green'></i>{% else %}<i class='fa fa-close fa-fw text-red'></i>{% endif %} {{ piece.label }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                Aucune pièce à fournir.
+            {% endif %}
+        {% endblock box_contenu %}
+    {% endembed %}
+
+    {# Transmettre des documents #}
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}Transmettre un document{% endblock %}
+        {% block box_contenu %}
+            <p>Cliquez sur le bouton ci-dessous pour nous transmettre un document (une pièce du dossier, un certificat, une attestation, etc...) :</p>
+            <a type="button" class="btn btn-success" title="Transmettre un document" href="#"><i class="fa fa-send-o margin-r-5"></i>Transmettre un document</a>
+        {% endblock box_contenu %}
+    {% endembed %}
+
+    {# Liste des documents à télécharger #}
+    {% if liste_documents %}
+        {% embed 'core/box.html' with box_titre=True %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Documents à télécharger{% endblock %}
+            {% block box_contenu %}
+                <p>Cliquez sur le nom d'un document pour le télécharger :</p>
+                <div class="card-columns">
+                    {% for document in liste_documents %}
+                        <div class="card mb-4" style="margin-top: 1px;">
+                            <span class="mailbox-attachment-icon bg-{{ document.couleur_fond }}">
+                                {% if document.extension|is_in_list:"jpg;JPG;png;PNG" %}
+                                    <i class="fa fa-file-image-o"></i>
+                                {% elif document.extension|is_in_list:"pdf;PDF" %}
+                                    <i class="fa fa-file-pdf-o"></i>
+                                {% elif document.extension|is_in_list:"doc;docx;DOC;DOCX" %}
+                                    <i class="fa fa-file-word-o"></i>
+                                {% else %}
+                                    <i class="fa fa-file-o"></i>
+                                {% endif %}
+                            </span>
+                            <div class="card-body pl-3 pr-3 pt-3 pb-1" style="background-color: #eeeeee">
+                                <h5 class="card-title"><a href="{{ document.fichier.url }}" target="_blank" title="Télécharger le document">{{ document.titre }}</a></h5>
+                                <div class="card-text link-muted mt-1"><small>{{ document.texte|default:"&nbsp;" }}</small></div>
+                                <span class="mailbox-attachment-size clearfix mt-1 mb-2">
+                                    <span>{{ document.fichier.size|filesizeformat }} - {{ document.extension|lower }}</span>
+                                    <a href="{{ document.fichier.url }}" class="btn btn-default btn-sm float-right" target="_blank" title="Télécharger le document"><i class="fa fa-download"></i></a>
+                                </span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endblock box_contenu %}
+        {% endembed %}
+    {% endif %}
+
+{% endblock contenu_page %}

@@ -8,7 +8,7 @@ from django.db.models import Q
 from core.models import TypeConsentement, UniteConsentement, Consentement, Inscription, Rattachement
 
 
-def Get_approbations_requises(famille=None, activites=None, idindividu=None):
+def Get_approbations_requises(famille=None, activites=None, idindividu=None, avec_consentements_existants=True):
     """ activites = Une liste d'activités. Si vide, on recherche les inscriptions de la famille """
     approbations_requises = {"consentements": [], "rattachements": [], "familles": [], "nbre_total": 0}
 
@@ -31,8 +31,11 @@ def Get_approbations_requises(famille=None, activites=None, idindividu=None):
     unites_consentements = {unite.type_consentement: unite for unite in UniteConsentement.objects.select_related("type_consentement").filter(conditions).order_by("date_debut")}
 
     # Recherche des consentements existants de la famille
-    consentements_famille = Consentement.objects.select_related("unite_consentement").filter(famille=famille, unite_consentement__in=unites_consentements.values()).order_by("horodatage")
-    unites_consentements_famille = [consentement.unite_consentement for consentement in consentements_famille]
+    if avec_consentements_existants:
+        consentements_famille = Consentement.objects.select_related("unite_consentement").filter(famille=famille, unite_consentement__in=unites_consentements.values()).order_by("horodatage")
+        unites_consentements_famille = [consentement.unite_consentement for consentement in consentements_famille]
+    else:
+        unites_consentements_famille = []
 
     # Mémorisation des consentements requis
     for type_consentement, unite_consentement in unites_consentements.items():

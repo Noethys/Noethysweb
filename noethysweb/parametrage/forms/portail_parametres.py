@@ -17,6 +17,7 @@ LISTE_RUBRIQUES = [
     ("Page de connexion", ["connexion_image_fond", "connexion_adresse_exp", ]),
     ("Page d'accueil", ["accueil_texte_bienvenue", ]),
     ("Page des renseignements", ["renseignements_afficher_page", "renseignements_intro"]),
+    ("Page des documents", ["documents_afficher_page", "documents_intro"]),
     ("Page des réservations", ["reservations_afficher_page", "reservations_intro", "reservations_intro_planning"]),
     ("Page de la facturation", ["facturation_afficher_page", "facturation_intro", "facturation_afficher_numero_facture", "facturation_afficher_solde_facture", "facturation_autoriser_detail_facture", "facturation_autoriser_telechargement_facture"]),
     ("Page des règlements", ["reglements_afficher_page", "reglements_intro", "reglements_afficher_encaissement", "reglements_autoriser_telechargement_recu"]),

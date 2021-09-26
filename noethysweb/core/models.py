@@ -964,6 +964,9 @@ class UniteConsentement(models.Model):
     def get_upload_path(self):
         return str(self.type_consentement_id)
 
+    def Get_extension(self):
+        return os.path.splitext(self.document.name)[1].replace(".", "")
+
 
 class Activite(models.Model):
     idactivite = models.AutoField(verbose_name="ID", db_column='IDactivite', primary_key=True)
@@ -1802,6 +1805,8 @@ class Piece(models.Model):
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
     document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, blank=True, null=True)
     titre = models.CharField(verbose_name="Titre", max_length=200, blank=True, null=True)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    auteur = models.ForeignKey(Utilisateur, verbose_name="Auteur", blank=True, null=True, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'pieces'
@@ -3098,3 +3103,23 @@ class ImageFond(models.Model):
     def __str__(self):
         return self.titre if self.idimage else "Nouvelle image de fond"
 
+
+class PortailDocument(models.Model):
+    iddocument = models.AutoField(verbose_name="ID", db_column='IDdocument', primary_key=True)
+    titre = models.CharField(verbose_name="Titre", max_length=200, help_text="Saisissez un titre pour ce document. Ex : Fiche d'inscription annuelle...")
+    texte = models.CharField(verbose_name="Sous-titre", max_length=200, blank=True, null=True, help_text="Vous pouvez saisir un sous-titre. Ex : Version 2021...")
+    choix_couleur = [("primary", "Bleu foncé"), ("info", "Bleu clair"), ("success", "Vert"), ("warning", "Jaune"), ("danger", "Rouge"), ("gray", "Gris")]
+    couleur_fond = models.CharField(verbose_name="Couleur de fond", max_length=100, choices=choix_couleur, default="primary", help_text="Couleur de fond de l'icône. Bleu foncé par défaut.")
+    document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, help_text="Privilégiez un document au format PDF.")
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = 'portail_documents'
+        verbose_name = "document"
+        verbose_name_plural = "documents"
+
+    def __str__(self):
+        return self.titre if self.iddocument else "Nouveau document"
+
+    def Get_extension(self):
+        return os.path.splitext(self.document.name)[1].replace(".", "")

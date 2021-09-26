@@ -22,7 +22,7 @@ from parametrage.views import organisateur, structures, \
     questionnaires, adresses_mail, activites_assistant, activites_assistant_sejour, activites_assistant_cantine, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
     portail_parametres, types_regimes_alimentaires, assureurs, categories_compte_internet, modeles_pes, \
-    types_consentements, unites_consentements, articles, images_articles, albums, images_fond
+    types_consentements, unites_consentements, articles, images_articles, albums, images_fond, portail_documents
 
 
 urlpatterns = [
@@ -432,6 +432,11 @@ urlpatterns = [
     path('parametrage/images_fond/modifier/<int:pk>', images_fond.Modifier.as_view(), name='images_fond_modifier'),
     path('parametrage/images_fond/supprimer/<int:pk>', images_fond.Supprimer.as_view(), name='images_fond_supprimer'),
 
+    # Articles
+    path('parametrage/portail_documents/liste', portail_documents.Liste.as_view(), name='portail_documents_liste'),
+    path('parametrage/portail_documents/ajouter', portail_documents.Ajouter.as_view(), name='portail_documents_ajouter'),
+    path('parametrage/portail_documents/modifier/<int:pk>', portail_documents.Modifier.as_view(), name='portail_documents_modifier'),
+    path('parametrage/portail_documents/supprimer/<int:pk>', portail_documents.Supprimer.as_view(), name='portail_documents_supprimer'),
 
 
     # AJAX
