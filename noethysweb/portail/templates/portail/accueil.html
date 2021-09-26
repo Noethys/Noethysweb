@@ -12,6 +12,10 @@
             -webkit-transform: none !important;
             transform: none !important;
         }
+        .card-img-top {
+            border-top-left-radius: .25rem;
+            border-top-right-radius: .25rem;
+        }
     </style>
 
     {# Texte bienvenue #}
@@ -63,7 +67,6 @@
             {% endif %}
 
             {# Pièces manquantes #}
-{% comment %}
             {% if nbre_pieces_manquantes %}
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-success">
@@ -72,13 +75,13 @@
                             <p>Pièce{{ nbre_pieces_manquantes|pluralize }} manquante{{ nbre_pieces_manquantes|pluralize }}</p>
                         </div>
                         <div class="icon">
-                            <i class="fa fa-comments"></i>
+                            <i class="fa fa-file-text-o"></i>
                         </div>
-                        <a href="{% url 'portail_contact' %}" class="small-box-footer">Consulter <i class="fa fa-arrow-circle-right"></i></a>
+                        <a href="{% url 'portail_documents' %}" class="small-box-footer">Consulter <i class="fa fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
             {% endif %}
-{% endcomment %}
+
 
         </div>
     {% endif %}
@@ -89,7 +92,7 @@
         <h5 class="mb-2 text-secondary">Actualités</h5>
         <div class="card-columns">
             {% for article in articles %}
-                <div class="card mb-4 {% if article.couleur_fond %}bg-{{ article.couleur_fond }}{% endif %}">
+                <div class="card mb-4 {% if article.couleur_fond %}bg-{{ article.couleur_fond }}{% endif %}" style="margin-top: 1px;">
                     {% if article.Get_anciennete <= 3 %}
                         <div class="ribbon-wrapper ribbon-lg">
                             <div class="ribbon bg-warning">Nouveau</div>
