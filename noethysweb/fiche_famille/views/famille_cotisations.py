@@ -3,18 +3,18 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from django.urls import reverse_lazy, reverse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
+from django.template import Template, RequestContext
+from django.db.models import Max, Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Famille, Cotisation, TypeCotisation, UniteCotisation, Prestation
+from core.utils import utils_dates
 from fiche_famille.forms.famille_cotisations import Formulaire
 from fiche_famille.views.famille import Onglet
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-from django.template import Template, RequestContext
-from core.utils import utils_dates
-import datetime
-from django.db.models import Max, Q
-from django.contrib import messages
+from cotisations.utils import utils_cotisations_manquantes
 
 
 def On_change_type_cotisation(request):
@@ -94,7 +94,7 @@ class Page(Onglet):
         if not hasattr(self, "verbe_action"):
             context['box_titre'] = "Adhésions"
         context['onglet_actif'] = "cotisations"
-        # context['cotisations_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(famille=context['famille'])
+        context['cotisations_manquantes'] = utils_cotisations_manquantes.Get_cotisations_manquantes(famille=context['famille'])
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
         ]
@@ -157,7 +157,7 @@ class Page(Onglet):
 
 class Liste(Page, crud.Liste):
     model = Cotisation
-    template_name = "fiche_famille/famille_pieces.html"
+    template_name = "fiche_famille/famille_cotisations.html"
 
     def get_queryset(self):
         return Cotisation.objects.select_related("type_cotisation", "type_cotisation__structure").filter(Q(famille=self.Get_idfamille()) & self.Get_filtres("Q"))
@@ -204,7 +204,7 @@ class Liste(Page, crud.Liste):
             view = kwargs["view"]
             kwargs = view.kwargs
             kwargs["pk"] = instance.pk
-            if instance.type_cotisation.structure in view.request.user.structures.all():
+            if not instance.type_cotisation.structure or instance.type_cotisation.structure in view.request.user.structures.all():
                 # Affiche les boutons d'action si l'utilisateur est associé à ce type de cotisation
                 html = [
                     self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
