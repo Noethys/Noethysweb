@@ -9,9 +9,9 @@ from django.contrib.auth import views as auth_views
 from consommations.views import grille
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
                             individu_regimes_alimentaires, individu_coords, individu_medecin, individu_infos_medicales, individu_assurances, individu_vaccinations, \
-                            famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents
+                            famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents, \
+                            transmettre_piece
 from core.decorators import secure_ajax_portail
-
 
 
 urlpatterns = [
@@ -86,6 +86,7 @@ urlpatterns = [
 
     # Documents
     path('documents', documents.View.as_view(), name='portail_documents'),
+    path('documents/transmettre', transmettre_piece.Ajouter.as_view(), name='portail_transmettre_piece'),
 
     # Réservations
     path('reservations', reservations.View.as_view(), name='portail_reservations'),

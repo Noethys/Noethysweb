@@ -51,7 +51,7 @@
         {% block box_titre %}Transmettre un document{% endblock %}
         {% block box_contenu %}
             <p>Cliquez sur le bouton ci-dessous pour nous transmettre un document (une pièce du dossier, un certificat, une attestation, etc...) :</p>
-            <a type="button" class="btn btn-success" title="Transmettre un document" href="#"><i class="fa fa-send-o margin-r-5"></i>Transmettre un document</a>
+            <a type="button" class="btn btn-success" title="Transmettre un document" href="{% url 'portail_transmettre_piece' %}"><i class="fa fa-send-o margin-r-5"></i>Transmettre un document</a>
         {% endblock box_contenu %}
     {% endembed %}
 
