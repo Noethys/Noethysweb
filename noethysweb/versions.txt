@@ -1,3 +1,10 @@
+Version 0.0.5.3 (28/09/2021) :
+
+- Ajout de la page Documents sur le portail
+- Ajout de l'alerte sur les cotisations manquantes
+- Ajout des pièces libres
+- Diverses corrections
+
 Version 0.0.5.2 (25/09/2021) :
 
 - Ajout du détail des factures sur le portail
