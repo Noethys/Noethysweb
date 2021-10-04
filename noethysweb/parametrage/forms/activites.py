@@ -7,7 +7,6 @@ from django import forms
 import datetime
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset
 from crispy_forms.bootstrap import Field, FormActions, PrependedText
@@ -34,6 +33,6 @@ class Formulaire(FormulaireBase, ModelForm):
             Hidden('date_debut', value=datetime.date(1977, 1, 1)),
             Hidden('date_fin', value=datetime.date(2999, 1, 1)),
             FormActions(
-                Submit('submit', _('Enregistrer'), css_class='btn-primary'),
+                Submit('submit', 'Enregistrer', css_class='btn-primary'),
                 HTML("""<a class="btn btn-danger" href="{% url 'activites_liste' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>"""))
         )

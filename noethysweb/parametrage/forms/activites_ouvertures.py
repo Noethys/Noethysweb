@@ -4,8 +4,6 @@
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ValidationError
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, HTML, ButtonHolder, Div, Fieldset
 from crispy_forms.bootstrap import Field, InlineCheckboxes
@@ -86,7 +84,7 @@ class Form_lot(forms.Form):
             ),
             ButtonHolder(
                 Div(
-                    Submit('submit', _('Valider'), css_class='btn-primary'),
+                    Submit('submit', 'Valider', css_class='btn-primary'),
                     HTML("""<button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>"""),
                     css_class="modal-footer", style="padding-bottom:0px;padding-right:0px;"
                 ),

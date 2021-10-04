@@ -6,7 +6,6 @@
 from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
 from crispy_forms.bootstrap import Field, StrictButton
@@ -83,7 +82,7 @@ class Formulaire(FormulaireBase, ModelForm):
             #     HTML("""<a type='button' class='btn btn-default pull-left' title="Envoyer par Email" onclick="impression_pdf(email=true)" href='#'><i class="fa fa-file-pdf-o"></i> Envoyer par email</a>"""),
             #     HTML("""<a type='button' class='btn btn-default pull-left' title="Aperçu PDF" href='#' onclick="impression_pdf()" style="margin-left: 5px;"><i class="fa fa-file-pdf-o"></i> Aperçu PDF</a>"""),
             #     Div(
-            #         Submit('submit', _('Enregistrer le reçu'), css_class='btn-primary'),
+            #         Submit('submit', 'Enregistrer le reçu', css_class='btn-primary'),
             #         HTML("""<a class="btn btn-default" href="{% url 'famille_reglements_liste' idfamille=idfamille %}">Annuler</a>"""),
             #         css_class="pull-right"
             #     ),

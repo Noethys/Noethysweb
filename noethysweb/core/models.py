@@ -5,7 +5,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from multiselectfield import MultiSelectField
-from django.utils.translation import ugettext as _
 from django.templatetags.static import static
 from django.db.models import Sum
 from core.data import data_civilites
@@ -44,47 +43,47 @@ LISTE_TYPES_RENSEIGNEMENTS = [
 
 
 LISTE_METHODES_TARIFS = [
-    { "code": "montant_unique", "label": _(u"Montant unique"), "type": "unitaire", "nbre_lignes_max": 1, "entete": None, "champs": ("montant_unique", "montant_questionnaire"), "champs_obligatoires": ("montant_unique",), "tarifs_compatibles": ("JOURN", "FORFAIT", "CREDIT") },
-    { "code": "qf", "label": _(u"En fonction du quotient familial"), "type": "unitaire", "nbre_lignes_max": None, "entete": "tranche", "champs": ("qf_min", "qf_max", "montant_unique"), "champs_obligatoires": ("qf_min", "qf_max", "montant_unique"), "tarifs_compatibles": ("JOURN", "FORFAIT", "CREDIT") },
+    { "code": "montant_unique", "label":u"Montant unique", "type": "unitaire", "nbre_lignes_max": 1, "entete": None, "champs": ("montant_unique", "montant_questionnaire"), "champs_obligatoires": ("montant_unique",), "tarifs_compatibles": ("JOURN", "FORFAIT", "CREDIT") },
+    { "code": "qf", "label":u"En fonction du quotient familial", "type": "unitaire", "nbre_lignes_max": None, "entete": "tranche", "champs": ("qf_min", "qf_max", "montant_unique"), "champs_obligatoires": ("qf_min", "qf_max", "montant_unique"), "tarifs_compatibles": ("JOURN", "FORFAIT", "CREDIT") },
 
-    { "code": "horaire_montant_unique", "label": _(u"Montant unique en fonction d'une tranche horaire"), "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "temps_facture", "montant_unique", "montant_questionnaire", "label"), "champs_obligatoires": ("heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
-    { "code": "horaire_qf", "label": _(u"En fonction d'une tranche horaire et du quotient familial"), "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "temps_facture", "montant_unique", "label"), "champs_obligatoires": ("qf_min", "qf_max", "heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
+    { "code": "horaire_montant_unique", "label":u"Montant unique en fonction d'une tranche horaire", "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "temps_facture", "montant_unique", "montant_questionnaire", "label"), "champs_obligatoires": ("heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
+    { "code": "horaire_qf", "label":u"En fonction d'une tranche horaire et du quotient familial", "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "temps_facture", "montant_unique", "label"), "champs_obligatoires": ("qf_min", "qf_max", "heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
 
-    { "code": "duree_montant_unique", "label": _(u"Montant unique en fonction d'une durée"), "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("duree_min", "duree_max", "temps_facture", "montant_unique", "montant_questionnaire", "label"), "champs_obligatoires": ("duree_min", "duree_max", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
-    { "code": "duree_qf", "label": _(u"En fonction d'une durée et du quotient familial"), "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "duree_min", "duree_max", "temps_facture", "montant_unique", "label"), "champs_obligatoires": ("qf_min", "qf_max", "duree_min", "duree_max", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
+    { "code": "duree_montant_unique", "label":u"Montant unique en fonction d'une durée", "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("duree_min", "duree_max", "temps_facture", "montant_unique", "montant_questionnaire", "label"), "champs_obligatoires": ("duree_min", "duree_max", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
+    { "code": "duree_qf", "label":u"En fonction d'une durée et du quotient familial", "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "duree_min", "duree_max", "temps_facture", "montant_unique", "label"), "champs_obligatoires": ("qf_min", "qf_max", "duree_min", "duree_max", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
 
-    { "code": "montant_unique_date", "label": _(u"Montant unique en fonction de la date"), "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("date", "montant_unique", "label"), "champs_obligatoires": ("date", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
-    { "code": "qf_date", "label": _(u"En fonction de la date et du quotient familial"), "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("date", "qf_min", "qf_max", "montant_unique", "label"), "champs_obligatoires": ("date", "qf_min", "qf_max", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
+    { "code": "montant_unique_date", "label":u"Montant unique en fonction de la date", "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("date", "montant_unique", "label"), "champs_obligatoires": ("date", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
+    { "code": "qf_date", "label":u"En fonction de la date et du quotient familial", "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("date", "qf_min", "qf_max", "montant_unique", "label"), "champs_obligatoires": ("date", "qf_min", "qf_max", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
 
-    # { "code": "variable", "label": _(u"Tarif libre (Saisi par l'utilisateur)"), "type": "unitaire", "nbre_lignes_max": 0, "entete": None, "champs": (), "champs_obligatoires": (), "tarifs_compatibles": ("JOURN",) },
-    # { "code": "choix", "label": _(u"Tarif au choix (Sélectionné par l'utilisateur)"), "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("montant_unique", "label"), "champs_obligatoires": ("montant_unique",), "tarifs_compatibles": ("JOURN", "FORFAIT",) },
+    # { "code": "variable", "label":u"Tarif libre (Saisi par l'utilisateur)"), "type": "unitaire", "nbre_lignes_max": 0, "entete": None, "champs": (), "champs_obligatoires": (), "tarifs_compatibles": ("JOURN",) },
+    # { "code": "choix", "label":u"Tarif au choix (Sélectionné par l'utilisateur)"), "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("montant_unique", "label"), "champs_obligatoires": ("montant_unique",), "tarifs_compatibles": ("JOURN", "FORFAIT",) },
 
-    { "code": "montant_evenement", "label": _(u"Montant de l'évènement"), "type": "unitaire", "nbre_lignes_max": 0, "entete": None, "champs": (), "champs_obligatoires": (), "tarifs_compatibles": ("JOURN",) },
+    { "code": "montant_evenement", "label":u"Montant de l'évènement", "type": "unitaire", "nbre_lignes_max": 0, "entete": None, "champs": (), "champs_obligatoires": (), "tarifs_compatibles": ("JOURN",) },
 
-    # { "code": "montant_unique_nbre_ind", "label": _(u"Montant unique en fonction du nombre d'individus de la famille présents"), "type": "unitaire", "nbre_lignes_max": 1, "entete": "tranche", "champs": ("montant_enfant_1", "montant_enfant_2", "montant_enfant_3", "montant_enfant_4", "montant_enfant_5", "montant_enfant_6", ), "champs_obligatoires": ("montant_enfant_1"), "tarifs_compatibles": ("JOURN",) },
-    # { "code": "qf_nbre_ind", "label": _(u"En fonction du quotient familial et du nombre d'individus de la famille présents"), "type": "unitaire", "nbre_lignes_max": None, "entete": "tranche", "champs": ("qf_min", "qf_max", "montant_enfant_1", "montant_enfant_2", "montant_enfant_3", "montant_enfant_4", "montant_enfant_5", "montant_enfant_6", ), "champs_obligatoires": ("qf_min", "qf_max", "montant_enfant_1"), "tarifs_compatibles": ("JOURN",) },
-    # { "code": "horaire_montant_unique_nbre_ind", "label": _(u"Montant unique en fonction du nombre d'individus de la famille présents et de la tranche horaire"), "type": "unitaire", "nbre_lignes_max": None, "entete": "tranche", "champs": ("heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "temps_facture", "montant_enfant_1", "montant_enfant_2", "montant_enfant_3", "montant_enfant_4", "montant_enfant_5", "montant_enfant_6", "label"), "champs_obligatoires": ("heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "montant_enfant_1"), "tarifs_compatibles": ("JOURN",) },
-    # { "code": "montant_unique_nbre_ind_degr", "label": _(u"Montant dégressif en fonction du nombre d'individus de la famille présents"), "type": "unitaire", "nbre_lignes_max": 1, "entete": "tranche", "champs": ("montant_enfant_1", "montant_enfant_2", "montant_enfant_3", "montant_enfant_4", "montant_enfant_5", "montant_enfant_6", ), "champs_obligatoires": ("montant_enfant_1"), "tarifs_compatibles": ("JOURN",) },
-    # { "code": "qf_nbre_ind_degr", "label": _(u"Montant dégressif en fonction du quotient familial et du nombre d'individus de la famille présents"), "type": "unitaire", "nbre_lignes_max": None, "entete": "tranche", "champs": ("qf_min", "qf_max", "montant_enfant_1", "montant_enfant_2", "montant_enfant_3", "montant_enfant_4", "montant_enfant_5", "montant_enfant_6", ), "champs_obligatoires": ("qf_min", "qf_max", "montant_enfant_1"), "tarifs_compatibles": ("JOURN",) },
-    # { "code": "horaire_montant_unique_nbre_ind_degr", "label": _(u"Montant dégressif en fonction du nombre d'individus de la famille présents et de la tranche horaire"), "type": "unitaire", "nbre_lignes_max": None, "entete": "tranche", "champs": ("heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "temps_facture", "montant_enfant_1", "montant_enfant_2", "montant_enfant_3", "montant_enfant_4", "montant_enfant_5", "montant_enfant_6", "label"), "champs_obligatoires": ("heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "montant_enfant_1"), "tarifs_compatibles": ("JOURN",) },
+    # { "code": "montant_unique_nbre_ind", "label":u"Montant unique en fonction du nombre d'individus de la famille présents"), "type": "unitaire", "nbre_lignes_max": 1, "entete": "tranche", "champs": ("montant_enfant_1", "montant_enfant_2", "montant_enfant_3", "montant_enfant_4", "montant_enfant_5", "montant_enfant_6", ), "champs_obligatoires": ("montant_enfant_1"), "tarifs_compatibles": ("JOURN",) },
+    # { "code": "qf_nbre_ind", "label":u"En fonction du quotient familial et du nombre d'individus de la famille présents"), "type": "unitaire", "nbre_lignes_max": None, "entete": "tranche", "champs": ("qf_min", "qf_max", "montant_enfant_1", "montant_enfant_2", "montant_enfant_3", "montant_enfant_4", "montant_enfant_5", "montant_enfant_6", ), "champs_obligatoires": ("qf_min", "qf_max", "montant_enfant_1"), "tarifs_compatibles": ("JOURN",) },
+    # { "code": "horaire_montant_unique_nbre_ind", "label":u"Montant unique en fonction du nombre d'individus de la famille présents et de la tranche horaire"), "type": "unitaire", "nbre_lignes_max": None, "entete": "tranche", "champs": ("heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "temps_facture", "montant_enfant_1", "montant_enfant_2", "montant_enfant_3", "montant_enfant_4", "montant_enfant_5", "montant_enfant_6", "label"), "champs_obligatoires": ("heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "montant_enfant_1"), "tarifs_compatibles": ("JOURN",) },
+    # { "code": "montant_unique_nbre_ind_degr", "label":u"Montant dégressif en fonction du nombre d'individus de la famille présents"), "type": "unitaire", "nbre_lignes_max": 1, "entete": "tranche", "champs": ("montant_enfant_1", "montant_enfant_2", "montant_enfant_3", "montant_enfant_4", "montant_enfant_5", "montant_enfant_6", ), "champs_obligatoires": ("montant_enfant_1"), "tarifs_compatibles": ("JOURN",) },
+    # { "code": "qf_nbre_ind_degr", "label":u"Montant dégressif en fonction du quotient familial et du nombre d'individus de la famille présents"), "type": "unitaire", "nbre_lignes_max": None, "entete": "tranche", "champs": ("qf_min", "qf_max", "montant_enfant_1", "montant_enfant_2", "montant_enfant_3", "montant_enfant_4", "montant_enfant_5", "montant_enfant_6", ), "champs_obligatoires": ("qf_min", "qf_max", "montant_enfant_1"), "tarifs_compatibles": ("JOURN",) },
+    # { "code": "horaire_montant_unique_nbre_ind_degr", "label":u"Montant dégressif en fonction du nombre d'individus de la famille présents et de la tranche horaire"), "type": "unitaire", "nbre_lignes_max": None, "entete": "tranche", "champs": ("heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "temps_facture", "montant_enfant_1", "montant_enfant_2", "montant_enfant_3", "montant_enfant_4", "montant_enfant_5", "montant_enfant_6", "label"), "champs_obligatoires": ("heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "montant_enfant_1"), "tarifs_compatibles": ("JOURN",) },
 
-    { "code": "duree_coeff_montant_unique", "label": _(u"Montant au prorata d'une durée"), "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("duree_min", "duree_max", "duree_seuil", "duree_plafond", "unite_horaire", "montant_unique", "montant_min", "montant_max", "montant_questionnaire", "ajustement", "label"), "champs_obligatoires": ("unite_horaire", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
-    { "code": "duree_coeff_qf", "label": _(u"Montant au prorata d'une durée et selon le quotient familial"), "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "duree_min", "duree_max", "duree_seuil", "duree_plafond", "unite_horaire", "montant_unique", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("qf_min", "qf_max", "unite_horaire", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
+    { "code": "duree_coeff_montant_unique", "label":u"Montant au prorata d'une durée", "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("duree_min", "duree_max", "duree_seuil", "duree_plafond", "unite_horaire", "montant_unique", "montant_min", "montant_max", "montant_questionnaire", "ajustement", "label"), "champs_obligatoires": ("unite_horaire", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
+    { "code": "duree_coeff_qf", "label":u"Montant au prorata d'une durée et selon le quotient familial", "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "duree_min", "duree_max", "duree_seuil", "duree_plafond", "unite_horaire", "montant_unique", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("qf_min", "qf_max", "unite_horaire", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
 
-    { "code": "taux_montant_unique", "label": _(u"Par taux d'effort"), "type": "unitaire", "nbre_lignes_max": 1, "entete": None, "champs": ("taux", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("taux",), "tarifs_compatibles": ("JOURN",) },
-    { "code": "taux_qf", "label": _(u"Par taux d'effort et par tranches de QF"), "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "taux", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("qf_min", "qf_max", "taux",), "tarifs_compatibles": ("JOURN",) },
-    { "code": "taux_date", "label": _(u"Par taux d'effort et par date"), "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("date", "taux", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("date", "taux"), "tarifs_compatibles": ("JOURN",)},
-    { "code": "duree_taux_montant_unique", "label": _(u"Par taux d'effort et en fonction d'une durée"), "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("duree_min", "duree_max", "temps_facture", "taux", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("duree_min", "duree_max", "taux"), "tarifs_compatibles": ("JOURN",) },
-    { "code": "duree_taux_qf", "label": _(u"Par taux d'effort et par tranches de QF en fonction d'une durée"), "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "duree_min", "duree_max", "temps_facture", "taux", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("qf_min", "qf_max", "duree_min", "duree_max", "taux"), "tarifs_compatibles": ("JOURN",) },
+    { "code": "taux_montant_unique", "label":u"Par taux d'effort", "type": "unitaire", "nbre_lignes_max": 1, "entete": None, "champs": ("taux", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("taux",), "tarifs_compatibles": ("JOURN",) },
+    { "code": "taux_qf", "label":u"Par taux d'effort et par tranches de QF", "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "taux", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("qf_min", "qf_max", "taux",), "tarifs_compatibles": ("JOURN",) },
+    { "code": "taux_date", "label":u"Par taux d'effort et par date", "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("date", "taux", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("date", "taux"), "tarifs_compatibles": ("JOURN",)},
+    { "code": "duree_taux_montant_unique", "label":u"Par taux d'effort et en fonction d'une durée", "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("duree_min", "duree_max", "temps_facture", "taux", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("duree_min", "duree_max", "taux"), "tarifs_compatibles": ("JOURN",) },
+    { "code": "duree_taux_qf", "label":u"Par taux d'effort et par tranches de QF en fonction d'une durée", "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "duree_min", "duree_max", "temps_facture", "taux", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("qf_min", "qf_max", "duree_min", "duree_max", "taux"), "tarifs_compatibles": ("JOURN",) },
 
     # Lignes PSU
-    # { "code": "forfait_contrat", "label": _(u"Forfait contrat"), "type": "unitaire", "nbre_lignes_max": 0, "entete": None, "champs": (), "champs_obligatoires": (), "tarifs_compatibles": ("CREDIT",) },
-    # { "code": "psu_revenu", "label": _(u"Barême PSU selon revenus"), "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("revenu_min", "revenu_max", "taux", "montant_min", "montant_max", "ajustement"), "champs_obligatoires": ("revenu_min", "revenu_max", "taux"), "tarifs_compatibles": ("BAREME",) },
-    # { "code": "psu_qf", "label": _(u"Barême PSU selon QF"), "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "taux", "montant_min", "montant_max", "ajustement"), "champs_obligatoires": ("qf_min", "qf_max", "taux"), "tarifs_compatibles": ("BAREME",) },
+    # { "code": "forfait_contrat", "label":u"Forfait contrat"), "type": "unitaire", "nbre_lignes_max": 0, "entete": None, "champs": (), "champs_obligatoires": (), "tarifs_compatibles": ("CREDIT",) },
+    # { "code": "psu_revenu", "label":u"Barême PSU selon revenus"), "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("revenu_min", "revenu_max", "taux", "montant_min", "montant_max", "ajustement"), "champs_obligatoires": ("revenu_min", "revenu_max", "taux"), "tarifs_compatibles": ("BAREME",) },
+    # { "code": "psu_qf", "label":u"Barême PSU selon QF"), "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "taux", "montant_min", "montant_max", "ajustement"), "champs_obligatoires": ("qf_min", "qf_max", "taux"), "tarifs_compatibles": ("BAREME",) },
 
     # Lignes PRODUITS
-    # {"code": "produit_montant_unique", "label": _(u"Montant unique"), "type": "unitaire", "nbre_lignes_max": 1, "entete": None, "champs": ("montant_unique",), "champs_obligatoires": ("montant_unique",), "tarifs_compatibles": ("PRODUIT",)},
-    # {"code": "produit_proportionnel_quantite", "label": _(u"Montant proportionnel à la quantité"), "type": "unitaire", "nbre_lignes_max": 1, "entete": None, "champs": ("montant_unique",), "champs_obligatoires": ("montant_unique",), "tarifs_compatibles": ("PRODUIT",)},
+    # {"code": "produit_montant_unique", "label":u"Montant unique"), "type": "unitaire", "nbre_lignes_max": 1, "entete": None, "champs": ("montant_unique",), "champs_obligatoires": ("montant_unique",), "tarifs_compatibles": ("PRODUIT",)},
+    # {"code": "produit_proportionnel_quantite", "label":u"Montant proportionnel à la quantité"), "type": "unitaire", "nbre_lignes_max": 1, "entete": None, "champs": ("montant_unique",), "champs_obligatoires": ("montant_unique",), "tarifs_compatibles": ("PRODUIT",)},
 
 ]
 
@@ -144,70 +143,70 @@ LISTE_ETATS_CONSO = [
 ]
 
 LISTE_CONTROLES_QUESTIONNAIRES = [
-    {"code": "ligne_texte", "label": _(u"Ligne de texte"), "image": "Texte_ligne.png", "filtre": "texte"},
-    {"code": "bloc_texte", "label": _(u"Bloc de texte multiligne"), "image": "Texte_bloc.png", "options": {"hauteur":60}, "filtre": "texte" },
-    {"code": "entier", "label": _(u"Nombre entier"), "image": "Ctrl_nombre.png", "options": {"min":0, "max":99999}, "filtre": "entier" },
-    {"code": "decimal", "label": _(u"Nombre décimal"), "image": "Ctrl_decimal.png", "options": {"min":0, "max":99999}, "filtre": "decimal" },
-    {"code": "montant", "label": _(u"Montant"), "image": "Euro.png", "filtre": "montant" },
-    {"code": "liste_deroulante", "label": _(u"Liste déroulante"), "image": "Ctrl_choice.png", "options":{"choix":None}, "filtre": "choix" },
-    {"code": "liste_coches", "label": _(u"Sélection multiple"), "image": "Coches.png", "options": {"hauteur":-1, "choix":None} , "filtre": "choix"},
-    {"code": "case_coche", "label": _(u"Case à cocher"), "image": "Ctrl_coche.png" , "filtre": "coche"},
-    {"code": "date", "label": _(u"Date"), "image": "Jour.png" , "filtre": "date"},
-    {"code": "slider", "label": _(u"Réglette"), "image": "Reglette.png", "options": {"hauteur":-1, "min":0, "max":100}, "filtre": "entier" },
-    {"code": "couleur", "label": _(u"Couleur"), "image": "Ctrl_couleur.png", "options": {"hauteur":20}, "filtre": None},
-    # {"code": "documents", "label": _(u"Porte-documents"), "image": "Document.png", "options": {"hauteur":60}, "filtre": None},
-    {"code": "codebarres", "label": _(u"Code-barres"), "image": "Codebarres.png", "options": {"norme":"39"}, "filtre": "texte" },
-    # {"code": "rfid", "label": _(u"Badge RFID"), "image": "Rfid.png" , "filtre": "texte"},
+    {"code": "ligne_texte", "label":u"Ligne de texte", "image": "Texte_ligne.png", "filtre": "texte"},
+    {"code": "bloc_texte", "label":u"Bloc de texte multiligne", "image": "Texte_bloc.png", "options": {"hauteur":60}, "filtre": "texte" },
+    {"code": "entier", "label":u"Nombre entier", "image": "Ctrl_nombre.png", "options": {"min":0, "max":99999}, "filtre": "entier" },
+    {"code": "decimal", "label":u"Nombre décimal", "image": "Ctrl_decimal.png", "options": {"min":0, "max":99999}, "filtre": "decimal" },
+    {"code": "montant", "label":u"Montant", "image": "Euro.png", "filtre": "montant" },
+    {"code": "liste_deroulante", "label":u"Liste déroulante", "image": "Ctrl_choice.png", "options":{"choix":None}, "filtre": "choix" },
+    {"code": "liste_coches", "label":u"Sélection multiple", "image": "Coches.png", "options": {"hauteur":-1, "choix":None} , "filtre": "choix"},
+    {"code": "case_coche", "label":u"Case à cocher", "image": "Ctrl_coche.png" , "filtre": "coche"},
+    {"code": "date", "label":u"Date", "image": "Jour.png" , "filtre": "date"},
+    {"code": "slider", "label":u"Réglette", "image": "Reglette.png", "options": {"hauteur":-1, "min":0, "max":100}, "filtre": "entier" },
+    {"code": "couleur", "label":u"Couleur", "image": "Ctrl_couleur.png", "options": {"hauteur":20}, "filtre": None},
+    # {"code": "documents", "label":u"Porte-documents", "image": "Document.png", "options": {"hauteur":60}, "filtre": None},
+    {"code": "codebarres", "label":u"Code-barres", "image": "Codebarres.png", "options": {"norme":"39"}, "filtre": "texte" },
+    # {"code": "rfid", "label":u"Badge RFID", "image": "Rfid.png" , "filtre": "texte"},
     ]
 
 
 LISTE_CATEGORIES_TIERS = [
-    (1, _(u"Personne physique")),
-    (20, _(u"Etat ou établissement public national")),
-    (21, _(u"Région")),
-    (22, _(u"Département")),
-    (23, _(u"Commune")),
-    (24, _(u"Groupement de collectivités")),
-    (25, _(u"Caisse des écoles")),
-    (26, _(u"CCAS")),
-    (27, _(u"Etablissement public de santé")),
-    (28, _(u"Ecole nationale de la santé publique")),
-    (29, _(u"Autre établissement publique ou organisme international")),
-    (50, _(u"Personne morale de droit privé autre qu'organisme social")),
-    (60, _(u"Caisse de sécurité sociale régime général")),
-    (61, _(u"Caisse de sécurité sociale régime agricole")),
-    (62, _(u"Sécurité sociale des travailleurs non salariés et professions non agricoles")),
-    (63, _(u"Autre régime obligatoire de sécurité sociale")),
-    (64, _(u"Mutuelle ou organisme d'assurance")),
-    (65, _(u"Autre tiers payant")),
-    (70, _(u"CNRACL")),
-    (71, _(u"IRCANTEC")),
-    (72, _(u"ASSEDIC")),
-    (73, _(u"Caisse mutualiste de retraite complémentaire")),
-    (74, _(u"Autre organisme social")),
+    (1,u"Personne physique"),
+    (20,u"Etat ou établissement public national"),
+    (21,u"Région"),
+    (22,u"Département"),
+    (23,u"Commune"),
+    (24,u"Groupement de collectivités"),
+    (25,u"Caisse des écoles"),
+    (26,u"CCAS"),
+    (27,u"Etablissement public de santé"),
+    (28,u"Ecole nationale de la santé publique"),
+    (29,u"Autre établissement publique ou organisme international"),
+    (50,u"Personne morale de droit privé autre qu'organisme social"),
+    (60,u"Caisse de sécurité sociale régime général"),
+    (61,u"Caisse de sécurité sociale régime agricole"),
+    (62,u"Sécurité sociale des travailleurs non salariés et professions non agricoles"),
+    (63,u"Autre régime obligatoire de sécurité sociale"),
+    (64,u"Mutuelle ou organisme d'assurance"),
+    (65,u"Autre tiers payant"),
+    (70,u"CNRACL"),
+    (71,u"IRCANTEC"),
+    (72,u"ASSEDIC"),
+    (73,u"Caisse mutualiste de retraite complémentaire"),
+    (74,u"Autre organisme social"),
     ]
 
 LISTE_NATURES_JURIDIQUES = [
-    (0, _(u"Inconnu")),
-    (1, _(u"Particulier")),
-    (2, _(u"Artisan / commerçant / agriculteur")),
-    (3, _(u"Société")),
-    (4, _(u"CAM ou Caisse appliquant les mêmes règles")),
-    (5, _(u"Caisse complémentaire")),
-    (6, _(u"Association")),
-    (7, _(u"Etat ou organisme d'état")),
-    (8, _(u"Etablissement public national")),
-    (9, _(u"Collectivité territoriale / EPL / EPS")),
-    (10, _(u"Etat étranger")),
-    (11, _(u"CAF")),
+    (0,u"Inconnu"),
+    (1,u"Particulier"),
+    (2,u"Artisan / commerçant / agriculteur"),
+    (3,u"Société"),
+    (4,u"CAM ou Caisse appliquant les mêmes règles"),
+    (5,u"Caisse complémentaire"),
+    (6,u"Association"),
+    (7,u"Etat ou organisme d'état"),
+    (8,u"Etablissement public national"),
+    (9,u"Collectivité territoriale / EPL / EPS"),
+    (10,u"Etat étranger"),
+    (11,u"CAF"),
     ]
 
 LISTE_TYPES_ID_TIERS = [
-    (9999, _(u"Aucun")),
-    (1, _(u"01 - SIRET")),
-    (2, _(u"02 - SIREN")),
-    (3, _(u"03 - FINESS")),
-    (4, _(u"04 - NIR")),
+    (9999,u"Aucun"),
+    (1,u"01 - SIRET"),
+    (2,u"02 - SIREN"),
+    (3,u"03 - FINESS"),
+    (4,u"04 - NIR"),
     ]
 
 CHOIX_AUTORISATIONS = [(None, "Autorisation non précisée"), (1, "Responsable légal(e)"), (2, "Contacter en cas d'urgence"), (3, "Raccompagnement autorisé"), (4, "Raccompagnement interdit")]

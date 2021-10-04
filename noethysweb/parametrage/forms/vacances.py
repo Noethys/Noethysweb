@@ -3,9 +3,8 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.forms import ModelForm
+from django.forms import ModelForm, ValidationError
 from core.forms.base import FormulaireBase
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, HTML, Row, Column, ButtonHolder
 from crispy_forms.bootstrap import Field, FormActions, StrictButton
@@ -44,5 +43,5 @@ class Formulaire(FormulaireBase, ModelForm):
 
     def clean_date_fin(self):
         if self.cleaned_data['date_debut'] > self.cleaned_data['date_fin'] :
-            raise ValidationError(_("La date de fin doit être supérieure à la date de début."))
+            raise ValidationError("La date de fin doit être supérieure à la date de début.")
         return self.cleaned_data['date_fin']

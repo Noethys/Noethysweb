@@ -3,7 +3,6 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.utils.translation import ugettext as _
 from core.utils import utils_infos_individus, utils_dates, utils_resolveur_formule
 from core.models import ModeleDocument, Organisateur
 import json, os, datetime
@@ -38,83 +37,85 @@ class Categorie():
 
 class Fond(Categorie):
     def __init__(self):
-        self.nom = _(u"Fond")
+        self.nom = u"Fond"
         self.code = "fond"
         self.photosIndividuelles = False
-        self.champs = [(_(u"Nom de l'organisateur"), _(u"Association Noethys"), "{ORGANISATEUR_NOM}"),
-            (_(u"Rue de l'organisateur"), _(u"Avenue des Lilas"), "{ORGANISATEUR_RUE}"),
-            (_(u"Code postal de l'organisateur"), u"29870", "{ORGANISATEUR_CP}"),
-            (_(u"Ville de l'organisateur"), _(u"LANNILIS"), "{ORGANISATEUR_VILLE}"),
-            (_(u"Téléphone de l'organisateur"), u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (_(u"Fax de l'organisateur"), u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (_(u"Mail de l'organisateur"), _(u"noethys") + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
-            (_(u"Site internet de l'organisateur"), u"www.noethys.com", "{ORGANISATEUR_SITE}"),
-            (_(u"Numéro d'agrément de l'organisateur"), u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
-            (_(u"Numéro SIRET de l'organisateur"), u"123456789123", "{ORGANISATEUR_SIRET}"),
-            (_(u"Code APE de l'organisateur"), _(u"NO123"), "{ORGANISATEUR_APE}"), ]
+        self.champs = [
+            (u"Nom de l'organisateur", u"Association Noethys", "{ORGANISATEUR_NOM}"),
+            (u"Rue de l'organisateur", u"Avenue des Lilas", "{ORGANISATEUR_RUE}"),
+            (u"Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", u"LANNILIS", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", u"noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
+            (u"Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
+            (u"Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
+            (u"Code APE de l'organisateur", u"NO123", "{ORGANISATEUR_APE}"), ]
         self.codesbarres = []
         self.speciaux = []
 
 
 class Facture(Categorie):
     def __init__(self):
-        self.nom = _(u"Facture")
+        self.nom = u"Facture"
         self.code = "facture"
 
         self.photosIndividuelles = False
 
-        self.champs = [(_(u"Numéro ID de la famille"), u"2582", "{IDFAMILLE}"),
-            (_(u"Noms des titulaires de dossier"), _(u"M. DUPOND Gérard"), "{FAMILLE_NOM}"),
-            (_(u"Rue de la famille"), _(u"10 rue des oiseaux"), "{FAMILLE_RUE}"),
-            (_(u"Code postal de la famille"), u"29200", "{FAMILLE_CP}"),
-            (_(u"Ville de la famille"), _(u"BREST"), "{FAMILLE_VILLE}"),
-            (_(u"Individus concernés"), _(u"Kévin ALLIBERT"), "{INDIVIDUS_CONCERNES}"),
+        self.champs = [
+            (u"Numéro ID de la famille", u"2582", "{IDFAMILLE}"),
+            (u"Noms des titulaires de dossier", u"M. DUPOND Gérard", "{FAMILLE_NOM}"),
+            (u"Rue de la famille", u"10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Code postal de la famille", u"29200", "{FAMILLE_CP}"),
+            (u"Ville de la famille", u"BREST", "{FAMILLE_VILLE}"),
+            (u"Individus concernés", u"Kévin ALLIBERT", "{INDIVIDUS_CONCERNES}"),
 
-            (_(u"Nom de l'organisateur"), _(u"Association Noethys"), "{ORGANISATEUR_NOM}"),
-            (_(u"Rue de l'organisateur"), _(u"Avenue des Lilas"), "{ORGANISATEUR_RUE}"),
-            (_(u"Code postal de l'organisateur"), u"29870", "{ORGANISATEUR_CP}"),
-            (_(u"Ville de l'organisateur"), _(u"LANNILIS"), "{ORGANISATEUR_VILLE}"),
-            (_(u"Téléphone de l'organisateur"), u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (_(u"Fax de l'organisateur"), u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (_(u"Mail de l'organisateur"), _(u"noethys") + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
-            (_(u"Site internet de l'organisateur"), u"www.noethys.com", "{ORGANISATEUR_SITE}"),
-            (_(u"Numéro d'agrément de l'organisateur"), u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
-            (_(u"Numéro SIRET de l'organisateur"), u"123456789123", "{ORGANISATEUR_SIRET}"),
-            (_(u"Code APE de l'organisateur"), _(u"NO123"), "{ORGANISATEUR_APE}"),
+            (u"Nom de l'organisateur", u"Association Noethys", "{ORGANISATEUR_NOM}"),
+            (u"Rue de l'organisateur", u"Avenue des Lilas", "{ORGANISATEUR_RUE}"),
+            (u"Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", u"LANNILIS", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", u"noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
+            (u"Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
+            (u"Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
+            (u"Code APE de l'organisateur", u"NO123", "{ORGANISATEUR_APE}"),
 
-            (_(u"Numéro de facture"), u"1234567", "{NUM_FACTURE}"),
-            (_(u"Code-barres - Numéro de facture"), u"F123456", "{CODEBARRES_NUM_FACTURE}"),
-            (_(u"Nom du lot"), _(u"Mars 2014"), "{NOM_LOT}"),
-            (_(u"Date d'échéance de paiement (long)"), _(u"Lundi 10 janvier 2011"), "{DATE_ECHEANCE_LONG}"),
-            (_(u"Date d'échéance de paiement (court)"), u"10/01/2011", "{DATE_ECHEANCE_COURT}"),
-            (_(u"Texte échéance de paiement"), _(u"Date d'échéance : 10/01/2011"), "{TEXTE_ECHEANCE}"),
-            (_(u"Date d'édition de la facture (long)"), _(u"Lundi 9 septembre 2011"), "{DATE_EDITION_LONG}"),
-            (_(u"Date d'édition de la facture (court)"), u"19/09/2011", "{DATE_EDITION_COURT}"),
-            (_(u"Date du prélèvement si facture prélevée"), u"15/10/2011", "{DATE_PRELEVEMENT}"),
+            (u"Numéro de facture", u"1234567", "{NUM_FACTURE}"),
+            (u"Code-barres - Numéro de facture", u"F123456", "{CODEBARRES_NUM_FACTURE}"),
+            (u"Nom du lot", u"Mars 2014", "{NOM_LOT}"),
+            (u"Date d'échéance de paiement (long)", u"Lundi 10 janvier 2011", "{DATE_ECHEANCE_LONG}"),
+            (u"Date d'échéance de paiement (court)", u"10/01/2011", "{DATE_ECHEANCE_COURT}"),
+            (u"Texte échéance de paiement", u"Date d'échéance : 10/01/2011", "{TEXTE_ECHEANCE}"),
+            (u"Date d'édition de la facture (long)", u"Lundi 9 septembre 2011", "{DATE_EDITION_LONG}"),
+            (u"Date d'édition de la facture (court)", u"19/09/2011", "{DATE_EDITION_COURT}"),
+            (u"Date du prélèvement si facture prélevée", u"15/10/2011", "{DATE_PRELEVEMENT}"),
 
-            (_(u"Total des prestations de la période"), u"10.00 €", "{TOTAL_PERIODE}"),
-            (_(u"Total déjà réglé pour la période"), u"6.00 €", "{TOTAL_REGLE}"),
-            (_(u"Solde dû pour la période"), u"4.00 €", "{SOLDE_DU}"),
-            (_(u"Total des reports des périodes précédentes"), u"134.50 €", "{TOTAL_REPORTS}"),
-            (_(u"Solde avec reports"), u"138.50 €", "{SOLDE_AVEC_REPORTS}"),
-            (_(u"Solde du compte"), u"-35.80 €", "{SOLDE_COMPTE}"),
-            (_(u"Total des déductions"), u"20.50 €", "{TOTAL_DEDUCTIONS}"),
+            (u"Total des prestations de la période", u"10.00 €", "{TOTAL_PERIODE}"),
+            (u"Total déjà réglé pour la période", u"6.00 €", "{TOTAL_REGLE}"),
+            (u"Solde dû pour la période", u"4.00 €", "{SOLDE_DU}"),
+            (u"Total des reports des périodes précédentes", u"134.50 €", "{TOTAL_REPORTS}"),
+            (u"Solde avec reports", u"138.50 €", "{SOLDE_AVEC_REPORTS}"),
+            (u"Solde du compte", u"-35.80 €", "{SOLDE_COMPTE}"),
+            (u"Total des déductions", u"20.50 €", "{TOTAL_DEDUCTIONS}"),
 
-            (_(u"PES ORMC ID de la pièce"), u"12345", "{PES_IDPIECE}"),
-            (_(u"PES ORMC Nom du lot"), u"Cantine janv 2016", "{PES_NOM_LOT}"),
-            (_(u"PES ORMC Exercice"), u"2016", "{PES_LOT_EXERCICE}"), (_(u"PES ORMC Mois"), u"12", "{PES_LOT_MOIS}"),
-            (_(u"PES ORMC Objet du lot"), u"Accueil périscolaire", "{PES_LOT_OBJET}"),
-            (_(u"PES ORMC ID Bordereau"), u"17", "{PES_LOT_ID_BORDEREAU}"),
-            (_(u"PES ORMC Code produit"), u"87", "{PES_LOT_CODE_PRODUIT}"), ]
+            (u"PES ORMC ID de la pièce", u"12345", "{PES_IDPIECE}"),
+            (u"PES ORMC Nom du lot", u"Cantine janv 2016", "{PES_NOM_LOT}"),
+            (u"PES ORMC Exercice", u"2016", "{PES_LOT_EXERCICE}", "PES ORMC Mois", u"12", "{PES_LOT_MOIS}"),
+            (u"PES ORMC Objet du lot", u"Accueil périscolaire", "{PES_LOT_OBJET}"),
+            (u"PES ORMC ID Bordereau", u"17", "{PES_LOT_ID_BORDEREAU}"),
+            (u"PES ORMC Code produit", u"87", "{PES_LOT_CODE_PRODUIT}"), ]
 
         self.champs.extend(utils_infos_individus.GetNomsChampsPossibles(mode="famille"))
 
-        self.codesbarres = [(_(u"Numéro de facture"), u"1234567", "{CODEBARRES_NUM_FACTURE}"), ]
+        self.codesbarres = [(u"Numéro de facture", u"1234567", "{CODEBARRES_NUM_FACTURE}"), ]
 
         self.speciaux = [
-            {"nom": _(u"Cadre principal"), "champ": _(u"cadre_principal"), "obligatoire": True, "nbreMax": 1, "x": None, "y": None, "verrouillageX": False, "verrouillageY": False, "Xmodifiable": True, "Ymodifiable": True, "largeur": 100, "hauteur": 150, "largeurModifiable": True, "hauteurModifiable": True, "largeurMin": 80, "largeurMax": 1000, "hauteurMin": 80, "hauteurMax": 1000, "verrouillageLargeur": False, "verrouillageHauteur": False, "verrouillageProportions": False, "interditModifProportions": False, },
-            {"nom": _(u"Coupon-réponse vertical"), "champ": _(u"coupon_vertical"), "obligatoire": False, "x": None, "y": None, "largeur": 15, "hauteur": 70, "largeurModifiable": False, "hauteurModifiable": False, "verrouillageLargeur": True, "verrouillageHauteur": True, "interditModifProportions": True, },
-            {"nom": _(u"Coupon-réponse horizontal"), "champ": _(u"coupon_horizontal"), "obligatoire": False, "x": None, "y": None, "largeur": 70, "hauteur": 15, "largeurModifiable": False, "hauteurModifiable": False, "verrouillageLargeur": True, "verrouillageHauteur": True, "interditModifProportions": True, },
+            {"nom": u"Cadre principal", "champ": "cadre_principal", "obligatoire": True, "nbreMax": 1, "x": None, "y": None, "verrouillageX": False, "verrouillageY": False, "Xmodifiable": True, "Ymodifiable": True, "largeur": 100, "hauteur": 150, "largeurModifiable": True, "hauteurModifiable": True, "largeurMin": 80, "largeurMax": 1000, "hauteurMin": 80, "hauteurMax": 1000, "verrouillageLargeur": False, "verrouillageHauteur": False, "verrouillageProportions": False, "interditModifProportions": False, },
+            {"nom": u"Coupon-réponse vertical", "champ": "coupon_vertical", "obligatoire": False, "x": None, "y": None, "largeur": 15, "hauteur": 70, "largeurModifiable": False, "hauteurModifiable": False, "verrouillageLargeur": True, "verrouillageHauteur": True, "interditModifProportions": True, },
+            {"nom": u"Coupon-réponse horizontal", "champ": "coupon_horizontal", "obligatoire": False, "x": None, "y": None, "largeur": 70, "hauteur": 15, "largeurModifiable": False, "hauteurModifiable": False, "verrouillageLargeur": True, "verrouillageHauteur": True, "interditModifProportions": True, },
         ]
 
         # Questionnaires
@@ -126,48 +127,48 @@ class Facture(Categorie):
 
 class Attestation(Categorie):
     def __init__(self):
-        self.nom = _(u"Attestation")
+        self.nom = "Attestation"
         self.code = "attestation"
 
         self.photosIndividuelles = False
 
-        self.champs = [(_(u"Numéro ID de la famille"), u"2582", "{IDFAMILLE}"),
+        self.champs = [(u"Numéro ID de la famille", u"2582", "{IDFAMILLE}"),
 
-            (_(u"Nom du destinataire"), _(u"M. DUPOND Gérard"), "{DESTINATAIRE_NOM}"),
-            (_(u"Rue de l'adresse du destinataire"), _(u"10 rue des oiseaux"), "{DESTINATAIRE_RUE}"),
-            (_(u"Ville de l'adresse du destinataire"), _(u"29000 QUIMPER"), "{DESTINATAIRE_VILLE}"),
+            (u"Nom du destinataire", u"M. DUPOND Gérard", "{DESTINATAIRE_NOM}"),
+            (u"Rue de l'adresse du destinataire", u"10 rue des oiseaux", "{DESTINATAIRE_RUE}"),
+            (u"Ville de l'adresse du destinataire", u"29000 QUIMPER", "{DESTINATAIRE_VILLE}"),
 
-            (_(u"Nom des individus concernés"), u"Xavier DUPOND et Lucie DUPOND", "{NOMS_INDIVIDUS}"),
-            (_(u"Date de début de la période"), u"01/01/2011", "{DATE_DEBUT}"),
-            (_(u"Date de fin de la période"), u"31/01/2011", "{DATE_FIN}"),
+            (u"Nom des individus concernés", u"Xavier DUPOND et Lucie DUPOND", "{NOMS_INDIVIDUS}"),
+            (u"Date de début de la période", u"01/01/2011", "{DATE_DEBUT}"),
+            (u"Date de fin de la période", u"31/01/2011", "{DATE_FIN}"),
 
-            (_(u"Nom de l'organisateur"), _(u"Association Noethys"), "{ORGANISATEUR_NOM}"),
-            (_(u"Rue de l'organisateur"), _(u"Avenue des Lilas"), "{ORGANISATEUR_RUE}"),
-            (_(u"Code postal de l'organisateur"), u"29870", "{ORGANISATEUR_CP}"),
-            (_(u"Ville de l'organisateur"), _(u"LANNILIS"), "{ORGANISATEUR_VILLE}"),
-            (_(u"Téléphone de l'organisateur"), u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (_(u"Fax de l'organisateur"), u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (_(u"Mail de l'organisateur"), _(u"noethys") + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
-            (_(u"Site internet de l'organisateur"), u"www.noethys.com", "{ORGANISATEUR_SITE}"),
-            (_(u"Numéro d'agrément de l'organisateur"), u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
-            (_(u"Numéro SIRET de l'organisateur"), u"123456789123", "{ORGANISATEUR_SIRET}"),
-            (_(u"Code APE de l'organisateur"), _(u"NO123"), "{ORGANISATEUR_APE}"),
+            (u"Nom de l'organisateur", u"Association Noethys", "{ORGANISATEUR_NOM}"),
+            (u"Rue de l'organisateur", u"Avenue des Lilas", "{ORGANISATEUR_RUE}"),
+            (u"Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", u"LANNILIS", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", u"noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
+            (u"Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
+            (u"Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
+            (u"Code APE de l'organisateur", u"NO123", "{ORGANISATEUR_APE}"),
 
-            (_(u"Numéro de l'attestation"), u"1234567", "{NUM_ATTESTATION}"),
-            (_(u"Date d'édition de l'attestation (long)"), _(u"Lundi 9 septembre 2011"), "{DATE_EDITION_LONG}"),
-            (_(u"Date d'édition de l'attestation (court)"), u"19/09/2011", "{DATE_EDITION_COURT}"),
+            (u"Numéro de l'attestation", u"1234567", "{NUM_ATTESTATION}"),
+            (u"Date d'édition de l'attestation (long)", u"Lundi 9 septembre 2011", "{DATE_EDITION_LONG}"),
+            (u"Date d'édition de l'attestation (court)", u"19/09/2011", "{DATE_EDITION_COURT}"),
 
-            (_(u"Total des prestations de la période"), u"10.00 €", "{TOTAL_PERIODE}"),
-            (_(u"Total déjà réglé pour la période"), u"6.00 €", "{TOTAL_REGLE}"),
-            (_(u"Solde dû pour la période"), u"4.00 €", "{SOLDE_DU}"),
-            (_(u"Total des déductions"), u"20.50 €", "{TOTAL_DEDUCTIONS}"), ]
+            (u"Total des prestations de la période", u"10.00 €", "{TOTAL_PERIODE}"),
+            (u"Total déjà réglé pour la période", u"6.00 €", "{TOTAL_REGLE}"),
+            (u"Solde dû pour la période", u"4.00 €", "{SOLDE_DU}"),
+            (u"Total des déductions", u"20.50 €", "{TOTAL_DEDUCTIONS}"), ]
 
         self.champs.extend(utils_infos_individus.GetNomsChampsPossibles(mode="famille"))
 
         self.codesbarres = []
 
         self.speciaux = [
-            {"nom": _(u"Cadre principal"), "champ": _(u"cadre_principal"), "obligatoire": True, "nbreMax": 1, "x": None, "y": None, "verrouillageX": False, "verrouillageY": False, "Xmodifiable": True, "Ymodifiable": True, "largeur": 100, "hauteur": 150, "largeurModifiable": True, "hauteurModifiable": True, "largeurMin": 80, "largeurMax": 1000, "hauteurMin": 80, "hauteurMax": 1000, "verrouillageLargeur": False, "verrouillageHauteur": False, "verrouillageProportions": False, "interditModifProportions": False, }
+            {"nom": "Cadre principal", "champ": "cadre_principal", "obligatoire": True, "nbreMax": 1, "x": None, "y": None, "verrouillageX": False, "verrouillageY": False, "Xmodifiable": True, "Ymodifiable": True, "largeur": 100, "hauteur": 150, "largeurModifiable": True, "hauteurModifiable": True, "largeurMin": 80, "largeurMax": 1000, "hauteurMin": 80, "hauteurMax": 1000, "verrouillageLargeur": False, "verrouillageHauteur": False, "verrouillageProportions": False, "interditModifProportions": False, }
         ]
 
         # Questionnaires
@@ -179,46 +180,49 @@ class Attestation(Categorie):
 
 class Rappel(Categorie):
     def __init__(self):
-        self.nom = _(u"Rappel")
+        self.nom = "Rappel"
         self.code = "rappel"
 
         self.photosIndividuelles = False
 
-        self.champs = [(_(u"Numéro ID de la famille"), u"2582", "{IDFAMILLE}"),
-            (_(u"Noms des titulaires de dossier"), _(u"M. DUPOND Gérard"), "{FAMILLE_NOM}"),
-            (_(u"Rue de la famille"), _(u"10 rue des oiseaux"), "{FAMILLE_RUE}"),
-            (_(u"Code postal de la famille"), u"29200", "{FAMILLE_CP}"),
-            (_(u"Ville de la famille"), _(u"BREST"), "{FAMILLE_VILLE}"),
+        self.champs = [
+            (u"Numéro ID de la famille", u"2582", "{IDFAMILLE}"),
+            (u"Noms des titulaires de dossier", u"M. DUPOND Gérard", "{FAMILLE_NOM}"),
+            (u"Rue de la famille", u"10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Code postal de la famille", u"29200", "{FAMILLE_CP}"),
+            (u"Ville de la famille", u"BREST", "{FAMILLE_VILLE}"),
 
-            (_(u"Nom de l'organisateur"), _(u"Association Noethys"), "{ORGANISATEUR_NOM}"),
-            (_(u"Rue de l'organisateur"), _(u"Avenue des Lilas"), "{ORGANISATEUR_RUE}"),
-            (_(u"Code postal de l'organisateur"), u"29870", "{ORGANISATEUR_CP}"),
-            (_(u"Ville de l'organisateur"), _(u"LANNILIS"), "{ORGANISATEUR_VILLE}"),
-            (_(u"Téléphone de l'organisateur"), u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (_(u"Fax de l'organisateur"), u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (_(u"Mail de l'organisateur"), _(u"noethys") + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
-            (_(u"Site internet de l'organisateur"), u"www.noethys.com", "{ORGANISATEUR_SITE}"),
-            (_(u"Numéro d'agrément de l'organisateur"), u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
-            (_(u"Numéro SIRET de l'organisateur"), u"123456789123", "{ORGANISATEUR_SIRET}"),
-            (_(u"Code APE de l'organisateur"), _(u"NO123"), "{ORGANISATEUR_APE}"),
+            (u"Nom de l'organisateur", u"Association Noethys", "{ORGANISATEUR_NOM}"),
+            (u"Rue de l'organisateur", u"Avenue des Lilas", "{ORGANISATEUR_RUE}"),
+            (u"Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", u"LANNILIS", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", u"noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
+            (u"Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
+            (u"Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
+            (u"Code APE de l'organisateur", u"NO123", "{ORGANISATEUR_APE}"),
 
-            (_(u"Numéro de rappel"), u"1234567", "{NUM_RAPPEL}"),
-            (_(u"Code-barres - Numéro de rappel"), u"F123456", "{CODEBARRES_NUM_RAPPEL}"),
-            (_(u"Nom du lot"), _(u"Mars 2014"), "{NOM_LOT}"),
-            (_(u"Date d'édition du rappel (long)"), _(u"Lundi 9 septembre 2011"), "{DATE_EDITION_LONG}"),
-            (_(u"Date d'édition du rappel (court)"), u"19/09/2011", "{DATE_EDITION_COURT}"),
-            (_(u"Date de début"), u"10/07/2011", "{DATE_DEBUT}"), (_(u"Date de fin"), u"21/12/2011", "{DATE_FIN}"),
+            (u"Numéro de rappel", u"1234567", "{NUM_RAPPEL}"),
+            (u"Code-barres - Numéro de rappel", u"F123456", "{CODEBARRES_NUM_RAPPEL}"),
+            (u"Nom du lot", u"Mars 2014", "{NOM_LOT}"),
+            (u"Date d'édition du rappel (long)", u"Lundi 9 septembre 2011", "{DATE_EDITION_LONG}"),
+            (u"Date d'édition du rappel (court)", u"19/09/2011", "{DATE_EDITION_COURT}"),
+            (u"Date de début", u"10/07/2011", "{DATE_DEBUT}", "Date de fin", u"21/12/2011", "{DATE_FIN}"),
 
-            (_(u"Solde"), u"12.00 €", "{SOLDE}"), (_(u"Solde en lettres"), _(u"Douze Euros"), "{SOLDE_LETTRES}"), ]
+            (u"Solde", u"12.00 €", "{SOLDE}"),
+            (u"Solde en lettres", u"Douze Euros", "{SOLDE_LETTRES}"),
+        ]
 
         self.champs.extend(utils_infos_individus.GetNomsChampsPossibles(mode="famille"))
 
-        self.codesbarres = [(_(u"Numéro de rappel"), u"1234567", "{CODEBARRES_NUM_RAPPEL}"), ]
+        self.codesbarres = [(u"Numéro de rappel", u"1234567", "{CODEBARRES_NUM_RAPPEL}"), ]
 
         self.speciaux = [
-            {"nom": _(u"Cadre principal"), "champ": _(u"cadre_principal"), "obligatoire": True, "nbreMax": 1, "x": None, "y": None, "verrouillageX": False, "verrouillageY": False, "Xmodifiable": True, "Ymodifiable": True, "largeur": 100, "hauteur": 150, "largeurModifiable": True, "hauteurModifiable": True, "largeurMin": 80, "largeurMax": 1000, "hauteurMin": 80, "hauteurMax": 1000, "verrouillageLargeur": False, "verrouillageHauteur": False, "verrouillageProportions": False, "interditModifProportions": False, },
-            {"nom": _(u"Coupon-réponse vertical"), "champ": _(u"coupon_vertical"), "obligatoire": False, "x": None, "y": None, "largeur": 15, "hauteur": 70, "largeurModifiable": False, "hauteurModifiable": False, "verrouillageLargeur": True, "verrouillageHauteur": True, "interditModifProportions": True, },
-            {"nom": _(u"Coupon-réponse horizontal"), "champ": _(u"coupon_horizontal"), "obligatoire": False, "x": None, "y": None, "largeur": 70, "hauteur": 15, "largeurModifiable": False, "hauteurModifiable": False, "verrouillageLargeur": True, "verrouillageHauteur": True, "interditModifProportions": True, },
+            {"nom": u"Cadre principal", "champ": "cadre_principal", "obligatoire": True, "nbreMax": 1, "x": None, "y": None, "verrouillageX": False, "verrouillageY": False, "Xmodifiable": True, "Ymodifiable": True, "largeur": 100, "hauteur": 150, "largeurModifiable": True, "hauteurModifiable": True, "largeurMin": 80, "largeurMax": 1000, "hauteurMin": 80, "hauteurMax": 1000, "verrouillageLargeur": False, "verrouillageHauteur": False, "verrouillageProportions": False, "interditModifProportions": False, },
+            {"nom": u"Coupon-réponse vertical", "champ": "coupon_vertical", "obligatoire": False, "x": None, "y": None, "largeur": 15, "hauteur": 70, "largeurModifiable": False, "hauteurModifiable": False, "verrouillageLargeur": True, "verrouillageHauteur": True, "interditModifProportions": True, },
+            {"nom": u"Coupon-réponse horizontal", "champ": "coupon_horizontal", "obligatoire": False, "x": None, "y": None, "largeur": 70, "hauteur": 15, "largeurModifiable": False, "hauteurModifiable": False, "verrouillageLargeur": True, "verrouillageHauteur": True, "interditModifProportions": True, },
         ]
 
         # Questionnaires
@@ -230,51 +234,52 @@ class Rappel(Categorie):
 
 class Reglement(Categorie):
     def __init__(self):
-        self.nom = _(u"Règlement")
+        self.nom = "Règlement"
         self.code = "reglement"
 
         self.photosIndividuelles = False
 
-        self.champs = [(_(u"Numéro ID de la famille"), u"2582", "{IDFAMILLE}"),
+        self.champs = [
+            (u"Numéro ID de la famille", u"2582", "{IDFAMILLE}"),
 
-            (_(u"Nom du destinataire"), _(u"M. DUPOND Gérard"), "{DESTINATAIRE_NOM}"),
-            (_(u"Rue de l'adresse du destinataire"), _(u"10 rue des oiseaux"), "{DESTINATAIRE_RUE}"),
-            (_(u"Ville de l'adresse du destinataire"), _(u"29000 QUIMPER"), "{DESTINATAIRE_VILLE}"),
+            (u"Nom du destinataire", u"M. DUPOND Gérard", "{DESTINATAIRE_NOM}"),
+            (u"Rue de l'adresse du destinataire", u"10 rue des oiseaux", "{DESTINATAIRE_RUE}"),
+            (u"Ville de l'adresse du destinataire", u"29000 QUIMPER", "{DESTINATAIRE_VILLE}"),
 
-            (_(u"Nom de l'organisateur"), _(u"Association Noethys"), "{ORGANISATEUR_NOM}"),
-            (_(u"Rue de l'organisateur"), _(u"Avenue des Lilas"), "{ORGANISATEUR_RUE}"),
-            (_(u"Code postal de l'organisateur"), u"29870", "{ORGANISATEUR_CP}"),
-            (_(u"Ville de l'organisateur"), _(u"LANNILIS"), "{ORGANISATEUR_VILLE}"),
-            (_(u"Téléphone de l'organisateur"), u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (_(u"Fax de l'organisateur"), u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (_(u"Mail de l'organisateur"), _(u"noethys") + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
-            (_(u"Site internet de l'organisateur"), u"www.noethys.com", "{ORGANISATEUR_SITE}"),
-            (_(u"Numéro d'agrément de l'organisateur"), u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
-            (_(u"Numéro SIRET de l'organisateur"), u"123456789123", "{ORGANISATEUR_SIRET}"),
-            (_(u"Code APE de l'organisateur"), _(u"NO123"), "{ORGANISATEUR_APE}"),
+            (u"Nom de l'organisateur", u"Association Noethys", "{ORGANISATEUR_NOM}"),
+            (u"Rue de l'organisateur", u"Avenue des Lilas", "{ORGANISATEUR_RUE}"),
+            (u"Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", u"LANNILIS", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", u"noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
+            (u"Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
+            (u"Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
+            (u"Code APE de l'organisateur", u"NO123", "{ORGANISATEUR_APE}"),
 
-            (_(u"Numéro du reçu"), u"1234567", "{NUM_RECU}"),
-            (_(u"Date d'édition du reçu (long)"), _(u"Lundi 9 septembre 2011"), "{DATE_EDITION_LONG}"),
-            (_(u"Date d'édition du reçu (court)"), u"19/09/2011", "{DATE_EDITION_COURT}"),
+            (u"Numéro du reçu", u"1234567", "{NUM_RECU}"),
+            (u"Date d'édition du reçu (long)", u"Lundi 9 septembre 2011", "{DATE_EDITION_LONG}"),
+            (u"Date d'édition du reçu (court)", u"19/09/2011", "{DATE_EDITION_COURT}"),
 
-            (_(u"ID du règlement"), u"11234567", "{IDREGLEMENT}"),
-            (_(u"Date du règlement"), u"21/03/2011", "{DATE_REGLEMENT}"),
-            (_(u"Mode de règlement"), _(u"Chèque"), "{MODE_REGLEMENT}"),
-            (_(u"Nom de l'émetteur"), _(u"Caisse d'épargne"), "{NOM_EMETTEUR}"),
-            (_(u"Numéro de pièce"), u"0001243", "{NUM_PIECE}"),
-            (_(u"Montant du règlement"), u"10.00 €", "{MONTANT_REGLEMENT}"),
-            (_(u"Nom du payeur"), _(u"DUPOND Gérard"), "{NOM_PAYEUR}"),
-            (_(u"Numéro de quittancier"), u"246", "{NUM_QUITTANCIER}"),
-            (_(u"Date de saisie du règlement"), u"23/03/2011", "{DATE_SAISIE}"),
-            (_(u"Date d'encaissement différé"), u"24/04/2011", "{DATE_DIFFERE}"),
-            (_(u"Observations"), _(u"Observations"), "{OBSERVATIONS}"), ]
+            (u"ID du règlement", u"11234567", "{IDREGLEMENT}"),
+            (u"Date du règlement", u"21/03/2011", "{DATE_REGLEMENT}"),
+            (u"Mode de règlement", u"Chèque", "{MODE_REGLEMENT}"),
+            (u"Nom de l'émetteur", u"Caisse d'épargne", "{NOM_EMETTEUR}"),
+            (u"Numéro de pièce", u"0001243", "{NUM_PIECE}"),
+            (u"Montant du règlement", u"10.00 €", "{MONTANT_REGLEMENT}"),
+            (u"Nom du payeur", u"DUPOND Gérard", "{NOM_PAYEUR}"),
+            (u"Numéro de quittancier", u"246", "{NUM_QUITTANCIER}"),
+            (u"Date de saisie du règlement", u"23/03/2011", "{DATE_SAISIE}"),
+            (u"Date d'encaissement différé", u"24/04/2011", "{DATE_DIFFERE}"),
+            (u"Observations", u"Observations", "{OBSERVATIONS}"), ]
 
         self.champs.extend(utils_infos_individus.GetNomsChampsPossibles(mode="famille"))
 
         self.codesbarres = []
 
         self.speciaux = [
-            {"nom": _(u"Cadre principal"), "champ": _(u"cadre_principal"), "obligatoire": True, "nbreMax": 1, "x": None, "y": None, "verrouillageX": False, "verrouillageY": False, "Xmodifiable": True, "Ymodifiable": True, "largeur": 100, "hauteur": 150, "largeurModifiable": True, "hauteurModifiable": True, "largeurMin": 80, "largeurMax": 1000, "hauteurMin": 80, "hauteurMax": 1000, "verrouillageLargeur": False, "verrouillageHauteur": False, "verrouillageProportions": False, "interditModifProportions": False}
+            {"nom": u"Cadre principal", "champ": "cadre_principal", "obligatoire": True, "nbreMax": 1, "x": None, "y": None, "verrouillageX": False, "verrouillageY": False, "Xmodifiable": True, "Ymodifiable": True, "largeur": 100, "hauteur": 150, "largeurModifiable": True, "hauteurModifiable": True, "largeurMin": 80, "largeurMax": 1000, "hauteurMin": 80, "hauteurMax": 1000, "verrouillageLargeur": False, "verrouillageHauteur": False, "verrouillageProportions": False, "interditModifProportions": False}
         ]
 
         # Questionnaires
@@ -286,48 +291,49 @@ class Reglement(Categorie):
 
 class Individu(Categorie):
     def __init__(self):
-        self.nom = _(u"Individu")
+        self.nom = "Individu"
         self.code = "individu"
         self.photosIndividuelles = True
 
-        self.champs = [(_(u"Numéro ID de l'individu"), u"2582", "{IDINDIVIDU}"),
-            (_(u"Civilité de l'individu (long)"), _(u"Mademoiselle"), "{INDIVIDU_CIVILITE_LONG}"),
-            (_(u"Civilité de l'individu (court)"), _(u"Melle"), "{INDIVIDU_CIVILITE_COURT}"),
-            (_(u"Genre de l'individu (M ou F)"), u"M", "{INDIVIDU_GENRE}"),
-            (_(u"Nom de l'individu"), _(u"DUPOND"), "{INDIVIDU_NOM}"),
-            (_(u"Prénom de l'individu"), _(u"Lucie"), "{INDIVIDU_PRENOM}"),
-            (_(u"Date de naissance de l'individu"), u"12/04/1998", "{INDIVIDU_DATE_NAISS}"),
-            (_(u"Age de l'individu"), u"12", "{INDIVIDU_AGE}"),
-            (_(u"Code postal de la ville de naissance"), u"29200", "{INDIVIDU_CP_NAISS}"),
-            (_(u"Nom de la ville de naissance"), _(u"BREST"), "{INDIVIDU_VILLE_NAISS}"),
-            (_(u"Rue de l'adresse de l'individu"), _(u"10 rue des oiseaux"), "{INDIVIDU_RUE}"),
-            (_(u"Code postal de l'adresse de l'individu"), u"29200", "{INDIVIDU_CP}"),
-            (_(u"Ville de l'adresse de l'individu"), _(u"BREST"), "{INDIVIDU_VILLE}"),
-            (_(u"Profession de l'individu"), _(u"Menuisier"), "{INDIVIDU_PROFESSION}"),
-            (_(u"Employeur de l'individu"), _(u"SARL DUPOND"), "{INDIVIDU_EMPLOYEUR}"),
-            (_(u"Téléphone fixe de l'individu"), u"01.02.03.04.05.", "{INDIVIDU_TEL_DOMICILE}"),
-            (_(u"Téléphone mobile de l'individu"), u"06.01.02.03.04.", "{INDIVIDU_TEL_MOBILE}"),
-            (_(u"Fax de l'individu"), u"01.02.03.04.05.", "{INDIVIDU_FAX}"),
-            (_(u"Adresse internet de l'individu"), _(u"moi@test.com"), "{INDIVIDU_EMAIL}"),
-            (_(u"Téléphone fixe pro de l'individu"), u"01.04.05.04.05.", "{INDIVIDU_TEL_PRO}"),
-            (_(u"Fax pro de l'individu"), u"06.03.04.05.04.", "{INDIVIDU_FAX_PRO}"),
-            (_(u"Adresse internet pro"), _(u"montravail@test.com"), "{INDIVIDU_EMAIL_PRO}"),
+        self.champs = [
+            (u"Numéro ID de l'individu", u"2582", "{IDINDIVIDU}"),
+            (u"Civilité de l'individu (long)", u"Mademoiselle", "{INDIVIDU_CIVILITE_LONG}"),
+            (u"Civilité de l'individu (court)", u"Melle", "{INDIVIDU_CIVILITE_COURT}"),
+            (u"Genre de l'individu (M ou F)", u"M", "{INDIVIDU_GENRE}"),
+            (u"Nom de l'individu", u"DUPOND", "{INDIVIDU_NOM}"),
+            (u"Prénom de l'individu", u"Lucie", "{INDIVIDU_PRENOM}"),
+            (u"Date de naissance de l'individu", u"12/04/1998", "{INDIVIDU_DATE_NAISS}"),
+            (u"Age de l'individu", u"12", "{INDIVIDU_AGE}"),
+            (u"Code postal de la ville de naissance", u"29200", "{INDIVIDU_CP_NAISS}"),
+            (u"Nom de la ville de naissance", u"BREST", "{INDIVIDU_VILLE_NAISS}"),
+            (u"Rue de l'adresse de l'individu", u"10 rue des oiseaux", "{INDIVIDU_RUE}"),
+            (u"Code postal de l'adresse de l'individu", u"29200", "{INDIVIDU_CP}"),
+            (u"Ville de l'adresse de l'individu", u"BREST", "{INDIVIDU_VILLE}"),
+            (u"Profession de l'individu", u"Menuisier", "{INDIVIDU_PROFESSION}"),
+            (u"Employeur de l'individu", u"SARL DUPOND", "{INDIVIDU_EMPLOYEUR}"),
+            (u"Téléphone fixe de l'individu", u"01.02.03.04.05.", "{INDIVIDU_TEL_DOMICILE}"),
+            (u"Téléphone mobile de l'individu", u"06.01.02.03.04.", "{INDIVIDU_TEL_MOBILE}"),
+            (u"Fax de l'individu", u"01.02.03.04.05.", "{INDIVIDU_FAX}"),
+            (u"Adresse internet de l'individu", u"moi@test.com", "{INDIVIDU_EMAIL}"),
+            (u"Téléphone fixe pro de l'individu", u"01.04.05.04.05.", "{INDIVIDU_TEL_PRO}"),
+            (u"Fax pro de l'individu", u"06.03.04.05.04.", "{INDIVIDU_FAX_PRO}"),
+            (u"Adresse internet pro", u"montravail@test.com", "{INDIVIDU_EMAIL_PRO}"),
 
-            (_(u"Nom de l'organisateur"), _(u"Association Noethys"), "{ORGANISATEUR_NOM}"),
-            (_(u"Rue de l'organisateur"), _(u"Avenue des Lilas"), "{ORGANISATEUR_RUE}"),
-            (_(u"Code postal de l'organisateur"), u"29870", "{ORGANISATEUR_CP}"),
-            (_(u"Ville de l'organisateur"), _(u"LANNILIS"), "{ORGANISATEUR_VILLE}"),
-            (_(u"Téléphone de l'organisateur"), u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (_(u"Fax de l'organisateur"), u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (_(u"Mail de l'organisateur"), _(u"noethys") + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
-            (_(u"Site internet de l'organisateur"), u"www.noethys.com", "{ORGANISATEUR_SITE}"),
-            (_(u"Numéro d'agrément de l'organisateur"), u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
-            (_(u"Numéro SIRET de l'organisateur"), u"123456789123", "{ORGANISATEUR_SIRET}"),
-            (_(u"Code APE de l'organisateur"), _(u"NO123"), "{ORGANISATEUR_APE}"), ]
+            (u"Nom de l'organisateur", u"Association Noethys", "{ORGANISATEUR_NOM}"),
+            (u"Rue de l'organisateur", u"Avenue des Lilas", "{ORGANISATEUR_RUE}"),
+            (u"Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", u"LANNILIS", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", u"noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
+            (u"Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
+            (u"Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
+            (u"Code APE de l'organisateur", "NO123", "{ORGANISATEUR_APE}"), ]
 
         self.champs.extend(utils_infos_individus.GetNomsChampsPossibles(mode="individu"))
 
-        self.codesbarres = [(_(u"ID de l'individu"), u"1234567", "{CODEBARRES_ID_INDIVIDU}"), ]
+        self.codesbarres = [("ID de l'individu", u"1234567", "{CODEBARRES_ID_INDIVIDU}"), ]
 
         self.speciaux = []
 
@@ -340,34 +346,35 @@ class Individu(Categorie):
 
 class Famille(Categorie):
     def __init__(self):
-        self.nom = _(u"famille")
+        self.nom = "famille"
         self.code = "famille"
         self.photosIndividuelles = False
 
-        self.champs = [(_(u"Numéro ID de la famille"), u"2582", "{IDFAMILLE}"),
-            (_(u"Noms des titulaires"), _(u"DUPOND Gérard et Lucie"), "{FAMILLE_NOM}"),
-            (_(u"Rue de l'adresse de la famille"), _(u"10 rue des oiseaux"), "{FAMILLE_RUE}"),
-            (_(u"Code postal de l'adresse de la famille"), u"29200", "{FAMILLE_CP}"),
-            (_(u"Ville de l'adresse de la famille"), _(u"BREST"), "{FAMILLE_VILLE}"),
-            (_(u"Régime social de la famille"), _(u"Régime général"), "{FAMILLE_REGIME}"),
-            (_(u"Caisse de la famille"), _(u"C.A.F."), "{FAMILLE_CAISSE}"),
-            (_(u"Numéro d'allocataire de la famille"), u"0123456X", "{FAMILLE_NUMALLOC}"),
+        self.champs = [
+            (u"Numéro ID de la famille", u"2582", "{IDFAMILLE}"),
+            (u"Noms des titulaires", u"DUPOND Gérard et Lucie", "{FAMILLE_NOM}"),
+            (u"Rue de l'adresse de la famille", u"10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Code postal de l'adresse de la famille", u"29200", "{FAMILLE_CP}"),
+            (u"Ville de l'adresse de la famille", u"BREST", "{FAMILLE_VILLE}"),
+            (u"Régime social de la famille", u"Régime général", "{FAMILLE_REGIME}"),
+            (u"Caisse de la famille", u"C.A.F.", "{FAMILLE_CAISSE}"),
+            (u"Numéro d'allocataire de la famille", u"0123456X", "{FAMILLE_NUMALLOC}"),
 
-            (_(u"Nom de l'organisateur"), _(u"Association Noethys"), "{ORGANISATEUR_NOM}"),
-            (_(u"Rue de l'organisateur"), _(u"Avenue des Lilas"), "{ORGANISATEUR_RUE}"),
-            (_(u"Code postal de l'organisateur"), u"29870", "{ORGANISATEUR_CP}"),
-            (_(u"Ville de l'organisateur"), _(u"LANNILIS"), "{ORGANISATEUR_VILLE}"),
-            (_(u"Téléphone de l'organisateur"), u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (_(u"Fax de l'organisateur"), u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (_(u"Mail de l'organisateur"), _(u"noethys") + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
-            (_(u"Site internet de l'organisateur"), u"www.noethys.com", "{ORGANISATEUR_SITE}"),
-            (_(u"Numéro d'agrément de l'organisateur"), u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
-            (_(u"Numéro SIRET de l'organisateur"), u"123456789123", "{ORGANISATEUR_SIRET}"),
-            (_(u"Code APE de l'organisateur"), _(u"NO123"), "{ORGANISATEUR_APE}"), ]
+            (u"Nom de l'organisateur", u"Association Noethys", "{ORGANISATEUR_NOM}"),
+            (u"Rue de l'organisateur", u"Avenue des Lilas", "{ORGANISATEUR_RUE}"),
+            (u"Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", u"LANNILIS", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", u"noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
+            (u"Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
+            (u"Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
+            (u"Code APE de l'organisateur", u"NO123", "{ORGANISATEUR_APE}"), ]
 
         self.champs.extend(utils_infos_individus.GetNomsChampsPossibles(mode="famille"))
 
-        self.codesbarres = [(_(u"ID de la famille"), u"1234567", "{CODEBARRES_ID_FAMILLE}"), ]
+        self.codesbarres = [("ID de la famille", u"1234567", "{CODEBARRES_ID_FAMILLE}"), ]
 
         self.speciaux = []
 
@@ -380,75 +387,76 @@ class Famille(Categorie):
 
 class Inscription(Categorie):
     def __init__(self):
-        self.nom = _(u"Inscription")
+        self.nom = "Inscription"
         self.code = "inscription"
         self.photosIndividuelles = True
 
-        self.champs = [(_(u"Numéro ID de l'individu"), u"2582", "{IDINDIVIDU}"),
-            (_(u"Civilité de l'individu (long)"), _(u"Mademoiselle"), "{INDIVIDU_CIVILITE_LONG}"),
-            (_(u"Civilité de l'individu (court)"), _(u"Melle"), "{INDIVIDU_CIVILITE_COURT}"),
-            (_(u"Genre de l'individu (M ou F)"), u"M", "{INDIVIDU_GENRE}"),
-            (_(u"Nom de l'individu"), _(u"DUPOND"), "{INDIVIDU_NOM}"),
-            (_(u"Prénom de l'individu"), _(u"Lucie"), "{INDIVIDU_PRENOM}"),
-            (_(u"Date de naissance de l'individu"), u"12/04/1998", "{INDIVIDU_DATE_NAISS}"),
-            (_(u"Age de l'individu"), u"12", "{INDIVIDU_AGE}"),
-            (_(u"Code postal de la ville de naissance"), u"29200", "{INDIVIDU_CP_NAISS}"),
-            (_(u"Nom de la ville de naissance"), _(u"BREST"), "{INDIVIDU_VILLE_NAISS}"),
-            (_(u"Rue de l'adresse de l'individu"), _(u"10 rue des oiseaux"), "{INDIVIDU_RUE}"),
-            (_(u"Code postal de l'adresse de l'individu"), u"29200", "{INDIVIDU_CP}"),
-            (_(u"Ville de l'adresse de l'individu"), _(u"BREST"), "{INDIVIDU_VILLE}"),
-            (_(u"Profession de l'individu"), _(u"Menuisier"), "{INDIVIDU_PROFESSION}"),
-            (_(u"Employeur de l'individu"), _(u"SARL DUPOND"), "{INDIVIDU_EMPLOYEUR}"),
-            (_(u"Téléphone fixe de l'individu"), u"01.02.03.04.05.", "{INDIVIDU_TEL_DOMICILE}"),
-            (_(u"Téléphone mobile de l'individu"), u"06.01.02.03.04.", "{INDIVIDU_TEL_MOBILE}"),
-            (_(u"Fax de l'individu"), u"01.02.03.04.05.", "{INDIVIDU_FAX}"),
-            (_(u"Adresse internet de l'individu"), _(u"moi@test.com"), "{INDIVIDU_EMAIL}"),
-            (_(u"Téléphone fixe pro de l'individu"), u"01.04.05.04.05.", "{INDIVIDU_TEL_PRO}"),
-            (_(u"Fax pro de l'individu"), u"06.03.04.05.04.", "{INDIVIDU_FAX_PRO}"),
-            (_(u"Adresse internet pro"), _(u"montravail@test.com"), "{INDIVIDU_EMAIL_PRO}"),
+        self.champs = [
+            (u"Numéro ID de l'individu", u"2582", "{IDINDIVIDU}"),
+            (u"Civilité de l'individu (long)", u"Mademoiselle", "{INDIVIDU_CIVILITE_LONG}"),
+            (u"Civilité de l'individu (court)", u"Melle", "{INDIVIDU_CIVILITE_COURT}"),
+            (u"Genre de l'individu (M ou F)", u"M", "{INDIVIDU_GENRE}"),
+            (u"Nom de l'individu", u"DUPOND", "{INDIVIDU_NOM}"),
+            (u"Prénom de l'individu", u"Lucie", "{INDIVIDU_PRENOM}"),
+            (u"Date de naissance de l'individu", u"12/04/1998", "{INDIVIDU_DATE_NAISS}"),
+            (u"Age de l'individu", u"12", "{INDIVIDU_AGE}"),
+            (u"Code postal de la ville de naissance", u"29200", "{INDIVIDU_CP_NAISS}"),
+            (u"Nom de la ville de naissance", u"BREST", "{INDIVIDU_VILLE_NAISS}"),
+            (u"Rue de l'adresse de l'individu", u"10 rue des oiseaux", "{INDIVIDU_RUE}"),
+            (u"Code postal de l'adresse de l'individu", u"29200", "{INDIVIDU_CP}"),
+            (u"Ville de l'adresse de l'individu", u"BREST", "{INDIVIDU_VILLE}"),
+            (u"Profession de l'individu", u"Menuisier", "{INDIVIDU_PROFESSION}"),
+            (u"Employeur de l'individu", u"SARL DUPOND", "{INDIVIDU_EMPLOYEUR}"),
+            (u"Téléphone fixe de l'individu", u"01.02.03.04.05.", "{INDIVIDU_TEL_DOMICILE}"),
+            (u"Téléphone mobile de l'individu", u"06.01.02.03.04.", "{INDIVIDU_TEL_MOBILE}"),
+            (u"Fax de l'individu", u"01.02.03.04.05.", "{INDIVIDU_FAX}"),
+            (u"Adresse internet de l'individu", u"moi@test.com", "{INDIVIDU_EMAIL}"),
+            (u"Téléphone fixe pro de l'individu", u"01.04.05.04.05.", "{INDIVIDU_TEL_PRO}"),
+            (u"Fax pro de l'individu", u"06.03.04.05.04.", "{INDIVIDU_FAX_PRO}"),
+            (u"Adresse internet pro", u"montravail@test.com", "{INDIVIDU_EMAIL_PRO}"),
 
-            (_(u"Numéro ID de la famille"), u"2582", "{IDFAMILLE}"),
-            (_(u"Noms des titulaires"), _(u"DUPOND Gérard et Lucie"), "{FAMILLE_NOM}"),
-            (_(u"Rue de l'adresse de la famille"), _(u"10 rue des oiseaux"), "{FAMILLE_RUE}"),
-            (_(u"Code postal de l'adresse de la famille"), u"29200", "{FAMILLE_CP}"),
-            (_(u"Ville de l'adresse de la famille"), _(u"BREST"), "{FAMILLE_VILLE}"),
-            (_(u"Régime social de la famille"), _(u"Régime général"), "{FAMILLE_REGIME}"),
-            (_(u"Caisse de la famille"), _(u"C.A.F."), "{FAMILLE_CAISSE}"),
-            (_(u"Numéro d'allocataire de la famille"), u"0123456X", "{FAMILLE_NUMALLOC}"),
+            (u"Numéro ID de la famille", "2582", "{IDFAMILLE}"),
+            (u"Noms des titulaires", "DUPOND Gérard et Lucie", "{FAMILLE_NOM}"),
+            (u"Rue de l'adresse de la famille", "10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Code postal de l'adresse de la famille", "29200", "{FAMILLE_CP}"),
+            (u"Ville de l'adresse de la famille", "BREST", "{FAMILLE_VILLE}"),
+            (u"Régime social de la famille", "Régime général", "{FAMILLE_REGIME}"),
+            (u"Caisse de la famille", "C.A.F.", "{FAMILLE_CAISSE}"),
+            (u"Numéro d'allocataire de la famille", "0123456X", "{FAMILLE_NUMALLOC}"),
 
-            (_(u"Numéro ID de l'inscription"), u"003", "{IDINSCRIPTION}"),
-            (_(u"Date de l'inscription"), u"01/01/2013", "{DATE_INSCRIPTION}"),
-            (_(u"Est parti"), _(u"Oui"), "{EST_PARTI}"),
+            (u"Numéro ID de l'inscription", "003", "{IDINSCRIPTION}"),
+            (u"Date de l'inscription", "01/01/2013", "{DATE_INSCRIPTION}"),
+            (u"Est parti", "Oui", "{EST_PARTI}"),
 
-            (_(u"Numéro ID de l'activité"), u"003", "{IDACTIVITE}"),
-            (_(u"Nom de l'activité (long)"), _(u"Accueil de Loisirs"), "{ACTIVITE_NOM_LONG}"),
-            (_(u"Nom de l'activité (abrégé)"), _(u"ALSH"), "{ACTIVITE_NOM_COURT}"),
+            (u"Numéro ID de l'activité", "003", "{IDACTIVITE}"),
+            (u"Nom de l'activité (long)", "Accueil de Loisirs", "{ACTIVITE_NOM_LONG}"),
+            (u"Nom de l'activité (abrégé)", "ALSH", "{ACTIVITE_NOM_COURT}"),
 
-            (_(u"Numéro ID du groupe"), u"001", "{IDGROUPE}"),
-            (_(u"Nom du groupe (long)"), _(u"Accueil de Loisirs"), "{GROUPE_NOM_LONG}"),
-            (_(u"Nom du groupe (abrégé)"), _(u"ALSH"), "{GROUPE_NOM_COURT}"),
+            (u"Numéro ID du groupe", "001", "{IDGROUPE}"),
+            (u"Nom du groupe (long)", "Accueil de Loisirs", "{GROUPE_NOM_LONG}"),
+            (u"Nom du groupe (abrégé)", "ALSH", "{GROUPE_NOM_COURT}"),
 
-            (_(u"Numéro ID de la catégorie de tarif"), u"004", "{IDCATEGORIETARIF}"),
-            (_(u"Nom de la catégorie de tarif"), _(u"Hors commune"), "{NOM_CATEGORIE_TARIF}"),
+            (u"Numéro ID de la catégorie de tarif", "004", "{IDCATEGORIETARIF}"),
+            (u"Nom de la catégorie de tarif", "Hors commune", "{NOM_CATEGORIE_TARIF}"),
 
-            (_(u"Nom de l'organisateur"), _(u"Association Noethys"), "{ORGANISATEUR_NOM}"),
-            (_(u"Rue de l'organisateur"), _(u"Avenue des Lilas"), "{ORGANISATEUR_RUE}"),
-            (_(u"Code postal de l'organisateur"), u"29870", "{ORGANISATEUR_CP}"),
-            (_(u"Ville de l'organisateur"), _(u"LANNILIS"), "{ORGANISATEUR_VILLE}"),
-            (_(u"Téléphone de l'organisateur"), u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (_(u"Fax de l'organisateur"), u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (_(u"Mail de l'organisateur"), _(u"noethys") + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
-            (_(u"Site internet de l'organisateur"), u"www.noethys.com", "{ORGANISATEUR_SITE}"),
-            (_(u"Numéro d'agrément de l'organisateur"), u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
-            (_(u"Numéro SIRET de l'organisateur"), u"123456789123", "{ORGANISATEUR_SIRET}"),
-            (_(u"Code APE de l'organisateur"), _(u"NO123"), "{ORGANISATEUR_APE}"), ]
+            (u"Nom de l'organisateur", "Association Noethys", "{ORGANISATEUR_NOM}"),
+            (u"Rue de l'organisateur", "Avenue des Lilas", "{ORGANISATEUR_RUE}"),
+            (u"Code postal de l'organisateur", "29870", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", "LANNILIS", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", "01.98.01.02.03", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", "01.04.05.06.", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", "noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Site internet de l'organisateur", "www.noethys.com", "{ORGANISATEUR_SITE}"),
+            (u"Numéro d'agrément de l'organisateur", "0256ORG234", "{ORGANISATEUR_AGREMENT}"),
+            (u"Numéro SIRET de l'organisateur", "123456789123", "{ORGANISATEUR_SIRET}"),
+            (u"Code APE de l'organisateur", "NO123", "{ORGANISATEUR_APE}"), ]
 
         self.champs.extend(utils_infos_individus.GetNomsChampsPossibles(mode="individu+famille"))
 
-        self.codesbarres = [(_(u"ID de l'individu"), u"1234567", "{CODEBARRES_ID_INDIVIDU}"), ]
+        self.codesbarres = [(u"ID de l'individu", "1234567", "{CODEBARRES_ID_INDIVIDU}"), ]
 
         self.speciaux = [
-            {"nom": _(u"Cadre principal"), "champ": _(u"cadre_principal"), "obligatoire": False, "nbreMax": 1, "x": None, "y": None, "verrouillageX": False, "verrouillageY": False, "Xmodifiable": True, "Ymodifiable": True, "largeur": 100, "hauteur": 150, "largeurModifiable": True, "hauteurModifiable": True, "largeurMin": 80, "largeurMax": 1000, "hauteurMin": 80, "hauteurMax": 1000, "verrouillageLargeur": False, "verrouillageHauteur": False, "verrouillageProportions": False, "interditModifProportions": False}
+            {"nom": u"Cadre principal", "champ": u"cadre_principal", "obligatoire": False, "nbreMax": 1, "x": None, "y": None, "verrouillageX": False, "verrouillageY": False, "Xmodifiable": True, "Ymodifiable": True, "largeur": 100, "hauteur": 150, "largeurModifiable": True, "hauteurModifiable": True, "largeurMin": 80, "largeurMax": 1000, "hauteurMin": 80, "hauteurMax": 1000, "verrouillageLargeur": False, "verrouillageHauteur": False, "verrouillageProportions": False, "interditModifProportions": False}
         ]
 
         # Questionnaires
@@ -466,69 +474,70 @@ class Inscription(Categorie):
 
 class Cotisation(Categorie):
     def __init__(self):
-        self.nom = _(u"Cotisation")
+        self.nom = "Cotisation"
         self.code = "cotisation"
         self.photosIndividuelles = False
 
-        self.champs = [(_(u"Numéro ID de la cotisation"), u"13215", "{IDCOTISATION}"),
-            (_(u"Numéro ID du type d'adhésion"), u"034", "{IDTYPE_COTISATION}"),
-            (_(u"Numéro ID de l'unité d'adhésion"), u"31", "{IDUNITE_COTISATION}"),
-            (_(u"Numéro ID de l'utilisateur qui a saisi l'adhésion"), u"023", "{IDUTILISATEUR}"),
-            (_(u"Date de saisie de l'adhésion"), u"01/01/2014", "{DATE_SAISIE}"),
-            (_(u"Date de création de la carte"), u"10/01/2014", "{DATE_CREATION_CARTE}"),
-            (_(u"Numéro de la carte"), u"0123321", "{NUMERO_CARTE}"),
-            (_(u"Numéro ID du dépôt de l'adhésion"), u"064", "{IDDEPOT_COTISATION}"),
-            (_(u"Date de début de validité"), u"01/01/2014", "{DATE_DEBUT}"),
-            (_(u"Date de fin de validité"), u"31/12/2014", "{DATE_FIN}"),
-            (_(u"Numéro ID de la prestation"), u"31211", "{IDPRESTATION}"),
-            (_(u"Nom du type d'adhésion"), _(u"Carte d'adhérent"), "{NOM_TYPE_COTISATION}"),
-            (_(u"Nom de l'unité de l'adhésion"), u"2014", "{NOM_UNITE_COTISATION}"),
-            (_(u"Adhésion familiale ou individuelle"), _(u"Cotisation familiale"), "{COTISATION_FAM_IND}"),
-            (_(u"Nom de l'adhésion (Type + unité)"), _(u"Carte d'adhérent - 2014"), "{NOM_COTISATION}"),
-            (_(u"Nom de dépôt d'adhésions"), _(u"Dépôt Janvier 2014"), "{NOM_DEPOT}"),
-            (_(u"Montant facturé"), u"20.00 €", "{MONTANT_FACTURE}"),
-            (_(u"Montant réglé"), u"20.00 €", "{MONTANT_REGLE}"), (_(u"Solde actuel"), u"20.00 €", "{SOLDE_ACTUEL}"),
-            (_(u"Activités associées"), u"Centre de loisirs, Cantine", "{ACTIVITES}"),
-            (_(u"Notes"), u"Texte libre", "{NOTES}"),
-            (_(u"Montant facturé en lettres"), _(u"Vingt Euros"), "{MONTANT_FACTURE_LETTRES}"),
-            (_(u"Montant réglé en lettres"), _(u"Vingt Euros"), "{MONTANT_REGLE_LETTRES}"),
-            (_(u"Solde actuel en lettres"), _(u"Vingt Euros"), "{SOLDE_ACTUEL_LETTRES}"),
-            (_(u"Date du règlement"), u"01/01/2014", "{DATE_REGLEMENT}"),
-            (_(u"Mode de règlement"), _(u"Chèque"), "{MODE_REGLEMENT}"),
+        self.champs = [
+            (u"Numéro ID de la cotisation", "13215", "{IDCOTISATION}"),
+            (u"Numéro ID du type d'adhésion", "034", "{IDTYPE_COTISATION}"),
+            (u"Numéro ID de l'unité d'adhésion", "31", "{IDUNITE_COTISATION}"),
+            (u"Numéro ID de l'utilisateur qui a saisi l'adhésion", "023", "{IDUTILISATEUR}"),
+            (u"Date de saisie de l'adhésion", "01/01/2014", "{DATE_SAISIE}"),
+            (u"Date de création de la carte", "10/01/2014", "{DATE_CREATION_CARTE}"),
+            (u"Numéro de la carte", "0123321", "{NUMERO_CARTE}"),
+            (u"Numéro ID du dépôt de l'adhésion", "064", "{IDDEPOT_COTISATION}"),
+            (u"Date de début de validité", "01/01/2014", "{DATE_DEBUT}"),
+            (u"Date de fin de validité", "31/12/2014", "{DATE_FIN}"),
+            (u"Numéro ID de la prestation", "31211", "{IDPRESTATION}"),
+            (u"Nom du type d'adhésion", "Carte d'adhérent", "{NOM_TYPE_COTISATION}"),
+            (u"Nom de l'unité de l'adhésion", "2014", "{NOM_UNITE_COTISATION}"),
+            (u"Adhésion familiale ou individuelle", "Cotisation familiale", "{COTISATION_FAM_IND}"),
+            (u"Nom de l'adhésion (Type + unité)", "Carte d'adhérent - 2014", "{NOM_COTISATION}"),
+            (u"Nom de dépôt d'adhésions", "Dépôt Janvier 2014", "{NOM_DEPOT}"),
+            (u"Montant facturé", "20.00 €", "{MONTANT_FACTURE}"),
+            (u"Montant réglé", "20.00 €", "{MONTANT_REGLE}"), (u"Solde actuel", "20.00 €", "{SOLDE_ACTUEL}"),
+            (u"Activités associées", "Centre de loisirs, Cantine", "{ACTIVITES}"),
+            (u"Notes", "Texte libre", "{NOTES}"),
+            (u"Montant facturé en lettres", "Vingt Euros", "{MONTANT_FACTURE_LETTRES}"),
+            (u"Montant réglé en lettres", "Vingt Euros", "{MONTANT_REGLE_LETTRES}"),
+            (u"Solde actuel en lettres", "Vingt Euros", "{SOLDE_ACTUEL_LETTRES}"),
+            (u"Date du règlement", "01/01/2014", "{DATE_REGLEMENT}"),
+            (u"Mode de règlement", "Chèque", "{MODE_REGLEMENT}"),
 
-            (_(u"Numéro ID de l'individu bénéficiaire"), u"4654", "{IDINDIVIDU}"),
-            (_(u"Numéro ID de la famille bénéficiare"), u"13211", "{BENEFICIAIRE_NOM}"),
-            (_(u"Adresse du bénéficiaire - Rue"), _(u"10 rue des oiseaux"), "{BENEFICIAIRE_RUE}"),
-            (_(u"Adresse du bénéficiaire - CP"), u"29200", "{BENEFICIAIRE_CP}"),
-            (_(u"Adresse du bénéficiaire - Ville"), _(u"BREST"), "{BENEFICIAIRE_VILLE}"),
+            (u"Numéro ID de l'individu bénéficiaire", "4654", "{IDINDIVIDU}"),
+            (u"Numéro ID de la famille bénéficiare", "13211", "{BENEFICIAIRE_NOM}"),
+            (u"Adresse du bénéficiaire - Rue", "10 rue des oiseaux", "{BENEFICIAIRE_RUE}"),
+            (u"Adresse du bénéficiaire - CP", "29200", "{BENEFICIAIRE_CP}"),
+            (u"Adresse du bénéficiaire - Ville", "BREST", "{BENEFICIAIRE_VILLE}"),
 
-            (_(u"Numéro ID de la famille"), u"2582", "{IDFAMILLE}"),
-            (_(u"Noms des titulaires"), _(u"DUPOND Gérard et Lucie"), "{FAMILLE_NOM}"),
-            (_(u"Rue de l'adresse de la famille"), _(u"10 rue des oiseaux"), "{FAMILLE_RUE}"),
-            (_(u"Code postal de l'adresse de la famille"), u"29200", "{FAMILLE_CP}"),
-            (_(u"Ville de l'adresse de la famille"), _(u"BREST"), "{FAMILLE_VILLE}"),
-            (_(u"Régime social de la famille"), _(u"Régime général"), "{FAMILLE_REGIME}"),
-            (_(u"Caisse de la famille"), _(u"C.A.F."), "{FAMILLE_CAISSE}"),
-            (_(u"Numéro d'allocataire de la famille"), u"0123456X", "{FAMILLE_NUMALLOC}"),
+            (u"Numéro ID de la famille", "2582", "{IDFAMILLE}"),
+            (u"Noms des titulaires", "DUPOND Gérard et Lucie", "{FAMILLE_NOM}"),
+            (u"Rue de l'adresse de la famille", "10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Code postal de l'adresse de la famille", "29200", "{FAMILLE_CP}"),
+            (u"Ville de l'adresse de la famille", "BREST", "{FAMILLE_VILLE}"),
+            (u"Régime social de la famille", "Régime général", "{FAMILLE_REGIME}"),
+            (u"Caisse de la famille", "C.A.F.", "{FAMILLE_CAISSE}"),
+            (u"Numéro d'allocataire de la famille", "0123456X", "{FAMILLE_NUMALLOC}"),
 
-            (_(u"Nom de l'organisateur"), _(u"Association Noethys"), "{ORGANISATEUR_NOM}"),
-            (_(u"Rue de l'organisateur"), _(u"Avenue des Lilas"), "{ORGANISATEUR_RUE}"),
-            (_(u"Code postal de l'organisateur"), u"29870", "{ORGANISATEUR_CP}"),
-            (_(u"Ville de l'organisateur"), _(u"LANNILIS"), "{ORGANISATEUR_VILLE}"),
-            (_(u"Téléphone de l'organisateur"), u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (_(u"Fax de l'organisateur"), u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (_(u"Mail de l'organisateur"), _(u"noethys") + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
-            (_(u"Site internet de l'organisateur"), u"www.noethys.com", "{ORGANISATEUR_SITE}"),
-            (_(u"Numéro d'agrément de l'organisateur"), u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
-            (_(u"Numéro SIRET de l'organisateur"), u"123456789123", "{ORGANISATEUR_SIRET}"),
-            (_(u"Code APE de l'organisateur"), _(u"NO123"), "{ORGANISATEUR_APE}"),
+            (u"Nom de l'organisateur", "Association Noethys", "{ORGANISATEUR_NOM}"),
+            (u"Rue de l'organisateur", "Avenue des Lilas", "{ORGANISATEUR_RUE}"),
+            (u"Code postal de l'organisateur", "29870", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", "LANNILIS", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", "01.98.01.02.03", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", "01.04.05.06.", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", "noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Site internet de l'organisateur", "www.noethys.com", "{ORGANISATEUR_SITE}"),
+            (u"Numéro d'agrément de l'organisateur", "0256ORG234", "{ORGANISATEUR_AGREMENT}"),
+            (u"Numéro SIRET de l'organisateur", "123456789123", "{ORGANISATEUR_SIRET}"),
+            (u"Code APE de l'organisateur", "NO123", "{ORGANISATEUR_APE}"),
 
-            (_(u"Date d'édition (long)"), _(u"Lundi 9 septembre 2011"), "{DATE_EDITION_LONG}"),
-            (_(u"Date d'édition (court)"), u"19/09/2011", "{DATE_EDITION_COURT}"), ]
+            (u"Date d'édition (long)", "Lundi 9 septembre 2011", "{DATE_EDITION_LONG}"),
+            (u"Date d'édition (court)", "19/09/2011", "{DATE_EDITION_COURT}"), ]
 
         self.champs.extend(utils_infos_individus.GetNomsChampsPossibles(mode="individu+famille"))
 
-        self.codesbarres = [(_(u"ID de la famille"), u"1234567", "{CODEBARRES_ID_FAMILLE}"), ]
+        self.codesbarres = [(u"ID de la famille", "1234567", "{CODEBARRES_ID_FAMILLE}"), ]
 
         self.speciaux = []
 
@@ -541,58 +550,58 @@ class Cotisation(Categorie):
 
 class Attestation_fiscale(Categorie):
     def __init__(self):
-        self.nom = _(u"Attestation fiscale")
+        self.nom = "Attestation fiscale"
         self.code = "attestation_fiscale"
 
         self.photosIndividuelles = False
 
-        self.champs = [(_(u"Numéro ID de la famille"), u"2582", "{IDFAMILLE}"),
-            (_(u"Noms des titulaires de dossier"), _(u"M. DUPOND Gérard"), "{FAMILLE_NOM}"),
-            (_(u"Rue de la famille"), _(u"10 rue des oiseaux"), "{FAMILLE_RUE}"),
-            (_(u"Code postal de la famille"), u"29200", "{FAMILLE_CP}"),
-            (_(u"Ville de la famille"), _(u"BREST"), "{FAMILLE_VILLE}"),
+        self.champs = [(u"Numéro ID de la famille", "2582", "{IDFAMILLE}"),
+            (u"Noms des titulaires de dossier", "M. DUPOND Gérard", "{FAMILLE_NOM}"),
+            (u"Rue de la famille", "10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Code postal de la famille", "29200", "{FAMILLE_CP}"),
+            (u"Ville de la famille", "BREST", "{FAMILLE_VILLE}"),
 
-            (_(u"Nom de l'organisateur"), _(u"Association Noethys"), "{ORGANISATEUR_NOM}"),
-            (_(u"Rue de l'organisateur"), _(u"Avenue des Lilas"), "{ORGANISATEUR_RUE}"),
-            (_(u"Code postal de l'organisateur"), u"29870", "{ORGANISATEUR_CP}"),
-            (_(u"Ville de l'organisateur"), _(u"LANNILIS"), "{ORGANISATEUR_VILLE}"),
-            (_(u"Téléphone de l'organisateur"), u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (_(u"Fax de l'organisateur"), u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (_(u"Mail de l'organisateur"), _(u"noethys") + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
-            (_(u"Site internet de l'organisateur"), u"www.noethys.com", "{ORGANISATEUR_SITE}"),
-            (_(u"Numéro d'agrément de l'organisateur"), u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
-            (_(u"Numéro SIRET de l'organisateur"), u"123456789123", "{ORGANISATEUR_SIRET}"),
-            (_(u"Code APE de l'organisateur"), _(u"NO123"), "{ORGANISATEUR_APE}"),
+            (u"Nom de l'organisateur", "Association Noethys", "{ORGANISATEUR_NOM}"),
+            (u"Rue de l'organisateur", "Avenue des Lilas", "{ORGANISATEUR_RUE}"),
+            (u"Code postal de l'organisateur", "29870", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", "LANNILIS", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", "01.98.01.02.03", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", "01.04.05.06.", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", "noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Site internet de l'organisateur", "www.noethys.com", "{ORGANISATEUR_SITE}"),
+            (u"Numéro d'agrément de l'organisateur", "0256ORG234", "{ORGANISATEUR_AGREMENT}"),
+            (u"Numéro SIRET de l'organisateur", "123456789123", "{ORGANISATEUR_SIRET}"),
+            (u"Code APE de l'organisateur", "NO123", "{ORGANISATEUR_APE}"),
 
-            (_(u"Date d'édition (long)"), _(u"Lundi 9 septembre 2011"), "{DATE_EDITION_LONG}"),
-            (_(u"Date d'édition (court)"), u"19/09/2011", "{DATE_EDITION_COURT}"),
-            (_(u"Date de début"), u"10/07/2011", "{DATE_DEBUT}"), (_(u"Date de fin"), u"21/12/2011", "{DATE_FIN}"),
+            (u"Date d'édition (long)", "Lundi 9 septembre 2011", "{DATE_EDITION_LONG}"),
+            (u"Date d'édition (court)", "19/09/2011", "{DATE_EDITION_COURT}"),
+            (u"Date de début", "10/07/2011", "{DATE_DEBUT}"), (u"Date de fin", "21/12/2011", "{DATE_FIN}"),
 
-            (_(u"Montant facturé"), u"20.00 €", "{MONTANT_FACTURE}"),
-            (_(u"Montant réglé"), u"20.00 €", "{MONTANT_REGLE}"),
-            (_(u"Montant impayé"), u"20.00 €", "{MONTANT_IMPAYE}"),
-            (_(u"Montant facturé en lettres"), _(u"Vingt Euros"), "{MONTANT_FACTURE_LETTRES}"),
-            (_(u"Montant réglé en lettres"), _(u"Vingt Euros"), "{MONTANT_REGLE_LETTRES}"),
-            (_(u"Montant impayé en lettres"), _(u"Vingt Euros"), "{MONTANT_IMPAYE_LETTRES}"),
+            (u"Montant facturé", "20.00 €", "{MONTANT_FACTURE}"),
+            (u"Montant réglé", "20.00 €", "{MONTANT_REGLE}"),
+            (u"Montant impayé", "20.00 €", "{MONTANT_IMPAYE}"),
+            (u"Montant facturé en lettres", "Vingt Euros", "{MONTANT_FACTURE_LETTRES}"),
+            (u"Montant réglé en lettres", "Vingt Euros", "{MONTANT_REGLE_LETTRES}"),
+            (u"Montant impayé en lettres", "Vingt Euros", "{MONTANT_IMPAYE_LETTRES}"),
 
-            (_(u"Texte d'introduction"), _(u"Veuillez trouver ici le montant..."), "{INTRO}"),
+            (u"Texte d'introduction", "Veuillez trouver ici le montant...", "{INTRO}"),
 
-            (_(u"Détail enfant 1"), _(u"10.00 € pour Lucie DUPOND née le 01/02/2005"), "{TXT_ENFANT_1}"),
-            (_(u"Détail enfant 2"), _(u"10.00 € pour Lucie DUPOND née le 01/02/2005"), "{TXT_ENFANT_2}"),
-            (_(u"Détail enfant 3"), _(u"10.00 € pour Lucie DUPOND née le 01/02/2005"), "{TXT_ENFANT_3}"),
-            (_(u"Détail enfant 4"), _(u"10.00 € pour Lucie DUPOND née le 01/02/2005"), "{TXT_ENFANT_4}"),
-            (_(u"Détail enfant 5"), _(u"10.00 € pour Lucie DUPOND née le 01/02/2005"), "{TXT_ENFANT_5}"),
-            (_(u"Détail enfant 6"), _(u"10.00 € pour Lucie DUPOND née le 01/02/2005"), "{TXT_ENFANT_6}"),
+            (u"Détail enfant 1", "10.00 € pour Lucie DUPOND née le 01/02/2005", "{TXT_ENFANT_1}"),
+            (u"Détail enfant 2", "10.00 € pour Lucie DUPOND née le 01/02/2005", "{TXT_ENFANT_2}"),
+            (u"Détail enfant 3", "10.00 € pour Lucie DUPOND née le 01/02/2005", "{TXT_ENFANT_3}"),
+            (u"Détail enfant 4", "10.00 € pour Lucie DUPOND née le 01/02/2005", "{TXT_ENFANT_4}"),
+            (u"Détail enfant 5", "10.00 € pour Lucie DUPOND née le 01/02/2005", "{TXT_ENFANT_5}"),
+            (u"Détail enfant 6", "10.00 € pour Lucie DUPOND née le 01/02/2005", "{TXT_ENFANT_6}"),
 
         ]
 
         self.champs.extend(utils_infos_individus.GetNomsChampsPossibles(mode="famille"))
 
         self.speciaux = [
-            {"nom": _(u"Cadre principal"), "champ": _(u"cadre_principal"), "obligatoire": False, "nbreMax": 1, "x": None, "y": None, "verrouillageX": False, "verrouillageY": False, "Xmodifiable": True, "Ymodifiable": True, "largeur": 100, "hauteur": 150, "largeurModifiable": True, "hauteurModifiable": True, "largeurMin": 80, "largeurMax": 1000, "hauteurMin": 80, "hauteurMax": 1000, "verrouillageLargeur": False, "verrouillageHauteur": False, "verrouillageProportions": False, "interditModifProportions": False, }
+            {"nom": u"Cadre principal", "champ": u"cadre_principal", "obligatoire": False, "nbreMax": 1, "x": None, "y": None, "verrouillageX": False, "verrouillageY": False, "Xmodifiable": True, "Ymodifiable": True, "largeur": 100, "hauteur": 150, "largeurModifiable": True, "hauteurModifiable": True, "largeurMin": 80, "largeurMax": 1000, "hauteurMin": 80, "hauteurMax": 1000, "verrouillageLargeur": False, "verrouillageHauteur": False, "verrouillageProportions": False, "interditModifProportions": False, }
         ]
 
-        self.codesbarres = [(_(u"ID de la famille"), u"1234567", "{CODEBARRES_ID_FAMILLE}"), ]
+        self.codesbarres = [(u"ID de la famille", "1234567", "{CODEBARRES_ID_FAMILLE}"), ]
 
         # Questionnaires
         self.champs.extend(GetQuestions("famille"))
@@ -603,46 +612,46 @@ class Attestation_fiscale(Categorie):
 
 class Location(Categorie):
     def __init__(self):
-        self.nom = _(u"Location")
+        self.nom = "Location"
         self.code = "location"
         self.photosIndividuelles = False
 
-        self.champs = [(_(u"Numéro ID de la location"), u"13215", "{IDLOCATION}"),
-            (_(u"Numéro ID du produit"), u"034", "{IDPRODUIT}"),
-            (_(u"Date de début de la location"), u"01/01/2017", "{DATE_DEBUT}"),
-            (_(u"Date de fin de la location"), u"31/12/2017", "{DATE_FIN}"),
-            (_(u"Heure de début de la location"), u"01/01/2014", "{HEURE_DEBUT}"),
-            (_(u"Heure de fin de la location"), u"10/01/2014", "{HEURE_FIN}"),
-            (_(u"Nom du produit"), u"0123321", "{NOM_PRODUIT}"), (_(u"Nom de la catégorie"), u"064", "{NOM_CATEGORIE}"),
-            (_(u"Notes sur la location"), u"01/01/2014", "{NOTES}"),
+        self.champs = [(u"Numéro ID de la location", "13215", "{IDLOCATION}"),
+            (u"Numéro ID du produit", "034", "{IDPRODUIT}"),
+            (u"Date de début de la location", "01/01/2017", "{DATE_DEBUT}"),
+            (u"Date de fin de la location", "31/12/2017", "{DATE_FIN}"),
+            (u"Heure de début de la location", "01/01/2014", "{HEURE_DEBUT}"),
+            (u"Heure de fin de la location", "10/01/2014", "{HEURE_FIN}"),
+            (u"Nom du produit", "0123321", "{NOM_PRODUIT}"), (u"Nom de la catégorie", "064", "{NOM_CATEGORIE}"),
+            (u"Notes sur la location", "01/01/2014", "{NOTES}"),
 
-            (_(u"Numéro ID de la famille"), u"2582", "{IDFAMILLE}"),
-            (_(u"Noms des titulaires"), _(u"DUPOND Gérard et Lucie"), "{FAMILLE_NOM}"),
-            (_(u"Rue de l'adresse de la famille"), _(u"10 rue des oiseaux"), "{FAMILLE_RUE}"),
-            (_(u"Code postal de l'adresse de la famille"), u"29200", "{FAMILLE_CP}"),
-            (_(u"Ville de l'adresse de la famille"), _(u"BREST"), "{FAMILLE_VILLE}"),
-            (_(u"Régime social de la famille"), _(u"Régime général"), "{FAMILLE_REGIME}"),
-            (_(u"Caisse de la famille"), _(u"C.A.F."), "{FAMILLE_CAISSE}"),
-            (_(u"Numéro d'allocataire de la famille"), u"0123456X", "{FAMILLE_NUMALLOC}"),
+            (u"Numéro ID de la famille", "2582", "{IDFAMILLE}"),
+            (u"Noms des titulaires", "DUPOND Gérard et Lucie", "{FAMILLE_NOM}"),
+            (u"Rue de l'adresse de la famille", "10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Code postal de l'adresse de la famille", "29200", "{FAMILLE_CP}"),
+            (u"Ville de l'adresse de la famille", "BREST", "{FAMILLE_VILLE}"),
+            (u"Régime social de la famille", "Régime général", "{FAMILLE_REGIME}"),
+            (u"Caisse de la famille", "C.A.F.", "{FAMILLE_CAISSE}"),
+            (u"Numéro d'allocataire de la famille", "0123456X", "{FAMILLE_NUMALLOC}"),
 
-            (_(u"Nom de l'organisateur"), _(u"Association Noethys"), "{ORGANISATEUR_NOM}"),
-            (_(u"Rue de l'organisateur"), _(u"Avenue des Lilas"), "{ORGANISATEUR_RUE}"),
-            (_(u"Code postal de l'organisateur"), u"29870", "{ORGANISATEUR_CP}"),
-            (_(u"Ville de l'organisateur"), _(u"LANNILIS"), "{ORGANISATEUR_VILLE}"),
-            (_(u"Téléphone de l'organisateur"), u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (_(u"Fax de l'organisateur"), u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (_(u"Mail de l'organisateur"), _(u"noethys") + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
-            (_(u"Site internet de l'organisateur"), u"www.noethys.com", "{ORGANISATEUR_SITE}"),
-            (_(u"Numéro d'agrément de l'organisateur"), u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
-            (_(u"Numéro SIRET de l'organisateur"), u"123456789123", "{ORGANISATEUR_SIRET}"),
-            (_(u"Code APE de l'organisateur"), _(u"NO123"), "{ORGANISATEUR_APE}"),
+            (u"Nom de l'organisateur", "Association Noethys", "{ORGANISATEUR_NOM}"),
+            (u"Rue de l'organisateur", "Avenue des Lilas", "{ORGANISATEUR_RUE}"),
+            (u"Code postal de l'organisateur", "29870", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", "LANNILIS", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", "01.98.01.02.03", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", "01.04.05.06.", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", "noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Site internet de l'organisateur", "www.noethys.com", "{ORGANISATEUR_SITE}"),
+            (u"Numéro d'agrément de l'organisateur", "0256ORG234", "{ORGANISATEUR_AGREMENT}"),
+            (u"Numéro SIRET de l'organisateur", "123456789123", "{ORGANISATEUR_SIRET}"),
+            (u"Code APE de l'organisateur", "NO123", "{ORGANISATEUR_APE}"),
 
-            (_(u"Date d'édition (long)"), _(u"Lundi 9 septembre 2017"), "{DATE_EDITION_LONG}"),
-            (_(u"Date d'édition (court)"), u"19/09/2017", "{DATE_EDITION_COURT}"), ]
+            (u"Date d'édition (long)", "Lundi 9 septembre 2017", "{DATE_EDITION_LONG}"),
+            (u"Date d'édition (court)", "19/09/2017", "{DATE_EDITION_COURT}"), ]
 
         self.champs.extend(utils_infos_individus.GetNomsChampsPossibles(mode="famille"))
 
-        self.codesbarres = [(_(u"ID de la famille"), u"1234567", "{CODEBARRES_ID_FAMILLE}"), ]
+        self.codesbarres = [(u"ID de la famille", "1234567", "{CODEBARRES_ID_FAMILLE}"), ]
 
         self.speciaux = []
 
@@ -662,43 +671,43 @@ class Location(Categorie):
 
 class Location_demande(Categorie):
     def __init__(self):
-        self.nom = _(u"Demande de location")
+        self.nom = "Demande de location"
         self.code = "location_demande"
         self.photosIndividuelles = False
 
-        self.champs = [(_(u"Numéro ID de la demande"), u"13215", "{IDDEMANDE}"),
-            (_(u"Date de la demande"), u"01/01/2017", "{DATE}"), (_(u"Heure de la demande"), u"01/01/2014", "{HEURE}"),
-            (_(u"Catégories demandées"), u"Catégorie 1, catégorie 2", "{CATEGORIES}"),
-            (_(u"Produits demandés"), u"Produit 1, produit 2", "{PRODUITS}"),
-            (_(u"Notes sur la demande"), u"01/01/2014", "{NOTES}"),
+        self.champs = [(u"Numéro ID de la demande", "13215", "{IDDEMANDE}"),
+            (u"Date de la demande", "01/01/2017", "{DATE}"), (u"Heure de la demande", "01/01/2014", "{HEURE}"),
+            (u"Catégories demandées", "Catégorie 1, catégorie 2", "{CATEGORIES}"),
+            (u"Produits demandés", "Produit 1, produit 2", "{PRODUITS}"),
+            (u"Notes sur la demande", "01/01/2014", "{NOTES}"),
 
-            (_(u"Numéro ID de la famille"), u"2582", "{IDFAMILLE}"),
-            (_(u"Noms des titulaires"), _(u"DUPOND Gérard et Lucie"), "{FAMILLE_NOM}"),
-            (_(u"Rue de l'adresse de la famille"), _(u"10 rue des oiseaux"), "{FAMILLE_RUE}"),
-            (_(u"Code postal de l'adresse de la famille"), u"29200", "{FAMILLE_CP}"),
-            (_(u"Ville de l'adresse de la famille"), _(u"BREST"), "{FAMILLE_VILLE}"),
-            (_(u"Régime social de la famille"), _(u"Régime général"), "{FAMILLE_REGIME}"),
-            (_(u"Caisse de la famille"), _(u"C.A.F."), "{FAMILLE_CAISSE}"),
-            (_(u"Numéro d'allocataire de la famille"), u"0123456X", "{FAMILLE_NUMALLOC}"),
+            (u"Numéro ID de la famille", "2582", "{IDFAMILLE}"),
+            (u"Noms des titulaires", "DUPOND Gérard et Lucie", "{FAMILLE_NOM}"),
+            (u"Rue de l'adresse de la famille", "10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Code postal de l'adresse de la famille", "29200", "{FAMILLE_CP}"),
+            (u"Ville de l'adresse de la famille", "BREST", "{FAMILLE_VILLE}"),
+            (u"Régime social de la famille", "Régime général", "{FAMILLE_REGIME}"),
+            (u"Caisse de la famille", "C.A.F.", "{FAMILLE_CAISSE}"),
+            (u"Numéro d'allocataire de la famille", "0123456X", "{FAMILLE_NUMALLOC}"),
 
-            (_(u"Nom de l'organisateur"), _(u"Association Noethys"), "{ORGANISATEUR_NOM}"),
-            (_(u"Rue de l'organisateur"), _(u"Avenue des Lilas"), "{ORGANISATEUR_RUE}"),
-            (_(u"Code postal de l'organisateur"), u"29870", "{ORGANISATEUR_CP}"),
-            (_(u"Ville de l'organisateur"), _(u"LANNILIS"), "{ORGANISATEUR_VILLE}"),
-            (_(u"Téléphone de l'organisateur"), u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (_(u"Fax de l'organisateur"), u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (_(u"Mail de l'organisateur"), _(u"noethys") + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
-            (_(u"Site internet de l'organisateur"), u"www.noethys.com", "{ORGANISATEUR_SITE}"),
-            (_(u"Numéro d'agrément de l'organisateur"), u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
-            (_(u"Numéro SIRET de l'organisateur"), u"123456789123", "{ORGANISATEUR_SIRET}"),
-            (_(u"Code APE de l'organisateur"), _(u"NO123"), "{ORGANISATEUR_APE}"),
+            (u"Nom de l'organisateur", "Association Noethys", "{ORGANISATEUR_NOM}"),
+            (u"Rue de l'organisateur", "Avenue des Lilas", "{ORGANISATEUR_RUE}"),
+            (u"Code postal de l'organisateur", "29870", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", "LANNILIS", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", "01.98.01.02.03", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", "01.04.05.06.", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", "noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Site internet de l'organisateur", "www.noethys.com", "{ORGANISATEUR_SITE}"),
+            (u"Numéro d'agrément de l'organisateur", "0256ORG234", "{ORGANISATEUR_AGREMENT}"),
+            (u"Numéro SIRET de l'organisateur", "123456789123", "{ORGANISATEUR_SIRET}"),
+            (u"Code APE de l'organisateur", "NO123", "{ORGANISATEUR_APE}"),
 
-            (_(u"Date d'édition (long)"), _(u"Lundi 9 septembre 2017"), "{DATE_EDITION_LONG}"),
-            (_(u"Date d'édition (court)"), u"19/09/2017", "{DATE_EDITION_COURT}"), ]
+            (u"Date d'édition (long)", "Lundi 9 septembre 2017", "{DATE_EDITION_LONG}"),
+            (u"Date d'édition (court)", "19/09/2017", "{DATE_EDITION_COURT}"), ]
 
         self.champs.extend(utils_infos_individus.GetNomsChampsPossibles(mode="famille"))
 
-        self.codesbarres = [(_(u"ID de la famille"), u"1234567", "{CODEBARRES_ID_FAMILLE}"), ]
+        self.codesbarres = [(u"ID de la famille", "1234567", "{CODEBARRES_ID_FAMILLE}"), ]
 
         self.speciaux = []
 
@@ -1146,6 +1155,3 @@ class ObjetPDF():
 
     def GetCoords(self):
         return [self.left, self.top, self.width, self.height]
-
-
-

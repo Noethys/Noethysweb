@@ -4,7 +4,6 @@
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, ButtonHolder, Fieldset, Div, Button
 from crispy_forms.bootstrap import Field, StrictButton
@@ -31,7 +30,7 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.field_class = 'col-md-10'
 
         # Nom de fichier initial
-        nom_fichier = _(u"Noethysweb_%s") % datetime.datetime.now().strftime("%Y%m%d_%H%M")
+        nom_fichier = "Noethysweb_%s" % datetime.datetime.now().strftime("%Y%m%d_%H%M")
         self.fields["nom"].initial = nom_fichier
 
         # Affichage
@@ -43,7 +42,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Field('inclure_media'),
             # ButtonHolder(
             #     Div(
-            #         Submit('bouton_submit', _("Sauvegarder"), css_class='btn-primary'),
+            #         Submit('bouton_submit', "Sauvegarder", css_class='btn-primary'),
             #         HTML("""<a class="btn btn-default" href="{% url 'outils_toc' %}">Annuler</a>"""),
             #         css_class="text-right"
             #     ),

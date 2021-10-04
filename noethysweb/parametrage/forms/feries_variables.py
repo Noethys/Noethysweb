@@ -4,9 +4,8 @@
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm
+from django.forms import ModelForm, ValidationError
 from core.forms.base import FormulaireBase
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, ButtonHolder
 from crispy_forms.bootstrap import Field, FormActions, StrictButton
@@ -45,5 +44,5 @@ class Formulaire(FormulaireBase, ModelForm):
 
     def clean_jour(self):
         if self.cleaned_data['jour'] < 1 or self.cleaned_data['jour'] > 31 :
-            raise ValidationError(_("Le jour doit être compris entre 1 et 31"))
+            raise ValidationError("Le jour doit être compris entre 1 et 31")
         return self.cleaned_data['jour']

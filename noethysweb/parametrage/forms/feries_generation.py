@@ -5,7 +5,6 @@
 
 from django import forms
 from django.forms import ValidationError
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Row, Column
 from crispy_forms.bootstrap import Field, FormActions, StrictButton

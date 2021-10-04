@@ -6,7 +6,6 @@
 from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder
 from crispy_forms.bootstrap import Field, StrictButton

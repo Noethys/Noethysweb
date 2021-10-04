@@ -4,7 +4,6 @@
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, ButtonHolder, Fieldset, Div, Button
 from crispy_forms.bootstrap import Field, StrictButton
@@ -31,7 +30,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Field('data'),
             ButtonHolder(
                 Div(
-                    Submit('bouton_submit', _("Analyser l'image"), css_class='btn-primary'),
+                    Submit('bouton_submit', "Analyser l'image", css_class='btn-primary'),
                     HTML("""<a class="btn btn-danger" href="{% url 'individus_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>"""),
                     css_class="text-right"
                 ),

@@ -7,7 +7,6 @@ from django.views.generic import TemplateView
 from core.views.base import CustomView
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.utils.translation import ugettext as _
 from core.models import Ferie
 from django.contrib import messages
 from parametrage.forms.feries_generation import Formulaire

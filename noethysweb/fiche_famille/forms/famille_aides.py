@@ -7,7 +7,6 @@ from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
 from django.db.models import Q
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
 from crispy_forms.bootstrap import Field, StrictButton, PrependedText, InlineCheckboxes
@@ -179,7 +178,7 @@ class Formulaire_selection_activite(FormulaireBase, forms.Form):
         self.helper.layout = Layout(
             Field('activite'),
             ButtonHolder(
-                Submit('submit', _('Valider'), css_class='btn-primary'),
+                Submit('submit', 'Valider', css_class='btn-primary'),
                 HTML("""<a class="btn btn-danger" href="{{ view.Get_annuler_url }}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>"""),
                 css_class="pull-right",
             )

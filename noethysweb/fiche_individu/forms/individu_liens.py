@@ -4,7 +4,6 @@
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, Div, ButtonHolder
 from core.utils.utils_commandes import Commandes

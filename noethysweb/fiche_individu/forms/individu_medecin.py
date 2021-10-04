@@ -6,7 +6,6 @@
 from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, ButtonHolder, Div, Fieldset
 from crispy_forms.bootstrap import Field, InlineCheckboxes, FormActions, StrictButton
@@ -36,7 +35,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Field("medecin"),
             ButtonHolder(
                 Div(
-                    Submit('submit', _('Valider'), css_class='btn-primary'),
+                    Submit('submit', 'Valider', css_class='btn-primary'),
                     HTML("""<button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>"""),
                     css_class="modal-footer", style="padding-bottom:0px;padding-right:0px;"
                 ),

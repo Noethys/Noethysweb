@@ -6,7 +6,6 @@
 from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
-from django.utils.translation import ugettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Row, Column, Fieldset, Hidden, Div
 from crispy_forms.bootstrap import Field, FormActions, PrependedText
@@ -121,7 +120,7 @@ class Formulaire_champs(forms.Form):
             Field("champs"),
             ButtonHolder(
                 Div(
-                    Submit('submit', _('Insérer'), css_class='btn-primary'),
+                    Submit('submit', 'Insérer', css_class='btn-primary'),
                     HTML("""<button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>"""),
                     css_class="modal-footer", style="padding-bottom:0px;padding-right:0px;"
                 ),
