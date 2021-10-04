@@ -10,6 +10,7 @@ class Champ():
     def __init__(self, *args, **kwargs):
         self.page = kwargs.get("page", None)
         self.code = kwargs.get("code", None)
+        self.label = kwargs.get("label", None)
         self.representant = kwargs.get("representant", None)
         self.enfant = kwargs.get("enfant", None)
         self.contact = kwargs.get("contact", None)
@@ -21,51 +22,51 @@ class Champ():
 
 LISTE_CHAMPS = [
 
-    Champ(page="famille_caisse", code="caisse", famille="AFFICHER"),
-    Champ(page="famille_caisse", code="num_allocataire", famille="AFFICHER"),
-    Champ(page="famille_caisse", code="allocataire", famille="AFFICHER"),
-    Champ(page="famille_caisse", code="autorisation_cafpro", famille="AFFICHER"),
+    Champ(page="famille_caisse", code="caisse", label="Caisse", famille="AFFICHER"),
+    Champ(page="famille_caisse", code="num_allocataire", label="N° allocataire", famille="AFFICHER"),
+    Champ(page="famille_caisse", code="allocataire", label="Nom de l'allocataire", famille="AFFICHER"),
+    Champ(page="famille_caisse", code="autorisation_cafpro", label="Autorisation CAFPRO", famille="AFFICHER"),
 
-    Champ(page="famille_consentements", code="consentements", famille="AFFICHER"),
+    Champ(page="famille_consentements", code="consentements", label="Consentements", famille="AFFICHER"),
 
-    Champ(page="individu_identite", code="nom", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
-    Champ(page="individu_identite", code="civilite", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
-    Champ(page="individu_identite", code="prenom", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
-    Champ(page="individu_identite", code="date_naiss", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
-    Champ(page="individu_identite", code="cp_naiss", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
-    Champ(page="individu_identite", code="ville_naiss", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
-    Champ(page="individu_identite", code="type_sieste", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
+    Champ(page="individu_identite", code="nom", label="Nom de famille", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
+    Champ(page="individu_identite", code="civilite", label="Civilité", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
+    Champ(page="individu_identite", code="prenom", label="Prénom", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
+    Champ(page="individu_identite", code="date_naiss", label="Date de naissance", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
+    Champ(page="individu_identite", code="cp_naiss", label="CP naissance", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
+    Champ(page="individu_identite", code="ville_naiss", label="Ville de naissance", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
+    Champ(page="individu_identite", code="type_sieste", label="Type de sieste", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 
-    Champ(page="individu_coords", code="type_adresse", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
-    Champ(page="individu_coords", code="adresse_auto", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
-    Champ(page="individu_coords", code="rue_resid", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
-    Champ(page="individu_coords", code="cp_resid", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
-    Champ(page="individu_coords", code="ville_resid", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
-    Champ(page="individu_coords", code="secteur", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
-    Champ(page="individu_coords", code="tel_domicile", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
-    Champ(page="individu_coords", code="tel_mobile", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
-    Champ(page="individu_coords", code="mail", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
-    Champ(page="individu_coords", code="categorie_travail", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
-    Champ(page="individu_coords", code="profession", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
-    Champ(page="individu_coords", code="employeur", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
-    Champ(page="individu_coords", code="travail_tel", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
-    Champ(page="individu_coords", code="travail_mail", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
+    Champ(page="individu_coords", code="type_adresse", label="Type d'adresse", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
+    Champ(page="individu_coords", code="adresse_auto", label="Adresse rattachée", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
+    Champ(page="individu_coords", code="rue_resid", label="Rue de résidence", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
+    Champ(page="individu_coords", code="cp_resid", label="CP de résidence", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
+    Champ(page="individu_coords", code="ville_resid", label="Ville de résidence", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
+    Champ(page="individu_coords", code="secteur", label="Secteur", representant="AFFICHER", enfant="AFFICHER", contact="AFFICHER"),
+    Champ(page="individu_coords", code="tel_domicile", label="Tél fixe", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
+    Champ(page="individu_coords", code="tel_mobile", label="Tél portable", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
+    Champ(page="individu_coords", code="mail", label="Email", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
+    Champ(page="individu_coords", code="categorie_travail", label="Catégorie socio-professionnelle", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
+    Champ(page="individu_coords", code="profession", label="Profession", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
+    Champ(page="individu_coords", code="employeur", label="Employeur", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
+    Champ(page="individu_coords", code="travail_tel", label="Tél pro.", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
+    Champ(page="individu_coords", code="travail_mail", label="Email pro.", representant="AFFICHER", enfant="MASQUER", contact="AFFICHER"),
 
-    Champ(page="individu_questionnaire", code="questionnaire", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
+    Champ(page="individu_questionnaire", code="questionnaire", label="Questionnaire", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 
-    Champ(page="individu_regimes_alimentaires", code="regimes_alimentaires", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
+    Champ(page="individu_regimes_alimentaires", code="regimes_alimentaires", label="Régimes alimentaires", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 
-    Champ(page="individu_maladies", code="maladies", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
+    Champ(page="individu_maladies", code="maladies", label="Maladies", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 
-    Champ(page="individu_medecin", code="medecin", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
+    Champ(page="individu_medecin", code="medecin", label="Médecin", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 
-    Champ(page="individu_vaccinations", code="vaccinations", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
+    Champ(page="individu_vaccinations", code="vaccinations", label="Vaccinations", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 
-    Champ(page="individu_infos_medicales", code="infos_medicales", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
+    Champ(page="individu_infos_medicales", code="infos_medicales", label="Information médicale", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 
-    Champ(page="individu_assurances", code="assurances", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
+    Champ(page="individu_assurances", code="assurances", label="Assurance", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 
-    Champ(page="individu_contacts", code="contacts", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
+    Champ(page="individu_contacts", code="contacts", label="Contact", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 ]
 
 def Get_liste_champs():
@@ -91,3 +92,9 @@ def Get_codes_champs_page(page="identite", categorie="representant", liste_champ
         if champ.page == page and getattr(champ, categorie) != "MASQUER":
             liste_champs_temp.append(champ.code)
     return liste_champs_temp
+
+def Get_labels_champs():
+    dict_labels = {}
+    for champ in LISTE_CHAMPS:
+        dict_labels[champ.code] = champ.label
+    return dict_labels

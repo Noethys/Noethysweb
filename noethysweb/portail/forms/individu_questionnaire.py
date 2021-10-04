@@ -31,7 +31,7 @@ class Formulaire(FormulaireBase, forms.Form):
 
         # Importation des renseignements en attente de validation
         renseignements = PortailRenseignement.objects.filter(categorie="individu_questionnaire", famille=rattachement.famille, individu=rattachement.individu, etat="ATTENTE").order_by("date")
-        dict_renseignements = {renseignement.code: json.loads(renseignement.valeur) for renseignement in renseignements}
+        dict_renseignements = {renseignement.code: json.loads(renseignement.nouvelle_valeur) for renseignement in renseignements}
 
         # Création des champs
         for question in QuestionnaireQuestion.objects.filter(categorie="individu", visible_portail=True).order_by("ordre"):

@@ -8,7 +8,8 @@ from core.views import toc
 from core.decorators import secure_ajax
 from outils.views import editeur_emails, editeur_emails_express, historique, update, sauvegarde_creer, sauvegarde_restaurer, statistiques, contacts, \
                         editeur_emails_familles, editeur_emails_individus, editeur_emails_contacts, editeur_emails_listes_diffusion, \
-                        editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel
+                        editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
+                        demandes_portail
 
 urlpatterns = [
 
@@ -60,11 +61,13 @@ urlpatterns = [
     path('outils/portail/messagerie', messagerie_portail.Ajouter.as_view(), name='messagerie_portail'),
     path('outils/portail/messagerie/<int:idstructure>/<int:idfamille>', messagerie_portail.Ajouter.as_view(), name='messagerie_portail'),
 
+    path('outils/portail/demandes/liste', demandes_portail.Liste.as_view(), name='demandes_portail_liste'),
 
     # AJAX
     path('outils/get_modele_email', secure_ajax(editeur_emails.Get_modele_email), name='ajax_get_modele_email'),
     path('outils/get_view_editeur_email', secure_ajax(editeur_emails_express.Get_view_editeur_email), name='ajax_get_view_editeur_email'),
     path('outils/envoyer_email_express', secure_ajax(editeur_emails_express.Envoyer_email), name='ajax_envoyer_email_express'),
     path('outils/get_calendrier_annuel', secure_ajax(calendrier_annuel.Get_calendrier_annuel), name='ajax_get_calendrier_annuel'),
+    path('outils/portail/demandes/', secure_ajax(demandes_portail.Appliquer_modification), name='ajax_appliquer_modification_portail'),
 
 ]

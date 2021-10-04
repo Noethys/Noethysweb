@@ -6,15 +6,15 @@
 import logging, json
 logger = logging.getLogger(__name__)
 from django.db import models
+from django.db.models.query import QuerySet
+from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 from core.models import Rattachement
 from portail.views.base import CustomView
 from portail.utils import utils_onglets
 from core.views import crud
-from django.contrib import messages
-from django.http import HttpResponseRedirect
 from core.models import PortailRenseignement
-from django.db.models.query import QuerySet
-from django.core.serializers.json import DjangoJSONEncoder
 
 
 class Onglet(CustomView):
@@ -93,22 +93,21 @@ class Onglet(CustomView):
         objet.certification_date = None
         objet.save()
 
-    def Get_valeurs(self, valeurs={}):
-        """ Pour modifier des valeurs à la volée """
-        for key, valeur in valeurs.items():
+    def Formate_valeur(self, valeur=None):
+        # Transforme une instance de model en pk
+        if isinstance(valeur, (models.Model, models.base.ModelBase)):
+            valeur = valeur.pk
 
-            # Transforme une instance de model en pk
-            if isinstance(valeur, (models.Model, models.base.ModelBase)):
-                valeur = valeur.pk
+        # Transforme les queryset en liste de pk
+        if isinstance(valeur, QuerySet):
+            valeur = [instance.pk for instance in valeur.all()]
 
-            # Transforme les queryset en liste de pk
-            if isinstance(valeur, QuerySet):
-                valeur = [instance.pk for instance in valeur.all()]
+        # Transforme une liste d'instances en liste de pk
+        if isinstance(valeur, list):
+            valeur = [item.pk if "models" in str(type(item)) else item for item in valeur]
 
-            # Transforme la valeur en json
-            valeurs[key] = json.dumps(valeur, cls=DjangoJSONEncoder)
-
-        return valeurs
+        # Transforme la valeur en json
+        return json.dumps(valeur, cls=DjangoJSONEncoder)
 
     def form_valid(self, form):
         """ Enregistrement des modifications """
@@ -124,9 +123,10 @@ class Onglet(CustomView):
                     messages.add_message(self.request, messages.SUCCESS, "Votre modification a été enregistrée")
             else:
                 # Avec validation par l'admin
-                valeurs = self.Get_valeurs(form.cleaned_data)
                 for code in form.changed_data:
-                    PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code=code, valeur=valeurs[code])
+                    PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code=code,
+                                                        nouvelle_valeur=self.Formate_valeur(form.cleaned_data.get(code, None)),
+                                                        ancienne_valeur=self.Formate_valeur(form.initial.get(code, None)))
                 if self.verbe_action == "Ajouter":
                     messages.add_message(self.request, messages.SUCCESS, "Votre ajout a été enregistré et transmis à l'administrateur")
                 else:

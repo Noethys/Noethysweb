@@ -58,8 +58,8 @@ class MyDatatable(Datatable):
     def Create_bouton_dupliquer(self, url=None, title="Dupliquer"):
         return self.Create_bouton(url=url, title=title, icone="fa-copy")
 
-    def Create_bouton(self, url=None, title="", icone="fa-copy"):
-        return """<a type='button' class='btn btn-default btn-xs' href='%s' title='%s'><i class="fa fa-fw %s"></i></a>""" % (url, title, icone)
+    def Create_bouton(self, url=None, title="", icone="fa-copy", args=""):
+        return """<a type='button' class='btn btn-default btn-xs' href='%s' title='%s' %s><i class="fa fa-fw %s"></i></a>""" % (url, title, args, icone)
 
     def Get_actions_standard(self, instance, *args, **kwargs):
         view = kwargs["view"]

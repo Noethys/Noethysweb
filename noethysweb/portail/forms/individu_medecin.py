@@ -15,7 +15,7 @@ class Widget_medecin(ModelSelect2Widget):
     search_fields = ['nom__icontains', 'prenom__icontains', 'ville_resid__icontains']
 
     def label_from_instance(widget, instance):
-        label = "%s %s" % (instance.nom, instance.prenom)
+        label = instance.Get_nom()
         if instance.ville_resid:
             label += " (%s)" % instance.ville_resid
         return label

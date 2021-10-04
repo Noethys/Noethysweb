@@ -1,0 +1,31 @@
+{% extends "core/crud/liste_in_box.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        function traiter_demande(iddemande, etat) {
+            // Modifie la donnée
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_appliquer_modification_portail' %}",
+                data: {
+                    "iddemande": iddemande,
+                    "etat": etat
+                },
+                datatype: "json",
+                success: function(data){
+                    // Recharge la liste
+                    var table = $('.datatable').DataTable()
+                    table.ajax.reload();
+                },
+                error: function(data) {
+                    toastr.error("Erreur");
+                }
+            })
+        };
+    </script>
+
+{% endblock scripts %}

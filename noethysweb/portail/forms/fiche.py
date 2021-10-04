@@ -35,7 +35,7 @@ class FormulaireBase():
 
         # Importation des renseignements en attente de validation
         renseignements = PortailRenseignement.objects.filter(categorie=self.nom_page, famille=famille, individu=individu, etat="ATTENTE").order_by("date")
-        dict_renseignements = {renseignement.code: json.loads(renseignement.valeur) for renseignement in renseignements}
+        dict_renseignements = {renseignement.code: json.loads(renseignement.nouvelle_valeur) for renseignement in renseignements}
 
         # Liste des champs à afficher
         liste_codes_champs = utils_champs.Get_codes_champs_page(page=self.nom_page, categorie=categorie)
@@ -52,7 +52,7 @@ class FormulaireBase():
                     if self.mode == "EDITION":
                         self.fields[code].help_text = self.help_texts.get(code, None)
                     # Recherche si une valeur existe déjà dans les renseignements modifiés
-                    if code in dict_renseignements and self.initial[code] != dict_renseignements[code]:
+                    if code in dict_renseignements and self.initial.get(code, None) != dict_renseignements.get(code, None):
                         self.initial[code] = dict_renseignements[code]
                         self.fields[code].help_text = "<span class='text-orange'><i class='fa fa-exclamation-circle margin-r-5'></i>Modification en attente de validation par l'administrateur.</span>"
                     # Génération du field
