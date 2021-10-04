@@ -468,6 +468,12 @@ class Medecin(models.Model):
     def __str__(self):
         return "%s %s" % (self.nom, self.prenom)
 
+    def Get_nom(self):
+        texte = self.nom
+        if self.prenom:
+            texte += " " + self.prenom
+        return texte
+
 
 class NiveauScolaire(models.Model):
     idniveau = models.AutoField(verbose_name="ID", db_column='IDniveau', primary_key=True)
@@ -2731,7 +2737,8 @@ class PortailRenseignement(models.Model):
     individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.PROTECT)
     categorie = models.CharField(verbose_name="Catégorie", max_length=200)
     code = models.CharField(verbose_name="Code", max_length=200)
-    valeur = encrypt(models.TextField(verbose_name="Valeur", blank=True, null=True))
+    nouvelle_valeur = encrypt(models.TextField(verbose_name="Nouvelle valeur", blank=True, null=True))
+    ancienne_valeur = encrypt(models.TextField(verbose_name="Ancienne valeur", blank=True, null=True))
     choix_etat = [("ATTENTE", "En attente de validation"), ("VALIDE", "Validé"), ("REFUS", "Refusé")]
     etat = models.CharField(verbose_name="Etat", max_length=100, choices=choix_etat, default="ATTENTE")
     traitement_utilisateur = models.ForeignKey(Utilisateur, verbose_name="Traité par", blank=True, null=True, on_delete=models.PROTECT)
