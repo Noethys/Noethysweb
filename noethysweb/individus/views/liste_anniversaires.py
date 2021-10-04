@@ -15,7 +15,7 @@ import json
 
 def Generer_pdf(request):
     # Récupération des options
-    form = Formulaire(request.POST, request=self.request)
+    form = Formulaire(request.POST, request=request)
     if not form.is_valid():
         return JsonResponse({"erreur": "Veuillez compléter les paramètres"}, status=401)
     options = form.cleaned_data
