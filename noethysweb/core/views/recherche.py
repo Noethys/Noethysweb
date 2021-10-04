@@ -67,7 +67,7 @@ class View(CustomView, TemplateView):
         resultats = {"texte": texte}
 
         # Recherche dans les individus
-        champs = ("nom_complet", "nom_complet_inverse", "individu__nom", "individu__nom_jfille", "individu__prenom", "individu__rue_resid", "individu__cp_resid", "individu__ville_resid", "individu__mail")
+        champs = ("nom_complet", "nom_complet_inverse", "individu__nom", "individu__nom_jfille", "individu__prenom")
         condition = reduce(or_, [Q(**{'{}__icontains'.format(f): texte}) for f in champs], Q())
         queryset = Rattachement.objects.select_related('individu', 'famille').annotate(nom_complet=Concat('individu__nom', Value(' '), 'individu__prenom'), nom_complet_inverse=Concat('individu__prenom', Value(' '), 'individu__nom'))
         resultats["rattachements"] = queryset.filter(condition).order_by("individu__nom", "individu__prenom")[:50]

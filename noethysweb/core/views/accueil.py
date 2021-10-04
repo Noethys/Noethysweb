@@ -94,10 +94,12 @@ class Accueil(CustomView, TemplateView):
             date_jour = datetime.date.today()
             if demain:
                 date_jour += datetime.timedelta(days=1)
-            individus = Individu.objects.filter(date_naiss__month=date_jour.month, date_naiss__day=date_jour.day, inscription__isnull=False).distinct()
+            # individus = Individu.objects.filter(date_naiss__month=date_jour.month, date_naiss__day=date_jour.day, inscription__isnull=False).distinct()
+            individus = Individu.objects.filter(date_naiss__isnull=False, inscription__isnull=False).distinct()
             liste_textes = []
             for individu in individus:
-                liste_textes.append("%s %s (%d ans)" % (individu.prenom, individu.nom, individu.Get_age(today=date_jour)))
+                if individu.date_naiss.month == date_jour.month and individu.date_naiss.day == date_jour.day:
+                    liste_textes.append("%s %s (%d ans)" % (individu.prenom, individu.nom, individu.Get_age(today=date_jour)))
             if liste_textes:
                 texte_anniversaires = "Joyeux anniversaire à %s." % utils_texte.Convert_liste_to_texte_virgules(liste_textes)
             else:

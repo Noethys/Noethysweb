@@ -11,9 +11,9 @@ from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.views.base import CustomView
 from core.models import Individu, Famille, Note, Rattachement, Inscription
-from core.utils import utils_texte
+from core.utils import utils_texte, utils_dates
 from fiche_individu.utils.utils_individu import LISTE_ONGLETS
-from fiche_individu.forms.individu import Formulaire
+# from fiche_individu.forms.individu import Formulaire
 
 
 class Page(crud.Page):
@@ -50,11 +50,11 @@ class Liste(Page, crud.Liste):
         prenom = columns.TextColumn("Prénom", sources=['individu__prenom'])
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         profil = columns.TextColumn("Profil", sources=['Get_profil'])
-        date_naiss = columns.TextColumn("Date naiss.", sources=['individu__date_naiss'], processor=helpers.format_date('%d/%m/%Y'))
-        age = columns.TextColumn("Age", sources=['individu__date_naiss'], processor="Get_age")
-        rue_resid = columns.TextColumn("Rue", sources=['individu__rue_resid'])
-        cp_resid = columns.TextColumn("CP", sources=['individu__cp_resid'])
-        ville_resid = columns.TextColumn("Ville", sources=['individu__ville_resid'])
+        date_naiss = columns.TextColumn("Date naiss.", processor="Get_date_naiss")
+        age = columns.TextColumn("Age", sources=['Get_age'], processor="Get_age")
+        rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
+        cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')
+        ville_resid = columns.TextColumn("Ville",  sources=None, processor='Get_ville_resid')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
@@ -73,6 +73,18 @@ class Liste(Page, crud.Liste):
 
         def Get_age(self, instance, *args, **kwargs):
             return instance.individu.Get_age()
+
+        def Get_date_naiss(self, instance, *args, **kwargs):
+            return utils_dates.ConvertDateToFR(instance.individu.date_naiss)
+
+        def Get_rue_resid(self, instance, *args, **kwargs):
+            return instance.individu.rue_resid
+
+        def Get_cp_resid(self, instance, *args, **kwargs):
+            return instance.individu.cp_resid
+
+        def Get_ville_resid(self, instance, *args, **kwargs):
+            return instance.individu.ville_resid
 
 
 # class Supprimer(Page, crud.Supprimer):
