@@ -3,6 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+from django.core.cache import cache
 from core.models import PortailChamp
 
 
@@ -19,10 +20,17 @@ class Champ():
     def __repr__(self):
         return "<%s:%s>" % (self.page, self.code)
 
+    def Get_champs_affiches(self):
+        liste_affiches = []
+        for public in ("famille", "representant", "enfant", "contact"):
+            if getattr(self, public) == "AFFICHER":
+                liste_affiches.append(public)
+        return liste_affiches
+
 
 LISTE_CHAMPS = [
 
-    Champ(page="famille_caisse", code="caisse", label="Caisse", famille="AFFICHER"),
+    Champ(page="famille_caisse", code="caisse", label="Caisse d'allocation", famille="AFFICHER"),
     Champ(page="famille_caisse", code="num_allocataire", label="N° allocataire", famille="AFFICHER"),
     Champ(page="famille_caisse", code="allocataire", label="Nom de l'allocataire", famille="AFFICHER"),
     Champ(page="famille_caisse", code="autorisation_cafpro", label="Autorisation CAFPRO", famille="AFFICHER"),
@@ -66,11 +74,15 @@ LISTE_CHAMPS = [
 
     Champ(page="individu_assurances", code="assurances", label="Assurance", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 
-    Champ(page="individu_contacts", code="contacts", label="Contact", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
+    Champ(page="individu_contacts", code="contacts", label="Contact d'urgence", representant="MASQUER", enfant="AFFICHER", contact="MASQUER"),
 ]
 
 def Get_liste_champs():
-    dict_champs_db = {"%s:%s" % (champ_db.page, champ_db.code): champ_db for champ_db in PortailChamp.objects.all()}
+    dict_champs_db = cache.get('parametres_portail_champs')
+    if not dict_champs_db:
+        dict_champs_db = {"%s:%s" % (champ_db.page, champ_db.code): champ_db for champ_db in PortailChamp.objects.all()}
+        cache.set('parametres_portail_champs', dict_champs_db)
+
     liste_champs_temp = []
     for champ in LISTE_CHAMPS:
         key = "%s:%s" % (champ.page, champ.code)

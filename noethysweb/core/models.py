@@ -2761,6 +2761,7 @@ class PortailChamp(models.Model):
     representant = models.CharField(verbose_name="Représentant", max_length=100, choices=choix_etat, default="AFFICHER")
     enfant = models.CharField(verbose_name="Enfant", max_length=100, choices=choix_etat, default="AFFICHER")
     contact = models.CharField(verbose_name="Contact", max_length=100, choices=choix_etat, default="AFFICHER")
+    famille = models.CharField(verbose_name="Famille", max_length=100, choices=choix_etat, default="AFFICHER")
 
     class Meta:
         db_table = 'portail_champs'

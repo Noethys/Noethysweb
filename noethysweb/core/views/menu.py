@@ -102,7 +102,8 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
     # Portail
     menu_portail = menu_parametrage.Add(titre="Portail")
-    menu_portail.Add(code="portail_parametres_modifier", titre="Paramètres", icone="file-text-o", compatible_demo=False)
+    menu_portail.Add(code="portail_parametres_modifier", titre="Paramètres généraux", icone="file-text-o", compatible_demo=False)
+    menu_portail.Add(code="portail_parametres_renseignements_modifier", titre="Paramètres des renseignements", icone="file-text-o", compatible_demo=False)
     menu_portail.Add(code="categories_compte_internet_liste", titre="Catégories de compte internet", icone="file-text-o")
     menu_portail.Add(code="types_consentements_liste", titre="Types de consentements", icone="file-text-o")
     menu_portail.Add(code="unites_consentements_liste", titre="Unités de consentements", icone="file-text-o")

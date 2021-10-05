@@ -22,7 +22,7 @@ from parametrage.views import organisateur, structures, \
     questionnaires, adresses_mail, activites_assistant, activites_assistant_sejour, activites_assistant_cantine, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
     portail_parametres, types_regimes_alimentaires, assureurs, categories_compte_internet, modeles_pes, \
-    types_consentements, unites_consentements, articles, images_articles, albums, images_fond, portail_documents
+    types_consentements, unites_consentements, articles, images_articles, albums, images_fond, portail_documents, portail_parametres_renseignements
 
 
 urlpatterns = [
@@ -390,6 +390,7 @@ urlpatterns = [
 
     # Portail
     path('parametrage/portail_parametres/modifier', portail_parametres.Modifier.as_view(), name='portail_parametres_modifier'),
+    path('parametrage/portail_parametres_renseignements/modifier', portail_parametres_renseignements.Modifier.as_view(), name='portail_parametres_renseignements_modifier'),
 
     # Types de consentements
     path('parametrage/types_consentements/liste', types_consentements.Liste.as_view(), name='types_consentements_liste'),
