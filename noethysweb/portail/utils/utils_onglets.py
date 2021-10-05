@@ -3,6 +3,8 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+from django.core.cache import cache
+from core.models import PortailParametre
 from portail.utils import utils_champs
 
 
@@ -17,11 +19,8 @@ class Onglet():
     def __repr__(self):
         return self.code
 
-LISTE_ONGLETS_FAMILLE = [
+LISTE_ONGLETS = [
     Onglet(code="famille_caisse", label="Caisse", icone="fa-institution", url="portail_famille_caisse", validation_auto=False),
-]
-
-LISTE_ONGLETS_INDIVIDU = [
     Onglet(code="individu_identite", label="Identité", icone="fa-user", url="portail_individu_identite", validation_auto=False),
     Onglet(code="individu_questionnaire", label="Questionnaire", icone="fa-question", url="portail_individu_questionnaire", validation_auto=True),
     Onglet(code="individu_coords", label="Coordonnées", icone="fa-map-marker", url="portail_individu_coords", validation_auto=False),
@@ -46,21 +45,23 @@ def Get_onglets(categorie=None):
     # Récupère la liste des onglets actifs
     liste_onglets = []
     onglets_actifs = list(set([champ.page for champ in liste_champs]))
-    if categorie == "famille":
-        liste_onglets_temp = LISTE_ONGLETS_FAMILLE
-    else:
-        liste_onglets_temp = LISTE_ONGLETS_INDIVIDU
-    for onglet in liste_onglets_temp:
-        if onglet.code in onglets_actifs:
+    if categorie != "famille":
+        categorie = "individu"
+    for onglet in LISTE_ONGLETS:
+        if onglet.code.startswith(categorie) and onglet.code in onglets_actifs:
             liste_onglets.append(onglet)
     return liste_onglets
 
 def Get_onglet(code=""):
-    if code.startswith("famille_"):
-        liste_onglets_temp = LISTE_ONGLETS_FAMILLE
-    else:
-        liste_onglets_temp = LISTE_ONGLETS_INDIVIDU
-    for onglet in liste_onglets_temp:
+    for onglet in LISTE_ONGLETS:
         if onglet.code == code:
+            # Récupération de la valeur validation_auto de l'onglet
+            code_parametre = "validation_auto:%s" % onglet.code
+            parametres_portail = cache.get('parametres_portail')
+            if parametres_portail:
+                validation_auto = parametres_portail.get(code_parametre)
+            else:
+                validation_auto = PortailParametre.objects.get(code=code_parametre).valeur
+            onglet.validation_auto = validation_auto in ("True", True)
             return onglet
     return None

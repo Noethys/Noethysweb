@@ -21,7 +21,6 @@ class Modifier(CustomView, TemplateView):
         context['page_titre'] = "Paramètres du portail"
         context['box_titre'] = "Paramètres"
         context['box_introduction'] = "Ajustez les paramètres du portail et cliquez sur le bouton Enregistrer."
-        # context['afficher_menu_brothers'] = True
         context['form'] = context.get("form", Formulaire)
         return context
 
@@ -32,7 +31,7 @@ class Modifier(CustomView, TemplateView):
 
         # Enregistrement
         for code, valeur in form.cleaned_data.items():
-            objet, created = PortailParametre.objects.update_or_create(code=code, defaults={'valeur': str(valeur)})
+            PortailParametre.objects.update_or_create(code=code, defaults={'valeur': str(valeur)})
 
         # Nettoyage du cache
         cache.delete("parametres_portail")

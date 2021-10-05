@@ -16,14 +16,15 @@ from core.utils.utils_portail import LISTE_PARAMETRES
 LISTE_RUBRIQUES = [
     ("Page de connexion", ["connexion_image_fond", "connexion_adresse_exp", ]),
     ("Page d'accueil", ["accueil_texte_bienvenue", ]),
-    ("Page des renseignements", ["renseignements_afficher_page", "renseignements_intro"]),
+    ("Page des renseignements", ["renseignements_afficher_page", "renseignements_intro", "validation_auto:famille_caisse", "validation_auto:individu_identite",
+                                 "validation_auto:individu_coords", "validation_auto:individu_regimes_alimentaires", "validation_auto:individu_maladies",
+                                 "validation_auto:individu_medecin"]),
     ("Page des documents", ["documents_afficher_page", "documents_intro"]),
     ("Page des réservations", ["reservations_afficher_page", "reservations_intro", "reservations_intro_planning"]),
     ("Page de la facturation", ["facturation_afficher_page", "facturation_intro", "facturation_afficher_numero_facture", "facturation_afficher_solde_facture", "facturation_autoriser_detail_facture", "facturation_autoriser_telechargement_facture"]),
     ("Page des règlements", ["reglements_afficher_page", "reglements_intro", "reglements_afficher_encaissement", "reglements_autoriser_telechargement_recu"]),
     ("Page contact", ["contact_afficher_page", "contact_intro", "messagerie_intro"]),
     ("Page des mentions légales", ["mentions_afficher_page", "mentions_intro", "mentions_conditions_generales"]),
-
 ]
 
 

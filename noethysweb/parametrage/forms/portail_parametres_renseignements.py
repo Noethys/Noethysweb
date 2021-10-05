@@ -37,19 +37,18 @@ class Formulaire(FormulaireBase, forms.Form):
                     setattr(dict_champs[(champ.page, champ.code)], public, getattr(champ, public))
 
         # Création des fields
-        for rubrique in (utils_onglets.LISTE_ONGLETS_FAMILLE, utils_onglets.LISTE_ONGLETS_INDIVIDU):
-            for onglet in rubrique:
-                liste_fields = []
-                for champ in utils_champs.LISTE_CHAMPS:
-                    if champ.page == onglet.code:
-                        liste_checks = []
-                        for public_code, public_label in (("famille", "Famille"), ("representant", "Représentant"), ("enfant", "Enfant"), ("contact", "Contact")):
-                            if getattr(champ, public_code, None):
-                                liste_checks.append((public_code, public_label))
-                        code_field = "%s:%s" % (champ.page, champ.code)
-                        self.fields[code_field] = forms.MultipleChoiceField(label=champ.label, required=False, widget=forms.CheckboxSelectMultiple, choices=liste_checks)
-                        self.fields[code_field].initial = dict_champs[(champ.page, champ.code)].Get_champs_affiches()
-                        liste_fields.append(InlineCheckboxes(code_field))
-                self.helper.layout.append(Fieldset("<i class='fa %s margin-r-5'></i> %s" % (onglet.icone, onglet.label), *liste_fields))
+        for onglet in utils_onglets.LISTE_ONGLETS:
+            liste_fields = []
+            for champ in utils_champs.LISTE_CHAMPS:
+                if champ.page == onglet.code:
+                    liste_checks = []
+                    for public_code, public_label in (("famille", "Famille"), ("representant", "Représentant"), ("enfant", "Enfant"), ("contact", "Contact")):
+                        if getattr(champ, public_code, None):
+                            liste_checks.append((public_code, public_label))
+                    code_field = "%s:%s" % (champ.page, champ.code)
+                    self.fields[code_field] = forms.MultipleChoiceField(label=champ.label, required=False, widget=forms.CheckboxSelectMultiple, choices=liste_checks)
+                    self.fields[code_field].initial = dict_champs[(champ.page, champ.code)].Get_champs_affiches()
+                    liste_fields.append(InlineCheckboxes(code_field))
+            self.helper.layout.append(Fieldset("<i class='fa %s margin-r-5'></i> %s" % (onglet.icone, onglet.label), *liste_fields))
 
         self.helper.layout.append(HTML("<br>"))
