@@ -61,7 +61,7 @@ urlpatterns = [
     path('outils/portail/messagerie', messagerie_portail.Ajouter.as_view(), name='messagerie_portail'),
     path('outils/portail/messagerie/<int:idstructure>/<int:idfamille>', messagerie_portail.Ajouter.as_view(), name='messagerie_portail'),
 
-    path('outils/portail/demandes/liste', demandes_portail.Liste.as_view(), name='demandes_portail_liste'),
+    path('outils/portail/renseignements/liste', demandes_portail.Liste.as_view(), name='demandes_portail_liste'),
 
     # AJAX
     path('outils/get_modele_email', secure_ajax(editeur_emails.Get_modele_email), name='ajax_get_modele_email'),

@@ -141,6 +141,15 @@
                 </li>
             {% endif %}
 
+            {# Renseignements à valider #}
+            {% if nbre_demandes_attente %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link" href="{% url 'demandes_portail_liste' %}" title="Vous avez {{ nbre_demandes_attente }} renseignement{{ nbre_demandes_attente|pluralize }} à valider">
+                        <i class="fa fa-thumbs-up"></i>
+                        <span class="badge badge-warning navbar-badge">{{ nbre_demandes_attente }}</span>
+                    </a>
+                </li>
+            {% endif %}
 
         </ul>
 

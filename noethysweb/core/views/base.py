@@ -6,7 +6,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from core.views.menu import GetMenuPrincipal
 from noethysweb.version import GetVersion
-from core.models import Organisateur, Parametre, Utilisateur, PortailMessage
+from core.models import Organisateur, Parametre, Utilisateur, PortailMessage, PortailRenseignement
 from django.core.cache import cache
 from core.utils import utils_parametres
 from django.http import JsonResponse
@@ -15,11 +15,19 @@ import json
 
 
 def Memorise_option(request):
-    """ Mémorise dans la DB et le cache une option d'interface pour l'utilisateur"""
+    """ Mémorise dans la DB et le cache une option d'interface pour l'utilisateur """
     nom = request.POST.get("nom")
     valeur = json.loads(request.POST.get("valeur"))
     utils_parametres.Set(nom=nom, categorie="options_interface", utilisateur=request.user, valeur=valeur)
     cache.delete('options_interface')
+    return JsonResponse({"success": True})
+
+def Memorise_parametre(request):
+    """ Mémorise un paramètre dans la DB """
+    nom = request.POST.get("nom")
+    categorie = request.POST.get("categorie")
+    valeur = json.loads(request.POST.get("valeur"))
+    utils_parametres.Set(nom=nom, categorie=categorie, utilisateur=request.user, valeur=valeur)
     return JsonResponse({"success": True})
 
 
@@ -109,6 +117,9 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
 
         # Messages du portail non lus
         context["liste_messages_non_lus"] = PortailMessage.objects.select_related("famille", "structure").filter(structure__in=self.request.user.structures.all(), utilisateur__isnull=True, date_lecture__isnull=True).order_by("date_creation")
+
+        # Renseignements à traiter
+        context["nbre_demandes_attente"] = PortailRenseignement.objects.filter(etat="ATTENTE").count()
 
         return context
 

@@ -6,11 +6,12 @@
 import json, datetime
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
+from django.db.models import Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import PortailRenseignement, TypeSieste, Caisse, Individu, Secteur, CategorieTravail, RegimeAlimentaire, TypeMaladie, Medecin
 from core.data import data_civilites
-from core.utils import utils_dates
+from core.utils import utils_dates, utils_parametres
 from portail.utils import utils_champs
 
 
@@ -71,9 +72,9 @@ def Appliquer_modification(request):
 class Page(crud.Page):
     model = PortailRenseignement
     url_liste = "demandes_portail_liste"
-    description_liste = "Voici ci-dessous la liste des demandes du portail à traiter."
-    objet_singulier = "une demande"
-    objet_pluriel = "des demandes"
+    description_liste = "Voici ci-dessous la liste des renseignements du portail à valider."
+    objet_singulier = "un renseignement à valider"
+    objet_pluriel = "des renseignements à valider"
 
 
 class Liste(Page, crud.Liste):
@@ -81,11 +82,16 @@ class Liste(Page, crud.Liste):
     template_name = "outils/demandes_portail.html"
 
     def get_queryset(self):
-        return PortailRenseignement.objects.select_related("famille", "individu", "traitement_utilisateur").filter(etat="ATTENTE").order_by("date")
+        self.afficher_renseignements_attente = utils_parametres.Get(nom="afficher_renseignements_attente", categorie="renseignements_attente", utilisateur=self.request.user, valeur=True)
+        conditions = Q()
+        if self.afficher_renseignements_attente:
+            conditions &= Q(etat="ATTENTE")
+        return PortailRenseignement.objects.select_related("famille", "individu", "traitement_utilisateur").filter(conditions).order_by("date")
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
         context['afficher_menu_brothers'] = True
+        context['afficher_renseignements_attente'] = self.afficher_renseignements_attente
         return context
 
     class datatable_class(MyDatatable):
@@ -135,9 +141,9 @@ class Liste(Page, crud.Liste):
         def Get_boutons_validation(self, instance, *args, **kwargs):
             html = []
             if instance.etat in ("ATTENTE", "REFUS"):
-                html.append("""<button class='btn btn-success btn-xs' onclick="traiter_demande(%d, 'VALIDE')" title='Valider'><i class="fa fa-fw fa-check"></i></button>""" % instance.pk)
+                html.append("""<button class='btn btn-success btn-xs' onclick="traiter_demande(%d, 'VALIDE')" title='Valider'><i class="fa fa-fw fa-thumbs-up"></i></button>""" % instance.pk)
             if instance.etat in ("ATTENTE", "VALIDE"):
-                html.append("""<button class='btn btn-danger btn-xs' onclick="traiter_demande(%d, 'REFUS')" title='Refuser'><i class="fa fa-fw fa-times"></i></button>""" % instance.pk)
+                html.append("""<button class='btn btn-danger btn-xs' onclick="traiter_demande(%d, 'REFUS')" title='Refuser'><i class="fa fa-fw fa-thumbs-down"></i></button>""" % instance.pk)
             return self.Create_boutons_actions(html)
 
         def Get_actions(self, instance, *args, **kwargs):
