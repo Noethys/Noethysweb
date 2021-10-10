@@ -35,7 +35,7 @@ class Formulaire(FormulaireBase, forms.Form):
                 self.fields[nom_controle] = ctrl
 
         # Importation des réponses
-        for reponse in QuestionnaireReponse.objects.filter(famille_id=self.idfamille):
+        for reponse in QuestionnaireReponse.objects.filter(famille_id=self.idfamille, question__categorie="famille"):
             self.fields["question_%d" % reponse.question_id].initial = reponse.Get_reponse_for_ctrl()
 
         # Affichage

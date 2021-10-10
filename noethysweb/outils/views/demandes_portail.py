@@ -122,7 +122,7 @@ class Liste(Page, crud.Liste):
         def Formate_code(self, instance, **kwargs):
             if not hasattr(self, "dict_labels"):
                 self.dict_labels = utils_champs.Get_labels_champs()
-            return self.dict_labels[instance.code]
+            return self.dict_labels.get(instance.code, "?")
 
         def Formate_individu(self, instance, **kwargs):
             return instance.individu.Get_nom() if instance.individu else ""

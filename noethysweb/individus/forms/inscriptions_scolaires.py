@@ -131,7 +131,7 @@ $(document).ready(function() {
 
 
 
-class Formulaire_ajouter_plusieurs(forms.Form):
+class Formulaire_ajouter_plusieurs(FormulaireBase, forms.Form):
     niveau = forms.ModelChoiceField(label="Niveau", queryset=NiveauScolaire.objects.all().order_by("ordre"), required=True)
     ecole = forms.ModelChoiceField(label="Ecole", queryset=Ecole.objects.all(), required=True)
     periode = forms.ChoiceField(label="Période", choices=[], required=True)
@@ -175,10 +175,5 @@ class Formulaire_ajouter_plusieurs(forms.Form):
                 Field('inscrits'),
             ),
             HTML(EXTRA_SCRIPT),
-            # ButtonHolder(
-            #     Submit('submit', 'Enregistrer', css_class='btn-primary'),
-            #     HTML("""<a class="btn btn-default" href="{% url 'inscriptions_scolaires_liste' idclasse=idclasse %}">Annuler</a>"""),
-            #     css_class="pull-right"
-            # ),
         )
 

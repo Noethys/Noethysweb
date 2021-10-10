@@ -62,17 +62,17 @@ class View(CustomView, TemplateView):
             # Lundi de Pâques
             lundi_paques = dimanche_paques + relativedelta(days=+1)
             if paques:
-                Save_date(nom=_(u"Lundi de Pâques"), date=lundi_paques)
+                Save_date(nom="Lundi de Pâques", date=lundi_paques)
 
             # Ascension
             ascension = dimanche_paques + relativedelta(days=+39)
             if ascension:
-                Save_date(nom=_(u"Jeudi de l'Ascension"), date=ascension)
+                Save_date(nom="Jeudi de l'Ascension", date=ascension)
 
             # Pentecote
             pentecote = dimanche_paques + relativedelta(days=+50)
             if pentecote:
-                Save_date(nom=_(u"Lundi de Pentecôte"), date=pentecote)
+                Save_date(nom="Lundi de Pentecôte", date=pentecote)
 
         messages.add_message(self.request, messages.SUCCESS, "%d jours fériés ont été générés automatiquement." % self.nbre_feries_crees)
         return HttpResponseRedirect(reverse_lazy("feries_variables_liste"))

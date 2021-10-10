@@ -7,8 +7,11 @@ from core.models import Historique
 
 
 def Ajouter(titre="", detail="", utilisateur=None, famille=None, individu=None, objet=None, idobjet=None, classe=None):
-    Historique.objects.create(titre=titre, detail=detail, utilisateur=utilisateur, famille_id=famille,
-                              individu_id=individu, objet=objet, idobjet=idobjet, classe=classe)
+    try:
+        Historique.objects.create(titre=titre, detail=detail, utilisateur=utilisateur, famille_id=famille,
+                                  individu_id=individu, objet=objet, idobjet=idobjet, classe=classe)
+    except:
+        pass
 
 def Ajouter_plusieurs(actions=[]):
     liste_ajouts = [Historique(**action) for action in actions]

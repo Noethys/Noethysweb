@@ -52,7 +52,7 @@ class FormulaireBase():
                     if self.mode == "EDITION":
                         self.fields[code].help_text = self.help_texts.get(code, None)
                     # Recherche si une valeur existe déjà dans les renseignements modifiés
-                    if code in dict_renseignements and self.initial.get(code, None) != dict_renseignements.get(code, None):
+                    if code in dict_renseignements:# and self.initial.get(code, None) != dict_renseignements.get(code, None): Ne fonctionne pas sur la page famille_caisse !
                         self.initial[code] = dict_renseignements[code]
                         self.fields[code].help_text = "<span class='text-orange'><i class='fa fa-exclamation-circle margin-r-5'></i>Modification en attente de validation par l'administrateur.</span>"
                     # Génération du field

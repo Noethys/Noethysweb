@@ -40,7 +40,7 @@ class Formulaire(FormulaireBase, forms.Form):
                 self.fields[nom_controle] = ctrl
 
         # Importation des réponses
-        for reponse in QuestionnaireReponse.objects.filter(individu=rattachement.individu):
+        for reponse in QuestionnaireReponse.objects.filter(individu=rattachement.individu, question__categorie="individu"):
             self.fields["question_%d" % reponse.question_id].initial = reponse.Get_reponse_for_ctrl()
 
         # Préparation du layout
