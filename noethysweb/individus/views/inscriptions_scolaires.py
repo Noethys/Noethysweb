@@ -124,7 +124,7 @@ class Liste(Page, crud.Liste):
         return HttpResponseRedirect(reverse_lazy(self.url_liste, kwargs={'idclasse': classe.pk}))
 
     def get_queryset(self):
-        return Scolarite.objects.select_related("individu").filter(Q(classe=self.Get_idclasse()) & self.Get_filtres("Q"))
+        return Scolarite.objects.select_related("individu", "niveau", "ecole", "classe").filter(Q(classe=self.Get_idclasse()) & self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
