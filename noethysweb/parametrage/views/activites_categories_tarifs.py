@@ -4,10 +4,11 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
-from core.views.mydatatableview import MyDatatable, columns, helpers, Deplacer_lignes
+from django.db.models import Count
+from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
 from parametrage.views.activites import Onglet
-from core.models import CategorieTarif, Activite
+from core.models import CategorieTarif
 from parametrage.forms.activites_categories_tarifs import Formulaire
 from django.db.models import Q
 
@@ -53,16 +54,16 @@ class Liste(Page, crud.Liste):
     template_name = "parametrage/activite_liste.html"
 
     def get_queryset(self):
-        return CategorieTarif.objects.filter(Q(activite=self.Get_idactivite()) & self.Get_filtres("Q"))
+        return CategorieTarif.objects.filter(Q(activite=self.Get_idactivite()) & self.Get_filtres("Q")).annotate(nbre_inscrits=Count("inscription"))
 
     class datatable_class(MyDatatable):
         filtres = ['idcategorie_tarif', 'nom']
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
+        nbre_inscrits = columns.TextColumn("Inscrits", sources="nbre_inscrits")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idcategorie_tarif', 'nom']
+            columns = ['idcategorie_tarif', 'nom', 'nbre_inscrits']
             ordering = ['nom']
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
