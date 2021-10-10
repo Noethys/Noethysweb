@@ -123,7 +123,7 @@
                 <div>
                     {% for rattachement in rattachements %}
                         {% if rattachement.categorie == num_categorie %}
-                        <div class="card card-widget vignette shadow {% if rattachement.individu.Get_sexe == "F" %}femme{% else %}homme{% endif %}" id="individu_{{ rattachement.individu_id }}">
+                        <div class="card card-widget vignette  {% if rattachement.individu.Get_sexe == "F" %}femme{% else %}homme{% endif %}" id="individu_{{ rattachement.individu_id }}">
 
 {% comment %}
                             <div class="ribbon-wrapper">

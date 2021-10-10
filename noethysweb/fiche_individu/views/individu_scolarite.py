@@ -118,12 +118,12 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['idscolarite', 'date_debut', 'date_fin', 'ecole__nom', 'classe__nom', 'niveau__nom']
+        filtres = ['idscolarite', 'date_debut', 'date_fin', 'ecole__nom', 'classe__nom', 'niveau__abrege']
 
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         ecole = columns.TextColumn("Ecole", sources=["ecole__nom"])
         classe = columns.TextColumn("Classe", sources=["classe__nom"])
-        niveau = columns.TextColumn("Niveau", sources=["niveau__nom"])
+        niveau = columns.TextColumn("Niveau", sources=["niveau__abrege"])
 
         class Meta:
             structure_template = MyDatatable.structure_template

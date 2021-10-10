@@ -3,12 +3,14 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
+import logging, json
+logger = logging.getLogger(__name__)
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.cache import cache
 from portail.views.menu import GetMenuPrincipal
 from noethysweb.version import GetVersion
 from core.models import Organisateur, Parametre
-from django.core.cache import cache
-from core.utils import utils_parametres, utils_portail
+from core.utils import utils_parametres, utils_portail, utils_historique
 
 
 class CustomView(LoginRequiredMixin, UserPassesTestMixin):
@@ -85,3 +87,50 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin):
             context['breadcrumb'] = context['menu_actif'].GetBreadcrumb()
 
         return context
+
+    def save_historique(self, instance=None, titre=None, detail=None, form=None):
+        # Titre
+        if not titre:
+            if hasattr(self, "Get_titre_historique"):
+                titre = self.Get_titre_historique(instance)
+            elif hasattr(self, "titre_historique"):
+                titre = getattr(self, "titre_historique")
+            else:
+                titre = "%s %s" % (self.verbe_action, getattr(self, "objet_singulier", ""))
+
+        # Détail
+        if not detail:
+            if hasattr(self, "Get_detail_historique"):
+                detail = self.Get_detail_historique(instance)
+            elif hasattr(self, "detail_historique"):
+                detail = getattr(self, "detail_historique", str(instance)).format(instance)
+            else:
+                details = []
+                if form:
+                    for nom_champ in form.changed_data:
+                        try:
+                            label_champ = form.instance._meta.get_field(nom_champ).verbose_name
+                            valeur_champ = getattr(form.instance, nom_champ)
+                            details.append("%s=%s" % (label_champ, valeur_champ))
+                        except:
+                            pass
+                else:
+                    details.append(str(instance))
+                detail = ", ".join(details)
+
+        utilisateur = self.request.user
+        objet = instance._meta.verbose_name.capitalize()
+        idobjet = instance.pk
+        classe = instance._meta.object_name
+        famille = getattr(instance, "famille_id", None)
+        if classe == "Famille":
+            famille = instance.pk
+        individu = getattr(instance, "individu_id", None)
+        if classe == "Individu":
+            individu = instance.pk
+        utils_historique.Ajouter(titre=titre, detail=detail, utilisateur=utilisateur, famille=famille, individu=individu, objet=objet, idobjet=idobjet, classe=classe)
+
+        # Ecriture dans le log
+        if famille:
+            detail += " Famille=%s" % famille
+        logger.debug("%s : %s (%s)" % (utilisateur, titre, detail))

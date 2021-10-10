@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-
-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
+
 
 LISTE_ONGLETS = [
     {"code": "resume", "label": "Résumé", "icone": "fa-home", "url": "famille_resume"},
@@ -21,4 +20,3 @@ LISTE_ONGLETS = [
     {"code": "outils", "label": "Outils", "icone": "fa-wrench", "url": "famille_outils"},
     {"code": "consommations", "label": "Consommations", "icone": "fa-calendar", "url": "famille_consommations"},
 ]
-

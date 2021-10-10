@@ -111,30 +111,30 @@ class Onglet(CustomView):
 
     def form_valid(self, form):
         """ Enregistrement des modifications """
+        self.save_historique(instance=self.object, form=form)
+
         if not form.changed_data:
             messages.add_message(self.request, messages.INFO, "Aucune modification n'a été enregistrée")
         else:
+            texte_message = "Votre ajout a été enregistré" if self.verbe_action == "Ajouter" else "Votre modification a été enregistrée"
+
             if self.get_dict_onglet_actif().validation_auto:
                 # Sans validation par l'admin
                 self.form_save(form)
-                if self.verbe_action == "Ajouter":
-                    messages.add_message(self.request, messages.SUCCESS, "Votre ajout a été enregistré")
-                else:
-                    messages.add_message(self.request, messages.SUCCESS, "Votre modification a été enregistrée")
             else:
                 # Avec validation par l'admin
                 for code in form.changed_data:
                     PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code=code,
                                                         nouvelle_valeur=self.Formate_valeur(form.cleaned_data.get(code, None)),
                                                         ancienne_valeur=self.Formate_valeur(form.initial.get(code, None)))
-                if self.verbe_action == "Ajouter":
-                    messages.add_message(self.request, messages.SUCCESS, "Votre ajout a été enregistré et transmis à l'administrateur")
-                else:
-                    messages.add_message(self.request, messages.SUCCESS, "Votre modification a été enregistrée et transmise à l'administrateur")
+                texte_message += " et transmis à l'administrateur" if self.verbe_action == "Ajouter" else " et transmise à l'administrateur"
+
+            # Message de confirmation
+            messages.add_message(self.request, messages.SUCCESS, texte_message)
 
             # Affichage dans logger
             if self.verbe_action == "Modifier":
-                logger.debug("%s : Modification des champs %s." % (self.request.user, ", ".join(form.changed_data)))
+                logger.debug("%s : Modification des champs : %s." % (self.request.user, ", ".join(form.changed_data)))
 
             # Demande une nouvelle certification
             self.Demande_nouvelle_certification()

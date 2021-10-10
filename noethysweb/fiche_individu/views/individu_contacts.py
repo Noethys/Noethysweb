@@ -71,8 +71,11 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idcontact", "nom", "prenom", "tel_domicile", "tel_mobile", "tel_travail", "autorisations", "actions"]
+            columns = ["idcontact", "nom", "prenom", "tel_domicile", "tel_mobile", "tel_travail", "lien", "autorisations", "actions"]
             ordering = ['nom', 'prenom']
+            labels = {
+                "lien": "Lien",
+            }
 
         def Get_autorisations(self, instance, *args, **kwargs):
             return instance.Get_autorisations()

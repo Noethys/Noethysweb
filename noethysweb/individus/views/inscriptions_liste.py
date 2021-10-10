@@ -79,6 +79,7 @@ class Liste(Page, crud.Liste):
             html = [
                 self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
                 self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
+                self.Create_bouton(url=reverse("famille_resume", args=[instance.famille_id]), title="Ouvrir la fiche famille", icone="fa-users"),
             ]
             return self.Create_boutons_actions(html)
 
