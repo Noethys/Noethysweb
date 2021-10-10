@@ -18,7 +18,10 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Famille
-        fields = ["mail", "code_compta", "titulaire_helios", "idtiers_helios", "natidtiers_helios", "reftiers_helios", "cattiers_helios", "natjur_helios"]
+        fields = ["mail", "memo", "code_compta", "titulaire_helios", "idtiers_helios", "natidtiers_helios", "reftiers_helios", "cattiers_helios", "natjur_helios"]
+        widgets = {
+            "memo": forms.Textarea(attrs={'rows': 3}),
+        }
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")
@@ -49,6 +52,9 @@ class Formulaire(FormulaireBase, ModelForm):
         # Affichage
         self.helper.layout = Layout(
             commandes,
+            Fieldset("Mémo",
+                Field("memo"),
+            ),
             Fieldset("Email",
                 Field("mail"),
             ),
