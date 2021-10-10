@@ -34,8 +34,8 @@ class Liste(Page, crud.Liste):
     model = Activite
 
     def get_queryset(self):
-        # return Activite.objects.prefetch_related("groupes_activites").filter(self.Get_filtres("Q"), structure=self.request.user.structure_actuelle)
-        return Activite.objects.prefetch_related("groupes_activites").filter(self.Get_filtres("Q"), structure__in=self.request.user.structures.all())
+        return Activite.objects.prefetch_related("groupes_activites").filter(self.Get_filtres("Q"), structure__in=self.request.user.structures.all()).annotate(nbre_inscrits=Count("inscription"))
+
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
         context['impression_introduction'] = ""
@@ -45,14 +45,14 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idactivite", "nom", "date_debut", "date_fin"]
-
         groupes = columns.TextColumn("Groupes d'activités", sources=None, processor='Get_groupes')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         periode = columns.DisplayColumn("Validité", sources="date_fin", processor='Get_validite')
+        nbre_inscrits = columns.TextColumn("Inscrits", sources="nbre_inscrits")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idactivite", "nom", "periode", "groupes"]
+            columns = ["idactivite", "nom", "periode", "groupes", "nbre_inscrits"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
