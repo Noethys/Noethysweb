@@ -161,52 +161,52 @@ LISTE_CONTROLES_QUESTIONNAIRES = [
 
 
 LISTE_CATEGORIES_TIERS = [
-    (1,u"Personne physique"),
-    (20,u"Etat ou établissement public national"),
-    (21,u"Région"),
-    (22,u"Département"),
-    (23,u"Commune"),
-    (24,u"Groupement de collectivités"),
-    (25,u"Caisse des écoles"),
-    (26,u"CCAS"),
-    (27,u"Etablissement public de santé"),
-    (28,u"Ecole nationale de la santé publique"),
-    (29,u"Autre établissement publique ou organisme international"),
-    (50,u"Personne morale de droit privé autre qu'organisme social"),
-    (60,u"Caisse de sécurité sociale régime général"),
-    (61,u"Caisse de sécurité sociale régime agricole"),
-    (62,u"Sécurité sociale des travailleurs non salariés et professions non agricoles"),
-    (63,u"Autre régime obligatoire de sécurité sociale"),
-    (64,u"Mutuelle ou organisme d'assurance"),
-    (65,u"Autre tiers payant"),
-    (70,u"CNRACL"),
-    (71,u"IRCANTEC"),
-    (72,u"ASSEDIC"),
-    (73,u"Caisse mutualiste de retraite complémentaire"),
-    (74,u"Autre organisme social"),
+    (1, "Personne physique"),
+    (20, "Etat ou établissement public national"),
+    (21, "Région"),
+    (22, "Département"),
+    (23, "Commune"),
+    (24, "Groupement de collectivités"),
+    (25, "Caisse des écoles"),
+    (26, "CCAS"),
+    (27, "Etablissement public de santé"),
+    (28, "Ecole nationale de la santé publique"),
+    (29, "Autre établissement publique ou organisme international"),
+    (50, "Personne morale de droit privé autre qu'organisme social"),
+    (60, "Caisse de sécurité sociale régime général"),
+    (61, "Caisse de sécurité sociale régime agricole"),
+    (62, "Sécurité sociale des travailleurs non salariés et professions non agricoles"),
+    (63, "Autre régime obligatoire de sécurité sociale"),
+    (64, "Mutuelle ou organisme d'assurance"),
+    (65, "Autre tiers payant"),
+    (70, "CNRACL"),
+    (71, "IRCANTEC"),
+    (72, "ASSEDIC"),
+    (73, "Caisse mutualiste de retraite complémentaire"),
+    (74, "Autre organisme social"),
     ]
 
 LISTE_NATURES_JURIDIQUES = [
-    (0,u"Inconnu"),
-    (1,u"Particulier"),
-    (2,u"Artisan / commerçant / agriculteur"),
-    (3,u"Société"),
-    (4,u"CAM ou Caisse appliquant les mêmes règles"),
-    (5,u"Caisse complémentaire"),
-    (6,u"Association"),
-    (7,u"Etat ou organisme d'état"),
-    (8,u"Etablissement public national"),
-    (9,u"Collectivité territoriale / EPL / EPS"),
-    (10,u"Etat étranger"),
-    (11,u"CAF"),
+    (0, "Inconnu"),
+    (1, "Particulier"),
+    (2, "Artisan / commerçant / agriculteur"),
+    (3, "Société"),
+    (4, "CAM ou Caisse appliquant les mêmes règles"),
+    (5, "Caisse complémentaire"),
+    (6, "Association"),
+    (7, "Etat ou organisme d'état"),
+    (8, "Etablissement public national"),
+    (9, "Collectivité territoriale / EPL / EPS"),
+    (10, "Etat étranger"),
+    (11, "CAF"),
     ]
 
 LISTE_TYPES_ID_TIERS = [
-    (9999,u"Aucun"),
-    (1,u"01 - SIRET"),
-    (2,u"02 - SIREN"),
-    (3,u"03 - FINESS"),
-    (4,u"04 - NIR"),
+    (9999, "Aucun"),
+    (1, "01 - SIRET"),
+    (2, "02 - SIREN"),
+    (3, "03 - FINESS"),
+    (4, "04 - NIR"),
     ]
 
 CHOIX_AUTORISATIONS = [(None, "Autorisation non précisée"), (1, "Responsable légal(e)"), (2, "Contacter en cas d'urgence"), (3, "Raccompagnement autorisé"), (4, "Raccompagnement interdit")]
@@ -1449,6 +1449,11 @@ class Individu(models.Model):
     listes_diffusion = models.ManyToManyField(ListeDiffusion, blank=True, related_name="individu_listes_diffusion")
     regimes_alimentaires = models.ManyToManyField(RegimeAlimentaire, verbose_name="Régimes alimentaires", related_name="individu_regimes_alimentaires", blank=True)
     maladies = models.ManyToManyField(TypeMaladie, verbose_name="Maladies contractées", related_name="individu_maladies", blank=True)
+    situation_familiale_choix = [(1, "Célibataires"), (2, "Mariés"), (3, "Divorcés"), (4, "Veuf(ve)"), (5, "En concubinage"), (6, "Séparés"), (7, "Pacsés"), (8, "En union libre"), (9, "Autre")]
+    situation_familiale = models.IntegerField(verbose_name="Situation des parents", choices=situation_familiale_choix, blank=True, null=True)
+    type_garde_choix = [(1, "Mère"), (2, "Père"), (3, "Garde alternée"), (4, "Autre personne")]
+    type_garde = models.IntegerField(verbose_name="Type de garde", choices=type_garde_choix, blank=True, null=True)
+    info_garde = models.TextField(verbose_name="Information sur la garde", blank=True, null=True)
 
     class Meta:
         db_table = 'individus'
