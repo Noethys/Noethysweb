@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.db.models import Count
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Classe
@@ -29,7 +30,7 @@ class Liste(Page, crud.Liste):
     model = Classe
 
     def get_queryset(self):
-        return Classe.objects.filter(self.Get_filtres("Q"))
+        return Classe.objects.prefetch_related("niveaux").filter(self.Get_filtres("Q")).annotate(nbre_inscrits=Count("scolarite"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -40,18 +41,22 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idclasse", "nom", "ecole__nom", "date_debut", "date_fin"]
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         ecole = columns.TextColumn("Ecole", sources=["ecole__nom"])
+        nbre_inscrits = columns.TextColumn("Elèves", sources="nbre_inscrits")
+        niveaux = columns.TextColumn("Niveaux", sources=None, processor='Get_niveaux')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idclasse", "nom", "ecole", "date_debut", "date_fin"]
+            columns = ["idclasse", "nom", "ecole", "date_debut", "date_fin", "nbre_inscrits", "niveaux"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ["date_debut"]
+
+        def Get_niveaux(self, instance, *args, **kwargs):
+            return ", ".join([niveau.abrege for niveau in instance.niveaux.all()])
 
 
 class Ajouter(Page, crud.Ajouter):
