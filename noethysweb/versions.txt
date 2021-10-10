@@ -1,3 +1,11 @@
+Version 0.0.5.4 (10/10/2021) :
+
+- Finalisation des renseignements à traiter
+- Ajout du paramétrage de l'affichage des renseignements sur le portail
+- Traitement manuel des demandes du portail
+- Cryptage de nouveaux champs
+- Correction de divers bugs
+
 Version 0.0.5.3 (28/09/2021) :
 
 - Ajout de la page Documents sur le portail
