@@ -14,6 +14,7 @@ class Consulter(Onglet, ConsulterBase):
     mode = "CONSULTATION"
     onglet_actif = "individu_maladies"
     categorie = "individu_maladies"
+    titre_historique = "Modifier les maladies"
 
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)

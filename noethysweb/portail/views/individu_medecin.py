@@ -14,6 +14,7 @@ class Consulter(Onglet, ConsulterBase):
     mode = "CONSULTATION"
     onglet_actif = "individu_medecin"
     categorie = "individu_medecin"
+    titre_historique = "Modifier le médecin"
 
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
@@ -31,7 +32,7 @@ class Modifier(Consulter):
 
     def get_context_data(self, **kwargs):
         context = super(Modifier, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Sélectionnez un medecin dans le champ ci-dessous et cliquez sur le bouton Enregistrer."
+        context['box_introduction'] = "Sélectionnez un médecin dans le champ ci-dessous et cliquez sur le bouton Enregistrer."
         if not self.get_dict_onglet_actif().validation_auto:
             context['box_introduction'] += " Ces informations devront être validées par l'administrateur de l'application."
         return context

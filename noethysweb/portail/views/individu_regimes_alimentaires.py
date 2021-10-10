@@ -15,6 +15,7 @@ class Consulter(Onglet, ConsulterBase):
     mode = "CONSULTATION"
     onglet_actif = "individu_regimes_alimentaires"
     categorie = "individu_regimes_alimentaires"
+    titre_historique = "Modifier les régimes alimentaires"
 
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
@@ -41,3 +42,5 @@ class Modifier(Consulter):
     def get_success_url(self):
         return reverse_lazy("portail_individu_regimes_alimentaires", kwargs={'idrattachement': self.kwargs['idrattachement']})
 
+    def Get_detail_historique(self, instance):
+        return "Régimes alimentaires=%s" % ", ".join([regime.nom for regime in instance.regimes_alimentaires.all()])
