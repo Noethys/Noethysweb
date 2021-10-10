@@ -58,6 +58,8 @@ class Liste_commun():
             for filtre in self.filtres_liste:
                 champ = filtre["champ"]
                 criteres = filtre.get("criteres", [])
+
+                # Filtres génériques
                 if filtre["condition"] == "EGAL": conditions &= Q(**{champ: criteres[0]})
                 if filtre["condition"] == "DIFFERENT": conditions &= ~Q(**{champ: criteres[0]})
                 if filtre["condition"] == "CONTIENT": conditions &= Q(**{champ + "__icontains": criteres[0]})
@@ -71,6 +73,8 @@ class Liste_commun():
                 if filtre["condition"] == "COMPRIS": conditions &= (Q(**{champ + "__gte": criteres[0]}) & Q(**{champ + "__lte": criteres[1]}))
                 if filtre["condition"] == "VRAI": conditions &= Q(**{champ: True})
                 if filtre["condition"] == "FAUX": conditions &= Q(**{champ: False})
+
+                # Filtre Inscrit/Présent
                 if filtre["condition"] in ("INSCRIT", "PRESENT"):
                     type_champ, champ = champ.split(":")
                     type_criteres, liste_criteres = criteres[0].split(":")
@@ -91,6 +95,18 @@ class Liste_commun():
 
                     # Création de la condition
                     conditions &= Q(**{champ + "__in": resultats})
+
+                # Filtre pour champ crypté
+                if "*" in filtre["condition"]:
+                    tous_objets = self.model.objects.all()
+                    if filtre["condition"] == "*EGAL": resultats = [objet.pk for objet in tous_objets if getattr(objet, champ) == criteres[0]]
+                    if filtre["condition"] == "*DIFFERENT": resultats = [objet.pk for objet in tous_objets if getattr(objet, champ) != criteres[0]]
+                    if filtre["condition"] == "*CONTIENT": resultats = [objet.pk for objet in tous_objets if criteres[0] in (getattr(objet, champ) or "")]
+                    if filtre["condition"] == "*NE_CONTIENT_PAS": resultats = [objet.pk for objet in tous_objets if criteres[0] not in (getattr(objet, champ) or "")]
+                    if filtre["condition"] == "*EST_VIDE": resultats = [objet.pk for objet in tous_objets if getattr(objet, champ) in ("", None)]
+                    if filtre["condition"] == "*EST_PAS_VIDE": resultats = [objet.pk for objet in tous_objets if getattr(objet, champ) not in ("", None)]
+                    conditions &= Q(pk__in=resultats)
+
             return conditions
         else:
             return self.filtres_liste

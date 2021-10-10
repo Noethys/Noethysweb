@@ -95,7 +95,7 @@ def Ajouter_filtre(request):
     if dict_resultat["condition"] == "PRESENT" and len(dict_resultat["criteres"]) == 2:
         return JsonResponse({"erreur": "Vous devez cocher au moins une ligne dans la liste"}, status=401)
 
-    dict_resultat["label_filtre"] = "%s %s" % (valeurs["label_champ"], traductions_criteres[dict_resultat["condition"]])
+    dict_resultat["label_filtre"] = "%s %s" % (valeurs["label_champ"], traductions_criteres[dict_resultat["condition"].replace("*", "")])
     if liste_labels_criteres:
         dict_resultat["label_filtre"] += " " + " et ".join(liste_labels_criteres)
 
@@ -122,6 +122,7 @@ class Formulaire(FormulaireBase, forms.Form):
     condition2 = forms.ChoiceField(label="Condition", choices=[("EGAL", "Est égal à"), ("DIFFERENT", "Est différent de"), ("SUPERIEUR", "Est supérieur à"), ("SUPERIEUR_EGAL", "Est supérieur ou égal à"), ("INFERIEUR", "Est inférieur à"), ("INFERIEUR_EGAL", "Est inférieur ou égal à"), ("COMPRIS", "Est compris entre")], required=False)
     condition3 = forms.ChoiceField(label="Condition", choices=[("VRAI", "Est vrai"), ("FAUX", "Est faux")], required=False)
     condition4 = forms.ChoiceField(label="Condition", choices=[("INSCRIT", "Est inscrit sur l'une des activités suivantes"), ("PRESENT", "Est présent sur l'une des activités suivantes")], required=False)
+    condition5 = forms.ChoiceField(label="Condition", choices=[("*EGAL", "Est égal à"), ("*DIFFERENT", "Est différent de"), ("*CONTIENT", "Contient"), ("*NE_CONTIENT_PAS", "Ne contient pas"), ("*EST_VIDE", "Est vide"), ("*EST_PAS_VIDE", "N'est pas vide")], required=False)
     critere_texte = forms.CharField(label="Texte", required=False)
     critere_date = forms.DateField(label="Date", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
     critere_date_min = forms.DateField(label="Date min", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
@@ -138,6 +139,7 @@ class Formulaire(FormulaireBase, forms.Form):
     critere_activites = forms.CharField(label="Activités", required=False, widget=SelectionActivitesWidget(attrs={"afficher_groupes": True}))
 
     dict_types = {
+        'BinaryField': {'condition': 'condition5', 'criteres': {"*EGAL": ["critere_texte"], "*DIFFERENT": ["critere_texte"], "*CONTIENT": ["critere_texte"], "*NE_CONTIENT_PAS": ["critere_texte"], "*EST_VIDE": [], "*EST_PAS_VIDE": []}},
         'CharField': {'condition': 'condition1', 'criteres': {"EGAL": ["critere_texte"], "DIFFERENT": ["critere_texte"], "CONTIENT": ["critere_texte"], "NE_CONTIENT_PAS": ["critere_texte"], "EST_VIDE": [], "EST_PAS_VIDE": []}},
         'TextField': {'condition': 'condition1', 'criteres': {"EGAL": ["critere_texte"], "DIFFERENT": ["critere_texte"], "CONTIENT": ["critere_texte"], "NE_CONTIENT_PAS": ["critere_texte"], "EST_VIDE": [], "EST_PAS_VIDE": []}},
         'BooleanField': {'condition': 'condition3', 'criteres': {"VRAI": [], "FAUX": []}},
@@ -239,6 +241,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("condition2"),
             Field("condition3"),
             Field("condition4"),
+            Field("condition5"),
             Field("critere_activites"),
             Field("critere_texte"),
             Field("critere_date"),
@@ -280,7 +283,7 @@ EXTRA_HTML = """
         };
     }
     
-    $("#id_condition1, #id_condition2, #id_condition3, #id_condition4").on("change", function(event){
+    $("#id_condition1, #id_condition2, #id_condition3, #id_condition4, #id_condition5").on("change", function(event){
         $("[id*=div_id_critere]").hide();
         var nom_champ = $("#id_champ").val();
         var type_champ = dict_champs[nom_champ].type;
