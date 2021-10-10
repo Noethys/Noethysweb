@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
@@ -42,7 +42,7 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["fpresent:famille", "idmandat", "date", "rum", "actif", "famille__nom", "sequence"]
-        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         iban = columns.TextColumn("IBAN", sources=[], processor='Get_iban')
         bic = columns.TextColumn("BIC", sources=[], processor='Get_bic')
@@ -64,6 +64,14 @@ class Liste(Page, crud.Liste):
 
         def Get_bic(self, instance, *args, **kwargs):
             return instance.bic
+
+        def Get_actions_speciales(self, instance, *args, **kwargs):
+            html = [
+                self.Create_bouton_modifier(url=reverse(kwargs["view"].url_modifier, args=[instance.pk])),
+                self.Create_bouton_supprimer(url=reverse(kwargs["view"].url_supprimer, args=[instance.pk])),
+                self.Create_bouton(url=reverse("famille_resume", args=[instance.famille_id]), title="Ouvrir la fiche famille", icone="fa-users"),
+            ]
+            return self.Create_boutons_actions(html)
 
 
 class Creer(Page, crud.Ajouter):

@@ -3,6 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+from django.urls import reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import ContactUrgence
@@ -36,7 +37,7 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idcontact", "fpresent:famille", "ipresent:individu", "famille__nom", "individu__nom", "individu__prenom", "nom", "prenom", "rue_resid", "tel_domicile", "tel_mobile", "tel_travail", "autorisation_sortie", "autorisation_appel"]
-        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         individu = columns.CompoundColumn("Individu", sources=['individu__nom', 'individu__prenom'])
         autorisations = columns.TextColumn("Autorisations", sources=["autorisation_sortie", "autorisation_appel"], processor='Get_autorisations')
@@ -48,6 +49,14 @@ class Liste(Page, crud.Liste):
 
         def Get_autorisations(self, instance, *args, **kwargs):
             return instance.Get_autorisations()
+
+        def Get_actions_speciales(self, instance, *args, **kwargs):
+            html = [
+                self.Create_bouton_modifier(url=reverse(kwargs["view"].url_modifier, args=[instance.pk])),
+                self.Create_bouton_supprimer(url=reverse(kwargs["view"].url_supprimer, args=[instance.pk])),
+                self.Create_bouton(url=reverse("famille_resume", args=[instance.famille_id]), title="Ouvrir la fiche famille", icone="fa-users"),
+            ]
+            return self.Create_boutons_actions(html)
 
 
 class Modifier(Page, crud.Modifier):
