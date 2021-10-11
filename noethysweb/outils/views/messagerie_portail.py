@@ -14,7 +14,7 @@ from django.template.defaultfilters import truncatechars, striptags
 
 class Page(crud.Page):
     model = PortailMessage
-    menu_code = "messagerie"
+    menu_code = "messagerie_portail"
 
     def get_context_data(self, **kwargs):
         context = super(Page, self).get_context_data(**kwargs)
