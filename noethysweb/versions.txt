@@ -1,3 +1,7 @@
+Version 0.0.5.5 (11/10/2021) :
+
+- Correction de divers bugs
+
 Version 0.0.5.4 (10/10/2021) :
 
 - Finalisation des renseignements à traiter
