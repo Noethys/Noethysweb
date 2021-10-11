@@ -3,6 +3,8 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import logging, json
+logger = logging.getLogger(__name__)
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from core.views.menu import GetMenuPrincipal
 from noethysweb.version import GetVersion
@@ -11,7 +13,6 @@ from django.core.cache import cache
 from core.utils import utils_parametres
 from django.http import JsonResponse
 from django.conf import settings
-import json
 
 
 def Memorise_option(request):
@@ -56,14 +57,17 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
             if not menu_code and hasattr(self, "url_liste"):
                 menu_code = self.url_liste
             if not self.request.user.has_perm("core.%s" % menu_code):
+                logger.debug("Interdiction d'accéder à la page 'core.%s' : Pas de permission." % menu_code)
                 return False
 
         # Vérifie que l'user est de type "utilisateur"
         if self.request.user.categorie != "utilisateur":
+            logger.debug("Interdiction d'accéder à cette page : L'utilisateur n'est pas de type 'utilisateur'.")
             return False
 
         # Vérifie que cette fonction est compatible avec le mode DEMO
         if not self.compatible_demo and settings.MODE_DEMO:
+            logger.debug("Interdiction d'accéder à cette page : Fonction incompatible avec le mode démo.")
             return False
 
         return True
