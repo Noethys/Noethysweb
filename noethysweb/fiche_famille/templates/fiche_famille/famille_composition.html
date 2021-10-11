@@ -53,7 +53,7 @@
         margin-top: 0px;
         margin-bottom: 0px;
         font-size: 12px;
-        font-weight: 200;
+        font-weight: 400;
         opacity: 0.7;
     }
     .vignette-contenu {
@@ -154,7 +154,16 @@
                                                 <li>Né{% if rattachement.individu.Get_sexe == "F" %}e{% endif %} le {{ rattachement.individu.date_naiss }} <span style="white-space: nowrap;">({{ rattachement.individu.Get_age }} ans)</span></li>
                                             {% endif %}
 
-                                            <li>{% if rattachement.individu.adresse_auto %}<i class="fa fa-link margin-r-5 text-gray"></i>{% endif %}<span style="white-space: nowrap;">{{ rattachement.individu.rue_resid|default:"" }}</span> <span style="white-space: nowrap;">{{ rattachement.individu.cp_resid|default:"" }} {{ rattachement.individu.ville_resid|default:"" }}</span></li>
+                                            <li>
+                                                <span style="white-space: nowrap;">
+                                                    <i class="fa fa-map-marker text-gray"></i>
+                                                    {{ rattachement.individu.rue_resid|default:"" }}
+                                                </span>
+                                                <span style="white-space: nowrap;">{{ rattachement.individu.cp_resid|default:"" }} {{ rattachement.individu.ville_resid|default:"" }}</span>
+                                                {% if rattachement.individu.adresse_auto %}
+                                                    <i class="fa fa-link text-gray"></i>
+                                                {% endif %}
+                                            </li>
 
                                             {% if rattachement.individu.tel_domicile or rattachement.individu.tel_mobile %}
                                                 <li>
