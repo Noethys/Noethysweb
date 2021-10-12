@@ -2,9 +2,11 @@
 
 <div class="input-group">
     <input id="{{ id }}" name="{{ name }}" value="{{ value }}" class="form-control" readonly>
-    <div class="input-group-append">
-        <button id="{{ id }}_generer_identifiant" title="Générer un nouvel identifiant" class="btn btn-default" type="button"><i class="fa fa-refresh"></i></button>
-    </div>
+    {% if not disabled %}
+        <div class="input-group-append">
+            <button id="{{ id }}_generer_identifiant" title="Générer un nouvel identifiant" class="btn btn-default" type="button"><i class="fa fa-refresh"></i></button>
+        </div>
+    {% endif %}
 </div>
 
 <script>
