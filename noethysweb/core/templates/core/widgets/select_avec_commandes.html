@@ -1,13 +1,21 @@
 {% load static %}
 {% load embed %}
 
-<div class="input-group">
+<style>
+    .input-group-nowrap {
+        -webkit-flex-wrap: nowrap;
+        -ms-flex-wrap: nowrap;
+        flex-wrap: nowrap;
+    }
+</style>
+
+<div class="input-group input-group-nowrap">
     {% if icon %}
         <div class="input-group-prepend">
             <i class="fa {{ icon }} input-group-text"></i>
         </div>
     {% endif %}
-    <select id="{{ id }}" name="{{ name }}" data-minimum-input-length="0" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2">
+    <select id="{{ id }}" name="{{ name }}" data-minimum-input-length="0" data-width="100%" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2">
         {% for choix in choices %}
             <option value="{{ choix.0 }}" {% if value == choix.0 %}selected{% endif %}>{{ choix.1 }}</option>
         {% endfor %}
@@ -35,7 +43,7 @@
 
         <div class="buttonHolder">
             <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
-                <input type="submit" value="Valider" class="btn btn-primary" id="{{ id }}_bouton_valider"/>
+                <button type="submit" class="btn btn-primary" title="Valider" id="{{ id }}_bouton_valider" value="Valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
             </div>
         </div>
