@@ -8,14 +8,13 @@ from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Fieldset
 from crispy_forms.bootstrap import Field
-from core.models import Vaccin
+from core.models import Vaccin, TypeVaccin
 from core.utils.utils_commandes import Commandes
 from portail.forms.fiche import FormulaireBase
 from core.widgets import DatePickerWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-
     class Meta:
         model = Vaccin
         fields = "__all__"
@@ -39,6 +38,9 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
         # self.helper.use_custom_control = False
+
+        # Tri des types de vaccins par ordre alpha
+        self.fields["type_vaccin"].queryset = TypeVaccin.objects.all().order_by("nom")
 
         # Affichage
         self.helper.layout = Layout(
