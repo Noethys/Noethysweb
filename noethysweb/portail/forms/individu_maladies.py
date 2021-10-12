@@ -4,17 +4,17 @@
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
 from core.models import Individu, PortailRenseignement, TypeMaladie
-from django_select2.forms import Select2MultipleWidget
+from core.widgets import Select_many_avec_plus
 from portail.forms.fiche import FormulaireBase
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    maladies = forms.ModelMultipleChoiceField(label="Maladies", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeMaladie.objects.all().order_by("nom"), required=False)
+    maladies = forms.ModelMultipleChoiceField(label="Maladies",
+                    widget=Select_many_avec_plus(attrs={"url_ajax": "portail_ajax_ajouter_maladie", "textes": {"champ": "Nom de la maladie", "ajouter": "Saisir une maladie"}}),
+                    queryset=TypeMaladie.objects.all().order_by("nom"), required=False)
 
     class Meta:
         model = Individu
@@ -36,7 +36,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Help_texts pour le mode édition
         self.help_texts = {
-            "maladies": "Sélectionnez les maladies contractées par l'individu dans la liste déroulante.",
+            "maladies": "Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix et cliquez sur un ou plusieurs éléments dans la liste. Cliquez sur le '+' pour ajouter une maladie manquante dans la liste de choix.",
         }
 
         # Champs affichables

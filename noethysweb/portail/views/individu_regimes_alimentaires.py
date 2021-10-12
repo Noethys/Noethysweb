@@ -4,9 +4,17 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy
+from django.http import JsonResponse
 from portail.views.fiche import Onglet, ConsulterBase
 from portail.forms.individu_regimes_alimentaires import Formulaire
+from core.models import RegimeAlimentaire
 
+
+def Ajouter_regime_alimentaire(request):
+    """ Ajouter un régime alimentaire """
+    nom = request.POST.get("valeur")
+    regime = RegimeAlimentaire.objects.create(nom=nom)
+    return JsonResponse({"id": regime.pk, "valeur": regime.nom})
 
 
 class Consulter(Onglet, ConsulterBase):

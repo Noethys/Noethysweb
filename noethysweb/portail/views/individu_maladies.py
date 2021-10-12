@@ -4,8 +4,17 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy
+from django.http import JsonResponse
 from portail.views.fiche import Onglet, ConsulterBase
 from portail.forms.individu_maladies import Formulaire
+from core.models import TypeMaladie
+
+
+def Ajouter_maladie(request):
+    """ Ajouter un type de maladie """
+    nom = request.POST.get("valeur")
+    maladie = TypeMaladie.objects.create(nom=nom)
+    return JsonResponse({"id": maladie.pk, "valeur": maladie.nom})
 
 
 class Consulter(Onglet, ConsulterBase):

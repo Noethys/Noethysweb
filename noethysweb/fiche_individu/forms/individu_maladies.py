@@ -7,15 +7,17 @@ from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden
-from crispy_forms.bootstrap import Field, StrictButton
+from crispy_forms.layout import Layout
+from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.models import Individu, TypeMaladie
-from django_select2.forms import Select2MultipleWidget
+from core.widgets import Select_many_avec_plus
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    maladies = forms.ModelMultipleChoiceField(label="Maladies", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeMaladie.objects.all().order_by("nom"), required=False)
+    maladies = forms.ModelMultipleChoiceField(label="Maladies",
+                    widget=Select_many_avec_plus(attrs={"url_ajax": "ajax_ajouter_maladie", "textes": {"champ": "Nom de la maladie", "ajouter": "Saisir une maladie"}}),
+                    queryset=TypeMaladie.objects.all().order_by("nom"), required=False, help_text="Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix ou tapez les premières lettres de la maladie recherchée. Cliquez sur le '+' pour ajouter une maladie manquante dans la liste de choix.")
 
     class Meta:
         model = Individu

@@ -4,7 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.forms.utils import flatatt
-from django.forms.widgets import Widget, Textarea, ClearableFileInput, FileInput
+from django.forms.widgets import Widget, Textarea, ClearableFileInput, FileInput, SelectMultiple
 from django.template import loader
 from django.utils.safestring import mark_safe
 from django.conf import settings
@@ -290,6 +290,31 @@ class Select_avec_commandes(Widget):
         context['name'] = name
         if value:
             context['value'] = int(value)
+        if "donnees_extra" not in context:
+            context['donnees_extra'] = {}
+        context['donnees_extra'] = json.dumps(context['donnees_extra'])
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
+
+
+
+class Select_many_avec_plus(SelectMultiple):
+    template_name = 'core/widgets/Select_many_avec_plus.html'
+
+    class Media:
+        css = {"all": ("lib/select2/css/select2.min.css",)}
+        js = ("django_select2/django_select2.js", "lib/select2/js/select2.min.js", "lib/select2/js/i18n/fr.js")
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        context['choices'] = self.choices
+        if attrs is not None:
+            context.update(attrs)
+        context['name'] = name
+        context['selections'] = value
         if "donnees_extra" not in context:
             context['donnees_extra'] = {}
         context['donnees_extra'] = json.dumps(context['donnees_extra'])

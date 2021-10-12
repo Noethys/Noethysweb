@@ -1,0 +1,116 @@
+{% load static %}
+{% load embed %}
+
+<script>
+    {% include 'core/csrftoken.html' %}
+</script>
+
+<style>
+    .input-group-nowrap {
+        -webkit-flex-wrap: nowrap;
+        -ms-flex-wrap: nowrap;
+        flex-wrap: nowrap;
+    }
+</style>
+
+<div class="input-group input-group-nowrap">
+    {% if icon %}
+        <div class="input-group-prepend">
+            <i class="fa {{ icon }} input-group-text"></i>
+        </div>
+    {% endif %}
+    <select id="{{ id }}" name="{{ name }}" lang="fr" {% if disabled %}disabled{% endif %} data-minimum-input-length="0" data-allow-clear="true" data-placeholder="" data-width="100%" class="select2multiplewidget form-control django-select2" multiple>
+        {% for choix in choices %}
+            <option value="{{ choix.0 }}" {% if choix.0 in selections %}selected{% endif %}>{{ choix.1 }}</option>
+        {% endfor %}
+    </select>
+    {% if not disabled %}
+        <div class="input-group-append">
+            <button id="{{ id }}_bouton_ajouter" title="Ajouter un élément dans la liste de choix" class="btn btn-default input-group-text" type="button"><i class="fa fa-plus"></i></button>
+        </div>
+    {% endif %}
+</div>
+
+
+{# Modal de modification d'un élément #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}{{ id }}_modal_modification{% endblock %}
+    {% block modal_titre %}{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+        <input type="hidden" id="{{ id }}_hidden_id" value=""/>
+
+        <div class="controls">
+            <label for="{{ id }}_champ_saisie" class="col-form-label">{{ textes.champ }}</label>
+            <input id="{{ id }}_champ_saisie" class="form-control" maxlength="300">
+        </div>
+
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="submit" class="btn btn-primary" title="Valider" id="{{ id }}_bouton_valider" value="Valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+
+    {% endblock %}
+{% endembed %}
+
+<script>
+
+    $(document).ready(function() {
+        $('#{{ id }}_modal_modification').on('shown.bs.modal', function () {
+            $("#{{ id }}_champ_saisie").focus();
+        });
+
+        $('#{{ id }}_modal_modification').on('keypress', function(e) {
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                $('#{{ id }}_bouton_valider').click();
+            };
+        });
+
+        // Ajouter un élément
+        $("#{{ id }}_bouton_ajouter").on("click",function(event){
+            $('#{{ id }}_champ_saisie').val("");
+            $('#{{ id }}_hidden_id').val("");
+            $('#{{ id }}_modal_modification .modal-title').html('{{ textes.ajouter }}');
+            $('#{{ id }}_modal_modification').modal('show');
+        });
+
+        // Modal : Validation
+        $("#{{ id }}_bouton_valider").on('click', function(e) {
+            e.preventDefault();
+            valeur = $('#{{ id }}_champ_saisie').val();
+            id = $('#{{ id }}_hidden_id').val();
+            if (valeur === '') {
+                toastr.error("Veuillez saisir un nom valide");
+                return false;
+            }
+            appel_ajax(id, valeur);
+        });
+
+        function appel_ajax(id=null, valeur=null) {
+            $.ajax({
+                type: "POST",
+                url: "{% url url_ajax %}",
+                data: {
+                    valeur: valeur,
+                },
+                datatype: "json",
+                success:function(data){
+                    var newOption = new Option(data.valeur, data.id, false, false);
+                    $("#{{ id }}").append(newOption).trigger('change');
+                    var nouvelles_selections = $("#{{ id }}").val()
+                    nouvelles_selections.push(data.id);
+                    $("#{{ id }}").val(nouvelles_selections);
+                    $('#{{ id }}_modal_modification').modal('hide');
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+    });
+
+</script>

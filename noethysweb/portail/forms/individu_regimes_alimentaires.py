@@ -4,17 +4,17 @@
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
 from core.models import Individu, PortailRenseignement, RegimeAlimentaire
-from django_select2.forms import Select2MultipleWidget
+from core.widgets import Select_many_avec_plus
 from portail.forms.fiche import FormulaireBase
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    regimes_alimentaires = forms.ModelMultipleChoiceField(label="Régimes alimentaires", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%", "data-width": "100%"}), queryset=RegimeAlimentaire.objects.all(), required=False)
+    regimes_alimentaires = forms.ModelMultipleChoiceField(label="Régimes alimentaires",
+                            widget=Select_many_avec_plus(attrs={"url_ajax": "portail_ajax_ajouter_regime_alimentaire", "textes": {"champ": "Nom du régime alimentaire", "ajouter": "Saisir un régime alimentaire"}}),
+                            queryset=RegimeAlimentaire.objects.all().order_by("nom"), required=False)
 
     class Meta:
         model = Individu
@@ -36,7 +36,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Help_texts pour le mode édition
         self.help_texts = {
-            "regimes_alimentaires": "Sélectionnez un ou plusieurs régimes dans la liste déroulante.",
+            "regimes_alimentaires": "Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix et cliquez sur un ou plusieurs éléments dans la liste. Cliquez sur le '+' pour ajouter un régime manquant dans la liste de choix.",
         }
 
         # Champs affichables

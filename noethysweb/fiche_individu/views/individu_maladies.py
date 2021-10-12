@@ -4,10 +4,18 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy
+from django.http import JsonResponse
 from core.views import crud
-from core.models import Individu, Famille
+from core.models import Individu, TypeMaladie
 from fiche_individu.forms.individu_maladies import Formulaire
 from fiche_individu.views.individu import Onglet
+
+
+def Ajouter_maladie(request):
+    """ Ajouter un type de maladie """
+    nom = request.POST.get("valeur")
+    maladie = TypeMaladie.objects.create(nom=nom)
+    return JsonResponse({"id": maladie.pk, "valeur": maladie.nom})
 
 
 class Consulter(Onglet, crud.Modifier):
