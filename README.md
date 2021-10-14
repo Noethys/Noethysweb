@@ -11,7 +11,8 @@ Installation
 ------------------------
 
 - Téléchargez le code source.
-- Installez python 3 et les dépendances (Voir requirements.txt).
+- Installez python 3 et les dépendances du fichier *requirements.txt* :
+    - `pip3 install -r requirements.txt`
 - Allez dans le répertoire *noethysweb/noethysweb* et renommez le fichier *settings_production_modele.py* en *settings_production.py*.
 - Personnalisez le fichier *settings_production.py* selon vos besoins.
 - Exécutez les commandes suivantes depuis le répertoire *noethysweb* :
