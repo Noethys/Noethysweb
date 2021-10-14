@@ -111,8 +111,6 @@ class Onglet(CustomView):
 
     def form_valid(self, form):
         """ Enregistrement des modifications """
-        self.save_historique(instance=self.object, form=form)
-
         if not form.changed_data:
             messages.add_message(self.request, messages.INFO, "Aucune modification n'a été enregistrée")
         else:
@@ -138,6 +136,9 @@ class Onglet(CustomView):
 
             # Demande une nouvelle certification
             self.Demande_nouvelle_certification()
+
+        if self.object:
+            self.save_historique(instance=self.object, form=form)
 
         return HttpResponseRedirect(self.get_success_url())
 

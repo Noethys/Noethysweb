@@ -56,12 +56,14 @@ def Get_onglet(code=""):
     for onglet in LISTE_ONGLETS:
         if onglet.code == code:
             # Récupération de la valeur validation_auto de l'onglet
+            onglet.validation_auto = True
             code_parametre = "validation_auto:%s" % onglet.code
             parametres_portail = cache.get('parametres_portail')
-            if parametres_portail:
-                validation_auto = parametres_portail.get(code_parametre)
+            if parametres_portail and code_parametre in parametres_portail:
+                onglet.validation_auto = parametres_portail.get(code_parametre) in ("True", True)
             else:
-                validation_auto = PortailParametre.objects.get(code=code_parametre).valeur
-            onglet.validation_auto = validation_auto in ("True", True)
+                parametre = PortailParametre.objects.filter(code=code_parametre)
+                if parametre:
+                    onglet.validation_auto = parametre.first().valeur in ("True", True)
             return onglet
     return None
