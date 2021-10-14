@@ -110,5 +110,7 @@ urlpatterns = [
     path('facturation/get_detail_facture', secure_ajax_portail(facturation.get_detail_facture), name='portail_ajax_get_detail_facture'),
     path('individus/ajouter_regime_alimentaire', secure_ajax_portail(individu_regimes_alimentaires.Ajouter_regime_alimentaire), name='portail_ajax_ajouter_regime_alimentaire'),
     path('individus/ajouter_maladie', secure_ajax_portail(individu_maladies.Ajouter_maladie), name='portail_ajax_ajouter_maladie'),
+    path('individus/ajouter_medecin', secure_ajax_portail(individu_medecin.Ajouter_medecin), name='portail_ajax_ajouter_medecin'),
+    path('individus/ajouter_assureur', secure_ajax_portail(individu_assurances.Ajouter_assureur), name='portail_ajax_ajouter_assureur'),
 
 ]

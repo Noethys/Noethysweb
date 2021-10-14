@@ -342,6 +342,12 @@ class Assureur(models.Model):
     def __str__(self):
         return self.nom
 
+    def Get_nom(self, afficher_ville=False):
+        texte = self.nom
+        if afficher_ville and self.ville_resid:
+            texte += " (%s)" % self.ville_resid
+        return texte
+
 
 class CategorieMedicale(models.Model):
     idcategorie = models.AutoField(verbose_name="ID", db_column='IDcategorie', primary_key=True)
@@ -466,12 +472,14 @@ class Medecin(models.Model):
         verbose_name_plural = "médecins"
 
     def __str__(self):
-        return "%s %s" % (self.nom, self.prenom)
+        return "%s %s" % (self.nom, self.prenom or "")
 
-    def Get_nom(self):
+    def Get_nom(self, afficher_ville=False):
         texte = self.nom
         if self.prenom:
             texte += " " + self.prenom
+        if afficher_ville and self.ville_resid:
+            texte += " (%s)" % self.ville_resid
         return texte
 
 

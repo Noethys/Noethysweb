@@ -11,11 +11,21 @@ from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Butto
 from crispy_forms.bootstrap import Field, InlineCheckboxes, FormActions, StrictButton
 from core.utils.utils_commandes import Commandes
 from core.models import Individu, Medecin
-from django_select2.forms import Select2Widget
+from django_select2.forms import Select2Widget, ModelSelect2Widget
+
+
+class Widget_medecin(ModelSelect2Widget):
+    search_fields = ['nom__icontains', 'prenom__icontains', 'ville_resid__icontains']
+
+    def label_from_instance(widget, instance):
+        label = instance.Get_nom()
+        if instance.ville_resid:
+            label += " (%s)" % instance.ville_resid
+        return label
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    medecin = forms.ModelChoiceField(label="Sélectionnez un médecin", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Medecin.objects.all(), required=False)
+    medecin = forms.ModelChoiceField(label="Sélectionnez un médecin", widget=Widget_medecin({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=Medecin.objects.all().order_by("nom", "prenom"), required=False)
 
     class Meta:
         model = Individu

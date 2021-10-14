@@ -3,26 +3,26 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+
 from django import forms
 from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
 from core.models import Individu, PortailRenseignement, Medecin
-from django_select2.forms import ModelSelect2Widget
 from portail.forms.fiche import FormulaireBase
+from core.widgets import Select_avec_commandes_form
 
 
-class Widget_medecin(ModelSelect2Widget):
+class Form_choix_medecin(forms.ModelChoiceField):
     search_fields = ['nom__icontains', 'prenom__icontains', 'ville_resid__icontains']
 
-    def label_from_instance(widget, instance):
-        label = instance.Get_nom()
-        if instance.ville_resid:
-            label += " (%s)" % instance.ville_resid
-        return label
+    def label_from_instance(self, instance):
+        return instance.Get_nom(afficher_ville=True)
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    medecin = forms.ModelChoiceField(label="Médecin", widget=Widget_medecin(attrs={"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=Medecin.objects.all().order_by("nom", "prenom"), required=False)
+    medecin = Form_choix_medecin(label="Médecin", queryset=Medecin.objects.all().order_by("nom", "prenom"), required=False,
+                                     widget=Select_avec_commandes_form(attrs={"url_ajax": "portail_ajax_ajouter_medecin", "id_form": "medecins_form",
+                                                                              "textes": {"champ": "Nom du régime alimentaire", "ajouter": "Ajouter un médecin", "modifier": "Modifier un médecin"}}))
 
     class Meta:
         model = Individu
@@ -40,11 +40,10 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
-        # self.helper.use_custom_control = False
 
         # Help_texts pour le mode édition
         self.help_texts = {
-            "medecin": "Sélectionnez un médecin dans la liste déroulante. Vous pouvez faire une recherche par nom, par prénom ou par ville.",
+            "medecin": "Cliquez sur le champ ci-dessus pour sélectionner un médecin dans la liste déroulante. Vous pouvez faire une recherche par nom, par prénom ou par ville. Cliquez sur le bouton '+' pour ajouter un médecin manquant dans la liste de choix.",
         }
 
         # Champs affichables
