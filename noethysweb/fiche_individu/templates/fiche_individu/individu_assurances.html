@@ -1,0 +1,33 @@
+{% extends "fiche_individu/individu.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_individu %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+                {% crispy form %}
+            {% endblock %}
+        {% endembed %}
+    </div>
+
+    {# Modal d'ajout d'un assureur #}
+    {% if form_ajout %}
+        {% embed 'core/modal.html' %}
+            {% block modal_id %}id_assureur_modal_ajout{% endblock %}
+            {% block modal_titre %}{% endblock %}
+            {% block modal_body %}
+                <div id="modal_erreurs" class="text-red"></div>
+                {% crispy form_ajout %}
+            {% endblock %}
+        {% endembed %}
+    {% endif %}
+
+{% endblock %}
+
+

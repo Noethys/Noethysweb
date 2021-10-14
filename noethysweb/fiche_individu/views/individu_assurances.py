@@ -3,13 +3,36 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
 from django.urls import reverse_lazy, reverse
+from django.db.models import Q
+from django.http import JsonResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Assurance
 from fiche_individu.forms.individu_assurances import Formulaire
 from fiche_individu.views.individu import Onglet
-from django.db.models import Q
+from fiche_individu.forms.assureurs import Formulaire as Formulaire_assureur
+
+
+def Ajouter_assureur(request):
+    """ Ajouter un assureur dans la liste de choix """
+    valeurs = json.loads(request.POST.get("valeurs"))
+
+    # Formatage des champs
+    valeurs["nom"] = valeurs["nom"].upper()
+    valeurs["rue_resid"] = valeurs["rue_resid"].title()
+    valeurs["ville_resid"] = valeurs["ville_resid"].upper()
+
+    # Vérification des données saisies
+    form = Formulaire_assureur(valeurs)
+    if not form.is_valid():
+        messages_erreurs = ["%s : %s" % (field.title(), erreur[0].message) for field, erreur in form.errors.as_data().items()]
+        return JsonResponse({"erreur": ", ".join(messages_erreurs)}, status=401)
+
+    # Sauvegarde de l'assureur
+    instance = form.save()
+    return JsonResponse({"id": instance.pk, "nom": instance.Get_nom(afficher_ville=True)})
 
 
 class Page(Onglet):
@@ -32,6 +55,7 @@ class Page(Onglet):
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
         ]
+        context['form_ajout'] = Formulaire_assureur()
         return context
 
     def get_form_kwargs(self, **kwargs):
@@ -93,11 +117,11 @@ class Liste(Page, crud.Liste):
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
-    template_name = "fiche_individu/individu_edit.html"
+    template_name = "fiche_individu/individu_assurances.html"
 
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire
-    template_name = "fiche_individu/individu_edit.html"
+    template_name = "fiche_individu/individu_assurances.html"
 
 class Supprimer(Page, crud.Supprimer):
     template_name = "fiche_individu/individu_delete.html"

@@ -4,17 +4,28 @@
 #  Distribué sous licence GNU GPL.
 
 import datetime
+from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, Div, ButtonHolder
 from crispy_forms.bootstrap import Field, InlineRadios
-from core.widgets import DatePickerWidget
+from core.widgets import DatePickerWidget, Select_avec_commandes_form
 from core.utils.utils_commandes import Commandes
-from core.models import Assurance
+from core.models import Assurance, Assureur
+
+
+class Form_choix_assureur(forms.ModelChoiceField):
+    search_fields = ['nom__icontains', 'ville_resid__icontains']
+
+    def label_from_instance(self, instance):
+        return instance.Get_nom(afficher_ville=True)
 
 
 class Formulaire(FormulaireBase, ModelForm):
+    assureur = Form_choix_assureur(label="Assureur", queryset=Assureur.objects.all().order_by("nom"), required=False, help_text="Cliquez sur le champ ci-dessus pour sélectionner un assureur dans la liste déroulante. Vous pouvez faire une recherche par nom ou par ville. Cliquez sur le bouton '+' pour ajouter un assureur manquant dans la liste de choix.",
+                                     widget=Select_avec_commandes_form(attrs={"url_ajax": "ajax_ajouter_assureur", "id_form": "assureurs_form",
+                                                                              "textes": {"champ": "Nom de l'assureur", "ajouter": "Ajouter un assureur", "modifier": "Modifier un assureur"}}))
 
     class Meta:
         model = Assurance
