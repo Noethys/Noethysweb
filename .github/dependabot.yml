@@ -8,4 +8,4 @@ updates:
   - package-ecosystem: npm
     directory: "/core/static/lib/"
     schedule:
-      interval: "live"
+      interval: "daily"
