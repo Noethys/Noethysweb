@@ -3,6 +3,7 @@
   "private": true,
   "dependencies": {
     "jquery": ">=2.1.1",
-    "jqueryui": ">=1.12.1"
+    "jqueryui": ">=1.12.1",
+	"fabric": ">=3.4.0"
   }
 }
