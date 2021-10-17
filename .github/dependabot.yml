@@ -5,7 +5,7 @@
 
 version: 2
 updates:
-  - package-ecosystem: javascript
-    directory: "/core/static/lib/"
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
       interval: "daily"
