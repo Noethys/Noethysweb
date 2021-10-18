@@ -69,5 +69,8 @@ urlpatterns = [
     path('outils/envoyer_email_express', secure_ajax(editeur_emails_express.Envoyer_email), name='ajax_envoyer_email_express'),
     path('outils/get_calendrier_annuel', secure_ajax(calendrier_annuel.Get_calendrier_annuel), name='ajax_get_calendrier_annuel'),
     path('outils/portail/demandes/', secure_ajax(demandes_portail.Appliquer_modification), name='ajax_appliquer_modification_portail'),
+    path('outils/sauvegarder_db/', secure_ajax(sauvegarde_creer.Sauvegarder_db), name='ajax_sauvegarder_db'),
+    path('outils/sauvegarder_media/', secure_ajax(sauvegarde_creer.Sauvegarder_media), name='ajax_sauvegarder_media'),
+    path('outils/sauvegarder_liste/', secure_ajax(sauvegarde_creer.Get_liste_sauvegardes), name='ajax_get_liste_sauvegardes'),
 
 ]

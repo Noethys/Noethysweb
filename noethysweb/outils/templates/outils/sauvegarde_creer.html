@@ -1,0 +1,132 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .liste_sauvegardes ul {
+            margin-bottom: 0px;
+            list-style-type: circle;
+        }
+        .liste_sauvegardes li {
+            display: inline;
+            white-space: nowrap;
+            margin-right: 20px;
+        }
+    </style>
+{% endblock styles %}
+
+
+{% block contenu_page %}
+
+    {% embed 'core/box.html' with box_titre=False %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_introduction %}
+            Vous pouvez effectuer ici des sauvegardes de la base de données et des documents. Les deux types de sauvegardes doivent être effectués l'une après l'autre grâce aux boutons ci-dessous.
+            Pour des raisons de sécurité, la restauration d'une sauvegarde ne peut être effectuée que depuis un terminal sur le serveur (Voir documentation).
+        {% endblock %}
+    {% endembed %}
+
+    {% embed 'core/box.html' %}
+        {% block box_theme %}card-outline{% endblock %}
+        {% block box_titre %}Sauvegarde de la base de données{% endblock %}
+        {% block box_introduction %}Cliquez sur le bouton ci-dessous pour sauvegarder la base de données :{% endblock %}
+        {% block box_contenu %}
+            <div id="erreurs_db" class="text-red"></div>
+            <button type='button' data-mode="db" class="bouton_sauvegarder btn btn-primary mb-3"><i class="fa fa-database margin-r-5"></i> Sauvegarder la base de données</button>
+            <div id="sauvegardes_db" class="liste_sauvegardes bg-gray-light p-2">
+                {% if fichiers_db %}
+                    <p>Dernières sauvegardes :</p>
+                    <ul>
+                        {% for nom_fichier in fichiers_db %}
+                            <li><i class="fa fa-file-zip-o margin-r-5"></i>{{ nom_fichier|date:'d/m/Y H:i:s' }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Aucune sauvegarde</p>
+                {% endif %}
+            </div>
+        {% endblock %}
+    {% endembed %}
+
+    {% embed 'core/box.html' %}
+        {% block box_theme %}card-outline{% endblock %}
+        {% block box_titre %}Sauvegarde des documents, photos et images{% endblock %}
+        {% block box_introduction %}Cliquez sur le bouton ci-dessous pour sauvegarder tous les documents, photos et images :{% endblock %}
+        {% block box_contenu %}
+            <div id="erreurs_media" class="text-red"></div>
+            <button type='button' data-mode="media" class="bouton_sauvegarder btn btn-primary mb-3"><i class="fa fa-file-picture-o margin-r-5"></i> Sauvegarder les documents, photos et images</button>
+            <div id="sauvegardes_media" class="liste_sauvegardes bg-gray-light p-2">
+                {% if fichiers_media %}
+                    <p>Dernières sauvegardes :</p>
+                    <ul>
+                        {% for nom_fichier in fichiers_media %}
+                            <li><i class="fa fa-file-zip-o margin-r-5"></i>{{ nom_fichier|date:'d/m/Y H:i:s' }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Aucune sauvegarde</p>
+                {% endif %}
+            </div>
+        {% endblock %}
+    {% endembed %}
+
+    <script>
+        $(document).ready(function() {
+            $(".bouton_sauvegarder").on('click', function(event) {
+                event.preventDefault();
+                var mode = $(this).data("mode")
+                if (mode === "db") {var url = "{% url 'ajax_sauvegarder_db' %}"};
+                if (mode === "media") {var url = "{% url 'ajax_sauvegarder_media' %}"};
+                var box = bootbox.dialog({
+                    message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Sauvegarde en cours</b><br><br>Cette opération peut durer plusieurs minutes. Veuillez patienter...</p>",
+                    closeButton: false
+                });
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                    },
+                    datatype: "json",
+                    success: function(data){
+                        box.modal("hide");
+                        var texte = "<div class='alert alert-success'><h6><i class='icon fa fa-check'></i> La sauvegarde est terminée</h6></div>"
+                        if (mode === "db") {$("#erreurs_db").html(texte)}
+                        if (mode === "media") {$("#erreurs_media").html(texte)}
+                        toastr.success(("La sauvegarde est terminée"));
+                        // Met à jour la liste des sauvegardes
+                        $.ajax({
+                            type: "POST",
+                            url: "{% url 'ajax_get_liste_sauvegardes' %}",
+                            data: {
+                                mode: mode,
+                                csrfmiddlewaretoken: "{{ csrf_token }}"
+                            },
+                            success: function (data) {
+                                $("#sauvegardes_" + mode).html(data);
+                            }
+                        });
+                    },
+                    error: function(data) {
+                        box.modal("hide");
+                        var texte = "<div class='alert alert-danger'><h6><i class='icon fa fa-exclamation-triangle'></i> Erreur</h6>" + data.responseJSON.erreur + "</div>"
+                        if (mode === "db") {$("#erreurs_db").html(texte)}
+                        if (mode === "media") {$("#erreurs_media").html(texte)}
+                        toastr.error(data.responseJSON.erreur);
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock %}

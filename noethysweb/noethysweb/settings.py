@@ -83,6 +83,8 @@ INSTALLED_APPS = [
     'captcha',
     'django_extensions',
     'upload_form',
+    'dbbackup',
+    'django_crontab',
 ]
 
 # Ajouté pour permettre l'affichage de la debugtoolbar
@@ -175,6 +177,7 @@ DJANGORESIZED_DEFAULT_KEEP_META = True
 DJANGORESIZED_DEFAULT_FORMAT_EXTENSIONS = {'JPEG': ".jpg", 'PNG': ".png"}
 DJANGORESIZED_DEFAULT_NORMALIZE_ROTATION = True
 
+# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

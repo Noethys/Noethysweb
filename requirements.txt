@@ -15,9 +15,14 @@ django-select2
 django-sn
 django-extensions
 django-upload-form
+django-dbbackup
+django-storages
+django-crontab
+dropbox
 numpy
 opencv-python
 pycryptodome
 python-dateutil
+python-gnupg
 reportlab
 bleach
