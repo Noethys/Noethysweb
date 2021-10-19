@@ -28,7 +28,7 @@
     position: sticky;
     top: 0;
     z-index: 5;
-    background-color: white;
+    /*background-color: white;*/
     padding: 5px 0px 10px 0px;
 }
 
@@ -66,8 +66,9 @@
     background-color: white;
     border: 1px solid #dee2e6;
 }
-
-
+.dark-mode .table-grille th {
+    background-color: #454d55;
+}
 
 /* Case de base */
 #table-grille .case {
@@ -333,12 +334,17 @@ td.complet {
     background-color: #faffc9;
 }
 
+.dark-mode .vacances {
+    background-color: rgba(255, 255, 255, 0);
+    color: #faffc9;
+}
+
 .date_regroupement {
     background-color: #d9d9d9;
     padding: 2px !important;
 }
 .dark-mode .date_regroupement {
-    background-color: #5a5a5a;
+    background-color: #5a5a5a !important;
     padding: 2px !important;
 }
 
