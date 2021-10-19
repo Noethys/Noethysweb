@@ -20,7 +20,7 @@ def Memorise_option(request):
     nom = request.POST.get("nom")
     valeur = json.loads(request.POST.get("valeur"))
     utils_parametres.Set(nom=nom, categorie="options_interface", utilisateur=request.user, valeur=valeur)
-    cache.delete('options_interface')
+    cache.delete("options_interface_user%d" % request.user.pk)
     return JsonResponse({"success": True})
 
 def Memorise_parametre(request):
