@@ -20,11 +20,11 @@ def GetPermissionsPossibles(organisateur=None):
                 liste_permissions.append((commande.code, "%s | %s" % (commande.parent.parent.titre, commande.titre)))
 
     # Fiche famille
-    for commande in LISTE_ONGLETS_FAMILLES[1:]:
+    for commande in LISTE_ONGLETS_FAMILLES:
         liste_permissions.append(("famille_%s" % commande["code"], "Fiche famille | %s" % commande["label"]))
 
     # Fiche individu
-    for commande in LISTE_ONGLETS_INDIVIDUS[1:]:
+    for commande in LISTE_ONGLETS_INDIVIDUS:
         liste_permissions.append(("individu_%s" % commande["code"], "Fiche individuelle | %s" % commande["label"]))
 
     return liste_permissions
