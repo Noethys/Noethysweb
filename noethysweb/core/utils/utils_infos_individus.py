@@ -730,7 +730,7 @@ class Informations():
                 # Mémorise l'étape de scolarité au format liste
                 self.dictIndividus[cotisation.individu_id]["cotisations"]["liste"].append({
                     "date_debut": utils_dates.ConvertDateToFR(cotisation.date_debut), "date_fin": utils_dates.ConvertDateToFR(cotisation.date_fin),
-                    "nom_type": cotisation.nom_type, "nom_unite": cotisation.nom_unite, "numero": cotisation.numero})
+                    "nom_type": cotisation.type_cotisation.nom, "nom_unite": cotisation.unite_cotisation.nom, "numero": cotisation.numero})
 
     # ---------------------------------------------------------------------------------------------------------------------------------
 
