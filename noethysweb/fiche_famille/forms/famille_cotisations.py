@@ -82,7 +82,7 @@ class Formulaire(FormulaireBase, ModelForm):
         # Individu
         if idfamille:
             rattachements = Rattachement.objects.select_related('individu').filter(famille=famille).order_by("individu__nom", "individu__prenom")
-            self.fields["individu"].choices = [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
+            self.fields["individu"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
 
         # Dates
         self.fields["date_creation_carte"].initial = datetime.date.today()
@@ -310,6 +310,9 @@ function On_change_unite() {
                 $('#id_label_prestation').val(data.label_prestation);
                 $('#id_montant').val(data.montant);
             }
+            // Affichage
+            On_change_carte();
+            On_change_facturer();
         }
     });
 };
@@ -352,7 +355,7 @@ $(document).ready(function() {
 // Carte
 function On_change_carte() {
     $('#div_carte').hide();
-    if ($(this).prop("checked")) {
+    if ($('#id_carte').prop("checked")) {
         $('#div_carte').show();
     };
 }
@@ -365,7 +368,7 @@ $(document).ready(function() {
 // Facturer
 function On_change_facturer() {
     $('#div_facturer').hide();
-    if ($(this).prop("checked")) {
+    if ($('#id_facturer').prop("checked")) {
         $('#div_facturer').show();
     };
 }
