@@ -20,6 +20,7 @@ dist/
 media/
 settings_production.py
 TODO.txt
+mysql.cfg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
