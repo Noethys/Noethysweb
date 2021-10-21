@@ -26,3 +26,4 @@ python-dateutil
 python-gnupg
 reportlab
 bleach
+mysqlclient
