@@ -1754,7 +1754,7 @@ class Vaccin(models.Model):
     idvaccin = models.AutoField(verbose_name="ID", db_column='IDvaccin', primary_key=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE)
     type_vaccin = models.ForeignKey(TypeVaccin, verbose_name="Type de vaccin", on_delete=models.PROTECT)
-    date = encrypt(models.DateField(verbose_name="Date de vaccination"))
+    date = models.DateField(verbose_name="Date de vaccination")
 
     class Meta:
         db_table = 'vaccins'
