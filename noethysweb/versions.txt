@@ -1,3 +1,7 @@
+Version 0.0.5.7 (21/10/2021) :
+
+- Correction de divers bugs
+
 Version 0.0.5.6 (21/10/2021) :
 
 - Envoi des sauvegardes chiffrées vers Dropbox
