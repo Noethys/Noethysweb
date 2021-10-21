@@ -1429,7 +1429,7 @@ class Individu(models.Model):
     cp_naiss = encrypt(models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True))
     ville_naiss = encrypt(models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True))
     deces = models.BooleanField(verbose_name="Individu décédé", default=False)
-    annee_deces = encrypt(models.IntegerField(verbose_name="Année de décès", blank=True, null=True))
+    annee_deces = models.IntegerField(verbose_name="Année de décès", blank=True, null=True)
     adresse_auto = models.IntegerField(verbose_name="Adresse rattachée", blank=True, null=True)
     rue_resid = encrypt(models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True))
     cp_resid = encrypt(models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True))
