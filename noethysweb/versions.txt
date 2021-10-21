@@ -1,3 +1,10 @@
+Version 0.0.5.6 (21/10/2021) :
+
+- Envoi des sauvegardes chiffrées vers Dropbox
+- Ajustement de couleurs pour le dark-mode
+- Ajout possible dans des listes du portail
+- Correction de divers bugs
+
 Version 0.0.5.5 (11/10/2021) :
 
 - Correction de divers bugs
