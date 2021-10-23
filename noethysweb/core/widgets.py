@@ -326,7 +326,7 @@ class Select_avec_commandes_form(Widget):
 
 
 class Select_many_avec_plus(SelectMultiple):
-    template_name = 'core/widgets/Select_many_avec_plus.html'
+    template_name = 'core/widgets/select_many_avec_plus.html'
 
     class Media:
         css = {"all": ("lib/select2/css/select2.min.css",)}
