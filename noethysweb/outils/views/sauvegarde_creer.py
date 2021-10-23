@@ -10,11 +10,13 @@ from django.template import Template, RequestContext
 from django.views.generic import TemplateView
 from django.core.management import call_command
 from core.views.base import CustomView
+from core.utils import utils_gnupg
 from dbbackup.storage import get_storage, utils
 
 
 def Sauvegarder_db(request):
     """ Créer une sauvegarde de la base de données """
+    utils_gnupg.Importation_cles()
     try:
         call_command("dbbackup", "--encrypt", verbosity=3)
     except Exception as err:
@@ -24,6 +26,7 @@ def Sauvegarder_db(request):
 
 def Sauvegarder_media(request):
     """ Créer une sauvegarde des medias """
+    utils_gnupg.Importation_cles()
     try:
         call_command("mediabackup", "--encrypt", verbosity=3)
     except Exception as err:

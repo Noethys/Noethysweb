@@ -19,6 +19,8 @@ def Test():
 def Sauvegarder_db():
     """ Sauvegarde de la base de données """
     logger.debug("%s : Lancement de dbbackup" % datetime.datetime.now())
+    from core.utils import utils_gnupg
+    utils_gnupg.Importation_cles()
     call_command("dbbackup", "--encrypt", verbosity=3)
     logger.debug("Fin de la sauvegarde db")
 
@@ -26,5 +28,7 @@ def Sauvegarder_db():
 def Sauvegarder_media():
     """ Sauvegarde du répertoire media """
     logger.debug("%s : Lancement de mediabackup" % datetime.datetime.now())
+    from core.utils import utils_gnupg
+    utils_gnupg.Importation_cles()
     call_command("mediabackup", "--encrypt", verbosity=3)
     logger.debug("Fin de la sauvegarde media")
