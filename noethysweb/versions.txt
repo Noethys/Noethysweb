@@ -1,3 +1,8 @@
+Version 0.0.5.8 (23/10/2021) :
+
+- Correction de l'importation des clés gnupg
+- Correction de divers bugs
+
 Version 0.0.5.7 (21/10/2021) :
 
 - Correction de divers bugs
