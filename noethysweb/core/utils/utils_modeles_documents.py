@@ -103,7 +103,8 @@ class Facture(Categorie):
 
             (u"PES ORMC ID de la pièce", u"12345", "{PES_IDPIECE}"),
             (u"PES ORMC Nom du lot", u"Cantine janv 2016", "{PES_NOM_LOT}"),
-            (u"PES ORMC Exercice", u"2016", "{PES_LOT_EXERCICE}", "PES ORMC Mois", u"12", "{PES_LOT_MOIS}"),
+            (u"PES ORMC Exercice", u"2016", "{PES_LOT_EXERCICE}"),
+            ("PES ORMC Mois", u"12", "{PES_LOT_MOIS}"),
             (u"PES ORMC Objet du lot", u"Accueil périscolaire", "{PES_LOT_OBJET}"),
             (u"PES ORMC ID Bordereau", u"17", "{PES_LOT_ID_BORDEREAU}"),
             (u"PES ORMC Code produit", u"87", "{PES_LOT_CODE_PRODUIT}"), ]
