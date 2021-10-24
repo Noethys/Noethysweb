@@ -10,9 +10,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'noethysweb.settings')
 
 application = get_wsgi_application()
 
-# Sécurisation du répertoire media pour apache2
-from django.contrib.auth.handlers.modwsgi import check_password
-
 try:
     from django.core.management import call_command
     call_command("crontab", "add")
