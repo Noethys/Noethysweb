@@ -20,7 +20,7 @@ class Modifier(CustomView, TemplateView):
         context = super(Modifier, self).get_context_data(**kwargs)
         context['page_titre'] = "Paramètres des renseignements du portail"
         context['box_titre'] = "Paramètres d'affichage"
-        context['box_introduction'] = "Cochez les champs à afficher sur le portail pour chaque type de public et cliquez sur le bouton Enregistrer."
+        context['box_introduction'] = "Indiquez le statut des champs pour chaque type de public et cliquez sur le bouton Enregistrer."
         context['form'] = context.get("form", Formulaire)
         return context
 
@@ -29,12 +29,15 @@ class Modifier(CustomView, TemplateView):
         if not form.is_valid():
             return self.render_to_response(self.get_context_data(form=form))
 
-        # Enregistrement
+        # Préparation des valeurs
+        dict_valeurs = {}
         for champ, valeur in form.cleaned_data.items():
-            page, code = champ.split(":")
-            valeurs = {}
-            for public in ("famille", "representant", "enfant", "contact"):
-                valeurs[public] = "AFFICHER" if public in valeur else "MASQUER"
+            page, code, public = champ.split(":")
+            dict_valeurs.setdefault((page, code), {})
+            dict_valeurs[(page, code)][public] = valeur
+
+        # Enregistrement
+        for (page, code), valeurs in dict_valeurs.items():
             PortailChamp.objects.update_or_create(page=page, code=code, defaults=valeurs)
 
         # Nettoyage du cache

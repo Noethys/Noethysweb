@@ -2770,11 +2770,11 @@ class PortailChamp(models.Model):
     idchamp = models.AutoField(verbose_name="ID", db_column='IDchamp', primary_key=True)
     page = models.CharField(verbose_name="Page", max_length=200, blank=True, null=True)
     code = models.CharField(verbose_name="Code", max_length=200, blank=True, null=True)
-    choix_etat = [("AFFICHER", "Afficher"), ("MASQUER", "Masquer")]
-    representant = models.CharField(verbose_name="Représentant", max_length=100, choices=choix_etat, default="AFFICHER")
-    enfant = models.CharField(verbose_name="Enfant", max_length=100, choices=choix_etat, default="AFFICHER")
-    contact = models.CharField(verbose_name="Contact", max_length=100, choices=choix_etat, default="AFFICHER")
-    famille = models.CharField(verbose_name="Famille", max_length=100, choices=choix_etat, default="AFFICHER")
+    choix_etat = [("MASQUER", "Masqué"), ("AFFICHER", "Affiché"), ("MODIFIABLE", "Modifiable")]
+    representant = models.CharField(verbose_name="Représentant", max_length=100, choices=choix_etat, default="MODIFIABLE")
+    enfant = models.CharField(verbose_name="Enfant", max_length=100, choices=choix_etat, default="MODIFIABLE")
+    contact = models.CharField(verbose_name="Contact", max_length=100, choices=choix_etat, default="MODIFIABLE")
+    famille = models.CharField(verbose_name="Famille", max_length=100, choices=choix_etat, default="MODIFIABLE")
 
     class Meta:
         db_table = 'portail_champs'

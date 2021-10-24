@@ -6,8 +6,8 @@
 import copy
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, HTML, Fieldset
-from crispy_forms.bootstrap import Field, InlineCheckboxes
+from crispy_forms.layout import Layout, HTML, Fieldset, Div
+from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import PortailChamp
@@ -44,11 +44,23 @@ class Formulaire(FormulaireBase, forms.Form):
                     liste_checks = []
                     for public_code, public_label in (("famille", "Famille"), ("representant", "Représentant"), ("enfant", "Enfant"), ("contact", "Contact")):
                         if getattr(champ, public_code, None):
-                            liste_checks.append((public_code, public_label))
-                    code_field = "%s:%s" % (champ.page, champ.code)
-                    self.fields[code_field] = forms.MultipleChoiceField(label=champ.label, required=False, widget=forms.CheckboxSelectMultiple, choices=liste_checks)
-                    self.fields[code_field].initial = dict_champs[(champ.page, champ.code)].Get_champs_affiches()
-                    liste_fields.append(InlineCheckboxes(code_field))
+                            code_field = "%s:%s:%s" % (champ.page, champ.code, public_code)
+                            choix_etat = [("MASQUER", "Masqué"), ("AFFICHER", "Affiché"), ("MODIFIABLE", "Modifiable")]
+                            self.fields[code_field] = forms.ChoiceField(label=public_label, required=False, choices=choix_etat)
+                            self.fields[code_field].initial = getattr(champ, public_code)
+                            liste_checks.append(Field(code_field))
+
+                    liste_fields.append(
+                        Div(
+                            HTML("<label class='col-form-label col-md-3'><b>%s</b></label>" % champ.label),
+                            Div(
+                                Div(*liste_checks),
+                                css_class="controls col-md-9"
+                            ),
+                            css_class="form-group row"
+                        )
+                    )
+
             self.helper.layout.append(Fieldset("<i class='fa %s margin-r-5'></i> %s" % (onglet.icone, onglet.label), *liste_fields))
 
         self.helper.layout.append(HTML("<br>"))

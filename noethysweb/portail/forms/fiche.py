@@ -6,9 +6,9 @@
 from django import forms
 from django.forms import ModelForm, ValidationError
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
+from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder
 from crispy_forms.bootstrap import Field, StrictButton
-from core.models import Individu, PortailRenseignement, Rattachement
+from core.models import Individu, PortailRenseignement
 from portail.utils import utils_champs
 import json
 
@@ -38,7 +38,7 @@ class FormulaireBase():
         dict_renseignements = {renseignement.code: json.loads(renseignement.nouvelle_valeur) for renseignement in renseignements}
 
         # Liste des champs à afficher
-        liste_codes_champs = utils_champs.Get_codes_champs_page(page=self.nom_page, categorie=categorie)
+        dict_champs = utils_champs.Get_champs_page(page=self.nom_page, categorie=categorie)
 
         # Préparation du layout
         self.helper.layout = Layout()
@@ -47,16 +47,28 @@ class FormulaireBase():
         for dict_rubrique in self.liste_champs_possibles:
             champs = []
             for code in dict_rubrique["champs"]:
-                if code in liste_codes_champs:
+                statut_champ = dict_champs.get(code, "MASQUER")
+
+                if statut_champ in ("AFFICHER", "MODIFIABLE"):
+
                     # Affiche les help_text si mode édition
                     if self.mode == "EDITION":
                         self.fields[code].help_text = self.help_texts.get(code, None)
+
                     # Recherche si une valeur existe déjà dans les renseignements modifiés
                     if code in dict_renseignements:# and self.initial.get(code, None) != dict_renseignements.get(code, None): Ne fonctionne pas sur la page famille_caisse !
                         self.initial[code] = dict_renseignements[code]
                         self.fields[code].help_text = "<span class='text-orange'><i class='fa fa-exclamation-circle margin-r-5'></i>Modification en attente de validation par l'administrateur.</span>"
+
+                    # Si champ en lecture seule
+                    if dict_champs[code] == "AFFICHER":
+                        self.fields[code].disabled = True
+                        if self.mode == "EDITION":
+                            self.fields[code].help_text = "Ce champ n'est pas modifiable."
+
                     # Génération du field
                     champs.append(Field(code, css_class="text-orange" if code in dict_renseignements else None))
+
             if champs:
                 self.helper.layout.append(Fieldset(dict_rubrique["titre"], *champs))
 
