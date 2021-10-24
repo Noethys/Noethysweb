@@ -60,6 +60,22 @@ DATABASES = {
 # DBBACKUP_STORAGE = "storages.backends.dropbox.DropBoxStorage"
 # DBBACKUP_STORAGE_OPTIONS = {"oauth2_access_token": "Token Dropbox à coller ici"}
 
+# ------------------------------- Stockage de documents ----------------------------------
+
+# Indiquer le type de stockage souhaité pour chaque information :
+# Pour un stockage sur le disque dur (par défaut) : django.core.files.storage.FileSystemStorage
+# Pour un stockage sur Dropbox : storages.backends.dropbox.DropBoxStorage
+
+# STORAGE_PROBLEME = "django.core.files.storage.FileSystemStorage"
+# STORAGE_PIECE = "django.core.files.storage.FileSystemStorage"
+# STORAGE_QUOTIENT = "django.core.files.storage.FileSystemStorage"
+# STORAGE_ASSURANCE = "django.core.files.storage.FileSystemStorage"
+# STORAGE_PHOTO = "django.core.files.storage.FileSystemStorage"
+
+# Si l'un des champs ci-dessus utilise Dropbox, renseignez le token Dropbox ci-dessous :
+# DROPBOX_OAUTH2_TOKEN = "XXXXXXXXXXXXXXX"
+
+
 # ------------------------------------- Crontab ---------------------------------------
 
 # Décommentez les lignes ci-dessous pour activer les tâches automatisées

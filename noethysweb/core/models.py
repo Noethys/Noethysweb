@@ -17,6 +17,7 @@ import datetime, decimal, uuid, os
 from django.conf import settings
 from django_cryptography.fields import encrypt
 from core.utils import utils_permissions
+from django.core.files.storage import get_storage_class
 
 
 JOURS_SEMAINE = [(0, "L"), (1, "M"), (2, "M"), (3, "J"), (4, "V"), (5, "S"), (6, "D")]
@@ -235,6 +236,10 @@ def get_uuid_path(instance, filename):
         base_chemin = os.path.join(base_chemin, instance.get_upload_path())
     return os.path.join(base_chemin, "%s.%s" % (get_uuid(), filename.split('.')[-1]))
 
+def get_storage(nom_champ=None):
+    """ Renvoie la classe de stockage souhaitée """
+    class_storage = getattr(settings, "STORAGE_%s" % nom_champ.upper(), "django.core.files.storage.FileSystemStorage")
+    return get_storage_class(class_storage)
 
 
 class AdresseMail(models.Model):
@@ -1736,7 +1741,7 @@ class ProblemeSante(models.Model):
     diffusion_listing_enfants = models.BooleanField(verbose_name="Afficher sur la liste des informations médicales", default=False)
     diffusion_listing_conso = models.BooleanField(verbose_name="Afficher sur la liste des consommations", default=False)
     diffusion_listing_repas = models.BooleanField(verbose_name="Afficher sur la commande des repas", default=False)
-    document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, blank=True, null=True, help_text="Vous pouvez ajouter un document.")
+    document = models.FileField(verbose_name="Document", storage=get_storage("probleme"), upload_to=get_uuid_path, blank=True, null=True, help_text="Vous pouvez ajouter un document.")
 
     class Meta:
         db_table = 'problemes_sante'
@@ -1825,7 +1830,7 @@ class Piece(models.Model):
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE, blank=True, null=True)
     date_debut = models.DateField(verbose_name="Date de début", blank=True, null=True)
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
-    document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, blank=True, null=True)
+    document = models.FileField(verbose_name="Document", storage=get_storage("piece"), upload_to=get_uuid_path, blank=True, null=True)
     titre = models.CharField(verbose_name="Titre", max_length=200, blank=True, null=True)
     observations = models.TextField(verbose_name="Observations", blank=True, null=True)
     auteur = models.ForeignKey(Utilisateur, verbose_name="Auteur", blank=True, null=True, on_delete=models.CASCADE)
@@ -2101,7 +2106,7 @@ class Quotient(models.Model):
     revenu = encrypt(models.DecimalField(verbose_name="Revenu", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True))
     observations = encrypt(models.TextField(verbose_name="Observations", blank=True, null=True))
     type_quotient = models.ForeignKey(TypeQuotient, verbose_name="Type de quotient", on_delete=models.PROTECT)
-    document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, blank=True, null=True)
+    document = models.FileField(verbose_name="Document", storage=get_storage("quotient"), upload_to=get_uuid_path, blank=True, null=True)
 
     class Meta:
         db_table = 'quotients'
@@ -2852,7 +2857,7 @@ class Assurance(models.Model):
     num_contrat = encrypt(models.CharField(verbose_name="N° de contrat", max_length=200))
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
-    document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, blank=True, null=True, help_text="Vous pouvez ajouter un document (PDF ou image).")
+    document = models.FileField(verbose_name="Document", storage=get_storage("assurance"), upload_to=get_uuid_path, blank=True, null=True, help_text="Vous pouvez ajouter un document (PDF ou image).")
 
     class Meta:
         db_table = 'assurances'
@@ -3043,7 +3048,7 @@ class Album(models.Model):
 class Photo(models.Model):
     idphoto = models.AutoField(verbose_name="ID", db_column='IDphoto', primary_key=True)
     album = models.ForeignKey(Album, verbose_name="Album", on_delete=models.PROTECT)
-    fichier = models.FileField(verbose_name="Fichier", upload_to=get_uuid_path)
+    fichier = models.FileField(verbose_name="Fichier", storage=get_storage("photo"), upload_to=get_uuid_path)
     titre = models.CharField(verbose_name="Titre de la photo", max_length=300, blank=True, null=True, help_text="Le titre est visible pour les familles sur le portail.")
     date_creation = models.DateTimeField(verbose_name="Date de création", blank=True, null=True, help_text="Cette date est utilisée pour trier les photos.")
 
