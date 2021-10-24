@@ -2,7 +2,6 @@
 
 import core.models
 from django.db import migrations, models
-import storages.backends.dropbox
 
 
 class Migration(migrations.Migration):
@@ -12,11 +11,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='piece',
-            name='document',
-            field=models.FileField(blank=True, null=True, storage=storages.backends.dropbox.DropBoxStorage(), upload_to=core.models.get_uuid_path, verbose_name='Document'),
-        ),
         migrations.AlterField(
             model_name='portailchamp',
             name='contact',
