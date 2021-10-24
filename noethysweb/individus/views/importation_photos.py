@@ -61,6 +61,8 @@ class View(CustomView, TemplateView):
             # Envoi l'image vers le répertoire media/individus
             image_origine = os.path.join(settings.MEDIA_ROOT, dict_temp["url"])
             url_destination = dict_temp["url"].replace("temp/", "individus/")
+            if not os.path.isdir(os.path.join(settings.MEDIA_ROOT, "individus")):
+                os.mkdir(os.path.join(settings.MEDIA_ROOT, "individus"))
             image_destination = os.path.join(settings.MEDIA_ROOT, url_destination)
             shutil.move(image_origine, image_destination, url_destination)
             # Modifie l'image de la fiche individuelle
@@ -76,8 +78,16 @@ class View(CustomView, TemplateView):
         import numpy as np
         from PIL import Image
 
+        # Recherche l'algorithme de détection
+        face_detector = None
+        try:
+            face_detector = "{base_path}/data/haarcascade_frontalface_default.xml".format(base_path=cv2.__path__[0])
+        except:
+            pass
+        if not face_detector:
+            face_detector = "/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml"
+
         # Charge l'algorithme de détection
-        face_detector = "{base_path}/data/haarcascade_frontalface_default.xml".format(base_path=cv2.__path__[0])
         detector = cv2.CascadeClassifier(face_detector)
 
         # Charge l'image
