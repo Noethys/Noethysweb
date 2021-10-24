@@ -1,3 +1,7 @@
+Version 0.0.6.0 (24/10/2021) :
+
+- Correction de la migration 34
+
 Version 0.0.5.9 (24/10/2021) :
 
 - Ajout du choix du stockage pour les documents
