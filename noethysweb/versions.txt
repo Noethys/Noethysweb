@@ -1,3 +1,9 @@
+Version 0.0.5.9 (24/10/2021) :
+
+- Ajout du choix du stockage pour les documents
+- Correction de l'importation des photos sous Linux
+- Correction de divers bugs
+
 Version 0.0.5.8 (23/10/2021) :
 
 - Correction de l'importation des clés gnupg
