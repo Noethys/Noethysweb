@@ -331,7 +331,7 @@ td.complet {
 }
 
 .vacances {
-    background-color: #faffc9;
+    background-color: #faffc9 !important;
 }
 
 .dark-mode .vacances {
