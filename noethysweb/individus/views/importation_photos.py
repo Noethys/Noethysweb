@@ -103,8 +103,12 @@ class View(CustomView, TemplateView):
 
         # Analyse l'image
         dict_resultats = {"image_originale": None, "portraits": []}
-        rects = detector.detectMultiScale(image_nb, scaleFactor=1.1, minNeighbors=5)
+        rects = detector.detectMultiScale(image_nb, scaleFactor=1.1, minNeighbors=5, minSize=(80, 80))
         for (x, y, w, h) in rects:
+            # Ajout d'une marge
+            marge = w * 10//100
+            x, y, w, h = x-marge, y-marge, w+marge*2, h+marge*2
+
             # Découpe chaque portrait
             img = image_pil.crop((x, y, x + w, y + h))
             nom_fichier = "temp/%s.jpg" % uuid.uuid4()
