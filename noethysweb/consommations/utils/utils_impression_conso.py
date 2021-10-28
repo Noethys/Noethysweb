@@ -114,7 +114,9 @@ class Impression(utils_impression.Impression):
                         return scolarite
             return None
 
-        liste_conso = Consommation.objects.select_related('individu', 'inscription', 'inscription__famille', 'individu__type_sieste', 'evenement').filter(conditions).order_by("date", "heure_debut")
+        liste_conso = Consommation.objects.select_related('individu', 'inscription', 'inscription__famille', 'inscription__activite', 'inscription__individu', 'individu__type_sieste', 'evenement') \
+            .prefetch_related("inscription__individu__regimes_alimentaires") \
+            .filter(conditions).order_by("date", "heure_debut")
 
         # Préparation des filtres de scolarité
         liste_ecoles = [int(idecole) for idecole in self.dict_donnees["ecoles"].split(";")] if self.dict_donnees["ecoles"] else []
@@ -177,7 +179,7 @@ class Impression(utils_impression.Impression):
         if self.dict_donnees["afficher_inscrits"]:
 
             conditions = Q(activite__in=liste_activites) & Q(statut="ok") #& (Q(date_fin__isnull=False) | Q(date_fin__gte=max(self.dict_donnees["dates"])))
-            inscriptions = Inscription.objects.select_related('individu', 'individu__type_sieste', 'individu_regimes_alimentaires').filter(conditions)
+            inscriptions = Inscription.objects.select_related('individu', 'activite', 'famille', 'individu__type_sieste').prefetch_related("individu__regimes_alimentaires").filter(conditions)
 
             for inscription in inscriptions:
 

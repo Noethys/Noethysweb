@@ -89,12 +89,13 @@ def Get_liste_pieces_manquantes(date_reference=None, activites=None, presents=No
 
     dict_pieces = {}
     for piece in pieces_existantes:
-        if piece.type_piece.public == "famille":
-            key = "famille_%d_%d" % (piece.famille_id, piece.type_piece_id)
-        else:
-            key = "individu_%d_%d" % (piece.individu_id, piece.type_piece_id)
-        dict_pieces.setdefault(key, [])
-        dict_pieces[key].append(piece)
+        if piece.type_piece:
+            if piece.type_piece.public == "famille":
+                key = "famille_%d_%d" % (piece.famille_id, piece.type_piece_id)
+            else:
+                key = "individu_%d_%d" % (piece.individu_id, piece.type_piece_id)
+            dict_pieces.setdefault(key, [])
+            dict_pieces[key].append(piece)
 
     liste_traitees = []
     dict_resultats = {}

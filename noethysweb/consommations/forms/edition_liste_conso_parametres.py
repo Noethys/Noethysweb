@@ -213,14 +213,15 @@ EXTRA_HTML = """
         $('#div_id_afficher_scolarite_inconnue').hide();
         $('#div_id_saut_page_ecoles').hide();
         $('#div_id_saut_page_classes').hide();
-        if ($("#id_regroupement_scolarite_2").prop("checked")) {
+        var mode_scolarite = $("input[name=regroupement_scolarite]:checked").val();
+        if (mode_scolarite === "ecoles") {
+            $('#div_id_afficher_scolarite_inconnue').show();
+            $('#div_id_saut_page_ecoles').show();
             $('#div_id_ecoles').show();
         };
-        if ($("#id_regroupement_scolarite_3").prop("checked")) {
-            $('#div_id_classes').show();
-        };
-        if ($("#id_regroupement_scolarite_2").prop("checked") | $("#id_regroupement_scolarite_3").prop("checked")) {
+        if (mode_scolarite === "classes") {
             $('#div_id_afficher_scolarite_inconnue').show();
+            $('#div_id_classes').show();
             $('#div_id_saut_page_ecoles').show();
             $('#div_id_saut_page_classes').show();
         };
