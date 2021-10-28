@@ -864,6 +864,15 @@ class Impression(utils_impression.Impression):
                                         if texte_sieste and texte_sieste[-1] != ".": texte_sieste += "."
                                         listeInfos.append(ParagraphAndImage(Paragraph(texte_sieste, paraStyle), Image(settings.STATIC_ROOT + "/images/reveil.png", width=8, height=8), xpad=1, ypad=0, side="left"))
 
+                                    # Anniversaire
+                                    for date in self.dict_donnees["dates"]:
+                                        if inscription.individu.date_naiss and inscription.individu.date_naiss.strftime("%d/%m") == date.strftime("%d/%m"):
+                                            if len(self.dict_donnees["dates"]) > 1:
+                                                texte_anniversaire = "C'est l'anniversaire de %s le %s (%s ans) !" % (prenom, date.strftime("%d/%m"), inscription.individu.Get_age(today=date))
+                                            else:
+                                                texte_anniversaire = "C'est l'anniversaire de %s (%s ans) !" % (prenom, inscription.individu.Get_age(today=date))
+                                            listeInfos.append(ParagraphAndImage(Paragraph(texte_anniversaire, paraStyle), Image(settings.STATIC_ROOT + "/images/anniversaire.png", width=8, height=8), xpad=1, ypad=0, side="left"))
+
                                     # Informations médicales
                                     if inscription.individu_id in dictInfosMedicales:
                                         for info in dictInfosMedicales[inscription.individu_id]:
