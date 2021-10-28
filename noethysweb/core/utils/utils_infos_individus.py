@@ -6,7 +6,7 @@
 import datetime
 from core.utils import utils_dates, utils_questionnaires
 from core.data import data_civilites
-from core.models import Individu, Famille, Rattachement, Quotient, Inscription, Note, ProblemeSante, Scolarite, Cotisation, Lien, CHOIX_AUTORISATIONS
+from core.models import Individu, Famille, Rattachement, Quotient, Inscription, Note, Information, Scolarite, Cotisation, Lien, CHOIX_AUTORISATIONS
 from individus.utils import utils_pieces_manquantes
 from core.data.data_liens import DICT_TYPES_LIENS
 from django.db.models import Q
@@ -599,10 +599,10 @@ class Informations():
                  "date_inscription": utils_dates.ConvertDateToFR(inscription.date_debut)})
 
     def RechercheInfosMedicales(self):
-        """ Récupération des informations médicales des individus """
-        problemes = ProblemeSante.objects.select_related('categorie').all()
+        """ Récupération des informations personnelles des individus """
+        problemes = Information.objects.select_related('categorie').all()
         for probleme in problemes:
-            # Mémorise le nombre d'informations médicales
+            # Mémorise le nombre d'informations personnelles
             if "medical" not in self.dictIndividus[probleme.individu_id]:
                 self.dictIndividus[probleme.individu_id]["medical"] = {"nombre": 0, "liste": []}
             self.dictIndividus[probleme.individu_id]["medical"]["nombre"] += 1

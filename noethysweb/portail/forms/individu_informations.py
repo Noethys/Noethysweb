@@ -8,7 +8,7 @@ from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Fieldset, Div, ButtonHolder
 from crispy_forms.bootstrap import Field, StrictButton
-from core.models import ProblemeSante, PortailRenseignement
+from core.models import Information, PortailRenseignement
 from core.utils.utils_commandes import Commandes
 from portail.forms.fiche import FormulaireBase
 
@@ -16,7 +16,7 @@ from portail.forms.fiche import FormulaireBase
 class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
-        model = ProblemeSante
+        model = Information
         fields = "__all__"
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
@@ -33,7 +33,7 @@ class Formulaire(FormulaireBase, ModelForm):
         mode = kwargs.pop("mode", "MODIFICATION")
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_id = 'individu_infos_medicales_form'
+        self.helper.form_id = 'individu_informations_form'
         self.helper.form_method = 'post'
 
         self.helper.form_class = 'form-horizontal'
@@ -50,5 +50,5 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("description"),
                 Field("document"),
             ),
-            Commandes(annuler_url="{% url 'portail_individu_infos_medicales' idrattachement=rattachement.pk %}", aide=False, css_class="pull-right"),
+            Commandes(annuler_url="{% url 'portail_individu_informations' idrattachement=rattachement.pk %}", aide=False, css_class="pull-right"),
         )

@@ -6,7 +6,7 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Individu, Vaccin, ProblemeSante, Medecin, TypeMaladie, Vaccin
+from core.models import Individu, Vaccin, Information, Medecin, TypeMaladie, Vaccin
 from fiche_individu.forms.individu_info_medicale import Formulaire as Formulaire_info_medicale
 from fiche_individu.forms.individu_vaccin import Formulaire as Formulaire_vaccin
 from fiche_individu.forms.individu_medecin import Formulaire as Formulaire_medecin
@@ -111,7 +111,7 @@ class Liste(Page, MultipleDatatableView):
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
-            model = ProblemeSante
+            model = Information
             structure_template = MyDatatable.structure_template
             columns = ['intitule']
             ordering = ['intitule']
@@ -161,7 +161,7 @@ class Liste(Page, MultipleDatatableView):
     }
 
     def get_informations_datatable_queryset(self):
-        return ProblemeSante.objects.filter(individu=self.Get_idindividu())
+        return Information.objects.filter(individu=self.Get_idindividu())
 
     def get_vaccins_datatable_queryset(self):
         return Vaccin.objects.filter(individu=self.Get_idindividu())
@@ -176,36 +176,36 @@ class Liste(Page, MultipleDatatableView):
 
 class Ajouter_infomedicale(Page, crud.Ajouter):
     form_class = Formulaire_info_medicale
-    model = ProblemeSante
+    model = Information
     template_name = "fiche_individu/individu_edit.html"
 
     def get_context_data(self, **kwargs):
         context = super(Page, self).get_context_data(**kwargs)
-        context['box_titre'] = "Informations médicales"
+        context['box_titre'] = "Informations personnelles"
         context['onglet_actif'] = "medical"
         return context
 
 
 class Modifier_infomedicale(Page, crud.Modifier):
     form_class = Formulaire_info_medicale
-    model = ProblemeSante
+    model = Information
     template_name = "fiche_individu/individu_edit.html"
 
     def get_context_data(self, **kwargs):
         context = super(Page, self).get_context_data(**kwargs)
-        context['box_titre'] = "Informations médicales"
+        context['box_titre'] = "Informations personnelles"
         context['onglet_actif'] = "medical"
         return context
 
 
 class Supprimer_infomedicale(Page, crud.Supprimer):
     form_class = Formulaire_info_medicale
-    model = ProblemeSante
+    model = Information
     template_name = "fiche_individu/individu_delete.html"
 
     def get_context_data(self, **kwargs):
         context = super(Page, self).get_context_data(**kwargs)
-        context['box_titre'] = "Informations médicales"
+        context['box_titre'] = "Informations personnelles"
         context['onglet_actif'] = "medical"
         return context
 

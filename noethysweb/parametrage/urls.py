@@ -11,7 +11,7 @@ from parametrage.views import organisateur, structures, \
     comptes_bancaires, modes_reglements, emetteurs, \
     lots_factures, prefixes_factures, regies, messages_factures, \
     types_pieces, regimes, caisses, types_quotients, categories_travail, secteurs, types_sieste, \
-    categories_medicales, types_maladies, types_vaccins, medecins, \
+    categories_informations, types_maladies, types_vaccins, medecins, \
     niveaux_scolaires, ecoles, classes, types_cotisations, unites_cotisations, \
     restaurateurs, menus_categories, menus_legendes, notes_categories, listes_diffusion, \
     types_groupes_activites, activites, activites_generalites, activites_responsables, activites_agrements, activites_groupes, \
@@ -245,13 +245,13 @@ urlpatterns = [
     path('parametrage/types_regimes_alimentaires/modifier/<int:pk>', types_regimes_alimentaires.Modifier.as_view(), name='types_regimes_alimentaires_modifier'),
     path('parametrage/types_regimes_alimentaires/supprimer/<int:pk>', types_regimes_alimentaires.Supprimer.as_view(), name='types_regimes_alimentaires_supprimer'),
 
-    # Catégories médicales
-    path('parametrage/categories_medicales/liste', categories_medicales.Liste.as_view(), name='categories_medicales_liste'),
-    path('parametrage/categories_medicales/ajouter', categories_medicales.Ajouter.as_view(), name='categories_medicales_ajouter'),
-    path('parametrage/categories_medicales/modifier/<int:pk>', categories_medicales.Modifier.as_view(), name='categories_medicales_modifier'),
-    path('parametrage/categories_medicales/supprimer/<int:pk>', categories_medicales.Supprimer.as_view(), name='categories_medicales_supprimer'),
+    # Catégories informations
+    path('parametrage/categories_informations/liste', categories_informations.Liste.as_view(), name='categories_informations_liste'),
+    path('parametrage/categories_informations/ajouter', categories_informations.Ajouter.as_view(), name='categories_informations_ajouter'),
+    path('parametrage/categories_informations/modifier/<int:pk>', categories_informations.Modifier.as_view(), name='categories_informations_modifier'),
+    path('parametrage/categories_informations/supprimer/<int:pk>', categories_informations.Supprimer.as_view(), name='categories_informations_supprimer'),
 
-    # Catégories médicales
+    # Types de maladies
     path('parametrage/types_maladies/liste', types_maladies.Liste.as_view(), name='types_maladies_liste'),
     path('parametrage/types_maladies/ajouter', types_maladies.Ajouter.as_view(), name='types_maladies_ajouter'),
     path('parametrage/types_maladies/modifier/<int:pk>', types_maladies.Modifier.as_view(), name='types_maladies_modifier'),

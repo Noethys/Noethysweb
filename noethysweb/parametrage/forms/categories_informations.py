@@ -10,12 +10,12 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, ButtonHolder
 from crispy_forms.bootstrap import Field, FormActions, PrependedText, StrictButton
 from core.utils.utils_commandes import Commandes
-from core.models import CategorieMedicale
+from core.models import CategorieInformation
 
 
 class Formulaire(FormulaireBase, ModelForm):
     class Meta:
-        model = CategorieMedicale
+        model = CategorieInformation
         fields = "__all__"
 
     def __init__(self, *args, **kwargs):
@@ -30,6 +30,6 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Affichage
         self.helper.layout = Layout(
-            Commandes(annuler_url="{% url 'categories_medicales_liste' %}"),
+            Commandes(annuler_url="{% url 'categories_informations_liste' %}"),
             Field('nom'),
         )

@@ -6,30 +6,30 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import CategorieMedicale
-from parametrage.forms.categories_medicales import Formulaire
+from core.models import CategorieInformation
+from parametrage.forms.categories_informations import Formulaire
 
 
 class Page(crud.Page):
-    model = CategorieMedicale
-    url_liste = "categories_medicales_liste"
-    url_ajouter = "categories_medicales_ajouter"
-    url_modifier = "categories_medicales_modifier"
-    url_supprimer = "categories_medicales_supprimer"
-    description_liste = "Voici ci-dessous la liste des catégories médicales."
-    description_saisie = "Saisissez toutes les informations concernant la catégorie médicale à saisir et cliquez sur le bouton Enregistrer."
-    objet_singulier = "une catégorie médicale"
-    objet_pluriel = "des catégories médicales"
+    model = CategorieInformation
+    url_liste = "categories_informations_liste"
+    url_ajouter = "categories_informations_ajouter"
+    url_modifier = "categories_informations_modifier"
+    url_supprimer = "categories_informations_supprimer"
+    description_liste = "Voici ci-dessous la liste des catégories d'informations personnelles."
+    description_saisie = "Saisissez toutes les informations concernant la catégorie d'information personnelle à saisir et cliquez sur le bouton Enregistrer."
+    objet_singulier = "une catégorie d'information personnelle"
+    objet_pluriel = "des catégories d'informations personnelles"
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
     ]
 
 
 class Liste(Page, crud.Liste):
-    model = CategorieMedicale
+    model = CategorieInformation
 
     def get_queryset(self):
-        return CategorieMedicale.objects.filter(self.Get_filtres("Q"))
+        return CategorieInformation.objects.filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

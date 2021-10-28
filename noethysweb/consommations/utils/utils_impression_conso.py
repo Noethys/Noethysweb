@@ -15,7 +15,7 @@ from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
 from reportlab.graphics.barcode import code39
 from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires
-from core.models import Activite, Ouverture, Unite, UniteRemplissage, Consommation, MemoJournee, Note, ProblemeSante, Individu, Inscription, Scolarite, Classe, Ecole, Evenement
+from core.models import Activite, Ouverture, Unite, UniteRemplissage, Consommation, MemoJournee, Note, Information, Individu, Inscription, Scolarite, Classe, Ecole, Evenement
 from individus.utils import utils_pieces_manquantes
 from cotisations.utils import utils_cotisations_manquantes
 
@@ -250,9 +250,10 @@ class Impression(utils_impression.Impression):
                                                                   activites=liste_activites, presents=(min(self.dict_donnees["dates"]), max(self.dict_donnees["dates"])),
                                                                   only_concernes=True)
 
-        # Récupération des informations médicales
+        # Récupération des informations personnelles
         dictInfosMedicales = {}
-        pbs = ProblemeSante.objects.filter(diffusion_listing_conso=True, date_debut__lte=min(self.dict_donnees["dates"]), date_fin__gte=max(self.dict_donnees["dates"]))
+        conditions = Q(diffusion_listing_conso=True) & (Q(date_debut__lte=min(self.dict_donnees["dates"])) | Q(date_debut__isnull=True)) & (Q(date_fin__gte=max(self.dict_donnees["dates"])) | Q(date_fin__isnull=True))
+        pbs = Information.objects.filter(conditions)
         for pb in pbs:
             dictInfosMedicales.setdefault(pb.individu_id, [])
             dictInfosMedicales[pb.individu_id].append(pb)
@@ -805,7 +806,7 @@ class Impression(utils_impression.Impression):
                                             ligne.append(donnee)
 
 
-                                    # Infos médicales
+                                    # Informations personnelles
                                     listeInfos = []
                                     paraStyle = ParagraphStyle(name="infos", fontName="Helvetica", fontSize=7, leading=8, spaceAfter=2)
 
@@ -873,7 +874,7 @@ class Impression(utils_impression.Impression):
                                                 texte_anniversaire = "C'est l'anniversaire de %s (%s ans) !" % (prenom, inscription.individu.Get_age(today=date))
                                             listeInfos.append(ParagraphAndImage(Paragraph(texte_anniversaire, paraStyle), Image(settings.STATIC_ROOT + "/images/anniversaire.png", width=8, height=8), xpad=1, ypad=0, side="left"))
 
-                                    # Informations médicales
+                                    # Informations personnelles
                                     if inscription.individu_id in dictInfosMedicales:
                                         for info in dictInfosMedicales[inscription.individu_id]:
                                             # Intitulé et description

@@ -63,7 +63,7 @@ LISTE_CHAMPS = [
 
     Champ(page="individu_vaccinations", code="vaccinations", label="Vaccinations", representant="MASQUER", enfant="MODIFIABLE", contact="MASQUER"),
 
-    Champ(page="individu_infos_medicales", code="infos_medicales", label="Information médicale", representant="MASQUER", enfant="MODIFIABLE", contact="MASQUER"),
+    Champ(page="individu_informations", code="informations", label="Informations", representant="MASQUER", enfant="MODIFIABLE", contact="MASQUER"),
 
     Champ(page="individu_assurances", code="assurances", label="Assurance", representant="MASQUER", enfant="MODIFIABLE", contact="MASQUER"),
 

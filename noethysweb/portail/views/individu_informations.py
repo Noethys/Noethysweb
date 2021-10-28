@@ -5,24 +5,24 @@
 
 from django.urls import reverse_lazy
 from core.views import crud
-from core.models import PortailRenseignement, ProblemeSante
-from portail.forms.individu_infos_medicales import Formulaire
+from core.models import PortailRenseignement, Information
+from portail.forms.individu_informations import Formulaire
 from portail.views.fiche import Onglet, ConsulterBase
 from django.views.generic import TemplateView
 
 
 class Page(Onglet):
-    model = ProblemeSante
-    url_liste = "portail_individu_infos_medicales"
-    url_ajouter = "portail_individu_infos_medicales_ajouter"
-    url_modifier = "portail_individu_infos_medicales_modifier"
-    url_supprimer = "portail_individu_infos_medicales_supprimer"
+    model = Information
+    url_liste = "portail_individu_informations"
+    url_ajouter = "portail_individu_informations_ajouter"
+    url_modifier = "portail_individu_informations_modifier"
+    url_supprimer = "portail_individu_informations_supprimer"
     description_liste = "Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle information."
     description_saisie = "Saisissez les informations nécessaires et cliquez sur le bouton Enregistrer."
-    objet_singulier = "une information médicale"
-    objet_pluriel = "des informations médicales"
-    onglet_actif = "individu_infos_medicales"
-    categorie = "individu_infos_medicales"
+    objet_singulier = "une information personnelle"
+    objet_pluriel = "des informations personnelles"
+    onglet_actif = "individu_informations"
+    categorie = "individu_informations"
 
 
     def get_context_data(self, **kwargs):
@@ -34,9 +34,9 @@ class Page(Onglet):
         return context
 
     def get_object(self):
-        if not self.kwargs.get("idprobleme"):
+        if not self.kwargs.get("idinformation"):
             return None
-        return ProblemeSante.objects.get(pk=self.kwargs.get("idprobleme"))
+        return Information.objects.get(pk=self.kwargs.get("idinformation"))
 
     def get_success_url(self):
         url = self.url_liste
@@ -46,14 +46,14 @@ class Page(Onglet):
 
 
 class Liste(Page, TemplateView):
-    model = ProblemeSante
-    template_name = "portail/individu_infos_medicales.html"
+    model = Information
+    template_name = "portail/individu_informations.html"
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
-        context['box_titre'] = "Informations médicales"
+        context['box_titre'] = "Informations personnelles"
         context['box_introduction'] = "Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle information."
-        context['liste_informations'] = ProblemeSante.objects.filter(individu=self.get_rattachement().individu).order_by("intitule")
+        context['liste_informations'] = Information.objects.filter(individu=self.get_rattachement().individu).order_by("intitule")
         return context
 
 

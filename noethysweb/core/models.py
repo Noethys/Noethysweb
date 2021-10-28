@@ -354,14 +354,14 @@ class Assureur(models.Model):
         return texte
 
 
-class CategorieMedicale(models.Model):
+class CategorieInformation(models.Model):
     idcategorie = models.AutoField(verbose_name="ID", db_column='IDcategorie', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=200)
 
     class Meta:
-        db_table = 'categories_medicales'
-        verbose_name = "catégorie médicale"
-        verbose_name_plural = "catégories médicales"
+        db_table = 'categories_informations'
+        verbose_name = "catégorie information"
+        verbose_name_plural = "catégories informations"
 
     def __str__(self):
         return self.nom
@@ -1723,10 +1723,10 @@ class Inscription(models.Model):
             return self.date_debut <= date_max
 
 
-class ProblemeSante(models.Model):
-    idprobleme = models.AutoField(verbose_name="ID", db_column='IDprobleme', primary_key=True)
+class Information(models.Model):
+    idinformation = models.AutoField(verbose_name="ID", db_column='IDinformation', primary_key=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE)
-    categorie = models.ForeignKey(CategorieMedicale, verbose_name="Catégorie", on_delete=models.PROTECT)
+    categorie = models.ForeignKey(CategorieInformation, verbose_name="Catégorie", on_delete=models.PROTECT)
     intitule = encrypt(models.CharField(verbose_name="Intitulé", max_length=200))
     date_debut = models.DateField(verbose_name="Date de début", blank=True, null=True)
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
@@ -1738,15 +1738,15 @@ class ProblemeSante(models.Model):
     eviction = models.BooleanField(verbose_name="Eviction", default=False)
     date_debut_eviction = models.DateField(verbose_name="Date de début de l'éviction", blank=True, null=True)
     date_fin_eviction = models.DateField(verbose_name="Date de fin de l'éviction", blank=True, null=True)
-    diffusion_listing_enfants = models.BooleanField(verbose_name="Afficher sur la liste des informations médicales", default=False)
+    diffusion_listing_enfants = models.BooleanField(verbose_name="Afficher sur la liste des informations personnelles", default=False)
     diffusion_listing_conso = models.BooleanField(verbose_name="Afficher sur la liste des consommations", default=False)
     diffusion_listing_repas = models.BooleanField(verbose_name="Afficher sur la commande des repas", default=False)
     document = models.FileField(verbose_name="Document", storage=get_storage("probleme"), upload_to=get_uuid_path, blank=True, null=True, help_text="Vous pouvez ajouter un document.")
 
     class Meta:
-        db_table = 'problemes_sante'
-        verbose_name = "information médicale"
-        verbose_name_plural = "informations médicales"
+        db_table = 'informations'
+        verbose_name = "information"
+        verbose_name_plural = "informations"
 
     def __str__(self):
         return self.intitule

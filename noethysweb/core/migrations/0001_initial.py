@@ -1559,7 +1559,7 @@ class Migration(migrations.Migration):
                 ('eviction', models.BooleanField(default=False, verbose_name='Eviction')),
                 ('date_debut_eviction', models.DateField(blank=True, null=True, verbose_name="Date de début de l'éviction")),
                 ('date_fin_eviction', models.DateField(blank=True, null=True, verbose_name="Date de fin de l'éviction")),
-                ('diffusion_listing_enfants', models.BooleanField(default=False, verbose_name='Afficher sur la liste des informations médicales')),
+                ('diffusion_listing_enfants', models.BooleanField(default=False, verbose_name='Afficher sur la liste des informations personnelles')),
                 ('diffusion_listing_conso', models.BooleanField(default=False, verbose_name='Afficher sur la liste des consommations')),
                 ('diffusion_listing_repas', models.BooleanField(default=False, verbose_name='Afficher sur la commande des repas')),
                 ('categorie', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.categoriemedicale', verbose_name='Catégorie')),
@@ -1567,7 +1567,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'verbose_name': 'information médicale',
-                'verbose_name_plural': 'informations médicales',
+                'verbose_name_plural': 'informations personnelles',
                 'db_table': 'problemes_sante',
             },
         ),

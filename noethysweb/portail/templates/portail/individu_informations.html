@@ -26,8 +26,8 @@
                                     <tr class="text-center">
                                         <td>{{ information.intitule }}</td>
                                         <td>
-                                            <a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_individu_infos_medicales_modifier' idrattachement=rattachement.pk idprobleme=information.pk %}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
-                                            <a type="button" class="btn btn-danger btn-xs" href="{% url 'portail_individu_infos_medicales_supprimer' idrattachement=rattachement.pk idprobleme=information.pk %}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
+                                            <a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_individu_informations_modifier' idrattachement=rattachement.pk idinformation=information.pk %}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
+                                            <a type="button" class="btn btn-danger btn-xs" href="{% url 'portail_individu_informations_supprimer' idrattachement=rattachement.pk idinformation=information.pk %}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -37,7 +37,7 @@
                         <b>Aucune information enregistrée.</b>
                     {% endif %}
                 </div>
-                <a class="btn btn-primary pull-right" href="{% url 'portail_individu_infos_medicales_ajouter' idrattachement=rattachement.pk %}" title="Ajouter une information"><i class="fa fa-plus margin-r-5"></i>Ajouter une information</a>
+                <a class="btn btn-primary pull-right" href="{% url 'portail_individu_informations_ajouter' idrattachement=rattachement.pk %}" title="Ajouter une information"><i class="fa fa-plus margin-r-5"></i>Ajouter une information</a>
 
             {% endblock box_contenu %}
             {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}

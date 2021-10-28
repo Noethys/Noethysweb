@@ -60,7 +60,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_renseignements.Add(code="secteurs_liste", titre="Secteurs géographiques", icone="file-text-o")
     menu_renseignements.Add(code="types_sieste_liste", titre="Types de sieste", icone="file-text-o")
     menu_renseignements.Add(code="types_regimes_alimentaires_liste", titre="Types de régimes alimentaires", icone="file-text-o")
-    menu_renseignements.Add(code="categories_medicales_liste", titre="Catégories médicales", icone="file-text-o")
+    menu_renseignements.Add(code="categories_informations_liste", titre="Catégories d'infos personnelles", icone="file-text-o")
     menu_renseignements.Add(code="types_maladies_liste", titre="Types de maladies", icone="file-text-o")
     menu_renseignements.Add(code="types_vaccins_liste", titre="Types de vaccins", icone="file-text-o")
     menu_renseignements.Add(code="medecins_liste", titre="Médecins", icone="file-text-o")

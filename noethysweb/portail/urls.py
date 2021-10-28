@@ -8,7 +8,7 @@ from portail.views import accueil, login
 from django.contrib.auth import views as auth_views
 from consommations.views import grille
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
-                            individu_regimes_alimentaires, individu_coords, individu_medecin, individu_infos_medicales, individu_assurances, individu_vaccinations, \
+                            individu_regimes_alimentaires, individu_coords, individu_medecin, individu_informations, individu_assurances, individu_vaccinations, \
                             famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents, \
                             transmettre_piece
 from core.decorators import secure_ajax_portail
@@ -69,10 +69,10 @@ urlpatterns = [
     path('renseignements/individu/vaccinations/modifier/<int:idrattachement>/<int:idvaccin>', individu_vaccinations.Modifier.as_view(), name='portail_individu_vaccinations_modifier'),
     path('renseignements/individu/vaccinations/supprimer/<int:idrattachement>/<int:idvaccin>', individu_vaccinations.Supprimer.as_view(), name='portail_individu_vaccinations_supprimer'),
 
-    path('renseignements/individu/infos_medicales/liste/<int:idrattachement>', individu_infos_medicales.Liste.as_view(), name='portail_individu_infos_medicales'),
-    path('renseignements/individu/infos_medicales/ajouter/<int:idrattachement>', individu_infos_medicales.Ajouter.as_view(), name='portail_individu_infos_medicales_ajouter'),
-    path('renseignements/individu/infos_medicales/modifier/<int:idrattachement>/<int:idprobleme>', individu_infos_medicales.Modifier.as_view(), name='portail_individu_infos_medicales_modifier'),
-    path('renseignements/individu/infos_medicales/supprimer/<int:idrattachement>/<int:idprobleme>', individu_infos_medicales.Supprimer.as_view(), name='portail_individu_infos_medicales_supprimer'),
+    path('renseignements/individu/informations/liste/<int:idrattachement>', individu_informations.Liste.as_view(), name='portail_individu_informations'),
+    path('renseignements/individu/informations/ajouter/<int:idrattachement>', individu_informations.Ajouter.as_view(), name='portail_individu_informations_ajouter'),
+    path('renseignements/individu/informations/modifier/<int:idrattachement>/<int:idinformation>', individu_informations.Modifier.as_view(), name='portail_individu_informations_modifier'),
+    path('renseignements/individu/informations/supprimer/<int:idrattachement>/<int:idinformation>', individu_informations.Supprimer.as_view(), name='portail_individu_informations_supprimer'),
 
     path('renseignements/individu/assurances/liste/<int:idrattachement>', individu_assurances.Liste.as_view(), name='portail_individu_assurances'),
     path('renseignements/individu/assurances/ajouter/<int:idrattachement>', individu_assurances.Ajouter.as_view(), name='portail_individu_assurances_ajouter'),

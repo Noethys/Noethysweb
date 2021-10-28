@@ -10,7 +10,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
 from crispy_forms.bootstrap import Field, StrictButton
 from core.utils.utils_commandes import Commandes
-from core.models import ProblemeSante, Individu
+from core.models import Information, Individu
 from core.widgets import DatePickerWidget
 from django_select2.forms import Select2Widget
 
@@ -31,7 +31,7 @@ class Formulaire(FormulaireBase, ModelForm):
     date_fin_eviction = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget())
 
     class Meta:
-        model = ProblemeSante
+        model = Information
         fields = "__all__"
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
@@ -42,7 +42,7 @@ class Formulaire(FormulaireBase, ModelForm):
         idindividu = kwargs.pop("idindividu")
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_id = 'individu_infos_medicales_form'
+        self.helper.form_id = 'individu_informations_form'
         self.helper.form_method = 'post'
 
         self.helper.form_class = 'form-horizontal'
