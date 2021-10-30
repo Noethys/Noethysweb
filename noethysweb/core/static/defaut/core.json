@@ -1,7 +1,7 @@
 [
     {
         "pk": 1,
-        "model": "core.CategorieMedicale",
+        "model": "core.CategorieInformation",
         "fields": {
             "idcategorie": 1,
             "nom": "Maladie"
@@ -9,7 +9,7 @@
     },
     {
         "pk": 2,
-        "model": "core.CategorieMedicale",
+        "model": "core.CategorieInformation",
         "fields": {
             "idcategorie": 2,
             "nom": "Alimentation"
@@ -17,7 +17,7 @@
     },
     {
         "pk": 3,
-        "model": "core.CategorieMedicale",
+        "model": "core.CategorieInformation",
         "fields": {
             "idcategorie": 3,
             "nom": "M\u00e9dicamentation"
@@ -25,7 +25,7 @@
     },
     {
         "pk": 4,
-        "model": "core.CategorieMedicale",
+        "model": "core.CategorieInformation",
         "fields": {
             "idcategorie": 4,
             "nom": "Allergie"
@@ -33,7 +33,7 @@
     },
     {
         "pk": 5,
-        "model": "core.CategorieMedicale",
+        "model": "core.CategorieInformation",
         "fields": {
             "idcategorie": 5,
             "nom": "Accident"
@@ -41,7 +41,7 @@
     },
     {
         "pk": 6,
-        "model": "core.CategorieMedicale",
+        "model": "core.CategorieInformation",
         "fields": {
             "idcategorie": 6,
             "nom": "Hospitalisation"
@@ -49,7 +49,7 @@
     },
     {
         "pk": 7,
-        "model": "core.CategorieMedicale",
+        "model": "core.CategorieInformation",
         "fields": {
             "idcategorie": 7,
             "nom": "Op\u00e9ration"
@@ -57,7 +57,7 @@
     },
     {
         "pk": 8,
-        "model": "core.CategorieMedicale",
+        "model": "core.CategorieInformation",
         "fields": {
             "idcategorie": 8,
             "nom": "Autre"
