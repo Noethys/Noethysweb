@@ -251,12 +251,12 @@ class Impression(utils_impression.Impression):
                                                                   only_concernes=True)
 
         # Récupération des informations personnelles
-        dictInfosMedicales = {}
+        dictInfosPerso = {}
         conditions = Q(diffusion_listing_conso=True) & (Q(date_debut__lte=min(self.dict_donnees["dates"])) | Q(date_debut__isnull=True)) & (Q(date_fin__gte=max(self.dict_donnees["dates"])) | Q(date_fin__isnull=True))
-        pbs = Information.objects.filter(conditions)
-        for pb in pbs:
-            dictInfosMedicales.setdefault(pb.individu_id, [])
-            dictInfosMedicales[pb.individu_id].append(pb)
+        infos = Information.objects.select_related("individu", "categorie").filter(conditions)
+        for info in infos:
+            dictInfosPerso.setdefault(info.individu_id, [])
+            dictInfosPerso[info.individu_id].append(info)
 
 
         # --------------------------------------- Création du PDF ----------------------------------------------
@@ -409,6 +409,7 @@ class Impression(utils_impression.Impression):
                                 dataTableau = []
                                 largeursColonnes = []
                                 labelsColonnes = []
+                                recapitulatif = {"informations": [], "regimes": []}
 
                                 # Recherche des entêtes de colonnes :
                                 if self.dict_donnees["afficher_photos"] != "non":
@@ -818,7 +819,7 @@ class Impression(utils_impression.Impression):
                                                 if len(self.dict_donnees["dates"]) > 1:
                                                     memo_journee = "%02d/%02d/%04d : %s" % (date.day, date.month, date.year, memo_journee)
                                                 if len(memo_journee) > 0 and memo_journee[-1] != ".": memo_journee += "."
-                                                listeInfos.append(ParagraphAndImage(Paragraph(memo_journee, paraStyle), Image(settings.STATIC_ROOT + "/images/information.png", width=8, height=8), xpad=1, ypad=0, side="left"))
+                                                listeInfos.append(ParagraphAndImage(Paragraph(memo_journee, paraStyle), Image(settings.STATIC_ROOT + "/images/attention.png", width=8, height=8), xpad=1, ypad=0, side="left"))
 
                                     # Messages individuels
                                     if inscription.individu_id in dictMessagesIndividus:
@@ -875,8 +876,10 @@ class Impression(utils_impression.Impression):
                                             listeInfos.append(ParagraphAndImage(Paragraph(texte_anniversaire, paraStyle), Image(settings.STATIC_ROOT + "/images/anniversaire.png", width=8, height=8), xpad=1, ypad=0, side="left"))
 
                                     # Informations personnelles
-                                    if inscription.individu_id in dictInfosMedicales:
-                                        for info in dictInfosMedicales[inscription.individu_id]:
+                                    if inscription.individu_id in dictInfosPerso:
+                                        for info in dictInfosPerso[inscription.individu_id]:
+                                            recapitulatif["informations"].append(info)
+
                                             # Intitulé et description
                                             if info.description:
                                                 texte = "<b>%s</b> : %s" % (info.intitule, info.description)
@@ -893,11 +896,13 @@ class Impression(utils_impression.Impression):
                                                 if info.date_debut_traitement == None and info.date_fin_traitement != None :
                                                     texteDatesTraitement = " jusqu'au %s" % utils_dates.ConvertDateToFR(info.date_fin_traitement)
                                                 texte += "Traitement%s : %s." % (texteDatesTraitement, info.description_traitement)
-                                            listeInfos.append(ParagraphAndImage(Paragraph(texte, paraStyle), Image(settings.STATIC_ROOT + "/images/medical.png", width=8, height=8), xpad=1, ypad=0, side="left"))
+                                            listeInfos.append(ParagraphAndImage(Paragraph(texte, paraStyle), Image(settings.STATIC_ROOT + "/images/information.png", width=8, height=8), xpad=1, ypad=0, side="left"))
 
                                     # Régimes alimentaires
                                     if self.dict_donnees["afficher_regimes_alimentaires"] and inscription.individu.regimes_alimentaires.exists():
-                                        listeInfos.append(ParagraphAndImage(Paragraph(", ".join([regime.nom for regime in inscription.individu.regimes_alimentaires.all()]), paraStyle), Image(settings.STATIC_ROOT + "/images/repas.png", width=8, height=8), xpad=1, ypad=0, side="left"))
+                                        texte_regimes = ", ".join([regime.nom for regime in inscription.individu.regimes_alimentaires.all()])
+                                        recapitulatif["regimes"].append((inscription.individu, texte_regimes))
+                                        listeInfos.append(ParagraphAndImage(Paragraph(texte_regimes, paraStyle), Image(settings.STATIC_ROOT + "/images/repas.png", width=8, height=8), xpad=1, ypad=0, side="left"))
 
                                     if self.dict_donnees["afficher_informations"]:
                                         if not self.dict_donnees["masquer_informations"]:
@@ -1021,7 +1026,42 @@ class Impression(utils_impression.Impression):
                                 tableau.setStyle(TableStyle(style))
                                 self.story.append(tableau)
 
-                                self.story.append(Spacer(0, 20))
+                                # Récapitulatif
+                                if self.dict_donnees["afficher_recapitulatif"]:
+
+                                    dataTableauRecap = []
+
+                                    style_categorie = ParagraphStyle(name="recap_categorie", fontName="Helvetica-Bold", fontSize=7, leading=8, spaceAfter=2)
+                                    style_info = ParagraphStyle(name="recap_info", fontName="Helvetica", fontSize=7, leading=8, spaceAfter=2)
+
+                                    info_par_categories = {}
+                                    for info in recapitulatif["informations"]:
+                                        info_par_categories.setdefault(info.categorie, [])
+                                        info_par_categories[info.categorie].append(info)
+
+                                    for categorie, infos in info_par_categories.items():
+                                        dataTableauRecap.append(Paragraph(categorie.nom, style_categorie))
+                                        for info in infos:
+                                            dataTableauRecap.append(Paragraph("%s : %s." % (info.individu, info.intitule), style_info, bulletText='   -'))
+
+                                    if recapitulatif["regimes"]:
+                                        dataTableauRecap.append(Paragraph("Régimes alimentaires", style_categorie))
+                                        for individu, texte_regimes in recapitulatif["regimes"]:
+                                            dataTableauRecap.append(Paragraph("%s : %s." % (individu.Get_nom(), texte_regimes), style_info, bulletText='   -'))
+
+                                    if dataTableauRecap:
+                                        styleRecap = [
+                                            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                                            ('FONT', (0, 0), (-1, -1), "Helvetica", 7),
+                                            ('ALIGN', (0, 0), (-1, -1), 'CENTRE'),
+                                            ('GRID', (0, 0), (-1, -1), 0.25, colors.black),
+                                            ('BACKGROUND', (0, 0), (-1, -1), self.dict_donnees["couleur_fond_entetes"])
+                                        ]
+                                        self.story.append(Spacer(0, 10))
+                                        tableauRecap = Table([(dataTableauRecap,),], [largeur_contenu,])
+                                        tableauRecap.setStyle(styleRecap)
+                                        self.story.append(tableauRecap)
+                                        self.story.append(Spacer(0, 20))
 
                                 # Export
                                 listeExport.append({"activite": activite.nom, "groupe": groupe.nom, "ecole": nomEcole, "classe": nomClasse, "evenement": nomEvenement, "etiquette": nomEtiquette, "lignes": listeLignesExport})

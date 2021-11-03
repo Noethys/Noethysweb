@@ -69,6 +69,7 @@ class Formulaire(FormulaireBase, forms.Form):
     afficher_informations = forms.BooleanField(label="Afficher la colonne", initial=True, required=False)
     masquer_informations = forms.BooleanField(label="Masquer les informations", initial=False, required=False)
     afficher_regimes_alimentaires = forms.BooleanField(label="Afficher les régimes alimentaires", initial=True, required=False)
+    afficher_recapitulatif = forms.BooleanField(label="Afficher le récapitulatif des informations individuelles", initial=True, required=False)
     afficher_cotisations_manquantes = forms.BooleanField(label="Afficher les cotisations manquantes", initial=False, required=False)
     afficher_pieces_manquantes = forms.BooleanField(label="Afficher les pièces manquantes", initial=False, required=False)
     liste_choix_largeur = [("automatique", "Automatique")] + [(str(x), "%d pixels" % x) for x in range(5, 505, 5)]
@@ -186,6 +187,7 @@ class Formulaire(FormulaireBase, forms.Form):
                         Field('afficher_informations'),
                         Field('masquer_informations'),
                         Field('afficher_regimes_alimentaires'),
+                        Field('afficher_recapitulatif'),
                         Field('afficher_cotisations_manquantes'),
                         Field('afficher_pieces_manquantes'),
                         Field('largeur_colonne_informations'),
