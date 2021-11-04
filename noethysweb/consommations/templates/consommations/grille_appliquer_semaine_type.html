@@ -1,0 +1,203 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    <style>
+        .tableau_semaine_type {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .tableau_semaine_type td {
+            padding: 10px !important;
+        }
+    </style>
+{% endblock styles %}
+
+
+{# Modal Appliquer une semaine type #}
+{% embed 'core/modal.html' with modal_footer=True %}
+    {% block modal_id %}modal_appliquer_semaine_type{% endblock %}
+    {% block modal_titre %}Appliquer une semaine-type{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+        <form id="form_appliquer_semaine_type" method="post">
+            {% csrf_token %}
+            {% crispy form_appliquer_semaine_type %}
+
+            <!-- Tableau de la semaine-type -->
+            <label>Semaine-type</label>
+
+            <!-- Toutes les semaines -->
+            <div id='tableau_semaine_type_0'>
+                {% embed 'consommations/grille_semaine_type.html' with num_semaine=0 %}{% endembed %}
+            </div>
+
+            <!-- Une semaine sur deux -->
+            <div id='tableau_semaine_type_1'>
+                <div class="nav-tabs-custom no-margin">
+                    <ul class="nav nav-pills pb-1">
+                        {% for num_semaine in 2|rangelistfrom1 %}
+                            <li class="nav-item">
+                                <a id="tab_sem_{{ num_semaine }}" class="nav-link {% if num_semaine == 1 %}active{% endif %}" href="#tab_{{ num_semaine }}" data-toggle="tab" role="tab">Semaine {{ num_semaine }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="tab-content no-padding">
+                        {% for num_semaine in 2|rangelistfrom1 %}
+                            <div class="tab-pane {% if num_semaine == 1 %}show active{% endif %}" id="tab_{{ num_semaine }}">
+                                {% embed 'consommations/grille_semaine_type.html' with num_semaine=num_semaine %}{% endembed %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Semaines paires/impaires -->
+            <div id='tableau_semaine_type_2'>
+                <div class="nav-tabs-custom no-margin">
+                    <ul class="nav nav-pills pb-1">
+                        <li class="nav-item">
+                            <a id="tab_sem_4" class="nav-link active" href="#tab_4" data-toggle="tab" role="tab">Semaine paire</a>
+                        </li>
+                        <li class="nav-item">
+                            <a id="tab_sem_5" class="nav-link" href="#tab_5" data-toggle="tab" role="tab">Semaine impaire</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content no-padding">
+                        <div class="tab-pane active" id="tab_4">
+                            {% embed 'consommations/grille_semaine_type.html' with num_semaine=4 %}{% endembed %}
+                        </div>
+                        <div class="tab-pane" id="tab_5">
+                            {% embed 'consommations/grille_semaine_type.html' with num_semaine=5 %}{% endembed %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    {% endblock %}
+    {% block modal_footer %}
+        <button type="button" class="btn btn-primary" id="bouton_valider_semaine_type"><i class="fa fa-check margin-r-5"></i>Valider</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+$(document).ready(function() {
+
+    // Ajuste les paramètres du daterangepicker
+    $('#modal_appliquer_semaine_type').on('show.bs.modal', function () {
+        {% if data.date_modifiable_min %}
+            $('#id_periode').data('daterangepicker').setStartDate("{{ data.date_modifiable_min|date:'d/m/Y' }}");
+            $('#id_periode').data('daterangepicker').setEndDate("{{ data.date_modifiable_max|date:'d/m/Y' }}");
+            $('#id_periode').data('daterangepicker').minDate = moment("{{ data.date_modifiable_min|date:'Y-m-d' }}");
+            $('#id_periode').data('daterangepicker').maxDate = moment("{{ data.date_modifiable_max|date:'Y-m-d' }}");
+        {% else %}
+            toastr.error("Aucune date n'est modifiable sur la période affichée");
+            return false;
+        {% endif %}
+    });
+
+    $('#id_frequence').on("change", function(e) {
+        if ( $("#id_frequence").val() == 0 ) {
+            $("#tableau_semaine_type_0").show();
+            $("#tableau_semaine_type_1").hide();
+            $("#tableau_semaine_type_2").hide();
+            }
+        if ( $("#id_frequence").val() == 1 ) {
+            $("#tableau_semaine_type_0").hide();
+            $("#tableau_semaine_type_1").show();
+            $("#tableau_semaine_type_2").hide();
+            }
+        if ( $("#id_frequence").val() == 2 ) {
+            $("#tableau_semaine_type_0").hide();
+            $("#tableau_semaine_type_1").hide();
+            $("#tableau_semaine_type_2").show();
+            }
+    });
+    $('#id_frequence').trigger("change");
+
+    // Vérifie les incompatibilités entre unités
+    $("input[name=case_semaine_type]").on("click", function(event){
+        if (this.checked) {
+            var unites_incompatibles = dict_unites[$(this).data("unite")].incompatibilites;
+            $("input[name=case_semaine_type][data-semaine=" + $(this).data("semaine") + "][data-jour=" + $(this).data("jour") + "]:checked").each(function () {
+                if (jQuery.inArray($(this).data("unite"), unites_incompatibles) !== -1) {
+                    $(this).prop("checked", false);
+                };
+            });
+        };
+    });
+
+    // Fonction Pair/Impair
+    function isPair(chiffre){
+        chiffre = parseInt(chiffre);
+        return ((chiffre & 1)=='0') ? true : false;
+    };
+
+    $("#bouton_valider_semaine_type").on("click", function (event) {
+
+        // Récupération des paramètres
+        var date_debut = $('#id_periode').data('daterangepicker').startDate.format('YYYY-MM-DD');
+        var num_semaine_debut = moment(date_debut, 'YYYY-MM-DD').isoWeek();
+        var date_fin = $('#id_periode').data('daterangepicker').endDate.format('YYYY-MM-DD');
+        var frequence = $("#id_frequence").val();
+
+        // Récupération des jours de la semaine-type
+        var liste_resultats = [];
+        $("input[name=case_semaine_type]:checked").each(function() {
+            var semaine = parseInt($(this).attr('data-semaine'));
+            var jour = parseInt($(this).attr('data-jour'));
+            var idunite = parseInt($(this).attr('data-unite'));
+            if ((frequence == 0 && semaine == 0) || (frequence == 1 && (semaine == 1 || semaine == 2) ) || (frequence == 2 && (semaine == 4 || semaine == 5) )) {
+                liste_resultats.push({semaine: semaine, jour: jour, unite: idunite});
+                };
+        });
+
+        // Application de la semaine-type
+        $.each(dict_cases, function (key, case_tableau) {
+            var datejs = moment(case_tableau.date, 'YYYY-MM-DD');
+            var jour_case = datejs.isoWeekday()-1;
+            var num_semaine_case = datejs.isoWeek();
+
+            // Recherche si la case est dans la liste des résultats
+            var valide = false;
+            for (var i=0; i < liste_resultats.length; i++) {
+                if (case_tableau.date >= date_debut && case_tableau.date <= date_fin && liste_resultats[i].jour == jour_case && liste_resultats[i].unite == case_tableau.unite) {
+                    // Toutes les semaines
+                    if (frequence == 0) {
+                        var valide = true;
+                    };
+                    // 1 semaine sur 2
+                    if (frequence == 1 && ((isPair(liste_resultats[i].semaine) != isPair(num_semaine_case)) == isPair(num_semaine_debut))) {
+                        var valide = true;
+                    };
+                    // Semaines paires/impaires
+                    if (frequence == 2 && isPair(liste_resultats[i].semaine) == isPair(num_semaine_case)) {
+                        var valide = true;
+                    };
+                }
+            }
+
+            // Application réservation
+            if (valide == true) {
+                case_tableau.ajouter(maj_facturation=false);
+                cases_touchees.push(case_tableau.key);
+            } else {
+                if (case_tableau.consommations.length > 0) {
+                    case_tableau.supprimer(maj_facturation=false);
+                    cases_touchees.push(case_tableau.key);
+                };
+            };
+
+        });
+
+        $('#modal_appliquer_semaine_type').modal('hide');
+
+    });
+
+});
+</script>

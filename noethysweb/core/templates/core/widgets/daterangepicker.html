@@ -2,11 +2,11 @@
 
     $(document).ready(function() {
         $("#{{ id }}").daterangepicker({
-            autoApply: true,
+            autoApply: {{ auto_application }},
             showDropdowns: false,
             alwaysShowCalendars: true,
             applyButtonClasses: "btn-primary",
-
+            {% if afficher_periodes_predefinies %}
             ranges: {
                 "Aujourd'hui": [moment(), moment()],
                 'Cette semaine': [moment().startOf('isoweek'), moment().endOf('isoweek')],
@@ -15,6 +15,7 @@
                 'Ce mois': [moment().startOf('month'), moment().endOf('month')],
                 'Le mois dernier': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
             },
+            {% endif %}
             locale: {
                 "format": "DD/MM/YYYY",
                 "separator": " - ",

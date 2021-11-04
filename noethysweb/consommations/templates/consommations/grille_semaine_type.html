@@ -1,0 +1,26 @@
+{% load static %}
+
+<table class='table table-bordered no-margin tableau_semaine_type'>
+    <tbody>
+        <tr>
+            <th></th>
+            {% for unite in data.liste_unites_visibles %}
+                <th>{{ unite.nom }}</th>
+            {% endfor %}
+        </tr>
+
+        {% for num_jour, label_jour in jours_complets_semaine %}
+            {% if num_jour in data.jours_semaine_modifiables %}
+                <tr>
+                    <td>{{ label_jour }}</td>
+                    {% for unite in data.liste_unites_visibles %}
+                        <td>
+                            <input type="checkbox" name="case_semaine_type" data-semaine="{{ num_semaine }}" data-jour="{{ num_jour }}" data-unite="{{ unite.pk }}" title="Cochez cette case pour réserver">
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endif %}
+        {% endfor %}
+
+    </tbody>
+</table>

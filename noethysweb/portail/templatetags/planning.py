@@ -10,6 +10,16 @@ import datetime
 
 
 @register.filter
+def rangelistfrom0(number):
+    return range(number)
+
+
+@register.filter
+def rangelistfrom1(number):
+    return range(1, number+1)
+
+
+@register.filter
 def is_modif_allowed(date, data):
     # Si le mode n'est pas portail on autorise les modifications
     if data["mode"] != "portail":

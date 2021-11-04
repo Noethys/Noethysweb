@@ -11,9 +11,10 @@ from django.shortcuts import redirect
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from core.models import Individu, Inscription, PortailPeriode, Ouverture, Unite, Vacance, Ferie, Activite
+from core.models import Individu, Inscription, PortailPeriode, Ouverture, Unite, Vacance, Ferie, Activite, JOURS_COMPLETS_SEMAINE
 from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
-from consommations.forms.grille_traitement_lot import Formulaire as form_traitement_lot
+from consommations.forms.appliquer_semaine_type import Formulaire as form_appliquer_semaine_type
+from portail.templatetags.planning import is_modif_allowed
 from portail.utils import utils_approbations
 from portail.views.base import CustomView
 
@@ -57,7 +58,8 @@ class View(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Planning"
-        context['form_traitement_lot'] = form_traitement_lot
+        context['form_appliquer_semaine_type'] = form_appliquer_semaine_type
+        context['jours_complets_semaine'] = JOURS_COMPLETS_SEMAINE
         context['data'] = self.Get_data_planning()
         return context
 
@@ -93,5 +95,14 @@ class View(CustomView, TemplateView):
 
         # Incorpore les données génériques
         data.update(Get_generic_data(data))
+
+        # Liste des dates modifiables
+        data["dates_modifiables"] = [date for date in data["liste_dates"] if is_modif_allowed(date, data)]
+        data["date_modifiable_min"] = min(data["dates_modifiables"]) if data["dates_modifiables"] else None
+        data["date_modifiable_max"] = max(data["dates_modifiables"]) if data["dates_modifiables"] else None
+
+        # Liste des jours de la semaine modifiables
+        jours = {date.weekday(): True for date in data["dates_modifiables"]}
+        data["jours_semaine_modifiables"] = list(jours.keys())
 
         return data
