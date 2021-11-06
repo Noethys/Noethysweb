@@ -1,3 +1,13 @@
+Version 1.0.0.0 (06/11/2021) :
+
+- Version stable
+- Nettoyage final des migrations
+- Ajout de la semaine-type dans le planning du portail
+- Ajout du récapitulatif dans la liste des conso
+- Ajout de l'affichage des anniversaires dans la liste des conso
+- Ajustement du cadrage automatique des photos importées
+- Correction de divers bugs
+
 Version 0.0.6.0 (24/10/2021) :
 
 - Correction de la migration 34
