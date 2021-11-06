@@ -144,7 +144,6 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Sauvegarde
     menu_sauvegarde = menu_outils.Add(titre="Sauvegarde")
     menu_sauvegarde.Add(code="sauvegarde_creer", titre="Créer une sauvegarde", icone="file-text-o", compatible_demo=False)
-    # menu_sauvegarde.Add(code="sauvegarde_restaurer", titre="Restaurer une sauvegarde", icone="file-text-o", compatible_demo=False)
 
     # Portail
     menu_portail = menu_outils.Add(titre="Portail")

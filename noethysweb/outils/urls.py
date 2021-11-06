@@ -6,7 +6,7 @@
 from django.urls import include, path
 from core.views import toc
 from core.decorators import secure_ajax
-from outils.views import editeur_emails, editeur_emails_express, historique, update, sauvegarde_creer, sauvegarde_restaurer, statistiques, contacts, \
+from outils.views import editeur_emails, editeur_emails_express, historique, update, sauvegarde_creer, statistiques, contacts, \
                         editeur_emails_familles, editeur_emails_individus, editeur_emails_contacts, editeur_emails_listes_diffusion, \
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
                         demandes_portail
@@ -52,7 +52,6 @@ urlpatterns = [
 
     # Sauvegarde
     path('outils/sauvegarde/creer', sauvegarde_creer.View.as_view(), name='sauvegarde_creer'),
-    path('outils/sauvegarde/restaurer', sauvegarde_restaurer.View.as_view(), name='sauvegarde_restaurer'),
 
     # Portail
     path('outils/portail/messages/liste', messages_portail.Liste.as_view(), name='messages_portail_liste'),
