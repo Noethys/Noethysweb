@@ -1,3 +1,8 @@
+Version 1.0.0.2 (07/11/2021) :
+
+- Ajout de la liste des individus en doublon dans le menu Individus
+- Ajout de colonnes données associées dans plusieurs listes du menu paramétrage
+
 Version 1.0.0.1 (07/11/2021) :
 
 - Ajout de la liste des informations dans le menu Individus
