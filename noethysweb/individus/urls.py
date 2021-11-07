@@ -10,7 +10,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             importation_photos, liste_anniversaires, liste_quotients, etiquettes, etiquettes_familles, etiquettes_individus, \
                             inscriptions_scolaires, scolarites, inscriptions_liste, inscriptions_impression, inscriptions_email, liste_comptes_internet, \
                             individus_detaches_liste, liste_mandats, liste_questionnaires_familles, liste_questionnaires_individus, liste_contacts_urgence, \
-                            liste_regimes_alimentaires, liste_maladies
+                            liste_regimes_alimentaires, liste_maladies, liste_informations
 
 urlpatterns = [
 
@@ -81,6 +81,10 @@ urlpatterns = [
     path('individus/maladies/liste', liste_maladies.Liste.as_view(), name='maladies_liste'),
     path('individus/maladies/modifier/<int:pk>', liste_maladies.Modifier.as_view(), name='maladies_modifier'),
 
+    path('individus/informations/liste', liste_informations.Liste.as_view(), name='informations_liste'),
+    path('individus/informations/modifier/<int:pk>', liste_informations.Modifier.as_view(), name='informations_modifier'),
+    path('individus/informations/supprimer/<int:pk>', liste_informations.Supprimer.as_view(), name='informations_supprimer'),
+
     path('individus/importation_photos', importation_photos.View.as_view(), name='importation_photos'),
     path('individus/liste_comptes_internet', liste_comptes_internet.Liste.as_view(), name='liste_comptes_internet'),
 
@@ -113,6 +117,7 @@ urlpatterns = [
     path('individus/comptes_internet_activer', secure_ajax(liste_comptes_internet.Activer), name='ajax_comptes_internet_activer'),
     path('individus/comptes_internet_reinitialiser_mdp', secure_ajax(liste_comptes_internet.Reinitialiser_mdp), name='ajax_comptes_internet_reinitialiser_mdp'),
     path('individus/comptes_internet_reinitialiser_identifiant', secure_ajax(liste_comptes_internet.Reinitialiser_identifiant), name='ajax_comptes_internet_reinitialiser_identifiant'),
+    path('individus/informations/modifier_diffusion/', secure_ajax(liste_informations.Modifier_diffusion), name='ajax_modifier_diffusion_information'),
     # path('individus/codes_internet_impression_pdf', secure_ajax(famille_portail.Impression_pdf), name='ajax_codes_internet_impression_pdf'),
 
 ]
