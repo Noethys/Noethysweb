@@ -1,3 +1,7 @@
+Version 1.0.0.3 (07/11/2021) :
+
+- Ajout de la colonne Catégorie à la liste des infos personnelles dans la fiche individuelle
+
 Version 1.0.0.2 (07/11/2021) :
 
 - Ajout de la liste des individus en doublon dans le menu Individus
