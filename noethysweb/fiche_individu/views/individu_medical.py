@@ -7,7 +7,7 @@ from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Individu, Vaccin, Information, Medecin, TypeMaladie, Vaccin
-from fiche_individu.forms.individu_info_medicale import Formulaire as Formulaire_info_medicale
+from fiche_individu.forms.individu_information import Formulaire as Formulaire_information
 from fiche_individu.forms.individu_vaccin import Formulaire as Formulaire_vaccin
 from fiche_individu.forms.individu_medecin import Formulaire as Formulaire_medecin
 from fiche_individu.views.individu import Onglet
@@ -76,7 +76,7 @@ class Page(Onglet):
         context['box_titre'] = "Médical"
         context['onglet_actif'] = "medical"
         context['boutons_liste_informations'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_infosmedicales_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
+            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_informations_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
         ]
         context['boutons_liste_vaccinations'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_vaccins_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
@@ -96,7 +96,7 @@ class Page(Onglet):
         """ Renvoie vers la liste après le formulaire """
         url = self.url_liste
         if "SaveAndNew" in self.request.POST and self.request.POST.get("page") == "info_medicale":
-            url = "individu_infosmedicales_ajouter"
+            url = "individu_informations_ajouter"
         if "SaveAndNew" in self.request.POST and self.request.POST.get("page") == "vaccin":
             url = "individu_vaccins_ajouter"
         return reverse_lazy(url, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)})
@@ -124,8 +124,8 @@ class Liste(Page, MultipleDatatableView):
             # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
             html = [
-                self.Create_bouton_modifier(url=reverse("individu_infosmedicales_modifier", kwargs=kwargs)),
-                self.Create_bouton_supprimer(url=reverse("individu_infosmedicales_supprimer", kwargs=kwargs)),
+                self.Create_bouton_modifier(url=reverse("individu_informations_modifier", kwargs=kwargs)),
+                self.Create_bouton_supprimer(url=reverse("individu_informations_supprimer", kwargs=kwargs)),
             ]
             return self.Create_boutons_actions(html)
 
@@ -174,8 +174,8 @@ class Liste(Page, MultipleDatatableView):
 
 
 
-class Ajouter_infomedicale(Page, crud.Ajouter):
-    form_class = Formulaire_info_medicale
+class Ajouter_information(Page, crud.Ajouter):
+    form_class = Formulaire_information
     model = Information
     template_name = "fiche_individu/individu_edit.html"
 
@@ -186,8 +186,8 @@ class Ajouter_infomedicale(Page, crud.Ajouter):
         return context
 
 
-class Modifier_infomedicale(Page, crud.Modifier):
-    form_class = Formulaire_info_medicale
+class Modifier_information(Page, crud.Modifier):
+    form_class = Formulaire_information
     model = Information
     template_name = "fiche_individu/individu_edit.html"
 
@@ -198,8 +198,8 @@ class Modifier_infomedicale(Page, crud.Modifier):
         return context
 
 
-class Supprimer_infomedicale(Page, crud.Supprimer):
-    form_class = Formulaire_info_medicale
+class Supprimer_information(Page, crud.Supprimer):
+    form_class = Formulaire_information
     model = Information
     template_name = "fiche_individu/individu_delete.html"
 

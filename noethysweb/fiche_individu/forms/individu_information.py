@@ -39,7 +39,7 @@ class Formulaire(FormulaireBase, ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        idindividu = kwargs.pop("idindividu")
+        idindividu = kwargs.pop("idindividu", None)
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'individu_informations_form'

@@ -48,9 +48,9 @@ urlpatterns = [
 
     path('individus/individus/medical/liste/<int:idfamille>/<int:idindividu>', individu_medical.Liste.as_view(), name='individu_medical_liste'),
 
-    path('individus/individus/medical/ajouter_info/<int:idfamille>/<int:idindividu>', individu_medical.Ajouter_infomedicale.as_view(), name='individu_infosmedicales_ajouter'),
-    path('individus/individus/medical/modifier_info/<int:idfamille>/<int:idindividu>/<int:pk>', individu_medical.Modifier_infomedicale.as_view(), name='individu_infosmedicales_modifier'),
-    path('individus/individus/medical/supprimer_info/<int:idfamille>/<int:idindividu>/<int:pk>', individu_medical.Supprimer_infomedicale.as_view(), name='individu_infosmedicales_supprimer'),
+    path('individus/individus/medical/ajouter_info/<int:idfamille>/<int:idindividu>', individu_medical.Ajouter_information.as_view(), name='individu_informations_ajouter'),
+    path('individus/individus/medical/modifier_info/<int:idfamille>/<int:idindividu>/<int:pk>', individu_medical.Modifier_information.as_view(), name='individu_informations_modifier'),
+    path('individus/individus/medical/supprimer_info/<int:idfamille>/<int:idindividu>/<int:pk>', individu_medical.Supprimer_information.as_view(), name='individu_informations_supprimer'),
 
     path('individus/individus/medical/ajouter_vaccin/<int:idfamille>/<int:idindividu>', individu_medical.Ajouter_vaccin.as_view(), name='individu_vaccins_ajouter'),
     path('individus/individus/medical/modifier_vaccin/<int:idfamille>/<int:idindividu>/<int:pk>', individu_medical.Modifier_vaccin.as_view(), name='individu_vaccins_modifier'),
