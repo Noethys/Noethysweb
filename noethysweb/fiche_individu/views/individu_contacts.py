@@ -4,10 +4,13 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.views.generic import TemplateView
+from django.http import HttpResponseRedirect
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import ContactUrgence
 from fiche_individu.forms.individu_contacts import Formulaire
+from fiche_individu.forms.individu_contacts_importer import Formulaire as Formulaire_importer
 from fiche_individu.views.individu import Onglet
 from django.db.models import Q
 
@@ -31,6 +34,7 @@ class Page(Onglet):
         context['onglet_actif'] = "contacts"
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
+            {"label": "Importer depuis une autre fiche", "classe": "btn btn-default", "href": reverse_lazy("individu_contacts_importer", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-download"},
         ]
         return context
 
@@ -61,7 +65,6 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
-        context['box_conclusion'] = """<a class="btn btn-default" href="%s"><i class="fa fa-download margin-r-5"></i> Importer un contact depuis la fiche d'un autre individu</a>""" % reverse_lazy("individu_contacts_liste", args=(self.kwargs['idfamille'], self.kwargs['idindividu']))
         return context
 
     class datatable_class(MyDatatable):
@@ -94,16 +97,45 @@ class Liste(Page, crud.Liste):
             return self.Create_boutons_actions(html)
 
 
-
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
     template_name = "fiche_individu/individu_edit.html"
     mode = "fiche_individu"
+
 
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire
     template_name = "fiche_individu/individu_edit.html"
     mode = "fiche_individu"
 
+
 class Supprimer(Page, crud.Supprimer):
     template_name = "fiche_individu/individu_delete.html"
+
+
+class Importer(Page, TemplateView):
+    form_class = Formulaire_importer
+    template_name = "fiche_individu/individu_edit.html"
+    mode = "fiche_individu"
+
+    def get_context_data(self, **kwargs):
+        context = super(Importer, self).get_context_data(**kwargs)
+        context['box_introduction'] = "Cochez le ou les contacts à importer et cliquez sur le bouton Importer."
+        context['form'] = Formulaire_importer(idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], request=self.request)
+        return context
+
+    def post(self, request, **kwargs):
+        # Validation du form
+        form = Formulaire_importer(request.POST, idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], request=self.request)
+        if form.is_valid() == False:
+            return self.render_to_response(self.get_context_data(form=form))
+
+        # Importation des contacts
+        liste_idcontact = form.cleaned_data.get("contacts", []).split(";")
+        if liste_idcontact:
+            for contact in ContactUrgence.objects.filter(pk__in=[int(idcontact) for idcontact in liste_idcontact]):
+                contact.pk = None
+                contact.individu_id = self.kwargs['idindividu']
+                contact.save()
+
+        return HttpResponseRedirect(reverse_lazy("individu_contacts_liste", args=(self.kwargs['idfamille'], self.kwargs['idindividu'])))

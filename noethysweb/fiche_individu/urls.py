@@ -60,6 +60,7 @@ urlpatterns = [
     path('individus/individus/contacts/ajouter/<int:idfamille>/<int:idindividu>', individu_contacts.Ajouter.as_view(), name='individu_contacts_ajouter'),
     path('individus/individus/contacts/modifier/<int:idfamille>/<int:idindividu>/<int:pk>', individu_contacts.Modifier.as_view(), name='individu_contacts_modifier'),
     path('individus/individus/contacts/supprimer/<int:idfamille>/<int:idindividu>/<int:pk>', individu_contacts.Supprimer.as_view(), name='individu_contacts_supprimer'),
+    path('individus/individus/contacts/importer/<int:idfamille>/<int:idindividu>', individu_contacts.Importer.as_view(), name='individu_contacts_importer'),
 
     path('individus/individus/assurances/liste/<int:idfamille>/<int:idindividu>', individu_assurances.Liste.as_view(), name='individu_assurances_liste'),
     path('individus/individus/assurances/ajouter/<int:idfamille>/<int:idindividu>', individu_assurances.Ajouter.as_view(), name='individu_assurances_ajouter'),
