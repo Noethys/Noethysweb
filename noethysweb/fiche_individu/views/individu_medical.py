@@ -109,12 +109,13 @@ class Liste(Page, MultipleDatatableView):
 
     class informations_datatable_class(MyDatatable):
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
+        categorie = columns.CompoundColumn("Catégorie", sources=['categorie__nom'])
 
         class Meta:
             model = Information
             structure_template = MyDatatable.structure_template
-            columns = ['intitule']
-            ordering = ['intitule']
+            columns = ['categorie', 'intitule']
+            ordering = ['categorie', 'intitule']
             footer = False
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
@@ -161,10 +162,10 @@ class Liste(Page, MultipleDatatableView):
     }
 
     def get_informations_datatable_queryset(self):
-        return Information.objects.filter(individu=self.Get_idindividu())
+        return Information.objects.select_related("categorie").filter(individu=self.Get_idindividu())
 
     def get_vaccins_datatable_queryset(self):
-        return Vaccin.objects.filter(individu=self.Get_idindividu())
+        return Vaccin.objects.select_related("type_vaccin").filter(individu=self.Get_idindividu())
 
     def get_datatables(self, only=None):
         datatables = super(Liste, self).get_datatables(only)
