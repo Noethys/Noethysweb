@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.db.models import Count
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import TypeQuotient
@@ -29,7 +30,7 @@ class Liste(Page, crud.Liste):
     model = TypeQuotient
 
     def get_queryset(self):
-        return TypeQuotient.objects.filter(self.Get_filtres("Q"))
+        return TypeQuotient.objects.filter(self.Get_filtres("Q")).annotate(nbre_quotients=Count("quotient"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -40,12 +41,12 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idtype_quotient", "nom"]
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
+        nbre_quotients = columns.TextColumn("Quotients associés", sources="nbre_quotients")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idtype_quotient", "nom"]
+            columns = ["idtype_quotient", "nom", "nbre_quotients"]
             ordering = ["nom"]
 
 

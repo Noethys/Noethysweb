@@ -4,11 +4,11 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.db.models import Count
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Regime
 from parametrage.forms.regimes import Formulaire
-
 
 
 class Page(crud.Page):
@@ -30,7 +30,7 @@ class Liste(Page, crud.Liste):
     model = Regime
 
     def get_queryset(self):
-        return Regime.objects.filter(self.Get_filtres("Q"))
+        return Regime.objects.filter(self.Get_filtres("Q")).annotate(nbre_familles=Count("caisse__famille"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -42,10 +42,11 @@ class Liste(Page, crud.Liste):
     class datatable_class(MyDatatable):
         filtres = ['idregime', 'nom']
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
+        nbre_familles = columns.TextColumn("Familles associées", sources="nbre_familles")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idregime', 'nom']
+            columns = ['idregime', 'nom', "nbre_familles"]
             ordering = ['nom']
 
 

@@ -4,11 +4,12 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy
+from django.db.models import Count
+from django.utils.dateparse import parse_date
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import TypePiece
 from parametrage.forms.types_pieces import Formulaire
-from django.utils.dateparse import parse_date
 
 
 class Page(crud.Page):
@@ -30,7 +31,7 @@ class Liste(Page, crud.Liste):
     model = TypePiece
 
     def get_queryset(self):
-        return TypePiece.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure())
+        return TypePiece.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure()).annotate(nbre_pieces=Count("piece"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -41,13 +42,13 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ['idtype_piece', 'nom', 'public']
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         duree_validite = columns.DisplayColumn("Validité", sources="duree_validite", processor='Get_validite')
+        nbre_pieces = columns.TextColumn("Pièces associées", sources="nbre_pieces")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idtype_piece', 'nom', 'public', 'duree_validite']
+            columns = ['idtype_piece', 'nom', 'public', 'duree_validite', "nbre_pieces"]
             ordering = ['nom']
 
         def Get_validite(self, instance, **kwargs):
