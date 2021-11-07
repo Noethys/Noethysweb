@@ -159,6 +159,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_gestion_individus.Add(code="famille_liste", titre="Liste des familles", icone="file-text-o")
     menu_gestion_individus.Add(code="individu_liste", titre="Liste des individus rattachés", icone="file-text-o")
     menu_gestion_individus.Add(code="individus_detaches_liste", titre="Liste des individus détachés", icone="file-text-o")
+    menu_gestion_individus.Add(code="individus_doublons_liste", titre="Liste des individus en doublon", icone="file-text-o")
 
     # Inscriptions
     menu_inscriptions = menu_individus.Add(titre="Inscriptions")
