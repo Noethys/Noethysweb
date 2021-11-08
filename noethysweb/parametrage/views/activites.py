@@ -57,7 +57,7 @@ class Liste(Page, crud.Liste):
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
             }
-            ordering = ["-date_fin"]
+            ordering = ["-date_fin", "nom"]
 
         def Get_validite(self, instance, **kwargs):
             if not instance.date_fin or instance.date_fin.year == 2999:
