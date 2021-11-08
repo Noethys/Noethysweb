@@ -47,8 +47,8 @@ class View(CustomView, TemplateView):
             individu.activites = sorted(dict_inscriptions[individu], key=lambda activite: activite.nom)
 
         # Récupération des périodes de réservation
-        conditions = Q(activite__in=liste_activites) #& Q(date_debut__gte=datetime.date.today()) ACTIVER CA APRES LES TESTS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        conditions &= (Q(affichage="TOUJOURS") | (Q(affichage="PERIODE") & Q(affichage_date_debut__gte=datetime.datetime.now()) & Q(affichage_date_fin__lte=datetime.datetime.now())))
+        conditions = Q(activite__in=liste_activites) & Q(date_debut__gte=datetime.date.today())
+        conditions &= (Q(affichage="TOUJOURS") | (Q(affichage="PERIODE") & Q(affichage_date_debut__lte=datetime.datetime.now()) & Q(affichage_date_fin__gte=datetime.datetime.now())))
         periodes = PortailPeriode.objects.select_related("activite").prefetch_related("categories").filter(conditions).order_by("date_debut")
         dict_periodes = {}
         for periode in periodes:
