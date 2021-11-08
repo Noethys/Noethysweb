@@ -1,3 +1,11 @@
+Version 1.0.0.4 (08/11/2021) :
+
+- Ajout de l'importation de contacts dans la fiche individuelle
+- Tri des activités par ordre alpha dans la liste des activités
+- Tri des types de vaccin par ordre alpha dans la saisie des vaccins
+- Tri des classes par niveau dans les inscriptions scolaires du menu Individus
+- Correction d'un bug sur l'affichage des périodes sur le portail
+
 Version 1.0.0.3 (07/11/2021) :
 
 - Ajout de la colonne Catégorie à la liste des infos personnelles dans la fiche individuelle
