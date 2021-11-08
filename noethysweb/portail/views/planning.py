@@ -82,10 +82,39 @@ class View(CustomView, TemplateView):
         else:
             data["date_min"] = max([periode_reservation.date_debut, datetime.date.today() - datetime.timedelta(days=afficher_dates_passees)])
         data["date_max"] = periode_reservation.date_fin
-        data["conditions_periodes"] = Q(date__gte=data["date_min"]) & Q(date__lte=data["date_max"])
         data["selection_activite"] = periode_reservation.activite
-        data["periode"] = {'mode': 'dates', 'selections': {}, 'periodes': ['%s;%s' % (data["date_min"], data["date_max"])]}
+        data["liste_vacances"] = Vacance.objects.filter(date_fin__gte=data["date_min"], date_debut__lte=data["date_max"]).order_by("date_debut")
         data["liste_feries"] = Ferie.objects.all()
+
+        # Création des périodes à afficher
+        data["periode"] = {'mode': 'dates', 'selections': {}, 'periodes': ['%s;%s' % (data["date_min"], data["date_max"])]}
+
+        if periode_reservation.type_date == "VACANCES":
+            data["periode"]["periodes"] = []
+            for vacance in data["liste_vacances"]:
+                vac_date_debut = vacance.date_debut if vacance.date_debut > data["date_min"] else data["date_min"]
+                vac_date_fin = vacance.date_fin if vacance.date_fin < data["date_max"] else data["date_max"]
+                data["periode"]["periodes"].append("%s;%s" % (vac_date_debut, vac_date_fin))
+
+        if periode_reservation.type_date == "SCOLAIRES":
+            data["periode"]["periodes"] = []
+            dates_scolaires = [[data["date_min"], None]]
+            for vacance in data["liste_vacances"]:
+                dates_scolaires[-1][1] = vacance.date_debut - datetime.timedelta(days=1)
+                if dates_scolaires[-1][1] < dates_scolaires[-1][0]:
+                    dates_scolaires[-1][0] = vacance.date_fin + datetime.timedelta(days=1)
+                else:
+                    dates_scolaires.append([vacance.date_fin + datetime.timedelta(days=1), None])
+                if dates_scolaires[-1][0] > data["date_max"]:
+                    dates_scolaires.pop(-1)
+                else:
+                    dates_scolaires[-1][1] = data["date_max"]
+            if dates_scolaires and not dates_scolaires[-1][1]:
+                dates_scolaires[-1][1] = data["date_max"]
+            data["periode"]["periodes"] = ["%s;%s" % (periode[0], periode[1]) for periode in dates_scolaires]
+
+        # Créatio de la condition des périodes
+        data = Get_periode(data)
 
         # Importation de toutes les inscriptions de l'individu
         data['liste_inscriptions'] = []

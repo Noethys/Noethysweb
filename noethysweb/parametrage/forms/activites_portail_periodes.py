@@ -51,6 +51,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Période",
                 Field("date_debut"),
                 Field("date_fin"),
+                Field("type_date"),
             ),
             Fieldset("Affichage",
                 Field("affichage"),

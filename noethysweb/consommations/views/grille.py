@@ -143,9 +143,10 @@ def Get_generic_data(data={}):
     data['liste_dates'] = liste_dates
 
     # Importation des vacances
-    liste_vacances = Vacance.objects.filter(date_fin__gte=data["date_min"], date_debut__lte=data["date_max"])
-    data['liste_vacances'] = liste_vacances
-    data['liste_vacances_json'] = mark_safe(json.dumps([(str(vac.date_debut), str(vac.date_fin)) for vac in liste_vacances]))
+    if "liste_vacances" not in data:
+        liste_vacances = Vacance.objects.filter(date_fin__gte=data["date_min"], date_debut__lte=data["date_max"])
+        data['liste_vacances'] = liste_vacances
+    data['liste_vacances_json'] = mark_safe(json.dumps([(str(vac.date_debut), str(vac.date_fin)) for vac in data['liste_vacances']]))
 
     # Importation des événements
     liste_evenements = Evenement.objects.filter(data["conditions_periodes"] & Q(activite=data['selection_activite'])).order_by("date", "heure_debut")

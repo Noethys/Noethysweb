@@ -2711,6 +2711,8 @@ class PortailPeriode(models.Model):
     nom = models.CharField(verbose_name="Nom de la période", max_length=200)
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin")
+    choix_type_date = [("TOUTES", "Toutes les dates"), ("VACANCES", "Uniquement les dates de vacances"), ("SCOLAIRES", "Uniquement les dates scolaires")]
+    type_date = models.CharField(verbose_name="Type de date", max_length=100, choices=choix_type_date, default="TOUTES")
     choix_affichage = [("TOUJOURS", "Toujours afficher"), ("JAMAIS", "Ne pas afficher"), ("PERIODE", "Afficher sur la période suivante")]
     affichage = models.CharField(verbose_name="Affichage", max_length=100, choices=choix_affichage, default="TOUJOURS")
     affichage_date_debut = models.DateTimeField(verbose_name="Début", blank=True, null=True)
