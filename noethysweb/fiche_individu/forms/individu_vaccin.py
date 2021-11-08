@@ -5,16 +5,18 @@
 
 from django import forms
 from django.forms import ModelForm
+from django_select2.forms import Select2Widget
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden
 from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
-from core.models import Vaccin, Individu
+from core.models import Vaccin, Individu, TypeVaccin
 from core.widgets import DatePickerWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
+    type_vaccin = forms.ModelChoiceField(label="Type de vaccin", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=TypeVaccin.objects.all().order_by("nom"), required=True)
     date = forms.DateField(label="Date de vaccination", required=True, widget=DatePickerWidget())
 
     class Meta:
