@@ -1,3 +1,7 @@
+Version 1.0.0.5 (08/11/2021) :
+
+- Ajout des types de dates dans les périodes de réservations
+
 Version 1.0.0.4 (08/11/2021) :
 
 - Ajout de l'importation de contacts dans la fiche individuelle
