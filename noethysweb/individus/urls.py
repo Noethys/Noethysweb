@@ -10,7 +10,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             importation_photos, liste_anniversaires, liste_quotients, etiquettes, etiquettes_familles, etiquettes_individus, \
                             inscriptions_scolaires, scolarites, inscriptions_liste, inscriptions_impression, inscriptions_email, liste_comptes_internet, \
                             individus_detaches_liste, liste_mandats, liste_questionnaires_familles, liste_questionnaires_individus, liste_contacts_urgence, \
-                            liste_regimes_alimentaires, liste_maladies, liste_informations, individus_doublons_liste
+                            liste_regimes_alimentaires, liste_maladies, liste_informations, individus_doublons_liste, liste_familles_sans_inscriptions
 
 urlpatterns = [
 
@@ -40,6 +40,7 @@ urlpatterns = [
     path('individus/liste_inscriptions_attente', liste_inscriptions_attente.View.as_view(etat="attente"), name='liste_inscriptions_attente'),
     path('individus/liste_inscriptions_refus', liste_inscriptions_attente.View.as_view(etat="refus"), name='liste_inscriptions_refus'),
     path('individus/suivi_inscriptions', suivi_inscriptions.View.as_view(), name='suivi_inscriptions'),
+    path('individus/liste_familles_sans_inscriptions', liste_familles_sans_inscriptions.Liste.as_view(), name='liste_familles_sans_inscriptions'),
 
     # Inscriptions scolaires
     path('individus/inscriptions_scolaires', inscriptions_scolaires.Liste.as_view(), name='inscriptions_scolaires_liste'),
