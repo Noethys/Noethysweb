@@ -43,6 +43,7 @@ urlpatterns = [
     path('individus/familles/cotisations/supprimer/<int:idfamille>/<int:pk>', famille_cotisations.Supprimer.as_view(), name='famille_cotisations_supprimer'),
     path('individus/familles/cotisations/supprimer_plusieurs/<int:idfamille>/<str:listepk>', famille_cotisations.Supprimer_plusieurs.as_view(), name='famille_cotisations_supprimer_plusieurs'),
     path('individus/familles/cotisations/voir/<int:idfamille>/<int:idcotisation>', famille_voir_cotisation.View.as_view(), name='famille_voir_cotisation'),
+    path('individus/familles/cotisations/ajouter/<int:idfamille>/<int:idtype_cotisation>/<int:idindividu>', famille_cotisations.Ajouter.as_view(), name='famille_cotisations_saisie_rapide'),
 
     path('individus/familles/caisse/<int:idfamille>', famille_caisse.Consulter.as_view(), name='famille_caisse'),
     path('individus/familles/caisse/modifier/<int:idfamille>', famille_caisse.Modifier.as_view(), name='famille_caisse_modifier'),

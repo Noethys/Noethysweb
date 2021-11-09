@@ -55,11 +55,11 @@ def Get_cotisations_manquantes(famille=None, date_reference=None, utilisateur=No
             else:
                 label = "%s de %s" % (type_cotisation.nom, inscription.individu.prenom)
 
-            # # Création du lien de création rapide
-            # if valide:
-            #     href = None
-            # else:
-            #     href = reverse_lazy("famille_pieces_saisie_rapide", kwargs={'idfamille': inscription.famille_id, 'idtype_piece': type_piece.pk, 'idindividu': inscription.individu_id})
+            # Création du lien de création rapide
+            if valide:
+                href = None
+            else:
+                href = reverse_lazy("famille_cotisations_saisie_rapide", kwargs={'idfamille': inscription.famille_id, 'idtype_cotisation': type_cotisation.pk, 'idindividu': inscription.individu_id})
 
             # Mémorise la cotisation à fournir
             dict_temp = {
@@ -67,7 +67,7 @@ def Get_cotisations_manquantes(famille=None, date_reference=None, utilisateur=No
                 "valide": valide,
                 "type_cotisation": type_cotisation,
                 "titre": "Cliquez ici pour créer immédiatement cette adhésion",
-                # "href": href,
+                "href": href,
             }
             if type_cotisation.type == "famille":
                 dict_temp["individu"] = None

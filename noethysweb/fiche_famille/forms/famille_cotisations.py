@@ -52,6 +52,8 @@ class Formulaire(FormulaireBase, ModelForm):
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille", None)
+        idindividu = kwargs.pop("idindividu", None)
+        idtype_cotisation = kwargs.pop("idtype_cotisation", None)
         super(Formulaire, self).__init__(*args, **kwargs)
 
         self.helper = FormHelper()
@@ -79,10 +81,16 @@ class Formulaire(FormulaireBase, ModelForm):
                 if unite_cotisation:
                     self.fields["unite_cotisation"].initial = unite_cotisation
 
+        if idtype_cotisation:
+            self.fields["type_cotisation"].initial = idtype_cotisation
+
         # Individu
         if idfamille:
             rattachements = Rattachement.objects.select_related('individu').filter(famille=famille).order_by("individu__nom", "individu__prenom")
             self.fields["individu"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
+
+        if idindividu:
+            self.fields["individu"].initial = idindividu
 
         # Dates
         self.fields["date_creation_carte"].initial = datetime.date.today()

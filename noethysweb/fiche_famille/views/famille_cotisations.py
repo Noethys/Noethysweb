@@ -106,6 +106,8 @@ class Page(Onglet):
         """ Envoie l'idfmille au formulaire """
         form_kwargs = super(Page, self).get_form_kwargs(**kwargs)
         form_kwargs["idfamille"] = self.Get_idfamille()
+        form_kwargs["idtype_cotisation"] = self.kwargs.get("idtype_cotisation", None)
+        form_kwargs["idindividu"] = self.kwargs.get("idindividu", None)
         return form_kwargs
 
     def get_success_url(self):
