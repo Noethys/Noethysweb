@@ -1,3 +1,10 @@
+Version 1.0.0.6 (09/11/2021) :
+
+- Ajout de la saisie rapide d'une adhésion
+- Ajout de la copie des tarifs d'un événement existant
+- Correction de l'application d'une semaine-type avec des événements
+- Correction du tri par ordre alpha de la liste des inscriptions
+
 Version 1.0.0.5 (08/11/2021) :
 
 - Ajout des types de dates dans les périodes de réservations
