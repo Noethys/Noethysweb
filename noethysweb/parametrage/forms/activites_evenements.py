@@ -5,13 +5,23 @@
 
 from django import forms
 from django.forms import ModelForm
+from django_select2.forms import ModelSelect2Widget
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
+from crispy_forms.layout import Layout, Hidden, HTML, Fieldset
+from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
+from core.utils import utils_dates
 from core.models import Unite, Groupe, Activite, Evenement, Tarif
-from core.widgets import DatePickerWidget, TimePickerWidget
+from core.widgets import DatePickerWidget
+
+
+class Widget_copie_tarif_evenement(ModelSelect2Widget):
+    search_fields = ["nom__icontains"]
+
+    def label_from_instance(widget, instance):
+        label = "%s : %s" % (utils_dates.ConvertDateToFR(instance.date), instance.nom)
+        return label
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -33,10 +43,12 @@ class Formulaire(FormulaireBase, ModelForm):
     choix_tarification = [
         ("GRATUIT", "Gratuit"),
         ("SIMPLE", "Tarif simple"),
-        ("AVANCE", "Tarification avancée")
+        ("AVANCE", "Tarification avancée"),
+        ("EXISTANT", "Copie des tarifs d'un événement existant")
     ]
     texte_aide = "Pour créer, modifier ou supprimer des tarifs avancés, sélectionnez 'Tarification avancée', cliquez sur Enregistrer puis cliquez sur le bouton <i class='fa fa-gear'></i> sur la ligne de l'événement dans la liste des événements."
     type_tarification = forms.TypedChoiceField(label="Tarification", choices=choix_tarification, initial="GRATUIT", required=False, help_text=texte_aide)
+    copie_evenement = forms.ModelChoiceField(label="Evénement", widget=Widget_copie_tarif_evenement({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=Evenement.objects.none(), required=False)
 
     class Meta:
         model = Evenement
@@ -91,6 +103,9 @@ class Formulaire(FormulaireBase, ModelForm):
                     self.fields['type_tarification'].initial = "AVANCE"
                     self.fields['type_tarification'].disabled = True
 
+        # Sélectionne les tarifs existants
+        self.fields["copie_evenement"].queryset = Evenement.objects.filter(activite=activite).exclude(pk=self.instance.pk).order_by("-date")
+
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{{ view.get_success_url }}"),
@@ -113,6 +128,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Tarification",
                 Field("type_tarification"),
                 Field("montant"),
+                Field("copie_evenement"),
             ),
             HTML(EXTRA_SCRIPT),
         )
@@ -130,6 +146,10 @@ class Formulaire(FormulaireBase, ModelForm):
 
         if self.cleaned_data["type_tarification"] in ("GRATUIT", "AVANCE"):
             self.cleaned_data["montant"] = None
+
+        if self.cleaned_data["type_tarification"] == "EXISTANT" and not self.cleaned_data["copie_evenement"]:
+                self.add_error('copie_evenement', "Vous devez sélectionner un événement existant dont les tarifs sont à dupliquer")
+                return
 
         return self.cleaned_data
 
@@ -153,8 +173,12 @@ $(document).ready(function() {
 // type_tarification
 function On_change_type_tarification() {
     $('#div_id_montant').hide();
+    $('#div_id_copie_evenement').hide();
     if($(this).val() == 'SIMPLE') {
         $('#div_id_montant').show();
+    }
+    if($(this).val() == 'EXISTANT') {
+        $('#div_id_copie_evenement').show();
     }
 }
 $(document).ready(function() {

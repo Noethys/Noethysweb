@@ -3,12 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+from copy import deepcopy
 from django.urls import reverse_lazy, reverse
-from core.views.mydatatableview import MyDatatable, columns, helpers, Deplacer_lignes
+from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.utils import utils_preferences
 from parametrage.views.activites import Onglet
-from core.models import Evenement, Activite, Ouverture, Tarif
+from core.models import Evenement, Activite, Ouverture, Tarif, TarifLigne
 from parametrage.forms.activites_evenements import Formulaire
 from django.db.models import Q
 from django.contrib import messages
@@ -47,6 +48,29 @@ class Page(Onglet):
         if "SaveAndNew" in self.request.POST:
             url = self.url_ajouter
         return reverse_lazy(url, kwargs={'idactivite': self.Get_idactivite()})
+
+    def Copie_tarifs_evenement_existant(self, evenement=None, copie_evenement=None):
+        for tarif in Tarif.objects.filter(evenement=copie_evenement):
+            nouveau_tarif = deepcopy(tarif)
+
+            # Duplication d'une tarif existant
+            nouveau_tarif.pk = None
+            nouveau_tarif.evenement = evenement
+            nouveau_tarif.date_debut = evenement.date
+            nouveau_tarif.date_fin = evenement.date
+            nouveau_tarif.save()
+
+            # Recopie également les champs manytomany
+            nouveau_tarif.categories_tarifs.add(*tarif.categories_tarifs.all())
+            nouveau_tarif.groupes.add(*tarif.groupes.all())
+            nouveau_tarif.cotisations.add(*tarif.cotisations.all())
+            nouveau_tarif.caisses.add(*tarif.caisses.all())
+
+            # Recopie les lignes de tarifs
+            for ligne_tarif in TarifLigne.objects.filter(tarif=tarif):
+                ligne_tarif.pk = None
+                ligne_tarif.tarif = nouveau_tarif
+                ligne_tarif.save()
 
 
 class Liste(Page, crud.Liste):
@@ -110,12 +134,21 @@ class Ajouter(Page, crud.Ajouter):
     template_name = "parametrage/activite_edit.html"
 
     def form_valid(self, form):
-        """ Après l'ajout d'un événement, on ouvre le calendrier si besoin """
+        # Enregistre d'abord l'événement
+        redirect = super(Ajouter, self).form_valid(form)
+
+        # Après l'ajout d'un événement, on ouvre le calendrier si besoin
         evenement = form.instance
         if Ouverture.objects.filter(date=evenement.date, groupe=evenement.groupe, unite=evenement.unite).count() == 0:
             Ouverture.objects.create(date=evenement.date, activite=evenement.activite, groupe=evenement.groupe, unite=evenement.unite)
             messages.add_message(self.request, messages.INFO, "Une ouverture a été créée automatiquement dans le calendrier")
-        return super(Ajouter, self).form_valid(form)
+
+        # Copie des tarifs d'un événement existant
+        if form.cleaned_data.get("type_tarification") == "EXISTANT":
+            copie_evenement = form.cleaned_data.get("copie_evenement")
+            self.Copie_tarifs_evenement_existant(evenement=self.object, copie_evenement=copie_evenement)
+
+        return redirect
 
 
 class Modifier(Page, crud.Modifier):
@@ -123,16 +156,21 @@ class Modifier(Page, crud.Modifier):
     template_name = "parametrage/activite_edit.html"
 
     def form_valid(self, form):
-        """ Après la modification d'un événement, on vérifie que la date est toujours exacte dans les tarifs avancés associés """
+        # près la modification d'un événement, on vérifie que la date est toujours exacte dans les tarifs avancés associés
         evenement = form.instance
         for tarif in Tarif.objects.filter(evenement=evenement):
             if tarif.date_debut != evenement.date or tarif.date_fin != evenement.date:
                 tarif.date_debut = evenement.date
                 tarif.date_fin = evenement.date
                 tarif.save()
+
+        # Copie des tarifs d'un événement existant
+        if form.cleaned_data.get("type_tarification") == "EXISTANT":
+            copie_evenement = form.cleaned_data.get("copie_evenement")
+            self.Copie_tarifs_evenement_existant(evenement=evenement, copie_evenement=copie_evenement)
+
         return super(Modifier, self).form_valid(form)
 
 
 class Supprimer(Page, crud.Supprimer):
     template_name = "parametrage/activite_delete.html"
-
