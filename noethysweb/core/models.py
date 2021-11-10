@@ -592,7 +592,8 @@ class TypePiece(models.Model):
 
     def Get_nom(self, individu=None):
         if self.public == "individu":
-            return self.nom + " de " + individu.prenom
+            prenom = individu.prenom or individu.nom
+            return self.nom + " de " + prenom
         else:
             return self.nom
 
@@ -1670,7 +1671,7 @@ class Famille(models.Model):
         for rattachement in rattachements:
             if rattachement.individu.nom not in dict_noms:
                 dict_noms[rattachement.individu.nom] = []
-            dict_noms[rattachement.individu.nom].append(rattachement.individu.prenom)
+            dict_noms[rattachement.individu.nom].append(rattachement.individu.prenom or "")
 
         nom_titulaires = ""
         if len(dict_noms) == 1:
@@ -1848,7 +1849,8 @@ class Piece(models.Model):
         if not self.type_piece:
             return self.titre
         if self.type_piece.public == "individu":
-            return self.type_piece.nom + " de " + self.individu.prenom
+            prenom = self.individu.prenom or self.individu.nom
+            return self.type_piece.nom + " de " + prenom
         else:
             return self.type_piece.nom
 
