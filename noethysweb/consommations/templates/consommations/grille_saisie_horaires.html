@@ -80,6 +80,9 @@
 
         $('#modal_saisir_horaires').on('shown.bs.modal', function () {
             $("#saisie_heure_debut").focus();
+            if (dict_unites[case_tableau.unite].heure_debut_fixe) {
+                $("#saisie_heure_fin").focus();
+            }
         });
 
         $('#modal_saisir_horaires').on('keypress', function(e) {
