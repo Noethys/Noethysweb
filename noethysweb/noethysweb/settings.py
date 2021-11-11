@@ -209,9 +209,11 @@ LOGGING = {
         },
         'file': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'formatter': 'complet',
             'filename': os.path.join(BASE_DIR, 'debug.log'),
+            'backupCount': 10,
+            'maxBytes': 20971520, # 20*1024*1024 bytes (20MB)
         },
         'mail_admins': {
             'level': 'ERROR',
