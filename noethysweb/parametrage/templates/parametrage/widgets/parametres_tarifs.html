@@ -118,7 +118,11 @@
     // Sélection de la méthode : Affichage du tableau correspondant à la méthode
     function On_change_methode_{{ id }}() {
         $('.div_spread_{{ id }}').hide();
+        $("#div_id_facturation_unite").hide();
         $('#div_' + GetCodeMethode_{{ id }}() + '_{{ id }}').show();
+        if (GetCodeMethode_{{ id }}().indexOf("duree_coeff_") >= 0) {
+            $("#div_id_facturation_unite").show();
+        }
     }
     $(document).ready(function() {
         $('#{{ id_ctrl_methode }}').change(On_change_methode_{{ id }});

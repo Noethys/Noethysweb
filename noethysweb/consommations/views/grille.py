@@ -596,7 +596,7 @@ class Facturation():
                         elif resultat == "break":
                             break
                         else:
-                            montant_tarif, nom_tarif, temps_facture = resultat
+                            montant_tarif, nom_tarif, temps_facture, quantite = resultat
 
                         logger.debug("Montant trouvé : Montant=%s (tarif=%s temps_facturé=%s Quantité=%d)" % (montant_tarif, nom_tarif, temps_facture, quantite))
 
@@ -1106,13 +1106,20 @@ class Facturation():
 
             if "qf" in methode_calcul:
                 qf_famille = self.Recherche_QF(tarif, case_tableau)
+                if not qf_famille:
+                    qf_famille = max([ligne_calcul.qf_max for ligne_calcul in lignes_calcul])
 
             for ligne_calcul in lignes_calcul:
                 duree_min = utils_dates.TimeEnDelta(ligne_calcul.duree_min)
                 duree_max = utils_dates.TimeEnDelta(ligne_calcul.duree_max)
                 duree_seuil = utils_dates.TimeEnDelta(ligne_calcul.duree_seuil)
                 duree_plafond = utils_dates.TimeEnDelta(ligne_calcul.duree_plafond)
+                duree_arrondi = utils_dates.TimeEnDelta(ligne_calcul.duree_arrondi)
                 unite_horaire = utils_dates.TimeEnDelta(ligne_calcul.unite_horaire)
+
+                # Arrondi inférieur de la durée
+                if duree_arrondi:
+                    duree = utils_dates.ArrondirDelta(duree=duree, delta_minutes=int(duree_arrondi.total_seconds() // 60), sens="inf")
 
                 # montant_questionnaire = self.GetQuestionnaire(ligneCalcul["montant_questionnaire"], IDfamille, IDindividu)
                 # if montant_questionnaire not in (None, 0.0):
@@ -1141,8 +1148,15 @@ class Facturation():
 
                     # Calcul du tarif
                     nbre = int(math.ceil(1.0 * duree_temp.seconds / unite_horaire.seconds))  # Arrondi à l'entier supérieur
-                    montant_tarif = nbre * ligne_calcul.montant_unique
-                    montant_tarif = float(decimal.Decimal(str(montant_tarif)))
+                    if tarif.facturation_unite:
+                        # Facturation par unité horaire (la quantité d'unités est intégrée dans la prestation)
+                        montant_tarif = ligne_calcul.montant_unique
+                        montant_tarif = float(decimal.Decimal(str(montant_tarif)))
+                        quantite = nbre
+                    else:
+                        # Facturation normale
+                        montant_tarif = nbre * ligne_calcul.montant_unique
+                        montant_tarif = float(decimal.Decimal(str(montant_tarif)))
 
                     # Montants seuil et plafond
                     if ligne_calcul.montant_min:
@@ -1298,7 +1312,7 @@ class Facturation():
         # Arrondit le montant à pour enlever les décimales en trop. Ex : 3.05678 -> 3.05
         montant_tarif = utils_decimal.FloatToDecimal(montant_tarif, plusProche=True)
 
-        return montant_tarif, nom_tarif, temps_facture
+        return montant_tarif, nom_tarif, temps_facture, quantite
 
 def Valider_traitement_lot(request):
     # Récupération des données générales

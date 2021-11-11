@@ -69,8 +69,8 @@ LISTE_METHODES_TARIFS = [
     # { "code": "qf_nbre_ind_degr", "label":u"Montant dégressif en fonction du quotient familial et du nombre d'individus de la famille présents"), "type": "unitaire", "nbre_lignes_max": None, "entete": "tranche", "champs": ("qf_min", "qf_max", "montant_enfant_1", "montant_enfant_2", "montant_enfant_3", "montant_enfant_4", "montant_enfant_5", "montant_enfant_6", ), "champs_obligatoires": ("qf_min", "qf_max", "montant_enfant_1"), "tarifs_compatibles": ("JOURN",) },
     # { "code": "horaire_montant_unique_nbre_ind_degr", "label":u"Montant dégressif en fonction du nombre d'individus de la famille présents et de la tranche horaire"), "type": "unitaire", "nbre_lignes_max": None, "entete": "tranche", "champs": ("heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "temps_facture", "montant_enfant_1", "montant_enfant_2", "montant_enfant_3", "montant_enfant_4", "montant_enfant_5", "montant_enfant_6", "label"), "champs_obligatoires": ("heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "montant_enfant_1"), "tarifs_compatibles": ("JOURN",) },
 
-    { "code": "duree_coeff_montant_unique", "label":u"Montant au prorata d'une durée", "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("duree_min", "duree_max", "duree_seuil", "duree_plafond", "unite_horaire", "montant_unique", "montant_min", "montant_max", "montant_questionnaire", "ajustement", "label"), "champs_obligatoires": ("unite_horaire", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
-    { "code": "duree_coeff_qf", "label":u"Montant au prorata d'une durée et selon le quotient familial", "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "duree_min", "duree_max", "duree_seuil", "duree_plafond", "unite_horaire", "montant_unique", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("qf_min", "qf_max", "unite_horaire", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
+    { "code": "duree_coeff_montant_unique", "label":u"Montant au prorata d'une durée", "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("duree_min", "duree_max", "duree_seuil", "duree_plafond", "duree_arrondi", "unite_horaire", "montant_unique", "montant_min", "montant_max", "montant_questionnaire", "ajustement", "label"), "champs_obligatoires": ("unite_horaire", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
+    { "code": "duree_coeff_qf", "label":u"Montant au prorata d'une durée et selon le quotient familial", "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "duree_min", "duree_max", "duree_seuil", "duree_plafond", "duree_arrondi", "unite_horaire", "montant_unique", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("qf_min", "qf_max", "unite_horaire", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
 
     { "code": "taux_montant_unique", "label":u"Par taux d'effort", "type": "unitaire", "nbre_lignes_max": 1, "entete": None, "champs": ("taux", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("taux",), "tarifs_compatibles": ("JOURN",) },
     { "code": "taux_qf", "label":u"Par taux d'effort et par tranches de QF", "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "taux", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("qf_min", "qf_max", "taux",), "tarifs_compatibles": ("JOURN",) },
@@ -119,6 +119,7 @@ DICT_COLONNES_TARIFS = {
     "unite_horaire": {"label": "Unité horaire", "largeur": 70, "editeur": "heure", "infobulle": "Unité horaire de base"},
     "duree_seuil": {"label": "Durée seuil", "largeur": 70, "editeur": "heure", "infobulle": "Durée seuil"},
     "duree_plafond": {"label": "Durée plafond", "largeur": 70, "editeur": "heure", "infobulle": "Durée plafond"},
+    "duree_arrondi": {"label": "Durée arrondi", "largeur": 70, "editeur": "heure", "infobulle": "Durée arrondi"},
     "taux": {"label": "Taux", "largeur": 70, "editeur": "decimal6", "infobulle": "Taux d'effort"},
     "ajustement": {"label": "Majoration/Déduction", "largeur": 75, "editeur": "decimal4", "infobulle": "Montant à majorer ou à déduire sur le tarif"},
 }
@@ -1311,6 +1312,7 @@ class Tarif(models.Model):
     cotisations = models.ManyToManyField(TypeCotisation, verbose_name="Cotisations", blank=True, related_name="tarif_cotisations")
     caisses = models.ManyToManyField(Caisse, verbose_name="Caisses", blank=True, related_name="tarif_caisses")
     type_quotient = models.ForeignKey(TypeQuotient, verbose_name="Type de QF", blank=True, null=True, on_delete=models.CASCADE, help_text="Sélectionnez un type de quotient familial ou laissez le champ vide pour tenir compte de tous les types de quotients.")
+    facturation_unite = models.BooleanField(verbose_name="Facturation par unité horaire", default=False, help_text="Le montant par unité horaire et la quantité seront mémorisés dans la prestation.")
 
     class Meta:
         db_table = 'tarifs'
@@ -1360,6 +1362,7 @@ class TarifLigne(models.Model):
     montant_questionnaire = models.CharField(verbose_name="Montant questionnaire", max_length=100, blank=True, null=True)
     revenu_min = models.DecimalField(verbose_name="Montant revenu min", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
     revenu_max = models.DecimalField(verbose_name="Montant revenu max", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
+    duree_arrondi = models.TimeField(verbose_name="Durée arrondi", blank=True, null=True)
     # idmodele = models.IntegerField(db_column='IDmodele', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -1899,13 +1902,11 @@ class MessageFacture(models.Model):
 class Facture(models.Model):
     idfacture = models.AutoField(verbose_name="ID", db_column='IDfacture', primary_key=True)
     numero = models.IntegerField(verbose_name="Numéro")
-    #idcompte_payeur = models.IntegerField(db_column='IDcompte_payeur', blank=True, null=True)  # Field name made lowercase.
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT, blank=True, null=True)
     date_edition = models.DateField(verbose_name="Date")
     date_echeance = models.DateField(verbose_name="Date d'échéance", blank=True, null=True)
     activites = models.CharField(verbose_name="Activités associées", max_length=200, blank=True, null=True)
     individus = models.CharField(verbose_name="Individus associés", max_length=200, blank=True, null=True)
-    #idutilisateur = models.IntegerField(db_column='IDutilisateur', blank=True, null=True)  # Field name made lowercase.
     date_debut = models.DateField(verbose_name="Début")
     date_fin = models.DateField(verbose_name="Fin")
     total = models.DecimalField(verbose_name="Total", max_digits=10, decimal_places=2, default=0.0)

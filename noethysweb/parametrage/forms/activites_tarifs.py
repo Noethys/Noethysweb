@@ -433,6 +433,7 @@ class Formulaire(FormulaireBase, ModelForm):
                     # HTML(TABLEAU_TARIFS_LIGNES),
                     Field("parametres_tarif"),
                     Field("type_quotient"),
+                    Field("facturation_unite"),
                 ),
             ),
             HTML(EXTRA_SCRIPT),
