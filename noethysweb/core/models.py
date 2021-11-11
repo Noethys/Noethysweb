@@ -1947,7 +1947,7 @@ class Prestation(models.Model):
     montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0)
     activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.PROTECT, blank=True, null=True)
     tarif = models.ForeignKey(Tarif, verbose_name="Tarif", on_delete=models.PROTECT, blank=True, null=True)
-    facture = models.ForeignKey(Facture, verbose_name="Facture", on_delete=models.PROTECT, blank=True, null=True)
+    facture = models.ForeignKey(Facture, verbose_name="Facture", on_delete=models.SET_NULL, blank=True, null=True)
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT, blank=True, null=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.PROTECT, blank=True, null=True)
     forfait = models.IntegerField(verbose_name="Type de forfait", blank=True, null=True)
@@ -3011,11 +3011,11 @@ class PesPiece(models.Model):
 
     class Meta:
         db_table = 'pes_pieces'
-        verbose_name = "pièce"
-        verbose_name_plural = "pièces"
+        verbose_name = "pièce d'export"
+        verbose_name_plural = "pièces d'export"
 
     def __str__(self):
-        return "Pièce ID%d" % self.idpiece if self.idpiece else "Nouvelle pièce"
+        return "Pièce d'export ID%d" % self.idpiece if self.idpiece else "Nouvelle pièce"
 
 
 class Consentement(models.Model):
