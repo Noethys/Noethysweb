@@ -1,3 +1,11 @@
+Version 1.0.0.7 (11/11/2021) :
+
+- Ajout de la rotation du log
+- Ajout de la liste des familles sans inscriptions
+- Ajout de l'arrondi et de la facturation à l'unité dans le tarif selon la durée
+- Correction de l'affichage du prénom si collectivité
+- Correction du focus sur la saisie de l'heure de fin d'une conso horaire
+
 Version 1.0.0.6 (09/11/2021) :
 
 - Ajout de la saisie rapide d'une adhésion
