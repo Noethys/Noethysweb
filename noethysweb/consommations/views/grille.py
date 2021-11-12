@@ -327,7 +327,8 @@ def Save_grille(request=None, donnees={}):
     if donnees["suppressions"]["consommations"]:
         logger.debug("Consommations à supprimer : " + str(donnees["suppressions"]["consommations"]))
         liste_conso_suppr = list(Consommation.objects.select_related("unite", "inscription").filter(pk__in=donnees["suppressions"]["consommations"]))
-        utils_db.bulk_delete(listeID=donnees["suppressions"]["consommations"], nom_table="consommations", nom_id="IDconso")
+        qs = Consommation.objects.filter(pk__in=donnees["suppressions"]["consommations"])
+        qs._raw_delete(qs.db)
         texte_notification.append("%s suppression%s" % (len(donnees["suppressions"]["consommations"]), "s" if len(donnees["suppressions"]["consommations"]) > 1 else ""))
         for conso in liste_conso_suppr:
             liste_historique.append({"titre": "Suppression d'une consommation", "detail": "%s du %s (%s)" % (conso.unite.nom, utils_dates.ConvertDateToFR(conso.date), conso.get_etat_display()),
@@ -341,8 +342,13 @@ def Save_grille(request=None, donnees={}):
     logger.debug("Prestations à supprimer : " + str(donnees["suppressions"]["prestations"]))
     if donnees["suppressions"]["prestations"]:
         liste_prestations_suppr = list(Prestation.objects.filter(pk__in=donnees["suppressions"]["prestations"]))
-        utils_db.bulk_delete(listeID=donnees["suppressions"]["prestations"], nom_table="deductions", nom_id="prestation_id")
-        utils_db.bulk_delete(listeID=donnees["suppressions"]["prestations"], nom_table="prestations", nom_id="IDprestation")
+
+        qs = Deduction.objects.filter(prestation_id__in=donnees["suppressions"]["prestations"])
+        qs._raw_delete(qs.db)
+
+        qs = Prestation.objects.filter(pk__in=donnees["suppressions"]["prestations"])
+        qs._raw_delete(qs.db)
+
         for prestation in liste_prestations_suppr:
             liste_historique.append({"titre": "Suppression d'une prestation", "detail": "%s du %s" % (prestation.label, utils_dates.ConvertDateToFR(prestation.date)),
                                      "utilisateur": request.user if request else None, "famille_id": prestation.famille_id, "individu_id": prestation.individu_id, "objet": "Prestation", "idobjet": prestation.pk, "classe": "Prestation"})
@@ -368,9 +374,13 @@ def Save_grille(request=None, donnees={}):
             liste_modifications.append(memo)
 
         # Traitement dans la base
-        if liste_ajouts: MemoJournee.objects.bulk_create(liste_ajouts)
-        if liste_modifications: MemoJournee.objects.bulk_update(liste_modifications, ["texte"])
-        if donnees["suppressions"]["memos"]: utils_db.bulk_delete(listeID=donnees["suppressions"]["memos"], nom_table="memo_journee", nom_id="IDmemo")
+        if liste_ajouts:
+            MemoJournee.objects.bulk_create(liste_ajouts)
+        if liste_modifications:
+            MemoJournee.objects.bulk_update(liste_modifications, ["texte"])
+        if donnees["suppressions"]["memos"]:
+            qs = MemoJournee.objects.filter(pk__in=donnees["suppressions"]["memos"])
+            qs._raw_delete(qs.db)
 
     # Sauvegarde de l'historique
     utils_historique.Ajouter_plusieurs(liste_historique)

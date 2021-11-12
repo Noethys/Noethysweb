@@ -163,18 +163,18 @@ def Traitement_lot_ouvertures(request):
     # Création des dict
     dict_ouvertures = {}
     for ouverture in liste_ouvertures:
-        key = "ouverture_%s_%d_%d" % (ouverture.date, ouverture.groupe.idgroupe, ouverture.unite.idunite)
+        key = "ouverture_%s_%d_%d" % (ouverture.date, ouverture.groupe_id, ouverture.unite_id)
         dict_ouvertures[key] = True
 
     dict_remplissage = {}
     for remplissage in liste_remplissage:
-        key = "remplissage_%s_%d_%d" % (remplissage.date, remplissage.groupe.idgroupe, remplissage.unite_remplissage.idunite_remplissage)
+        key = "remplissage_%s_%d_%d" % (remplissage.date, remplissage.groupe_id, remplissage.unite_remplissage_id)
         dict_remplissage[key] = remplissage.places
 
     # Regroupement des consommations
     dict_conso = {}
     for conso in liste_conso:
-        key = "ouverture_%s_%d_%d" % (conso.date, conso.groupe.idgroupe, conso.unite.idunite)
+        key = "ouverture_%s_%d_%d" % (conso.date, conso.groupe_id, conso.unite_id)
         if key not in dict_conso: dict_conso[key] = 0
         dict_conso[key] += 1
 
@@ -231,11 +231,11 @@ def Traitement_lot_ouvertures(request):
                 if action in ("COPIER_DATE", "schema", "REINIT"):
 
                     for unite in liste_unites:
-                        key = "ouverture_%s_%d_%d" % (date, groupe.idgroupe, unite.idunite)
+                        key = "ouverture_%s_%d_%d" % (date, groupe.pk, unite.pk)
 
                         etat = False
                         if action == "COPIER_DATE":
-                            key_modele = "ouverture_%s_%d_%d" % (date_modele, groupe.idgroupe, unite.idunite)
+                            key_modele = "ouverture_%s_%d_%d" % (date_modele, groupe.pk, unite.pk)
                             if key_modele in dict_ouvertures:
                                 etat = dict_ouvertures[key_modele]
                             if key_modele in ouvertures_modifications:
@@ -251,11 +251,11 @@ def Traitement_lot_ouvertures(request):
                 if action in ("COPIER_DATE", "schema", "REINIT"):
 
                     for uniteRemplissage in liste_unites_remplissage:
-                        key = "remplissage_%s_%d_%d" % (date, groupe.idgroupe, uniteRemplissage.idunite_remplissage)
+                        key = "remplissage_%s_%d_%d" % (date, groupe.pk, uniteRemplissage.pk)
 
                         nbrePlaces = ""
                         if action == "COPIER_DATE":
-                            key_modele = "remplissage_%s_%d_%d" % (date_modele, groupe.idgroupe, uniteRemplissage.idunite_remplissage)
+                            key_modele = "remplissage_%s_%d_%d" % (date_modele, groupe.pk, uniteRemplissage.pk)
                             if key_modele in dict_remplissage:
                                 nbrePlaces = dict_remplissage[key_modele]
                             if key_modele in remplissages_modifications:
@@ -319,7 +319,8 @@ def Valider_calendrier_ouvertures(request):
             liste_suppressions.append(ouverture.pk)
 
     if liste_suppressions:
-        utils_db.bulk_delete(listeID=liste_suppressions, nom_table="ouvertures", nom_id="IDouverture")
+        qs = Ouverture.objects.filter(pk__in=liste_suppressions)
+        qs._raw_delete(qs.db)
 
     # Ajout des ouvertures
     liste_ajouts = []
@@ -349,7 +350,8 @@ def Valider_calendrier_ouvertures(request):
             liste_suppressions.append(remplissage.pk)
 
     if liste_suppressions:
-        utils_db.bulk_delete(listeID=liste_suppressions, nom_table="remplissage", nom_id="IDremplissage")
+        qs = Remplissage.objects.filter(pk__in=liste_suppressions)
+        qs._raw_delete(qs.db)
 
     # Ajout et modification des remplissages
     liste_ajouts = []
