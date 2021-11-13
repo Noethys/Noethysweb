@@ -57,6 +57,9 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Email",
                 Field('adresse_exp'),
             ),
+            Fieldset("Portail",
+                Field('messagerie_active'),
+            ),
             Fieldset("Logo",
                 Div(
                     Field('logo'),

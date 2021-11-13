@@ -20,7 +20,7 @@ class View(CustomView, TemplateView):
         context['page_titre'] = "Contact"
 
         # Importation de toutes les structures
-        context['liste_structures'] = Structure.objects.all().order_by("nom")
+        context['liste_structures'] = Structure.objects.filter(messagerie_active=True).order_by("nom")
 
         # Importation du nombre de messages non lus (regroupement par structure)
         context['dict_messages_non_lus'] = {valeur["structure"]: valeur["nbre"] for valeur in PortailMessage.objects.values("structure").filter(famille=self.request.user.famille, utilisateur__isnull=False, date_lecture__isnull=True).annotate(nbre=Count('pk'))}
