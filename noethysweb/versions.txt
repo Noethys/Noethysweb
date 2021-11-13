@@ -1,3 +1,7 @@
+Version 1.0.0.9 (13/11/2021) :
+
+- Modification des ratios des images des articles
+
 Version 1.0.0.8 (13/11/2021) :
 
 - Ajout des renseignements manquants sur le portail
