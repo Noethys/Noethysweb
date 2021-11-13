@@ -15,6 +15,13 @@
             text-align: center;
             border-radius: 5px 5px 0 0;
         }
+        @media (min-width: 576px) {
+            .card-columns {
+                -webkit-column-count: 4;
+                -moz-column-count: 4;
+                column-count: 4;
+            }
+        }
     </style>
 {% endblock %}
 
@@ -65,22 +72,22 @@
                 <div class="card-columns">
                     {% for document in liste_documents %}
                         <div class="card mb-4" style="margin-top: 1px;">
-                            <span class="mailbox-attachment-icon bg-{{ document.couleur_fond }}">
-                                {% if document.extension|is_in_list:"jpg;JPG;png;PNG" %}
-                                    <i class="fa fa-file-image-o"></i>
-                                {% elif document.extension|is_in_list:"pdf;PDF" %}
-                                    <i class="fa fa-file-pdf-o"></i>
-                                {% elif document.extension|is_in_list:"doc;docx;DOC;DOCX" %}
-                                    <i class="fa fa-file-word-o"></i>
-                                {% else %}
-                                    <i class="fa fa-file-o"></i>
-                                {% endif %}
-                            </span>
-                            <div class="card-body pl-3 pr-3 pt-3 pb-1" style="background-color: #eeeeee">
+{#                            <span class="mailbox-attachment-icon bg-{{ document.couleur_fond }}">#}
+{#                                {% if document.extension|is_in_list:"jpg;JPG;png;PNG" %}#}
+{#                                    <i class="fa fa-file-image-o"></i>#}
+{#                                {% elif document.extension|is_in_list:"pdf;PDF" %}#}
+{#                                    <i class="fa fa-file-pdf-o"></i>#}
+{#                                {% elif document.extension|is_in_list:"doc;docx;DOC;DOCX" %}#}
+{#                                    <i class="fa fa-file-word-o"></i>#}
+{#                                {% else %}#}
+{#                                    <i class="fa fa-file-o"></i>#}
+{#                                {% endif %}#}
+{#                            </span>#}
+                            <div class="card-body pl-3 pr-3 pt-3 pb-1" style="background-color: #f4f6f9">
                                 <h5 class="card-title"><a href="{{ document.fichier.url }}" target="_blank" title="Télécharger le document">{{ document.titre }}</a></h5>
                                 <div class="card-text link-muted mt-1"><small>{{ document.texte|default:"&nbsp;" }}</small></div>
                                 <span class="mailbox-attachment-size clearfix mt-1 mb-2">
-                                    <span>{{ document.fichier.size|filesizeformat }} - {{ document.extension|lower }}</span>
+                                    <span>{{ document.fichier.size|filesizeformat }} - {{ document.extension|upper }}</span>
                                     <a href="{{ document.fichier.url }}" class="btn btn-default btn-sm float-right" target="_blank" title="Télécharger le document"><i class="fa fa-download"></i></a>
                                 </span>
                             </div>
