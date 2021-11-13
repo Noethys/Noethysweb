@@ -3,15 +3,17 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import json
+import json, datetime
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.views.generic import TemplateView
+from django.db.models import Q
 from core.views import crud
-from core.models import PortailRenseignement, Assurance
+from core.models import Inscription, Assurance
 from portail.forms.individu_assurances import Formulaire
 from portail.views.fiche import Onglet, ConsulterBase
 from portail.forms.assureurs import Formulaire as Formulaire_assureur
+from individus.utils import utils_assurances
 
 
 def Ajouter_assureur(request):
@@ -78,6 +80,12 @@ class Liste(Page, TemplateView):
         context['box_titre'] = "Assurances"
         context['box_introduction'] = "Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle assurance."
         context['liste_assurances'] = Assurance.objects.filter(famille=self.get_rattachement().famille, individu=self.get_rattachement().individu).order_by("-date_debut")
+
+        # Recherche si l'assurance de l'individu est manquante
+        conditions = Q(famille=self.request.user.famille) & Q(individu=self.get_rattachement().individu) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
+        inscriptions = Inscription.objects.select_related("activite").filter(conditions)
+        context["assurance_manquante"] = len(utils_assurances.Get_assurances_manquantes_by_inscriptions(famille=self.request.user.famille, inscriptions=inscriptions)) > 0
+
         return context
 
 

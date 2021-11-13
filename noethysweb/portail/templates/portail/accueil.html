@@ -34,22 +34,6 @@
         <h5 class="mb-2 text-secondary">En attente</h5>
         <div class="row mb-2">
 
-            {# Approbations #}
-            {% if nbre_approbations_requises %}
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-info">
-                        <div class="inner">
-                            <h3>{{ nbre_approbations_requises }}</h3>
-                            <p>Approbation{{ nbre_approbations_requises|pluralize }} en attente</p>
-                        </div>
-                        <div class="icon">
-                            <i class="fa fa-edit"></i>
-                        </div>
-                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">Corriger <i class="fa fa-arrow-circle-right"></i></a>
-                    </div>
-                </div>
-            {% endif %}
-
             {# Messages #}
             {% if nbre_messages_non_lus %}
                 <div class="col-lg-3 col-6">
@@ -58,9 +42,7 @@
                             <h3>{{ nbre_messages_non_lus }}</h3>
                             <p>Nouveau{{ nbre_messages_non_lus|pluralize:"x" }} message{{ nbre_messages_non_lus|pluralize }}</p>
                         </div>
-                        <div class="icon">
-                            <i class="fa fa-comments"></i>
-                        </div>
+                        <div class="icon"><i class="fa fa-comments"></i></div>
                         <a href="{% url 'portail_contact' %}" class="small-box-footer">Consulter <i class="fa fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
@@ -69,19 +51,58 @@
             {# Pièces manquantes #}
             {% if nbre_pieces_manquantes %}
                 <div class="col-lg-3 col-6">
-                    <div class="small-box bg-success">
+                    <div class="small-box bg-danger">
                         <div class="inner">
                             <h3>{{ nbre_pieces_manquantes }}</h3>
                             <p>Pièce{{ nbre_pieces_manquantes|pluralize }} manquante{{ nbre_pieces_manquantes|pluralize }}</p>
                         </div>
-                        <div class="icon">
-                            <i class="fa fa-file-text-o"></i>
-                        </div>
+                        <div class="icon"><i class="fa fa-file-text-o"></i></div>
                         <a href="{% url 'portail_documents' %}" class="small-box-footer">Consulter <i class="fa fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
             {% endif %}
 
+            {# Vaccinations manquantes #}
+            {% if nbre_vaccinations_manquantes %}
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>{{ nbre_vaccinations_manquantes }}</h3>
+                            <p>Vaccination{{ nbre_vaccinations_manquantes|pluralize }} manquante{{ nbre_vaccinations_manquantes|pluralize }}</p>
+                        </div>
+                        <div class="icon"><i class="fa fa-medkit"></i></div>
+                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">Corriger <i class="fa fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            {% endif %}
+
+            {# Assurances manquantes #}
+            {% if nbre_assurances_manquantes %}
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>{{ nbre_assurances_manquantes }}</h3>
+                            <p>Assurance{{ nbre_assurances_manquantes|pluralize }} manquante{{ nbre_assurances_manquantes|pluralize }}</p>
+                        </div>
+                        <div class="icon"><i class="fa fa-shield"></i></div>
+                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">Corriger <i class="fa fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            {% endif %}
+
+            {# Approbations #}
+            {% if nbre_approbations_requises %}
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ nbre_approbations_requises }}</h3>
+                            <p>Approbation{{ nbre_approbations_requises|pluralize }} en attente</p>
+                        </div>
+                        <div class="icon"><i class="fa fa-edit"></i></div>
+                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">Corriger <i class="fa fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            {% endif %}
 
         </div>
     {% endif %}

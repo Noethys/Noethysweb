@@ -12,6 +12,9 @@
             {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
             {% block box_contenu %}
 
+                {% embed "individus/alerte.html" with titre_uniquement=True titre="Assurance obligatoire"%}
+                {% endembed %}
+
                 <div class="">
                     {% if liste_assurances %}
                         <table class="table table-bordered">

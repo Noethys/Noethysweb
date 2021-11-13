@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 from django.db.models import Q
 from portail.views.base import CustomView
 from portail.utils import utils_approbations
-from individus.utils import utils_pieces_manquantes
+from individus.utils import utils_pieces_manquantes, utils_vaccinations, utils_assurances
 from core.models import PortailMessage, Article, Inscription, Consommation
 
 
@@ -31,9 +31,15 @@ class Accueil(CustomView, TemplateView):
         context['nbre_approbations_requises'] = approbations_requises["nbre_total"]
 
         # Récupération des activités de la famille
-        conditions = Q(famille=self.request.user.famille) & (Q(date_fin__isnull=False) | Q(date_fin__gte=datetime.date.today()))
-        inscriptions = Inscription.objects.select_related("activite").filter(conditions)
+        conditions = Q(famille=self.request.user.famille) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
+        inscriptions = Inscription.objects.select_related("activite", "individu").filter(conditions)
         activites = list({inscription.activite: True for inscription in inscriptions}.keys())
+
+        # Vaccins manquants
+        context["nbre_vaccinations_manquantes"] = sum([len(liste_vaccinations) for individu, liste_vaccinations in utils_vaccinations.Get_vaccins_obligatoires_by_inscriptions(inscriptions=inscriptions).items()])
+
+        # Assurances manquantes
+        context["nbre_assurances_manquantes"] = len(utils_assurances.Get_assurances_manquantes_by_inscriptions(famille=self.request.user.famille, inscriptions=inscriptions))
 
         # Articles
         conditions = Q(statut="publie") & Q(date_debut__lte=datetime.datetime.now()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.datetime.now()))

@@ -8,8 +8,10 @@ logger = logging.getLogger(__name__)
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse_lazy
+from django.db.models import Q
 from core.views import crud
-from core.models import Consentement, Rattachement
+from core.models import Consentement, Rattachement, Inscription
+from individus.utils import utils_vaccinations, utils_assurances
 from portail.views.base import CustomView
 from portail.forms.approbations import Formulaire
 
@@ -24,6 +26,24 @@ class View(CustomView, crud.Modifier):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Renseignements"
         context['rattachements'] = Rattachement.objects.prefetch_related('individu').filter(famille=self.request.user.famille).order_by("individu__nom", "individu__prenom")
+
+        # Récupération des activités de la famille
+        conditions = Q(famille=self.request.user.famille) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
+        inscriptions = Inscription.objects.select_related("activite", "individu").filter(conditions)
+
+        renseignements_manquants = {}
+
+        # Recherche les informations manquantes
+        for individu, liste_vaccinations in utils_vaccinations.Get_vaccins_obligatoires_by_inscriptions(inscriptions=inscriptions).items():
+            renseignements_manquants.setdefault(individu, [])
+            renseignements_manquants[individu].append("%d vaccination%s manquante%s" % (len(liste_vaccinations), "s" if len(liste_vaccinations) else "", "s" if len(liste_vaccinations) else ""))
+
+        for individu in utils_assurances.Get_assurances_manquantes_by_inscriptions(famille=self.request.user.famille, inscriptions=inscriptions):
+            renseignements_manquants.setdefault(individu, [])
+            renseignements_manquants[individu].append("Assurance manquante")
+
+        context["renseignements_manquants"] = renseignements_manquants
+
         return context
 
     def get_object(self):

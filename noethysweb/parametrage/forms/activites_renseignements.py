@@ -17,7 +17,7 @@ from django_select2.forms import Select2MultipleWidget
 class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Activite
-        fields = ["pieces", "cotisations", "vaccins_obligatoires", "types_consentements"]
+        fields = ["pieces", "cotisations", "vaccins_obligatoires", "assurance_obligatoire", "types_consentements"]
         widgets = {
             "pieces": Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
             "cotisations": Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
@@ -55,5 +55,8 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Vaccinations",
                 Field("vaccins_obligatoires"),
+            ),
+            Fieldset("Assurances",
+                Field("assurance_obligatoire"),
             ),
         )

@@ -59,7 +59,7 @@ LISTE_PARAMETRES = [
 
     # Renseignements
     Parametre(code="renseignements_afficher_page", label="Afficher la page", type="boolean", valeur=True),
-    Parametre(code="renseignements_intro", label="Texte d'introduction", type="char", valeur="Cliquez sur l'une des fiches listées ci-dessous pour consulter les renseignements et les modifier si besoin."),
+    Parametre(code="renseignements_intro", label="Texte d'introduction", type="char", valeur="Cliquez sur l'une des fiches listées ci-dessous pour consulter les renseignements et les corriger si besoin."),
     Parametre(code="validation_auto:famille_caisse", label="Validation automatique de la page 'Caisse'", type="boolean", valeur=True),
     Parametre(code="validation_auto:individu_identite", label="Validation automatique de la page 'Identité'", type="boolean", valeur=True),
     Parametre(code="validation_auto:individu_coords", label="Validation automatique de la page 'Coordonnées'", type="boolean", valeur=True),

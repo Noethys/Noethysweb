@@ -17,6 +17,9 @@
                 display: none;
             }
         }
+        .project-state {
+            text-align: left !important;
+        }
     </style>
 {% endblock %}
 
@@ -32,7 +35,7 @@
     {# Approbations en attente #}
     {% if form.fields %}
         {% embed 'core/box.html' with box_introduction=True %}
-            {% block box_theme %}card-outline card-danger{% endblock %}
+            {% block box_theme %}card-outline card-info{% endblock %}
             {% block box_titre %}Approbations en attente{% endblock %}
             {% block box_introduction %}L'accès aux réservations nécessite les approbations suivantes. Cochez la case pour chaque ligne souhaitée et cliquez sur le bouton Valider.{% endblock %}
             {% block box_contenu %}
@@ -41,6 +44,29 @@
         {% endembed %}
     {% endif %}
 
+{% comment %}
+    {#  Renseignements manquants #}
+    {% if renseignements_manquants %}
+        {% embed 'core/box.html' with box_introduction=True %}
+            {% block box_theme %}card-outline card-danger{% endblock %}
+            {% block box_titre %}<i class="fa fa-exclamation-triangle text-danger"></i> Renseignements manquants{% endblock %}
+            {% block box_introduction %}Merci de renseigner les informations manquantes dans les fiches ci-dessous :{% endblock %}
+            {% block box_contenu %}
+                <ul>
+                {% for individu, liste_renseignements in renseignements_manquants.items %}
+                    <li><strong>{{ individu.prenom }}</strong> :
+                        <ul>
+                            {% for renseignement in liste_renseignements %}
+                                <li>{{ renseignement }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% endblock %}
+        {% endembed %}
+    {% endif %}
+{% endcomment %}
 
     {# Liste des fiches de renseignements #}
     {% embed 'core/box.html' with box_titre=True %}
@@ -63,11 +89,13 @@
                         </td>
                         <td class="project-state">
                             <small>
-                                {% if request.user.famille.certification_date %}
-                                    <span><i class="fa fa-check text-success margin-r-5"></i>Fiche certifiée exacte le {{ request.user.famille.certification_date|date:'d/m/Y' }}</span>
-                                {% else %}
-                                    <span><i class="fa fa-remove text-red margin-r-5"></i>Fiche en attente de certification</span>
-                                {% endif %}
+                                <ul class="list-unstyled">
+                                    {% if request.user.famille.certification_date %}
+                                        <li class="text-success"><i class="fa fa-check margin-r-5"></i>Fiche certifiée exacte le {{ request.user.famille.certification_date|date:'d/m/Y' }}</li>
+                                    {% else %}
+                                        <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>Fiche en attente de certification</li>
+                                    {% endif %}
+                                </ul>
                             </small>
                         </td>
                         <td class="text-right">
@@ -89,11 +117,16 @@
                             </td>
                             <td class="project-state">
                                 <small>
-                                    {% if rattachement.certification_date %}
-                                        <span><i class="fa fa-check text-success margin-r-5"></i>Fiche certifiée exacte le {{ rattachement.certification_date|date:'d/m/Y' }}</span>
-                                    {% else %}
-                                        <span><i class="fa fa-remove text-red margin-r-5"></i>Fiche en attente de certification</span>
-                                    {% endif %}
+                                    <ul class="list-unstyled">
+                                        {% if rattachement.certification_date %}
+                                            <li class="text-success"><i class="fa fa-check margin-r-5"></i>Fiche certifiée exacte le {{ rattachement.certification_date|date:'d/m/Y' }}</li>
+                                        {% else %}
+                                            <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>Fiche en attente de certification</li>
+                                        {% endif %}
+                                        {% for renseignement in renseignements_manquants|get_item:rattachement.individu %}
+                                            <li class="text-red"><i class="fa fa-remove margin-r-5"></i>{{ renseignement }}</li>
+                                        {% endfor %}
+                                    </ul>
                                 </small>
                             </td>
                             <td class="text-right">

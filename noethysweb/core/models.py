@@ -1007,6 +1007,7 @@ class Activite(models.Model):
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
     # public = models.CharField(blank=True, null=True)
     vaccins_obligatoires = models.BooleanField(verbose_name="Vaccinations obligatoires", default=False)
+    assurance_obligatoire = models.BooleanField(verbose_name="Assurance obligatoire", default=False)
     date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
     nbre_inscrits_max = models.IntegerField(verbose_name="Nombre d'inscrits maximal", blank=True, null=True)
     code_comptable = models.CharField(verbose_name="Code comptable", max_length=200, blank=True, null=True)

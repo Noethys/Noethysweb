@@ -4,6 +4,8 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.http import JsonResponse
+from datatableview.views import MultipleDatatableView
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Individu, Vaccin, Information, Medecin, TypeMaladie, Vaccin
@@ -11,10 +13,7 @@ from fiche_individu.forms.individu_information import Formulaire as Formulaire_i
 from fiche_individu.forms.individu_vaccin import Formulaire as Formulaire_vaccin
 from fiche_individu.forms.individu_medecin import Formulaire as Formulaire_medecin
 from fiche_individu.views.individu import Onglet
-from datatableview.views import MultipleDatatableView
-from django.http import JsonResponse
-from core.utils import utils_dates
-import datetime
+from individus.utils import utils_vaccinations
 
 
 def Select_medecin(request):
@@ -45,24 +44,6 @@ def Deselect_medecin(request):
 
     return JsonResponse({"success": True})
 
-def RechercherVaccinsObligatoires(individu=None, nonvalides_only=False):
-    liste_resultats = []
-    vaccins = Vaccin.objects.select_related("type_vaccin").prefetch_related("type_vaccin__types_maladies").filter(individu=individu)
-    for maladie in TypeMaladie.objects.filter(vaccin_obligatoire=True).order_by("nom"):
-        if not individu.date_naiss or not maladie.vaccin_date_naiss_min or (maladie.vaccin_date_naiss_min and individu.date_naiss >= maladie.vaccin_date_naiss_min):
-            valide = False
-            for vaccin in vaccins:
-                if maladie in vaccin.type_vaccin.types_maladies.all():
-                    if vaccin.type_vaccin.duree_validite:
-                        date_fin_validite = vaccin.date + utils_dates.ConvertDureeStrToDuree(vaccin.type_vaccin.duree_validite)
-                        if date_fin_validite >= datetime.date.today():
-                            valide = True
-                    else:
-                        valide = True
-            if not nonvalides_only or (nonvalides_only and not valide):
-                liste_resultats.append({"label": maladie.nom, "valide": valide})
-    return liste_resultats
-
 
 class Page(Onglet):
     url_liste = "individu_medical_liste"
@@ -82,7 +63,7 @@ class Page(Onglet):
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_vaccins_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
         ]
         context['form_selection_medecin'] = Formulaire_medecin(idindividu=self.Get_idindividu())
-        context['vaccins_obligatoires'] = RechercherVaccinsObligatoires(individu=context["individu"])
+        context['vaccins_obligatoires'] = utils_vaccinations.Get_vaccins_obligatoires_individu(individu=context["individu"])
         context['pieces_manquantes'] = [{"label": "Fiche sanitaire", "valide": True}, {"label": "Fiche famille", "valide": False}]
         return context
 

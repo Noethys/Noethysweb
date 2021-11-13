@@ -9,7 +9,7 @@ from core.models import Vaccin
 from portail.forms.individu_vaccinations import Formulaire
 from portail.views.fiche import Onglet
 from django.views.generic import TemplateView
-from fiche_individu.views.individu_medical import RechercherVaccinsObligatoires
+from individus.utils import utils_vaccinations
 
 
 class Page(Onglet):
@@ -54,7 +54,7 @@ class Liste(Page, TemplateView):
         context['box_titre'] = "Vaccinations"
         context['box_introduction'] = "Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle vaccination."
         context['liste_vaccinations'] = Vaccin.objects.select_related("type_vaccin").filter(individu=self.get_rattachement().individu).order_by("date")
-        context['vaccins_obligatoires'] = RechercherVaccinsObligatoires(individu=self.get_rattachement().individu)
+        context['vaccins_obligatoires'] = utils_vaccinations.Get_vaccins_obligatoires_individu(individu=self.get_rattachement().individu)
         return context
 
 
