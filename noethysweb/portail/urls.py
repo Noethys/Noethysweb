@@ -83,6 +83,7 @@ urlpatterns = [
     path('renseignements/individu/contacts/ajouter/<int:idrattachement>', individu_contacts.Ajouter.as_view(), name='portail_individu_contacts_ajouter'),
     path('renseignements/individu/contacts/modifier/<int:idrattachement>/<int:idcontact>', individu_contacts.Modifier.as_view(), name='portail_individu_contacts_modifier'),
     path('renseignements/individu/contacts/supprimer/<int:idrattachement>/<int:idcontact>', individu_contacts.Supprimer.as_view(), name='portail_individu_contacts_supprimer'),
+    path('renseignements/individu/contacts/importer/<int:idrattachement>', individu_contacts.Importer.as_view(), name='portail_individu_contacts_importer'),
 
     # Documents
     path('documents', documents.View.as_view(), name='portail_documents'),

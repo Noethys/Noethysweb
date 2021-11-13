@@ -131,8 +131,9 @@ class Importer(Page, TemplateView):
             return self.render_to_response(self.get_context_data(form=form))
 
         # Importation des contacts
-        liste_idcontact = form.cleaned_data.get("contacts", []).split(";")
-        if liste_idcontact:
+        liste_txt = form.cleaned_data.get("contacts", "")
+        if liste_txt:
+            liste_idcontact = liste_txt.split(";")
             for contact in ContactUrgence.objects.filter(pk__in=[int(idcontact) for idcontact in liste_idcontact]):
                 contact.pk = None
                 contact.individu_id = self.kwargs['idindividu']

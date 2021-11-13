@@ -3,13 +3,15 @@
 {% block styles %}
 <style>
 
-    #div_table_{{ id }} {
-        display: inline-block;
-        height: {% if hauteur %}{{ hauteur }}{% else %}200px{% endif %};
-        overflow-y: scroll;
-        width: 100%;
-        border: solid 1px #e5e5e5;
-    }
+    {% if not hauteur_libre %}
+        #div_table_{{ id }} {
+            display: inline-block;
+            height: {% if hauteur %}{{ hauteur }}{% else %}200px{% endif %};
+            overflow-y: scroll;
+            width: 100%;
+            border: solid 1px #e5e5e5;
+        }
+    {% endif %}
     .ligne_regroupement {
         background-color: #eaeaea;
     }
@@ -19,6 +21,10 @@
 
 </style>
 {% endblock styles %}
+
+{% if not liste_branches1 and texte_si_vide %}
+    <strong>{{ texte_si_vide }}</strong>
+{% endif %}
 
 <div id="div_table_{{ id }}">
     <table id="table_{{ id }}" class="table table-bordered">

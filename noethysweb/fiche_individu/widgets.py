@@ -85,7 +85,8 @@ class SelectionContactsAutresFiches(Widget):
         context['name'] = name
 
         # Définit la hauteur du ctrl
-        context['hauteur'] = "600px"
+        if "hauteur" not in context:
+            context['hauteur'] = "600px"
 
         # Récupération des dates
         idfamille = context.get("idfamille", None)
