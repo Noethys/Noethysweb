@@ -11,13 +11,13 @@ def GetMenuPrincipal(parametres_portail=None, user=None):
     menu = Menu(titre="Menu principal", user=user)
 
     menu.Add(code="portail_accueil", titre="Accueil", icone="home", toujours_afficher=True)
-    menu.Add(code="portail_renseignements", titre="Renseignements", icone="folder-open-o", toujours_afficher=True)
-    menu.Add(code="portail_documents", titre="Documents", icone="file-text-o", toujours_afficher=True)
-    menu.Add(code="portail_reservations", titre="Réservations", icone="calendar", toujours_afficher=True)
-    menu.Add(code="portail_facturation", titre="Facturation", icone="euro", toujours_afficher=True)
-    menu.Add(code="portail_reglements", titre="Règlements", icone="money", toujours_afficher=True)
-    menu.Add(code="portail_contact", titre="Contact", icone="comments", toujours_afficher=True)
-    menu.Add(code="portail_mentions", titre="Mentions légales", icone="info-circle", toujours_afficher=True)
+    menu.Add(code="portail_renseignements", titre="Renseignements", icone="folder-open-o", toujours_afficher=parametres_portail.get("renseignements_afficher_page", False))
+    menu.Add(code="portail_documents", titre="Documents", icone="file-text-o", toujours_afficher=parametres_portail.get("documents_afficher_page", False))
+    menu.Add(code="portail_reservations", titre="Réservations", icone="calendar", toujours_afficher=parametres_portail.get("reservations_afficher_page", False))
+    menu.Add(code="portail_facturation", titre="Facturation", icone="euro", toujours_afficher=parametres_portail.get("facturation_afficher_page", False))
+    menu.Add(code="portail_reglements", titre="Règlements", icone="money", toujours_afficher=parametres_portail.get("reglements_afficher_page", False))
+    menu.Add(code="portail_contact", titre="Contact", icone="comments", toujours_afficher=parametres_portail.get("contact_afficher_page", False))
+    menu.Add(code="portail_mentions", titre="Mentions légales", icone="info-circle", toujours_afficher=parametres_portail.get("mentions_afficher_page", False))
 
     return menu
 
