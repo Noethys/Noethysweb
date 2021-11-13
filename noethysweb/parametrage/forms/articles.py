@@ -33,7 +33,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "date_debut": DateTimePickerWidget(),
             "date_fin": DateTimePickerWidget(),
             "texte": SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '220px'}}),
-            "image": Crop_image(attrs={"largeur_min": 447, "hauteur_min": 251, "ratio": "16/9"}),
+            "image": Crop_image(attrs={"largeur_min": 447, "hauteur_min": 167, "ratio": "447/167"}),
             "image_article": Selection_image_article(),
             "activites": Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
             "groupes": Select2MultipleWidget({"lang": "fr", "data-minimum-input-length": 0, "data-width": "100%"}),

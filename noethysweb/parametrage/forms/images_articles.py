@@ -22,7 +22,7 @@ class Formulaire(FormulaireBase, ModelForm):
         model = ImageArticle
         fields = "__all__"
         widgets = {
-            "image": Crop_image(attrs={"largeur_min": 447, "hauteur_min": 251, "ratio": "16/9"}),
+            "image": Crop_image(attrs={"largeur_min": 447, "hauteur_min": 167, "ratio": "447/167"}),
         }
 
     def __init__(self, *args, **kwargs):
