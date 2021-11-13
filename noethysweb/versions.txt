@@ -1,3 +1,10 @@
+Version 1.0.1.0 (13/11/2021) :
+
+- Ajout de l'importation des contacts sur le portail
+- Ajout du champ messagerie_active dans les structures
+- Ajout de la gestion de l'affichage des pages du portail
+- Modification des couleurs des cards documents du portail
+
 Version 1.0.0.9 (13/11/2021) :
 
 - Modification des ratios des images des articles
