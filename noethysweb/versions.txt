@@ -1,3 +1,8 @@
+Version 1.0.0.8 (13/11/2021) :
+
+- Ajout des renseignements manquants sur le portail
+- Remplacement de bulk_delete par raw_delete
+
 Version 1.0.0.7 (11/11/2021) :
 
 - Ajout de la rotation du log
