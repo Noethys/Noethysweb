@@ -1,3 +1,8 @@
+Version 1.0.1.1 (14/11/2021) :
+
+- Correction de l'affichage du nom de l'utilisateur dans le header
+- Masquer commande signaler un bug si hors mode démo
+
 Version 1.0.1.0 (13/11/2021) :
 
 - Ajout de l'importation des contacts sur le portail
