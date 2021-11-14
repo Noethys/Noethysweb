@@ -108,6 +108,9 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
         if not self.menu_code and hasattr(self, "url_liste"):
             self.menu_code = self.url_liste
 
+        # Mode démo
+        context['mode_demo'] = settings.MODE_DEMO
+
         # Mémorise le menu actif
         menu_actif = menu_principal.Find(code=self.menu_code)
         context['menu_actif'] = menu_actif
