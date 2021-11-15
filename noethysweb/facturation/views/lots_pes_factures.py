@@ -7,7 +7,7 @@ from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import PesLot, PesPiece, Facture, Mandat
+from core.models import PesLot, PesPiece, Facture, Mandat, Activite
 from core.utils import utils_preferences
 import json
 
@@ -72,11 +72,23 @@ def Generation_pieces(idlot=None, liste_idfacture=[]):
     # Importation des mandats
     dict_mandats = {mandat.famille: mandat for mandat in Mandat.objects.filter(famille__in=[facture.famille_id for facture in factures], actif=True)}
 
+    # Importation des activités
+    dict_structures_activites = {activite.pk: activite.structure for activite in Activite.objects.select_related("structure").all()}
+
     # Création des pièces
     liste_ajouts = []
     for facture in factures:
         params = {"lot_id": idlot, "famille_id": facture.famille_id, "type": "facture", "facture": facture, "montant": facture.solde_actuel, "titulaire_helios": facture.famille.titulaire_helios}
         mandat = dict_mandats.get(facture.famille, None)
+
+        # Vérifie que ce mandat peut être utilisé pour payer cette facture (structure compatible)
+        if mandat and mandat.structures.all() and facture.activites:
+            for idactivite in [int(idactivite) for idactivite in facture.activites.split(";")]:
+                if dict_structures_activites[idactivite] not in mandat.structures.all():
+                    mandat = None
+                    break
+
+        # Mémorise le mandat pour activer le prélèvement
         if mandat:
             params.update({"prelevement": True, "prelevement_mandat": mandat, "prelevement_sequence": mandat.sequence})
             mandat.Actualiser(ajouter=True)

@@ -2900,6 +2900,7 @@ class Mandat(models.Model):
     ]
     sequence = models.CharField(verbose_name="Séquence", max_length=100, choices=choix_sequences, default="FRST", help_text="La prochaine séquence est généralement définie sur FRST lors de la création du mandat.")
     actif = models.BooleanField(verbose_name="Mandat actif", default=True, help_text="Décochez la case pour désactiver ce mandat.")
+    structures = models.ManyToManyField(Structure, verbose_name="Structures associées", related_name="mandat_structures", blank=True, help_text="Ce mandat ne sera utilisé que pour les structures sélectionnées.")
 
     class Meta:
         db_table = 'mandats'
