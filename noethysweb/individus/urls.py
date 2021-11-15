@@ -88,6 +88,8 @@ urlpatterns = [
     path('individus/informations/supprimer/<int:pk>', liste_informations.Supprimer.as_view(), name='informations_supprimer'),
 
     path('individus/importation_photos', importation_photos.View.as_view(), name='importation_photos'),
+    path('individus/importation_photos/<str:uuid_lot>', importation_photos.View.as_view(), name='importation_photos'),
+
     path('individus/liste_comptes_internet', liste_comptes_internet.Liste.as_view(), name='liste_comptes_internet'),
 
     path('individus/questionnaires/familles/liste', liste_questionnaires_familles.Liste.as_view(), name='questionnaires_familles_liste'),
@@ -106,7 +108,7 @@ urlpatterns = [
     path('individus/get_suivi_inscriptions', secure_ajax(suivi_inscriptions.Get_suivi_inscriptions), name='ajax_get_suivi_inscriptions'),
     path('individus/get_form_activites', secure_ajax(suivi_inscriptions.Get_form_activites), name='ajax_get_form_activites'),
     path('individus/valider_form_activites', secure_ajax(suivi_inscriptions.Valider_form_activites), name='ajax_valider_form_activites'),
-    path('individus/importation_photos_get_individus', secure_ajax(importation_photos.Get_individus), name='ajax_importation_photos_get_individus'),
+    path('individus/importation_photos/analyse/get_individus', secure_ajax(importation_photos.Get_individus), name='ajax_importation_photos_get_individus'),
     path('individus/liste_anniversaires/generer_pdf', secure_ajax(liste_anniversaires.Generer_pdf), name='ajax_liste_anniversaires_generer_pdf'),
     path('individus/etiquettes_impression_pdf', secure_ajax(etiquettes.Impression_pdf), name='ajax_etiquettes_impression_pdf'),
     path('individus/inscriptions_scolaires/get_periodes', secure_ajax(inscriptions_scolaires.Get_periodes), name='ajax_inscriptions_scolaires_get_periodes'),
@@ -120,6 +122,7 @@ urlpatterns = [
     path('individus/comptes_internet_reinitialiser_mdp', secure_ajax(liste_comptes_internet.Reinitialiser_mdp), name='ajax_comptes_internet_reinitialiser_mdp'),
     path('individus/comptes_internet_reinitialiser_identifiant', secure_ajax(liste_comptes_internet.Reinitialiser_identifiant), name='ajax_comptes_internet_reinitialiser_identifiant'),
     path('individus/informations/modifier_diffusion/', secure_ajax(liste_informations.Modifier_diffusion), name='ajax_modifier_diffusion_information'),
+    path('individus/importer_photos_individus', secure_ajax(importation_photos.Importer_photos_individus), name="ajax_importer_photos_individus"),
     # path('individus/codes_internet_impression_pdf', secure_ajax(famille_portail.Impression_pdf), name='ajax_codes_internet_impression_pdf'),
 
 ]

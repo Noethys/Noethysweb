@@ -3,18 +3,29 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import os, json, shutil
 from django.urls import reverse_lazy
-from core.views.base import CustomView
-from django.views.generic import TemplateView
-from core.models import Individu
-from django.shortcuts import render
-from individus.forms.importation_photos_selection import Formulaire as form_selection_individu
-from individus.forms.importation_photos import Formulaire
 from django.conf import settings
 from django.http import JsonResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.db.models import Q
-import os, json, uuid, shutil
+from django.views.generic import TemplateView
+from core.views.base import CustomView
+from core.models import Individu
+from individus.forms.importation_photos_selection import Formulaire as form_selection_individu
+from individus.forms.importation_photos import Formulaire, Formulaire_importation
+
+
+def Importer_photos_individus(request):
+    assert request.method == 'POST'
+    assert request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+    form = Formulaire_importation(request.POST, request.FILES)
+    if form.is_valid():
+        uuid_lot = form.form_valid(request)
+        url = reverse_lazy("importation_photos", kwargs={"uuid_lot": uuid_lot})
+        return JsonResponse({'action': 'redirect', 'url': url})
+    else:
+        return JsonResponse({'action': 'replace', 'html': form.as_html(request)})
 
 
 def Get_individus(request):
@@ -33,27 +44,28 @@ class View(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Importer des photos individuelles"
-        context['box_titre'] = "Sélection d'une photo"
-        context['box_introduction'] = "Vous pouvez ici importer une photo comportant un ou plusieurs individus. L'application va détecter les visages, les découper et les envoyer vers les fiches individuelles. Commencez par sélectionner la photo à analyser et cliquez sur le bouton Analyser."
+        context['box_titre'] = "Sélection des photos"
+        context['box_introduction'] = "Vous pouvez ici importer des photos comportant un ou plusieurs individus. L'application va détecter les visages, les découper et les envoyer vers les fiches individuelles. Commencez par sélectionner la ou les photos à analyser et cliquez sur Envoyer."
         context['form'] = kwargs.get("form", Formulaire())
         context['form_selection_individu'] = form_selection_individu()
+        context['formulaire_upload'] = Formulaire_importation()
+        context['formulaire_upload_as_html'] = context['formulaire_upload'].as_html(self.request)
+
+        # Lecture d'un lot de photos
+        if "uuid_lot" in self.kwargs and "-" in self.kwargs["uuid_lot"]:
+            rep = os.path.join(settings.MEDIA_ROOT, "temp", self.kwargs["uuid_lot"])
+            context['liste_portraits'] = [os.path.join(rep, fichier) for fichier in os.listdir(rep)]
+
         return context
 
     def post(self, request, *args, **kwargs):
         # Validation du formulaire
-        form = Formulaire(request.POST, request.FILES, request=self.request)
+        form = Formulaire(request.POST, request=self.request)
         validation = form.is_valid()
 
         # S'il manque le nom de fichier, on renvoie le form
         if not form.cleaned_data.get("data") and not validation:
             return self.render_to_response(self.get_context_data(form=form))
-
-        # Si le form est valide, on renvoie les résultats
-        if validation:
-            context = self.get_context_data(**kwargs)
-            context["form"] = form
-            context["resultats"] = self.Get_resultats(photo=form.cleaned_data.get("photo"))
-            return render(request, self.template_name, context)
 
         # Enregistrement des photos
         data = json.loads(form.cleaned_data.get("data"))
@@ -72,56 +84,3 @@ class View(CustomView, TemplateView):
 
         messages.add_message(request, messages.SUCCESS, "%d photos ont été importées avec succès" % len(data))
         return HttpResponseRedirect(reverse_lazy("individus_toc"))
-
-    def Get_resultats(self, photo):
-        import cv2
-        import numpy as np
-        from PIL import Image
-
-        # Recherche l'algorithme de détection
-        face_detector = None
-        try:
-            face_detector = "{base_path}/data/haarcascade_frontalface_default.xml".format(base_path=cv2.__path__[0])
-        except:
-            pass
-        if not face_detector:
-            face_detector = "/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml"
-
-        # Charge l'algorithme de détection
-        detector = cv2.CascadeClassifier(face_detector)
-
-        # Charge l'image
-        image = np.asarray(bytearray(photo.file.read()), dtype="uint8")
-        image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-        image_nb = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        image_couleur = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image_pil = Image.fromarray(image_couleur)
-
-        # Création du répertoire temp
-        if not os.path.exists(os.path.join(settings.MEDIA_ROOT, "temp")):
-            os.makedirs(os.path.join(settings.MEDIA_ROOT, "temp"))
-
-        # Analyse l'image
-        dict_resultats = {"image_originale": None, "portraits": []}
-        rects = detector.detectMultiScale(image_nb, scaleFactor=1.1, minNeighbors=5, minSize=(80, 80))
-        for (x, y, w, h) in rects:
-            # Ajout d'une marge
-            marge = w * 10//100
-            x, y, w, h = x-marge, y-marge, w+marge*2, h+marge*2
-
-            # Découpe chaque portrait
-            img = image_pil.crop((x, y, x + w, y + h))
-            nom_fichier = "temp/%s.jpg" % uuid.uuid4()
-            img.save(os.path.join(settings.MEDIA_ROOT, nom_fichier))
-            dict_resultats["portraits"].append(nom_fichier)
-
-            # Tracé du cadre rouge sur la photo originale
-            cv2.rectangle(image_couleur, (x, y), (x + w, y + h), (255, 0, 0), 2)
-
-        # Dessin de l'image originale
-        image_pil = Image.fromarray(image_couleur)
-        nom_fichier = "temp/%s.jpg" % uuid.uuid4()
-        dict_resultats["image_originale"] = nom_fichier
-        image_pil.save(os.path.join(settings.MEDIA_ROOT, nom_fichier))
-
-        return dict_resultats

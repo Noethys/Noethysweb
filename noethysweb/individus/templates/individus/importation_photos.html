@@ -7,7 +7,7 @@
 
 
 <div class="row">
-    <div class="col-md-9">
+    <div class="col-md-12">
         {# Box sélection de l'image #}
         {% embed 'core/box.html' %}
             {% block box_theme %}card-outline card-lightblue{% endblock %}
@@ -15,34 +15,53 @@
             {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
             {% block box_contenu %}
                 {% crispy form %}
+
+                <style>
+                    .uploadform_drop_area {
+                        padding: 0px;
+                        background-color: #f8f9fa !important;
+                        border-radius: 10px;
+                    }
+                    .uploadform_drop_area label img {
+                        height: 30px;
+                        color: #444 !important;
+                    }
+                    .uploadform_drop_area label p {
+                        font-size: 12px;
+                        margin-bottom: 0px;
+                    }
+                    .uploadform_drop_area .file_list_input label {
+                        width: 95%;
+                        padding: 10px;
+                        font-size: 1.8em;
+                        background-color: #eaeaea;
+                        border-radius: 10px;
+                    }
+                    .file_list_wrapper {
+                        margin-bottom: 15px;
+                    }
+                </style>
+
+                {# Zone d'envoi des fichiers #}
+                {% if formulaire_upload_as_html %}
+                    <div id="form-container" class="mt-3 mb-0">
+                        {{ formulaire_upload_as_html }}
+                    </div>
+                {% endif %}
+
             {% endblock %}
         {% endembed %}
-    </div>
-    <div class="col-md-3">
-        {# Box Affichage de l'image #}
-        <div class="card card-warning">
-            <div class="card-header with-border">
-                <h3 class="card-title">Analyse de la photo</h3>
-            </div>
-            <div class="card-body">
-                {% if resultats %}
-                    <center><img class="img-fluid" style="max-height: 150px;" src="{{ MEDIA_URL }}{{ resultats.image_originale }}"></center>
-                {% else %}
-                    Aucune photo sélectionnée.
-                {% endif %}
-            </div>
-        </div>
     </div>
 </div>
 
 {# Affichage des résultats #}
-{% if resultats %}
+{% if liste_portraits %}
     {% embed 'core/box.html' %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
         {% block box_titre %}Attribution des photos{% endblock %}
         {% block box_introduction %}
-            {% if resultats.portraits %}
-                {{ resultats.portraits|length }} visages ont été détectés. Veuillez cliquer sur chaque photo pour les associer à des individus et cliquez sur le bouton Enregistrer.
+            {% if liste_portraits %}
+                {{ liste_portraits|length }} visages ont été détectés. Veuillez cliquer sur chaque photo pour les associer à des individus et cliquez sur le bouton Enregistrer.
                 Les photos non associées seront ignorées lors de l'enregistrement.
             {% else %}
                 Aucun visage n'a été détecté dans l'image.
@@ -50,9 +69,9 @@
         {% endblock %}
         {% block box_contenu %}
 
-            {% if resultats.portraits %}
+            {% if liste_portraits %}
                 <ul class="users-list clearfix">
-                    {% for url in resultats.portraits %}
+                    {% for url in liste_portraits %}
                         <li>
                             <a href="#" data-index="{{ forloop.counter0 }}" data-idindividu="" data-url="{{ url }}" class="lien_selection">
                                 <img class="img-fluid img-thumbnail" style="max-width: 150px;" src="{{ MEDIA_URL }}{{ url }}">
@@ -94,46 +113,52 @@
 {% endembed %}
 
 
-<script>
-
-    $(document).ready(function() {
-        $(".lien_selection").on("click",function(event) {
-            event.preventDefault();
-            $('#index').val(this.dataset.index);
-            $("#id_individu").val('').trigger('change');
-            $('#modal_selection_individu').modal('show');
-        });
-
-        // Modal : Validation de l'individu
-        $("#selection_individu_valider").on('click', function (e) {
-            var index = $('#index').val();
-            var idindividu = $('#id_individu').val();
-            if (idindividu === "") {
-                toastr.error(("Vous devez sélectionner un individu dans la liste"));
-                return false;
-            }
-            $('#modal_selection_individu').modal('hide');
-            var data = $("#id_individu").select2('data')
-            $("span[data-index='" + index + "']").html(data[0].text)
-            $("a[data-index='" + index + "']").attr('data-idindividu', idindividu);
-        });
-
-        $("#bouton_enregistrer").on("click",function(event) {
-            var liste_photos = [];
-            $(".lien_selection").each(function() {
-                if (this.dataset.idindividu !== '') {
-                    liste_photos.push({"url": this.dataset.url, "idindividu": this.dataset.idindividu});
-                }
-            });
-            if (liste_photos.length === 0) {
-                toastr.error("Vous devez associer au moins un individu à une photo");
-                return false;
-            }
-            $("#id_data").val(JSON.stringify(liste_photos));
-            $('#form_importation_photos').submit();
-        });
-
-    });
-</script>
-
 {% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    {{ formulaire_upload.media }}
+
+    <script>
+
+        $(document).ready(function() {
+            $(".lien_selection").on("click",function(event) {
+                event.preventDefault();
+                $('#index').val(this.dataset.index);
+                $("#id_individu").val('').trigger('change');
+                $('#modal_selection_individu').modal('show');
+            });
+
+            // Modal : Validation de l'individu
+            $("#selection_individu_valider").on('click', function (e) {
+                var index = $('#index').val();
+                var idindividu = $('#id_individu').val();
+                if (idindividu === "") {
+                    toastr.error(("Vous devez sélectionner un individu dans la liste"));
+                    return false;
+                }
+                $('#modal_selection_individu').modal('hide');
+                var data = $("#id_individu").select2('data')
+                $("span[data-index='" + index + "']").html(data[0].text)
+                $("a[data-index='" + index + "']").attr('data-idindividu', idindividu);
+            });
+
+            $("#bouton_enregistrer").on("click",function(event) {
+                var liste_photos = [];
+                $(".lien_selection").each(function() {
+                    if (this.dataset.idindividu !== '') {
+                        liste_photos.push({"url": this.dataset.url, "idindividu": this.dataset.idindividu});
+                    }
+                });
+                if (liste_photos.length === 0) {
+                    toastr.error("Vous devez associer au moins un individu à une photo");
+                    return false;
+                }
+                $("#id_data").val(JSON.stringify(liste_photos));
+                $('#form_importation_photos').submit();
+            });
+
+        });
+    </script>
+
+{% endblock scripts %}
