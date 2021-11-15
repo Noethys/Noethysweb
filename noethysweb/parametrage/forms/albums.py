@@ -24,7 +24,7 @@ class Formulaire_album(FormulaireBase, ModelForm):
 
     class Meta:
         model = Album
-        fields = ["titre", "description", "structure"]
+        fields = ["titre", "description", "structure", "auteur"]
         widgets = {
             "description": SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '200px'}}),
         }
