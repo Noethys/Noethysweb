@@ -1,3 +1,11 @@
+Version 1.0.1.2 (15/11/2021) :
+
+- Ajout de l'importation multiple de photos individuelles
+- Ajout de la sélection des structures associées à un mandat
+- Correction de la saisie de conso de type quantité sur le portail
+- Correction de l'affichage des périodes de réservations sur le portail
+- Correction de l'auteur dans la saisie d'un album
+
 Version 1.0.1.1 (14/11/2021) :
 
 - Correction de l'affichage du nom de l'utilisateur dans le header
