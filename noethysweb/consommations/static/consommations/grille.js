@@ -357,7 +357,7 @@ class Case_standard extends Case_base {
                 infos = conso.heure_debut.substring(0,5).replace(":", "h") + "-" + conso.heure_fin.substring(0,5).replace(":", "h");
                 $("#" + this.key + " .infos").html(infos);
             };
-            if (this.type_case === "quantite") {
+            if ((this.type_case === "quantite") && (mode !== "portail")) {
                 if (conso.quantite) {infos = conso.quantite} else {infos = 1};
                 $("#" + this.key + " .infos").html(infos);
             };
@@ -593,6 +593,13 @@ class Case_quantite extends Case_standard {
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
 
+        // Si saisie en mode portail
+        if (mode === "portail") {
+            data = {
+                quantite: 1,
+            }
+        };
+
         // Saisie directe si data donnée
         if (Object.keys(data).length > 0) {
             this.creer_conso(data, maj_facturation);
@@ -625,7 +632,11 @@ class Case_quantite extends Case_standard {
     // Toggle une conso
     toggle() {
         if (this.has_conso()) {
-            this.modifier();
+            if (mode === "portail") {
+                this.supprimer();
+            } else {
+                this.modifier();
+            };
         } else {
             this.ajouter();
         };
