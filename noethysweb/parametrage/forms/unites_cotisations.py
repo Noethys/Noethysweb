@@ -19,7 +19,7 @@ class Formulaire(FormulaireBase, ModelForm):
     # Label de la prestation
     choix_label = [("DEFAUT", "Label par défaut (Type d'adhésion suivi de l'unité)"), ("PERSO", "Label personnalisé")]
     label_type = forms.TypedChoiceField(label="Label de la prestation", choices=choix_label, initial='DEFAUT', required=True)
-    label_perso = forms.CharField(label="Label personnalisé*", required=False)
+    label_perso = forms.CharField(label="Label personnalisé*", required=False, help_text="Saisissez le label de prestation souhaité. Exemple : Adhésion annuelle.")
 
     # Durée de validité
     choix_validite = [("PERIODE", "Une période"), ("DUREE", "Une durée")]
@@ -28,12 +28,20 @@ class Formulaire(FormulaireBase, ModelForm):
     validite_mois = forms.IntegerField(label="Mois", required=False)
     validite_annees = forms.IntegerField(label="Années", required=False)
 
+    # Tarif
+    type_tarif = forms.ChoiceField(label="Type de tarif", choices=[("GRATUIT", "Gratuit"), ("MONTANT", "Montant unique"), ("QF", "Montant selon le quotient familial")], initial="MONTANT", required=False, help_text="Sélectionnez un type de tarif à appliquer : montant unique ou selon le quotient familial.")
+
     class Meta:
         model = UniteCotisation
         fields = "__all__"
         widgets = {
             'date_debut': DatePickerWidget(),
             'date_fin': DatePickerWidget(),
+            "tarifs": forms.Textarea(attrs={'rows': 5}),
+        }
+        help_texts = {
+            "montant": "Saisissez un montant pour cette unité d'adhésion.",
+            "tarifs": "Saisissez ici une tranche de qf et son montant associé par ligne de la façon suivante : QFMIN-QFMAX=MONTANT. Exemple : <br>0-499=9.50<br>500-950=10.05<br>951-999999=13.90",
         }
 
     def __init__(self, *args, **kwargs):
@@ -67,6 +75,13 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields['label_type'].initial = "PERSO"
             self.fields['label_perso'].initial = self.instance.label_prestation
 
+        # Type de tarif
+        if self.instance.pk :
+            if self.instance.tarifs:
+                self.fields["type_tarif"].initial = "QF"
+            elif self.instance.tarif:
+                self.fields["type_tarif"].initial = "MONTANT"
+
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{{ view.get_success_url }}"),
@@ -90,7 +105,9 @@ class Formulaire(FormulaireBase, ModelForm):
                 ),
             ),
             Fieldset('Prestation',
+                Field('type_tarif'),
                 PrependedText('montant', utils_preferences.Get_symbole_monnaie()),
+                Field('tarifs'),
                 Field('label_type'),
                 Field('label_perso'),
             ),
@@ -128,7 +145,35 @@ class Formulaire(FormulaireBase, ModelForm):
                 return
             self.cleaned_data["label_prestation"] = self.cleaned_data["label_perso"]
 
+        # Type de tarifs
+        if self.cleaned_data.get("type_tarif") == "MONTANT":
+            self.cleaned_data["tarifs"] = None
+            if self.cleaned_data.get("montant") in (None, ""):
+                self.add_error("montant", "Vous devez saisir un montant pour la prestation")
+
+        if self.cleaned_data.get("type_tarif") == "QF":
+            self.cleaned_data["montant"] = 0.0
+            if not self.cleaned_data.get("tarifs"):
+                self.add_error("tarifs", "Vous devez saisir au moins un tarif")
+            else:
+                resultat = self.Verifie_coherence_tarifs(tarifs=self.cleaned_data["tarifs"])
+                if resultat != True:
+                    self.add_error("tarifs", resultat)
+
         return self.cleaned_data
+
+    def Verifie_coherence_tarifs(self, tarifs=""):
+        for num_ligne, ligne in enumerate(tarifs.splitlines(), start=1):
+            try:
+                tranches, montant = ligne.split("=")
+                qfmin, qfmax = tranches.split("-")
+                qfmin, qfmax, montant = float(qfmin), float(qfmax), float(montant)
+            except:
+                return "La ligne tarifaire %d semble mal formatée : Vérifiez les valeurs saisies." % num_ligne
+            if qfmin > qfmax:
+                return "Le QF min est supérieur au QF max sur la ligne %d !" % num_ligne
+
+        return True
 
 
 EXTRA_SCRIPT = """
@@ -137,7 +182,6 @@ EXTRA_SCRIPT = """
 // label_type
 function On_change_label_type() {
     $('#div_id_label_perso').hide();
-
     if($(this).val() == 'PERSO') {
         $('#div_id_label_perso').show();
     }
@@ -147,12 +191,10 @@ $(document).ready(function() {
     On_change_label_type.call($('#id_label_type').get(0));
 });
 
-
 // validite_type
 function On_change_validite_type() {
     $('#bloc_duree').hide();
     $('#bloc_periode').hide();
-
     if($(this).val() == 'DUREE') {
         $('#bloc_duree').show();
     }
@@ -163,6 +205,23 @@ function On_change_validite_type() {
 $(document).ready(function() {
     $('#id_validite_type').change(On_change_validite_type);
     On_change_validite_type.call($('#id_validite_type').get(0));
+});
+
+
+// Type de tarif
+function On_change_type_tarif() {
+    $('#div_id_montant').hide();
+    $('#div_id_tarifs').hide();
+    if($(this).val() == 'MONTANT') {
+        $('#div_id_montant').show();
+    }
+    if($(this).val() == 'QF') {
+        $('#div_id_tarifs').show();
+    }
+}
+$(document).ready(function() {
+    $('#id_type_tarif').change(On_change_type_tarif);
+    On_change_type_tarif.call($('#id_type_tarif').get(0));
 });
 
 </script>

@@ -4,11 +4,12 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.db.models import Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import UniteCotisation, TypeCotisation
+from core.utils import utils_texte
 from parametrage.forms.unites_cotisations import Formulaire
-from django.db.models import Q
 
 
 class Page(crud.Page):
@@ -80,6 +81,7 @@ class Liste(Page, crud.Liste):
         duree_validite = columns.DisplayColumn("Validité", sources="duree_validite", processor='Get_validite')
         type_cotisation = columns.TextColumn("Type d'adhésion", sources=["type_cotisation__nom"])
         defaut = columns.TextColumn("Défaut", sources="defaut", processor='Get_default')
+        montant = columns.TextColumn("Tarif", sources="tarif", processor='Get_montant')
 
         class Meta:
             structure_template = MyDatatable.structure_template
@@ -98,7 +100,6 @@ class Liste(Page, crud.Liste):
             else:
                 periode = "Du %s au %s" % (instance.date_debut.strftime('%d/%m/%Y'), instance.date_fin.strftime('%d/%m/%Y'))
                 return periode
-            return ""
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut la catégorie dans les boutons d'actions """
@@ -110,6 +111,14 @@ class Liste(Page, crud.Liste):
 
         def Get_default(self, instance, **kwargs):
             return "<i class='fa fa-check text-success'></i>" if instance.defaut else ""
+
+        def Get_montant(self, instance, **kwargs):
+            if instance.tarifs:
+                return "Selon le QF"
+            elif not instance.montant:
+                return "Gratuit"
+            else:
+                return utils_texte.Formate_montant(instance.montant)
 
 
 class Ajouter(Page, crud.Ajouter):

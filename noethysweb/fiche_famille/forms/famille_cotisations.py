@@ -279,7 +279,10 @@ function On_change_unite() {
     $.ajax({ 
         type: "POST",
         url: "{% url 'ajax_on_change_unite_cotisation' %}",
-        data: {'idunite_cotisation': $("#id_unite_cotisation").val()},
+        data: {
+            'idunite_cotisation': $("#id_unite_cotisation").val(),
+            'idfamille': famille
+        },
         success: function (data) { 
             // Période de validité
             $('#id_date_debut').datepicker("setDate", data.date_debut);

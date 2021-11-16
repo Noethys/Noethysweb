@@ -10,7 +10,7 @@ from django.template import Template, RequestContext
 from django.db.models import Max, Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Cotisation, TypeCotisation, UniteCotisation, Prestation
+from core.models import Famille, Cotisation, TypeCotisation, UniteCotisation, Prestation, Quotient
 from core.utils import utils_dates
 from fiche_famille.forms.famille_cotisations import Formulaire
 from fiche_famille.views.famille import Onglet
@@ -36,6 +36,8 @@ def On_change_type_cotisation(request):
 
 def On_change_unite_cotisation(request):
     idunite_cotisation = request.POST.get('idunite_cotisation')
+    idfamille = request.POST.get('idfamille')
+
     if idunite_cotisation == "":
         return JsonResponse({})
 
@@ -62,12 +64,30 @@ def On_change_unite_cotisation(request):
     numero += 1
     numero = "%06d" % numero
 
+    # Tarif
+    montant = 0.0
+    if unite_cotisation.tarifs:
+        qf_famille = Quotient.objects.filter(famille_id=idfamille, date_debut__lte=datetime.date.today(), date_fin__gte=datetime.date.today()).first()
+        liste_montants = []
+        for ligne in unite_cotisation.tarifs.splitlines():
+            tranches, montant_tarif = ligne.split("=")
+            qf_min, qf_max = tranches.split("-")
+            liste_montants.append(float(montant_tarif))
+            if qf_famille and float(qf_min) <= qf_famille.quotient <= float(qf_max):
+                montant = float(montant_tarif)
+        if not qf_famille:
+            montant = max(liste_montants)
+
+    if unite_cotisation.montant:
+        montant = unite_cotisation.montant
+
+    # Renvoie les résultats
     dict_resultats = {
         "type": unite_cotisation.type_cotisation.type,
         "carte": unite_cotisation.type_cotisation.carte,
         "date_debut": utils_dates.ConvertDateToFR(date_debut),
         "date_fin": utils_dates.ConvertDateToFR(date_fin),
-        "montant": unite_cotisation.montant,
+        "montant": montant,
         "label_prestation": label,
         "date_creation_carte": utils_dates.ConvertDateToFR(date_creation_carte),
         "numero": numero,

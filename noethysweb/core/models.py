@@ -783,6 +783,7 @@ class UniteCotisation(models.Model):
     montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0)
     label_prestation = models.CharField(verbose_name="Label de la prestation", max_length=200, blank=True, null=True)
     defaut = models.BooleanField(verbose_name="Unité par défaut", default=False)
+    tarifs = models.TextField(verbose_name="Tarifs", blank=True, null=True)
 
     class Meta:
         db_table = 'unites_cotisations'
