@@ -29,7 +29,7 @@ class Liste(Page, crud.Liste):
     model = Scolarite
 
     def get_queryset(self):
-        return Scolarite.objects.select_related("individu").prefetch_related("niveau").filter(self.Get_filtres("Q"))
+        return Scolarite.objects.select_related("individu", "ecole", "classe").prefetch_related("niveau").filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -45,11 +45,14 @@ class Liste(Page, crud.Liste):
         nom = columns.TextColumn("Nom", sources=["individu__nom"])
         prenom = columns.TextColumn("Prénom", sources=["individu__prenom"])
         date_naiss = columns.TextColumn("Date naiss.", sources=["individu__date_naiss"], processor=helpers.format_date('%d/%m/%Y'))
+        ecole = columns.TextColumn("Ecole", sources=["ecole__nom"])
+        classe = columns.TextColumn("Classe", sources=["classe__nom"])
         niveau = columns.TextColumn("Niveau", sources=["niveau__abrege"])
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idscolarite", "nom", "prenom", "date_naiss", "date_debut", "date_fin", "niveau"]
+            columns = ["idscolarite", "nom", "prenom", "date_naiss", "date_debut", "date_fin", "ecole", "classe", "niveau"]
+            hidden_columns = ["date_naiss"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
