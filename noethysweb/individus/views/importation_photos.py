@@ -54,7 +54,7 @@ class View(CustomView, TemplateView):
         # Lecture d'un lot de photos
         if "uuid_lot" in self.kwargs and "-" in self.kwargs["uuid_lot"]:
             rep = os.path.join(settings.MEDIA_ROOT, "temp", self.kwargs["uuid_lot"])
-            context['liste_portraits'] = [os.path.join(rep, fichier) for fichier in os.listdir(rep)]
+            context['liste_portraits'] = [os.path.join("temp", self.kwargs["uuid_lot"], str(fichier)) for fichier in os.listdir(rep)]
 
         return context
 
@@ -72,7 +72,7 @@ class View(CustomView, TemplateView):
         for dict_temp in data:
             # Envoi l'image vers le répertoire media/individus
             image_origine = os.path.join(settings.MEDIA_ROOT, dict_temp["url"])
-            url_destination = dict_temp["url"].replace("temp/", "individus/")
+            url_destination = dict_temp["url"].replace("temp/%s" % self.kwargs["uuid_lot"], "individus/")
             if not os.path.isdir(os.path.join(settings.MEDIA_ROOT, "individus")):
                 os.mkdir(os.path.join(settings.MEDIA_ROOT, "individus"))
             image_destination = os.path.join(settings.MEDIA_ROOT, url_destination)
