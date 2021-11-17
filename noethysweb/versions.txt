@@ -1,3 +1,7 @@
+Version 1.0.1.6 (17/11/2021) :
+
+- Ajout des signatures d'emails
+
 Version 1.0.1.5 (17/11/2021) :
 
 - Ajout des dates extrêmes du mois dans l'export pes
