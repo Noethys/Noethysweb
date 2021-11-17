@@ -74,7 +74,7 @@ class Formulaire(FormulaireBase, ModelForm):
         # Affichage
         self.helper.layout = Layout(
             Hidden("idmail", value=self.instance.pk),
-            Commandes(enregistrer=False, ajouter=False, annuler=False,
+            Commandes(enregistrer=False, ajouter=False, annuler=False, aide=False,
                       autres_commandes=[
                           HTML("""<a class="btn btn-primary" id="bouton_envoyer" title="Envoyer"><i class="fa fa-send-o margin-r-5"></i>Envoyer</a> """),
                           HTML("""<a class="btn btn-danger" title="Annuler" onclick="$('#modal_editeur_emails').modal('hide');"><i class="fa fa-ban margin-r-5"></i>Annuler</a> """),

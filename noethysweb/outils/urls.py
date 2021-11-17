@@ -64,6 +64,7 @@ urlpatterns = [
 
     # AJAX
     path('outils/get_modele_email', secure_ajax(editeur_emails.Get_modele_email), name='ajax_get_modele_email'),
+    path('outils/get_signature_email', secure_ajax(editeur_emails.Get_signature_email), name='ajax_get_signature_email'),
     path('outils/get_view_editeur_email', secure_ajax(editeur_emails_express.Get_view_editeur_email), name='ajax_get_view_editeur_email'),
     path('outils/envoyer_email_express', secure_ajax(editeur_emails_express.Envoyer_email), name='ajax_envoyer_email_express'),
     path('outils/get_calendrier_annuel', secure_ajax(calendrier_annuel.Get_calendrier_annuel), name='ajax_get_calendrier_annuel'),

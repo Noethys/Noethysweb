@@ -3,17 +3,16 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
 from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponseRedirect
-from core.models import ModeleEmail, Mail, PieceJointe, Destinataire, Famille, Individu, Contact
-from outils.utils import utils_email
+from django.db.models import Q, Count
+from django.contrib import messages
+from core.views import crud
+from core.models import ModeleEmail, Mail, PieceJointe, Destinataire, Famille, Individu, Contact, SignatureEmail
 from core.utils import utils_texte
 from outils.forms.editeur_emails import Formulaire
-from django.contrib import messages
-import json
-from core.views import crud
-from django.db.models import Q, Count
-
+from outils.utils import utils_email
 
 
 def Get_modele_email(request):
@@ -22,6 +21,12 @@ def Get_modele_email(request):
     modele = ModeleEmail.objects.filter(pk=idmodele).first()
     return JsonResponse({"objet": modele.objet, "html": modele.html})
 
+
+def Get_signature_email(request):
+    """ Renvoie le contenu HTML d'une signature d'emails """
+    idsignature = int(request.POST.get("idsignature"))
+    signature = SignatureEmail.objects.filter(pk=idsignature).first()
+    return JsonResponse({"html": signature.html})
 
 
 class Page(crud.Page):
@@ -37,6 +42,7 @@ class Page(crud.Page):
         mail = Mail.objects.get(pk=self.Get_idmail()) if self.Get_idmail() else None
         categorie = mail.categorie if mail else "saisie_libre"
         context['modeles'] = ModeleEmail.objects.filter(categorie=categorie)
+        context['signatures'] = SignatureEmail.objects.filter(Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
         context['mail'] = mail
 
         # Importe la liste des destinataires (Elimine les doublons)

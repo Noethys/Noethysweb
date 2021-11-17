@@ -107,14 +107,24 @@ def Envoyer_model_mail(idmail=None, request=None):
         messages.add_message(request, messages.ERROR, "Connexion impossible au serveur de messagerie : %s" % err)
         return
 
+    # Chargement de la signature de l'utilisateur
+    signature = ""
+    if "{UTILISATEUR_SIGNATURE}" in mail.html:
+        if request.user.signature:
+            signature = request.user.signature.html
+        else:
+            messages.add_message(request, messages.ERROR, "Vous avez demandé à intéger une signature d'emails alors que votre profil utilisateur n'est associé à aucune signature.")
+            return
+
     # Valeurs de fusion par défaut
     valeurs_defaut = {
-            "{UTILISATEUR_NOM_COMPLET}": request.user.get_full_name() if request else "",
-            "{UTILISATEUR_NOM}": request.user.last_name if request else "",
-            "{UTILISATEUR_PRENOM}": request.user.first_name if request else "",
-            "{DATE_COURTE}": utils_dates.DateComplete(datetime.date.today()),
-            "{DATE_LONGUE}": utils_dates.ConvertDateToFR(datetime.date.today()),
-        }
+        "{UTILISATEUR_NOM_COMPLET}": request.user.get_full_name() if request else "",
+        "{UTILISATEUR_NOM}": request.user.last_name if request else "",
+        "{UTILISATEUR_PRENOM}": request.user.first_name if request else "",
+        "{UTILISATEUR_SIGNATURE}": signature,
+        "{DATE_COURTE}": utils_dates.DateComplete(datetime.date.today()),
+        "{DATE_LONGUE}": utils_dates.ConvertDateToFR(datetime.date.today()),
+    }
 
     condition = ~Q(resultat_envoi="OK") if mail.selection == "NON_ENVOYE" else Q()
     liste_envois_succes = []
@@ -227,7 +237,3 @@ def Envoyer_mail_test(request=None, dict_options={}):
 
     connection.close()
     return "Message envoyé avec succès." if resultat else resultat
-
-
-
-

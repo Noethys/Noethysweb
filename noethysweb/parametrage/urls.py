@@ -3,7 +3,6 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import include, path
-
 from core.views import toc
 from core.decorators import secure_ajax
 from parametrage.views import organisateur, structures, \
@@ -18,7 +17,7 @@ from parametrage.views import organisateur, structures, \
     activites_renseignements, activites_unites_conso, activites_unites_remplissage, activites_calendrier, \
     activites_ouvertures, activites_evenements, activites_evenements_tarifs, activites_categories_tarifs, activites_noms_tarifs, \
     activites_tarifs, activites_portail_parametres, activites_portail_periodes, \
-    modeles_documents, modeles_emails, modeles_rappels, \
+    modeles_documents, modeles_emails, modeles_rappels, signatures_emails, \
     questionnaires, adresses_mail, activites_assistant, activites_assistant_sejour, activites_assistant_cantine, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
     portail_parametres, types_regimes_alimentaires, assureurs, categories_compte_internet, modeles_pes, \
@@ -375,6 +374,13 @@ urlpatterns = [
     path('parametrage/adresses_mail/ajouter', adresses_mail.Ajouter.as_view(), name='adresses_mail_ajouter'),
     path('parametrage/adresses_mail/modifier/<int:pk>', adresses_mail.Modifier.as_view(), name='adresses_mail_modifier'),
     path('parametrage/adresses_mail/supprimer/<int:pk>', adresses_mail.Supprimer.as_view(), name='adresses_mail_supprimer'),
+
+    # Signatures d'emails
+    path('parametrage/signatures_emails/liste', signatures_emails.Liste.as_view(), name='signatures_emails_liste'),
+    path('parametrage/signatures_emails/ajouter', signatures_emails.Ajouter.as_view(), name='signatures_emails_ajouter'),
+    path('parametrage/signatures_emails/modifier/<int:pk>', signatures_emails.Modifier.as_view(), name='signatures_emails_modifier'),
+    path('parametrage/signatures_emails/supprimer/<int:pk>', signatures_emails.Supprimer.as_view(), name='signatures_emails_supprimer'),
+    path('parametrage/signatures_emails/dupliquer/<int:pk>', signatures_emails.Dupliquer.as_view(), name='signatures_emails_dupliquer'),
 
     # Assureurs
     path('parametrage/assureurs/liste', assureurs.Liste.as_view(), name='assureurs_liste'),

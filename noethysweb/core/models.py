@@ -298,6 +298,21 @@ class Structure(models.Model):
         return self.nom
 
 
+class SignatureEmail(models.Model):
+    idsignature = models.AutoField(verbose_name="ID", db_column='IDsignature', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=250, help_text="Donnez un nom à cette signature pour la retrouver plus facilement.")
+    html = models.TextField(verbose_name="Texte", blank=True, null=True)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True, help_text="Associez si besoin cette signature à une structure pour limiter son accès aux utilisateurs.")
+
+    class Meta:
+        db_table = 'signatures_emails'
+        verbose_name = "signature d'email"
+        verbose_name_plural = "signatures d'emails"
+
+    def __str__(self):
+        return self.nom if self.nom else "Nouvelle signature"
+
+
 class CustomUserManager(UserManager):
     """ Permet d'ajouter au user le prefetch_related sur la table structures """
     def get(self, *args, **kwargs):
@@ -308,6 +323,7 @@ class Utilisateur(AbstractUser):
     force_reset_password = models.BooleanField(verbose_name="Force la mise à jour du mot de passe", default=False)
     structures = models.ManyToManyField(Structure, verbose_name="Structures", related_name="utilisateur_structures", blank=True)
     adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Adresse d'expédition d'emails", related_name="utilisateur_adresse_exp", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez une adresse d'expédition d'emails favorite dans la liste. Il est possible de créer de nouvelles adresses depuis le menu Paramétrage > Adresses d'expédition.")
+    signature = models.ForeignKey(SignatureEmail, verbose_name="Signature d'emails", related_name="utilisateur_signature", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez une signature d'emails favorite dans la liste. Il est possible de créer de nouvelles signatures depuis le menu Paramétrage > Signatures d'emails.")
     objects = CustomUserManager()
 
     class Meta:

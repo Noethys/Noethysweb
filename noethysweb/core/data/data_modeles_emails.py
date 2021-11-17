@@ -37,6 +37,7 @@ MOTSCLES_STANDARDS = [
     ("{UTILISATEUR_NOM_COMPLET}", "Nom complet de l'utilisateur"),
     ("{UTILISATEUR_NOM}", "Nom de famille de l'utilisateur"),
     ("{UTILISATEUR_PRENOM}", "Prénom de l'utilisateur"),
+    ("{UTILISATEUR_SIGNATURE}", "Signature de l'utilisateur"),
     ("{DATE_COURTE}", "Date du jour courte"),
     ("{DATE_LONGUE}", "Date du jour longue"),
 ]

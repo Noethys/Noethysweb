@@ -92,6 +92,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Emails
     menu_emails = menu_parametrage.Add(titre="Emails")
     menu_emails.Add(code="adresses_mail_liste", titre="Adresses d'expédition d'emails", icone="file-text-o", compatible_demo=False)
+    menu_emails.Add(code="signatures_emails_liste", titre="Signatures d'emails", icone="file-text-o")
     menu_emails.Add(code="listes_diffusion_liste", titre="Listes de diffusion", icone="file-text-o")
 
     # Calendrier

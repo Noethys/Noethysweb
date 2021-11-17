@@ -3,12 +3,11 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
-from core.models import Famille, ModeleEmail, Mail, AdresseMail, Destinataire
+from django.db.models import Q
 from django.views.generic.detail import DetailView
+from core.models import Famille, ModeleEmail, Mail, SignatureEmail, Destinataire
 from fiche_famille.views.famille import Onglet
 from outils.forms.editeur_emails_express import Formulaire
-
 
 
 class Ajouter(Onglet, DetailView):
@@ -21,6 +20,7 @@ class Ajouter(Onglet, DetailView):
         context['onglet_actif'] = "outils"
         context['form'] = Formulaire(instance=self.Get_nouveau_mail(), request=self.request)
         context['modeles'] = ModeleEmail.objects.filter(categorie="saisie_libre")
+        context['signatures'] = SignatureEmail.objects.filter(Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
         return context
 
     def get_object(self):
