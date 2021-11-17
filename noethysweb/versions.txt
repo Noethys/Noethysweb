@@ -1,3 +1,8 @@
+Version 1.0.1.5 (17/11/2021) :
+
+- Ajout des dates extrêmes du mois dans l'export pes
+- Changement de FRST à RCUR sur les nouveaux mandats
+
 Version 1.0.1.4 (17/11/2021) :
 
 - Correction de l'affichage des classes dans les inscriptions scolaires
