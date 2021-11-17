@@ -79,6 +79,8 @@ class Exporter():
             libelle = libelle.replace("{MOIS}", str(self.lot.mois))
             libelle = libelle.replace("{MOIS_LETTRES}", self.lot.get_mois_display())
             libelle = libelle.replace("{ANNEE}", str(self.lot.exercice))
+            libelle = libelle.replace("{DATE_DEBUT_MOIS}", datetime.date(prestation.date.year, prestation.date.month, 1).strftime('%d/%m/%Y'))
+            libelle = libelle.replace("{DATE_FIN_MOIS}", datetime.date(prestation.date.year, prestation.date.month, calendar.monthrange(prestation.date.year, prestation.date.month)[1]).strftime('%d/%m/%Y'))
 
             # Mémorisation du label et de la quantité
             libelle = (libelle, montant_unitaire)
@@ -114,6 +116,8 @@ class Exporter():
         texte = texte.replace("{MOIS}", str(self.lot.mois))
         texte = texte.replace("{MOIS_LETTRES}", self.lot.get_mois_display())
         texte = texte.replace("{ANNEE}", str(self.lot.exercice))
+        texte = texte.replace("{DATE_DEBUT_MOIS}", datetime.date(self.lot.exercice, self.lot.mois, 1).strftime('%d/%m/%Y'))
+        texte = texte.replace("{DATE_FIN_MOIS}", datetime.date(self.lot.exercice, self.lot.mois, calendar.monthrange(self.lot.exercice, self.lot.mois)[1]).strftime('%d/%m/%Y'))
         return texte
 
     def Generation_pieces_jointes(self, repertoire=""):
