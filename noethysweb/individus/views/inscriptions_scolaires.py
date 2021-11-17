@@ -40,7 +40,7 @@ def Get_classes(request):
     resultat = ""
     if idecole and periode:
         date_debut, date_fin = periode.split("_")
-        classes = Classe.objects.filter(ecole_id=idecole, date_debut=date_debut, date_fin=date_fin).order_by("niveaux__ordre")
+        classes = Classe.objects.filter(ecole_id=idecole, date_debut=date_debut, date_fin=date_fin).order_by("nom")
         if classes:
             html = """
             <option value="">---------</option>
