@@ -19,11 +19,16 @@
     </style>
 
     {# Texte bienvenue #}
-    {% if parametres_portail.accueil_texte_bienvenue %}
+    {% if parametres_portail.accueil_texte_bienvenue or parametres_portail.accueil_url_video %}
         <h5 class="mb-2 text-secondary">Bienvenue</h5>
         <div class="card mb-4">
             <div class="card-body p-3">
                 {{ parametres_portail.accueil_texte_bienvenue|safe }}
+                {% if parametres_portail.accueil_url_video %}
+                    {% if parametres_portail.accueil_texte_bienvenue %}<p></p>{% endif %}
+                    <a href="#" class="video-btn btn btn-outline-primary btn-sm" data-src="{{ parametres_portail.accueil_url_video }}" data-toggle="modal" data-target="#modal_video" title="Cliquez ici pour lancer la vidéo"><i class='fa fa-film margin-r-5'></i>{{ parametres_portail.accueil_titre_video }}</a>
+                    {% embed 'core/accueil/video.html' %}{% endembed %}
+                {% endif %}
             </div>
         </div>
     {% endif %}

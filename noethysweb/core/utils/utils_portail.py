@@ -21,7 +21,9 @@ class Parametre():
     def Get_ctrl(self):
         if self.type == "boolean":
             return forms.BooleanField(label=self.label, required=self.required, help_text=self.help_text)
-        if self.type == "char":
+        if self.type == "char_1ligne":
+            return forms.CharField(label=self.label, required=self.required, help_text=self.help_text)
+        if self.type == "char_2lignes":
             return forms.CharField(label=self.label, required=self.required, help_text=self.help_text, widget=forms.Textarea(attrs={'rows': 2}))
         if self.type == "adresse_exp":
             return forms.ChoiceField(label=self.label, choices=[(None, "Aucune")] + [(adresse_exp.pk, adresse_exp.adresse) for adresse_exp in AdresseMail.objects.all().order_by("adresse")], required=self.required, help_text=self.help_text)
@@ -56,10 +58,12 @@ LISTE_PARAMETRES = [
 
     # Accueil
     Parametre(code="accueil_texte_bienvenue", label="Texte de bienvenue", type="html", valeur="Bienvenue sur le portail Famille"),
+    Parametre(code="accueil_url_video", label="URL vidéo", type="char_1ligne", valeur="", help_text="Saisissez l'URL d'un tutoriel vidéo que vous souhaitez voir apparaître sur la page d'accueil."),
+    Parametre(code="accueil_titre_video", label="Titre de la vidéo", type="char_1ligne", valeur="Découvrez le portail en vidéo", help_text="Saisissez le titre qui apparaîtra dans le bouton de lecture de la vidéo."),
 
     # Renseignements
     Parametre(code="renseignements_afficher_page", label="Afficher la page", type="boolean", valeur=True),
-    Parametre(code="renseignements_intro", label="Texte d'introduction", type="char", valeur="Cliquez sur l'une des fiches listées ci-dessous pour consulter les renseignements et les corriger si besoin."),
+    Parametre(code="renseignements_intro", label="Texte d'introduction", type="char_2lignes", valeur="Cliquez sur l'une des fiches listées ci-dessous pour consulter les renseignements et les corriger si besoin."),
     Parametre(code="validation_auto:famille_caisse", label="Validation automatique de la page 'Caisse'", type="boolean", valeur=True),
     Parametre(code="validation_auto:individu_identite", label="Validation automatique de la page 'Identité'", type="boolean", valeur=True),
     Parametre(code="validation_auto:individu_coords", label="Validation automatique de la page 'Coordonnées'", type="boolean", valeur=True),
@@ -69,16 +73,16 @@ LISTE_PARAMETRES = [
 
     # Documents
     Parametre(code="documents_afficher_page", label="Afficher la page", type="boolean", valeur=True),
-    Parametre(code="documents_intro", label="Texte d'introduction", type="char", valeur="Vous pouvez ici consulter ou transmettre des documents."),
+    Parametre(code="documents_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez ici consulter ou transmettre des documents."),
 
     # Réservations
     Parametre(code="reservations_afficher_page", label="Afficher la page", type="boolean", valeur=True),
-    Parametre(code="reservations_intro", label="Texte d'introduction", type="char", valeur="Sélectionnez une activité puis cliquez sur une des périodes disponibles pour accéder au calendrier des réservations correspondant."),
-    Parametre(code="reservations_intro_planning", label="Texte d'introduction du planning", type="char", valeur="Cliquez dans les cases pour ajouter ou supprimer des consommations avant de valider l'envoi des données."),
+    Parametre(code="reservations_intro", label="Texte d'introduction", type="char_2lignes", valeur="Sélectionnez une activité puis cliquez sur une des périodes disponibles pour accéder au calendrier des réservations correspondant."),
+    Parametre(code="reservations_intro_planning", label="Texte d'introduction du planning", type="char_2lignes", valeur="Cliquez dans les cases pour ajouter ou supprimer des consommations avant de valider l'envoi des données."),
 
     # Facturation
     Parametre(code="facturation_afficher_page", label="Afficher la page", type="boolean", valeur=True),
-    Parametre(code="facturation_intro", label="Texte d'introduction", type="char", valeur="Vous pouvez consulter ici les données de facturation."),
+    Parametre(code="facturation_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez consulter ici les données de facturation."),
     Parametre(code="facturation_afficher_numero_facture", label="Afficher le numéro des factures", type="boolean", valeur=True),
     Parametre(code="facturation_afficher_solde_facture", label="Afficher le solde actuel des factures", type="boolean", valeur=True),
     Parametre(code="facturation_autoriser_detail_facture", label="Afficher le détail des factures", type="boolean", valeur=True),
@@ -86,18 +90,18 @@ LISTE_PARAMETRES = [
 
     # Règlements
     Parametre(code="reglements_afficher_page", label="Afficher la page", type="boolean", valeur=True),
-    Parametre(code="reglements_intro", label="Texte d'introduction", type="char", valeur="Vous pouvez consulter ici la liste de vos règlements."),
+    Parametre(code="reglements_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez consulter ici la liste de vos règlements."),
     Parametre(code="reglements_afficher_encaissement", label="Afficher la date d'encaissement", type="boolean", valeur=True),
     Parametre(code="reglements_autoriser_telechargement_recu", label="Autoriser le téléchargement du reçu", type="boolean", valeur=True),
 
     # Contact
     Parametre(code="contact_afficher_page", label="Afficher la page", type="boolean", valeur=True),
-    Parametre(code="contact_intro", label="Texte d'introduction", type="char", valeur="Vous pouvez trouver ici les moyens de correspondre avec l'organisateur."),
-    Parametre(code="messagerie_intro", label="Texte d'introduction de la messagerie", type="char", valeur="Saisissez un message et cliquez sur le bouton Envoyer."),
+    Parametre(code="contact_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez trouver ici les moyens de correspondre avec l'organisateur."),
+    Parametre(code="messagerie_intro", label="Texte d'introduction de la messagerie", type="char_2lignes", valeur="Saisissez un message et cliquez sur le bouton Envoyer."),
 
     # Mentions
     Parametre(code="mentions_afficher_page", label="Afficher la page", type="boolean", valeur=True),
-    Parametre(code="mentions_intro", label="Texte d'introduction", type="char", valeur="Vous pouvez consulter ici les mentions légales du portail."),
+    Parametre(code="mentions_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez consulter ici les mentions légales du portail."),
     Parametre(code="mentions_conditions_generales", label="Conditions générales d'utilisation", type="html", valeur=render_to_string("portail/modele_conditions_generales.html"), help_text="Vous pouvez insérer dans le texte les mots-clés suivants : {ORGANISATEUR_NOM},  {ORGANISATEUR_RUE}, {ORGANISATEUR_CP}, {ORGANISATEUR_VILLE}."),
 
 ]
