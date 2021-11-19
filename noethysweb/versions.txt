@@ -1,3 +1,7 @@
+Version 1.0.1.7 (19/11/2021) :
+
+- Ajout de la vidéo d'accueil sur le portail
+
 Version 1.0.1.6 (17/11/2021) :
 
 - Ajout des signatures d'emails
