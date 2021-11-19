@@ -58,7 +58,7 @@ LISTE_PARAMETRES = [
 
     # Accueil
     Parametre(code="accueil_texte_bienvenue", label="Texte de bienvenue", type="html", valeur="Bienvenue sur le portail Famille"),
-    Parametre(code="accueil_url_video", label="URL vidéo", type="char_1ligne", valeur="", help_text="Saisissez l'URL d'un tutoriel vidéo que vous souhaitez voir apparaître sur la page d'accueil."),
+    Parametre(code="accueil_url_video", label="URL vidéo", type="char_1ligne", valeur="", help_text="Saisissez l'URL d'un tutoriel vidéo que vous souhaitez voir apparaître sur la page d'accueil. Pour insérer une vidéo Youtube, saisissez l'url 'https://www.youtube.com/embed/xxxxxx' en remplaçant les x par le code youtube de la vidéo."),
     Parametre(code="accueil_titre_video", label="Titre de la vidéo", type="char_1ligne", valeur="Découvrez le portail en vidéo", help_text="Saisissez le titre qui apparaîtra dans le bouton de lecture de la vidéo."),
 
     # Renseignements

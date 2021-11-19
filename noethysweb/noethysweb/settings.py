@@ -261,6 +261,7 @@ CSP_SCRIPT_SRC = (
 
 CSP_FRAME_SRC = (
     "'self'",
+    "https://www.youtube.com",
 )
 
 CSP_FRAME_ANCESTORS = (
