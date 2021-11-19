@@ -1,3 +1,9 @@
+Version 1.0.1.8 (19/11/2021) :
+
+- Ajustement de la taille de la vidéo d'accueil
+- Autorise l'utilisation de vidéos Youtube sur la page d'accueil du portail
+- Correction d'un bug sur la génération du PDF de l'état global
+
 Version 1.0.1.7 (19/11/2021) :
 
 - Ajout de la vidéo d'accueil sur le portail
