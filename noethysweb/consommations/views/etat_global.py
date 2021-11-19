@@ -60,7 +60,7 @@ def Generer_pdf(request):
     options = form.cleaned_data
 
     # Récupération des paramètres
-    parametres = json.loads(request.POST.get("liste_parametres"))
+    parametres = json.loads(request.POST.get('"liste_parametres'))
     if not parametres:
         return JsonResponse({"erreur": "Vous devez définir les paramètres"}, status=401)
 

@@ -259,7 +259,7 @@
 
         // Générer le PDF
         function generer_pdf() {
-            var parametres = get_parametres()
+            var parametres = get_parametres();
             parametres["periode"] = $("[name=selection_periode]").val();
             $('input[name=liste_parametres]').val(JSON.stringify(parametres));
             $.ajax({

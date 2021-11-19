@@ -375,8 +375,6 @@ class Impression(utils_impression.Impression):
                         #     dlg.Destroy()
                         #     return False
 
-                        print("valeur=", valeur)
-
                         # Si un arrondi est demandé
                         arrondi = dictCalcul["arrondi"]
                         if arrondi:
