@@ -45,10 +45,13 @@
     width: 100%;
     border-spacing: 0;
 }
+.table-grille td {
+    z-index: 0;
+}
 .table-grille thead tr th {
     position: sticky;
     position: -webkit-sticky;
-    top: 0px;
+    top: -1px;
     background-color: white;
     z-index: 3;
     border: 1px solid #dee2e6;
