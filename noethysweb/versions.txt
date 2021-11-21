@@ -1,3 +1,9 @@
+Version 1.0.1.9 (21/11/2021) :
+
+- Amélioration de l'affichage des approbations sur le portail
+- Ajout du rappel des approbations manquantes sur la page réservations du portail
+- Correction du défilement de la grille des conso
+
 Version 1.0.1.8 (19/11/2021) :
 
 - Ajustement de la taille de la vidéo d'accueil
