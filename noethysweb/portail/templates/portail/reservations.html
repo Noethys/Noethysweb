@@ -7,13 +7,14 @@
 {% block styles %}
     {{ block.super }}
     <style>
-        .widget-user-2 .nav > li > a {
+        .card-individu .nav > li:first-child > a {
             border-left: 0px solid;
-            border-radius: 0px;
-            border-color: #dee2e6 #dee2e6 #dee2e6;
         }
-        .widget-user-2 .list-group a {
-            padding: 8px 12px;
+        .card-individu .list-group a {
+            border-radius: 0.25rem;
+        }
+        .card-individu {
+            border-radius: 5px;
         }
     </style>
 {% endblock %}
@@ -27,17 +28,20 @@
         </div>
     {% endif %}
 
+    {% if nbre_approbations_requises > 0 %}
+        <div class="alert alert-warning">
+            <i class="fa fa-warning margin-r-5"></i> Avant d'accéder aux réservations, vous devez valider les approbations de la page <a href="{% url 'portail_renseignements' %}">Renseignements</a>.
+        </div>
+    {% endif %}
 
     {% for individu in liste_individus %}
-        <div class="card card-widget widget-user-2">
+        <div class="card card-individu">
 
             <!-- Nom de l'individu -->
-            <div class="widget-user-header bg-lightblue">
-                <div class="widget-user-image">
-                    <img class="img-circle elevation-2" src="{{ individu.Get_photo }}" alt="Photo">
-                </div>
-                <h3 class="widget-user-username">{{ individu.prenom }}</h3>
-                {% if individu.Get_age %}<h6 class="widget-user-desc">{{ individu.Get_age }} ans</h6>{% endif %}
+            <div class="user-block card-footer m-0" style="padding: .6rem 1rem;">
+                <img class="img-circle" src="{{ individu.Get_photo }}" alt="Individu Image">
+                <span class="username">{{ individu.prenom }}</span>
+                {% if individu.Get_age %}<span class="description">{{ individu.Get_age }} ans</span>{% endif %}
             </div>
 
             <!-- Liste des périodes -->

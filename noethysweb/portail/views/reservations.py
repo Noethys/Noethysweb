@@ -3,13 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, datetime
 logger = logging.getLogger(__name__)
-from portail.views.base import CustomView
+from django.db.models import Q
 from django.views.generic import TemplateView
 from core.models import Inscription, PortailPeriode
-from django.db.models import Q
-import datetime
+from portail.views.base import CustomView
+from portail.utils import utils_approbations
 
 
 class View(CustomView, TemplateView):
@@ -56,5 +56,9 @@ class View(CustomView, TemplateView):
                 dict_periodes.setdefault(periode.activite, [])
                 dict_periodes[periode.activite].append(periode)
         context['dict_periodes'] = dict_periodes
+
+        # Approbations
+        approbations_requises = utils_approbations.Get_approbations_requises(famille=self.request.user.famille)
+        context['nbre_approbations_requises'] = approbations_requises["nbre_total"]
 
         return context
