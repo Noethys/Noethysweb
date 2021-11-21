@@ -1,13 +1,13 @@
 {% load static %}
 
-<div class="alert alert-default-secondary p-0">
+<div class="card alert-default-secondary p-0 card_approbation">
     <table class="table no-border m-1">
         <tbody>
             <tr>
-                <td>
+                <td class="p-1">
                     <div id="div_{{ id }}" class="custom-control custom-checkbox">
                         <input type="checkbox" name="{{ name }}" class="checkboxinput custom-control-input" id="{{ id }}">
-                        <label for="{{ id }}" class="custom-control-label">
+                        <label for="{{ id }}" class="custom-control-label" style="font-size: 13px;">
                             {% if unite_consentement %}
                                 J'ai lu et j'accepte les conditions décrites dans le document '{{ unite_consentement.type_consentement.nom }}'.
                             {% endif %}
@@ -24,8 +24,8 @@
                     </div>
                 </td>
                 {% if unite_consentement %}
-                    <td class="text-right py-0 align-middle">
-                        <a href="{{ unite_consentement.document.url }}" style="text-decoration: none;" target="_blank" class="btn btn-light" title="Cliquez ici pour ouvrir le document dans un nouvel onglet"><i class="fa fa-download"></i></br>Télécharger</a>
+                    <td class="text-right py-0 pt-1">
+                        <a href="{{ unite_consentement.document.url }}" style="text-decoration: none;" target="_blank" class="btn btn-light btn-xs" title="Cliquez ici pour ouvrir le document dans un nouvel onglet"><i class="fa fa-search"></i></a>
                     </td>
                 {% endif %}
             </tr>

@@ -20,6 +20,46 @@
         .project-state {
             text-align: left !important;
         }
+
+        @media (min-width: 1500px) {
+            .card-columns {
+                -webkit-column-count: 4;
+                -moz-column-count: 4;
+                column-count: 4;
+            }
+        }
+        @media (max-width: 1500px) {
+            .card-columns {
+                -webkit-column-count: 3;
+                -moz-column-count: 3;
+                column-count: 3;
+            }
+        }
+        @media (max-width: 800px) {
+            .card-columns {
+                -webkit-column-count: 2;
+                -moz-column-count: 2;
+                column-count: 2;
+            }
+        }
+        @media (max-width: 550px) {
+            .card-columns {
+                -webkit-column-count: 1;
+                -moz-column-count: 1;
+                column-count: 1;
+            }
+        }
+        .card_approbation {
+            margin-bottom: 0px !important;
+            margin-top: 1px;
+        }
+        .card-columns {
+            column-gap: 10px;
+            margin-bottom: 4px;
+        }
+        #famille_approbations_form .form-group {
+            margin-bottom: 5px;
+        }
     </style>
 {% endblock %}
 
@@ -37,9 +77,15 @@
         {% embed 'core/box.html' with box_introduction=True %}
             {% block box_theme %}card-outline card-info{% endblock %}
             {% block box_titre %}Approbations en attente{% endblock %}
-            {% block box_introduction %}L'accès aux réservations nécessite les approbations suivantes. Cochez la case pour chaque ligne souhaitée et cliquez sur le bouton Valider.{% endblock %}
+            {% block box_introduction %}L'accès aux réservations nécessite les approbations suivantes. Après avoir vérifié les fiches, cochez les cases puis cliquez sur le bouton Valider.{% endblock %}
             {% block box_contenu %}
-                {% crispy form %}
+                <form id="famille_approbations_form" method="post">
+                    {% csrf_token %}
+                    <div class="card-columns">
+                        {% crispy form %}
+                    </div>
+                    <button type="submit" title="Enregistrer" class="btn btn-primary pull-right" value="Enregistrer"><i class="fa fa-check margin-r-5"></i>Valider les approbations cochées</button>
+                </form>
             {% endblock %}
         {% endembed %}
     {% endif %}

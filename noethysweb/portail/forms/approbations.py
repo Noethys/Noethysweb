@@ -22,6 +22,7 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.form_id = 'famille_approbations_form'
         self.helper.form_method = 'post'
         self.helper.form_show_labels = False
+        self.helper.form_tag = False
         self.helper.layout = Layout()
 
         # Importation des données
@@ -51,7 +52,3 @@ class Formulaire(FormulaireBase, forms.Form):
         # Création des contrôles de validation
         if not self.fields:
             self.helper.layout.append(HTML("<strong>Aucune approbation n'est actuellement nécessaire.</strong>"))
-        else:
-            self.helper.layout.append(ButtonHolder(
-                StrictButton("<i class='fa fa-check margin-r-5'></i>Valider les approbations cochées", title="Enregistrer", name="enregistrer", type="submit", css_class="btn-primary"),
-                css_class="pull-right"))
