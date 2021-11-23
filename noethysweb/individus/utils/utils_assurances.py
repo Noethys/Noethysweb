@@ -17,15 +17,12 @@ def Get_assurances_manquantes_by_inscriptions(famille=None, inscriptions=None):
 
     # Recherche les assurances existantes
     dict_assurances = {}
-    conditions = Q(famille=famille) & Q(individu_id__in=liste_individus) & Q(date_debut__gte=datetime.date.today()) & (Q(date_fin__isnull=True) | Q(date_fin__lte=datetime.date.today()))
+    conditions = Q(famille=famille) & Q(individu_id__in=liste_individus) & Q(date_debut__lte=datetime.date.today()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
     for assurance in Assurance.objects.select_related("individu").filter(conditions):
         dict_assurances.setdefault(assurance.individu, [])
         dict_assurances[assurance.individu].append(assurance)
 
     # Recherche les assurances manquantes
-    resultats = []
-    for individu in liste_individus:
-        if individu not in dict_assurances:
-            resultats.append(individu)
+    resultats = [individu for individu in liste_individus if individu not in dict_assurances]
 
     return resultats

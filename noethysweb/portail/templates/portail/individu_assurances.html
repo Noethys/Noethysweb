@@ -12,8 +12,10 @@
             {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
             {% block box_contenu %}
 
-                {% embed "individus/alerte.html" with titre_uniquement=True titre="Assurance obligatoire"%}
-                {% endembed %}
+                {% if assurance_manquante %}
+                    {% embed "individus/alerte.html" with titre_uniquement=True titre="<i class='icon fa fa-warning text-danger'></i> Assurance obligatoire"%}
+                    {% endembed %}
+                {% endif %}
 
                 <div class="">
                     {% if liste_assurances %}
