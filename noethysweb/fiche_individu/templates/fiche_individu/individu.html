@@ -8,9 +8,15 @@
 {% block styles %}
     {{ block.super }}
 
-    <style type="text/css">
+    <style>
         .widget-user-2 .widget-user-username, .widget-user-2 .widget-user-desc {
             margin-left: 0px;
+        }
+        .card-rubriques .card-footer {
+            border-radius: 0 0 0.25rem 0.25rem;
+        }
+        .card-rubriques .list-group a:last-child {
+            border-radius: 0 0 0.25rem 0.25rem;
         }
     </style>
 
@@ -23,7 +29,7 @@
 
             <a type='button' title="Retour à la fiche famille" class='btn btn-block btn-default' style="margin-bottom: 20px;" href="{% url 'famille_resume' idfamille=idfamille %}"><i class="fa fa-arrow-circle-o-left"></i> Retour à la fiche famille</a>
 
-            <div class="card card-widget widget-user-2">
+            <div class="card card-widget widget-user-2 card-rubriques">
 
                 {# Nom de l'individu #}
                 <div class="widget-user-header bg-lightblue">

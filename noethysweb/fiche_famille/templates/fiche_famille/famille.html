@@ -8,9 +8,15 @@
 {% block styles %}
     {{ block.super }}
 
-    <style type="text/css">
+    <style>
         .widget-user-2 .widget-user-username, .widget-user-2 .widget-user-desc {
             margin-left: 0px;
+        }
+        .card-rubriques .card-footer {
+            border-radius: 0 0 0.25rem 0.25rem;
+        }
+        .card-rubriques .list-group a:last-child {
+            border-radius: 0 0 0.25rem 0.25rem;
         }
     </style>
 
@@ -20,25 +26,12 @@
 
     <div class="row">
         <div class="col-md-3">
-            <div class="card card-widget widget-user-2">
+            <div class="card card-widget widget-user-2 card-rubriques">
 
                 {# Nom de la famille #}
                 <div class="widget-user-header bg-lightblue">
                     <h3 class="widget-user-username">{{ famille.nom }}</h3>
                 </div>
-
-                {# Onglets la famille #}
-{#                <div class="card-footer p-0 bg-white">#}
-{#                    <ul class="nav flex-column">#}
-{#                        {% for onglet in liste_onglets %}#}
-{#                            <li class="nav-item {% if onglet_actif == onglet.code %}active{% endif %}">#}
-{#                                <a class="nav-link" href="{% url onglet.url idfamille=famille.idfamille %}">#}
-{#                                    <i class="fa {{ onglet.icone }} text-light-blue fa-fw"></i> {{ onglet.label }}#}
-{#                                </a>#}
-{#                            </li>#}
-{#                        {% endfor %}#}
-{#                    </ul>#}
-{#                </div>#}
 
                 <div class="card-footer p-0 bg-white">
                     <ul class="list-group list-group-flush">
