@@ -1,3 +1,8 @@
+Version 1.0.2.0 (23/11/2021) :
+
+- Correction de l'affichage de l'assurance manquante sur le portail
+- Quelques corrections sur les radius
+
 Version 1.0.1.9 (21/11/2021) :
 
 - Amélioration de l'affichage des approbations sur le portail
