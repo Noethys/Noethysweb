@@ -107,6 +107,9 @@ function On_change_activite() {
             } else {
                 $("#div_id_groupe").show()
             }
+            if ($("#id_groupe").children('option').length === 2) {
+                $("#id_groupe").val($("#id_groupe option:eq(1)").val());
+            };
         }
     });
     $.ajax({ 
@@ -121,6 +124,9 @@ function On_change_activite() {
             } else {
                 $("#div_id_categorie_tarif").show()
             }
+            if ($("#id_categorie_tarif").children('option').length == 2) {
+                $("#id_categorie_tarif").val($("#id_categorie_tarif option:eq(1)").val());
+            };
         }
     });
 };
