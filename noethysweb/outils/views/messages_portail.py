@@ -52,7 +52,7 @@ class Liste(Page, crud.Liste):
                 'date_creation': "date"
             }
             processors = {
-                'date_creation': helpers.format_date('%d/%m/%Y %H:%m'),
+                'date_creation': helpers.format_date('%d/%m/%Y %H:%M'),
             }
 
         def Get_date_lecture(self, instance, *args, **kwargs):

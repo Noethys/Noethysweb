@@ -51,7 +51,7 @@ class Liste(Page, crud.Liste):
             columns = ['check', 'idmail', 'date_creation', 'objet', 'nbre_destinataires']
             ordering = ['date_creation']
             processors = {
-                'date_creation': helpers.format_date('%d/%m/%Y %H:%m'),
+                'date_creation': helpers.format_date('%d/%m/%Y %H:%M'),
             }
 
 
