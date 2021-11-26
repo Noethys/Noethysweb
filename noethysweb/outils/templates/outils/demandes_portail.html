@@ -13,7 +13,7 @@
                 {% block box_contenu %}
                     <div class="custom-control custom-checkbox custom-control-inline">
                         <input type="checkbox" class="custom-control-input" id="id_check_attente" {% if afficher_renseignements_attente %}checked{% endif %}>
-                        <label class="custom-control-label" for="id_check_attente">Afficher uniquement les valisations en attente</label>
+                        <label class="custom-control-label" for="id_check_attente">Afficher uniquement les modifications en attente de lecture ou de validation</label>
                     </div>
                     {% embed 'core/crud/liste.html' %}
                     {% endembed %}

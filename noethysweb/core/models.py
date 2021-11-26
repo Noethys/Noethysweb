@@ -1533,7 +1533,6 @@ class Individu(models.Model):
                 "adresse_complete": adresse_complete, "secteur": individu.secteur, "mail": mail}
 
     def Get_ville_resid(self):
-        print("self.ville_resid=", self.ville_resid)
         return self.ville_resid
 
     def Get_adresse_complete(self):
@@ -1791,7 +1790,7 @@ class Vaccin(models.Model):
         verbose_name_plural = "vaccins"
 
     def __str__(self):
-        return "Vaccin du %s" % self.date.strftime('%d/%m/%Y')
+        return "Vaccin %s du %s" % (self.type_vaccin, self.date.strftime('%d/%m/%Y'))
 
 
 class Note(models.Model):
@@ -2501,9 +2500,12 @@ class Historique(models.Model):
     individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.CASCADE)
     titre = models.CharField(verbose_name="Action", max_length=300, blank=True, null=True)
     detail = encrypt(models.TextField(verbose_name="Détail", blank=True, null=True))
+    old = encrypt(models.TextField(verbose_name="Ancienne valeur", blank=True, null=True))
     objet = models.CharField(verbose_name="Objet", max_length=300, blank=True, null=True)
     idobjet = models.IntegerField(verbose_name="ID objet", blank=True, null=True)
     classe = models.CharField(verbose_name="Classe objet", max_length=300, blank=True, null=True)
+    portail = models.BooleanField(verbose_name="Portail", default=False)
+    date_lecture = models.DateTimeField(verbose_name="Date de lecture", blank=True, null=True)
 
     class Meta:
         db_table = 'historique'
@@ -2786,6 +2788,8 @@ class PortailRenseignement(models.Model):
     etat = models.CharField(verbose_name="Etat", max_length=100, choices=choix_etat, default="ATTENTE")
     traitement_utilisateur = models.ForeignKey(Utilisateur, verbose_name="Traité par", blank=True, null=True, on_delete=models.PROTECT)
     traitement_date = models.DateTimeField(verbose_name="Date du traitement", blank=True, null=True)
+    validation_auto = models.BooleanField(verbose_name="Validation automatique", default=True)
+    idobjet = models.IntegerField(verbose_name="ID objet", blank=True, null=True)
 
     class Meta:
         db_table = 'portail_renseignements'
@@ -2890,7 +2894,12 @@ class Assurance(models.Model):
         verbose_name_plural = "assurances"
 
     def __str__(self):
-        return "Assurance %s à partir du %s" % (self.assureur, utils_dates.ConvertDateToFR(self.date_debut))
+        texte = "Assurance %s" % self.assureur
+        if self.date_fin:
+            texte += " du %s au %s" % (utils_dates.ConvertDateToFR(self.date_debut), utils_dates.ConvertDateToFR(self.date_fin))
+        else:
+            texte += " à partir du %s" % utils_dates.ConvertDateToFR(self.date_debut)
+        return texte
 
     def get_upload_path(self):
         return str(self.individu_id)

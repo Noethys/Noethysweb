@@ -3,11 +3,12 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, datetime
+import logging, json
 logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
+from django.core.serializers.json import DjangoJSONEncoder
 from core.views import crud
-from core.models import PortailMessage
+from core.models import PortailMessage, PortailRenseignement
 from portail.forms.transmettre_piece import Formulaire
 from portail.views.base import CustomView
 
@@ -34,3 +35,9 @@ class Ajouter(Page, crud.Ajouter):
 
     def Get_detail_historique(self, instance):
         return "Famille=%s, Pièce=%s" % (instance.famille, instance.Get_nom())
+
+    def Apres_form_valid(self, form=None, instance=None):
+        # Mémorisation du renseignement
+        PortailRenseignement.objects.create(famille=instance.famille, individu=instance.individu,
+                                            categorie="documents", code="Nouvelle pièce",
+                                            nouvelle_valeur=json.dumps(instance.Get_nom(), cls=DjangoJSONEncoder))

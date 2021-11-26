@@ -3,12 +3,14 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.contrib import messages
+from django.core.serializers.json import DjangoJSONEncoder
 from core.views import crud
-from core.models import ContactUrgence
+from core.models import ContactUrgence, PortailRenseignement
 from portail.forms.individu_contacts import Formulaire
 from portail.views.fiche import Onglet
 from portail.forms.individu_contacts_importer import Formulaire as Formulaire_importer
@@ -63,12 +65,42 @@ class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
     template_name = "portail/fiche_edit.html"
 
+    def form_valid(self, form):
+        """ Enregistrement des modifications """
+        # Enregistrement des valeurs
+        instance = self.form_save(form)
+
+        # Mémorisation du renseignement
+        PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code="Nouveau contact",
+                                            nouvelle_valeur=json.dumps(instance.Get_nom(), cls=DjangoJSONEncoder), idobjet=instance.pk)
+
+        # Message de confirmation
+        messages.add_message(self.request, messages.SUCCESS, "Votre ajout a été enregistré")
+
+        # Demande une nouvelle certification
+        self.Demande_nouvelle_certification()
+
+        if self.object:
+            self.save_historique(instance=self.object, form=form)
+
+        return HttpResponseRedirect(self.get_success_url())
+
+
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire
     template_name = "portail/fiche_edit.html"
 
 class Supprimer(Page, crud.Supprimer):
     template_name = "portail/fiche_delete.html"
+
+    def Apres_suppression(self, objet=None):
+        # Mémorisation du renseignement
+        PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code="Contact supprimé",
+                                            ancienne_valeur=json.dumps(objet.Get_nom(), cls=DjangoJSONEncoder))
+
+        # Demande une nouvelle certification de la fiche
+        self.Demande_nouvelle_certification()
+
 
 class Importer(Page, TemplateView):
     form_class = Formulaire_importer
@@ -96,6 +128,13 @@ class Importer(Page, TemplateView):
                 contact.pk = None
                 contact.individu_id = self.get_individu().pk
                 contact.save()
+
+                # Mémorisation du renseignement
+                PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code="Contact importé",
+                                                    nouvelle_valeur=json.dumps(contact.Get_nom(), cls=DjangoJSONEncoder))
+
+            messages.add_message(self.request, messages.SUCCESS, "%d contacts importés avec succès" % len(liste_idcontact))
+
         else:
             messages.add_message(self.request, messages.INFO, "Aucun contact importé")
 

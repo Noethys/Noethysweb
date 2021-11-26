@@ -30,7 +30,7 @@ class Formulaire(FormulaireBase, forms.Form):
         # self.helper.use_custom_control = False
 
         # Importation des renseignements en attente de validation
-        renseignements = PortailRenseignement.objects.filter(categorie="individu_questionnaire", famille=rattachement.famille, individu=rattachement.individu, etat="ATTENTE").order_by("date")
+        renseignements = PortailRenseignement.objects.filter(categorie="individu_questionnaire", famille=rattachement.famille, individu=rattachement.individu, etat="ATTENTE", validation_auto=False).order_by("date")
         dict_renseignements = {renseignement.code: json.loads(renseignement.nouvelle_valeur) for renseignement in renseignements}
 
         # Création des champs

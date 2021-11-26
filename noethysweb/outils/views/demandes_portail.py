@@ -9,7 +9,8 @@ from django.http import JsonResponse
 from django.db.models import Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import PortailRenseignement, TypeSieste, Caisse, Individu, Secteur, CategorieTravail, RegimeAlimentaire, TypeMaladie, Medecin
+from core.models import PortailRenseignement, TypeSieste, Caisse, Individu, Secteur, CategorieTravail, RegimeAlimentaire, TypeMaladie, \
+                        Medecin, ContactUrgence, Assurance, Information, QuestionnaireQuestion, Vaccin
 from core.data import data_civilites
 from core.utils import utils_dates, utils_parametres
 from portail.utils import utils_champs
@@ -24,7 +25,7 @@ def Appliquer_modification(request):
 
     if etat == "VALIDE":
         # Récupération de la nouvelle valeur
-        nouvelle_valeur = json.loads(demande.nouvelle_valeur)
+        nouvelle_valeur = json.loads(demande.nouvelle_valeur) if demande.nouvelle_valeur else None
 
         # Famille
         if demande.categorie == "famille_caisse":
@@ -69,10 +70,25 @@ def Appliquer_modification(request):
     return JsonResponse({"succes": True})
 
 
+def Get_labels():
+    dict_labels = utils_champs.Get_labels_champs()
+
+    # Ajout des tables spéciales
+    for categorie, table in [("individu_contacts", ContactUrgence), ("individu_assurance", Assurance), ("individu_informations", Information), ("individu_vaccinations", Vaccin)]:
+        for field in table._meta.get_fields():
+            dict_labels[(categorie, field.name)] = "%s : %s" % (table._meta.verbose_name.capitalize(), field.verbose_name)
+
+    # Ajout des questionnaires
+    for question in QuestionnaireQuestion.objects.all():
+        dict_labels["question_%d" % question.pk] = "Questionnaire : %s" % question.label
+
+    return dict_labels
+
+
 class Page(crud.Page):
     model = PortailRenseignement
     url_liste = "demandes_portail_liste"
-    description_liste = "Voici ci-dessous la liste des renseignements du portail à valider."
+    description_liste = "Voici ci-dessous la liste des modifications effectuées sur le portail à lire ou à valider."
     objet_singulier = "un renseignement à valider"
     objet_pluriel = "des renseignements à valider"
 
@@ -90,6 +106,8 @@ class Liste(Page, crud.Liste):
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
+        context['page_titre'] = "Historique du portail"
+        context['box_titre'] = "Liste des modifications effectuées sur le portail"
         context['afficher_menu_brothers'] = True
         context['afficher_renseignements_attente'] = self.afficher_renseignements_attente
         return context
@@ -107,7 +125,7 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idrenseignement", "date", "famille", "individu", "code", "ancienne_valeur", "nouvelle_valeur",
+            columns = ["idrenseignement", "date", "famille", "individu", "code", "nouvelle_valeur", "ancienne_valeur",
                        "etat", "traitement_date", "traitement_utilisateur", "boutons_validation", "actions"]
             ordering = ['date']
             labels = {
@@ -115,41 +133,71 @@ class Liste(Page, crud.Liste):
                 "traitement_date": "Traité le",
             }
             processors = {
-                "date": helpers.format_date('%d/%m/%Y %H:%m'),
-                "traitement_date": helpers.format_date('%d/%m/%Y %H:%m'),
+                "date": helpers.format_date('%d/%m/%Y %H:%M'),
+                "traitement_date": helpers.format_date('%d/%m/%Y %H:%M'),
             }
 
         def Formate_code(self, instance, **kwargs):
             if not hasattr(self, "dict_labels"):
-                self.dict_labels = utils_champs.Get_labels_champs()
-            return self.dict_labels.get(instance.code, "?")
+                self.dict_labels = Get_labels()
+            if (instance.categorie, instance.code) in self.dict_labels:
+                return self.dict_labels.get((instance.categorie, instance.code))
+            return self.dict_labels.get(instance.code, instance.code)
 
         def Formate_individu(self, instance, **kwargs):
             return instance.individu.Get_nom() if instance.individu else ""
 
         def Formate_etat(self, instance, **kwargs):
-            if instance.etat == "ATTENTE": return "<small class='badge badge-warning'>Attente</small>"
-            if instance.etat == "VALIDE": return "<small class='badge badge-success'>Validé</small>"
-            if instance.etat == "REFUS": return "<small class='badge badge-danger'>Refusé</small>"
+            if instance.validation_auto:
+                if instance.etat == "ATTENTE": return "<small class='badge badge-warning'>Non lu</small>"
+                if instance.etat == "VALIDE": return "<small class='badge badge-success'>Lu</small>"
+            else:
+                if instance.etat == "ATTENTE": return "<small class='badge badge-warning'>Attente</small>"
+                if instance.etat == "VALIDE": return "<small class='badge badge-success'>Validé</small>"
+                if instance.etat == "REFUS": return "<small class='badge badge-danger'>Refusé</small>"
 
         def Formate_ancienne_valeur(self, instance, **kwargs):
+            if not instance.ancienne_valeur:
+                return ""
             return """<span class='text-danger'>%s</span>""" % self.Formate_valeur(json.loads(instance.ancienne_valeur), instance)
 
         def Formate_nouvelle_valeur(self, instance, **kwargs):
+            if not instance.nouvelle_valeur:
+                return ""
             return """<span class='text-success'>%s</span>""" % self.Formate_valeur(json.loads(instance.nouvelle_valeur), instance)
 
         def Get_boutons_validation(self, instance, *args, **kwargs):
             html = []
-            if instance.etat in ("ATTENTE", "REFUS"):
-                html.append("""<button class='btn btn-success btn-xs' onclick="traiter_demande(%d, 'VALIDE')" title='Valider'><i class="fa fa-fw fa-thumbs-up"></i></button>""" % instance.pk)
-            if instance.etat in ("ATTENTE", "VALIDE"):
-                html.append("""<button class='btn btn-danger btn-xs' onclick="traiter_demande(%d, 'REFUS')" title='Refuser'><i class="fa fa-fw fa-thumbs-down"></i></button>""" % instance.pk)
+            if instance.validation_auto:
+                if instance.etat == "ATTENTE":
+                    html.append("""<button class='btn btn-primary btn-xs' onclick="traiter_demande(%d, 'VALIDE')" title='Marquer comme lu'><i class="fa fa-fw fa-eye"></i></button>""" % instance.pk)
+                if instance.etat == "VALIDE":
+                    html.append("""<button class='btn btn-danger btn-xs' onclick="traiter_demande(%d, 'ATTENTE')" title='Marquer comme non lu'><i class="fa fa-fw fa-eye-slash"></i></button>""" % instance.pk)
+            else:
+                if instance.etat in ("ATTENTE", "REFUS"):
+                    html.append("""<button class='btn btn-success btn-xs' onclick="traiter_demande(%d, 'VALIDE')" title='Valider'><i class="fa fa-fw fa-thumbs-up"></i></button>""" % instance.pk)
+                if instance.etat in ("ATTENTE", "VALIDE"):
+                    html.append("""<button class='btn btn-danger btn-xs' onclick="traiter_demande(%d, 'REFUS')" title='Refuser'><i class="fa fa-fw fa-thumbs-down"></i></button>""" % instance.pk)
             return self.Create_boutons_actions(html)
 
         def Get_actions(self, instance, *args, **kwargs):
-            html = [
-                self.Create_bouton(url=reverse("famille_resume", args=[instance.famille_id]), title="Ouvrir la fiche famille", icone="fa-users", args="target='_blank'"),
-            ]
+            html = []
+
+            # Modifier les données
+            if instance.idobjet and instance.categorie in ("individu_vaccinations", "individu_informations", "individu_contacts", "individu_assurances"):
+                html.append(self.Create_bouton(url=reverse("%s_modifier" % instance.categorie, args=[instance.famille_id, instance.individu_id, instance.idobjet]), title="Modifier", icone="fa-pencil", args="target='_blank'"))
+            elif instance.categorie in ("individu_identite", "individu_coords", "individu_questionnaire", "individu_regimes_alimentaires", "individu_maladies"):
+                html.append(self.Create_bouton(url=reverse("%s_modifier" % instance.categorie, args=[instance.famille_id, instance.individu_id]), title="Modifier", icone="fa-pencil", args="target='_blank'"))
+            elif instance.categorie in ("individu_medecin"):
+                html.append(self.Create_bouton(url=reverse("individu_medical_liste", args=[instance.famille_id, instance.individu_id]), title="Modifier", icone="fa-pencil", args="target='_blank'"))
+            elif instance.categorie in ("famille_caisse",):
+                html.append(self.Create_bouton(url=reverse("%s_modifier" % instance.categorie, args=[instance.famille_id]), title="Modifier", icone="fa-pencil", args="target='_blank'"))
+
+            # Ouvrir la fiche individuelle
+            if instance.individu:
+                html.append(self.Create_bouton(url=reverse("famille_resume", args=[instance.famille_id]), title="Ouvrir la fiche famille", icone="fa-users", args="target='_blank'"))
+
+            # Ouvrir la fiche famille
             if instance.individu:
                 html.append(self.Create_bouton(url=reverse("individu_resume", args=[instance.famille_id, instance.individu_id]), title="Ouvrir la fiche individuelle", icone="fa-user", args="target='_blank'"))
             return self.Create_boutons_actions(html)

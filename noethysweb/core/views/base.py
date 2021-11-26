@@ -6,13 +6,15 @@
 import logging, json
 logger = logging.getLogger(__name__)
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
-from core.views.menu import GetMenuPrincipal
-from noethysweb.version import GetVersion
-from core.models import Organisateur, Parametre, Utilisateur, PortailMessage, PortailRenseignement
-from django.core.cache import cache
-from core.utils import utils_parametres
+from django.db.models import Count
 from django.http import JsonResponse
 from django.conf import settings
+from django.core.cache import cache
+from core.views.menu import GetMenuPrincipal
+from core.models import Organisateur, Parametre, Utilisateur, PortailMessage, PortailRenseignement
+from core.utils import utils_parametres
+from noethysweb.version import GetVersion
+
 
 
 def Memorise_option(request):
@@ -126,7 +128,9 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
         context["liste_messages_non_lus"] = PortailMessage.objects.select_related("famille", "structure").filter(structure__in=self.request.user.structures.all(), utilisateur__isnull=True, date_lecture__isnull=True).order_by("date_creation")
 
         # Renseignements à traiter
-        context["nbre_demandes_attente"] = PortailRenseignement.objects.filter(etat="ATTENTE").count()
+        renseignements_attente = {validation_auto: nbre for validation_auto, nbre in PortailRenseignement.objects.filter(etat="ATTENTE").values_list("validation_auto").annotate(nbre=Count("pk"))}
+        context["nbre_renseignements_attente_validation"] = renseignements_attente.get(False, 0)
+        context["nbre_renseignements_attente_lecture"] = renseignements_attente.get(True, 0)
 
         return context
 

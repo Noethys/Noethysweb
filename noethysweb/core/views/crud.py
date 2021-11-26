@@ -230,6 +230,9 @@ class Ajouter(BaseView, CreateView):
         # Mémorisation dans l'historique
         self.save_historique(instance=self.object, form=form)
 
+        if hasattr(self, "Apres_form_valid"):
+            self.Apres_form_valid(form=form, instance=self.object)
+
         return HttpResponseRedirect(self.get_success_url())
 
     def Supprimer_defaut_autres_objets(self, form):
@@ -250,6 +253,9 @@ class Modifier(BaseView, UpdateView):
         # Mémorisation dans l'historique
         if form.changed_data:
             self.save_historique(instance=form.instance, form=form)
+
+        if hasattr(self, "Apres_form_valid"):
+            self.Apres_form_valid(form=form, instance=form.instance)
 
         return super(Modifier, self).form_valid(form)
 

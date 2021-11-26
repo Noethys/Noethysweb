@@ -60,7 +60,7 @@ class Page(Onglet):
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_informations_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
         ]
         context['boutons_liste_vaccinations'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_vaccins_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
+            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_vaccinations_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
         ]
         context['form_selection_medecin'] = Formulaire_medecin(idindividu=self.Get_idindividu())
         context['vaccins_obligatoires'] = utils_vaccinations.Get_vaccins_obligatoires_individu(individu=context["individu"])
@@ -79,7 +79,7 @@ class Page(Onglet):
         if "SaveAndNew" in self.request.POST and self.request.POST.get("page") == "info_medicale":
             url = "individu_informations_ajouter"
         if "SaveAndNew" in self.request.POST and self.request.POST.get("page") == "vaccin":
-            url = "individu_vaccins_ajouter"
+            url = "individu_vaccinations_ajouter"
         return reverse_lazy(url, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)})
 
 
@@ -132,8 +132,8 @@ class Liste(Page, MultipleDatatableView):
             # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
             html = [
-                self.Create_bouton_modifier(url=reverse("individu_vaccins_modifier", kwargs=kwargs)),
-                self.Create_bouton_supprimer(url=reverse("individu_vaccins_supprimer", kwargs=kwargs)),
+                self.Create_bouton_modifier(url=reverse("individu_vaccinations_modifier", kwargs=kwargs)),
+                self.Create_bouton_supprimer(url=reverse("individu_vaccinations_supprimer", kwargs=kwargs)),
             ]
             return self.Create_boutons_actions(html)
 

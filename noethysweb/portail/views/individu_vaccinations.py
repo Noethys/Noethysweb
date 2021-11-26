@@ -3,12 +3,16 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
 from django.urls import reverse_lazy
+from django.http import HttpResponseRedirect
+from django.views.generic import TemplateView
+from django.contrib import messages
+from django.core.serializers.json import DjangoJSONEncoder
 from core.views import crud
-from core.models import Vaccin
+from core.models import Vaccin, PortailRenseignement
 from portail.forms.individu_vaccinations import Formulaire
 from portail.views.fiche import Onglet
-from django.views.generic import TemplateView
 from individus.utils import utils_vaccinations
 
 
@@ -62,9 +66,37 @@ class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
     template_name = "portail/fiche_edit.html"
 
+    def form_valid(self, form):
+        """ Enregistrement des modifications """
+        # Enregistrement des valeurs
+        instance = self.form_save(form)
+
+        # Mémorisation du renseignement
+        PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code="Nouveau vaccin",
+                                            nouvelle_valeur=json.dumps(str(instance), cls=DjangoJSONEncoder), idobjet=instance.pk)
+
+        # Message de confirmation
+        messages.add_message(self.request, messages.SUCCESS, "Votre ajout a été enregistré")
+
+        # Demande une nouvelle certification
+        self.Demande_nouvelle_certification()
+
+        if self.object:
+            self.save_historique(instance=self.object, form=form)
+
+        return HttpResponseRedirect(self.get_success_url())
+
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire
     template_name = "portail/fiche_edit.html"
 
 class Supprimer(Page, crud.Supprimer):
     template_name = "portail/fiche_delete.html"
+
+    def Apres_suppression(self, objet=None):
+        # Mémorisation du renseignement
+        PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code="Vaccin supprimé",
+                                            ancienne_valeur=json.dumps(str(objet), cls=DjangoJSONEncoder))
+
+        # Demande une nouvelle certification de la fiche
+        self.Demande_nouvelle_certification()

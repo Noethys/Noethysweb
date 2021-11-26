@@ -17,7 +17,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Information
-        fields = "__all__"
+        fields = ["individu", "categorie", "intitule", "description", "document"]
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
         }

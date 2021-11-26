@@ -34,7 +34,7 @@ class FormulaireBase():
             categorie = "famille"
 
         # Importation des renseignements en attente de validation
-        renseignements = PortailRenseignement.objects.filter(categorie=self.nom_page, famille=famille, individu=individu, etat="ATTENTE").order_by("date")
+        renseignements = PortailRenseignement.objects.filter(categorie=self.nom_page, famille=famille, individu=individu, etat="ATTENTE", validation_auto=False).order_by("date")
         dict_renseignements = {renseignement.code: json.loads(renseignement.nouvelle_valeur) for renseignement in renseignements}
 
         # Liste des champs à afficher

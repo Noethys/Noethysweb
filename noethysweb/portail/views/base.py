@@ -5,6 +5,8 @@
 
 import logging, json
 logger = logging.getLogger(__name__)
+from django.db import models
+from django.db.models.query import QuerySet
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.cache import cache
 from portail.views.menu import GetMenuPrincipal
@@ -88,7 +90,25 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin):
 
         return context
 
+    def Formate_historique(self, valeur=None):
+        # Transforme une instance de model en pk
+        if isinstance(valeur, (models.Model, models.base.ModelBase)):
+            valeur = str(valeur)
+
+        # Transforme les queryset en liste de pk
+        if isinstance(valeur, QuerySet):
+            valeur = ", ".join([str(instance) for instance in valeur.all()])
+
+        # Transforme une liste d'instances en liste de pk
+        if isinstance(valeur, list):
+            valeur = ", ".join([str(item) if "models" in str(type(item)) else item for item in valeur])
+
+        # Transforme la valeur en json
+        return valeur
+
     def save_historique(self, instance=None, titre=None, detail=None, form=None):
+        old = None
+
         # Titre
         if not titre:
             if hasattr(self, "Get_titre_historique"):
@@ -106,17 +126,20 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin):
                 detail = getattr(self, "detail_historique", str(instance)).format(instance)
             else:
                 details = []
+                anciennes_valeurs = []
                 if form:
                     for nom_champ in form.changed_data:
                         try:
                             label_champ = form.instance._meta.get_field(nom_champ).verbose_name
                             valeur_champ = getattr(form.instance, nom_champ)
                             details.append("%s=%s" % (label_champ, valeur_champ))
+                            anciennes_valeurs.append("%s=%s" % (label_champ, self.Formate_historique(form.initial.get(nom_champ, None))))
                         except:
                             pass
                 else:
                     details.append(str(instance))
                 detail = ", ".join(details)
+                old = ", ".join(anciennes_valeurs)
 
         utilisateur = self.request.user
         objet = instance._meta.verbose_name.capitalize()
@@ -128,7 +151,7 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin):
         individu = getattr(instance, "individu_id", None)
         if classe == "Individu":
             individu = instance.pk
-        utils_historique.Ajouter(titre=titre, detail=detail, utilisateur=utilisateur, famille=famille, individu=individu, objet=objet, idobjet=idobjet, classe=classe)
+        utils_historique.Ajouter(titre=titre, detail=detail, old=old, utilisateur=utilisateur, famille=famille, individu=individu, objet=objet, idobjet=idobjet, classe=classe, portail=True)
 
         # Ecriture dans le log
         if famille:

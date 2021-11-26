@@ -52,9 +52,9 @@ urlpatterns = [
     path('individus/individus/medical/modifier_info/<int:idfamille>/<int:idindividu>/<int:pk>', individu_medical.Modifier_information.as_view(), name='individu_informations_modifier'),
     path('individus/individus/medical/supprimer_info/<int:idfamille>/<int:idindividu>/<int:pk>', individu_medical.Supprimer_information.as_view(), name='individu_informations_supprimer'),
 
-    path('individus/individus/medical/ajouter_vaccin/<int:idfamille>/<int:idindividu>', individu_medical.Ajouter_vaccin.as_view(), name='individu_vaccins_ajouter'),
-    path('individus/individus/medical/modifier_vaccin/<int:idfamille>/<int:idindividu>/<int:pk>', individu_medical.Modifier_vaccin.as_view(), name='individu_vaccins_modifier'),
-    path('individus/individus/medical/supprimer_vaccin/<int:idfamille>/<int:idindividu>/<int:pk>', individu_medical.Supprimer_vaccin.as_view(), name='individu_vaccins_supprimer'),
+    path('individus/individus/medical/ajouter_vaccin/<int:idfamille>/<int:idindividu>', individu_medical.Ajouter_vaccin.as_view(), name='individu_vaccinations_ajouter'),
+    path('individus/individus/medical/modifier_vaccin/<int:idfamille>/<int:idindividu>/<int:pk>', individu_medical.Modifier_vaccin.as_view(), name='individu_vaccinations_modifier'),
+    path('individus/individus/medical/supprimer_vaccin/<int:idfamille>/<int:idindividu>/<int:pk>', individu_medical.Supprimer_vaccin.as_view(), name='individu_vaccinations_supprimer'),
 
     path('individus/individus/contacts/liste/<int:idfamille>/<int:idindividu>', individu_contacts.Liste.as_view(), name='individu_contacts_liste'),
     path('individus/individus/contacts/ajouter/<int:idfamille>/<int:idindividu>', individu_contacts.Ajouter.as_view(), name='individu_contacts_ajouter'),

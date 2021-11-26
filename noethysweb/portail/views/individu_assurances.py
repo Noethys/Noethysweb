@@ -5,11 +5,13 @@
 
 import json, datetime
 from django.urls import reverse_lazy
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.db.models import Q
+from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib import messages
 from core.views import crud
-from core.models import Inscription, Assurance
+from core.models import Inscription, Assurance, PortailRenseignement
 from portail.forms.individu_assurances import Formulaire
 from portail.views.fiche import Onglet, ConsulterBase
 from portail.forms.assureurs import Formulaire as Formulaire_assureur
@@ -93,9 +95,37 @@ class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
     template_name = "portail/individu_assureur.html"
 
+    def form_valid(self, form):
+        """ Enregistrement des modifications """
+        # Enregistrement des valeurs
+        instance = self.form_save(form)
+
+        # Mémorisation du renseignement
+        PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code="Nouvelle assurance",
+                                            nouvelle_valeur=json.dumps(str(instance), cls=DjangoJSONEncoder), idobjet=instance.pk)
+
+        # Message de confirmation
+        messages.add_message(self.request, messages.SUCCESS, "Votre ajout a été enregistré")
+
+        # Demande une nouvelle certification
+        self.Demande_nouvelle_certification()
+
+        if self.object:
+            self.save_historique(instance=self.object, form=form)
+
+        return HttpResponseRedirect(self.get_success_url())
+
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire
     template_name = "portail/individu_assureur.html"
 
 class Supprimer(Page, crud.Supprimer):
     template_name = "portail/fiche_delete.html"
+
+    def Apres_suppression(self, objet=None):
+        # Mémorisation du renseignement
+        PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code="Assurance supprimée",
+                                            ancienne_valeur=json.dumps(str(objet), cls=DjangoJSONEncoder))
+
+        # Demande une nouvelle certification de la fiche
+        self.Demande_nouvelle_certification()

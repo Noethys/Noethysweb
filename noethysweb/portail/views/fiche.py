@@ -81,7 +81,7 @@ class Onglet(CustomView):
     def form_save(self, form=None):
         """ Pour enregistrement direct des données """
         # super().form_valid(form)
-        form.save()
+        return form.save()
 
     def Demande_nouvelle_certification(self):
         """ Demande une nouvelle certification de la fiche """
@@ -115,17 +115,22 @@ class Onglet(CustomView):
             messages.add_message(self.request, messages.INFO, "Aucune modification n'a été enregistrée")
         else:
             texte_message = "Votre ajout a été enregistré" if self.verbe_action == "Ajouter" else "Votre modification a été enregistrée"
+            validation_auto = self.get_dict_onglet_actif().validation_auto
 
-            if self.get_dict_onglet_actif().validation_auto:
-                # Sans validation par l'admin
-                self.form_save(form)
+            # Enregistrement des valeurs si validation auto
+            if validation_auto:
+                instance = self.form_save(form)
+                idobjet = instance.pk if instance else None
             else:
-                # Avec validation par l'admin
-                for code in form.changed_data:
-                    PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code=code,
-                                                        nouvelle_valeur=self.Formate_valeur(form.cleaned_data.get(code, None)),
-                                                        ancienne_valeur=self.Formate_valeur(form.initial.get(code, None)))
+                idobjet = None
                 texte_message += " et transmis à l'administrateur" if self.verbe_action == "Ajouter" else " et transmise à l'administrateur"
+
+            # Mémorisation du renseignement
+            for code in form.changed_data:
+                PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code=code,
+                                                    nouvelle_valeur=self.Formate_valeur(form.cleaned_data.get(code, None)),
+                                                    ancienne_valeur=self.Formate_valeur(form.initial.get(code, None)),
+                                                    validation_auto=validation_auto, idobjet=idobjet)
 
             # Message de confirmation
             messages.add_message(self.request, messages.SUCCESS, texte_message)
