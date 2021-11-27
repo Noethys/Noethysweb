@@ -447,7 +447,7 @@ urlpatterns = [
 
 
     # AJAX
-    path('parametrage/get_calendrier', secure_ajax(calendrier.Get_calendrier), name='ajax_get_calendrier'),
+    path('parametrage/get_calendrier', calendrier.Get_calendrier, name='ajax_get_calendrier'),
     path('parametrage/niveaux_scolaires/deplacer_lignes', secure_ajax(niveaux_scolaires.Deplacer.as_view()), name='ajax_deplacer_lignes_niveaux_scolaires'),
     path('parametrage/menus_categories/deplacer_lignes', secure_ajax(menus_categories.Deplacer.as_view()), name='ajax_deplacer_lignes_menus_categories'),
     path('parametrage/activites/groupes/liste/deplacer_lignes', secure_ajax(activites_groupes.Deplacer.as_view()), name='ajax_deplacer_lignes_activites_groupes'),
