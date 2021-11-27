@@ -6,6 +6,7 @@
 import datetime
 from django import forms
 from django.forms import ModelForm
+from django.contrib import messages
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Fieldset, Div, ButtonHolder
 from crispy_forms.bootstrap import Field, StrictButton
@@ -68,3 +69,10 @@ class Formulaire(FormulaireBase, ModelForm):
             Field("document"),
             Commandes(annuler_url="{% url 'portail_individu_assurances' idrattachement=rattachement.pk %}", aide=False, css_class="pull-right"),
         )
+
+    def clean(self):
+        if self.cleaned_data["date_fin"] and self.cleaned_data["date_debut"] > self.cleaned_data["date_fin"]:
+            messages.add_message(self.request, messages.ERROR, "La date de fin doit être supérieure à la date de début")
+            self.add_error("date_fin", "La date de fin doit être supérieure à la date de début")
+
+        return self.cleaned_data
