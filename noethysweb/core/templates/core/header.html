@@ -141,24 +141,28 @@
                 </li>
             {% endif %}
 
-            {# Renseignements à valider #}
-            {% if nbre_renseignements_attente_validation %}
-                <li class="nav-item dropdown">
-                    <a class="nav-link" href="{% url 'demandes_portail_liste' %}" title="Vous avez {{ nbre_renseignements_attente_validation }} renseignement{{ nbre_renseignements_attente_validation|pluralize }} à valider">
-                        <i class="fa fa-thumbs-up"></i>
-                        <span class="badge badge-warning navbar-badge">{{ nbre_renseignements_attente_validation }}</span>
-                    </a>
-                </li>
-            {% endif %}
+            {% if perms.core.demande_portail_liste %}
 
-            {# Renseignements à lire #}
-            {% if nbre_renseignements_attente_lecture %}
-                <li class="nav-item dropdown">
-                    <a class="nav-link" href="{% url 'demandes_portail_liste' %}" title="Vous avez {{ nbre_renseignements_attente_lecture }} renseignement{{ nbre_renseignements_attente_lecture|pluralize }} à lire">
-                        <i class="fa fa-eye"></i>
-                        <span class="badge badge-warning navbar-badge">{{ nbre_renseignements_attente_lecture }}</span>
-                    </a>
-                </li>
+                {# Renseignements à valider #}
+                {% if nbre_renseignements_attente_validation %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="{% url 'demandes_portail_liste' %}" title="Vous avez {{ nbre_renseignements_attente_validation }} renseignement{{ nbre_renseignements_attente_validation|pluralize }} à valider">
+                            <i class="fa fa-thumbs-up"></i>
+                            <span class="badge badge-warning navbar-badge">{{ nbre_renseignements_attente_validation }}</span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {# Renseignements à lire #}
+                {% if nbre_renseignements_attente_lecture %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="{% url 'demandes_portail_liste' %}" title="Vous avez {{ nbre_renseignements_attente_lecture }} renseignement{{ nbre_renseignements_attente_lecture|pluralize }} à lire">
+                            <i class="fa fa-eye"></i>
+                            <span class="badge badge-warning navbar-badge">{{ nbre_renseignements_attente_lecture }}</span>
+                        </a>
+                    </li>
+                {% endif %}
+
             {% endif %}
 
         </ul>

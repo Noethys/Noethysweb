@@ -119,6 +119,7 @@ class Liste(Page, crud.Liste):
         code = columns.TextColumn("Donnée", sources=['code'], processor='Formate_code')
         ancienne_valeur = columns.TextColumn("Ancienne valeur", sources=['ancienne_valeur'], processor='Formate_ancienne_valeur')
         nouvelle_valeur = columns.TextColumn("Nouvelle valeur", sources=['nouvelle_valeur'], processor='Formate_nouvelle_valeur')
+        traitement = columns.TextColumn("Traitement", sources=["traitement_date", "traitement_utilisateur"], processor='Formate_traitement')
         etat = columns.TextColumn("Etat", sources=['etat'], processor='Formate_etat')
         boutons_validation = columns.TextColumn("Validation", sources=None, processor='Get_boutons_validation')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions')
@@ -126,7 +127,7 @@ class Liste(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ["idrenseignement", "date", "famille", "individu", "code", "nouvelle_valeur", "ancienne_valeur",
-                       "etat", "traitement_date", "traitement_utilisateur", "boutons_validation", "actions"]
+                       "etat", "traitement", "boutons_validation", "actions"]
             ordering = ['date']
             labels = {
                 "date": "Date",
@@ -143,6 +144,11 @@ class Liste(Page, crud.Liste):
             if (instance.categorie, instance.code) in self.dict_labels:
                 return self.dict_labels.get((instance.categorie, instance.code))
             return self.dict_labels.get(instance.code, instance.code)
+
+        def Formate_traitement(self, instance, **kwargs):
+            if instance.traitement_date:
+                return "%s (%s)" % (utils_dates.ConvertDateToFR(instance.traitement_date), instance.traitement_utilisateur)
+            return ""
 
         def Formate_individu(self, instance, **kwargs):
             return instance.individu.Get_nom() if instance.individu else ""
@@ -190,14 +196,16 @@ class Liste(Page, crud.Liste):
                 html.append(self.Create_bouton(url=reverse("%s_modifier" % instance.categorie, args=[instance.famille_id, instance.individu_id]), title="Modifier", icone="fa-pencil", args="target='_blank'"))
             elif instance.categorie in ("individu_medecin"):
                 html.append(self.Create_bouton(url=reverse("individu_medical_liste", args=[instance.famille_id, instance.individu_id]), title="Modifier", icone="fa-pencil", args="target='_blank'"))
-            elif instance.categorie in ("famille_caisse",):
+            elif instance.categorie in ("famille_pieces"):
+                html.append(self.Create_bouton(url=reverse("%s_modifier" % instance.categorie, args=[instance.famille_id, instance.idobjet]), title="Modifier", icone="fa-pencil", args="target='_blank'"))
+            elif instance.categorie in ("famille_caisse"):
                 html.append(self.Create_bouton(url=reverse("%s_modifier" % instance.categorie, args=[instance.famille_id]), title="Modifier", icone="fa-pencil", args="target='_blank'"))
 
-            # Ouvrir la fiche individuelle
-            if instance.individu:
+            # Ouvrir la fiche famille
+            if instance.famille:
                 html.append(self.Create_bouton(url=reverse("famille_resume", args=[instance.famille_id]), title="Ouvrir la fiche famille", icone="fa-users", args="target='_blank'"))
 
-            # Ouvrir la fiche famille
+            # Ouvrir la fiche individuelle
             if instance.individu:
                 html.append(self.Create_bouton(url=reverse("individu_resume", args=[instance.famille_id, instance.individu_id]), title="Ouvrir la fiche individuelle", icone="fa-user", args="target='_blank'"))
             return self.Create_boutons_actions(html)

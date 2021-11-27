@@ -39,5 +39,5 @@ class Ajouter(Page, crud.Ajouter):
     def Apres_form_valid(self, form=None, instance=None):
         # Mémorisation du renseignement
         PortailRenseignement.objects.create(famille=instance.famille, individu=instance.individu,
-                                            categorie="documents", code="Nouvelle pièce",
-                                            nouvelle_valeur=json.dumps(instance.Get_nom(), cls=DjangoJSONEncoder))
+                                            categorie="famille_pieces", code="Nouvelle pièce", validation_auto=True,
+                                            nouvelle_valeur=json.dumps(instance.Get_nom(), cls=DjangoJSONEncoder), idobjet=instance.pk)
