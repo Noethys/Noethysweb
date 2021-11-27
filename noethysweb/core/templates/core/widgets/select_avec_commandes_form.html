@@ -41,9 +41,25 @@
 
         // Ajouter un élément
         $("#{{ id }}_bouton_ajouter").on("click", function(event) {
-            $("#{{ id }}_modal_ajout input, #{{ id }}_modal_ajout textarea").val("");
-            $('#{{ id }}_modal_ajout .modal-title').html('{{ textes.ajouter }}');
-            $('#{{ id }}_modal_ajout').modal('show');
+            bootbox.dialog({
+                title: "{{ textes.ajouter }}",
+                message: "Souhaitez-vous vraiment {{ textes.ajouter|lower }} à la liste déroulante ?<br><small>Merci de bien vérifier que cette proposition n'existe pas déjà.</small>",
+                buttons: {
+                    ok: {
+                        label: "<i class='fa fa-check'></i> Oui",
+                        className: 'btn-primary',
+                        callback: function(){
+                            $("#{{ id }}_modal_ajout input, #{{ id }}_modal_ajout textarea").val("");
+                            $('#{{ id }}_modal_ajout .modal-title').html('{{ textes.ajouter }}');
+                            $('#{{ id }}_modal_ajout').modal('show');
+                        }
+                    },
+                    cancel: {
+                        label: "<i class='fa fa-ban'></i> Non",
+                        className: 'btn-danger',
+                    }
+                }
+            });
         });
 
         // Modal : Validation

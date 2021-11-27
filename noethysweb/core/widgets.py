@@ -305,7 +305,8 @@ class Select_avec_commandes_form(Widget):
 
     class Media:
         css = {"all": ("lib/select2/css/select2.min.css",)}
-        js = ("django_select2/django_select2.js", "lib/select2/js/select2.min.js", "lib/select2/js/i18n/fr.js")
+        js = ("django_select2/django_select2.js", "lib/select2/js/select2.min.js", "lib/select2/js/i18n/fr.js",
+              "lib/bootbox/bootbox.min.js")
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())
@@ -330,7 +331,8 @@ class Select_many_avec_plus(SelectMultiple):
 
     class Media:
         css = {"all": ("lib/select2/css/select2.min.css",)}
-        js = ("django_select2/django_select2.js", "lib/select2/js/select2.min.js", "lib/select2/js/i18n/fr.js")
+        js = ("django_select2/django_select2.js", "lib/select2/js/select2.min.js", "lib/select2/js/i18n/fr.js",
+              "lib/bootbox/bootbox.min.js")
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())
