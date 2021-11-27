@@ -98,7 +98,7 @@ class Ajouter(Page, crud.Ajouter):
 
         # Insertion des dernières factures générées
         if assistant == 999999:
-            filtre = FiltreListe.objects.filter(nom="facturation.views.lots_pes_factures", parametres__contains="Dernières factures générées").first()
+            filtre = FiltreListe.objects.filter(nom="facturation.views.lots_pes_factures", parametres__contains="Dernières factures générées", utilisateur=self.request.user).first()
             if filtre:
                 parametres_filtre = json.loads(filtre.parametres)
                 idmin, idmax = parametres_filtre["criteres"]

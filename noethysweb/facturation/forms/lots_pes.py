@@ -33,7 +33,7 @@ class Formulaire_creation(FormulaireBase, forms.Form):
         # Assistant de préparation
         lots_factures = LotFactures.objects.order_by("-pk")
         liste_choix = [(0, "Aucune")]
-        if FiltreListe.objects.filter(nom="facturation.views.lots_pes_factures", parametres__contains="Dernières factures générées"):
+        if FiltreListe.objects.filter(nom="facturation.views.lots_pes_factures", parametres__contains="Dernières factures générées", utilisateur=self.request.user):
             liste_choix += [(999999, "Les dernières factures générées")]
             self.fields["assistant"].initial = 999999
         self.fields["assistant"].choices = liste_choix + [(lot.pk, "Le lot de factures %s" % lot.nom) for lot in lots_factures]

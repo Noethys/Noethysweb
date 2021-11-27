@@ -106,7 +106,7 @@ def Ajouter_filtre(request):
         filtre.parametres = json.dumps(dict_resultat)
         filtre.save()
     else:
-        FiltreListe.objects.create(nom=valeurs["nom_liste"], parametres=json.dumps(dict_resultat))
+        FiltreListe.objects.create(nom=valeurs["nom_liste"], parametres=json.dumps(dict_resultat), utilisateur=request.user)
     return JsonResponse({"success": True})
 
 

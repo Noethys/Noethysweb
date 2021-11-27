@@ -47,7 +47,7 @@ class Liste_commun():
         if not hasattr(self, "filtres_liste"):
             nom_liste = str(self)[1:str(self).find(".Liste")]
             self.filtres_liste = []
-            for item in FiltreListe.objects.filter(nom=nom_liste):
+            for item in FiltreListe.objects.filter(nom=nom_liste, utilisateur=self.request.user):
                 dict_filtre = json.loads(item.parametres)
                 dict_filtre.update({"idfiltre": item.pk})
                 self.filtres_liste.append(dict_filtre)

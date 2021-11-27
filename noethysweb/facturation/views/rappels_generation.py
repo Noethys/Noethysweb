@@ -137,14 +137,14 @@ def Generation_rappels(request):
     rappels = Rappel.objects.select_related('famille').filter(pk__gte=id_min, pk__lte=id_max).order_by("idrappel")
 
     # Enregistre le filtre pour l'impression
-    FiltreListe.objects.filter(nom="facturation.views.rappels_impression").delete()
+    FiltreListe.objects.filter(nom="facturation.views.rappels_impression", utilisateur=request.user).delete()
     parametres = """{"champ": "idrappel", "criteres": ["%d", "%d"], "condition": "COMPRIS", "label_filtre": "Rappel : Derniers rappels générés"}""" % (id_min, id_max)
-    FiltreListe.objects.create(nom="facturation.views.rappels_impression", parametres=parametres)
+    FiltreListe.objects.create(nom="facturation.views.rappels_impression", parametres=parametres, utilisateur=request.user)
 
     # Enregistre le filtre pour l'envoi par email
-    FiltreListe.objects.filter(nom="facturation.views.rappels_email").delete()
+    FiltreListe.objects.filter(nom="facturation.views.rappels_email", utilisateur=request.user).delete()
     parametres = """{"champ": "idrappel", "criteres": ["%d", "%d"], "condition": "COMPRIS", "label_filtre": "Rappel : Derniers rappels générés"}""" % (id_min, id_max)
-    FiltreListe.objects.create(nom="facturation.views.rappels_email", parametres=parametres)
+    FiltreListe.objects.create(nom="facturation.views.rappels_email", parametres=parametres, utilisateur=request.user)
 
     return render(request, "facturation/rappels_generation_actions.html", {"rappels": rappels})
 

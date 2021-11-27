@@ -2520,6 +2520,7 @@ class FiltreListe(models.Model):
     idfiltre = models.AutoField(verbose_name="ID", db_column='IDfiltre', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=400)
     parametres = models.TextField(verbose_name="Paramètres", blank=True, null=True)
+    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'filtres_listes'
