@@ -101,21 +101,32 @@ EXTRA_HTML = """
                         <span style="margin-right:20px;padding-left: 5px;">{{ unite.nom }}</span>
 
                         {% if unite.type == "Quantite" %}
-                            <div class="input-group">
-                                <span class="input-group-addon">Quantité</span>
+                            
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Quantité</span>
+                                </div>
                                 <input name="unite_{{ unite.pk }}_quantite" type="number" class="numberinput form-control" min="1" value="1" style="width: 100px;">
                             </div>
+
                         {% endif %}
 
                         {% if unite.type == "Horaire" %}
-                            <div class="input-group">
-                                <span class="input-group-addon">Début</span>
+                        
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Début</span>
+                                </div>
                                 <input name="unite_{{ unite.pk }}_debut" type="time" value="{{ unite.heure_debut }}" class="form-control"/>
                             </div>
-                            <div class="input-group">
-                                <span class="input-group-addon">fin</span>
+                            
+                            <div class="input-group input-group-sm ml-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Fin</span>
+                                </div>
                                 <input name="unite_{{ unite.pk }}_fin" type="time" value="{{ unite.heure_fin }}" class="form-control"/>
                             </div>
+
                         {% endif %}
                     
                     {% endif %}
