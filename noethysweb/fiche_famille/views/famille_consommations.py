@@ -11,10 +11,11 @@ from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from core.utils import utils_parametres
-from core.models import Inscription, Activite
+from core.models import Inscription, Activite, JOURS_COMPLETS_SEMAINE
 from core.views.base import CustomView
 from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
 from consommations.forms.grille_traitement_lot import Formulaire as form_traitement_lot
+from consommations.forms.appliquer_semaine_type import Formulaire as form_appliquer_semaine_type
 
 
 class Onglet(CustomView):
@@ -47,6 +48,8 @@ class Modifier(Onglet, TemplateView):
         context['idfamille'] = self.IDfamille
         context['idindividu'] = self.IDindividu
         context['form_traitement_lot'] = form_traitement_lot
+        context['form_appliquer_semaine_type'] = form_appliquer_semaine_type
+        context['jours_complets_semaine'] = JOURS_COMPLETS_SEMAINE
         context['data'] = self.Get_data_grille()
         return context
 
@@ -114,5 +117,11 @@ class Modifier(Onglet, TemplateView):
 
         # Incorpore les données génériques
         data.update(Get_generic_data(data))
+
+        # Liste des dates modifiables pour l'application d'une semaine-type
+        data["date_modifiable_min"] = min(data["liste_dates"])
+        data["date_modifiable_max"] = max(data["liste_dates"])
+        data["jours_semaine_modifiables"] = [0, 1, 2, 3, 4, 5, 6]
+
         return data
 

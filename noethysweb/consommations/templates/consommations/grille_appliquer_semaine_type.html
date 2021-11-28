@@ -144,7 +144,7 @@ $(document).ready(function() {
         var date_debut = $('#id_periode').data('daterangepicker').startDate.format('YYYY-MM-DD');
         var num_semaine_debut = moment(date_debut, 'YYYY-MM-DD').isoWeek();
         var date_fin = $('#id_periode').data('daterangepicker').endDate.format('YYYY-MM-DD');
-        var frequence = $("#id_frequence").val();
+        var frequence = parseInt($("#id_frequence").val());
 
         // Récupération des jours de la semaine-type
         var liste_resultats = [];
@@ -152,14 +152,15 @@ $(document).ready(function() {
             var semaine = parseInt($(this).attr('data-semaine'));
             var jour = parseInt($(this).attr('data-jour'));
             var idunite = parseInt($(this).attr('data-unite'));
-            if ((frequence == 0 && semaine == 0) || (frequence == 1 && (semaine == 1 || semaine == 2) ) || (frequence == 2 && (semaine == 4 || semaine == 5) )) {
+            if ((frequence === 0 && semaine === 0) || (frequence === 1 && (semaine === 1 || semaine === 2) ) || (frequence === 2 && (semaine === 4 || semaine === 5) )) {
                 liste_resultats.push({semaine: semaine, jour: jour, unite: idunite});
-                };
+            };
         });
 
         // Application de la semaine-type
+        touche_clavier = 17;
         $.each(dict_cases, function (key, case_tableau) {
-            if (!(case_tableau.type_case === "evenement") && !(case_tableau.type_case === "multi")) {
+            if (case_tableau.date >= date_debut && case_tableau.date <= date_fin && !(case_tableau.type_case === "evenement") && !(case_tableau.type_case === "multi")) {
                 var datejs = moment(case_tableau.date, 'YYYY-MM-DD');
                 var jour_case = datejs.isoWeekday() - 1;
                 var num_semaine_case = datejs.isoWeek();
@@ -167,34 +168,36 @@ $(document).ready(function() {
                 // Recherche si la case est dans la liste des résultats
                 var valide = false;
                 for (var i = 0; i < liste_resultats.length; i++) {
-                    if (case_tableau.date >= date_debut && case_tableau.date <= date_fin && liste_resultats[i].jour == jour_case && liste_resultats[i].unite == case_tableau.unite) {
+                    if (liste_resultats[i].jour === jour_case && liste_resultats[i].unite === case_tableau.unite) {
                         // Toutes les semaines
-                        if (frequence == 0) {
+                        if (frequence === 0) {
                             var valide = true;
                         }
                         // 1 semaine sur 2
-                        if (frequence == 1 && ((isPair(liste_resultats[i].semaine) != isPair(num_semaine_case)) == isPair(num_semaine_debut))) {
+                        if (frequence === 1 && ((isPair(liste_resultats[i].semaine) !== isPair(num_semaine_case)) === isPair(num_semaine_debut))) {
                             var valide = true;
                         }
                         // Semaines paires/impaires
-                        if (frequence == 2 && isPair(liste_resultats[i].semaine) == isPair(num_semaine_case)) {
+                        if (frequence === 2 && isPair(liste_resultats[i].semaine) === isPair(num_semaine_case)) {
                             var valide = true;
                         }
                     }
                 }
 
                 // Application réservation
-                if (valide == true) {
-                    case_tableau.ajouter(maj_facturation = false);
+                var active_facturation = !(mode === "portail");
+                if (valide === true) {
+                    case_tableau.ajouter(maj_facturation = active_facturation);
                     cases_touchees.push(case_tableau.key);
                 } else {
                     if (case_tableau.consommations.length > 0) {
-                        case_tableau.supprimer(maj_facturation = false);
+                        case_tableau.supprimer(maj_facturation = active_facturation);
                         cases_touchees.push(case_tableau.key);
                     }
                 }
             }
         });
+        touche_clavier = null;
 
         $('#modal_appliquer_semaine_type').modal('hide');
 
