@@ -6,13 +6,15 @@
 import json
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
+from django.views.generic import TemplateView
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Assurance
 from fiche_individu.forms.individu_assurances import Formulaire
 from fiche_individu.views.individu import Onglet
 from fiche_individu.forms.assureurs import Formulaire as Formulaire_assureur
+from fiche_individu.forms.individu_assurances_importer import Formulaire as Formulaire_importer
 
 
 def Ajouter_assureur(request):
@@ -54,7 +56,7 @@ class Page(Onglet):
         context['onglet_actif'] = "assurances"
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-        ]
+            {"label": "Importer depuis une autre fiche", "classe": "btn btn-default", "href": reverse_lazy("individu_assurances_importer", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-download"}, ]
         context['form_ajout'] = Formulaire_assureur()
         return context
 
@@ -125,3 +127,32 @@ class Modifier(Page, crud.Modifier):
 
 class Supprimer(Page, crud.Supprimer):
     template_name = "fiche_individu/individu_delete.html"
+
+
+class Importer(Page, TemplateView):
+    form_class = Formulaire_importer
+    template_name = "fiche_individu/individu_edit.html"
+    mode = "fiche_individu"
+
+    def get_context_data(self, **kwargs):
+        context = super(Importer, self).get_context_data(**kwargs)
+        context['box_introduction'] = "Cochez la ou les assurances à importer et cliquez sur le bouton Importer."
+        context['form'] = Formulaire_importer(idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], request=self.request)
+        return context
+
+    def post(self, request, **kwargs):
+        # Validation du form
+        form = Formulaire_importer(request.POST, idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], request=self.request)
+        if form.is_valid() == False:
+            return self.render_to_response(self.get_context_data(form=form))
+
+        # Importation des assurances
+        liste_txt = form.cleaned_data.get("assurances", "")
+        if liste_txt:
+            liste_idassurance = liste_txt.split(";")
+            for assurance in Assurance.objects.filter(pk__in=[int(idassurance) for idassurance in liste_idassurance]):
+                assurance.pk = None
+                assurance.individu_id = self.kwargs['idindividu']
+                assurance.save()
+
+        return HttpResponseRedirect(reverse_lazy("individu_assurances_liste", args=(self.kwargs['idfamille'], self.kwargs['idindividu'])))

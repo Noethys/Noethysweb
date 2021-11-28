@@ -15,6 +15,7 @@ from core.models import Inscription, Assurance, PortailRenseignement
 from portail.forms.individu_assurances import Formulaire
 from portail.views.fiche import Onglet, ConsulterBase
 from portail.forms.assureurs import Formulaire as Formulaire_assureur
+from portail.forms.individu_assurances_importer import Formulaire as Formulaire_importer
 from individus.utils import utils_assurances
 
 
@@ -129,3 +130,42 @@ class Supprimer(Page, crud.Supprimer):
 
         # Demande une nouvelle certification de la fiche
         self.Demande_nouvelle_certification()
+
+
+class Importer(Page, TemplateView):
+    form_class = Formulaire_importer
+    template_name = "portail/fiche_edit.html"
+    # mode = "fiche_individu"
+
+    def get_context_data(self, **kwargs):
+        context = super(Importer, self).get_context_data(**kwargs)
+        context['box_titre'] = "Importer les assurances d'une autre fiche"
+        context['box_introduction'] = "Cochez la ou les assurances à importer et cliquez sur le bouton Importer."
+        context['form'] = Formulaire_importer(idfamille=self.request.user.famille.pk, idindividu=self.get_individu().pk, idrattachement=self.get_rattachement().pk, request=self.request)
+        return context
+
+    def post(self, request, **kwargs):
+        # Validation du form
+        form = Formulaire_importer(request.POST, idfamille=self.request.user.famille.pk, idindividu=self.get_individu().pk, idrattachement=self.get_rattachement().pk, request=self.request)
+        if form.is_valid() == False:
+            return self.render_to_response(self.get_context_data(form=form))
+
+        # Importation des assurances
+        liste_txt = form.cleaned_data.get("assurances", "")
+        if liste_txt:
+            liste_idassurance = liste_txt.split(";")
+            for assurance in Assurance.objects.filter(pk__in=[int(idassurance) for idassurance in liste_idassurance]):
+                assurance.pk = None
+                assurance.individu_id = self.get_individu().pk
+                assurance.save()
+
+                # Mémorisation du renseignement
+                PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code="Assurance importée",
+                                                    nouvelle_valeur=json.dumps(str(assurance), cls=DjangoJSONEncoder))
+
+            messages.add_message(self.request, messages.SUCCESS, "%d assurances importées avec succès" % len(liste_idassurance))
+
+        else:
+            messages.add_message(self.request, messages.INFO, "Aucune assurance importée")
+
+        return HttpResponseRedirect(reverse_lazy("portail_individu_assurances", kwargs={"idrattachement": self.get_rattachement().pk}))

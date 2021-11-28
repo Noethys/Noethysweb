@@ -66,7 +66,7 @@ urlpatterns = [
     path('individus/individus/assurances/ajouter/<int:idfamille>/<int:idindividu>', individu_assurances.Ajouter.as_view(), name='individu_assurances_ajouter'),
     path('individus/individus/assurances/modifier/<int:idfamille>/<int:idindividu>/<int:pk>', individu_assurances.Modifier.as_view(), name='individu_assurances_modifier'),
     path('individus/individus/assurances/supprimer/<int:idfamille>/<int:idindividu>/<int:pk>', individu_assurances.Supprimer.as_view(), name='individu_assurances_supprimer'),
-
+    path('individus/individus/assurances/importer/<int:idfamille>/<int:idindividu>', individu_assurances.Importer.as_view(), name='individu_assurances_importer'),
 
     path('individus/individus/notes/ajouter/<int:idfamille>/<int:idindividu>', individu_notes.Ajouter.as_view(), name='individu_notes_ajouter'),
     path('individus/individus/notes/modifier/<int:idfamille>/<int:idindividu>/<int:pk>', individu_notes.Modifier.as_view(), name='individu_notes_modifier'),

@@ -31,7 +31,7 @@ class Formulaire(FormulaireBase, forms.Form):
 
         # Vérifie s'il existe des contacts à importer
         if ContactUrgence.objects.exclude(individu_id=self.idindividu).filter(famille_id=self.idfamille):
-            html = """"
+            html = """
                 <div class="pull-right">
                     <button type="submit" class='btn btn-primary' name="enregistrer"><i class="fa fa-check margin-r-5"></i>Importer les contacts cochés</button> 
                     <a class="btn btn-danger" href="{% url 'portail_individu_contacts' idrattachement=idrattachement %}" title="Annuler"><i class="fa fa-ban margin-r-5"></i>Annuler</a>

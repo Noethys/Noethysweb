@@ -7,7 +7,7 @@ from django.forms.widgets import Widget
 from django.template import loader
 from django.utils.safestring import mark_safe
 from core.utils import utils_dates
-from core.models import ContactUrgence
+from core.models import ContactUrgence, Assurance
 
 
 class CarteOSM(Widget):
@@ -108,6 +108,52 @@ class SelectionContactsAutresFiches(Widget):
             context['dict_branches2'].setdefault(individu.pk, [])
             for contact in contacts:
                 context['dict_branches2'][individu.pk].append({"pk": contact.pk, "label": contact.Get_nom()})
+
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
+
+    def value_from_datadict(self, data, files, name):
+        selections = data.getlist(name, [])
+        return ";".join(selections)
+
+
+class SelectionAssurancesAutresFiches(Widget):
+    template_name = 'core/widgets/checktree.html'
+    request = None
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        context['name'] = name
+
+        # Définit la hauteur du ctrl
+        if "hauteur" not in context:
+            context['hauteur'] = "600px"
+
+        # Récupération des dates
+        idfamille = context.get("idfamille", None)
+        idindividu = context.get("idindividu", None)
+
+        # Importation des assurances
+        assurances = Assurance.objects.select_related("individu").exclude(individu_id=idindividu).filter(famille_id=idfamille).order_by("-date_debut")
+        dict_assurances = {}
+        for assurance in assurances:
+            dict_assurances.setdefault(assurance.individu, [])
+            dict_assurances[assurance.individu].append(assurance)
+
+        # Branches 1
+        context['liste_branches1'] = [{"pk": individu.pk, "label": individu.Get_nom()} for individu, assurances in dict_assurances.items()]
+
+        # Branches 2
+        context['dict_branches2'] = {}
+        for individu, assurances in dict_assurances.items():
+            context['dict_branches2'].setdefault(individu.pk, [])
+            for assurance in assurances:
+                context['dict_branches2'][individu.pk].append({"pk": assurance.pk, "label": str(assurance)})
 
         return context
 

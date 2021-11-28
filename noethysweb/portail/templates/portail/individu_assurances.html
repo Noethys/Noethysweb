@@ -48,7 +48,10 @@
                         <b>Aucune assurance enregistrée.</b>
                     {% endif %}
                 </div>
-                <a class="btn btn-primary pull-right" href="{% url 'portail_individu_assurances_ajouter' idrattachement=rattachement.pk %}" title="Ajouter une assurance"><i class="fa fa-plus margin-r-5"></i>Ajouter une assurance</a>
+                <div class="pull-right">
+                    <a class="btn btn-default" href="{% url 'portail_individu_assurances_importer' idrattachement=rattachement.pk %}" title="Importer des assurances depuis une autre fiche"><i class="fa fa-download margin-r-5"></i>Importer les assurances d'une autre fiche</a>
+                    <a class="btn btn-primary" href="{% url 'portail_individu_assurances_ajouter' idrattachement=rattachement.pk %}" title="Ajouter une assurance"><i class="fa fa-plus margin-r-5"></i>Ajouter une assurance</a>
+                </div>
 
             {% endblock box_contenu %}
             {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
