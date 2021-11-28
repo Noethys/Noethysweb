@@ -85,6 +85,7 @@ var id_unique_multi = 1;
 var dict_places_prises = {};
 var cases_touchees = [];
 var chrono;
+var touche_clavier = null;
 
 
 class Case_memo {
@@ -526,7 +527,7 @@ class Case_horaire extends Case_standard {
         if (this.check_compatilites_unites() === false) {return false};
 
         // Si saisie en mode portail
-        if (mode === "portail") {
+        if ((mode === "portail") || (touche_clavier === 17)) {
             data = {
                 heure_debut: dict_unites[this.unite].heure_debut,
                 heure_fin: dict_unites[this.unite].heure_fin,
@@ -570,7 +571,7 @@ class Case_horaire extends Case_standard {
     // Toggle une conso
     toggle() {
         if (this.has_conso()) {
-            if (mode === "portail") {
+            if ((mode === "portail") || (touche_clavier === 17)) {
                 this.supprimer();
             } else {
                 this.modifier();
@@ -594,7 +595,7 @@ class Case_quantite extends Case_standard {
         if (this.check_compatilites_unites() === false) {return false};
 
         // Si saisie en mode portail
-        if (mode === "portail") {
+        if ((mode === "portail") || (touche_clavier === 17)) {
             data = {
                 quantite: 1,
             }
@@ -632,7 +633,7 @@ class Case_quantite extends Case_standard {
     // Toggle une conso
     toggle() {
         if (this.has_conso()) {
-            if (mode === "portail") {
+            if ((mode === "portail") || (touche_clavier === 17)) {
                 this.supprimer();
             } else {
                 this.modifier();
@@ -923,7 +924,6 @@ $(function () {
     var case_contextmenu = null;
 
     // Mémorise la touche enfoncée
-    var touche_clavier = null;
     $(window).keydown(function(evt) {touche_clavier = evt.which})
     .keyup(function(evt) {touche_clavier = null});
 

@@ -77,7 +77,7 @@
             dict_unites[unite.pk] = unite.fields;
             if (unite.fields.touche_raccourci === "WXK_SHIFT") {dict_touches_raccourcis[16] = unite.pk};
             if (unite.fields.touche_raccourci === "WXK_ALT") {dict_touches_raccourcis[18] = unite.pk};
-            if (unite.fields.touche_raccourci === "WXK_CONTROL") {dict_touches_raccourcis[17] = unite.pk};
+            {#if (unite.fields.touche_raccourci === "WXK_CONTROL") {dict_touches_raccourcis[17] = unite.pk};#}
         });
 
     </script>
