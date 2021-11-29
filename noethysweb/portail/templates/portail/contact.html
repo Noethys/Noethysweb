@@ -23,7 +23,7 @@
         {% block box_titre %}Messagerie{% endblock %}
         {% block box_introduction %}Cliquez ci-dessous sur la structure ou le service avec lequel vous souhaitez converser.{% endblock %}
         {% block box_contenu %}
-            {% for structure in liste_structures %}
+            {% for structure in liste_structures_messagerie %}
 
                 {% with dict_messages_non_lus|get_item:structure.pk as nbre_messages_non_lus %}
                 <a class="btn btn-app" href="{% url 'portail_messagerie' idstructure=structure.pk %}">
@@ -39,17 +39,42 @@
         {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
     {% endembed %}
 
-    {# Coordonnées #}
-    {% embed 'core/box.html' with box_titre=True box_introduction=True %}
-        {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}Coordonnées{% endblock %}
-        {% block box_introduction %}Retrouvez ci-dessous les coordonnées de l'organisateur.{% endblock %}
-        {% block box_contenu %}
-            <div><strong>{{ organisateur.nom }}</strong></div>
-            <div><i class='fa fa-map-marker margin-r-5'></i>{{ organisateur.rue }} {{ organisateur.cp }} {{ organisateur.ville }}</div>
-            <div><i class='fa fa-phone margin-r-5'></i>{{ organisateur.tel }}</div>
-        {% endblock box_contenu %}
-        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
-    {% endembed %}
+
+    {# Coordonnées des structures #}
+    {% if parametres_portail.contact_afficher_coords_structures %}
+        {% embed 'core/box.html' with box_titre=True box_introduction=False %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Annuaire des structures ou services{% endblock %}
+            {% block box_contenu %}
+                <div class="row">
+                    {% for structure in liste_structures_coords %}
+                        <div class="col-md-4 pl-3 pr-3 pb-3 pt-1">
+                            <div><strong>{{ structure.nom }}</strong></div>
+                            {% if structure.rue or structure.cp or structure.ville %}<div><i class='fa fa-map-marker margin-r-5'></i>{{ structure.rue }} {{ structure.cp }} {{ structure.ville }}</div>{% endif %}
+                            {% if structure.tel %}<div><i class='fa fa-phone margin-r-5'></i>{{ structure.tel }}</div>{% endif %}
+                            {% if structure.site %}<div><i class='fa fa-globe margin-r-5'></i><a href="http://{{ structure.site }}" target="_blank">{{ structure.site }}</a></div>{% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endblock box_contenu %}
+        {% endembed %}
+    {% endif %}
+
+
+    {# Coordonnées de l'organisateur #}
+    {% if parametres_portail.contact_afficher_coords_organisateur %}
+        {% embed 'core/box.html' with box_titre=True box_introduction=False %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Coordonnées de l'organisateur{% endblock %}
+            {% block box_contenu %}
+                <div class="m-2">
+                    <div><strong>{{ organisateur.nom }}</strong></div>
+                    {% if organisateur.rue or organisateur.cp or organisateur.ville %}<div><i class='fa fa-map-marker margin-r-5'></i>{{ organisateur.rue }} {{ organisateur.cp }} {{ organisateur.ville }}</div>{% endif %}
+                    {% if organisateur.tel %}<div><i class='fa fa-phone margin-r-5'></i>{{ organisateur.tel }}</div>{% endif %}
+                    {% if organisateur.site %}<div><i class='fa fa-globe margin-r-5'></i><a href="http://{{ organisateur.site }}" target="_blank">{{ organisateur.site }}</a></div>{% endif %}
+                </div>
+            {% endblock box_contenu %}
+        {% endembed %}
+    {% endif %}
 
 {% endblock contenu_page %}

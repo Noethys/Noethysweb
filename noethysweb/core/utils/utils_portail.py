@@ -98,6 +98,8 @@ LISTE_PARAMETRES = [
     Parametre(code="contact_afficher_page", label="Afficher la page", type="boolean", valeur=True),
     Parametre(code="contact_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez trouver ici les moyens de correspondre avec l'organisateur."),
     Parametre(code="messagerie_intro", label="Texte d'introduction de la messagerie", type="char_2lignes", valeur="Saisissez un message et cliquez sur le bouton Envoyer."),
+    Parametre(code="contact_afficher_coords_structures", label="Afficher les coordonnées des structures", type="boolean", valeur=True),
+    Parametre(code="contact_afficher_coords_organisateur", label="Afficher les coordonnées de l'organisateur", type="boolean", valeur=True),
 
     # Mentions
     Parametre(code="mentions_afficher_page", label="Afficher la page", type="boolean", valeur=True),

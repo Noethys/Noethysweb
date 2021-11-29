@@ -59,6 +59,7 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Portail",
                 Field('messagerie_active'),
+                Field('afficher_coords'),
             ),
             Fieldset("Logo",
                 Div(
