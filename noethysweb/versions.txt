@@ -1,3 +1,8 @@
+Version 1.0.2.4 (29/11/2021) :
+
+- Remplacement des boutons d'ajouts d'éléments sur le portail
+- Suppression des boutons Enregistrer et Ajouter sur le portail
+
 Version 1.0.2.3 (29/11/2021) :
 
 - Ajout de l'annuaire des structures sur le portail
