@@ -76,10 +76,10 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields['label_perso'].initial = self.instance.label_prestation
 
         # Type de tarif
-        if self.instance.pk :
+        if self.instance.pk:
             if self.instance.tarifs:
                 self.fields["type_tarif"].initial = "QF"
-            elif self.instance.tarif:
+            elif self.instance.montant:
                 self.fields["type_tarif"].initial = "MONTANT"
 
         # Affichage
