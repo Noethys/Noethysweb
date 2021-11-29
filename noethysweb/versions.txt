@@ -1,3 +1,9 @@
+Version 1.0.2.3 (29/11/2021) :
+
+- Ajout de l'annuaire des structures sur le portail
+- Correction de l'ouverture d'une unité de cotisation
+- Correction de l'url sur le logo du portail
+
 Version 1.0.2.2 (28/11/2021) :
 
 - Ajout de la saisie par semaine-type dans la grille des conso
