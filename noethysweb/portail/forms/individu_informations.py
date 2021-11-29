@@ -50,5 +50,5 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("description"),
                 Field("document"),
             ),
-            Commandes(annuler_url="{% url 'portail_individu_informations' idrattachement=rattachement.pk %}", aide=False, css_class="pull-right"),
+            Commandes(annuler_url="{% url 'portail_individu_informations' idrattachement=rattachement.pk %}", aide=False, ajouter=False, css_class="pull-right"),
         )

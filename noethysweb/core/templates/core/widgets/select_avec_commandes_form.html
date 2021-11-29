@@ -21,9 +21,9 @@
             <option value="{{ choix.0 }}" {% if value == choix.0 %}selected{% endif %}>{{ choix.1 }}</option>
         {% endfor %}
     </select>
-    {% if not disabled %}
+    {% if not disabled and afficher_bouton_ajouter %}
         <div class="input-group-append">
-            <button id="{{ id }}_bouton_ajouter" title="{{ textes.ajouter }}" class="btn btn-success input-group-text" type="button"><i class="fa fa-plus"></i></button>
+            <button id="{{ id }}_bouton_ajouter" title="{{ textes.ajouter }}" class="ajouter_element btn btn-success input-group-text" type="button"><i class="fa fa-plus"></i></button>
         </div>
     {% endif %}
 </div>
@@ -40,7 +40,7 @@
         });
 
         // Ajouter un élément
-        $("#{{ id }}_bouton_ajouter").on("click", function(event) {
+        $(".ajouter_element").on("click", function(event) {
             bootbox.dialog({
                 title: "{{ textes.ajouter }}",
                 message: "Souhaitez-vous vraiment {{ textes.ajouter|lower }} à la liste déroulante ?<br><small>Merci de bien vérifier que cette proposition n'existe pas déjà.</small>",

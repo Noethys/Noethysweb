@@ -23,8 +23,8 @@ class Form_choix_assureur(forms.ModelChoiceField):
         return instance.Get_nom(afficher_ville=True)
 
 class Formulaire(FormulaireBase, ModelForm):
-    assureur = Form_choix_assureur(label="Assureur", queryset=Assureur.objects.all().order_by("nom"), required=False, help_text="Cliquez sur le champ ci-dessus pour sélectionner un assureur dans la liste déroulante. Vous pouvez faire une recherche par nom ou par ville. Cliquez sur le bouton '+' pour ajouter un assureur manquant dans la liste de choix.",
-                                     widget=Select_avec_commandes_form(attrs={"url_ajax": "portail_ajax_ajouter_assureur", "id_form": "assureurs_form",
+    assureur = Form_choix_assureur(label="Assureur", queryset=Assureur.objects.all().order_by("nom"), required=False, help_text="Cliquez sur le champ ci-dessus pour sélectionner un assureur dans la liste déroulante. Vous pouvez faire une recherche par nom ou par ville.  <a href='#' class='ajouter_element'>Cliquez ici pour ajouter un assureur manquant dans la liste de choix.</a>",
+                                     widget=Select_avec_commandes_form(attrs={"url_ajax": "portail_ajax_ajouter_assureur", "id_form": "assureurs_form", "afficher_bouton_ajouter": False,
                                                                               "textes": {"champ": "Nom de l'assureur", "ajouter": "Ajouter un assureur", "modifier": "Modifier un assureur"}}))
 
     class Meta:
@@ -67,7 +67,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Field("date_debut"),
             Field("date_fin"),
             Field("document"),
-            Commandes(annuler_url="{% url 'portail_individu_assurances' idrattachement=rattachement.pk %}", aide=False, css_class="pull-right"),
+            Commandes(annuler_url="{% url 'portail_individu_assurances' idrattachement=rattachement.pk %}", aide=False, ajouter=False, css_class="pull-right"),
         )
 
     def clean(self):

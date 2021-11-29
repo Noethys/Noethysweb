@@ -49,5 +49,5 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("type_vaccin"),
                 Field("date"),
             ),
-            Commandes(annuler_url="{% url 'portail_individu_vaccinations' idrattachement=rattachement.pk %}", aide=False, css_class="pull-right"),
+            Commandes(annuler_url="{% url 'portail_individu_vaccinations' idrattachement=rattachement.pk %}", aide=False, ajouter=False, css_class="pull-right"),
         )

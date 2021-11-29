@@ -21,7 +21,7 @@ class Form_choix_medecin(forms.ModelChoiceField):
 
 class Formulaire(FormulaireBase, ModelForm):
     medecin = Form_choix_medecin(label="Médecin", queryset=Medecin.objects.all().order_by("nom", "prenom"), required=False,
-                                     widget=Select_avec_commandes_form(attrs={"url_ajax": "portail_ajax_ajouter_medecin", "id_form": "medecins_form",
+                                     widget=Select_avec_commandes_form(attrs={"url_ajax": "portail_ajax_ajouter_medecin", "id_form": "medecins_form", "afficher_bouton_ajouter": False,
                                                                               "textes": {"champ": "Nom du régime alimentaire", "ajouter": "Ajouter un médecin", "modifier": "Modifier un médecin"}}))
 
     class Meta:
@@ -43,7 +43,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Help_texts pour le mode édition
         self.help_texts = {
-            "medecin": "Cliquez sur le champ ci-dessus pour sélectionner un médecin dans la liste déroulante. Vous pouvez faire une recherche par nom, par prénom ou par ville. Cliquez sur le bouton '+' pour ajouter un médecin manquant dans la liste de choix.",
+            "medecin": "Cliquez sur le champ ci-dessus pour sélectionner un médecin dans la liste déroulante. Vous pouvez faire une recherche par nom, par prénom ou par ville. <a href='#' class='ajouter_element'>Cliquez ici pour ajouter un médecin manquant dans la liste de choix.</a>",
         }
 
         # Champs affichables

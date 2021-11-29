@@ -79,5 +79,5 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Divers",
                 Field("observations"),
             ),
-            Commandes(annuler_url="{% url 'portail_individu_contacts' idrattachement=rattachement.pk %}", aide=False, css_class="pull-right"),
+            Commandes(annuler_url="{% url 'portail_individu_contacts' idrattachement=rattachement.pk %}", aide=False, ajouter=False, css_class="pull-right"),
         )

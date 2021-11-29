@@ -318,6 +318,8 @@ class Select_avec_commandes_form(Widget):
             context['value'] = int(value)
         if "donnees_extra" not in context:
             context['donnees_extra'] = {}
+        if "afficher_bouton_ajouter" not in context:
+            context['afficher_bouton_ajouter'] = True
         context['donnees_extra'] = json.dumps(context['donnees_extra'])
         return context
 
@@ -343,6 +345,8 @@ class Select_many_avec_plus(SelectMultiple):
         context['selections'] = value
         if "donnees_extra" not in context:
             context['donnees_extra'] = {}
+        if "afficher_bouton_ajouter" not in context:
+            context['afficher_bouton_ajouter'] = True
         context['donnees_extra'] = json.dumps(context['donnees_extra'])
         return context
 

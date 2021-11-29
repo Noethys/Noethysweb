@@ -13,7 +13,7 @@ from portail.forms.fiche import FormulaireBase
 
 class Formulaire(FormulaireBase, ModelForm):
     maladies = forms.ModelMultipleChoiceField(label="Maladies",
-                    widget=Select_many_avec_plus(attrs={"url_ajax": "portail_ajax_ajouter_maladie", "textes": {"champ": "Nom de la maladie", "ajouter": "Saisir une maladie"}}),
+                    widget=Select_many_avec_plus(attrs={"url_ajax": "portail_ajax_ajouter_maladie", "afficher_bouton_ajouter": False, "textes": {"champ": "Nom de la maladie", "ajouter": "Ajouter une maladie"}}),
                     queryset=TypeMaladie.objects.all().order_by("nom"), required=False)
 
     class Meta:
@@ -36,12 +36,12 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Help_texts pour le mode édition
         self.help_texts = {
-            "maladies": "Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix et cliquez sur un ou plusieurs éléments dans la liste. Cliquez sur le '+' pour ajouter une maladie manquante dans la liste de choix.",
+            "maladies": "Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix et cliquez sur un ou plusieurs éléments dans la liste. <a href='#' class='ajouter_element'>Cliquez ici pour ajouter une maladie manquante dans la liste de choix.</a>",
         }
 
         # Champs affichables
         self.liste_champs_possibles = [
-            {"titre": "Maladies", "champs": ["maladies"]},
+            {"titre": "Maladies contractées", "champs": ["maladies"]},
         ]
 
         # Préparation du layout

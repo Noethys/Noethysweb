@@ -13,7 +13,7 @@ from portail.forms.fiche import FormulaireBase
 
 class Formulaire(FormulaireBase, ModelForm):
     regimes_alimentaires = forms.ModelMultipleChoiceField(label="Régimes alimentaires",
-                            widget=Select_many_avec_plus(attrs={"url_ajax": "portail_ajax_ajouter_regime_alimentaire", "textes": {"champ": "Nom du régime alimentaire", "ajouter": "Saisir un régime alimentaire"}}),
+                            widget=Select_many_avec_plus(attrs={"url_ajax": "portail_ajax_ajouter_regime_alimentaire", "afficher_bouton_ajouter": False, "textes": {"champ": "Nom du régime alimentaire", "ajouter": "Ajouter un nouveau régime alimentaire"}}),
                             queryset=RegimeAlimentaire.objects.all().order_by("nom"), required=False)
 
     class Meta:
@@ -36,7 +36,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Help_texts pour le mode édition
         self.help_texts = {
-            "regimes_alimentaires": "Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix et cliquez sur un ou plusieurs éléments dans la liste. Cliquez sur le '+' pour ajouter un régime manquant dans la liste de choix.",
+            "regimes_alimentaires": "Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix et cliquez sur un ou plusieurs éléments dans la liste. <a href='#' class='ajouter_element'>Cliquez ici pour ajouter un régime manquant dans la liste de choix.</a>",
         }
 
         # Champs affichables

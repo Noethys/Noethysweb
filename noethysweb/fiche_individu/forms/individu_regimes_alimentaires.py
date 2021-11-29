@@ -16,7 +16,7 @@ from core.widgets import Select_many_avec_plus
 
 class Formulaire(FormulaireBase, ModelForm):
     regimes_alimentaires = forms.ModelMultipleChoiceField(label="Régimes alimentaires",
-                            widget=Select_many_avec_plus(attrs={"url_ajax": "ajax_ajouter_regime_alimentaire", "textes": {"champ": "Nom du régime alimentaire", "ajouter": "Saisir un régime alimentaire"}}),
+                            widget=Select_many_avec_plus(attrs={"url_ajax": "ajax_ajouter_regime_alimentaire", "textes": {"champ": "Nom du régime alimentaire", "ajouter": "Ajouter un nouveau régime alimentaire"}}),
                             queryset=RegimeAlimentaire.objects.all().order_by("nom"), required=False, help_text="Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix ou tapez les premières lettres du régime recherché. Cliquez sur le '+' pour ajouter un régime manquant dans la liste de choix.")
 
     class Meta:
