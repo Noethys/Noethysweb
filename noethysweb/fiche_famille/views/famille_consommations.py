@@ -119,8 +119,9 @@ class Modifier(Onglet, TemplateView):
         data.update(Get_generic_data(data))
 
         # Liste des dates modifiables pour l'application d'une semaine-type
-        data["date_modifiable_min"] = min(data["liste_dates"])
-        data["date_modifiable_max"] = max(data["liste_dates"])
+        if data["liste_dates"]:
+            data["date_modifiable_min"] = min(data["liste_dates"])
+            data["date_modifiable_max"] = max(data["liste_dates"])
         data["jours_semaine_modifiables"] = [0, 1, 2, 3, 4, 5, 6]
 
         return data
