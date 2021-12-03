@@ -660,8 +660,8 @@ class Impression(utils_impression.Impression):
                                                                     listeLabels.append(Paragraph(label, styleConso))
 
                                                                     # Affichage de l'évènement
-                                                                    if self.dict_donnees["afficher_evenements"] and dictConsoTemp["IDevenement"] != None:
-                                                                        texteEvenement = self.dict_donnees[dictConsoTemp["IDevenement"]]["nom"]
+                                                                    if self.dict_donnees["afficher_evenements"] and dictConsoTemp["evenement"] != None:
+                                                                        texteEvenement = dictConsoTemp["evenement"].nom
                                                                         listeLabels.append(Paragraph(texteEvenement, styleEvenement))
 
                                                                     # Affichage de l'étiquette
@@ -728,8 +728,8 @@ class Impression(utils_impression.Impression):
                                                                             listeLabels.append(Paragraph(label, styleConso))
 
                                                                             # Affichage de l'évènement
-                                                                            if self.dict_donnees["afficher_evenements"] and dictConsoTemp["IDevenement"]:
-                                                                                texteEvenement = dict_evenements[dictConsoTemp["IDevenement"]].nom
+                                                                            if self.dict_donnees["afficher_evenements"] and dictConsoTemp["evenement"]:
+                                                                                texteEvenement = dictConsoTemp["evenement"].nom
                                                                                 listeLabels.append(Paragraph(texteEvenement, styleEvenement))
 
                                                                             # Affichage de l'étiquette
