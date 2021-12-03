@@ -51,7 +51,7 @@ class View(CustomView, TemplateView):
         periode = PortailPeriode.objects.select_related("activite").prefetch_related("categories").get(pk=self.kwargs.get('idperiode'))
         if not periode or not periode.Is_active_today():
             return False
-        if (periode.types_categories == "AUCUNE" and self.request.user.famille.internet_categorie) or (periode.types_categories == "SELECTION" and self.request.user.famille.internet_categorie not in periode.categories.all()):
+        if not periode.Is_famille_authorized(famille=self.request.user.famille):
             return False
         return True
 
@@ -127,8 +127,9 @@ class View(CustomView, TemplateView):
 
         # Liste des dates modifiables
         data["dates_modifiables"] = [date for date in data["liste_dates"] if is_modif_allowed(date, data)]
-        data["date_modifiable_min"] = min(data["dates_modifiables"]) if data["dates_modifiables"] else None
-        data["date_modifiable_max"] = max(data["dates_modifiables"]) if data["dates_modifiables"] else None
+        if data["dates_modifiables"]:
+            data["date_modifiable_min"] = min(data["dates_modifiables"]) if data["dates_modifiables"] else None
+            data["date_modifiable_max"] = max(data["dates_modifiables"]) if data["dates_modifiables"] else None
 
         # Liste des jours de la semaine modifiables
         jours = {date.weekday(): True for date in data["dates_modifiables"]}

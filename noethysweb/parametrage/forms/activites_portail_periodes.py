@@ -28,6 +28,11 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = PortailPeriode
         fields = "__all__"
+        help_texts = {
+            "types_categories": "Vous pouvez attribuer cette période uniquement à une sélection de comptes internet.",
+            "types_villes": "Vous pouvez attribuer cette période uniquement aux familles résidant ou ne résidant pas sur une ou plusieurs villes données.",
+            "villes": "Saisissez en majuscules un ou plusieurs noms de villes séparés par des virgules."
+        }
 
     def __init__(self, *args, **kwargs):
         idactivite = kwargs.pop("idactivite")
@@ -70,6 +75,8 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Options",
                 Field("types_categories"),
                 Field("categories"),
+                Field("types_villes"),
+                Field("villes"),
             ),
             HTML(EXTRA_SCRIPT),
         )
@@ -101,6 +108,12 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.add_error('categories', "Vous devez sélectionner au moins une catégorie")
                 return
 
+        # Villes
+        if self.cleaned_data["types_villes"] in ("SELECTION", "SELECTION_INVERSE"):
+            if not self.cleaned_data["villes"]:
+                self.add_error('villes', "Vous devez saisir au moins une ville")
+                return
+
         return self.cleaned_data
 
 
@@ -129,6 +142,21 @@ function On_change_types_categories() {
 $(document).ready(function() {
     $('#id_types_categories').change(On_change_types_categories);
     On_change_types_categories.call($('#id_types_categories').get(0));
+});
+
+// types_villes
+function On_change_types_villes() {
+    $('#div_id_villes').hide();
+    if ($(this).val() == 'SELECTION') {
+        $('#div_id_villes').show();
+    }
+    if ($(this).val() == 'SELECTION_INVERSE') {
+        $('#div_id_villes').show();
+    }
+}
+$(document).ready(function() {
+    $('#id_types_villes').change(On_change_types_villes);
+    On_change_types_villes.call($('#id_types_villes').get(0));
 });
 
 </script>

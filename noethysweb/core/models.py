@@ -2747,8 +2747,11 @@ class PortailPeriode(models.Model):
     introduction = models.TextField(verbose_name="Introduction", blank=True, null=True)
     prefacturation = models.BooleanField(verbose_name="Activer la préfacturation pour cette période", default=False)
     choix_categories = [("TOUTES", "Toutes les catégories de compte internet"), ("AUCUNE", "Uniquement les catégories de compte internet non renseignées"), ("SELECTION", "Uniquement les catégories suivantes")]
-    types_categories = models.CharField(verbose_name="Catégories", max_length=100, choices=choix_categories, default="TOUTES")
+    types_categories = models.CharField(verbose_name="Filtre catégories", max_length=100, choices=choix_categories, default="TOUTES")
     categories = models.ManyToManyField(CategorieCompteInternet, verbose_name="Sélection de catégories", related_name="periode_categories", blank=True)
+    choix_villes = [("TOUTES", "Toutes les villes de résidence"), ("SELECTION", "Uniquement les familles résidant sur les villes suivantes"), ("SELECTION_INVERSE", "Uniquement les familles ne résidant pas sur les villes suivantes")]
+    types_villes = models.CharField(verbose_name="Filtre villes", max_length=100, choices=choix_villes, default="TOUTES")
+    villes = models.CharField(verbose_name="Sélection de villes", max_length=400, blank=True, null=True)
 
     class Meta:
         db_table = 'portail_periodes'
@@ -2761,6 +2764,18 @@ class PortailPeriode(models.Model):
     def Is_active_today(self):
         """ Vérifie si la période est active ce jour """
         return self.affichage == "TOUJOURS" or (datetime.datetime.now() >= self.affichage_date_debut and datetime.datetime.now() <= self.affichage_date_fin)
+
+    def Is_famille_authorized(self, famille=None):
+        """ Vérifie si une famille est autorisée à accéder à cette période """
+        # Vérification du compte internet
+        if (self.types_categories == "AUCUNE" and famille.internet_categorie) or (self.types_categories == "SELECTION" and famille.internet_categorie not in self.categories.all()):
+            return False
+        # Vérification de la ville de résidence
+        if self.types_villes != "TOUTES" and self.villes:
+            liste_villes = [ville.strip().upper() for ville in self.villes.split(",")]
+            if not famille.ville_resid or (self.types_villes == "SELECTION" and famille.ville_resid.upper() not in liste_villes) or (self.types_villes == "SELECTION_INVERSE" and famille.ville_resid.upper() in liste_villes):
+                return False
+        return True
 
 
 class PortailParametre(models.Model):

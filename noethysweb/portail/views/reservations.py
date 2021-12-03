@@ -52,7 +52,7 @@ class View(CustomView, TemplateView):
         periodes = PortailPeriode.objects.select_related("activite").prefetch_related("categories").filter(conditions).order_by("date_debut")
         dict_periodes = {}
         for periode in periodes:
-            if periode.types_categories == "TOUTES" or (periode.types_categories == "AUCUNE" and not self.request.user.famille.internet_categorie) or (periode.types_categories == "SELECTION" and self.request.user.famille.internet_categorie in periode.categories.all()):
+            if periode.Is_famille_authorized(famille=self.request.user.famille):
                 dict_periodes.setdefault(periode.activite, [])
                 dict_periodes[periode.activite].append(periode)
         context['dict_periodes'] = dict_periodes
