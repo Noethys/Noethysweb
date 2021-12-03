@@ -1,3 +1,11 @@
+Version 1.0.2.5 (03/12/2021) :
+
+- Ajout du filtre villes dans les périodes de réservations
+- Correction filtre individu présent dans 2 listes
+- Correction accès activité dans gestionnaire des conso
+- Correction affichage des événements dans liste des conso
+- Correction date_modifiable_min dans grille des conso
+
 Version 1.0.2.4 (29/11/2021) :
 
 - Remplacement des boutons d'ajouts d'éléments sur le portail
