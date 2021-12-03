@@ -72,7 +72,7 @@ class View(CustomView, TemplateView):
 
         # Recherche des activités ouvertes à la date choisie
         liste_idactivites = [d["activite"] for d in Ouverture.objects.values('activite').filter(date=data["date_min"]).annotate(nbre=Count('pk'))]
-        data['liste_activites_possibles'] = Activite.objects.filter(idactivite__in=liste_idactivites)
+        data['liste_activites_possibles'] = Activite.objects.filter(idactivite__in=liste_idactivites, structure__in=self.request.user.structures.all())
 
         # Sélection de l'activité à afficher
         if data['liste_activites_possibles'] and (not data["selection_activite"] or data["selection_activite"] not in data['liste_activites_possibles']):
