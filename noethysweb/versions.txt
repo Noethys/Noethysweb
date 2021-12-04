@@ -1,3 +1,7 @@
+Version 1.0.2.7 (04/12/2021) :
+
+- Correction d'un bug dans la réinitialisation du mdp du portail
+
 Version 1.0.2.6 (04/12/2021) :
 
 - Correction de bugs dans l'envoi des codes internet par email
