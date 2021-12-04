@@ -112,8 +112,10 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["fpresent:pk", "idfamille", "nom", "rue_resid", "cp_resid", "ville_resid"]
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
+        rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
+        cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')
+        ville_resid = columns.TextColumn("Ville",  sources=None, processor='Get_ville_resid')
 
         class Meta:
             structure_template = MyDatatable.structure_template
@@ -128,6 +130,15 @@ class Liste(Page, crud.Liste):
                 self.Create_bouton_modifier(url=reverse(kwargs["view"].url_modifier, args=[instance.pk])),
             ]
             return self.Create_boutons_actions(html)
+
+        def Get_rue_resid(self, instance, *args, **kwargs):
+            return instance.rue_resid
+
+        def Get_cp_resid(self, instance, *args, **kwargs):
+            return instance.cp_resid
+
+        def Get_ville_resid(self, instance, *args, **kwargs):
+            return instance.ville_resid
 
 
 
