@@ -72,7 +72,7 @@ class MyPasswordResetForm(PasswordResetForm):
         email = self.cleaned_data["email"]
 
         # Recherche l'utilisateur
-        utilisateur = Utilisateur.objects.filter(famille__mail__iexact=email, username__iexact=identifiant, is_active=True, categorie="famille").first()
+        utilisateur = Utilisateur.objects.filter(famille__mail=email, username__iexact=identifiant, is_active=True, categorie="famille").first()
         if not utilisateur:
             return "Il n'existe pas de compte actif correspondant à cet identifiant et cette adresse Email."
 
