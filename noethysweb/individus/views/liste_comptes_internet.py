@@ -172,6 +172,7 @@ class Liste(Page, crud.Liste):
 
         check = columns.CheckBoxSelectColumn(label="")
         internet_actif = columns.TextColumn("Activation", sources=["internet_actif"], processor='Get_internet_actif')
+        internet_identifiant = columns.TextColumn("Mot de passe", sources=[], processor='Get_internet_identifiant')
         internet_mdp = columns.TextColumn("Mot de passe", sources=[], processor='Get_internet_mdp')
         derniere_action = columns.TextColumn("Dernière action", sources=["derniere_action"], processor=helpers.format_date('%d/%m/%Y'))
 
@@ -182,6 +183,9 @@ class Liste(Page, crud.Liste):
 
         def Get_internet_actif(self, instance, *args, **kwargs):
             return "<i class='fa fa-check margin-r-5 text-green'></i>" if instance.internet_actif else "<i class='fa fa-close margin-r-5 text-red'></i>"
+
+        def Get_internet_identifiant(self, instance, *args, **kwargs):
+            return instance.internet_identifiant
 
         def Get_internet_mdp(self, instance, *args, **kwargs):
             return "******" if instance.internet_mdp and instance.internet_mdp.startswith("custom") else instance.internet_mdp
