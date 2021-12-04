@@ -1,3 +1,7 @@
+Version 1.0.2.8 (04/12/2021) :
+
+- Nouvelle correction du bug de réinitialisation du mdp du portail
+
 Version 1.0.2.7 (04/12/2021) :
 
 - Correction d'un bug dans la réinitialisation du mdp du portail
