@@ -3,17 +3,16 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, json
 logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy, reverse
-from core.views.mydatatableview import MyDatatable, columns, helpers
-from core.views import crud
-from fiche_famille.utils import utils_internet
-from core.models import Famille, Mail, DocumentJoint, Destinataire, AdresseMail, ModeleEmail
 from django.http import JsonResponse
 from django.contrib import messages
 from django.db.models import Max
-import json
+from core.views.mydatatableview import MyDatatable, columns, helpers
+from core.views import crud
+from core.models import Famille, Mail, DocumentJoint, Destinataire, AdresseMail, ModeleEmail
+from fiche_famille.utils import utils_internet
 
 
 def Envoyer_email(request):
@@ -38,19 +37,33 @@ def Envoyer_email(request):
     # Importation des comptes internet
     familles = Famille.objects.filter(pk__in=coches)
 
+    # Recherche le dernier ID de la table Destinataires
+    dernier_destinataire = Destinataire.objects.last()
+    idmax = dernier_destinataire.pk if dernier_destinataire else 0
+
     # Création des destinataires et des documents joints
     logger.debug("Enregistrement des destinataires et documents joints...")
     liste_anomalies = []
+    liste_ajouts = []
     for famille in familles:
         if famille.mail:
-            valeurs = {"NOM_FAMILLE": famille.nom, "IDENTIFIANT_INTERNET": famille.internet_identifiant, "MOTDEPASSE_INTERNET": famille.internet_mdp}
-            destinataire = Destinataire.objects.create(categorie="famille", famille=famille, adresse=famille.mail, valeurs=json.dumps(valeurs))
-            mail.destinataires.add(destinataire)
+            valeurs = {"{NOM_FAMILLE}": famille.nom, "{IDENTIFIANT_INTERNET}": famille.internet_identifiant, "{MOTDEPASSE_INTERNET}": famille.internet_mdp}
+            liste_ajouts.append(Destinataire(categorie="famille", famille=famille, adresse=famille.mail, valeurs=json.dumps(valeurs)))
         else:
             liste_anomalies.append(famille.nom)
 
+    if liste_ajouts:
+        # Enregistre les destinataires
+        Destinataire.objects.bulk_create(liste_ajouts)
+        # Associe les destinataires au mail
+        destinataires = Destinataire.objects.filter(pk__gt=idmax)
+        ThroughModel = Mail.destinataires.through
+        ThroughModel.objects.bulk_create([ThroughModel(mail_id=mail.pk, destinataire_id=destinataire.pk) for destinataire in destinataires])
+
     if liste_anomalies:
-        messages.add_message(request, messages.ERROR, "Adresses mail manquantes : %s" % ", ".join(liste_anomalies))
+        texte_anomalies = "%d adresses mail manquantes : %s" % (len(liste_anomalies), ", ".join(liste_anomalies))
+        messages.add_message(request, messages.ERROR, texte_anomalies)
+        logger.debug(texte_anomalies)
 
     # Création de l'URL pour ouvrir l'éditeur d'emails
     logger.debug("Redirection vers l'éditeur d'emails...")
@@ -155,7 +168,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "idfamille", 'nom', "internet_actif", "internet_identifiant", "internet_mdp", "derniere_action"]
+        filtres = ["fpresent:pk", "idfamille", 'nom', "internet_actif", "internet_identifiant", "internet_mdp", "derniere_action"]
 
         check = columns.CheckBoxSelectColumn(label="")
         internet_actif = columns.TextColumn("Activation", sources=["internet_actif"], processor='Get_internet_actif')
