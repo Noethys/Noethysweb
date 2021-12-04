@@ -3,11 +3,12 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import logging
+logger = logging.getLogger(__name__)
 from django import forms
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.forms import ValidationError
 from django.core.validators import validate_email
-from core.models import Utilisateur, AdresseMail
 from django.core import mail as djangomail
 from django.core.mail import EmailMultiAlternatives
 from django.template import loader
@@ -15,6 +16,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+from core.models import Utilisateur, AdresseMail
 from core.utils.utils_captcha import CaptchaField, CustomCaptchaTextInput
 from core.utils import utils_portail
 
@@ -70,10 +72,12 @@ class MyPasswordResetForm(PasswordResetForm):
         """
         identifiant = self.cleaned_data["identifiant"]
         email = self.cleaned_data["email"]
+        logger.debug("Demande de reset du password : %s %s." % (identifiant, email))
 
         # Recherche l'utilisateur
-        utilisateur = Utilisateur.objects.filter(famille__mail=email, username__iexact=identifiant, is_active=True, categorie="famille").first()
-        if not utilisateur:
+        utilisateur = Utilisateur.objects.filter(username__iexact=identifiant, is_active=True, categorie="famille").first()
+        if not utilisateur or not utilisateur.famille.mail or utilisateur.famille.mail != email:
+            logger.debug("Erreur : Pas de compte actif existant.")
             return "Il n'existe pas de compte actif correspondant à cet identifiant et cette adresse Email."
 
         if not domain_override:
@@ -98,6 +102,7 @@ class MyPasswordResetForm(PasswordResetForm):
         if idadresse_exp:
             adresse_exp = AdresseMail.objects.get(pk=idadresse_exp)
         else:
+            logger.debug("Erreur : Pas d'adresse d'expédition paramétrée pour l'envoi du mail.")
             return "L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur."
 
         # Backend CONSOLE (Par défaut)
@@ -120,6 +125,7 @@ class MyPasswordResetForm(PasswordResetForm):
         try:
             connection.open()
         except Exception as err:
+            logger.debug("Erreur : Connexion impossible au serveur de messagerie : %s." % err)
             return "Connexion impossible au serveur de messagerie : %s" % err
 
         # Création du message
@@ -127,7 +133,7 @@ class MyPasswordResetForm(PasswordResetForm):
         objet = ''.join(objet.splitlines())
         body = loader.render_to_string(email_template_name, context)
 
-        message = EmailMultiAlternatives(subject=objet, body=body, from_email=adresse_exp.adresse, to=[utilisateur.email], connection=connection)
+        message = EmailMultiAlternatives(subject=objet, body=body, from_email=adresse_exp.adresse, to=[utilisateur.famille.mail], connection=connection)
 
         if html_email_template_name is not None:
             html_email = loader.render_to_string(html_email_template_name, context)
@@ -137,7 +143,13 @@ class MyPasswordResetForm(PasswordResetForm):
         try:
             resultat = message.send()
         except Exception as err:
+            logger.debug("Erreur : Envoi du mail de reset impossible : %s." % err)
             resultat = err
+
+        if resultat == 1:
+            logger.debug("Message de reset password envoyé.")
+        else:
+            logger.debug("Message de reset password non envoyé.")
 
         connection.close()
         return resultat
