@@ -1,3 +1,8 @@
+Version 1.0.2.6 (04/12/2021) :
+
+- Correction de bugs dans l'envoi des codes internet par email
+- Correction de divers bugs
+
 Version 1.0.2.5 (03/12/2021) :
 
 - Ajout du filtre villes dans les périodes de réservations
