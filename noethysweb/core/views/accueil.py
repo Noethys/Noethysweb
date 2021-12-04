@@ -26,17 +26,28 @@ class Accueil(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(Accueil, self).get_context_data(**kwargs)
         context['page_titre'] = "Accueil"
+
+        # Suivi des conso et des inscriptions
         context['suivi_consommations_parametres'] = suivi_consommations.Get_parametres(request=self.request)
         context['suivi_inscriptions_parametres'] = suivi_inscriptions.Get_parametres(request=self.request)
+
+        # Technique
+        context['mode_demo'] = settings.MODE_DEMO
+        context['nouvelle_version'] = self.Get_update()
+
+        # Ephéméride
         context['citation_texte'], context['citation_auteur'] = self.Get_citation()
         context['celebrations'] = self.Get_celebrations()
         context['anniversaires_aujourdhui'] = self.Get_anniversaires()
         context['anniversaires_demain'] = self.Get_anniversaires(demain=True)
-        context['nouvelle_version'] = self.Get_update()
+
+        # Graphique nombre d'individus
         context['graphique_individus_activite'] = utils_parametres.Get(nom="activite", categorie="graphique_individus", utilisateur=self.request.user, valeur=0)
         context['graphique_individus'] = self.Get_graphique_individu(idactivite=context['graphique_individus_activite'])
-        context['mode_demo'] = settings.MODE_DEMO
-        context['notes'] = Note.objects.select_related('famille', 'individu').filter(afficher_accueil=True).order_by("date_parution")
+
+        # Notes
+        conditions = Q(date_parution__lte=datetime.date.today()) & (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
+        context['notes'] = Note.objects.select_related('famille', 'individu').filter(conditions, afficher_accueil=True).order_by("date_parution")
         return context
 
     def Get_update(self):

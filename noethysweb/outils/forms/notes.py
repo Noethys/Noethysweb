@@ -16,7 +16,7 @@ import datetime
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    date_parution = forms.DateField(label="Date de parution", required=False, widget=DatePickerWidget())
+    date_parution = forms.DateField(label="Date de parution", required=True, widget=DatePickerWidget())
     acces = forms.ChoiceField(label="Utilisateurs associés", initial="automatique", required=True, help_text="Sélectionnez les utilisateurs qui auront accès à cette note.", choices=[
         (None, "-------"), ("moi", "Uniquement moi"),
         ("structure", "Les utilisateurs de la structure suivante"),
