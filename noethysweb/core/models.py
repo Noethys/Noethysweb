@@ -2694,7 +2694,13 @@ class Mail(models.Model):
     pieces_jointes = models.ManyToManyField(PieceJointe, verbose_name="Pièces jointes", blank=True)
     destinataires = models.ManyToManyField(Destinataire, verbose_name="Destinataires", blank=True)
     date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
-    selection = models.CharField(verbose_name="Sélection", max_length=200, choices=[("NON_ENVOYE", "Uniquemement les destinataires qui n'ont pas déjà reçu le message"), ("TOUS", "Tous les destinataires")], default="NON_ENVOYE")
+    selection = models.CharField(verbose_name="Sélection", max_length=200, choices=[
+        ("NON_ENVOYE", "Uniquemement les destinataires qui n'ont pas déjà reçu le message"),
+        ("NON_ENVOYE_10", "Uniquemement les 10 premiers destinataires qui n'ont pas déjà reçu le message"),
+        ("NON_ENVOYE_50", "Uniquemement les 50 premiers destinataires qui n'ont pas déjà reçu le message"),
+        ("NON_ENVOYE_100", "Uniquemement les 100 premiers destinataires qui n'ont pas déjà reçu le message"),
+        ("TOUS", "Tous les destinataires")],
+        default="NON_ENVOYE")
     verrouillage_destinataires = models.BooleanField(verbose_name="Verrouillages des destinataires", default=False)
 
     class Meta:

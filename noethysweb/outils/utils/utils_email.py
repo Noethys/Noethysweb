@@ -3,18 +3,17 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, time, re, datetime, mimetypes, json
 logger = logging.getLogger(__name__)
 from django.conf import settings
-import re, datetime, mimetypes, json
 from django.core import mail as djangomail
 from django.utils.html import strip_tags
 from django.core.mail import EmailMultiAlternatives
+from django.db.models import Q
+from django.contrib import messages
 from email.mime.image import MIMEImage
 from core.models import Mail
 from core.utils import utils_dates, utils_historique
-from django.db.models import Q
-from django.contrib import messages
 
 
 def Textify(html):
@@ -126,9 +125,17 @@ def Envoyer_model_mail(idmail=None, request=None):
         "{DATE_LONGUE}": utils_dates.ConvertDateToFR(datetime.date.today()),
     }
 
-    condition = ~Q(resultat_envoi="OK") if mail.selection == "NON_ENVOYE" else Q()
+    # Récupère la liste des destinataires
+    condition = ~Q(resultat_envoi="ok") if "NON_ENVOYE" in mail.selection else Q()
+    destinataires = mail.destinataires.filter(condition)
+
+    # Sélection d'une quantité de mails à envoyer
+    if mail.selection.startswith("NON_ENVOYE_"):
+        destinataires = destinataires[:int(mail.selection.replace("NON_ENVOYE_", ""))]
+
+    # Envoi de chaque mail
     liste_envois_succes = []
-    for destinataire in mail.destinataires.filter(condition):
+    for destinataire in destinataires:
         html = mail.html
         objet = mail.objet
 
