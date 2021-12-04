@@ -148,8 +148,9 @@ class MyPasswordResetForm(PasswordResetForm):
 
         if resultat == 1:
             logger.debug("Message de reset password envoyé.")
-        else:
+        if resultat == 0:
             logger.debug("Message de reset password non envoyé.")
+            return "L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur."
 
         connection.close()
         return resultat
