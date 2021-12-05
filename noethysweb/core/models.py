@@ -2711,6 +2711,11 @@ class Mail(models.Model):
     def __str__(self):
         return "Email du %s : %s" % (self.date_creation.strftime('%d/%m/%Y %H:%m') if self.date_creation else "X", self.objet if self.objet else "Sans objet")
 
+    def delete(self, *args, **kwargs):
+        self.destinataires.all().delete()
+        self.pieces_jointes.all().delete()
+        super().delete(*args, **kwargs)
+
 
 # class PortailUnite(models.Model):
 #     idunite = models.AutoField(verbose_name='ID', db_column='IDunite', primary_key=True)
