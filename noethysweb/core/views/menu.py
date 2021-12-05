@@ -239,6 +239,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_gestion_conso.Add(code="gestionnaire_conso", titre="Gestionnaire des consommations", icone="file-text-o")
     menu_gestion_conso.Add(code="pointeuse_conso", titre="Pointeuse en temps réel", icone="file-text-o")
     menu_gestion_conso.Add(code="suivi_consommations", titre="Suivi des consommations", icone="file-text-o")
+    menu_gestion_conso.Add(code="liste_consommations", titre="Liste des consommations", icone="file-text-o")
 
     # Liste par état
     menu_listes_etat = menu_consommations.Add(titre="Listes par état")

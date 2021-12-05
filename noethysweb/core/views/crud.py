@@ -386,6 +386,12 @@ class Supprimer_plusieurs(BaseView, CustomView, TemplateView):
         if collector.protected:
             context['erreurs_protection'].append("Ils sont rattachés aux données suivantes : %s." % Formate_liste_objets(objets=collector.protected))
 
+        # Autres protections
+        if hasattr(self, "Check_protections"):
+            protections = self.Check_protections(objets=self.get_objets())
+            if protections:
+                context['erreurs_protection'].append("Protection contre la suppression : %s." % utils_texte.Convert_liste_to_texte_virgules(protections))
+
         return context
 
     def get_objets(self):
@@ -395,6 +401,13 @@ class Supprimer_plusieurs(BaseView, CustomView, TemplateView):
 
     def post(self, request, **kwargs):
         liste_objets = []
+
+        # Fonction bonus
+        if hasattr(self, "Avant_suppression"):
+            if not self.Avant_suppression(objets=self.get_objets()):
+                return HttpResponseRedirect(self.get_success_url(), status=303)
+
+        # Suppression des objets
         for objet in self.get_objets():
             liste_objets.append(objet)
             pk = objet.pk
