@@ -11,24 +11,26 @@
                 {% block box_titre %}{{ box_titre }}{% endblock %}
                 {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
                 {% block box_contenu %}
-                    {% embed 'core/crud/liste.html' %}
-                    {% endembed %}
 
                     <form id="form_selections" method="POST">
                         <input type="hidden" name="selections" value="">
                         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
-                        {% if categorie == "saisie_libre" %}
-                            <textarea rows="10" name="adresses" class="textinput textInput form-control">{{ adresses }}</textarea>
-                        {% endif %}
-
-                        <div class="buttonHolder" style="margin-top: 20px;">
-                            <div class="text-right" >
+                        <div class="buttonHolder" style="margin-top: 10px;">
+                            <div>
                                 <button class="btn btn-primary btn-primary" id="bouton_valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
                                 <a class="btn btn-danger" href="{% url 'editeur_emails' pk=idmail %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
                             </div>
                         </div>
+
+                        {% if categorie == "saisie_libre" %}
+                            <textarea rows="10" name="adresses" class="textinput textInput form-control mt-3">{{ adresses }}</textarea>
+                        {% endif %}
+
                     </form>
+
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
 
                     <script>
                         $("#bouton_valider").on("click",function(event) {
@@ -42,6 +44,3 @@
         </div>
     </div>
 {% endblock contenu_page %}
-
-
-
