@@ -1,3 +1,10 @@
+Version 1.0.2.9 (05/12/2021) :
+
+- Ajout de la liste des consommations dans le menu Consommations
+- Ajout suppression auto des champs destinataires et pièces jointes dans les mails
+- Modification de la position des boutons dans liste destinataires mail
+- Amélioration affichage pas de période disponible sur portail
+
 Version 1.0.2.8 (04/12/2021) :
 
 - Nouvelle correction du bug de réinitialisation du mdp du portail
