@@ -23,7 +23,7 @@ class Form_choix_assureur(forms.ModelChoiceField):
         return instance.Get_nom(afficher_ville=True)
 
 class Formulaire(FormulaireBase, ModelForm):
-    assureur = Form_choix_assureur(label="Assureur", queryset=Assureur.objects.all().order_by("nom"), required=False, help_text="Cliquez sur le champ ci-dessus pour sélectionner un assureur dans la liste déroulante. Vous pouvez faire une recherche par nom ou par ville.  <a href='#' class='ajouter_element'>Cliquez ici pour ajouter un assureur manquant dans la liste de choix.</a>",
+    assureur = Form_choix_assureur(label="Assureur", queryset=Assureur.objects.all().order_by("nom"), required=True, help_text="Cliquez sur le champ ci-dessus pour sélectionner un assureur dans la liste déroulante. Vous pouvez faire une recherche par nom ou par ville.  <a href='#' class='ajouter_element'>Cliquez ici pour ajouter un assureur manquant dans la liste de choix.</a>",
                                      widget=Select_avec_commandes_form(attrs={"url_ajax": "portail_ajax_ajouter_assureur", "id_form": "assureurs_form", "afficher_bouton_ajouter": False,
                                                                               "textes": {"champ": "Nom de l'assureur", "ajouter": "Ajouter un assureur", "modifier": "Modifier un assureur"}}))
 
@@ -71,6 +71,9 @@ class Formulaire(FormulaireBase, ModelForm):
         )
 
     def clean(self):
+        if "assureur" not in self.cleaned_data:
+            messages.add_message(self.request, messages.ERROR, "Vous devez sélectionner un assureur dans la liste déroulante")
+
         if self.cleaned_data["date_fin"] and self.cleaned_data["date_debut"] > self.cleaned_data["date_fin"]:
             messages.add_message(self.request, messages.ERROR, "La date de fin doit être supérieure à la date de début")
             self.add_error("date_fin", "La date de fin doit être supérieure à la date de début")
