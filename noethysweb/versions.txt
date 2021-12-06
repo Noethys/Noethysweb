@@ -1,3 +1,7 @@
+Version 1.0.3.0 (06/12/2021) :
+
+- Correction de l'assureur obligatoire dans la saisie d'une assurance
+
 Version 1.0.2.9 (05/12/2021) :
 
 - Ajout de la liste des consommations dans le menu Consommations
