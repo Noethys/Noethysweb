@@ -3,15 +3,45 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django import forms
+import json
+from django.urls import reverse_lazy
 from django.forms import ModelForm
+from django.contrib import messages
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML
 from crispy_forms.bootstrap import Field, StrictButton
-from core.models import PortailMessage
+from core.models import PortailMessage, ModeleEmail, Mail, Destinataire
 from core.forms.base import FormulaireBase
-from portail.utils.utils_summernote import SummernoteTextFormField
 from core.utils.utils_commandes import Commandes
+from portail.utils.utils_summernote import SummernoteTextFormField
+from outils.utils import utils_email
+
+
+def Envoi_notification_message(request=None, famille=None, structure=None):
+    """ Envoie une notification de nouveau message à la famille par email """
+    modele_email = ModeleEmail.objects.filter(categorie="portail_notification_message", defaut=True).first()
+    if not modele_email:
+        messages.add_message(request, messages.ERROR, "Envoi de la notification par email impossible : Aucun modèle d'email n'a été paramétré")
+        return False
+
+    mail = Mail.objects.create(
+        categorie="portail_notification_message",
+        objet=modele_email.objet if modele_email else "",
+        html=modele_email.html if modele_email else "",
+        adresse_exp=structure.adresse_exp,
+        selection="NON_ENVOYE",
+        utilisateur=request.user if request else None,
+    )
+    url_message = request.build_absolute_uri(reverse_lazy("portail_messagerie", kwargs={'idstructure': structure.pk}))
+    valeurs_fusion = {"{URL_MESSAGE}": "<a href='%s'>Accéder au message</a>" % url_message}
+    destinataire = Destinataire.objects.create(categorie="famille", famille=famille, adresse=famille.mail, valeurs=json.dumps(valeurs_fusion))
+    mail.destinataires.add(destinataire)
+    succes = utils_email.Envoyer_model_mail(idmail=mail.pk, request=request)
+    if succes:
+        messages.add_message(request, messages.INFO, "Une notification a été envoyé par email à la famille")
+    else:
+        messages.add_message(request, messages.ERROR, "La notification par email n'a pas pu être envoyée à la famille")
+    return True
 
 
 class Formulaire(FormulaireBase, ModelForm):

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
 from core.views import crud
 from core.models import PortailMessage, Structure, Famille
-from outils.forms.messagerie_portail import Formulaire
+from outils.forms.messagerie_portail import Formulaire, Envoi_notification_message
 from django.template.defaultfilters import truncatechars, striptags
 
 
@@ -59,3 +59,8 @@ class Ajouter(Page, crud.Ajouter):
 
     def Get_detail_historique(self, instance):
         return "Texte=%s" % (truncatechars(striptags(instance.texte), 40))
+
+    def form_valid(self, form):
+        """ Envoie une notification de nouveau message à la famille par email """
+        Envoi_notification_message(request=self.request, famille=form.cleaned_data["famille"], structure=form.cleaned_data["structure"])
+        return super(Ajouter, self).form_valid(form)

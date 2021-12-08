@@ -7,7 +7,7 @@ from django.urls import reverse_lazy, reverse
 from core.views import crud
 from fiche_famille.views.famille import Onglet
 from core.models import PortailMessage, Structure
-from outils.forms.messagerie_portail import Formulaire
+from outils.forms.messagerie_portail import Formulaire, Envoi_notification_message
 from django.db.models import Q, Count
 
 
@@ -21,9 +21,6 @@ class Page(Onglet):
 
         # Importation de toutes les structures
         context['liste_structures'] = Structure.objects.filter(pk__in=self.request.user.structures.all()).order_by("nom")
-        if not self.get_idstructure() and context['liste_structures']:
-            # Sélection par défaut d'une structure
-            self.kwargs["idstructure"] = context['liste_structures'].first().pk
 
         # Importation du nombre de messages non lus (regroupement par structure)
         context['dict_messages_par_structure'] = {valeur["structure"]: valeur["nbre"] for valeur in PortailMessage.objects.values("structure").filter(famille_id=self.Get_idfamille()).annotate(nbre=Count('pk'))}
@@ -55,3 +52,8 @@ class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
     template_name = "fiche_famille/famille_messagerie_portail.html"
     texte_confirmation = "Le message a bien été envoyé"
+
+    def form_valid(self, form):
+        """ Envoie une notification de nouveau message à la famille par email """
+        Envoi_notification_message(request=self.request, famille=form.cleaned_data["famille"], structure=form.cleaned_data["structure"])
+        return super(Ajouter, self).form_valid(form)
