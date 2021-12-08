@@ -1,3 +1,8 @@
+Version 1.0.3.1 (08/12/2021) :
+
+- Ajout de l'envoi de notification de message à la famille
+- Correction maj des infos familles sur le portail
+
 Version 1.0.3.0 (06/12/2021) :
 
 - Correction de l'assureur obligatoire dans la saisie d'une assurance
