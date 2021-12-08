@@ -39,4 +39,5 @@ class Modifier(Consulter):
         return context
 
     def get_success_url(self):
+        self.Maj_infos_famille()
         return reverse_lazy("portail_individu_identite", kwargs={'idrattachement': self.kwargs['idrattachement']})

@@ -10,7 +10,7 @@ from django.db.models.query import QuerySet
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-from core.models import Rattachement
+from core.models import Rattachement, Individu
 from portail.views.base import CustomView
 from portail.utils import utils_onglets
 from core.views import crud
@@ -150,6 +150,22 @@ class Onglet(CustomView):
     def Apres_suppression(self, objet=None):
         # Demande une nouvelle certification de la fiche
         self.Demande_nouvelle_certification()
+
+    def Maj_infos_famille(self):
+        """ Met à jour les infos de toutes les familles rattachées à cet individu"""
+        individu = self.get_individu()
+
+        # Met à jour la fiche individuelle
+        individu.Maj_infos()
+
+        # Met à jour en cascade les adresses rattachées à cet individu
+        for individu in Individu.objects.filter(adresse_auto=individu.pk):
+            individu.Maj_infos()
+
+        # Met à jour le nom des titulaires de la famille et l'adresse familiale
+        rattachements = Rattachement.objects.select_related('famille').filter(individu=individu)
+        for rattachement in rattachements:
+            rattachement.famille.Maj_infos()
 
 
 class ConsulterBase(crud.Modifier):
