@@ -13,17 +13,25 @@ from crispy_forms.bootstrap import Field, StrictButton
 from core.models import PortailMessage, ModeleEmail, Mail, Destinataire
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
+from core.utils import utils_portail
 from portail.utils.utils_summernote import SummernoteTextFormField
 from outils.utils import utils_email
 
 
 def Envoi_notification_message(request=None, famille=None, structure=None):
     """ Envoie une notification de nouveau message à la famille par email """
+    # Vérifie qu'une notification doit être envoyée
+    parametres_portail = utils_portail.Get_dict_parametres()
+    if not parametres_portail.get("messagerie_envoyer_notification", False):
+        return False
+
+    # Recherche le modèle d'email
     modele_email = ModeleEmail.objects.filter(categorie="portail_notification_message", defaut=True).first()
     if not modele_email:
         messages.add_message(request, messages.ERROR, "Envoi de la notification par email impossible : Aucun modèle d'email n'a été paramétré")
         return False
 
+    # Création de l'email
     mail = Mail.objects.create(
         categorie="portail_notification_message",
         objet=modele_email.objet if modele_email else "",
