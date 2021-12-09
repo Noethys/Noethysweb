@@ -562,6 +562,7 @@ class Facturation():
                     for evenement in liste_evenements:
                         # Recherche un tarif spécial évènement
                         if evenement:
+                            tarif = None
                             for tarif_evenement in Tarif.objects.filter(evenement=evenement).order_by("date_debut"):
                                 if self.Recherche_tarif_valide(tarif_evenement, case_tableau):
                                     tarif = tarif_evenement
@@ -600,6 +601,8 @@ class Facturation():
                                     quantite = dictQuantites[idunite]
 
                         # Calcul du tarif
+                        if not tarif:
+                            break
                         resultat = self.Calcule_tarif(tarif, tarif_base.combi_retenue, case_tableau, temps_facture, quantite, evenement, modeSilencieux, action)
                         if resultat == False:
                             return False
