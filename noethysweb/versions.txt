@@ -1,3 +1,10 @@
+Version 1.0.3.2 (09/12/2021) :
+
+- Ajout de la liste des consommations sans prestations
+- Correction du dédoublement des conso avec la semaine-type
+- Correction des événements gratuits
+- Correction du fuseau horaire
+
 Version 1.0.3.1 (08/12/2021) :
 
 - Ajout de l'envoi de notification de message à la famille
