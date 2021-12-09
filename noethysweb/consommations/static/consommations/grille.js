@@ -491,6 +491,8 @@ class Case_unitaire extends Case_standard {
     };
 
     ajouter(data={}, maj_facturation=true) {
+        if (this.has_conso()) {return false};
+
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
 
@@ -499,6 +501,7 @@ class Case_unitaire extends Case_standard {
 
         // Créer conso
         this.creer_conso(data, maj_facturation);
+        return true;
     };
 
     // Toggle une conso
@@ -523,6 +526,8 @@ class Case_horaire extends Case_standard {
     };
 
     ajouter(data={}, maj_facturation=true) {
+        if (this.has_conso()) {return false};
+
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
 
@@ -591,6 +596,8 @@ class Case_quantite extends Case_standard {
     };
 
     ajouter(data={}, maj_facturation=true) {
+        if (this.has_conso()) {return false};
+
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
 
@@ -689,10 +696,12 @@ class Case_event extends Case_standard {
     };
 
     ajouter() {
+        if (this.has_conso()) {return false};
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
         // Créer conso
         this.creer_conso({evenement: this.evenement.pk});
+        return true;
     };
 
     // Toggle une conso
