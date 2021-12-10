@@ -119,7 +119,7 @@ class Accueil(CustomView, TemplateView):
         return texte_anniversaires
 
     def Get_graphique_individu(self, idactivite=0):
-        conditions = Q(activite_id=idactivite) & Q(date__gte=datetime.date.today() - datetime.timedelta(days=15)) & Q(date__lte=datetime.date.today() + datetime.timedelta(days=30))
+        conditions = Q(activite_id=idactivite) & Q(date__gte=datetime.date.today() - datetime.timedelta(days=10)) & Q(date__lte=datetime.date.today() + datetime.timedelta(days=30))
         liste_ouvertures = Ouverture.objects.values("date").filter(conditions).distinct().order_by("date")
         consommations = {item["date"]: item["nbre"] for item in Consommation.objects.values("date").filter(conditions, etat__in=("reservation", "present")).annotate(nbre=Count("individu_id"))}
         liste_labels, liste_valeurs = [], []
