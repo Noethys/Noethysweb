@@ -247,10 +247,11 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_gestion_conso.Add(code="liste_consommations", titre="Liste des consommations", icone="file-text-o")
 
     # Liste par état
-    menu_listes_etat = menu_consommations.Add(titre="Listes par état")
+    menu_listes_etat = menu_consommations.Add(titre="Listes")
     menu_listes_etat.Add(code="liste_attente", titre="Liste d'attente", icone="file-text-o")
     menu_listes_etat.Add(code="liste_refus", titre="Liste des places refusées", icone="file-text-o")
     menu_listes_etat.Add(code="liste_absences", titre="Liste des absences", icone="file-text-o")
+    menu_listes_etat.Add(code="liste_repas", titre="Liste des repas", icone="file-text-o")
 
     # Analyse
     menu_analyse = menu_consommations.Add(titre="Analyse")
