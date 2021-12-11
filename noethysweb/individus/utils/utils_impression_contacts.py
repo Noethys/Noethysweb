@@ -104,7 +104,7 @@ class Impression(utils_impression.Impression):
                 texte_lien = []
                 lien = dict_liens.get((representant.individu_id, rattachement.individu_id), None)
                 dict_civilite = data_civilites.GetCiviliteForIndividu(individu=representant.individu)
-                if lien and dict_civilite["sexe"]:
+                if lien and lien.idtype_lien and dict_civilite["sexe"]:
                     texte_lien.append(DICT_TYPES_LIENS[lien.idtype_lien][dict_civilite["sexe"]])
                 if representant.titulaire:
                     texte_lien.append("titulaire")
