@@ -1,3 +1,7 @@
+Version 1.0.3.4 (11/12/2021) :
+
+- Ajout de l'édition des contacts
+
 Version 1.0.3.3 (10/12/2021) :
 
 - Ajout de la liste des repas
