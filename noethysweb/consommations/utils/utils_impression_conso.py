@@ -5,6 +5,7 @@
 
 import logging, json, operator, datetime
 logger = logging.getLogger(__name__)
+logging.getLogger('PIL').setLevel(logging.WARNING)
 from django.db.models import Q
 from django.conf import settings
 from django.templatetags.static import static

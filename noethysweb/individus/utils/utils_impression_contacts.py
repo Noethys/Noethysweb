@@ -5,6 +5,7 @@
 
 import logging
 logger = logging.getLogger(__name__)
+logging.getLogger('PIL').setLevel(logging.WARNING)
 from django.conf import settings
 from django.db.models import Q
 from reportlab.platypus import Spacer, Paragraph, Table, TableStyle
