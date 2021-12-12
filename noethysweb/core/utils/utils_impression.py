@@ -246,7 +246,7 @@ class Impression():
     def Draw(self):
         pass
 
-    def Insert_header(self):
+    def Insert_header(self, titre=None, espace_apres=20):
         """ Création d'un header standard """
         # Importation de l'organisateur
         organisateur = cache.get('organisateur', None)
@@ -256,7 +256,7 @@ class Impression():
         # Dessin du tableau
         dataTableau = []
         largeursColonnes = ((self.taille_page[0] - 175, 100))
-        dataTableau.append((self.titre, "%s\nEdité le %s" % (organisateur.nom, utils_dates.ConvertDateToFR(str(datetime.date.today())))))
+        dataTableau.append((titre or self.titre, "%s\nEdité le %s" % (organisateur.nom, utils_dates.ConvertDateToFR(str(datetime.date.today())))))
         style = TableStyle([
             ('BOX', (0, 0), (-1, -1), 0.25, colors.black), ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ('ALIGN', (0, 0), (0, 0), 'LEFT'), ('FONT', (0, 0), (0, 0), "Helvetica-Bold", 16),
@@ -264,7 +264,7 @@ class Impression():
         tableau = Table(dataTableau, largeursColonnes)
         tableau.setStyle(style)
         self.story.append(tableau)
-        self.story.append(Spacer(0, 20))
+        self.story.append(Spacer(0, espace_apres))
 
     def Get_champs_fusion(self):
         return self.dict_donnees

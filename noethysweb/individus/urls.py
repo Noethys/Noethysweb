@@ -11,7 +11,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             inscriptions_scolaires, scolarites, inscriptions_liste, inscriptions_impression, inscriptions_email, liste_comptes_internet, \
                             individus_detaches_liste, liste_mandats, liste_questionnaires_familles, liste_questionnaires_individus, liste_contacts_urgence, \
                             liste_regimes_alimentaires, liste_maladies, liste_informations, individus_doublons_liste, liste_familles_sans_inscriptions, \
-                            edition_contacts
+                            edition_contacts, edition_renseignements
 
 urlpatterns = [
 
@@ -63,6 +63,8 @@ urlpatterns = [
     path('individus/pieces_supprimer_plusieurs/<str:listepk>', liste_pieces_fournies.Supprimer_plusieurs.as_view(), name='pieces_supprimer_plusieurs'),
 
     # Informations
+    path('individus/edition_renseignements', edition_renseignements.View.as_view(), name='edition_renseignements'),
+
     path('individus/liste_anniversaires', liste_anniversaires.View.as_view(), name='liste_anniversaires'),
     path('individus/liste_regimes_caisses', liste_regimes_caisses.Liste.as_view(), name='liste_regimes_caisses'),
     path('individus/liste_quotients', liste_quotients.Liste.as_view(), name='liste_quotients'),
@@ -127,5 +129,6 @@ urlpatterns = [
     path('individus/informations/modifier_diffusion/', secure_ajax(liste_informations.Modifier_diffusion), name='ajax_modifier_diffusion_information'),
     path('individus/importer_photos_individus', secure_ajax(importation_photos.Importer_photos_individus), name="ajax_importer_photos_individus"),
     path('individus/edition_contacts/generer_pdf', secure_ajax(edition_contacts.Generer_pdf), name='ajax_edition_contacts_generer_pdf'),
+    path('individus/edition_renseignements/generer_pdf', secure_ajax(edition_renseignements.Generer_pdf), name='ajax_edition_renseignements_generer_pdf'),
 
 ]
