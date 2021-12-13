@@ -35,7 +35,7 @@ def Envoyer_email(request):
 
     # Analyse des destinataires saisis
     liste_adresses, liste_anomalies = [], []
-    regex = re.compile(r"\"?([-a-zA-Z0-9.`?{}]+@\w+\.\w+)\"?")
+    regex = re.compile(r"^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$")
     for dest in destinataires:
         nom, adresse = parseaddr(dest)
         if re.match(regex, adresse):
