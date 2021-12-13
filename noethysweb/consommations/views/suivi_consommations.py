@@ -99,7 +99,7 @@ def Get_data(parametres={}, request=None):
             date_min, date_max = min(listes_dates), max(listes_dates)
 
     # Importation des unités de remplissage
-    liste_unites_remplissage = UniteRemplissage.objects.prefetch_related('activite', 'unites').filter(activite__in=liste_activites).order_by("ordre")
+    liste_unites_remplissage = UniteRemplissage.objects.prefetch_related('activite', 'unites').filter(activite__in=liste_activites, afficher_page_accueil=True).order_by("ordre")
     dict_unites_remplissage = {}
     dict_unites_remplissage_unites = {}
     for unite_remplissage in liste_unites_remplissage:
