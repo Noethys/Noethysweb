@@ -1,3 +1,10 @@
+Version 1.0.3.6 (13/12/2021) :
+
+- Correction de l'insertion des photos dans les PDF
+- Correction du regex de validation des adresses mail
+- Correction de l'accès à la rubrique Edition des fiches
+- Petits ajustements dans l'édition des fiches
+
 Version 1.0.3.5 (12/12/2021) :
 
 - Ajout de l'édition des renseignements
