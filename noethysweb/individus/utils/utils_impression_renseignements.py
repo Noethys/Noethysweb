@@ -257,16 +257,20 @@ class Impression(utils_impression.Impression):
             # Informations
             contenu_tableau = []
             for information in dict_informations.get(rattachement.individu_id, []):
-                texte = "<b>%s</b> : %s" % (information.intitule, information.description or "")
+                texte = "<b>%s</b>" % information.intitule
+                if information.description:
+                    texte += " : %s" % information.description
                 contenu_tableau.append(Paragraph(texte, style_defaut))
-            self.story.append(Tableau(titre="Informations et recommandations".upper(), aide="Préciser les informations particulères et recommandations", contenu=contenu_tableau))
+            self.story.append(Tableau(titre="Informations et recommandations".upper(), aide="Préciser les informations particulières et recommandations", contenu=contenu_tableau))
 
             # Vaccinations obligatoires
             liste_vaccinations_obligatoires = [vaccination for vaccination in dict_vaccinations.get(rattachement.individu, []) if vaccination["obligatoire"]]
             contenu_tableau = []
             ligne = []
             for index, vaccination in enumerate(liste_vaccinations_obligatoires):
-                ligne.append(Paragraph("%s :" % vaccination["label"], style_droite))
+                label_vaccin = vaccination["label"]
+                label_vaccin = label_vaccin.replace("influenzae", "infl.")
+                ligne.append(Paragraph("%s :" % label_vaccin, style_droite))
                 ligne.append(Paragraph(utils_dates.ConvertDateToFR(vaccination["dernier_rappel"]) if vaccination["dernier_rappel"] else "__/__/____", style_defaut))
                 if len(ligne) == 6 or index == len(liste_vaccinations_obligatoires)-1:
                     contenu_tableau.append(ligne)
