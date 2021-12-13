@@ -589,6 +589,8 @@ class Impression(utils_impression.Impression):
                                     # Photo
                                     if self.dict_donnees["afficher_photos"] != "non":
                                         nom_fichier = inscription.individu.Get_photo(forTemplate=False)
+                                        if "media/" in nom_fichier:
+                                            nom_fichier = settings.MEDIA_ROOT + nom_fichier.replace("media/", "")
                                         img = Image(nom_fichier, width=tailleImageFinal, height=tailleImageFinal)
                                         ligne.append(img)
                                         indexColonne += 1
