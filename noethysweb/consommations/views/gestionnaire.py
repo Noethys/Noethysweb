@@ -102,7 +102,7 @@ class View(CustomView, TemplateView):
                     liste_idinscriptions.append(inscription.pk)
 
         # Importation des classes pour le gestionnaire des conso
-        data["liste_classes"] = Classe.objects.select_related("ecole").filter(date_debut__lte=data["date_min"], date_fin__gte=data["date_min"]).order_by("ecole__nom", "niveaux__ordre")
+        data["liste_classes"] = Classe.objects.select_related("ecole").filter(date_debut__lte=data["date_min"], date_fin__gte=data["date_min"]).order_by("ecole__nom", "nom")
 
         # Sélection des classes
         if not data['selection_classes']:

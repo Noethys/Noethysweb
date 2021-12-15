@@ -97,7 +97,7 @@
                     </div>
                     <div id="panneau_3" class="collapse" data-parent="#accordeon_parametres" aria-labelledby="head_3">
                         <div class="card-body p-0">
-                            <select multiple class="form-control" id="selection_groupes">
+                            <select multiple class="form-control" id="selection_groupes" size="8">
                                 {% for groupe in data.liste_groupes %}
                                     <option value="{{ groupe.pk }}" {% if groupe.pk in data.selection_groupes %}selected{% endif %}>{{ groupe.nom }}</option>
                                 {% endfor %}
@@ -126,7 +126,7 @@
                     </div>
                     <div id="panneau_4" class="collapse" aria-labelledby="head_4" data-parent="#accordeon_parametres">
                         <div class="card-body p-0">
-                            <select multiple class="form-control" id="selection_classes">
+                            <select multiple class="form-control" id="selection_classes" size="15">
                                 {% for classe in data.liste_classes %}
                                     <option value="{{ classe.pk }}" {% if classe.pk in data.selection_classes %}selected{% endif %}>{{ classe.ecole.nom|truncatechars:15 }} | {{ classe.nom }}</option>
                                 {% endfor %}
