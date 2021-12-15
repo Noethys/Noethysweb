@@ -35,7 +35,7 @@ class Impression(utils_impression.Impression):
 
         # Nom de l'organisateur
         dataTableau.append([[
-            Paragraph("""<para align=center fontSize=10>%s %s %s %s</para>""" % (self.dict_donnees["{ORGANISATEUR_NOM}"], self.dict_donnees["{ORGANISATEUR_RUE}"], self.dict_donnees["{ORGANISATEUR_CP}"], self.dict_donnees["{ORGANISATEUR_VILLE}"]), styleSheet['BodyText']),
+            Paragraph("""<para align=center fontSize=10>%s</para>""" % self.dict_donnees["{ORGANISATEUR_NOM}"], styleSheet['BodyText']),
             Paragraph("""<para align=center fontSize=10>ICS n°%s</para>""" % code_ics, styleSheet['BodyText']),
             Paragraph("""<para align=center fontSize=8>%s %s %s</para>""" % (self.dict_donnees["{ORGANISATEUR_RUE}"], self.dict_donnees["{ORGANISATEUR_CP}"], self.dict_donnees["{ORGANISATEUR_VILLE}"]), styleSheet['BodyText']),
         ]])
