@@ -1,3 +1,8 @@
+Version 1.0.3.8 (15/12/2021) :
+
+- Ajout de l'impression des mandats
+- Correction de l'impression des reçus de règlements
+
 Version 1.0.3.7 (15/12/2021) :
 
 - Ajout du non-regroupement par groupe dans l'édition des consommations
