@@ -182,15 +182,6 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_scolarite.Add(code="inscriptions_scolaires_liste", titre="Inscriptions scolaires", icone="file-text-o")
     menu_scolarite.Add(code="scolarites_liste", titre="Etapes de scolarité", icone="file-text-o")
 
-    # Pièces
-    menu_pieces_individus = menu_individus.Add(titre="Pièces")
-    menu_pieces_individus.Add(code="liste_pieces_manquantes", titre="Liste des pièces manquantes", icone="file-text-o")
-    menu_pieces_individus.Add(code="liste_pieces_fournies", titre="Liste des pièces fournies", icone="file-text-o")
-
-    # Photos
-    menu_photos_individus = menu_individus.Add(titre="Photos")
-    menu_photos_individus.Add(code="importation_photos", titre="Importer des photos individuelles", icone="file-text-o")
-
     # Informations
     menu_infos_individus = menu_individus.Add(titre="Informations")
     menu_infos_individus.Add(code="edition_renseignements", titre="Edition des fiches de renseignements", icone="file-text-o")
@@ -207,6 +198,11 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_infos_individus.Add(code="edition_informations", titre="Edition des informations et régimes", icone="file-text-o")
     menu_infos_individus.Add(code="liste_comptes_internet", titre="Liste des comptes internet", icone="file-text-o")
 
+    # Pièces
+    menu_pieces_individus = menu_individus.Add(titre="Pièces")
+    menu_pieces_individus.Add(code="liste_pieces_manquantes", titre="Liste des pièces manquantes", icone="file-text-o")
+    menu_pieces_individus.Add(code="liste_pieces_fournies", titre="Liste des pièces fournies", icone="file-text-o")
+
     # Questionnaires
     menu_infos_questionnaires = menu_individus.Add(titre="Questionnaires")
     menu_infos_questionnaires.Add(code="questionnaires_familles_liste", titre="Liste des questionnaires familiaux", icone="file-text-o")
@@ -215,6 +211,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Impression
     menu_impression_individus = menu_individus.Add(titre="Impression")
     menu_impression_individus.Add(code="etiquettes_individus", titre="Edition d'étiquettes et de badges", icone="file-text-o")
+
+    # Photos
+    menu_photos_individus = menu_individus.Add(titre="Photos")
+    menu_photos_individus.Add(code="importation_photos", titre="Importer des photos individuelles", icone="file-text-o")
 
 
     # ------------------------------------ Cotisations ------------------------------------
