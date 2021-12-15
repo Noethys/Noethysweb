@@ -232,7 +232,7 @@ class Liste(Page, crud.Liste):
                 return "Non"
 
             # Dates
-            if instance.code in ("date_naiss", "date_debut", "date_fin"):
+            if instance.code in ("date_naiss", "date_debut", "date_fin", "date"):
                 try:
                     return utils_dates.ConvertDateENGtoFR(valeur)
                 except:
