@@ -74,7 +74,7 @@ def Get_labels():
     dict_labels = utils_champs.Get_labels_champs()
 
     # Ajout des tables spéciales
-    for categorie, table in [("individu_contacts", ContactUrgence), ("individu_assurance", Assurance), ("individu_informations", Information), ("individu_vaccinations", Vaccin)]:
+    for categorie, table in [("individu_contacts", ContactUrgence), ("individu_assurances", Assurance), ("individu_informations", Information), ("individu_vaccinations", Vaccin)]:
         for field in table._meta.get_fields():
             dict_labels[(categorie, field.name)] = "%s : %s" % (table._meta.verbose_name.capitalize(), field.verbose_name)
 
@@ -139,11 +139,23 @@ class Liste(Page, crud.Liste):
             }
 
         def Formate_code(self, instance, **kwargs):
+            # Recherche le label de la donnée
             if not hasattr(self, "dict_labels"):
                 self.dict_labels = Get_labels()
+            label = self.dict_labels.get(instance.code, instance.code)
             if (instance.categorie, instance.code) in self.dict_labels:
-                return self.dict_labels.get((instance.categorie, instance.code))
-            return self.dict_labels.get(instance.code, instance.code)
+                label = self.dict_labels.get((instance.categorie, instance.code))
+            # Insère une icône si donnée importante
+            warning = False
+            if instance.categorie in ("individu_questionnaire", "individu_informations", "famille_pieces", "individu_regimes_alimentaires"):
+                warning = True
+            if instance.categorie == "individu_coords" and instance.code in ("type_adresse", "ville_resid"):
+                warning = True
+            if instance.categorie == "individu_identite" and instance.code in ("nom", "prenom"):
+                warning = True
+            if warning:
+                label = "<i class='fa fa-warning text-yellow' title='Information importante'></i> " + label
+            return label
 
         def Formate_traitement(self, instance, **kwargs):
             if instance.traitement_date:
@@ -219,15 +231,18 @@ class Liste(Page, crud.Liste):
             if valeur == "False":
                 return "Non"
 
+            # Dates
+            if instance.code in ("date_naiss", "date_debut", "date_fin"):
+                try:
+                    return utils_dates.ConvertDateENGtoFR(valeur)
+                except:
+                    return str(valeur)
+
             # Civilité
             if instance.code == "civilite":
                 if not hasattr(self, "dict_civilites"):
                     self.dict_civilites = data_civilites.GetDictCivilites()
                 return self.dict_civilites[int(valeur)]["label"]
-
-            # Date de naissance
-            if instance.code == "date_naiss":
-                return utils_dates.ConvertDateENGtoFR(valeur)
 
             # Type de sieste
             if instance.code == "type_sieste":
