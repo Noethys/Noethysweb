@@ -188,11 +188,11 @@ class Impression(utils_impression.Impression):
                 # Filtre de scolarité
                 scolarite = None
                 if self.dict_donnees["regroupement_scolarite"] == "ecoles":
-                    scolarite = Get_scolarite(inscription.individu_id, min(self.dict_donnees["liste_dates"]), "ecole")
+                    scolarite = Get_scolarite(inscription.individu_id, min(self.dict_donnees["dates"]), "ecole")
                     if scolarite not in liste_ecoles:
                         valide = False
                 if self.dict_donnees["regroupement_scolarite"] == "classes":
-                    scolarite = Get_scolarite(inscription.individu_id, min(self.dict_donnees["liste_dates"]), "classe")
+                    scolarite = Get_scolarite(inscription.individu_id, min(self.dict_donnees["dates"]), "classe")
                     if scolarite not in liste_classes:
                         valide = False
 
