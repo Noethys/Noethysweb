@@ -4,13 +4,12 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.db.models import Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Mandat
 from fiche_famille.forms.famille_mandat import Formulaire
 from fiche_famille.views.famille import Onglet
-from django.db.models import Q
-
 
 
 class Page(Onglet):
@@ -45,7 +44,6 @@ class Page(Onglet):
         if "SaveAndNew" in self.request.POST:
             url = self.url_ajouter
         return reverse_lazy(url, kwargs={'idfamille': self.kwargs.get('idfamille', None)})
-
 
 
 class Liste(Page, crud.Liste):
@@ -84,6 +82,7 @@ class Liste(Page, crud.Liste):
             html = [
                 self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
                 self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
+                self.Create_bouton_imprimer(url=reverse("famille_voir_mandat", kwargs={"idfamille": kwargs["idfamille"], "idmandat": instance.pk}), title="Imprimer ou envoyer par email le mandat"),
             ]
             return self.Create_boutons_actions(html)
 

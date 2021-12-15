@@ -17,6 +17,7 @@ CATEGORIES = [
     ("attestation_fiscale", "Attestation fiscale"),
     ("reservations", "Liste des réservations"),
     ("cotisation", "Cotisation"),
+    ("mandat_sepa", "Mandat SEPA"),
     ("rappel_pieces_manquantes", "Rappel pièces manquantes"),
     ("portail", "Rappel des données du compte internet"),
     ("portail_demande_inscription", "Portail - Demande d'une inscription"),

@@ -1,0 +1,66 @@
+{% extends "fiche_famille/famille_liste.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+{% endblock scripts %}
+
+
+{% block detail_famille %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+
+                {# Boutons de commandes #}
+                <div class="buttonHolder">
+                    <button class="btn btn-primary" onclick="impression_pdf()" title="Aperçu PDF du mandat"><i class='fa fa-file-pdf-o margin-r-5'></i>Aperçu PDF</button>
+                    <button class="btn btn-primary" onclick="impression_pdf(true)" title="Envoyer la facture par Email"><i class='fa fa-send-o margin-r-5'></i>Envoyer par Email</button>
+                    <a class="btn btn-danger" href="{% url 'famille_mandats_liste' idfamille=idfamille %}"><i class='fa fa-ban margin-r-5'></i>Fermer</a>
+                </div>
+
+            {% endblock box_contenu %}
+            {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+        {% endembed %}
+
+    </div>
+
+    {# Insertion des modals #}
+    {% include 'outils/modal_editeur_emails.html' %}
+    {% include 'core/modal_pdf.html' %}
+
+    <script>
+
+        // Impression du PDF
+        function impression_pdf(email=false) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_mandat_impression_pdf' %}",
+                data: {
+                    idmandat: {{ idmandat }},
+                    idfamille: {{ idfamille }},
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                datatype: "json",
+                success: function(data){
+                    if (email) {
+                        envoyer_email(data);
+                    } else {
+                        charge_pdf(data);
+                    }
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+    </script>
+
+{% endblock %}

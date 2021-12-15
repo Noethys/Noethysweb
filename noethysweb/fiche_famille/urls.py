@@ -8,7 +8,7 @@ from core.decorators import secure_ajax
 from fiche_famille.views import famille, famille_questionnaire, famille_notes, famille_ajouter, famille_pieces, famille_cotisations, famille_caisse, famille_aides, famille_quotients, famille_divers, \
                             famille_prestations, famille_reglements, famille_consommations, famille_factures, famille_voir_facture, famille_voir_cotisation, famille_abo_factures_email, \
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, \
-                            famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats
+                            famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats, famille_voir_mandat
 
 urlpatterns = [
 
@@ -89,6 +89,7 @@ urlpatterns = [
     path('individus/familles/mandats/ajouter/<int:idfamille>', famille_mandats.Ajouter.as_view(), name='famille_mandats_ajouter'),
     path('individus/familles/mandats/modifier/<int:idfamille>/<int:pk>', famille_mandats.Modifier.as_view(), name='famille_mandats_modifier'),
     path('individus/familles/mandats/supprimer/<int:idfamille>/<int:pk>', famille_mandats.Supprimer.as_view(), name='famille_mandats_supprimer'),
+    path('individus/familles/mandats/voir/<int:idfamille>/<int:idmandat>', famille_voir_mandat.View.as_view(), name='famille_voir_mandat'),
 
     path('individus/familles/attestations/liste/<int:idfamille>', famille_attestations.Liste.as_view(), name='famille_attestations_liste'),
     path('individus/familles/attestations/ajouter/<int:idfamille>', famille_attestations.Ajouter.as_view(), name='famille_attestations_ajouter'),
@@ -137,6 +138,7 @@ urlpatterns = [
     path('individus/recu_impression_pdf', secure_ajax(reglement_recu.Impression_pdf), name='ajax_recu_impression_pdf'),
     path('individus/facture_impression_pdf', secure_ajax(famille_voir_facture.Impression_pdf), name='ajax_facture_impression_pdf'),
     path('individus/attestation_impression_pdf', secure_ajax(famille_attestations.Impression_pdf), name='ajax_attestation_impression_pdf'),
+    path('individus/facture_mandat_pdf', secure_ajax(famille_voir_mandat.Impression_pdf), name='ajax_mandat_impression_pdf'),
     path('individus/devis_impression_pdf', secure_ajax(famille_devis.Impression_pdf), name='ajax_devis_impression_pdf'),
     path('individus/cotisation_impression_pdf', secure_ajax(famille_voir_cotisation.Impression_pdf), name='ajax_cotisation_impression_pdf'),
     path('individus/rappel_impression_pdf', secure_ajax(famille_voir_rappel.Impression_pdf), name='ajax_rappel_impression_pdf'),
