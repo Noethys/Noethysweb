@@ -80,7 +80,7 @@ def Impression_pdf(request):
     dict_donnees["intro"] = utils_texte.Fusionner_motscles(intro, dict_donnees)
 
     # Création du PDF
-    from individus.utils import utils_impression_recu
+    from fiche_famille.utils import utils_impression_recu
     impression = utils_impression_recu.Impression(titre="Reçu de règlement", dict_donnees=dict_donnees, IDmodele=int(IDmodele))
     nom_fichier = impression.Get_nom_fichier()
 
