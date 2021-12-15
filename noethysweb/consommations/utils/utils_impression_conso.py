@@ -129,6 +129,11 @@ class Impression(utils_impression.Impression):
         for conso in liste_conso:
             valide = True
 
+            # Groupe
+            IDgroupe = conso.groupe_id
+            if not self.dict_donnees["regroupement_groupe"]:
+                IDgroupe = None
+
             # Filtre de scolarité
             scolarite = None
             if self.dict_donnees["regroupement_scolarite"] == "ecoles":
@@ -165,15 +170,15 @@ class Impression(utils_impression.Impression):
                     # dictIndividus[conso.individu_id] = {"IDcivilite": conso.individu.civilite, "IDfamille": conso.inscription.famille_id, "individu": conso.individu}
 
                     utils_dictionnaires.DictionnaireImbrique(dictionnaire=dictConso,
-                                                             cles=[conso.activite_id, conso.groupe_id, scolarite, IDevenement, IDetiquette, conso.inscription],
+                                                             cles=[conso.activite_id, IDgroupe, scolarite, IDevenement, IDetiquette, conso.inscription],
                                                              valeur={"IDcivilite": conso.individu.civilite, "nom": conso.individu.nom, "prenom": conso.individu.prenom, "date_naiss": conso.individu.date_naiss, "age": conso.individu.Get_age(), "listeConso": {}})
 
-                    utils_dictionnaires.DictionnaireImbrique(dictionnaire=dictConso[conso.activite_id][conso.groupe_id][scolarite][IDevenement][IDetiquette][conso.inscription]["listeConso"],
+                    utils_dictionnaires.DictionnaireImbrique(dictionnaire=dictConso[conso.activite_id][IDgroupe][scolarite][IDevenement][IDetiquette][conso.inscription]["listeConso"],
                                                              cles=[conso.date, conso.unite_id],
                                                              valeur=[])
 
                     detail_conso = {"heure_debut": conso.heure_debut, "heure_fin": conso.heure_fin, "etat": conso.etat, "quantite": conso.quantite, "IDfamille": conso.inscription.famille_id, "evenement": conso.evenement}  #, "etiquettes": etiquettes}
-                    dictConso[conso.activite_id][conso.groupe_id][scolarite][IDevenement][IDetiquette][conso.inscription]["listeConso"][conso.date][conso.unite_id].append(detail_conso)
+                    dictConso[conso.activite_id][IDgroupe][scolarite][IDevenement][IDetiquette][conso.inscription]["listeConso"][conso.date][conso.unite_id].append(detail_conso)
 
 
         # Intégration de tous les inscrits
@@ -183,8 +188,13 @@ class Impression(utils_impression.Impression):
             inscriptions = Inscription.objects.select_related('individu', 'activite', 'famille', 'individu__type_sieste').prefetch_related("individu__regimes_alimentaires").filter(conditions)
 
             for inscription in inscriptions:
-
                 valide = True
+
+                # Groupe
+                IDgroupe = inscription.groupe_id
+                if not self.dict_donnees["regroupement_groupe"]:
+                    IDgroupe = None
+
                 # Filtre de scolarité
                 scolarite = None
                 if self.dict_donnees["regroupement_scolarite"] == "ecoles":
@@ -212,7 +222,7 @@ class Impression(utils_impression.Impression):
                     # dictIndividus[inscription.individu_id] = {"IDcivilite": inscription.individu.civilite, "IDfamille": inscription.famille_id, "individu": inscription.individu}
 
                     utils_dictionnaires.DictionnaireImbrique(dictionnaire=dictConso,
-                                                             cles=[inscription.activite_id, inscription.groupe_id, scolarite, IDevenement, IDetiquette, inscription],
+                                                             cles=[inscription.activite_id, IDgroupe, scolarite, IDevenement, IDetiquette, inscription],
                                                              valeur={"IDcivilite": inscription.individu.civilite, "nom": inscription.individu.nom, "prenom": inscription.individu.prenom, "date_naiss": inscription.individu.date_naiss, "age": inscription.individu.Get_age(), "listeConso": {}})
 
         # Récupération des mémo-journées
@@ -340,14 +350,23 @@ class Impression(utils_impression.Impression):
 
                 # tri des groupes par ordre
                 listeGroupesTemp = sorted(list(dictOuvertures[activite.pk].keys()), key=lambda x: x.ordre)
+                if not self.dict_donnees["regroupement_groupe"]:
+                    listeGroupesTemp = [None]
 
                 for indexGroupe, groupe in enumerate(listeGroupesTemp, 1):
-                    dictDatesUnites = dictOuvertures[activite.pk][groupe]
+                    IDgroupe = groupe.pk if groupe else None
+
+                    if self.dict_donnees["regroupement_groupe"]:
+                        dictDatesUnites = dictOuvertures[activite.pk][groupe]
+                    else:
+                        dictDatesUnites = {}
+                        for groupeTemp, dictUnitesTemp in dictOuvertures[activite.pk].items():
+                            dictDatesUnites.update(dictUnitesTemp)
 
                     # Classes
                     listeScolarite = []
-                    if activite.pk in dictConso and groupe.pk in dictConso[activite.pk]:
-                        listeScolarite = list(dictConso[activite.pk][groupe.pk].keys())
+                    if activite.pk in dictConso and IDgroupe in dictConso[activite.pk]:
+                        listeScolarite = list(dictConso[activite.pk][IDgroupe].keys())
 
                     # tri des classes
                     listeInfosScolarite = [] if self.dict_donnees["regroupement_scolarite"] == "aucun" else self.TriClasses(listeScolarite)
@@ -380,8 +399,8 @@ class Impression(utils_impression.Impression):
 
                         # Recherche des évènements
                         listeEvenements = []
-                        if activite.pk in dictConso and groupe.pk in dictConso[activite.pk] and scolarite in dictConso[activite.pk][groupe.pk]:
-                            listeEvenements = list(dictConso[activite.pk][groupe.pk][scolarite].keys())
+                        if activite.pk in dictConso and IDgroupe in dictConso[activite.pk] and scolarite in dictConso[activite.pk][IDgroupe]:
+                            listeEvenements = list(dictConso[activite.pk][IDgroupe][scolarite].keys())
 
                         # Si regroupement par évènement
                         if not self.dict_donnees["regroupement_evenements"]:
@@ -494,7 +513,7 @@ class Impression(utils_impression.Impression):
                                     largeursColonnes.append(largeurColonneInformations)
 
                                 # ------ Création de l'entete de groupe ------
-                                CreationTitreTableau(activite.nom, groupe.nom, nomEcole, nomClasse)
+                                CreationTitreTableau(activite.nom, groupe.nom if groupe else "&nbsp;", nomEcole, nomClasse)
 
                                 if IDevenement:
                                     nomEvenement = dict_evenements[IDevenement].nom
@@ -552,7 +571,7 @@ class Impression(utils_impression.Impression):
                                 # Création d'une liste temporaire pour le tri
                                 listeInscriptions = []
                                 try:
-                                    for inscription, dictInscription in dictConso[activite.pk][groupe.pk][scolarite][IDevenement][IDetiquette].items():
+                                    for inscription, dictInscription in dictConso[activite.pk][IDgroupe][scolarite][IDevenement][IDetiquette].items():
                                         listeInscriptions.append((inscription, dictInscription["nom"], dictInscription["prenom"], dictInscription["age"]))
                                 except:
                                     pass
@@ -581,7 +600,7 @@ class Impression(utils_impression.Impression):
                                 indexLigne = 0
                                 for inscription, nom, prenom, age in listeInscriptions:
 
-                                    dictInscription = dictConso[activite.pk][groupe.pk][scolarite][IDevenement][IDetiquette][inscription]
+                                    dictInscription = dictConso[activite.pk][IDgroupe][scolarite][IDevenement][IDetiquette][inscription]
                                     ligne = []
                                     indexColonne = 0
                                     ligneVide = True
@@ -1064,10 +1083,11 @@ class Impression(utils_impression.Impression):
                                         tableauRecap = Table([(dataTableauRecap,),], [largeur_contenu,])
                                         tableauRecap.setStyle(styleRecap)
                                         self.story.append(tableauRecap)
-                                        self.story.append(Spacer(0, 20))
+
+                                self.story.append(Spacer(0, 10))
 
                                 # Export
-                                listeExport.append({"activite": activite.nom, "groupe": groupe.nom, "ecole": nomEcole, "classe": nomClasse, "evenement": nomEvenement, "etiquette": nomEtiquette, "lignes": listeLignesExport})
+                                listeExport.append({"activite": activite.nom, "groupe": groupe.nom if groupe else "", "ecole": nomEcole, "classe": nomClasse, "evenement": nomEvenement, "etiquette": nomEtiquette, "lignes": listeLignesExport})
 
                                 # Saut de page après une étiquette
                                 # if self.GetPage("etiquettes").checkbox_etiquettes.GetValue() == True and self.GetPage("etiquettes").checkbox_saut_etiquettes.GetValue() == True :

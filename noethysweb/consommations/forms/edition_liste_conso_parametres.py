@@ -20,6 +20,7 @@ class Formulaire(FormulaireBase, forms.Form):
 
     # Activités
     groupes = forms.CharField(label="Activités", required=False, widget=SelectionGroupesWidget(attrs={"coche_tout": False}))
+    regroupement_groupe = forms.BooleanField(label="Regrouper par groupe", required=False, initial=True)
     saut_page_activites = forms.BooleanField(label="Insérer un saut de page après chaque activité", required=False, initial=True)
     saut_page_groupes = forms.BooleanField(label="Insérer un saut de page après chaque groupe", required=False, initial=True)
 
@@ -128,6 +129,7 @@ class Formulaire(FormulaireBase, forms.Form):
             TabHolder(
                 Tab("Activités",
                     Field('groupes'),
+                    Field('regroupement_groupe'),
                     Field('saut_page_activites'),
                     Field('saut_page_groupes'),
                     ),
