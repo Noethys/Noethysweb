@@ -10,6 +10,8 @@ from django.db.models.query import QuerySet
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
+from django.db.models.fields.files import FieldFile
 from core.models import Rattachement, Individu
 from portail.views.base import CustomView
 from portail.utils import utils_onglets
@@ -105,6 +107,10 @@ class Onglet(CustomView):
         # Transforme une liste d'instances en liste de pk
         if isinstance(valeur, list):
             valeur = [item.pk if "models" in str(type(item)) else item for item in valeur]
+
+        # Si document uploadé
+        if type(valeur) in (TemporaryUploadedFile, InMemoryUploadedFile, FieldFile):
+            valeur = None
 
         # Transforme la valeur en json
         return json.dumps(valeur, cls=DjangoJSONEncoder)
