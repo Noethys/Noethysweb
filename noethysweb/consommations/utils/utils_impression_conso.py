@@ -1102,28 +1102,9 @@ class Impression(utils_impression.Impression):
                             CreationSautPage()
 
                         # Saut de page après une école
-                        # todo : provisoire
-                        # if self.dict_donnees["regroupement_scolarite"] == "classes" and self.dict_donnees["saut_page_ecoles"]:
-                        #     IDecoleActuelle = None
-                        #     IDecoleSuivante = None
-                        #     if IDclasse in dictClasses :
-                        #         IDecoleActuelle = dictClasses[IDclasse]["IDecole"]
-                        #         if indexClasse < len(listeInfosScolarite):
-                        #             IDclasseSuivante = listeInfosScolarite[indexClasse]["IDclasse"]
-                        #             if IDclasseSuivante in dictClasses :
-                        #                 IDecoleSuivante = dictClasses[IDclasseSuivante]["IDecole"]
-                        #     if IDecoleActuelle != IDecoleSuivante :
-                        #         CreationSautPage()
-                        #
-                        # # Saut de page après une école
-                        # if self.dict_donnees["regroupement_scolarite"] == "ecoles" and self.dict_donnees["saut_page_ecoles"]:
-                        #     IDecoleActuelle = scolarite
-                        #     IDecoleSuivante = None
-                        #     if indexClasse < len(listeInfosScolarite):
-                        #         IDecoleSuivante = listeInfosScolarite[indexClasse]["IDecole"]
-                        #     if IDecoleActuelle != IDecoleSuivante :
-                        #         CreationSautPage()
-
+                        if self.dict_donnees["regroupement_scolarite"] in ("classes", "ecoles") and self.dict_donnees["saut_page_ecoles"]:
+                            if indexClasse < len(listeInfosScolarite) and IDecole != listeInfosScolarite[indexClasse]["IDecole"]:
+                                CreationSautPage()
 
                     # Saut de page après un groupe
                     if self.dict_donnees["saut_page_groupes"] and indexGroupe < len(dictOuvertures[activite.pk]):
