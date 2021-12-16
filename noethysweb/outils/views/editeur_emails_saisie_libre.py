@@ -3,13 +3,15 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
-from core.models import ListeDiffusion, Destinataire, Mail, Individu
-from outils.views.editeur_emails import Page_destinataires
+import re
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.views.generic import TemplateView
-import re
+from django.urls import reverse_lazy, reverse
+from core.models import ListeDiffusion, Destinataire, Mail, Individu
+from outils.views.editeur_emails import Page_destinataires
+from outils.utils import utils_email
+
 
 
 class Liste(Page_destinataires, TemplateView):
@@ -32,10 +34,10 @@ class Liste(Page_destinataires, TemplateView):
             liste_adresses = []
 
             # Vérifie toutes les adresses mails
-            regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+            validation = utils_email.Validation_adresse()
             liste_anomalies = []
             for adresse in texte_adresses.split(";"):
-                if not re.search(regex, adresse):
+                if not validation.Check(adresse=adresse):
                     liste_anomalies.append(adresse)
                 else:
                     liste_adresses.append(adresse)

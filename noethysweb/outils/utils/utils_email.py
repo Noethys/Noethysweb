@@ -16,6 +16,15 @@ from core.models import Mail
 from core.utils import utils_dates, utils_historique
 
 
+class Validation_adresse():
+    """ Validation d'une adresse mail """
+    def __init__(self):
+        self.regex = re.compile(r"([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+")
+
+    def Check(self, adresse=""):
+        return re.search(self.regex, adresse)
+
+
 def Textify(html):
     """ Convertit un html en str """
     text_only = re.sub('[ \t]+', ' ', strip_tags(html))

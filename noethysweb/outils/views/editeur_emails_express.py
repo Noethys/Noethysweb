@@ -35,10 +35,10 @@ def Envoyer_email(request):
 
     # Analyse des destinataires saisis
     liste_adresses, liste_anomalies = [], []
-    regex = re.compile(r"^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$")
+    validation = utils_email.Validation_adresse()
     for dest in destinataires:
         nom, adresse = parseaddr(dest)
-        if re.match(regex, adresse):
+        if validation.Check(adresse=adresse):
             liste_adresses.append(adresse)
         else:
             liste_anomalies.append(adresse)
