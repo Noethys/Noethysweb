@@ -1,4 +1,4 @@
-Version 1.0.4.0 (16/12/2021) :
+Version 1.0.4.1 (16/12/2021) :
 
 - Correction du renseignement de type document
 
