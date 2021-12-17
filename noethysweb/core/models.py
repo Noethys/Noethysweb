@@ -2300,7 +2300,7 @@ class ModeleEmail(models.Model):
     categorie = models.CharField(verbose_name="Catégorie", max_length=200, choices=CATEGORIES_MODELES_EMAILS)
     nom = models.CharField(verbose_name="Nom", max_length=250)
     description = models.CharField(verbose_name="Description", max_length=400, blank=True, null=True)
-    objet = models.CharField(verbose_name="Objet", max_length=300)
+    objet = models.CharField(verbose_name="Objet", max_length=300, blank=True, null=True)
     html = models.TextField(verbose_name="Texte", blank=True, null=True)
     defaut = models.BooleanField(verbose_name="Modèle par défaut", default=False)
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
@@ -2687,7 +2687,7 @@ class Destinataire(models.Model):
 class Mail(models.Model):
     idmail = models.AutoField(verbose_name="ID", db_column='IDmail', primary_key=True)
     categorie = models.CharField(verbose_name="Catégorie", max_length=200, blank=True, null=True)
-    objet = models.CharField(verbose_name="Objet", max_length=300)
+    objet = models.CharField(verbose_name="Objet", max_length=300, blank=True, null=True)
     html = models.TextField(verbose_name="Texte", blank=True, null=True)
     utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.CASCADE)
     adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Expéditeur", blank=True, null=True, on_delete=models.SET_NULL)
