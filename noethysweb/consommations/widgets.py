@@ -187,6 +187,7 @@ class SelectionEcolesWidget(Widget):
         context['selections'] = []
         if value:
             context['selections'] = [int(id) for id in value.split(";")]
+            context['coche_tout'] = False
 
         # Items
         liste_ecoles = Ecole.objects.all().order_by("nom")
@@ -216,6 +217,7 @@ class SelectionClassesWidget(Widget):
         context['selections'] = []
         if value:
             context['selections'] = [int(id) for id in value.split(";")]
+            context['coche_tout'] = False
 
         # Récupération des dates
         liste_dates = context.get("dates", [])
