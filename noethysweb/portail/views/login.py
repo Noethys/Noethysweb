@@ -13,7 +13,7 @@ from django.contrib.auth.models import update_last_login
 from noethysweb.version import GetVersion
 from portail.forms.login import FormLoginFamille
 from core.models import Organisateur, ImageFond
-from core.utils import utils_portail
+from core.utils import utils_portail, utils_historique
 
 
 class ClassCommuneLogin:
@@ -60,6 +60,8 @@ class LoginViewFamille(ClassCommuneLogin, LoginView):
         update_last_login(None, form.get_user())
         # Enregistre la connexion dans le log
         logger.debug("Connexion portail de la famille %s" % form.get_user())
+        # Enregistre la connexion dans l'historique
+        utils_historique.Ajouter(titre="Connexion au portail", utilisateur=form.get_user(), famille=form.get_user().famille.pk, portail=True)
         return super(LoginViewFamille, self).form_valid(form)
 
     def get_success_url(self):
