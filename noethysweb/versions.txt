@@ -1,3 +1,8 @@
+Version 1.0.4.3 (18/12/2021) :
+
+- Ajout des statistiques du portail
+- Autorise null dans l'objet d'un modèle d'email
+
 Version 1.0.4.2 (17/12/2021) :
 
 - Correction de la mémorisation des écoles dans le profil de configuration de l'édition des consommations
