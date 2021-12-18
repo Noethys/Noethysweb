@@ -3,6 +3,8 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import logging
+logger = logging.getLogger(__name__)
 from core.models import Historique
 
 
@@ -10,8 +12,9 @@ def Ajouter(titre="", detail="", utilisateur=None, famille=None, individu=None, 
     try:
         Historique.objects.create(titre=titre, detail=detail, utilisateur=utilisateur, famille_id=famille,
                                   individu_id=individu, objet=objet, idobjet=idobjet, classe=classe, old=old, portail=portail)
-    except:
-        pass
+    except Exception as err:
+        logger.error("Erreur dans ajout historique : %s" % err)
+
 
 def Ajouter_plusieurs(actions=[]):
     liste_ajouts = [Historique(**action) for action in actions]
