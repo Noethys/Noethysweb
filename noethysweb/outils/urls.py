@@ -9,7 +9,7 @@ from core.decorators import secure_ajax
 from outils.views import editeur_emails, editeur_emails_express, historique, update, sauvegarde_creer, statistiques, contacts, \
                         editeur_emails_familles, editeur_emails_individus, editeur_emails_contacts, editeur_emails_listes_diffusion, \
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
-                        demandes_portail, liste_conso_sans_presta
+                        demandes_portail, liste_conso_sans_presta, statistiques_portail
 
 urlpatterns = [
 
@@ -18,6 +18,7 @@ urlpatterns = [
 
     # Statistiques
     path('outils/statistiques', statistiques.View.as_view(), name='statistiques'),
+    path('outils/statistiques_portail', statistiques_portail.View.as_view(), name='statistiques_portail'),
 
     # Carnets de contacts
     path('outils/contacts/liste', contacts.Liste.as_view(), name='contacts_liste'),

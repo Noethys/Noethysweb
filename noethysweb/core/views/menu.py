@@ -120,7 +120,8 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
     # Statistiques
     menu_stats = menu_outils.Add(titre="Statistiques")
-    menu_stats.Add(code="statistiques", titre="Statistiques", icone="file-text-o")
+    menu_stats.Add(code="statistiques", titre="Statistiques générales", icone="file-text-o")
+    menu_stats.Add(code="statistiques_portail", titre="Statistiques du portail", icone="file-text-o")
 
     # Communication
     menu_emails = menu_outils.Add(titre="Emails")
