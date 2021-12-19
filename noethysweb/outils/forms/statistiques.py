@@ -29,6 +29,9 @@ class Formulaire(FormulaireBase, forms.Form):
             ("familles_caisse", "Caisse des familles"),
             ("familles_composition", "Composition des familles"),
         )),
+        ("Consommations", (
+            ("consommations_saisie", "Saisie des consommations"),
+        )),
     ]
     rubrique = forms.ChoiceField(label="Rubrique", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), choices=choix_rubrique, required=True)
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))

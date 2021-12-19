@@ -5,7 +5,7 @@
 
 from django.urls import reverse_lazy, reverse
 from core.views.base import CustomView
-from django.db.models import Q, Count
+from django.db.models import Q, Count, F
 from core.models import Activite, Consommation, Inscription, Famille, Individu, Vacance, Scolarite, LISTE_MOIS
 from django.views.generic import TemplateView
 from outils.forms.statistiques import Formulaire
@@ -52,13 +52,14 @@ class Camembert(Element):
 
 
 class Histogramme(Element):
-    def __init__(self, titre="", labels=[], type_chart="line", valeurs=[]):
+    def __init__(self, titre="", labels=[], type_chart="line", valeurs=[], chronologie=None):
         Element.__init__(self)
         self.categorie = "histogramme"
         self.type_chart = type_chart # "line" ou "bar"
         self.titre = titre
         self.labels = labels
         self.valeurs = valeurs
+        self.chronologie = chronologie # "date"
 
 
 def Calcule_periodes_comparatives(parametres={}, presents=None, liste_activites=[]):
@@ -449,8 +450,31 @@ class View(CustomView, TemplateView):
                     labels=[item[0] for item in familles],
                     valeurs=[item[1] for item in familles], ))
 
+            # ---------------------------- CONSOMMATIONS : Saisie -------------------------------
 
+            if rubrique == "consommations_saisie":
+                if not presents:
+                    data.append(Texte(texte="Données accessible uniquement avec le mode Présents."))
+                else:
 
+                    # Chart : Dates de saisie des consommations
+                    donnees = Consommation.objects.filter(activite__in=liste_activites, date__range=presents).values_list("date_saisie__date").annotate(nbre=Count("idconso", distinct=True)).order_by("date_saisie__date")
+                    data.append(Histogramme(titre="Dates de saisie des consommations", type_chart="bar", chronologie="date",
+                        labels=[str(date) for date, nbre in donnees],
+                        valeurs=[nbre for date, nbre in donnees],
+                    ))
 
+                    # Chart : Anticipation des réservations en nombre de jours
+                    donnees = Consommation.objects.filter(activite__in=liste_activites, date__range=presents).annotate(jours=F("date_saisie__date") - F("date")).values_list("jours")
+                    resultats = {}
+                    for delta, in donnees:
+                        resultats.setdefault(delta, 0)
+                        resultats[delta] += 1
+                    donnees = [(nbre_jours, nbre_conso) for nbre_jours, nbre_conso in resultats.items()]
+                    donnees.sort()
+                    data.append(Histogramme(titre="Anticipation des réservations en nombre de jours", type_chart="bar",
+                        labels=[nbre_jours.days for nbre_jours, nbre_conso in donnees],
+                        valeurs=[nbre_conso for nbre_jours, nbre_conso in donnees],
+                    ))
 
         return data
