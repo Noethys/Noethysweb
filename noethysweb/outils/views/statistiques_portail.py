@@ -57,7 +57,7 @@ class View(CustomView, TemplateView):
             # ---------------------------- Connexions -------------------------------
             if rubrique == "connexions":
 
-                condition = Q(titre="Connexion au portail", horodatage__range=(dates[0], dates[1]))
+                condition = Q(titre="Connexion au portail", horodatage__range=dates)
 
                 # Texte : Nombre total de connexions
                 data.append(Texte(texte="%d connexions sur la période." % Historique.objects.filter(condition).distinct().count(),))
@@ -65,8 +65,8 @@ class View(CustomView, TemplateView):
                 # Chart : Nombre de connexions par date
                 donnees = Historique.objects.filter(condition).values_list("horodatage__date").annotate(nbre=Count("idaction", distinct=True)).order_by("horodatage__date")
                 data.append(Histogramme(
-                    titre="Nombre de connexions par date", type_chart="line",
-                    labels=[utils_dates.ConvertDateToFR(date) for date, nbre in donnees],
+                    titre="Nombre de connexions par date", type_chart="bar", chronologie="date",
+                    labels=[str(date) for date, nbre in donnees],
                     valeurs=[nbre for date, nbre in donnees],
                 ))
 
@@ -93,7 +93,7 @@ class View(CustomView, TemplateView):
             # ---------------------------- Renseignements -------------------------------
             if rubrique == "renseignements":
 
-                condition = Q(portail=True, horodatage__range=(dates[0], dates[1]))
+                condition = Q(portail=True, horodatage__range=dates)
                 donnees = Historique.objects.filter(condition).values_list("titre").annotate(nbre=Count("idaction", distinct=True)).order_by("titre")
                 resultats = {}
                 for titre, nbre in donnees:
@@ -114,8 +114,8 @@ class View(CustomView, TemplateView):
                 ))
 
                 # Tableau : Certification des fiches
-                nbre_familles = Famille.objects.filter(certification_date__range=(dates[0], dates[1])).distinct().count()
-                nbre_individus = Rattachement.objects.filter(certification_date__range=(dates[0], dates[1])).distinct().count()
+                nbre_familles = Famille.objects.filter(certification_date__range=dates).distinct().count()
+                nbre_individus = Rattachement.objects.filter(certification_date__range=dates).distinct().count()
                 data.append(Tableau(
                     titre="Certification des fiches",
                     colonnes=["Type de fiche", "Nombre de certifications"],
@@ -123,7 +123,7 @@ class View(CustomView, TemplateView):
                 ))
 
                 # Tableau : Consentements
-                donnees = Consentement.objects.filter(horodatage__range=(dates[0], dates[1])).values_list("unite_consentement__type_consentement__nom").annotate(nbre=Count("idconsentement", distinct=True)).order_by("unite_consentement__type_consentement__nom")
+                donnees = Consentement.objects.filter(horodatage__range=dates).values_list("unite_consentement__type_consentement__nom").annotate(nbre=Count("idconsentement", distinct=True)).order_by("unite_consentement__type_consentement__nom")
                 if donnees:
                     data.append(Tableau(
                         titre="Consentements",
@@ -136,11 +136,11 @@ class View(CustomView, TemplateView):
 
                 # Chart : Nombre d'ajouts et de suppressions de consommations
                 for type_action in ("Ajout", "Suppression"):
-                    condition = Q(titre="%s d'une consommation" % type_action, horodatage__range=(dates[0], dates[1]), utilisateur__famille__isnull=False)
+                    condition = Q(titre="%s d'une consommation" % type_action, horodatage__range=dates, utilisateur__famille__isnull=False)
                     donnees = Historique.objects.filter(condition).values_list("horodatage__date").annotate(nbre=Count("idaction", distinct=True)).order_by("horodatage__date")
                     data.append(Histogramme(
-                        titre="Nombre %ss de consommations par date" % type_action.lower(), type_chart="line",
-                        labels=[utils_dates.ConvertDateToFR(date) for date, nbre in donnees],
+                        titre="Nombre %ss de consommations par date" % type_action.lower(), type_chart="bar", chronologie="date",
+                        labels=[str(date) for date, nbre in donnees],
                         valeurs=[nbre for date, nbre in donnees],
                     ))
 

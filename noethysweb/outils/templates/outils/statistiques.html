@@ -152,6 +152,19 @@
                                             }
                                         },
                                         scales: {
+                                            {% if element.chronologie == "date" %}
+                                                xAxes: [{
+                                                    type: 'time',
+                                                    time: {
+                                                        unit: 'day',
+                                                        tooltipFormat: 'D MMM, YYYY',
+                                                        displayFormats: {
+                                                            day: 'D MMM'
+                                                        },
+                                                        distribution: 'series'
+                                                    },
+                                                }],
+                                            {% endif %}
                                             yAxes: [{
                                                 ticks: {
                                                     min: 0,
