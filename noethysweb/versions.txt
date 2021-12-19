@@ -1,3 +1,9 @@
+Version 1.0.4.4 (19/12/2021) :
+
+- Ajout des graphiques de type chrono dans les stats
+- Ajout des stats des dates de saisie des conso
+- Ajout de fonctionnalités aux stats du portail
+
 Version 1.0.4.3 (18/12/2021) :
 
 - Ajout des statistiques du portail
