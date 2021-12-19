@@ -36,7 +36,7 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ['idaction', 'titre', 'detail', 'individu__nom']
-
+        detail = columns.TextColumn("Détail", sources=[], processor='Formate_detail')
         utilisateur = columns.TextColumn("Utilisateur", sources=None, processor='Formate_utilisateur')
 
         class Meta:
@@ -47,6 +47,9 @@ class Liste(Page, crud.Liste):
             }
             ordering = ['horodatage']
             footer = False
+
+        def Formate_detail(self, instance, **kwargs):
+            return instance.detail
 
         def Formate_utilisateur(self, instance, **kwargs):
             if instance.utilisateur:

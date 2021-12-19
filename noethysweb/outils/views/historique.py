@@ -37,7 +37,7 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ['idaction', 'titre', 'detail', 'famille__nom', 'individu__nom', "utilisateur__username", "idobjet", "objet"]
-
+        detail = columns.TextColumn("Détail", sources=[], processor='Formate_detail')
         utilisateur = columns.TextColumn("Utilisateur", sources=["utilisateur__username"], processor='Formate_utilisateur')
         famille = columns.TextColumn("Famille", sources=["famille__nom"])
         individu = columns.TextColumn("Individu", sources=["individu__nom", "individu__prenom"], processor='Formate_individu')
@@ -49,6 +49,9 @@ class Liste(Page, crud.Liste):
                 'horodatage': helpers.format_date('%d/%m/%Y %H:%M'),
             }
             ordering = ['-idaction']
+
+        def Formate_detail(self, instance, **kwargs):
+            return instance.detail
 
         def Formate_individu(self, instance, **kwargs):
             return instance.individu.Get_nom() if instance.individu else ""
