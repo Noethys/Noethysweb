@@ -7,7 +7,7 @@ import datetime, calendar
 from django.db.models import Q, Count
 from django.views.generic import TemplateView
 from core.views.base import CustomView
-from core.models import Vacance, Historique
+from core.models import Famille, Rattachement, Vacance, Historique, Consentement, JOURS_COMPLETS_SEMAINE
 from core.utils import utils_dates
 from outils.forms.statistiques_portail import Formulaire
 from outils.views.statistiques import Texte, Tableau, Camembert, Histogramme
@@ -59,6 +59,9 @@ class View(CustomView, TemplateView):
 
                 condition = Q(titre="Connexion au portail", horodatage__range=(dates[0], dates[1]))
 
+                # Texte : Nombre total de connexions
+                data.append(Texte(texte="%d connexions sur la période." % Historique.objects.filter(condition).distinct().count(),))
+
                 # Chart : Nombre de connexions par date
                 donnees = Historique.objects.filter(condition).values_list("horodatage__date").annotate(nbre=Count("idaction", distinct=True)).order_by("horodatage__date")
                 data.append(Histogramme(
@@ -68,10 +71,8 @@ class View(CustomView, TemplateView):
                 ))
 
                 # Chart : Nombre de connexions par heure
-                donnees = {heure: nbre for heure, nbre in Historique.objects.filter(condition).values_list("horodatage__hour").annotate(nbre=Count("idaction", distinct=True))}
-                for heure in range(0, 24):
-                    if heure not in donnees:
-                        donnees[heure] = 0
+                donnees = {heure: 0 for heure in range(0, 24)}
+                donnees.update({heure: nbre for heure, nbre in Historique.objects.filter(condition).values_list("horodatage__hour").annotate(nbre=Count("idaction", distinct=True))})
                 resultats = [(heure, nbre) for heure, nbre in donnees.items()]
                 resultats.sort()
                 data.append(Histogramme(titre="Nombre de connexions par heure", type_chart="bar",
@@ -79,10 +80,19 @@ class View(CustomView, TemplateView):
                     valeurs=[nbre for heure, nbre in resultats],
                 ))
 
+                # Chart : Nombre de connexions par jour de la semaine
+                donnees = {index+1: 0 for index, label_jour in JOURS_COMPLETS_SEMAINE}
+                donnees.update({jour: nbre for jour, nbre in Historique.objects.filter(condition).values_list("horodatage__iso_week_day").annotate(nbre=Count("idaction", distinct=True))})
+                resultats = [(jour, nbre) for jour, nbre in donnees.items()]
+                resultats.sort()
+                data.append(Histogramme(titre="Nombre de connexions par jour de la semaine", type_chart="bar",
+                    labels=[label_jour for index, label_jour in JOURS_COMPLETS_SEMAINE],
+                    valeurs=[nbre for jour, nbre in resultats],
+                ))
+
             # ---------------------------- Renseignements -------------------------------
             if rubrique == "renseignements":
 
-                # Camembert : Catégories de renseignements modifiés
                 condition = Q(portail=True, horodatage__range=(dates[0], dates[1]))
                 donnees = Historique.objects.filter(condition).values_list("titre").annotate(nbre=Count("idaction", distinct=True)).order_by("titre")
                 resultats = {}
@@ -91,12 +101,35 @@ class View(CustomView, TemplateView):
                         if code in titre:
                             resultats.setdefault(label, 0)
                             resultats[label] += nbre
+
+                # Texte : Nombre total de renseignements modifiés
+                data.append(Texte(texte="%d renseignements modifiés sur la période." % sum(resultats.values()),))
+
+                # Camembert : Catégories de renseignements modifiés
                 donnees = [(label, nbre) for label, nbre in resultats.items()]
                 data.append(Camembert(
                     titre="Catégories de renseignements modifiés",
                     labels=[item[0] for item in donnees],
                     valeurs=[item[1] for item in donnees],
                 ))
+
+                # Tableau : Certification des fiches
+                nbre_familles = Famille.objects.filter(certification_date__range=(dates[0], dates[1])).distinct().count()
+                nbre_individus = Rattachement.objects.filter(certification_date__range=(dates[0], dates[1])).distinct().count()
+                data.append(Tableau(
+                    titre="Certification des fiches",
+                    colonnes=["Type de fiche", "Nombre de certifications"],
+                    lignes=[("Fiche famille", nbre_familles), ("Fiche individuelle", nbre_individus)]
+                ))
+
+                # Tableau : Consentements
+                donnees = Consentement.objects.filter(horodatage__range=(dates[0], dates[1])).values_list("unite_consentement__type_consentement__nom").annotate(nbre=Count("idconsentement", distinct=True)).order_by("unite_consentement__type_consentement__nom")
+                if donnees:
+                    data.append(Tableau(
+                        titre="Consentements",
+                        colonnes=["Type de consentement", "Nombre"],
+                        lignes=donnees,
+                    ))
 
             # ---------------------------- Réservations -------------------------------
             if rubrique == "reservations":
