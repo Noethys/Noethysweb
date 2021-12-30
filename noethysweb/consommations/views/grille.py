@@ -432,6 +432,11 @@ def Facturer(request=None):
         dict_idprestation, dict_idconso = Save_grille(request=request, donnees=donnees_save)
         donnees_retour["modifications_idconso"] = dict_idconso
 
+        # Attribue les nouvelles prestations aux consommations
+        for key_case, idprestation in donnees_retour["modifications_idprestation"].items():
+            if idprestation in dict_idprestation:
+                donnees_retour["modifications_idprestation"][key_case] = dict_idprestation[idprestation]
+
         # Remplacement des anciens idprestation par les nouveaux idprestation
         for idprestation in list(donnees_retour["nouvelles_prestations"].keys()):
             if idprestation in dict_idprestation:
@@ -716,7 +721,6 @@ class Facturation():
                         for IDunite in tarif_base.combi_retenue:
                             IDevenement = evenement.pk if evenement else None
                             dictUnitesPrestations[(IDunite, IDevenement)] = IDprestation
-
 
                 # 7 - Parcourt toutes les unités de la date pour modifier le IDprestation
                 for conso in self.donnees["consommations"].get("%s_%s" % (case_tableau["date"], case_tableau["inscription"]), []):

@@ -201,7 +201,6 @@
             groupe: parseInt(groupe),
             etat: etat,
         };
-        console.log("infos=", infos)
         if (action === "ajouter") {dict_cases[key].creer_conso(infos)};
         if (action === "modifier") {dict_cases[key].modifier_conso(infos, maj_facturation=true)};
 
