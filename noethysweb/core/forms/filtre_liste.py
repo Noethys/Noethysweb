@@ -85,7 +85,7 @@ def Ajouter_filtre(request):
         "EGAL": "est égal à", "DIFFERENT": "est différent de", "CONTIENT": "contient", "NE_CONTIENT_PAS": "ne contient pas",
         "SUPERIEUR": "est supérieur à", "SUPERIEUR_EGAL": "est supérieur ou égal à", "INFERIEUR": "est inférieur à", "INFERIEUR_EGAL": "est inférieur ou égal à",
         "VRAI": "est vrai", "FAUX": "est faux", "COMPRIS": "est compris entre", "INSCRIT": "est inscrit sur une sélection d'activités", "PRESENT": "est présent sur une sélection d'activités entre",
-        "EST_VIDE": "est vide", "EST_PAS_VIDE": "n'est pas vide",
+        "SANS_RESA": "est sans réservations sur une sélection d'activités entre", "EST_VIDE": "est vide", "EST_PAS_VIDE": "n'est pas vide",
     }
 
     if valeurs["champ"].startswith("ipresent"): valeurs["label_champ"] = "L'individu"
@@ -93,6 +93,8 @@ def Ajouter_filtre(request):
     if dict_resultat["condition"] == "INSCRIT" and len(dict_resultat["criteres"]) == 0:
         return JsonResponse({"erreur": "Vous devez cocher au moins une ligne dans la liste"}, status=401)
     if dict_resultat["condition"] == "PRESENT" and len(dict_resultat["criteres"]) == 2:
+        return JsonResponse({"erreur": "Vous devez cocher au moins une ligne dans la liste"}, status=401)
+    if dict_resultat["condition"] == "SANS_RESA" and len(dict_resultat["criteres"]) == 2:
         return JsonResponse({"erreur": "Vous devez cocher au moins une ligne dans la liste"}, status=401)
 
     dict_resultat["label_filtre"] = "%s %s" % (valeurs["label_champ"], traductions_criteres[dict_resultat["condition"].replace("*", "")])
@@ -121,7 +123,7 @@ class Formulaire(FormulaireBase, forms.Form):
     condition1 = forms.ChoiceField(label="Condition", choices=[("EGAL", "Est égal à"), ("DIFFERENT", "Est différent de"), ("CONTIENT", "Contient"), ("NE_CONTIENT_PAS", "Ne contient pas"), ("EST_VIDE", "Est vide"), ("EST_PAS_VIDE", "N'est pas vide")], required=False)
     condition2 = forms.ChoiceField(label="Condition", choices=[("EGAL", "Est égal à"), ("DIFFERENT", "Est différent de"), ("SUPERIEUR", "Est supérieur à"), ("SUPERIEUR_EGAL", "Est supérieur ou égal à"), ("INFERIEUR", "Est inférieur à"), ("INFERIEUR_EGAL", "Est inférieur ou égal à"), ("COMPRIS", "Est compris entre")], required=False)
     condition3 = forms.ChoiceField(label="Condition", choices=[("VRAI", "Est vrai"), ("FAUX", "Est faux")], required=False)
-    condition4 = forms.ChoiceField(label="Condition", choices=[("INSCRIT", "Est inscrit sur l'une des activités suivantes"), ("PRESENT", "Est présent sur l'une des activités suivantes")], required=False)
+    condition4 = forms.ChoiceField(label="Condition", choices=[("INSCRIT", "Est inscrit sur l'une des activités suivantes"), ("PRESENT", "Est présent sur l'une des activités suivantes"), ("SANS_RESA", "Est sans réservations sur l'une des activités suivantes")], required=False)
     condition5 = forms.ChoiceField(label="Condition", choices=[("*EGAL", "Est égal à"), ("*DIFFERENT", "Est différent de"), ("*CONTIENT", "Contient"), ("*NE_CONTIENT_PAS", "Ne contient pas"), ("*EST_VIDE", "Est vide"), ("*EST_PAS_VIDE", "N'est pas vide")], required=False)
     critere_texte = forms.CharField(label="Texte", required=False)
     critere_date = forms.DateField(label="Date", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
@@ -148,8 +150,8 @@ class Formulaire(FormulaireBase, forms.Form):
         'AutoField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"]}},
         'IntegerField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"]}},
         'DecimalField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_decimal"], "DIFFERENT": ["critere_decimal"], "SUPERIEUR": ["critere_decimal"], "SUPERIEUR_EGAL": ["critere_decimal"], "INFERIEUR": ["critere_decimal"], "INFERIEUR_EGAL": ["critere_decimal"], "COMPRIS": ["critere_decimal_min", "critere_decimal_max"]}},
-        'ipresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max"]}},
-        'fpresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max"]}}, }
+        'ipresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
+        'fpresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}}, }
 
     critere = forms.CharField(label="Critère", required=False)
 

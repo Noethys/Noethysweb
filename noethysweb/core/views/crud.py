@@ -75,7 +75,7 @@ class Liste_commun():
                 if filtre["condition"] == "FAUX": conditions &= Q(**{champ: False})
 
                 # Filtre Inscrit/Présent
-                if filtre["condition"] in ("INSCRIT", "PRESENT"):
+                if filtre["condition"] in ("INSCRIT", "PRESENT", "SANS_RESA"):
                     type_champ, champ = champ.split(":")
                     type_criteres, liste_criteres = criteres[0].split(":")
                     liste_criteres = [int(x) for x in liste_criteres.split(";")]
@@ -92,6 +92,13 @@ class Liste_commun():
                         donnee = "inscription__famille" if type_champ == "fpresent" else "individu"
                         condition &= Q(date__gte=criteres[1]) & Q(date__lte=criteres[2])
                         resultats = [resultat[donnee] for resultat in Consommation.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
+                    if filtre["condition"] == "SANS_RESA":
+                        donnee = "famille" if type_champ == "fpresent" else "individu"
+                        inscrits = [resultat[donnee] for resultat in Inscription.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
+                        donnee = "inscription__famille" if type_champ == "fpresent" else "individu"
+                        condition &= Q(date__gte=criteres[1]) & Q(date__lte=criteres[2])
+                        presents = [resultat[donnee] for resultat in Consommation.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
+                        resultats = [pk for pk in inscrits if pk not in presents]
 
                     # Création de la condition
                     conditions &= Q(**{champ + "__in": resultats})
