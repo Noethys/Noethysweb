@@ -1,3 +1,11 @@
+Version 1.0.4.5 (30/12/2021) :
+
+- Ajout du filtre de liste individus sans réservations
+- Ajout de la rétroactivité sur les consommations après la modification d'une inscription
+- Correction de la sauvegarde mysql sur les champs blob
+- Correction de la pointeuse en temps réel
+- Correction recherche rapide dans historique
+
 Version 1.0.4.4 (19/12/2021) :
 
 - Ajout des graphiques de type chrono dans les stats
