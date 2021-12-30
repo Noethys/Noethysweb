@@ -7,20 +7,25 @@ from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder
+from crispy_forms.layout import Layout, Hidden, Div, HTML, Fieldset, ButtonHolder
 from crispy_forms.bootstrap import Field, StrictButton
 from core.utils.utils_commandes import Commandes
-from core.models import Inscription, Individu, Activite
+from core.models import Inscription, Individu, Activite, Consommation
 from core.widgets import DatePickerWidget
 from django_select2.forms import Select2Widget
 import datetime
-
 
 
 class Formulaire(FormulaireBase, ModelForm):
     activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Activite.objects.none(), required=True)
     date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
     date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(), help_text="Laissez vide la date de fin si vous ne connaissez pas la durée de l'inscription.")
+    action_conso = forms.ChoiceField(label="Action", required=False, choices=[
+        (None, "------"),
+        ("MODIFIER_TOUT", "Modifier toutes les consommations existantes (Recommandé)"),
+        ("MODIFIER_AUJOURDHUI", "Modifier les consommations existantes à partir d'aujourd'hui"),
+        ("MODIFIER_RIEN", "Ne pas modifier les consommations existantes"),
+    ])
 
     class Meta:
         model = Inscription
@@ -48,10 +53,17 @@ class Formulaire(FormulaireBase, ModelForm):
         self.fields['activite'].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_debut")
 
         # Si modification
+        nbre_conso = 0
         if self.instance.idinscription != None:
             self.fields['individu'].disabled = True
             self.fields['famille'].disabled = True
             self.fields['activite'].disabled = True
+
+            # Recherche si consommations existantes
+            nbre_conso = Consommation.objects.filter(inscription=self.instance).count()
+            if nbre_conso:
+                self.fields["action_conso"].required = True
+                self.fields["action_conso"].help_text = "Il existe déjà %d consommations associées à cette inscription. Que souhaitez-vous faire de ces consommations ?" % nbre_conso
 
         # Période de validité
         if not self.instance.pk:
@@ -77,6 +89,17 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             HTML(EXTRA_SCRIPT),
         )
+
+        # Affichage du champ consommations existantes
+        if nbre_conso:
+            self.helper.layout.insert(3,
+                Fieldset("Consommations associées",
+                    Div(
+                        Field("action_conso"),
+                        css_class="alert alert-warning"
+                    ),
+                ),
+            )
 
     def clean(self):
         if self.cleaned_data["date_fin"] and self.cleaned_data["date_debut"] > self.cleaned_data["date_fin"]:

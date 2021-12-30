@@ -3,18 +3,20 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import logging, datetime
+logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy, reverse
-from core.views.mydatatableview import MyDatatable, columns, helpers
-from core.views import crud
-from core.models import Inscription, Individu, Activite, Groupe, CategorieTarif, Consommation
-from fiche_individu.forms.individu_inscriptions import Formulaire
-from fiche_individu.views.individu import Onglet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import Template, RequestContext
 from django.db.models import Q
 from django.contrib import messages
+from core.views.mydatatableview import MyDatatable, columns, helpers
+from core.views import crud
+from core.models import Inscription, Individu, Activite, Groupe, CategorieTarif, Consommation, Ouverture
+from core.utils import utils_dates
+from fiche_individu.forms.individu_inscriptions import Formulaire
+from fiche_individu.views.individu import Onglet
 from individus.utils import utils_forfaits
-import datetime
 
 
 def Get_groupes(request):
@@ -49,8 +51,6 @@ def Get_categories_tarifs(request):
         context = {'categories_tarifs': categories_tarifs}
         resultat = Template(html).render(RequestContext(request, context))
     return HttpResponse(resultat)
-
-
 
 
 class Page(Onglet):
@@ -215,6 +215,48 @@ class Modifier(Page, crud.Modifier):
         if nbre_conso:
             messages.add_message(self.request, messages.ERROR, "Modification impossible : %d consommations existent déjà hors de la période d'inscription sélectionnée" % nbre_conso)
             return self.render_to_response(self.get_context_data(form=form))
+
+        # Modification des conso déjà associées
+        if form.cleaned_data["action_conso"] in ("MODIFIER_TOUT", "MODIFIER_AUJOURDHUI"):
+
+            # Importation des consommations existantes
+            conditions = Q(inscription=self.object)
+            if form.cleaned_data["action_conso"] == "MODIFIER_AUJOURDHUI":
+                conditions &= Q(date__gte=datetime.date.today())
+            consommations = Consommation.objects.filter(conditions)
+
+            # Changement du groupe
+            if "groupe" in form.changed_data and consommations:
+                logger.debug("Changement de groupe pour les consommations...")
+                # Vérifie que les unités et dates souhaitées sont ouvertes sur le nouveau groupe
+                ouvertures = [(ouverture.date, ouverture.unite_id) for ouverture in Ouverture.objects.filter(groupe=form.cleaned_data["groupe"])]
+                anomalies = []
+                for conso in consommations:
+                    if (conso.date, conso.unite_id) not in ouvertures:
+                        anomalies.append(utils_dates.ConvertDateToFR(conso.date))
+                if anomalies:
+                    messages.add_message(self.request, messages.ERROR, "Modification impossible des consommations ! Les consommations ne peuvent pas être transférées sur les dates suivantes car les unités sont fermées : %s." % ", ".join(anomalies))
+                    return self.render_to_response(self.get_context_data(form=form))
+                # Modifie le groupe des consommations existantes
+                nouvelles_conso = []
+                for conso in consommations:
+                    conso.groupe = form.cleaned_data["groupe"]
+                    nouvelles_conso.append(conso)
+                Consommation.objects.bulk_update(nouvelles_conso, ["groupe"], batch_size=50)
+
+            # Changement de la catégorie de tarif
+            if "categorie_tarif" in form.changed_data and consommations:
+                logger.debug("Changement de catégorie de tarif pour les consommations...")
+                # Enregistre l'inscription modifiée
+                self.object.save()
+                # Recalcule les prestations
+                liste_dates = [conso.date for conso in consommations]
+                from consommations.utils.utils_grille_virtuelle import Grille_virtuelle
+                grille = Grille_virtuelle(request=self.request, idfamille=form.cleaned_data["famille"].pk, idindividu=form.cleaned_data["individu"].pk,
+                                          idactivite=form.cleaned_data["activite"].pk, date_min=min(liste_dates), date_max=max(liste_dates))
+                for conso in consommations:
+                    grille.Modifier(criteres={"idconso": conso.pk}, modifications={"categorie_tarif": form.cleaned_data["categorie_tarif"].pk})
+                grille.Enregistrer()
 
         return super(Modifier, self).form_valid(form)
 
