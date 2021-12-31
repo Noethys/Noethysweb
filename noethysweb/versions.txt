@@ -1,3 +1,8 @@
+Version 1.0.4.6 (31/12/2021) :
+
+- Ajout du correcteur d'anomalies
+- Correction de la suppression des consommations fantômes
+
 Version 1.0.4.5 (30/12/2021) :
 
 - Ajout du filtre de liste individus sans réservations
