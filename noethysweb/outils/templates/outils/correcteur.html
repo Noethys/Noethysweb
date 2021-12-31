@@ -1,0 +1,30 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+    {% embed 'core/box.html' %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}{{ box_titre }}{% endblock %}
+        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+        {% block box_contenu %}
+
+            {% for titre, valeurs in anomalies.items %}
+                <table id="table" class="table table-bordered table-sm mb-4">
+                    <thead>
+                        <tr><th class="bg-light">{{ titre }}</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for valeur in valeurs %}
+                            <tr><td style="vertical-align: middle;">{{ valeur }}</td></tr>
+                        {% empty %}
+                            <tr><td style="vertical-align: middle;color: #b9b9b9;">Aucune anomalie</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endfor %}
+
+        {% endblock %}
+    {% endembed %}
+{% endblock %}

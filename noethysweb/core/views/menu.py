@@ -155,6 +155,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
     # Dépannage
     menu_depannage = menu_outils.Add(titre="Dépannage")
+    menu_depannage.Add(code="correcteur", titre="Correcteur d'anomalies", icone="file-text-o")
     menu_depannage.Add(code="liste_conso_sans_presta", titre="Liste des consommations sans prestations", icone="file-text-o")
 
 
