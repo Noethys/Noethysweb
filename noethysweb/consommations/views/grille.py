@@ -346,6 +346,9 @@ def Save_grille(request=None, donnees={}):
         qs = Deduction.objects.filter(prestation_id__in=donnees["suppressions"]["prestations"])
         qs._raw_delete(qs.db)
 
+        # Pour supprimer les consommations fantômes
+        Consommation.objects.filter(prestation_id__in=donnees["suppressions"]["prestations"]).delete()
+
         qs = Prestation.objects.filter(pk__in=donnees["suppressions"]["prestations"])
         qs._raw_delete(qs.db)
 
