@@ -22,7 +22,7 @@ def Get_individus(request):
     """ Renvoie une liste d'individus pour le Select2 """
     recherche = request.GET.get("term", "")
     liste_individus = []
-    for individu in Individu.objects.all().filter(Q(nom__icontains=recherche) | Q(prenom__icontains=recherche)).order_by("nom", "prenom"):
+    for individu in Individu.objects.all().filter(Q(nom__icontains=recherche) | Q(prenom__icontains=recherche), inscription__isnull=False).distinct().order_by("nom", "prenom"):
         liste_individus.append({"id": individu.pk, "text": individu.Get_nom()})
     return JsonResponse({"results": liste_individus, "pagination": {"more": True}})
 
