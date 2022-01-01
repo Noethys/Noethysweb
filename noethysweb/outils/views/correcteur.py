@@ -5,7 +5,7 @@
 
 from django.views.generic import TemplateView
 from django.db.models.functions import Concat
-from django.db.models import Count, F, CharField, Value
+from django.db.models import Count, F, CharField, Value, Q, Min, Max
 from core.views.base import CustomView
 from core.models import Consommation, Prestation
 
@@ -34,5 +34,9 @@ class View(CustomView, TemplateView):
         qs = Prestation.objects.select_related("individu").annotate(doublon_id=Concat(F("individu_id"), Value("_"), F("famille_id"), Value("_"), F("tarif_id"), Value("_"), F("date"), output_field=CharField()))
         doublons = qs.values("individu__nom", "individu__prenom", "date", "doublon_id").annotate(nbre_doublons=Count("doublon_id")).filter(nbre_doublons__gt=1)
         data["Doublons de prestations"] = ["%s %s : %d doublons le %s." % (d["individu__nom"], d["individu__prenom"], d["doublon_id"], d["date"]) for d in doublons]
+
+        # Recherche les consommations gratuites
+        resultats = Consommation.objects.values("activite__nom").filter(prestation_id=None, etat__in=("reservation", "present", "absenti")).annotate(nbre=Count("pk"), min_date=Min("date"), max_date=Max("date"))
+        data["Consommations gratuites"] = ["%s : %s consommations (Du %s au %s)." % (r["activite__nom"], r["nbre"], r["min_date"].strftime("%d/%m/%Y"), r["max_date"].strftime("%d/%m/%Y")) for r in resultats]
 
         return data
