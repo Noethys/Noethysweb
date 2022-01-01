@@ -216,6 +216,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
     # Photos
     menu_photos_individus = menu_individus.Add(titre="Photos")
+    menu_photos_individus.Add(code="liste_photos_manquantes", titre="Liste des photos manquantes", icone="file-text-o")
     menu_photos_individus.Add(code="importation_photos", titre="Importer des photos individuelles", icone="file-text-o")
 
 
