@@ -1,3 +1,10 @@
+Version 1.0.4.7 (02/01/2022) :
+
+- Ajout de la recherche avancée d'individus dans le menu Individus
+- Ajout de la liste des photos manquantes dans le menu Individus
+- Ajout de la recherche des consommations gratuites dans le correcteur
+- Correction de l'affichage des individus ajoutés manuellement dans le gestionnaire
+
 Version 1.0.4.6 (31/12/2021) :
 
 - Ajout du correcteur d'anomalies
