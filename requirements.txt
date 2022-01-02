@@ -27,3 +27,4 @@ python-gnupg
 reportlab
 bleach
 mysqlclient
+jellyfish
