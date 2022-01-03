@@ -1,3 +1,9 @@
+Version 1.0.4.8 (03/01/2022) :
+
+- Correction de la largeur de la première colonne de la grille des conso sur les mobiles
+- Correction de l'affichage du planning si previous page après logout
+- Correction de l'affichage du prénom si collectivité dans la grille des conso
+
 Version 1.0.4.7 (02/01/2022) :
 
 - Ajout de la recherche avancée d'individus dans le menu Individus
