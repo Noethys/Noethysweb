@@ -25,6 +25,8 @@ class View(CustomView, TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         """ Vérifie si des approbations sont requises """
+        if not request.user.is_authenticated:
+            return redirect("portail_connexion")
         activite = Activite.objects.prefetch_related("types_consentements").get(pk=kwargs["idactivite"])
         approbations_requises = utils_approbations.Get_approbations_requises(famille=request.user.famille, activites=[activite,], idindividu=kwargs["idindividu"])
         if approbations_requises["nbre_total"] > 0:

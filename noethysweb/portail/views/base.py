@@ -9,6 +9,7 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.cache import cache
+from django.shortcuts import redirect
 from portail.views.menu import GetMenuPrincipal
 from noethysweb.version import GetVersion
 from core.models import Organisateur, Parametre
@@ -22,6 +23,12 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin):
     # Connexion obligatoire
     login_url = 'portail_connexion'
     redirect_field_name = 'portail_accueil'
+
+    def dispatch(self, request, *args, **kwargs):
+        """ Vérifie que l'utilisateur est connecté """
+        if not request.user.is_authenticated:
+            return redirect("portail_connexion")
+        return super(CustomView, self).dispatch(request, *args, **kwargs)
 
     def test_func(self):
         # # Vérifie que l'user a une permission
