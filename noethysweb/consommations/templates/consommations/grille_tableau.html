@@ -141,14 +141,14 @@
                             <th class="{% if date|est_en_vacances:data.liste_vacances and data.mode == 'individu' %}vacances{% endif %}">
                                 {% if data.mode == 'date' or data.mode == 'pointeuse' %}
                                     <div>
-                                        {{ inscription.individu.nom }} {{ inscription.individu.prenom }}
+                                        {{ inscription.individu.nom }} {{ inscription.individu.prenom|default:"" }}
                                     </div>
                                     <div class='infos_inscription'>
                                         {% if inscription.infos_diffentes %}{{ inscription.infos_diffentes }}{% endif %}
                                     </div>
                                 {% else %}
                                     {% if data.liste_inscriptions|length > 1 %}
-                                        <div>{{ inscription.individu.prenom }}</div><div class='infos_inscription'>{% if inscription.infos_diffentes %}{{ inscription.infos_diffentes }}{% endif %}</div>
+                                        <div>{{ inscription.individu.prenom|default:inscription.individu.nom }}</div><div class='infos_inscription'>{% if inscription.infos_diffentes %}{{ inscription.infos_diffentes }}{% endif %}</div>
                                     {% else %}
                                         {{ date|date:"l j F Y"|title }} {% if not modif_allowed %}<i class='fa fa-lock text-red' title="Date non modifiable"></i>{% endif %}
                                     {% endif %}
