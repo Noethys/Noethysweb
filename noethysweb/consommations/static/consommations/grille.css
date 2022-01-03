@@ -69,6 +69,26 @@
     background-color: white;
     border: 1px solid #dee2e6;
 }
+
+@media (max-width: 579px) {
+    .table-grille th {
+        max-width: 40px;
+        width: 40px;
+    }
+    .texte_entete_ligne_large {
+        display: none;
+    }
+}
+
+@media (min-width: 580px) {
+    .table-grille th {
+        width: 100px;
+    }
+    .texte_entete_ligne_court {
+        display: none;
+    }
+}
+
 .dark-mode .table-grille th {
     background-color: #454d55;
 }

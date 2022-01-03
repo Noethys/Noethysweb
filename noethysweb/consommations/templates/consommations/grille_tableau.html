@@ -100,7 +100,7 @@
                     {% if data.mode == 'pointeuse' %}
                         <th style="width:40px">Photo</th>
                     {% endif %}
-                    <th style="width:100px">
+                    <th>
                         {% if data.mode == 'jour' or data.mode == 'pointeuse' %}Individu{% else %}Date{% endif %}
                     </th>
                     {% for unite in data.liste_unites_visibles %}
@@ -150,7 +150,8 @@
                                     {% if data.liste_inscriptions|length > 1 %}
                                         <div>{{ inscription.individu.prenom|default:inscription.individu.nom }}</div><div class='infos_inscription'>{% if inscription.infos_diffentes %}{{ inscription.infos_diffentes }}{% endif %}</div>
                                     {% else %}
-                                        {{ date|date:"l j F Y"|title }} {% if not modif_allowed %}<i class='fa fa-lock text-red' title="Date non modifiable"></i>{% endif %}
+                                        <span class="texte_entete_ligne_large">{{ date|date:"l j F Y"|title }}</span><span class="texte_entete_ligne_court">{{ date|date:"D. d/m/y"|title }}</span>
+                                        {% if not modif_allowed %}<i class='fa fa-lock text-red' title="Date non modifiable"></i>{% endif %}
                                     {% endif %}
                                 {% endif %}
                             </th>
