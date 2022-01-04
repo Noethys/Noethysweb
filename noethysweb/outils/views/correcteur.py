@@ -28,12 +28,12 @@ class View(CustomView, TemplateView):
         # Recherche les doublons dans les consommations (pour un individu sur une même date avec la même unité)
         qs = Consommation.objects.select_related("individu").annotate(doublon_id=Concat(F("individu_id"), Value("_"), F("inscription_id"), Value("_"), F("unite_id"), Value("_"), F("date"), output_field=CharField()))
         doublons = qs.values("individu__nom", "individu__prenom", "date", "doublon_id").annotate(nbre_doublons=Count("doublon_id")).filter(nbre_doublons__gt=1)
-        data["Doublons de consommations"] = ["%s %s : %d doublons le %s." % (d["individu__nom"], d["individu__prenom"], d["doublon_id"], d["date"]) for d in doublons]
+        data["Doublons de consommations"] = ["%s %s : %d doublons le %s." % (d["individu__nom"], d["individu__prenom"], d["nbre_doublons"], d["date"]) for d in doublons]
 
         # Recherche les doublons dans les prestations (pour un individu sur une même date avec le même tarif de prestation)
         qs = Prestation.objects.select_related("individu").annotate(doublon_id=Concat(F("individu_id"), Value("_"), F("famille_id"), Value("_"), F("tarif_id"), Value("_"), F("date"), output_field=CharField()))
         doublons = qs.values("individu__nom", "individu__prenom", "date", "doublon_id").annotate(nbre_doublons=Count("doublon_id")).filter(nbre_doublons__gt=1)
-        data["Doublons de prestations"] = ["%s %s : %d doublons le %s." % (d["individu__nom"], d["individu__prenom"], d["doublon_id"], d["date"]) for d in doublons]
+        data["Doublons de prestations"] = ["%s %s : %d doublons le %s." % (d["individu__nom"], d["individu__prenom"], d["nbre_doublons"], d["date"]) for d in doublons]
 
         # Recherche les consommations gratuites
         resultats = Consommation.objects.values("activite__nom").filter(prestation_id=None, etat__in=("reservation", "present", "absenti")).annotate(nbre=Count("pk"), min_date=Min("date"), max_date=Max("date"))
