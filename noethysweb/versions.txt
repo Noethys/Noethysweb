@@ -1,3 +1,9 @@
+Version 1.0.4.9 (04/01/2022) :
+
+- Correction de l'affichage des photos dans les documents PDF
+- Correction de l'image montgolfière dans l'édition des anniversaires
+- Correction de l'affichage des doublons dans le correcteur
+
 Version 1.0.4.8 (03/01/2022) :
 
 - Correction de la largeur de la première colonne de la grille des conso sur les mobiles
