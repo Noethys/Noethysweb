@@ -346,6 +346,7 @@ class Informations():
                 "INDIVIDU_TEL_PORTABLE": individu.tel_mobile,
                 "INDIVIDU_FAX": individu.tel_fax,
                 "INDIVIDU_MAIL": individu.mail,
+                "INDIVIDU_PHOTO": individu.Get_photo(forTemplate=False),
                 "MEDECIN_NOM": individu.medecin.nom if individu.medecin else "",
                 "MEDECIN_PRENOM": individu.medecin.prenom if individu.medecin else "",
                 "MEDECIN_RUE": individu.medecin.rue_resid if individu.medecin else "",

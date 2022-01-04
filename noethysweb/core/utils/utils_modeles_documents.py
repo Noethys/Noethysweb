@@ -878,7 +878,10 @@ class Modele_doc():
 
             valeur = texte
 
-        # -------- IMAGE -------
+        # -------- PHOTO -------
+        if objet.get("categorie") == "photo":
+            valeur = dict_valeurs["{INDIVIDU_PHOTO}"]
+
         # if objet.categorie == "image":
         #     if objet.typeImage == "logo":
         #         # Type Logo
@@ -1057,16 +1060,20 @@ class ObjetPDF():
                         organisateur = Organisateur.objects.filter(pk=1).first()
                     self.src = organisateur.logo.url
 
-                # Si c'est une URL vers image
-                if "data:" not in self.src:
-                    if self.categorie == "photo" and "static/" in self.src:
-                        url = os.path.join(settings.STATIC_ROOT, self.src[self.src.find("images/"):])
-                    else:
-                        url = settings.MEDIA_ROOT + self.src.replace("media/", "")
-
-                # Si c'est une image au format base64
+                # Image standard
                 if "data:" in self.src:
+                    # Si c'est une image au format base64
                     url = self.src
+                else:
+                    # Si c'est une URL vers image
+                    url = settings.MEDIA_ROOT + self.src.replace("media/", "")
+
+                # Si c'est une photo
+                if self.categorie == "photo":
+                    if "media/" in valeur:
+                        url = settings.MEDIA_ROOT + valeur.replace("media/", "")
+                    else:
+                        url = os.path.join(settings.STATIC_ROOT, valeur[valeur.find("images/"):])
 
                 # Chargement de l'image
                 try:
