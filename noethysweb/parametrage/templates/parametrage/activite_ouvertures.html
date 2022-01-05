@@ -316,7 +316,6 @@
             var data = $(this).serializeArray();
             data.push({name: 'idactivite', value: {{ idactivite }} });
             data.push({name: 'ouvertures_modifications', value: JSON.stringify(ouvertures_modifications) });
-            data.push({name: 'ouvertures_modifications', value: JSON.stringify(ouvertures_modifications) });
             data.push({name: 'remplissages_modifications', value: JSON.stringify(remplissages_modifications) });
 
             $.ajax({

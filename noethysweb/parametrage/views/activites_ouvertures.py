@@ -346,7 +346,7 @@ def Valider_calendrier_ouvertures(request):
         key = "remplissage_%s_%d_%d" % (remplissage.date, remplissage.groupe_id, remplissage.unite_remplissage_id)
         dict_remplissages_existants[key] = remplissage
         # Suppression
-        if remplissages_modifications.get(key, None) in (0, "", None):
+        if remplissages_modifications.get(key, "XXX") in (0, "", None):
             liste_suppressions.append(remplissage.pk)
 
     if liste_suppressions:
