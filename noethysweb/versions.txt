@@ -1,3 +1,8 @@
+Version 1.0.5.0 (05/01/2022) :
+
+- Ajout du masquage des dates non ouvertes pour l'individu dans la grille des consommations
+- Correction de l'enregistrement des remplissages dans le calendrier des ouvertures
+
 Version 1.0.4.9 (04/01/2022) :
 
 - Correction de l'affichage des photos dans les documents PDF
