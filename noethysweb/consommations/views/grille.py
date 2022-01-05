@@ -130,11 +130,12 @@ def Get_generic_data(data={}):
     #-------------------------- Importation des données du calendrier ------------------------------
 
     # Importation des ouvertures
+    list_groupes_inscriptions = list({inscription.groupe_id: None for inscription in data["liste_inscriptions"]}.keys())
     liste_ouvertures = []
     liste_dates = []
     for ouverture in Ouverture.objects.filter(data["conditions_periodes"] & Q(activite=data['selection_activite'])):
         liste_ouvertures.append("%s_%s_%s" % (ouverture.date, ouverture.groupe_id, ouverture.unite_id))
-        if ouverture.date not in liste_dates:
+        if ouverture.date not in liste_dates and ouverture.groupe_id in list_groupes_inscriptions:
             liste_dates.append(ouverture.date)
     data['liste_ouvertures'] = liste_ouvertures
 
