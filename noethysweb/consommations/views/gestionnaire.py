@@ -89,9 +89,10 @@ class View(CustomView, TemplateView):
         liste_idinscriptions = list({conso.inscription_id:None for conso in liste_conso}.keys())
 
         # Ajoute les éventuelles inscriptions des individus ajoutés manuellement
+        selection_idactivite = data["selection_activite"].pk if data["selection_activite"] else None
         for key_case, dict_conso in data["consommations"].items():
             for conso in dict_conso:
-                if conso["inscription"] not in liste_idinscriptions and str(conso["date"]) == str(data["date_min"]):
+                if conso["inscription"] not in liste_idinscriptions and str(conso["date"]) == str(data["date_min"]) and conso["activite"] == selection_idactivite:
                     liste_idinscriptions.append(conso["inscription"])
 
         # Ajouter un nouvel individu
