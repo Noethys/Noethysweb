@@ -1,3 +1,9 @@
+Version 1.0.5.1 (06/01/2022) :
+
+- Ajout de l'ajout multiple d'individus dans le gestionnaire des consommations
+- Correction de l'affichage des inscrits dans le gestionnaire des consommations
+- Correction de l'accès à la fonction de recherche avancée des individus
+
 Version 1.0.5.0 (05/01/2022) :
 
 - Ajout du masquage des dates non ouvertes pour l'individu dans la grille des consommations
