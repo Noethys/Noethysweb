@@ -469,7 +469,7 @@ class Facturation():
 
     def Facturer(self):
         for key_case, case_tableau in self.donnees["cases_touchees"].items():
-            logger.debug("Case étudiée : " + str(key_case))
+            #logger.debug("Case étudiée : " + str(key_case))
 
             if key_case not in self.dict_modif_cases:
 
@@ -485,7 +485,7 @@ class Facturation():
                     if not conso["forfait"] and (conso["unite"] not in dictUnitesUtilisees or dictUnitesUtilisees[conso["unite"]] in (None, "attente", "refus")):
                         dictUnitesUtilisees[conso["unite"]] = conso["etat"]
                     dictQuantites[conso["unite"]] = conso["quantite"]
-                logger.debug("Unités utilisées sur la ligne : " + str(dictUnitesUtilisees))
+                #logger.debug("Unités utilisées sur la ligne : " + str(dictUnitesUtilisees))
 
                 # Mémorise les tarifs
                 key = (case_tableau["activite"], case_tableau["categorie_tarif"])
