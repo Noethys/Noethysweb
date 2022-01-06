@@ -97,8 +97,9 @@ class View(CustomView, TemplateView):
 
         # Ajouter un nouvel individu
         ajouter_individu = self.request.POST.get("donnees_ajouter_individu")
-        if ajouter_individu and ajouter_individu != 999999:
-            for inscription in Inscription.objects.filter(individu_id=ajouter_individu, activite=data["selection_activite"]):
+        if ajouter_individu and ajouter_individu != "999999":
+            selection_ajouter_individu = [int(idindividu) for idindividu in ajouter_individu.split(";")]
+            for inscription in Inscription.objects.filter(individu_id__in=selection_ajouter_individu, activite=data["selection_activite"]):
                 if inscription.pk not in liste_idinscriptions and inscription.Is_inscription_in_periode(data["date_min"], data["date_max"]):
                     liste_idinscriptions.append(inscription.pk)
 

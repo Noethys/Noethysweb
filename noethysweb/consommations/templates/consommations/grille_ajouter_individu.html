@@ -3,10 +3,10 @@
 {% load embed %}
 
 
-{# Model Ajouter un individu #}
+{# Model Ajouter des individus #}
 {% embed 'core/modal.html' %}
     {% block modal_id %}modal_ajouter_individu{% endblock %}
-    {% block modal_titre %}Ajouter un individu{% endblock %}
+    {% block modal_titre %}Ajouter des individus{% endblock %}
     {% block modal_body %}
         <div id="modal_erreurs" class="text-red"></div>
 
@@ -35,13 +35,13 @@
 
     // Modal : Validation de l'individu
     $("#ajouter_individu_valider").on('click', function(e) {
-        var idindividu = $('#id_individu').val();
-        if (idindividu === "") {
-            toastr.error(("Vous devez sélectionner un individu dans la liste"));
+        var selection_individus = $('#id_individu').val();
+        if (selection_individus.length === 0) {
+            toastr.error(("Vous devez sélectionner au moins un individu dans la liste"));
             return false;
         }
         $('#modal_ajouter_individu').modal('hide');
-        $('#donnees_ajouter_individu').val(idindividu);
+        $('#donnees_ajouter_individu').val(selection_individus.join(";"));
         $('#form-maj').submit();
     });
 
