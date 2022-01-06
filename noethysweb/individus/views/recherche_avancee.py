@@ -14,7 +14,7 @@ from individus.forms.recherche_avancee import Formulaire
 
 
 class View(CustomView, TemplateView):
-    menu_code = "recherche_avancee"
+    menu_code = "individus_recherche_avancee"
     template_name = "core/crud/edit.html"
 
     def get_context_data(self, **kwargs):
