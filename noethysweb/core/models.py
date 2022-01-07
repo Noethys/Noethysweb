@@ -1604,6 +1604,7 @@ class Famille(models.Model):
     internet_actif = models.BooleanField(verbose_name="Compte internet activé", default=True)
     internet_identifiant = encrypt(models.CharField(verbose_name="Identifiant", max_length=200, blank=True, null=True))
     internet_mdp = encrypt(models.CharField(verbose_name="Mot de passe", max_length=200, blank=True, null=True))
+    internet_secquest = models.CharField(verbose_name="Question", max_length=200, blank=True, null=True)
     internet_categorie = models.ForeignKey(CategorieCompteInternet, verbose_name="Catégorie", related_name="internet_categorie", on_delete=models.PROTECT, blank=True, null=True)
     internet_reservations = models.BooleanField(verbose_name="Autoriser les réservations sur le portail", default=True)
     memo = models.TextField(verbose_name="Mémo", blank=True, null=True)

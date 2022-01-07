@@ -5,7 +5,7 @@
 
 from django import forms
 from django.contrib.auth.forms import SetPasswordForm
-
+from portail.utils import utils_secquest
 
 
 class MyPasswordChangeForm(SetPasswordForm):
@@ -20,3 +20,7 @@ class MyPasswordChangeForm(SetPasswordForm):
         self.fields['new_password2'].widget.attrs['class'] = "form-control"
         self.fields['new_password2'].widget.attrs['title'] = "Saisissez le nouveau mot de passe une nouvelle fois"
         self.fields['new_password2'].widget.attrs['placeholder'] = "Saisissez le nouveau mot de passe une nouvelle fois"
+
+        # Question
+        if kwargs["user"].famille.internet_secquest:
+            self.fields["secquest"] = utils_secquest.Generation_field_secquest(famille=kwargs["user"].famille)

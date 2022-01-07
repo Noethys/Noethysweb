@@ -4,10 +4,11 @@
 #  Distribué sous licence GNU GPL.
 
 from django.contrib.auth import views as auth_views
-from portail.forms.change_password import MyPasswordChangeForm
 from django.urls import reverse_lazy
 from django.contrib.auth import update_session_auth_hash
+from portail.forms.change_password import MyPasswordChangeForm
 from portail.views.login import ClassCommuneLogin
+from portail.utils import utils_secquest
 
 
 class MyPasswordChangeView(ClassCommuneLogin, auth_views.PasswordChangeView):
@@ -27,6 +28,12 @@ class MyPasswordChangeView(ClassCommuneLogin, auth_views.PasswordChangeView):
         return context
 
     def form_valid(self, form):
+        # Vérification de la secquest
+        if "secquest" in form.cleaned_data:
+            if not utils_secquest.Check_secquest(famille=self.request.user.famille, reponse=form.cleaned_data["secquest"]):
+                form.add_error(None, "La réponse à la question est erronée")
+                return self.render_to_response(self.get_context_data(form=form))
+
         form.save()
         utilisateur = form.user
 

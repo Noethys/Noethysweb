@@ -14,7 +14,7 @@ from core.utils.utils_portail import LISTE_PARAMETRES
 
 
 LISTE_RUBRIQUES = [
-    ("Page de connexion", ["connexion_image_fond", "connexion_adresse_exp", ]),
+    ("Page de connexion", ["connexion_image_fond", "connexion_adresse_exp", "connexion_question_perso"]),
     ("Page d'accueil", ["accueil_texte_bienvenue", "accueil_url_video", "accueil_titre_video"]),
     ("Page des renseignements", ["renseignements_afficher_page", "renseignements_intro", "validation_auto:famille_caisse", "validation_auto:individu_identite",
                                  "validation_auto:individu_coords", "validation_auto:individu_regimes_alimentaires", "validation_auto:individu_maladies",

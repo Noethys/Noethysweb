@@ -16,9 +16,10 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from core.models import Utilisateur, AdresseMail
+from core.models import Utilisateur, AdresseMail, Rattachement
 from core.utils.utils_captcha import CaptchaField, CustomCaptchaTextInput
 from core.utils import utils_portail
+from portail.utils import utils_secquest
 
 
 class MySetPasswordForm(SetPasswordForm):
@@ -30,6 +31,10 @@ class MySetPasswordForm(SetPasswordForm):
         self.fields['new_password2'].widget.attrs['class'] = "form-control"
         self.fields['new_password2'].widget.attrs['title'] = "Saisissez le nouveau mot de passe une nouvelle fois"
         self.fields['new_password2'].widget.attrs['placeholder'] = "Saisissez le nouveau mot de passe une nouvelle fois"
+
+        # Question
+        if kwargs["user"].famille.internet_secquest:
+            self.fields["secquest"] = utils_secquest.Generation_field_secquest(famille=kwargs["user"].famille)
 
 
 class MyPasswordResetForm(PasswordResetForm):
@@ -153,4 +158,8 @@ class MyPasswordResetForm(PasswordResetForm):
             return "L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur."
 
         connection.close()
+
+        # Génération du secquest
+        utils_secquest.Generation_secquest(famille=utilisateur.famille)
+
         return resultat

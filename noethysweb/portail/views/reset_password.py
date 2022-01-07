@@ -4,9 +4,10 @@
 #  Distribué sous licence GNU GPL.
 
 from django.contrib.auth import views as auth_views
-from portail.forms.reset_password import MyPasswordResetForm, MySetPasswordForm
 from django.urls import reverse_lazy
+from portail.forms.reset_password import MyPasswordResetForm, MySetPasswordForm
 from portail.views.login import ClassCommuneLogin
+from portail.utils import utils_secquest
 
 
 class MyPasswordResetView(ClassCommuneLogin, auth_views.PasswordResetView):
@@ -40,9 +41,20 @@ class MyPasswordResetView(ClassCommuneLogin, auth_views.PasswordResetView):
 class MyPasswordResetDoneView(ClassCommuneLogin, auth_views.PasswordResetDoneView):
     template_name = "portail/password_reset_done.html"
 
+
 class MyPasswordResetConfirmView(ClassCommuneLogin, auth_views.PasswordResetConfirmView):
     template_name = "portail/password_reset_confirm.html"
     form_class = MySetPasswordForm
+
+    def form_valid(self, form):
+        # Vérification de la secquest
+        if "secquest" in form.cleaned_data:
+            if not utils_secquest.Check_secquest(famille=self.user.famille, reponse=form.cleaned_data["secquest"]):
+                form.add_error(None, "La réponse à la question est erronée")
+                return self.render_to_response(self.get_context_data(form=form))
+
+        return super().form_valid(form)
+
 
 class MyPasswordResetCompleteView(ClassCommuneLogin, auth_views.PasswordResetCompleteView):
     template_name = "portail/password_reset_complete.html"

@@ -5,6 +5,7 @@
 
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from portail.utils import utils_secquest
 
 
 class CustomMiddleware:
@@ -17,6 +18,7 @@ class CustomMiddleware:
         # Oblige la famille à changer son mot de passe
         url_change_password = reverse("password_change")
         if request.user.is_authenticated and request.user.categorie == "famille" and request.user.force_reset_password and request.path != url_change_password:
+            utils_secquest.Generation_secquest(famille=request.user.famille)
             return HttpResponseRedirect(url_change_password)
 
         return response

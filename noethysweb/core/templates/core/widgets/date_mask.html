@@ -1,0 +1,11 @@
+{% load static %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.1.60/inputmask/jquery.inputmask.js"></script>
+
+<input type="text" class="{{ class }}" data-date-format="{{ format }}" name="{{ name }}" title="{{ title }}" placeholder="{{ placeholder }}" id="{{ id }}" value="{{ value }}" {% if required %}required{% endif %} {% if disabled %}disabled="disabled"{% endif %}/>
+
+<script>
+$(function () {
+    $('#{{ id }}').inputmask('99/99/9999', { 'placeholder': '__/__/____' })
+});
+</script>
