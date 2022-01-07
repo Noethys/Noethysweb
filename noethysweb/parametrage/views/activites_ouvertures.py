@@ -39,7 +39,7 @@ def Get_calendrier_ouvertures(request=None):
     liste_ouvertures = Ouverture.objects.filter(activite_id=idactivite, date__gte=date_min, date__lte=date_max)
     liste_remplissage = Remplissage.objects.filter(activite_id=idactivite, date__gte=date_min, date__lte=date_max)
     liste_vacances = Vacance.objects.filter(date_fin__gte=date_min, date_debut__lte=date_max)
-    liste_feries = Ferie.objects.filter(mois=mois).filter(Q(annee=0) | Q(annee=0))
+    liste_feries = Ferie.objects.filter(mois=mois).filter(Q(annee=0) | Q(annee=annee))
     liste_conso = Consommation.objects.filter(activite_id=idactivite, date__gte=date_min, date__lte=date_max)
     liste_evenements = Evenement.objects.filter(activite_id=idactivite, date__gte=date_min, date__lte=date_max)
 
