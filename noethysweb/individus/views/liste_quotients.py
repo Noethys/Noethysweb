@@ -29,6 +29,7 @@ class Liste(Page, crud.CustomListe):
         Colonne(code="date_debut", label="Date de début", classe="DateField"),
         Colonne(code="date_fin", label="Date de fin", classe="DateField"),
         Colonne(code="observations", label="Observations", classe="CharField"),
+        Colonne(code="actions", label="Actions", classe=""),
     ]
 
     def get_context_data(self, **kwargs):
@@ -38,7 +39,7 @@ class Liste(Page, crud.CustomListe):
         context['box_introduction'] = "Voici ci-dessous la liste des quotients familiaux/revenus."
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
-        context["hauteur_table"] = "400px"
+        context["hauteur_table"] = "500px"
         if "form_parametres" not in kwargs:
             context['form_parametres'] = Formulaire(request=self.request)
             context["datatable"] = self.Get_customdatatable()
@@ -92,16 +93,19 @@ class Liste(Page, crud.CustomListe):
             lignes = []
             for famille in liste_familles:
                 quotient = dict_quotients.get(famille.pk)
+                boutons = [
+                    """<a type="button" class="btn btn-default btn-xs" href="%s" title="Ouvrir la fiche famille" target="_blank"><i class="fa fa-fw fa-users"></i></a>""" % reverse("famille_quotients_liste", args=[famille.pk]),
+                ]
                 if filtre_familles == "TOUTES" or (filtre_familles == "AVEC_QF" and quotient) or (filtre_familles == "SANS_QF" and not quotient):
                     lignes.append([
                         famille.nom,
                         "Oui" if famille.autorisation_cafpro else "",
                         quotient.quotient if quotient else "",
-                        quotient.revenu if quotient else "",
+                        quotient.revenu if quotient and quotient.revenu else "",
                         utils_dates.ConvertDateToFR(quotient.date_debut) if quotient else "",
                         utils_dates.ConvertDateToFR(quotient.date_fin) if quotient else "",
-                        quotient.observations if quotient else "",
+                        quotient.observations if quotient and quotient.observations else "",
+                        " ".join(boutons),
                     ])
 
         return CustomDatatable(colonnes=self.colonnes, lignes=lignes, filtres=self.Get_filtres())
-
