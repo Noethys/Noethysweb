@@ -3,6 +3,16 @@
 {% load static %}
 {% load embed %}
 
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/js-year-calendar/js-year-calendar.min.css' %}">
+{% endblock styles %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/js-year-calendar/js-year-calendar.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/js-year-calendar/js-year-calendar.fr.js' %}"></script>
+{% endblock scripts %}
 
 {% block detail_activite %}
     <div class="col-md-9">
@@ -20,6 +30,7 @@
                     {% endfor %}
                 </div>
 
+                {# Arborescence des ouvertures #}
                 <script>
                     var contenu_table = JSON.parse('{{ liste_lignes|escapejs }}');
                     var tree_state = "collapsed";
@@ -49,6 +60,61 @@
                 </table>
 
                 {% include 'core/widgets/bootstrap-table.html' %}
+
+                {# Calendrier annuel #}
+                <div class="mt-4">
+                    <div id="calendar" style="padding: 0px"></div>
+                    <script>
+                        let calendar = new Calendar('#calendar', {
+                            language: 'fr',
+                            style: 'custom',
+                            dataSource: [],
+                            customDataSourceRenderer: function(element, date, events) {
+                                for (var event of events) {
+                                    $(element).css('border-radius', '0px');
+                                    $(element).css('background-color', event.color);
+                                    if (event.consommations === 1) {
+                                        $(element).css('color', 'red');
+                                    };
+                                };
+                            },
+                            yearChanged: function(e) {
+                                e.preventRendering = true;
+                                $.ajax({
+                                    method: "POST",
+                                    url: "{% url 'ajax_get_calendrier_annuel_ouvertures' %}",
+                                    data: {
+                                        annee: e.currentYear,
+                                        idactivite: {{ idactivite }},
+                                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                                    },
+                                    success: function(data) {
+                                        var events = [];
+                                        for (var i = 0; i < data.length; i++) {
+                                            events.push({
+                                                name: data[i].name,
+                                                startDate: new Date(data[i].debut[0], data[i].debut[1], data[i].debut[2]),
+                                                endDate: new Date(data[i].fin[0], data[i].fin[1], data[i].fin[2]),
+                                                color: data[i].color,
+                                                ouvert: data[i].ouvert,
+                                                consommations: data[i].consommations,
+                                            });
+                                        }
+                                        e.calendar.setDataSource(events);
+                                    }
+                                });
+                            },
+                        })
+                    </script>
+                </div>
+
+                {# Légende du calendrier annuel #}
+                <div class="mt-3">
+                    <span class="mr-3"><i class="fa fa-square margin-r-5" style="color: #eaeaea;"></i> Férié</span>
+                    <span class="mr-3"><i class="fa fa-square margin-r-5" style="color: #faffc9;"></i> Vacances</span>
+                    <span class="mr-3"><i class="fa fa-square margin-r-5" style="color: #a5c3d4;"></i> Ouvert</span>
+                    <span><i class="fa fa-square margin-r-5" style="color: red;"></i> Consommations existantes</span>
+                </div>
 
             {% endblock %}
 

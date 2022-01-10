@@ -3,12 +3,50 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json, datetime
 from django.views.generic import TemplateView
 from django.urls import reverse_lazy
-from core.models import Unite, Ouverture, Groupe
-from parametrage.views.activites import Onglet
+from django.db.models import Q
+from django.http import JsonResponse
+from core.models import Unite, Ouverture, Groupe, Vacance, Ferie, Consommation
 from core.utils import utils_dates
-import json
+from parametrage.views.activites import Onglet
+
+
+def Get_calendrier_annuel_ouvertures(request):
+    """ Renvoie les jours du calendrier annuel des ouvertures """
+    annee = int(request.POST.get("annee"))
+    idactivite = int(request.POST.get("idactivite"))
+    events = []
+
+    # Périodes de vacances
+    for vacance in Vacance.objects.filter(date_fin__gte=datetime.date(annee, 1, 1), date_debut__lte=datetime.date(annee, 12, 31)):
+        events.append({
+            "debut": [vacance.date_debut.year, vacance.date_debut.month-1, vacance.date_debut.day],
+            "fin": [vacance.date_fin.year, vacance.date_fin.month-1, vacance.date_fin.day],
+            "color": "#faffc9",
+        })
+
+    # Jours fériés
+    for ferie in Ferie.objects.filter(Q(annee=annee) | Q(annee=0)):
+        events.append({
+            "debut": [annee, ferie.mois-1, ferie.jour],
+            "fin": [annee, ferie.mois-1, ferie.jour],
+            "color": "#eaeaea",
+        })
+
+    # Ouvertures
+    consommations = [conso["date"] for conso in Consommation.objects.values("date").filter(activite_id=idactivite, date__gte=datetime.date(annee, 1, 1), date__lte=datetime.date(annee, 12, 31)).distinct()]
+    for date in [ouverture["date"] for ouverture in Ouverture.objects.values("date").filter(activite_id=idactivite, date__gte=datetime.date(annee, 1, 1), date__lte=datetime.date(annee, 12, 31)).distinct().order_by("date")]:
+        events.append({
+            "debut": [date.year, date.month-1, date.day],
+            "fin": [date.year, date.month-1, date.day],
+            "ouvert": 1,
+            "consommations": 1 if date in consommations else 0,
+            "color": "#a5c3d4",
+        })
+
+    return JsonResponse(events, safe=False)
 
 
 class View(Onglet, TemplateView):
@@ -26,6 +64,7 @@ class View(Onglet, TemplateView):
         liste_colonnes, liste_lignes = self.Get_ouvertures(idactivite=idactivite)
         context['liste_colonnes'] = liste_colonnes
         context['liste_lignes'] = json.dumps(liste_lignes)
+        context['idactivite'] = idactivite
         return context
 
     def Get_ouvertures(self, idactivite=None):

@@ -453,6 +453,7 @@ urlpatterns = [
     path('parametrage/activites/groupes/liste/deplacer_lignes', secure_ajax(activites_groupes.Deplacer.as_view()), name='ajax_deplacer_lignes_activites_groupes'),
     path('parametrage/activites/unites_conso/liste/deplacer_lignes', secure_ajax(activites_unites_conso.Deplacer.as_view()), name='ajax_deplacer_lignes_activites_unites_conso'),
     path('parametrage/activites/unites_remplissage/liste/deplacer_lignes', secure_ajax(activites_unites_remplissage.Deplacer.as_view()), name='ajax_deplacer_lignes_activites_unites_remplissage'),
+    path('parametrage/get_calendrier_annuel_ouvertures', secure_ajax(activites_calendrier.Get_calendrier_annuel_ouvertures), name='ajax_get_calendrier_annuel_ouvertures'),
     path('parametrage/get_calendrier_ouvertures', secure_ajax(activites_ouvertures.Get_calendrier_ouvertures), name='ajax_get_calendrier_ouvertures'),
     path('parametrage/traitement_lot_ouvertures', secure_ajax(activites_ouvertures.Traitement_lot_ouvertures), name='ajax_traitement_lot_ouvertures'),
     path('parametrage/valider_calendrier_ouvertures', secure_ajax(activites_ouvertures.Valider_calendrier_ouvertures), name='ajax_valider_calendrier_ouvertures'),
