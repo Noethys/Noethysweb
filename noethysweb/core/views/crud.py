@@ -311,6 +311,12 @@ class Supprimer(BaseView, DeleteView):
         if collector.protected:
             context['erreurs_protection'].append("Il est rattaché aux données suivantes : %s." % Formate_liste_objets(objets=collector.protected))
 
+        # Autres protections
+        if hasattr(self, "Check_protections"):
+            protections = self.Check_protections(objet=self.get_object())
+            if protections:
+                context['erreurs_protection'].append("Protection contre la suppression : %s." % utils_texte.Convert_liste_to_texte_virgules(protections))
+
         # Vérifie si des champs ManyToMany ne sont pas associés
         for label, related_name in self.manytomany_associes:
             resultat = self.model.objects.filter(pk=self.get_object().pk).aggregate(nbre=Count(related_name))

@@ -83,9 +83,8 @@ class Formulaire(FormulaireBase, ModelForm):
             )
 
     def clean(self):
-        if self.cleaned_data["date_debut"] > self.cleaned_data["date_fin"] :
+        if self.cleaned_data["date_debut"] > self.cleaned_data["date_fin"]:
             self.add_error('date_fin', "La date de fin doit être supérieure à la date de début")
             return
 
         return self.cleaned_data
-
