@@ -5,15 +5,14 @@
 
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder
+from crispy_forms.layout import Layout, Hidden, Div, HTML, Fieldset, ButtonHolder
 from crispy_forms.bootstrap import Field, StrictButton, PrependedText
+from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import Famille, Quotient
 from core.widgets import DatePickerWidget
 from core.utils import utils_preferences
-
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -39,7 +38,15 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.field_class = 'col-md-10'
 
         # Définit la famille associée
-        famille = Famille.objects.get(pk=idfamille)
+        famille = Famille.objects.select_related("caisse", "allocataire").get(pk=idfamille)
+
+        # Si ajout : insertion des valeurs du précédent quotient saisi
+        if not self.instance.pk:
+            dernier_quotient = Quotient.objects.last()
+            if dernier_quotient:
+                self.fields["date_debut"].initial = dernier_quotient.date_debut
+                self.fields["date_fin"].initial = dernier_quotient.date_fin
+                self.fields["type_quotient"].initial = dernier_quotient.type_quotient
 
         # Affichage
         self.helper.layout = Layout(
@@ -59,6 +66,21 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field('document'),
             ),
         )
+
+        # Affichage des informations de la caisse
+        if not self.instance.pk:
+            self.helper.layout.insert(1,
+                Fieldset("Rappel des données allocataire",
+                    Div(
+                        HTML("""
+                        <span>Caisse : %s</span>
+                        <span class="ml-5">Allocataire : %s</span>
+                        <span class="ml-5">N° allocataire : %s</span>
+                        """ % (famille.caisse.nom or "Inconnue", famille.allocataire or "Inconnu", famille.num_allocataire or "Inconnu")),
+                        css_class="alert alert-light text-center"
+                    ),
+                ),
+            )
 
     def clean(self):
         if self.cleaned_data["date_debut"] > self.cleaned_data["date_fin"] :
