@@ -572,23 +572,30 @@ class Impression(utils_impression.Impression):
                                 listeInscriptions = []
                                 try:
                                     for inscription, dictInscription in dictConso[activite.pk][IDgroupe][scolarite][IDevenement][IDetiquette].items():
-                                        listeInscriptions.append((inscription, dictInscription["nom"], dictInscription["prenom"], dictInscription["age"]))
+                                        listeInscriptions.append((
+                                            inscription,
+                                            dictInscription["nom"],
+                                            dictInscription["prenom"],
+                                            dictInscription["age"],
+                                            "%s %s" % (dictInscription["nom"], dictInscription["prenom"] or ""),
+                                            "%s %s" % (dictInscription["prenom"] or "", dictInscription["nom"]),
+                                        ))
                                 except:
                                     pass
 
-                                if self.dict_donnees["tri"] == "nom": paramTri = 1
-                                if self.dict_donnees["tri"] == "prenom": paramTri = 2
+                                if self.dict_donnees["tri"] == "nom": paramTri = 4
+                                if self.dict_donnees["tri"] == "prenom": paramTri = 5
                                 if self.dict_donnees["tri"] == "age": paramTri = 3
                                 listeInscriptions = sorted(listeInscriptions, key=operator.itemgetter(paramTri), reverse=self.dict_donnees["ordre"] != "croissant")
 
                                 # Recherche des différences entre les inscriptions
                                 dict_differences = {}
-                                for inscription, nom, prenom, age in listeInscriptions:
+                                for inscription, nom, prenom, age, nom_complet, prenom_complet in listeInscriptions:
                                     dict_differences.setdefault(inscription.individu, {})
                                     dict_differences[inscription.individu].setdefault(inscription.activite, {"famille": []})
                                     if inscription.famille not in dict_differences[inscription.individu][inscription.activite]["famille"]:
                                         dict_differences[inscription.individu][inscription.activite]["famille"].append(inscription.famille)
-                                for inscription, nom, prenom, age in listeInscriptions:
+                                for inscription, nom, prenom, age, nom_complet, prenom_complet in listeInscriptions:
                                     inscription.infos_differentes = []
                                     for info in ("famille",):
                                         if len(dict_differences[inscription.individu][inscription.activite][info]) > 1:
@@ -598,7 +605,7 @@ class Impression(utils_impression.Impression):
                                 # Récupération des lignes inscriptions
                                 dictTotauxColonnes = {}
                                 indexLigne = 0
-                                for inscription, nom, prenom, age in listeInscriptions:
+                                for inscription, nom, prenom, age, nom_complet, prenom_complet in listeInscriptions:
 
                                     dictInscription = dictConso[activite.pk][IDgroupe][scolarite][IDevenement][IDetiquette][inscription]
                                     ligne = []
