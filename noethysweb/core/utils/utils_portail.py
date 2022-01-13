@@ -99,7 +99,8 @@ LISTE_PARAMETRES = [
     Parametre(code="contact_afficher_page", label="Afficher la page", type="boolean", valeur=True),
     Parametre(code="contact_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez trouver ici les moyens de correspondre avec l'organisateur."),
     Parametre(code="messagerie_intro", label="Texte d'introduction de la messagerie", type="char_2lignes", valeur="Saisissez un message et cliquez sur le bouton Envoyer."),
-    Parametre(code="messagerie_envoyer_notification", label="Envoyer une notification par email des messages postés à la famille", type="boolean", valeur=True),
+    Parametre(code="messagerie_envoyer_notification_famille", label="Envoyer une notification par email des messages postés à la famille", type="boolean", valeur=True),
+    Parametre(code="messagerie_envoyer_notification_admin", label="Envoyer une notification par email des messages postés à l'administrateur", type="boolean", valeur=True),
     Parametre(code="contact_afficher_coords_structures", label="Afficher les coordonnées des structures", type="boolean", valeur=True),
     Parametre(code="contact_afficher_coords_organisateur", label="Afficher les coordonnées de l'organisateur", type="boolean", valeur=True),
 
@@ -115,7 +116,8 @@ def Get_dict_parametres():
     """ Renvoi un dict code: valeur des paramètres """
     dict_parametres = {parametre.code: parametre for parametre in LISTE_PARAMETRES}
     for parametre_db in PortailParametre.objects.all():
-        dict_parametres[parametre_db.code].From_db(parametre_db.valeur)
+        if parametre_db.code in dict_parametres:
+            dict_parametres[parametre_db.code].From_db(parametre_db.valeur)
     return {code: parametre.valeur for code, parametre in dict_parametres.items()}
 
 def Get_parametre(code=""):

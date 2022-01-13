@@ -22,7 +22,7 @@ def Envoi_notification_message(request=None, famille=None, structure=None):
     """ Envoie une notification de nouveau message à la famille par email """
     # Vérifie qu'une notification doit être envoyée
     parametres_portail = utils_portail.Get_dict_parametres()
-    if not parametres_portail.get("messagerie_envoyer_notification", False):
+    if not parametres_portail.get("messagerie_envoyer_notification_famille", False):
         return False
 
     # Recherche le modèle d'email

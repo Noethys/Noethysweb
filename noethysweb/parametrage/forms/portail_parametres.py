@@ -23,7 +23,7 @@ LISTE_RUBRIQUES = [
     ("Page des réservations", ["reservations_afficher_page", "reservations_intro", "reservations_intro_planning"]),
     ("Page de la facturation", ["facturation_afficher_page", "facturation_intro", "facturation_afficher_numero_facture", "facturation_afficher_solde_facture", "facturation_autoriser_detail_facture", "facturation_autoriser_telechargement_facture"]),
     ("Page des règlements", ["reglements_afficher_page", "reglements_intro", "reglements_afficher_encaissement", "reglements_autoriser_telechargement_recu"]),
-    ("Page contact", ["contact_afficher_page", "contact_intro", "messagerie_intro", "messagerie_envoyer_notification", "contact_afficher_coords_structures", "contact_afficher_coords_organisateur"]),
+    ("Page contact", ["contact_afficher_page", "contact_intro", "messagerie_intro", "messagerie_envoyer_notification_famille", "messagerie_envoyer_notification_admin", "contact_afficher_coords_structures", "contact_afficher_coords_organisateur"]),
     ("Page des mentions légales", ["mentions_afficher_page", "mentions_intro", "mentions_conditions_generales"]),
 ]
 
@@ -46,7 +46,8 @@ class Formulaire(FormulaireBase, forms.Form):
         # Importation des paramètres par défaut
         dict_parametres = {parametre.code: parametre for parametre in LISTE_PARAMETRES}
         for parametre_db in PortailParametre.objects.all():
-            dict_parametres[parametre_db.code].From_db(parametre_db.valeur)
+            if parametre_db.code in dict_parametres:
+                dict_parametres[parametre_db.code].From_db(parametre_db.valeur)
 
         # Création des fields
         for titre_rubrique, liste_parametres in LISTE_RUBRIQUES:
