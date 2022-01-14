@@ -16,14 +16,14 @@
         <div class="card-body p-0">
             <ul class="products-list product-list-in-card">
                 {% for message in liste_messages_non_lus %}
-                    <li class="item p-0 bg-transparent">
+                    <li class="item p-0 bg-transparent" title="{{ message.texte|striptags }}">
                         <a href="{% url 'messagerie_portail' idfamille=message.famille_id idstructure=message.structure_id %}" class="dropdown-item">
                             <div class="media">
                                 <div class="media-body">
                                     <p class="mb-0 text-bold">
                                         {{ message.famille.nom }}
                                     </p>
-                                    <p class="text-xs mb-0" title="{{ message.texte|striptags }}">{{ message.texte|striptags|truncatechars:55 }}</p>
+                                    <p class="text-xs mb-0">{{ message.texte|striptags|truncatechars:55 }}</p>
                                     <p class="text-right mb-0 text-muted" style="font-size: 10px;"><i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }} | <i class="fa fa-home mr-1"></i>{{ message.structure }}</p>
                                 </div>
                             </div>

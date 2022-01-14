@@ -119,7 +119,7 @@
                         <div class="dropdown-divider"></div>
 
                         {% for message in liste_messages_non_lus %}
-                            <a href="{% url 'messagerie_portail' idfamille=message.famille_id idstructure=message.structure_id %}" class="dropdown-item">
+                            <a href="{% url 'messagerie_portail' idfamille=message.famille_id idstructure=message.structure_id %}" class="dropdown-item" title="{{ message.texte|striptags }}">
                                 <div class="media">
                                     <div class="media-body">
                                         <h3 class="dropdown-item-title">
