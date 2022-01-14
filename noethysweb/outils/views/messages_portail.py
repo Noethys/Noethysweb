@@ -21,6 +21,7 @@ class Page(crud.Page):
 
 class Liste(Page, crud.Liste):
     model = PortailMessage
+    template_name = "outils/messages_portail.html"
 
     def get_queryset(self):
         return PortailMessage.objects.select_related("famille", "structure", "utilisateur").filter(structure__in=self.request.user.structures.all())
@@ -61,7 +62,7 @@ class Liste(Page, crud.Liste):
             return "<span class='badge bg-danger'>Non lu</span>"
 
         def Get_texte(self, instance, *args, **kwargs):
-            return truncatechars(striptags(instance.texte), 30)
+            return truncatechars(striptags(instance.texte), 50)
 
         def Get_auteur(self, instance, *args, **kwargs):
             if instance.utilisateur:
@@ -72,9 +73,13 @@ class Liste(Page, crud.Liste):
             view = kwargs["view"]
             kwargs = view.kwargs
             kwargs["pk"] = instance.pk
-            html = [
-                self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
-            ]
+            html = []
+            if not instance.date_lecture:
+                html.append("""<button class='btn btn-success btn-xs' onclick="marquer_lu(%d, 'true')" title='Marquer comme lu'><i class="fa fa-fw fa-eye"></i></button>""" % instance.pk)
+            else:
+                html.append("""<button class='btn btn-danger btn-xs' onclick="marquer_lu(%d, 'false')" title='Marquer comme non lu'><i class="fa fa-fw fa-eye-slash"></i></button>""" % instance.pk)
+            html.append("""<a class='btn btn-default btn-xs' href="%s" title="Accéder à la discussion"><i class="fa fa-fw fa-comments"></i></button>""" % reverse_lazy("famille_messagerie_portail", kwargs={'idstructure': instance.structure_id, 'idfamille': instance.famille_id}))
+            html.append(self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),)
             return self.Create_boutons_actions(html)
 
 

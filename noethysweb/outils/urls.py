@@ -78,5 +78,7 @@ urlpatterns = [
     path('outils/sauvegarder_db/', secure_ajax(sauvegarde_creer.Sauvegarder_db), name='ajax_sauvegarder_db'),
     path('outils/sauvegarder_media/', secure_ajax(sauvegarde_creer.Sauvegarder_media), name='ajax_sauvegarder_media'),
     path('outils/sauvegarder_liste/', secure_ajax(sauvegarde_creer.Get_liste_sauvegardes), name='ajax_get_liste_sauvegardes'),
+    path('outils/messages/marquer_lu/', secure_ajax(messagerie_portail.Marquer_lu), name='ajax_message_marquer_lu'),
+
 
 ]

@@ -1,0 +1,48 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+    </div>
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+
+        function marquer_lu(idmessage, etat) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_message_marquer_lu' %}",
+                data: {
+                    "idmessage": idmessage,
+                    "etat": etat
+                },
+                datatype: "json",
+                success: function(data){
+                    // Recharge la liste
+                    var table = $('.datatable').DataTable()
+                    table.ajax.reload(null, false);
+                },
+                error: function(data) {
+                    toastr.error("Erreur");
+                }
+            })
+        };
+    </script>
+
+{% endblock scripts %}

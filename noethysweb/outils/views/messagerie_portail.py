@@ -6,10 +6,23 @@
 import logging, datetime
 logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
+from django.http import JsonResponse
+from django.template.defaultfilters import truncatechars, striptags
 from core.views import crud
 from core.models import PortailMessage, Structure, Famille
 from outils.forms.messagerie_portail import Formulaire, Envoi_notification_message
-from django.template.defaultfilters import truncatechars, striptags
+
+
+def Marquer_lu(request):
+    """ Marquer un message comme lu ou non """
+    idmessage = int(request.POST.get("idmessage"))
+    etat = request.POST.get("etat")
+    message = PortailMessage.objects.filter(pk=idmessage)
+    if etat == "true":
+        message.update(date_lecture=datetime.datetime.now())
+    else:
+        message.update(date_lecture=None)
+    return JsonResponse({"succes": True})
 
 
 class Page(crud.Page):
@@ -30,9 +43,8 @@ class Page(crud.Page):
             context["famille"] = Famille.objects.get(pk=self.get_idfamille())
 
         # Indiquer que les messages de la discussion ouverte sont lus
-        if messages_non_lus:
-            messages_non_lus.update(date_lecture=datetime.datetime.now())
-
+        if messages_non_lus and self.get_idfamille():
+            messages_non_lus.filter(famille_id=self.get_idfamille()).update(date_lecture=datetime.datetime.now())
         return context
 
     def get_form_kwargs(self, **kwargs):
