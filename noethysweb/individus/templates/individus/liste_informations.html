@@ -37,7 +37,7 @@
                 success: function(data){
                     // Recharge la liste
                     var table = $('.datatable').DataTable()
-                    table.ajax.reload();
+                    table.ajax.reload(null, false);
                 },
                 error: function(data) {
                     toastr.error("Erreur");
