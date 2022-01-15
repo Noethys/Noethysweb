@@ -60,7 +60,7 @@
                                             {# Si c'est un message de l'administrateur #}
                                             <div class="direct-chat-msg right">
                                                 <div class="direct-chat-infos clearfix">
-                                                    <span class="direct-chat-name float-right">{{ message.utilisateur }}</span>
+                                                    <span class="direct-chat-name float-right">{% firstof message.utilisateur.get_full_name message.utilisateur message.utilisateur.get_short_name %}</span>
                                                     <span class="direct-chat-timestamp float-left">{{ message.date_creation|date:"l j F Y H:i" }}</span>
                                                 </div>
                                                 <img class="direct-chat-img" src="{% static "images/user.png" %}">
