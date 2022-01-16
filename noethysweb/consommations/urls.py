@@ -23,7 +23,9 @@ urlpatterns = [
     path('consommations/suivi_consommations', suivi_consommations.View.as_view(), name='suivi_consommations'),
 
     path('consommations/liste_consommations', liste_consommations.Liste.as_view(), name='liste_consommations'),
-    # path('consommations/consommations_supprimer_plusieurs/<str:listepk>', liste_consommations.Supprimer_plusieurs.as_view(), name='consommations_supprimer_plusieurs'),
+    path('consommations/liste_consommations/modifier/<int:pk>', liste_consommations.Modifier.as_view(), name='liste_consommations_modifier'),
+    path('consommations/liste_consommations/supprimer/<int:pk>', liste_consommations.Supprimer.as_view(), name='liste_consommations_supprimer'),
+    path('consommations/consommations_supprimer_plusieurs/<str:listepk>', liste_consommations.Supprimer_plusieurs.as_view(), name='consommations_supprimer_plusieurs'),
 
     # Listes par état
     path('consommations/liste_attente', liste_attente.View.as_view(etat="attente"), name='liste_attente'),
