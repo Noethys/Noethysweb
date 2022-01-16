@@ -1,3 +1,22 @@
+Version 1.0.5.2 (16/01/2022) :
+
+- Ajout des prestations sans conso dans le correcteur
+- Ajout de la modification dans la liste des consommations
+- Affichage du nom complet de l'auteur du message du portail
+- Ajout de la colonne Tarif à la liste des prestations
+- Ajout de la question personnelle de sécurité
+- Ajout de la notification des messages par email à l'administrateur de la structure
+- Ajout du calendrier annuel des ouvertures
+- Ajout du recalcul après modification du quotient
+- Ajout du bouton Ouvrir fiche famille dans la liste des quotients
+- Ajout du rappel des données caisse durant la saisie d'un quotient
+- Ajout de l'affichage des messages dans des infobulles
+- Désactivation du reset paging des datatables
+- Correction de l'ordre alpha des noms de la liste des consommations
+- Correction de la permission d'affichage des notifications des renseignements
+- Correction du marquage comme lu des messages
+- Correction de l'affichage des fériés variables dans le calendrier des ouvertures
+
 Version 1.0.5.1 (06/01/2022) :
 
 - Ajout de l'ajout multiple d'individus dans le gestionnaire des consommations
