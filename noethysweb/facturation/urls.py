@@ -69,6 +69,7 @@ urlpatterns = [
     path('facturation/rappels_impression_pdf', secure_ajax(rappels_impression.Impression_pdf), name='ajax_rappels_impression_pdf'),
     path('facturation/rappels_email_pdf', secure_ajax(rappels_email.Impression_pdf), name='ajax_rappels_email_pdf'),
     path('facturation/lots_pes_exporter', secure_ajax(lots_pes.Exporter), name='ajax_lots_pes_exporter'),
+    path('facturation/lots_pes_impression_pdf', secure_ajax(lots_pes.Impression_pdf), name='ajax_lots_pes_impression_pdf'),
     path('facturation/ajax_recalculer_prestations', secure_ajax(recalculer_prestations.Recalculer), name='ajax_recalculer_prestations'),
 
 ]

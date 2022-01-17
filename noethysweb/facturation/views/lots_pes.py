@@ -237,3 +237,16 @@ def Exporter(request):
     if not resultat:
         return JsonResponse({"erreurs": export.Get_erreurs_html()}, status=401)
     return JsonResponse({"resultat": "ok", "nom_fichier": resultat})
+
+
+def Impression_pdf(request):
+    """ Impression du lot """
+    idlot = int(request.POST.get("idlot"))
+
+    # Création du PDF
+    from facturation.utils import utils_impression_lot_pes
+    impression = utils_impression_lot_pes.Impression(titre="Edition d'un export", dict_donnees={"idlot": idlot})
+    if impression.erreurs:
+        return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
+    nom_fichier = impression.Get_nom_fichier()
+    return JsonResponse({"nom_fichier": nom_fichier})

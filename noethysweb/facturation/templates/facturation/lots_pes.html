@@ -19,6 +19,7 @@
                         <a class="btn btn-default" href="{% url 'lots_pes_ajouter_piece' idlot=lot.pk %}"><i class='fa fa-plus margin-r-5'></i>Ajouter des pièces</a>
                         <a class="btn btn-default" href="{% url 'lots_pes_modifier' pk=lot.pk %}"><i class="fa fa-pencil margin-r-5"></i>Modifier les paramètres</a>
                         <button class="btn btn-default" id="bouton_exporter"><i class='fa fa-bolt margin-r-5'></i>Générer le fichier d'export</button>
+                        <button class="btn btn-default" onclick="impression_pdf()" title="Aperçu PDF"><i class='fa fa-file-pdf-o margin-r-5'></i>Aperçu PDF</button>
                         <a class="btn btn-default" href="#" target="_blank" title="Consulter l'aide"><i class="fa fa-life-saver margin-r-5"></i>Aide</a>
                     </div>
 
@@ -73,6 +74,9 @@
 
     </div>
 
+    {# Insertion des modals #}
+    {% include 'core/modal_pdf.html' %}
+
     {# Modal de résultat de la génération #}
     {% embed 'core/modal.html' with mode_static=True %}
         {% block modal_id %}modal_resultat{% endblock %}
@@ -107,6 +111,25 @@
                 }
             });
         });
+
+        // Impression du PDF
+        function impression_pdf() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_lots_pes_impression_pdf' %}",
+                data: {
+                    idlot: {{ lot.pk }},
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                datatype: "json",
+                success: function(data){
+                    charge_pdf(data);
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
 
     </script>
 
