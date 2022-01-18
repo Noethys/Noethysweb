@@ -9,7 +9,7 @@ from core.decorators import Verifie_ventilation
 from core.decorators import secure_ajax
 from facturation.views import factures_generation, liste_prestations, liste_factures, liste_deductions, liste_soldes, synthese_impayes, \
                                 synthese_prestations, liste_tarifs, rappels_generation, liste_rappels, factures_impression, factures_email, \
-                                rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations
+                                rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations
 
 urlpatterns = [
 
@@ -52,6 +52,7 @@ urlpatterns = [
     path('facturation/liste_deductions', liste_deductions.Liste.as_view(), name='liste_deductions'),
     path('facturation/liste_soldes', Verifie_ventilation(liste_soldes.Liste.as_view()), name='liste_soldes'),
     path('facturation/synthese_prestations', synthese_prestations.View.as_view(), name='synthese_prestations'),
+    path('facturation/edition_prestations', edition_prestations.View.as_view(), name='edition_prestations'),
     path('facturation/recalculer_prestations', recalculer_prestations.View.as_view(), name='recalculer_prestations'),
 
     # Impayés
@@ -71,5 +72,6 @@ urlpatterns = [
     path('facturation/lots_pes_exporter', secure_ajax(lots_pes.Exporter), name='ajax_lots_pes_exporter'),
     path('facturation/lots_pes_impression_pdf', secure_ajax(lots_pes.Impression_pdf), name='ajax_lots_pes_impression_pdf'),
     path('facturation/ajax_recalculer_prestations', secure_ajax(recalculer_prestations.Recalculer), name='ajax_recalculer_prestations'),
+    path('facturation/edition_prestations/generer_pdf', secure_ajax(edition_prestations.Generer_pdf), name='ajax_edition_prestations_generer_pdf'),
 
 ]
