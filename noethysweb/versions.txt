@@ -1,3 +1,8 @@
+Version 1.0.5.3 (18/01/2022) :
+
+- Ajout de l'impression PDF d'un export PES
+- Ajout de l'édition des prestations dans le menu Prestations
+
 Version 1.0.5.2 (16/01/2022) :
 
 - Ajout des prestations sans conso dans le correcteur
