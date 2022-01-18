@@ -34,7 +34,10 @@ class Impression(utils_impression.Impression):
             dict_prestations_temp = {}
             for prestation in dict_prestations.get(piece.facture, []):
                 prix_unitaire = prestation.montant / prestation.quantite
-                libelle = "%s - %s" % (prestation.individu.prenom, prestation.label) if prestation.individu else prestation.label
+                if prestation.individu:
+                    libelle = "%s - %s" % (prestation.individu.prenom or prestation.individu.nom, prestation.label)
+                else:
+                    libelle = prestation.label
                 key = (libelle, prix_unitaire)
                 dict_prestations_temp.setdefault(key, {"quantite": 0, "montant": decimal.Decimal(0), "label": prestation.label, "individus": {}})
                 dict_prestations_temp[key]["quantite"] += prestation.quantite
@@ -114,7 +117,7 @@ class Impression(utils_impression.Impression):
             ligne.append(piece.facture.numero)
 
             # Famille
-            texte = "%s<br/>%s<br/>%s %s" % (piece.famille, piece.famille.rue_resid, piece.famille.cp_resid, piece.famille.ville_resid)
+            texte = "%s<br/>%s<br/>%s %s" % (piece.famille, piece.famille.rue_resid or "", piece.famille.cp_resid or "", piece.famille.ville_resid or "")
             ligne.append(Paragraph(texte, style_defaut))
 
             # Montant de la facture
@@ -146,7 +149,7 @@ class Impression(utils_impression.Impression):
             ("ALIGN", (0, 0), (-1, -1), "CENTRE"),
         ])
         # Création du tableau
-        tableau = Table(dataTableau, [45, 150, 45, 20, 150, 30, 40, 40])
+        tableau = Table(dataTableau, [45, 150, 45, 20, 145, 30, 40, 45], repeatRows=1)
         tableau.setStyle(style)
         self.story.append(tableau)
 

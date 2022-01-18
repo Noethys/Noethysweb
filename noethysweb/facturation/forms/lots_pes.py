@@ -3,16 +3,16 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime, json
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset
 from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
-from core.models import PesLot, PesModele, PesPiece, Rattachement, Mandat, LotFactures, FiltreListe
+from core.models import PesLot, PesModele, PesPiece, Rattachement, Mandat, LotFactures, FiltreListe, Facture
 from core.widgets import DatePickerWidget
-import datetime
+from core.forms.base import FormulaireBase
 
 
 class Formulaire_creation(FormulaireBase, forms.Form):
@@ -87,6 +87,20 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields["date_envoi"].initial = datetime.date.today()
             # self.fields["objet_piece"].initial = modele.objet_piece
             # self.fields["prestation_libelle"].initial = modele.prestation_libelle
+
+            # Importe le nom de lot de factures pour l'utiliser comme nom de lot pes
+            if assistant and assistant > 0:
+                premiere_facture = None
+                if assistant == 999999:
+                    filtre = FiltreListe.objects.filter(nom="facturation.views.lots_pes_factures", parametres__contains="Dernières factures générées", utilisateur=self.request.user).first()
+                    if filtre:
+                        parametres_filtre = json.loads(filtre.parametres)
+                        idmin, idmax = parametres_filtre["criteres"]
+                        premiere_facture = Facture.objects.select_related("lot").filter(pk__gte=idmin, pk__lte=idmax).first()
+                else:
+                    premiere_facture = Facture.objects.select_related("lot").filter(lot_id=assistant).first()
+                if premiere_facture and premiere_facture.lot:
+                    self.fields["nom"].initial = premiere_facture.lot.nom
 
         # Affichage
         self.helper.layout = Layout(
