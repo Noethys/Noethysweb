@@ -1,3 +1,7 @@
+Version 1.0.5.4 (24/01/2022) :
+
+- Ajout du filtre de liste Scolarité
+
 Version 1.0.5.3 (18/01/2022) :
 
 - Ajout de l'impression PDF d'un export PES
