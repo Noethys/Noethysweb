@@ -154,7 +154,7 @@ class Consulter(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "idpiece", "famille", "montant", "prelevement", "prelevement_statut", "prelevement_sequence", "titulaire_helios", "facture"]
+        filtres = ["fpresent:famille", "fscolarise:famille", "idpiece", "famille", "montant", "prelevement", "prelevement_statut", "prelevement_sequence", "titulaire_helios", "facture"]
         check = columns.CheckBoxSelectColumn(label="")
         famille = columns.TextColumn("Famille", sources=["famille__nom"])
         montant = columns.TextColumn("Montant", sources=["montant"], processor="Formate_montant")

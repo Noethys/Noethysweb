@@ -22,7 +22,7 @@ class Page(crud.Page):
 class Liste(Page, crud.CustomListe):
     template_name = "consommations/liste_absences.html"
 
-    filtres = ["fpresent:idindividu", "individu", "quantite", "absences"]
+    filtres = ["fpresent:idindividu", "fscolarise:idindividu", "individu", "quantite", "absences"]
     colonnes = [
         Colonne(code="individu", label="Individu", classe="CharField", label_filtre="Nom"),
         Colonne(code="quantite", label="Quantité", classe="IntegerField"),

@@ -35,7 +35,7 @@ class Liste(crud.Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:pk", 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'lot__nom']
+        filtres = ["fpresent:pk", "fscolarise:pk", 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'lot__nom']
         check = columns.CheckBoxSelectColumn(label="")
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         solde_actuel = columns.TextColumn("Solde actuel", sources=['solde_actuel'], processor='Get_solde_actuel')

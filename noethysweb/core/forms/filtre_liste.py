@@ -3,21 +3,21 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json, datetime
+from operator import itemgetter
 from django import forms
+from django.http import JsonResponse
+from django.template import Template, RequestContext
+from django.shortcuts import redirect
+from django.utils.html import escapejs
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
 from crispy_forms.bootstrap import Field, StrictButton
-from django.http import JsonResponse
-from django.template import Template, RequestContext
 from core.forms.base import FormulaireBase
-import json
-from django.utils.html import escapejs
-from core.widgets import DatePickerWidget, SelectionActivitesWidget
 from core.utils import utils_dates
 from core.models import FiltreListe
-from django.shortcuts import redirect
-from operator import itemgetter
-
+from core.widgets import DatePickerWidget, SelectionActivitesWidget
+from consommations.widgets import SelectionEcolesWidget, SelectionClassesWidget
 
 
 def Get_form_filtres(request):
@@ -86,10 +86,11 @@ def Ajouter_filtre(request):
         "SUPERIEUR": "est supérieur à", "SUPERIEUR_EGAL": "est supérieur ou égal à", "INFERIEUR": "est inférieur à", "INFERIEUR_EGAL": "est inférieur ou égal à",
         "VRAI": "est vrai", "FAUX": "est faux", "COMPRIS": "est compris entre", "INSCRIT": "est inscrit sur une sélection d'activités", "PRESENT": "est présent sur une sélection d'activités entre",
         "SANS_RESA": "est sans réservations sur une sélection d'activités entre", "EST_VIDE": "est vide", "EST_PAS_VIDE": "n'est pas vide",
+        "ECOLES": "est scolarisé sur une sélection d'écoles", "CLASSES": "est scolarisé sur une sélection de classes",
     }
 
-    if valeurs["champ"].startswith("ipresent"): valeurs["label_champ"] = "L'individu"
-    if valeurs["champ"].startswith("fpresent"): valeurs["label_champ"] = "L'un des membres de la famille"
+    if valeurs["champ"].startswith("ipresent") or valeurs["champ"].startswith("iscolarise"): valeurs["label_champ"] = "L'individu"
+    if valeurs["champ"].startswith("fpresent") or valeurs["champ"].startswith("fscolarise"): valeurs["label_champ"] = "L'un des membres de la famille"
     if dict_resultat["condition"] == "INSCRIT" and len(dict_resultat["criteres"]) == 0:
         return JsonResponse({"erreur": "Vous devez cocher au moins une ligne dans la liste"}, status=401)
     if dict_resultat["condition"] == "PRESENT" and len(dict_resultat["criteres"]) == 2:
@@ -125,6 +126,7 @@ class Formulaire(FormulaireBase, forms.Form):
     condition3 = forms.ChoiceField(label="Condition", choices=[("VRAI", "Est vrai"), ("FAUX", "Est faux")], required=False)
     condition4 = forms.ChoiceField(label="Condition", choices=[("INSCRIT", "Est inscrit sur l'une des activités suivantes"), ("PRESENT", "Est présent sur l'une des activités suivantes"), ("SANS_RESA", "Est sans réservations sur l'une des activités suivantes")], required=False)
     condition5 = forms.ChoiceField(label="Condition", choices=[("*EGAL", "Est égal à"), ("*DIFFERENT", "Est différent de"), ("*CONTIENT", "Contient"), ("*NE_CONTIENT_PAS", "Ne contient pas"), ("*EST_VIDE", "Est vide"), ("*EST_PAS_VIDE", "N'est pas vide")], required=False)
+    condition6 = forms.ChoiceField(label="Condition", choices=[("ECOLES", "Est scolarisé dans l'une des écoles suivantes"), ("CLASSES", "Est scolarisé dans l'une des classes suivantes")], required=False)
     critere_texte = forms.CharField(label="Texte", required=False)
     critere_date = forms.DateField(label="Date", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
     critere_date_min = forms.DateField(label="Date min", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
@@ -139,6 +141,8 @@ class Formulaire(FormulaireBase, forms.Form):
     critere_decimal_min = forms.DecimalField(label="Nbre min", required=False)
     critere_decimal_max = forms.DecimalField(label="Nbre max", required=False)
     critere_activites = forms.CharField(label="Activités", required=False, widget=SelectionActivitesWidget(attrs={"afficher_groupes": True}))
+    critere_ecoles = forms.CharField(label="Ecoles", required=False, widget=SelectionEcolesWidget(attrs={"name": "liste_ecoles"}))
+    critere_classes = forms.CharField(label="Classes", required=False, widget=SelectionClassesWidget(attrs={"name": "liste_classes"}))
 
     dict_types = {
         'BinaryField': {'condition': 'condition5', 'criteres': {"*EGAL": ["critere_texte"], "*DIFFERENT": ["critere_texte"], "*CONTIENT": ["critere_texte"], "*NE_CONTIENT_PAS": ["critere_texte"], "*EST_VIDE": [], "*EST_PAS_VIDE": []}},
@@ -151,7 +155,10 @@ class Formulaire(FormulaireBase, forms.Form):
         'IntegerField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"]}},
         'DecimalField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_decimal"], "DIFFERENT": ["critere_decimal"], "SUPERIEUR": ["critere_decimal"], "SUPERIEUR_EGAL": ["critere_decimal"], "INFERIEUR": ["critere_decimal"], "INFERIEUR_EGAL": ["critere_decimal"], "COMPRIS": ["critere_decimal_min", "critere_decimal_max"]}},
         'ipresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
-        'fpresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}}, }
+        'fpresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
+        'iscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_ecoles"], "CLASSES": ["critere_classes"]}},
+        'fscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_ecoles"], "CLASSES": ["critere_classes"]}},
+    }
 
     critere = forms.CharField(label="Critère", required=False)
 
@@ -173,6 +180,9 @@ class Formulaire(FormulaireBase, forms.Form):
         # Liste uniquement les activités accessibles pour l'utilisateur
         self.fields["critere_activites"].widget.request = self.request
 
+        # Date du jour
+        self.fields["critere_classes"].widget.attrs.update({"dates": [datetime.date.today()]})
+
         # Choix du champ à filtrer
         choix_champs = []
         dict_champs = {}
@@ -182,6 +192,8 @@ class Formulaire(FormulaireBase, forms.Form):
                 nom_filtre, champ = filtre.split(":")
                 if nom_filtre == "ipresent": nom_champ = "Individu : Inscrit/présent"
                 if nom_filtre == "fpresent": nom_champ = "Famille : Inscrit/présent"
+                if nom_filtre == "iscolarise": nom_champ = "Individu : Scolarisé"
+                if nom_filtre == "fscolarise": nom_champ = "Famille : Scolarisé"
                 # Mémorisation du champ
                 dict_champs[filtre] = {'type': nom_filtre, 'label': nom_champ}
                 choix_champs.append((filtre, nom_champ))
@@ -244,6 +256,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("condition3"),
             Field("condition4"),
             Field("condition5"),
+            Field("condition6"),
             Field("critere_activites"),
             Field("critere_texte"),
             Field("critere_date"),
@@ -258,6 +271,8 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("critere_decimal"),
             Field("critere_decimal_min"),
             Field("critere_decimal_max"),
+            Field("critere_ecoles"),
+            Field("critere_classes"),
             ButtonHolder(
                 Div(
                     HTML("""<button type="button" class="btn btn-primary" onclick="valider_ajout_filtre()"><i class="fa fa-check margin-r-5"></i>Valider</button>"""),
@@ -285,7 +300,7 @@ EXTRA_HTML = """
         };
     }
     
-    $("#id_condition1, #id_condition2, #id_condition3, #id_condition4, #id_condition5").on("change", function(event){
+    $("#id_condition1, #id_condition2, #id_condition3, #id_condition4, #id_condition5, #id_condition6").on("change", function(event){
         $("[id*=div_id_critere]").hide();
         var nom_champ = $("#id_champ").val();
         var type_champ = dict_champs[nom_champ].type;

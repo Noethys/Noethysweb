@@ -3,20 +3,19 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, json
+import logging, json, datetime
 logger = logging.getLogger(__name__)
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, TemplateView
 from django.urls import reverse_lazy, reverse
+from django.db.models import Q, Count, ProtectedError
+from django.contrib.admin.utils import NestedObjects
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatableView, MyMultipleDatatableView
-from django.contrib import messages
-from django.db.models import ProtectedError
-from django.http import HttpResponseRedirect
 from core.utils import utils_texte, utils_historique
-from core.models import FiltreListe, Consommation, Inscription
-from django.db.models import Q, Count
-from django.contrib.admin.utils import NestedObjects
+from core.models import FiltreListe, Consommation, Inscription, Scolarite
 
 
 class Page(CustomView):
@@ -74,8 +73,8 @@ class Liste_commun():
                 if filtre["condition"] == "VRAI": conditions &= Q(**{champ: True})
                 if filtre["condition"] == "FAUX": conditions &= Q(**{champ: False})
 
-                # Filtre Inscrit/Présent
-                if filtre["condition"] in ("INSCRIT", "PRESENT", "SANS_RESA"):
+                # Filtres spéciaux : Inscrit/Présent et Scolarisé
+                if filtre["condition"] in ("INSCRIT", "PRESENT", "SANS_RESA", "ECOLES", "CLASSES"):
                     type_champ, champ = champ.split(":")
                     type_criteres, liste_criteres = criteres[0].split(":")
                     liste_criteres = [int(x) for x in liste_criteres.split(";")]
@@ -83,6 +82,8 @@ class Liste_commun():
                     if type_criteres == "groupes_activites": condition = Q(activite__groupes_activites__in=liste_criteres)
                     if type_criteres == "activites": condition = Q(activite__in=liste_criteres)
                     if type_criteres == "groupes": condition = Q(groupe__in=liste_criteres)
+                    if type_criteres == "ecoles": condition = Q(date_debut__lte=datetime.date.today(), date_fin__gte=datetime.date.today(), ecole__in=liste_criteres)
+                    if type_criteres == "classes": condition = Q(date_debut__lte=datetime.date.today(), date_fin__gte=datetime.date.today(), classe__in=liste_criteres)
 
                     # Recherche les inscrits ou les présents
                     if filtre["condition"] == "INSCRIT":
@@ -99,6 +100,12 @@ class Liste_commun():
                         condition &= Q(date__gte=criteres[1]) & Q(date__lte=criteres[2])
                         presents = [resultat[donnee] for resultat in Consommation.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
                         resultats = [pk for pk in inscrits if pk not in presents]
+                    if filtre["condition"] == "ECOLES":
+                        donnee = "individu__rattachement__famille" if type_champ == "fscolarise" else "individu"
+                        resultats = [resultat[donnee] for resultat in Scolarite.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
+                    if filtre["condition"] == "CLASSES":
+                        donnee = "individu__rattachement__famille" if type_champ == "fscolarise" else "individu"
+                        resultats = [resultat[donnee] for resultat in Scolarite.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
 
                     # Création de la condition
                     conditions &= Q(**{champ + "__in": resultats})

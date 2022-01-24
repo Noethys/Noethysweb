@@ -20,7 +20,7 @@ class Page(crud.Page):
 class Liste(Page, crud.CustomListe):
     template_name = "cotisations/liste_cotisations_manquantes.html"
 
-    filtres = ["fpresent:idfamille", "famille"]
+    filtres = ["fpresent:idfamille", "fscolarise:idfamille", "famille"]
     colonnes = [
         Colonne(code="famille", label="Famille", classe="CharField", label_filtre="Famille"),
         Colonne(code="pieces", label="Détail des adhésions", classe="CharField", label_filtre="Détail"),

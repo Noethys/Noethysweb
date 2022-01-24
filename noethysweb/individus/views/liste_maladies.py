@@ -33,7 +33,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["idindividu", "ipresent:pk", "nom", "prenom", "maladies__nom"]
+        filtres = ["idindividu", "ipresent:pk", "iscolarise:pk", "nom", "prenom", "maladies__nom"]
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         individu = columns.CompoundColumn("Individu", sources=['nom', 'prenom'])
         maladies = columns.TextColumn("Maladies", sources=["maladies__nom"], processor='Get_maladies')

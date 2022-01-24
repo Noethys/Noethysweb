@@ -181,11 +181,12 @@ class SelectionEcolesWidget(Widget):
         context = dict(self.attrs.items())
         if attrs is not None:
             context.update(attrs)
-        context['name'] = name
+        context['name'] = self.attrs.get("name", name)
 
         # Récupère les sélections initiales
         context['selections'] = []
         if value:
+            value = value.replace("ecoles:", "")
             context['selections'] = [int(id) for id in value.split(";")]
             context['coche_tout'] = False
 
@@ -211,11 +212,12 @@ class SelectionClassesWidget(Widget):
         context = dict(self.attrs.items())
         if attrs is not None:
             context.update(attrs)
-        context['name'] = name
+        context['name'] = self.attrs.get("name", name)
 
         # Récupère les sélections initiales
         context['selections'] = []
         if value:
+            value = value.replace("classes:", "")
             context['selections'] = [int(id) for id in value.split(";")]
             context['coche_tout'] = False
 
@@ -226,7 +228,7 @@ class SelectionClassesWidget(Widget):
         # Branches 2
         context['dict_branches2'] = {}
         if liste_dates:
-            for classe in Classe.objects.select_related('ecole').filter(date_debut__lte=max(liste_dates), date_fin__gte=min(liste_dates)).order_by("date_debut"):
+            for classe in Classe.objects.select_related('ecole').filter(date_debut__lte=max(liste_dates), date_fin__gte=min(liste_dates)).order_by("date_debut", "nom"):
                 context['dict_branches2'].setdefault(classe.ecole_id, [])
                 context['dict_branches2'][classe.ecole_id].append({"pk": classe.pk, "label": classe.nom})
 

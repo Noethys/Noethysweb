@@ -20,7 +20,7 @@ class Page(crud.Page):
 class Liste(Page, crud.CustomListe):
     template_name = "individus/liste_quotients.html"
 
-    filtres = ["fpresent:idfamille", "famille", "autorisation_cafpro", "qf", "revenu", "date_debut", "date_fin", "observations"]
+    filtres = ["fpresent:idfamille", "fscolarise:idfamille", "famille", "autorisation_cafpro", "qf", "revenu", "date_debut", "date_fin", "observations"]
     colonnes = [
         Colonne(code="famille", label="Famille", classe="CharField", label_filtre="Famille"),
         Colonne(code="autorisation_cafpro", label="Autorisation CAF-CDAP", classe="BooleanField"),

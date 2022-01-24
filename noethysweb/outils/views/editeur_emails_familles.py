@@ -30,7 +30,7 @@ class Liste(Page_destinataires, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:pk", "idfamille", "nom", "rue_resid", "cp_resid", "ville_resid", "mail"]
+        filtres = ["fpresent:pk", "fscolarise:pk", "idfamille", "nom", "rue_resid", "cp_resid", "ville_resid", "mail"]
         check = columns.CheckBoxSelectColumn(label="")
         mail = columns.TextColumn("Rue", processor='Get_mail')
         rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')

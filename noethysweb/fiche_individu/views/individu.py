@@ -44,7 +44,9 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['idrattachement', 'individu__pk', "individu__nom", "individu__prenom", "famille__nom", "individu__date_naiss", "individu__rue_resid", "individu__cp_resid", "individu__ville_resid"]
+        filtres = ['idrattachement', "ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille",
+                   'individu__pk', "individu__nom", "individu__prenom", "famille__nom", "individu__date_naiss", "individu__rue_resid",
+                   "individu__cp_resid", "individu__ville_resid"]
         idindividu = columns.IntegerColumn("ID", sources=['individu__pk'])
         nom = columns.TextColumn("Nom", sources=['individu__nom'])
         prenom = columns.TextColumn("Prénom", sources=['individu__prenom'])

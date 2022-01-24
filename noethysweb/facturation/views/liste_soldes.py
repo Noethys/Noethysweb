@@ -16,7 +16,7 @@ class Page(crud.Page):
 
 
 class Liste(Page, crud.CustomListe):
-    filtres = ["fpresent:idfamille", "famille", "solde", "prestations", "reglements"]
+    filtres = ["fpresent:idfamille", "fscolarise:idfamille", "famille", "solde", "prestations", "reglements"]
     colonnes = [
         Colonne(code="famille", label="Famille", classe="CharField", label_filtre="Nom"),
         Colonne(code="solde", label="Solde", classe="DecimalField"),

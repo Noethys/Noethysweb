@@ -30,7 +30,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:prestation__individu", "fpresent:famille", "iddeduction", "date", "label", "famille__nom", "individu__nom", "montant"]
+        filtres = ["ipresent:prestation__individu", "fpresent:famille", "iscolarise:prestation__individu", "fscolarise:famille", "iddeduction", "date", "label", "famille__nom", "individu__nom", "montant"]
 
         activite = columns.TextColumn("Activité", sources=['prestation__activite__nom'])
         individu = columns.CompoundColumn("Individu", sources=['prestation__individu__nom', 'prestation__individu__prenom'])

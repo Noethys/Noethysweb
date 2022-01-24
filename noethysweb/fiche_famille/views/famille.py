@@ -111,7 +111,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:pk", "idfamille", "nom", "rue_resid", "cp_resid", "ville_resid"]
+        filtres = ["fpresent:pk", "fscolarise:pk", "idfamille", "nom", "rue_resid", "cp_resid", "ville_resid"]
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
         cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')

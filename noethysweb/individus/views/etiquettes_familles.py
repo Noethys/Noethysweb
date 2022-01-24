@@ -23,7 +23,7 @@ class Liste(etiquettes.Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:pk", "idfamille", "nom", "rue_resid", "cp_resid", "ville_resid"]
+        filtres = ["fpresent:pk", "fscolarise:pk", "idfamille", "nom", "rue_resid", "cp_resid", "ville_resid"]
         check = columns.CheckBoxSelectColumn(label="")
 
         class Meta:

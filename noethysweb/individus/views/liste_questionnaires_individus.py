@@ -17,7 +17,7 @@ class Page(crud.Page):
 
 class Liste(Page, liste_questionnaires_base.Liste):
     categorie_question = "individu"
-    filtres = ["ipresent:individu", "individu__nom", "individu__prenom", "reponse"]
+    filtres = ["ipresent:individu", "iscolarise:individu", "individu__nom", "individu__prenom", "reponse"]
     colonnes = [
         Colonne(code="individu__nom", label="Nom", classe="CharField", label_filtre="Nom"),
         Colonne(code="individu__prenom", label="Prénom", classe="CharField", label_filtre="Prénom"),

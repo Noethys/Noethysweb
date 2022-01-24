@@ -56,7 +56,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:individu", "idinformation", "categorie__nom", "individu__nom", "individu__prenom", "intitule", "description"]
+        filtres = ["fpresent:individu", "fscolarise:individu", "idinformation", "categorie__nom", "individu__nom", "individu__prenom", "intitule", "description"]
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         categorie = columns.CompoundColumn("Catégorie", sources=['categorie__nom'])
         individu = columns.CompoundColumn("Individu", sources=['individu__nom', 'individu__prenom'])
