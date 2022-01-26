@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy
+from django.db.models import Q, Count
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import TypeCotisation
@@ -29,7 +30,7 @@ class Liste(Page, crud.Liste):
     model = TypeCotisation
 
     def get_queryset(self):
-        return TypeCotisation.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure())
+        return TypeCotisation.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure()).annotate(nbre_cotisations=Count("cotisation"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -40,14 +41,14 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ['idtype_cotisation', 'nom', 'type', 'carte', 'defaut']
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         carte = columns.TextColumn("Carte", sources="carte", processor='Get_carte')
         defaut = columns.TextColumn("Défaut", sources="defaut", processor='Get_default')
+        nbre_cotisations = columns.TextColumn("Adhésions associées", sources="nbre_cotisations")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idtype_cotisation', 'nom', 'type', 'carte', 'defaut']
+            columns = ['idtype_cotisation', 'nom', 'type', 'carte', 'defaut', 'nbre_cotisations']
             ordering = ['nom']
 
         def Get_carte(self, instance, **kwargs):

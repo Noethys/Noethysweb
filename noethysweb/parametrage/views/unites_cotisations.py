@@ -4,7 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
-from django.db.models import Q
+from django.db.models import Q, Count
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import UniteCotisation, TypeCotisation
@@ -65,7 +65,7 @@ class Liste(Page, crud.Liste):
     template_name = "core/crud/liste_avec_categorie.html"
 
     def get_queryset(self):
-        return UniteCotisation.objects.filter(Q(type_cotisation=self.Get_categorie()) & self.Get_filtres("Q"))
+        return UniteCotisation.objects.filter(Q(type_cotisation=self.Get_categorie()) & self.Get_filtres("Q")).annotate(nbre_cotisations=Count("cotisation"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -76,16 +76,16 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ['idunite', 'nom', 'type_cotisation__nom', 'montant', 'defaut']
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         duree_validite = columns.DisplayColumn("Validité", sources="duree_validite", processor='Get_validite')
         type_cotisation = columns.TextColumn("Type d'adhésion", sources=["type_cotisation__nom"])
         defaut = columns.TextColumn("Défaut", sources="defaut", processor='Get_default')
         montant = columns.TextColumn("Tarif", sources="tarif", processor='Get_montant')
+        nbre_cotisations = columns.TextColumn("Adhésions associées", sources="nbre_cotisations")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idunite_cotisation', 'nom', 'type_cotisation', 'duree_validite', 'montant', 'defaut']
+            columns = ['idunite_cotisation', 'nom', 'type_cotisation', 'duree_validite', 'montant', 'defaut', 'nbre_cotisations']
             ordering = ['nom']
 
         def Get_validite(self, instance, **kwargs):
