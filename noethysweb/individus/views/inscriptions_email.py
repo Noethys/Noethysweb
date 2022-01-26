@@ -31,7 +31,7 @@ def Impression_pdf(request):
     dict_options = form_modele.cleaned_data
 
     # Création des PDF
-    from individus.utils import utils_inscriptions
+    from fiche_individu.utils import utils_inscriptions
     inscription = utils_inscriptions.Inscriptions()
     resultat = inscription.Impression(liste_inscriptions=inscriptions_cochees, dict_options=dict_options, mode_email=True)
     if not resultat:
@@ -103,11 +103,12 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille", 'idinscription', 'famille__nom', 'individu__nom', 'individu__prenom', 'date_debut', 'date_fin', 'activite__nom', 'groupe__nom', 'statut', 'categorie_tarif__nom']
-
         check = columns.CheckBoxSelectColumn(label="")
         activite = columns.TextColumn("Activité", sources=['activite__nom'])
         groupe = columns.TextColumn("Groupe", sources=['groupe__nom'])
         categorie_tarif = columns.TextColumn("Catégorie de tarif", sources=['categorie_tarif__nom'])
+        individu = columns.CompoundColumn("Individu", sources=['individu__nom', 'individu__prenom'])
+        famille = columns.TextColumn("Famille", sources=['famille__nom'])
 
         class Meta:
             structure_template = MyDatatable.structure_template
