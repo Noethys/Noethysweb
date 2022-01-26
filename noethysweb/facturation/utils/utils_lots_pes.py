@@ -11,7 +11,10 @@ import os, calendar, datetime, shutil, uuid
 
 
 def ConvertToTexte(valeur):
-    return '"%s"' % valeur
+    valeur = '"%s"' % valeur
+    valeur = valeur.replace("\n", " ")
+    valeur = valeur.replace("\r", " ")
+    return valeur
 
 
 class Exporter():
