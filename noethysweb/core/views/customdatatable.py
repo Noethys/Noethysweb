@@ -42,7 +42,10 @@ class CustomDatatable():
 
                         # Conversion
                         if colonne.classe == "DecimalField":
-                            valeur = Decimal(valeur)
+                            try:
+                                valeur = Decimal(valeur)
+                            except:
+                                valeur = 0
                             criteres = [Decimal(critere) for critere in criteres]
 
                         if colonne.classe == "FloatField":
