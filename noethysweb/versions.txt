@@ -1,3 +1,10 @@
+Version 1.0.5.5 (27/01/2022) :
+
+- Affichage du nombre de cotisations associées dans le paramétrage des cotisations
+- Correction de la recherche rapide dans la liste des inscriptions
+- Correction du filtre décimal pour customdatatable
+- Correction du saut à la ligne dans l'export pes
+
 Version 1.0.5.4 (24/01/2022) :
 
 - Ajout du filtre de liste Scolarité
