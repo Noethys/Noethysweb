@@ -32,7 +32,7 @@ from reportlab.graphics import renderPDF
 from reportlab.platypus.flowables import DocAssign, Flowable
 
 
-def Get_motscles_defaut():
+def Get_motscles_defaut(request=None):
     organisateur = cache.get('organisateur', None)
     if not organisateur:
         organisateur = cache.get_or_set('organisateur', Organisateur.objects.filter(pk=1).first())
@@ -49,6 +49,11 @@ def Get_motscles_defaut():
         "{ORGANISATEUR_AGREMENT}": organisateur.num_agrement,
         "{ORGANISATEUR_SIRET}": organisateur.num_siret,
         "{ORGANISATEUR_APE}": organisateur.code_ape,
+        "{UTILISATEUR_NOM_COMPLET}": request.user.get_full_name() if request else "",
+        "{UTILISATEUR_NOM}": request.user.last_name if request else "",
+        "{UTILISATEUR_PRENOM}": request.user.first_name if request else "",
+        "{DATE_LONGUE}": utils_dates.DateComplete(datetime.date.today()),
+        "{DATE_COURTE}": utils_dates.ConvertDateToFR(datetime.date.today()),
     }
     return dict_valeurs
 
@@ -178,12 +183,13 @@ class Bookmark(Flowable):
 
 
 class Impression():
-    def __init__(self, titre="", dict_donnees={}, dict_options={}, IDmodele=None, taille_page=None, generation_auto=True):
+    def __init__(self, titre="", dict_donnees={}, dict_options={}, IDmodele=None, taille_page=None, generation_auto=True, request=None):
         self.titre = titre
         self.IDmodele = IDmodele
         self.dict_options = dict_options
         self.taille_page = taille_page
         self.modele_doc = None
+        self.request = request
         if generation_auto:
             self.Generation_document(dict_donnees=dict_donnees)
 
@@ -192,7 +198,7 @@ class Impression():
         self.erreurs = []
 
         # Rajoute les mots-clés par défaut au dict_donnees
-        motscles_defaut = Get_motscles_defaut()
+        motscles_defaut = Get_motscles_defaut(request=self.request)
         self.dict_donnees.update(motscles_defaut)
         for key, valeurs in self.dict_donnees.items():
             if isinstance(key, int):
@@ -234,8 +240,6 @@ class Impression():
 
         # Prépare la story
         self.story = []
-
-        logger.debug("Préparation de la story...")
 
         # Dessine le doc
         self.Draw()

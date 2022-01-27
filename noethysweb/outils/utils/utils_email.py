@@ -130,8 +130,8 @@ def Envoyer_model_mail(idmail=None, request=None):
         "{UTILISATEUR_NOM}": request.user.last_name if request else "",
         "{UTILISATEUR_PRENOM}": request.user.first_name if request else "",
         "{UTILISATEUR_SIGNATURE}": signature,
-        "{DATE_COURTE}": utils_dates.DateComplete(datetime.date.today()),
-        "{DATE_LONGUE}": utils_dates.ConvertDateToFR(datetime.date.today()),
+        "{DATE_LONGUE}": utils_dates.DateComplete(datetime.date.today()),
+        "{DATE_COURTE}": utils_dates.ConvertDateToFR(datetime.date.today()),
     }
 
     # Récupère la liste des destinataires
