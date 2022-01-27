@@ -1,3 +1,7 @@
+Version 1.0.5.6 (27/01/2022) :
+
+- Petites corrections diverses
+
 Version 1.0.5.5 (27/01/2022) :
 
 - Affichage du nombre de cotisations associées dans le paramétrage des cotisations
