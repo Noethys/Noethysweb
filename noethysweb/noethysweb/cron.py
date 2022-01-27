@@ -18,7 +18,7 @@ def Test():
 
 def Sauvegarder_db():
     """ Sauvegarde de la base de données """
-    logger.debug("%s : Lancement de dbbackup" % datetime.datetime.now())
+    logger.debug("%s : Lancement de dbbackup..." % datetime.datetime.now())
     from core.utils import utils_gnupg
     utils_gnupg.Importation_cles()
     call_command("dbbackup", "--encrypt", verbosity=3)
@@ -27,8 +27,19 @@ def Sauvegarder_db():
 
 def Sauvegarder_media():
     """ Sauvegarde du répertoire media """
-    logger.debug("%s : Lancement de mediabackup" % datetime.datetime.now())
+    logger.debug("%s : Lancement de mediabackup..." % datetime.datetime.now())
     from core.utils import utils_gnupg
     utils_gnupg.Importation_cles()
     call_command("mediabackup", "--encrypt", verbosity=3)
     logger.debug("Fin de la sauvegarde media")
+
+
+def Traiter_attentes():
+    logger.debug("%s : Lancement du traitement des attentes..." % datetime.datetime.now())
+    from consommations.utils import utils_traitement_attentes
+    utils_traitement_attentes.Traiter_attentes(request=None)
+
+
+def Vider_rep_temp():
+    logger.debug("%s : Lancement du vidage du répertoire temp..." % datetime.datetime.now())
+    call_command("reset_rep_temp")
