@@ -159,7 +159,7 @@ class Case_base {
         $.each(dict_cases, function(key, valeurs) {
             if (valeurs.date === self.date && valeurs.inscription === self.inscription) {
                 for (var conso of valeurs.consommations) {
-                    if (jQuery.inArray(conso.etat, ["reservation", "present"]) !== -1 && jQuery.inArray(valeurs.unite, unites_incompatibles) !== -1) {
+                    if (jQuery.inArray(conso.etat, ["reservation", "present", "attente"]) !== -1 && jQuery.inArray(valeurs.unite, unites_incompatibles) !== -1) {
                         toastr.error("L'unité " + dict_unites[self.unite].nom + " est incompatible avec l'unité " + dict_unites[valeurs.unite].nom);
                         resultat = false;
                         return false;

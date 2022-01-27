@@ -5,19 +5,19 @@
 
 import logging, datetime, json
 logger = logging.getLogger(__name__)
-from core.models import Activite, Famille, Individu, Mail, ModeleEmail, Destinataire, AdresseMail, Consommation, Prestation, Vacance
+from core.models import Activite, Famille, Individu, Mail, ModeleEmail, Destinataire, AdresseMail
 from core.utils import utils_dates, utils_portail
 from outils.utils import utils_email
 from consommations.views.liste_attente import Get_resultats
 from consommations.utils.utils_grille_virtuelle import Grille_virtuelle
 
 
-def Traiter_attentes(request=None):
+def Traiter_attentes(request=None, test=False):
     logger.debug("Recherche de places en attente à réattribuer...")
     date_min = datetime.date.today()
     date_max = date_min + datetime.timedelta(365)
 
-    # Recherche les places dispnoibles
+    # Recherche les places disponibles
     liste_resultats = Get_resultats(parametres={
         "donnees": "traitement_attente",
         "date_min": date_min,
@@ -54,12 +54,16 @@ def Traiter_attentes(request=None):
     if idadresse_exp:
         adresse_exp = AdresseMail.objects.get(pk=idadresse_exp)
     else:
-        logger.debug("Aucune adresse d'expédition paramétrée pour l'envoi des places disponibles.")
+        logger.error("Aucune adresse d'expédition paramétrée pour l'envoi des places disponibles.")
         return
 
     # Création du mail
     logger.debug("Création du mail des places en attente à réattribuer...")
     modele_email = ModeleEmail.objects.filter(categorie="portail_places_disponibles", defaut=True).first()
+    if not modele_email:
+        logger.error("Erreur : Aucune modèle d'email de catégorie 'portail_places_disponibles' n'a été paramétré !")
+        return
+
     mail = Mail.objects.create(
         categorie="portail_places_disponibles",
         objet=modele_email.objet if modele_email else "",
@@ -91,17 +95,20 @@ def Traiter_attentes(request=None):
 
     # Envoi du mail
     logger.debug("Envoi du mail de réattribution des places en attente.")
-    utils_email.Envoyer_model_mail(idmail=mail.pk, request=request)
+    if not test:
+        utils_email.Envoyer_model_mail(idmail=mail.pk, request=request)
 
     # Transformation des consommations Attente en Réservation
-    logger.debug("Tranformation des consommation attente en réservation...")
+    logger.debug("Tranformation des consommations attente en réservation...")
     for idfamille, dict_individus in dict_resultats_familles.items():
         for idindividu, dict_dates in dict_individus.items():
             for date, liste_temp in dict_dates.items():
                 for dict_temp in liste_temp:
                     grille = Grille_virtuelle(request=request, idfamille=idfamille, idindividu=idindividu, idactivite=dict_temp["idactivite"], date_min=date, date_max=date)
+                    logger.debug("Tranformation des consommations : %s..." % str(dict_temp["consommations"]))
                     for idconso in dict_temp["consommations"]:
                         grille.Modifier(criteres={"idconso": idconso, "etat": "attente"}, modifications={"etat": "reservation"})
-                    grille.Enregistrer()
+                    if not test:
+                        grille.Enregistrer()
 
     logger.debug("Fin de la procédure de réattribution des places en attente.")
