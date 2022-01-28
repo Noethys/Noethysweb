@@ -179,7 +179,7 @@ def Get_data(parametres={}, request=None):
             capacite_max = evenement.capacite_max if evenement.capacite_max else 0
             evenement.prises = dict_places.get(key + "_%d" % evenement.pk, 0)
             evenement.restantes = capacite_max - evenement.prises
-            evenement.classe = "disponible" if evenement.restantes > 0 else "complet"
+            evenement.classe = "disponible" if evenement.restantes >= 0 else "complet"
             if mode == "places_initiales": evenement.valeur = capacite_max
             if mode == "places_prises": evenement.valeur = evenement.prises
             if mode == "places_restantes": evenement.valeur = evenement.restantes
@@ -223,7 +223,7 @@ def Get_data(parametres={}, request=None):
                 restantes = initiales - prises
 
                 seuil_alerte = dict_seuils[colonne["unite"].pk]
-                if restantes < 0: classe = "complet"
+                if restantes <= 0: classe = "complet"
                 elif 0 < restantes < seuil_alerte: classe = "dernieresplaces"
                 else: classe = "disponible"
                 if not initiales: classe = ""
