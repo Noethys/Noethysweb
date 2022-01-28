@@ -3,13 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from core.models import Activite, Ouverture, Remplissage, UniteRemplissage, Vacance, Consommation, Evenement, Groupe
-from core.views.base import CustomView
-from django.views.generic import TemplateView
-from core.utils import utils_dates, utils_parametres
 import datetime, json
 from django.db.models import Q, Count
 from django.shortcuts import render
+from django.views.generic import TemplateView
+from core.models import Activite, Ouverture, Remplissage, UniteRemplissage, Vacance, Consommation, Evenement, Groupe
+from core.views.base import CustomView
+from core.utils import utils_dates, utils_parametres
 
 
 def Get_activites(request=None):
@@ -166,6 +166,11 @@ def Get_data(parametres={}, request=None):
             for unite in dict_unites_remplissage.get(activite, []):
                 dict_colonnes["unites"].append({"unite": unite, "groupe": groupe, "activite": activite})
 
+    # Récupération des seuils d'alerte
+    dict_seuils = {}
+    for unite_remplissage in liste_unites_remplissage:
+        dict_seuils[unite_remplissage.pk] = unite_remplissage.seuil_alerte
+
     # Importation des événements
     liste_evenements = Evenement.objects.filter(conditions_periodes & Q(activite__in=liste_activites)).order_by("date", "heure_debut")
 
@@ -179,7 +184,10 @@ def Get_data(parametres={}, request=None):
             capacite_max = evenement.capacite_max if evenement.capacite_max else 0
             evenement.prises = dict_places.get(key + "_%d" % evenement.pk, 0)
             evenement.restantes = capacite_max - evenement.prises
-            evenement.classe = "disponible" if evenement.restantes >= 0 else "complet"
+            seuil_alerte = dict_seuils[id_unite_remplissage]
+            if evenement.restantes <= 0: evenement.classe = "complet"
+            elif 0 < evenement.restantes < seuil_alerte: evenement.classe = "dernieresplaces"
+            else: evenement.classe = "disponible"
             if mode == "places_initiales": evenement.valeur = capacite_max
             if mode == "places_prises": evenement.valeur = evenement.prises
             if mode == "places_restantes": evenement.valeur = evenement.restantes
@@ -188,11 +196,6 @@ def Get_data(parametres={}, request=None):
                 if mode in ("places_initiales", "places_restantes"):
                     evenement.valeur = ""
             dict_evenements[key].append(evenement)
-
-    # Récupération des seuils d'alerte
-    dict_seuils = {}
-    for unite_remplissage in liste_unites_remplissage:
-        dict_seuils[unite_remplissage.pk] = unite_remplissage.seuil_alerte
 
     dict_cases = {}
     for date in liste_dates:
@@ -246,7 +249,6 @@ def Get_data(parametres={}, request=None):
     return data
 
 
-
 class View(CustomView, TemplateView):
     menu_code = "suivi_consommations"
     template_name = "consommations/suivi_consommations_view.html"
@@ -256,4 +258,3 @@ class View(CustomView, TemplateView):
         context['page_titre'] = "Suivi des consommations"
         context['suivi_consommations_parametres'] = Get_parametres(request=self.request)
         return context
-

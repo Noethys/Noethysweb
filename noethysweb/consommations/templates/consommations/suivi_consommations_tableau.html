@@ -34,20 +34,22 @@
 
                 {% if key_case in data_suivi_consommations.dict_cases %}
                     {% with data_suivi_consommations.dict_cases|get_item:key_case as info_case %}
-                        <td class="case ouvert {{ info_case.classe }}" id="{{ key_case }}">
-                            {% if info_case.evenements %}
+                        {% if info_case.evenements %}
+                            <td class="case ouvert {{ info_case.classe }}" id="{{ key_case }}">
                                 <table class='table table_evenements'><tbody><tr>
                                     {% for evenement in info_case.evenements %}
-                                        <td class='case ouvert {{ evenement.classe }}' id='event_{{ key_case }}_{{ evenement_pk }}'>
+                                        <td class="case ouvert {{ evenement.classe }}" id="event_{{ key_case }}_{{ evenement_pk }}" title="Places initiales : {{ evenement.capacite_max|default:"---" }}&#013;Places prises : {{ evenement.prises }}&#013;Places restantes : {{ evenement.restantes }}">
                                             <span style="font-size: 11px;">{{ evenement.nom|truncatechars:15 }}</span><br>
                                             <span>{{ evenement.valeur }}</span>
                                         </td>
                                     {% endfor %}
                                 </tr></tbody></table>
-                            {% else %}
+                            </td>
+                        {% else %}
+                            <td class="case ouvert {{ info_case.classe }}" id="{{ key_case }}" title="Places initiales : {{ info_case.initiales }}&#013;Places prises : {{ info_case.prises }}&#013;Places restantes : {{ info_case.restantes }}">
                                 {{ info_case|get_item:'valeur' }}
-                            {% endif %}
-                        </td>
+                            </td>
+                        {% endif %}
                     {% endwith %}
                 {% else %}
                     <td class="case {{ unite.type|lower }} fermeture"></td>
