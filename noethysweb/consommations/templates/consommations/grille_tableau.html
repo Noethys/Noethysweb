@@ -55,7 +55,7 @@
         {% if data.mode == "date" or data.mode == "pointeuse" %}var url_annuler = "{% url 'consommations_toc' %}";{% endif %}
         {% if data.mode == "individu" %}var url_annuler = "{% url 'famille_resume' idfamille=idfamille %}";{% endif %}
 
-        {# Tranformation de la liste des groupes en dict #}
+        {# Transformation de la liste des groupes en dict #}
         var dict_groupes = {};
         liste_groupes.forEach(function(groupe) {
             dict_groupes[groupe.pk] = groupe.fields;
