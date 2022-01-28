@@ -729,21 +729,26 @@ class Case_event extends Case_standard {
         var nbre_places_prises = 0;
         var key = this.date + "_" + this.unite + "_" + this.groupe + "_" + this.evenement.pk;
         if (key in dict_places_prises) {
-            var nbre_places_prises = dict_places_prises[key];
-        } else {
-            var nbre_places_prises = 0;
+            nbre_places_prises = dict_places_prises[key];
         }
 
         if (capacite_max) {
             // Calcule le nombre de places disponibles
             var nbre_places_restantes = capacite_max - nbre_places_prises;
 
-            // MAJ de l'affichage de la couleur de fond
-            if (nbre_places_restantes > 0) {
-                var klass = "disponible";
-            } else {
-                var klass = "complet";
+            // Recherche le seuil d'alerte
+            var liste_seuils = [];
+            var seuil_alerte = null;
+            for (var idunite_remplissage of dict_unites[this.unite].unites_remplissage) {
+                liste_seuils.push(dict_unites_remplissage[idunite_remplissage]["seuil_alerte"]);
             };
+            if (liste_seuils.length > 0) {seuil_alerte = Math.min.apply(null, liste_seuils)};
+
+            // MAJ de l'affichage de la couleur de fond
+            var klass = null;
+            if (nbre_places_restantes > seuil_alerte) {klass = "disponible"};
+            if ((nbre_places_restantes > 0) && (nbre_places_restantes <= seuil_alerte)) {klass = "dernieresplaces"};
+            if (nbre_places_restantes <= 0) {klass = "complet"};
 
             if (!$("#" + this.key).hasClass(klass)) {
                 $("#" + this.key).removeClass("disponible dernieresplaces complet");
@@ -1055,7 +1060,6 @@ function maj_remplissage(date) {
     $.each(dict_cases, function (key, case_tableau) {
         if (!(case_tableau.type_case === "evenement") && !(case_tableau.type_case === "multi")) {
             for (var conso of case_tableau.consommations) {
-
                 // Mémorise les places pour chaque conso
                 if (conso.etat === "reservation" || conso.etat === "present") {
                     var key = conso.date + "_" + conso.unite + "_" + conso.groupe;

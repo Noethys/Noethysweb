@@ -180,6 +180,10 @@ def Get_generic_data(data={}):
         key = "%s_%d_%d" % (p["date"], p["unite"], p["groupe"])
         quantite = p["nbre"] * p["quantite"] if p["quantite"] else p["nbre"]
         dict_places[key] = quantite
+        if p["evenement"]:
+            key += "_%d" % p["evenement"]
+            dict_places[key] = dict_places.get(key, 0) + quantite
+
     data['dict_places_json'] = mark_safe(json.dumps(dict_places))
 
     # Importation des groupes
