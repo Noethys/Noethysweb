@@ -193,6 +193,7 @@ def Get_data(parametres={}, request=None):
             if mode == "places_restantes": evenement.valeur = evenement.restantes
             if not evenement.capacite_max:
                 evenement.classe = ""
+                evenement.restantes = None
                 if mode in ("places_initiales", "places_restantes"):
                     evenement.valeur = ""
             dict_evenements[key].append(evenement)

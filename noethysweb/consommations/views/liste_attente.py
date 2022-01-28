@@ -3,17 +3,17 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
-from core.views.base import CustomView
-from django.views.generic import TemplateView
-from core.utils import utils_dates, utils_infos_individus, utils_dictionnaires
-from consommations.forms.liste_attente import Formulaire
-from core.models import Unite, Activite, Evenement, Consommation, Groupe
-from django.db.models import Q
 import json, datetime
-from consommations.views import suivi_consommations
+from django.urls import reverse_lazy, reverse
+from django.views.generic import TemplateView
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.core.exceptions import PermissionDenied
+from core.views.base import CustomView
+from core.utils import utils_dates, utils_infos_individus, utils_dictionnaires
+from core.models import Unite, Activite, Evenement, Consommation, Groupe
+from consommations.views import suivi_consommations
+from consommations.forms.liste_attente import Formulaire
 
 
 def Traitement_automatique(request):
@@ -138,7 +138,8 @@ def Get_resultats(parametres={}, etat="attente", request=None):
 
         dictTemp = {"IDconso": conso.pk, "IDindividu": conso.individu_id, "IDactivite": conso.activite_id, "date": conso.date, "IDunite": conso.unite_id,
                     "IDgroupe": conso.groupe_id, "etat": conso.etat, "date_saisie": conso.date_saisie, "nomUnite": conso.unite.nom, "ordreUnite": conso.unite.ordre,
-                    "IDfamille": conso.inscription.famille_id, "IDevenement": conso.evenement_id, "nomEvenement": conso.evenement.nom if conso.evenement else None}
+                    "IDfamille": conso.inscription.famille_id, "IDevenement": conso.evenement_id, "nom_activite": conso.activite.nom,
+                    "nomEvenement": conso.evenement.nom if conso.evenement else None}
 
         dictConso[conso.date][conso.activite_id][conso.groupe_id][conso.evenement_id][conso.individu_id].append(dictTemp)
 
@@ -185,7 +186,11 @@ def Get_resultats(parametres={}, etat="attente", request=None):
 
             for IDgroupe in listeGroupes:
                 id_groupe = "%s_groupe_%d" % (date, IDgroupe)
-                liste_resultats.append({"id": id_groupe, "pid": id_activite, "type": "groupe", "label": dictGroupes[IDgroupe], "unites": "", "date_saisie": "", "action": ""})
+                if len(listeActivites) > 1:
+                    label_groupe = dictGroupes[IDgroupe]
+                else:
+                    label_groupe = "%s - %s" % (dictActivites[IDactivite], dictGroupes[IDgroupe])
+                liste_resultats.append({"id": id_groupe, "pid": id_activite, "type": "groupe", "label": label_groupe, "unites": "", "date_saisie": "", "action": ""})
 
                 # Parcourt les évènements
                 for IDevenement, dictTemp in dictConso[date][IDactivite][IDgroupe].items():
@@ -216,7 +221,6 @@ def Get_resultats(parametres={}, etat="attente", request=None):
                         texteUnites = ""
                         dateSaisie = None
                         placeDispo = True
-                        listePlaces = []
                         listeIDunite = []
                         listeIDconso = []
                         for dictUnite in dictConso[date][IDactivite][IDgroupe][IDevenement][IDindividu]:
@@ -225,22 +229,37 @@ def Get_resultats(parametres={}, etat="attente", request=None):
                             date_saisie = dictUnite["date_saisie"]
                             nomUnite = dictUnite["nomUnite"]
                             if IDevenement != None:
-                                nomUnite += " (%s)" % dictEvenements[IDevenement]
+                                nomUnite = dictEvenements[IDevenement]
                             texteUnites += nomUnite + " + "
                             if dateSaisie == None or date_saisie < dateSaisie:
                                 dateSaisie = date_saisie
 
                             # Etat des places
-                            key_case = "%s_%s_%s" % (date, IDunite, IDgroupe)
-                            case = data_remplissage["dict_cases"].get(key_case)
-                            if case:
-                                nbrePlacesRestantes = case["restantes"]
-                                if IDunite in data_remplissage["dict_unites_remplissage_unites"]:
-                                    for IDuniteRemplissage in data_remplissage["dict_unites_remplissage_unites"][IDunite]:
+                            listePlacesRestantes = []
+                            if IDunite in data_remplissage["dict_unites_remplissage_unites"]:
+                                for IDuniteRemplissage in data_remplissage["dict_unites_remplissage_unites"][IDunite]:
+
+                                    # Récupère les places restantes du suivi des conso
+                                    key_unite_remplissage = "%s_%s_%s" % (date, IDuniteRemplissage, IDgroupe)
+                                    dict_places_unite_remplissage = data_remplissage["dict_cases"].get(key_unite_remplissage, None)
+
+                                    # Enlève les places réattribuées
+                                    if dict_places_unite_remplissage:
+                                        nbre_places_restantes = None
+                                        if IDevenement:
+                                            for evenement in dict_places_unite_remplissage["evenements"]:
+                                                if evenement.pk == IDevenement:
+                                                    nbre_places_restantes = evenement.restantes
+                                        else:
+                                            nbre_places_restantes = dict_places_unite_remplissage["restantes"]
+
                                         key = (date, IDactivite, IDgroupe, IDuniteRemplissage, IDevenement)
-                                        nbrePlacesRestantes -= dictPlacesRestantes.get(key, 0)
-                                if nbrePlacesRestantes <= 0:
-                                    placeDispo = False
+                                        if nbre_places_restantes is not None:
+                                            nbre_places_restantes -= dictPlacesRestantes.get(key, 0)
+                                            listePlacesRestantes.append(nbre_places_restantes)
+
+                            if listePlacesRestantes and min(listePlacesRestantes) <= 0:
+                                placeDispo = False
 
                         # S'il reste finalement une place dispo, on change le nbre de places restantes
                         if placeDispo == True:

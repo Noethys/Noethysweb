@@ -85,9 +85,10 @@ def Traiter_attentes(request=None, test=False):
             liste_dates.sort()
             texte_detail = ""
             for date in liste_dates:
-                texte_detail = "<b>%s</b><br>" % utils_dates.DateComplete(date)
+                texte_detail += "<b>%s</b> :<br>" % utils_dates.DateComplete(date)
                 for dict_temp in dict_dates[date]:
                     texte_detail += " - %s (%s)<br>" % (dict_temp["nom_unites"], dict_temp["nom_activite"])
+            logger.debug("Détail = %s" % texte_detail)
 
             valeurs_fusion = {"{DETAIL_PLACES}": texte_detail, "{INDIVIDU_NOM}": individu.nom, "{INDIVIDU_PRENOM}": individu.prenom, "{INDIVIDU_NOM_COMPLET}": individu.Get_nom()}
             destinataire = Destinataire.objects.create(categorie="famille", famille=famille, adresse=famille.mail, valeurs=json.dumps(valeurs_fusion))
@@ -99,13 +100,13 @@ def Traiter_attentes(request=None, test=False):
         utils_email.Envoyer_model_mail(idmail=mail.pk, request=request)
 
     # Transformation des consommations Attente en Réservation
-    logger.debug("Tranformation des consommations attente en réservation...")
+    logger.debug("Transformation des consommations attente en réservation...")
     for idfamille, dict_individus in dict_resultats_familles.items():
         for idindividu, dict_dates in dict_individus.items():
             for date, liste_temp in dict_dates.items():
                 for dict_temp in liste_temp:
                     grille = Grille_virtuelle(request=request, idfamille=idfamille, idindividu=idindividu, idactivite=dict_temp["idactivite"], date_min=date, date_max=date)
-                    logger.debug("Tranformation des consommations : %s..." % str(dict_temp["consommations"]))
+                    logger.debug("Transformation des consommations : %s..." % str(dict_temp["consommations"]))
                     for idconso in dict_temp["consommations"]:
                         grille.Modifier(criteres={"idconso": idconso, "etat": "attente"}, modifications={"etat": "reservation"})
                     if not test:
