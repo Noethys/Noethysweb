@@ -1271,6 +1271,7 @@ function validation_form(event) {
         "activite": Get_activite(),
         "groupes": Get_groupes(),
         "classes": Get_classes(),
+        "mode_parametres": Get_mode_parametres(),
         "consommations": dict_conso,
         "memos": dict_memos,
         "options": dict_options,

@@ -57,6 +57,7 @@ class View(CustomView, TemplateView):
             data["selection_classes"] = [int(idclasse) for idclasse in donnees_post.get("classes", [])] if donnees_post.get("classes") else None
             data["options"] = donnees_post["options"]
             data["dict_suppressions"] = donnees_post["suppressions"]
+            data["mode_parametres"] = donnees_post["mode_parametres"]
         else:
             # Si c'est un chargement initial de la page
             date_jour = str(datetime.date.today())

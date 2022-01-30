@@ -49,7 +49,7 @@
                             </a>
                         </h4>
                     </div>
-                    <div id="panneau_1" class="collapse show" aria-labelledby="head_1" data-parent="#accordeon_parametres">
+                    <div id="panneau_1" class="collapse {% if data.mode_parametres|default:"panneau_1" == "panneau_1" %}show{% endif %}" aria-labelledby="head_1" data-parent="#accordeon_parametres">
                         <div class="card-body p-0">
                             {% include "consommations/grille_selection_date.html" %}
                         </div>
@@ -69,7 +69,7 @@
                             </a>
                         </h4>
                     </div>
-                    <div id="panneau_2" class="collapse" data-parent="#accordeon_parametres" aria-labelledby="head_2">
+                    <div id="panneau_2" class="collapse {% if data.mode_parametres == "panneau_2" %}show{% endif %}" data-parent="#accordeon_parametres" aria-labelledby="head_2">
                         <div class="card-body p-0">
 
                             <select class="form-control" id="selection_activite">
@@ -95,7 +95,7 @@
                             </a>
                         </h4>
                     </div>
-                    <div id="panneau_3" class="collapse" data-parent="#accordeon_parametres" aria-labelledby="head_3">
+                    <div id="panneau_3" class="collapse {% if data.mode_parametres == "panneau_3" %}show{% endif %}" data-parent="#accordeon_parametres" aria-labelledby="head_3">
                         <div class="card-body p-0">
                             <select multiple class="form-control" id="selection_groupes" size="8">
                                 {% for groupe in data.liste_groupes %}
@@ -124,7 +124,7 @@
                             </a>
                         </h4>
                     </div>
-                    <div id="panneau_4" class="collapse" aria-labelledby="head_4" data-parent="#accordeon_parametres">
+                    <div id="panneau_4" class="collapse {% if data.mode_parametres == "panneau_4" %}show{% endif %}" aria-labelledby="head_4" data-parent="#accordeon_parametres">
                         <div class="card-body p-0">
                             <select multiple class="form-control" id="selection_classes" size="15">
                                 {% for classe in data.liste_classes %}
@@ -140,12 +140,15 @@
                     </div>
                 </div>
 
-
             </div>
 
         </div>
     </div>
 
+<script>
+    function Get_mode_parametres() {
+        return $(".collapse[data-parent='#accordeon_parametres']:visible").attr("id");
+    };
+</script>
+
 {% endblock contenu_page %}
-
-
