@@ -124,7 +124,7 @@ def Get_generic_data(data={}):
                 data["prestations"][p.pk]["aides"] = dict_deductions[p.pk]
 
     data['dict_prestations_json'] = mark_safe(json.dumps(data["prestations"]))
-    logger.debug("prestations=" + str(data['dict_prestations_json']))
+    #logger.debug("prestations=" + str(data['dict_prestations_json']))
 
 
     #-------------------------- Importation des données du calendrier ------------------------------
@@ -234,8 +234,8 @@ def Get_generic_data(data={}):
 
 def Save_grille(request=None, donnees={}):
     logger.debug("Sauvegarde de la grille...")
-    logger.debug("prestations : " + str(donnees["prestations"]))
-    logger.debug("suppressions : " + str(donnees["suppressions"]))
+    #logger.debug("prestations : " + str(donnees["prestations"]))
+    #logger.debug("suppressions : " + str(donnees["suppressions"]))
     chrono = time.time()
 
     liste_historique = []
@@ -410,10 +410,10 @@ def CompareDict(dict1={}, dict2={}, keys=[]):
 def Facturer(request=None):
     donnees_aller = json.loads(request.POST.get("donnees", {}))
     logger.debug("============== Facturation ================")
-    logger.debug("données aller : " + str(donnees_aller))
+    #logger.debug("données aller : " + str(donnees_aller))
     facturation = Facturation(donnees=donnees_aller)
     donnees_retour = facturation.Facturer()
-    logger.debug("données retour : " + str(donnees_retour))
+    #logger.debug("données retour : " + str(donnees_retour))
 
     # Si mode pointage, sauvegarde les données
     if donnees_aller.get("mode", None) == "pointeuse":
