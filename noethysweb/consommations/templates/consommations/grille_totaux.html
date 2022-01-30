@@ -1,6 +1,17 @@
 {% load crispy_forms_tags %}
 {% load static %}
 
+{% block styles %}
+    <style>
+        .entete-colonne {
+            background-color: #f6f6f6;
+        }
+        .dark-mode .entete-colonne {
+            background-color: #5a5a5a;
+        }
+    </style>
+{% endblock styles %}
+
 {% block contenu_page %}
 
     <!-- Box Totaux -->
@@ -15,7 +26,7 @@
 
             <table id="table_totaux" class="table table-sm">
                 <thead>
-                    <tr style="background-color: #f6f6f6;">
+                    <tr class="entete-colonne">
                         <th></th>
                         {% for groupe in data.liste_groupes %}
                             <th>{% firstof groupe.abrege groupe.nom %}</th>
@@ -46,7 +57,7 @@
                         {% endif %}
                     {% endfor %}
                     {% for unite_remplissage in data.liste_unites_remplissage %}
-                        <tr style="background-color: #f6f6f6;">
+                        <tr class="entete-colonne">
                             <td style="text-align: center;" title="Unité de remplissage : {{ unite_remplissage.nom }}">{% firstof unite_remplissage.abrege unite_remplissage.nom %}</td>
                             {% for groupe in data.liste_groupes %}
                                 <td id="total_remplissage_{{ unite_remplissage.pk }}_{{ groupe.pk }}" style="text-align: center;" title="Unité de remplissage : {{ unite_remplissage.nom }} / {{ groupe.nom }}" data-idunite="{{ unite_remplissage.pk }}" data-idgroupe="{{ groupe.pk }}">0</td>

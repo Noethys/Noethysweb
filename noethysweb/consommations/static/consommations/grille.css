@@ -40,6 +40,9 @@
     height: 70vh;
     border: 1px solid #e8e8e8;
 }
+.dark-mode #table_grille {
+    border: 1px solid #6c757d;
+}
 .table-grille {
     table-layout: auto;
     width: 100%;
