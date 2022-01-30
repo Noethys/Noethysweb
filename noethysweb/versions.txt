@@ -1,3 +1,11 @@
+Version 1.0.5.9 (30/01/2022) :
+
+- Ajout d'un loader durant le submit de la grille des consommations
+- Ajout de la mémorisation du mode paramètres dans le gestionnaire des consommations
+- Correction du traitement automatique des réservations en attente
+- Allègement du logger de la grille des consommations
+- Ajustements pour le dark-mode
+
 Version 1.0.5.8 (28/01/2022) :
 
 - Ajout de l'infobulle des places dans le suivi des consommations
