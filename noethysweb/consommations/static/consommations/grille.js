@@ -275,8 +275,10 @@ class Case_base {
         // Annule la maj si il y a déjà une conso affichée dans la case
         if (this.consommations.length > 0) {return false};
 
+        var liste_places_initiales = [];
         var liste_places_restantes = [];
         var liste_seuils = [];
+        var nbre_places_initiales = null;
         var nbre_places_restantes = null;
         var seuil_alerte = null;
 
@@ -298,12 +300,14 @@ class Case_base {
                 };
 
                 // Calcule le nombre de places disponibles
+                liste_places_initiales.push(capacite_max)
                 liste_places_restantes.push(capacite_max - nbre_places_prises);
                 liste_seuils.push(dict_unites_remplissage[idunite_remplissage]["seuil_alerte"]);
             };
         };
 
         // Conserve uniquement les valeurs les plus basses
+        if (liste_places_initiales.length > 0) {nbre_places_initiales = Math.min.apply(null, liste_places_initiales)};
         if (liste_places_restantes.length > 0) {nbre_places_restantes = Math.min.apply(null, liste_places_restantes)};
         if (liste_seuils.length > 0) {seuil_alerte = Math.min.apply(null, liste_seuils)};
 
@@ -1207,13 +1211,21 @@ $(document).ready(function() {
     // Envoi des paramètres au format json vers le form de maj
     $("#form-maj").on('submit', function(event) {
 
-        // Vérifie qu'il n'y a pas un calcul de facturation en cours
         if (mode !== "portail") {
+
+            // Vérifie qu'il n'y a pas un calcul de facturation en cours
             if (!($("#loader_facturation").hasClass("masquer"))) {
                 event.preventDefault();
                 toastr.error("Vous devez attendre la fin du calcul de la facturation avant de pouvoir quitter");
                 return false;
             };
+
+            // Affiche un loader durant le submit
+            var box = bootbox.dialog({
+                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog margin-r-5'></i> Veuillez patienter...</p>",
+                closeButton: false
+            });
+
         };
 
         // Validation du formulaire
