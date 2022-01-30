@@ -26,7 +26,7 @@ class View(CustomView, TemplateView):
         data = {}
 
         # Recherche les doublons dans les consommations (pour un individu sur une même date avec la même unité)
-        qs = Consommation.objects.select_related("individu").annotate(doublon_id=Concat(F("individu_id"), Value("_"), F("inscription_id"), Value("_"), F("unite_id"), Value("_"), F("date"), output_field=CharField()))
+        qs = Consommation.objects.select_related("individu").annotate(doublon_id=Concat(F("individu_id"), Value("_"), F("inscription_id"), Value("_"), F("unite_id"), Value("_"), F("date"), Value("_"), F("evenement_id"), output_field=CharField()))
         doublons = qs.values("individu__nom", "individu__prenom", "date", "doublon_id").annotate(nbre_doublons=Count("doublon_id")).filter(nbre_doublons__gt=1)
         data["Doublons de consommations"] = ["%s %s : %d doublons le %s." % (d["individu__nom"], d["individu__prenom"], d["nbre_doublons"], d["date"]) for d in doublons]
 
