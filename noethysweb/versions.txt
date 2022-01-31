@@ -1,3 +1,10 @@
+Version 1.0.6.0 (31/01/2022) :
+
+- Correction de l'export pes
+- Correction de l'édition des prestations
+- Correction de la recherche des doublons de conso avec événements dans le correcteur
+- Correction de la saisie des quotients si caisse null
+
 Version 1.0.5.9 (30/01/2022) :
 
 - Ajout d'un loader durant le submit de la grille des consommations
