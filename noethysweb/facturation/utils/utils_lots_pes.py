@@ -270,13 +270,13 @@ class Exporter():
                     ligne[32] = "0"
 
                     # Priorité - Entier
-                    ligne[33] = "0"
+                    ligne[33] = ""
 
                     # Accepté - O/N
-                    ligne[35] = "0"
+                    ligne[35] = ""
 
                     # Erroné - O/N
-                    ligne[36] = "0"
+                    ligne[36] = ""
 
                     # NJ - Texte (2)
                     ligne[38] = ConvertToTexte("%02d" % piece.famille.natjur_helios)
@@ -288,22 +288,22 @@ class Exporter():
                     ligne[41] = self.lot.modele.service2 or ""
 
                     # Mixte - Texte (1)
-                    ligne[44] = ConvertToTexte("N")
+                    ligne[44] = ConvertToTexte("")
 
                     # Imprévisible - Texte (1)
-                    ligne[45] = ConvertToTexte("N")
+                    ligne[45] = ConvertToTexte("")
 
                     # CodeAlim - Texte (1)
-                    ligne[46] = ConvertToTexte("N")
+                    ligne[46] = ConvertToTexte("")
 
                     # MarcheSim - Texte (1)
-                    ligne[47] = ConvertToTexte("N")
+                    ligne[47] = ConvertToTexte("")
 
                     # SuiviDelai - Texte (1)
-                    ligne[50] = ConvertToTexte("N")
+                    ligne[50] = ConvertToTexte("")
 
                     # DelaiPaiement - Entier
-                    ligne[51] = "0"
+                    ligne[51] = ""
 
                     # CPL - Texte (4)
                     ligne[54] = code_produit_local[:4]
@@ -382,7 +382,7 @@ class Exporter():
                     if civilite_titulaire == "Melle": ligne[93] = ConvertToTexte("MLLE")
 
                     # NatIdentifiantTiers - Numérique (2)
-                    ligne[94] = ConvertToTexte(piece.famille.natidtiers_helios)
+                    ligne[94] = ConvertToTexte("" if piece.famille.natidtiers_helios == 9999 else piece.famille.natidtiers_helios)
 
                     # IdentifiantTiers - Texte (18)
                     ligne[95] = ConvertToTexte(piece.famille.idtiers_helios or "")
@@ -403,13 +403,13 @@ class Exporter():
                     ligne[109] = ConvertToTexte("N")
 
                     # NumeroFacture - Texte (50)
-                    ligne[111] = ConvertToTexte(piece.facture.numero)
+                    # ligne[111] = ConvertToTexte(piece.facture.numero)
 
                     # EditionASAP - Numérique (2)
                     ligne[112] = ConvertToTexte(self.lot.modele.edition_asap)
 
                     # DateEnvoiASAP - Texte (10)
-                    ligne[113] = ConvertToTexte(self.lot.date_envoi.strftime("%Y%m%d"))
+                    # ligne[113] = ConvertToTexte(self.lot.date_envoi.strftime("%Y%m%d"))
 
                     # Formatage de la ligne
                     texte_ligne = ['""' for x in range(0, 123)]
