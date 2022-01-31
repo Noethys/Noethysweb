@@ -76,7 +76,7 @@ class Formulaire(FormulaireBase, ModelForm):
                         <span>Caisse : %s</span>
                         <span class="ml-5">Allocataire : %s</span>
                         <span class="ml-5">N° allocataire : %s</span>
-                        """ % (famille.caisse.nom or "Inconnue", famille.allocataire or "Inconnu", famille.num_allocataire or "Inconnu")),
+                        """ % (famille.caisse.nom if famille.caisse else "Inconnue", famille.allocataire or "Inconnu", famille.num_allocataire or "Inconnu")),
                         css_class="alert alert-light text-center"
                     ),
                 ),
