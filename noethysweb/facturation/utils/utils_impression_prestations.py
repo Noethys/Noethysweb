@@ -9,14 +9,18 @@ logging.getLogger("PIL").setLevel(logging.WARNING)
 from reportlab.platypus import Spacer, Paragraph, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
-from core.models import Prestation
+from core.models import Prestation, Activite
 from core.utils import utils_impression, utils_texte
 
 
 class Impression(utils_impression.Impression):
     def Draw(self):
         # Importation des prestations
-        prestations = Prestation.objects.select_related("famille", "activite", "individu", "facture").filter(activite_id__in=self.dict_donnees["activites"]["ids"], date__range=self.dict_donnees["periode"]).order_by("individu__prenom")
+        if self.dict_donnees["activites"]["type"] == "groupes_activites":
+            liste_activites = [activite.pk for activite in Activite.objects.filter(groupes_activites__in=self.dict_donnees["activites"]["ids"])]
+        else:
+            liste_activites = self.dict_donnees["activites"]["ids"]
+        prestations = Prestation.objects.select_related("famille", "activite", "individu", "facture").filter(activite_id__in=liste_activites, date__range=self.dict_donnees["periode"]).order_by("individu__prenom")
 
         # Importation des prestations
         dict_prestations = {}
