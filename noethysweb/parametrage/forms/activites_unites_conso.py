@@ -18,8 +18,12 @@ from django_select2.forms import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    heure_debut = forms.TimeField(label="Heure de début", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-    heure_fin = forms.TimeField(label="Heure de fin", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
+    heure_debut = forms.TimeField(label="Heure de début par défaut", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
+    heure_fin = forms.TimeField(label="Heure de fin par défaut", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
+    heure_debut_min = forms.TimeField(label="Heure de début min.", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
+    heure_debut_max = forms.TimeField(label="Heure de début max.", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
+    heure_fin_min = forms.TimeField(label="Heure de fin min.", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
+    heure_fin_max = forms.TimeField(label="Heure de fin max.", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
 
     # Durée de validité
     choix_validite = [("ILLIMITEE", "Durée illimitée"), ("LIMITEE", "Durée limitée")]
@@ -38,7 +42,8 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Unite
         fields = ["ordre", "activite", "nom", "abrege", "type", "heure_debut", "heure_fin", "heure_debut_fixe", "heure_fin_fixe",
-                  "repas", "restaurateur", "touche_raccourci", "date_debut", "date_fin", "groupes", "incompatibilites", "visible_portail"]
+                  "repas", "restaurateur", "touche_raccourci", "date_debut", "date_fin", "groupes", "incompatibilites", "visible_portail",
+                  "heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max"]
 
     def __init__(self, *args, **kwargs):
         idactivite = kwargs.pop("idactivite")
@@ -94,15 +99,23 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Caractéristiques",
                 Field("type"),
-                Field("heure_debut"),
-                Field("heure_fin"),
                 Field("incompatibilites"),
-                Field("heure_debut_fixe"),
-                Field("heure_fin_fixe"),
                 Field("repas"),
                 Field("restaurateur"),
                 Field("touche_raccourci"),
                 Field("visible_portail"),
+            ),
+            Fieldset("Heure de début",
+                Field("heure_debut"),
+                Field("heure_debut_min"),
+                Field("heure_debut_max"),
+                Field("heure_debut_fixe"),
+            ),
+            Fieldset("Heure de fin",
+                Field("heure_fin"),
+                Field("heure_fin_min"),
+                Field("heure_fin_max"),
+                Field("heure_fin_fixe"),
             ),
             Fieldset("Durée de validité",
                 Field("validite_type"),

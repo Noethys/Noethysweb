@@ -172,6 +172,39 @@
                 toastr.error(("L'heure de fin doit être supérieure à l'heure de début"));
                 return false;
             }
+
+            var heure_debut_min = dict_unites[case_tableau.unite].heure_debut_min;
+            if (heure_debut_min !== "None") {
+                if (heure_debut < moment(heure_debut_min.slice(0, 5), "HH:mm", true)) {
+                    toastr.error(("L'heure de début doit être supérieure ou égale à " + heure_debut_min));
+                    return false;
+                }
+            }
+
+            var heure_debut_max = dict_unites[case_tableau.unite].heure_debut_max;
+            if (heure_debut_max !== "None") {
+                if (heure_debut > moment(heure_debut_max.slice(0, 5), "HH:mm", true)) {
+                    toastr.error(("L'heure de début doit être inférieure ou égale à " + heure_debut_max));
+                    return false;
+                }
+            }
+
+            var heure_fin_min = dict_unites[case_tableau.unite].heure_fin_min;
+            if (heure_fin_min !== "None") {
+                if (heure_fin < moment(heure_fin_min.slice(0, 5), "HH:mm", true)) {
+                    toastr.error(("L'heure de fin doit être supérieure ou égale à " + heure_fin_min));
+                    return false;
+                }
+            }
+
+            var heure_fin_max = dict_unites[case_tableau.unite].heure_fin_max;
+            if (heure_fin_max !== "None") {
+                if (heure_fin > moment(heure_fin_max.slice(0, 5), "HH:mm", true)) {
+                    toastr.error(("L'heure de fin doit être inférieure ou égale à " + heure_fin_max));
+                    return false;
+                }
+            }
+
             var heure_debut = heure_debut._i;
             var heure_fin = heure_fin._i;
         } else {
