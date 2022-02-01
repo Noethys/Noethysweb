@@ -469,6 +469,12 @@ class Case_standard extends Case_base {
         };
     };
 
+    set_dirty(etat) {
+        if (this.has_conso()) {
+            this.consommations[0].dirty = etat;
+        };
+    }
+
     // Vérifie si la conso est verrouillée
     is_locked() {
         if ((this.consommations.length > 0) && (jQuery.inArray(this.consommations[0].etat, ["present", "absentj", "absenti"]) !== -1)) {
@@ -1298,6 +1304,14 @@ function facturer(case_tableau) {
     if (mode === "portail") {
         return false;
     }
+    // Si mode pointeuse, on affiche un loader
+    if (mode === "pointeuse") {
+        box = bootbox.dialog({
+            message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog margin-r-5'></i> Veuillez patienter...</p>",
+            closeButton: false, animate: false, centerVertical: true, size: "small",
+        });
+    }
+
     afficher_loader_facturation(true);
     cases_touchees.push(case_tableau.key);
     clearTimeout(chrono);
@@ -1396,11 +1410,23 @@ function ajax_facturer(cases_touchees_temp) {
                 });
             };
 
+            // Si mode pointeuse, on désactive le dirty de toutes les consommations
+            if (mode === 'pointeuse') {
+                $.each(dict_cases, function (key, case_tableau) {
+                    dict_cases[key].set_dirty(false);
+                })
+                dict_suppressions = {"consommations": [], "prestations": [], "memos": []};
+            }
+
             // MAJ du box facturation
             maj_box_facturation();
 
             // Masque loader du box facturation
             afficher_loader_facturation(false);
+
+            if (mode === "pointeuse") {
+                box.modal("hide");
+            };
 
             // Si mode portail, on déclenche le submit
             if (mode === "portail") {
@@ -1410,7 +1436,7 @@ function ajax_facturer(cases_touchees_temp) {
         },
         error: function(data) {
             console.log("Erreur de facturation !");
-            if (mode === "portail") {
+            if (mode === "portail" || mode === "pointeuse") {
                 box.modal("hide");
             };
         }

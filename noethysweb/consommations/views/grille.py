@@ -637,7 +637,8 @@ class Facturation():
 
                         liste_aide_retenues = []
                         if key_aide in self.dict_aides:
-                            logger.debug("Aides potentielles trouvées = " + str(self.dict_aides[key_aide]))
+                            if self.dict_aides[key_aide]:
+                                logger.debug("Aides potentielles trouvées = " + str(self.dict_aides[key_aide]))
 
                             for aide in self.dict_aides[key_aide]:
                                 if str(aide.date_debut) <= case_tableau["date"] and str(aide.date_fin) >= case_tableau["date"] and self.Verification_periodes(aide.jours_scolaires, aide.jours_vacances, case_tableau["date"]):
@@ -790,6 +791,10 @@ class Facturation():
 
                 # Renvoie prestation existante si la prestation semble identique avec montants identiques
                 keys = ["date", "individu", "tarif", "montant_initial", "montant", "categorie_tarif", "famille", "label", "temps_facture", "quantite"]
+
+                if dictPrestation["temps_facture"]: dictPrestation["temps_facture"] = dictPrestation["temps_facture"].lstrip("0")
+                if dict_prestation_2["temps_facture"]: dict_prestation_2["temps_facture"] = dict_prestation_2["temps_facture"].lstrip("0")
+
                 if CompareDict(dictPrestation, dict_prestation_2, keys=keys) == True:
                     logger.debug("Récupération d'un IDprestation existant : " + str(IDprestation))
                     return {"IDprestation": IDprestation, "dictPrestation": dict_prestation_2, "nouveau": False}
@@ -1128,7 +1133,6 @@ class Facturation():
 
             # Recherche des heures debut et fin des unités cochées
             duree, heure_debut_delta, heure_fin_delta = self.Calcule_duree(case_tableau, combinaisons_unites)
-
             if "qf" in methode_calcul:
                 qf_famille = self.Recherche_QF(tarif, case_tableau)
                 if not qf_famille:
@@ -1142,9 +1146,13 @@ class Facturation():
                 duree_arrondi = utils_dates.TimeEnDelta(ligne_calcul.duree_arrondi)
                 unite_horaire = utils_dates.TimeEnDelta(ligne_calcul.unite_horaire)
 
+                duree_temp = copy.copy(duree)
+
                 # Arrondi inférieur de la durée
                 if duree_arrondi:
-                    duree = utils_dates.ArrondirDelta(duree=duree, delta_minutes=int(duree_arrondi.total_seconds() // 60), sens="inf")
+                    duree_arrondie = utils_dates.ArrondirDelta(duree=duree_temp, delta_minutes=int(duree_arrondi.total_seconds() // 60), sens="inf")
+                    if duree_arrondie > datetime.timedelta(0):
+                        duree_temp = duree_arrondie
 
                 # montant_questionnaire = self.GetQuestionnaire(ligneCalcul["montant_questionnaire"], IDfamille, IDindividu)
                 # if montant_questionnaire not in (None, 0.0):
@@ -1163,8 +1171,7 @@ class Facturation():
                     else:
                         conditionQF = False
 
-                if duree_min <= duree <= duree_max and conditionQF == True:
-                    duree_temp = duree
+                if duree_min <= duree_temp <= duree_max and conditionQF == True:
                     # Vérifie durées seuil et plafond
                     if duree_seuil:
                         if duree_temp < duree_seuil: duree_temp = duree_seuil
