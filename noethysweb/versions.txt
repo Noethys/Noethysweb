@@ -1,3 +1,12 @@
+Version 1.0.6.2 (02/02/2022) :
+
+- Ajout de la ville de résidence dans la liste des inscriptions scolaires
+- Ajout de la prédiction de l'exercice et du mois selon le nom de l'export pes
+- Meilleure prise en charge des adresses postales à plusieurs lignes
+- Correction des prestations antérieures dans la génération des factures
+- Correction de la sélection des factures au-dessus d'un montant donné
+- Petites corrections
+
 Version 1.0.6.1 (02/02/2022) :
 
 - Stabilisation de la pointeuse
