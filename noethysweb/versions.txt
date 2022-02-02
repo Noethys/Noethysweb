@@ -1,3 +1,9 @@
+Version 1.0.6.1 (02/02/2022) :
+
+- Stabilisation de la pointeuse
+- Ajout des heures min et max des unités de consommation
+- Petites corrections
+
 Version 1.0.6.0 (31/01/2022) :
 
 - Correction de l'export pes
