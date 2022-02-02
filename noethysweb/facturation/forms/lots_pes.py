@@ -10,7 +10,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset
 from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
-from core.models import PesLot, PesModele, PesPiece, Rattachement, Mandat, LotFactures, FiltreListe, Facture
+from core.models import PesLot, PesModele, PesPiece, Rattachement, Mandat, LotFactures, FiltreListe, Facture, LISTE_MOIS
 from core.widgets import DatePickerWidget
 from core.forms.base import FormulaireBase
 
@@ -101,6 +101,16 @@ class Formulaire(FormulaireBase, ModelForm):
                     premiere_facture = Facture.objects.select_related("lot").filter(lot_id=assistant).first()
                 if premiere_facture and premiere_facture.lot:
                     self.fields["nom"].initial = premiere_facture.lot.nom
+
+            # Essaye de deviner l'exercice et le mois selon le nom de l'export
+            nom_lot = self.fields["nom"].initial
+            if nom_lot:
+                for num_mois, nom_mois in LISTE_MOIS:
+                    if nom_mois.lower() in nom_lot.lower():
+                        self.fields["mois"].initial = num_mois
+                for annee in [datetime.date.today().year-1, datetime.date.today().year, datetime.date.today().year+1]:
+                    if str(annee) in nom_lot:
+                        self.fields["exercice"].initial = annee
 
         # Affichage
         self.helper.layout = Layout(
