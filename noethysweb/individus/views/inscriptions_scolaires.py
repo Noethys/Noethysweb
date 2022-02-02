@@ -143,16 +143,17 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ['idscolarite', 'date_debut', 'date_fin', 'ecole__nom', 'classe__nom', 'niveau__abrege', 'individu__nom', 'individu__prenom', 'individu__date_naiss']
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         nom = columns.TextColumn("Nom", sources=["individu__nom"])
         prenom = columns.TextColumn("Prénom", sources=["individu__prenom"])
         date_naiss = columns.TextColumn("Date naiss.", sources=["individu__date_naiss"], processor=helpers.format_date('%d/%m/%Y'))
         niveau = columns.TextColumn("Niveau", sources=["niveau__abrege"])
+        ville_resid = columns.TextColumn("Ville de résidence", sources=["individu__ville_resid"])
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idscolarite", "nom", "prenom", "date_naiss", "date_debut", "date_fin", "niveau"]
+            columns = ["idscolarite", "nom", "prenom", "date_naiss", "date_debut", "date_fin", "niveau", "ville_resid"]
+            hidden_columns = ["ville_resid"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
