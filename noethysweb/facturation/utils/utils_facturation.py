@@ -108,8 +108,8 @@ class Facturation():
 
         # En cas d'intégration des prestations antérieures
         date_debut_temp = date_debut
-        if not date_anterieure:
-            date_debut_temp = date_debut
+        if date_anterieure:
+            date_debut_temp = date_anterieure
 
         # Recherche des prestations de la période
         if liste_factures:

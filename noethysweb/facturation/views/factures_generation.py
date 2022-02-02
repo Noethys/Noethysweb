@@ -69,7 +69,8 @@ def Get_factures(data={}):
     # Calcul des factures
     facturation = utils_facturation.Facturation()
     dict_factures = facturation.GetDonnees(liste_activites=liste_activites, date_debut=date_debut, date_fin=date_fin, date_edition=data["date_emission"],
-                                           date_echeance=data["date_echeance"], categories_prestations=data["categories"], IDfamille=IDfamille)
+                                           date_echeance=data["date_echeance"], categories_prestations=data["categories"], IDfamille=IDfamille,
+                                           date_anterieure=data["prestations_anterieures"])
     liste_factures = facturation.GetListeTriee(dict_factures)
     return liste_factures
 
