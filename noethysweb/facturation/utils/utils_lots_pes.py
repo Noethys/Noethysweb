@@ -224,10 +224,14 @@ class Exporter():
                     ligne[10] = ConvertToTexte(piece.famille.titulaire_helios.nom[:50])
 
                     # Designation2 - Texte (50)
-                    ligne[11] = ConvertToTexte(piece.famille.titulaire_helios.prenom[:50])
+                    if piece.famille.titulaire_helios.prenom:
+                        ligne[11] = ConvertToTexte(piece.famille.titulaire_helios.prenom[:50])
 
-                    # AdrLig1 - Texte (50)
-                    ligne[12] = ConvertToTexte(piece.famille.titulaire_helios.rue_resid[:50])
+                    # AdrLig1, AdrLig2, et AdrLig3 - Texte (50)
+                    if piece.famille.titulaire_helios.rue_resid:
+                        lignes_rue = piece.famille.titulaire_helios.rue_resid.split("\n")
+                        for idx, valeur in enumerate(lignes_rue[:3], 12):
+                            ligne[idx] = ConvertToTexte(valeur[:50])
 
                     # Codepostal - Texte (10)
                     ligne[15] = ConvertToTexte(piece.famille.titulaire_helios.cp_resid[:10])

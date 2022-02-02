@@ -1537,6 +1537,9 @@ class Individu(models.Model):
         return {"rue": individu.rue_resid, "cp": individu.cp_resid, "ville": individu.ville_resid, "cp_ville": cp_ville,
                 "adresse_complete": adresse_complete, "secteur": individu.secteur, "mail": mail}
 
+    def Get_rue_resid(self):
+        return self.rue_resid.replace("\n", "<br/>") if self.rue_resid else None
+
     def Get_ville_resid(self):
         return self.ville_resid
 
@@ -1688,6 +1691,9 @@ class Famille(models.Model):
                 self.titulaire_helios = rattachements.first().individu
 
         self.save()
+
+    def Get_rue_resid(self):
+        return self.rue_resid.replace("\n", "<br/>") if self.rue_resid else None
 
     def Get_infos(self, avec_civilite=False):
         """ Renvoie le nom des titulaires """

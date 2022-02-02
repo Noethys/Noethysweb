@@ -117,7 +117,7 @@ class Impression(utils_impression.Impression):
             ligne.append(piece.facture.numero)
 
             # Famille
-            texte = "%s<br/>%s<br/>%s %s" % (piece.famille, piece.famille.rue_resid or "", piece.famille.cp_resid or "", piece.famille.ville_resid or "")
+            texte = "%s<br/>%s<br/>%s %s" % (piece.famille, piece.famille.Get_rue_resid() or "", piece.famille.cp_resid or "", piece.famille.ville_resid or "")
             ligne.append(Paragraph(texte, style_defaut))
 
             # Montant de la facture
