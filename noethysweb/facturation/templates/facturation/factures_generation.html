@@ -145,7 +145,7 @@
             maj_lot_checkboxes = true;
             $(".check_facture").each(function (index) {
                 $(this).prop("checked", false);
-                if (parseFloat(this.dataset.solde) >= parseFloat($("#id_montant").val())) {$(this).prop("checked")};
+                if (parseFloat(this.dataset.solde) >= parseFloat($("#id_montant").val())) {$(this).prop("checked", true)};
             });
             maj_lot_checkboxes = false;
             maj_bouton_generer(get_factures_cochees().length);
