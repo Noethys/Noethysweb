@@ -30,7 +30,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "fscolarise:famille", "idfamille", "nom", "regime", "caisse", "famille", "num_allocataire", "allocataire__nom"]
+        filtres = ["fpresent:famille", "fscolarise:famille", "idfamille", "nom", "caisse__regime__nom", "caisse__nom", "famille", "num_allocataire", "allocataire__nom"]
 
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         caisse = columns.TextColumn("Caisse", sources=['caisse__nom'])

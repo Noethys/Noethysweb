@@ -22,7 +22,7 @@ class Liste(Page_destinataires, crud.Liste):
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
         context['box_titre'] = "Sélection d'individus"
-        context['box_introduction'] = "Sélectionnez des individus ci-dessous."
+        context['box_introduction'] = context['box_introduction'] = "Cochez les individus souhaités ci-dessous. Cochez la case de l'entête en haut à gauche pour cocher tous les individus affichés. Astuce : Utilisez le bouton Filtrer <i class='fa fa-filter text-gray'></i> pour sélectionner les inscrits d'une ou plusieurs activités données ou les présents d'une période spécifique."
         context['active_checkbox'] = True
         context['bouton_supprimer'] = False
         context["hauteur_table"] = "400px"

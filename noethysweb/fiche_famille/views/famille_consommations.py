@@ -78,7 +78,7 @@ class Modifier(Onglet, TemplateView):
 
         # Récupération de la période
         data = Get_periode(data)
-        logger.debug("Période de la grille =", data)
+        # logger.debug("Période de la grille =", data)
 
         # Importation de toutes les inscriptions de la famille sur la période sélectionnée
         dict_inscriptions = {}

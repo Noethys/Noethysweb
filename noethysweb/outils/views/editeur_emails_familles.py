@@ -22,7 +22,7 @@ class Liste(Page_destinataires, crud.Liste):
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
         context['box_titre'] = "Sélection de familles"
-        context['box_introduction'] = "Sélectionnez des familles ci-dessous."
+        context['box_introduction'] = "Cochez les familles souhaitées ci-dessous. Cochez la case de l'entête en haut à gauche pour cocher toutes les familles affichées. Astuce : Utilisez le bouton Filtrer <i class='fa fa-filter text-gray'></i> pour sélectionner les inscrits d'une ou plusieurs activités données ou les présents d'une période spécifique."
         context['active_checkbox'] = True
         context['bouton_supprimer'] = False
         context["hauteur_table"] = "400px"
@@ -30,7 +30,7 @@ class Liste(Page_destinataires, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:pk", "fscolarise:pk", "idfamille", "nom", "rue_resid", "cp_resid", "ville_resid", "mail"]
+        filtres = ["fpresent:pk", "fscolarise:pk", "idfamille", "nom", "rue_resid", "cp_resid", "ville_resid", "mail", "caisse__nom"]
         check = columns.CheckBoxSelectColumn(label="")
         mail = columns.TextColumn("Rue", processor='Get_mail')
         rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
