@@ -19,7 +19,10 @@ class Liste(Page, crud.Liste):
     model = Famille
 
     def get_queryset(self):
-        return Famille.objects.select_related("caisse", "allocataire", "caisse__regime").filter(self.Get_filtres("Q"))
+        try:
+            return Famille.objects.select_related("caisse", "allocataire", "caisse__regime").filter(self.Get_filtres("Q"))
+        except:
+            return Famille.objects.select_related("caisse", "allocataire", "caisse__regime")
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -30,7 +33,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "fscolarise:famille", "idfamille", "nom", "caisse__regime__nom", "caisse__nom", "famille", "num_allocataire", "allocataire__nom"]
+        filtres = ["fpresent:pk", "fscolarise:pk", "idfamille", "nom", "caisse__regime__nom", "caisse__nom", "num_allocataire", "allocataire__nom"]
 
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         caisse = columns.TextColumn("Caisse", sources=['caisse__nom'])

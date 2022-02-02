@@ -35,7 +35,10 @@ class Liste(Page, crud.Liste):
     model = Rattachement
 
     def get_queryset(self):
-        return Rattachement.objects.select_related('individu', 'famille').filter(self.Get_filtres("Q"))
+        try:
+            return Rattachement.objects.select_related('individu', 'famille').filter(self.Get_filtres("Q"))
+        except:
+            return Rattachement.objects.select_related('individu', 'famille').all()
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
