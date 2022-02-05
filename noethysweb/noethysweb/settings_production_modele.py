@@ -3,36 +3,58 @@
 #  Distribué sous licence GNU GPL.
 
 #########################################################################################
-#              Fichier de configuration à modifier selon les besoins
+#              FICHIER DE CONFIGURATION A MODIFIER SELON LES BESOINS
+#
+# Valeurs à personnaliser impérativement avant une mise en ligne :
+# SECRET_KEY, ALLOWED_HOSTS, URL_GESTION, DATABASES
+#
 #########################################################################################
 
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# ----------------- Secret Key : Saisissez une clé aléatoire de votre choix --------------
+#########################################################################################
+# CLE SECRETE : Saisissez une clé aléatoire complexe de votre choix (50 caract. minimum)
+#########################################################################################
 
 SECRET_KEY = 'cle_secrete_a_modifier_imperativement'
 
-# ------------------------------------ Mode démo -----------------------------------------
+#########################################################################################
+# MODE DEMO : Pour désactiver des fonctionnalités
+#########################################################################################
 
 MODE_DEMO = False
 
-# ------------------------------------ Debug Mode ----------------------------------------
+#########################################################################################
+# MODE DEBUG : Conserver False en production impérativement
+#########################################################################################
 
 DEBUG = False
 
-# -------------------------------------- URLS --------------------------------------------
+#########################################################################################
+# URLS : à personnaliser selon les souhaits
+# Il est fortement conseillé de définir une URL aléatoire pour le URL_GESTION
+# Et de définir une URL un peu plus complexe pour le URL_BUREAU
+#########################################################################################
 
 URL_GESTION = "administrateur/"
 URL_BUREAU = "utilisateur/"
 URL_PORTAIL = ""
 PORTAIL_ACTIF = True
 
-# ------------------ Hosts : Saisissez les hosts autorisés (IP ou urls) ------------------
+#########################################################################################
+# HOSTS : Saisissez les hosts autorisés (IP ou urls du serveur).
+# Obligatoire pour fonctionner sur un serveur.
+# Exemple : ALLOWED_HOSTS = ["127.0.0.1", "www.monsite.com"]
+#########################################################################################
 
 ALLOWED_HOSTS = []
 
-# ------- Database : Modifier si besoin (en cas d'utilisation de MySQL par exemple) -------
+#########################################################################################
+# BASE DE DONNEES : Modifier si besoin (en cas d'utilisation de MySQL par exemple)
+# Le moteur par défaut SQLITE est à utiliser uniquement pour des tests en local.
+# Exemple : https://docs.djangoproject.com/fr/4.0/ref/databases/#connection-management
+#########################################################################################
 
 DATABASES = {
     'default': {
@@ -41,9 +63,11 @@ DATABASES = {
     }
 }
 
-# ------------------------------------ Sauvegardes --------------------------------------
-
+#########################################################################################
+# SAUVEGARDES : Permet de générer et envoyer des sauvegardes chiffrées des données
+# vers un répertoire du serveur ou vers Dropbox.
 # Pour plus d'infos, consulter https://django-dbbackup.readthedocs.io/en/master/
+#########################################################################################
 
 # ID de la clé GPG pour le chiffrement de la sauvegarde
 # DBBACKUP_GPG_RECIPIENT = "XXXXXXXXX"
@@ -61,11 +85,12 @@ DATABASES = {
 # DBBACKUP_STORAGE = "storages.backends.dropbox.DropBoxStorage"
 # DBBACKUP_STORAGE_OPTIONS = {"oauth2_access_token": "Token Dropbox à coller ici"}
 
-# ------------------------------- Stockage de documents ----------------------------------
-
+#########################################################################################
+# STOCKAGE DE DOCUMENTS
 # Indiquer le type de stockage souhaité pour chaque information :
 # Pour un stockage sur le disque dur (par défaut) : django.core.files.storage.FileSystemStorage
 # Pour un stockage sur Dropbox : storages.backends.dropbox.DropBoxStorage
+#########################################################################################
 
 # STORAGE_PROBLEME = "django.core.files.storage.FileSystemStorage"
 # STORAGE_PIECE = "django.core.files.storage.FileSystemStorage"
@@ -76,23 +101,25 @@ DATABASES = {
 # Si l'un des champs ci-dessus utilise Dropbox, renseignez le token Dropbox ci-dessous :
 # DROPBOX_OAUTH2_TOKEN = "XXXXXXXXXXXXXXX"
 
-
-# ------------------------------------- Crontab ---------------------------------------
-
+#########################################################################################
+# CRONTAB (tâches planifiées)
 # Décommentez les lignes ci-dessous pour activer les tâches automatisées
 # et modifiez si besoin les horaires de déclenchement et le path python :
+#########################################################################################
 
 # CRONTAB_PYTHON_EXECUTABLE = "/usr/bin/python3.9"
 # CRONTAB_COMMAND_SUFFIX = '2>&1'
 # CRONJOBS = [
-#     # ("* * * * *", "noethysweb.cron.Test_cron", ">> " + os.path.join(BASE_DIR, "debug_cron.log"))
-#     ("00 23 * * *", "noethysweb.cron.Sauvegarder_db", ">> " + os.path.join(BASE_DIR, "debug_cron.log")),
-#     ("30 23 * * *", "noethysweb.cron.Sauvegarder_media", ">> " + os.path.join(BASE_DIR, "debug_cron.log")),
-#     ("45 23 * * *", "noethysweb.cron.Traiter_attentes", ">> " + os.path.join(BASE_DIR, "debug_cron.log")),
-#     ("55 23 * * *", "noethysweb.cron.Vider_rep_temp", ">> " + os.path.join(BASE_DIR, "debug_cron.log")),
+#     ("* * * * *", "noethysweb.cron.Test_cron", ">> " + os.path.join(BASE_DIR, "debug_cron.log")) # Pour des tests
+#     ("00 23 * * *", "noethysweb.cron.Sauvegarder_db", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour sauvegarder la base de données
+#     ("30 23 * * *", "noethysweb.cron.Sauvegarder_media", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour sauvegarde le répertoire media
+#     ("45 23 * * *", "noethysweb.cron.Traiter_attentes", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour traiter les réservations en attente
+#     ("55 23 * * *", "noethysweb.cron.Vider_rep_temp", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour purger le répertoire temp
 # ]
 
-# ------------------------------------ Sécurité ----------------------------------------
+#########################################################################################
+# SECURITE : Les paramètres par défaut conviendront généralement.
+#########################################################################################
 
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'Strict'
