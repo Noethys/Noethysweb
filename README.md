@@ -5,7 +5,7 @@ les accueils de loisirs, crèches, garderies périscolaires, cantines, TAP ou NA
 
 Plus d'infos sur www.noethys.com
 
-###### Développement en cours : Ne pas utiliser en production.
+###### Actuellement en test : Soyez vigilants lors d'une utilisation en production.
 
 Installation
 ------------------------
