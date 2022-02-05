@@ -88,6 +88,8 @@ DATABASES = {
 #     # ("* * * * *", "noethysweb.cron.Test_cron", ">> " + os.path.join(BASE_DIR, "debug_cron.log"))
 #     ("00 23 * * *", "noethysweb.cron.Sauvegarder_db", ">> " + os.path.join(BASE_DIR, "debug_cron.log")),
 #     ("30 23 * * *", "noethysweb.cron.Sauvegarder_media", ">> " + os.path.join(BASE_DIR, "debug_cron.log")),
+#     ("45 23 * * *", "noethysweb.cron.Traiter_attentes", ">> " + os.path.join(BASE_DIR, "debug_cron.log")),
+#     ("55 23 * * *", "noethysweb.cron.Vider_rep_temp", ">> " + os.path.join(BASE_DIR, "debug_cron.log")),
 # ]
 
 # ------------------------------------ Sécurité ----------------------------------------
