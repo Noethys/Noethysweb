@@ -1,3 +1,9 @@
+Version 1.0.6.3 (07/02/2022) :
+
+- Correction de l'affichage du détail d'une facture sur le portail
+- Update bootstrap-table et table-export
+- Update requirements
+
 Version 1.0.6.2 (02/02/2022) :
 
 - Ajout de la ville de résidence dans la liste des inscriptions scolaires
