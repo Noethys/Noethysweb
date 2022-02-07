@@ -65,7 +65,7 @@
                                     {% if parametres_portail.facturation_autoriser_telechargement_facture or parametres_portail.facturation_autoriser_detail_facture %}
                                         <td>
                                             {% if parametres_portail.facturation_autoriser_detail_facture %}
-                                                <button id="bouton_detail_facture" data-idfacture="{{ facture.pk }}" class="btn btn-primary btn-xs" title="Afficher le détail de la facture"><i class="fa fa-fw fa-search"></i></button>
+                                                <button data-idfacture="{{ facture.pk }}" class="btn btn-primary btn-xs bouton_detail_facture" title="Afficher le détail de la facture"><i class="fa fa-fw fa-search"></i></button>
                                             {% endif %}
                                             {% if parametres_portail.facturation_autoriser_telechargement_facture %}
                                                 <a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_accueil' %}" title="Télécharger la facture"><i class="fa fa-fw fa-download"></i></a>
@@ -100,7 +100,7 @@
         $(document).ready(function() {
 
             // Affiche le détail d'une facture
-            $("#bouton_detail_facture").on('click', function(e) {
+            $(".bouton_detail_facture").on('click', function(e) {
                 $.ajax({
                     type: "POST",
                     url: "{% url 'portail_ajax_get_detail_facture' %}",
