@@ -14,7 +14,7 @@ from consommations.utils.utils_grille_virtuelle import Grille_virtuelle
 
 def Traiter_attentes(request=None, test=False):
     logger.debug("Recherche de places en attente à réattribuer...")
-    date_min = datetime.date.today()
+    date_min = datetime.date.today() + datetime.timedelta(2)
     date_max = date_min + datetime.timedelta(365)
 
     # Recherche les places disponibles
