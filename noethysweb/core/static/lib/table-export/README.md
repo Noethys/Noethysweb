@@ -26,23 +26,42 @@ To save the generated export files on client side, include in your html code:
 <script type="text/javascript" src="libs/FileSaver/FileSaver.min.js"></script>
 ```
 
-To export the table in XLSX (Excel 2007+ XML Format) format, you need to include additionally:
+To export the table in XLSX (Excel 2007+ XML Format) format, you need to include additionally [SheetJS/js-xlsx](https://github.com/SheetJS/js-xlsx):
+
 ```html
 <script type="text/javascript" src="libs/js-xlsx/xlsx.core.min.js"></script>
 ```
 
-To export the table as a PDF file the following includes are required:
+In case you still want to support IE11, you need to include jsPDF's polyfills.umd.js.
+Please do this before you include jspdf.umd.min.js and html2canvas.min.js
+```html
+<script type="text/javascript" src="../libs/jsPDF/polyfills.umd.js"></script>
+```
+
+To export an html table to a PDF file, you can use jsPDF as a PDF producer:
 
 ```html
-<script type="text/javascript" src="libs/jsPDF/jspdf.min.js"></script>
-<script type="text/javascript" src="libs/jsPDF-AutoTable/jspdf.plugin.autotable.js"></script>
+<script type="text/javascript" src="libs/jsPDF/jspdf.umd.min.js"></script>
+```
+
+Many HTML stylings can be converted to PDF with jsPDF, but support for non-western character sets is almost non-existent. Especially if you want to export Arabic or Chinese characters to your PDF file, you can use pdfmake as an alternative PDF producer. The disadvantage compared to jspdf is that using pdfmake has a reduced styling capability. To use pdfmake enable the pdfmake option and instead of the jsPDF files include    
+
+```html
+<script type="text/javascript" src="libs/pdfmake/pdfmake.min.js"></script>
+<script type="text/javascript" src="libs/pdfmake/vfs_fonts.js"></script>
+
+<!-- To export arabic characters include mirza_fonts.js _instead_ of vfs_fonts.js
+<script type="text/javascript" src="libs/pdfmake/mirza_fonts.js"></script>
+-->
+
+<!-- For a chinese font include either gbsn00lp_fonts.js or ZCOOLXiaoWei_fonts.js _instead_ of vfs_fonts.js 
+<script type="text/javascript" src="libs/pdfmake/gbsn00lp_fonts.js"></script>
+-->
 ```
 
 To export the table in PNG format, you need to include:
 
 ```html
-<!-- For IE support include es6-promise before html2canvas -->
-<script type="text/javascript" src="libs/es6-promise/es6-promise.auto.min.js"></script>
 <script type="text/javascript" src="libs/html2canvas/html2canvas.min.js"></script>
 ```
 
@@ -62,12 +81,11 @@ Dependencies
 Library | Version
 --------|--------
 [jQuery](https://github.com/jquery/jquery) | \>= 1.9.1
-[es6-promise](https://github.com/stefanpenner/es6-promise) | \>= 4.2.4
-[FileSaver](https://github.com/hhurz/tableExport.jquery.plugin/blob/master/libs/FileSaver/FileSaver.min.js) | \>= 1.2.0
-[html2canvas](https://github.com/niklasvh/html2canvas) | \>= 0.5.0-beta4
-[jsPDF](https://github.com/MrRio/jsPDF) | 1.3.2 - 1.3.4
-[jsPDF-AutoTable](https://github.com/simonbengtsson/jsPDF-AutoTable) | 2.0.14 or 2.0.17
-[SheetJS](https://github.com/SheetJS/js-xlsx) | \>= 0.12.5
+[FileSaver](https://github.com/eligrey/FileSaver.js) | \>= 2.0.1
+[html2canvas](https://github.com/niklasvh/html2canvas) | \>= 1.0.0
+[jsPDF](https://github.com/MrRio/jsPDF) | \>=2.0.0
+[pdfmake](https://github.com/bpampuch/pdfmake) | 0.1.71
+[SheetJS](https://github.com/SheetJS/js-xlsx) | \>= 0.16.0
 
 
 
@@ -75,19 +93,19 @@ Library | Version
 Examples
 ========
 
-```
+```javascript
 // CSV format
 
 $('#tableID').tableExport({type:'csv'});
 ```
 
-```
+```javascript
 // Excel 2000 html format
 
 $('#tableID').tableExport({type:'excel'});
 ```
 
-```
+```javascript
 // XML Spreadsheet 2003 file format with multiple worksheet support
 
 $('table').tableExport({type:'excel',
@@ -95,7 +113,7 @@ $('table').tableExport({type:'excel',
                               worksheetName: ['Table 1','Table 2', 'Table 3']}});
 ```
 
-```
+```javascript
 // PDF export using jsPDF only
 
 $('#tableID').tableExport({type:'pdf',
@@ -105,7 +123,7 @@ $('#tableID').tableExport({type:'pdf',
                           });
 ```
 
-```
+```javascript
 // PDF format using jsPDF and jsPDF Autotable 
 
 $('#tableID').tableExport({type:'pdf',
@@ -119,7 +137,7 @@ $('#tableID').tableExport({type:'pdf',
                           });
 ```
 
-```
+```javascript
 // PDF format with callback example
 
 function DoCellData(cell, row, col, data) {}
@@ -136,16 +154,23 @@ $('table').tableExport({fileName: sFileName,
                        });
 ```
 
+```javascript
+// PDF export using pdfmake
+
+$('#tableID').tableExport({type:'pdf',
+                           pdfmake:{enabled:true,
+                                    docDefinition:{pageOrientation:'landscape'}}
+                          });
+```
+
 Options (Default settings)
 =======
 
-```
+```javascript
 csvEnclosure: '"'
 csvSeparator: ','
 csvUseBOM: true
 date: html: 'dd/mm/yyyy'
-displayTableName: false  (Deprecated)
-escape: false  (Deprecated)
 exportHiddenCells: false
 fileName: 'tableExport'
 htmlContent: false
@@ -189,11 +214,12 @@ mso: fileFormat: 'xlshtml'
      rtl: false
      styles: []
      worksheetName: ''
-     xslx: formatId: date: 14
+     xlsx: formatId: date: 14
                      numbers: 2
+           onHyperlink: null
 numbers: html: decimalMark: '.'
                thousandsSeparator: ','
-         output: decimalMark: '.',
+         output: decimalMark: '.'
                  thousandsSeparator: ','
 onAfterSaveToFile: null
 onBeforeSaveToFile: null
@@ -205,8 +231,17 @@ onTableExportBegin: null
 onTableExportEnd: null
 outputMode: 'file'
 pdfmake: enabled: false
-         docDefinition: pageOrientation: 'portrait'
-                        defaultStyle: font: 'Roboto'
+         docDefinition: pageSize: 'A4'
+                        pageOrientation: 'portrait'
+                        styles: header: background: '#34495E'
+                                        color: '#FFFFFF'
+                                        bold: true
+                                        alignment: 'center'
+                                        fillColor: '#34495E'
+                        alternateRow: fillColor: '#f5f5f5'
+                        defaultStyle: color: '#000000'
+                                      fontSize: 8
+                                      font: 'Roboto'
          fonts: {}
 preserve: leadingWS: false
           trailingWS: false
@@ -219,29 +254,37 @@ theadSelector: 'tr'
 tableName: 'myTableName'
 type: 'csv'
 ```
-
-```ignoreColumn``` can be either an array of indexes (i.e. [0, 2]) or field names (i.e. ["id", "name"]).
+### Notes on options that apply to all formats
+The option ```ignoreColumn``` can be either an array of indexes (i.e. [0, 2]) or field names (i.e. ["id", "name"]), where
 * Indexes correspond to the position of the header elements `th` in the DOM starting at 0. (If the `th` elements are removed or added to the DOM, the indexes will be shifted so use the functionality wisely!)
 * Field names should correspond to the values set on the "data-field" attribute of the header elements `th` in the DOM.
 * "Nameless" columns without data-field attribute will be named by their index number (converted to a string)
 
 To disable formatting of numbers in the exported output, which can be useful for csv and excel format, set the option ``` numbers: output ``` to ``` false ```.
 
+There is an option ``` preventInjection ``` (enabled by default) that prevents the injection of formulas when exporting in CSV or Excel format. To achieve this, a single quote is appended to cell strings starting with =,+,- or @
+
+There are a couple of format-independent and format-specific callback functions that can be used to control the output result during export. All callback functions have a name starting with `on` and are initialized with null.
+
+### Notes for Excel formats
 Set the option ``` mso.fileFormat ``` to ``` 'xmlss' ``` if you want to export in XML Spreadsheet 2003 file format. Use this format if multiple tables should be exported into a single file. 
 
 Excel 2000 html format is the default excel file format which has better support of exporting table styles.
 
 The ``` mso.styles ``` option lets you define the css attributes of the original html table cells, that should be taken over when exporting to an excel worksheet (Excel 2000 html format only).
 
-To export in XSLX format [SheetJS/js-xlsx](https://github.com/SheetJS/js-xlsx) is used. Please note that the implementation of this format type lets you only export table data, but not any styling information of the html table.
+To export in XSLX format [SheetJS/js-xlsx](https://github.com/SheetJS/js-xlsx) is used. Please note that with this format the amount of exportable styling information of the HTML table is limited compared to other formats.
 
-Note: There is an option ``` preventInjection ``` (default is enabled) that prevents formula injection when exporting in CSV or Excel format. To achieve that a single quote will be prepended to cell strings that start with =,+,- or @   
+When exporting in Excel 2000 html format (xlshtml), the default extension of the output file is XLS, although the type of the file content is HTML. When you open a file in Microsoft Office Excel 2007 or later that contains content that does not match the extensionof the file, you receive the following warning message:
+```The file you are trying to open, 'name.ext', is in a different format than specified by the file extension. Verify that the file is not corrupted and is from a trusted source before opening the file. Do you want to open the file now?```
+According to a [Knowledge base article](https://support.microsoft.com/en-us/help/948615/error-opening-file-the-file-format-differs-from-the-format-that-the-fi) the warning message can help prevent unexpected problems that might occur because of possible incompatibility between the actual content of the file and the file name extension. The article also gives you some hints to disable the warning message.
 
-For jspdf options see the documentation of [jsPDF](https://github.com/MrRio/jsPDF) and [jsPDF-AutoTable](https://github.com/simonbengtsson/jsPDF-AutoTable) resp.
+### PDF format related options
+For jsPDF options see the documentation of [jsPDF](https://github.com/MrRio/jsPDF). To generate tables with jsPDF this plugin uses a specific modified version (2.0.17) of [jsPDF-AutoTable](https://github.com/simonbengtsson/jsPDF-AutoTable). Due to compatibility reasons the source code of this version has been integrated and was adapted.
 
-There is an extended setting for ``` jsPDF option 'format' ```. Setting the option value to ``` 'bestfit' ``` lets the tableExport plugin try to choose the minimum required paper format and orientation in which the table (or tables in multitable mode) completely fits without column adjustment.
+There is an extended setting for the jsPDF option ``` format ```. If you set the value of the option to ``bestfit``, the tableExport plugin will try to choose the minimum required paper size and orientation in which the table (or tables in multitable mode) can be displayed without column adjustment.
 
-Also there is an extended setting for the ``` jsPDF-AutoTable options 'fillColor', 'textColor' and 'fontStyle'```. When setting these option values to ``` 'inherit' ``` the original css values for background and text color will be used as fill and text color while exporting to pdf. A css font-weight >= 700 results in a bold fontStyle and the italic css font-style will be used as italic fontStyle.
+Also there is an extended setting for the jsPDF-AutoTable options ``` 'fillColor', 'textColor' and 'fontStyle'```. When setting these option values to ``` 'inherit' ``` the original css values for background and text color will be used as fill and text color while exporting to pdf. A css font-weight >= 700 results in a bold fontStyle and the italic css font-style will be used as italic fontStyle.
 
 When exporting to pdf the option ``` outputImages ``` lets you enable or disable the output of images that are located in the original html table.
 
@@ -357,9 +400,7 @@ Optional html data attributes
                                                    "56"                上午/下午 hh時mm分ss秒
 ```
 
-Excel Notes
-===========
-
-When exporting in Excel 2000 html format (xlshtml) the default extension of the result file is XLS although the type of the file content is HTML. When you open a file in Microsoft Office Excel 2007 or later that contains content that does not match the files extension, you receive the following warning message:
-```The file you are trying to open, 'name.ext', is in a different format than specified by the file extension. Verify that the file is not corrupted and is from a trusted source before opening the file. Do you want to open the file now?```
-According to this [Knowledge base article](https://support.microsoft.com/en-us/help/948615/error-opening-file-the-file-format-differs-from-the-format-that-the-fi) The warning message can help prevent unexpected problems that might occur because of possible incompatibility between the actual content of the file and the file name extension. The article also gives you some hints to disable the warning message.
+Support
+=======
+The IDE used in the development of this project is supported by [JetBrains](https://jb.gg/OpenSource).
+<div><img alt="https://jb.gg/OpenSource" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" style="width: 130px"></div>

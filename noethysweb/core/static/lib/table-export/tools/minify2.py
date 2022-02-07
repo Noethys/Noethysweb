@@ -1,9 +1,5 @@
 #!/usr/bin/python2
 
-#  Copyright (c) 2019-2021 Ivan LUCAS.
-#  Noethysweb, application de gestion multi-activités.
-#  Distribué sous licence GNU GPL.
-
 # Minify tableExport.jquery.plugin file(s)
 # using Simon Georget's python script to minify javascript files
 # https://github.com/simogeo/Filemanager/blob/master/utils/minify.py
