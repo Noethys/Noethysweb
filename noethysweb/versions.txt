@@ -1,3 +1,7 @@
+Version 1.0.6.4 (08/02/2022) :
+
+- Correction du délai de traitement des attentes
+
 Version 1.0.6.3 (07/02/2022) :
 
 - Correction de l'affichage du détail d'une facture sur le portail
