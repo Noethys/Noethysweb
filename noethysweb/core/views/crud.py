@@ -332,6 +332,11 @@ class Supprimer(BaseView, DeleteView):
 
         return context
 
+    def get_form_kwargs(self, **kwargs):
+        """ Pour compatibilité avec Django 4 """
+        form_kwargs = super(BaseView, self).get_form_kwargs(**kwargs)
+        return form_kwargs
+
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         pk = instance.pk
