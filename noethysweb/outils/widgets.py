@@ -41,4 +41,18 @@ class Documents_joints(Widget):
         return mark_safe(loader.render_to_string(self.template_name, context))
 
 
+class Texte_SMS(Widget):
+    template_name = 'outils/widgets/texte_sms.html'
 
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        context['name'] = name
+        if value is not None:
+            context['value'] = value
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))

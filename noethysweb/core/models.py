@@ -273,6 +273,24 @@ class AdresseMail(models.Model):
             return None
 
 
+class ConfigurationSMS(models.Model):
+    idconfiguration = models.AutoField(verbose_name="ID", db_column='IDconfiguration', primary_key=True)
+    moteur = models.CharField(verbose_name="Moteur", max_length=200, choices=[("mailjet", "Mailjet"),], help_text="Sélectionnez un moteur d'expédition.")
+    token = encrypt(models.CharField(verbose_name="Token", max_length=300, blank=True, null=True, help_text="Saisissez le token qui vous a été communiqué par votre fournisseur."))
+    nom_exp = models.CharField(verbose_name="Nom de l'expéditeur", max_length=11, blank=True, null=True, help_text="Saisissez le nom d'expéditeur qui doit apparaître dans le SMS (11 caractères max).")
+    nbre_caracteres = models.IntegerField(verbose_name="Nbre caractères max.", default=160, help_text="Précisez le nombre de caractères maximal accepté pour un SMS (160 par défaut).")
+    montant_unitaire = models.DecimalField(verbose_name="Montant unitaire", max_digits=10, decimal_places=4, default=0.0, help_text="Indiquez le coût unitaire d'un SMS.")
+    solde = models.IntegerField(verbose_name="Solde de SMS", blank=True, null=True, help_text="Précisez le nombre approximatif de SMS restants sur votre compte prépayé.")
+
+    class Meta:
+        db_table = 'configurations_sms'
+        verbose_name = "configuration SMS"
+        verbose_name_plural = "configurations SMS"
+
+    def __str__(self):
+        return self.nom_exp if self.nom_exp else "Configuration SMS"
+
+
 class Structure(models.Model):
     idstructure = models.AutoField(verbose_name="ID", db_column="IDstructure", primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=200)
@@ -287,6 +305,7 @@ class Structure(models.Model):
     gps = models.CharField(verbose_name="GPS", max_length=200, blank=True, null=True)
     logo_update = models.DateTimeField(verbose_name="Date MAJ Logo", max_length=200, blank=True, null=True)
     adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Adresse d'expédition", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez une des adresses d'expédition d'emails dans la liste. Il est possible de créer de nouvelles adresses depuis le menu Paramétrage > Adresses d'expédition.")
+    configuration_sms = models.ForeignKey(ConfigurationSMS, verbose_name="Configuration SMS", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez une configuration SMS dans la liste. Il est possible de créer de nouvelles configurations depuis le menu Paramétrage > Configurations SMS.")
     messagerie_active = models.BooleanField(verbose_name="Les familles sont autorisées à converser avec cette structure depuis la rubrique Contact du portail.", default=True)
     afficher_coords = models.BooleanField(verbose_name="Afficher les coordonnées de la structure sur le portail.", default=True)
 
@@ -340,6 +359,13 @@ class Utilisateur(AbstractUser):
                 return structure.adresse_exp
         return None
 
+    def Get_configuration_sms_defaut(self):
+        # Recherche une configuration SMS parmi celles des structures
+        for structure in self.structures.all():
+            if structure.configuration_sms:
+                return structure.configuration_sms
+        return None
+
     def Get_adresses_exp_possibles(self):
         liste_adresses_possibles = []
         if self.adresse_exp:
@@ -348,6 +374,13 @@ class Utilisateur(AbstractUser):
             if structure.adresse_exp and structure.adresse_exp_id not in liste_adresses_possibles:
                 liste_adresses_possibles.append(structure.adresse_exp_id)
         return liste_adresses_possibles
+
+    def Get_configurations_sms_possibles(self):
+        liste_configurations_possibles = []
+        for structure in self.structures.all():
+            if structure.configuration_sms and structure.configuration_sms_id not in liste_configurations_possibles:
+                liste_configurations_possibles.append(structure.configuration_sms_id)
+        return liste_configurations_possibles
 
 
 class Assureur(models.Model):
@@ -1636,6 +1669,7 @@ class Famille(models.Model):
     ville_resid = encrypt(models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True))
     secteur = models.ForeignKey(Secteur, verbose_name="Secteur", on_delete=models.PROTECT, blank=True, null=True)
     mail = encrypt(models.EmailField(verbose_name="Email favori", max_length=300, blank=True, null=True))
+    mobile = encrypt(models.CharField(verbose_name="Portable favori", max_length=100, blank=True, null=True))
     utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, null=True)
     certification_date = models.DateTimeField(verbose_name="Date de certification", blank=True, null=True)
 
@@ -1674,6 +1708,22 @@ class Famille(models.Model):
             for rattachement in rattachements:
                 if rattachement.individu.mail:
                     self.mail = rattachement.individu.mail
+                    break
+
+        # Mobile favori
+        if self.mobile:
+            # recherche si le mobile est toujours celui d'un titulaire de la famille
+            found = False
+            for rattachement in rattachements:
+                if rattachement.individu.tel_mobile == self.mobile:
+                    found = True
+            if not found:
+                self.mobile = None
+        if not self.mobile:
+            # Recherche un numéro de mobile valide parmi les titulaires de la famille
+            for rattachement in rattachements:
+                if rattachement.individu.tel_mobile:
+                    self.mobile = rattachement.individu.tel_mobile
                     break
 
         # Titulaire Hélios
@@ -3226,3 +3276,52 @@ class PortailDocument(models.Model):
 
     def Get_extension(self):
         return os.path.splitext(self.document.name)[1].replace(".", "")
+
+
+class DestinataireSMS(models.Model):
+    iddestinataire = models.AutoField(verbose_name="ID", db_column='IDdestinataire', primary_key=True)
+    categorie = models.CharField(verbose_name="Catégorie", max_length=300, blank=True, null=True)
+    individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.CASCADE)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", blank=True, null=True, on_delete=models.CASCADE)
+    contact = models.ForeignKey(Contact, verbose_name="Contact", blank=True, null=True, on_delete=models.CASCADE)
+    mobile = encrypt(models.EmailField(verbose_name="Mobile", max_length=300, blank=True, null=True))
+    date_envoi = models.DateTimeField(verbose_name="Date d'envoi", blank=True, null=True)
+    resultat_envoi = models.CharField(verbose_name="Résultat de l'envoi", max_length=300, blank=True, null=True)
+
+    class Meta:
+        db_table = 'destinataires_sms'
+        verbose_name = "destinataire SMS"
+        verbose_name_plural = "destinataires SMS"
+
+    def __str__(self):
+        return "Destinataire ID%d" % self.iddestinataire if self.iddestinataire else "Nouveau"
+
+
+class SMS(models.Model):
+    idsms = models.AutoField(verbose_name="ID", db_column='IDsms', primary_key=True)
+    objet = models.CharField(verbose_name="Objet", max_length=300, blank=True, null=True)
+    texte = models.TextField(verbose_name="Texte", blank=True, null=True)
+    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.CASCADE)
+    configuration_sms = models.ForeignKey(ConfigurationSMS, verbose_name="Configuration", blank=True, null=True, on_delete=models.SET_NULL)
+    destinataires = models.ManyToManyField(DestinataireSMS, verbose_name="Destinataires", blank=True)
+    date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
+    selection = models.CharField(verbose_name="Sélection", max_length=200, choices=[
+        ("NON_ENVOYE", "Uniquemement les destinataires qui n'ont pas déjà reçu le message"),
+        ("NON_ENVOYE_10", "Uniquemement les 10 premiers destinataires qui n'ont pas déjà reçu le message"),
+        ("NON_ENVOYE_50", "Uniquemement les 50 premiers destinataires qui n'ont pas déjà reçu le message"),
+        ("NON_ENVOYE_100", "Uniquemement les 100 premiers destinataires qui n'ont pas déjà reçu le message"),
+        ("TOUS", "Tous les destinataires")],
+        default="NON_ENVOYE")
+    verrouillage_destinataires = models.BooleanField(verbose_name="Verrouillages des destinataires", default=False)
+
+    class Meta:
+        db_table = 'sms'
+        verbose_name = "SMS"
+        verbose_name_plural = "SMS"
+
+    def __str__(self):
+        return "SMS du %s : %s" % (self.date_creation.strftime('%d/%m/%Y %H:%m') if self.date_creation else "X", self.objet if self.objet else "Sans objet")
+
+    def delete(self, *args, **kwargs):
+        self.destinataires.all().delete()
+        super().delete(*args, **kwargs)

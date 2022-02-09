@@ -1,0 +1,23 @@
+{% load static %}
+
+<style>
+    #compteur {
+        font-size: smaller;
+    }
+</style>
+
+
+<textarea name="{{ name }}" cols="40" rows="10" maxlength="{{ maxlength }}" class="{{ class }}" id="{{ id }}">{{ value }}</textarea>
+<span id="compteur" class="text-gray"></span>
+
+<script>
+    $(document).ready(function() {
+        maj_compteur();
+        $("#{{ id }}").on("input", function () {
+            maj_compteur();
+        });
+    })
+    function maj_compteur() {
+        $("#compteur").text("Nombre de caractères : " + $("#{{ id }}").val().length + " / " + $("#{{ id }}").attr("maxlength"));
+    }
+</script>

@@ -56,6 +56,7 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Email",
                 Field('adresse_exp'),
+                Field('configuration_sms'),
             ),
             Fieldset("Portail",
                 Field('messagerie_active'),

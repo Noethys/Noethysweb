@@ -9,7 +9,8 @@ from core.decorators import secure_ajax
 from outils.views import editeur_emails, editeur_emails_express, historique, update, sauvegarde_creer, statistiques, contacts, \
                         editeur_emails_familles, editeur_emails_individus, editeur_emails_contacts, editeur_emails_listes_diffusion, \
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
-                        demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur
+                        demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur, editeur_sms, editeur_sms_familles, \
+                        editeur_sms_individus, editeur_sms_saisie_libre, sms
 
 urlpatterns = [
 
@@ -39,6 +40,16 @@ urlpatterns = [
     path('outils/emails/supprimer/<int:pk>', emails.Supprimer.as_view(), name='emails_supprimer'),
     path('outils/emails/supprimer_plusieurs/<str:listepk>', emails.Supprimer_plusieurs.as_view(), name='emails_supprimer_plusieurs'),
 
+    # Editeur de SMS
+    path('outils/editeur_sms', editeur_sms.Ajouter.as_view(), name='editeur_sms'),
+    path('outils/editeur_sms/<int:pk>', editeur_sms.Modifier.as_view(), name='editeur_sms'),
+    path('outils/editeur_sms/familles/<int:idsms>', editeur_sms_familles.Liste.as_view(), name='editeur_sms_familles'),
+    path('outils/editeur_sms/individus/<int:idsms>', editeur_sms_individus.Liste.as_view(), name='editeur_sms_individus'),
+    path('outils/editeur_sms/saisie_libre/<int:idsms>', editeur_sms_saisie_libre.Liste.as_view(), name='editeur_sms_saisie_libre'),
+
+    path('outils/sms/liste', sms.Liste.as_view(), name='sms_liste'),
+    path('outils/sms/supprimer/<int:pk>', sms.Supprimer.as_view(), name='sms_supprimer'),
+    path('outils/sms/supprimer_plusieurs/<str:listepk>', sms.Supprimer_plusieurs.as_view(), name='sms_supprimer_plusieurs'),
 
     path('outils/historique', historique.Liste.as_view(), name='historique'),
     path('outils/update', update.View.as_view(), name='update'),

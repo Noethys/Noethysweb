@@ -5,20 +5,21 @@
 
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
+from crispy_forms.layout import Layout, Fieldset
+from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.models import Famille, Rattachement
+from core.forms.base import FormulaireBase
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    mail = forms.ChoiceField(label="Mail favori", choices=[], required=False)
+    mail = forms.ChoiceField(label="Mail favori", choices=[], required=False, help_text="Cette adresse mail sera privilégiée pour envoyer des mails à la famille.")
+    mobile = forms.ChoiceField(label="Portable favori", choices=[], required=False, help_text="Ce numéro de téléphone sera privilégié pour envoyer des SMS à la famille.")
 
     class Meta:
         model = Famille
-        fields = ["mail", "memo", "code_compta", "titulaire_helios", "idtiers_helios", "natidtiers_helios", "reftiers_helios", "cattiers_helios", "natjur_helios"]
+        fields = ["mail", "mobile", "memo", "code_compta", "titulaire_helios", "idtiers_helios", "natidtiers_helios", "reftiers_helios", "cattiers_helios", "natjur_helios"]
         widgets = {
             "memo": forms.Textarea(attrs={'rows': 3}),
         }
@@ -36,8 +37,9 @@ class Formulaire(FormulaireBase, ModelForm):
 
         rattachements = Rattachement.objects.select_related("individu").filter(famille_id=idfamille, titulaire=True).order_by("individu__nom", "individu__prenom")
 
-        # Mail favori
+        # Coordonnées favorites
         self.fields["mail"].choices = [(None, "---------")] + [(rattachement.individu.mail, rattachement.individu.mail) for rattachement in rattachements if rattachement.individu.mail]
+        self.fields["mobile"].choices = [(None, "---------")] + [(rattachement.individu.tel_mobile, "%s (%s)" % (rattachement.individu.tel_mobile, rattachement.individu.Get_nom())) for rattachement in rattachements if rattachement.individu.tel_mobile]
 
         # Titulaire hélios
         self.fields["titulaire_helios"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
@@ -55,8 +57,9 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Mémo",
                 Field("memo"),
             ),
-            Fieldset("Email",
+            Fieldset("Coordonnées",
                 Field("mail"),
+                Field("mobile"),
             ),
             Fieldset("Comptabilité",
                 Field("code_compta"),

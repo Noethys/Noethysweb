@@ -21,7 +21,8 @@ from parametrage.views import organisateur, structures, \
     questionnaires, adresses_mail, activites_assistant, activites_assistant_sejour, activites_assistant_cantine, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
     portail_parametres, types_regimes_alimentaires, assureurs, categories_compte_internet, modeles_pes, \
-    types_consentements, unites_consentements, articles, images_articles, albums, images_fond, portail_documents, portail_parametres_renseignements
+    types_consentements, unites_consentements, articles, images_articles, albums, images_fond, portail_documents, portail_parametres_renseignements, \
+    configurations_sms
 
 
 urlpatterns = [
@@ -382,6 +383,12 @@ urlpatterns = [
     path('parametrage/signatures_emails/supprimer/<int:pk>', signatures_emails.Supprimer.as_view(), name='signatures_emails_supprimer'),
     path('parametrage/signatures_emails/dupliquer/<int:pk>', signatures_emails.Dupliquer.as_view(), name='signatures_emails_dupliquer'),
 
+    # Configurations SMS
+    path('parametrage/configurations_sms/liste', configurations_sms.Liste.as_view(), name='configurations_sms_liste'),
+    path('parametrage/configurations_sms/ajouter', configurations_sms.Ajouter.as_view(), name='configurations_sms_ajouter'),
+    path('parametrage/configurations_sms/modifier/<int:pk>', configurations_sms.Modifier.as_view(), name='configurations_sms_modifier'),
+    path('parametrage/configurations_sms/supprimer/<int:pk>', configurations_sms.Supprimer.as_view(), name='configurations_sms_supprimer'),
+
     # Assureurs
     path('parametrage/assureurs/liste', assureurs.Liste.as_view(), name='assureurs_liste'),
     path('parametrage/assureurs/ajouter', assureurs.Ajouter.as_view(), name='assureurs_ajouter'),
@@ -461,6 +468,7 @@ urlpatterns = [
     path('parametrage/export_svg', secure_ajax(modeles_documents.Export_svg), name='ajax_export_svg'),
     path('parametrage/questions/deplacer_lignes', secure_ajax(questionnaires.Deplacer.as_view()), name='ajax_deplacer_lignes_questionnaires'),
     path('parametrage/adresses_mail/envoyer_mail_test', secure_ajax(adresses_mail.Envoyer_mail_test), name='ajax_envoyer_mail_test'),
+    path('parametrage/configurations_sms/envoyer_sms_test', secure_ajax(configurations_sms.Envoyer_sms_test), name='ajax_envoyer_sms_test'),
     path('parametrage/albums/importer_photos_album', secure_ajax(albums.Importer_photos_album), name="ajax_importer_photos_album"),
 
 ]

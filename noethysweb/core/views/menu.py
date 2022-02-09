@@ -95,6 +95,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_emails.Add(code="signatures_emails_liste", titre="Signatures d'emails", icone="file-text-o")
     menu_emails.Add(code="listes_diffusion_liste", titre="Listes de diffusion", icone="file-text-o")
 
+    # SMS
+    menu_sms = menu_parametrage.Add(titre="SMS")
+    menu_sms.Add(code="configurations_sms_liste", titre="Configurations SMS", icone="file-text-o", compatible_demo=False)
+
     # Calendrier
     menu_calendrier = menu_parametrage.Add(titre="Calendrier")
     menu_calendrier.Add(code="vacances_liste", titre="Périodes de vacances", icone="file-text-o")
@@ -123,11 +127,16 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_stats.Add(code="statistiques", titre="Statistiques générales", icone="file-text-o")
     menu_stats.Add(code="statistiques_portail", titre="Statistiques du portail", icone="file-text-o")
 
-    # Communication
+    # Emails
     menu_emails = menu_outils.Add(titre="Emails")
     menu_emails.Add(code="contacts_liste", titre="Carnets d'adresses", icone="file-text-o")
     menu_emails.Add(code="editeur_emails", titre="Editeur d'Emails", icone="file-text-o")
-    menu_emails.Add(code="emails_liste", titre="Listes des Emails", icone="file-text-o")
+    menu_emails.Add(code="emails_liste", titre="Liste des Emails", icone="file-text-o")
+
+    # SMS
+    menu_sms = menu_outils.Add(titre="SMS")
+    menu_sms.Add(code="editeur_sms", titre="Editeur de SMS", icone="file-text-o")
+    menu_sms.Add(code="sms_liste", titre="Liste des SMS", icone="file-text-o")
 
     # Outils
     menu_historique = menu_outils.Add(titre="Historique")
