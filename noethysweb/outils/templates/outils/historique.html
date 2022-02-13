@@ -1,0 +1,53 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+                    <div class="custom-control custom-checkbox custom-control-inline">
+                        <input type="checkbox" class="custom-control-input" id="id_check_delai" {% if afficher_dernier_mois %}checked{% endif %}>
+                        <label class="custom-control-label" for="id_check_delai">Afficher uniquement les actions des 10 derniers jours</label>
+                    </div>
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+    </div>
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        $(document).ready(function() {
+            $("#id_check_delai").on('change', function () {
+                var etat = $(this)[0].checked;
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_memorise_parametre' %}",
+                    data: {
+                        nom: "afficher_dernier_mois",
+                        categorie: "historique",
+                        valeur: etat,
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                    },
+                    datatype: "json",
+                    success: function (data) {
+                        // Recharge la liste
+                        var table = $('.datatable').DataTable()
+                        table.ajax.reload();
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock scripts %}

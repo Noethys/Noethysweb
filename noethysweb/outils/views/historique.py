@@ -3,10 +3,12 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from django.db.models import Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Famille, Historique
+from core.utils import utils_parametres
 
 
 class Page(crud.Page):
@@ -24,15 +26,20 @@ class Page(crud.Page):
 
 class Liste(Page, crud.Liste):
     model = Historique
+    template_name = "outils/historique.html"
 
     def get_queryset(self):
         conditions = (Q(utilisateur__structures__in=self.request.user.structures.all()) | Q(utilisateur__categorie="famille"))
+        self.afficher_dernier_mois = utils_parametres.Get(nom="afficher_dernier_mois", categorie="historique", utilisateur=self.request.user, valeur=True)
+        if self.afficher_dernier_mois:
+            conditions &= Q(horodatage__date__gte=datetime.date.today() - datetime.timedelta(days=10))
         return Historique.objects.select_related("famille", "individu", "utilisateur").filter(conditions, self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
+        context['afficher_dernier_mois'] = self.afficher_dernier_mois
         return context
 
     class datatable_class(MyDatatable):
