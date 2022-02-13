@@ -1,3 +1,10 @@
+Version 1.0.6.5 (13/02/2022) :
+
+- Ajout de l'éditeur de SMS
+- Ajout compatibilité Django 4
+- Amélioration du dépôt des règlements
+- Amélioration du dépôt des cotisations
+
 Version 1.0.6.4 (08/02/2022) :
 
 - Correction du délai de traitement des attentes
