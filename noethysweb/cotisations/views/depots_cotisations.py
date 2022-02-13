@@ -4,72 +4,13 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.http import HttpResponseRedirect
+from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import DepotCotisations, Cotisation
-from cotisations.forms.depots_cotisations import Formulaire
+from core.models import DepotCotisations, Cotisation, FiltreListe
 from core.utils import utils_texte, utils_preferences
-from django.shortcuts import render
-from django.db.models import Q, Count
-import json, datetime
-from decimal import Decimal
-from django.http import JsonResponse, HttpResponseRedirect
-
-
-
-
-def Get_stats(request):
-    liste_cotisations = request.POST.get("liste_cotisations")
-    if len(liste_cotisations) == 0:
-        texte = "Aucune adhésion incluse"
-    else:
-        liste_cotisations = [int(id) for id in liste_cotisations.split(";")]
-        liste_details = []
-        cotisations = Cotisation.objects.select_related('type_cotisation', 'unite_cotisation').values("type_cotisation__nom", "unite_cotisation__nom").filter(pk__in=liste_cotisations).annotate(nbre=Count("pk"))
-        for stat in cotisations:
-            liste_details.append("%d %s %s" % (stat["nbre"], stat["type_cotisation__nom"], stat["unite_cotisation__nom"]))
-        texte = "%d adhésions : %s." % (len(liste_cotisations), utils_texte.Convert_liste_to_texte_virgules(liste_details))
-    return JsonResponse({"texte": texte})
-
-
-
-def Modifier_cotisations(request):
-    """ Renvoie le contenu de la table """
-    liste_cotisations = request.POST.get("liste_cotisations")
-    only_inclus = True if request.POST.get("only_inclus") == "true" else False
-
-    if len(liste_cotisations) == 0:
-        liste_cotisations = []
-    else:
-        liste_cotisations = [int(id) for id in liste_cotisations.split(";")]
-    if only_inclus:
-        condition = Q(pk__in=liste_cotisations)
-    else:
-        condition = (Q(pk__in=liste_cotisations) | Q(depot_cotisation__isnull=True))
-
-    # Sélectionne uniquement les structures accessibles par l'utilisateur
-    condition &= (Q(type_cotisation__structure__in=request.user.structures.all()) | Q(type_cotisation__structure__isnull=True))
-
-    lignes = []
-    for cotisation in Cotisation.objects.select_related("type_cotisation", "type_cotisation__structure", "unite_cotisation", "famille", "individu").filter(condition):
-        lignes.append({
-            "pk": cotisation.pk,
-            "date_debut": str(cotisation.date_debut) if cotisation.date_debut else None,
-            "date_fin": str(cotisation.date_fin) if cotisation.date_fin else None,
-            "type_cotisation": cotisation.type_cotisation.nom,
-            "unite_cotisation": cotisation.unite_cotisation.nom,
-            "famille": cotisation.famille.nom,
-            "individu": cotisation.individu.Get_nom() if cotisation.individu else None,
-            "date_creation_carte": str(cotisation.date_creation_carte) if cotisation.date_creation_carte else None,
-            "observations": cotisation.observations if cotisation.observations else None,
-        })
-
-    context = {
-        "resultats": json.dumps(lignes),
-        "selections": json.dumps(liste_cotisations),
-        "only_inclus": only_inclus,
-    }
-    return render(request, "cotisations/selection_cotisations_depot.html", context)
+from cotisations.forms.depots_cotisations import Formulaire
 
 
 class Page(crud.Page):
@@ -78,6 +19,7 @@ class Page(crud.Page):
     url_ajouter = "depots_cotisations_ajouter"
     url_modifier = "depots_cotisations_modifier"
     url_supprimer = "depots_cotisations_supprimer"
+    url_consulter = "depots_cotisations_consulter"
     description_liste = "Voici ci-dessous la liste des dépôts d'adhésions."
     description_saisie = "Saisissez toutes les informations concernant le dépôt à saisir et cliquez sur le bouton Enregistrer."
     objet_singulier = "un dépôt d'adhésions"
@@ -85,47 +27,6 @@ class Page(crud.Page):
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
     ]
-
-    def form_valid(self, form):
-        if form.is_valid() == False:
-            return self.render_to_response(self.get_context_data(form=form))
-
-        # Recherche les cotisations existantes pour ce dépôt
-        if self.object:
-            cotisations_existantes = Cotisation.objects.filter(depot_cotisation=self.object)
-        else:
-            cotisations_existantes = []
-
-        # Recherche les cotisations associées
-        if len(form.cleaned_data["cotisations"]) == 0:
-            liste_idcotisation = []
-        else:
-            liste_idcotisation = [int(id) for id in form.cleaned_data["cotisations"].split(";")]
-        liste_modifications = []
-        liste_cotisations = Cotisation.objects.filter(pk__in=liste_idcotisation)
-
-        # Enregistrement du dépôt
-        if not self.object:
-            self.object = form.save()
-
-        self.object.quantite = len(liste_cotisations)
-        self.object.save()
-
-        # Modification des règlements associés
-        for cotisation in liste_cotisations:
-            cotisation.depot_cotisation = self.object
-            liste_modifications.append(cotisation)
-
-        # Détache du dépôt les règlements qui ne sont plus associés
-        for cotisation in cotisations_existantes:
-            if cotisation not in liste_cotisations:
-                cotisation.depot_cotisation = None
-                liste_modifications.append(cotisation)
-
-        # Enregistrement des modifications dans la db
-        Cotisation.objects.bulk_update(liste_modifications, ["depot_cotisation"], batch_size=50)
-
-        return HttpResponseRedirect(self.get_success_url())
 
 
 class Liste(Page, crud.Liste):
@@ -142,18 +43,21 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['iddepot', 'date', 'nom', 'quantite', 'verrouillage', 'observations']
-
-        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
+        filtres = ["iddepot", 'verrouillage', 'date', 'nom', 'quantite', 'observations']
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         verrouillage = columns.TextColumn("Verrouillage", sources=["montant"], processor='Get_verrouillage')
 
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['iddepot', 'verrouillage', 'date', 'nom', 'quantite', 'observations']
             processors = {
-                'date': helpers.format_date('%d/%m/%Y'),
+                "date": helpers.format_date("%d/%m/%Y"),
+                "montant": "Formate_montant",
             }
-            ordering = ['date']
+            ordering = ["date"]
+
+        def Formate_montant(self, instance, **kwargs):
+            return "%0.2f %s" % (instance.montant or 0.0, utils_preferences.Get_symbole_monnaie())
 
         def Get_verrouillage(self, instance, **kwargs):
             if instance.verrouillage:
@@ -161,13 +65,138 @@ class Liste(Page, crud.Liste):
             else:
                 return "<span class='text-red'><i class='fa fa-unlock margin-r-5'></i> Non verrouillé</span>"
 
+        def Get_actions_speciales(self, instance, *args, **kwargs):
+            view = kwargs["view"]
+            html = [
+                self.Create_bouton_modifier(url=reverse(view.url_consulter, args=[instance.pk])),
+                self.Create_bouton_supprimer(url=reverse(view.url_supprimer, args=[instance.pk])),
+            ]
+            return self.Create_boutons_actions(html)
+
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
 
+    def get_success_url(self):
+        return reverse_lazy(self.url_consulter, kwargs={'pk': self.object.iddepot})
+
+
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire
+
+    def get_success_url(self):
+        return reverse_lazy(self.url_consulter, kwargs={'pk': self.kwargs['pk']})
+
 
 class Supprimer(Page, crud.Supprimer):
     pass
 
+
+class Consulter(Page, crud.Liste):
+    template_name = "cotisations/depots_cotisations.html"
+    mode = "CONSULTATION"
+    model = Cotisation
+    boutons_liste = []
+    url_supprimer_plusieurs = "depots_cotisations_supprimer_plusieurs_cotisations"
+
+    def get_queryset(self):
+        return Cotisation.objects.select_related('famille', 'individu', 'type_cotisation', 'type_cotisation__structure', 'unite_cotisation', 'depot_cotisation').filter(self.Get_filtres("Q"), depot_cotisation_id=self.kwargs["pk"])
+
+    def Get_stats(self, iddepot=None):
+        quantite = Cotisation.objects.filter(depot_cotisation_id=iddepot).count()
+        if not quantite:
+            texte = "<b>Aucune adhésion incluse</b> : Cliquez sur 'Ajouter des adhésions' pour commencer..."
+        else:
+            texte = "<b>%d adhésions</b>" % quantite
+        return texte
+
+    def get_context_data(self, **kwargs):
+        context = super(Consulter, self).get_context_data(**kwargs)
+        context['box_titre'] = "Consulter un dépot"
+        context['box_introduction'] = "Vous pouvez ici ajouter des adhésions au dépot ou modifier les paramètres du dépôt."
+        context['onglet_actif'] = "depots_cotisations_liste"
+        context['active_checkbox'] = True
+        context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={"iddepot": self.kwargs["pk"], "listepk": "xxx"})
+        context['depot'] = DepotCotisations.objects.get(pk=self.kwargs["pk"])
+        context["stats"] = self.Get_stats(iddepot=self.kwargs["pk"])
+        return context
+
+    class datatable_class(MyDatatable):
+        filtres = ["ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille", "idcotisation",
+                   "date_saisie", "date_creation_carte", 'famille__nom', 'individu__nom', 'individu__prenom', "numero",
+                   "date_debut", "date_fin", "observations", "type_cotisation__nom", "unite_cotisation__nom"]
+        check = columns.CheckBoxSelectColumn(label="")
+        individu = columns.CompoundColumn("Individu", sources=['individu__nom', 'individu__prenom'])
+        famille = columns.TextColumn("Famille", sources=['famille__nom'])
+        nom_cotisation = columns.TextColumn("Nom", sources=['type_cotisation__nom', 'unite_cotisation__nom'], processor='Get_nom_cotisation')
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
+
+        class Meta:
+            structure_template = MyDatatable.structure_template
+            columns = ["check", "idcotisation", "date_debut", "date_fin", "famille", "individu", "nom_cotisation", "numero", "actions"]
+            processors = {
+                "date_debut": helpers.format_date("%d/%m/%Y"),
+                "date_fin": helpers.format_date("%d/%m/%Y"),
+            }
+            labels = {
+                "date_debut": "Début",
+                "date_fin": "Fin",
+            }
+            ordering = ["-idcotisation"]
+
+        def Get_nom_cotisation(self, instance, *args, **kwargs):
+            if instance.prestation:
+                return instance.prestation.label
+            else:
+                return "%s - %s" % (instance.type_cotisation.nom, instance.unite_cotisation.nom)
+
+        def Get_actions_speciales(self, instance, *args, **kwargs):
+            html = [
+                self.Create_bouton_supprimer(url=reverse("depots_cotisations_supprimer_cotisation", kwargs={"iddepot": instance.depot_cotisation_id, "pk": instance.pk})),
+            ]
+            return self.Create_boutons_actions(html)
+
+        def Formate_montant(self, instance, **kwargs):
+            return utils_texte.Formate_montant(instance.montant)
+
+
+class Supprimer_cotisation(Page, crud.Supprimer):
+    model = Cotisation
+    objet_singulier = "une adhésion"
+
+    def delete(self, request, *args, **kwargs):
+        # Modification du dépôt de cette cotisation
+        cotisation = self.get_object()
+        cotisation.depot_cotisation = None
+        cotisation.save()
+
+        # Enregistrement de la nouvelle quantité du dépôt
+        DepotCotisations.objects.get(pk=self.kwargs["iddepot"]).Maj_quantite()
+
+        # Confirmation de la suppression
+        messages.add_message(self.request, messages.SUCCESS, 'Suppression effectuée avec succès')
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse_lazy(self.url_consulter, kwargs={"pk": self.kwargs["iddepot"]})
+
+
+class Supprimer_plusieurs_cotisations(Page, crud.Supprimer_plusieurs):
+    model = Cotisation
+    objet_pluriel = "des adhésions"
+
+    def post(self, request, **kwargs):
+        # Modification du dépôt de ces adhésions
+        for cotisation in self.get_objets():
+            cotisation.depot_cotisation = None
+            cotisation.save()
+
+        # Enregistrement de la nouvelle quantité du dépôt
+        DepotCotisations.objects.get(pk=self.kwargs["iddepot"]).Maj_quantite()
+
+        # Confirmation de la suppression
+        messages.add_message(self.request, messages.SUCCESS, 'Suppressions effectuées avec succès')
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse_lazy(self.url_consulter, kwargs={"pk": self.kwargs["iddepot"]})

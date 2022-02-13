@@ -2106,6 +2106,10 @@ class DepotCotisations(models.Model):
             return "%s (%s)" % (self.nom, utils_dates.ConvertDateToFR(self.date))
         return self.nom if self.nom else "Nouveau dépôt"
 
+    def Maj_quantite(self):
+        self.quantite = Cotisation.objects.filter(depot_cotisation=self).count()
+        self.save()
+
 
 class Cotisation(models.Model):
     idcotisation = models.AutoField(verbose_name="ID", db_column='IDcotisation', primary_key=True)

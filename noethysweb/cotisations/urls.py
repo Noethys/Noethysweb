@@ -7,7 +7,7 @@ from django.urls import include, path
 from core.views import toc
 from core.decorators import secure_ajax
 from cotisations.views import liste_cotisations, liste_cotisations_disponibles, depots_cotisations, saisie_lot_cotisations, liste_cotisations_manquantes, \
-                            cotisations_impression, cotisations_email
+                            cotisations_impression, cotisations_email, depots_cotisations_selection
 
 urlpatterns = [
 
@@ -27,16 +27,17 @@ urlpatterns = [
 
     # Dépôts de cotisations
     path('cotisations/liste_cotisations_disponibles', liste_cotisations_disponibles.Liste.as_view(), name='liste_cotisations_disponibles'),
+
     path('cotisations/depots_cotisations/liste', depots_cotisations.Liste.as_view(), name='depots_cotisations_liste'),
     path('cotisations/depots_cotisations/ajouter', depots_cotisations.Ajouter.as_view(), name='depots_cotisations_ajouter'),
     path('cotisations/depots_cotisations/modifier/<int:pk>', depots_cotisations.Modifier.as_view(), name='depots_cotisations_modifier'),
     path('cotisations/depots_cotisations/supprimer/<int:pk>', depots_cotisations.Supprimer.as_view(), name='depots_cotisations_supprimer'),
-
-
+    path('cotisations/depots_cotisations/consulter/<int:pk>', depots_cotisations.Consulter.as_view(), name='depots_cotisations_consulter'),
+    path('cotisations/depots_cotisations/cotisations/ajouter/<int:iddepot>', depots_cotisations_selection.Liste.as_view(), name='depots_cotisations_ajouter_cotisation'),
+    path('cotisations/depots_cotisations/cotisations/supprimer/<int:iddepot>/<int:pk>', depots_cotisations.Supprimer_cotisation.as_view(), name='depots_cotisations_supprimer_cotisation'),
+    path('cotisations/depots_cotisations/cotisations/supprimer_plusieurs/<int:iddepot>/<str:listepk>', depots_cotisations.Supprimer_plusieurs_cotisations.as_view(), name='depots_cotisations_supprimer_plusieurs_cotisations'),
 
     # AJAX
-    path('cotisations/depots_cotisations/modifier_cotisations', secure_ajax(depots_cotisations.Modifier_cotisations), name='ajax_modifier_cotisations_depot'),
-    path('cotisations/depots_cotisations/get_stats', secure_ajax(depots_cotisations.Get_stats), name='ajax_get_cotisations_stats'),
     path('cotisations/get_table_beneficiaires', secure_ajax(saisie_lot_cotisations.Get_table_beneficiaires), name='ajax_get_table_beneficiaires'),
     path('cotisations/cotisations_impression_pdf', secure_ajax(cotisations_impression.Impression_pdf), name='ajax_cotisations_impression_pdf'),
     path('cotisations/cotisations_email_pdf', secure_ajax(cotisations_email.Impression_pdf), name='ajax_cotisations_email_pdf'),
