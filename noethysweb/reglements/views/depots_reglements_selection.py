@@ -29,9 +29,6 @@ class Liste(crud.Page, crud.Liste):
         context['bouton_supprimer'] = False
         context["hauteur_table"] = "400px"
         context['iddepot'] = self.kwargs.get("iddepot")
-        context['boutons_liste'] = [
-            {"label": "Revenir à la page précédente", "classe": "btn btn-danger", "href": reverse_lazy("depots_reglements_consulter", kwargs={"pk": self.kwargs.get("iddepot")}), "icone": "fa fa-reply"},
-        ]
         return context
 
     class datatable_class(MyDatatable):

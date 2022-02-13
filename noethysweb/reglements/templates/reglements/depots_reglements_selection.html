@@ -10,15 +10,13 @@
                 {% block box_titre %}{{ box_titre }}{% endblock %}
                 {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
                 {% block box_contenu %}
-                    {% embed 'core/crud/liste.html' %}
-                    {% endembed %}
 
                     <form id="form_selections" method="POST">
                         <input type="hidden" name="selections" value="">
                         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
                         <div class="buttonHolder" style="margin-top: 20px;">
-                            <div class="text-right" >
+                            <div>
                                 <button class="btn btn-primary btn-primary" id="bouton_valider"><i class="fa fa-check margin-r-5"></i>Ajouter les règlements cochés</button>
                                 <a class="btn btn-danger" href="{% url 'depots_reglements_consulter' pk=iddepot %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
                             </div>
@@ -31,6 +29,9 @@
                             $('#form_selections').submit();
                         });
                     </script>
+
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
 
                 {% endblock box_contenu %}
             {% endembed %}
