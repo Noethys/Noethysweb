@@ -2436,6 +2436,10 @@ class Depot(models.Model):
             return "%s (%s)" % (self.nom, utils_dates.ConvertDateToFR(self.date))
         return self.nom if self.nom else "Nouveau dépôt"
 
+    def Maj_montant(self):
+        self.montant = Reglement.objects.filter(depot=self).aggregate(Sum("montant"))["montant__sum"]
+        self.save()
+
 
 class Reglement(models.Model):
     idreglement = models.AutoField(verbose_name="ID", db_column='IDreglement', primary_key=True)
