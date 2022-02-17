@@ -91,7 +91,7 @@ class Liste_commun():
                         resultats = [resultat[donnee] for resultat in Inscription.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
                     if filtre["condition"] == "PRESENT":
                         donnee = "inscription__famille" if type_champ == "fpresent" else "individu"
-                        condition &= Q(date__gte=criteres[1]) & Q(date__lte=criteres[2])
+                        condition &= Q(date__gte=criteres[1]) & Q(date__lte=criteres[2]) & Q(etat__in=("reservation", "present"))
                         resultats = [resultat[donnee] for resultat in Consommation.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
                     if filtre["condition"] == "SANS_RESA":
                         donnee = "famille" if type_champ == "fpresent" else "individu"
