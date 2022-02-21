@@ -210,10 +210,10 @@ class Exporter():
                     ligne[5] = ConvertToTexte(self.lot.modele.code_budget[:10])
 
                     # Exercice - Entier
-                    ligne[6] = str(self.lot.exercice)
+                    ligne[6] = ConvertToTexte(self.lot.exercice)
 
                     # Multiple - Texte (1)
-                    ligne[7] = ConvertToTexte("M" if num_sous_ligne == 1 else "S")
+                    ligne[7] = ConvertToTexte("")# ConvertToTexte("M" if num_sous_ligne == 1 else "S")
 
                     # CodeTiers - Texte (15)
                     ligne[8] = ConvertToTexte("FAM%06d" % piece.famille_id)
@@ -253,43 +253,43 @@ class Exporter():
                     ligne[25] = ConvertToTexte(utils_dates.ConvertDateToFR(self.lot.date_emission))
 
                     # Article - Texte (10)
-                    ligne[26] = IDposte[:10]
+                    ligne[26] = ConvertToTexte(IDposte[:10])
 
                     # Opération - Texte (10)
-                    ligne[27] = self.lot.modele.operation or ""
+                    ligne[27] = ConvertToTexte(self.lot.modele.operation or "")
 
                     # Service - Texte (15)
-                    ligne[28] = self.lot.modele.service1 or ""
+                    ligne[28] = ConvertToTexte(self.lot.modele.service1 or "")
 
                     # Fonction - Texte (10)
-                    ligne[29] = self.lot.modele.fonction or ""
+                    ligne[29] = ConvertToTexte(self.lot.modele.fonction or "")
 
                     # Montant HT - Monétaire (,4)
-                    ligne[30] = str(montant) + "00"
+                    ligne[30] = ConvertToTexte(str(montant))
 
                     # Montant TVA - Monétaire (,4)
-                    ligne[31] = "0.0000"
+                    ligne[31] = ConvertToTexte("0.00")
 
                     # Solder - O/N
-                    ligne[32] = "0"
+                    ligne[32] = ConvertToTexte("0")
 
                     # Priorité - Entier
-                    ligne[33] = ""
+                    ligne[33] = ConvertToTexte("")
 
                     # Accepté - O/N
-                    ligne[35] = ""
+                    ligne[35] = ConvertToTexte("")
 
                     # Erroné - O/N
-                    ligne[36] = ""
+                    ligne[36] = ConvertToTexte("")
 
                     # NJ - Texte (2)
                     ligne[38] = ConvertToTexte("%02d" % piece.famille.natjur_helios)
 
                     # TvaTaux - Reel Simple (5)
-                    ligne[40] = "0.000000"
+                    ligne[40] = ConvertToTexte("")
 
                     # Service 2 - Texte (10)
-                    ligne[41] = self.lot.modele.service2 or ""
+                    ligne[41] = ConvertToTexte(self.lot.modele.service2 or "")
 
                     # Mixte - Texte (1)
                     ligne[44] = ConvertToTexte("")
@@ -307,10 +307,10 @@ class Exporter():
                     ligne[50] = ConvertToTexte("")
 
                     # DelaiPaiement - Entier
-                    ligne[51] = ""
+                    ligne[51] = ConvertToTexte("")
 
                     # CPL - Texte (4)
-                    ligne[54] = code_produit_local[:4]
+                    ligne[54] = ConvertToTexte(code_produit_local[:4])
 
                     # Prélèvement :
                     if piece.prelevement:
@@ -326,7 +326,7 @@ class Exporter():
                         ligne[66] = ConvertToTexte(piece.prelevement_mandat.bic)
 
                     # Tribunal - Texte (100)
-                    ligne[68] = ConvertToTexte(self.lot.modele.nom_tribunal[:100])
+                    ligne[68] = ConvertToTexte("")#ConvertToTexte(self.lot.modele.nom_tribunal[:100])
 
                     # TIPI - O/N
                     ligne[70] = ConvertToTexte("O" if self.lot.modele.payable_internet else "N")
@@ -348,7 +348,7 @@ class Exporter():
                         ligne[75] = ConvertToTexte(piece.prelevement_mandat.rum)
 
                     # RUMMigre - O/N
-                    ligne[76] = ConvertToTexte("N")
+                    ligne[76] = ConvertToTexte("")
 
                     # RUM - Texte (35)
                     if piece.prelevement:
@@ -374,10 +374,10 @@ class Exporter():
                     ligne[90] = ConvertToTexte("19")
 
                     # CategorieTiersPES - Numérique (2)
-                    ligne[91] = ConvertToTexte(piece.famille.cattiers_helios)
+                    ligne[91] = ConvertToTexte("%02d" % piece.famille.cattiers_helios)
 
                     # NatJuridiqueTiersPES - Numérique (2)
-                    ligne[92] = ConvertToTexte(piece.famille.natjur_helios)
+                    ligne[92] = ConvertToTexte("%02d" % piece.famille.natjur_helios)
 
                     # Civilité - Texte (32)
                     civilite_titulaire = piece.famille.titulaire_helios.Get_abrege_civilite()
@@ -398,7 +398,7 @@ class Exporter():
                     ligne[98] = ConvertToTexte("01")
 
                     # DatNaisTiers - Texte (10)
-                    ligne[107] = ConvertToTexte(utils_dates.ConvertDateToFR(piece.famille.titulaire_helios.date_naiss)) if piece.famille.titulaire_helios.date_naiss else ""
+                    ligne[107] = ConvertToTexte(utils_dates.ConvertDateToFR(piece.famille.titulaire_helios.date_naiss) if piece.famille.titulaire_helios.date_naiss else "")
 
                     # TitreASAP - O/N
                     ligne[108] = ConvertToTexte("O")
@@ -416,7 +416,7 @@ class Exporter():
                     # ligne[113] = ConvertToTexte(self.lot.date_envoi.strftime("%Y%m%d"))
 
                     # Formatage de la ligne
-                    texte_ligne = ['""' for x in range(0, 123)]
+                    texte_ligne = ['""' for x in range(0, 125)]
                     for index, valeur in ligne.items():
                         texte_ligne[index-1] = valeur
                     lignes.append(";".join(texte_ligne))
