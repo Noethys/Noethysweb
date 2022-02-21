@@ -1275,6 +1275,7 @@ function validation_form(event) {
         "individus": Get_individus(),
         "periode": Get_periode(),
         "activite": Get_activite(),
+        "ancienne_activite": selection_activite,
         "groupes": Get_groupes(),
         "classes": Get_classes(),
         "mode_parametres": Get_mode_parametres(),

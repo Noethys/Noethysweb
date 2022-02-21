@@ -53,11 +53,12 @@ class View(CustomView, TemplateView):
             data["memos"] = donnees_post["memos"]
             data["periode"] = donnees_post["periode"]
             data["selection_activite"] = Activite.objects.get(pk=donnees_post.get("activite")) if donnees_post.get("activite") else None
+            data["ancienne_activite"] = donnees_post.get("ancienne_activite", None)
             data["selection_groupes"] = [int(idgroupe) for idgroupe in donnees_post.get("groupes", [])] if donnees_post.get("groupes") else None
             data["selection_classes"] = [int(idclasse) for idclasse in donnees_post.get("classes", [])] if donnees_post.get("classes") else None
             data["options"] = donnees_post["options"]
             data["dict_suppressions"] = donnees_post["suppressions"]
-            data["mode_parametres"] = donnees_post["mode_parametres"]
+            data["mode_parametres"] = donnees_post.get("mode_parametres", None)
         else:
             # Si c'est un chargement initial de la page
             date_jour = str(datetime.date.today())
@@ -79,6 +80,10 @@ class View(CustomView, TemplateView):
         if data['liste_activites_possibles'] and (not data["selection_activite"] or data["selection_activite"] not in data['liste_activites_possibles']):
             data['selection_activite'] = data['liste_activites_possibles'][0]
 
+        # Si changement d'activité, on réinitialise la sélection des groupes
+        if data.get("ancienne_activite", None) != (data["selection_activite"].pk if data["selection_activite"] else None):
+            data["selection_groupes"] = None
+
         # Importation des consommations
         conditions = Q(date=data["date_min"])
         if data["selection_activite"] != None: conditions &= Q(activite=data["selection_activite"])
@@ -93,7 +98,7 @@ class View(CustomView, TemplateView):
         selection_idactivite = data["selection_activite"].pk if data["selection_activite"] else None
         for key_case, dict_conso in data["consommations"].items():
             for conso in dict_conso:
-                if conso["inscription"] not in liste_idinscriptions and str(conso["date"]) == str(data["date_min"]) and conso["activite"] == selection_idactivite:
+                if conso["inscription"] not in liste_idinscriptions and str(conso["date"]) == str(data["date_min"]) and conso["activite"] == selection_idactivite and (not data["selection_groupes"] or conso["groupe"] in data["selection_groupes"]):
                     liste_idinscriptions.append(conso["inscription"])
 
         # Ajouter un nouvel individu
