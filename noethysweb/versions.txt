@@ -1,3 +1,12 @@
+Version 1.0.6.6 (21/02/2022) :
+
+- Limitation de l'affichage de l'historique général
+- Remplace Annuler par Fermer dans les éditeurs mails et sms
+- Affiche les auteurs des mails et sms
+- Correction de la sélection des groupes dans le gestionnaire
+- Correction du filtre de liste présents
+- Correction de l'export BL
+
 Version 1.0.6.5 (13/02/2022) :
 
 - Ajout de l'éditeur de SMS
