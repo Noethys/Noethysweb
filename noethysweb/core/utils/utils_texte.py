@@ -53,3 +53,6 @@ def ConvertListeToStr(liste=[], separateur=";"):
     if liste == None : liste = []
     return separateur.join([str(x) for x in liste])
 
+def Supprimer_accents(texte=""):
+    import unicodedata
+    return unicodedata.normalize('NFKD', texte).encode('ASCII', 'ignore').decode("utf-8")

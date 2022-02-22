@@ -1681,64 +1681,76 @@ class Famille(models.Model):
     def __str__(self):
         return self.nom if self.nom else "Famille ID%d" % self.pk
 
-    def Maj_infos(self):
+    def Maj_infos(self, maj_adresse=True, maj_mail=True, maj_mobile=True, maj_titulaire_helios=True, maj_code_compta=True):
         """ MAJ du nom des titulaires et de l'adresse de la famille """
-        dict_infos = self.Get_infos()
+        # MAJ Adresse de la famille
+        if maj_adresse:
+            dict_infos = self.Get_infos()
+            self.nom = dict_infos["nom"]
+            self.rue_resid = dict_infos.get("rue", None)
+            self.cp_resid = dict_infos.get("cp", None)
+            self.ville_resid = dict_infos.get("ville", None)
+            self.secteur = dict_infos.get("secteur", None)
 
-        # Adresse de la famille
-        self.nom = dict_infos["nom"]
-        self.rue_resid = dict_infos.get("rue", None)
-        self.cp_resid = dict_infos.get("cp", None)
-        self.ville_resid = dict_infos.get("ville", None)
-        self.secteur = dict_infos.get("secteur", None)
-
+        # Recherche des titulaires
         rattachements = Rattachement.objects.prefetch_related('individu').filter(famille=self, categorie=1, titulaire=True).order_by("pk")
 
         # Mail favori
-        if self.mail:
-            # recherche si l'adresse est toujours celle d'un titulaire de la famille
-            found = False
-            for rattachement in rattachements:
-                if rattachement.individu.mail == self.mail:
-                    found = True
-            if not found:
-                self.mail = None
-        if not self.mail:
-            # Recherche une adresse mail valide parmi les titulaires de la famille
-            for rattachement in rattachements:
-                if rattachement.individu.mail:
-                    self.mail = rattachement.individu.mail
-                    break
+        if maj_mail:
+            if self.mail:
+                # recherche si l'adresse est toujours celle d'un titulaire de la famille
+                found = False
+                for rattachement in rattachements:
+                    if rattachement.individu.mail == self.mail:
+                        found = True
+                if not found:
+                    self.mail = None
+            if not self.mail:
+                # Recherche une adresse mail valide parmi les titulaires de la famille
+                for rattachement in rattachements:
+                    if rattachement.individu.mail:
+                        self.mail = rattachement.individu.mail
+                        break
 
         # Mobile favori
-        if self.mobile:
-            # recherche si le mobile est toujours celui d'un titulaire de la famille
-            found = False
-            for rattachement in rattachements:
-                if rattachement.individu.tel_mobile == self.mobile:
-                    found = True
-            if not found:
-                self.mobile = None
-        if not self.mobile:
-            # Recherche un numéro de mobile valide parmi les titulaires de la famille
-            for rattachement in rattachements:
-                if rattachement.individu.tel_mobile:
-                    self.mobile = rattachement.individu.tel_mobile
-                    break
+        if maj_mobile:
+            if self.mobile:
+                # recherche si le mobile est toujours celui d'un titulaire de la famille
+                found = False
+                for rattachement in rattachements:
+                    if rattachement.individu.tel_mobile == self.mobile:
+                        found = True
+                if not found:
+                    self.mobile = None
+            if not self.mobile:
+                # Recherche un numéro de mobile valide parmi les titulaires de la famille
+                for rattachement in rattachements:
+                    if rattachement.individu.tel_mobile:
+                        self.mobile = rattachement.individu.tel_mobile
+                        break
 
         # Titulaire Hélios
-        if self.titulaire_helios:
-            # recherche si le titulaire est toujours dans la famille
-            found = False
-            for rattachement in rattachements:
-                if rattachement.individu == self.titulaire_helios:
-                    found = True
-            if not found:
-                self.titulaire_helios = None
-        if not self.titulaire_helios:
-            # Recherche un individu valide parmi les titulaires de la famille
-            if rattachements:
-                self.titulaire_helios = rattachements.first().individu
+        if maj_titulaire_helios:
+            if self.titulaire_helios:
+                # recherche si le titulaire est toujours dans la famille
+                found = False
+                for rattachement in rattachements:
+                    if rattachement.individu == self.titulaire_helios:
+                        found = True
+                if not found:
+                    self.titulaire_helios = None
+            if not self.titulaire_helios:
+                # Recherche un individu valide parmi les titulaires de la famille
+                if rattachements:
+                    self.titulaire_helios = rattachements.first().individu
+
+        # Code comptable
+        if maj_code_compta:
+            if not self.code_compta and rattachements:
+                titulaire = rattachements.first()
+                nom = utils_texte.Supprimer_accents(titulaire.individu.nom.upper())
+                prenom = utils_texte.Supprimer_accents(titulaire.individu.prenom.upper()) if titulaire.individu.prenom else ""
+                self.code_compta = ("%d%s_%s" % (self.idfamille, nom, prenom))[:15]
 
         self.save()
 
