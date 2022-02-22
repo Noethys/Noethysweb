@@ -1,3 +1,7 @@
+Version 1.0.6.7 (22/02/2022) :
+
+- Génération auto des codes comptables des familles
+
 Version 1.0.6.6 (21/02/2022) :
 
 - Limitation de l'affichage de l'historique général
