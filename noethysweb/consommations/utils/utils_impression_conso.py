@@ -277,12 +277,16 @@ class Impression(utils_impression.Impression):
         styleEntetes = ParagraphStyle(name="entetes", fontName="Helvetica", alignment=1, fontSize=6, leading=7)
         styleDifferences = ParagraphStyle(name="differences", fontName="Helvetica", alignment=1, fontSize=4, spaceAfter=0, leading=5, textColor=colors.grey)
 
+        # Nom du profil
+        profil = self.dict_donnees.get("profil", None)
+        nom_profil = profil.nom if profil else None
+
         # Création du header du document
         def CreationTitreDocument():
             self.titre = "Consommations"
             if len(self.dict_donnees["dates"]) == 1:
                 self.titre = "Consommations du %s" % utils_dates.DateComplete(min(self.dict_donnees["dates"]))
-            self.Insert_header()
+            self.Insert_header(detail=nom_profil)
 
         # Création du titre des tableaux
         def CreationTitreTableau(nomActivite="", nomGroupe="", nomEcole="", nomClasse="", couleurTexte=colors.black, tailleGroupe=14):

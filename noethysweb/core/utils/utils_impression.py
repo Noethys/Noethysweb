@@ -250,7 +250,7 @@ class Impression():
     def Draw(self):
         pass
 
-    def Insert_header(self, titre=None, espace_apres=20):
+    def Insert_header(self, titre=None, espace_apres=20, detail=None):
         """ Création d'un header standard """
         # Importation de l'organisateur
         organisateur = cache.get('organisateur', None)
@@ -260,7 +260,10 @@ class Impression():
         # Dessin du tableau
         dataTableau = []
         largeursColonnes = ((self.taille_page[0] - 175, 100))
-        dataTableau.append((titre or self.titre, "%s\nEdité le %s" % (organisateur.nom, utils_dates.ConvertDateToFR(str(datetime.date.today())))))
+        details = "%s\n%s" % (organisateur.nom, datetime.datetime.now().strftime("%d/%m/%Y-%H:%M"))
+        if detail:
+            details += "\n%s" % detail
+        dataTableau.append((titre or self.titre, details))
         style = TableStyle([
             ('BOX', (0, 0), (-1, -1), 0.25, colors.black), ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ('ALIGN', (0, 0), (0, 0), 'LEFT'), ('FONT', (0, 0), (0, 0), "Helvetica-Bold", 16),
