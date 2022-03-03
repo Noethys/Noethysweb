@@ -186,7 +186,7 @@ class Impression(utils_impression.Impression):
                         paraStyle = ParagraphStyle(name="individu",
                                               fontName="Helvetica",
                                               fontSize=int(self.dict_options["taille_texte_individu"]),
-                                              leading=int(self.dict_options["taille_texte_individu"]),
+                                              leading=int(self.dict_options["taille_texte_individu"]+2),
                                               spaceBefore=0,
                                               spaceafter=0)
                         texteIndividu = Paragraph(dictIndividus["texte"], paraStyle)
@@ -255,8 +255,8 @@ class Impression(utils_impression.Impression):
                                         deductions = dictPrestation["deductions"]
                                         tva = dictPrestation["tva"]
                                         
-                                        if self.dict_options["affichage_prestations"] == "1": labelkey = label
-                                        if self.dict_options["affichage_prestations"] == "2": labelkey = label + " P.U. " + "%.2f %s" % (montant, utils_preferences.Get_symbole_monnaie())
+                                        if self.dict_options["affichage_prestations"] in ("1", "3"): labelkey = label
+                                        if self.dict_options["affichage_prestations"] in ("2", "4"): labelkey = label + " P.U. " + "%.2f %s" % (montant, utils_preferences.Get_symbole_monnaie())
 
                                         # Si c'est une prestation antérieure
                                         if date < dictValeur["date_debut"]:
@@ -265,13 +265,14 @@ class Impression(utils_impression.Impression):
                                             label += "*"
 
                                         if (labelkey in dictRegroupement) == False:
-                                            dictRegroupement[labelkey] = {"labelpresta": label, "total": 0, "nbre": 0, "base": 0, "dates_forfait": None}
+                                            dictRegroupement[labelkey] = {"labelpresta": label, "total": 0, "nbre": 0, "base": 0, "dates_forfait": None, "dates": []}
                                             dictRegroupement[labelkey]["base"] = montant
                                         
                                         dictRegroupement[labelkey]["total"] += montant
                                         dictRegroupement[labelkey]["nbre"] += 1
+                                        dictRegroupement[labelkey]["dates"] += listeDatesUnite
                                         
-                                        if self.dict_options["affichage_prestations"] == "1":
+                                        if self.dict_options["affichage_prestations"] in ("1", "3"):
                                             dictRegroupement[labelkey]["base"] = dictRegroupement[labelkey]["total"] / dictRegroupement[labelkey]["nbre"]
  
                                         if len(listeDatesUnite) > 1:
@@ -297,6 +298,11 @@ class Impression(utils_impression.Impression):
                                     nbre = dictRegroupement[labelkey]["nbre"]
                                     total = dictRegroupement[labelkey]["total"]
                                     base = dictRegroupement[labelkey]["base"]
+
+                                    # Ajout des dates
+                                    if self.dict_options["affichage_prestations"] in ("3", "4") and dictRegroupement[labelkey]["dates"]:
+                                        dictRegroupement[labelkey]["dates"].sort()
+                                        label += u"<br/><font size=5>(%s)</font>" % ", ".join([utils_dates.ConvertDateToFR(date) for date in dictRegroupement[labelkey]["dates"]])
 
                                     # recherche d'un commentaire
                                     if "dictCommentaires" in self.dict_options:
@@ -589,18 +595,22 @@ class Impression(utils_impression.Impression):
                 largeurColonneLabel = 110
                 largeursColonnes = [self.taille_cadre[2] - largeurColonneMontantTTC - largeurColonneLabel, largeurColonneLabel, largeurColonneMontantTTC]
 
-                if self.mode == "devis":
+                if self.mode == "devis" or (not self.dict_options["afficher_deja_paye"] and not self.dict_options["afficher_reste_regler"]):
                     dataTableau.append((listeMessages, "Total :", "%.02f %s" % (dictValeur["total"], utils_preferences.Get_symbole_monnaie())))
                 else:
                     dataTableau.append((listeMessages, "Total période :", u"%.02f %s" % (dictValeur["total"], utils_preferences.Get_symbole_monnaie())))
-                    dataTableau.append(("", "Montant déjà réglé :", u"%.02f %s" % (dictValeur["ventilation"], utils_preferences.Get_symbole_monnaie())))
+
+                    if self.dict_options["afficher_deja_paye"]:
+                        dataTableau.append(("", "Montant déjà réglé :", u"%.02f %s" % (dictValeur["ventilation"], utils_preferences.Get_symbole_monnaie())))
                 
                     if self.mode == "facture" and self.dict_options["integrer_impayes"] == True and dictValeur["total_reports"] > 0.0:
                         dataTableau.append(("", "Report impayés :", "%.02f %s" % (dictValeur["total_reports"], utils_preferences.Get_symbole_monnaie()) ))
-                        dataTableau.append(("", "Reste à régler :", "%.02f %s" % (dictValeur["solde"] + dictValeur["total_reports"], utils_preferences.Get_symbole_monnaie()) ))
+                        if self.dict_options["afficher_reste_regler"]:
+                            dataTableau.append(("", "Reste à régler :", "%.02f %s" % (dictValeur["solde"] + dictValeur["total_reports"], utils_preferences.Get_symbole_monnaie()) ))
                         rowHeights=[10, 10, 10, None]
                     else :
-                        dataTableau.append(("", "Reste à régler :", "%.02f %s" % (dictValeur["solde"], utils_preferences.Get_symbole_monnaie()) ))
+                        if self.dict_options["afficher_reste_regler"]:
+                            dataTableau.append(("", "Reste à régler :", "%.02f %s" % (dictValeur["solde"], utils_preferences.Get_symbole_monnaie()) ))
                         rowHeights=[18, 18, None]
                     
                 style = [
