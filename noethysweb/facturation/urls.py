@@ -20,6 +20,7 @@ urlpatterns = [
     path('facturation/factures_generation', Verifie_ventilation(factures_generation.View.as_view()), name='factures_generation'),
     path('facturation/factures_generation/<int:idfamille>', factures_generation.View.as_view(), name='factures_generation'),
     path('facturation/liste_factures', liste_factures.Liste.as_view(), name='liste_factures'),
+    path('facturation/factures_supprimer_plusieurs/<str:listepk>', liste_factures.Supprimer_plusieurs.as_view(), name='factures_supprimer_plusieurs'),
     path('facturation/factures_impression', Verifie_ventilation(factures_impression.Liste.as_view()), name='factures_impression'),
     path('facturation/factures_email', Verifie_ventilation(factures_email.Liste.as_view()), name='factures_email'),
 

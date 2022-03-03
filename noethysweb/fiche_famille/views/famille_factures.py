@@ -19,6 +19,7 @@ class Page(Onglet):
     url_liste = "famille_factures_liste"
     url_modifier = "famille_factures_modifier"
     url_supprimer = "famille_factures_supprimer"
+    url_supprimer_plusieurs = "famille_factures_supprimer_plusieurs"
     description_liste = "Saisissez ici les factures de la famille."
     description_saisie = "Saisissez toutes les informations concernant la facture et cliquez sur le bouton Enregistrer."
     objet_singulier = "une facture"
@@ -32,6 +33,7 @@ class Page(Onglet):
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("factures_generation", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
         ]
+        context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={'idfamille': self.kwargs.get('idfamille', None), "listepk": "xxx"})
         return context
 
     def get_form_kwargs(self, **kwargs):
@@ -60,18 +62,19 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
+        context['active_checkbox'] = True
         return context
 
     class datatable_class(MyDatatable):
         filtres = ['idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'lot__nom']
-
+        check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         solde_actuel = columns.TextColumn("Solde actuel", sources=['solde_actuel'], processor='Get_solde_actuel')
         lot = columns.TextColumn("Lot", sources=['lot__nom'])
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'lot']
+            columns = ['check', 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'lot']
             processors = {
                 'date_edition': helpers.format_date('%d/%m/%Y'),
                 'date_debut': helpers.format_date('%d/%m/%Y'),
@@ -122,4 +125,8 @@ class Modifier(ClasseCommune, crud.Modifier):
 
 
 class Supprimer(Page, crud.Supprimer):
+    template_name = "fiche_famille/famille_delete.html"
+
+
+class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
     template_name = "fiche_famille/famille_delete.html"

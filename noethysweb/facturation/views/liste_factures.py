@@ -14,10 +14,11 @@ from django.db.models import Sum
 
 class Page(crud.Page):
     model = Facture
-    url_liste = "factures_liste"
+    url_liste = "liste_factures"
     description_liste = "Voici ci-dessous la liste des factures."
     objet_singulier = "une facture"
     objet_pluriel = "des factures"
+    url_supprimer_plusieurs = "factures_supprimer_plusieurs"
 
 
 class Liste(Page, crud.Liste):
@@ -30,11 +31,12 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
+        context['active_checkbox'] = True
         return context
 
     class datatable_class(MyDatatable):
         filtres = ["fpresent:famille", "fscolarise:famille", 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'lot__nom']
-
+        check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         solde_actuel = columns.TextColumn("Solde actuel", sources=['solde_actuel'], processor='Get_solde_actuel')
@@ -43,7 +45,7 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idfacture', 'date_edition', 'numero', 'date_debut', 'date_fin', 'famille', 'total', 'solde', 'solde_actuel', 'lot']
+            columns = ['check', 'idfacture', 'date_edition', 'numero', 'date_debut', 'date_fin', 'famille', 'total', 'solde', 'solde_actuel', 'lot']
             processors = {
                 'date_edition': helpers.format_date('%d/%m/%Y'),
                 'date_debut': helpers.format_date('%d/%m/%Y'),
@@ -63,3 +65,5 @@ class Liste(Page, crud.Liste):
             return self.Create_boutons_actions(html)
 
 
+class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
+    pass

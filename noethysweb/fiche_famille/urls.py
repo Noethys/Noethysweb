@@ -69,6 +69,7 @@ urlpatterns = [
     path('individus/familles/factures/ajouter/<int:idfamille>', famille_factures.Ajouter.as_view(), name='famille_factures_ajouter'),
     path('individus/familles/factures/modifier/<int:idfamille>/<int:pk>', famille_factures.Modifier.as_view(), name='famille_factures_modifier'),
     path('individus/familles/factures/supprimer/<int:idfamille>/<int:pk>', famille_factures.Supprimer.as_view(), name='famille_factures_supprimer'),
+    path('individus/familles/factures/supprimer_plusieurs/<int:idfamille>/<str:listepk>', famille_factures.Supprimer_plusieurs.as_view(), name='famille_factures_supprimer_plusieurs'),
     path('individus/familles/factures/voir/<int:idfamille>/<int:idfacture>', famille_voir_facture.View.as_view(), name='famille_voir_facture'),
     path('individus/familles/factures/abo_factures_email/<int:idfamille>', famille_abo_factures_email.Modifier.as_view(), name='famille_abo_factures_email'),
 
