@@ -3,17 +3,17 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
+from django.db.models import Max
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Div, Fieldset, ButtonHolder
 from crispy_forms.bootstrap import Field, FormActions, StrictButton
+from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import Unite, Groupe, Activite
-from django.db.models import Max
 from core.widgets import DatePickerWidget
-import datetime
 from django_select2.forms import Select2MultipleWidget
 
 
@@ -43,7 +43,14 @@ class Formulaire(FormulaireBase, ModelForm):
         model = Unite
         fields = ["ordre", "activite", "nom", "abrege", "type", "heure_debut", "heure_fin", "heure_debut_fixe", "heure_fin_fixe",
                   "repas", "restaurateur", "touche_raccourci", "date_debut", "date_fin", "groupes", "incompatibilites", "visible_portail",
-                  "heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max"]
+                  "heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "equiv_journees", "equiv_heures"]
+        help_texts = {
+            "equiv_journees": "Saisissez l'équivalence en journées (utile uniquement pour l'état global et l'état nominatif). Ex : une journée=1, une demi-journée=0.5, etc...",
+            "equiv_heures": "Saisissez l'équivalence en heures (utile uniquement pour l'état global et l'état nominatif). Format : HH:MM.",
+        }
+        widgets = {
+            "equiv_heures": forms.TimeInput(attrs={'type': 'time'}),
+        }
 
     def __init__(self, *args, **kwargs):
         idactivite = kwargs.pop("idactivite")
@@ -116,6 +123,10 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("heure_fin_min"),
                 Field("heure_fin_max"),
                 Field("heure_fin_fixe"),
+            ),
+            Fieldset("Equivalences",
+                Field("equiv_journees"),
+                Field("equiv_heures"),
             ),
             Fieldset("Durée de validité",
                 Field("validite_type"),

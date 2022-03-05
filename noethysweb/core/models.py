@@ -1219,6 +1219,8 @@ class Unite(models.Model):
     groupes = models.ManyToManyField(Groupe, blank=True)
     incompatibilites = models.ManyToManyField("self", verbose_name="Incompatibilités", blank=True)
     visible_portail = models.BooleanField(verbose_name="Visible sur le portail", default=True)
+    equiv_journees = models.FloatField(verbose_name="Equivalence en journées", blank=True, null=True)
+    equiv_heures = models.TimeField(verbose_name="Equivalence en heures", blank=True, null=True)
 
     class Meta:
         db_table = 'unites'
