@@ -1,3 +1,12 @@
+Version 1.0.6.8 (06/03/2022) :
+
+- Ajout de l'état nominatif
+- Ajout du nom de profil dans la liste des consommations
+- Ajout de nouvelles options d'impression des factures
+- Ajout de la suppression de plusieurs factures
+- Ajout des équivalences aux unités de conso
+- Petites corrections
+
 Version 1.0.6.7 (22/02/2022) :
 
 - Génération auto des codes comptables des familles
