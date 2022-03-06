@@ -272,6 +272,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Analyse
     menu_analyse = menu_consommations.Add(titre="Analyse")
     menu_analyse.Add(code="etat_global", titre="Etat global", icone="file-text-o")
+    menu_analyse.Add(code="etat_nomin", titre="Etat nominatif", icone="file-text-o")
     menu_analyse.Add(code="synthese_consommations", titre="Synthèse des consommations", icone="file-text-o")
 
 

@@ -7,7 +7,7 @@ from django.urls import include, path
 from core.views import toc
 from parametrage.views import calendrier
 from consommations.views import grille, gestionnaire, suivi_consommations, etat_global, synthese_consommations, liste_attente, liste_absences, edition_liste_conso, \
-                                pointeuse, liste_consommations, liste_repas
+                                pointeuse, liste_consommations, liste_repas, etat_nomin
 from core.decorators import secure_ajax
 
 
@@ -36,6 +36,7 @@ urlpatterns = [
 
     # Analyse
     path('consommations/etat_global', etat_global.View.as_view(), name='etat_global'),
+    path('consommations/etat_nomin', etat_nomin.View.as_view(), name='etat_nomin'),
     path('consommations/synthese_consommations', synthese_consommations.View.as_view(), name='synthese_consommations'),
 
     # AJAX

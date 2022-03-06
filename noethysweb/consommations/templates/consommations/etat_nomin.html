@@ -1,0 +1,35 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title">Etat nominatif</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>{% block box_introduction %}{{ box_introduction|safe }}{% endblock %}</p>
+                    {% crispy form_parametres %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% include 'core/widgets/bootstrap-table.html' %}
+
+    {% if afficher_resultats %}
+        <script>$("a[href='#resultats']").tab("show");</script>
+    {% endif %}
+
+{% endblock contenu_page %}

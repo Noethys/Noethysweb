@@ -1,0 +1,134 @@
+{% load static %}
+{% load crispy_forms_tags %}
+{% load embed %}
+
+<input id="{{ id }}" type="hidden" name="{{ name }}" value="{{ value }}">
+
+<div id="div_{{ id }}">
+    <ul id="ul_{{ id }}" class="todo-list">
+    </ul>
+</div>
+
+<br>
+<span class="text-gray"><i class="fa fa-info-circle margin-r-5"></i> Cliquez sur <i class="fa fa-ellipsis-v"></i> <i class="fa fa-ellipsis-v"></i> pour modifier l'ordre des colonnes.</span>
+<button type="button" class="btn btn-success pull-right" title="Ajouter une colonne" onclick="ajouter_colonne()"><i class="fa fa-plus margin-r-5"></i> Ajouter une colonne</button>
+
+
+{# Modal Saisir une colonne #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_saisir_colonne{% endblock %}
+    {% block modal_titre %}Saisir une colonne{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+        <input type="hidden" id="id_colonne_id" value="">
+        {{ form|crispy }}
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" id="bouton_valider_colonne"/><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+
+    function ajouter_colonne() {
+        $("#id_colonne_id").val("");
+        $("#id_nom").val("");
+        $("#id_donnee").val("aucun");
+        $("#modal_saisir_colonne").modal('show');
+    }
+
+    function modifier_colonne(id) {
+        $("#id_colonne_id").val(id);
+        var liste_items = $("#ul_{{ id }}").sortable("toArray");
+        var index = jQuery.inArray("colonne_" + id, liste_items);
+        var liste_colonnes = JSON.parse($("#{{ id }}").val());
+        $("#id_nom").val(liste_colonnes[index].nom);
+        $("#id_donnee").val(liste_colonnes[index].code);
+        $("#modal_saisir_colonne").modal('show');
+    }
+
+    function supprimer_colonne(id) {
+        var liste_items = $("#ul_{{ id }}").sortable("toArray");
+        var index = jQuery.inArray(id, liste_items);
+        var liste_colonnes = JSON.parse($("#{{ id }}").val());
+        liste_colonnes.splice(index, 1);
+        $("#{{ id }}").val(JSON.stringify(liste_colonnes));
+        afficher_colonnes();
+    }
+
+    function afficher_colonnes() {
+        var liste_colonnes = JSON.parse($("#{{ id }}").val());
+        var html = "";
+        var id = 0;
+        liste_colonnes.forEach(function (item) {
+            html += "<li id='colonne_" + id + "' data-nom='" + item.nom + "' data-code='" + item.code + "'>";
+            html += "<span class='handle'> <i class='fa fa-ellipsis-v'></i> <i class='fa fa-ellipsis-v'></i></span>";
+            html += "<span class='text'>" + item.nom + "</span>";
+            html += "<div class='tools'> <i class='fa fa-edit' title='Modifier' onclick='modifier_colonne(" + id + ")'></i> <i class='fa fa-trash-o' title='Supprimer' onclick='supprimer_colonne(" + id + ")'></i></div>";
+            html += "</li>";
+            id +=1;
+        });
+        $("#ul_{{ id }}").html(html);
+    }
+
+    function create_value_{{ id }}() {
+        var liste_resultats = [];
+        $("#ul_{{ id }} li").each(function (item) {
+            liste_resultats.push({"nom": this.dataset.nom, "code": this.dataset.code});
+        });
+        $("#{{ id }}").val(JSON.stringify(liste_resultats));
+    }
+
+    $(function () {
+
+        // Initialisation jQuery UI sortable
+        $("#div_{{ id }} .todo-list").sortable({
+            placeholder: "sort-highlight",
+            handle: ".handle",
+            forcePlaceholderSize: true,
+            zIndex: 999998,
+            stop: function(event, ui) {
+                create_value_{{ id }}();
+            }
+        });
+
+        $("#bouton_valider_colonne").on('click', function(e) {
+            e.preventDefault();
+
+            // Vérification de la saisie
+            var id = $("#id_colonne_id").val();
+            var nom = $("#id_nom").val();
+            var donnee = $("#id_donnee").val();
+            var liste_colonnes = JSON.parse($("#{{ id }}").val());
+
+            if (nom === "") {
+                toastr.error(("Vous devez saisir un nom pour cette colonne"));
+                return false;
+            }
+
+            if (id) {
+                // Modifie la colonne
+                var liste_items = $("#ul_{{ id }}").sortable("toArray");
+                var index = jQuery.inArray("colonne_" + id, liste_items);
+                liste_colonnes[index] = {"nom": nom, "code": donnee};
+            } else {
+                // Ajoute la colonne
+                liste_colonnes.push({"nom": nom, "code": donnee});
+            };
+
+            // MAJ de la liste des colonnes
+            $("#{{ id }}").val(JSON.stringify(liste_colonnes));
+            afficher_colonnes();
+            $("#modal_saisir_colonne").modal('hide');
+        });
+
+        // Dessine les colonnes
+        afficher_colonnes();
+
+    });
+
+</script>

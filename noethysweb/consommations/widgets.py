@@ -245,3 +245,27 @@ class SelectionClassesWidget(Widget):
     def value_from_datadict(self, data, files, name):
         selections = data.getlist(name, [])
         return ";".join(selections)
+
+
+class ColonnesEtatNominWidget(Widget):
+    template_name = 'consommations/widgets/colonnes_etat_nomin.html'
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        context['name'] = name
+        if value is not None:
+            context['value'] = value
+        else:
+            context['value'] = "[]"
+
+        # Importation du form de saisie d'une colonne
+        from consommations.forms.colonne_etat_nomin import Formulaire
+        context['form'] = Formulaire()
+
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
