@@ -58,7 +58,7 @@ class View(CustomView, TemplateView):
         form = Formulaire(request.POST, request=self.request)
         if form.is_valid() == False:
             return self.render_to_response(self.get_context_data(form_parametres=form))
-        
+
         liste_colonnes, liste_lignes = self.Get_resultats(parametres=form.cleaned_data)
         context = {
             "form_parametres": form,
