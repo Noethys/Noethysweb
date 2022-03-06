@@ -16,14 +16,15 @@
     </select>
 
     <div class="input-group-append">
-        <button id="{{ id }}_appliquer_profil" title="Appliquer" class="btn btn-default" type="button"><i class="fa fa-play"></i></button>
-        <button id="{{ id }}_enregistrer_profil" title="Enregistrer" class="btn btn-default" type="button"><i class="fa fa-save"></i></button>
+        <button id="{{ id }}_appliquer_profil" title="Appliquer" class="btn btn-default" type="button">Appliquer</button>
         <button title="Menu" data-toggle="dropdown" class="btn btn-default" type="button"><i class="fa fa-ellipsis-v"></i></button>
         <ul class="dropdown-menu">
-            <li class="dropdown-item"><a href="#" id="{{ id }}_ajouter_profil">Ajouter un nouveau profil</a></li>
+            <li class="dropdown-item"><a href="#" id="{{ id }}_ajouter_profil"><i class="fa fa-plus"></i> Créer un nouveau profil</a></li>
             <li class="dropdown-divider"></li>
-            <li class="dropdown-item"><a href="#" id="{{ id }}_modifier_profil">Modifier le profil sélectionné</a></li>
-            <li class="dropdown-item"><a href="#" id="{{ id }}_supprimer_profil">Supprimer le profil sélectionné</a></li>
+            <li class="dropdown-item"><a href="#" id="{{ id }}_enregistrer_profil"><i class="fa fa-save"></i> Enregistrer le profil sélectionné</a></li>
+            <li class="dropdown-divider"></li>
+            <li class="dropdown-item"><a href="#" id="{{ id }}_modifier_profil"><i class="fa fa-pencil"></i> Modifier le profil sélectionné</a></li>
+            <li class="dropdown-item"><a href="#" id="{{ id }}_supprimer_profil"><i class="fa fa-trash"></i> Supprimer le profil sélectionné</a></li>
         </ul>
     </div>
 
@@ -53,6 +54,23 @@
 <script>
 
     $(document).ready(function() {
+
+        // using jQuery
+        var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        // set csrf header
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
         $('#{{ id }}_modal_modification').on('shown.bs.modal', function () {
             $("#id_profil_nom").focus();
         });
