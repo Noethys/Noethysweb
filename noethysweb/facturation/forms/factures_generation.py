@@ -3,19 +3,20 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from django import forms
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, Submit, HTML, ButtonHolder, Hidden
-from crispy_forms.bootstrap import Field, StrictButton
-from core.utils.utils_commandes import Commandes
-from core.widgets import DatePickerWidget, DateRangePickerWidget, Select_avec_commandes, SelectionActivitesWidget, CheckDateWidget
-from facturation.widgets import ChampAutomatiqueWidget
-from core.models import LotFactures, PrefixeFacture, Facture, Famille
-from django_select2.forms import Select2MultipleWidget, Select2Widget
-import datetime, json
 from django.contrib import messages
 from django.db.models import Max
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Fieldset, HTML, Hidden
+from crispy_forms.bootstrap import Field
+from django_select2.forms import Select2MultipleWidget, Select2Widget
+from core.utils.utils_commandes import Commandes
+from core.widgets import DatePickerWidget, DateRangePickerWidget, Select_avec_commandes, SelectionActivitesWidget, CheckDateWidget
+from core.models import LotFactures, PrefixeFacture, Facture, Famille
 from core.forms.base import FormulaireBase
+from core.utils import utils_parametres
+from facturation.widgets import ChampAutomatiqueWidget
 
 
 class Formulaire(FormulaireBase, forms.Form):
@@ -60,6 +61,9 @@ class Formulaire(FormulaireBase, forms.Form):
         # Catégories
         self.fields["categories"].initial = ["consommation", "cotisation", "location", "autre"]
 
+        # Prestations antérieures
+        self.fields["prestations_anterieures"].initial = utils_parametres.Get(nom="prestations_anterieures", categorie="generation_factures", utilisateur=self.request.user, valeur=None)
+
         # Sélection famille
         if idfamille:
             self.fields["selection_familles"].initial = "FAMILLE"
@@ -68,6 +72,7 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'facturation_toc' %}", enregistrer_label="<i class='fa fa-search margin-r-5'></i>Rechercher des factures à générer", ajouter=False),
             Hidden('liste_factures_json', value=""),
+            Hidden('montant_minimum', value=""),
             Fieldset('Généralités',
                 Field('periode'),
                 Field('lot_factures'),

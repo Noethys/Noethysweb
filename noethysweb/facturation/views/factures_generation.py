@@ -3,20 +3,17 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy
-from core.models import Activite, Facture, Prestation, LotFactures, FiltreListe
-from core.views.base import CustomView
+import json
 from django.views.generic import TemplateView
-from core.utils import utils_dates, utils_dictionnaires
-from facturation.utils import utils_facturation
 from django.http import JsonResponse
 from django.shortcuts import render
-import json, datetime
-from facturation.forms.factures_generation import Formulaire
 from django.template import Template, RequestContext
 from django.db.models import Max
-
-
+from core.models import Activite, Facture, Prestation, LotFactures, FiltreListe
+from core.views.base import CustomView
+from core.utils import utils_dates, utils_dictionnaires, utils_parametres
+from facturation.utils import utils_facturation
+from facturation.forms.factures_generation import Formulaire
 
 
 def Modifier_lot_factures(request):
@@ -84,9 +81,14 @@ def Recherche_factures(request):
         liste_messages_erreurs = [erreur[0].message for field, erreur in form.errors.as_data().items()]
         return JsonResponse({"html": data, "erreur": "Veuillez corriger les erreurs suivantes : %s." % ", ".join(liste_messages_erreurs)}, status=401)
 
+    # Mémorisation de la date prestations antérieures
+    prestations_anterieures = form.cleaned_data.get("prestations_anterieures")
+    utils_parametres.Set(nom="prestations_anterieures", categorie="generation_factures", utilisateur=request.user, valeur=str(prestations_anterieures) if prestations_anterieures else None)
+
     # Recherche des factures à générer
     liste_factures = Get_factures(form.cleaned_data)
-    return render(request, "facturation/factures_generation_selection.html", {"factures": liste_factures})
+    montant_minimum = utils_parametres.Get(nom="montant_minimum", categorie="generation_factures", utilisateur=request.user, valeur=0.0)
+    return render(request, "facturation/factures_generation_selection.html", {"factures": liste_factures, "montant_minimum": montant_minimum})
 
 
 
@@ -95,7 +97,13 @@ def Generation_factures(request):
     if not form.is_valid():
         return JsonResponse({"html": "ERREUR!", "erreur": "Veuillez renseigner les paramètres manquants"}, status=401)
 
+    # Mémorisation du montant minimum à facturer
+    montant_minimum = request.POST.get("montant_minimum")
+    utils_parametres.Set(nom="montant_minimum", categorie="generation_factures", utilisateur=request.user, valeur=montant_minimum if montant_minimum else None)
+
     liste_factures_cochees = json.loads(request.POST.get("liste_factures_json"))
+    if not liste_factures_cochees:
+        return JsonResponse({"html": "ERREUR!", "erreur": "Vous devez cocher au moins une facture dans la liste !"}, status=401)
 
     # Recherche des factures à générer
     liste_factures = Get_factures(form.cleaned_data)

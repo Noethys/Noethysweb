@@ -190,6 +190,7 @@
 
         function generer() {
             $('input[name=liste_factures_json]').val(JSON.stringify(get_factures_cochees()));
+            $('input[name=montant_minimum]').val($("#id_montant").val());
             $("#div_selection_factures").hide();
             $("#div_loader_generation").show();
             $("#box_introduction").html("")

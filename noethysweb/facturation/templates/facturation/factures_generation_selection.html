@@ -16,7 +16,7 @@
         <div class="input-group-prepend">
             <button type="button" class="btn btn-default btn-sm" onclick="cocher_montant()"><i class="fa fa-check-square-o"></i> Cocher si dû période supérieur ou égal à</button>
         </div>
-        <input type="number" style="width: 100px;" name="montant" value="0.00" step="0.01" class="numberinput form-control form-control-sm" id="id_montant">
+        <input type="number" style="width: 100px;" name="montant" value="{{ montant_minimum|floatformat }}" step="0.01" class="numberinput form-control form-control-sm" id="id_montant">
     </div>
 </div>
 
