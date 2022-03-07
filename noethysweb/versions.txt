@@ -1,3 +1,8 @@
+Version 1.0.6.9 (07/03/2022) :
+
+- Ajout de la mémorisation de paramètres dans la génération des factures
+- Ajout de la structure aux assistants de paramétrage
+
 Version 1.0.6.8 (06/03/2022) :
 
 - Ajout de l'état nominatif
