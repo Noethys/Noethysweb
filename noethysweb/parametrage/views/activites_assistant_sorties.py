@@ -6,7 +6,7 @@
 from django import forms
 import datetime
 from django_select2.forms import Select2MultipleWidget
-from core.models import TypeGroupeActivite, Unite, UniteRemplissage, Ouverture, Remplissage, NomTarif, Tarif, CategorieTarif, TarifLigne
+from core.models import TypeGroupeActivite, Unite, UniteRemplissage, Ouverture, Remplissage, NomTarif, Tarif, CategorieTarif, TarifLigne, Structure
 from parametrage.views.activites_assistant import Assistant_base, Page_responsable, Page_responsable, Page_renseignements
 
 
@@ -15,6 +15,7 @@ class Page_introduction(forms.Form):
 
 class Page_generalites(forms.Form):
     nom_activite = forms.CharField(label="Quel est le nom de l'activité ?", required=True, max_length=300, help_text="Exemple: 'Sorties familiales'.")
+    structure = forms.ModelChoiceField(label="Quelle est la structure associée à ce séjour ?", queryset=Structure.objects.all(), required=True, help_text="Sélectionnez une structure dans la liste proposée.")
     groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à cette activité", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
 
 class Page_conclusion(forms.Form):

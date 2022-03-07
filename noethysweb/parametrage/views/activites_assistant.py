@@ -157,7 +157,7 @@ class Assistant_base(CustomView, SessionWizardView):
         nbre_inscrits_max = donnees["nbre_inscrits_max"] if donnees.get("nbre_inscrits_max", None) else None
 
         # Enregistrement de l'activité
-        activite = Activite.objects.create(nom=nom, abrege=abrege, date_debut=date_debut, date_fin=date_fin, nbre_inscrits_max=nbre_inscrits_max)
+        activite = Activite.objects.create(nom=nom, abrege=abrege, date_debut=date_debut, date_fin=date_fin, nbre_inscrits_max=nbre_inscrits_max, structure=donnees.get("structure"))
         donnees["activite"] = activite
 
         # Enregistrement des groupes d'activités

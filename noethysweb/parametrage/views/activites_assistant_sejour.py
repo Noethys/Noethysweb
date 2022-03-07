@@ -8,7 +8,7 @@ import datetime
 from dateutil import rrule
 from core.widgets import DatePickerWidget
 from django_select2.forms import Select2MultipleWidget
-from core.models import TypeGroupeActivite, Unite, UniteRemplissage, Ouverture, Remplissage, NomTarif, Tarif
+from core.models import TypeGroupeActivite, Unite, UniteRemplissage, Ouverture, Remplissage, NomTarif, Tarif, Structure
 from parametrage.views.activites_assistant import Assistant_base, Page_responsable, Page_responsable, Page_renseignements, Page_categories, \
                                                     Page_categories_nombre, Page_tarifs, Page_conclusion, Page_groupes_nombre, Page_groupes_noms
 
@@ -22,6 +22,7 @@ class Page_generalites(forms.Form):
     date_fin = forms.DateField(label="Quelle est la date de fin ?", required=True, widget=DatePickerWidget(), help_text="Saisissez la date de fin du séjour.")
     agrement = forms.CharField(label="Quel est le numéro d'agrément du séjour ?", required=False, max_length=200, help_text="Exemple: 0123CL00125. S'il n'y a pas d'agrément, laisser vide.")
     nbre_inscrits_max = forms.IntegerField(label="Quel est le nombre maximal d'inscrits ?", initial=0, min_value=0, required=False, help_text="S'il n'existe aucune limitation du nombre d'inscrits, laisser la valeur à 0.")
+    structure = forms.ModelChoiceField(label="Quelle est la structure associée à ce séjour ?", queryset=Structure.objects.all(), required=True, help_text="Sélectionnez une structure dans la liste proposée.")
     groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à ce séjour", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
 
     def clean(self):
@@ -61,7 +62,8 @@ class Assistant(Assistant_base):
 
         # Enregistrement de l'unité de conso
         unite = Unite.objects.create(activite=donnees["activite"], nom="Journée Camp", abrege="JC", ordre=1, type="Unitaire",
-                                     date_debut=datetime.date(1977, 1, 1), date_fin=datetime.date(2999, 1, 1))
+                                     date_debut=datetime.date(1977, 1, 1), date_fin=datetime.date(2999, 1, 1),
+                                     equiv_journees=1, equiv_heures=datetime.time(hour=10, minute=0))
 
         # Enregistrement de l'unité de remplissage
         unite_remplissage = UniteRemplissage.objects.create(activite=donnees["activite"], nom="Journée Camp", abrege="JC", ordre=1,

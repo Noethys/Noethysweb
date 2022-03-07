@@ -9,7 +9,7 @@ from core.utils import utils_dates
 from dateutil import rrule
 from core.widgets import DatePickerWidget
 from django_select2.forms import Select2MultipleWidget
-from core.models import TypeGroupeActivite, Unite, UniteRemplissage, Ouverture, Remplissage, NomTarif, Tarif, Vacance, JOURS_SEMAINE
+from core.models import TypeGroupeActivite, Unite, UniteRemplissage, Ouverture, Remplissage, NomTarif, Tarif, Vacance, JOURS_SEMAINE, Structure
 from parametrage.views.activites_assistant import Assistant_base, Page_responsable, Page_responsable, Page_renseignements, Page_categories, \
                                                     Page_categories_nombre, Page_tarifs, Page_conclusion
 
@@ -22,6 +22,7 @@ class Page_generalites(forms.Form):
     date_debut = forms.DateField(label="Quelle est la date de début de l'activité ?", required=True, widget=DatePickerWidget(), help_text="Saisissez la date de début.")
     date_fin = forms.DateField(label="Quelle est la date de fin de l'activité ?", required=True, widget=DatePickerWidget(), help_text="Saisissez la date de fin.")
     nbre_inscrits_max = forms.IntegerField(label="Quel est le nombre maximal d'inscrits ?", initial=0, min_value=0, required=False, help_text="S'il n'existe aucune limitation du nombre d'inscrits, laisser la valeur à 0.")
+    structure = forms.ModelChoiceField(label="Quelle est la structure associée à ce séjour ?", queryset=Structure.objects.all(), required=True, help_text="Sélectionnez une structure dans la liste proposée.")
     groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à cette activité", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
 
     def clean(self):
