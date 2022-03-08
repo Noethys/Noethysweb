@@ -97,9 +97,11 @@
         <table cellspacing="0" id="table-grille" class="table table-bordered table-grille" style="min-width: 400px;">
             <thead>
                 <tr>
+{% comment %}
                     {% if data.mode == 'pointeuse' %}
                         <th style="width:40px">Photo</th>
                     {% endif %}
+{% endcomment %}
                     <th>
                         {% if data.mode == 'jour' or data.mode == 'pointeuse' %}Individu{% else %}Date{% endif %}
                     </th>
@@ -132,11 +134,13 @@
                     {% for inscription in data.liste_inscriptions %}
 
                         <tr>
+{% comment %}
                             {% if data.mode == 'pointeuse' %}
                                 <th>
                                     <img src="{{ inscription.individu.Get_photo }}" alt="photo-individu" class="img-circle img-fluid" style="max-width: 40px">
                                 </th>
                             {% endif %}
+{% endcomment %}
 
                             <th class="{% if date|est_en_vacances:data.liste_vacances and data.mode == 'individu' %}vacances{% endif %}">
                                 {% if data.mode == 'date' or data.mode == 'pointeuse' %}
