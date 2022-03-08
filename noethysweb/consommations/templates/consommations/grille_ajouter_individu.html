@@ -14,7 +14,17 @@
 
         <div class="buttonHolder">
             <div class="modal-footer d-flex" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
-                <button type="button" class="btn btn-default mr-auto" id="ajouter_tous_inscrits"><i class="fa fa-users margin-r-5"></i>Tous les inscrits</button>
+                <div class="btn-group mr-auto">
+                    <button type="button" class="btn btn-default" id="ajouter_tous_inscrits"><i class="fa fa-users margin-r-5"></i>Tous les inscrits</button>
+                    <button type="button" class="btn btn-default dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                        <span class="sr-only">Menu</span>
+                    </button>
+                    <div class="dropdown-menu" role="menu">
+                        {% for groupe in data.liste_groupes %}
+                            <a class="dropdown-item ajouter_inscrits" data-idgroupe="{{ groupe.pk }}" href="#">Les inscrits du groupe {{ groupe.nom }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
                 <button type="button" class="btn btn-primary" id="ajouter_individu_valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
             </div>
@@ -48,8 +58,16 @@
     // Modal : Tous les inscrits
     $("#ajouter_tous_inscrits").on('click', function(e) {
         $('#modal_ajouter_individu').modal('hide');
-        $('#donnees_ajouter_individu').val(999999);
+        $('#donnees_ajouter_individu').val("INSCRITS_TOUS");
         $('#form-maj').submit();
     });
+
+    // Modal : Inscrits d'un groupe
+    $(".ajouter_inscrits").on('click', function(e) {
+        $('#modal_ajouter_individu').modal('hide');
+        $('#donnees_ajouter_individu').val("INSCRITS_GROUPE:" + this.dataset.idgroupe);
+        $('#form-maj').submit();
+    });
+
 
 </script>

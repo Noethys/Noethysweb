@@ -103,7 +103,7 @@ class View(CustomView, TemplateView):
 
         # Ajouter un nouvel individu
         ajouter_individu = self.request.POST.get("donnees_ajouter_individu")
-        if ajouter_individu and ajouter_individu != "999999":
+        if ajouter_individu and not ajouter_individu.startswith("INSCRITS"):
             selection_ajouter_individu = [int(idindividu) for idindividu in ajouter_individu.split(";")]
             for inscription in Inscription.objects.filter(individu_id__in=selection_ajouter_individu, activite=data["selection_activite"]):
                 if inscription.pk not in liste_idinscriptions and inscription.Is_inscription_in_periode(data["date_min"], data["date_max"]):
@@ -117,8 +117,10 @@ class View(CustomView, TemplateView):
             data['selection_classes'] = [classe.pk for classe in data['liste_classes']]
 
         # Importation des inscriptions
-        if data["options"]["afficher_tous_inscrits"] or ajouter_individu == "999999":
+        if data["options"]["afficher_tous_inscrits"] or ajouter_individu == "INSCRITS_TOUS":
             conditions = Q(activite=data["selection_activite"])
+        elif ajouter_individu and ajouter_individu.startswith("INSCRITS_GROUPE"):
+            conditions = Q(activite=data["selection_activite"], groupe_id=int(ajouter_individu.split(":")[1])) | Q(pk__in=liste_idinscriptions)
         else:
             conditions = Q(pk__in=liste_idinscriptions)
 
