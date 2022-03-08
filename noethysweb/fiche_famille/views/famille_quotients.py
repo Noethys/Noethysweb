@@ -72,7 +72,7 @@ class Page(Onglet):
                     form.add_error(None, "Vous ne pouvez pas modifier le montant du quotient car des prestations sont déjà facturées sur la période du %s au %s. Créez plutôt un nouveau QF." % (prestations_facturees["date__min"].strftime("%d/%m/%Y"), prestations_facturees["date__max"].strftime("%d/%m/%Y")))
                     return False, form
                 # Si ce sont seulement les dates du QF qui ont été modifiées
-                if (form.cleaned_data["date_debut"] >= prestations_facturees["date__min"]) or (form.cleaned_data["date_fin"] <= prestations_facturees["date__max"]):
+                if (form.cleaned_data["date_debut"] > prestations_facturees["date__min"]) or (form.cleaned_data["date_fin"] < prestations_facturees["date__max"]):
                     form.add_error(None, "Ces nouvelles dates sont erronées car des prestations sont déjà facturées sur la période du %s au %s. Créez plutôt un nouveau QF." % (prestations_facturees["date__min"].strftime("%d/%m/%Y"), prestations_facturees["date__max"].strftime("%d/%m/%Y")))
                     return False, form
 
