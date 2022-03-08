@@ -1,13 +1,35 @@
 
-// Fonction 'icontains' qui rend la fonction contains case-insensitive (sert à la recherche)
-$.expr[':'].icontains = $.expr.createPseudo(function(text) {
-    text = text.toLowerCase();
-    return function (el) {
-        return ~$.text(el).toLowerCase().indexOf(text);
-    }
-});
+// Fonction 'icontains' qui rend la fonction contains insensible aux accents et aux majuscules (sert à la recherche)
+jQuery.expr[':'].icontains = function(a, i, m) {
+    var rExps=[
+        {re: /[\xC0-\xC6]/g, ch: "A"},
+        {re: /[\xE0-\xE6]/g, ch: "a"},
+        {re: /[\xC8-\xCB]/g, ch: "E"},
+        {re: /[\xE8-\xEB]/g, ch: "e"},
+        {re: /[\xCC-\xCF]/g, ch: "I"},
+        {re: /[\xEC-\xEF]/g, ch: "i"},
+        {re: /[\xD2-\xD6]/g, ch: "O"},
+        {re: /[\xF2-\xF6]/g, ch: "o"},
+        {re: /[\xD9-\xDC]/g, ch: "U"},
+        {re: /[\xF9-\xFC]/g, ch: "u"},
+        {re: /[\xC7-\xE7]/g, ch: "c"},
+        {re: /[\xD1]/g, ch: "N"},
+        {re: /[\xF1]/g, ch: "n"}
+    ];
 
-// CRéaiton d'un UUID
+    var element = $(a).text();
+    var search = m[3];
+    $.each(rExps, function() {
+        element = element.replace(this.re, this.ch);
+        search = search.replace(this.re, this.ch);
+    });
+
+    return element.toUpperCase()
+    .indexOf(search.toUpperCase()) >= 0;
+};
+
+
+// Création d'un UUID
 function uuid() {
   return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
     (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
