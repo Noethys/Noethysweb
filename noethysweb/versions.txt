@@ -1,3 +1,11 @@
+Version 1.0.7.0 (08/03/2022) :
+
+- Ajout de la suppression dans le champ de recherche de la grille des consommations
+- Rend la recherche insensible aux accents dans la grille des consommations
+- Désactive l'affichage des photos dans la pointeuse
+- Correction de la vérification lors de la modification d'un quotient
+- Correction du calcul des prestations si quotient à zéro
+
 Version 1.0.6.9 (07/03/2022) :
 
 - Ajout de la mémorisation de paramètres dans la génération des factures
