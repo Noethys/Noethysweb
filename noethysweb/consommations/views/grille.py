@@ -974,7 +974,7 @@ class Facturation():
             qf_famille = self.Recherche_QF(tarif, case_tableau)
             for ligne in lignes_calcul:
                 montant_tarif = ligne.montant_unique
-                if qf_famille and qf_famille >= ligne.qf_min and qf_famille <= ligne.qf_max:
+                if qf_famille != None and qf_famille >= ligne.qf_min and qf_famille <= ligne.qf_max:
                     break
 
         # Recherche du montant du tarif : HORAIRE - MONTANT UNIQUE OU SELON QF
@@ -1002,7 +1002,7 @@ class Facturation():
                 # if montant_questionnaire not in (None, 0.0):
                 #     montant_tarif_ligne = montant_questionnaire
 
-                if "qf" in methode_calcul and qf_famille:
+                if "qf" in methode_calcul and qf_famille != None:
                     if qf_famille < ligne_calcul.qf_min or qf_famille > ligne_calcul.qf_max:
                         break
 
@@ -1060,7 +1060,7 @@ class Facturation():
                         if "{HEURE_FIN}" in label: label = label.replace("{HEURE_FIN}", utils_dates.DeltaEnStr(heure_fin_delta))
                         nom_tarif = label
 
-                    if "qf" in methode_calcul and qf_famille:
+                    if "qf" in methode_calcul and qf_famille != None:
                         if qf_famille < ligne_calcul.qf_min or qf_famille > ligne_calcul.qf_max:
                             break
 
@@ -1078,7 +1078,7 @@ class Facturation():
                 if ligne_calcul.label:
                     nom_tarif = ligne_calcul.label
 
-                if "qf" in methode_calcul and qf_famille:
+                if "qf" in methode_calcul and qf_famille != None:
                     if qf_famille < ligne_calcul.qf_min or qf_famille > ligne_calcul.qf_max:
                         break
 
@@ -1138,7 +1138,7 @@ class Facturation():
             duree, heure_debut_delta, heure_fin_delta = self.Calcule_duree(case_tableau, combinaisons_unites)
             if "qf" in methode_calcul:
                 qf_famille = self.Recherche_QF(tarif, case_tableau)
-                if not qf_famille:
+                if qf_famille == None:
                     qf_famille = max([ligne_calcul.qf_max for ligne_calcul in lignes_calcul])
 
             for ligne_calcul in lignes_calcul:
@@ -1168,7 +1168,7 @@ class Facturation():
 
                 # Condition QF
                 conditionQF = True
-                if "qf" in methode_calcul and qf_famille:
+                if "qf" in methode_calcul and qf_famille != None:
                     if qf_famille >= ligne_calcul.qf_min and qf_famille <= ligne_calcul.qf_max:
                         conditionQF = True
                     else:
@@ -1232,7 +1232,7 @@ class Facturation():
             for ligne_calcul in lignes_calcul:
                 # Vérifie si QF ok pour le calcul basé également sur paliers de QF
                 conditions = True
-                if "qf" in methode_calcul and qf_famille:
+                if "qf" in methode_calcul and qf_famille != None:
                     if qf_famille >= ligne_calcul.qf_min and qf_famille <= ligne_calcul.qf_max:
                         conditions = True
                     else:
@@ -1245,7 +1245,7 @@ class Facturation():
                 if conditions == True:
 
                     # Calcul du tarif
-                    if qf_famille:
+                    if qf_famille != None:
                         montant_tarif = qf_famille * ligne_calcul.taux
                         montant_tarif = float(decimal.Decimal(str(montant_tarif)))
                     else:
@@ -1295,7 +1295,7 @@ class Facturation():
 
                 # Vérifie si QF ok pour le calcul basé également sur paliers de QF
                 conditionQF = True
-                if "qf" in methode_calcul and qf_famille:
+                if "qf" in methode_calcul and qf_famille != None:
                     if qf_famille >= ligne_calcul.qf_min and qf_famille <= ligne_calcul.qf_max:
                         conditionQF = True
                     else:
@@ -1303,7 +1303,7 @@ class Facturation():
 
                 if duree_min <= duree <= duree_max and conditionQF == True:
                     # Calcul du tarif
-                    if qf_famille:
+                    if qf_famille != None:
                         montant_tarif = qf_famille * ligne_calcul.taux
                         montant_tarif = float(decimal.Decimal(str(montant_tarif)))
                     else:
