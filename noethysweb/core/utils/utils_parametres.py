@@ -35,19 +35,25 @@ def Get_categorie(categorie=None, utilisateur=None, parametres={}):
         parametres_existants = {}
     return dict_parametres
 
-    # Ancienne version non optimisée
-    # dict_parametres = {}
-    # for nom, valeur in parametres.items():
-    #     try:
-    #         objet, created = Parametre.objects.get_or_create(nom=nom, categorie=categorie, utilisateur=utilisateur, defaults={"parametre": To_db(valeur)})
-    #         dict_parametres[nom] = To_python(objet.parametre, valeur)
-    #     except:
-    #         dict_parametres[nom] = valeur
-    # return dict_parametres
-
 def Set_categorie(categorie=None, utilisateur=None, parametres={}):
+    parametres_existants = {parametre.nom: parametre for parametre in Parametre.objects.filter(categorie=categorie, utilisateur=utilisateur)}
+    liste_ajouts, liste_modifications = [], []
     for nom, valeur in parametres.items():
-        objet, created = Parametre.objects.update_or_create(nom=nom, categorie=categorie, utilisateur=utilisateur, defaults={"parametre": To_db(valeur)})
+        if nom not in parametres_existants:
+            liste_ajouts.append(Parametre(nom=nom, categorie=categorie, utilisateur=utilisateur, parametre=To_db(valeur)))
+        else:
+            parametre = parametres_existants[nom]
+            if parametre.parametre != valeur:
+                parametre.parametre = To_db(valeur)
+                liste_modifications.append(parametre)
+    if liste_ajouts:
+        Parametre.objects.bulk_create(liste_ajouts)
+    if liste_modifications:
+        Parametre.objects.bulk_update(liste_modifications, ["parametre"])
+
+    # Ancienne version :
+    # for nom, valeur in parametres.items():
+    #     objet, created = Parametre.objects.update_or_create(nom=nom, categorie=categorie, utilisateur=utilisateur, defaults={"parametre": To_db(valeur)})
 
 def To_python(valeur=None, defaut=None):
     if not valeur: return valeur
@@ -68,4 +74,3 @@ def To_db(valeur=None):
     if type_parametre in (tuple, dict, list):
         return json.dumps(valeur)
     return str(valeur)
-
