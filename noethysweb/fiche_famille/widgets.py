@@ -151,3 +151,24 @@ class Consommations_prestation(Widget):
     def render(self, name, value, attrs=None, renderer=None):
         context = self.get_context(name, value, attrs)
         return mark_safe(loader.render_to_string(self.template_name, context))
+
+
+class Prestation_cotisation(Widget):
+    template_name = 'fiche_famille/widgets/prestation_cotisation.html'
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        context['name'] = name
+        if value:
+            context['texte'] = "Prestation ID%d" % value
+        else:
+            context['texte'] = "Aucune prestation associée"
+        if value is not None:
+            context['value'] = value
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))

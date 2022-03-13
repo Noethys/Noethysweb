@@ -812,6 +812,7 @@ class TypeCotisation(models.Model):
     code_comptable = models.CharField(verbose_name="Code comptable", max_length=200, blank=True, null=True)
     code_produit_local = models.CharField(verbose_name="Code produit local", max_length=200, blank=True, null=True)
     defaut = models.BooleanField(verbose_name="Type par défaut", default=False)
+    activite = models.ForeignKey("Activite", verbose_name="Activité associée", on_delete=models.PROTECT, blank=True, null=True)
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
@@ -2138,7 +2139,7 @@ class Cotisation(models.Model):
     depot_cotisation = models.ForeignKey(DepotCotisations, verbose_name="Dépôt d'adhésions", on_delete=models.PROTECT, blank=True, null=True)
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin")
-    prestation = models.OneToOneField(Prestation, verbose_name="Prestation", on_delete=models.CASCADE, blank=True, null=True)
+    prestation = models.OneToOneField(Prestation, verbose_name="Prestation", on_delete=models.SET_NULL, blank=True, null=True)
     observations = models.TextField(verbose_name="Observations", blank=True, null=True)
     activites = models.ManyToManyField(Activite, verbose_name="Activités", blank=True)
 

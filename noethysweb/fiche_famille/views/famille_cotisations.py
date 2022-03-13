@@ -139,11 +139,13 @@ class Page(Onglet):
 
     def form_valid(self, form):
         famille = form.cleaned_data["famille"]
+        individu = form.cleaned_data["individu"]
         facturer = form.cleaned_data["facturer"]
         date_facturation = form.cleaned_data["date_facturation"]
         label_prestation = form.cleaned_data["label_prestation"]
         montant = form.cleaned_data["montant"]
         prestation = form.cleaned_data["prestation"]
+        type_cotisation = form.cleaned_data["type_cotisation"]
 
         if form.is_valid() == False:
             return self.render_to_response(self.get_context_data(form=form))
@@ -154,15 +156,17 @@ class Page(Onglet):
         # Sauvegarde de la prestation
         if facturer:
             if prestation == None:
-                prestation = Prestation.objects.create(date=date_facturation, categorie="cotisation", label=label_prestation,
-                                                       famille=famille, montant_initial=montant, montant=montant)
+                prestation = Prestation.objects.create(date=date_facturation, categorie="cotisation", label=label_prestation, individu=individu,
+                                                       famille=famille, montant_initial=montant, montant=montant, activite=type_cotisation.activite)
             else:
                 prestation.date = date_facturation
                 prestation.categorie = "cotisation"
                 prestation.label = label_prestation
                 prestation.famille = famille
+                prestation.individu = individu
                 prestation.montant_initial = montant
                 prestation.montant = montant
+                prestation.activite = type_cotisation.activite
                 prestation.save()
 
         if not facturer and prestation:

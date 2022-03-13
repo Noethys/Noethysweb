@@ -3,20 +3,22 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+
+import datetime
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
+from django_select2.forms import Select2MultipleWidget
+from django.db.models import Q, Max
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
 from crispy_forms.bootstrap import Field, StrictButton, PrependedText
+from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import Famille, Cotisation, Activite, Rattachement, TypeCotisation, UniteCotisation, Prestation, ModeleDocument
 from core.widgets import DatePickerWidget
-from django_select2.forms import Select2MultipleWidget
-from django.db.models import Q, Max
-import datetime
 from core.utils import utils_preferences
 from cotisations.widgets import Selection_beneficiaires_cotisation
+from fiche_famille.widgets import Prestation_cotisation
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -44,6 +46,7 @@ class Formulaire(FormulaireBase, ModelForm):
             'date_debut': DatePickerWidget(),
             'date_fin': DatePickerWidget(),
             'date_creation_carte': DatePickerWidget(),
+            "prestation": Prestation_cotisation(),
         }
         labels = {
             "type_cotisation": "Type",
@@ -157,6 +160,7 @@ class Formulaire(FormulaireBase, ModelForm):
                     Field('date_facturation'),
                     Field('label_prestation'),
                     PrependedText('montant', utils_preferences.Get_symbole_monnaie()),
+                    Field('prestation'),
                     id="div_facturer"
                 ),
             ),
@@ -340,7 +344,10 @@ $(document).ready(function() {
     $.ajax({ 
         type: "POST",
         url: "{% url 'ajax_on_change_unite_cotisation' %}",
-        data: {'idunite_cotisation': $("#id_unite_cotisation").val()},
+        data: {
+            'idunite_cotisation': $("#id_unite_cotisation").val(),
+            'idfamille': famille
+        },
         success: function (data) { 
             // Individu
             if (data.type == 'individu') {

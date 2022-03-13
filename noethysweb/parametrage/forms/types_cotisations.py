@@ -47,6 +47,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field('defaut'),
             ),
             Fieldset('Options',
+                Field('activite'),
                 Field('code_comptable'),
                 Field("code_produit_local"),
             ),
