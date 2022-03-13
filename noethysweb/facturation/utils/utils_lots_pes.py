@@ -5,12 +5,14 @@
 
 from django.conf import settings
 from core.models import PesLot, PesPiece, Prestation, Organisateur, LISTE_MOIS
-from core.utils import utils_dates, utils_parametres
+from core.utils import utils_dates, utils_parametres, utils_texte
 from dateutil.relativedelta import relativedelta
 import os, calendar, datetime, shutil, uuid
 
 
-def ConvertToTexte(valeur):
+def ConvertToTexte(valeur, majuscules=False):
+    if majuscules and valeur:
+        valeur = utils_texte.Supprimer_accents(valeur.upper())
     valeur = '"%s"' % valeur
     valeur = valeur.replace("\n", " ")
     valeur = valeur.replace("\r", " ")
@@ -221,17 +223,17 @@ class Exporter():
                         ligne[8] = ConvertToTexte(piece.famille.code_compta[:15])
 
                     # Designation1 - Texte (50)
-                    ligne[10] = ConvertToTexte(piece.famille.titulaire_helios.nom[:50])
+                    ligne[10] = ConvertToTexte(piece.famille.titulaire_helios.nom[:50], majuscules=True)
 
                     # Designation2 - Texte (50)
                     if piece.famille.titulaire_helios.prenom:
-                        ligne[11] = ConvertToTexte(piece.famille.titulaire_helios.prenom[:50])
+                        ligne[11] = ConvertToTexte(piece.famille.titulaire_helios.prenom[:50], majuscules=True)
 
                     # AdrLig1, AdrLig2, et AdrLig3 - Texte (50)
                     if piece.famille.titulaire_helios.rue_resid:
                         lignes_rue = piece.famille.titulaire_helios.rue_resid.split("\n")
                         for idx, valeur in enumerate(lignes_rue[:3], 12):
-                            ligne[idx] = ConvertToTexte(valeur[:50])
+                            ligne[idx] = ConvertToTexte(valeur[:50], majuscules=True)
 
                     # Codepostal - Texte (10)
                     ligne[15] = ConvertToTexte(piece.famille.titulaire_helios.cp_resid[:10])
@@ -317,7 +319,7 @@ class Exporter():
 
                         # TitCpte - Texte (32)
                         individu_mandat = piece.prelevement_mandat.individu_nom or piece.prelevement_mandat.individu.Get_nom()
-                        ligne[64] = ConvertToTexte(individu_mandat[:32])
+                        ligne[64] = ConvertToTexte(individu_mandat[:32], majuscules=True)
 
                         # IBAN - Texte (34)
                         ligne[65] = ConvertToTexte(piece.prelevement_mandat.iban)
