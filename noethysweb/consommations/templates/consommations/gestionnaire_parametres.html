@@ -27,17 +27,19 @@
     </style>
 
     <!-- Box Paramètres -->
+    {% if data.mode != 'pointeuse' %}
     <div class="card card-default">
 
         <div class="card-header">
             <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i>Paramètres</h3>
             <div class="card-tools">
-                <button type="submit" name="type_submit" form="form-maj" style="margin-right: 10px;" value="MAJ" class="btn btn-default btn-xs" title="Appliquer les paramètres sélectionnés">Appliquer</button>
+                <button type="submit" name="type_submit" form="form-maj" value="MAJ" class="btn btn-default btn-xs" title="Appliquer les paramètres sélectionnés">Appliquer</button>
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
             </div>
         </div>
 
         <div class="card-body p-0">
-
+    {% endif %}
             <div id="accordeon_parametres">
 
                 {# Panneau Date #}
@@ -140,10 +142,34 @@
                     </div>
                 </div>
 
+
+                {# Panneau Options #}
+                <div class="card">
+                    <div class="card-header" id="head_5">
+                        <h4 class="card-title w-100">
+                            <a class="d-block w-100" data-toggle="collapse" data-target="#panneau_5" href="#panneau_5" aria-expanded="true" aria-controls="panneau_5">
+                                <i class="fa fa-angle-down margin-r-5"></i>Options
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="panneau_5" class="collapse {% if data.mode_parametres == "panneau_5" %}show{% endif %}" aria-labelledby="head_5" data-parent="#accordeon_parametres">
+                        <div class="card-body">
+                            {% crispy form_options %}
+                            <script>
+                                function Get_options() {
+                                    return $("#form_options").serializeArray()
+                                };
+                            </script>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
+    {% if data.mode != 'pointeuse' %}
         </div>
     </div>
+    {% endif %}
 
 <script>
     function Get_mode_parametres() {

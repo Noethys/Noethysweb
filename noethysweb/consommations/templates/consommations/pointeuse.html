@@ -1,0 +1,155 @@
+{% load static %}
+{% load embed %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    {% block meta %}
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Noethysweb">
+    {% endblock meta %}
+
+    <link rel="shortcut icon" href="{% static 'images/icone.png' %}"/>
+
+    <title>Noethysweb | {% block page_titre %}{{ page_titre }}{% endblock page_titre %}</title>
+
+    {% block styles %}
+        {% include 'core/styles.html' %}
+
+        <style>
+            #sidebar {
+                background-color: #343a40;
+                color: white;
+                height: 100%;
+                padding: 5px;
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 70px;
+                z-index: 2;
+                overflow-x: hidden;
+                overflow-y: auto;
+                display: block;
+            }
+            .content-wrapper {
+                margin-left: 70px !important;
+            }
+            @media (min-width: 838px) {
+                #table_grille {
+                    height: calc(100vh - 85px) !important;
+                }
+            }
+            @media (max-width: 837px) {
+                #table_grille {
+                    height: calc(100vh - 118px) !important;
+                }
+            }
+            @media (max-width: 478px) {
+                #table_grille {
+                    height: calc(100vh - 151px) !important;
+                }
+            }
+        </style>
+
+    {% endblock %}
+
+    {% block scripts %}
+        {% include 'core/scripts.html' %}
+    {% endblock %}
+
+    {% block extra_head %}
+    {% endblock %}
+
+</head>
+
+<body class="accent-lightblue border-bottom-0 layout-fixed text-sm" style="height: auto;">
+
+    <div class="wrapper">
+
+        <div id="sidebar" role="navigation">
+            <div class="btn-group-vertical">
+                {% for lettre in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+                    <button type="button" class="btn btn-default bg-gray bouton_alphabet">{{ lettre }}</button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="content-wrapper" style="background-color: #343a40;">
+
+            <section class="content p-0">
+                <div class="container-fluid">
+
+                    {% block messages %}
+                        {% include 'core/messages.html' %}
+                    {% endblock %}
+
+                    <script>
+                        var dict_options = JSON.parse('{{ data.options_json|escapejs }}');
+                    </script>
+
+                    <div class="row">
+                        <div class="col-md-12" >
+
+                            <div class="pt-1">
+                                <h6 style="color: white;">{{ data.titre_grille }}</h6>
+                            </div>
+
+                            <!-- Grille -->
+                            {% include "consommations/grille_tableau.html" %}
+                            {% include 'consommations/grille_saisie_detail.html' %}
+                            {% include 'consommations/grille_saisie_memo.html' %}
+                            {% include 'consommations/grille_saisie_pointage.html' %}
+                            {% include 'consommations/grille_ajouter_individu.html' %}
+
+                        </div>
+                    </div>
+
+                    {# Modal Paramètres #}
+                    {% embed 'core/modal.html' with modal_footer=True %}
+                        {% block modal_id %}modal_parametres{% endblock %}
+                        {% block modal_titre %}Paramètres{% endblock %}
+                        {% block modal_body_classe %}p-0{% endblock %}
+                        {% block modal_body %}
+                            <div>
+                                {% include "consommations/gestionnaire_parametres.html" %}
+                            </div>
+                        {% endblock %}
+                        {% block modal_footer %}
+                            <button type="submit" class="btn btn-primary" name="type_submit" form="form-maj" value="MAJ" title="Appliquer les paramètres sélectionnés"><i class="fa fa-check margin-r-5"></i>Appliquer</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                        {% endblock %}
+                    {% endembed %}
+
+                    {# Modal Totaux #}
+                    {% embed 'core/modal.html' with modal_footer=True %}
+                        {% block modal_id %}modal_totaux{% endblock %}
+                        {% block modal_titre %}Totaux{% endblock %}
+                        {% block modal_body_classe %}p-0{% endblock %}
+                        {% block modal_body %}
+                            <div>
+                                {% include "consommations/grille_totaux.html" %}
+                            </div>
+                        {% endblock %}
+                        {% block modal_footer %}
+                            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-close margin-r-5'></i>Fermer</button>
+                        {% endblock %}
+                    {% endembed %}
+
+                </div>
+            </section>
+
+        </div>
+
+    </div>
+
+    <script>
+        function Get_individus() {return []}
+        function Get_inscriptions() {return []}
+    </script>
+
+</body>
+</html>

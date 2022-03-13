@@ -2,6 +2,10 @@
     margin-left: 0px;
 }
 
+.card.maximized-card {
+    z-index: 1050;
+}
+
 .commandes_grille {
     margin: 0px 0px 0px 0px;
 }

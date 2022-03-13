@@ -18,23 +18,13 @@
 
     <div class="row">
         <div class="col-md-3" >
-
-            <!-- Sélection des paramètres -->
             {% include "consommations/gestionnaire_parametres.html" %}
-
-            <!-- Totaux -->
             {% include "consommations/grille_totaux.html" %}
-
-            <!-- Box facturation -->
             {% include "consommations/grille_facturation.html" %}
-
         </div>
 
         <div class="col-md-9">
-
-            <!-- Grille -->
             {% include "consommations/grille.html" %}
-
         </div>
 
     </div>
@@ -51,8 +41,4 @@
         function Get_individus() {return []}
         function Get_inscriptions() {return []}
     </script>
-
 {% endblock scripts %}
-
-
-

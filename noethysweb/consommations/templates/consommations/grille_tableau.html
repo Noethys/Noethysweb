@@ -94,7 +94,7 @@
     </div>
 
     <div class="table noselect masquer" id="table_grille" draggable="false">
-        <table cellspacing="0" id="table-grille" class="table table-bordered table-grille" style="min-width: 400px;">
+        <table cellspacing="0" id="table-grille" class="table table-bordered table-grille bg-white" style="min-width: 400px;">
             <thead>
                 <tr>
 {% comment %}
@@ -109,7 +109,7 @@
                         <th>{{ unite.nom }}</th>
                     {% endfor %}
                     {% if data.mode != "portail" %}
-                        <th>Mémo journalier</th>
+                        <th>Mémo</th>
                     {% endif %}
                 </tr>
             </thead>
@@ -145,14 +145,18 @@
                             <th class="{% if date|est_en_vacances:data.liste_vacances and data.mode == 'individu' %}vacances{% endif %}">
                                 {% if data.mode == 'date' or data.mode == 'pointeuse' %}
                                     <div>
-                                        {{ inscription.individu.nom }} {{ inscription.individu.prenom|default:"" }}
+                                        {% if data.options.tri|default:"nom" == 'prenom' %}
+                                            {{ inscription.individu.prenom|default:"" }}{% if inscription.individu.prenom %} {% endif %}{{ inscription.individu.nom }}
+                                        {% else %}
+                                            {{ inscription.individu.nom }} {{ inscription.individu.prenom|default:"" }}
+                                        {% endif %}
                                     </div>
                                     <div class='infos_inscription'>
-                                        {% if inscription.infos_diffentes %}{{ inscription.infos_diffentes }}{% endif %}
+                                        {% if inscription.infos %}{{ inscription.infos }}{% endif %}
                                     </div>
                                 {% else %}
                                     {% if data.liste_inscriptions|length > 1 %}
-                                        <div>{{ inscription.individu.prenom|default:inscription.individu.nom }}</div><div class='infos_inscription'>{% if inscription.infos_diffentes %}{{ inscription.infos_diffentes }}{% endif %}</div>
+                                        <div>{{ inscription.individu.prenom|default:inscription.individu.nom }}</div><div class='infos_inscription'>{% if inscription.infos %}{{ inscription.infos }}{% endif %}</div>
                                     {% else %}
                                         <span class="texte_entete_ligne_large">{{ date|date:"l j F Y"|title }}</span><span class="texte_entete_ligne_court">{{ date|date:"D. d/m/y"|title }}</span>
                                         {% if not modif_allowed %}<i class='fa fa-lock text-red' title="Date non modifiable"></i>{% endif %}
@@ -252,5 +256,26 @@
             <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
         {% endblock %}
     {% endembed %}
+
+    {# Modal Suggestions de recherche #}
+    {% if data.mode == "date" or data.mode == "pointeuse" %}
+        {% embed 'core/modal.html' with modal_footer=True %}
+            {% block modal_id %}modal_suggestions{% endblock %}
+            {% block modal_titre %}Suggestions de recherche{% endblock %}
+            {% block modal_body_classe %}p-0{% endblock %}
+            {% block modal_body %}
+                <div class="btn-group-vertical btn-block">
+                    {% if data.options.afficher_classe == "oui" %}
+                        {% for classe in data.liste_classes %}
+                            <button class="btn btn-default btn-block btn-flat suggestion" style="text-align: left;" data-suggestion="{{ classe.nom }}">{{ classe.ecole.nom|truncatechars:15 }} | {{ classe.nom }}</button>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endblock %}
+            {% block modal_footer %}
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-close margin-r-5'></i>Fermer</button>
+            {% endblock %}
+        {% endembed %}
+    {% endif %}
 
 {% endblock contenu_page %}

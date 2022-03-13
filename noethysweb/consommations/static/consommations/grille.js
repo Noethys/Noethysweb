@@ -1082,6 +1082,23 @@ $(function () {
         $(".table-grille tbody th:not(:icontains('" + $(this).val() + "')):not('.date_regroupement')").closest("tr").addClass("masquer");
     });
 
+    // Recherche avec l'alphabet
+    $(".bouton_alphabet").click(function(e){
+        var scrolled = false;
+        $(".table-grille tbody th").each(function() {
+            if ($(this)[0].innerText.substring(0,1) === e.target.innerText) {
+                if (scrolled === false) {
+                    var $container = $("#table_grille");
+                    var $scrollTo = $(this);
+                    $container.scrollTop($scrollTo.offset().top - $container.offset().top + $container.scrollTop() - $scrollTo[0].offsetHeight);
+                    scrolled = true;
+                }
+                $(this).fadeTo(100, 0.3, function() { $(this).fadeTo(500, 1.0); });
+            }
+        });
+    });
+
+
 });
 
 
@@ -1207,6 +1224,23 @@ $(document).ready(function() {
         $('#modal_outils').modal('show');
     });
 
+    $('[name=bouton_parametres]').on('click', function(event) {
+        $('#modal_parametres').modal('show');
+    });
+
+    $('[name=bouton_totaux]').on('click', function(event) {
+        $('#modal_totaux').modal('show');
+    });
+
+    $('[name=bouton_suggestions]').on('click', function(event) {
+        $('#modal_suggestions').modal('show');
+    });
+
+    $('.suggestion').on('click', function(event) {
+        $('#rechercher').val($(this).data("suggestion")).trigger("input");
+        $('#modal_suggestions').modal('hide');
+    });
+
     $('[name=bouton_enregistrer]').on('click', function(event) {
         // Si mode portail, on générer la facturation avant le submit
         var box = bootbox.dialog({
@@ -1239,7 +1273,7 @@ $(document).ready(function() {
     // Envoi des paramètres au format json vers le form de maj
     $("#form-maj").on('submit', function(event) {
 
-        if (mode !== "portail") {
+        if ((mode !== "portail") && (mode !== "pointeuse")) {
 
             // Vérifie qu'il n'y a pas un calcul de facturation en cours
             if (!($("#loader_facturation").hasClass("masquer"))) {
@@ -1303,7 +1337,7 @@ function validation_form(event) {
         "mode_parametres": Get_mode_parametres(),
         "consommations": dict_conso,
         "memos": dict_memos,
-        "options": dict_options,
+        "options": Get_options(),
         "suppressions": dict_suppressions,
         "prestations": dict_prestations,
     });

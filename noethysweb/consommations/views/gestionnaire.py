@@ -3,19 +3,20 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy
-from core.models import Inscription, Activite, Ouverture, Consommation, Famille, Classe
-from core.views.base import CustomView
-from django.views.generic import TemplateView
-from core.utils import utils_dates, utils_dictionnaires
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
 import json, datetime
-from consommations.forms.grille_selection_date import Formulaire as form_selection_date
-from consommations.forms.grille_ajouter_individu import Formulaire as form_ajouter_individu
-from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
+from django.urls import reverse_lazy
 from django.db.models import Q, Count
 from django.core import serializers
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.views.generic import TemplateView
+from core.models import Inscription, Activite, Ouverture, Consommation, Famille, Classe, NiveauScolaire
+from core.views.base import CustomView
+from core.utils import utils_dates, utils_dictionnaires, utils_parametres
+from consommations.forms.grille_selection_date import Formulaire as form_selection_date
+from consommations.forms.grille_ajouter_individu import Formulaire as form_ajouter_individu
+from consommations.forms.grille_options import Formulaire as form_options
+from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
 
 
 class View(CustomView, TemplateView):
@@ -39,10 +40,12 @@ class View(CustomView, TemplateView):
         context['form_selection_date'] = form_selection_date
         context['form_ajouter_individu'] = form_ajouter_individu
         context['data'] = self.Get_data_grille()
+        context['form_options'] = form_options(initial=context["data"]["options"])
         return context
 
     def Get_data_grille(self):
         data = {"mode": self.mode_grille, "consommations": {}, "prestations": {}, "memos": {}}
+        options_defaut = {"tri": "nom", "afficher_date_naiss": "non", "afficher_age": "non", "afficher_groupe": "non", "afficher_classe": "non", "afficher_niveau_scolaire": "non"}
 
         # Sélections par défaut
         if self.request.POST:
@@ -59,6 +62,12 @@ class View(CustomView, TemplateView):
             data["options"] = donnees_post["options"]
             data["dict_suppressions"] = donnees_post["suppressions"]
             data["mode_parametres"] = donnees_post.get("mode_parametres", None)
+
+            # Enregistrement des options
+            if isinstance(data["options"], list):
+                data["options"] = {item["name"]: item["value"] for item in data["options"] if item["name"] != "csrfmiddlewaretoken"}
+            utils_parametres.Set_categorie(categorie="gestionnaire_%s" % self.mode_grille, utilisateur=self.request.user, parametres=data["options"])
+
         else:
             # Si c'est un chargement initial de la page
             date_jour = str(datetime.date.today())
@@ -66,7 +75,7 @@ class View(CustomView, TemplateView):
             data["selection_activite"] = None
             data["selection_groupes"] = None
             data["selection_classes"] = None
-            data["options"] = {"cocher_auto_activites": True, "afficher_tous_inscrits": False} # todo: charger paramètre depuis la base de données
+            data["options"] = utils_parametres.Get_categorie(categorie="gestionnaire_%s" % self.mode_grille, utilisateur=self.request.user, parametres=options_defaut)
             data["dict_suppressions"] = {"consommations": [], "prestations": [], "memos": []}
 
         # Récupération de la période
@@ -109,15 +118,26 @@ class View(CustomView, TemplateView):
                 if inscription.pk not in liste_idinscriptions and inscription.Is_inscription_in_periode(data["date_min"], data["date_max"]):
                     liste_idinscriptions.append(inscription.pk)
 
-        # Importation des classes pour le gestionnaire des conso
-        data["liste_classes"] = Classe.objects.select_related("ecole").filter(date_debut__lte=data["date_min"], date_fin__gte=data["date_min"]).order_by("ecole__nom", "nom")
+        # Importation des classes
+        liste_classes = Classe.objects.select_related("ecole").filter(date_debut__lte=data["date_min"], date_fin__gte=data["date_min"]).order_by("ecole__nom", "niveaux__ordre", "nom")
+        data["liste_classes"] = list({classe: True for classe in liste_classes}.keys())
+
+        # # Tri des classes par niveau scolaire
+        # dict_niveaux = {niveau.pk: niveau for niveau in NiveauScolaire.objects.all()}
+        # dict_classes = {classe.pk: classe for classe in liste_classes}
+        # dict_niveaux_classes = {}
+        # for classe_niveaux in Classe.niveaux.through.objects.filter(classe__in=liste_classes):
+        #     dict_niveaux_classes.setdefault(classe_niveaux.classe_id, [])
+        #     dict_niveaux_classes[classe_niveaux.classe_id].append(dict_niveaux[classe_niveaux.niveauscolaire_id].ordre)
+        # liste_temp = sorted([(sorted(niveaux), idclasse) for idclasse, niveaux in dict_niveaux_classes.items()])
+        # data["liste_classes"] = [dict_classes[idclasse] for niveaux, idclasse in liste_temp]
 
         # Sélection des classes
         if not data['selection_classes']:
             data['selection_classes'] = [classe.pk for classe in data['liste_classes']]
 
         # Importation des inscriptions
-        if data["options"]["afficher_tous_inscrits"] or ajouter_individu == "INSCRITS_TOUS":
+        if ajouter_individu == "INSCRITS_TOUS":
             conditions = Q(activite=data["selection_activite"])
         elif ajouter_individu and ajouter_individu.startswith("INSCRITS_GROUPE"):
             conditions = Q(activite=data["selection_activite"], groupe_id=int(ajouter_individu.split(":")[1])) | Q(pk__in=liste_idinscriptions)
@@ -127,7 +147,14 @@ class View(CustomView, TemplateView):
         if len(data["selection_classes"]) < len(data["liste_classes"]):
             conditions &= Q(individu__scolarite__classe_id__in=data["selection_classes"])
 
-        data["liste_inscriptions"] = Inscription.objects.select_related('individu', 'activite', 'groupe', 'famille', 'categorie_tarif').filter(conditions).order_by("individu__nom", "individu__prenom")
+        if data["options"].get("tri", "nom") == "prenom":
+            tri = ("individu__prenom", "individu__nom")
+        else:
+            tri = ("individu__nom", "individu__prenom")
+        data["liste_inscriptions"] = Inscription.objects.select_related('individu', 'activite', 'groupe', 'famille', 'categorie_tarif').filter(conditions).order_by(*tri)
+
+        if data["options"].get("tri") == "date_naiss":
+            data["liste_inscriptions"] = sorted(data["liste_inscriptions"], key=lambda x: x.individu.date_naiss or datetime.date(1900, 1, 1), reverse=True)
 
         # Définit le titre de la grille
         data["titre_grille"] = utils_dates.DateComplete(utils_dates.ConvertDateENGtoDate(data["date_min"]))

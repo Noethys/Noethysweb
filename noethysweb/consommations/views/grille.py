@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 from django.http import JsonResponse
 from django.contrib import messages
 from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite, Consommation, MemoJournee, Evenement, Groupe, Individu, \
-                        Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Ferie, Individu, Activite, Classe
+                        Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Ferie, Individu, Activite, Classe, Scolarite
 from core.utils import utils_dates, utils_dictionnaires, utils_db, utils_texte, utils_decimal, utils_historique
 from consommations.utils import utils_consommations
 from django.utils.safestring import mark_safe
@@ -71,12 +71,35 @@ def Get_generic_data(data={}):
         if inscription.groupe not in dict_differences[inscription.individu][inscription.activite]["groupe"]: dict_differences[inscription.individu][inscription.activite]["groupe"].append(inscription.groupe)
         if inscription.famille not in dict_differences[inscription.individu][inscription.activite]["famille"]: dict_differences[inscription.individu][inscription.activite]["famille"].append(inscription.famille)
         if inscription.categorie_tarif not in dict_differences[inscription.individu][inscription.activite]["categorie_tarif"]: dict_differences[inscription.individu][inscription.activite]["categorie_tarif"].append(inscription.categorie_tarif)
+
+    # Importation de la scolarité
+    dict_scolarites = {}
+    if data["options"].get("afficher_classe", "non") == "oui" or data["options"].get("afficher_niveau_scolaire", "non") == "oui":
+        conditions = Q(individu_id__in=data["liste_key_individus"]) & Q(date_debut__lte=data["date_max"]) & Q(date_fin__gte=data["date_min"])
+        dict_scolarites = {scolarite.individu: scolarite for scolarite in Scolarite.objects.select_related("individu", "classe", "niveau").filter(conditions)}
+
     for inscription in data["liste_inscriptions"]:
-        inscription.infos_diffentes = []
+        inscription.infos = []
+
+        # Ajout des informations différentes
         for info in ("groupe", "famille", "categorie_tarif"):
             if len(dict_differences[inscription.individu][inscription.activite][info]) > 1:
-                inscription.infos_diffentes.append(getattr(inscription, info).nom)
-        inscription.infos_diffentes = " | ".join(inscription.infos_diffentes)
+                inscription.infos.append(getattr(inscription, info).nom)
+
+        # Ajout d'autres informations
+        if data["options"].get("afficher_date_naiss", "non") == "oui" and inscription.individu.date_naiss:
+            inscription.infos.append(inscription.individu.date_naiss.strftime("%d/%m/%Y"))
+        if data["options"].get("afficher_age", "non") == "oui" and inscription.individu.date_naiss:
+            inscription.infos.append("%d ans" % inscription.individu.Get_age())
+        if data["options"].get("afficher_groupe", "non") == "oui":
+            inscription.infos.append(inscription.groupe.nom)
+        if data["options"].get("afficher_classe", "non") == "oui" and inscription.individu in dict_scolarites:
+            inscription.infos.append(dict_scolarites[inscription.individu].classe.nom)
+        if data["options"].get("afficher_niveau_scolaire", "non") == "oui" and inscription.individu in dict_scolarites:
+            inscription.infos.append(dict_scolarites[inscription.individu].niveau.abrege)
+
+        # Formatage des informations
+        inscription.infos = " | ".join(inscription.infos)
 
     # Regroupe les inscriptions par individu
     dict_resultats = {}
@@ -225,7 +248,7 @@ def Get_generic_data(data={}):
     data["liste_key_individus_json"] = mark_safe(json.dumps(data["liste_key_individus"]))
 
     # Suppression de données inutiles
-    for key in ("liste_familles", "periode", "consommations", "memos", "options", "dict_suppressions", "liste_idindividus", "liste_key_individus", "liste_evenements", "prestations"):
+    for key in ("liste_familles", "periode", "consommations", "memos", "dict_suppressions", "liste_idindividus", "liste_key_individus", "liste_evenements", "prestations"):
         if key in data:
             del data[key]
 

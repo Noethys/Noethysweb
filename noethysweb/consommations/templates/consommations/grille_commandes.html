@@ -9,6 +9,8 @@
         {% endif %}
         {% if data.mode == "pointeuse" %}
             <button type='button' id="annuler" name="bouton_annuler" title="Fermer" class='btn btn-danger btn-sm'><i class="fa fa-times margin-r-5"></i>Fermer</button>
+            <button type="button" id="parametres" name="bouton_parametres" class="btn btn-default btn-sm" title="Accéder aux paramètres"><i class="fa fa-gear margin-r-5"></i>Paramètres</button>
+            <button type="button" id="totaux" name="bouton_totaux" class="btn btn-default btn-sm" title="Accéder aux totaux"><i class="fa fa-bar-chart margin-r-5"></i>Totaux</button>
         {% endif %}
         {% if data.mode == "date" or data.mode == "pointeuse" %}
             <button type="button" id="ajouter_individu" class="btn btn-default btn-sm" onclick="$('#modal_ajouter_individu').modal('show');" title="Ajouter des individus"><i class="fa fa-plus margin-r-5"></i>Individus</button>
@@ -20,11 +22,16 @@
         <button type="button" id="outils" name="bouton_outils" class="btn btn-default btn-sm" title="Accéder aux outils"><i class="fa fa-wrench margin-r-5"></i>Outils</button>
 
         <div>
-            <div class="input-group input-group-sm " style="width: 140px;">
+            <div class="input-group input-group-sm" style="width: 170px;">
                 <div class="input-group-prepend">
                     <button type="submit" class="input-group-text"><i class="fa fa-search"></i></button>
                 </div>
                 <input type="search" id="rechercher" class="form-control form-control-sm text-sm" title="Rechercher une date ou un individu" placeholder="Rechercher...">
+                {% if data.mode == "date" or data.mode == "pointeuse" %}
+                    <div class="input-group-append">
+                        <button type="button" name="bouton_suggestions" class="btn btn-default" title="Accéder aux suggestions de recherche"><i class="fa fa-bars"></i></button>
+                    </div>
+                {% endif %}
             </div>
         </div>
 

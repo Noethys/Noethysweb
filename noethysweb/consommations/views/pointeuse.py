@@ -6,14 +6,12 @@
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from consommations.forms.grille_selection_date import Formulaire as form_selection_date
-from consommations.forms.grille_ajouter_individu import Formulaire as form_ajouter_individu
 from consommations.views import gestionnaire
 
 
 class View(gestionnaire.View):
     menu_code = "pointeuse_conso"
-    template_name = "consommations/gestionnaire.html"
+    template_name = "consommations/pointeuse.html"
     mode_grille = "pointeuse"
 
     def post(self, request, *args, **kwargs):
@@ -26,7 +24,4 @@ class View(gestionnaire.View):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Pointeuse en temps réel"
-        context['form_selection_date'] = form_selection_date
-        context['form_ajouter_individu'] = form_ajouter_individu
-        context['data'] = self.Get_data_grille()
         return context

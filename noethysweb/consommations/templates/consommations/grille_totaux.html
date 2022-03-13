@@ -15,6 +15,7 @@
 {% block contenu_page %}
 
     <!-- Box Totaux -->
+    {% if data.mode != 'pointeuse' %}
     <div class="card card-default">
         <div class="card-header with-border">
             <h3 class="card-title"><i class="fa fa-calendar margin-r-5"></i> Totaux</h3>
@@ -23,7 +24,7 @@
             </div>
         </div>
         <div class="card-body p-0" style="display: block;overflow-x: auto;white-space: nowrap;">
-
+    {% endif %}
             <table id="table_totaux" class="table table-sm">
                 <thead>
                     <tr class="entete-colonne">
@@ -67,7 +68,9 @@
                 </tbody>
             </table>
 
+    {% if data.mode != 'pointeuse' %}
         </div>
     </div>
+    {% endif %}
 
 {% endblock contenu_page %}
