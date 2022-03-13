@@ -20,7 +20,7 @@
 
                     {# Sélection des horaires #}
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-sm-6">
                             <label for="saisie_heure_debut" class="col-form-label">Début</label>
                             <div class="input-group date choix_horaires">
                                 <input id="saisie_heure_debut" type="time" class="form-control"/>
@@ -29,7 +29,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-sm-6">
                             <label for="saisie_heure_fin" class="col-form-label">Fin</label>
                             <div class="input-group date choix_horaires">
                                 <input id="saisie_heure_fin" type="time" class="form-control"/>
@@ -42,14 +42,14 @@
 
                     <div class="row">
                         {# Sélection de la quantité #}
-                        <div class="col-md-6">
+                        <div class="col-sm-6">
                             <div class="controls">
                                 <label for="saisie_quantite" class="col-form-label">Quantité</label>
                                 <input id="saisie_quantite" type="number" class="numberinput form-control" min="1">
                             </div>
                         </div>
                         {# Sélection du groupe #}
-                        <div class="col-md-6">
+                        <div class="col-sm-6">
                             <label for="saisie_groupe" class="col-form-label">Groupe</label>
                             <select class="select form-control" id="saisie_groupe">
                                 {% for groupe in data.liste_groupes %}
@@ -66,15 +66,15 @@
                                 <label for="boutons_etat" class="col-form-label">Etat</label>
                                 <div data-toggle="buttons">
                                     <div class="row">
-                                        <div class="col-md-4">
+                                        <div class="col-sm-4">
                                             <label class="btn btn-default btn-block"><input type="radio" name="saisie_etat" value="reservation" checked> Réservation</label>
                                             <label class="btn btn-default btn-block"><input type="radio" name="saisie_etat" value="present"> Présent</label>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-sm-4">
                                             <label class="btn btn-default btn-block"><input type="radio" name="saisie_etat" value="attente"> Attente</label>
                                             <label class="btn btn-default btn-block"><input type="radio" name="saisie_etat" value="absentj"> Abs. justifiée</label>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-sm-4">
                                             <label class="btn btn-default btn-block"><input type="radio" name="saisie_etat" value="refus"> Refus</label>
                                             <label class="btn btn-default btn-block"><input type="radio" name="saisie_etat" value="absenti"> Abs. injustifiée</label>
                                         </div>
