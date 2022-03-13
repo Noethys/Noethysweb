@@ -1251,6 +1251,10 @@ $(document).ready(function() {
     });
 
     $('[name=bouton_annuler]').on('click', function(event) {
+        if (mode === "pointeuse") {
+            window.location.href = url_annuler;
+            return
+        };
         var box = bootbox.dialog({
             title: "Fermer le planning",
             message: "Souhaitez-vous vraiment fermer le planning ? <br>Les éventuelles modifications effectuées seront perdues...",
