@@ -104,7 +104,8 @@ class View(CustomView, TemplateView):
             if form.cleaned_data["facturer"]:
                 prestation = Prestation.objects.create(date=form.cleaned_data["date_facturation"], categorie="cotisation",
                                                        label=form.cleaned_data["label_prestation"], famille=famille,
-                                                       montant_initial=form.cleaned_data["montant"], montant=form.cleaned_data["montant"])
+                                                       montant_initial=form.cleaned_data["montant"], montant=form.cleaned_data["montant"],
+                                                       activite=form.cleaned_data["type_cotisation"].activite)
 
             # Création de la cotisation
             cotisation = Cotisation.objects.create(
