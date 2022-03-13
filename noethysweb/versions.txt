@@ -1,3 +1,12 @@
+Version 1.0.7.1 (13/03/2022) :
+
+- Amélioration de la pointeuse
+- Ajout de l'ajout des inscrits d'un groupe dans le gestionnaire
+- Ajustement de l'affichage des boutons dans le détail d'une consommation
+- Optimisation de set_categorie dans les paramètres
+- Correction des tiers en majuscules dans l'export BL
+- Correction de la saisie d'une cotisation
+
 Version 1.0.7.0 (08/03/2022) :
 
 - Ajout de la suppression dans le champ de recherche de la grille des consommations
