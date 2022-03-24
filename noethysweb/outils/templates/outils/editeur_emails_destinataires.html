@@ -32,11 +32,49 @@
                     {% embed 'core/crud/liste.html' %}
                     {% endembed %}
 
+                    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
                     <script>
                         $("#bouton_valider").on("click",function(event) {
                             $("[name=selections]").val(JSON.stringify(get_coches()));
-                            $('#form_selections').submit();
+
+                            {# Recherche les adresses manquantes #}
+                            var liste_adresses_manquantes = [];
+                            {% if categorie == "individu" or categorie == "famille" or categorie == "contact" %}
+                                var table = new $.fn.dataTable.Api('.datatable');
+                                $.each(table.rows({selected: true}).data().toArray(), function (index, valeurs) {
+                                    {% if categorie == "famille" %}
+                                        if (valeurs[3] == null | valeurs[3] == '') {liste_adresses_manquantes.push(valeurs[2]);};
+                                    {% else %}
+                                        if (valeurs[4] == null | valeurs[4] == '') {liste_adresses_manquantes.push(valeurs[2] + " " + valeurs[3]);};
+                                    {% endif %}
+                                });
+                            {% endif %}
+
+                            {# Affiche les adresses manquantes #}
+                            if (liste_adresses_manquantes.length > 0) {
+                                var dialog = bootbox.dialog({
+                                    title: "Avertissement",
+                                    message: "Les individus suivants ne possèdent pas d'adresses : " + liste_adresses_manquantes.join(", ") + ".",
+                                    buttons: {
+                                        ok: {
+                                            label: "<i class='fa fa-check'></i> Continuer quand même",
+                                            className: 'btn-primary',
+                                            callback: function () {
+                                                $('#form_selections').submit();
+                                            }
+                                        },
+                                        cancel: {
+                                            label: "<i class='fa fa-ban'></i> Annuler",
+                                            className: 'btn-danger',
+                                        }
+                                    }
+                                });
+                                return false;
+                            } else {
+                                $('#form_selections').submit();
+                            };
                         });
+
                     </script>
 
                 {% endblock box_contenu %}
