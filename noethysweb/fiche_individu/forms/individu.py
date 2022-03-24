@@ -18,13 +18,16 @@ class Formulaire(FormulaireBase, ModelForm):
     action = forms.ChoiceField(label="Action*", widget=forms.RadioSelect, choices=[("CREER", "Créer un individu"), ("RATTACHER", "Rattacher un individu existant")], required=False)
     categorie = forms.ChoiceField(label="Catégorie*", widget=forms.RadioSelect, choices=CATEGORIES_RATTACHEMENT, required=False)
     titulaire = forms.BooleanField(label="Titulaire du dossier", initial=True, required=False)
-    nom = forms.CharField(label="Nom*", required=False)
-    prenom = forms.CharField(label="Prénom*", required=False)
+    nom = forms.CharField(label="Nom*", required=False, help_text="Saisissez le nom de famille en majuscules. Ex : DUPOND.")
+    prenom = forms.CharField(label="Prénom*", required=False, help_text="Saisissez le prénom en minuscules avec la première lettre en majuscule. Ex : Kévin.")
     individu = forms.ModelChoiceField(label="Individu*", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Individu.objects.all().order_by("nom", "prenom"), required=False)
 
     class Meta:
         model = Individu
         fields = ["civilite", "nom", "prenom"]
+        help_texts = {
+            "civilite": "Sélectionnez une civilité dans la liste. S'il s'agit d'un enfant, sélectionnez Fille ou Garçon.",
+        }
 
     def __init__(self, *args, **kwargs):
         if "idfamille" in kwargs:
