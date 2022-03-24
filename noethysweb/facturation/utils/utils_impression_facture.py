@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, datetime
 logger = logging.getLogger(__name__)
 from core.utils import utils_dates, utils_impression, utils_preferences
 from decimal import Decimal
@@ -91,10 +91,15 @@ class Impression(utils_impression.Impression):
                     dataTableau = []
                     largeursColonnes = [self.taille_cadre[2], ]
                     dataTableau.append((titre,))
-                    texteDateDebut = utils_dates.ConvertDateENGtoFR(str(dictValeur["date_debut"]))
-                    texteDateFin = utils_dates.ConvertDateENGtoFR(str(dictValeur["date_fin"]))
+                    dateDebut = dictValeur["date_debut"]
+                    dateFin = dictValeur["date_fin"]
+
+                    if dictValeur["{NOM_LOT}"] and "PORTAGE" in dictValeur["{NOM_LOT}"].upper():
+                        dateFin = dateDebut - datetime.timedelta(days=1)
+                        dateDebut = datetime.date(year=dateFin.year, month=dateFin.month, day=1)
+
                     if self.dict_options["afficher_periode"] == True:
-                        dataTableau.append((u"Période du %s au %s" % (texteDateDebut, texteDateFin),))
+                        dataTableau.append((u"Période du %s au %s" % (utils_dates.ConvertDateENGtoFR(str(dateDebut)), utils_dates.ConvertDateENGtoFR(str(dateFin))),))
                     styles = [
                             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                             ('FONT', (0, 0), (0, 0), "Helvetica-Bold", int(self.dict_options["taille_texte_titre"])),
@@ -254,9 +259,11 @@ class Impression(utils_impression.Impression):
                                         montant = dictPrestation["montant"]
                                         deductions = dictPrestation["deductions"]
                                         tva = dictPrestation["tva"]
+                                        quantite = dictPrestation["quantite"] or 1
+                                        montant_unitaire = dictPrestation["montant"] / dictPrestation["quantite"]
                                         
                                         if self.dict_options["affichage_prestations"] in ("1", "3"): labelkey = label
-                                        if self.dict_options["affichage_prestations"] in ("2", "4"): labelkey = label + " P.U. " + "%.2f %s" % (montant, utils_preferences.Get_symbole_monnaie())
+                                        if self.dict_options["affichage_prestations"] in ("2", "4"): labelkey = label + " P.U. " + "%.2f %s" % (montant_unitaire, utils_preferences.Get_symbole_monnaie())
 
                                         # Si c'est une prestation antérieure
                                         if date < dictValeur["date_debut"]:
@@ -266,15 +273,15 @@ class Impression(utils_impression.Impression):
 
                                         if (labelkey in dictRegroupement) == False:
                                             dictRegroupement[labelkey] = {"labelpresta": label, "total": 0, "nbre": 0, "base": 0, "dates_forfait": None, "dates": []}
-                                            dictRegroupement[labelkey]["base"] = montant
-                                        
+                                            dictRegroupement[labelkey]["base"] = montant_unitaire
+
                                         dictRegroupement[labelkey]["total"] += montant
-                                        dictRegroupement[labelkey]["nbre"] += 1
+                                        dictRegroupement[labelkey]["nbre"] += quantite
                                         dictRegroupement[labelkey]["dates"] += listeDatesUnite
                                         
-                                        if self.dict_options["affichage_prestations"] in ("1", "3"):
-                                            dictRegroupement[labelkey]["base"] = dictRegroupement[labelkey]["total"] / dictRegroupement[labelkey]["nbre"]
- 
+                                        # if self.dict_options["affichage_prestations"] in ("1", "3"):
+                                        #     dictRegroupement[labelkey]["base"] = dictRegroupement[labelkey]["total"] / dictRegroupement[labelkey]["nbre"]
+
                                         if len(listeDatesUnite) > 1:
                                             listeDatesUnite.sort()
                                             date_debut = listeDatesUnite[0]
@@ -300,9 +307,16 @@ class Impression(utils_impression.Impression):
                                     base = dictRegroupement[labelkey]["base"]
 
                                     # Ajout des dates
+                                    texte_dates = ""
                                     if self.dict_options["affichage_prestations"] in ("3", "4") and dictRegroupement[labelkey]["dates"]:
                                         dictRegroupement[labelkey]["dates"].sort()
-                                        label += u"<br/><font size=5>(%s)</font>" % ", ".join([utils_dates.ConvertDateToFR(date) for date in dictRegroupement[labelkey]["dates"]])
+                                        texte_dates = u"<br/><font size=5>(%s)</font>" % ", ".join([utils_dates.ConvertDateToFR(date) for date in dictRegroupement[labelkey]["dates"]])
+
+                                    if dictValeur["{NOM_LOT}"] and ("PORTAGE" in dictValeur["{NOM_LOT}"].upper() or "MINIBUS" in dictValeur["{NOM_LOT}"].upper()):
+                                        texte_dates = ""
+
+                                    if texte_dates:
+                                        label += texte_dates
 
                                     # recherche d'un commentaire
                                     if "dictCommentaires" in self.dict_options:

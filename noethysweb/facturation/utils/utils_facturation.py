@@ -452,7 +452,7 @@ class Facturation():
                 "montant_initial": prestation.montant_initial, "montant": prestation.montant, "tva": prestation.tva,
                 "IDtarif": prestation.tarif_id, "nomTarif": prestation.tarif.nom_tarif.nom if prestation.tarif else None,
                 "nomCategorieTarif": prestation.categorie_tarif.nom if prestation.categorie_tarif else None,
-                "montant_ventilation": montant_ventilation, "listeDatesConso": listeDates,
+                "montant_ventilation": montant_ventilation, "listeDatesConso": listeDates, "quantite": prestation.quantite,
                 "deductions": deductions,
                 }
 
@@ -670,7 +670,7 @@ class Facturation():
                 dictCompte["{SOLDE_LETTRES}"] = utils_conversion.trad(facture.solde).strip().capitalize()
                 dictCompte["{SOLDE_AVEC_REPORTS}"] = u"%.2f %s" % (dictCompte["solde_avec_reports"], utils_preferences.Get_symbole_monnaie())
                 dictCompte["{SOLDE_AVEC_REPORTS_LETTRES}"] = utils_conversion.trad(facture.solde+dictCompte["total_reports"]).strip().capitalize()
-                dictCompte["{NOM_LOT}"] = facture.lot if facture.lot else ""
+                dictCompte["{NOM_LOT}"] = facture.lot.nom if facture.lot else ""
 
                 # Ajoute les informations de base famille
                 dictCompte.update(infosIndividus.GetDictValeurs(mode="famille", ID=facture.famille_id, formatChamp=True))
