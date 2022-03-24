@@ -41,7 +41,7 @@ $(document).ready(function() {
 
         buttons:[
             {
-                text: '<i class="fa fa-filter" title="Ajouter un filtre"></i>',
+                text: '<i class="fa fa-filter" title="Ajouter un filtre"></i> Filtrer',
                 action: function (e, dt, node, config) {
                     ajouter_filtre();
                 },
@@ -304,3 +304,25 @@ function supprimer_selections() {
     var url = url_supprimer_plusieurs.replace("xxx", listepk.join(";"));
     window.location = url;
 }
+
+$('.datatable th').on('click', function() {
+    var code_colonne = $(this).data("code");
+    var table = new $.fn.dataTable.Api('.datatable');
+    var table_order = table.order();
+    function trier_liste() {
+        $.ajax({
+            type: "POST",
+            url: url_tri_liste,
+            data: {
+                view: nom_view,
+                colonne: code_colonne,
+                sens: table_order[0][1],
+            },
+            datatype: "json",
+            success: function(data){
+                toastr.success("Le tri de cette liste a été mémorisé")
+            },
+        });
+    };
+    window.setTimeout(trier_liste, 1000);
+});

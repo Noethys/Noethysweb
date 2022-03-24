@@ -8,7 +8,7 @@
                 {% if "checkbox" in column.label %}
                     <th data-name="{{ column.label|slugify }}"{{ column.attributes|safe }} style="padding: 12px;width: 25px;text-align: center;vertical-align: middle;"><input id='checkbox_all' type='checkbox'></th>
                 {% else %}
-                    <th data-name="{{ column.label|slugify }}"{{ column.attributes|safe }}>{{ column.label }}</th>
+                    <th data-code="{{ column.name }}" data-name="{{ column.label|slugify }}"{{ column.attributes|safe }}>{{ column.label }}</th>
                 {% endif %}
             {% endfor %}
         </tr>
@@ -23,4 +23,3 @@
         </tfoot>
     {% endif %}
 </table>
-

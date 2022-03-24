@@ -12,5 +12,7 @@
     var bouton_supprimer = {% if bouton_supprimer == False %}false{% else %}true{% endif %};
     var url_supprimer_plusieurs = "{% if url_supprimer_plusieurs %}{{ url_supprimer_plusieurs }}{% endif %}";
     var liste_coches = {% if liste_coches %}{{ liste_coches }}{% else %}[]{% endif %};
+    var url_tri_liste = "{% url 'ajax_memorise_tri_liste' %}";
+    var nom_view = "{{ view }}";
 </script>
 

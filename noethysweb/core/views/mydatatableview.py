@@ -11,11 +11,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from datatableview import Datatable, columns, helpers
 from datatableview.views import DatatableView, MultipleDatatableView, XEditableDatatableView
-from core.utils import utils_texte
+from core.utils import utils_texte, utils_parametres
 
 
 class MyDatatableView(DatatableView):
     pass
+
 
 class MyMultipleDatatableView(MultipleDatatableView):
     pass
@@ -39,9 +40,18 @@ class Deplacer_lignes(View):
         return JsonResponse({'status': 'Success'})
 
 
-
 class MyDatatable(Datatable):
     structure_template = "core/widgets/datatableview/bootstrap_structure.html"
+
+    def __init__(self, *args, **kwargs):
+        nom_view = str(kwargs["view"])
+        nom_view = nom_view[1:nom_view.find(".Liste ")]
+        request = kwargs["view"].request
+        tri_liste = utils_parametres.Get(nom=nom_view, categorie="tri_liste", utilisateur=request.user, valeur=None)
+        if tri_liste:
+            nom_colonne, sens = tri_liste.split(";")
+            self._meta.ordering = ["%s%s" % ("-" if sens == "desc" else "", nom_colonne)]
+        super(MyDatatable, self).__init__(*args, **kwargs)
 
     def Create_boutons_actions(self, liste_boutons=[]):
         return format_html("&nbsp;".join(liste_boutons))

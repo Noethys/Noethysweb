@@ -33,6 +33,15 @@ def Memorise_parametre(request):
     utils_parametres.Set(nom=nom, categorie=categorie, utilisateur=request.user, valeur=valeur)
     return JsonResponse({"success": True})
 
+def Memorise_tri_liste(request):
+    """ Mémorise le tri d'une liste """
+    colonne = request.POST.get("colonne")
+    sens = request.POST.get("sens")
+    nom_view = request.POST.get("view")
+    nom_view = nom_view[4:nom_view.find(".Liste ")]
+    utils_parametres.Set(nom=nom_view, categorie="tri_liste", utilisateur=request.user, valeur="%s;%s" % (colonne, sens))
+    return JsonResponse({"success": True})
+
 
 # def Memorise_structure(request):
 #     """ Mémorise dans la DB la structure actuelle de l'utilisateur """
