@@ -32,10 +32,47 @@
                     {% embed 'core/crud/liste.html' %}
                     {% endembed %}
 
+                    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
                     <script>
                         $("#bouton_valider").on("click",function(event) {
                             $("[name=selections]").val(JSON.stringify(get_coches()));
-                            $('#form_selections').submit();
+
+                            {# Recherche les numéros manquants #}
+                            var liste_numeros_manquants = [];
+                            {% if categorie == "individu" or categorie == "famille" or categorie == "contact" %}
+                                var table = new $.fn.dataTable.Api('.datatable');
+                                $.each(table.rows({selected: true}).data().toArray(), function (index, valeurs) {
+                                    {% if categorie == "famille" %}
+                                        if (valeurs[3] == null | valeurs[3] == '') {liste_numeros_manquants.push(valeurs[2]);};
+                                    {% else %}
+                                        if (valeurs[4] == null | valeurs[4] == '') {liste_numeros_manquants.push(valeurs[2] + " " + valeurs[3]);};
+                                    {% endif %}
+                                });
+                            {% endif %}
+
+                            {# Affiche les numéros manquants #}
+                            if (liste_numeros_manquants.length > 0) {
+                                var dialog = bootbox.dialog({
+                                    title: "Avertissement",
+                                    message: "Les individus suivants ne possèdent pas de numéros : " + liste_numeros_manquants.join(", ") + ".",
+                                    buttons: {
+                                        ok: {
+                                            label: "<i class='fa fa-check'></i> Continuer quand même",
+                                            className: 'btn-primary',
+                                            callback: function () {
+                                                $('#form_selections').submit();
+                                            }
+                                        },
+                                        cancel: {
+                                            label: "<i class='fa fa-ban'></i> Annuler",
+                                            className: 'btn-danger',
+                                        }
+                                    }
+                                });
+                                return false;
+                            } else {
+                                $('#form_selections').submit();
+                            };
                         });
                     </script>
 
