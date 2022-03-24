@@ -39,7 +39,8 @@ def Memorise_tri_liste(request):
     sens = request.POST.get("sens")
     nom_view = request.POST.get("view")
     nom_view = nom_view[4:nom_view.find(".Liste ")]
-    utils_parametres.Set(nom=nom_view, categorie="tri_liste", utilisateur=request.user, valeur="%s;%s" % (colonne, sens))
+    if colonne:
+        utils_parametres.Set(nom=nom_view, categorie="tri_liste", utilisateur=request.user, valeur="%s;%s" % (colonne, sens))
     return JsonResponse({"success": True})
 
 

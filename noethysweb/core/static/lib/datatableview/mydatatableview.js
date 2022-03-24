@@ -307,22 +307,24 @@ function supprimer_selections() {
 
 $('.datatable th').on('click', function() {
     var code_colonne = $(this).data("code");
-    var table = new $.fn.dataTable.Api('.datatable');
-    var table_order = table.order();
-    function trier_liste() {
-        $.ajax({
-            type: "POST",
-            url: url_tri_liste,
-            data: {
-                view: nom_view,
-                colonne: code_colonne,
-                sens: table_order[0][1],
-            },
-            datatype: "json",
-            success: function(data){
-                toastr.success("Le tri de cette liste a été mémorisé")
-            },
-        });
+    if (code_colonne) {
+        var table = new $.fn.dataTable.Api('.datatable');
+        var table_order = table.order();
+        function trier_liste() {
+            $.ajax({
+                type: "POST",
+                url: url_tri_liste,
+                data: {
+                    view: nom_view,
+                    colonne: code_colonne,
+                    sens: table_order[0][1],
+                },
+                datatype: "json",
+                success: function (data) {
+                    toastr.success("Le tri de cette liste a été mémorisé")
+                },
+            });
+        };
+        window.setTimeout(trier_liste, 1000);
     };
-    window.setTimeout(trier_liste, 1000);
 });
