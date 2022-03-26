@@ -21,7 +21,11 @@ Installation
     - `python3 manage.py collectstatic`
     - `python3 manage.py createsuperuser`
     - `python3 manage.py update_permissions`
-    - `python3 manage.py import_defaut` (Uniquement si vous souhaitez importer les données par défaut : jours fériés, modèles, documents...)
+- Si vous souhaitez commencer avec une base de données vide :
+    - `python3 manage.py import_defaut`
+- Ou si vous souhaitez importer la base de données d'un fichier Noethys - où xxx est le nom du fichier d'export créé depuis la fonction "Exporter vers Noethysweb" du menu Fichier de Noethys, et motdepasse est le mot de passe saisi lors de la génération de l'export :
+    - `python3 manage.py import_fichier xxx.nweb motdepasse`
+- Lancez enfin le serveur intégré (Uniquement pour des tests) :
     - `python3 manage.py runserver`
 - Consultez le site www.djangoproject.com pour en savoir davantage sur les options et le déploiement.
 
