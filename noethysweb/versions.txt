@@ -1,3 +1,12 @@
+Version 1.0.7.2 (26/03/2022) :
+
+- Ajout de la mémorisation du tri des listes
+- Ajout signalement numéros manquants dans éditeur SMS
+- Ajout signalement adresses manquantes dans éditeur emails
+- Ajout help text dans formulaire d'ajout d'un individu
+- Correction affichage adresse vide dans vignette individu
+- Correction détail des factures
+
 Version 1.0.7.1 (13/03/2022) :
 
 - Amélioration de la pointeuse
