@@ -31,6 +31,7 @@ class Grille_virtuelle():
             "memos": {},
             "prestations": {},
             "consommations": {},
+            "options": {},
             "periode": {'mode': 'jour', 'selections': {'jour': None}, 'periodes': ['%s;%s' % (date_min, date_max)]},
             "selection_individus": [idindividu,],
             "selection_activite": Activite.objects.get(pk=idactivite),
