@@ -40,7 +40,7 @@ class View(CustomView, TemplateView):
         data["Consommations gratuites"] = ["%s : %s consommations (Du %s au %s)." % (r["activite__nom"], r["nbre"], r["min_date"].strftime("%d/%m/%Y"), r["max_date"].strftime("%d/%m/%Y")) for r in resultats]
 
         # Recherche les prestations sans consommations associées
-        resultats = Prestation.objects.select_related("individu").values("individu__nom", "individu__prenom", "label").filter(consommation__isnull=True).annotate(nbre=Count("pk"), min_date=Min("date"), max_date=Max("date")).order_by("individu__nom", "individu__prenom")
+        resultats = Prestation.objects.select_related("individu").values("individu__nom", "individu__prenom", "label").filter(consommation__isnull=True, categorie="consommation").annotate(nbre=Count("pk"), min_date=Min("date"), max_date=Max("date")).order_by("individu__nom", "individu__prenom")
         data["Prestations sans consommations associées"] = ["%s %s : %s %s (Du %s au %s)." % (r["individu__nom"], r["individu__prenom"], r["nbre"], r["label"], r["min_date"].strftime("%d/%m/%Y"), r["max_date"].strftime("%d/%m/%Y")) for r in resultats]
 
         return data
