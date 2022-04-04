@@ -217,12 +217,17 @@ class Modifier(Page, crud.Modifier):
             return self.render_to_response(self.get_context_data(form=form))
 
         # Modification des conso déjà associées
-        if form.cleaned_data["action_conso"] in ("MODIFIER_TOUT", "MODIFIER_AUJOURDHUI"):
+        if form.cleaned_data["action_conso"] in ("MODIFIER_TOUT", "MODIFIER_AUJOURDHUI", "MODIFIER_DATE"):
 
             # Importation des consommations existantes
             conditions = Q(inscription=self.object)
             if form.cleaned_data["action_conso"] == "MODIFIER_AUJOURDHUI":
                 conditions &= Q(date__gte=datetime.date.today())
+            if form.cleaned_data["action_conso"] == "MODIFIER_DATE":
+                if not form.cleaned_data["date_modification"]:
+                    messages.add_message(self.request, messages.ERROR, "Vous devez saisir une date d'application")
+                    return self.render_to_response(self.get_context_data(form=form))
+                conditions &= Q(date__gte=form.cleaned_data["date_modification"])
             consommations = Consommation.objects.filter(conditions)
 
             # Changement du groupe

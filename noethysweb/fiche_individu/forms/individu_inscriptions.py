@@ -24,8 +24,10 @@ class Formulaire(FormulaireBase, ModelForm):
         (None, "------"),
         ("MODIFIER_TOUT", "Modifier toutes les consommations existantes (Recommandé)"),
         ("MODIFIER_AUJOURDHUI", "Modifier les consommations existantes à partir d'aujourd'hui"),
+        ("MODIFIER_DATE", "Modifier les consommations existantes à partir d'une date donnée"),
         ("MODIFIER_RIEN", "Ne pas modifier les consommations existantes"),
     ])
+    date_modification = forms.DateField(label="Date", required=False, widget=DatePickerWidget(), help_text="Renseignez la date de début d'application de la modification.")
 
     class Meta:
         model = Inscription
@@ -96,6 +98,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Fieldset("Consommations associées",
                     Div(
                         Field("action_conso"),
+                        Field("date_modification"),
                         css_class="alert alert-warning"
                     ),
                 ),
@@ -156,6 +159,18 @@ function On_change_activite() {
 $(document).ready(function() {
     $('#id_activite').change(On_change_activite);
     On_change_activite.call($('#id_activite').get(0));
+});
+
+// Affiche de la date de modification
+function On_change_action() {
+    $('#div_id_date_modification').hide();
+    if ($("#id_action_conso").val() == 'MODIFIER_DATE') {
+        $('#div_id_date_modification').show();
+    };
+}
+$(document).ready(function() {
+    $('#id_action_conso').on('change', On_change_action);
+    On_change_action.call($('#id_action_conso').get(0));
 });
 
 
