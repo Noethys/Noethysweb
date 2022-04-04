@@ -1,3 +1,11 @@
+Version 1.0.7.3 (04/04/2022) :
+
+- Ajout d'une colonne ville dans la liste des inscriptions
+- Ajout de la date personnalisée dans la modification d'une inscription
+- Correction des options dans la grille virtuelle
+- Correction des adhésions dans le correcteur
+- Correction du filtre sur champs cryptés
+
 Version 1.0.7.2 (26/03/2022) :
 
 - Ajout de la mémorisation du tri des listes
