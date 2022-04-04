@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 import logging, json, datetime
+from operator import attrgetter
 logger = logging.getLogger(__name__)
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, TemplateView
@@ -112,13 +113,17 @@ class Liste_commun():
 
                 # Filtre pour champ crypté
                 if "*" in filtre["condition"]:
-                    tous_objets = self.model.objects.all()
-                    if filtre["condition"] == "*EGAL": resultats = [objet.pk for objet in tous_objets if getattr(objet, champ) == criteres[0]]
-                    if filtre["condition"] == "*DIFFERENT": resultats = [objet.pk for objet in tous_objets if getattr(objet, champ) != criteres[0]]
-                    if filtre["condition"] == "*CONTIENT": resultats = [objet.pk for objet in tous_objets if criteres[0] in (getattr(objet, champ) or "")]
-                    if filtre["condition"] == "*NE_CONTIENT_PAS": resultats = [objet.pk for objet in tous_objets if criteres[0] not in (getattr(objet, champ) or "")]
-                    if filtre["condition"] == "*EST_VIDE": resultats = [objet.pk for objet in tous_objets if getattr(objet, champ) in ("", None)]
-                    if filtre["condition"] == "*EST_PAS_VIDE": resultats = [objet.pk for objet in tous_objets if getattr(objet, champ) not in ("", None)]
+                    champs_temp = champ.split("__")
+                    if len(champs_temp) > 1:
+                        tous_objets = self.model.objects.select_related(champs_temp[0]).all()
+                    else:
+                        tous_objets = self.model.objects.all()
+                    if filtre["condition"] == "*EGAL": resultats = [objet.pk for objet in tous_objets if attrgetter(".".join(champs_temp))(objet) == criteres[0]]
+                    if filtre["condition"] == "*DIFFERENT": resultats = [objet.pk for objet in tous_objets if attrgetter(".".join(champs_temp))(objet) != criteres[0]]
+                    if filtre["condition"] == "*CONTIENT": resultats = [objet.pk for objet in tous_objets if criteres[0] in (attrgetter(".".join(champs_temp))(objet) or "")]
+                    if filtre["condition"] == "*NE_CONTIENT_PAS": resultats = [objet.pk for objet in tous_objets if criteres[0] not in (attrgetter(".".join(champs_temp))(objet) or "")]
+                    if filtre["condition"] == "*EST_VIDE": resultats = [objet.pk for objet in tous_objets if attrgetter(".".join(champs_temp))(objet) in ("", None)]
+                    if filtre["condition"] == "*EST_PAS_VIDE": resultats = [objet.pk for objet in tous_objets if attrgetter(".".join(champs_temp))(objet) not in ("", None)]
                     conditions &= Q(pk__in=resultats)
 
             return conditions
