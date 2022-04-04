@@ -32,35 +32,38 @@ class Liste(Page, crud.Liste):
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
-        context['impression_introduction'] = ""
-        context['impression_conclusion'] = ""
-        context['afficher_menu_brothers'] = True
-        context['active_checkbox'] = True
+        context["impression_introduction"] = ""
+        context["impression_conclusion"] = ""
+        context["afficher_menu_brothers"] = True
+        context["active_checkbox"] = True
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille", 'idinscription', 'famille__nom', 'individu__nom', 'individu__prenom', 'date_debut', 'date_fin', 'activite__nom', 'groupe__nom', 'statut', 'categorie_tarif__nom']
+        filtres = ["ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille", "idinscription", "famille__nom", "individu__nom", "individu__prenom", "individu__ville_resid", "famille__ville_resid", "date_debut", "date_fin", "activite__nom", "groupe__nom", "statut", "categorie_tarif__nom"]
         check = columns.CheckBoxSelectColumn(label="")
-        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
-        activite = columns.TextColumn("Activité", sources=['activite__nom'])
-        groupe = columns.TextColumn("Groupe", sources=['groupe__nom'])
-        categorie_tarif = columns.TextColumn("Catégorie de tarif", sources=['categorie_tarif__nom'])
-        individu = columns.CompoundColumn("Individu", sources=['individu__nom', 'individu__prenom'])
-        famille = columns.TextColumn("Famille", sources=['famille__nom'])
+        actions = columns.TextColumn("Actions", sources=None, processor="Get_actions_speciales")
+        activite = columns.TextColumn("Activité", sources=["activite__nom"])
+        groupe = columns.TextColumn("Groupe", sources=["groupe__nom"])
+        categorie_tarif = columns.TextColumn("Catégorie de tarif", sources=["categorie_tarif__nom"])
+        individu = columns.CompoundColumn("Individu", sources=["individu__nom", "individu__prenom"])
+        famille = columns.TextColumn("Famille", sources=["famille__nom"])
+        individu_ville = columns.TextColumn("Ville de l'individu", sources=["individu__ville_resid"])
+        famille_ville = columns.TextColumn("Ville de la famille", sources=["famille__ville_resid"])
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idinscription", 'date_debut', 'date_fin', 'individu', 'famille', 'activite', 'groupe', 'categorie_tarif', 'statut']
+            columns = ["check", "idinscription", "date_debut", "date_fin", "individu", "famille", "activite", "groupe", "categorie_tarif", "individu_ville", "famille_ville", "statut"]
+            hidden_columns = ["famille_ville"]
             processors = {
-                'date_debut': helpers.format_date('%d/%m/%Y'),
-                'date_fin': helpers.format_date('%d/%m/%Y'),
-                'statut': 'Formate_statut',
+                "date_debut": helpers.format_date("%d/%m/%Y"),
+                "date_fin": helpers.format_date("%d/%m/%Y"),
+                "statut": "Formate_statut",
             }
             labels = {
                 "date_debut": "Début",
                 "date_fin": "Fin",
             }
-            ordering = ['individu']
+            ordering = ["individu"]
 
         def Formate_statut(self, instance, *args, **kwargs):
             if instance.statut == "attente":
