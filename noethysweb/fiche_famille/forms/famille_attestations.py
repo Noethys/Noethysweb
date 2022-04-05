@@ -69,7 +69,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Signataire
         if utilisateur:
-            self.fields["signataire"].initial = utilisateur.get_username()
+            self.fields["signataire"].initial = utilisateur.get_full_name() or utilisateur.get_short_name() or utilisateur
 
         # Charge le modèle de document par défaut
         modele_defaut = ModeleDocument.objects.filter(categorie="attestation", defaut=True)
@@ -91,7 +91,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'famille_attestations_liste' idfamille=idfamille %}", enregistrer=False, ajouter=False,
                 commandes_principales=[
-                    HTML("""<button class='btn btn-primary' onclick="$('#famille_attestations_form').submit()"><i class="fa fa-check margin-r-5"></i>Enregistrer</button> """)
+                    HTML("""<button class='btn btn-primary' onclick="impression_pdf(false, false)"><i class="fa fa-check margin-r-5"></i>Enregistrer</button> """)
                 ],
                 autres_commandes=[
                     HTML("""<a type='button' class='btn btn-default' title="Envoyer par Email" onclick="impression_pdf(true, false)" href='#'><i class="fa fa-send-o margin-r-5"></i>Envoyer par email</a> """),
@@ -135,15 +135,6 @@ EXTRA_HTML = """
 
 <script>
 
-$(document).ready(function() {
-    $("#famille_attestations_form").on('submit', function(event) {
-        if ($('input[name=infos]').val() === '') {
-            impression_pdf(false, false);
-            return false;
-        };
-    });
-});
-
 // Impression du PDF
 function impression_pdf(email=false, afficher=true) {
     $.ajax({
@@ -153,10 +144,15 @@ function impression_pdf(email=false, afficher=true) {
         datatype: "json",
         success: function(data){
             $('input[name=infos]').val(JSON.stringify(data.infos));
-            if (email) {envoyer_email(data)} 
-            if (afficher) {charge_pdf(data);
+            if (email) {
+                envoyer_email(data)
+            } 
+            if (afficher) {
+                charge_pdf(data);
             }
-            if ((email === false) & (afficher == false)) {$("#famille_attestations_form").submit()};
+            if ((email === false) & (afficher == false)) {
+                $("#famille_attestations_form").submit()
+            };
         },
         error: function(data) {
             toastr.error(data.responseJSON.erreur);

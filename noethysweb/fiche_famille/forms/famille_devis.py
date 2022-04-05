@@ -69,7 +69,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Signataire
         if utilisateur:
-            self.fields["signataire"].initial = utilisateur.get_username()
+            self.fields["signataire"].initial = utilisateur.get_full_name() or utilisateur.get_short_name() or utilisateur
 
         # Charge le modèle de document par défaut
         modele_defaut = ModeleDocument.objects.filter(categorie="devis", defaut=True)

@@ -56,7 +56,7 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields["modele"].initial = modele_defaut
 
         # Signataire
-        self.fields["signataire"].initial = utilisateur.get_username()
+        self.fields["signataire"].initial = utilisateur.get_full_name() or utilisateur.get_short_name() or utilisateur
 
         # Introduction
         self.fields["intro"].initial = "Je soussigné(e) {SIGNATAIRE}, certifie avoir reçu pour la famille de {FAMILLE} la somme de {MONTANT}."
