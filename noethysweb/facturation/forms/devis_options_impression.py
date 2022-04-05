@@ -19,6 +19,8 @@ class Formulaire(FormulaireBase, forms.Form):
     affichage_solde = forms.ChoiceField(label="Afficher le solde", choices=[("0", "Actuel"), ("1", "Initial")], initial="actuel", required=False)
     afficher_impayes = forms.BooleanField(label="Afficher le rappel des impayés", initial=True, required=False)
     integrer_impayes = forms.BooleanField(label="Intégrer les impayés au solde", initial=True, required=False)
+    afficher_deja_paye = forms.BooleanField(label="Afficher la case du montant déjà réglé", initial=True, required=False)
+    afficher_reste_regler = forms.BooleanField(label="Afficher la case du solde à régler", initial=True, required=False)
     afficher_coupon_reponse = forms.BooleanField(label="Afficher le coupon-réponse", initial=True, required=False)
     afficher_messages = forms.BooleanField(label="Afficher les messages", initial=True, required=False)
     afficher_codes_barres = forms.BooleanField(label="Afficher les codes-barres", initial=True, required=False)
@@ -91,6 +93,8 @@ class Formulaire(FormulaireBase, forms.Form):
                 Field("affichage_solde"),
                 Field("afficher_impayes"),
                 Field("integrer_impayes"),
+                Field("afficher_deja_paye"),
+                Field("afficher_reste_regler"),
                 Field("afficher_coupon_reponse"),
                 Field("afficher_messages"),
                 Field("afficher_codes_barres"),
