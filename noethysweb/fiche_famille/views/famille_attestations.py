@@ -158,8 +158,10 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idattestation", "numero", 'date_edition', 'date_debut', 'date_fin', 'total', 'regle', 'solde']
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
+        total = columns.TextColumn("Total", sources=['total'], processor='Formate_total')
+        regle = columns.TextColumn("Réglé", sources=['regle'], processor='Formate_regle')
+        solde = columns.TextColumn("Solde", sources=['solde'], processor='Formate_solde')
 
         class Meta:
             structure_template = MyDatatable.structure_template
@@ -170,6 +172,15 @@ class Liste(Page, crud.Liste):
                 'date_fin': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ['date_edition']
+
+        def Formate_total(self, instance, **kwargs):
+            return "%0.2f %s" % (instance.total, utils_preferences.Get_symbole_monnaie())
+
+        def Formate_regle(self, instance, **kwargs):
+            return "%0.2f %s" % (instance.regle, utils_preferences.Get_symbole_monnaie())
+
+        def Formate_solde(self, instance, **kwargs):
+            return "%0.2f %s" % (instance.solde, utils_preferences.Get_symbole_monnaie())
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idactivite dans les boutons d'actions """
