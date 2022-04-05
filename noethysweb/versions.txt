@@ -1,3 +1,10 @@
+Version 1.0.7.4 (05/04/2022) :
+
+- Ajout d'options aux impressions des attestations et devis
+- Amélioration de l'intégration des signataires dans les attestations et les devis
+- Amélioration de la liste des attestations de la fiche famille
+- Correction du filtre de la liste des prestations de la fiche famille
+
 Version 1.0.7.3 (04/04/2022) :
 
 - Ajout d'une colonne ville dans la liste des inscriptions
