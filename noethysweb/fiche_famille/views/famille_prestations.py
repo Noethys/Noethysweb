@@ -111,6 +111,9 @@ class Liste(Page, crud.Liste):
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         facture = columns.TextColumn("Facture", sources=["facture__numero"])
+        activite = columns.TextColumn("Activité", sources=['activite__nom'])
+        label = columns.TextColumn("Label", sources=['label'])
+        individu = columns.TextColumn("Individu", sources=["individu__nom", "individu__prenom"], processor="Formate_individu")
 
         class Meta:
             structure_template = MyDatatable.structure_template
@@ -120,6 +123,9 @@ class Liste(Page, crud.Liste):
                 'montant': "Formate_montant_standard",
             }
             ordering = ['date']
+
+        def Formate_individu(self, instance, **kwargs):
+            return instance.individu.Get_nom() if instance.individu else ""
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
