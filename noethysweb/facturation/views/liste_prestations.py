@@ -25,7 +25,7 @@ class Liste(Page, crud.Liste):
     model = Prestation
 
     def get_queryset(self):
-        return Prestation.objects.select_related('activite', 'famille', 'individu', 'tarif').filter(self.Get_filtres("Q"))
+        return Prestation.objects.select_related('activite', 'famille', 'individu', 'tarif', 'facture').filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -37,7 +37,7 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille", "idprestation", "date", "label", "montant", "activite__nom", "famille__nom", "individu__nom", "individu__prenom",
-                   "tarif__idtarif", "tarif__date_debut"]
+                   "tarif__idtarif", "tarif__date_debut", "facture__idfacture"]
 
         check = columns.CheckBoxSelectColumn(label="")
         activite = columns.TextColumn("Activité", sources=['activite__nom'])
@@ -48,9 +48,10 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', "idprestation", "date", "label", "montant", "activite", "famille", "individu", "tarif", "tarif_date_debut"]
+            columns = ['check', "idprestation", "date", "label", "montant", "activite", "famille", "individu", "tarif", "tarif_date_debut", "facture"]
             processors = {
                 "date": helpers.format_date("%d/%m/%Y"),
+                "montant": "Formate_montant_standard",
             }
             ordering = ["date"]
 
