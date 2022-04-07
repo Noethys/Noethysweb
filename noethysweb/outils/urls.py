@@ -10,7 +10,7 @@ from outils.views import editeur_emails, editeur_emails_express, historique, upd
                         editeur_emails_familles, editeur_emails_individus, editeur_emails_contacts, editeur_emails_listes_diffusion, \
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
                         demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur, editeur_sms, editeur_sms_familles, \
-                        editeur_sms_individus, editeur_sms_saisie_libre, sms
+                        editeur_sms_individus, editeur_sms_saisie_libre, sms, utilisateurs_bloques
 
 urlpatterns = [
 
@@ -52,8 +52,14 @@ urlpatterns = [
     path('outils/sms/supprimer_plusieurs/<str:listepk>', sms.Supprimer_plusieurs.as_view(), name='sms_supprimer_plusieurs'),
 
     path('outils/historique', historique.Liste.as_view(), name='historique'),
+
+    # Maintenance
     path('outils/update', update.View.as_view(), name='update'),
     path('outils/notes_versions', notes_versions.View.as_view(), name='notes_versions'),
+    path('outils/utilisateurs_bloques/liste', utilisateurs_bloques.Liste.as_view(), name='utilisateurs_bloques_liste'),
+    path('outils/utilisateurs_bloques/supprimer/<int:pk>', utilisateurs_bloques.Supprimer.as_view(), name='utilisateurs_bloques_supprimer'),
+
+    # Calendrier annuel
     path('outils/calendrier_annuel', calendrier_annuel.View.as_view(), name='calendrier_annuel'),
 
     # Notes

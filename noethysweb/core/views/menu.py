@@ -147,6 +147,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_maintenance = menu_outils.Add(titre="Maintenance")
     menu_maintenance.Add(code="update", titre="Mise à jour de l'application", icone="file-text-o")
     menu_maintenance.Add(code="notes_versions", titre="Notes de versions", icone="file-text-o")
+    menu_maintenance.Add(code="utilisateurs_bloques_liste", titre="Utilisateurs bloqués", icone="file-text-o")
 
     # Calendrier
     menu_calendrier = menu_outils.Add(titre="Calendrier")
