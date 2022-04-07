@@ -135,7 +135,7 @@ class Consulter(Page, crud.Liste):
     url_supprimer_plusieurs = "lots_pes_supprimer_plusieurs_pieces"
 
     def get_queryset(self):
-        return PesPiece.objects.select_related("famille", "facture", "prelevement_mandat").filter(self.Get_filtres("Q"), lot_id=self.kwargs["pk"])
+        return PesPiece.objects.select_related("famille", "facture", "prelevement_mandat", "titulaire_helios").filter(self.Get_filtres("Q"), lot_id=self.kwargs["pk"])
 
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
@@ -161,8 +161,8 @@ class Consulter(Page, crud.Liste):
         prelevement_statut = columns.TextColumn("Statut", sources=["prelevement_statut"], processor="Formate_prelevement_statut")
         mandat = columns.TextColumn("Mandat", sources=["prelevement_mandat__rum"])
         facture = columns.TextColumn("Facture", sources=["facture__numero"])
-        iban = columns.TextColumn("IBAN", sources=["prelevement_mandat__iban"])
-        bic = columns.TextColumn("BIC", sources=["prelevement_mandat__bic"])
+        iban = columns.TextColumn("IBAN", sources=[], processor='Get_iban')
+        bic = columns.TextColumn("BIC", sources=[], processor='Get_bic')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
@@ -181,6 +181,12 @@ class Consulter(Page, crud.Liste):
                 self.Create_bouton_supprimer(url=reverse("lots_pes_supprimer_piece", kwargs={"idlot": instance.lot_id, "pk": instance.pk})),
             ]
             return self.Create_boutons_actions(html)
+
+        def Get_iban(self, instance, *args, **kwargs):
+            return instance.prelevement_mandat.iban if instance.prelevement_mandat else None
+
+        def Get_bic(self, instance, *args, **kwargs):
+            return instance.prelevement_mandat.bic if instance.prelevement_mandat else None
 
         def Formate_prelevement_statut(self, instance, **kwargs):
             return instance.get_prelevement_statut_display()
