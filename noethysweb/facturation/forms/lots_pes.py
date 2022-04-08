@@ -25,17 +25,24 @@ class Formulaire_creation(FormulaireBase, forms.Form):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
 
-        # Recherche le dernier modèle utilisé
-        lot = PesLot.objects.last()
-        if lot:
-            self.fields["modele"].initial = lot.modele
-
         # Assistant de préparation
         lots_factures = LotFactures.objects.order_by("-pk")
         liste_choix = [(0, "Aucune")]
         if FiltreListe.objects.filter(nom="facturation.views.lots_pes_factures", parametres__contains="Dernières factures générées", utilisateur=self.request.user):
             liste_choix += [(999999, "Les dernières factures générées")]
             self.fields["assistant"].initial = 999999
+
+            # Recherche un modèle d'export dont le nom ressemble au nom du lot de factures
+            derniere_facture = Facture.objects.last()
+            if derniere_facture:
+                nom_lot = derniere_facture.lot.nom
+                import jellyfish
+                scores = []
+                for modele in PesModele.objects.all():
+                    scores.append((jellyfish.jaro_distance(modele.nom.lower(), nom_lot.lower()), modele))
+                if scores:
+                    self.fields["modele"].initial = max(scores)[1]
+
         self.fields["assistant"].choices = liste_choix + [(lot.pk, "Le lot de factures %s" % lot.nom) for lot in lots_factures]
 
         self.helper.layout = Layout(
