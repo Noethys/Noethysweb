@@ -13,7 +13,7 @@ from core.forms.base import FormulaireBase
 
 
 class Formulaire(FormulaireBase, forms.Form):
-    activites = forms.CharField(label="Inscrits aux activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": True}))
+    activites = forms.CharField(label="Inscrits aux activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": True, "afficher_groupes": True}))
     presents = forms.CharField(label="Uniquement les présents", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
     orientation = forms.ChoiceField(label="Orientation de la page", choices=[("portrait", "Portrait"), ("paysage", "Paysage")], initial="portrait", required=False, help_text="Sélectionnez l'orientation de la page.")
 

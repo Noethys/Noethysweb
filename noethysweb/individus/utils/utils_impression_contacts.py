@@ -12,7 +12,7 @@ from reportlab.platypus import Spacer, Paragraph, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
-from core.models import Activite, Lien, Rattachement, ContactUrgence
+from core.models import Activite, Groupe, Lien, Rattachement, ContactUrgence
 from core.data.data_liens import DICT_TYPES_LIENS
 from core.data import data_civilites
 from core.utils import utils_dates, utils_impression
@@ -31,9 +31,14 @@ class Impression(utils_impression.Impression):
         param_activites = self.dict_donnees["activites"]
         if param_activites["type"] == "groupes_activites":
             liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
+            conditions = Q(individu__inscription__activite__in=liste_activites)
         if param_activites["type"] == "activites":
             liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
-        conditions = Q(individu__inscription__activite__in=liste_activites)
+            conditions = Q(individu__inscription__activite__in=liste_activites)
+        if param_activites["type"] == "groupes":
+            liste_groupes = Groupe.objects.filter(pk__in=param_activites["ids"])
+            conditions = Q(individu__inscription__groupe__in=liste_groupes)
+
         if self.dict_donnees["presents"]:
             conditions &= Q(individu__inscription__consommation__date__gte=self.dict_donnees["presents"][0], individu__inscription__consommation__date__lte=self.dict_donnees["presents"][1])
         rattachements = Rattachement.objects.select_related("individu", "famille", "individu__medecin").filter(conditions).distinct().order_by("individu__nom", "individu__prenom")
