@@ -18,7 +18,7 @@ from core.forms.base import FormulaireBase
 
 class Formulaire(FormulaireBase, forms.Form):
     date_reference = forms.DateField(label="Date de référence", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
-    lot_rappels = forms.ModelChoiceField(label="Lot de rappels", queryset=LotRappels.objects.all(), required=False, widget=Select_avec_commandes({
+    lot_rappels = forms.ModelChoiceField(label="Lot de rappels", queryset=LotRappels.objects.all().order_by("-pk"), required=False, widget=Select_avec_commandes({
             "donnees_extra": {}, "url_ajax": "ajax_modifier_lot_rappels",
             "textes": {"champ": "Nom du lot", "ajouter": "Saisir un lot de rappels", "modifier": "Modifier un lot de rappels"}}))
     date_emission = forms.DateField(label="Date d'émission", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))

@@ -21,7 +21,7 @@ from facturation.widgets import ChampAutomatiqueWidget
 
 class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
-    lot_factures = forms.ModelChoiceField(label="Lot de factures", queryset=LotFactures.objects.all(), required=False, widget=Select_avec_commandes({
+    lot_factures = forms.ModelChoiceField(label="Lot de factures", queryset=LotFactures.objects.all().order_by("-pk"), required=False, widget=Select_avec_commandes({
             "donnees_extra": {}, "url_ajax": "ajax_modifier_lot_factures",
             "textes": {"champ": "Nom du lot", "ajouter": "Saisir un lot de factures", "modifier": "Modifier un lot de factures"}}))
     prefixe = forms.ModelChoiceField(label="Préfixe de numéro", queryset=PrefixeFacture.objects.all(), required=False)
