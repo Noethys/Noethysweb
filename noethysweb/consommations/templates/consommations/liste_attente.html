@@ -36,12 +36,19 @@
                 </div>
                 <div class="card-body">
 
+                    {% if nbre_disponibilites %}
+                        <div class="alert alert-success">
+                            <i class="fa fa-info-circle margin-r-5"></i> Il est possible de réattribuer {{ nbre_disponibilites }} place{{ nbre_disponibilites|pluralize }} disponible{{ nbre_disponibilites|pluralize }} ! Cliquez sur le bouton ci-dessous si vous souhaitez le faire maintenant.
+                        </div>
+                    {% endif %}
+
                     <div class="buttonHolder">
                         <a class="btn btn-default" href="{% url 'liste_attente_traitement_automatique' %}" title="L'application va réattribuer les places disponibles et envoyer des emails de notification aux familles concernées"><i class='fa fa-magic margin-r-5'></i>Traiter automatiquement les places en attente</a>
                     </div>
 
                     <script>
                         var contenu_table = JSON.parse('{{ resultats|escapejs }}');
+                        var affiche_pagination = false;
                     </script>
 
                     <style>

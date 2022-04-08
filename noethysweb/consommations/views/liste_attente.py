@@ -40,7 +40,9 @@ class View(CustomView, TemplateView):
         if "form_parametres" not in kwargs:
             context['form_parametres'] = Formulaire(request=self.request)
             parametres = {"donnees": "periode_reference"}
-            context['resultats'] = json.dumps(Get_resultats(parametres=parametres, etat=self.etat, request=self.request))
+            liste_resultats = Get_resultats(parametres=parametres, etat=self.etat, request=self.request)
+            context['resultats'] = json.dumps(liste_resultats)
+            context['nbre_disponibilites'] = len([1 for resultat in liste_resultats if resultat.get("place_dispo", False)])
         return context
 
     def post(self, request, **kwargs):
