@@ -26,9 +26,20 @@ class Liste(etiquettes.Page, crud.Liste):
     class datatable_class(MyDatatable):
         filtres = ["ipresent:pk", "iscolarise:pk", "idindividu", "nom", "prenom", "rue_resid", "cp_resid", "ville_resid"]
         check = columns.CheckBoxSelectColumn(label="")
+        rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
+        cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')
+        ville_resid = columns.TextColumn("Ville",  sources=None, processor='Get_ville_resid')
 
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['check', "idindividu", "nom", "prenom", "rue_resid", "cp_resid", "ville_resid"]
             ordering = ["nom", "prenom"]
 
+        def Get_rue_resid(self, instance, *args, **kwargs):
+            return instance.rue_resid
+
+        def Get_cp_resid(self, instance, *args, **kwargs):
+            return instance.cp_resid
+
+        def Get_ville_resid(self, instance, *args, **kwargs):
+            return instance.ville_resid
