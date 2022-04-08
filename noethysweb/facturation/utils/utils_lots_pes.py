@@ -16,6 +16,7 @@ def ConvertToTexte(valeur, majuscules=False):
     valeur = '"%s"' % valeur
     valeur = valeur.replace("\n", " ")
     valeur = valeur.replace("\r", " ")
+    valeur = valeur.strip()
     return valeur
 
 
@@ -79,7 +80,7 @@ class Exporter():
             libelle = libelle.replace("{PRESTATION_QUANTITE}", str(prestation.quantite))
             libelle = libelle.replace("{PRESTATION_MOIS}", {num: label for (num, label) in LISTE_MOIS}[prestation.date.month])
             libelle = libelle.replace("{PRESTATION_ANNEE}", str(prestation.date.year))
-            libelle = libelle.replace("{INDIVIDU_PRENOM}", prestation.individu.prenom if prestation.individu.prenom else "")
+            libelle = libelle.replace("{INDIVIDU_PRENOM}", prestation.individu.prenom or prestation.individu.nom)
             libelle = libelle.replace("{INDIVIDU_NOM}", prestation.individu.nom if prestation.individu.nom else "")
             libelle = libelle.replace("{MOIS}", str(self.lot.mois))
             libelle = libelle.replace("{MOIS_LETTRES}", self.lot.get_mois_display())
@@ -242,7 +243,7 @@ class Exporter():
                     ligne[16] = ConvertToTexte(piece.famille.titulaire_helios.ville_resid[:50])
 
                     # Libelle1 - Texte (50)
-                    ligne[18] = ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece, piece=piece)[:50])
+                    ligne[18] = ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece, piece=piece)[:50], majuscules=True)
 
                     # PièceJustificative1 - Texte (50)
                     pj = dict_pieces_jointes.get(piece.facture_id, None)
@@ -357,7 +358,7 @@ class Exporter():
                         ligne[77] = ConvertToTexte(utils_dates.ConvertDateToFR(piece.prelevement_mandat.date))
 
                         # LibellePrel - Texte (140)
-                        ligne[78] = ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.prelevement_libelle, piece=piece)[:140])
+                        ligne[78] = ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.prelevement_libelle, piece=piece)[:140], majuscules=True)
 
                         # SequencePrel - Texte (02)
                         if piece.prelevement_sequence == "FRST": sequence = "02"
@@ -446,7 +447,7 @@ class Exporter():
                             ligne_detail[4] = ConvertToTexte(utils_dates.ConvertDateToFR(date_max))
 
                             # Libelle - Texte (200)
-                            ligne_detail[5] = ConvertToTexte(dict_detail["libelle"][:200])
+                            ligne_detail[5] = ConvertToTexte(dict_detail["libelle"][:200], majuscules=True)
 
                             # Quantite - Numérique (5)
                             ligne_detail[6] = str(dict_detail["quantite"])
@@ -481,7 +482,7 @@ class Exporter():
                 ligne_pj[2] = ConvertToTexte(pj["NomPJ"][:100])
 
                 # DescriptionPJ - Texte (255)
-                ligne_pj[3] = ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece, piece=piece)[:255])
+                ligne_pj[3] = ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece, piece=piece)[:255], majuscules=True)
 
                 # TypPJPES - Texte (3)
                 ligne_pj[4] = ConvertToTexte("006")
