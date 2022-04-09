@@ -3072,7 +3072,7 @@ class PesModele(models.Model):
     format = models.CharField(verbose_name="Format", max_length=100, choices=CHOIX_FORMAT_EXPORT_TRESOR)
     compte = models.ForeignKey(CompteBancaire, verbose_name="Compte à créditer", on_delete=models.PROTECT, help_text="Sélectionnez le compte bancaire à créditer dans le cadre du règlement automatique.")
     id_poste = models.CharField(verbose_name="Poste comptable par défaut", max_length=200, blank=True, null=True)
-    id_collectivite = models.CharField(verbose_name="ID budget collectivité", max_length=200, blank=True, null=True)
+    id_collectivite = models.CharField(verbose_name="ID Collectivité", max_length=200, blank=True, null=True)
     code_collectivite = models.CharField(verbose_name="Code collectivité", max_length=200, blank=True, null=True)
     code_budget = models.CharField(verbose_name="Code budget", max_length=10, blank=True, null=True)
     code_prodloc = models.CharField(verbose_name="Code produit local par défaut", max_length=4, blank=True, null=True)
@@ -3094,7 +3094,7 @@ class PesModele(models.Model):
         ("03", "03-ASAP ORMC Chorus Pro"),
         ("04", "04-ASAP sans traitement DGFIP"),
     ]
-    edition_asap = models.CharField(verbose_name="Edition ASAP", max_length=100, choices=choix_edition_asap, default="01", help_text="Indiquez si l'ASAP doit être édité ou non par le centre éditique (Balise Edition dans bloc pièce du PES Titre).")
+    edition_asap = models.CharField(verbose_name="Edition ASAP", max_length=100, choices=choix_edition_asap, default="01", blank=True, null=True, help_text="Indiquez si l'ASAP doit être édité ou non par le centre éditique (Balise Edition dans bloc pièce du PES Titre).")
     nom_tribunal = models.CharField(verbose_name="Nom du tribunal", max_length=400, blank=True, null=True, default="le tribunal administratif", help_text="Saisissez le nom du tribunal administratif de recours.")
     inclure_detail = models.BooleanField(verbose_name="Inclure le détail des factures", default=True, help_text="Cochez cette case si vous souhaitez que Noethys intègre le détail des prestations de chaque facture.")
     inclure_pieces_jointes = models.BooleanField(verbose_name="Inclure les factures au format PDF", default=True, help_text="Cochez cette case si vous souhaitez que Noethys intègre les factures au format PDF.")

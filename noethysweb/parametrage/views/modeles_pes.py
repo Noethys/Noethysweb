@@ -75,8 +75,10 @@ class Ajouter(Page, crud.Ajouter):
         form_kwargs["format"] = self.kwargs.get("format", None)
         return form_kwargs
 
+
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire
+
 
 class Supprimer(Page, crud.Supprimer):
     pass

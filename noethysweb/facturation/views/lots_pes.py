@@ -3,6 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json, importlib
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Sum, Count
 from django.http import HttpResponseRedirect, JsonResponse
@@ -11,7 +12,6 @@ from core.views import crud
 from core.models import PesLot, PesPiece, Facture, Mandat, FiltreListe
 from core.utils import utils_texte
 from facturation.forms.lots_pes import Formulaire, Formulaire_creation, Formulaire_piece
-import json
 
 
 class Page(crud.Page):
@@ -237,8 +237,9 @@ class Supprimer_plusieurs_pieces(Page, crud.Supprimer_plusieurs):
 
 def Exporter(request):
     """ Générer le fichier d'export """
-    from facturation.utils import utils_lots_pes
-    export = utils_lots_pes.Exporter(idlot=int(request.POST["idlot"]), request=request)
+    lot = PesLot.objects.get(pk=int(request.POST["idlot"]))
+    module_export = importlib.import_module("facturation.utils.utils_export_%s" % lot.modele.format)
+    export = module_export.Exporter(idlot=lot.pk, request=request)
     resultat = export.Generer()
     if not resultat:
         return JsonResponse({"erreurs": export.Get_erreurs_html()}, status=401)
@@ -247,11 +248,8 @@ def Exporter(request):
 
 def Impression_pdf(request):
     """ Impression du lot """
-    idlot = int(request.POST.get("idlot"))
-
-    # Création du PDF
     from facturation.utils import utils_impression_lot_pes
-    impression = utils_impression_lot_pes.Impression(titre="Edition d'un export", dict_donnees={"idlot": idlot})
+    impression = utils_impression_lot_pes.Impression(titre="Edition d'un export", dict_donnees={"idlot": int(request.POST.get("idlot"))})
     if impression.erreurs:
         return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
     nom_fichier = impression.Get_nom_fichier()

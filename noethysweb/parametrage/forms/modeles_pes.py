@@ -78,18 +78,18 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("code_budget", type=None if format in ("pes", "magnus", "jvs") else "hidden"),
                 Field("code_prodloc", type=None if format in ("pes", "magnus", "jvs") else "hidden"),
                 Field("id_poste", type=None if format in ("pes", "magnus", "jvs") else "hidden"),
-                Field("code_etab", type=None if format in ("pes") else "hidden"),
-                Field("operation", type=None if format in ("magnus") else "hidden"),
-                Field("fonction", type=None if format in ("magnus") else "hidden"),
-                Field("service1", type=None if format in ("magnus") else "hidden"),
-                Field("service2", type=None if format in ("magnus") else "hidden"),
-                Field("edition_asap", type=None if format in ("magnus") else "hidden"),
-                Field("nom_tribunal", type=None if format in ("magnus") else "hidden"),
-                Field("payable_internet", type=None if format in ("magnus") else "hidden"),
-                Field("inclure_detail", type=None if format in ("magnus") else "hidden"),
-                Field("inclure_pieces_jointes", type=None if format in ("magnus") else "hidden"),
-                Field("modele_document", type=None if format in ("magnus") else "hidden"),
-                Field("code_compta_as_alias", type=None if format in ("magnus") else "hidden"),
+                Field("code_etab", type=None if format in ("pes",) else "hidden"),
+                Field("operation", type=None if format in ("magnus",) else "hidden"),
+                Field("fonction", type=None if format in ("magnus",) else "hidden"),
+                Field("service1", type=None if format in ("magnus",) else "hidden"),
+                Field("service2", type=None if format in ("magnus",) else "hidden"),
+                Field("edition_asap", type=None if format in ("magnus",) else "hidden"),
+                Field("nom_tribunal", type=None if format in ("magnus",) else "hidden"),
+                Field("payable_internet", type=None if format in ("magnus",) else "hidden"),
+                Field("inclure_detail", type=None if format in ("magnus",) else "hidden"),
+                Field("inclure_pieces_jointes", type=None if format in ("magnus",) else "hidden"),
+                Field("modele_document", type=None if format in ("magnus",) else "hidden"),
+                Field("code_compta_as_alias", type=None if format in ("magnus",) else "hidden"),
             ),
             Fieldset("Libellés",
                 Field("objet_piece"),
@@ -106,19 +106,25 @@ class Formulaire(FormulaireBase, ModelForm):
     def clean(self):
         format = self.cleaned_data["format"]
 
-        if not self.cleaned_data["code_collectivite"] and format in ("magnus"):
+        if not self.cleaned_data["id_collectivite"] and format in ("pes", "jvs"):
             self.add_error("code_collectivite", "Vous devez renseigner le code collectivité")
 
-        if not self.cleaned_data["code_budget"] and format in ("magnus"):
+        if not self.cleaned_data["code_collectivite"] and format in ("magnus", "pes", "jvs"):
+            self.add_error("code_collectivite", "Vous devez renseigner le code collectivité")
+
+        if not self.cleaned_data["code_budget"] and format in ("magnus", "pes", "jvs"):
             self.add_error("code_budget", "Vous devez renseigner le code budget")
 
-        if not self.cleaned_data["id_poste"] and format in ("magnus"):
+        if not self.cleaned_data["id_poste"] and format in ("magnus", "pes", "jvs"):
             self.add_error("id_poste", "Vous devez renseigner le poste")
 
-        if not self.cleaned_data["code_prodloc"] and format in ("magnus"):
+        if not self.cleaned_data["code_prodloc"] and format in ("magnus", "pes", "jvs"):
             self.add_error("code_prodloc", "Vous devez renseigner le code produit local")
 
-        if not self.cleaned_data["modele_document"] and self.cleaned_data["inclure_pieces_jointes"]:
+        if not self.cleaned_data["code_etab"] and format in ("pes",):
+            self.add_error("code_prodloc", "Vous devez renseigner le code produit local")
+
+        if not self.cleaned_data["modele_document"] and format in ("magnus",) and self.cleaned_data["inclure_pieces_jointes"]:
             self.add_error("modele_document", "Vous devez sélectionner un modèle de facture")
 
         return self.cleaned_data
