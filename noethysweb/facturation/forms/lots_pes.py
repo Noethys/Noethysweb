@@ -92,8 +92,6 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields["date_emission"].initial = datetime.date.today()
             self.fields["date_prelevement"].initial = datetime.date.today()
             self.fields["date_envoi"].initial = datetime.date.today()
-            # self.fields["objet_piece"].initial = modele.objet_piece
-            # self.fields["prestation_libelle"].initial = modele.prestation_libelle
 
             # Importe le nom de lot de factures pour l'utiliser comme nom de lot pes
             if assistant and assistant > 0:
@@ -130,14 +128,20 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Paramètres",
                 Field("exercice"),
                 Field("mois"),
-                # Field("objet_piece"),
-                # Field("prestation_libelle"),
                 Field("date_emission"),
                 Field("date_prelevement"),
                 Field("date_envoi"),
-                Field("id_bordereau", type=None if modele.format in ("pes", "jvs") else "hidden")
+                Field("id_bordereau", type=None if modele.format in ("pes", "jvs") else "hidden"),
             ),
         )
+
+    def clean(self):
+        format = self.cleaned_data["modele"].format
+
+        if not self.cleaned_data["id_bordereau"] and format in ("pes", "jvs"):
+            self.add_error("id_bordereau", "Vous devez renseigner l'identifiant du bordereau")
+
+        return self.cleaned_data
 
 
 class Formulaire_piece(FormulaireBase, ModelForm):

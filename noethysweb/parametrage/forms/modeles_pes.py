@@ -90,6 +90,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("inclure_pieces_jointes", type=None if format in ("magnus",) else "hidden"),
                 Field("modele_document", type=None if format in ("magnus",) else "hidden"),
                 Field("code_compta_as_alias", type=None if format in ("magnus",) else "hidden"),
+                Field("nom_collectivite", type=None if format in ("jvs",) else "hidden"),
             ),
             Fieldset("Libellés",
                 Field("objet_piece"),
@@ -126,6 +127,9 @@ class Formulaire(FormulaireBase, ModelForm):
 
         if not self.cleaned_data["modele_document"] and format in ("magnus",) and self.cleaned_data["inclure_pieces_jointes"]:
             self.add_error("modele_document", "Vous devez sélectionner un modèle de facture")
+
+        if not self.cleaned_data["nom_collectivite"] and format in ("jvs",):
+            self.add_error("code_prodloc", "Vous devez renseigner le nom de la collectivité")
 
         return self.cleaned_data
 
