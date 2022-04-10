@@ -1,3 +1,16 @@
+Version 1.0.7.5 (10/04/2022) :
+
+- Ajout des exports PES et JVS
+- Ajout de la liste des utilisateurs bloqués
+- Ajout d'un raccourci depuis la page d'accueil vers la liste d'attente
+- Ajout de la prédiction du modèle d'export à sélectionner
+- Ajout de la sélection de groupes dans l'édition des contacts
+- Ajout de la colonne Facture dans la liste générale des prestations
+- Amélioration de l'affichage de la liste d'attente
+- Modification de l'ordre des lots de factures et de rappels
+- Correction des espaces et majuscules dans l'export PES
+- Correction du filtre rapide dans l'édition de badges
+
 Version 1.0.7.4 (05/04/2022) :
 
 - Ajout d'options aux impressions des attestations et devis
