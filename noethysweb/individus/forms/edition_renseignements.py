@@ -15,7 +15,9 @@ from core.forms.base import FormulaireBase
 class Formulaire(FormulaireBase, forms.Form):
     activites = forms.CharField(label="Inscrits aux activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": True}))
     presents = forms.CharField(label="Uniquement les présents", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
-    afficher_signature = forms.BooleanField(label="Afficher la signature", required=False, initial=True)
+    tri = forms.ChoiceField(label="Tri", choices=[("nom", "Nom"), ("classe", "Classe")], initial="nom", required=False)
+    afficher_signature = forms.BooleanField(label="Afficher la signature", required=False, initial=True, help_text="Une case signature est ajoutée à la fin du document afin de permettre la validation des données par la famille.")
+    mode_condense = forms.BooleanField(label="Mode condensé", required=False, initial=False, help_text="Aucune ligne vierge n'est ajoutée aux rubriques.")
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -37,6 +39,8 @@ class Formulaire(FormulaireBase, forms.Form):
                 Field("presents"),
             ),
             Fieldset("Options",
+                Field("tri"),
                 Field("afficher_signature"),
+                Field("mode_condense"),
             ),
         )

@@ -109,6 +109,14 @@ class Impression(utils_impression.Impression):
         # Préparation du tableau
         largeur_contenu = self.taille_page[0] - 75
 
+        # Tri des pages
+        def tri_classe(rattachement):
+            scolarite = dict_scolarites.get(rattachement.individu_id, None)
+            return scolarite.classe.nom if scolarite else ""
+
+        if self.dict_donnees["tri"] == "classe":
+            rattachements = sorted(rattachements, key=tri_classe)
+
         # Remplissage du tableau
         for rattachement in rattachements:
 
@@ -226,6 +234,8 @@ class Impression(utils_impression.Impression):
 
                 contenu_tableau.append(Paragraph(texte, style_defaut))
 
+            if not self.dict_donnees["mode_condense"]:
+                contenu_tableau.append(Paragraph("<br/><br/><br/>", style_defaut))
             self.story.append(Tableau(titre="Contacts".upper(), aide="Lister les noms des contacts d'urgence et leurs coordonnées", contenu=contenu_tableau))
 
             # Assurance
@@ -234,6 +244,8 @@ class Impression(utils_impression.Impression):
                 texte_assurance = "%s - Contrat n°%s valable du %s au %s" % (assurance.assureur.nom, assurance.num_contrat, utils_dates.ConvertDateToFR(assurance.date_debut), utils_dates.ConvertDateToFR(assurance.date_fin) or "----")
             else:
                 texte_assurance = ""
+            if not self.dict_donnees["mode_condense"]:
+                texte_assurance += "<br/><br/>"
             self.story.append(Tableau(titre="Assurance".upper(), aide="Préciser l'assureur et ses coordonnées puis le numéro et les dates de validité du contrat", contenu=[Paragraph(texte_assurance, style_defaut)]))
 
             # Médecin
@@ -244,14 +256,20 @@ class Impression(utils_impression.Impression):
                 texte_medecin = texte
             else:
                 texte_medecin = ""
+            if not self.dict_donnees["mode_condense"]:
+                texte_medecin += "<br/><br/>"
             self.story.append(Tableau(titre="Médecin traitant".upper(), aide="Renseigner le nom et les coordonnées du médecin traitant", contenu=[Paragraph(texte_medecin, style_defaut)]))
 
             # Régimes alimentaires
             texte_regimes = ", ".join([regime.nom for regime in rattachement.individu.regimes_alimentaires.all()])
+            if not self.dict_donnees["mode_condense"]:
+                texte_regimes += "<br/><br/>"
             self.story.append(Tableau(titre="Régimes alimentaires".upper(), aide="Lister les régimes alimentaires", contenu=[Paragraph(texte_regimes, style_defaut)]))
 
             # Maladies
             texte_maladies = ", ".join([maladie.nom for maladie in rattachement.individu.maladies.all()])
+            if not self.dict_donnees["mode_condense"]:
+                texte_maladies += "<br/><br/>"
             self.story.append(Tableau(titre="Maladies contractées".upper(), aide="Lister les maladies contractées", contenu=[Paragraph(texte_maladies, style_defaut)]))
 
             # Informations
@@ -261,6 +279,8 @@ class Impression(utils_impression.Impression):
                 if information.description:
                     texte += " : %s" % information.description
                 contenu_tableau.append(Paragraph(texte, style_defaut))
+            if not self.dict_donnees["mode_condense"]:
+                contenu_tableau.append(Paragraph("<br/><br/><br/>", style_defaut))
             self.story.append(Tableau(titre="Informations et recommandations".upper(), aide="Préciser les informations particulières et recommandations", contenu=contenu_tableau))
 
             # Vaccinations obligatoires
@@ -291,6 +311,8 @@ class Impression(utils_impression.Impression):
             for index, vaccination in enumerate(dict_vaccinations.get(rattachement.individu, [])):
                 if not vaccination["obligatoire"] and vaccination["valide"]:
                     texte_vaccinations.append("%s (%s)" % (vaccination["label"], utils_dates.ConvertDateToFR(vaccination["dernier_rappel"])))
+            if not self.dict_donnees["mode_condense"]:
+                texte_vaccinations.append("<br/><br/><br/>")
             self.story.append(Tableau(titre="Autres vaccinations".upper(), aide="Indiquer les autres vaccinations en précisant la date de rappel", contenu=[Paragraph(", ".join(texte_vaccinations), style_defaut)]))
 
             # Certification
