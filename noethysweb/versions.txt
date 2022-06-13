@@ -1,3 +1,9 @@
+Version 1.0.7.6 (13/06/2022) :
+
+- Ajout du tri par classe dans l'édition d'une fiche de renseignements
+- Ajout du nombre de factures associées aux lots de facture
+- Correction de la saisie des consommations dans un forfait daté
+
 Version 1.0.7.5 (10/04/2022) :
 
 - Ajout des exports PES et JVS
