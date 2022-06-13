@@ -5,10 +5,10 @@
 
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
+from django.db.models import Count
 from core.views import crud
 from core.models import LotFactures
 from parametrage.forms.lots_factures import Formulaire
-
 
 
 class Page(crud.Page):
@@ -30,7 +30,7 @@ class Liste(Page, crud.Liste):
     model = LotFactures
 
     def get_queryset(self):
-        return LotFactures.objects.filter(self.Get_filtres("Q"))
+        return LotFactures.objects.filter(self.Get_filtres("Q")).annotate(nbre_factures=Count("facture"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -41,12 +41,12 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idlot", "nom"]
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
+        nbre_factures = columns.TextColumn("Factures associées", sources="nbre_factures")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idlot", "nom"]
+            columns = ["idlot", "nom", "nbre_factures", "actions"]
             ordering = ['nom']
 
 
