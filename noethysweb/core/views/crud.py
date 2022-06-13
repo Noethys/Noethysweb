@@ -320,8 +320,15 @@ class Supprimer(BaseView, DeleteView):
         # Recherche si des protections existent
         collector = NestedObjects(using='default')
         collector.collect([self.get_object()])
-        if collector.protected:
-            context['erreurs_protection'].append("Il est rattaché aux données suivantes : %s." % Formate_liste_objets(objets=collector.protected))
+        protected_objects = collector.protected
+
+        if hasattr(self, "Get_objets_supprimables"):
+            for objet_supprimable in self.Get_objets_supprimables(objet=self.get_object()):
+                if objet_supprimable in protected_objects:
+                    protected_objects.remove(objet_supprimable)
+
+        if protected_objects:
+            context['erreurs_protection'].append("Il est rattaché aux données suivantes : %s." % Formate_liste_objets(objets=protected_objects))
 
         # Autres protections
         if hasattr(self, "Check_protections"):

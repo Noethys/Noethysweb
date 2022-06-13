@@ -12,7 +12,7 @@ from django.db.models import Q
 from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Inscription, Individu, Activite, Groupe, CategorieTarif, Consommation, Ouverture
+from core.models import Inscription, Prestation, Groupe, CategorieTarif, Consommation, Ouverture
 from core.utils import utils_dates
 from fiche_individu.forms.individu_inscriptions import Formulaire
 from fiche_individu.views.individu import Onglet
@@ -278,6 +278,13 @@ class Supprimer(Page, crud.Supprimer):
             return False
         return True
 
+    def Get_objets_supprimables(self, objet=None):
+        liste_conso_supprimables = []
+        for conso in Consommation.objects.filter(inscription=objet):
+            if conso.forfait == 2 and conso.etat == "reservation":
+                liste_conso_supprimables.append(conso)
+        return liste_conso_supprimables
+
     def Avant_suppression(self, objet=None):
         """ Suppression des conso forfait supprimables """
         liste_conso = Consommation.objects.filter(inscription=objet)
@@ -291,4 +298,21 @@ class Supprimer(Page, crud.Supprimer):
             for conso in liste_conso:
                 conso.delete()
 
+        # Supprime les prestations associées
+        for prestation in Prestation.objects.filter(famille=objet.famille, individu=objet.individu, activite=objet.activite, forfait=2):
+            prestation.delete()
+
         return True
+
+    def Check_protections(self, objet=None):
+        protections = []
+
+        nbre_prestations_facturees = Prestation.objects.filter(famille=objet.famille, individu=objet.individu, activite=objet.activite, facture__isnull=False).count()
+        if nbre_prestations_facturees:
+            protections.append("Vous ne pouvez pas supprimer cette inscription car %s prestations associées sont déjà facturées." % nbre_prestations_facturees)
+
+        nbre_prestations = Prestation.objects.filter(famille=objet.famille, individu=objet.individu, activite=objet.activite).exclude(forfait=2).count()
+        if nbre_prestations:
+            protections.append("Vous ne pouvez pas supprimer cette inscription car %s prestations sont déjà associées." % nbre_prestations)
+
+        return protections

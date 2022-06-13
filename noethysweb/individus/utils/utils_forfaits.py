@@ -178,7 +178,7 @@ class Forfaits():
                                 # Si la famille a un QF :
                                 for quotient in quotients:
                                     if quotient.date_debut <= date_facturation <= quotient.date_fin and (not tarif.type_quotient or tarif.type_quotient == quotient.type_quotient):
-                                        return quotient
+                                        return quotient.quotient
                                 # Si la famille n'a pas de QF, on attribue le QF le plus élevé :
                                 listeQF = [ligne.qf_max for ligne in tarif.lignes_calcul]
                                 if listeQF:
@@ -193,7 +193,7 @@ class Forfaits():
                             if tarif.methode == "qf":
                                 montant_tarif = 0.0
                                 for ligne in tarif.lignes_calcul:
-                                    montant_tarif = ligne["montant_unique"]
+                                    montant_tarif = ligne.montant_unique
                                     QFfamille = RechercheQF()
                                     if QFfamille and ligne.qf_min <= QFfamille <= ligne.qf_max:
                                         break
