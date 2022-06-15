@@ -43,7 +43,7 @@ class Liste(Page, crud.Liste):
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         nbre_destinataires = columns.TextColumn("Destinataires", sources=['nbre_destinataires'])
-        utilisateur = columns.TextColumn("Auteur", sources="utilisateur", processor='Formate_utilisateur')
+        utilisateur = columns.TextColumn("Auteur", sources=None, processor='Formate_utilisateur')
 
         class Meta:
             structure_template = MyDatatable.structure_template
