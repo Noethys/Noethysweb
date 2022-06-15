@@ -47,8 +47,8 @@ class Liste(Page, crud.Liste):
         categorie_tarif = columns.TextColumn("Catégorie de tarif", sources=["categorie_tarif__nom"])
         individu = columns.CompoundColumn("Individu", sources=["individu__nom", "individu__prenom"])
         famille = columns.TextColumn("Famille", sources=["famille__nom"])
-        individu_ville = columns.TextColumn("Ville de l'individu", sources=["individu__ville_resid"])
-        famille_ville = columns.TextColumn("Ville de la famille", sources=["famille__ville_resid"])
+        individu_ville = columns.TextColumn("Ville de l'individu", processor="Get_ville_individu")
+        famille_ville = columns.TextColumn("Ville de la famille", processor="Get_ville_famille")
 
         class Meta:
             structure_template = MyDatatable.structure_template
@@ -86,6 +86,12 @@ class Liste(Page, crud.Liste):
                 self.Create_bouton(url=reverse("famille_resume", args=[instance.famille_id]), title="Ouvrir la fiche famille", icone="fa-users"),
             ]
             return self.Create_boutons_actions(html)
+
+        def Get_ville_individu(self, instance, *args, **kwargs):
+            return instance.individu.ville_resid
+
+        def Get_ville_famille(self, instance, *args, **kwargs):
+            return instance.famille.ville_resid
 
 
 class Ajouter(Page, crud.Ajouter):
