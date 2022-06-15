@@ -1,3 +1,10 @@
+Version 1.0.7.7 (15/06/2022) :
+
+- Ajout d'un masque sur les iban et bic
+- Correction du nom de la colonne identifiant internet
+- Correction de la recherche rapide dans les listes emails et sms
+- Correction des villes dans la liste des inscriptions
+
 Version 1.0.7.6 (13/06/2022) :
 
 - Ajout du tri par classe dans l'édition d'une fiche de renseignements
