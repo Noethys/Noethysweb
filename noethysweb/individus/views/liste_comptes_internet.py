@@ -172,7 +172,7 @@ class Liste(Page, crud.Liste):
 
         check = columns.CheckBoxSelectColumn(label="")
         internet_actif = columns.TextColumn("Activation", sources=["internet_actif"], processor='Get_internet_actif')
-        internet_identifiant = columns.TextColumn("Mot de passe", sources=[], processor='Get_internet_identifiant')
+        internet_identifiant = columns.TextColumn("Identifiant", sources=[], processor='Get_internet_identifiant')
         internet_mdp = columns.TextColumn("Mot de passe", sources=[], processor='Get_internet_mdp')
         derniere_action = columns.TextColumn("Dernière action", sources=["derniere_action"], processor=helpers.format_date('%d/%m/%Y'))
 
