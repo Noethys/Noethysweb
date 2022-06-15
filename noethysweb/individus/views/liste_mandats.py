@@ -60,10 +60,10 @@ class Liste(Page, crud.Liste):
             return "<small class='badge badge-success'>Activé</small>" if instance.actif else "<small class='badge badge-danger'>Désactivé</small>"
 
         def Get_iban(self, instance, *args, **kwargs):
-            return instance.iban
+            return instance.iban[:-5] + "*****"
 
         def Get_bic(self, instance, *args, **kwargs):
-            return instance.bic
+            return instance.bic[:-5] + "*****"
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             html = [

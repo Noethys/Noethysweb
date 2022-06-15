@@ -183,10 +183,10 @@ class Consulter(Page, crud.Liste):
             return self.Create_boutons_actions(html)
 
         def Get_iban(self, instance, *args, **kwargs):
-            return instance.prelevement_mandat.iban if instance.prelevement_mandat else None
+            return instance.prelevement_mandat.iban[:-5] + "*****" if instance.prelevement_mandat else None
 
         def Get_bic(self, instance, *args, **kwargs):
-            return instance.prelevement_mandat.bic if instance.prelevement_mandat else None
+            return instance.prelevement_mandat.bic[:-5] + "*****" if instance.prelevement_mandat else None
 
         def Formate_prelevement_statut(self, instance, **kwargs):
             return instance.get_prelevement_statut_display()
