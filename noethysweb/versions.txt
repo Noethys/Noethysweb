@@ -1,3 +1,7 @@
+Version 1.0.7.8 (22/06/2022) :
+
+- Correction de la permission sur les assistants de paramétrage
+
 Version 1.0.7.7 (15/06/2022) :
 
 - Ajout d'un masque sur les iban et bic
