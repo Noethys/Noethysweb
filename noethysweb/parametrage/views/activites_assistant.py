@@ -116,7 +116,7 @@ def Afficher_page_nbre_categories(wizard):
 
 
 class Assistant_base(CustomView, SessionWizardView):
-    menu_code = "parametrage"
+    menu_code = "activites_liste"
     template_name = "parametrage/activites_assistant.html"
     condition_dict = {
         "nbre_groupes": Afficher_page_nbre_groupes,
