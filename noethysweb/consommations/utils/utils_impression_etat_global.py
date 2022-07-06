@@ -190,7 +190,7 @@ class Impression(utils_impression.Impression):
 
         # Récupération des consommations
         self.dict_unites = {}
-        liste_conso = Consommation.objects.select_related("unite", "activite", "groupe", "prestation", "categorie_tarif", "inscription", "inscription__famille__caisse").filter(date__gte=date_debut, date__lte=date_fin, unite__in=liste_idunite).order_by("date")
+        liste_conso = Consommation.objects.select_related("unite", "activite", "groupe", "prestation", "categorie_tarif", "inscription", "inscription__famille", "individu", "inscription__famille__caisse").filter(date__gte=date_debut, date__lte=date_fin, unite__in=liste_idunite).order_by("date")
         for conso in liste_conso:
             self.dict_unites.setdefault(conso.date, {})
             self.dict_unites[conso.date]["unite%d" % conso.unite_id] = Unite(conso.unite_id, conso.heure_debut, conso.heure_fin, conso.etat, conso.quantite)
@@ -458,7 +458,7 @@ class Impression(utils_impression.Impression):
 
                     # Si régime inconnu :
                     if dict_options["associer_regime_inconnu"] not in (None, "non", "") and IDregime == 0:
-                        IDregime = dict_options["associer_regime_inconnu"]
+                        IDregime = int(dict_options["associer_regime_inconnu"])
 
                     # Mémoriser les régimes à afficher
                     if IDregime not in listeRegimesUtilises:
