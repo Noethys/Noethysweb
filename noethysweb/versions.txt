@@ -1,3 +1,7 @@
+Version 1.0.7.9 (06/07/2022) :
+
+- Correction sur les régimes dans l'état global
+
 Version 1.0.7.8 (22/06/2022) :
 
 - Correction de la permission sur les assistants de paramétrage
