@@ -28,3 +28,4 @@ reportlab
 bleach
 mysqlclient
 jellyfish
+lxml
