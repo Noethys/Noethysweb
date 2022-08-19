@@ -131,7 +131,7 @@ def Get_generic_data(data={}):
         dict_deductions[deduction.prestation_id].append({"label": deduction.label, "date": str(deduction.date), "aide": deduction.aide_id, "montant": float(deduction.montant)})
 
     # Importation des prestations
-    conditions = data["conditions_periodes"]
+    conditions = data["conditions_periodes"] & Q(categorie="consommation")
     if data["mode"] in ("individu", "portail"):
         conditions &= Q(famille_id=data["idfamille"]) & Q(individu__in=data["liste_individus"])
     liste_prestations = Prestation.objects.filter(conditions)
