@@ -1,3 +1,7 @@
+Version 1.0.8.0 (19/08/2022) :
+
+- Correction sur la prestation cotisation dans la grille
+
 Version 1.0.7.9 (06/07/2022) :
 
 - Correction sur les régimes dans l'état global
