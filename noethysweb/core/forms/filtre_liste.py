@@ -181,7 +181,7 @@ class Formulaire(FormulaireBase, forms.Form):
         self.fields["critere_activites"].widget.request = self.request
 
         # Date du jour
-        self.fields["critere_classes"].widget.attrs.update({"dates": [datetime.date.today()]})
+        # self.fields["critere_classes"].widget.attrs.update({"dates": [datetime.date.today()]})
 
         # Choix du champ à filtrer
         choix_champs = []

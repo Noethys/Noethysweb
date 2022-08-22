@@ -3,12 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
+from django.db.models import Q
 from django.forms.widgets import Widget
 from django.template import loader
 from django.utils.safestring import mark_safe
 from core.models import Activite, Groupe, Unite, UniteRemplissage, Evenement, Ecole, Classe
 from core.utils import utils_dates
-import json
 
 
 class SelectionGroupesWidget(Widget):
@@ -227,10 +228,12 @@ class SelectionClassesWidget(Widget):
 
         # Branches 2
         context['dict_branches2'] = {}
+        conditions = Q()
         if liste_dates:
-            for classe in Classe.objects.select_related('ecole').filter(date_debut__lte=max(liste_dates), date_fin__gte=min(liste_dates)).order_by("date_debut", "nom"):
-                context['dict_branches2'].setdefault(classe.ecole_id, [])
-                context['dict_branches2'][classe.ecole_id].append({"pk": classe.pk, "label": classe.nom})
+            conditions &= Q(date_debut__lte=max(liste_dates), date_fin__gte=min(liste_dates))
+        for classe in Classe.objects.select_related('ecole').filter(conditions).order_by("date_debut", "nom"):
+            context['dict_branches2'].setdefault(classe.ecole_id, [])
+            context['dict_branches2'][classe.ecole_id].append({"pk": classe.pk, "label": classe.nom})
 
         # Branches 1
         liste_ecoles = Ecole.objects.filter(pk__in=context['dict_branches2'].keys()).order_by("nom")

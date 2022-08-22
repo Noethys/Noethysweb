@@ -43,6 +43,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_modeles.Add(code="modeles_emails_liste", titre="Modèles d'emails", icone="file-text-o")
     menu_modeles.Add(code="modeles_rappels_liste", titre="Modèles de lettres de rappel", icone="file-text-o")
     menu_modeles.Add(code="modeles_pes_liste", titre="Modèles d'exports vers le Trésor Public", icone="file-text-o")
+    # menu_modeles.Add(code="modeles_prelevements_liste", titre="Modèles de prélèvements", icone="file-text-o")
 
     # Comptabilité
     menu_comptabilite = menu_parametrage.Add(titre="Comptabilité")
@@ -72,6 +73,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_facturation.Add(code="prefixes_factures_liste", titre="Préfixes de factures", icone="file-text-o")
     menu_facturation.Add(code="messages_factures_liste", titre="Messages de factures", icone="file-text-o")
     menu_facturation.Add(code="regies_liste", titre="Régies", icone="file-text-o")
+    # menu_facturation.Add(code="perceptions_liste", titre="Perceptions", icone="file-text-o")
 
     # Scolarité
     menu_scolarite = menu_parametrage.Add(titre="Scolarité")
@@ -189,6 +191,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_inscriptions.Add(code="suivi_inscriptions", titre="Suivi des inscriptions", icone="file-text-o")
     menu_inscriptions.Add(code="inscriptions_impression", titre="Imprimer des inscriptions", icone="file-text-o")
     menu_inscriptions.Add(code="inscriptions_email", titre="Envoyer des inscriptions par Email", icone="file-text-o")
+    menu_inscriptions.Add(code="inscriptions_modifier", titre="Modifier des inscriptions par lot", icone="file-text-o")
 
     # Inscriptions scolaires
     menu_scolarite = menu_individus.Add(titre="Scolarité")
@@ -285,6 +288,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_factures = menu_facturation.Add(titre="Factures")
     menu_factures.Add(code="factures_generation", titre="Génération des factures", icone="file-text-o")
     menu_factures.Add(code="lots_pes_liste", titre="Exports vers le Trésor Public", icone="file-text-o")
+    # menu_factures.Add(code="lots_prelevements_liste", titre="Prélèvements", icone="file-text-o")
     menu_factures.Add(code="factures_impression", titre="Imprimer des factures", icone="file-text-o")
     menu_factures.Add(code="factures_email", titre="Envoyer des factures par Email", icone="file-text-o")
     menu_factures.Add(code="liste_factures", titre="Liste des factures", icone="file-text-o")
