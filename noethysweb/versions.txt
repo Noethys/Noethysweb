@@ -1,3 +1,7 @@
+Version 1.0.8.1 (22/08/2022) :
+
+- Ajout de la modification des inscriptions par lot
+
 Version 1.0.8.0 (19/08/2022) :
 
 - Correction sur la prestation cotisation dans la grille
