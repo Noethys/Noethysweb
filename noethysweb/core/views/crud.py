@@ -75,16 +75,21 @@ class Liste_commun():
                 if filtre["condition"] == "FAUX": conditions &= Q(**{champ: False})
 
                 # Filtres spéciaux : Inscrit/Présent et Scolarisé
-                if filtre["condition"] in ("INSCRIT", "PRESENT", "SANS_RESA", "ECOLES", "CLASSES"):
+                if filtre["condition"] in ("INSCRIT", "PRESENT", "SANS_RESA", "ECOLES", "CLASSES", "NIVEAUX"):
                     type_champ, champ = champ.split(":")
-                    type_criteres, liste_criteres = criteres[0].split(":")
+                    if filtre["condition"] in ("ECOLES", "NIVEAUX"):
+                        date_reference = criteres[0]
+                        type_criteres, liste_criteres = criteres[1].split(":")
+                    else:
+                        type_criteres, liste_criteres = criteres[0].split(":")
                     liste_criteres = [int(x) for x in liste_criteres.split(";")]
 
                     if type_criteres == "groupes_activites": condition = Q(activite__groupes_activites__in=liste_criteres)
                     if type_criteres == "activites": condition = Q(activite__in=liste_criteres)
                     if type_criteres == "groupes": condition = Q(groupe__in=liste_criteres)
-                    if type_criteres == "ecoles": condition = Q(date_debut__lte=datetime.date.today(), date_fin__gte=datetime.date.today(), ecole__in=liste_criteres)
-                    if type_criteres == "classes": condition = Q(date_debut__lte=datetime.date.today(), date_fin__gte=datetime.date.today(), classe__in=liste_criteres)
+                    if type_criteres == "ecoles": condition = Q(date_debut__lte=date_reference, date_fin__gte=date_reference, ecole__in=liste_criteres)
+                    if type_criteres == "classes": condition = Q(classe__in=liste_criteres)
+                    if type_criteres == "niveaux": condition = Q(date_debut__lte=date_reference, date_fin__gte=date_reference, niveau__in=liste_criteres)
 
                     # Recherche les inscrits ou les présents
                     if filtre["condition"] == "INSCRIT":
@@ -101,10 +106,7 @@ class Liste_commun():
                         condition &= Q(date__gte=criteres[1]) & Q(date__lte=criteres[2])
                         presents = [resultat[donnee] for resultat in Consommation.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
                         resultats = [pk for pk in inscrits if pk not in presents]
-                    if filtre["condition"] == "ECOLES":
-                        donnee = "individu__rattachement__famille" if type_champ == "fscolarise" else "individu"
-                        resultats = [resultat[donnee] for resultat in Scolarite.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
-                    if filtre["condition"] == "CLASSES":
+                    if filtre["condition"] in ("ECOLES", "CLASSES", "NIVEAUX"):
                         donnee = "individu__rattachement__famille" if type_champ == "fscolarise" else "individu"
                         resultats = [resultat[donnee] for resultat in Scolarite.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
 

@@ -17,7 +17,7 @@ from core.forms.base import FormulaireBase
 from core.utils import utils_dates
 from core.models import FiltreListe
 from core.widgets import DatePickerWidget, SelectionActivitesWidget
-from consommations.widgets import SelectionEcolesWidget, SelectionClassesWidget
+from consommations.widgets import SelectionEcolesWidget, SelectionClassesWidget, SelectionNiveauxWidget
 
 
 def Get_form_filtres(request):
@@ -86,7 +86,8 @@ def Ajouter_filtre(request):
         "SUPERIEUR": "est supérieur à", "SUPERIEUR_EGAL": "est supérieur ou égal à", "INFERIEUR": "est inférieur à", "INFERIEUR_EGAL": "est inférieur ou égal à",
         "VRAI": "est vrai", "FAUX": "est faux", "COMPRIS": "est compris entre", "INSCRIT": "est inscrit sur une sélection d'activités", "PRESENT": "est présent sur une sélection d'activités entre",
         "SANS_RESA": "est sans réservations sur une sélection d'activités entre", "EST_VIDE": "est vide", "EST_PAS_VIDE": "n'est pas vide",
-        "ECOLES": "est scolarisé sur une sélection d'écoles", "CLASSES": "est scolarisé sur une sélection de classes",
+        "ECOLES": "est scolarisé sur une sélection d'écoles au", "CLASSES": "est scolarisé sur une sélection de classes",
+        "NIVEAUX": "est scolarisé sur une sélection de niveaux scolaires au",
     }
 
     if valeurs["champ"].startswith("ipresent") or valeurs["champ"].startswith("iscolarise"): valeurs["label_champ"] = "L'individu"
@@ -126,7 +127,7 @@ class Formulaire(FormulaireBase, forms.Form):
     condition3 = forms.ChoiceField(label="Condition", choices=[("VRAI", "Est vrai"), ("FAUX", "Est faux")], required=False)
     condition4 = forms.ChoiceField(label="Condition", choices=[("INSCRIT", "Est inscrit sur l'une des activités suivantes"), ("PRESENT", "Est présent sur l'une des activités suivantes"), ("SANS_RESA", "Est sans réservations sur l'une des activités suivantes")], required=False)
     condition5 = forms.ChoiceField(label="Condition", choices=[("*EGAL", "Est égal à"), ("*DIFFERENT", "Est différent de"), ("*CONTIENT", "Contient"), ("*NE_CONTIENT_PAS", "Ne contient pas"), ("*EST_VIDE", "Est vide"), ("*EST_PAS_VIDE", "N'est pas vide")], required=False)
-    condition6 = forms.ChoiceField(label="Condition", choices=[("ECOLES", "Est scolarisé dans l'une des écoles suivantes"), ("CLASSES", "Est scolarisé dans l'une des classes suivantes")], required=False)
+    condition6 = forms.ChoiceField(label="Condition", choices=[("ECOLES", "Est scolarisé dans l'une des écoles suivantes"), ("CLASSES", "Est scolarisé dans l'une des classes suivantes"), ("NIVEAUX", "Est scolarisé dans l'un des niveaux suivants")], required=False)
     critere_texte = forms.CharField(label="Texte", required=False)
     critere_date = forms.DateField(label="Date", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
     critere_date_min = forms.DateField(label="Date min", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
@@ -143,6 +144,7 @@ class Formulaire(FormulaireBase, forms.Form):
     critere_activites = forms.CharField(label="Activités", required=False, widget=SelectionActivitesWidget(attrs={"afficher_groupes": True}))
     critere_ecoles = forms.CharField(label="Ecoles", required=False, widget=SelectionEcolesWidget(attrs={"name": "liste_ecoles"}))
     critere_classes = forms.CharField(label="Classes", required=False, widget=SelectionClassesWidget(attrs={"name": "liste_classes"}))
+    critere_niveaux = forms.CharField(label="Niveaux", required=False, widget=SelectionNiveauxWidget(attrs={"name": "liste_niveaux"}))
 
     dict_types = {
         'BinaryField': {'condition': 'condition5', 'criteres': {"*EGAL": ["critere_texte"], "*DIFFERENT": ["critere_texte"], "*CONTIENT": ["critere_texte"], "*NE_CONTIENT_PAS": ["critere_texte"], "*EST_VIDE": [], "*EST_PAS_VIDE": []}},
@@ -156,8 +158,8 @@ class Formulaire(FormulaireBase, forms.Form):
         'DecimalField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_decimal"], "DIFFERENT": ["critere_decimal"], "SUPERIEUR": ["critere_decimal"], "SUPERIEUR_EGAL": ["critere_decimal"], "INFERIEUR": ["critere_decimal"], "INFERIEUR_EGAL": ["critere_decimal"], "COMPRIS": ["critere_decimal_min", "critere_decimal_max"]}},
         'ipresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
         'fpresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
-        'iscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_ecoles"], "CLASSES": ["critere_classes"]}},
-        'fscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_ecoles"], "CLASSES": ["critere_classes"]}},
+        'iscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_date", "critere_ecoles"], "CLASSES": ["critere_classes"], "NIVEAUX": ["critere_date", "critere_niveaux"]}},
+        'fscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_date", "critere_ecoles"], "CLASSES": ["critere_classes"], "NIVEAUX": ["critere_date", "critere_niveaux"]}},
     }
 
     critere = forms.CharField(label="Critère", required=False)
@@ -273,6 +275,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("critere_decimal_max"),
             Field("critere_ecoles"),
             Field("critere_classes"),
+            Field("critere_niveaux"),
             ButtonHolder(
                 Div(
                     HTML("""<button type="button" class="btn btn-primary" onclick="valider_ajout_filtre()"><i class="fa fa-check margin-r-5"></i>Valider</button>"""),

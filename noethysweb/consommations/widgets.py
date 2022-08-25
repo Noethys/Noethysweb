@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.forms.widgets import Widget
 from django.template import loader
 from django.utils.safestring import mark_safe
-from core.models import Activite, Groupe, Unite, UniteRemplissage, Evenement, Ecole, Classe
+from core.models import Activite, Groupe, Unite, UniteRemplissage, Evenement, Ecole, Classe, NiveauScolaire
 from core.utils import utils_dates
 
 
@@ -233,11 +233,42 @@ class SelectionClassesWidget(Widget):
             conditions &= Q(date_debut__lte=max(liste_dates), date_fin__gte=min(liste_dates))
         for classe in Classe.objects.select_related('ecole').filter(conditions).order_by("date_debut", "nom"):
             context['dict_branches2'].setdefault(classe.ecole_id, [])
-            context['dict_branches2'][classe.ecole_id].append({"pk": classe.pk, "label": classe.nom})
+            context['dict_branches2'][classe.ecole_id].append({"pk": classe.pk, "label": "%s (%s-%s)" % (classe.nom, classe.date_debut.strftime("%Y"), classe.date_fin.strftime("%y"))})
 
         # Branches 1
         liste_ecoles = Ecole.objects.filter(pk__in=context['dict_branches2'].keys()).order_by("nom")
         context['liste_branches1'] = [{"pk": ecole.pk, "label": ecole.nom} for ecole in liste_ecoles]
+
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
+
+    def value_from_datadict(self, data, files, name):
+        selections = data.getlist(name, [])
+        return ";".join(selections)
+
+
+class SelectionNiveauxWidget(Widget):
+    template_name = 'core/widgets/checklist.html'
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        context['name'] = self.attrs.get("name", name)
+
+        # Récupère les sélections initiales
+        context['selections'] = []
+        if value:
+            value = value.replace("niveaux:", "")
+            context['selections'] = [int(id) for id in value.split(";")]
+            context['coche_tout'] = False
+
+        # Items
+        liste_niveaux = NiveauScolaire.objects.all().order_by("ordre")
+        context['items'] = [{"pk": niveau.pk, "label": niveau.nom} for niveau in liste_niveaux]
 
         return context
 
