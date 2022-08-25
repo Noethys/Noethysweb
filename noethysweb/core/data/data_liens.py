@@ -45,5 +45,8 @@ DICT_TYPES_LIENS = {
 
     23: {"M": "voisin", "F": "voisine", "public": "AE", "lien": 23, "type": None, "texte": {"M": "est son voisin", "F": "est sa voisine"}},
 
+    24: {"M": u"assistant familial", "F": u"assistante familiale", "public": "A", "lien": 25, "type": None, "texte": {"M": u"est son assistant familial", "F": u"est son assistante familiale"}},
+    25: {"M": u"sous sa garde", "F": u"sous sa garde", "public": "E", "lien": 24, "type": None, "texte": {"M": u"est sous sa garde", "F": u"est sous sa garde"}},
+
 }
 
