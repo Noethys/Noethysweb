@@ -1,3 +1,8 @@
+Version 1.0.8.2 (25/08/2022) :
+
+- Ajout du filtre de liste par niveaux scolaires
+- Ajout du lien assistant familial
+
 Version 1.0.8.1 (22/08/2022) :
 
 - Ajout de la modification des inscriptions par lot
