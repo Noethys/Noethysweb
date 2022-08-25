@@ -85,7 +85,7 @@ class Liste_commun():
                             type_criteres, liste_criteres = criteres[0].split(":")
                         liste_criteres = [int(x) for x in liste_criteres.split(";")]
                     except:
-                        type_criteres, liste_criteres = "", []
+                        type_criteres, liste_criteres, condition = None, [], Q(pk=None)
 
                     if type_criteres == "groupes_activites": condition = Q(activite__groupes_activites__in=liste_criteres)
                     if type_criteres == "activites": condition = Q(activite__in=liste_criteres)
