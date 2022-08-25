@@ -77,12 +77,15 @@ class Liste_commun():
                 # Filtres spéciaux : Inscrit/Présent et Scolarisé
                 if filtre["condition"] in ("INSCRIT", "PRESENT", "SANS_RESA", "ECOLES", "CLASSES", "NIVEAUX"):
                     type_champ, champ = champ.split(":")
-                    if filtre["condition"] in ("ECOLES", "NIVEAUX"):
-                        date_reference = criteres[0]
-                        type_criteres, liste_criteres = criteres[1].split(":")
-                    else:
-                        type_criteres, liste_criteres = criteres[0].split(":")
-                    liste_criteres = [int(x) for x in liste_criteres.split(";")]
+                    try:
+                        if filtre["condition"] in ("ECOLES", "NIVEAUX"):
+                            date_reference = criteres[0]
+                            type_criteres, liste_criteres = criteres[1].split(":")
+                        else:
+                            type_criteres, liste_criteres = criteres[0].split(":")
+                        liste_criteres = [int(x) for x in liste_criteres.split(";")]
+                    except:
+                        type_criteres, liste_criteres = "", []
 
                     if type_criteres == "groupes_activites": condition = Q(activite__groupes_activites__in=liste_criteres)
                     if type_criteres == "activites": condition = Q(activite__in=liste_criteres)
