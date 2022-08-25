@@ -1,3 +1,7 @@
+Version 1.0.8.3 (25/08/2022) :
+
+- Correction du filtre par niveaux scolaires
+
 Version 1.0.8.2 (25/08/2022) :
 
 - Ajout du filtre de liste par niveaux scolaires
