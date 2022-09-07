@@ -184,7 +184,7 @@ class Impression(utils_impression.Impression):
         # Intégration de tous les inscrits
         if self.dict_donnees["afficher_inscrits"]:
 
-            conditions = Q(activite__in=liste_activites) & Q(statut="ok") #& (Q(date_fin__isnull=False) | Q(date_fin__gte=max(self.dict_donnees["dates"])))
+            conditions = Q(activite__in=liste_activites) & Q(statut="ok") & (Q(date_fin__isnull=True) | Q(date_fin__gte=max(self.dict_donnees["dates"])))
             inscriptions = Inscription.objects.select_related('individu', 'activite', 'famille', 'individu__type_sieste').prefetch_related("individu__regimes_alimentaires").filter(conditions)
 
             for inscription in inscriptions:
