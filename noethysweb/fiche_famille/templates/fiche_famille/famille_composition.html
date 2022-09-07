@@ -134,8 +134,8 @@
                             </div>
 {% endcomment %}
 
-                            <div class="card-header bg-light"></div>
-                            <div class="vignette-body bg-light">
+                            <div class="card-header bg-light {% if rattachement.individu.deces %}bg-gray-dark{% endif %}"></div>
+                            <div class="vignette-body bg-light {% if rattachement.individu.deces %}bg-gray-dark{% endif %}">
 
                                 {% if rattachement.titulaire %}
                                     <i class="fa fa-star image_titulaire" title="Titulaire du dossier"></i>
@@ -180,11 +180,11 @@
                                 </div>
                             </div>
 
-                            <div class="card-footer bg-light">
+                            <div class="card-footer bg-light {% if rattachement.individu.deces %}bg-gray-dark{% endif %}">
                                 <div class="text-right">
 
-                                    <a type='button' class='btn btn-light btn-sm' title="Ouvrir la grille des consommations" href='{% url 'famille_consommations' idfamille=idfamille idindividu=rattachement.individu.idindividu %}'><i class="fa fa-calendar"></i></a>
-                                    <a type='button' class='btn btn-light btn-sm dropdown-toggle' title="Ouvrir le menu" data-toggle="dropdown" href='#'><i class="fa fa-bars"></i></a>
+                                    <a type='button' class='btn {% if rattachement.individu.deces %}bg-gray-dark{% else %}btn-light{% endif %} btn-sm' title="Ouvrir la grille des consommations" href='{% url 'famille_consommations' idfamille=idfamille idindividu=rattachement.individu.idindividu %}'><i class="fa fa-calendar"></i></a>
+                                    <a type='button' class='btn {% if rattachement.individu.deces %}bg-gray-dark{% else %}btn-light{% endif %} btn-sm dropdown-toggle' title="Ouvrir le menu" data-toggle="dropdown" href='#'><i class="fa fa-bars"></i></a>
                                     <ul class="dropdown-menu">
                                         {# Accéder à la grille des conso #}
                                         <li class="dropdown-item"><a href="{% url 'famille_consommations' idfamille=idfamille idindividu=rattachement.individu.idindividu %}"><i class="fa fa-calendar"></i> Grille des consommations</a></li>

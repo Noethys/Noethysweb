@@ -28,7 +28,7 @@ class View(CustomView, TemplateView):
         # Importation des inscriptions
         conditions = Q(famille=self.request.user.famille) & Q(statut="ok") & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
         conditions &= Q(activite__portail_reservations_affichage="TOUJOURS") & (Q(activite__date_fin__isnull=True) | Q(activite__date_fin__gte=datetime.date.today()))
-        conditions &= Q(internet_reservations=True)
+        conditions &= Q(internet_reservations=True) & Q(individu__deces=False)
         inscriptions = Inscription.objects.select_related("activite", "individu").filter(conditions)
 
         # Récupération des individus
