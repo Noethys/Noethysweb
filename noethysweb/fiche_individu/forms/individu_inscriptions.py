@@ -22,7 +22,7 @@ class Formulaire(FormulaireBase, ModelForm):
     date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(), help_text="Laissez vide la date de fin si vous ne connaissez pas la durée de l'inscription.")
     action_conso = forms.ChoiceField(label="Action", required=False, choices=[
         (None, "------"),
-        ("MODIFIER_TOUT", "Modifier toutes les consommations existantes (Recommandé)"),
+        ("MODIFIER_TOUT", "Modifier toutes les consommations existantes"),
         ("MODIFIER_AUJOURDHUI", "Modifier les consommations existantes à partir d'aujourd'hui"),
         ("MODIFIER_DATE", "Modifier les consommations existantes à partir d'une date donnée"),
         ("MODIFIER_RIEN", "Ne pas modifier les consommations existantes"),
