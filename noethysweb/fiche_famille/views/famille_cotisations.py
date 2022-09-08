@@ -11,7 +11,7 @@ from django.db.models import Max, Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Famille, Cotisation, TypeCotisation, UniteCotisation, Prestation, Quotient
-from core.utils import utils_dates
+from core.utils import utils_dates, utils_texte
 from fiche_famille.forms.famille_cotisations import Formulaire
 from fiche_famille.views.famille import Onglet
 from cotisations.utils import utils_cotisations_manquantes
@@ -59,10 +59,7 @@ def On_change_unite_cotisation(request):
     numero = Cotisation.objects.aggregate(Max('numero'))['numero__max']
     if numero == None:
         numero = 0
-    else:
-        numero = int(numero)
-    numero += 1
-    numero = "%06d" % numero
+    numero = utils_texte.Incrementer(numero)
 
     # Tarif
     montant = 0.0

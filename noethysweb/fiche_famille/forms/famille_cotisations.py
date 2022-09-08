@@ -16,7 +16,7 @@ from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import Famille, Cotisation, Activite, Rattachement, TypeCotisation, UniteCotisation, Prestation, ModeleDocument
 from core.widgets import DatePickerWidget
-from core.utils import utils_preferences
+from core.utils import utils_preferences, utils_texte
 from cotisations.widgets import Selection_beneficiaires_cotisation
 from fiche_famille.widgets import Prestation_cotisation
 
@@ -103,10 +103,7 @@ class Formulaire(FormulaireBase, ModelForm):
         numero = Cotisation.objects.aggregate(Max('numero'))['numero__max']
         if numero == None:
             numero = 0
-        else:
-            numero = int(numero)
-        numero += 1
-        self.fields["numero"].initial = "%06d" % numero
+        self.fields["numero"].initial = utils_texte.Incrementer(numero)
 
         # Importation
         individu_type = ""
