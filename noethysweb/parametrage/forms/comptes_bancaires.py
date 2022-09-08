@@ -18,7 +18,8 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = CompteBancaire
         fields = ['nom', 'numero', 'defaut', 'raison', 'code_etab', 'code_guichet',
-                  'cle_rib', 'cle_iban', 'iban', 'bic', 'code_ics', 'code_nne', 'structure']
+                  'cle_rib', 'cle_iban', 'iban', 'bic', 'code_ics', 'code_nne', "dft_titulaire",
+                  "dft_iban", 'structure']
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -41,19 +42,25 @@ class Formulaire(FormulaireBase, ModelForm):
             Commandes(annuler_url="{% url 'comptes_bancaires_liste' %}"),
             Fieldset('Généralités',
                 Field('nom'),
-                Field('numero'),
                 Field('defaut'),
             ),
-            Fieldset('Informations complémentaires',
-                Field('raison'),
+            Fieldset("Coordonnées bancaires",
+                Field('numero'),
                 Field('code_etab'),
                 Field('code_guichet'),
                 Field('cle_rib'),
                 Field('cle_iban'),
                 Field('iban'),
                 Field('bic'),
+            ),
+            Fieldset("Prélèvement",
                 Field('code_ics'),
                 Field('code_nne'),
+            ),
+            Fieldset("Compte DFT",
+                Field('raison'),
+                Field("dft_titulaire"),
+                Field("dft_iban"),
             ),
             Fieldset('Structure associée',
                 Field('structure'),

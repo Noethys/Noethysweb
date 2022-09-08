@@ -9,7 +9,8 @@ from core.decorators import Verifie_ventilation
 from core.decorators import secure_ajax
 from facturation.views import factures_generation, liste_prestations, liste_factures, liste_deductions, liste_soldes, synthese_impayes, \
                                 synthese_prestations, liste_tarifs, rappels_generation, liste_rappels, factures_impression, factures_email, \
-                                rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations
+                                rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations, \
+                                lots_prelevements, lots_prelevements_factures
 
 urlpatterns = [
 
@@ -43,6 +44,17 @@ urlpatterns = [
     path('facturation/lots_pes/pieces/supprimer/<int:idlot>/<int:pk>', lots_pes.Supprimer_piece.as_view(), name='lots_pes_supprimer_piece'),
     path('facturation/lots_pes/pieces/supprimer_plusieurs/<int:idlot>/<str:listepk>', lots_pes.Supprimer_plusieurs_pieces.as_view(), name='lots_pes_supprimer_plusieurs_pieces'),
 
+    # Lots prélèvements
+    path('facturation/lots_prelevements/liste', lots_prelevements.Liste.as_view(), name='lots_prelevements_liste'),
+    path('facturation/lots_prelevements/creer', lots_prelevements.Creer.as_view(), name='lots_prelevements_creer'),
+    path('facturation/lots_prelevements/ajouter/<int:idmodele>/<int:assistant>', lots_prelevements.Ajouter.as_view(), name='lots_prelevements_ajouter'),
+    path('facturation/lots_prelevements/modifier/<int:pk>', lots_prelevements.Modifier.as_view(), name='lots_prelevements_modifier'),
+    path('facturation/lots_prelevements/supprimer/<int:pk>', lots_prelevements.Supprimer.as_view(), name='lots_prelevements_supprimer'),
+    path('facturation/lots_prelevements/consulter/<int:pk>', lots_prelevements.Consulter.as_view(), name='lots_prelevements_consulter'),
+    path('facturation/lots_prelevements/pieces/ajouter/<int:idlot>', lots_prelevements_factures.Liste.as_view(), name='lots_prelevements_ajouter_piece'),
+    path('facturation/lots_prelevements/pieces/modifier/<int:idlot>/<int:pk>', lots_prelevements.Modifier_piece.as_view(), name='lots_prelevements_modifier_piece'),
+    path('facturation/lots_prelevements/pieces/supprimer/<int:idlot>/<int:pk>', lots_prelevements.Supprimer_piece.as_view(), name='lots_prelevements_supprimer_piece'),
+    path('facturation/lots_prelevements/pieces/supprimer_plusieurs/<int:idlot>/<str:listepk>', lots_prelevements.Supprimer_plusieurs_pieces.as_view(), name='lots_prelevements_supprimer_plusieurs_pieces'),
 
     # Tarifs
     path('facturation/liste_tarifs', liste_tarifs.View.as_view(), name='liste_tarifs'),
@@ -72,6 +84,8 @@ urlpatterns = [
     path('facturation/rappels_email_pdf', secure_ajax(rappels_email.Impression_pdf), name='ajax_rappels_email_pdf'),
     path('facturation/lots_pes_exporter', secure_ajax(lots_pes.Exporter), name='ajax_lots_pes_exporter'),
     path('facturation/lots_pes_impression_pdf', secure_ajax(lots_pes.Impression_pdf), name='ajax_lots_pes_impression_pdf'),
+    path('facturation/lots_prelevements_exporter', secure_ajax(lots_prelevements.Exporter), name='ajax_lots_prelevements_exporter'),
+    path('facturation/lots_prelevements_impression_pdf', secure_ajax(lots_prelevements.Impression_pdf), name='ajax_lots_prelevements_impression_pdf'),
     path('facturation/ajax_recalculer_prestations', secure_ajax(recalculer_prestations.Recalculer), name='ajax_recalculer_prestations'),
     path('facturation/edition_prestations/generer_pdf', secure_ajax(edition_prestations.Generer_pdf), name='ajax_edition_prestations_generer_pdf'),
 

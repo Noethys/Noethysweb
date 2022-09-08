@@ -227,6 +227,12 @@ CHOIX_FORMAT_EXPORT_TRESOR = [
     ("jvs", "Millesime Online JVS"),
 ]
 
+CHOIX_FORMAT_PRELEVEMENTS = [
+    ("prive", "Secteur privé"),
+    ("public_dft", "Secteur public DFT"),
+]
+
+
 
 def get_uuid():
     return uuid.uuid4()
@@ -1373,6 +1379,10 @@ class Tarif(models.Model):
     caisses = models.ManyToManyField(Caisse, verbose_name="Caisses", blank=True, related_name="tarif_caisses")
     type_quotient = models.ForeignKey(TypeQuotient, verbose_name="Type de QF", blank=True, null=True, on_delete=models.CASCADE, help_text="Sélectionnez un type de quotient familial ou laissez le champ vide pour tenir compte de tous les types de quotients.")
     facturation_unite = models.BooleanField(verbose_name="Facturation par unité horaire", default=False, help_text="Le montant par unité horaire et la quantité seront mémorisés dans la prestation.")
+    choix_penalite = [(None, "Aucune"), ("pourcentage", "Pourcentage du montant dû")]
+    penalite = models.CharField(verbose_name="Pénalité", max_length=100, choices=choix_penalite, default=None, blank=True, null=True, help_text="Sélectionnez un type de pénalité financière à appliquer en cas d'absence injustifiée.")
+    penalite_pourcentage = models.DecimalField(verbose_name="Pourcentage", max_digits=10, decimal_places=2, default=100, blank=True, null=True, help_text="Saisissez le pourcentage à appliquer.")
+    penalite_label = models.CharField(verbose_name="Label de la prestation", max_length=300, blank=True, null=True, help_text="Saisissez le label de la prestation de pénalité. Laissez vide pour utiliser le label par défaut.")
 
     class Meta:
         db_table = 'tarifs'
@@ -3349,3 +3359,80 @@ class SMS(models.Model):
     def delete(self, *args, **kwargs):
         self.destinataires.all().delete()
         super().delete(*args, **kwargs)
+
+
+class Perception(models.Model):
+    idperception = models.AutoField(verbose_name="ID", db_column='IDperception', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=300)
+    rue_resid = models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True)
+    cp_resid = models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True)
+    ville_resid = models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True)
+
+    class Meta:
+        db_table = 'perceptions'
+        verbose_name = "perception"
+        verbose_name_plural = "perceptions"
+
+    def __str__(self):
+        return self.nom
+
+
+class PrelevementsModele(models.Model):
+    idmodele = models.AutoField(verbose_name="ID", db_column="IDmodele", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    format = models.CharField(verbose_name="Format", max_length=100, choices=CHOIX_FORMAT_PRELEVEMENTS)
+    compte = models.ForeignKey(CompteBancaire, verbose_name="Compte à créditer", on_delete=models.PROTECT, help_text="Sélectionnez le compte bancaire à créditer.")
+    mode = models.ForeignKey(ModeReglement, verbose_name="Mode de règlement", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez le mode de règlement à utiliser.")
+    reglement_auto = models.BooleanField(verbose_name="Règlement automatique", default=False, help_text="Cochez cette case si vous souhaitez que Noethysweb créé un règlement automatiquement.")
+    encodage = models.CharField(verbose_name="Encodage", max_length=100, choices=[("utf-8", "UTF-8"), ("iso-8859-15", "ISO-8859-15")], default="utf-8", help_text="Sélectionnez le format souhaité")
+    perception = models.ForeignKey(Perception, verbose_name="Perception", on_delete=models.PROTECT, blank=True, null=True)
+    identifiant_service = models.CharField(verbose_name="Identifiant du service", max_length=200, blank=True, null=True, help_text="Saisissez l'identifiant du service. Exemple : TGDFT027 (numéro de département sur 3 chiffres).")
+    poste_comptable = models.CharField(verbose_name="Poste comptable par défaut", max_length=200, blank=True, null=True, help_text="Saisissez le codique de la DDFiP de rattachement sur 6 caractères. Exemple : 027000")
+
+    class Meta:
+        db_table = 'modeles_prelevements'
+        verbose_name = "modèle de lot de prélèvements"
+        verbose_name_plural = "modèles de lot de prélèvements"
+
+    def __str__(self):
+        return self.nom if self.nom else "Nouveau modèle"
+
+
+class PrelevementsLot(models.Model):
+    idlot = models.AutoField(verbose_name="ID", db_column='IDlot', primary_key=True)
+    modele = models.ForeignKey(PrelevementsModele, verbose_name="Modèle de lot", on_delete=models.PROTECT)
+    nom = models.CharField(verbose_name="Nom du lot", max_length=200, help_text="Nom interne à l'application. Exemple : Restauration - Janvier 2021.")
+    date = models.DateField(verbose_name="Date de prélèvement")
+    # verrouillage = models.BooleanField(verbose_name="Verrouillage", default=False)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    motif = models.CharField(verbose_name="Motif", max_length=300, blank=True, null=True, help_text="Saisissez le motif du prélèvement. Ex : 'Garderie Novembre 2019'.")
+    numero_sequence = models.IntegerField(verbose_name="Numéro de séquence", default=1, blank=True, null=True, help_text="Numéro de séquence du fichier dans une même journée. Exemple: 1 = premier fichier de la journée.")
+
+    class Meta:
+        db_table = 'lots_prelevements'
+        verbose_name = "lot de prélèvements"
+        verbose_name_plural = "lots de prélèvements"
+
+    def __str__(self):
+        return self.nom if self.nom else "Nouveau lot de prélèvements"
+
+
+class Prelevements(models.Model):
+    idprelevement = models.AutoField(verbose_name="ID", db_column='IDprelevement', primary_key=True)
+    lot = models.ForeignKey(PrelevementsLot, verbose_name="Lot", on_delete=models.PROTECT)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
+    type = models.CharField(verbose_name="Type", choices=[("facture", "Facture"), ("manuel", "Manuel")], max_length=100, default="facture")
+    facture = models.ForeignKey(Facture, verbose_name="Facture", on_delete=models.PROTECT, blank=True, null=True)
+    montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2)
+    mandat = models.ForeignKey(Mandat, verbose_name="Mandat", on_delete=models.PROTECT)
+    sequence = models.CharField(verbose_name="Séquence", choices=[("OOFF", "Prélèvement ponctuel (OOFF)"), ("FRST", "Premier prélèvement d'une série (FRST)"), ("RCUR", "Prélèvement suivant d'une série (RCUR)"), ('FNAL', "Dernier prélèvement d'une série (FNAL)")], max_length=100)
+    statut = models.CharField(verbose_name="Statut", choices=[("valide", "Valide"), ("refus", "Refus"), ("attente", "Attente")], default="attente", max_length=100)
+
+    class Meta:
+        db_table = "prelevements"
+        verbose_name = "prélèvement"
+        verbose_name_plural = "prélèvements"
+
+    def __str__(self):
+        return "Prélèvement ID%d" % self.idprelevement if self.idprelevement else "Nouveau prélèvement"

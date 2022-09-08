@@ -22,7 +22,7 @@ from parametrage.views import organisateur, structures, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
     portail_parametres, types_regimes_alimentaires, assureurs, categories_compte_internet, modeles_pes, \
     types_consentements, unites_consentements, articles, images_articles, albums, images_fond, portail_documents, portail_parametres_renseignements, \
-    configurations_sms
+    configurations_sms, perceptions, modeles_prelevements
 
 
 urlpatterns = [
@@ -190,12 +190,25 @@ urlpatterns = [
     path('parametrage/regies/modifier/<int:pk>', regies.Modifier.as_view(), name='regies_modifier'),
     path('parametrage/regies/supprimer/<int:pk>', regies.Supprimer.as_view(), name='regies_supprimer'),
 
+    # Perceptions
+    path('parametrage/perceptions/liste', perceptions.Liste.as_view(), name='perceptions_liste'),
+    path('parametrage/perceptions/ajouter', perceptions.Ajouter.as_view(), name='perceptions_ajouter'),
+    path('parametrage/perceptions/modifier/<int:pk>', perceptions.Modifier.as_view(), name='perceptions_modifier'),
+    path('parametrage/perceptions/supprimer/<int:pk>', perceptions.Supprimer.as_view(), name='perceptions_supprimer'),
+
     # Modèles de lots PES
     path('parametrage/modeles_pes/liste', modeles_pes.Liste.as_view(), name='modeles_pes_liste'),
     path('parametrage/modeles_pes/creer', modeles_pes.Creer.as_view(), name='modeles_pes_creer'),
     path('parametrage/modeles_pes/ajouter/<str:format>', modeles_pes.Ajouter.as_view(), name='modeles_pes_ajouter'),
     path('parametrage/modeles_pes/modifier/<int:pk>', modeles_pes.Modifier.as_view(), name='modeles_pes_modifier'),
     path('parametrage/modeles_pes/supprimer/<int:pk>', modeles_pes.Supprimer.as_view(), name='modeles_pes_supprimer'),
+
+    # Modèles de prélèvements
+    path('parametrage/modeles_prelevements/liste', modeles_prelevements.Liste.as_view(), name='modeles_prelevements_liste'),
+    path('parametrage/modeles_prelevements/creer', modeles_prelevements.Creer.as_view(), name='modeles_prelevements_creer'),
+    path('parametrage/modeles_prelevements/ajouter/<str:format>', modeles_prelevements.Ajouter.as_view(), name='modeles_prelevements_ajouter'),
+    path('parametrage/modeles_prelevements/modifier/<int:pk>', modeles_prelevements.Modifier.as_view(), name='modeles_prelevements_modifier'),
+    path('parametrage/modeles_prelevements/supprimer/<int:pk>', modeles_prelevements.Supprimer.as_view(), name='modeles_prelevements_supprimer'),
 
     # Types de pièces
     path('parametrage/types_pieces/liste', types_pieces.Liste.as_view(), name='types_pieces_liste'),

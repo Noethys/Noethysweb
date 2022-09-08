@@ -16,9 +16,9 @@
                         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
                         <div class="buttonHolder" style="margin-top: 20px;">
-                            <div class="text-right" >
+                            <div>
                                 <button class="btn btn-primary btn-primary" id="bouton_valider"><i class="fa fa-check margin-r-5"></i>Ajouter les factures cochées</button>
-                                <a class="btn btn-danger" href="{% url 'lots_pes_consulter' pk=idlot %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                                <a class="btn btn-danger" href="{% url 'lots_prelevements_consulter' pk=idlot %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
                             </div>
                         </div>
                     </form>

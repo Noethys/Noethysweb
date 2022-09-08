@@ -3,28 +3,28 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import PesLot, PesPiece, Facture, Mandat, Activite
+from core.models import Prelevements, Facture, Mandat, Activite
 from core.utils import utils_preferences
-import json
 
 
 class Liste(crud.Page, crud.Liste):
-    template_name = "facturation/lots_pes_factures.html"
-    menu_code = "lots_pes_liste"
+    template_name = "facturation/lots_prelevements_factures.html"
+    menu_code = "lots_prelevements_liste"
     model = Facture
-    objet_pluriel = "des pièces d'export"
+    objet_pluriel = "des prélèvements"
 
     def get_queryset(self):
-        return Facture.objects.select_related('famille', 'lot', 'prefixe').filter(self.Get_filtres("Q"))
+        return Facture.objects.select_related('famille', 'lot', 'prefixe').filter(famille__mandats__actif=True).filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
         context['box_titre'] = "Sélection de factures"
-        context['box_introduction'] = "Sélectionnez des factures ci-dessous."
+        context['box_introduction'] = "Sélectionnez des factures ci-dessous. Seules les familles disposant d'un mandat actif sont affichées."
         context['active_checkbox'] = True
         context['bouton_supprimer'] = False
         context["hauteur_table"] = "400px"
@@ -59,7 +59,7 @@ class Liste(crud.Page, crud.Liste):
         liste_selections = json.loads(request.POST.get("selections"))
         Generation_pieces(idlot=idlot, liste_idfacture=liste_selections)
 
-        return HttpResponseRedirect(reverse_lazy("lots_pes_consulter", kwargs={'pk': idlot}))
+        return HttpResponseRedirect(reverse_lazy("lots_prelevements_consulter", kwargs={'pk': idlot}))
 
 
 def Generation_pieces(idlot=None, liste_idfacture=[]):
@@ -75,7 +75,7 @@ def Generation_pieces(idlot=None, liste_idfacture=[]):
     # Création des pièces
     liste_ajouts = []
     for facture in factures:
-        params = {"lot_id": idlot, "famille_id": facture.famille_id, "type": "facture", "facture": facture, "montant": facture.solde_actuel, "titulaire_helios": facture.famille.titulaire_helios}
+        params = {"lot_id": idlot, "famille_id": facture.famille_id, "type": "facture", "facture": facture, "montant": facture.solde_actuel}
         mandat = dict_mandats.get(facture.famille, None)
 
         # Vérifie que ce mandat peut être utilisé pour payer cette facture (structure compatible)
@@ -85,11 +85,10 @@ def Generation_pieces(idlot=None, liste_idfacture=[]):
                     mandat = None
                     break
 
-        # Mémorise le mandat pour activer le prélèvement
         if mandat:
-            params.update({"prelevement": True, "prelevement_mandat": mandat, "prelevement_sequence": mandat.sequence})
+            params.update({"mandat": mandat, "sequence": mandat.sequence})
             mandat.Actualiser(ajouter=True)
-        liste_ajouts.append(PesPiece(**params))
+            liste_ajouts.append(Prelevements(**params))
 
     # Enregistrement des pièces
-    PesPiece.objects.bulk_create(liste_ajouts)
+    Prelevements.objects.bulk_create(liste_ajouts)

@@ -108,7 +108,7 @@ class Formulaire(FormulaireBase, ModelForm):
         format = self.cleaned_data["format"]
 
         if not self.cleaned_data["id_collectivite"] and format in ("pes", "jvs"):
-            self.add_error("code_collectivite", "Vous devez renseigner le code collectivité")
+            self.add_error("id_collectivite", "Vous devez renseigner l'identifiant de la collectivité")
 
         if not self.cleaned_data["code_collectivite"] and format in ("magnus", "pes", "jvs"):
             self.add_error("code_collectivite", "Vous devez renseigner le code collectivité")

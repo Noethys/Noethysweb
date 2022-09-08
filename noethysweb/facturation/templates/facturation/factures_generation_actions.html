@@ -55,6 +55,8 @@
 <div style="margin: 10px;">
     <a class="btn btn-app actions" href="{% url 'lots_pes_creer' %}"><i class="fa fa-bank"></i> Exporter vers le Trésor Public</a>
     <i class="fa fa-caret-right actions"></i>
+    <a class="btn btn-app actions" href="{% url 'lots_prelevements_creer' %}"><i class="fa fa-credit-card"></i> Créer des prélèvements</a>
+    <i class="fa fa-caret-right actions"></i>
     <a class="btn btn-app actions" href="{% url 'factures_email' %}">{% if nbre_factures_email %}<span class="badge bg-blue">{{ nbre_factures_email }}</span>{% endif %}<i class="fa fa-envelope-o"></i> Envoyer par Email</a>
     <i class="fa fa-caret-right actions"></i>
     <a class="btn btn-app actions" href="{% url 'factures_impression' %}">{% if nbre_factures_impression %}<span class="badge bg-blue">{{ nbre_factures_impression }}</span>{% endif %}<i class="fa fa-print"></i> Imprimer</a>
