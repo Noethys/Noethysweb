@@ -288,7 +288,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_factures = menu_facturation.Add(titre="Factures")
     menu_factures.Add(code="factures_generation", titre="Génération des factures", icone="file-text-o")
     menu_factures.Add(code="lots_pes_liste", titre="Exports vers le Trésor Public", icone="file-text-o")
-    # menu_factures.Add(code="lots_prelevements_liste", titre="Prélèvements", icone="file-text-o")
+    menu_factures.Add(code="lots_prelevements_liste", titre="Prélèvements", icone="file-text-o")
     menu_factures.Add(code="factures_impression", titre="Imprimer des factures", icone="file-text-o")
     menu_factures.Add(code="factures_email", titre="Envoyer des factures par Email", icone="file-text-o")
     menu_factures.Add(code="liste_factures", titre="Liste des factures", icone="file-text-o")

@@ -34,7 +34,7 @@ class Formulaire_creation(FormulaireBase, forms.Form):
 
             # Recherche un modèle d'export dont le nom ressemble au nom du lot de factures
             derniere_facture = Facture.objects.last()
-            if derniere_facture:
+            if derniere_facture and derniere_facture.lot:
                 nom_lot = derniere_facture.lot.nom
                 import jellyfish
                 scores = []
