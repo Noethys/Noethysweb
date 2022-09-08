@@ -80,6 +80,7 @@ class Page(crud.Page):
     url_ajouter_plusieurs = "inscriptions_scolaires_ajouter_plusieurs"
     url_modifier = "inscriptions_scolaires_modifier"
     url_supprimer = "inscriptions_scolaires_supprimer"
+    url_supprimer_plusieurs = "inscriptions_scolaires_plusieurs"
     description_liste = "Saisissez ici les étapes de scolarité de l'individu."
     description_saisie = "Saisissez toutes les informations concernant l'étape de scolarité et cliquez sur le bouton Enregistrer."
     objet_singulier = "une étape de scolarité"
@@ -130,6 +131,8 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
+        context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={"idclasse": self.Get_idclasse(), "listepk": "xxx"})
+        context["active_checkbox"] = True
         if self.Get_idclasse():
             context['box_introduction'] = "Vous pouvez ajouter ici un ou plusieurs individus dans la classe sélectionnée."
             context['boutons_liste'] = [
@@ -143,6 +146,7 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ['idscolarite', 'date_debut', 'date_fin', 'ecole__nom', 'classe__nom', 'niveau__abrege', 'individu__nom', 'individu__prenom', 'individu__date_naiss']
+        check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         nom = columns.TextColumn("Nom", sources=["individu__nom"])
         prenom = columns.TextColumn("Prénom", sources=["individu__prenom"])
@@ -152,7 +156,7 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idscolarite", "nom", "prenom", "date_naiss", "date_debut", "date_fin", "niveau", "ville_resid"]
+            columns = ["check", "idscolarite", "nom", "prenom", "date_naiss", "date_debut", "date_fin", "niveau", "ville_resid"]
             hidden_columns = ["ville_resid"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
@@ -233,3 +237,8 @@ class Modifier(Page, crud.Modifier):
 
 class Supprimer(Page, crud.Supprimer):
     pass
+
+
+class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
+    def get_success_url(self):
+        return reverse_lazy(self.url_liste, kwargs={"idclasse": self.kwargs["idclasse"]})

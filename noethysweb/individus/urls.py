@@ -54,6 +54,7 @@ urlpatterns = [
     path('individus/inscriptions_scolaires/ajouter_plusieurs/<int:idclasse>', inscriptions_scolaires.Ajouter_plusieurs.as_view(), name='inscriptions_scolaires_ajouter_plusieurs'),
     path('individus/inscriptions_scolaires/modifier/<int:idclasse>/<int:pk>', inscriptions_scolaires.Modifier.as_view(), name='inscriptions_scolaires_modifier'),
     path('individus/inscriptions_scolaires/supprimer/<int:idclasse>/<int:pk>', inscriptions_scolaires.Supprimer.as_view(), name='inscriptions_scolaires_supprimer'),
+    path('individus/inscriptions_scolaires/supprimer_plusieurs/<int:idclasse>/<str:listepk>', inscriptions_scolaires.Supprimer_plusieurs.as_view(), name='inscriptions_scolaires_plusieurs'),
 
     # Etapes de scolarité
     path('individus/scolarites', scolarites.Liste.as_view(), name='scolarites_liste'),
