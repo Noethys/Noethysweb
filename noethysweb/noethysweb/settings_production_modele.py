@@ -83,7 +83,7 @@ DATABASES = {
 # 3. Une fois l'appli créée, cochez les permissions files.metadata et files.content.
 # 4. Générez le token et copiez-le ci-dessous.
 # DBBACKUP_STORAGE = "storages.backends.dropbox.DropBoxStorage"
-# DBBACKUP_STORAGE_OPTIONS = {"oauth2_access_token": "Token Dropbox à coller ici"}
+# DBBACKUP_STORAGE_OPTIONS = {"oauth2_access_token": "XXXX", "app_key": "XXXX", "app_secret": "XXXX", "oauth2_refresh_token": "XXXX"}
 
 #########################################################################################
 # STOCKAGE DE DOCUMENTS
@@ -100,6 +100,9 @@ DATABASES = {
 
 # Si l'un des champs ci-dessus utilise Dropbox, renseignez le token Dropbox ci-dessous :
 # DROPBOX_OAUTH2_TOKEN = "XXXXXXXXXXXXXXX"
+# DROPBOX_OAUTH2_REFRESH_TOKEN = "XXXXXXXXXXXXXXX"
+# DROPBOX_APP_KEY = "XXXXXXXXXXXXXXX"
+# DROPBOX_APP_SECRET = "XXXXXXXXXXXXXXX"
 
 #########################################################################################
 # CRONTAB (tâches planifiées)
