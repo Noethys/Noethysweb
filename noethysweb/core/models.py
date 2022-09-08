@@ -1382,7 +1382,7 @@ class Tarif(models.Model):
     choix_penalite = [(None, "Aucune"), ("pourcentage", "Pourcentage du montant dû")]
     penalite = models.CharField(verbose_name="Pénalité", max_length=100, choices=choix_penalite, default=None, blank=True, null=True, help_text="Sélectionnez un type de pénalité financière à appliquer en cas d'absence injustifiée.")
     penalite_pourcentage = models.DecimalField(verbose_name="Pourcentage", max_digits=10, decimal_places=2, default=100, blank=True, null=True, help_text="Saisissez le pourcentage à appliquer.")
-    penalite_label = models.CharField(verbose_name="Label de la prestation", max_length=300, blank=True, null=True, help_text="Saisissez le label de la prestation de pénalité. Laissez vide pour utiliser le label par défaut.")
+    penalite_label = models.CharField(verbose_name="Label de la prestation", max_length=300, blank=True, null=True, help_text="Saisissez le label de la prestation de pénalité. Laissez vide pour utiliser le label par défaut. Mots-clés disponibles : {LABEL_PRESTATION}.")
 
     class Meta:
         db_table = 'tarifs'

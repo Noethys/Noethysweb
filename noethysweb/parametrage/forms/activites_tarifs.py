@@ -380,6 +380,9 @@ class Formulaire(FormulaireBase, ModelForm):
                             css_class="form-group row"
                         ),
                         InlineCheckboxes("etats"),
+                        Field("penalite"),
+                        PrependedText("penalite_pourcentage", "%"),
+                        Field("penalite_label"),
                         id="div_type_journ"
                     ),
                     # Forfait daté
@@ -480,6 +483,12 @@ class Formulaire(FormulaireBase, ModelForm):
                 return
         else:
             self.cleaned_data["caisses"] = []
+
+        # Pénalité
+        if self.cleaned_data["penalite"] == "pourcentage":
+            if not self.cleaned_data["penalite_pourcentage"]:
+                self.add_error("penalite_pourcentage", "Vous devez saisir un pourcentage valide")
+                return
 
         # Forfait daté : Génération de consommations
         if self.cleaned_data["type"] == "FORFAIT":
@@ -702,6 +711,20 @@ function On_change_type() {
 $(document).ready(function() {
     $('#id_type').change(On_change_type);
     On_change_type.call($('#id_type').get(0));
+});
+
+// Pénalité
+function On_change_penalite() {
+    $('#div_id_penalite_pourcentage').hide();
+    $('#div_id_penalite_label').hide();
+    if($(this).val() == 'pourcentage') {
+        $('#div_id_penalite_pourcentage').show();
+        $('#div_id_penalite_label').show();
+    }
+}
+$(document).ready(function() {
+    $('#id_penalite').change(On_change_penalite);
+    On_change_penalite.call($('#id_penalite').get(0));
 });
 
 // conso_forfait_type

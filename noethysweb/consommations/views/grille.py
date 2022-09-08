@@ -606,6 +606,9 @@ class Facturation():
                                 if self.Recherche_tarif_valide(tarif_evenement, case_tableau):
                                     tarif = tarif_evenement
                                     tarif.nom_evenement = evenement.nom
+                                    tarif.penalite = tarif_base.penalite
+                                    tarif.penalite_pourcentage = tarif_base.penalite_pourcentage
+                                    tarif.penalite_label = tarif_base.penalite_label
                                     logger.debug("Un tarif spécial événement a été trouvé : IDtarif " + str(tarif.pk))
 
                         # Forfait crédit
@@ -1365,7 +1368,21 @@ class Facturation():
         # Si unité de type QUANTITE
         if quantite and quantite > 1:
             montant_tarif = montant_tarif * quantite
-            # nom_tarif = "%d %s" % (quantite, nom_tarif)
+
+        # Application d'une pénalité financière
+        if tarif.penalite:
+            appliquer_penalite = False
+            for conso in self.donnees["consommations"].get("%s_%s" % (case_tableau["date"], case_tableau["inscription"]), []):
+                if conso["unite"] in combinaisons_unites and conso["etat"] == "absenti":
+                    appliquer_penalite = True
+
+            if appliquer_penalite:
+                if tarif.penalite_pourcentage:
+                    if isinstance(montant_tarif, float):
+                        montant_tarif = decimal.Decimal(montant_tarif)
+                    montant_tarif = montant_tarif * tarif.penalite_pourcentage / 100
+                if tarif.penalite_label:
+                    nom_tarif = tarif.penalite_label.replace("{LABEL_PRESTATION}", nom_tarif)
 
         # Arrondit le montant à pour enlever les décimales en trop. Ex : 3.05678 -> 3.05
         montant_tarif = utils_decimal.FloatToDecimal(montant_tarif, plusProche=True)
