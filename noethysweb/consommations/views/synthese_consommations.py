@@ -67,7 +67,7 @@ class View(CustomView, TemplateView):
         #         IDetiquette] = {"label": label, "IDactivite": IDactivite, "parent": parent, "ordre": ordre, "couleur": couleur}
 
         # Consommations
-        consommations = Consommation.objects.select_related('activite', 'groupe', 'prestation', 'categorie_tarif', 'inscription').filter(activite=parametres["activite"], date__gte=date_debut, date__lte=date_fin, etat__in=parametres["etats"])
+        consommations = Consommation.objects.select_related('activite', 'groupe', 'prestation', 'categorie_tarif', 'inscription').filter(activite=parametres["activite"], date__gte=date_debut, date__lte=date_fin, etat__in=parametres["etats"]).order_by("date")
 
         # Calcul des données
         dictResultats = {}
@@ -249,8 +249,8 @@ class View(CustomView, TemplateView):
             if parametres["regroupement"] == "jour": label = utils_dates.DateComplete(regroupement)
             elif parametres["regroupement"] == "mois": label = utils_dates.FormateMois(regroupement)
             elif parametres["regroupement"] == "annee": label = str(regroupement)
-            elif parametres["regroupement"] == "evenement" and regroupement in dictEvenements: label = dictEvenements[regroupement]["nom"]
-            elif parametres["regroupement"] == "evenement_date" and regroupement in dictEvenements: label = u"%s (%s)" % (dictEvenements[regroupement]["nom"], utils_dates.ConvertDateFRtoDate(dictEvenements[regroupement]["date"]))
+            elif parametres["regroupement"] == "evenement" and regroupement in dictEvenements: label = dictEvenements[regroupement].nom
+            elif parametres["regroupement"] == "evenement_date" and regroupement in dictEvenements: label = u"%s (%s)" % (dictEvenements[regroupement].nom, utils_dates.ConvertDateToFR(dictEvenements[regroupement].date))
             elif parametres["regroupement"] == "qf" and type(regroupement) == tuple: label = u"%d-%d" % regroupement
             else: label = str(regroupement)
 

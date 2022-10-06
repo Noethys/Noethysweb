@@ -434,7 +434,7 @@ def CompareDict(dict1={}, dict2={}, keys=[]):
 
 
 def Facturer(request=None):
-    donnees_aller = json.loads(request.POST.get("donnees", {}))
+    donnees_aller = json.loads(request.POST.get("donnees", "{}"))
     logger.debug("============== Facturation ================")
     #logger.debug("données aller : " + str(donnees_aller))
     facturation = Facturation(donnees=donnees_aller)

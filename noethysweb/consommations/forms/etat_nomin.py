@@ -154,7 +154,7 @@ HTML_RESULTATS = """
                         var heure = item[colonne].split("h");
                         var heures = parseInt(heure[0]);
                         var minutes = parseInt(heure[1]);
-                        total += heures + (0.1 * minutes * 100 / 60)
+                        total += heures + (minutes / 60)
                     }
                 };
             });
