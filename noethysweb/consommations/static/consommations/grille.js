@@ -732,7 +732,7 @@ class Case_event extends Case_standard {
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
         // Créer conso
-        this.creer_conso({evenement: this.evenement.pk});
+        this.creer_conso({evenement: this.evenement.pk, heure_debut: this.evenement.heure_debut, heure_fin: this.evenement.heure_fin});
         return true;
     };
 
