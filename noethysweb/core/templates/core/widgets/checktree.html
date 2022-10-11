@@ -41,9 +41,11 @@
                 <tr>
                     <td>
                         <div style="padding-left:20px;">
-                            <input name="{{ name }}" type="checkbox" class="check_branche2" data-idbranche1="{{ dict_branche1.pk }}" value="{{ dict_branche2.pk }}" {% if dict_branche2.pk in selections or coche_tout %}checked{% endif %}>
-                            {% if dict_branche2.pk in selections or coche_tout %}
-                                <script>$("#div_table_{{ id }} .check_branche1[data-idbranche1='{{ dict_branche1.pk }}']").prop("checked", true);</script>
+                            {% if dict_branche2.checkable != False %}
+                                <input name="{{ name }}" type="checkbox" class="check_branche2" data-idbranche1="{{ dict_branche1.pk }}" value="{{ dict_branche2.pk }}" {% if dict_branche2.pk in selections or coche_tout %}checked{% endif %}>
+                                {% if dict_branche2.pk in selections or coche_tout %}
+                                    <script>$("#div_table_{{ id }} .check_branche1[data-idbranche1='{{ dict_branche1.pk }}']").prop("checked", true);</script>
+                                {% endif %}
                             {% endif %}
                             <span style="margin-left: 2px;margin-right:20px;">{{ dict_branche2.label }}</span>
                         </div>
