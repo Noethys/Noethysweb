@@ -76,6 +76,8 @@ DATABASES = {
 # DBBACKUP_STORAGE = "django.core.files.storage.FileSystemStorage"
 # DBBACKUP_STORAGE_OPTIONS = {"location": "C:/Users/XXXXXX/Desktop/sauvegardes/"}
 # DBBACKUP_CONNECTORS = {"default": {"dump_suffix": "--hex-blob"}}
+# DBBACKUP_CLEANUP_KEEP = 10
+# DBBACKUP_CLEANUP_KEEP_MEDIA = 10
 
 # Pour un stockage de la sauvegarde sur Dropbox (Renseigner ci-dessous le token de Dropbox)
 # 1. Connectez-vous à Dropbox et accédez à Developper Apps : https://www.dropbox.com/developers/apps
