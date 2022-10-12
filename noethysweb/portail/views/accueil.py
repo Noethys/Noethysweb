@@ -9,7 +9,7 @@ from django.db.models import Q
 from portail.views.base import CustomView
 from portail.utils import utils_approbations
 from individus.utils import utils_pieces_manquantes, utils_vaccinations, utils_assurances
-from core.models import PortailMessage, Article, Inscription, Consommation
+from core.models import PortailMessage, Article, Inscription, Consommation, Lecture
 
 
 class Accueil(CustomView, TemplateView):
@@ -46,6 +46,7 @@ class Accueil(CustomView, TemplateView):
         conditions &= (Q(public__in=("toutes", "presents", "presents_groupes")) | (Q(public="inscrits") & Q(activites__in=activites)))
         articles = Article.objects.select_related("image_article", "album", "auteur").filter(conditions).distinct().order_by("-date_debut")
         selection_articles = []
+        popups = []
         for article in articles:
             # Filtre les présents si besoin
             if article.public in ("presents", "presents_groupes"):
@@ -59,6 +60,17 @@ class Accueil(CustomView, TemplateView):
                 valide = True
             if valide:
                 selection_articles.append(article)
+                if article.texte_popup:
+                    popups.append(article)
         context['articles'] = selection_articles
+
+        # Popups
+        context['articles_popups'] = []
+        if popups:
+            popups_lus = [lecture.article for lecture in Lecture.objects.filter(article__in=popups, famille=self.request.user.famille)]
+            for popup in popups:
+                if popup not in popups_lus:
+                    context['articles_popups'].append(popup)
+                    Lecture.objects.create(famille=self.request.user.famille, article=popup)
 
         return context

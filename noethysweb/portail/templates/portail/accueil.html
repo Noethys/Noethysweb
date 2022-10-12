@@ -148,4 +148,31 @@
         </div>
     {% endif %}
 
+    {# Modal : Articles popups #}
+    {% if articles_popups %}
+        <div class="modal" id="modal_popup" data-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-lightblue">
+                        <h5 class="modal-title"><i class="fa fa-info-circle margin-r-5"></i>Informations</h5>
+                    </div>
+                    <div class="modal-body">
+                        {% for article in articles_popups %}
+                            <span>{{ article.texte_popup|safe }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            $(document).ready(function() {
+                $('#modal_popup').modal('show');
+            });
+        </script>
+    {% endif %}
+
+
 {% endblock contenu_page %}

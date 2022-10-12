@@ -38,6 +38,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "activites": Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
             "groupes": Select2MultipleWidget({"lang": "fr", "data-minimum-input-length": 0, "data-width": "100%"}),
             "album": Select2Widget({"lang": "fr", "data-width": "100%"}),
+            "texte_popup": SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '180px'}}),
         }
         labels = {
             "image": "Image à importer",
@@ -108,6 +109,9 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Album photos joint",
                 Field("album"),
+            ),
+            Fieldset("Fenêtre popup",
+                Field("texte_popup"),
             ),
             Fieldset("Public destinataire",
                 Field("public"),

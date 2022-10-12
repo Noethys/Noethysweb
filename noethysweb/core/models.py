@@ -3264,6 +3264,7 @@ class Article(models.Model):
     present_debut = models.DateField(verbose_name="Date de début", blank=True, null=True)
     present_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
     album = models.ForeignKey(Album, verbose_name="Album photos", blank=True, null=True, on_delete=models.SET_NULL, help_text="Sélectionnez un album photos existant à joindre à cet article.")
+    texte_popup = models.TextField(verbose_name="Texte", blank=True, null=True, help_text="Ce texte sera affiché dans une fenêtre popup sur la page d'accueil. A utiliser uniquement pour les informations importantes.")
 
     class Meta:
         db_table = 'articles'
@@ -3436,3 +3437,18 @@ class Prelevements(models.Model):
 
     def __str__(self):
         return "Prélèvement ID%d" % self.idprelevement if self.idprelevement else "Nouveau prélèvement"
+
+
+class Lecture(models.Model):
+    idlecture = models.AutoField(verbose_name="ID", db_column='IDlecture', primary_key=True)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE, blank=True, null=True)
+    article = models.ForeignKey(Article, verbose_name="Article", on_delete=models.CASCADE)
+    horodatage = models.DateTimeField(verbose_name="Date", auto_now_add=True)
+
+    class Meta:
+        db_table = 'lectures'
+        verbose_name = "lecture"
+        verbose_name_plural = "lectures"
+
+    def __str__(self):
+        return "Lecture ID%d" % self.idlecture
