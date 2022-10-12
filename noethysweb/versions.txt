@@ -1,3 +1,9 @@
+Version 1.0.8.7 (12/10/2022) :
+
+- Ajout des fenêtres popup sur le portail
+- Ajout du nettoyage des sauvegardes obsolètes
+- Ajout de la correction automatique dans le correcteur
+
 Version 1.0.8.6 (06/10/2022) :
 
 - Ajout de la liste des durées
