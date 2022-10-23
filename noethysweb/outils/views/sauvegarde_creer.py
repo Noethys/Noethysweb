@@ -18,7 +18,7 @@ def Sauvegarder_db(request):
     """ Créer une sauvegarde de la base de données """
     utils_gnupg.Importation_cles()
     try:
-        call_command("dbbackup", "--encrypt --clean", verbosity=3)
+        call_command("dbbackup", "--encrypt", "--clean", verbosity=1)
     except Exception as err:
         return JsonResponse({"erreur": str(err)}, status=401)
     return JsonResponse({"success": True})
@@ -28,7 +28,7 @@ def Sauvegarder_media(request):
     """ Créer une sauvegarde des medias """
     utils_gnupg.Importation_cles()
     try:
-        call_command("mediabackup", "--encrypt --clean", verbosity=3)
+        call_command("mediabackup", "--encrypt", "--clean", verbosity=3)
     except Exception as err:
         return JsonResponse({"erreur": str(err)}, status=401)
     return JsonResponse({"success": True})
