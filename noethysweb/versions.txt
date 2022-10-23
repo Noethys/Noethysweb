@@ -1,3 +1,8 @@
+Version 1.0.8.9 (23/10/2022) :
+
+- Ajout du champ Actif sur les adresses d'expédition d'emails
+- Correction de la commande de sauvegarde
+
 Version 1.0.8.8 (23/10/2022) :
 
 - Correction de petits bugs
