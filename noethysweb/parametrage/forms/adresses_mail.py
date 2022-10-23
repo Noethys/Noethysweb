@@ -55,6 +55,7 @@ class Formulaire(FormulaireBase, ModelForm):
             ]),
             Fieldset('Généralités',
                 Field('moteur'),
+                Field('actif'),
             ),
             Fieldset('Paramètres',
                 Field('adresse'),
@@ -80,7 +81,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         if self.cleaned_data["moteur"] == "smtp":
 
-            if not self.cleaned_data["nom_adresse"]:
+            if not self.cleaned_data["hote"]:
                 self.add_error('hote', "Vous devez renseigner l'hôte")
                 return
 

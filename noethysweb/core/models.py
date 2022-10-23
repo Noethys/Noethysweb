@@ -262,6 +262,7 @@ class AdresseMail(models.Model):
     nom_adresse = models.CharField(verbose_name="Adresse affichée", max_length=300, blank=True, null=True, help_text="Saisissez le nom ou l'adresse que vous souhaitez voir apparaître dans le client de messagerie du destinataire.")
     moteur = models.CharField(verbose_name="Moteur", max_length=200, choices=[("smtp", "SMTP"), ("mailjet", "Mailjet"), ("console", "Console")], help_text="Sélectionnez un moteur d'expédition (Smtp ou Mailjet).")
     parametres = models.CharField(verbose_name="Paramètres", max_length=500, blank=True, null=True)
+    actif = models.BooleanField(verbose_name="Actif", default=True, help_text="Décochez la case pour désactiver cette adresse.")
 
     class Meta:
         db_table = 'adresses_mail'

@@ -3,14 +3,14 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
-from core.views.mydatatableview import MyDatatable, columns, helpers
+import json
+from django.urls import reverse_lazy
+from django.http import JsonResponse
+from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
 from core.models import AdresseMail
 from parametrage.forms.adresses_mail import Formulaire
-from django.http import JsonResponse
 from outils.utils import utils_email
-import json
 
 
 def Envoyer_mail_test(request):
@@ -32,7 +32,6 @@ def Envoyer_mail_test(request):
     # Envoi du message
     resultat = utils_email.Envoyer_mail_test(request=request, dict_options=dict_options)
     return JsonResponse({"resultat": resultat})
-
 
 
 class Page(crud.Page):
@@ -65,16 +64,20 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['idadresse', 'adresse', 'moteur']
+        filtres = ['idadresse', 'actif', 'adresse', 'moteur']
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
+        actif = columns.TextColumn("Etat", sources=["actif"], processor='Get_actif')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idadresse', 'adresse', 'moteur']
+            columns = ['idadresse', 'actif', 'adresse', 'moteur']
             ordering = ['adresse']
 
         def Get_default(self, instance, **kwargs):
             return "<i class='fa fa-check text-success'></i>" if instance.defaut else ""
+
+        def Get_actif(self, instance, *args, **kwargs):
+            return "<small class='badge badge-success'>Activée</small>" if instance.actif else "<small class='badge badge-danger'>Désactivée</small>"
 
 
 class Ajouter(Page, crud.Ajouter):

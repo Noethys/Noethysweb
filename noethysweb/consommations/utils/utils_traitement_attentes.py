@@ -51,9 +51,10 @@ def Traiter_attentes(request=None, test=False):
 
     # Recherche de l'adresse d'expédition du mail
     idadresse_exp = utils_portail.Get_parametre(code="connexion_adresse_exp")
+    adresse_exp = None
     if idadresse_exp:
-        adresse_exp = AdresseMail.objects.get(pk=idadresse_exp)
-    else:
+        adresse_exp = AdresseMail.objects.get(pk=idadresse_exp, actif=True)
+    if not adresse_exp:
         logger.error("Aucune adresse d'expédition paramétrée pour l'envoi des places disponibles.")
         return
 

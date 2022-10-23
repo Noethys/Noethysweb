@@ -104,9 +104,10 @@ class MyPasswordResetForm(PasswordResetForm):
 
         # Importation de l'adresse d'expédition d'emails
         idadresse_exp = utils_portail.Get_parametre(code="connexion_adresse_exp")
+        adresse_exp = None
         if idadresse_exp:
-            adresse_exp = AdresseMail.objects.get(pk=idadresse_exp)
-        else:
+            adresse_exp = AdresseMail.objects.get(pk=idadresse_exp, actif=True)
+        if not adresse_exp:
             logger.debug("Erreur : Pas d'adresse d'expédition paramétrée pour l'envoi du mail.")
             return "L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur."
 

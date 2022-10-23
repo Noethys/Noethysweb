@@ -39,7 +39,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.field_class = 'col-md-10'
 
         # Sélectionne l'adresse d'expédition
-        self.fields["adresse_exp"].queryset = AdresseMail.objects.filter(pk__in=self.request.user.Get_adresses_exp_possibles()).order_by("adresse")
+        self.fields["adresse_exp"].queryset = AdresseMail.objects.filter(pk__in=self.request.user.Get_adresses_exp_possibles(), actif=True).order_by("adresse")
         if not idmail:
             self.fields['adresse_exp'].initial = self.request.user.Get_adresse_exp_defaut()
 
