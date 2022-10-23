@@ -1,3 +1,7 @@
+Version 1.0.8.8 (23/10/2022) :
+
+- Correction de petits bugs
+
 Version 1.0.8.7 (12/10/2022) :
 
 - Ajout des fenêtres popup sur le portail
