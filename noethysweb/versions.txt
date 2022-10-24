@@ -1,3 +1,7 @@
+Version 1.0.9.0 (24/10/2022) :
+
+- Correction de l'import des mots de passe internet
+
 Version 1.0.8.9 (23/10/2022) :
 
 - Ajout du champ Actif sur les adresses d'expédition d'emails
