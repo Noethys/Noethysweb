@@ -44,7 +44,7 @@ class Classe_commune(TestCase):
         self.famille = Famille.objects.create()
 
         # Création des codes pour le portail
-        from individus.utils import utils_internet
+        from fiche_famille.utils import utils_internet
         self.famille.internet_identifiant = utils_internet.CreationIdentifiant(IDfamille=self.famille.pk)
         self.famille.internet_mdp = utils_internet.CreationMDP()
         self.famille.save()
