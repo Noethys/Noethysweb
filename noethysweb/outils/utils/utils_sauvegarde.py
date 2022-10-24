@@ -13,6 +13,7 @@ from django.core.serializers.base import DeserializationError
 from django.db import IntegrityError
 from django.core.management import call_command
 from core.utils import utils_cryptage_fichier, utils_fichiers
+from fiche_famille.utils import utils_internet
 
 
 def Nettoyer(rep_destination):
@@ -21,7 +22,7 @@ def Nettoyer(rep_destination):
     except:
         pass
 
-def Restauration(form=None, nom_fichier=None, mdp=None):
+def Restauration(form=None, nom_fichier=None, mdp=None, conserve_mdp_internet=False):
     # Créé le répertoire temp s'il n'existe pas
     rep_temp = utils_fichiers.GetTempRep()
 
@@ -81,6 +82,10 @@ def Restauration(form=None, nom_fichier=None, mdp=None):
     # MAJ des infos
     from core.utils import utils_db
     utils_db.Maj_infos()
+
+    # RAZ des mots de passe internet
+    if not conserve_mdp_internet:
+        utils_internet.ReinitTousMdp()
 
     return None
 

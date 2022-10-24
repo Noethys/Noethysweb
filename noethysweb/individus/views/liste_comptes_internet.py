@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.db.models import Max
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Mail, DocumentJoint, Destinataire, AdresseMail, ModeleEmail
+from core.models import Famille, Mail, Utilisateur, Destinataire, ModeleEmail
 from fiche_famille.utils import utils_internet
 
 
@@ -112,9 +112,16 @@ def Reinitialiser_mdp(request):
         return JsonResponse({"erreur": "Veuillez cocher au moins un compte internet dans la liste"}, status=401)
 
     # Reinitialisation des comptes dans la DB
-    for famille in Famille.objects.all():
+    for famille in Famille.objects.select_related("utilisateur").all():
         if famille.pk in coches:
-            famille.internet_mdp = utils_internet.CreationMDP()
+            internet_mdp = utils_internet.CreationMDP()
+            famille.internet_mdp = internet_mdp
+            if not famille.utilisateur:
+                utilisateur = Utilisateur(username=famille.internet_identifiant, categorie="famille", force_reset_password=True)
+                utilisateur.save()
+                utilisateur.set_password(internet_mdp)
+                utilisateur.save()
+                famille.utilisateur = utilisateur
             famille.save()
 
     # Réactualisation de la page
@@ -129,9 +136,16 @@ def Reinitialiser_identifiant(request):
         return JsonResponse({"erreur": "Veuillez cocher au moins un compte internet dans la liste"}, status=401)
 
     # Reinitialisation des comptes dans la DB
-    for famille in Famille.objects.all():
+    for famille in Famille.objects.select_related("utilisateur").all():
         if famille.pk in coches:
-            famille.internet_identifiant = utils_internet.CreationIdentifiant(IDfamille=famille.pk)
+            internet_identifiant = utils_internet.CreationIdentifiant(IDfamille=famille.pk)
+            famille.internet_identifiant = internet_identifiant
+            if not famille.utilisateur:
+                utilisateur = Utilisateur(username=internet_identifiant, categorie="famille", force_reset_password=True)
+                utilisateur.save()
+                utilisateur.set_password(famille.internet_mdp)
+                utilisateur.save()
+                famille.utilisateur = utilisateur
             famille.save()
 
     # Réactualisation de la page

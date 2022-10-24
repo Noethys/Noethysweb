@@ -3,9 +3,10 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, random
 logger = logging.getLogger(__name__)
-import random
+from core.models import Famille, Utilisateur
+from fiche_famille.utils import utils_internet
 
 
 def CreationIdentifiant(IDfamille=None, IDutilisateur=None, nbreCaract=8):
@@ -24,3 +25,15 @@ def CreationMDP(nbreCaract=10):
     """ Création d'un mot de passe aléatoire """
     mdp = "".join([random.choice("bcdfghjkmnprstvwxzBCDFGHJKLMNPRSTVWXZ123456789") for x in range(0, nbreCaract)])
     return mdp
+
+def ReinitTousMdp():
+    for famille in Famille.objects.select_related("utilisateur").all():
+        internet_mdp = utils_internet.CreationMDP()
+        famille.internet_mdp = internet_mdp
+        if not famille.utilisateur:
+            utilisateur = Utilisateur(username=famille.internet_identifiant, categorie="famille", force_reset_password=True)
+            utilisateur.save()
+            utilisateur.set_password(internet_mdp)
+            utilisateur.save()
+            famille.utilisateur = utilisateur
+        famille.save()
