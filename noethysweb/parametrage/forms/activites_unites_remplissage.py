@@ -28,7 +28,7 @@ class Formulaire(FormulaireBase, ModelForm):
     unites = forms.ModelMultipleChoiceField(label="Unités de consommation associées", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(), required=True)
 
     # Plage horaire
-    heure_min = forms.TimeField(label="Heure min", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
+    heure_min = forms.TimeField(label="Heure min", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="La plage horaire permet de comptabiliser uniquement les consommations appartenant à la plage horaire renseignée.")
     heure_max = forms.TimeField(label="Heure max", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
 
     class Meta:
