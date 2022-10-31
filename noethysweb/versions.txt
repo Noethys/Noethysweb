@@ -1,3 +1,7 @@
+Version 1.0.9.1 (31/10/2022) :
+
+- Correction du calcul du remplissage quand la quantité est nulle
+
 Version 1.0.9.0 (24/10/2022) :
 
 - Correction de l'import des mots de passe internet
