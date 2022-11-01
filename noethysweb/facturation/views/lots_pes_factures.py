@@ -64,7 +64,7 @@ class Liste(crud.Page, crud.Liste):
 
 def Generation_pieces(idlot=None, liste_idfacture=[]):
     # Importation des factures
-    factures = Facture.objects.select_related("famille").filter(pk__in=liste_idfacture)
+    factures = Facture.objects.select_related("famille", "famille__titulaire_helios", "famille__tiers_solidaire").filter(pk__in=liste_idfacture)
 
     # Importation des mandats
     dict_mandats = {mandat.famille: mandat for mandat in Mandat.objects.filter(famille__in=[facture.famille_id for facture in factures], actif=True)}

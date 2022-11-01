@@ -30,7 +30,7 @@ class Exporter():
     def Generer(self):
         # Importation des données
         self.lot = PesLot.objects.select_related("modele", "modele__compte", "modele__mode").get(pk=self.idlot)
-        self.pieces = PesPiece.objects.select_related("famille", "prelevement_mandat", "titulaire_helios", "facture").filter(lot=self.lot)
+        self.pieces = PesPiece.objects.select_related("famille", "prelevement_mandat", "prelevement_mandat__individu", "titulaire_helios", "tiers_solidaire", "facture", "famille__titulaire_helios", "famille__tiers_solidaire").filter(lot=self.lot)
 
         # Création du répertoire de sortie
         self.rep_base = os.path.join("temp", str(uuid.uuid4()))
@@ -48,7 +48,7 @@ class Exporter():
         return os.path.join(settings.MEDIA_URL, self.rep_base, nom_fichier_zip)
 
     def Get_detail_pieces(self):
-        prestations = Prestation.objects.select_related("activite", "individu").filter(facture_id__in=[piece.facture_id for piece in self.pieces])
+        prestations = Prestation.objects.select_related("activite", "individu", "facture").filter(facture_id__in=[piece.facture_id for piece in self.pieces])
 
         dict_resultats = {}
         dict_prestations_factures = {}
@@ -191,6 +191,7 @@ class Exporter():
         lignes = []
         lignes_pj = []
         lignes_detail = []
+        lignes_tsol = []
         for IdEcriture, piece in enumerate(self.pieces, start=1):
             num_sous_ligne = 1
             if piece.facture in dict_codes:
@@ -502,6 +503,59 @@ class Exporter():
                     texte_ligne_pj[index-1] = valeur
                 lignes_pj.append(";".join(texte_ligne_pj))
 
+            # Création du tiers solidaire
+            ligne_tsol = {}
+            if self.lot.modele.inclure_tiers_solidaires and piece.famille.tiers_solidaire:
+
+                # Version - Numérique (3)
+                ligne_tsol[1] = ConvertToTexte("19")
+
+                # RefIdEcriture - Texte (50)
+                ligne_tsol[2] = ligne[1]
+
+                # CodeTiers - Texte (15)
+                ligne_tsol[3] = ligne[8]
+
+                # Designation1 - Texte (50)
+                ligne_tsol[4] = ConvertToTexte(piece.famille.tiers_solidaire.nom[:50], majuscules=True)
+
+                # Designation2 - Texte (50)
+                if piece.famille.tiers_solidaire.prenom:
+                    ligne_tsol[5] = ConvertToTexte(piece.famille.tiers_solidaire.prenom[:50], majuscules=True)
+
+                # AdrLig1, AdrLig2, et AdrLig3 - Texte (50)
+                if piece.famille.tiers_solidaire.rue_resid:
+                    lignes_rue = piece.famille.tiers_solidaire.rue_resid.split("\n")
+                    for idx, valeur in enumerate(lignes_rue[:3], 6):
+                        ligne_tsol[idx] = ConvertToTexte(valeur[:50], majuscules=True)
+
+                # Codepostal - Texte (10)
+                ligne_tsol[9] = ConvertToTexte(piece.famille.tiers_solidaire.cp_resid[:10])
+
+                # Ville - Texte (50)
+                ligne_tsol[10] = ConvertToTexte(piece.famille.tiers_solidaire.ville_resid[:50])
+
+                # Catégorie Tiers PES
+                ligne_tsol[19] = ConvertToTexte("01")
+
+                # Nat Juridique Tiers PES
+                ligne_tsol[20] = ConvertToTexte("01")
+
+                # Civilité PES - Texte (32)
+                civilite_titulaire = piece.famille.tiers_solidaire.Get_abrege_civilite()
+                if civilite_titulaire == "M.": ligne_tsol[21] = ConvertToTexte("M")
+                if civilite_titulaire == "Mme": ligne_tsol[21] = ConvertToTexte("MME")
+                if civilite_titulaire == "Melle": ligne_tsol[21] = ConvertToTexte("MLLE")
+
+                # DatNaisTiers - Texte (10)
+                ligne_tsol[27] = ConvertToTexte(utils_dates.ConvertDateToFR(piece.famille.tiers_solidaire.date_naiss) if piece.famille.tiers_solidaire.date_naiss else "")
+
+                # Formatage de la ligne TSOL
+                texte_ligne_tsol = ['""' for x in range(0, 27)]
+                for index, valeur in ligne_tsol.items():
+                    texte_ligne_tsol[index-1] = valeur
+                lignes_tsol.append(";".join(texte_ligne_tsol))
+
         # Enregistrement du fichier ECRITURES
         if lignes:
             contenu_lignes = "\n".join(lignes)
@@ -519,5 +573,11 @@ class Exporter():
             contenu_lignes_pj = "\n".join(lignes_pj)
             with open(os.path.join(self.rep_destination, "WTAMC001PJ.txt"), "w") as fichier:
                 fichier.write(contenu_lignes_pj)
+
+        # Enregistrement du fichier ECRITURES_TSOL
+        if lignes_tsol:
+            contenu_lignes_tsol = "\n".join(lignes_tsol)
+            with open(os.path.join(self.rep_destination, "WTAMC001_TSOL.txt"), "w") as fichier:
+                fichier.write(contenu_lignes_tsol)
 
         return True
