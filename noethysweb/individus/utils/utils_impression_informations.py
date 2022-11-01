@@ -34,7 +34,7 @@ class Impression(utils_impression.Impression):
         conditions = Q(individu__inscription__activite__in=liste_activites)
         if self.dict_donnees["presents"]:
             conditions &= Q(individu__inscription__consommation__date__gte=self.dict_donnees["presents"][0], individu__inscription__consommation__date__lte=self.dict_donnees["presents"][1])
-        rattachements_temp = Rattachement.objects.select_related("individu", "famille", "individu__medecin").filter(conditions).distinct().order_by("individu__nom", "individu__prenom")
+        rattachements_temp = Rattachement.objects.select_related("individu", "famille", "individu__medecin").prefetch_related("individu__regimes_alimentaires").filter(conditions).distinct().order_by("individu__nom", "individu__prenom")
 
         # Importation de toutes les informations
         dict_informations = {}

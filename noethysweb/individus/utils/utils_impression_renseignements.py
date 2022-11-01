@@ -34,7 +34,7 @@ class Impression(utils_impression.Impression):
         conditions = Q(individu__inscription__activite__in=liste_activites)
         if self.dict_donnees["presents"]:
             conditions &= Q(individu__inscription__consommation__date__gte=self.dict_donnees["presents"][0], individu__inscription__consommation__date__lte=self.dict_donnees["presents"][1])
-        rattachements = Rattachement.objects.select_related("individu", "famille", "individu__medecin").filter(conditions).distinct().order_by("individu__nom", "individu__prenom")
+        rattachements = Rattachement.objects.select_related("individu", "famille", "individu__medecin").prefetch_related("individu__regimes_alimentaires", "individu__maladies").filter(conditions).distinct().order_by("individu__nom", "individu__prenom")
         if not rattachements:
             self.erreurs.append("Aucun individu n'a été trouvé avec les paramètres donnés")
 
@@ -159,7 +159,13 @@ class Impression(utils_impression.Impression):
             # Scolarité
             scolarite = dict_scolarites.get(rattachement.individu_id, None)
             if scolarite:
-                texte_scolarite = "Classe %s-%s : %s (%s - %s)." % (scolarite.date_debut.strftime("%Y"), scolarite.date_fin.strftime("%Y"), scolarite.niveau.abrege or "", scolarite.classe.nom or "", scolarite.ecole.nom or "")
+                texte_scolarite = "Classe %s-%s : %s (%s - %s)." % (
+                    scolarite.date_debut.strftime("%Y"),
+                    scolarite.date_fin.strftime("%Y"),
+                    scolarite.niveau.abrege if scolarite.niveau else "",
+                    scolarite.classe.nom if scolarite.classe else "",
+                    scolarite.ecole.nom if scolarite.ecole else "",
+                )
                 detail_individu.append(Paragraph(texte_scolarite, style_defaut))
 
             # Cadre identité de l'individu
