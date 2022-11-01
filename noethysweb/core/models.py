@@ -1670,6 +1670,7 @@ class Famille(models.Model):
     email_depots_adresses = models.CharField(verbose_name="Adresses pour l'envoi des avis d'encaissement par Email", max_length=400, blank=True, null=True)
     code_compta = models.CharField(verbose_name="Code comptable", max_length=200, blank=True, null=True)
     titulaire_helios = models.ForeignKey(Individu, verbose_name="Titulaire Hélios", related_name="titulaire_helios", on_delete=models.SET_NULL, blank=True, null=True)
+    tiers_solidaire = models.ForeignKey(Individu, verbose_name="Tiers solidaire", related_name="tiers_solidaire", on_delete=models.SET_NULL, blank=True, null=True)
     idtiers_helios = models.CharField(verbose_name="Identifiant national", max_length=300, blank=True, null=True, help_text="Saisissez l'identifiant national (SIRET ou SIREN ou FINESS ou NIR)")
     natidtiers_helios = models.IntegerField(verbose_name="Type d'identifiant national", blank=True, null=True, choices=LISTE_TYPES_ID_TIERS, default=9999, help_text="Sélectionnez le type d'identifiant national du tiers pour Hélios (Trésor Public)")
     reftiers_helios = models.CharField(verbose_name="Référence locale", max_length=200, blank=True, null=True, help_text="Saisissez la référence locale du tiers")
@@ -1695,7 +1696,7 @@ class Famille(models.Model):
     def __str__(self):
         return self.nom if self.nom else "Famille ID%d" % self.pk
 
-    def Maj_infos(self, maj_adresse=True, maj_mail=True, maj_mobile=True, maj_titulaire_helios=True, maj_code_compta=True):
+    def Maj_infos(self, maj_adresse=True, maj_mail=True, maj_mobile=True, maj_titulaire_helios=True, maj_tiers_solidaire=True, maj_code_compta=True):
         """ MAJ du nom des titulaires et de l'adresse de la famille """
         # MAJ Adresse de la famille
         if maj_adresse:
@@ -1757,6 +1758,23 @@ class Famille(models.Model):
                 # Recherche un individu valide parmi les titulaires de la famille
                 if rattachements:
                     self.titulaire_helios = rattachements.first().individu
+
+        if maj_tiers_solidaire:
+            if self.tiers_solidaire:
+                # recherche si le titulaire est toujours dans la famille
+                found = False
+                for rattachement in rattachements:
+                    if rattachement.individu == self.tiers_solidaire:
+                        found = True
+                if not found:
+                    self.tiers_solidaire = None
+            if not self.tiers_solidaire:
+                # Recherche un individu valide parmi les titulaires de la famille
+                if rattachements:
+                    for rattachement in rattachements:
+                        if rattachement.individu != self.titulaire_helios:
+                            self.tiers_solidaire = rattachement.individu
+                            break
 
         # Code comptable
         if maj_code_compta:
@@ -3112,6 +3130,7 @@ class PesModele(models.Model):
     inclure_pieces_jointes = models.BooleanField(verbose_name="Inclure les factures au format PDF", default=True, help_text="Cochez cette case si vous souhaitez que Noethys intègre les factures au format PDF.")
     code_compta_as_alias = models.BooleanField(verbose_name="Utiliser le code comptable familial comme code tiers", default=True, help_text="Utiliser le code comptable de la famille (Fiche famille > Onglet Divers) comme code tiers (ou alias). Sinon un code de type FAM000001 sera généré automatiquement.")
     modele_document = models.ForeignKey(ModeleDocument, verbose_name="Modèle de document", on_delete=models.PROTECT, blank=True, null=True)
+    inclure_tiers_solidaires = models.BooleanField(verbose_name="Inclure les tiers solidaires", default=True, help_text="Cochez cette case si vous souhaitez que Noethys intègre les tiers solidaires.")
 
     class Meta:
         db_table = 'pes_modeles'
@@ -3155,7 +3174,8 @@ class PesPiece(models.Model):
     prelevement_mandat = models.ForeignKey(Mandat, verbose_name="Mandat", blank=True, null=True, on_delete=models.PROTECT)
     prelevement_sequence = models.CharField(verbose_name="Séquence", blank=True, null=True, choices=[("OOFF", "Prélèvement ponctuel (OOFF)"), ("FRST", "Premier prélèvement d'une série (FRST)"), ("RCUR", "Prélèvement suivant d'une série (RCUR)"), ('FNAL', "Dernier prélèvement d'une série (FNAL)")], max_length=100)
     prelevement_statut = models.CharField(verbose_name="Statut du prélèvement", choices=[("valide", "Valide"), ("refus", "Refus"), ("attente", "Attente")], default="attente", max_length=100)
-    titulaire_helios = models.ForeignKey(Individu, verbose_name="Titulaire Hélios", on_delete=models.PROTECT)
+    titulaire_helios = models.ForeignKey(Individu, verbose_name="Titulaire Hélios", related_name="piece_titulaire_helios", on_delete=models.PROTECT)
+    tiers_solidaire = models.ForeignKey(Individu, verbose_name="Tiers solidaire", related_name="piece_tiers_solidaire", on_delete=models.PROTECT, blank=True, null=True)
     type = models.CharField(verbose_name="Type de pièce", choices=[("facture", "Facture"), ("manuel", "Manuel")], max_length=100, default="facture")
     facture = models.ForeignKey(Facture, verbose_name="Facture", on_delete=models.PROTECT, blank=True, null=True)
     # numero = models.IntegerField(blank=True, null=True)

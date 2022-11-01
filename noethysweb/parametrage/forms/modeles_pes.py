@@ -88,6 +88,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("payable_internet", type=None if format in ("magnus",) else "hidden"),
                 Field("inclure_detail", type=None if format in ("magnus",) else "hidden"),
                 Field("inclure_pieces_jointes", type=None if format in ("magnus",) else "hidden"),
+                Field("inclure_tiers_solidaires", type=None if format in ("magnus",) else "hidden"),
                 Field("modele_document", type=None if format in ("magnus",) else "hidden"),
                 Field("code_compta_as_alias", type=None if format in ("magnus",) else "hidden"),
                 Field("nom_collectivite", type=None if format in ("jvs",) else "hidden"),

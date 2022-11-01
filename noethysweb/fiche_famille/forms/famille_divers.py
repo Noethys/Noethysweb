@@ -19,7 +19,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Famille
-        fields = ["mail", "mobile", "memo", "code_compta", "titulaire_helios", "idtiers_helios", "natidtiers_helios", "reftiers_helios", "cattiers_helios", "natjur_helios"]
+        fields = ["mail", "mobile", "memo", "code_compta", "titulaire_helios", "tiers_solidaire", "idtiers_helios", "natidtiers_helios", "reftiers_helios", "cattiers_helios", "natjur_helios"]
         widgets = {
             "memo": forms.Textarea(attrs={'rows': 3}),
         }
@@ -43,6 +43,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Titulaire hélios
         self.fields["titulaire_helios"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
+        self.fields["tiers_solidaire"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
 
         # Création des boutons de commande
         if self.mode == "CONSULTATION":
@@ -66,6 +67,7 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Données tiers pour Hélios",
                 Field("titulaire_helios"),
+                Field("tiers_solidaire"),
                 Field("idtiers_helios"),
                 Field("natidtiers_helios"),
                 Field("reftiers_helios"),

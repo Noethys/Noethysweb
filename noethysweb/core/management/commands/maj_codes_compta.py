@@ -12,5 +12,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         for famille in Famille.objects.all():
-            famille.Maj_infos(maj_adresse=False, maj_mail=False, maj_mobile=False, maj_titulaire_helios=False, maj_code_compta=True)
+            famille.Maj_infos(maj_adresse=False, maj_mail=False, maj_mobile=False, maj_titulaire_helios=False, maj_tiers_solidaire=False, maj_code_compta=True)
         self.stdout.write(self.style.SUCCESS("MAJ des codes comptables des familles OK"))

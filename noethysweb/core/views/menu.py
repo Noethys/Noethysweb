@@ -201,10 +201,11 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Informations
     menu_infos_individus = menu_individus.Add(titre="Informations")
     menu_infos_individus.Add(code="edition_renseignements", titre="Edition des fiches de renseignements", icone="file-text-o")
-    menu_infos_individus.Add(code="liste_anniversaires", titre="Liste des anniversaires", icone="file-text-o")
+    menu_infos_individus.Add(code="liste_anniversaires", titre="Edition des anniversaires", icone="file-text-o")
     menu_infos_individus.Add(code="liste_regimes_caisses", titre="Liste des régimes et des caisses", icone="file-text-o")
     menu_infos_individus.Add(code="liste_quotients", titre="Liste des quotients familiaux/revenus", icone="file-text-o")
     menu_infos_individus.Add(code="liste_codes_comptables", titre="Liste des codes comptables", icone="file-text-o")
+    menu_infos_individus.Add(code="liste_titulaires_helios", titre="Liste des titulaires Hélios", icone="file-text-o")
     menu_infos_individus.Add(code="mandats_liste", titre="Liste des mandats SEPA", icone="file-text-o")
     menu_infos_individus.Add(code="contacts_urgence_liste", titre="Liste des contacts d'urgence et de sortie", icone="file-text-o")
     menu_infos_individus.Add(code="edition_contacts", titre="Edition des contacts", icone="file-text-o")

@@ -75,7 +75,8 @@ def Generation_pieces(idlot=None, liste_idfacture=[]):
     # Création des pièces
     liste_ajouts = []
     for facture in factures:
-        params = {"lot_id": idlot, "famille_id": facture.famille_id, "type": "facture", "facture": facture, "montant": facture.solde_actuel, "titulaire_helios": facture.famille.titulaire_helios}
+        params = {"lot_id": idlot, "famille_id": facture.famille_id, "type": "facture", "facture": facture, "montant": facture.solde_actuel,
+                  "titulaire_helios": facture.famille.titulaire_helios, "tiers_solidaire": facture.famille.tiers_solidaire}
         mandat = dict_mandats.get(facture.famille, None)
 
         # Vérifie que ce mandat peut être utilisé pour payer cette facture (structure compatible)

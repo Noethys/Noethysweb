@@ -11,7 +11,8 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             inscriptions_scolaires, scolarites, inscriptions_liste, inscriptions_impression, inscriptions_email, liste_comptes_internet, \
                             individus_detaches_liste, liste_mandats, liste_questionnaires_familles, liste_questionnaires_individus, liste_contacts_urgence, \
                             liste_regimes_alimentaires, liste_maladies, liste_informations, individus_doublons_liste, liste_familles_sans_inscriptions, \
-                            edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier
+                            edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
+                            liste_titulaires_helios
 
 urlpatterns = [
 
@@ -74,6 +75,7 @@ urlpatterns = [
     path('individus/liste_regimes_caisses', liste_regimes_caisses.Liste.as_view(), name='liste_regimes_caisses'),
     path('individus/liste_quotients', liste_quotients.Liste.as_view(), name='liste_quotients'),
     path('individus/liste_codes_comptables', liste_codes_comptables.Liste.as_view(), name='liste_codes_comptables'),
+    path('individus/liste_titulaires_helios', liste_titulaires_helios.Liste.as_view(), name='liste_titulaires_helios'),
 
     path('individus/mandats/liste', liste_mandats.Liste.as_view(), name='mandats_liste'),
     path('individus/mandats/creer', liste_mandats.Creer.as_view(), name='mandats_creer'),
@@ -141,5 +143,6 @@ urlpatterns = [
     path('individus/edition_renseignements/generer_pdf', secure_ajax(edition_renseignements.Generer_pdf), name='ajax_edition_renseignements_generer_pdf'),
     path('individus/edition_informations/generer_pdf', secure_ajax(edition_informations.Generer_pdf), name='ajax_edition_informations_generer_pdf'),
     path('individus/inscriptions_modifier', secure_ajax(inscriptions_modifier.Appliquer), name='ajax_inscriptions_modifier'),
+    path('individus/liste_titulaires_helios/generer_tiers_solidaires', secure_ajax(liste_titulaires_helios.Generer_tiers_solidaires), name='ajax_liste_titulaires_helios_generer_tiers_solidaires'),
 
 ]

@@ -149,7 +149,7 @@ class Formulaire_piece(FormulaireBase, ModelForm):
 
     class Meta:
         model = PesPiece
-        fields = ["prelevement", "prelevement_mandat", "prelevement_sequence", "prelevement_statut", "titulaire_helios", "type", "montant"]
+        fields = ["prelevement", "prelevement_mandat", "prelevement_sequence", "prelevement_statut", "titulaire_helios", "tiers_solidaire", "type", "montant"]
 
     def __init__(self, *args, **kwargs):
         super(Formulaire_piece, self).__init__(*args, **kwargs)
@@ -165,9 +165,10 @@ class Formulaire_piece(FormulaireBase, ModelForm):
         for champ in ("type", "montant"):
             self.fields[champ].disabled = True
 
-        # Titulaire hélios
+        # Titulaire hélios et tiers solidaire
         rattachements = Rattachement.objects.select_related("individu").filter(famille=self.instance.famille, titulaire=True).order_by("individu__nom", "individu__prenom")
         self.fields["titulaire_helios"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
+        self.fields["tiers_solidaire"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
 
         # Mandat
         self.fields["prelevement_mandat"].choices = [(None, "---------")] + [(mandat.pk, mandat.rum) for mandat in Mandat.objects.filter(famille=self.instance.famille)]
@@ -188,7 +189,7 @@ class Formulaire_piece(FormulaireBase, ModelForm):
             ),
             Fieldset("Options",
                 Field("titulaire_helios"),
-
+                Field("tiers_solidaire"),
             ),
         )
 
