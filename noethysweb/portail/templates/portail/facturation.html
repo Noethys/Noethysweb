@@ -240,9 +240,11 @@
                                             {% if parametres_portail.facturation_autoriser_detail_facture %}
                                                 <button data-idfacture="{{ facture.pk }}" class="btn btn-primary btn-xs bouton_detail_facture" title="Afficher le détail de la facture"><i class="fa fa-fw fa-search"></i></button>
                                             {% endif %}
+{% comment %}
                                             {% if parametres_portail.facturation_autoriser_telechargement_facture %}
                                                 <a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_accueil' %}" title="Télécharger la facture"><i class="fa fa-fw fa-download"></i></a>
                                             {% endif %}
+{% endcomment %}
                                         </td>
                                     {% endif %}
                                 </tr>

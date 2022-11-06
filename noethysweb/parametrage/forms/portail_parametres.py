@@ -85,6 +85,7 @@ EXTRA_HTML = """
 <script>
     function On_change_paiement_ligne_systeme() {
         $('#div_id_paiement_ligne_mode_reglement').hide();
+        $('#div_id_paiement_ligne_compte_bancaire').hide();
         $('#div_id_paiement_ligne_montant_minimal').hide();
         $('#div_id_paiement_ligne_multi_factures').hide();
         $('#div_id_paiement_ligne_off_si_prelevement').hide();
@@ -95,6 +96,7 @@ EXTRA_HTML = """
         $('#div_id_payzen_mode').hide();
         $('#div_id_payzen_echelonnement').hide();
         if ($("#id_paiement_ligne_systeme").val()) {
+            $('#div_id_paiement_ligne_compte_bancaire').show();
             $('#div_id_paiement_ligne_mode_reglement').show();
             $('#div_id_paiement_ligne_montant_minimal').show();
             $('#div_id_paiement_ligne_multi_factures').show();

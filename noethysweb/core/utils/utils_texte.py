@@ -19,6 +19,8 @@ def Convert_liste_to_texte_virgules(liste=[]):
 def Incrementer(texte=""):
     """ Incrémenter un numéro dans une chaîne """
     lastNum = re.compile(r'(?:[^\d]*(\d+)[^\d]*)+')
+    if isinstance(texte, int):
+        texte = str(texte)
     m = lastNum.search(texte)
     if m:
         next = str(int(m.group(1))+1)

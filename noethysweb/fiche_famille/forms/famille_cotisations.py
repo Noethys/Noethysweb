@@ -103,7 +103,7 @@ class Formulaire(FormulaireBase, ModelForm):
         numero = Cotisation.objects.aggregate(Max('numero'))['numero__max']
         if numero == None:
             numero = 0
-        self.fields["numero"].initial = utils_texte.Incrementer(numero)
+        self.fields["numero"].initial = utils_texte.Incrementer(str(numero))
 
         # Importation
         individu_type = ""
