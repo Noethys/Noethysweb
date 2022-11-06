@@ -1,3 +1,9 @@
+Version 1.0.9.4 (06/11/2022) :
+
+- Correction du recalcul du solde des factures
+- Correcteur de l'émetteur dans la saisie des règlements
+- Corrections diverses sur les paiements en ligne
+
 Version 1.0.9.3 (06/11/2022) :
 
 - Ajout du paiement en ligne avec Payzen et Payfip
