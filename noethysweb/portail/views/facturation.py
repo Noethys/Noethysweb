@@ -6,14 +6,15 @@
 import logging, decimal, sys, datetime, re, copy
 logger = logging.getLogger(__name__)
 from django.urls import reverse
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.generic import TemplateView
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import render
 from django.db.models import Sum, Q
 from eopayment import Payment
 from portail.views.base import CustomView
-from core.models import Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur
+from core.models import Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur, ModeReglement, CompteBancaire
 from core.utils import utils_portail, utils_fichiers, utils_dates, utils_texte
 
 ETATS_PAIEMENTS = {1: "RECEIVED", 2: "ACCEPTED", 3: "PAID", 4: "DENIED", 5: "CANCELLED", 6: "WAITING", 99: "ERROR"}
@@ -173,6 +174,7 @@ def effectuer_paiement_en_ligne(request):
         return JsonResponse({"systeme_paiement": "payzen", "form_paiement": form})
 
 
+@csrf_exempt
 @require_http_methods(["POST"])
 def retour_payfip(request):
     logger.debug("Page RETOUR PAYFIP")
@@ -188,7 +190,7 @@ def retour_payfip(request):
 
     # Récupération des données et calcul de la signature
     p = Payment("tipi_regie", {})
-    reponse = p.response(data)
+    reponse = p.response(data.urlencode())
 
     # Recherche l'état du paiement
     resultat = ETATS_PAIEMENTS[reponse.result]
@@ -222,6 +224,7 @@ def retour_payfip(request):
     #     return redirect(url_for('retour_paiement_error'))
 
 
+@csrf_exempt
 @require_http_methods(["POST"])
 def ipn_payzen(request):
     logger.debug("Page RETOUR IPN PAYZEN")
@@ -230,9 +233,12 @@ def ipn_payzen(request):
     data = request.POST
     logger.debug(data)
 
+    # Récupération des paramètres généraux du portail
+    parametres_portail = utils_portail.Get_dict_parametres()
+
     # Récupération des données et calcul de la signature
-    p = GetPaymentPayzen()
-    reponse = p.response(data)
+    p = GetPaymentPayzen(request=request, parametres_portail=parametres_portail)
+    reponse = p.response(data.urlencode())
 
     # Vérifie que la signature de la réponse est correcte
     if reponse.signed != True:
@@ -254,7 +260,7 @@ def ipn_payzen(request):
     # Modification du paiement préenregistré
     paiement = Paiement.objects.get(idtransaction=reponse.order_id)
     paiement.resultat = resultat
-    paiement.message = reponse.bank_status.decode("utf8")
+    paiement.message = reponse.bank_status
     paiement.save()
 
     # Paiement échelonné
@@ -265,8 +271,7 @@ def ipn_payzen(request):
     if resultat == "PAID":
         Enregistrement_reglement(paiement=paiement, vads_payment_config=vads_payment_config)
 
-    logger.debug("Enregistrement de l'action Paiement en ligne IDtransaction=%s" % paiement.idtransaction)
-    return "Notification processed"
+    return HttpResponse("Notification processed")
 
 
 def Enregistrement_reglement(paiement=None, vads_payment_config=None):
@@ -291,7 +296,7 @@ def Enregistrement_reglement(paiement=None, vads_payment_config=None):
     liste_paiements = [(paiement.montant, datetime.date.today())]
 
     if "payzen" in paiement.systeme_paiement:
-        compte = parametres_portail.get("paiement_ligne_compte_bancaire")
+        compte = CompteBancaire.objects.get(pk=int(parametres_portail.get("paiement_ligne_compte_bancaire")))
         num_piece = IDtransaction
         if vads_payment_config.startswith("MULTI"):
             # Paiement en plusieurs fois
@@ -331,7 +336,7 @@ def Enregistrement_reglement(paiement=None, vads_payment_config=None):
         reglement = Reglement.objects.create(
             famille=paiement.famille,
             date=datetime.date.today(),
-            mode=parametres_portail.get("paiement_ligne_mode_reglement"),
+            mode=ModeReglement.objects.get(pk=int(parametres_portail.get("paiement_ligne_mode_reglement"))),
             numero_piece=num_piece,
             montant=decimal.Decimal(montant_paiement),
             payeur=payeur,
@@ -351,6 +356,10 @@ def Enregistrement_reglement(paiement=None, vads_payment_config=None):
                 prestation.solde -= ventilation
                 credit -= ventilation
                 Ventilation.objects.create(famille=paiement.famille, reglement=reglement, prestation=prestation, montant=ventilation)
+
+    # MAJ du solde des factures
+    for facture in factures:
+        facture.Maj_solde_actuel()
 
 
 def get_detail_facture(request):
@@ -424,30 +433,31 @@ class View(CustomView, TemplateView):
                     liste_periodes.append(periode)
                     liste_dates_extremes.append(periode.date_debut)
                     liste_dates_extremes.append(periode.date_fin)
-            date_min = min(liste_dates_extremes)
-            date_max = max(liste_dates_extremes)
-
-            # Recherche les impayés par période de réservations
             if liste_periodes:
-                ventilations = Ventilation.objects.values("prestation").filter(famille=self.request.user.famille, prestation__date__gte=date_min, prestation__date__lte=date_max).annotate(total=Sum("montant"))
-                dict_ventilations = {ventilation["prestation"]: ventilation["total"] for ventilation in ventilations}
-                for prestation in Prestation.objects.filter(famille=self.request.user.famille, date__gte=date_min, date__lte=date_max):
-                    solde_prestation = prestation.montant - dict_ventilations.get(prestation.pk, decimal.Decimal(0))
-                    if solde_prestation > decimal.Decimal(0):
-                        for periode in liste_periodes:
-                            if periode.date_debut <= prestation.date <= periode.date_fin:
-                                periode.total += prestation.montant
-                                periode.regle += dict_ventilations.get(prestation.pk, decimal.Decimal(0))
-                                periode.solde += solde_prestation
+                date_min = min(liste_dates_extremes)
+                date_max = max(liste_dates_extremes)
 
-                # Ajoute les paiements en cours
-                for periode in liste_periodes:
-                    if periode.pk in dict_paiements["P"]:
-                        periode.regle = periode.total
-                        periode.solde = decimal.Decimal(0)
-                    total_periodes_impayees += periode.solde
-                    if periode.solde:
-                        liste_finale_periodes.append(periode)
+                # Recherche les impayés par période de réservations
+                if liste_periodes:
+                    ventilations = Ventilation.objects.values("prestation").filter(famille=self.request.user.famille, prestation__date__gte=date_min, prestation__date__lte=date_max).annotate(total=Sum("montant"))
+                    dict_ventilations = {ventilation["prestation"]: ventilation["total"] for ventilation in ventilations}
+                    for prestation in Prestation.objects.filter(famille=self.request.user.famille, date__gte=date_min, date__lte=date_max):
+                        solde_prestation = prestation.montant - dict_ventilations.get(prestation.pk, decimal.Decimal(0))
+                        if solde_prestation > decimal.Decimal(0):
+                            for periode in liste_periodes:
+                                if periode.date_debut <= prestation.date <= periode.date_fin:
+                                    periode.total += prestation.montant
+                                    periode.regle += dict_ventilations.get(prestation.pk, decimal.Decimal(0))
+                                    periode.solde += solde_prestation
+
+                    # Ajoute les paiements en cours
+                    for periode in liste_periodes:
+                        if periode.pk in dict_paiements["P"]:
+                            periode.regle = periode.total
+                            periode.solde = decimal.Decimal(0)
+                        total_periodes_impayees += periode.solde
+                        if periode.solde:
+                            liste_finale_periodes.append(periode)
 
         context["liste_periodes_prefacturation"] = liste_finale_periodes
 

@@ -44,10 +44,13 @@ class Liste(Page, crud.Liste):
                 "horodatage": helpers.format_date("%d/%m/%Y %H:%M"),
                 "montant": "Formate_montant",
             }
+            labels = {
+                "systeme_paiement": "Système",
+            }
             ordering = ["horodatage"]
 
         def Formate_montant(self, instance, **kwargs):
             return utils_texte.Formate_montant(instance.montant)
 
         def Get_reglements(self, instance, *args, **kwargs):
-            return ", ".join([reglement.pk for reglement in instance.reglements.all()])
+            return ", ".join(["ID%d" % reglement.pk for reglement in instance.reglements.all()])
