@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 from django.http import JsonResponse
 from django.contrib import messages
-from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite, Consommation, MemoJournee, Evenement, Groupe, Individu, \
+from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite, Consommation, MemoJournee, Evenement, Groupe, Individu, Ventilation, \
                         Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Ferie, Individu, Activite, Classe, Scolarite
 from core.utils import utils_dates, utils_dictionnaires, utils_db, utils_texte, utils_decimal, utils_historique
 from consommations.utils import utils_consommations
@@ -380,6 +380,7 @@ def Save_grille(request=None, donnees={}):
         # Pour supprimer les consommations fantômes
         Consommation.objects.filter(prestation_id__in=donnees["suppressions"]["prestations"]).delete()
 
+        Ventilation.objects.filter(prestation_id__in=donnees["suppressions"]["prestations"]).delete()
         qs = Prestation.objects.filter(pk__in=donnees["suppressions"]["prestations"])
         qs._raw_delete(qs.db)
 
