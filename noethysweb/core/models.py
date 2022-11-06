@@ -2060,6 +2060,9 @@ class Facture(models.Model):
             self.solde_actuel = solde_actuel
             self.save()
 
+    def Get_regle_actuel(self):
+        return self.total - self.solde_actuel
+
 
 class Prestation(models.Model):
     idprestation = models.AutoField(verbose_name="ID", db_column='IDprestation', primary_key=True)
@@ -2869,7 +2872,7 @@ class PortailPeriode(models.Model):
     affichage_date_fin = models.DateTimeField(verbose_name="Fin", blank=True, null=True)
     modele = models.ForeignKey(ModeleEmail, verbose_name="Modèle d'Email", blank=True, null=True, on_delete=models.PROTECT)
     introduction = models.TextField(verbose_name="Introduction", blank=True, null=True)
-    prefacturation = models.BooleanField(verbose_name="Activer la préfacturation pour cette période", default=False)
+    prefacturation = models.BooleanField(verbose_name="Activer la préfacturation pour cette période", default=False, help_text="Cochez cette case pour que la famille puisse payer les prestations de cette période sur le portail même si aucune facture n'a été générée.")
     choix_categories = [("TOUTES", "Toutes les catégories de compte internet"), ("AUCUNE", "Uniquement les catégories de compte internet non renseignées"), ("SELECTION", "Uniquement les catégories suivantes")]
     types_categories = models.CharField(verbose_name="Filtre catégories", max_length=100, choices=choix_categories, default="TOUTES")
     categories = models.ManyToManyField(CategorieCompteInternet, verbose_name="Sélection de catégories", related_name="periode_categories", blank=True)
@@ -3473,3 +3476,31 @@ class Lecture(models.Model):
 
     def __str__(self):
         return "Lecture ID%d" % self.idlecture
+
+
+class Paiement(models.Model):
+    idpaiement = models.AutoField(verbose_name="ID", db_column='IDpaiement', primary_key=True)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
+    idtransaction = models.CharField(verbose_name="ID transaction", max_length=50, blank=True, null=True)
+    refdet = models.CharField(verbose_name="refdet", max_length=50, blank=True, null=True)
+    montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0)
+    objet = models.CharField(verbose_name="objet", max_length=50, blank=True, null=True)
+    saisie = models.CharField(verbose_name="Mode", max_length=50, blank=True, null=True)
+    resultrans = models.CharField(verbose_name="resultrans", max_length=50, blank=True, null=True)
+    numauto = models.CharField(verbose_name="numauto", max_length=50, blank=True, null=True)
+    dattrans = models.CharField(verbose_name="dattrans", max_length=50, blank=True, null=True)
+    heurtrans = models.CharField(verbose_name="heurtrans", max_length=50, blank=True, null=True)
+    systeme_paiement = models.CharField(verbose_name="Système de paiement", max_length=50, blank=True, null=True)
+    resultat = models.CharField(verbose_name="Résultat", max_length=50, blank=True, null=True)
+    message = models.CharField(verbose_name="Message", max_length=450, blank=True, null=True)
+    ventilation = models.TextField(verbose_name="ventilation", blank=True, null=True)
+    horodatage = models.DateTimeField(verbose_name="Horodatage", auto_now_add=True)
+    reglements = models.ManyToManyField(Reglement, verbose_name="Règlements", blank=True)
+
+    class Meta:
+        db_table = 'paiements'
+        verbose_name = "Paiement en ligne"
+        verbose_name_plural = "Paiements en ligne"
+
+    def __str__(self):
+        return "Paiement ID%d" % self.idpaiement if self.idpaiement else "Nouveau"

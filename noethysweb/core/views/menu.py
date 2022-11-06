@@ -330,6 +330,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_listes.Add(code="liste_recus", titre="Liste des reçus de règlements", icone="file-text-o")
     menu_listes.Add(code="liste_reglements", titre="Liste des règlements", icone="file-text-o")
     menu_listes.Add(code="liste_detaillee_reglements", titre="Liste détaillée des règlements", icone="file-text-o")
+    menu_listes.Add(code="liste_paiements", titre="Liste des paiements en ligne", icone="file-text-o")
 
     # Analyse
     menu_analyse_reglements = menu_reglements.Add(titre="Analyse")

@@ -9,7 +9,7 @@ from core.decorators import secure_ajax
 from core.decorators import Verifie_ventilation
 from reglements.views import liste_reglements, liste_recus, liste_detaillee_reglements, synthese_modes_reglements, \
                             depots_reglements, depots_reglements_selection, detail_prestations_depot, \
-                            liste_reglements_disponibles, corriger_ventilation
+                            liste_reglements_disponibles, corriger_ventilation, liste_paiements
 
 
 urlpatterns = [
@@ -22,6 +22,7 @@ urlpatterns = [
     path('reglements/reglements_supprimer_plusieurs/<str:listepk>', liste_reglements.Supprimer_plusieurs.as_view(), name='reglements_supprimer_plusieurs'),
     path('reglements/liste_recus', liste_recus.Liste.as_view(), name='liste_recus'),
     path('reglements/liste_detaillee_reglements', liste_detaillee_reglements.Liste.as_view(), name='liste_detaillee_reglements'),
+    path('reglements/liste_paiements', liste_paiements.Liste.as_view(), name='liste_paiements'),
 
     # Analyse
     path('reglements/detail_prestations_depot', Verifie_ventilation(detail_prestations_depot.View.as_view()), name='detail_prestations_depot'),

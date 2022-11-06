@@ -3,8 +3,9 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import decimal
 from django import forms
-from core.models import PortailParametre, AdresseMail, ImageFond
+from core.models import PortailParametre, AdresseMail, ImageFond, ModeReglement, CompteBancaire
 from django_summernote.widgets import SummernoteInplaceWidget
 from django.template.loader import render_to_string
 
@@ -17,6 +18,7 @@ class Parametre():
         self.valeur = kwargs.get("valeur", None)
         self.help_text = kwargs.get("help_text", None)
         self.required = kwargs.get("required", False)
+        self.choix = kwargs.get("choix", [])
 
     def Get_ctrl(self):
         if self.type == "boolean":
@@ -29,6 +31,14 @@ class Parametre():
             return forms.ChoiceField(label=self.label, choices=[(None, "Aucune")] + [(adresse_exp.pk, adresse_exp.adresse) for adresse_exp in AdresseMail.objects.all().order_by("adresse")], required=self.required, help_text=self.help_text)
         if self.type == "image_fond":
             return forms.ChoiceField(label=self.label, choices=[(None, "Image par défaut")] + [(image.pk, image.titre) for image in ImageFond.objects.all().order_by("titre")], required=self.required, help_text=self.help_text)
+        if self.type == "comptes_bancaires":
+            return forms.ChoiceField(label=self.label, choices=[(None, "Aucun")] + [(compte.pk, compte.nom) for compte in CompteBancaire.objects.all().order_by("nom")], required=self.required, help_text=self.help_text)
+        if self.type == "modes_reglements":
+            return forms.ChoiceField(label=self.label, choices=[(None, "Aucun")] + [(mode.pk, mode.label) for mode in ModeReglement.objects.all().order_by("label")], required=self.required, help_text=self.help_text)
+        if self.type == "choix":
+            return forms.ChoiceField(label=self.label, choices=self.choix, required=self.required, help_text=self.help_text)
+        if self.type == "decimal":
+            return forms.DecimalField(label=self.label, max_digits=6, decimal_places=2, initial=0.0, required=self.required, help_text=self.help_text)
         if self.type == "html":
             return forms.CharField(label=self.label, required=self.required, help_text=self.help_text, widget=SummernoteInplaceWidget(
                 attrs={'summernote': {'width': '100%', 'height': '200px', 'toolbar': [
@@ -88,6 +98,20 @@ LISTE_PARAMETRES = [
     Parametre(code="facturation_afficher_solde_facture", label="Afficher le solde actuel des factures", type="boolean", valeur=True),
     Parametre(code="facturation_autoriser_detail_facture", label="Afficher le détail des factures", type="boolean", valeur=True),
     Parametre(code="facturation_autoriser_telechargement_facture", label="Autoriser le téléchargement des factures", type="boolean", valeur=True),
+
+    # Paiement en ligne
+    Parametre(code="paiement_ligne_systeme", label="Paiement en ligne", type="choix", valeur=None, choix=[(None, "Aucun"), ("payfip", "PayFIP"), ("payzen", "Payzen"), ("demo", "Mode démo")], help_text="Sélectionnez un système de paiement en ligne."),
+    Parametre(code="paiement_ligne_mode_reglement", label="Mode de règlement", type="modes_reglements", valeur=None, help_text="Sélectionnez le mode de règlement qui est associé aux paiements en ligne."),
+    Parametre(code="paiement_ligne_compte_bancaire", label="Compte bancaire", type="comptes_bancaires", valeur=None, help_text="Sélectionnez le compte bancaire qui est associé aux paiements en ligne."),
+    Parametre(code="paiement_ligne_montant_minimal", label="Montant minimal autorisé", type="decimal", valeur=decimal.Decimal("1.00")),
+    Parametre(code="paiement_ligne_multi_factures", label="Autoriser le paiement multi factures", type="boolean", valeur=False, help_text="Cochez la case pour autoriser le paiement de plusieurs factures à la fois avec un seul paiement."),
+    Parametre(code="paiement_ligne_off_si_prelevement", label="Désactiver le paiement en ligne si prélèvement auto.", type="boolean", valeur=True),
+    Parametre(code="payfip_mode", label="Mode de fonctionnement", type="choix", valeur="test", choix=[("test", "Test"), ("validation", "Validation"), ("production", "Production")], help_text="Sélectionnez le mode de fonctionnement."),
+    Parametre(code="payzen_site_id", label="Identifiant boutique", type="char_1ligne", valeur="", help_text="Saisissez l'identifiant boutique que vous trouverez sur le backoffice Payzen."),
+    Parametre(code="payzen_certificat_test", label="Certificat de test", type="char_1ligne", valeur="", help_text="Saisissez le certificat de test que vous trouverez sur le backoffice Payzen."),
+    Parametre(code="payzen_certificat_production", label="Certificat de production", type="char_1ligne", valeur="", help_text="Saisissez le certificat de production que vous trouverez sur le backoffice Payzen."),
+    Parametre(code="payzen_mode", label="Mode de fonctionnement", type="choix", valeur="TEST", choix=[("TEST", "Test"), ("PRODUCTION", "Production")], help_text="Sélectionnez un mode de fonctionnement."),
+    Parametre(code="payzen_echelonnement", label="Proposer le paiement en 3 fois", type="boolean", valeur=False),
 
     # Règlements
     Parametre(code="reglements_afficher_page", label="Afficher la page", type="boolean", valeur=True),

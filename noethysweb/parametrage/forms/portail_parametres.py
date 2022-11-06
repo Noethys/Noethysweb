@@ -22,6 +22,9 @@ LISTE_RUBRIQUES = [
     ("Page des documents", ["documents_afficher_page", "documents_intro"]),
     ("Page des réservations", ["reservations_afficher_page", "reservations_intro", "reservations_intro_planning"]),
     ("Page de la facturation", ["facturation_afficher_page", "facturation_intro", "facturation_afficher_numero_facture", "facturation_afficher_solde_facture", "facturation_autoriser_detail_facture", "facturation_autoriser_telechargement_facture"]),
+    ("Paiement en ligne", ["paiement_ligne_systeme", "paiement_ligne_mode_reglement", "paiement_ligne_compte_bancaire", "paiement_ligne_montant_minimal",
+                           "paiement_ligne_multi_factures", "paiement_ligne_off_si_prelevement", "payfip_mode", "payzen_site_id", "payzen_certificat_test",
+                           "payzen_certificat_production", "payzen_mode", "payzen_echelonnement"]),
     ("Page des règlements", ["reglements_afficher_page", "reglements_intro", "reglements_afficher_encaissement", "reglements_autoriser_telechargement_recu"]),
     ("Page contact", ["contact_afficher_page", "contact_intro", "messagerie_intro", "messagerie_envoyer_notification_famille", "messagerie_envoyer_notification_admin", "contact_afficher_coords_structures", "contact_afficher_coords_organisateur"]),
     ("Page des mentions légales", ["mentions_afficher_page", "mentions_intro", "mentions_conditions_generales"]),
@@ -59,3 +62,58 @@ class Formulaire(FormulaireBase, forms.Form):
             self.helper.layout.append(Fieldset(titre_rubrique, *liste_fields))
 
         self.helper.layout.append(HTML("<br>"))
+        self.helper.layout.append(HTML(EXTRA_HTML))
+
+    def clean(self):
+        # Paiement en ligne
+        if self.cleaned_data["paiement_ligne_systeme"]:
+            if not self.cleaned_data["paiement_ligne_mode_reglement"]:
+                self.add_error("paiement_ligne_mode_reglement", "Vous devez sélectionner un mode de règlement pour le paiement en ligne.")
+
+            if self.cleaned_data["paiement_ligne_systeme"] == "payzen":
+                if not self.cleaned_data["payzen_site_id"]:
+                    self.add_error("payzen_site_id", "Vous devez saisir l'identifiant boutique pour le paiement en ligne.")
+                if not self.cleaned_data["payzen_certificat_test"]:
+                    self.add_error("payzen_certificat_test", "Vous devez saisir le certificat de test pour le paiement en ligne.")
+                if not self.cleaned_data["payzen_certificat_production"]:
+                    self.add_error("payzen_certificat_production", "Vous devez saisir le certificat de production pour le paiement en ligne.")
+
+        return self.cleaned_data
+
+
+EXTRA_HTML = """
+<script>
+    function On_change_paiement_ligne_systeme() {
+        $('#div_id_paiement_ligne_mode_reglement').hide();
+        $('#div_id_paiement_ligne_montant_minimal').hide();
+        $('#div_id_paiement_ligne_multi_factures').hide();
+        $('#div_id_paiement_ligne_off_si_prelevement').hide();
+        $('#div_id_payfip_mode').hide();
+        $('#div_id_payzen_site_id').hide();
+        $('#div_id_payzen_certificat_test').hide();
+        $('#div_id_payzen_certificat_production').hide();
+        $('#div_id_payzen_mode').hide();
+        $('#div_id_payzen_echelonnement').hide();
+        if ($("#id_paiement_ligne_systeme").val()) {
+            $('#div_id_paiement_ligne_mode_reglement').show();
+            $('#div_id_paiement_ligne_montant_minimal').show();
+            $('#div_id_paiement_ligne_multi_factures').show();
+            $('#div_id_paiement_ligne_off_si_prelevement').show();
+        };
+        if ($("#id_paiement_ligne_systeme").val() == "payfip") {
+            $('#div_id_payfip_mode').show();
+        };
+        if ($("#id_paiement_ligne_systeme").val() == "payzen") {
+            $('#div_id_payzen_site_id').show();
+            $('#div_id_payzen_certificat_test').show();
+            $('#div_id_payzen_certificat_production').show();
+            $('#div_id_payzen_mode').show();
+            $('#div_id_payzen_echelonnement').show();
+        };
+    }
+    $(document).ready(function() {
+        $('#id_paiement_ligne_systeme').change(On_change_paiement_ligne_systeme);
+        On_change_paiement_ligne_systeme.call($('#id_paiement_ligne_systeme').get(0));
+    });
+</script>
+"""

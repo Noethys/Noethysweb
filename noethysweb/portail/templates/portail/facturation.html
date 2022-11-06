@@ -3,9 +3,13 @@
 {% load static %}
 {% load embed %}
 
-
 {% block styles %}
     {{ block.super }}
+    <style>
+        .table-facturation {
+            text-align: center;
+        }
+    </style>
 {% endblock %}
 
 {% block contenu_page %}
@@ -17,23 +21,192 @@
         </div>
     {% endif %}
 
+    {# Récapitulatif des factures impayées #}
+    {% if texte_impayes and parametres_portail.facturation_afficher_solde_facture %}
+        <div class="alert alert-danger">
+            <i class='fa fa-exclamation-triangle margin-r-5'></i>{{ texte_impayes|safe }}
+        </div>
+    {% endif %}
+
+    {# Paiement en ligne #}
+    {% if texte_impayes and parametres_portail.paiement_ligne_systeme %}
+        {% embed 'core/box.html' with box_titre=True %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Payer en ligne{% endblock %}
+            {% block box_contenu %}
+                {% if parametres_portail.paiement_ligne_systeme|is_in_list:"payzen;demo" %}
+                    <img src="{% static "images/payzen.png" %}" class="pull-right" alt="Logo Payzen">
+                    <p>Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PayZen. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.</p>
+                {% else %}
+                    <img src="{% static "images/payfip.jpg" %}" class="pull-right" alt="Logo Payfip">
+                    <p>Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne TIPI. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.</p>
+                {% endif %}
+                <div>
+                    <a href="#" class="btn btn-success" data-toggle="modal" data-target="#modal_selection_factures" title="Payer en ligne avec une carte bancaire"><i class="fa fa-credit-card margin-r-5"></i>Payer en ligne</a>
+                </div>
+            {% endblock box_contenu %}
+            {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+        {% endembed %}
+
+        {# Modal Sélection des impayés à régler #}
+        {% embed 'core/modal.html' with modal_footer=True %}
+            {% block modal_id %}modal_selection_factures{% endblock %}
+            {% block modal_titre %}Payer en ligne{% endblock %}
+            {% block modal_classe %}modal-lg{% endblock %}
+            {% block modal_body %}
+                <p>Cochez les sommes à payer et cliquez sur le bouton Valider pour accéder à la page de paiement sécurisée de notre partenaire.</p>
+			    <div id="message_erreur" class="text-red"></div>
+                <div class="box-body table-responsive">
+
+                    <table class="table-facturation table table-bordered table-striped">
+                        <tbody>
+                            <tr>
+                                <th>Sélection</th>
+                                <th>Intitulé</th>
+                                <th>Montant</th>
+                                <th>Déjà réglé</th>
+                                <th>Reste à régler</th>
+                            </tr>
+
+                            {% for facture in liste_factures_impayees %}
+                                <tr>
+                                    <td><input type="checkbox" class="check_impaye" name="check_impaye" value="{{ facture.solde_actuel|stringformat:".2f" }}" data-type='facture' data-id={{ facture.pk }} data-num={{ facture.numero }} data-solde={{ facture.solde_actuel|stringformat:".2f" }}></td>
+                                    <td>Facture n°{{ facture.numero }}</td>
+                                    <td>{{ facture.total|montant }}</td>
+                                    <td>{{ facture.Get_regle_actuel|montant }}</td>
+                                    <td><span class="badge-pill bg-{% if facture.en_cours_paiement %}yellow{% elif facture.solde_actuel > 0.0 %}red{% else %}green{% endif %}">{{ facture.solde_actuel|montant }}</span></td>
+                                </tr>
+                            {% endfor %}
+
+                            {% for periode in liste_periodes_prefacturation %}
+                                <tr>
+                                    <td><input type="checkbox" class="check_impaye" name="check_impaye" value={{ periode.solde|stringformat:".2f" }} unchecked data-type='periode' data-id={{ periode.pk }} data-num="" data-solde={{ periode.solde|stringformat:".2f" }}></td>
+                                    <td>{{ periode.nom }}</td>
+                                    <td>{{ periode.total|montant }}</td>
+                                    <td>{{ periode.regle|montant }}</td>
+                                    <td><span class="badge-pill bg-{% if periode.solde > 0.0 %}red{% else %}green{% endif %}">{{ periode.solde|montant }}</span></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <div>
+                        Montant du règlement : <strong><span class="total">0.00 €</span></strong>
+                    </div>
+
+                    {% if parametres_portail.payzen_echelonnement %}
+                        </br>
+                        <div>
+                            <input type="checkbox" id="check_echelonnement" name="check_echelonnement"> Payer en 3 fois sans frais (Echelonnement sur 3 mois)
+                        </div>
+                    {% endif %}
+                </div>
+            {% endblock %}
+
+            {% block modal_footer %}
+                <div id="div_form_paiement" style="visibility:hidden"></div>
+                <button type="button" class="btn btn-primary" id="bouton_valider_montant"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            {% endblock %}
+
+        {% endembed %}
+
+        <script>
+            // Reset des champs de saisie de la fenêtre modale
+            $('#modal_selection_factures').on('show.bs.modal', function (event) {
+                $('#message_erreur').text('')
+                $('#div_form_paiement').hide();
+                $('#div_form_paiement').html('');
+            })
+
+            $(document).ready(function() {
+                {# Fonction de calcul du total du paiement #}
+                function maj_montant_paiement() {
+                    var montant_reglement = 0.0;
+                    $("input[name='check_impaye']:checked").each(function() {
+                        montant_reglement += parseFloat($(this).val());
+                    });
+                    $('.total').html(parseFloat(montant_reglement).toFixed(2) + " €");
+                }
+
+                {# Mise à jour du montant total du règlement #}
+                $(".check_impaye").change(function() {
+                    maj_montant_paiement();
+                });
+
+                {# Sélection d'une seule facture si multi factures non actif #}
+                {% if parametres_portail.paiement_ligne_multi_factures %}
+                    $(".check_impaye").change(function() {
+                        if ($(this).prop("checked") === true) {
+                            $("#modal_selection_factures .check_impaye:checked").prop("checked", false);
+                            $(this).prop("checked", true);
+                            maj_montant_paiement();
+                        }
+                    });
+                {% endif %}
+
+                {# Validation du montant du paiement #}
+                $('#bouton_valider_montant').on('click', function(event) {
+                    var nbr_selected_impayes = 0;
+                    var selected_impayes = [];
+                    var montant_reglement = 0;
+                    var paiement_echelonne = 0;
+                    $(".check_impaye:checked").each(function() {
+                        nbr_selected_impayes += 1;
+                        selected_impayes.push($(this).attr("data-type") + "##" + $(this).attr("data-id") + "##" + $(this).attr("data-solde"));
+                        montant_reglement += parseFloat($(this).attr("data-solde"));
+                    });
+                    if (($("#check_echelonnement").length) && ($("#check_echelonnement").prop("checked") === true)) {
+                        paiement_echelonne = 1;
+                    };
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'portail_ajax_effectuer_paiement_en_ligne' %}",
+                        datatype: "json",
+                        data: {
+                            liste_impayes: selected_impayes.toString(),
+                            montant_reglement: montant_reglement,
+                            paiement_echelonne: paiement_echelonne,
+                            csrfmiddlewaretoken: "{{ csrf_token }}",
+                        },
+                        success: function(data) {
+                            if (data.systeme_paiement === "demo") {
+                                toastr.info(data.texte);
+                            }
+                            if (data.systeme_paiement === "payzen") {
+                                $('#div_form_paiement').html(data.form_paiement);
+                                $('#div_form_paiement').hide();
+                                $("#form_paiement").submit()
+                            }
+                            if (data.systeme_paiement === "payfip") {
+                                $('#modal_paiement_factures').modal('hide');
+                                $('#valider_montant').attr('href', data.urltoredirect);
+                                location.href = "{% url 'portail_facturation' %}"
+                            }
+                        },
+                        error: function(data) {
+                            toastr.error(data.responseJSON.erreur);
+                        },
+                    });
+                });
+
+            });
+
+        </script>
+
+	{% endif %}
+
     {# Liste des factures #}
     {% embed 'core/box.html' with box_titre=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
         {% block box_titre %}Liste des dernières factures{% endblock %}
+        {% block card_body_classe %}p-0{% endblock %}
         {% block box_contenu %}
-
-            {# Récapitulatif des factures impayées #}
-            {% if liste_factures_impayees and parametres_portail.facturation_afficher_solde_facture %}
-                <div class="alert alert-danger">
-                    <i class='fa fa-exclamation-triangle margin-r-5'></i>Il reste {{ liste_factures_impayees|length }} facture{{ liste_factures_impayees|length|pluralize }} à régler pour un total de {{ liste_factures_impayees|somme|montant }}
-                </div>
-            {% endif %}
 
             {# Liste des factures #}
             <div style="display: block;overflow-x: auto;white-space: nowrap;">
                 {% if liste_factures %}
-                    <table class="table table-bordered">
+                    <table class="table projects">
                         <thead>
                             <tr class="text-center">
                                 <th>Du</th>
@@ -111,7 +284,7 @@
                     success: function (data) {
                         $("#texte_detail_facture").html(data);
                         $('#modal_detail_facture').modal('show');
-                    }
+                    },
                 });
             });
         });

@@ -29,3 +29,4 @@ bleach
 mysqlclient
 jellyfish
 lxml
+eopayment

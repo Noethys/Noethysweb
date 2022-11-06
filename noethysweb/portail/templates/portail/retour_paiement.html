@@ -1,0 +1,43 @@
+{% extends "portail/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+{% endblock %}
+
+{% block contenu_page %}
+    <p>
+		<a id="retour_factures" href="{% url 'portail_facturation' %}"><i class="fa fa-arrow-circle-o-left"></i> Revenir à la page de la facturation</a>
+	</p>
+
+	{% if etat == "cancel" %}
+        <div class="alert alert-danger alert-dismissible">
+            <h6><i class="icon fa fa-ban"></i> Vous avez annulé avant d'avoir procédé au paiement !</h6>
+            Vous pouvez revenir à la page des factures.
+        </div>
+	{% endif %}
+
+	{% if etat == "error" %}
+        <div class="alert alert-danger alert-dismissible">
+            <h6><i class="icon fa fa-ban"></i> Une erreur a été rencontrée par la plate-forme de paiement !</h6>
+            Vous pouvez revenir à la page des factures.
+        </div>
+	{% endif %}
+
+	{% if etat == "refused" %}
+        <div class="alert alert-danger alert-dismissible">
+            <h6><i class="icon fa fa-ban"></i> Votre paiement a été refusé !</h6>
+            Vous pouvez revenir à la page des factures.
+        </div>
+	{% endif %}
+
+	{% if etat == "success" %}
+        <div class="alert alert-success alert-dismissible">
+            <h6><i class="icon fa fa-check"></i> Votre paiement a bien été enregistré !</h6>
+            Vous pouvez revenir à la page des factures.
+        </div>
+	{% endif %}
+
+{% endblock contenu_page %}
