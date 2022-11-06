@@ -20,7 +20,8 @@ import datetime
 class Formulaire(FormulaireBase, ModelForm):
     date = forms.DateField(label="Date", required=True, widget=DatePickerWidget())
     mode = forms.ModelChoiceField(label="Mode de règlement", queryset=ModeReglement.objects.all(), widget=Selection_mode_reglement(), required=True)
-    emetteur = forms.ModelChoiceField(label="Emetteur", queryset=Emetteur.objects.all(), widget=Selection_emetteur(), required=False)
+    # emetteur = forms.ModelChoiceField(label="Emetteur", queryset=Emetteur.objects.none(), widget=Selection_emetteur(), required=False)
+    emetteur = forms.ChoiceField(label="Emetteur", choices=[], widget=Selection_emetteur(), required=False)
     payeur = forms.ModelChoiceField(label="Payeur", queryset=Payeur.objects.none(), widget=Select_avec_commandes(), required=True)
     observations = forms.CharField(label="Observations", widget=forms.Textarea(attrs={'rows': 1}), required=False)
     date_differe = forms.DateField(label="Encaissement différé", required=False, widget=DatePickerWidget())
@@ -139,6 +140,8 @@ class Formulaire(FormulaireBase, ModelForm):
         return self.cleaned_data["date"]
 
     def clean_emetteur(self):
+        if self.cleaned_data["emetteur"] in ("None", ""):
+            self.cleaned_data["emetteur"] = None
         if self.instance and self.instance.depot:
             return getattr(self.instance, "emetteur")
         return self.cleaned_data["emetteur"]

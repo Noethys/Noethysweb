@@ -2,7 +2,7 @@
 {% load embed %}
 
 
-<select id="{{ id }}" name="{{ name }}" style="width: 100%;" data-minimum-input-length="0" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2" required {{ disabled }}>
+<select id="{{ id }}" name="{{ name }}" style="width: 100%;" data-minimum-input-length="0" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2" {{ disabled }}>
     {% for choix in choices %}
         <option value="{{ choix.0 }}" {% if value == choix.0 %}selected{% endif %}>{{ choix.1 }}</option>
     {% endfor %}
