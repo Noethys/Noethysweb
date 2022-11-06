@@ -3,19 +3,19 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
+from decimal import Decimal
 from django.urls import reverse_lazy, reverse
-from core.views.mydatatableview import MyDatatable, columns, helpers
-from core.views import crud
-from core.models import Famille, Reglement, Payeur, Emetteur, ModeReglement, Prestation, Ventilation, Mandat
-from fiche_famille.forms.famille_reglements import Formulaire
-from fiche_famille.views.famille import Onglet
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.db.models import Sum, Q
-from decimal import Decimal
-import json
+from core.views.mydatatableview import MyDatatable, columns, helpers
+from core.views import crud
+from core.models import Famille, Reglement, Payeur, Emetteur, ModeReglement, Prestation, Ventilation, Mandat
 from core.utils import utils_dates, utils_texte
-
+from facturation.utils import utils_factures
+from fiche_famille.forms.famille_reglements import Formulaire
+from fiche_famille.views.famille import Onglet
 
 
 def Get_ventilation(request):
@@ -225,9 +225,14 @@ class ClasseCommune(Page):
             liste_IDtraitees.append(dict_temp["idprestation"])
 
         # Supprime les ventilations obsolètes
+        liste_ID_prestations = []
         for ventilation in ventilations_reglement:
+            liste_ID_prestations.append(ventilation.prestation_id)
             if ventilation.prestation_id not in liste_IDtraitees:
                 ventilation.delete()
+
+        # Recalcule le solde des factures associées
+        utils_factures.Maj_solde_actuel(liste_idprestation=liste_ID_prestations + liste_IDtraitees)
 
         return super().form_valid(form)
 
@@ -245,6 +250,15 @@ class Modifier(ClasseCommune, crud.Modifier):
 
 class Supprimer(Page, crud.Supprimer):
     template_name = "fiche_famille/famille_delete.html"
+    liste_idprestation = []
+
+    def Avant_suppression(self, objet=None):
+        # Met à jour le solde des factures associées aux prestations du règlement
+        self.liste_idprestation = [ventilation.prestation_id for ventilation in Ventilation.objects.filter(reglement=objet)]
+        return True
+
+    def Apres_suppression(self, objet=None):
+        utils_factures.Maj_solde_actuel(liste_idprestation=self.liste_idprestation)
 
     # def delete(self, request, *args, **kwargs):
     #     """ Empêche la suppression de règlement déjà inclus dans dépôt """
@@ -254,6 +268,16 @@ class Supprimer(Page, crud.Supprimer):
     #     reponse = super(Supprimer, self).delete(request, *args, **kwargs)
     #     return reponse
 
+
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
     template_name = "fiche_famille/famille_delete.html"
+    liste_idprestation = []
 
+    def Avant_suppression(self, objets=[]):
+        # Met à jour le solde des factures associées aux prestations du règlement
+        for reglement in objets:
+            self.liste_idprestation += [ventilation.prestation_id for ventilation in Ventilation.objects.filter(reglement=reglement)]
+        return True
+
+    def Apres_suppression(self, objets=[]):
+        utils_factures.Maj_solde_actuel(liste_idprestation=self.liste_idprestation)

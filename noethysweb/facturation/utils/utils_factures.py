@@ -5,9 +5,9 @@
 
 import logging
 logger = logging.getLogger(__name__)
-from core.models import Facture, Ventilation
-from django.db.models import Q, Sum
 from decimal import Decimal
+from django.db.models import Q, Sum
+from core.models import Facture, Ventilation, Prestation
 
 
 def Maj_solde_actuel_factures(IDfamille=None):
@@ -26,3 +26,14 @@ def Maj_solde_actuel_factures(IDfamille=None):
             facture.solde_actuel = solde_actuel
             facture.save()
 
+
+def Maj_solde_actuel(liste_idprestation=[], liste_prestations=[]):
+    """
+    Met à jour les soldes actuels des factures associées aux prestations données
+    IMPORTANT : Renseigner liste_idprestation OU liste_prestations
+    """
+    if liste_prestations:
+        liste_idprestation = [prestation.ok for prestation in liste_prestations]
+    factures = {prestation.facture: None for prestation in Prestation.objects.select_related("facture").filter(pk__in=liste_idprestation, facture__isnull=False)}
+    for facture in factures.keys():
+        facture.Maj_solde_actuel()
