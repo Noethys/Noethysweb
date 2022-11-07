@@ -208,7 +208,7 @@ class Liste(Page, crud.Liste):
                 html.append(self.Create_bouton(url=reverse("%s_modifier" % instance.categorie, args=[instance.famille_id, instance.individu_id]), title="Modifier", icone="fa-pencil", args="target='_blank'"))
             elif instance.categorie in ("individu_medecin"):
                 html.append(self.Create_bouton(url=reverse("individu_medical_liste", args=[instance.famille_id, instance.individu_id]), title="Modifier", icone="fa-pencil", args="target='_blank'"))
-            elif instance.categorie in ("famille_pieces"):
+            elif instance.categorie in ("famille_pieces", "famille_reglements"):
                 html.append(self.Create_bouton(url=reverse("%s_modifier" % instance.categorie, args=[instance.famille_id, instance.idobjet]), title="Modifier", icone="fa-pencil", args="target='_blank'"))
             elif instance.categorie in ("famille_caisse"):
                 html.append(self.Create_bouton(url=reverse("%s_modifier" % instance.categorie, args=[instance.famille_id]), title="Modifier", icone="fa-pencil", args="target='_blank'"))

@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, decimal, sys, datetime, re, copy
+import logging, decimal, sys, datetime, re, copy, json
 logger = logging.getLogger(__name__)
 from django.urls import reverse
 from django.http import JsonResponse, HttpResponse
@@ -14,7 +14,7 @@ from django.shortcuts import render
 from django.db.models import Sum, Q
 from eopayment import Payment
 from portail.views.base import CustomView
-from core.models import Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur, ModeReglement, CompteBancaire
+from core.models import Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur, ModeReglement, CompteBancaire, PortailRenseignement
 from core.utils import utils_portail, utils_fichiers, utils_dates, utils_texte
 
 ETATS_PAIEMENTS = {1: "RECEIVED", 2: "ACCEPTED", 3: "PAID", 4: "DENIED", 5: "CANCELLED", 6: "WAITING", 99: "ERROR"}
@@ -357,6 +357,10 @@ def Enregistrement_reglement(paiement=None, vads_payment_config=None):
                 credit -= ventilation
                 Ventilation.objects.create(famille=paiement.famille, reglement=reglement, prestation=prestation, montant=ventilation)
 
+        # Mémorisation du paiement dans l'historique du portail
+        PortailRenseignement.objects.create(famille=paiement.famille, categorie="famille_reglements", code="Nouveau paiement en ligne", validation_auto=True, idobjet=reglement.pk,
+                                            nouvelle_valeur=json.dumps("Paiement %s de %s" % (paiement.systeme_paiement, utils_texte.Formate_montant(reglement.montant))))
+
     # MAJ du solde des factures
     for facture in factures:
         facture.Maj_solde_actuel()
@@ -391,16 +395,16 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Facturation"
 
-        # Importation des paiements en cours
-        liste_paiements = Paiement.objects.filter(famille=self.request.user.famille).exclude(Q(resultat="PAID") | Q(resultrans__in=["P", "V"]) | (Q(systeme_paiement="payfip") & Q(horodatage__lt=datetime.datetime.now() - datetime.timedelta(minutes=5))))
+        # Importation des paiements PAYFIP en cours
+        liste_paiements = Paiement.objects.filter(famille=self.request.user.famille, systeme_paiement="payfip", horodatage__lt=datetime.datetime.now() - datetime.timedelta(minutes=5))
         dict_paiements = {"F": {}, "P": {}}
-        # for paiement in liste_paiements:
-        #     for texte in paiement.ventilation.split(","):
-        #         type_impaye = texte[0]
-        #         ID, montant = texte[1:].split("#")
-        #         ID, montant = int(ID), decimal.Decimal(montant)
-        #         dict_paiements[type_impaye].setdefault(ID, decimal.Decimal(0))
-        #         dict_paiements[type_impaye][ID] += montant
+        for paiement in liste_paiements:
+            for texte in paiement.ventilation.split(","):
+                type_impaye = texte[0]
+                ID, montant = texte[1:].split("#")
+                ID, montant = int(ID), decimal.Decimal(montant)
+                dict_paiements[type_impaye].setdefault(ID, decimal.Decimal(0))
+                dict_paiements[type_impaye][ID] += montant
 
         # Importation des factures impayées
         liste_factures = []
