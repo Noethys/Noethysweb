@@ -170,6 +170,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_depannage.Add(code="correcteur", titre="Correcteur d'anomalies", icone="file-text-o")
     menu_depannage.Add(code="liste_conso_sans_presta", titre="Liste des consommations sans prestations", icone="file-text-o")
 
+    # Utilitaires
+    menu_utilitaires = menu_outils.Add(titre="Utilitaires")
+    menu_utilitaires.Add(code="procedures", titre="Procédures", icone="file-text-o")
+
 
     # ------------------------------------ Individus ------------------------------------
     menu_individus = menu.Add(code="individus_toc", titre="Individus", icone="user")

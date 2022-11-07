@@ -10,7 +10,7 @@ from outils.views import editeur_emails, editeur_emails_express, historique, upd
                         editeur_emails_familles, editeur_emails_individus, editeur_emails_contacts, editeur_emails_listes_diffusion, \
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
                         demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur, editeur_sms, editeur_sms_familles, \
-                        editeur_sms_individus, editeur_sms_saisie_libre, sms, utilisateurs_bloques
+                        editeur_sms_individus, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures
 
 urlpatterns = [
 
@@ -84,6 +84,9 @@ urlpatterns = [
     path('outils/correcteur', correcteur.View.as_view(), name='correcteur'),
     path('outils/liste_conso_sans_presta', liste_conso_sans_presta.Liste.as_view(), name='liste_conso_sans_presta'),
     path('outils/liste_conso_sans_presta_supprimer_plusieurs/<str:listepk>', liste_conso_sans_presta.Supprimer_plusieurs.as_view(), name='liste_conso_sans_presta_supprimer_plusieurs'),
+
+    # Utilitaires
+    path('outils/procedures', procedures.View.as_view(), name='procedures'),
 
     # AJAX
     path('outils/get_modele_email', secure_ajax(editeur_emails.Get_modele_email), name='ajax_get_modele_email'),

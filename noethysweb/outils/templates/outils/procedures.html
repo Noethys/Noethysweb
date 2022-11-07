@@ -1,0 +1,35 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+
+    {% embed 'core/box.html' with box_titre=True box_introduction=True %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}Commande{% endblock %}
+        {% block box_introduction %}Saisissez une commande et cliquez sur Valider.{% endblock %}
+        {% block box_contenu %}
+            <form id="form_procedures" method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col">
+                        {{ form|crispy }}
+                    </div>
+                    <div class="col-md-auto">
+                        <button type="submit" form="form_procedures" class="btn btn-primary" name="submit" title="Exécuter la commande"><i class="fa fa-bolt margin-r-5"></i> <span class="text-md">Exécuter</span></button>
+                    </div>
+                </div>
+            </form>
+        {% endblock %}
+    {% endembed %}
+
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline{% endblock %}
+        {% block box_titre %}Résultats{% endblock %}
+        {% block box_contenu %}
+            {{ resultat|safe }}
+        {% endblock %}
+    {% endembed %}
+
+{% endblock contenu_page %}
