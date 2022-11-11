@@ -172,7 +172,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
     # Utilitaires
     menu_utilitaires = menu_outils.Add(titre="Utilitaires")
-    menu_utilitaires.Add(code="procedures", titre="Procédures", icone="file-text-o")
+    menu_utilitaires.Add(code="procedures", titre="Procédures", icone="file-text-o", compatible_demo=False)
 
 
     # ------------------------------------ Individus ------------------------------------

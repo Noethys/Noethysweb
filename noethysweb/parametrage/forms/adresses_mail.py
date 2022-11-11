@@ -85,18 +85,6 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.add_error('hote', "Vous devez renseigner l'hôte")
                 return
 
-            if not self.cleaned_data["port"]:
-                self.add_error('port', "Vous devez renseigner le numéro de port")
-                return
-
-            if not self.cleaned_data["utilisateur"]:
-                self.add_error('utilisateur', "Vous devez renseigner l'utilisateur")
-                return
-
-            if not self.cleaned_data["motdepasse"]:
-                self.add_error('motdepasse', "Vous devez renseigner le mot de passe")
-                return
-
         if self.cleaned_data["moteur"] == "mailjet":
 
             if not self.cleaned_data["cle_api"]:

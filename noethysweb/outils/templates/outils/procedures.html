@@ -8,7 +8,7 @@
     {% embed 'core/box.html' with box_titre=True box_introduction=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
         {% block box_titre %}Commande{% endblock %}
-        {% block box_introduction %}Saisissez une commande et cliquez sur Valider.{% endblock %}
+        {% block box_introduction %}Saisissez une commande et cliquez sur Exécuter.{% endblock %}
         {% block box_contenu %}
             <form id="form_procedures" method="post">
                 {% csrf_token %}
