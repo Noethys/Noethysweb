@@ -13,3 +13,6 @@ def Maj_infos():
 
     # Met à jour les adresses de tous les individus
     utils_individus.Maj_infos_tous_individus()
+
+    # Ajoute l'IDfamille aux cotisations individuelles
+    utils_individus.Maj_cotisations_individuelles()

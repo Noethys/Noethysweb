@@ -5,9 +5,7 @@
 
 import logging
 logger = logging.getLogger(__name__)
-from core.models import Famille, Individu, Rattachement
-from core.utils import utils_texte
-from django.db.models import Q
+from core.models import Famille, Individu, Cotisation, Rattachement
 
 
 def Maj_infos_toutes_familles():
@@ -23,3 +21,20 @@ def Maj_infos_tous_individus():
     for individu in Individu.objects.all():
         individu.Maj_infos()
     logger.debug("Fin de la MAJ des infos.")
+
+def Maj_cotisations_individuelles():
+    """ Associe l'IDfamille à toutes cotisations individuelles sans IDfamille """
+    logger.debug("MAJ des cotisations individuelles...")
+    cotisations = Cotisation.objects.select_related("prestation").filter(famille_id__isnull=True)
+    for cotisation in cotisations:
+        idfamille = None
+        if cotisation.prestation:
+            idfamille = cotisation.prestation.famille_id
+        else:
+            rattachement = Rattachement.objects.filter(individu_id=cotisation.individu_id).first()
+            if rattachement:
+                idfamille = rattachement.famille_id
+        if idfamille:
+            cotisation.famille_id = idfamille
+            cotisation.save()
+    logger.debug("Fin de la MAJ des cotisations individuelles.")
