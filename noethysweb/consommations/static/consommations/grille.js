@@ -1471,6 +1471,14 @@ function ajax_facturer(cases_touchees_temp) {
                 });
             };
 
+            // Messages
+            if (data.messages) {
+                for (var message of data.messages) {
+                    if (message[0] === "info") {toastr.info(message[1])}
+                    if (message[0] === "erreur") {toastr.error(message[1])}
+                }
+            }
+
             // Si mode pointeuse, on désactive le dirty de toutes les consommations
             if (mode === 'pointeuse') {
                 $.each(dict_cases, function (key, case_tableau) {
