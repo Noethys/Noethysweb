@@ -16,3 +16,6 @@ def Maj_infos():
 
     # Ajoute l'IDfamille aux cotisations individuelles
     utils_individus.Maj_cotisations_individuelles()
+
+    # Met à jour les tarif_ligne dans chaque prestation
+    utils_individus.Maj_lignes_tarifs_prestations()

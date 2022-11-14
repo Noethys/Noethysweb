@@ -6,7 +6,7 @@
 from django.forms.widgets import Widget
 from django.template import loader
 from django.utils.safestring import mark_safe
-from core.models import Facture, Consommation
+from core.models import Facture, Consommation, TarifLigne
 from core.utils import utils_dates
 
 
@@ -128,6 +128,46 @@ class Facture_prestation(Widget):
         else:
             context['texte'] = "Aucune facture associée"
         context['facture'] = facture
+        if value is not None:
+            context['value'] = value
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
+
+
+class Texte_simple(Widget):
+    template_name = 'fiche_famille/widgets/ligne_tarif.html'
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        context['name'] = name
+        if value is not None:
+            context['value'] = value
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
+
+
+
+class Ligne_tarif(Widget):
+    template_name = 'fiche_famille/widgets/ligne_tarif.html'
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        context['name'] = name
+        ligne = TarifLigne.objects.get(pk=value) if value else None
+        if ligne:
+            context['texte'] = "Ligne %s - %s" % (ligne.tranche, ligne.code)
+        else:
+            context['texte'] = "Aucune ligne tarifaire"
         if value is not None:
             context['value'] = value
         return context

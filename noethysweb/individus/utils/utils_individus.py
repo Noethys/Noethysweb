@@ -5,7 +5,7 @@
 
 import logging
 logger = logging.getLogger(__name__)
-from core.models import Famille, Individu, Cotisation, Rattachement
+from core.models import Famille, Individu, Cotisation, Rattachement, TarifLigne, Prestation
 
 
 def Maj_infos_toutes_familles():
@@ -38,3 +38,28 @@ def Maj_cotisations_individuelles():
             cotisation.famille_id = idfamille
             cotisation.save()
     logger.debug("Fin de la MAJ des cotisations individuelles.")
+
+def Maj_lignes_tarifs_prestations():
+    """ Met à jour les tarif_ligne dans chaque prestation """
+    logger.debug("MAJ des lignes de tarifs dans les prestations...")
+
+    # Importation des lignes de tarifs existantes
+    dict_lignes = {}
+    for ligne in TarifLigne.objects.all().order_by("num_ligne"):
+        dict_lignes.setdefault(ligne.tarif_id, [])
+        dict_lignes[ligne.tarif_id].append(ligne)
+
+    # MAJ des prestations
+    liste_modifications = []
+    prestations = Prestation.objects.filter(tarif_ligne__isnull=True, tarif__isnull=False)
+    logger.debug("Nbre prestations trouvées : %s" % len(prestations))
+    for prestation in prestations:
+        # Recherche une ligne de tarif correspondant au montant
+        for ligne in dict_lignes.get(prestation.tarif_id, []):
+            if ligne.montant_unique * prestation.quantite == prestation.montant_initial:
+                prestation.tarif_ligne = ligne
+                liste_modifications.append(prestation)
+                break
+    logger.debug("Modification de %d prestations..." % len(liste_modifications))
+    Prestation.objects.bulk_update(liste_modifications, ["tarif_ligne"], batch_size=50)
+    logger.debug("Fin de la MAJ des lignes de tarifs.")

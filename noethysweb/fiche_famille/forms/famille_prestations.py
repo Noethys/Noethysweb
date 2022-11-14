@@ -15,8 +15,7 @@ from core.models import Famille, Prestation, Deduction, Individu, Rattachement, 
 from core.widgets import DatePickerWidget, Formset
 from django.forms.models import inlineformset_factory, BaseInlineFormSet
 from core.utils import utils_preferences
-from fiche_famille.widgets import Facture_prestation, Consommations_prestation
-
+from fiche_famille.widgets import Facture_prestation, Consommations_prestation, Ligne_tarif, Texte_simple
 
 
 class DeductionForm(forms.ModelForm):
@@ -75,6 +74,10 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             "date": DatePickerWidget(),
             "facture": Facture_prestation(),
+            "activite": Texte_simple(),
+            "categorie_tarif": Texte_simple(),
+            "tarif": Texte_simple(),
+            "tarif_ligne": Texte_simple(),
         }
         labels = {
             "montant_initial": "Montant initial",
@@ -104,9 +107,15 @@ class Formulaire(FormulaireBase, ModelForm):
         rattachements = Rattachement.objects.select_related("individu").filter(famille_id=idfamille).order_by("individu__nom", "individu__prenom")
         self.fields["individu"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
 
-        # Activité
-        activites = {inscription.activite_id: inscription.activite.nom for inscription in Inscription.objects.select_related("activite").filter(famille_id=idfamille)}
-        self.fields["activite"].choices = [(None, "---------")] + [(idactivite, nom_activite) for idactivite, nom_activite in activites.items()]
+        # # Activité
+        # activites = {inscription.activite_id: inscription.activite.nom for inscription in Inscription.objects.select_related("activite").filter(famille_id=idfamille)}
+        # self.fields["activite"].choices = [(None, "---------")] + [(idactivite, nom_activite) for idactivite, nom_activite in activites.items()]
+
+        # Tarif
+        self.fields["activite"].widget.attrs["texte"] = str(self.instance.activite) if self.instance and self.instance.activite else "Aucune activité"
+        self.fields["categorie_tarif"].widget.attrs["texte"] = str(self.instance.categorie_tarif) if self.instance and self.instance.categorie_tarif else "Aucune catégorie"
+        self.fields["tarif"].widget.attrs["texte"] = "ID%d - %s - A partir du %s" % (self.instance.tarif.pk, self.instance.tarif.nom_tarif, self.instance.tarif.date_debut.strftime("%d/%m/%Y")) if self.instance and self.instance.tarif else "Aucun tarif"
+        self.fields["tarif_ligne"].widget.attrs["texte"] = "ID%d - Ligne %s (%s-%s)" % (self.instance.tarif_ligne.pk, self.instance.tarif_ligne.num_ligne+1, self.instance.tarif_ligne.qf_min, self.instance.tarif_ligne.qf_max) if self.instance and self.instance.tarif_ligne else "Aucune ligne de tarif"
 
         # Si prestation facturée
         if self.instance.facture:
@@ -131,6 +140,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field('activite'),
                 Field('categorie_tarif'),
                 Field('tarif'),
+                Field('tarif_ligne'),
                 id="fieldset_activite",
             ),
             Fieldset("Tarification",
