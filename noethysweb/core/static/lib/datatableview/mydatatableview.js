@@ -203,7 +203,6 @@ $(document).ready(function() {
             var rowData = table.row( diff[i].node ).data();
             deplacements[rowData["DT_RowId"]] = diff[i].newPosition + 1;
         }
-        console.log("deplacements=", deplacements)
         $.ajax({
             type: "POST",
             url: "deplacer_lignes",

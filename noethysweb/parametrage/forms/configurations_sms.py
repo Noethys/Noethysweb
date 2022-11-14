@@ -106,7 +106,6 @@ $(document).ready(function() {
             },
             datatype: "json",
             success: function(data){
-                console.log("data=", data);
                 $('#modal_erreurs').html(data.resultat);
             },
             error: function(data) {
