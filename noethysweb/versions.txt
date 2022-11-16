@@ -1,3 +1,12 @@
+Version 1.0.9.6 (16/11/2022) :
+
+- Ajout du tarif selon le nombre d'enfants de la famille présents
+- Ajout des lignes de tarifs dans les prestations
+- Ajout de la procédure de réinitialisation des mdp
+- Correction de l'import des cotisations individuelles sans idfamille
+- Correction de l'export PDF des listes
+- Correction de petits bugs
+
 Version 1.0.9.5 (07/11/2022) :
 
 - Ajout des procédures
