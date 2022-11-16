@@ -56,7 +56,9 @@ def Maj_lignes_tarifs_prestations():
     for prestation in prestations:
         # Recherche une ligne de tarif correspondant au montant
         for ligne in dict_lignes.get(prestation.tarif_id, []):
-            if ligne.montant_unique * prestation.quantite == prestation.montant_initial:
+            if not prestation.quantite:
+                prestation.quantite = 1
+            if ligne.montant_unique and ligne.montant_unique * prestation.quantite == prestation.montant_initial:
                 prestation.tarif_ligne = ligne
                 liste_modifications.append(prestation)
                 break

@@ -424,7 +424,7 @@ def Save_grille(request=None, donnees={}):
 
     # ------------------ TRAITEMENT DES TARIFS SELON NBRE INDIVIDUS PRESENTS -------------------
 
-    Maj_tarifs_fratries(activite=donnees["activite"], prestations=liste_nouvelles_prestations + liste_prestations_suppr)
+    Maj_tarifs_fratries(activite=donnees.get("selection_activite", None), prestations=liste_nouvelles_prestations + liste_prestations_suppr)
 
     # ---------------------------------- MEMOS JOURNALIERS -------------------------------------
 
