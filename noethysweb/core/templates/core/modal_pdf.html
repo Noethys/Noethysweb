@@ -55,4 +55,24 @@
         })
     };
 
+    // Envoi par SMS
+    function envoyer_sms(donnees={}, csrf_token='') {
+        if (csrf_token === '') {
+            csrf_token = "{{ csrf_token }}";
+        }
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_get_view_editeur_sms' %}",
+            data: {
+                donnees: JSON.stringify(donnees),
+                csrfmiddlewaretoken: csrf_token,
+            },
+            datatype: "json",
+            success: function(data){
+                $('#div_editeur_sms').html(data);
+                $('#modal_editeur_sms').modal('show');
+            }
+        })
+    };
+
 </script>

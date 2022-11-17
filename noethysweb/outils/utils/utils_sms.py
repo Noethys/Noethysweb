@@ -9,7 +9,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.contrib import messages
 from core.models import SMS
-from core.utils import utils_historique
+from core.utils import utils_historique, utils_dates
 
 
 def Envoyer_model_sms(idsms=None, request=None):
@@ -20,6 +20,15 @@ def Envoyer_model_sms(idsms=None, request=None):
 
     # Importation du SMS à envoyer
     sms = SMS.objects.prefetch_related('destinataires').select_related("configuration_sms").get(pk=idsms)
+
+    # Valeurs de fusion par défaut
+    valeurs_defaut = {
+        "{UTILISATEUR_NOM_COMPLET}": request.user.get_full_name() if request else "",
+        "{UTILISATEUR_NOM}": request.user.last_name if request else "",
+        "{UTILISATEUR_PRENOM}": request.user.first_name if request else "",
+        "{DATE_LONGUE}": utils_dates.DateComplete(datetime.date.today()),
+        "{DATE_COURTE}": utils_dates.ConvertDateToFR(datetime.date.today()),
+    }
 
     # Récupère la liste des destinataires
     condition = ~Q(resultat_envoi="ok") if "NON_ENVOYE" in sms.selection else Q()
@@ -40,11 +49,19 @@ def Envoyer_model_sms(idsms=None, request=None):
         api_url = "https://api.mailjet.com/v4/sms-send"
 
         # Envoi des SMS
-        texte = sms.texte.replace("\n", "")
-
         for destinataire in destinataires:
+            texte = sms.texte.replace("\n", "")
             numero = destinataire.mobile.replace(".", "")
             numero = "+33" + numero[1:]
+
+            # Remplacement des mots-clés
+            try:
+                valeurs = json.loads(destinataire.valeurs)
+            except:
+                valeurs = {}
+            valeurs.update(valeurs_defaut)
+            for motcle, valeur in valeurs.items():
+                texte = texte.replace(motcle, valeur)
 
             # Création du message JSON
             message_data = {"From": sms.configuration_sms.nom_exp, "To": numero, "Text": texte}
@@ -59,7 +76,7 @@ def Envoyer_model_sms(idsms=None, request=None):
 
                 if "API key authentication/authorization failure" in resultat_envoi:
                     messages.add_message(request, messages.ERROR, "Impossible de se connecter au serveur d'envoi : Le token semble erroné")
-                    return
+                    return []
 
             # Mémorise le résultat de l'envoi dans la DB
             destinataire.date_envoi = datetime.datetime.now()
@@ -75,6 +92,8 @@ def Envoyer_model_sms(idsms=None, request=None):
     if liste_envois_succes:
         sms.configuration_sms.solde -= len(liste_envois_succes)
         sms.configuration_sms.save()
+
+    return liste_envois_succes
 
 
 def Envoyer_sms_test(request=None, dict_options={}):

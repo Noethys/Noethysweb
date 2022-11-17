@@ -7,7 +7,7 @@ from django.urls import include, path
 from core.decorators import secure_ajax
 from fiche_famille.views import famille, famille_questionnaire, famille_notes, famille_ajouter, famille_pieces, famille_cotisations, famille_caisse, famille_aides, famille_quotients, famille_divers, \
                             famille_prestations, famille_reglements, famille_consommations, famille_factures, famille_voir_facture, famille_voir_cotisation, famille_abo_factures_email, \
-                            famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, \
+                            famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, famille_sms, \
                             famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats, famille_voir_mandat
 
 urlpatterns = [
@@ -120,8 +120,9 @@ urlpatterns = [
     path('individus/familles/historique/<int:idfamille>', famille_historique.Liste.as_view(), name='famille_historique'),
     path('individus/familles/export_xml/<int:idfamille>', famille_export_xml.View.as_view(), name='famille_export_xml'),
 
-    # Emails
+    # Communication
     path('individus/familles/emails/ajouter/<int:idfamille>', famille_emails.Ajouter.as_view(), name='famille_emails_ajouter'),
+    path('individus/familles/sms/ajouter/<int:idfamille>', famille_sms.Ajouter.as_view(), name='famille_sms_ajouter'),
 
     # Messagerie du portail
     path('individus/familles/messagerie/<int:idfamille>', famille_messagerie_portail.Ajouter.as_view(), name='famille_messagerie_portail'),
@@ -145,7 +146,7 @@ urlpatterns = [
     path('individus/rappel_impression_pdf', secure_ajax(famille_voir_rappel.Impression_pdf), name='ajax_rappel_impression_pdf'),
     path('individus/regenerer_identifiant', secure_ajax(famille_portail.Regenerer_identifiant), name='ajax_regenerer_identifiant'),
     path('individus/regenerer_mdp', secure_ajax(famille_portail.Regenerer_mdp), name='ajax_regenerer_mdp'),
-    path('individus/codes_internet_impression_pdf', secure_ajax(famille_portail.Impression_pdf), name='ajax_codes_internet_impression_pdf'),
+    path('individus/codes_internet_impression_pdf', secure_ajax(famille_portail.Envoyer_codes), name='ajax_codes_internet_envoyer'),
     path('individus/ajax_get_tarifs_prestation', secure_ajax(famille_prestations.Get_tarifs), name='ajax_get_tarifs_prestation'),
     path('individus/ajax_get_activites_prestation', secure_ajax(famille_prestations.Get_activites), name='ajax_get_activites_prestation'),
 

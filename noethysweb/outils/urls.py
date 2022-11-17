@@ -10,7 +10,7 @@ from outils.views import editeur_emails, editeur_emails_express, historique, upd
                         editeur_emails_familles, editeur_emails_individus, editeur_emails_contacts, editeur_emails_listes_diffusion, \
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
                         demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur, editeur_sms, editeur_sms_familles, \
-                        editeur_sms_individus, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures
+                        editeur_sms_individus, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures, editeur_sms_express
 
 urlpatterns = [
 
@@ -93,6 +93,9 @@ urlpatterns = [
     path('outils/get_signature_email', secure_ajax(editeur_emails.Get_signature_email), name='ajax_get_signature_email'),
     path('outils/get_view_editeur_email', secure_ajax(editeur_emails_express.Get_view_editeur_email), name='ajax_get_view_editeur_email'),
     path('outils/envoyer_email_express', secure_ajax(editeur_emails_express.Envoyer_email), name='ajax_envoyer_email_express'),
+    path('outils/get_view_editeur_sms', secure_ajax(editeur_sms_express.Get_view_editeur_sms), name='ajax_get_view_editeur_sms'),
+    path('outils/envoyer_sms_express', secure_ajax(editeur_sms_express.Envoyer_sms), name='ajax_envoyer_sms_express'),
+    path('outils/get_modele_sms', secure_ajax(editeur_sms.Get_modele_sms), name='ajax_get_modele_sms'),
     path('outils/get_calendrier_annuel', secure_ajax(calendrier_annuel.Get_calendrier_annuel), name='ajax_get_calendrier_annuel'),
     path('outils/portail/demandes/', secure_ajax(demandes_portail.Appliquer_modification), name='ajax_appliquer_modification_portail'),
     path('outils/sauvegarder_db/', secure_ajax(sauvegarde_creer.Sauvegarder_db), name='ajax_sauvegarder_db'),

@@ -41,6 +41,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_modeles = menu_parametrage.Add(titre="Modèles")
     menu_modeles.Add(code="modeles_documents_liste", titre="Modèles de documents", icone="file-text-o")
     menu_modeles.Add(code="modeles_emails_liste", titre="Modèles d'emails", icone="file-text-o")
+    menu_modeles.Add(code="modeles_sms_liste", titre="Modèles de SMS", icone="file-text-o")
     menu_modeles.Add(code="modeles_rappels_liste", titre="Modèles de lettres de rappel", icone="file-text-o")
     menu_modeles.Add(code="modeles_pes_liste", titre="Modèles d'exports vers le Trésor Public", icone="file-text-o")
     # menu_modeles.Add(code="modeles_prelevements_liste", titre="Modèles de prélèvements", icone="file-text-o")

@@ -1,0 +1,19 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
+{# Modal Envoyer un SMS #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_editeur_sms{% endblock %}
+    {% block modal_classe %}modal-lg{% endblock %}
+    {% block modal_titre %}Envoyer un SMS{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+        <div id="div_editeur_sms">
+        </div>
+    {% endblock %}
+{% endembed %}

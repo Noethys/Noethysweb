@@ -9,10 +9,17 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.db.models import Q, Count
 from django.contrib import messages
 from core.views import crud
-from core.models import SMS, DestinataireSMS, Famille, Individu
+from core.models import SMS, DestinataireSMS, Famille, Individu, ModeleSMS
 from core.utils import utils_texte
 from outils.forms.editeur_sms import Formulaire
 from outils.utils import utils_sms
+
+
+def Get_modele_sms(request):
+    """ Renvoie le contenu d'un modèle de SMS """
+    idmodele = int(request.POST.get("idmodele"))
+    modele = ModeleSMS.objects.filter(pk=idmodele).first()
+    return JsonResponse({"objet": modele.objet, "texte": modele.texte})
 
 
 class Page(crud.Page):

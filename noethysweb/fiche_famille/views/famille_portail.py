@@ -13,7 +13,7 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.contrib import messages
 
 
-def Impression_pdf(request):
+def Envoyer_codes(request):
     # Récupération des données du formulaire
     internet_identifiant = request.POST.get("internet_identifiant")
     internet_mdp = request.POST.get("internet_mdp")
@@ -29,11 +29,11 @@ def Impression_pdf(request):
     return JsonResponse({"categorie": "portail", "champs": champs, "idfamille": idfamille})
 
 
-
 def Regenerer_identifiant(request):
     IDfamille = int(request.POST.get("idfamille"))
     identifiant = utils_internet.CreationIdentifiant(IDfamille=IDfamille)
     return JsonResponse({"identifiant": identifiant})
+
 
 def Regenerer_mdp(request):
     mdp = utils_internet.CreationMDP()

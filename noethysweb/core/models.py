@@ -10,7 +10,7 @@ from django.db.models import Sum
 from core.data import data_civilites
 from core.utils import utils_texte, utils_dates
 from core.data.data_modeles_emails import CATEGORIES as CATEGORIES_MODELES_EMAILS
-# from django.contrib.auth.models import User
+from core.data.data_modeles_sms import CATEGORIES as CATEGORIES_MODELES_SMS
 from django.contrib.auth.models import AbstractUser, UserManager
 from django_resized import ResizedImageField
 import datetime, decimal, uuid, os
@@ -2437,6 +2437,35 @@ class ModeleEmail(models.Model):
                 objet.save()
 
 
+class ModeleSMS(models.Model):
+    idmodele = models.AutoField(verbose_name="ID", db_column='IDmodele', primary_key=True)
+    categorie = models.CharField(verbose_name="Catégorie", max_length=200, choices=CATEGORIES_MODELES_SMS)
+    nom = models.CharField(verbose_name="Nom", max_length=250)
+    description = models.CharField(verbose_name="Description", max_length=400, blank=True, null=True)
+    objet = models.CharField(verbose_name="Objet", max_length=300, blank=True, null=True)
+    texte = models.TextField(verbose_name="Texte", blank=True, null=True)
+    defaut = models.BooleanField(verbose_name="Modèle par défaut", default=False)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = 'modeles_sms'
+        verbose_name = "modèle de SMS"
+        verbose_name_plural = "modèles de SMS"
+
+    def __str__(self):
+        return "ModeleSMS ID%d" % self.idmodele if self.idmodele else "Nouveau modèle"
+
+    def delete(self, *args, **kwargs):
+        # Supprime l'objet
+        super().delete(*args, **kwargs)
+        # Si le défaut a été supprimé, on le réattribue à une autre objet
+        if len(ModeleSMS.objects.filter(categorie=self.categorie, defaut=True)) == 0:
+            objet = ModeleSMS.objects.first(categorie=self.categorie)
+            if objet != None:
+                objet.defaut = True
+                objet.save()
+
+
 class Parametre(models.Model):
     idparametre = models.AutoField(verbose_name="ID", db_column='IDparametre', primary_key=True)
     categorie = models.CharField(verbose_name="Catégorie", max_length=200, blank=True, null=True)
@@ -3347,6 +3376,7 @@ class DestinataireSMS(models.Model):
     mobile = encrypt(models.EmailField(verbose_name="Mobile", max_length=300, blank=True, null=True))
     date_envoi = models.DateTimeField(verbose_name="Date d'envoi", blank=True, null=True)
     resultat_envoi = models.CharField(verbose_name="Résultat de l'envoi", max_length=300, blank=True, null=True)
+    valeurs = encrypt(models.TextField(verbose_name="Valeurs", blank=True, null=True))
 
     class Meta:
         db_table = 'destinataires_sms'

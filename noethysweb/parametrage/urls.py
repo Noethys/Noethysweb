@@ -17,7 +17,7 @@ from parametrage.views import organisateur, structures, \
     activites_renseignements, activites_unites_conso, activites_unites_remplissage, activites_calendrier, \
     activites_ouvertures, activites_evenements, activites_evenements_tarifs, activites_categories_tarifs, activites_noms_tarifs, \
     activites_tarifs, activites_portail_parametres, activites_portail_periodes, \
-    modeles_documents, modeles_emails, modeles_rappels, signatures_emails, \
+    modeles_documents, modeles_emails, modeles_sms, modeles_rappels, signatures_emails, \
     questionnaires, adresses_mail, activites_assistant, activites_assistant_sejour, activites_assistant_cantine, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
     portail_parametres, types_regimes_alimentaires, assureurs, categories_compte_internet, modeles_pes, \
@@ -368,6 +368,14 @@ urlpatterns = [
     path('parametrage/modeles_emails/modifier/<str:categorie>/<int:pk>', modeles_emails.Modifier.as_view(), name='modeles_emails_modifier'),
     path('parametrage/modeles_emails/supprimer/<str:categorie>/<int:pk>', modeles_emails.Supprimer.as_view(), name='modeles_emails_supprimer'),
     path('parametrage/modeles_emails/dupliquer/<str:categorie>/<int:pk>', modeles_emails.Dupliquer.as_view(), name='modeles_emails_dupliquer'),
+
+    # Modèles de SMS
+    path('parametrage/modeles_sms/liste', modeles_sms.Liste.as_view(), name='modeles_sms_liste'),
+    path('parametrage/modeles_sms/liste/<str:categorie>', modeles_sms.Liste.as_view(), name='modeles_sms_liste'),
+    path('parametrage/modeles_sms/ajouter/<str:categorie>', modeles_sms.Ajouter.as_view(), name='modeles_sms_ajouter'),
+    path('parametrage/modeles_sms/modifier/<str:categorie>/<int:pk>', modeles_sms.Modifier.as_view(), name='modeles_sms_modifier'),
+    path('parametrage/modeles_sms/supprimer/<str:categorie>/<int:pk>', modeles_sms.Supprimer.as_view(), name='modeles_sms_supprimer'),
+    path('parametrage/modeles_sms/dupliquer/<str:categorie>/<int:pk>', modeles_sms.Dupliquer.as_view(), name='modeles_sms_dupliquer'),
 
     # Modèles de lettres de rappel
     path('parametrage/modeles_rappels/liste', modeles_rappels.Liste.as_view(), name='modeles_rappels_liste'),

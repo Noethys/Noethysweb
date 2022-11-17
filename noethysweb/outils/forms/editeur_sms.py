@@ -56,6 +56,7 @@ class Formulaire(FormulaireBase, ModelForm):
                     HTML("""<a class="btn btn-primary" id="bouton_envoyer" title="Envoyer"><i class="fa fa-send-o margin-r-5"></i>Envoyer</a> """),
                     HTML("""<a class="btn btn-danger" title="Fermer" href='{% url 'outils_toc' %}'><i class="fa fa-ban margin-r-5"></i>Fermer</a> """),
                     HTML("""<button type="submit" name="enregistrer_brouillon" title="Enregistrer le brouillon" class="btn btn-default"><i class="fa fa-save margin-r-5"></i>Enregistrer le brouillon</button> """),
+                    HTML(EXTRA_HTML),
                 ],
             ),
             Hidden('action', value=''),
@@ -64,3 +65,41 @@ class Formulaire(FormulaireBase, ModelForm):
             Field('texte'),
             Field("selection"),
         )
+
+
+EXTRA_HTML = """
+
+<div class="btn-group">
+    <a type='button' class='btn btn-default' style='margin-top: 2px;' dropdown-toggle' title="Charger un modèle" data-toggle="dropdown" href='#'><i class="fa fa-file-text-o margin-r-5"></i>Charger un modèle</a>
+    <ul class="dropdown-menu">
+        {% for modele in modeles %}
+            <li class="dropdown-item"><a tabindex="-1" href="#" class="modele_sms" data-idmodele="{{ modele.pk }}">{{ modele.nom }}{% if modele.defaut %} (Modèle par défaut){% endif %}</a></li>
+        {% empty %}
+            <li class="dropdown-header">Aucun modèle disponible</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Charger un modèle de SMS
+        $(".modele_sms").on('click', function(event) {
+            event.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_get_modele_sms' %}",
+                data: {
+                    idmodele: this.dataset.idmodele,
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                },
+                datatype: "json",
+                success: function(data){
+                    $('#id_texte').val(data.texte);
+                    $('#id_objet').val(data.objet);
+                },
+            });
+        });
+
+    });
+</script>
+"""

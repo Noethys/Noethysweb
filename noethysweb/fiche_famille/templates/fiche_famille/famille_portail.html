@@ -20,15 +20,16 @@
 
     {# Insertion des modals #}
     {% include 'outils/modal_editeur_emails.html' %}
+    {% include 'outils/modal_editeur_sms.html' %}
     {% include 'core/modal_pdf.html' %}
 
     <script>
 
-        // Impression du PDF
-        function impression_pdf() {
+        // Envoyer les codes
+        function envoyer(mode="") {
             $.ajax({
                 type: "POST",
-                url: "{% url 'ajax_codes_internet_impression_pdf' %}",
+                url: "{% url 'ajax_codes_internet_envoyer' %}",
                 data: {
                     internet_identifiant: $("#id_internet_identifiant").val(),
                     internet_mdp: $("#id_internet_mdp").val(),
@@ -37,7 +38,11 @@
                 },
                 datatype: "json",
                 success: function(data){
-                    envoyer_email(data);
+                    if (mode === 'sms') {
+                        envoyer_sms(data);
+                    } else {
+                        envoyer_email(data)
+                    }
                 },
                 error: function(data) {
                     toastr.error(data.responseJSON.erreur);
@@ -48,5 +53,3 @@
     </script>
 
 {% endblock %}
-
-
