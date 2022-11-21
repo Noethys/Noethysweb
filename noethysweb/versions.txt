@@ -1,3 +1,10 @@
+Version 1.0.9.8 (21/11/2022) :
+
+- Ajout de la dépendance colorhash
+- Ajout de l'envoi de SMS depuis la fiche famille
+- Ajout de l'envoie des codes internet par SMS
+- Ajout des modèles de SMS dans le menu Paramétrage
+
 Version 1.0.9.7 (16/11/2022) :
 
 - Correction d'un bug sur le tarif selon le nombre d'enfants de la famille
