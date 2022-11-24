@@ -130,9 +130,16 @@
                         <div class="card-body p-0">
                             <select multiple class="form-control" id="selection_classes" size="15">
                                 {% for classe in data.liste_classes %}
-                                    <option value="{{ classe.pk }}" {% if classe.pk in data.selection_classes %}selected{% endif %}>{{ classe.ecole.nom|truncatechars:15 }} | {{ classe.nom }}</option>
+                                    <option value="{{ classe.pk }}" {% if classe.pk in data.selection_classes %}selected{% endif %} data-ecole="{{ classe.ecole_id }}">{{ classe.ecole.nom|truncatechars:15 }} | {{ classe.nom }}</option>
                                 {% endfor %}
                             </select>
+                            <div class="m-2">
+                                <button type="button" class="btn btn-default btn-xs" onclick="Tout_cocher(etat=false)" title="Tout décocher"><i class="fa fa-square-o"></i> Rien</button>
+                                <button type="button" class="btn btn-default btn-xs" onclick="Tout_cocher(etat=true)" title="Tout cocher"><i class="fa fa-check-square-o"></i> Tout</button>
+                                {% for ecole in data.liste_ecoles %}
+                                    <button type="button" class="btn btn-default btn-xs" onclick="Cocher_ecole(idecole={{ ecole.pk }})" title="Cocher les classes de {{ ecole.nom }}"><i class="fa fa-check-square-o"></i> {{ ecole.nom|truncatechars:15 }}</button>
+                                {% endfor %}
+                            </div>
                             <script>
                                 function Get_classes() {
                                     return $('#selection_classes').val();
@@ -172,6 +179,15 @@
     {% endif %}
 
 <script>
+
+    function Tout_cocher(etat) {
+        $("#selection_classes option").prop('selected', etat);
+    };
+
+    function Cocher_ecole(idecole) {
+        $("#selection_classes option[data-ecole='" + idecole + "']").prop("selected", true);
+    }
+
     function Get_mode_parametres() {
         return $(".collapse[data-parent='#accordeon_parametres']:visible").attr("id");
     };
