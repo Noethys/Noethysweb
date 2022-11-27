@@ -16,6 +16,7 @@ from core.utils import utils_dates, utils_dictionnaires, utils_parametres
 from consommations.forms.grille_selection_date import Formulaire as form_selection_date
 from consommations.forms.grille_ajouter_individu import Formulaire as form_ajouter_individu
 from consommations.forms.grille_options import Formulaire as form_options
+# from consommations.forms.grille_forfaits import Formulaire as form_forfaits
 from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
 
 
@@ -40,6 +41,8 @@ class View(CustomView, TemplateView):
         context['form_selection_date'] = form_selection_date
         context['form_ajouter_individu'] = form_ajouter_individu
         context['data'] = self.Get_data_grille()
+        # if context['data']["tarifs_credits_exists"]:
+        #     context['form_forfaits'] = form_forfaits(inscriptions=context['data']["liste_inscriptions"])
         context['form_options'] = form_options(initial=context["data"]["options"])
         return context
 
@@ -121,6 +124,7 @@ class View(CustomView, TemplateView):
         # Importation des classes
         liste_classes = Classe.objects.select_related("ecole").filter(date_debut__lte=data["date_min"], date_fin__gte=data["date_min"]).order_by("ecole__nom", "niveaux__ordre", "nom")
         data["liste_classes"] = list({classe: True for classe in liste_classes}.keys())
+        data["liste_ecoles"] = list({classe.ecole: True for classe in liste_classes}.keys())
 
         # # Tri des classes par niveau scolaire
         # dict_niveaux = {niveau.pk: niveau for niveau in NiveauScolaire.objects.all()}
