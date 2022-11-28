@@ -53,7 +53,7 @@ class Formulaire(FormulaireBase, ModelForm):
         # Affichage
         self.helper.layout = Layout(
             Commandes(enregistrer=False, ajouter=False, annuler=False, aide=False, autres_commandes=[
-                    HTML("""<a class="btn btn-primary" id="bouton_envoyer" title="Envoyer"><i class="fa fa-send-o margin-r-5"></i>Envoyer</a> """),
+                    HTML("""<a class="btn btn-primary" id="bouton_envoyer_sms" title="Envoyer"><i class="fa fa-send-o margin-r-5"></i>Envoyer</a> """),
                     HTML("""<a class="btn btn-danger" title="Fermer" href='{% url 'outils_toc' %}'><i class="fa fa-ban margin-r-5"></i>Fermer</a> """),
                     HTML("""<button type="submit" name="enregistrer_brouillon" title="Enregistrer le brouillon" class="btn btn-default"><i class="fa fa-save margin-r-5"></i>Enregistrer le brouillon</button> """),
                     HTML(EXTRA_HTML),

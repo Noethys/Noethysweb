@@ -108,7 +108,7 @@
                     <script>
                         $(document).ready(function() {
 
-                            $("#bouton_envoyer").on('click', function(event) {
+                            $("#bouton_envoyer_sms").on('click', function(event) {
                                 if ($('#id_selection').val() == "TOUS") {
                                     var nbre_destinataires = {{ destinataires|length }};
                                 } else {
