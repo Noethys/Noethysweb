@@ -1,3 +1,7 @@
+Version 1.1.0.0 (28/11/2022) :
+
+- Correction de l'envoi de SMS depuis la fiche famille
+
 Version 1.0.9.9 (28/11/2022) :
 
 - Ajout du bouton tout cocher dans la sélection des classes du gestionnaire
