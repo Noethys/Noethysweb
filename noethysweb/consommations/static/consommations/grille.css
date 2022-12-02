@@ -294,7 +294,9 @@ td.complet {
 #table_facturation td, #table_facturation th {
     padding-top: 1px;
     padding-bottom: 1px;
+    padding-left: 4px !important;
     text-align: left;
+    border-top: 0px solid;
 }
 #table_facturation .individu_prestation {
     overflow: hidden;

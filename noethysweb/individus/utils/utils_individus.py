@@ -51,14 +51,14 @@ def Maj_lignes_tarifs_prestations():
 
     # MAJ des prestations
     liste_modifications = []
-    prestations = Prestation.objects.filter(tarif_ligne__isnull=True, tarif__isnull=False)
+    prestations = Prestation.objects.select_related("tarif").filter(tarif_ligne__isnull=True, tarif__isnull=False)
     logger.debug("Nbre prestations trouvées : %s" % len(prestations))
     for prestation in prestations:
         # Recherche une ligne de tarif correspondant au montant
         for ligne in dict_lignes.get(prestation.tarif_id, []):
             if not prestation.quantite:
                 prestation.quantite = 1
-            if ligne.montant_unique and ligne.montant_unique * prestation.quantite == prestation.montant_initial:
+            if ligne.montant_unique and (ligne.montant_unique * prestation.quantite == prestation.montant_initial or (prestation.tarif.penalite_pourcentage and ligne.montant_unique * prestation.tarif.penalite_pourcentage / 100) * prestation.quantite == prestation.montant_initial):
                 prestation.tarif_ligne = ligne
                 liste_modifications.append(prestation)
                 break
