@@ -36,7 +36,9 @@ class Formulaire(FormulaireBase, forms.Form):
 
         # Importation des réponses
         for reponse in QuestionnaireReponse.objects.filter(famille_id=self.idfamille, question__categorie="famille"):
-            self.fields["question_%d" % reponse.question_id].initial = reponse.Get_reponse_for_ctrl()
+            key = "question_%d" % reponse.question_id
+            if key in self.fields:
+                self.fields[key].initial = reponse.Get_reponse_for_ctrl()
 
         # Affichage
         self.helper.layout = Layout()
