@@ -57,13 +57,20 @@ class Exporter():
             # Recherche le code compta et le code prod local
             id_poste = self.lot.modele.id_poste
             code_prodloc = self.lot.modele.code_prodloc
+            service1 = self.lot.modele.service1
+            service2 = self.lot.modele.service2
             if prestation.activite.code_comptable: id_poste = prestation.activite.code_comptable
             if prestation.activite.code_produit_local: code_prodloc = prestation.activite.code_produit_local
             if prestation.code_compta: id_poste = prestation.code_compta
             if prestation.code_produit_local: code_prodloc = prestation.code_produit_local
+            if prestation.activite.service1: service1 = prestation.activite.service1
+            if prestation.activite.service2: service2 = prestation.activite.service2
 
             dict_prestations_factures.setdefault(prestation.facture, [])
-            dict_prestations_factures[prestation.facture].append({"prestation": prestation, "label": prestation.label, "montant": prestation.montant, "id_poste": id_poste, "code_prodloc": code_prodloc})
+            dict_prestations_factures[prestation.facture].append({
+                "prestation": prestation, "label": prestation.label, "montant": prestation.montant, "id_poste": id_poste,
+                "code_prodloc": code_prodloc, "service1": service1, "service2": service2,
+            })
 
             # Définit le montant
             montant_unitaire = prestation.montant / prestation.quantite
@@ -183,7 +190,7 @@ class Exporter():
         for facture, liste_prestations in dict_prestations_factures.items():
             dict_codes.setdefault(facture, {})
             for dict_prestation in liste_prestations:
-                key = (dict_prestation["id_poste"], dict_prestation["code_prodloc"])
+                key = (dict_prestation["id_poste"], dict_prestation["code_prodloc"], dict_prestation["service1"], dict_prestation["service2"])
                 dict_codes[facture].setdefault(key, 0)
                 dict_codes[facture][key] += dict_prestation["montant"]
 
@@ -195,7 +202,7 @@ class Exporter():
         for IdEcriture, piece in enumerate(self.pieces, start=1):
             num_sous_ligne = 1
             if piece.facture in dict_codes:
-                for (IDposte, code_produit_local), montant in dict_codes[piece.facture].items():
+                for (IDposte, code_produit_local, service1, service2), montant in dict_codes[piece.facture].items():
                     ligne = {}
 
                     # IDEcriture - Texte (50)
@@ -217,7 +224,7 @@ class Exporter():
                     ligne[6] = ConvertToTexte(self.lot.exercice)
 
                     # Multiple - Texte (1)
-                    ligne[7] = ConvertToTexte("")# ConvertToTexte("M" if num_sous_ligne == 1 else "S")
+                    ligne[7] = ConvertToTexte("M" if num_sous_ligne == 1 else "S")
 
                     # CodeTiers - Texte (15)
                     ligne[8] = ConvertToTexte("FAM%06d" % piece.famille_id)
@@ -263,7 +270,7 @@ class Exporter():
                     ligne[27] = ConvertToTexte(self.lot.modele.operation or "")
 
                     # Service - Texte (15)
-                    ligne[28] = ConvertToTexte(self.lot.modele.service1 or "")
+                    ligne[28] = ConvertToTexte(service1 or "")
 
                     # Fonction - Texte (10)
                     ligne[29] = ConvertToTexte(self.lot.modele.fonction or "")
@@ -293,7 +300,7 @@ class Exporter():
                     ligne[40] = ConvertToTexte("")
 
                     # Service 2 - Texte (10)
-                    ligne[41] = ConvertToTexte(self.lot.modele.service2 or "")
+                    ligne[41] = ConvertToTexte(service2 or "")
 
                     # Mixte - Texte (1)
                     ligne[44] = ConvertToTexte("")

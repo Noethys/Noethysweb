@@ -1095,6 +1095,8 @@ class Activite(models.Model):
     inscriptions_multiples = models.BooleanField(verbose_name="Autoriser plusieurs inscriptions simultanées pour chaque individu", default=False)
     code_produit_local = models.CharField(verbose_name="Code produit local", max_length=200, blank=True, null=True)
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT)
+    service1 = models.CharField(verbose_name="Service axe 1", max_length=15, blank=True, null=True, help_text="Premier axe analytique.")
+    service2 = models.CharField(verbose_name="Service axe 2", max_length=10, blank=True, null=True, help_text="Second axe analytique.")
 
     class Meta:
         db_table = 'activites'
