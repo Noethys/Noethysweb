@@ -1,0 +1,44 @@
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block contenu_page %}
+
+    <!-- Box forfaits credits -->
+    <div class="card card-default">
+        <div class="card-header with-border">
+            <h3 class="card-title"><i class="fa fa-euro margin-r-5"></i>Forfaits</h3>
+            <div class="card-tools">
+                <a class="btn btn-default btn-xs" style="margin-right: 10px;" onclick="$('#modal_forfaits').modal('show');" title="Ajouter un forfait-crédit">Ajouter</a>
+            </div>
+        </div>
+        <div class="card-body p-0" style="min-height: 0">
+            <table id="table_forfaits" class="table table-sm">
+            </table>
+        </div>
+    </div>
+
+    {% include 'consommations/grille_appliquer_forfait.html' %}
+
+    <script>
+
+    // Dessine la table forfaits
+    function maj_box_forfaits() {
+        var html = "";
+        $.each(dict_prestations, function (idprestation, prestation) {
+            if ((prestation.activite == selection_activite) && (prestation.forfait_date_debut)) {
+                html += "<tr><td class='date_prestation' style='font-size: 13px;'><i class='fa fa-tag margin-r-5 ml-1' style='color: " + prestation.couleur + ";' title='Forfait crédit'></i>" + prestation.label + "</td>"
+                html += "<td style='width: 45px;text-align: right;'>"
+                html += "<a type='button' class='btn-xs' href='#' onclick='modifier_forfait(&quot;" + idprestation + "&quot;)' title='Modifier'><i class='fa fa-pencil'></i></a>"
+                html += "<a type='button' class='btn-xs' href='#' onclick='supprimer_forfait(&quot;" + idprestation + "&quot;)' title='Supprimer'><i class='fa fa-trash'></i></a>"
+                html += "</tr>";
+            };
+        });
+        $("#table_forfaits").html(html);
+    }
+
+    $(document).ready(function() {
+        maj_box_forfaits()
+    });
+
+    </script>
+{% endblock contenu_page %}

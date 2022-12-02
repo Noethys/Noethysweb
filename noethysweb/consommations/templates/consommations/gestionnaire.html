@@ -20,6 +20,9 @@
         <div class="col-md-3" >
             {% include "consommations/gestionnaire_parametres.html" %}
             {% include "consommations/grille_totaux.html" %}
+            {% if data.tarifs_credits_exists %}
+                {% include "consommations/grille_forfaits.html" %}
+            {% endif %}
             {% include "consommations/grille_facturation.html" %}
         </div>
 

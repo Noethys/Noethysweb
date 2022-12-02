@@ -16,6 +16,7 @@ from core.views.base import CustomView
 from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
 from consommations.forms.grille_traitement_lot import Formulaire as form_traitement_lot
 from consommations.forms.appliquer_semaine_type import Formulaire as form_appliquer_semaine_type
+from consommations.forms.grille_forfaits import Formulaire as form_forfaits
 
 
 class Onglet(CustomView):
@@ -51,6 +52,8 @@ class Modifier(Onglet, TemplateView):
         context['form_appliquer_semaine_type'] = form_appliquer_semaine_type
         context['jours_complets_semaine'] = JOURS_COMPLETS_SEMAINE
         context['data'] = self.Get_data_grille()
+        if context['data']["tarifs_credits_exists"]:
+            context['form_forfaits'] = form_forfaits(inscriptions=context['data']["liste_inscriptions"])
         return context
 
     def Get_data_grille(self):

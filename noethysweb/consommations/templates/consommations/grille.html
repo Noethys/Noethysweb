@@ -40,6 +40,10 @@
         {# Menu contextuel des consommations #}
         <div id="contextMenu" class="dropdown clearfix">
             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
+                {% if data.tarifs_credits_exists %}
+                    <li class="dropdown-item"><a tabindex="-1" href="#" id="contextmenu_forfait">Appliquer un forfait crédit</a></li>
+                    <li class="dropdown-divider"></li>
+                {% endif %}
                 <li class="dropdown-item"><a tabindex="-1" href="#" id="contextmenu_supprimer">Supprimer</a></li>
                 <li class="dropdown-divider"></li>
                 <li class="dropdown-item"><a tabindex="-1" href="#" data-etat="reservation" id="contextmenu_reservation">Réservation</a></li>

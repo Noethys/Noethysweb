@@ -36,6 +36,7 @@ function uuid() {
   );
 }
 
+
 /*
 * jQuery.ajaxQueue - A queue for ajax requests
 *
@@ -93,8 +94,6 @@ $.ajaxQueue = function( ajaxOpts ) {
 };
 
 })(jQuery);
-
-
 
 
 // Variables globales
@@ -403,6 +402,7 @@ class Case_standard extends Case_base {
 
             // Dessine les icones
             var texte_icones = "";
+            if (conso.prestation && dict_prestations[conso.prestation].forfait_date_debut) {texte_icones += " <i class='fa fa-tag' style='color: " + dict_prestations[conso.prestation].couleur + ";' title='Forfait crédit'></i>"};
             if ((conso.prestation === null) && (mode !== "portail")) {texte_icones += " <i class='fa fa-exclamation-triangle text-orange' title='Aucune prestation'></i>"};
             if (conso.etat === "present") {texte_icones += " <i class='fa fa-check-circle-o text-green' title='Présent'></i>"};
             if (conso.etat === "absenti") {texte_icones += " <i class='fa fa-times-circle-o text-red' title='Absence injustifiée'></i>"};
@@ -414,6 +414,12 @@ class Case_standard extends Case_base {
             // Pour les tests, affiche l'id de la prestation
             // $("#" + this.key + " .groupe").html(conso.prestation);
         };
+    };
+
+    // Appliquer un forfait crédit
+    appliquer_forfait() {
+        $('#modal_forfaits').modal('show');
+        $("#id_date_debut").datepicker("setDate", moment(this.date).format("DD/MM/YYYY"));
     };
 
     // Supprimer une conso
@@ -1049,6 +1055,7 @@ $(function () {
     });
     $(document).on('click', "#contextMenu li a", function(e) {
         var id = $(this).attr('id');
+        if (id === "contextmenu_forfait") {case_contextmenu.appliquer_forfait()};
         if (id === "contextmenu_supprimer") {case_contextmenu.supprimer()};
         if (id === "contextmenu_reservation") {case_contextmenu.set_etat("reservation")};
         if (id === "contextmenu_attente") {case_contextmenu.set_etat("attente")};
@@ -1410,7 +1417,7 @@ function get_donnees_for_facturation(keys_cases_touchees) {
     $.each(dict_prestations, function (idprestation, dict_prestation) {
         // Mémorisation des prestations de la ligne uniquement
         var key = dict_prestation.date + "_" + dict_prestation.famille + "_" + dict_prestation.individu + "_" + dict_prestation.activite;
-        if (liste_keys_pour_prestations.includes(key)) {
+        if (liste_keys_pour_prestations.includes(key) || dict_prestation.forfait_date_debut) {
             dict_prestations_temp[idprestation] = dict_prestation;
         }
         // Mémorisation de toutes les aides

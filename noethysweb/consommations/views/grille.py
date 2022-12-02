@@ -3,19 +3,18 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, hashlib, json, datetime, time, decimal, math, re, copy
 logger = logging.getLogger(__name__)
+from uuid import uuid4
+from colorhash import ColorHash
 from django.http import JsonResponse
-from django.contrib import messages
+from django.utils.safestring import mark_safe
+from django.db.models import Q, Count
+from django.core import serializers
 from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite, Consommation, MemoJournee, Evenement, Groupe, Individu, Ventilation, \
                         Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Ferie, Individu, Activite, Classe, Scolarite
 from core.utils import utils_dates, utils_dictionnaires, utils_db, utils_texte, utils_decimal, utils_historique
 from consommations.utils import utils_consommations
-from django.utils.safestring import mark_safe
-from django.db.models import Q, Count
-from django.core import serializers
-import json, datetime, time, decimal, math, re, copy
-from uuid import uuid4
 
 
 def Get_individus(request):
@@ -162,7 +161,7 @@ def Get_generic_data(data={}):
         dict_deductions[deduction.prestation_id].append({"label": deduction.label, "date": str(deduction.date), "aide": deduction.aide_id, "montant": float(deduction.montant)})
 
     # Importation des prestations
-    conditions = data["conditions_periodes"] & Q(categorie="consommation")
+    conditions = Q(categorie="consommation") & (data["conditions_periodes"] | (Q(forfait_date_debut__lte=data["date_max"]) & Q(forfait_date_fin__gte=data["date_min"])))
     if data["mode"] in ("individu", "portail"):
         conditions &= Q(famille_id=data["idfamille"]) & Q(individu__in=data["liste_individus"])
     liste_prestations = Prestation.objects.filter(conditions)
@@ -173,9 +172,15 @@ def Get_generic_data(data={}):
                 "montant": float(p.montant), "activite": p.activite_id, "tarif": p.tarif_id, "facture": p.facture_id,
                 "famille": p.famille_id, "individu": p.individu_id, "categorie_tarif": p.categorie_tarif_id, "temps_facture": utils_dates.DeltaEnStr(p.temps_facture, separateur=":"),
                 "quantite": p.quantite, "tarif_ligne": p.tarif_ligne_id, "tva": float(p.tva) if p.tva else None, "code_compta": p.code_compta, "aides": [],
+                "forfait_date_debut": str(p.forfait_date_debut) if p.forfait_date_debut else None, "forfait_date_fin": str(p.forfait_date_fin) if p.forfait_date_fin else None,
+                "dirty": False,
             }
             if p.pk in dict_deductions:
                 data["prestations"][p.pk]["aides"] = dict_deductions[p.pk]
+
+            if p.forfait_date_debut:
+                # Création d'une couleur pour le forfait crédit
+                data["prestations"][p.pk]["couleur"] = ColorHash(str(p.pk)).hex
 
     data['dict_prestations_json'] = mark_safe(json.dumps(data["prestations"]))
     #logger.debug("prestations=" + str(data['dict_prestations_json']))
@@ -256,6 +261,12 @@ def Get_generic_data(data={}):
     # Sélection des unités visibles
     data["liste_unites_visibles"] = [unite for unite in data["liste_unites"] if unite.visible_portail or data["mode"] != "portail"]
 
+    # Recherche s'il y a des forfaits crédit dans les tarifs de l'activité
+    data["tarifs_credits_exists"] = False
+    if data["mode"] != "portail":
+        data["tarifs_credits_exists"] = Tarif.objects.filter(activite=data['selection_activite'], date_debut__lte=data["date_min"]).exists()
+        data["liste_idinscription"] = [inscription.pk for inscription in data["liste_inscriptions"]]
+
     # Conversion des unités de conso en JSON
     liste_unites_json = []
     for unite in data["liste_unites"]:
@@ -299,21 +310,23 @@ def Save_grille(request=None, donnees={}):
 
     # ----------------------------------- PRESTATIONS --------------------------------------
 
-    # Enregistrement des nouvelles prestations
+    # Enregistrement des prestations
     dict_idprestation = {}
     liste_nouvelles_prestations = []
     for IDprestation, dict_prestation in donnees["prestations"].items():
 
+        prestation_temp = {
+            "date": dict_prestation["date"], "categorie": "consommation", "label": dict_prestation["label"], "montant_initial": dict_prestation["montant_initial"],
+            "montant": dict_prestation["montant"], "activite_id": dict_prestation["activite"], "tarif_id": dict_prestation["tarif"], "famille_id": dict_prestation["famille"],
+            "individu_id": dict_prestation["individu"], "temps_facture": utils_dates.HeureStrEnDelta(dict_prestation["temps_facture"]), "categorie_tarif_id": dict_prestation["categorie_tarif"],
+            "quantite": dict_prestation["quantite"], "tarif_ligne_id": dict_prestation["tarif_ligne"], "tva": dict_prestation["tva"], "code_compta": dict_prestation["code_compta"],
+            "forfait_date_debut": dict_prestation["forfait_date_debut"], "forfait_date_fin": dict_prestation["forfait_date_fin"],
+        }
+
+        # Enregistrement des nouvelles prestations
         if "-" in IDprestation:
             logger.debug("Prestation à ajouter : ID" + str(IDprestation) + " > " + str(dict_prestation))
-
-            # Enregistre la prestation
-            prestation = Prestation.objects.create(
-                date=dict_prestation["date"], categorie="consommation", label=dict_prestation["label"], montant_initial=dict_prestation["montant_initial"],
-                montant=dict_prestation["montant"], activite_id=dict_prestation["activite"], tarif_id=dict_prestation["tarif"], famille_id=dict_prestation["famille"],
-                individu_id=dict_prestation["individu"], temps_facture=utils_dates.HeureStrEnDelta(dict_prestation["temps_facture"]), categorie_tarif_id=dict_prestation["categorie_tarif"],
-                quantite=dict_prestation["quantite"], tarif_ligne_id=dict_prestation["tarif_ligne"], tva=dict_prestation["tva"], code_compta=dict_prestation["code_compta"],
-            )
+            prestation = Prestation.objects.create(**prestation_temp)
             liste_nouvelles_prestations.append(prestation)
 
             liste_historique.append({"titre": "Ajout d'une prestation", "detail": "%s du %s" % (dict_prestation["label"], utils_dates.ConvertDateToFR(dict_prestation["date"])), "utilisateur": request.user if request else None,
@@ -327,6 +340,10 @@ def Save_grille(request=None, donnees={}):
                 deduction = Deduction.objects.create(date=dict_prestation["date"], label=dict_aide["label"], aide_id=dict_aide["aide"], famille_id=dict_prestation["famille"], prestation=prestation, montant=dict_aide["montant"])
                 liste_historique.append({"titre": "Ajout d'une déduction", "detail": "%s du %s" % (dict_aide["label"], utils_dates.ConvertDateToFR(dict_prestation["date"])), "utilisateur": request.user if request else None,
                                          "famille_id": dict_prestation["famille"], "individu_id": dict_prestation["individu"], "objet": "Déduction", "idobjet": deduction.pk, "classe": "Deduction"})
+
+        # Modification de prestations
+        if "-" not in IDprestation and dict_prestation.get("dirty", False):
+            Prestation.objects.filter(pk=int(IDprestation)).update(**prestation_temp)
 
     # ---------------------------------- CONSOMMATIONS -------------------------------------
 
@@ -536,6 +553,7 @@ class Facturation():
         self.tarif_fratries_exists = False
 
     def Facturer(self):
+        messages = []
         for key_case, case_tableau in self.donnees["cases_touchees"].items():
             #logger.debug("Case étudiée : " + str(key_case))
 
@@ -543,7 +561,6 @@ class Facturation():
 
                 action = "saisie" # todo : PROVISOIRE
                 modeSilencieux = False # todo : PROVISOIRE
-                self.dictForfaits = {} # todo : PROVISOIRE
 
 
                 # Recherche les unités utilisées de la ligne
@@ -589,6 +606,7 @@ class Facturation():
                             if len(unites_combi) > tarif.nbre_max_unites_combi:
                                 tarif.nbre_max_unites_combi = len(unites_combi)
                                 tarif.combi_retenue = unites_combi
+                                tarif.combinaison = combinaison
                                 tarifs_valides2.append(tarif)
 
                 # Tri des tarifs par date de début puis par nbre d'unités
@@ -597,13 +615,62 @@ class Facturation():
 
                 #-----------------------------------------------------------
                 # Si forfaits au crédits présents dans les tarifs
-                # todo : Prise en charge forfait-crédit à coder ici
+
+                nbre_tarifs_forfait = len([tarif for tarif in tarifs_valides2 if tarif.type == "CREDIT"])
+                if nbre_tarifs_forfait:
+                    tarifs_valides3 = []
+                    for tarif in tarifs_valides2:
+                        if tarif.type == "CREDIT":
+                            # tarif crédit
+                            IDprestationForfait = self.Recherche_forfait_credit(tarif=tarif, case_tableau=case_tableau)
+
+                            # Vérification des quantités max
+                            if IDprestationForfait and tarif.combinaison.quantite_max:
+                                dict_quantites = {}
+
+                                # Recherche la quantité de conso dans la grille affichée
+                                for key, liste_conso_temp in self.donnees["consommations"].items():
+                                    for conso in liste_conso_temp:
+                                        if (tarif.forfait_beneficiaire == "individu" and conso["inscription"] == case_tableau["inscription"]) or (tarif.forfait_beneficiaire == "famille" and conso["famille"] == case_tableau["famille"]):
+                                            dict_quantites.setdefault(key, [])
+                                            dict_quantites[key].append(conso["unite"])
+                                            dict_quantites[key].sort()
+
+                                # Recherche la quantité de conso déjà enregistrées dans la DB
+                                if "-" not in IDprestationForfait:
+                                    for conso in Consommation.objects.filter(prestation_id=IDprestationForfait):
+                                        key = "%d_%d" % (conso.date, conso.inscription_id)
+                                        dict_quantites.setdefault(key, [])
+                                        dict_quantites[key].append(conso.unite_id)
+                                        dict_quantites[key].sort()
+
+                                # Compte la quantité de conso utilisées
+                                quantite_forfait = len([key for key, unites in dict_quantites.items() if unites == tarif.combi_retenue])
+                                if quantite_forfait > tarif.combinaison.quantite_max:
+                                    IDprestationForfait = None
+                                    messages.append(("info", "Il n'y a plus de crédit disponible dans le forfait !"))
+                                    # if "blocage_plafond" in tarif.options:
+                                    #     pass
+
+                            if IDprestationForfait:
+                                tarif.credit = IDprestationForfait
+                                tarifs_valides3.append(tarif)
+                        else:
+                            # Tarif normal
+                            tarifs_valides3.append(tarif)
+
+                    # Met les forfaits crédit en premier
+                    tarifs_valides3.sort(key=lambda tarif: tarif.type)
+
+                    tarifs_valides2 = tarifs_valides3
+
                 #-----------------------------------------------------------
 
                 # Sélection des tarifs qui ont le plus grand nombre d'unités
                 liste_tarifs_retenus = []
                 liste_unites_traitees = []
                 for tarif in tarifs_valides2:
+
                     # Recherche des unités non traitées
                     valide = True
                     for idunite in tarif.combi_retenue:
@@ -650,11 +717,7 @@ class Facturation():
                                     logger.debug("Un tarif spécial événement a été trouvé : IDtarif " + str(tarif.pk))
 
                         # Forfait crédit
-                        # if "CREDIT" in tarif:
-                        #     forfait_credit = tarif["CREDIT"]
-                        # else:
-                        #     forfait_credit = False
-                        forfait_credit = False # Provisoire : doit être remplacé par le code ci-dessus
+                        forfait_credit = getattr(tarif, "credit", None)
 
                         # Recherche du temps facturé par défaut
                         temps_facture = None
@@ -765,7 +828,7 @@ class Facturation():
                                             liste_aide_retenues.append(combi_retenue)
 
 
-                        if forfait_credit == False :
+                        if not forfait_credit:
                             # Application de la déduction
                             montant_initial = montant_tarif
                             montant_final = montant_initial
@@ -783,7 +846,6 @@ class Facturation():
                             if dict_resultat["nouveau"]:
                                 self.dict_nouvelles_prestations[IDprestation] = dict_resultat["dictPrestation"]
                                 logger.debug("Ajout de la nouvelle prestation " + str(IDprestation))
-
                         else:
                             IDprestation = forfait_credit
 
@@ -810,12 +872,11 @@ class Facturation():
                 # 8 - Supprime des prestations qui ne sont plus utilisées sur la ligne
                 for idprestation, dict_prestation in self.donnees["prestations"].items():
                     if dict_prestation["date"] == case_tableau["date"] and dict_prestation["famille"] == case_tableau["famille"] and dict_prestation["individu"] == case_tableau["individu"] and dict_prestation["activite"] == case_tableau["activite"]:
-                        if idprestation not in dictUnitesPrestations.values() and idprestation not in self.liste_anciennes_prestations:
+                        if idprestation not in dictUnitesPrestations.values() and idprestation not in self.liste_anciennes_prestations and not dict_prestation["forfait_date_debut"]:
                             logger.debug("La prestation suivante ne semble plus utilisée, on la supprime : " + str(idprestation))
                             self.liste_anciennes_prestations.append(idprestation)
 
         # Messages d'information
-        messages = []
         if self.tarif_fratries_exists and self.donnees["mode"] in ("individu", "date"):
             messages.append(("info", "Notez que les tarifs selon le nombre d'individus par famille seront calculés uniquement après l'enregistrement"))
 
@@ -826,6 +887,15 @@ class Facturation():
             "messages": messages,
         }
         return donnees_retour
+
+    def Recherche_forfait_credit(self, tarif=None, case_tableau=None):
+        """ Recherche un forfait dans la liste des forfaits disponibles pour une consommation donnée """
+        for dict_temp in (self.donnees["prestations"].items(), self.dict_nouvelles_prestations.items()):
+            for IDprestation, dict_prestation in dict_temp:
+                if dict_prestation["tarif"] == tarif.pk and dict_prestation["forfait_date_debut"] <= case_tableau["date"] and dict_prestation["forfait_date_fin"] >= case_tableau["date"] and dict_prestation["famille"] == case_tableau["famille"]:
+                    if dict_prestation["individu"] == case_tableau["individu"] or not dict_prestation["individu"]:
+                        return IDprestation
+        return None
 
     def Memorise_prestation(self, case_tableau, tarif, nom_tarif, montant_initial, montant_final, liste_aides=[],
                            temps_facture=None, forfait_date_debut=None, forfait_date_fin=None, evenement=None, quantite=1, tarif_ligne=None):
@@ -1065,10 +1135,6 @@ class Facturation():
                 # if montant_questionnaire not in (None, 0.0):
                 #     montant_tarif_ligne = montant_questionnaire
 
-                if "qf" in methode_calcul and qf_famille != None:
-                    if qf_famille < ligne_calcul.qf_min or qf_famille > ligne_calcul.qf_max:
-                        break
-
                 if ligne_calcul.heure_debut_min <= heure_debut <= ligne_calcul.heure_debut_max and ligne_calcul.heure_fin_min <= heure_fin <= ligne_calcul.heure_fin_max:
                     montant_tarif = ligne_calcul.montant_unique
                     if ligne_calcul.temps_facture:
@@ -1088,7 +1154,12 @@ class Facturation():
                         if "{HEURE_DEBUT}" in label: label = label.replace("{HEURE_DEBUT}", utils_dates.DeltaEnStr(heure_debut_delta))
                         if "{HEURE_FIN}" in label: label = label.replace("{HEURE_FIN}", utils_dates.DeltaEnStr(heure_fin_delta))
                         nom_tarif = label
-                    break
+
+                    if "qf" in methode_calcul:
+                        if qf_famille and ligne_calcul.qf_min <= qf_famille <= ligne_calcul.qf_max:
+                            break
+                    else:
+                        break
 
         # Recherche du montant du tarif : DUREE - MONTANT UNIQUE OU SELON QF
         if methode_calcul in ("duree_montant_unique", "duree_qf"):
@@ -1112,7 +1183,7 @@ class Facturation():
                     if ligne_calcul.temps_facture:
                         temps_facture = datetime.timedelta(hours=ligne_calcul.temps_facture.hour, minutes=ligne_calcul.temps_facture.minute)
                     else:
-                        temps_facture = ligne_calcul.duree_max
+                        temps_facture = datetime.timedelta(hours=ligne_calcul.duree_max.hour, minutes=ligne_calcul.duree_max.minute)
 
                     # Création du label personnalisé
                     label = ligne_calcul.label
@@ -1123,8 +1194,8 @@ class Facturation():
                         if "{HEURE_FIN}" in label: label = label.replace("{HEURE_FIN}", utils_dates.DeltaEnStr(heure_fin_delta))
                         nom_tarif = label
 
-                    if "qf" in methode_calcul and qf_famille != None:
-                        if qf_famille < ligne_calcul.qf_min or qf_famille > ligne_calcul.qf_max:
+                    if "qf" in methode_calcul and qf_famille:
+                        if ligne_calcul.qf_min <= qf_famille <= ligne_calcul.qf_max:
                             break
 
 
@@ -1141,8 +1212,8 @@ class Facturation():
                 if ligne_calcul.label:
                     nom_tarif = ligne_calcul.label
 
-                if "qf" in methode_calcul and qf_famille != None:
-                    if qf_famille < ligne_calcul.qf_min or qf_famille > ligne_calcul.qf_max:
+                if "qf" in methode_calcul and qf_famille:
+                    if ligne_calcul.qf_min <= qf_famille <= ligne_calcul.qf_max:
                         break
 
 
@@ -1165,7 +1236,7 @@ class Facturation():
             if "qf" in methode_calcul:
                 for ligne_calcul in lignes_calcul:
                     qf_famille = self.Recherche_QF(tarif, case_tableau)
-                    if qf_famille and qf_famille < ligne_calcul.qf_min or qf_famille > ligne_calcul.qf_max:
+                    if qf_famille and ligne_calcul.qf_min <= qf_famille <= ligne_calcul.qf_max:
                         break
 
             if "horaire" in methode_calcul:

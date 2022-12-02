@@ -6,6 +6,7 @@
 from django.urls import include, path
 from core.views import toc
 from parametrage.views import calendrier
+from consommations.forms import grille_forfaits
 from consommations.views import grille, gestionnaire, suivi_consommations, etat_global, synthese_consommations, liste_attente, liste_absences, edition_liste_conso, \
                                 pointeuse, liste_consommations, liste_repas, etat_nomin, liste_durees
 from core.decorators import secure_ajax
@@ -43,6 +44,9 @@ urlpatterns = [
     # AJAX
     path('consommations/get_vacances', secure_ajax(calendrier.Get_vacances), name='ajax_get_vacances'),
     path('consommations/get_individus', secure_ajax(grille.Get_individus), name='ajax_get_individus'),
+    path('consommations/get_familles', secure_ajax(grille_forfaits.Get_familles), name='ajax_get_familles'),
+    path('consommations/get_forfaits_disponibles', secure_ajax(grille_forfaits.Get_forfaits_disponibles), name='ajax_get_forfaits_disponibles'),
+    path('consommations/creation_forfait', secure_ajax(grille_forfaits.Creation_forfait), name='ajax_creation_forfait'),
     path('consommations/facturer', secure_ajax(grille.Facturer), name='ajax_facturer'),
     path('consommations/traitement_lot', secure_ajax(grille.Valider_traitement_lot), name='ajax_traitement_lot'),
     path('consommations/impression_pdf', secure_ajax(grille.Impression_pdf), name='ajax_grille_impression_pdf'),

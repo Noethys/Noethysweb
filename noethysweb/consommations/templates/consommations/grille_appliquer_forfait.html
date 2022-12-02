@@ -1,0 +1,176 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Modal Grille Appliquer un forfait crédit #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_forfaits{% endblock %}
+    {% block modal_titre %}Appliquer un forfait crédit{% endblock %}
+    {% block modal_classe %}modal-lg{% endblock %}
+    {% block modal_body %}
+        <p>Saisissez une date de début puis sélectionnez un forfait dans la liste.</p>
+        <div id="modal_erreurs" class="text-red"></div>
+        <form id="form_forfaits" method="post">
+            {% csrf_token %}
+            {% crispy form_forfaits %}
+        </form>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+$(document).ready(function() {
+
+    var dict_forfaits = null;
+    dict_forfait = null;
+
+    function maj_forfaits_disponibles() {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_get_forfaits_disponibles' %}",
+            data: {
+                "idfamille": $("#id_famille").val(),
+                "date_debut": $("#id_date_debut").val(),
+                "activite": selection_activite,
+                "selection": $("#id_forfait").val(),
+                "liste_idinscription": JSON.stringify({{ data.liste_idinscription }}),
+            },
+            datatype: "json",
+            success: function(reponse){
+                $("#id_forfait").html(reponse.html_ctrl);
+                if (reponse.dict_forfaits) {
+                    dict_forfaits = JSON.parse(reponse.dict_forfaits);
+                }
+                // Si modification d'un forfait
+                if (dict_forfait) {
+                    $("#id_date_fin").datepicker("setDate", moment(dict_forfait["forfait_date_fin"]).format("DD/MM/YYYY"));
+                    if (dict_forfait["individu"] === null) {individu=0} else {individu=dict_forfait["individu"]}
+                    $("#id_forfait").val(individu + "_" + dict_forfait["tarif"]);
+                    $("#id_label").val(dict_forfait["label"])
+                    $("#id_date").datepicker("setDate", moment(dict_forfait["date"]).format("DD/MM/YYYY"));
+                    $("#id_montant").val(dict_forfait["montant"]);
+                    dict_forfait = null;
+                }
+            }
+        });
+    }
+
+    function on_selection_forfait() {
+        var key_forfait = $("#id_forfait").val();
+        $("#id_label").val(dict_forfaits[key_forfait].label);
+        $("#id_montant").val(dict_forfaits[key_forfait].montant);
+        $("#id_date").datepicker("setDate", dict_forfaits[key_forfait].date);
+        $("#id_date_fin").datepicker("setDate", dict_forfaits[key_forfait].date_fin);
+    }
+
+    // Si modification de la famille
+    $("#id_famille").on("change", function(e) {
+        if (dict_forfait !== null) {return}
+        maj_forfaits_disponibles();
+    });
+
+    // Si modification de la date
+    $("#id_date_debut").on("change", function(e) {
+        maj_forfaits_disponibles();
+    });
+
+    // Si modification du forfait
+    $("#id_forfait").on("change", function(e) {
+        if (dict_forfait !== null) {return}
+        on_selection_forfait();
+    });
+
+    // Initialisation des champs de saisie
+    $('#modal_forfaits').on('show.bs.modal', function (event) {
+        if (event.namespace !== 'bs.modal') {return}
+        if ((event.target == $("#id_date_fin")) || (event.target == $("#id_date_debut")) || (event.target == $("#id_date"))) {return}
+        if (dict_forfait !== null) {return}
+        $("#id_label").val(null);
+        $("#id_montant").val("0.0");
+        $("#id_date").datepicker("setDate", null);
+        $("#id_date_debut").datepicker("setDate", null);
+        $("#id_date_fin").datepicker("setDate", null);
+        $("#id_forfait").val(null);
+        maj_forfaits_disponibles();
+    });
+
+    $('#modal_forfaits').on('hidden.bs.modal', function (event) {
+        dict_forfait = null;
+    });
+
+    $("#form_forfaits").on('submit', function (event) {
+        event.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_creation_forfait' %}",
+            data: {
+                "idfamille": $("#id_famille").val(),
+                "date_debut": $("#id_date_debut").val(),
+                "date_fin": $("#id_date_fin").val(),
+                "forfait": $("#id_forfait").val(),
+                "date": $("#id_date").val(),
+                "label": $("#id_label").val(),
+                "montant": $("#id_montant").val(),
+                "idprestation": $("[name='idprestation']").val(),
+                "dict_forfait": JSON.stringify(dict_forfaits[$("#id_forfait").val()]),
+            },
+            datatype: "json",
+            success: function(reponse){
+                dict_prestations[reponse.idprestation] = JSON.parse(reponse.dict_prestation);
+                dict_prestations[reponse.idprestation].dirty = true;
+                $("#modal_forfaits").modal("hide");
+                tout_recalculer();
+                maj_box_forfaits();
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        });
+    });
+
+});
+
+function modifier_forfait(idprestation) {
+    dict_forfait = dict_prestations[idprestation]
+    if (dict_forfait.facture) {
+        toastr.error("Modification impossible : Cette prestation a déjà été facturée");
+        return false;
+    }
+    $('#modal_forfaits').modal('show');
+    $("[name='idprestation']").val(idprestation);
+    $("#id_famille").val(dict_forfait["famille"]);
+    $("#id_date_debut").datepicker("setDate", moment(dict_forfait["forfait_date_debut"]).format("DD/MM/YYYY"));
+}
+
+function supprimer_forfait(idprestation) {
+    dict_forfait_suppr = dict_prestations[idprestation]
+    if (dict_forfait_suppr.facture) {
+        toastr.error("Suppression impossible : Cette prestation a déjà été facturée");
+        return false;
+    }
+    bootbox.dialog({
+        title: "Supprimer un forfait",
+        message: "Voulez-vous vraiment supprimer le forfait <i class='fa fa-tag' style='color: " + dict_forfait_suppr["couleur"] + ";'></i> ?",
+        buttons: {
+            ok: {
+                label: "<i class='fa fa-trash'></i> Supprimer",
+                className: 'btn-warning',
+                callback: function() {
+                    if (!(idprestation.toString().includes("-"))) {
+                        dict_suppressions.prestations.push(parseInt(idprestation));
+                    }
+                    delete dict_prestations[idprestation];
+                    tout_recalculer();
+                    maj_box_forfaits();
+                }
+            },
+            cancel: {
+                label: "<i class='fa fa-ban'></i> Annuler",
+                className: 'btn-danger',
+            }
+        }
+    })
+}
+
+</script>

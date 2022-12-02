@@ -9,7 +9,6 @@
     {{ block.super }}
 {% endblock styles %}
 
-
 {% block contenu_page %}
 
     <script>
@@ -18,30 +17,21 @@
 
     <div class="row">
         <div class="col-md-3" >
-
-            <!-- Sélection des paramètres -->
             {% include "consommations/grille_parametres.html" %}
-
-            <!-- Box facturation -->
+            {% if data.tarifs_credits_exists %}
+                {% include "consommations/grille_forfaits.html" %}
+            {% endif %}
             {% include "consommations/grille_facturation.html" %}
-
-            <!-- Box envoi Email -->
             {% include 'outils/modal_editeur_emails.html' %}
-
         </div>
 
         <div class="col-md-9">
-
-            <!-- Grille -->
             {% include "consommations/grille.html" %}
-
         </div>
 
     </div>
 
-
 {% endblock contenu_page %}
-
 
 
 {% block scripts %}
@@ -54,6 +44,4 @@
     </script>
 
 {% endblock scripts %}
-
-
 

@@ -16,7 +16,7 @@ from core.utils import utils_dates, utils_dictionnaires, utils_parametres
 from consommations.forms.grille_selection_date import Formulaire as form_selection_date
 from consommations.forms.grille_ajouter_individu import Formulaire as form_ajouter_individu
 from consommations.forms.grille_options import Formulaire as form_options
-# from consommations.forms.grille_forfaits import Formulaire as form_forfaits
+from consommations.forms.grille_forfaits import Formulaire as form_forfaits
 from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
 
 
@@ -41,8 +41,8 @@ class View(CustomView, TemplateView):
         context['form_selection_date'] = form_selection_date
         context['form_ajouter_individu'] = form_ajouter_individu
         context['data'] = self.Get_data_grille()
-        # if context['data']["tarifs_credits_exists"]:
-        #     context['form_forfaits'] = form_forfaits(inscriptions=context['data']["liste_inscriptions"])
+        if context['data']["tarifs_credits_exists"]:
+            context['form_forfaits'] = form_forfaits(inscriptions=context['data']["liste_inscriptions"])
         context['form_options'] = form_options(initial=context["data"]["options"])
         return context
 
