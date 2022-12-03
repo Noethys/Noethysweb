@@ -48,6 +48,7 @@ def Envoyer_email(request):
         return JsonResponse({"message": "Vous devez sélectionner ou saisir au moins une adresse valide"}, status=401)
 
     destinataire_defaut = mail.destinataires.first()
+
     destinataire_defaut_found = False
     for adresse in liste_adresses:
         if adresse != destinataire_defaut.adresse:
@@ -62,7 +63,7 @@ def Envoyer_email(request):
         destinataire_defaut.delete()
 
     liste_envois_succes = utils_email.Envoyer_model_mail(idmail=mail.pk, request=request)
-    liste_reussis = [destinataire.adresse for destinataire in  liste_envois_succes]
+    liste_reussis = [destinataire.adresse for destinataire in liste_envois_succes]
     liste_echecs = [adresse for adresse in liste_adresses if adresse not in liste_reussis]
     if len(liste_reussis) == len(liste_adresses):
         return JsonResponse({"message": "Le mail a été envoyé avec succès à %d destinataire(s)" % len(liste_adresses)})

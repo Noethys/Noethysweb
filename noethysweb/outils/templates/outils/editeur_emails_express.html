@@ -62,7 +62,7 @@
                 },
                 error: function (data) {
                     {#dialogbox.modal('hide');#}
-                    toastr.error(data.message);
+                    toastr.error(data.responseJSON.message);
                 }
             });
         };
