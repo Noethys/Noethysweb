@@ -43,3 +43,8 @@ def Traiter_attentes():
 def Vider_rep_temp():
     logger.debug("%s : Lancement du vidage du répertoire temp..." % datetime.datetime.now())
     call_command("reset_rep_temp")
+
+
+def Corriger_anomalies():
+    logger.debug("%s : Lancement de la correction automatique des anomalies..." % datetime.datetime.now())
+    call_command("corrige_anomalies")
