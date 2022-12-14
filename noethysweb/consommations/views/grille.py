@@ -264,7 +264,7 @@ def Get_generic_data(data={}):
     # Recherche s'il y a des forfaits crédit dans les tarifs de l'activité
     data["tarifs_credits_exists"] = False
     if data["mode"] != "portail":
-        data["tarifs_credits_exists"] = Tarif.objects.filter(activite=data['selection_activite'], date_debut__lte=data["date_min"]).exists()
+        data["tarifs_credits_exists"] = Tarif.objects.filter(type="CREDIT", activite=data['selection_activite'], date_debut__lte=data["date_min"]).exists()
         data["liste_idinscription"] = [inscription.pk for inscription in data["liste_inscriptions"]]
 
     # Conversion des unités de conso en JSON
