@@ -48,7 +48,7 @@ $(document).ready(function() {
                     if (dict_forfait["individu"] === null) {individu=0} else {individu=dict_forfait["individu"]}
                     $("#id_forfait").val(individu + "_" + dict_forfait["tarif"]);
                     $("#id_label").val(dict_forfait["label"])
-                    $("#id_date").datepicker("setDate", moment(dict_forfait["date"]).format("DD/MM/YYYY"));
+                    $("#id_date_prestation").datepicker("setDate", moment(dict_forfait["date"]).format("DD/MM/YYYY"));
                     $("#id_montant").val(dict_forfait["montant"]);
                     dict_forfait = null;
                 }
@@ -60,7 +60,7 @@ $(document).ready(function() {
         var key_forfait = $("#id_forfait").val();
         $("#id_label").val(dict_forfaits[key_forfait].label);
         $("#id_montant").val(dict_forfaits[key_forfait].montant);
-        $("#id_date").datepicker("setDate", dict_forfaits[key_forfait].date);
+        $("#id_date_prestation").datepicker("setDate", dict_forfaits[key_forfait].date);
         $("#id_date_fin").datepicker("setDate", dict_forfaits[key_forfait].date_fin);
     }
 
@@ -84,11 +84,11 @@ $(document).ready(function() {
     // Initialisation des champs de saisie
     $('#modal_forfaits').on('show.bs.modal', function (event) {
         if (event.namespace !== 'bs.modal') {return}
-        if ((event.target == $("#id_date_fin")) || (event.target == $("#id_date_debut")) || (event.target == $("#id_date"))) {return}
+        if ((event.target == $("#id_date_fin")) || (event.target == $("#id_date_debut")) || (event.target == $("#id_date_prestation"))) {return}
         if (dict_forfait !== null) {return}
         $("#id_label").val(null);
         $("#id_montant").val("0.0");
-        $("#id_date").datepicker("setDate", null);
+        $("#id_date_prestation").datepicker("setDate", null);
         $("#id_date_debut").datepicker("setDate", null);
         $("#id_date_fin").datepicker("setDate", null);
         $("#id_forfait").val(null);
@@ -109,7 +109,7 @@ $(document).ready(function() {
                 "date_debut": $("#id_date_debut").val(),
                 "date_fin": $("#id_date_fin").val(),
                 "forfait": $("#id_forfait").val(),
-                "date": $("#id_date").val(),
+                "date": $("#id_date_prestation").val(),
                 "label": $("#id_label").val(),
                 "montant": $("#id_montant").val(),
                 "idprestation": $("[name='idprestation']").val(),

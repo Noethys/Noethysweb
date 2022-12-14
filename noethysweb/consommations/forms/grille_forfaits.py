@@ -149,7 +149,7 @@ class Formulaire(FormulaireBase, forms.Form):
     date_fin = forms.DateField(label="Au", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': False}))
     forfait = forms.ChoiceField(label="Forfait", choices=[], initial="aucun", required=False)
     label = forms.CharField(label="Label", required=False)
-    date = forms.DateField(label="Date", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
+    date_prestation = forms.DateField(label="Date", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
     montant = forms.DecimalField(label="Montant", max_digits=6, decimal_places=2, initial=0.0, required=False)
 
     def __init__(self, *args, **kwargs):
@@ -180,7 +180,7 @@ class Formulaire(FormulaireBase, forms.Form):
             ),
             Fieldset("Prestation",
                 Field("label"),
-                Field("date"),
+                Field("date_prestation"),
                 Field("montant"),
             ),
             ButtonHolder(
@@ -207,8 +207,8 @@ class Formulaire(FormulaireBase, forms.Form):
         if not self.cleaned_data["label"]:
             self.add_error("label", "Vous devez saisir un label pour la prestation")
             return
-        if not self.cleaned_data["date"]:
-            self.add_error("date", "Vous devez saisir une date pour la prestation")
+        if not self.cleaned_data["date_prestation"]:
+            self.add_error("date_prestation", "Vous devez saisir une date pour la prestation")
             return
         if not self.cleaned_data["montant"]:
             self.add_error("montant", "Vous devez saisir un montant pour la prestation")
