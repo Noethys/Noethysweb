@@ -1029,16 +1029,16 @@ class Facturation():
         """ Vérifie si jour est scolaire ou vacances """
         def EstEnVacances(date_temp=None):
             for vac_debut, vac_fin in self.donnees["liste_vacances"]:
-                if vac_debut >= str(date_temp) >= vac_fin:
+                if vac_debut <= str(date_temp) <= vac_fin:
                     return True
             return False
         date = utils_dates.ConvertDateENGtoDate(date)
         valide = False
         if jours_scolaires:
-            if not EstEnVacances(date) and str(date.weekday()) in jours_scolaires:
+            if not EstEnVacances(date) and str(date.weekday()) in [x for x in jours_scolaires]:
                 valide = True
         if jours_vacances:
-            if EstEnVacances(date) and str(date.weekday()) in jours_vacances:
+            if EstEnVacances(date) and str(date.weekday()) in [x for x in jours_vacances]:
                 valide = True
         return valide
 
