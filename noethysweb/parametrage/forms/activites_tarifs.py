@@ -247,6 +247,8 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.fields['cotisations_type'].initial = "SELECTION"
             if self.instance.caisses.count() > 0:
                 self.fields['caisses_type'].initial = "SELECTION"
+            if self.instance.jours_scolaires or self.instance.jours_vacances:
+                self.fields['periodes_type'].initial = "SELECTION"
 
         # Forfait-crédit : Génération de conso
         if self.instance.type == "FORFAIT":
