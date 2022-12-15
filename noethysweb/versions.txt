@@ -1,3 +1,11 @@
+Version 1.1.0.3 (15/12/2022) :
+
+- Modification de la couleur des absences injustifiées
+- Correction du calcul du remplissage quand groupe est null
+- Correction de la détection de la période d'une date dans la grille
+- Correction de la condition d'application par période dans le tarif
+- Correction de la détection des forfaits crédit
+
 Version 1.1.0.2 (12/12/2022) :
 
 - Amélioration du correcteur d'anomalies
