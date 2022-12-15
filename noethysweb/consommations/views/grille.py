@@ -215,7 +215,7 @@ def Get_generic_data(data={}):
 
     # Importation des remplissages
     liste_remplissage = Remplissage.objects.filter(data["conditions_periodes"] & Q(activite=data['selection_activite']))
-    data['dict_capacite_json'] = mark_safe(json.dumps({'%s_%d_%d' % (r.date, r.unite_remplissage_id, r.groupe_id): r.places for r in liste_remplissage}))
+    data['dict_capacite_json'] = mark_safe(json.dumps({'%s_%d_%d' % (r.date, r.unite_remplissage_id, r.groupe_id or 0): r.places for r in liste_remplissage}))
 
     # Importation des unités de remplissage
     liste_unites_remplissage = UniteRemplissage.objects.prefetch_related('unites').filter(activite=data['selection_activite']).order_by("ordre")
