@@ -110,7 +110,7 @@ def Get_forfaits_disponibles(request):
                 if mois: date_fin = date_fin + relativedelta.relativedelta(months=+mois)
                 if annees: date_fin = date_fin + relativedelta.relativedelta(years=+annees)
 
-            resultat = facturation.Calcule_tarif(tarif=tarif, case_tableau={"date": date_debut})
+            resultat = facturation.Calcule_tarif(tarif=tarif, case_tableau={"date": date_debut, "famille": idfamille})
             if resultat:
                 montant_tarif, nom_tarif, temps_facture, quantite, tarif_ligne = resultat
                 detail_forfait = {"date_fin": utils_dates.ConvertDateToFR(date_fin), "label": nom_tarif, "montant": float(montant_tarif),
