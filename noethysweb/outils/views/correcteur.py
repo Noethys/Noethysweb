@@ -71,7 +71,7 @@ def Get_anomalies():
         for r in resultats]
 
     # Recherche les prestations sans consommations associées
-    resultats = Prestation.objects.select_related("individu").values("individu__nom", "individu__prenom", "individu__pk", "famille__pk", "activite__pk", "label").filter(consommation__isnull=True, tarif__isnull=False, categorie="consommation").annotate(nbre=Count("pk"), min_date=Min("date"), max_date=Max("date")).order_by("individu__nom", "individu__prenom")
+    resultats = Prestation.objects.select_related("individu").values("individu__nom", "individu__prenom", "individu__pk", "famille__pk", "activite__pk", "label").filter(consommation__isnull=True, tarif__isnull=False, categorie="consommation", forfait_date_debut__isnull=True).annotate(nbre=Count("pk"), min_date=Min("date"), max_date=Max("date")).order_by("individu__nom", "individu__prenom")
     data["Prestations sans consommations associées"] = [Anomalie(
         label="%s %s : %s %s (Du %s au %s)." % (r["individu__nom"], r["individu__prenom"], r["nbre"], r["label"], r["min_date"].strftime("%d/%m/%Y"), r["max_date"].strftime("%d/%m/%Y")),
         idcategorie="presta_sans_conso", idfamille=r["famille__pk"], idindividu=r["individu__pk"], idactivite=r["activite__pk"], date_min=r["min_date"], date_max=r["max_date"])
@@ -98,7 +98,7 @@ def Corrige_anomalies(request=None, anomalies=[]):
         # Suppression de la prestation fantôme
         if anomalie.idcategorie == "presta_sans_conso":
             conditions = Q(famille_id=anomalie.idfamille, individu_id=anomalie.idindividu, activite_id=anomalie.idactivite, date__gte=anomalie.date_min, date__lte=anomalie.date_max)
-            for prestation in Prestation.objects.filter(conditions, facture__isnull=True, consommation__isnull=True, tarif__isnull=False, categorie="consommation"):
+            for prestation in Prestation.objects.filter(conditions, facture__isnull=True, consommation__isnull=True, tarif__isnull=False, categorie="consommation", forfait_date_debut__isnull=True):
                 Ventilation.objects.filter(prestation=prestation).delete()
                 prestation.delete()
 
