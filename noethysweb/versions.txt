@@ -1,3 +1,7 @@
+Version 1.1.0.4 (16/12/2022) :
+
+- Correction de la détection du tarif fratries
+
 Version 1.1.0.3 (15/12/2022) :
 
 - Modification de la couleur des absences injustifiées
