@@ -124,7 +124,7 @@ def Get_forfaits_disponibles(request):
                     for inscription in inscriptions:
                         key = "%s_%d" % (inscription.individu_id, tarif.pk)
                         liste_forfaits.append((key, "%s - %s - %s" % (inscription.individu.Get_nom(), tarif.description or tarif.nom_tarif.nom, utils_texte.Formate_montant(montant_tarif))))
-                        dict_forfaits[key] = detail_forfait
+                        dict_forfaits[key] = copy.copy(detail_forfait)
                         dict_forfaits[key]["individu"] = inscription.individu_id
                         dict_forfaits[key]["categorie_tarif"] = inscription.categorie_tarif_id
 
