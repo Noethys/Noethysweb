@@ -91,7 +91,11 @@ class Formulaire(FormulaireBase, ModelForm):
             ("{DATE_LONGUE}", "Date longue"),
             ("{NOM_JOUR}", "Nom du jour de la semaine"),
             ("{MOIS}", "Nom du mois"),
+            ("{MOIS_PRECEDENT}", "Nom du mois précédent"),
+            ("{MOIS_SUIVANT}", "Nom du mois suivant"),
             ("{ANNEE}", "Année"),
+            ("{ANNEE_PRECEDENTE}", "Année précédente"),
+            ("{ANNEE_SUIVANTE}", "Année suivante"),
             ("{NOM_VACANCE}", "Nom de la période de vacances"),
         ]
 

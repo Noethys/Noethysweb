@@ -6,6 +6,7 @@
 import logging, datetime
 logger = logging.getLogger(__name__)
 from dateutil.rrule import rrulestr
+from dateutil.relativedelta import relativedelta
 from django.db.models import Q
 from core.models import Tache_recurrente, Tache, Vacance
 from core.utils import utils_dates
@@ -56,7 +57,11 @@ def Generer_taches():
             titre = titre.replace("{DATE_LONGUE}", utils_dates.DateComplete(today))
             titre = titre.replace("{NOM_JOUR}", utils_dates.LISTE_JOURS[today.weekday()])
             titre = titre.replace("{MOIS}", utils_dates.LISTE_MOIS[today.month-1])
+            titre = titre.replace("{MOIS_PRECEDENT}", utils_dates.LISTE_MOIS[(today + relativedelta(months=-1)).month - 1])
+            titre = titre.replace("{MOIS_SUIVANT}", utils_dates.LISTE_MOIS[(today + relativedelta(months=+1)).month - 1])
             titre = titre.replace("{ANNEE}", str(today.year))
+            titre = titre.replace("{ANNEE_PRECEDENTE}", str(today.year-1))
+            titre = titre.replace("{ANNEE_SUIVANTE}", str(today.year+1))
             titre = titre.replace("{NOM_VACANCE}", "%s %s" % (creer.nom, creer.annee) if creer != True else "")
             logger.debug("Génération de la tâche %s." % titre)
             tache = Tache.objects.create(tache_recurrente=tache_recurrente, titre=titre, date=today,
