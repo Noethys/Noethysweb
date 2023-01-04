@@ -101,6 +101,10 @@ def Envoyer_model_mail(idmail=None, request=None):
             "secret_key": mail.adresse_exp.Get_parametre("api_secret"),
         }
 
+    # Recherche si envoi par lot activé
+    nbre_mails_lot = mail.adresse_exp.Get_parametre("nbre_mails")
+    duree_pause = mail.adresse_exp.Get_parametre("duree_pause")
+
     # Création de la connexion
     connection = djangomail.get_connection(backend=backend, fail_silently=False, **backend_kwargs)
     try:
@@ -137,6 +141,7 @@ def Envoyer_model_mail(idmail=None, request=None):
         destinataires = destinataires[:int(mail.selection.replace("NON_ENVOYE_", ""))]
 
     # Envoi de chaque mail
+    index_lot = 1
     liste_envois_succes = []
     for destinataire in destinataires:
         html = mail.html
@@ -203,6 +208,13 @@ def Envoyer_model_mail(idmail=None, request=None):
             # Mémorise l'envoi dans l'historique
             utils_historique.Ajouter(titre="Envoi d'un email", detail=objet, utilisateur=request.user if request else None, famille=destinataire.famille_id,
                                      individu=destinataire.individu_id, objet="Email", idobjet=mail.pk, classe="Mail")
+
+        # Pause si envoi par lot activé
+        if nbre_mails_lot and len(destinataires) > 1:
+            if index_lot >= int(nbre_mails_lot):
+                time.sleep(int(duree_pause))
+                index_lot = 0
+            index_lot += 1
 
     connection.close()
     return liste_envois_succes
