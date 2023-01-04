@@ -58,6 +58,7 @@ urlpatterns = [
     path('outils/notes_versions', notes_versions.View.as_view(), name='notes_versions'),
     path('outils/utilisateurs_bloques/liste', utilisateurs_bloques.Liste.as_view(), name='utilisateurs_bloques_liste'),
     path('outils/utilisateurs_bloques/supprimer/<int:pk>', utilisateurs_bloques.Supprimer.as_view(), name='utilisateurs_bloques_supprimer'),
+    path('outils/utilisateurs_bloques/supprimer_plusieurs/<str:listepk>', utilisateurs_bloques.Supprimer_plusieurs.as_view(), name='utilisateurs_bloques_supprimer_plusieurs'),
 
     # Calendrier annuel
     path('outils/calendrier_annuel', calendrier_annuel.View.as_view(), name='calendrier_annuel'),

@@ -13,7 +13,8 @@ class Page(crud.Page):
     model = AccessAttempt
     url_liste = "utilisateurs_bloques_liste"
     url_supprimer = "utilisateurs_bloques_supprimer"
-    description_liste = "Voici ci-dessous la liste des utilisateurs bloqués par le système de sécurité de Noethysweb. Le blocage intervient après un trop grand nombre de tentatives de connexion échouées au portail ou à l'administration. Supprimez une ligne pour débloquer l'utilisateur."
+    url_supprimer_plusieurs = "utilisateurs_bloques_supprimer_plusieurs"
+    description_liste = "Voici ci-dessous la liste des dernières tentatives de connexion échouées par des utilisateurs. Après un trop grand nombre d'échecs de connexion, Noethysweb bloque l'utilisateur durant 24h. Il est toutefois possible de supprimer ci-dessous l'historique des tentatives de connexion afin de permettre à l'utilisateur de se connecter à nouveau."
     objet_singulier = "un utilisateur bloqué"
     objet_pluriel = "des utilisateurs bloqués"
 
@@ -39,7 +40,8 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "id", "username", "ip_address", "attempt_time", "failures_since_start", "actions"]
+            # J'ai retiré ceci ci-dessous car cela bloquait mystérieusement l'affichage de la liste : "ip_address"
+            columns = ["check", "id", "username", "attempt_time", "failures_since_start", "actions"]
             ordering = ['id']
             labels = {
                 "username": "Identifiant",
@@ -62,4 +64,8 @@ class Liste(Page, crud.Liste):
 
 
 class Supprimer(Page, crud.Supprimer):
+    pass
+
+
+class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
     pass
