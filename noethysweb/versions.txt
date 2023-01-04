@@ -1,3 +1,11 @@
+Version 1.1.0.8 (04/01/2023) :
+
+- Ajout de l'envoi des mails par lot
+- Ajout du menu dans le widget notes du tableau de bord
+- Correction de la liste des utilisateurs bloqués
+- Correction du filtre présent dans la liste des consommations
+- Correction de la liste de diffusion sur le portail famille
+
 Version 1.1.0.7 (04/01/2023) :
 
 - Ajout de mots-clés pour les tâches récurrentes
