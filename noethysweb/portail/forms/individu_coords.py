@@ -24,7 +24,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "adresse_auto", "rue_resid", "cp_resid", "ville_resid", "secteur",
             "tel_domicile","tel_mobile", "mail",
             "categorie_travail","profession", "employeur", "travail_tel", "travail_mail",
-            "tel_domicile_sms","tel_mobile_sms", "travail_tel_sms", "listes_diffusion",
+            "tel_domicile_sms","tel_mobile_sms", "travail_tel_sms", #"listes_diffusion",
         ]
         widgets = {
             'tel_domicile': Telephone(),
