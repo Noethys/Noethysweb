@@ -1,3 +1,8 @@
+Version 1.1.0.7 (04/01/2023) :
+
+- Ajout de mots-clés pour les tâches récurrentes
+- Petites corrections
+
 Version 1.1.0.6 (04/01/2023) :
 
 - Ajout des tâches
