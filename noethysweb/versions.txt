@@ -1,3 +1,9 @@
+Version 1.1.0.6 (04/01/2023) :
+
+- Ajout des tâches
+- Ajout du tableau de bord configurable
+- Ajout des dépendances feedparser et beautifulsoup4
+
 Version 1.1.0.5 (26/12/2022) :
 
 - Correction de l'application d'un forfait crédit
