@@ -9,6 +9,12 @@
         {% block box_titre %}<i class="fa fa-sticky-note-o margin-r-5"></i> Notes{% endblock %}
         {% block box_outils %}
             <a type="button" class="btn btn-tool" title="Ajouter une note" href="{% url 'notes_ajouter' %}?next={{ request.path|urlencode }}"><i class="fa fa-plus-circle"></i></a>
+            <div class="btn-group">
+                <button href="#" class="btn btn-tool" title="Menu des notes" data-toggle="dropdown"><i class="fa fa-bars"></i></button>
+                <div class="dropdown-menu dropdown-menu-right" role="menu">
+                    <a class="dropdown-item" href="{% url 'notes_liste' %}?next={{ request.path|urlencode }}">Liste de toutes les notes</a>
+                </div>
+            </div>
             <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
         {% endblock %}
         {% block card_body_classe %}p-0{% endblock %}
