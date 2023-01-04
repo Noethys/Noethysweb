@@ -1,0 +1,25 @@
+<style>
+    .tableau_taches td {
+        padding: 6px !important;
+    }
+</style>
+
+<table class="tableau_taches table">
+    <tbody>
+        {% for tache in taches %}
+            <tr class="text-center" style="padding: 10px !important;">
+                <td style="width: 90px;color: #9c9c9c;padding: 6px !important;">{{ tache.date|date:"d/m/Y" }}</td>
+                <td style="text-align: left;padding: 6px !important;">
+                    {{ tache.titre }}
+                    {% if tache.date|calc_delai:1 %}
+                        <small class='badge badge-pill badge-danger'>Nouveau</small>
+                    {% endif %}
+                </td>
+                <td style="width: 90px;text-align: right;padding: 6px !important;">
+                    <a type="button" class="btn-xs" href="{% url 'taches_modifier' pk=tache.pk %}?next={{ request.path|urlencode }}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
+                    <a type="button" class="btn-xs" href="{% url 'taches_supprimer' pk=tache.pk %}?next={{ request.path|urlencode }}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

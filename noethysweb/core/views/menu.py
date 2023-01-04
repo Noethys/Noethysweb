@@ -92,6 +92,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_notes = menu_parametrage.Add(titre="Notes")
     menu_notes.Add(code="notes_categories_liste", titre="Catégories de notes", icone="file-text-o")
 
+    # Tâches récurrentes
+    menu_taches_recurrentes = menu_parametrage.Add(titre="Tâches")
+    menu_taches_recurrentes.Add(code="taches_recurrentes_liste", titre="Tâches récurrentes", icone="file-text-o")
+
     # Emails
     menu_emails = menu_parametrage.Add(titre="Emails")
     menu_emails.Add(code="adresses_mail_liste", titre="Adresses d'expédition d'emails", icone="file-text-o", compatible_demo=False)
@@ -145,6 +149,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_historique = menu_outils.Add(titre="Historique")
     menu_historique.Add(code="historique", titre="Historique", icone="file-text-o")
     menu_historique.Add(code="notes_liste", titre="Notes", icone="file-text-o")
+    menu_historique.Add(code="taches_liste", titre="Tâches", icone="file-text-o")
 
     # Maintenance
     menu_maintenance = menu_outils.Add(titre="Maintenance")

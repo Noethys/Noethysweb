@@ -3537,3 +3537,39 @@ class Paiement(models.Model):
 
     def __str__(self):
         return "Paiement ID%d" % self.idpaiement if self.idpaiement else "Nouveau"
+
+
+class Tache_recurrente(models.Model):
+    idtache_recurrente = models.AutoField(verbose_name="ID", db_column='IDtache_recurrente', primary_key=True)
+    titre = models.CharField(verbose_name="Titre", max_length=250)
+    date_debut = models.DateField(verbose_name="Date de début")
+    date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
+    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.CASCADE)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", blank=True, null=True, on_delete=models.SET_NULL)
+    recurrence = models.CharField(verbose_name="Récurrence", max_length=250, blank=True, null=True)
+
+    class Meta:
+        db_table = 'taches_recurrentes'
+        verbose_name = "tâche récurrente"
+        verbose_name_plural = "tâches récurrentes"
+
+    def __str__(self):
+        return "Tâche récurrente ID%d" % self.idtache_recurrente if self.idtache_recurrente else "Nouveau"
+
+
+class Tache(models.Model):
+    idtache = models.AutoField(verbose_name="ID", db_column='IDtache', primary_key=True)
+    tache_recurrente = models.ForeignKey(Tache_recurrente, verbose_name="Tâche récurrente", blank=True, null=True, on_delete=models.CASCADE)
+    date = models.DateField(verbose_name="Date")
+    titre = models.CharField(verbose_name="Titre", max_length=250)
+    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.CASCADE)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", blank=True, null=True, on_delete=models.SET_NULL)
+    fait = models.BooleanField(verbose_name="Tâche effectuée", default=False)
+
+    class Meta:
+        db_table = 'taches'
+        verbose_name = "tâche"
+        verbose_name_plural = "tâches"
+
+    def __str__(self):
+        return "Tâche du %s" % self.date.strftime('%d/%m/%Y')

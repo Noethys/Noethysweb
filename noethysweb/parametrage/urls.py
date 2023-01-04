@@ -22,7 +22,7 @@ from parametrage.views import organisateur, structures, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
     portail_parametres, types_regimes_alimentaires, assureurs, categories_compte_internet, modeles_pes, \
     types_consentements, unites_consentements, articles, images_articles, albums, images_fond, portail_documents, portail_parametres_renseignements, \
-    configurations_sms, perceptions, modeles_prelevements
+    configurations_sms, perceptions, modeles_prelevements, taches_recurrentes
 
 
 urlpatterns = [
@@ -323,6 +323,12 @@ urlpatterns = [
     path('parametrage/notes_categories/ajouter', notes_categories.Ajouter.as_view(), name='notes_categories_ajouter'),
     path('parametrage/notes_categories/modifier/<int:pk>', notes_categories.Modifier.as_view(), name='notes_categories_modifier'),
     path('parametrage/notes_categories/supprimer/<int:pk>', notes_categories.Supprimer.as_view(), name='notes_categories_supprimer'),
+
+    # Tâches récurrentes
+    path('parametrage/taches_recurrentes/liste', taches_recurrentes.Liste.as_view(), name='taches_recurrentes_liste'),
+    path('parametrage/taches_recurrentes/ajouter', taches_recurrentes.Ajouter.as_view(), name='taches_recurrentes_ajouter'),
+    path('parametrage/taches_recurrentes/modifier/<int:pk>', taches_recurrentes.Modifier.as_view(), name='taches_recurrentes_modifier'),
+    path('parametrage/taches_recurrentes/supprimer/<int:pk>', taches_recurrentes.Supprimer.as_view(), name='taches_recurrentes_supprimer'),
 
     # Listes de diffusion
     path('parametrage/listes_diffusion/liste', listes_diffusion.Liste.as_view(), name='listes_diffusion_liste'),

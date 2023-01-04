@@ -10,7 +10,7 @@ from outils.views import editeur_emails, editeur_emails_express, historique, upd
                         editeur_emails_familles, editeur_emails_individus, editeur_emails_contacts, editeur_emails_listes_diffusion, \
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
                         demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur, editeur_sms, editeur_sms_familles, \
-                        editeur_sms_individus, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures, editeur_sms_express
+                        editeur_sms_individus, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures, editeur_sms_express, taches
 
 urlpatterns = [
 
@@ -67,6 +67,12 @@ urlpatterns = [
     path('outils/notes/ajouter', notes.Ajouter.as_view(), name='notes_ajouter'),
     path('outils/notes/modifier/<int:pk>', notes.Modifier.as_view(), name='notes_modifier'),
     path('outils/notes/supprimer/<int:pk>', notes.Supprimer.as_view(), name='notes_supprimer'),
+
+    # Tâches
+    path('outils/taches/liste', taches.Liste.as_view(), name='taches_liste'),
+    path('outils/taches/ajouter', taches.Ajouter.as_view(), name='taches_ajouter'),
+    path('outils/taches/modifier/<int:pk>', taches.Modifier.as_view(), name='taches_modifier'),
+    path('outils/taches/supprimer/<int:pk>', taches.Supprimer.as_view(), name='taches_supprimer'),
 
     # Sauvegarde
     path('outils/sauvegarde/creer', sauvegarde_creer.View.as_view(), name='sauvegarde_creer'),

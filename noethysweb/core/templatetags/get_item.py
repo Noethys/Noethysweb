@@ -7,7 +7,8 @@ from django.db import models
 from django.utils.safestring import mark_safe
 from core.utils import utils_dates
 from core.utils import utils_preferences
-import os, re
+import os, re, datetime
+
 
 @register.filter
 def get_item(dictionary, key):
@@ -85,6 +86,13 @@ def startswith(texte, chaine):
 @register.filter
 def is_date_in_inscription(inscription, date):
     return inscription.Is_date_in_inscription(date)
+
+@register.filter
+def calc_delai(date=None, nbre_jours=2):
+    if isinstance(date, datetime.datetime):
+        return (datetime.datetime.now() - date).days <= nbre_jours
+    if isinstance(date, datetime.date):
+        return (datetime.date.today() - date).days <= nbre_jours
 
 @register.simple_tag
 def get_item_defaut(dictionnaire, key, defaut=None):

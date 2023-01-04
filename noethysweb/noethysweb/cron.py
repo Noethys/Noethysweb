@@ -48,3 +48,8 @@ def Vider_rep_temp():
 def Corriger_anomalies():
     logger.debug("%s : Lancement de la correction automatique des anomalies..." % datetime.datetime.now())
     call_command("corrige_anomalies")
+
+
+def Generer_taches():
+    logger.debug("%s : Lancement de la génération des tâches récurrentes..." % datetime.datetime.now())
+    call_command("generation_taches")

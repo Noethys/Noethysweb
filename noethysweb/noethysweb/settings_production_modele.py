@@ -121,6 +121,7 @@ DATABASES = {
 #     ("30 23 * * *", "noethysweb.cron.Sauvegarder_media", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour sauvegarde le répertoire media
 #     ("45 23 * * *", "noethysweb.cron.Traiter_attentes", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour traiter les réservations en attente
 #     ("50 23 * * *", "noethysweb.cron.Corriger_anomalies", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour corriger les anomalies
+#     ("03 00 * * *", "noethysweb.cron.Generer_taches", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour générer les tâches récurrentes
 # ]
 
 #########################################################################################
