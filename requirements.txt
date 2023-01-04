@@ -31,3 +31,5 @@ jellyfish
 lxml
 eopayment
 colorhash
+feedparser
+beautifulsoup4
