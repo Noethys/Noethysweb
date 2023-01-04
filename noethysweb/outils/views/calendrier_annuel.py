@@ -40,5 +40,5 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Calendrier annuel"
         context['box_titre'] = ""
-        context['box_introduction'] = "Ce calendrier annuel vous permet notamment de vérifier si les périodes de vacances et les jours fériés ont bien paramétrés."
+        context['box_introduction'] = "Ce calendrier annuel vous permet notamment de vérifier si les périodes de vacances et les jours fériés ont bien été paramétrés."
         return context

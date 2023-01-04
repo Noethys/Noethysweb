@@ -48,6 +48,12 @@ MY_UPLOAD_FORM_MAX_IMAGE_SIZE = 1920
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 AUTH_USER_MODEL = 'core.Utilisateur'
 
+# CONFIGURATION ACCEUIL
+CONFIG_ACCUEIL_DEFAUT = [
+    [[6, "citation", "anniversaires"], [6, "celebrations", "anniversaires_demain"]],
+    [[8, "notes", "taches", "suivi_consommations", "suivi_inscriptions"], [4, "graphe_individus", "messages"]],
+]
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',

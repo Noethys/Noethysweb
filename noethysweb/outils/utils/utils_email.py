@@ -7,13 +7,12 @@ import logging, time, re, datetime, mimetypes, json
 logger = logging.getLogger(__name__)
 from django.conf import settings
 from django.core import mail as djangomail
-from django.utils.html import strip_tags
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.contrib import messages
 from email.mime.image import MIMEImage
 from core.models import Mail
-from core.utils import utils_dates, utils_historique
+from core.utils import utils_dates, utils_historique, utils_texte
 
 
 class Validation_adresse():
@@ -24,11 +23,6 @@ class Validation_adresse():
     def Check(self, adresse=""):
         return re.search(self.regex, adresse)
 
-
-def Textify(html):
-    """ Convertit un html en str """
-    text_only = re.sub('[ \t]+', ' ', strip_tags(html))
-    return text_only.replace('\n ', '\n').strip()
 
 
 # def Envoyer_rappel(destinataires, objet=None, html=None, pieces=[], document=None, remplacements={}):
@@ -48,7 +42,7 @@ def Textify(html):
 #         index += 1
 #
 #     # Création du message
-#     message = EmailMultiAlternatives(subject=objet, body=Textify(html), from_email=settings.EMAIL_HOST_USER, to=destinataires)
+#     message = EmailMultiAlternatives(subject=objet, body=utils_texte.Textify(html), from_email=settings.EMAIL_HOST_USER, to=destinataires)
 #     message.mixed_subtype = 'related'
 #     message.attach_alternative(html, "text/html")
 #
@@ -168,7 +162,7 @@ def Envoyer_model_mail(idmail=None, request=None):
             index += 1
 
         # Création du message
-        message = EmailMultiAlternatives(subject=objet, body=Textify(html), from_email=mail.adresse_exp.adresse, to=[destinataire.adresse], connection=connection)
+        message = EmailMultiAlternatives(subject=objet, body=utils_texte.Textify(html), from_email=mail.adresse_exp.adresse, to=[destinataire.adresse], connection=connection)
         message.mixed_subtype = 'related'
         message.attach_alternative(html, "text/html")
 

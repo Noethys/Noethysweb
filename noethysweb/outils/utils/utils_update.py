@@ -3,14 +3,29 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, os, datetime, codecs, zipfile
 logger = logging.getLogger(__name__)
-import os, datetime, codecs, zipfile
 from urllib.request import urlopen, urlretrieve
 from noethysweb import version
 from django.core.management import call_command
 from django.conf import settings
 from django.core.cache import cache
+
+
+def Get_update_for_accueil(request=None):
+    """ Recherche si une nouvelle version est disponible """
+    key_cache = "last_check_update_user%d" % request.user.pk
+    last_check_update = cache.get(key_cache)
+    if last_check_update:
+        nouvelle_version = last_check_update["nouvelle_version"]
+        # Si la dernière recherche date de plus d'un jour, on cherche une nouvelle version
+        if datetime.date.today() > last_check_update["date"].date():
+            last_check_update = None
+    if not last_check_update:
+        logger.debug("Recherche d'une nouvelle version...")
+        nouvelle_version, changelog = Recherche_update()
+        cache.set(key_cache, {"date": datetime.datetime.now(), "nouvelle_version": nouvelle_version})
+    return nouvelle_version
 
 
 def Recherche_update():

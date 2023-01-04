@@ -16,7 +16,6 @@ from core.utils import utils_parametres
 from noethysweb.version import GetVersion
 
 
-
 def Memorise_option(request):
     """ Mémorise dans la DB et le cache une option d'interface pour l'utilisateur """
     nom = request.POST.get("nom")
@@ -107,6 +106,7 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
                 "masquer-sidebar": False,
                 "text-sm": True,
                 "sidebar-no-expand": True,
+                "configuration_accueil": json.dumps(settings.CONFIG_ACCUEIL_DEFAUT),
             }
             parametres = utils_parametres.Get_categorie(categorie='options_interface', utilisateur=self.request.user, parametres=defaut)
             context['options_interface'] = parametres
