@@ -13,7 +13,7 @@ def Get_parametres(request):
     """ Récupère les paramètres du graphique """
     activites = Activite.objects.filter(structure__in=request.user.structures.all()).order_by("-date_fin")
     context = {"activites": activites}
-    return render(request, "core/accueil/graphe_individus_parametres.html", context)
+    return render(request, "core/accueil/widgets/graphe_individus_parametres.html", context)
 
 def Set_parametres(request):
     """ Mémorise les paramètres du graphique """

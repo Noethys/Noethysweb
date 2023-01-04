@@ -1,0 +1,215 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .item {
+            background-color: #dbd6d6;
+            cursor: move;
+            display: block;
+            margin-bottom: 4px;
+            padding: 6px;
+            color: #5a5a5a;
+            font-size: 12px;
+            border-radius: 5px;
+        }
+        .liste_items {
+            background-color: #fff;
+            list-style: none;
+            margin-bottom: 10px;
+            min-height: 30px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .liste_items:last-child {
+            margin-bottom: 0;
+        }
+        .ligne {
+            background-color: #eeeeee;
+        }
+        .ligne_header {
+            border-bottom: 0px;
+            padding: 8px 8px 0px 8px;
+        }
+        .ligne_body {
+            padding: 8px;
+        }
+        .icon_colonne {
+            border: #ffffff 2px solid;
+            background-color: #dbd6d6;
+            color: #c2c2c2;
+        }
+        #liste_propositions li {
+            display: inline-block;
+            margin-right: 5px;
+        }
+        #card_propositions {
+            background-color: #dbd6d6;
+        }
+    </style>
+{% endblock styles %}
+
+{% block contenu_page %}
+    {% embed 'core/box.html' %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}{{ box_titre }}{% endblock %}
+        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+        {% block box_contenu %}
+
+            <div class="buttonHolder commandes mb-3">
+                <button class="btn btn-primary" name="submit" form="form_lignes" title="Enregistrer" type="submit"><i class='fa fa-check margin-r-5'></i>Enregistrer</button>
+                <a class="btn btn-danger" href="{% url 'accueil' %}" title="Annuler"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
+                <button class="btn btn-default" onclick="ajouter_ligne()"><i class="fa fa-plus margin-r-5"></i>Ajouter une ligne</button>
+                <button class="btn btn-default" onclick="reset_lignes()"><i class="fa fa-refresh margin-r-5"></i>Restaurer les valeurs par défaut</button>
+            </div>
+
+            <form id="form_lignes" method="post">
+                {% csrf_token %}
+
+                <input type="text" id="resultats" name="resultats" hidden>
+
+                <div id="card_propositions" class='card'>
+                    <div class='card-header ligne_header'><b>Widgets disponibles</b></div>
+                    <div class='card-body ligne_body'>
+                        <div>
+                            <ul id="liste_propositions" class='liste_items'>
+                                {% for code, label in items_disponibles.items %}
+                                    <li class='item' id='{{ code }}'><i class='fa fa-arrows margin-r-5'></i>{{ label }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="liste_lignes"></div>
+
+            </form>
+
+            {# Modal Ajouter une ligne #}
+            {% embed 'core/modal.html' with modal_footer=True %}
+                {% block modal_id %}modal_ajouter_ligne{% endblock %}
+                {% block modal_titre %}Ajouter une ligne{% endblock %}
+                {% block modal_body %}
+                    <p>Cliquez sur la configuration de colonnes souhaitée :</p>
+                    <div class="row">
+                        {% for colonne in colonnes_disponibles %}
+                            <div class="col-6 pb-2">
+                                <button class="btn btn-default btn-block bouton_choix_type_ligne" data-valeur="{{ colonne }}">
+                                    <div class="row">
+                                        {% for largeur in colonne %}
+                                            <div class="col-{{ largeur }} icon_colonne">{{ largeur }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endblock %}
+                {% block modal_footer %}
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                {% endblock %}
+            {% endembed %}
+
+            <script>
+
+                $(document).ready(function(){
+                    $("#liste_lignes").sortable({
+                        items: ".ligne",
+                        placeholder: 'sort-highlight',
+                        forcePlaceholderSize: true,
+                    });
+                    active_events();
+                    draw_lignes(JSON.parse('{{ config_actuelle }}'));
+                });
+
+                function active_events() {
+                    $('.liste_items').sortable({
+                        connectWith: '.liste_items',
+                        placeholder: 'sort-highlight',
+                        forcePlaceholderSize: true,
+                    });
+                    $('.bouton_supprimer_ligne').on('click', function(event) {
+                        var idligne = $(this).attr('id');
+                        $('#ligne_' + idligne + ' li').each(function() {
+                            $(this).appendTo('#liste_propositions');
+                        });
+                        $('#ligne_' + idligne).remove();
+                    });
+                }
+
+                function ajouter_ligne() {
+                    $("#modal_ajouter_ligne").modal('show');
+                }
+
+                function reset_lignes() {
+                    $('.ligne li').each(function() {
+                        $(this).appendTo('#liste_propositions');
+                    });
+                    $(".ligne").remove();
+                    draw_lignes(JSON.parse('{{ config_defaut }}'));
+                }
+
+                $('.bouton_choix_type_ligne').on('click', function(event) {
+                    var valeur = $(this).data("valeur");
+                    valeur = JSON.parse(valeur.replace(",)", ")").replace("(", "[").replace(")", "]"));
+                    $('#modal_ajouter_ligne').modal('hide');
+                    var valeur2 = jQuery.map(valeur, function(a) {
+                        return [[a.toString()]];
+                    });
+                    draw_ligne(valeur2, $(".ligne").length+1);
+                });
+
+                function draw_lignes(valeurs) {
+                    valeurs.forEach(function(valeurs_ligne, index_ligne) {
+                        draw_ligne(valeurs_ligne, index_ligne)
+                    });
+                }
+
+                function draw_ligne(valeurs_ligne, index_ligne) {
+                    var texte = "";
+                    var items_ligne = [];
+                    texte += "<div class='card ligne' id='ligne_" + index_ligne + "'><div class='card-header ligne_header'><i class='fa fa-arrows'></i>";
+                    texte += "<div class='card-tools'><button type='button' id='" + index_ligne + "' class='btn btn-tool bouton_supprimer_ligne' title='Supprimer la ligne'><i class='fa fa-trash margin-r-5'></i>"
+                    texte += "</button></div></div><div class='card-body ligne_body'><div class='row'>"
+                    valeurs_ligne.forEach(function(colonne, index_colonne) {
+                        colonne.forEach(function(item, index_item) {
+                            if (index_item == 0) {
+                                texte += "<div class='col-" + item + "'><ul id='col_" + index_ligne + "_" + index_colonne + "' class='liste_items' data-largeur=" + item + ">"
+                            } else {
+                                items_ligne.push([index_ligne, index_colonne, item])
+                            }
+                        });
+                        texte += "</ul></div>"
+                    });
+                    texte += "</div></div></div>"
+                    $("#liste_lignes").append(texte);
+                    active_events();
+                    items_ligne.forEach(function(donnees) {
+                        $("#" + donnees[2]).appendTo("#col_" + donnees[0] + "_" + donnees[1]);
+                    })
+                }
+
+                $("#form_lignes").on('submit', function(event) {
+                    var valeurs = [];
+                    $('.ligne').each(function() {
+                        var valeurs_ligne = [];
+                        $("#" + $(this).attr("id") + " .liste_items").each(function() {
+                            var valeurs_colonne = [$(this).data("largeur")];
+                            $("#" + $(this).attr("id") + " .item").each(function() {
+                                valeurs_colonne.push($(this).attr("id"));
+                            });
+                            valeurs_ligne.push(valeurs_colonne);
+                        })
+                        valeurs.push(valeurs_ligne);
+                    });
+                    $('#resultats').val(JSON.stringify(valeurs));
+                    return true;
+                });
+
+            </script>
+        {% endblock %}
+    {% endembed %}
+{% endblock %}

@@ -53,55 +53,6 @@
 
                 {% block contenu_page %}
 
-                    <!-- Info boxes -->
-                    <div class="row">
-
-                        <div class="col-md-6 col-sm-6 col-xs-12">
-                            <div class="info-box">
-                                <span class="info-box-icon bg-red"><i class="fa fa-quote-right"></i></span>
-
-                                <div class="info-box-content">
-                                    <span class="info-box-text">Citation</span>
-                                    <span class="info-box-number">{{ citation_texte }} &nbsp;<span style="font-size: 10px;color: grey;">{{ citation_auteur }}</span></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- fix for small devices only -->
-                        <div class="clearfix visible-sm-block"></div>
-
-                        <div class="col-md-6 col-sm-6 col-xs-12">
-                            <div class="info-box">
-                                <span class="info-box-icon bg-green"><i class="fa fa-smile-o"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text">Célébrations</span>
-                                    <span class="info-box-number">{{ celebrations }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 col-sm-6 col-xs-12">
-                            <div class="info-box">
-                                <span class="info-box-icon bg-yellow"><i class="fa fa-birthday-cake"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text">Anniversaires du jour</span>
-                                    <span class="info-box-number">{{ anniversaires_aujourdhui }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 col-sm-6 col-xs-12">
-                            <div class="info-box">
-                                <span class="info-box-icon bg-info"><i class="fa fa-birthday-cake"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text">Anniversaires de demain</span>
-                                    <span class="info-box-number">{{ anniversaires_demain }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
                     {# Nouvelle version disponible #}
                     {% if nouvelle_version %}
                         <div class="alert alert-warning">
@@ -140,32 +91,22 @@
                         </div>
                     {% endif %}
 
-                    <div class="row">
-
-                        <div class="col-md-8">
-
-                            {# Notes #}
-                            {% include "core/accueil/notes.html" %}
-
-                            <!-- Suivi des consommations -->
-                            {% include "consommations/suivi_consommations.html" %}
-
-                            <!-- Suivi des inscriptions -->
-                            {% include "individus/suivi_inscriptions.html" %}
-
+                    {# Intégration des widgets #}
+                    {% for ligne in configuration_accueil %}
+                        <div class="row">
+                            {% for colonne in ligne %}
+                                <div class="col-md-{{ colonne.0 }}">
+                                {% for item in colonne|slice:"1:" %}
+                                    {% with nom_template="core/accueil/widgets/"|add:item|add:".html" %}
+                                        {% include nom_template %}
+                                    {% endwith %}
+                                {% endfor %}
+                                </div>
+                            {% endfor %}
                         </div>
+                    {% endfor %}
 
-                        <div class="col-md-4">
-
-                            {# Graphique des individus #}
-                            {% include "core/accueil/graphe_individus.html" %}
-
-                            {# Messages non lus #}
-                            {% include "core/accueil/messages.html" %}
-
-                        </div>
-
-                    </div>
+                    <div class="text-left pb-2"><a href="{% url 'accueil_configuration' %}"><i class="fa fa-gear margin-r-5"></i>Configurer le tableau de bord</a></div>
 
                 {% endblock contenu_page %}
             </div>
@@ -181,22 +122,10 @@
 
     <script>
         $(document).ready(function() {
-
             // Active la slimscroll sur les petits cadres
             $('.info-box-number').slimScroll({
                 height: '55px'
             });
-
-            // Make the dashboard widgets sortable Using jquery UI
-            $('.connectedSortable').sortable({
-                placeholder: 'sort-highlight',
-                connectWith: '.connectedSortable',
-                handle: '.card-header, .nav-tabs',
-                forcePlaceholderSize: true,
-                zIndex: 999999
-            })
-            $('.connectedSortable .card-header').css('cursor', 'move')
-
         });
     </script>
 

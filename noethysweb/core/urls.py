@@ -4,7 +4,7 @@
 
 from django.urls import include, path
 from django.contrib.auth import views as auth_views
-from core.views import login, accueil, recherche, base, profil_configuration, profil_utilisateur, change_password_utilisateur
+from core.views import login, accueil, accueil_configuration, recherche, base, profil_configuration, profil_utilisateur, change_password_utilisateur
 from core.forms import filtre_liste
 from core.decorators import secure_ajax
 from core.utils import utils_graphique_individus
@@ -12,6 +12,7 @@ from core.utils import utils_graphique_individus
 
 urlpatterns = [
     path('', accueil.Accueil.as_view(), name='accueil'),
+    path('accueil_configuration', accueil_configuration.View.as_view(), name='accueil_configuration'),
     path('connexion', login.LoginViewUtilisateur.as_view(), name='connexion'),
     path('deconnexion', auth_views.LogoutView.as_view(next_page='connexion'), name='deconnexion'),
 

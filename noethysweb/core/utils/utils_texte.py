@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 import re
+from django.utils.html import strip_tags
 from core.utils import utils_preferences
 
 
@@ -58,3 +59,8 @@ def ConvertListeToStr(liste=[], separateur=";"):
 def Supprimer_accents(texte=""):
     import unicodedata
     return unicodedata.normalize('NFKD', texte).encode('ASCII', 'ignore').decode("utf-8")
+
+def Textify(html):
+    """ Convertit un html en str """
+    text_only = re.sub('[ \t]+', ' ', strip_tags(html))
+    return text_only.replace('\n ', '\n').strip()

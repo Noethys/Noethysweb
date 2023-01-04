@@ -1,0 +1,57 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/js-year-calendar/js-year-calendar.min.css' %}">
+{% endblock styles %}
+
+{% block scripts %}
+    <script type="text/javascript" src="{% static 'lib/js-year-calendar/js-year-calendar.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/js-year-calendar/js-year-calendar.fr.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline{% endblock %}
+        {% block box_titre %}<i class="fa fa-cutlery margin-r-5"></i> Calendrier annuel{% endblock %}
+        {% block box_outils %}
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Diminuer"><i class="fa fa-minus"></i></button>
+        {% endblock %}
+        {% block box_contenu %}
+            <div id="calendar"></div>
+            <script>
+                let calendar = new Calendar('#calendar', {
+                    language: 'fr',
+                    style: 'background',
+                    dataSource: [],
+                    yearChanged: function(e) {
+                        e.preventRendering = true;
+                        $.ajax({
+                            method: "POST",
+                            url: "{% url 'ajax_get_calendrier_annuel' %}",
+                            data: {
+                                annee: e.currentYear,
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                            },
+                            success: function(data) {
+                                var events = [];
+                                for (var i = 0; i < data.length; i++) {
+                                    events.push({
+                                        name: data[i].name,
+                                        startDate: new Date(data[i].debut[0], data[i].debut[1], data[i].debut[2]),
+                                        endDate: new Date(data[i].fin[0], data[i].fin[1], data[i].fin[2]),
+                                        color: data[i].color
+                                        });
+                                    }
+                                    e.calendar.setDataSource(events);
+                                }
+                            });
+                        },
+                    })
+            </script>
+        {% endblock %}
+    {% endembed %}
+
+{% endblock %}

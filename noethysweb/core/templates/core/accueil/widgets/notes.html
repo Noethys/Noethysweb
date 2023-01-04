@@ -8,7 +8,8 @@
         {% block box_theme %}card-outline{% endblock %}
         {% block box_titre %}<i class="fa fa-sticky-note-o margin-r-5"></i> Notes{% endblock %}
         {% block box_outils %}
-            <a type="button" class="btn btn-success btn-xs" style="margin-right: 10px;" title="Ajouter une note" href="{% url 'notes_ajouter' %}?next={{ request.path|urlencode }}"><i class="fa fa-plus"></i> Ajouter</a>
+            <a type="button" class="btn btn-tool" title="Ajouter une note" href="{% url 'notes_ajouter' %}?next={{ request.path|urlencode }}"><i class="fa fa-plus-circle"></i></a>
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
         {% endblock %}
         {% block card_body_classe %}p-0{% endblock %}
         {% block box_contenu %}
