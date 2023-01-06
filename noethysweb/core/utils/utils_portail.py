@@ -66,6 +66,7 @@ LISTE_PARAMETRES = [
     Parametre(code="connexion_image_fond", label="Image de fond", type="image_fond", valeur=None, help_text="Sélectionnez une image de fond dans la liste. Vous pouvez ajouter de nouvelles images depuis le menu Paramétrage > Images de fond."),
     Parametre(code="connexion_adresse_exp", label="Adresse d'expédition", type="adresse_exp", valeur=None, help_text="Cette adresse mail est utilisée pour envoyer des mails de réinitialisation de mots de passe. A défaut de sélection, la fonction mot de passe oublié sera désactivée."),
     Parametre(code="connexion_question_perso", label="Activer la question personnelle de sécurité lors du changement de mot de passe", type="boolean", valeur=True, help_text="L'usager doit répondre à une question personnelle lors de la personnalisation de son mot de passe."),
+    Parametre(code="connexion_afficher_nom_organisateur", label="Afficher le nom de l'organisateur", type="boolean", valeur=True, help_text="Décochez cette case si votre logo inclut déjà le nom de l'organisateur."),
 
     # Accueil
     Parametre(code="accueil_texte_bienvenue", label="Texte de bienvenue", type="html", valeur="Bienvenue sur le portail Famille"),

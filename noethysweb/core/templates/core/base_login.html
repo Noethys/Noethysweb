@@ -173,7 +173,9 @@
                                     <img src="{{ organisateur.logo.url }}" alt="logo" class="logo">
                                 {% endif %}
                             </div>
-                            <p class="login-card-description">{{ organisateur.nom }}</p>
+                            {% if not parametres_portail or parametres_portail.connexion_afficher_nom_organisateur %}
+                                <p class="login-card-description">{{ organisateur.nom }}</p>
+                            {% endif %}
 
                             <p class="titre_contenu">{% block titre_contenu %}Connexion{% endblock titre_contenu %}</p>
 
