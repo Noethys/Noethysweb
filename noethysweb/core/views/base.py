@@ -42,6 +42,22 @@ def Memorise_tri_liste(request):
         utils_parametres.Set(nom=nom_view, categorie="tri_liste", utilisateur=request.user, valeur="%s;%s" % (colonne, sens))
     return JsonResponse({"success": True})
 
+def Memorise_hidden_columns(request):
+    """ Mémorise les colonnes cachées """
+    colonnes = request.POST.get("colonnes")
+    nom_view = request.POST.get("view")
+    nom_view = nom_view[4:nom_view.find(".Liste ")]
+    utils_parametres.Set(nom=nom_view, categorie="hidden_columns", utilisateur=request.user, valeur=colonnes)
+    return JsonResponse({"success": True})
+
+def Memorise_page_length(request):
+    """ Mémorise le page_length """
+    page_length = request.POST.get("page_length")
+    nom_view = request.POST.get("view")
+    nom_view = nom_view[4:nom_view.find(".Liste ")]
+    utils_parametres.Set(nom=nom_view, categorie="page_length", utilisateur=request.user, valeur=page_length)
+    return JsonResponse({"success": True})
+
 
 # def Memorise_structure(request):
 #     """ Mémorise dans la DB la structure actuelle de l'utilisateur """

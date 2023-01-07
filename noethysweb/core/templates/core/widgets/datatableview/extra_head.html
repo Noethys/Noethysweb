@@ -13,6 +13,8 @@
     var url_supprimer_plusieurs = "{% if url_supprimer_plusieurs %}{{ url_supprimer_plusieurs }}{% endif %}";
     var liste_coches = {% if liste_coches %}{{ liste_coches }}{% else %}[]{% endif %};
     var url_tri_liste = "{% url 'ajax_memorise_tri_liste' %}";
+    var url_hidden_columns = "{% url 'ajax_memorise_hidden_columns' %}";
+    var url_page_length = "{% url 'ajax_memorise_page_length' %}";
     var nom_view = "{{ view }}";
 </script>
 

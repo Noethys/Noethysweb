@@ -281,7 +281,48 @@ $(document).ready(function() {
         }
     });
 
+    $('.datatable').on( 'length.dt', function (e, settings, len) {
+        function memorise_page_length() {
+            $.ajax({
+                type: "POST",
+                url: url_page_length,
+                data: {
+                    view: nom_view,
+                    page_length: JSON.stringify(len),
+                },
+                datatype: "json",
+                success: function (data) {
+                    toastr.success("Le nombre de lignes à afficher pour cette liste a été mémorisé")
+                },
+            });
+        };
+        window.setTimeout(memorise_page_length, 1000);
+    } );
 
+    $('.datatable').on( 'column-visibility.dt', function (e, settings, column, state) {
+        var all_columns = table.settings().init().columns;
+        var hidden_columns = [];
+        for (var i in all_columns) {
+            if (table.column(all_columns[i].name + ':name').visible() === false) {
+                hidden_columns.push(all_columns[i].undefined);
+            }
+        }
+        function memorise_hidden_columns() {
+            $.ajax({
+                type: "POST",
+                url: url_hidden_columns,
+                data: {
+                    view: nom_view,
+                    colonnes: JSON.stringify(hidden_columns),
+                },
+                datatype: "json",
+                success: function (data) {
+                    toastr.success("Les colonnes à afficher pour cette liste ont été mémorisées")
+                },
+            });
+        };
+        window.setTimeout(memorise_hidden_columns, 1000);
+    } );
 
 });
 

@@ -47,11 +47,29 @@ class MyDatatable(Datatable):
         nom_view = str(kwargs["view"])
         nom_view = nom_view[1:nom_view.find(".Liste ")]
         request = kwargs["view"].request
+
+        # Tri mémorisé de la liste
         tri_liste = utils_parametres.Get(nom=nom_view, categorie="tri_liste", utilisateur=request.user, valeur=None)
         if tri_liste:
             nom_colonne, sens = tri_liste.split(";")
             self._meta.ordering = ["%s%s" % ("-" if sens == "desc" else "", nom_colonne)]
+
+        # Colonnes cachées mémorisées
+        hidden_columns = utils_parametres.Get(nom=nom_view, categorie="hidden_columns", utilisateur=request.user, valeur=None)
+        if hidden_columns:
+            self._meta.hidden_columns = json.loads(hidden_columns)
+
+        # Page length mémorisées
+        page_length = utils_parametres.Get(nom=nom_view, categorie="page_length", utilisateur=request.user, valeur=None)
+        if page_length:
+            self._meta.page_length = page_length
+
         super(MyDatatable, self).__init__(*args, **kwargs)
+
+        # vérifie que les hidden columns sont bien cachées
+        for code, colonne in self.columns.items():
+            if code not in self._meta.hidden_columns:
+                colonne.visible = True
 
     def Create_boutons_actions(self, liste_boutons=[]):
         return format_html("&nbsp;".join(liste_boutons))
