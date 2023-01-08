@@ -85,6 +85,7 @@ $(document).ready(function() {
                 extend: 'collection',
                 text: '<i class="fa fa-share-square-o" title="Exporter"></i>',
                 className: "btn-default",
+                align: 'button-right',
                 buttons: [
                     'copy',
                     'csv',
@@ -105,6 +106,7 @@ $(document).ready(function() {
                 extend: 'colvis',
                 text: '<i class="fa fa-eye-slash" title="Afficher ou masquer des colonnes"></i>',
                 className: "btn-default",
+                align: 'button-right'
             },
             // {
             //     extend: 'collection',
@@ -119,6 +121,7 @@ $(document).ready(function() {
                 extend: 'pageLength',
                 text: '<i class="fa fa-cog" title="Configuration"></i>',
                 className: "btn-default",
+                align: 'button-right'
             },
 
         ],
