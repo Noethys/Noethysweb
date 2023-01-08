@@ -12,7 +12,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             individus_detaches_liste, liste_mandats, liste_questionnaires_familles, liste_questionnaires_individus, liste_contacts_urgence, \
                             liste_regimes_alimentaires, liste_maladies, liste_informations, individus_doublons_liste, liste_familles_sans_inscriptions, \
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
-                            liste_titulaires_helios
+                            liste_titulaires_helios, inscriptions_activite_liste
 
 urlpatterns = [
 
@@ -44,6 +44,13 @@ urlpatterns = [
     path('individus/liste_inscriptions_refus', liste_inscriptions_attente.View.as_view(etat="refus"), name='liste_inscriptions_refus'),
     path('individus/suivi_inscriptions', suivi_inscriptions.View.as_view(), name='suivi_inscriptions'),
     path('individus/liste_familles_sans_inscriptions', liste_familles_sans_inscriptions.Liste.as_view(), name='liste_familles_sans_inscriptions'),
+
+    path('individus/inscriptions_activite', inscriptions_activite_liste.Liste.as_view(), name='inscriptions_activite_liste'),
+    path('individus/inscriptions_activite/<str:activite>', inscriptions_activite_liste.Liste.as_view(), name='inscriptions_activite_liste'),
+    path('individus/inscriptions_activite/ajouter/<str:activite>', inscriptions_activite_liste.Ajouter.as_view(), name='inscriptions_activite_ajouter'),
+    path('individus/inscriptions_activite/modifier/<str:activite>/<int:pk>', inscriptions_activite_liste.Modifier.as_view(), name='inscriptions_activite_modifier'),
+    path('individus/inscriptions_activite/supprimer/<str:activite>/<int:pk>', inscriptions_activite_liste.Supprimer.as_view(), name='inscriptions_activite_supprimer'),
+    path('individus/inscriptions_activite/supprimer_plusieurs/<str:activite>/<str:listepk>', inscriptions_activite_liste.Supprimer_plusieurs.as_view(), name='inscriptions_activite_supprimer_plusieurs'),
 
     path('individus/inscriptions_modifier/selection_activite', inscriptions_modifier.Selection_activite.as_view(), name='inscriptions_modifier'),
     path('individus/inscriptions_modifier/liste/<int:idactivite>', inscriptions_modifier.Liste.as_view(), name='inscriptions_modifier_liste'),

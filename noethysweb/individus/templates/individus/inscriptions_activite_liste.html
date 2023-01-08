@@ -1,0 +1,50 @@
+{% extends "core/crud/liste_in_box.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+    {% embed 'core/box.html' %}
+        {% block box_titre %}{{ box_titre }}{% endblock %}
+        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+        {% block box_contenu %}
+
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Activité</span>
+                </div>
+                <select id="choix_activite" class="form-control">
+                    {% for code, label in liste_activites %}
+                        <option {% if code == activite %}selected{% endif %} value="{% if not code %}0{% else %}{{ code }}{% endif %}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-check text-right">
+                <input type="checkbox" class="checkboxinput form-check-input" id="check_afficher_obsoletes" {% if afficher_obsoletes %}checked{% endif %}>
+                <label for="check_afficher_obsoletes" class="form-check-label">
+                    Afficher les activités obsolètes
+                </label>
+            </div>
+
+            <script>
+                $(document).ready(function() {
+                    function reload_page() {
+                        var url = "{% url url_liste %}" + "/" + $("#choix_activite").val();
+                        var afficher_obsoletes = $("#check_afficher_obsoletes").prop("checked");
+                        if (afficher_obsoletes === true) {url += "A"};
+                        window.location.href = url;
+                    }
+                    $('#choix_activite').change(reload_page);
+                    $('#check_afficher_obsoletes').change(reload_page);
+                });
+            </script>
+
+            {% embed 'core/crud/liste.html' %}
+            {% endembed %}
+
+        {% endblock box_contenu %}
+        {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+    {% endembed %}
+{% endblock contenu_page %}
