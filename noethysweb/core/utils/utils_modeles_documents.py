@@ -210,7 +210,8 @@ class Rappel(Categorie):
             (u"Nom du lot", u"Mars 2014", "{NOM_LOT}"),
             (u"Date d'édition du rappel (long)", u"Lundi 9 septembre 2011", "{DATE_EDITION_LONG}"),
             (u"Date d'édition du rappel (court)", u"19/09/2011", "{DATE_EDITION_COURT}"),
-            (u"Date de début", u"10/07/2011", "{DATE_DEBUT}", "Date de fin", u"21/12/2011", "{DATE_FIN}"),
+            (u"Date de début", u"10/07/2011", "{DATE_DEBUT}"),
+            (u"Date de fin", u"21/12/2011", "{DATE_FIN}"),
 
             (u"Solde", u"12.00 €", "{SOLDE}"),
             (u"Solde en lettres", u"Douze Euros", "{SOLDE_LETTRES}"),
@@ -576,7 +577,8 @@ class Attestation_fiscale(Categorie):
 
             (u"Date d'édition (long)", "Lundi 9 septembre 2011", "{DATE_EDITION_LONG}"),
             (u"Date d'édition (court)", "19/09/2011", "{DATE_EDITION_COURT}"),
-            (u"Date de début", "10/07/2011", "{DATE_DEBUT}"), (u"Date de fin", "21/12/2011", "{DATE_FIN}"),
+            (u"Date de début", "10/07/2011", "{DATE_DEBUT}"),
+            (u"Date de fin", "21/12/2011", "{DATE_FIN}"),
 
             (u"Montant facturé", "20.00 €", "{MONTANT_FACTURE}"),
             (u"Montant réglé", "20.00 €", "{MONTANT_REGLE}"),

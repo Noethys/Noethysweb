@@ -455,7 +455,7 @@
                             fabric.util.enlivenObjects(objets_modele_fond, function (objets) {
                                 objets.forEach(function (objet) {
                                     if(objet.categorie === "logo") {
-                                        objet.setSrc("{{ organisateur.logo.url }}");
+                                        objet.setSrc("{% if organisateur.logo %}{{ organisateur.logo.url }}{% endif %}");
                                     };
                                     group.addWithUpdate(objet);
                                     canvas.requestRenderAll();
@@ -480,7 +480,7 @@
                         fabric.util.enlivenObjects(objets_json, function (objets) {
                             objets.forEach(function (objet) {
                                 if(objet.categorie === "logo") {
-                                    objet.setSrc("{{ organisateur.logo.url }}");
+                                    objet.setSrc("{% if organisateur.logo %}{{ organisateur.logo.url }}{% endif %}");
                                 };
                                 canvas.add(objet);
                             });
@@ -682,7 +682,7 @@
 
                         function ajouter_logo() {
                             // /media/organisateur/logo.png
-                            fabric.Image.fromURL("{{ organisateur.logo.url }}", function(objet) {
+                            fabric.Image.fromURL("{% if organisateur.logo %}{{ organisateur.logo.url }}{% endif %}", function(objet) {
                                 objet.set({
                                     nom: "Logo organisateur",
                                     stroke: 'rgba(0,0,0,0)',
