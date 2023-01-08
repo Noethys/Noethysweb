@@ -1,3 +1,7 @@
+Version 1.1.1.0 (08/01/2023) :
+
+- Update du plugin Datatables
+
 Version 1.1.0.9 (08/01/2023) :
 
 - Ajout de la liste des inscriptions à une activité
