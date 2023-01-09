@@ -1,3 +1,7 @@
+Version 1.1.1.1 (09/01/2023) :
+
+- Ajout du groupe dans la liste des inscriptions par activité
+
 Version 1.1.1.0 (08/01/2023) :
 
 - Update du plugin Datatables
