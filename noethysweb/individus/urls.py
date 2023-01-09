@@ -47,6 +47,7 @@ urlpatterns = [
 
     path('individus/inscriptions_activite', inscriptions_activite_liste.Liste.as_view(), name='inscriptions_activite_liste'),
     path('individus/inscriptions_activite/<str:activite>', inscriptions_activite_liste.Liste.as_view(), name='inscriptions_activite_liste'),
+    path('individus/inscriptions_activite/<str:activite>/<str:groupe>', inscriptions_activite_liste.Liste.as_view(), name='inscriptions_activite_liste'),
     path('individus/inscriptions_activite/ajouter/<str:activite>', inscriptions_activite_liste.Ajouter.as_view(), name='inscriptions_activite_ajouter'),
     path('individus/inscriptions_activite/modifier/<str:activite>/<int:pk>', inscriptions_activite_liste.Modifier.as_view(), name='inscriptions_activite_modifier'),
     path('individus/inscriptions_activite/supprimer/<str:activite>/<int:pk>', inscriptions_activite_liste.Supprimer.as_view(), name='inscriptions_activite_supprimer'),

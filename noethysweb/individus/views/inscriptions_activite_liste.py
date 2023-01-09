@@ -7,7 +7,7 @@ import datetime
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Inscription, Activite, Rattachement, Cotisation
+from core.models import Inscription, Activite, Rattachement, Cotisation, Groupe
 from fiche_individu.forms.individu_inscriptions import Formulaire
 from django.db.models import Q
 
@@ -30,6 +30,8 @@ class Liste(Page, crud.Liste):
 
     def get_queryset(self):
         condition = Q(activite__structure__in=self.request.user.structures.all())
+        if self.Get_groupe():
+            condition &= Q(groupe=self.Get_groupe())
         return Inscription.objects.select_related("famille", "individu", "groupe", "categorie_tarif", "activite", "activite__structure").filter(self.Get_filtres("Q"), condition, activite=self.Get_activite())
 
     def get_context_data(self, **kwargs):
@@ -40,6 +42,7 @@ class Liste(Page, crud.Liste):
         context["afficher_menu_brothers"] = True
         context["active_checkbox"] = True
 
+        # Choix de l'activité
         context['afficher_obsoletes'] = self.Get_afficher_obsoletes()
         context['activite'] = int(self.Get_activite()) if self.Get_activite() else None
         condition = Q()
@@ -55,6 +58,12 @@ class Liste(Page, crud.Liste):
                 liste_activites.append((activite.pk, "%s - A partir du %s" % (activite.nom, activite.date_debut.strftime("%d/%m/%Y"))))
         context['liste_activites'] = [(None, "--------")] + liste_activites
 
+        # Choix du groupe
+        context['liste_groupes'] = [(None, "Tous les groupes")]
+        if self.Get_activite():
+            context['liste_groupes'] += [(groupe.pk, groupe.nom) for groupe in Groupe.objects.filter(activite_id=int(self.Get_activite())).order_by("ordre")]
+        context['groupe'] = int(self.Get_groupe()) if self.Get_groupe() else None
+
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={'activite': self.kwargs.get('activite', None), "listepk": "xxx"})
         return context
 
@@ -63,6 +72,12 @@ class Liste(Page, crud.Liste):
         if activite:
             activite = activite.replace("A", "")
             return activite
+        return None
+
+    def Get_groupe(self):
+        groupe = self.kwargs.get("groupe", None)
+        if groupe:
+            return int(groupe)
         return None
 
     def Get_afficher_obsoletes(self):

@@ -28,15 +28,28 @@
                 </label>
             </div>
 
+            <div class="input-group" {% if not activite %}style="display: none;"{% endif %}>
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Groupe</span>
+                </div>
+                <select id="choix_groupe" class="form-control">
+                    {% for code, label in liste_groupes %}
+                        <option {% if code == groupe %}selected{% endif %} value="{% if not code %}0{% else %}{{ code }}{% endif %}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
             <script>
                 $(document).ready(function() {
                     function reload_page() {
                         var url = "{% url url_liste %}" + "/" + $("#choix_activite").val();
                         var afficher_obsoletes = $("#check_afficher_obsoletes").prop("checked");
                         if (afficher_obsoletes === true) {url += "A"};
+                        url += "/" + $("#choix_groupe").val();
                         window.location.href = url;
                     }
                     $('#choix_activite').change(reload_page);
+                    $('#choix_groupe').change(reload_page);
                     $('#check_afficher_obsoletes').change(reload_page);
                 });
             </script>
