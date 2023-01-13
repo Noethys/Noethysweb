@@ -67,6 +67,7 @@
         constructor(data) {
             this.key_regroupement = null;
             this.mode_regroupement = 'mois';
+            this.label_regroupement = '';
             this.total_ventilation = 0.0;
 
             if (data) {
@@ -78,24 +79,20 @@
             };
 
             // Affichage du titre du regroupement
-            var titre = this.key_regroupement;
-            if (this.mode_regroupement == 'mois') {
-                var periode = this.key_regroupement.split("_");
-                var liste_mois = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-                titre = liste_mois[periode[1]-1] + " " + periode[0];
-            };
-            if (this.mode_regroupement == 'facture') {
-                if (this.key_regroupement === "None") {titre = "Non facturé"};
-            };
-            $(this.case_titre).html(titre);
+            $(this.case_titre).html(this.label_regroupement);
             this.maj_affichage();
         };
 
         click() {
             var self = this;
+            if (self.total_ventilation > 0) {
+                var action = "deventile";
+            } else {
+                var action = "ventile";
+            }
             $.each(dict_lignes, function (key, ligne) {
-                if (this.ligne_regroupement == self) {
-                    if (self.total_ventilation > 0) {
+                if (this.ligne_regroupement === self) {
+                    if (action === "deventile") {
                         this.deventile();
                     } else {
                         this.ventile();

@@ -5,19 +5,20 @@
 {% group_by_mois prestations mode_regroupement as prestations %}
 
 {% for regroupement in prestations %}
-    <tr id="regroupement_{{ regroupement }}" class="ligne_regroupement">
-        <td id="regroupement_{{ regroupement }}_titre" colspan="4">{{ regroupement }}</td>
-        <td id="regroupement_{{ regroupement }}_montant_prestation" class="montant"></td>
-        <td id="regroupement_{{ regroupement }}_reste_ventilation" class="montant"></td>
-        <td id="regroupement_{{ regroupement }}_ventilation_reglement" class="montant"></td>
+    <tr id="regroupement_{{ regroupement.0 }}" class="ligne_regroupement">
+        <td id="regroupement_{{ regroupement.0 }}_titre" colspan="4">{{ regroupement.1 }}</td>
+        <td id="regroupement_{{ regroupement.0 }}_montant_prestation" class="montant"></td>
+        <td id="regroupement_{{ regroupement.0 }}_reste_ventilation" class="montant"></td>
+        <td id="regroupement_{{ regroupement.0 }}_ventilation_reglement" class="montant"></td>
     </tr>
 
     <script>
         var regroupement = new Regroupement({
-            key_regroupement: "{{ regroupement }}" ,
+            key_regroupement: "{{ regroupement.0 }}" ,
             mode_regroupement: "{{ mode_regroupement }}",
+            label_regroupement: "{{ regroupement.1 }}",
         });
-        dict_regroupements["regroupement_{{ regroupement }}"] = regroupement;
+        dict_regroupements["regroupement_{{ regroupement.0 }}"] = regroupement;
     </script>
 
     {% for prestation in prestations|get_item:regroupement %}
