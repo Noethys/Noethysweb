@@ -151,6 +151,6 @@ class Saisie_rapide(Page, RedirectView):
         date_fin = type_piece.Get_date_fin_validite()
 
         # Enregistrement de la pièce
-        piece = Piece.objects.create(type_piece=type_piece, individu=individu, famille=famille, date_debut=date_debut, date_fin=date_fin)
+        piece = Piece.objects.create(type_piece=type_piece, individu=individu, famille=famille, date_debut=date_debut, date_fin=date_fin, auteur=self.request.user)
         messages.add_message(self.request, messages.SUCCESS, "La pièce '%s' a été créée avec succès" % piece.Get_nom())
         return self.request.META['HTTP_REFERER']
