@@ -173,8 +173,8 @@ class View(CustomView, TemplateView):
             listeLabels.append((nomActivite, IDactivite, dictActivite))
         listeLabels.sort()
 
+        id_regroupement = 10000
         for nomActivite, IDactivite, dictActivite in listeLabels:
-            id_regroupement = "regroupement_%s" % IDactivite
             ligne = {"id": id_regroupement, "pid": 0, "col0": nomActivite, "regroupement": True}
 
             # Total par mode
@@ -220,5 +220,7 @@ class View(CustomView, TemplateView):
 
                 liste_lignes.append(ligne)
 
+            id_regroupement += 1
+            
         return liste_colonnes, liste_lignes
 
