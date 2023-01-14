@@ -115,6 +115,7 @@ def Generation_factures(request):
 
     liste_factures_generees = []
     liste_id_factures = []
+    dict_reports = {}
     for dict_facture in liste_factures:
         if dict_facture["IDfamille"] in liste_factures_cochees:
             facture = Facture.objects.create(
@@ -137,6 +138,10 @@ def Generation_factures(request):
             )
             liste_factures_generees.append(facture)
             liste_id_factures.append(facture.pk)
+            dict_reports[facture.pk] = {
+                "total_reports": dict_facture["total_reports"],
+                "solde_avec_reports": dict_facture["solde_avec_reports"],
+            }
             numero += 1
 
             # Insertion du IDfacture dans les prestations
@@ -149,6 +154,13 @@ def Generation_factures(request):
     # Importation des factures générées
     id_min, id_max = min(liste_id_factures), max(liste_id_factures)
     factures = Facture.objects.select_related('famille').filter(pk__gte=id_min, pk__lte=id_max).order_by("idfacture")
+
+    # Intégration des impayés dans les résultats
+    for facture in factures:
+        if facture.pk in dict_reports:
+            facture.total_reports = dict_reports[facture.pk]["total_reports"]
+            facture.solde_avec_reports = dict_reports[facture.pk]["solde_avec_reports"]
+
     nbre_factures_email = len([facture for facture in factures if facture.famille.email_factures])
     nbre_factures_impression = len(factures) - nbre_factures_email
 
