@@ -3,7 +3,6 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Deduction
@@ -21,7 +20,7 @@ class Liste(Page, crud.Liste):
     model = Deduction
 
     def get_queryset(self):
-        return Deduction.objects.select_related('prestation', 'prestation__activite').filter(self.Get_filtres("Q"))
+        return Deduction.objects.select_related('prestation', 'prestation__activite', 'prestation__facture').filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -30,18 +29,17 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:prestation__individu", "fpresent:famille", "iscolarise:prestation__individu", "fscolarise:famille", "iddeduction", "date", "label", "famille__nom", "individu__nom", "montant"]
-
+        filtres = ["ipresent:prestation__individu", "fpresent:famille", "iscolarise:prestation__individu", "fscolarise:famille", "iddeduction", "date", "label", "famille__nom", "individu__nom", "montant", "prestation__code_compta"]
         activite = columns.TextColumn("Activité", sources=['prestation__activite__nom'])
         individu = columns.CompoundColumn("Individu", sources=['prestation__individu__nom', 'prestation__individu__prenom'])
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
+        num_facture = columns.CompoundColumn("N° Facture", sources=['prestation__facture__numero'])
+        code_compta_prestation = columns.CompoundColumn("Code compta presta.", sources=['prestation__code_compta'])
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["iddeduction", "date", "label", "famille", "individu", "montant", "activite"]
+            columns = ["iddeduction", "date", "label", "famille", "individu", "montant", "activite", "num_facture", "code_compta_prestation"]
             processors = {
                 'date': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ["date"]
-
-
