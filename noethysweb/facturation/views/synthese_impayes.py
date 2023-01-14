@@ -3,14 +3,14 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from core.views.base import CustomView
-from django.views.generic import TemplateView
-from core.utils import utils_dates, utils_infos_individus, utils_texte, utils_dictionnaires
 import json
-from facturation.forms.synthese_impayes import Formulaire
-from core.models import Activite, Prestation, Ventilation
-from django.db.models import Q, Sum
 from decimal import Decimal
+from django.views.generic import TemplateView
+from django.db.models import Q, Sum
+from core.views.base import CustomView
+from core.utils import utils_dates
+from core.models import Activite, Prestation, Ventilation
+from facturation.forms.synthese_impayes import Formulaire
 
 
 class View(CustomView, TemplateView):
@@ -170,9 +170,9 @@ class View(CustomView, TemplateView):
             return listeLabels
 
         # Branches de niveau 1
+        id_regroupement = 10000
         listeLabels1 = GetLabels(parametres["regroupement_lignes"])
         for label1, ID1 in listeLabels1:
-            id_regroupement = "regroupement_%d" % ID1
             ligne = {"id": id_regroupement, "pid": 0, "col0": label1, "regroupement": True}
             if parametres["regroupement_lignes"] == "familles":
                 ligne.update({"type": "famille", "IDfamille": ID1})
@@ -233,5 +233,6 @@ class View(CustomView, TemplateView):
 
                 liste_lignes.append(ligne)
 
-        return liste_colonnes, liste_lignes
+            id_regroupement += 1
 
+        return liste_colonnes, liste_lignes
