@@ -1,3 +1,11 @@
+Version 1.1.1.2 (14/01/2023) :
+
+- Ajout de colonnes dans la liste des déductions
+- Correction de l'émetteur dans la saisie des règlements
+- Correction de l'enregistrement de l'auteur d'une pièce
+- Correction de la ventilation dans la saisie d'un règlement
+- Correction de l'affichage des reports dans l'assistant de génération des factures
+
 Version 1.1.1.1 (09/01/2023) :
 
 - Ajout du groupe dans la liste des inscriptions par activité
