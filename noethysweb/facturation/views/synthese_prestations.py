@@ -3,14 +3,14 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from core.views.base import CustomView
-from django.views.generic import TemplateView
-from core.utils import utils_dates, utils_infos_individus, utils_texte, utils_dictionnaires
 import json
-from facturation.forms.synthese_prestations import Formulaire
-from core.models import Activite, Prestation, Ventilation, TarifLigne
-from django.db.models import Q, Sum
 from decimal import Decimal
+from django.views.generic import TemplateView
+from django.db.models import Q, Sum
+from core.views.base import CustomView
+from core.utils import utils_dates, utils_infos_individus
+from core.models import Activite, Prestation, Ventilation, TarifLigne
+from facturation.forms.synthese_prestations import Formulaire
 
 
 class View(CustomView, TemplateView):
@@ -111,7 +111,7 @@ class View(CustomView, TemplateView):
                 if key_code == "jour":
                     key = prestation.date
                     key_tri = key
-                    key_label = utils_dates.utils_dates.ConvertDateToFR(prestation.date)
+                    key_label = utils_dates.ConvertDateToFR(prestation.date)
 
                 if key_code == "mois":
                     key = (prestation.date.year, prestation.date.month)
@@ -306,9 +306,9 @@ class View(CustomView, TemplateView):
             listeKeys1.append((dictKey1["tri"], key1, dictKey1["label"]))
         listeKeys1.sort()
 
+        id_regroupement = 10000
         for key1_tri, key1, key1_label in listeKeys1:
             # niveau1 = AppendItem(root, key1_label)
-            id_regroupement = "regroupement_%s" % key1
             ligne = {"id": id_regroupement, "pid": 0, "col0": key1_label, "regroupement": True}
 
             regroupements = list(dictPrestations[key1]["regroupements"].keys())
@@ -358,5 +358,6 @@ class View(CustomView, TemplateView):
 
                 liste_lignes.append(ligne)
 
-        return liste_colonnes, liste_lignes
+            id_regroupement += 1
 
+        return liste_colonnes, liste_lignes
