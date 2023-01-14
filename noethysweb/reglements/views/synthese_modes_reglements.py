@@ -3,15 +3,14 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from core.views.base import CustomView
-from django.views.generic import TemplateView
-from core.utils import utils_dates
 import json
-from reglements.forms.synthese_modes_reglements import Formulaire
-from core.models import Activite, Prestation, Ventilation, Reglement, ModeReglement
-from django.db.models import Q, Sum
 from decimal import Decimal
-
+from django.views.generic import TemplateView
+from django.db.models import Q, Sum
+from core.views.base import CustomView
+from core.utils import utils_dates
+from core.models import Activite, Ventilation, Reglement, ModeReglement
+from reglements.forms.synthese_modes_reglements import Formulaire
 
 
 class View(CustomView, TemplateView):
@@ -221,6 +220,5 @@ class View(CustomView, TemplateView):
                 liste_lignes.append(ligne)
 
             id_regroupement += 1
-            
-        return liste_colonnes, liste_lignes
 
+        return liste_colonnes, liste_lignes
