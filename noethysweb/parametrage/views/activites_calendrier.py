@@ -103,8 +103,8 @@ class View(Onglet, TemplateView):
 
         liste_annees = list(dict_ouvertures.keys())
         liste_annees.sort()
+        idannee = 10000
         for annee in liste_annees:
-            idannee = "annee-%d" % annee
             ligne_annee = {"id": idannee, "pid": 0, "col0": str(annee), "regroupement": True}
             for idunite, nbre_dates in dict_totaux[annee].items():
                 ligne_annee["col%d" % dict_colonnes[idunite]] = "%d date%s" % (nbre_dates, "s" if nbre_dates > 1 else "")
@@ -117,5 +117,5 @@ class View(Onglet, TemplateView):
                 for idunite, nbre_dates in dict_ouvertures[annee][mois].items():
                     ligne_mois["col%d" % dict_colonnes[idunite]] = "%d date%s" % (nbre_dates, "s" if nbre_dates > 1 else "")
                 liste_lignes.append(ligne_mois)
-
+            idannee += 1
         return liste_colonnes, liste_lignes
