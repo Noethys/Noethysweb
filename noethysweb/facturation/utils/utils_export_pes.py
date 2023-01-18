@@ -428,7 +428,7 @@ class Exporter():
 
         # Enregistrement du fichier XML
         f = open(os.path.join(self.rep_destination, self.nom_fichier), "w")
-        f.write(doc.toxml())
+        f.write(doc.toprettyxml(indent="  ", encoding="ISO-8859-1"))
         f.close()
 
         return True
