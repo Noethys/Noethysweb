@@ -1,0 +1,10 @@
+
+{% if form.errors %}
+    <div class="alert alert-danger">
+        <ul style="margin-bottom: 1px;padding-left: 12px;">
+            {% for field in form %}
+                {% if field.errors %}<li>{{ field.label }} : {{ field.errors|striptags }}</li>{% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

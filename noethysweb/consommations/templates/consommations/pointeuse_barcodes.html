@@ -1,1 +1,83 @@
+{% load static %}
+{% load embed %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
     {% block meta %}
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Noethysweb">
+    {% endblock meta %}
+
+    <link rel="shortcut icon" href="{% static 'images/icone.png' %}"/>
+
+    <title>Noethysweb | {% block page_titre %}{{ page_titre }}{% endblock page_titre %}</title>
+
+    {% block styles %}
+        {% include 'core/styles.html' %}
+    {% endblock %}
+
+    {% block scripts %}
+        {% include 'core/scripts.html' %}
+    {% endblock %}
+
+    {% block extra_head %}
+    {% endblock %}
+
+</head>
+
+<body class="accent-lightblue border-bottom-0 layout-fixed text-sm" style="height: auto;">
+
+    <div class="wrapper">
+
+        <div class="content-wrapper" style="background-color: #343a40;">
+
+            <section class="content p-0">
+                <div class="container-fluid">
+
+                    {% block messages %}
+                        {% include 'core/messages.html' %}
+                    {% endblock %}
+
+                    <script>
+                        // https://stackoverflow.com/questions/22777854/barcode-scanner-for-html5-and-jquery-application
+                        // https://developer.mozilla.org/en-US/docs/Web/API/Barcode_Detection_API
+
+                        // check compatibility
+                        if (!("BarcodeDetector" in window)) {
+                            console.log("Barcode Detector is not supported by this browser.");
+                        } else {
+                            console.log("Barcode Detector supported!");
+
+                        // create new detector
+                        const barcodeDetector = new BarcodeDetector({
+                            formats: ["code_39", "codabar", "ean_13"],
+                        });
+                        }
+                    </script>
+
+                    <div class="row">
+                        <div class="col-md-12" >
+
+                            <div class="pt-1">
+                                <h6 style="color: white;">Titre de la page</h6>
+                            </div>
+
+                            Contenu ICI...
+
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
