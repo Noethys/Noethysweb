@@ -8,7 +8,7 @@ from core.decorators import secure_ajax
 from fiche_famille.views import famille, famille_questionnaire, famille_notes, famille_ajouter, famille_pieces, famille_cotisations, famille_caisse, famille_aides, famille_quotients, famille_divers, \
                             famille_prestations, famille_reglements, famille_consommations, famille_factures, famille_voir_facture, famille_voir_cotisation, famille_abo_factures_email, \
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, famille_sms, \
-                            famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats, famille_voir_mandat
+                            famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats, famille_voir_mandat, famille_prestations_modele
 
 urlpatterns = [
 
@@ -61,6 +61,8 @@ urlpatterns = [
 
     path('individus/familles/prestations/liste/<int:idfamille>', famille_prestations.Liste.as_view(), name='famille_prestations_liste'),
     path('individus/familles/prestations/ajouter/<int:idfamille>', famille_prestations.Ajouter.as_view(), name='famille_prestations_ajouter'),
+    path('individus/familles/prestations/selection_modele/<int:idfamille>', famille_prestations_modele.Selection_modele.as_view(), name='famille_prestations_selection_modele'),
+    path('individus/familles/prestations/ajouter_modele/<int:idfamille>/<int:idmodele>', famille_prestations_modele.Ajouter.as_view(), name='famille_prestations_ajouter_modele'),
     path('individus/familles/prestations/modifier/<int:idfamille>/<int:pk>', famille_prestations.Modifier.as_view(), name='famille_prestations_modifier'),
     path('individus/familles/prestations/supprimer/<int:idfamille>/<int:pk>', famille_prestations.Supprimer.as_view(), name='famille_prestations_supprimer'),
     path('individus/familles/prestations/supprimer_plusieurs/<int:idfamille>/<str:listepk>', famille_prestations.Supprimer_plusieurs.as_view(), name='famille_prestations_supprimer_plusieurs'),

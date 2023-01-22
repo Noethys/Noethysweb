@@ -1396,6 +1396,31 @@ class Tarif(models.Model):
         return "Tarif ID%d" % self.idtarif if self.idtarif else "Nouveau tarif"
 
 
+class ModelePrestation(models.Model):
+    idmodele = models.AutoField(verbose_name="ID", db_column='IDmodele', primary_key=True)
+    categorie_choix = [("cotisation", "Adhésion"), ("consommation", "Consommation"), ("autre", "Autre")]
+    categorie = models.CharField(verbose_name="Catégorie", max_length=100, choices=categorie_choix, default="autre")
+    label = models.CharField(verbose_name="Label", max_length=200)
+    activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.SET_NULL, blank=True, null=True)
+    tarif = models.ForeignKey(Tarif, verbose_name="Tarif", on_delete=models.SET_NULL, blank=True, null=True)
+    categorie_tarif = models.ForeignKey(CategorieTarif, verbose_name="Catégorie de tarif", on_delete=models.SET_NULL, blank=True, null=True)
+    tva = models.DecimalField(verbose_name="Taux de TVA", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
+    code_compta = models.CharField(verbose_name="Code comptable", max_length=200, blank=True, null=True)
+    public_choix = [("individu", "Individu"), ("famille", "Famille")]
+    public = models.CharField(verbose_name="Public", max_length=50, choices=public_choix)
+    montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0)
+    tarifs = models.TextField(verbose_name="Tarifs", blank=True, null=True)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+    # type_quotient = models.ForeignKey(TypeQuotient, verbose_name="Type de QF", blank=True, null=True, on_delete=models.SET_NULL, help_text="Sélectionnez un type de quotient familial ou laissez le champ vide pour tenir compte de tous les types de quotients.")
+
+    class Meta:
+        db_table = 'modeles_prestations'
+        verbose_name = "modèle de prestation"
+        verbose_name_plural = "modèles de prestations"
+
+    def __str__(self):
+        return "Modèle de prestation ID%d" % self.idmodele if self.idmodele else "Nouveau modèle de prestation"
+
 
 class TarifLigne(models.Model):
     idligne = models.AutoField(verbose_name="ID", db_column='IDligne', primary_key=True)
@@ -1436,7 +1461,7 @@ class TarifLigne(models.Model):
     revenu_min = models.DecimalField(verbose_name="Montant revenu min", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
     revenu_max = models.DecimalField(verbose_name="Montant revenu max", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
     duree_arrondi = models.TimeField(verbose_name="Durée arrondi", blank=True, null=True)
-    # idmodele = models.IntegerField(db_column='IDmodele', blank=True, null=True)  # Field name made lowercase.
+    # modele_prestation = models.ForeignKey(ModelePrestation, verbose_name="Modèle de prestation", on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         db_table = 'tarifs_lignes'
@@ -2100,7 +2125,7 @@ class Prestation(models.Model):
         verbose_name_plural = "prestations"
 
     def __str__(self):
-        return "Prestation ID%d" % self.idprestation
+        return "Prestation ID%d : %s" % (self.idprestation, self.label)
 
 
 

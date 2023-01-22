@@ -22,7 +22,7 @@ from parametrage.views import organisateur, structures, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
     portail_parametres, types_regimes_alimentaires, assureurs, categories_compte_internet, modeles_pes, \
     types_consentements, unites_consentements, articles, images_articles, albums, images_fond, portail_documents, portail_parametres_renseignements, \
-    configurations_sms, perceptions, modeles_prelevements, taches_recurrentes
+    configurations_sms, perceptions, modeles_prelevements, taches_recurrentes, modeles_prestations
 
 
 urlpatterns = [
@@ -389,6 +389,12 @@ urlpatterns = [
     path('parametrage/modeles_rappels/modifier/<int:pk>', modeles_rappels.Modifier.as_view(), name='modeles_rappels_modifier'),
     path('parametrage/modeles_rappels/supprimer/<int:pk>', modeles_rappels.Supprimer.as_view(), name='modeles_rappels_supprimer'),
     path('parametrage/modeles_rappels/dupliquer/<int:pk>', modeles_rappels.Dupliquer.as_view(), name='modeles_rappels_dupliquer'),
+
+    # Modèles de prestations
+    path('parametrage/modeles_prestations/liste', modeles_prestations.Liste.as_view(), name='modeles_prestations_liste'),
+    path('parametrage/modeles_prestations/ajouter', modeles_prestations.Ajouter.as_view(), name='modeles_prestations_ajouter'),
+    path('parametrage/modeles_prestations/modifier/<int:pk>', modeles_prestations.Modifier.as_view(), name='modeles_prestations_modifier'),
+    path('parametrage/modeles_prestations/supprimer/<int:pk>', modeles_prestations.Supprimer.as_view(), name='modeles_prestations_supprimer'),
 
     # Questions des questionnaires
     path('parametrage/questions/liste', questionnaires.Liste.as_view(), name='questions_liste'),
