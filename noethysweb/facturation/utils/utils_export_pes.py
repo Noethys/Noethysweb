@@ -4,11 +4,11 @@
 #  Distribué sous licence GNU GPL.
 
 import os, calendar, datetime, uuid
-from django.conf import settings
-from core.models import PesLot, PesPiece, Prestation, Organisateur, LISTE_MOIS
-from core.utils import utils_dates, utils_parametres, utils_texte
-from noethysweb.version import GetVersion
 from xml.dom.minidom import Document
+from django.conf import settings
+from core.models import PesLot, PesPiece, Organisateur
+from core.utils import utils_texte
+from noethysweb.version import GetVersion
 
 
 def ConvertToTexte(valeur, majuscules=False):
@@ -427,7 +427,7 @@ class Exporter():
                 CpteBancaire.appendChild(TitCpte)
 
         # Enregistrement du fichier XML
-        f = open(os.path.join(self.rep_destination, self.nom_fichier), "w")
+        f = open(os.path.join(self.rep_destination, self.nom_fichier), "wb")
         f.write(doc.toprettyxml(indent="  ", encoding="ISO-8859-1"))
         f.close()
 

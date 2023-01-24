@@ -935,7 +935,7 @@ class Modele_doc():
     def DessineTextes(self, canvas, dict_valeurs={}):
         """ Dessine les textes """
         for objet in self.objets:
-            if "texte" in objet.get("categorie"):
+            if "texte" in objet.get("categorie", ""):
                 valeur = self.GetValeur(objet, dict_valeurs)
                 ObjetPDF(objet, canvas, valeur=valeur)
 
