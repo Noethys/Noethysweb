@@ -1,3 +1,7 @@
+Version 1.1.1.5 (24/01/2023) :
+
+- Petits correctifs
+
 Version 1.1.1.4 (22/01/2023) :
 
 - Ajout des modèles de prestations
