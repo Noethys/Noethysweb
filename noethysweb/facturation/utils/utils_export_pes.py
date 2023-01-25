@@ -3,11 +3,14 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import os, calendar, datetime, uuid
+import os, calendar, datetime, uuid, zipfile
+from urllib.request import urlretrieve
 from xml.dom.minidom import Document
+from lxml import etree
+from io import BytesIO
 from django.conf import settings
 from core.models import PesLot, PesPiece, Organisateur
-from core.utils import utils_texte
+from core.utils import utils_texte, utils_fichiers
 from noethysweb.version import GetVersion
 
 
@@ -228,7 +231,7 @@ class Exporter():
             BlocPiece.appendChild(NumDette)
 
             Per = doc.createElement("Per")
-            Per.setAttribute("V", str(self.lot.mois))
+            Per.setAttribute("V", str(self.lot.mois)[:1])
             BlocPiece.appendChild(Per)
 
             Cle1 = doc.createElement("Cle1")
@@ -343,7 +346,7 @@ class Exporter():
                 IdTiers.setAttribute("V", piece.famille.idtiers_helios)
                 InfoTiers.appendChild(IdTiers)
 
-            if piece.famille.natidtiers_helios:
+            if piece.famille.natidtiers_helios and piece.famille.natidtiers_helios != 9999:
                 NatIdTiers = doc.createElement("NatIdTiers")
                 NatIdTiers.setAttribute("V", "" if piece.famille.natidtiers_helios == 9999 else piece.famille.natidtiers_helios)
                 InfoTiers.appendChild(NatIdTiers)
@@ -426,9 +429,17 @@ class Exporter():
                 TitCpte.setAttribute("V", ConvertToTexte(individu_mandat[:32], majuscules=True))
                 CpteBancaire.appendChild(TitCpte)
 
+        # Génération du XML
+        xml = doc.toprettyxml(indent="  ", encoding="ISO-8859-1")
+
+        # Validation XSD
+        validation = self.ValidationXSD(xml)
+        if not validation:
+            return False
+
         # Enregistrement du fichier XML
         f = open(os.path.join(self.rep_destination, self.nom_fichier), "wb")
-        f.write(doc.toprettyxml(indent="  ", encoding="ISO-8859-1"))
+        f.write(xml)
         f.close()
 
         return True
@@ -456,3 +467,37 @@ class Exporter():
         alphabet = "ABCDEFGHJKLMNPQRSTUVWXY"
         cle = alphabet[k-1]
         return cle
+
+    def ValidationXSD(self, xml=""):
+        try :
+            # Téléchargement du fichier XSD
+            fichier_dest = os.path.join(utils_fichiers.GetTempRep(), "schemas_pes.zip")
+            urlretrieve("https://www.noethys.com/fichiers/pes/schemas_pes.zip", fichier_dest)
+
+            # Décompression du zip XSD
+            z = zipfile.ZipFile(fichier_dest, "r")
+            rep_dest = os.path.join(utils_fichiers.GetTempRep(), "schemas_pes")
+            z.extractall(rep_dest)
+            z.close()
+
+            # Lecture du XSD
+            fichier_pes = rep_dest + "/Schemas_PES/PES_V2/Rev0/PES_Aller.xsd"
+            xmlschema_doc = etree.parse(fichier_pes)
+            xsd = etree.XMLSchema(xmlschema_doc)
+
+            # Lecture du XML
+            doc = etree.parse(BytesIO(xml))
+
+            # Validation du XML avec le XSD
+            if xsd.validate(doc):
+                return True
+
+            # Affichage des erreurs
+            for error in xsd.error_log:
+                self.erreurs.append("Ligne %d : %s" % (error.line, error.message))
+            return False
+
+        except Exception as err:
+            print("Erreur dans validation XSD :")
+            print(err)
+            return True
