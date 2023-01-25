@@ -1,3 +1,8 @@
+Version 1.1.1.6 (25/01/2023) :
+
+- Ajout de la validation XSD sur l'export PES
+- Correction de la balise per dans l'export PES
+
 Version 1.1.1.5 (24/01/2023) :
 
 - Petits correctifs
