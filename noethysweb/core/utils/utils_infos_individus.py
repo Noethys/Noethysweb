@@ -325,6 +325,7 @@ class Informations():
                 "individu_IDcivilite": individu.civilite,
                 "INDIVIDU_NOM": individu.nom,
                 "INDIVIDU_NOM_COMPLET": individu.Get_nom(),
+                "CODEBARRES_ID_INDIVIDU": "I%06d" % individu.pk,
                 "INDIVIDU_PRENOM": individu.prenom,
                 "INDIVIDU_DATE_NAISS": utils_dates.ConvertDateToFR(individu.date_naiss),
                 "INDIVIDU_CP_NAISS": individu.cp_naiss,

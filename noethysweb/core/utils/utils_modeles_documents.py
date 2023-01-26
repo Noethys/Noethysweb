@@ -1095,7 +1095,6 @@ class ObjetPDF():
             # ------- BARCODE ------
             if self.categorie == "barcode":
                 largeur, hauteur = self.width, self.height
-                valeur = "123456"
                 if valeur != None:
                     # Vérifie que uniquement des chiffres dans certains codes-barres
                     if self.cb_norme in ("EAN8", "EAN13"):
