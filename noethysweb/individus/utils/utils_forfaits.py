@@ -127,7 +127,7 @@ class Forfaits():
                             # Label personnalisé
                             label_forfait = tarif.nom_tarif.nom
                             if tarif.label_prestation == "description_tarif":
-                                label_forfait = tarif.description_tarif
+                                label_forfait = tarif.description
                             if tarif.label_prestation and tarif.label_prestation.startswith("autre:"):
                                 label_forfait = tarif.label_prestation[6:]
 
