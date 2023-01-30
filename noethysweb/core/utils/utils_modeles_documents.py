@@ -6,6 +6,7 @@
 from core.utils import utils_infos_individus, utils_dates, utils_resolveur_formule
 from core.models import ModeleDocument, Organisateur
 import json, os, datetime
+from io import BytesIO
 from django.conf import settings
 from django.core.cache import cache
 from reportlab.lib.units import mm as mmPDF
@@ -111,7 +112,10 @@ class Facture(Categorie):
 
         self.champs.extend(utils_infos_individus.GetNomsChampsPossibles(mode="famille"))
 
-        self.codesbarres = [(u"Numéro de facture", u"1234567", "{CODEBARRES_NUM_FACTURE}"), ]
+        self.codesbarres = [
+            (u"Numéro de facture", u"1234567", "{CODEBARRES_NUM_FACTURE}"),
+            (u"Datamatrix PESV2", u"1234567", "{PES_DATAMATRIX}"),
+        ]
 
         self.speciaux = [
             {"nom": u"Cadre principal", "champ": "cadre_principal", "obligatoire": True, "nbreMax": 1, "x": None, "y": None, "verrouillageX": False, "verrouillageY": False, "Xmodifiable": True, "Ymodifiable": True, "largeur": 100, "hauteur": 150, "largeurModifiable": True, "hauteurModifiable": True, "largeurMin": 80, "largeurMax": 1000, "hauteurMin": 80, "hauteurMax": 1000, "verrouillageLargeur": False, "verrouillageHauteur": False, "verrouillageProportions": False, "interditModifProportions": False, },
@@ -1115,9 +1119,16 @@ class ObjetPDF():
                     if self.cb_norme == "Extended93": barcode = Extended93(valeur, barHeight=hauteur, humanReadable=self.cb_affiche_numero)
                     if self.cb_norme == "Standard93": barcode = Standard93(valeur, barHeight=hauteur, humanReadable=self.cb_affiche_numero)
                     if self.cb_norme == "POSTNET": barcode = POSTNET(valeur, barHeight=hauteur, humanReadable=self.cb_affiche_numero)
+                    if self.cb_norme == "datamatrix":
+                        from pystrich.datamatrix import DataMatrixEncoder
+                        encoder = DataMatrixEncoder(valeur)
+                        png = encoder.get_imagedata()
+                        buf = BytesIO(png)
+                        canvas.drawImage(ImageReader(buf), self.left-3, self.top-3, largeur * 1.11, hauteur * 1.11, mask="auto", preserveAspectRatio=True)
 
-                    canvas.scale(1, -1)
-                    barcode.drawOn(canvas, self.left - 18, -self.top - self.height)
+                    if self.cb_norme != "datamatrix":
+                        canvas.scale(1, -1)
+                        barcode.drawOn(canvas, self.left - 18, -self.top - self.height)
 
             # ------- SPECIAL ------
             if self.categorie == "special":

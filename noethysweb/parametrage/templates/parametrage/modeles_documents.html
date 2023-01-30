@@ -300,6 +300,7 @@
                                             <option value="FIM">FIM</option>
                                             <option value="POSTNET">POSTNET</option>
                                             <option value="USPS_4State">USPS_4State</option>
+                                            <option value="datamatrix">Datamatrix</option>
                                         </select>
                                     </div>
                                     <input type="checkbox" id="codes_barres_numero">
@@ -731,6 +732,13 @@
                                     "scaleY": 0.05,
                                     "stroke": 'rgba(0,0,0,0)',
                                 });
+                                if (champ.indexOf("DATAMATRIX") >= 0) {
+                                    objet.cb_norme = "datamatrix";
+                                    objet.scaleX = 1;
+                                    objet.scaleY = 1;
+                                    objet.width = 22;
+                                    objet.height = 22;
+                                }
                                 canvas.add(objet);
                                 canvas.viewportCenterObject(objet);
                                 canvas.setActiveObject(objet);

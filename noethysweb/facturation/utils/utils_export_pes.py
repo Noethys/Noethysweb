@@ -243,7 +243,7 @@ class Exporter():
             BlocPiece.appendChild(Cle1)
 
             Cle2 = doc.createElement("Cle2")
-            cle2 = self.Get_cle_modulo_23([
+            cle2 = Get_cle_modulo_23([
                 str(self.lot.exercice)[-2:], str(self.lot.mois), "00",
                 "{:0>13}".format(str(piece.facture.numero))
             ])
@@ -460,14 +460,6 @@ class Exporter():
         if cle > 9: cle = 1
         return cle
 
-    def Get_cle_modulo_23(self, elements=[]):
-        """ Calcul de la clé Modulo 23 """
-        nombre = "".join(elements)
-        k = (int(nombre) % 23) + 1
-        alphabet = "ABCDEFGHJKLMNPQRSTUVWXY"
-        cle = alphabet[k-1]
-        return cle
-
     def ValidationXSD(self, xml=""):
         try :
             # Téléchargement du fichier XSD
@@ -501,3 +493,12 @@ class Exporter():
             print("Erreur dans validation XSD :")
             print(err)
             return True
+
+
+def Get_cle_modulo_23(elements=[]):
+    """ Calcul de la clé Modulo 23 """
+    nombre = "".join(elements)
+    k = (int(nombre) % 23) + 1
+    alphabet = "ABCDEFGHJKLMNPQRSTUVWXY"
+    cle = alphabet[k-1]
+    return cle

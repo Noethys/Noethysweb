@@ -5,40 +5,24 @@
 
 import logging
 logger = logging.getLogger(__name__)
-
-# from Data import DATA_Codes_etab
-# from Data import DATA_Civilites as Civilites
-# DICT_CIVILITES = Civilites.GetDictCivilites()
-#
-# import GestionDB
-# import FonctionsPerso
-# from Utils import UTILS_Questionnaires
-# from Utils import UTILS_Impression_facture
-# from Utils import UTILS_Dates
-# from Dlg import DLG_Apercu_facture
-# from Utils.UTILS_Decimal import FloatToDecimal as FloatToDecimal
-# from Utils import UTILS_Infos_individus
-# from Utils import UTILS_Fichiers
-# from Utils import UTILS_Texte
-# from Utils.UTILS_Pes import GetCle_modulo23
-
-import datetime
-from django.db.models import Q, Sum
-from core.models import Prestation, Ventilation, Deduction, Consommation, Reglement, Individu, Agrement, Facture, Quotient
 from decimal import Decimal
+from django.db.models import Q, Sum
+from core.models import Prestation, Ventilation, Deduction, Consommation, Reglement, Agrement, Facture, Quotient, PesPiece
+from core.data import data_codes_etab
 from core.utils import utils_preferences, utils_dates, utils_conversion, utils_impression, utils_infos_individus, utils_questionnaires
 from facturation.utils import utils_impression_facture
+from facturation.utils.utils_export_pes import Get_cle_modulo_23
 
 
-def FormateMaj(nom_titulaires):
-    """ Formate nom de fichier en majuscules et sans caractères spéciaux """
-    nom_titulaires = UTILS_Texte.Supprime_accent(nom_titulaires)
-    resultat = ""
-    for caract in nom_titulaires :
-        if caract in " abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" :
-            resultat += caract.upper()
-    resultat = resultat.replace(" ", "_")
-    return resultat
+# def FormateMaj(nom_titulaires):
+#     """ Formate nom de fichier en majuscules et sans caractères spéciaux """
+#     nom_titulaires = UTILS_Texte.Supprime_accent(nom_titulaires)
+#     resultat = ""
+#     for caract in nom_titulaires :
+#         if caract in " abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" :
+#             resultat += caract.upper()
+#     resultat = resultat.replace(" ", "_")
+#     return resultat
 
 
 class Facturation():
@@ -583,7 +567,9 @@ class Facturation():
         # todo: à intégrer
 
 
-        # # Infos PES ORMC
+        # Infos PES ORMC
+        dict_pes = {piece.facture_id: piece for piece in PesPiece.objects.select_related("lot", "lot__modele").filter(facture_id__in=liste_factures)}
+
         # req = """SELECT
         # pes_pieces.IDlot, pes_pieces.IDfacture, pes_lots.nom, pes_lots.exercice, pes_lots.mois, pes_lots.objet_piece, pes_lots.id_bordereau, pes_lots.code_prodloc,
         # pes_lots.code_collectivite, pes_lots.id_collectivite, pes_lots.id_poste
@@ -701,28 +687,17 @@ class Facturation():
                 #     dictCompte["{DATE_PRELEVEMENT}"] = ""
 
                 # Infos PES ORMC
-                # if IDfacture in dictPes :
-                #     dictCompte["dict_pes"] = dictPes[IDfacture]
-                #     dictCompte["{PES_DATAMATRIX}"] = Calculer_datamatrix(dictCompte)
-                #     dictCompte["{PES_IDPIECE}"] = str(IDfacture)
-                #     dictCompte["{PES_IDLOT}"] = dictPes[IDfacture]["pes_IDlot"]
-                #     dictCompte["{PES_NOM_LOT}"] = dictPes[IDfacture]["pes_nom_lot"]
-                #     dictCompte["{PES_LOT_EXERCICE}"] = dictPes[IDfacture]["pes_lot_exercice"]
-                #     dictCompte["{PES_LOT_MOIS}"] = dictPes[IDfacture]["pes_lot_mois"]
-                #     dictCompte["{PES_LOT_OBJET}"] = dictPes[IDfacture]["pes_lot_objet"]
-                #     dictCompte["{PES_LOT_ID_BORDEREAU}"] = dictPes[IDfacture]["pes_lot_id_bordereau"]
-                #     dictCompte["{PES_LOT_CODE_PRODUIT}"] = dictPes[IDfacture]["pes_lot_code_produit"]
-                # else:
-                #     dictCompte["dict_pes"] = {}
-                #     dictCompte["{PES_DATAMATRIX}"] = ""
-                #     dictCompte["{PES_IDPIECE}"] = ""
-                #     dictCompte["{PES_IDLOT}"] = ""
-                #     dictCompte["{PES_NOM_LOT}"] = ""
-                #     dictCompte["{PES_LOT_EXERCICE}"] = ""
-                #     dictCompte["{PES_LOT_MOIS}"] = ""
-                #     dictCompte["{PES_LOT_OBJET}"] = ""
-                #     dictCompte["{PES_LOT_ID_BORDEREAU}"] = ""
-                #     dictCompte["{PES_LOT_CODE_PRODUIT}"] = ""
+                piece_pes = dict_pes.get(facture.pk, None)
+                dictCompte["piece_pes"] = piece_pes
+                dictCompte["{PES_DATAMATRIX}"] = Calculer_datamatrix(dictCompte) if piece_pes else ""
+                dictCompte["{PES_IDPIECE}"] = str(facture.pk)
+                dictCompte["{PES_IDLOT}"] = piece_pes.lot_id if piece_pes else ""
+                dictCompte["{PES_NOM_LOT}"] = piece_pes.lot.nom if piece_pes else ""
+                dictCompte["{PES_LOT_EXERCICE}"] = piece_pes.lot.exercice if piece_pes else ""
+                dictCompte["{PES_LOT_MOIS}"] = piece_pes.lot.mois if piece_pes else ""
+                # dictCompte["{PES_LOT_OBJET}"] = dictPes[IDfacture]["pes_lot_objet"]
+                dictCompte["{PES_LOT_ID_BORDEREAU}"] = piece_pes.lot.id_bordereau if piece_pes else ""
+                # dictCompte["{PES_LOT_CODE_PRODUIT}"] = dictPes[IDfacture]["pes_lot_code_produit"]
 
                 # Champs de fusion pour Email
                 dictChampsFusion[facture.pk] = {}
@@ -816,7 +791,7 @@ class Facturation():
 
 
 def Calculer_datamatrix(dictCompte):
-    dict_pes = dictCompte["dict_pes"]
+    piece_pes = dictCompte["piece_pes"]
     elements = []
 
     # 1-40 : Données métiers (40 caractères)
@@ -826,20 +801,20 @@ def Calculer_datamatrix(dictCompte):
     elements.append(" " * 24)
 
     # 65-67 : Code établissement (3 caractères)
-    code_etab = DATA_Codes_etab.Rechercher(str(dict_pes["pes_lot_code_collectivite"]))
+    code_etab = data_codes_etab.Rechercher(str(piece_pes.lot.modele.code_collectivite))
     elements.append("%03d" % int(code_etab))
 
     # 68 : Code période (1 caractère)
-    elements.append(str(dict_pes["pes_lot_mois"])[:1])
+    elements.append(str(piece_pes.lot.mois)[:1])
 
     # 69-71 : Deux derniers chiffres du CodProdLoc (3 caractères)
-    elements.append("%03d" % int(dict_pes["pes_lot_code_produit"][:2]))
+    elements.append("%03d" % int(piece_pes.lot.modele.code_prodloc[:2]))
 
     # 72-73 : deux zéros
     elements.append("00")
 
     # 74-75 : Deux derniers chiffres de la balise Exerc (2 caractères)
-    elements.append(str(dict_pes["pes_lot_exercice"])[-2:])
+    elements.append(str(piece_pes.lot.exercice)[-2:])
 
     # 76 : Clé 5 (modulo 11)
     base = int("".join(elements[-5:]))
@@ -847,7 +822,7 @@ def Calculer_datamatrix(dictCompte):
     elements.append(cle)
 
     # 77-82 : Code émetteur (6 caractères)
-    elements.append("%06d" % int(dict_pes["pes_lot_id_collectivite"][:6]))
+    elements.append("%06d" % int(piece_pes.lot.modele.id_collectivite[:6]))
 
     # 83-86 : Code établissement (=0001)
     elements.append("0001")
@@ -861,11 +836,11 @@ def Calculer_datamatrix(dictCompte):
     elements.append(" ")
 
     # 92-115 : Référence de l'opération (24 caractères)
-    id_poste = "%06d" % int(dict_pes["pes_lot_id_poste"])
+    id_poste = "%06d" % int(piece_pes.lot.modele.id_poste)
 
     num_dette = "%015d" % int(dictCompte["num_facture"])
 
-    cle2 = GetCle_modulo23((str(dict_pes["pes_lot_exercice"])[-2:], str(dict_pes["pes_lot_mois"]), "00", u"{:0>13}".format(dictCompte["num_facture"])))
+    cle2 = Get_cle_modulo_23((str(piece_pes.lot.exercice)[-2:], str(piece_pes.lot.mois), "00", u"{:0>13}".format(dictCompte["num_facture"])))
     alphabet = "ABCDEFGHJKLMNPQRSTUVWXY"
     cle2 = "%02d" % (alphabet.index(cle2) + 1)
 
@@ -905,4 +880,3 @@ def Calculer_datamatrix(dictCompte):
     # Finalisation du datamatrix
     datamatrix = "".join(elements)
     return datamatrix
-
