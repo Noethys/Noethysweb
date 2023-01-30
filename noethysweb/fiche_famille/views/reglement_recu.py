@@ -49,7 +49,7 @@ def Impression_pdf(request):
         "{IDREGLEMENT}": str(reglement.pk),
         "{DATE_REGLEMENT}": utils_dates.ConvertDateToFR(reglement.date) if reglement.date else "",
         "{MODE_REGLEMENT}": reglement.mode.label,
-        "{NOM_EMETTEUR}": reglement.emetteur.nom,
+        "{NOM_EMETTEUR}": reglement.emetteur.nom if reglement.emetteur else "",
         "{NUM_PIECE}": reglement.numero_piece,
         "{MONTANT_REGLEMENT}": reglement.montant,
         "{MONTANT}": "%0.2f %s" % (reglement.montant, utils_preferences.Get_symbole_monnaie()),
