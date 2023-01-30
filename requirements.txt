@@ -33,3 +33,4 @@ eopayment
 colorhash
 feedparser
 beautifulsoup4
+pystrich
