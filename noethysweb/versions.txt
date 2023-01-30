@@ -1,3 +1,12 @@
+Version 1.1.1.7 (30/01/2023) :
+
+- Ajout de la librairie pystrich
+- Correction de l'intégration du datamatrix dans les factures
+- Correction de l'affichage de l'horodatage d'un message du portail
+- Correction de l'affichage des codes-barres individu dans l'éditeur d'étiquettes
+- Correction de l'impression d'un reçu de règlement
+- Correction du nom de tarif selon description
+
 Version 1.1.1.6 (25/01/2023) :
 
 - Ajout de la validation XSD sur l'export PES
