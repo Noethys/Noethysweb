@@ -24,7 +24,7 @@
                                         {{ message.famille.nom }}
                                     </p>
                                     <p class="text-xs mb-0">{{ message.texte|striptags|truncatechars:55 }}</p>
-                                    <p class="text-right mb-0 text-muted" style="font-size: 10px;"><i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }} | <i class="fa fa-home mr-1"></i>{{ message.structure }}</p>
+                                    <p class="mt-1 mb-0" style="font-size: 10px;"><i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }} | <i class="fa fa-home mr-1"></i>{{ message.structure }}</p>
                                 </div>
                             </div>
                         </a>

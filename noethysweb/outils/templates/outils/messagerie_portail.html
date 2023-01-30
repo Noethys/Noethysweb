@@ -30,7 +30,7 @@
                                                 <i class="fa fa-envelope text-danger mr-1"></i> {{ message.famille.nom }}
                                             </h3>
                                             <p class="text-xs m-0">{{ message.texte|striptags|truncatechars:50 }}</p>
-                                            <p class="text-right m-0 text-muted" style="font-size: 10px;"><i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }} | <i class="fa fa-home mr-1"></i>{{ message.structure }}</p>
+                                            <p class="mt-1 m-0" style="font-size: 10px;"><i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }} | <i class="fa fa-home mr-1"></i>{{ message.structure }}</p>
                                         </div>
                                     </div>
                                 </a>
