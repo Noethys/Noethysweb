@@ -51,7 +51,7 @@ def Envoyer_email(request):
 
     destinataire_defaut_found = False
     for adresse in liste_adresses:
-        if adresse != destinataire_defaut.adresse:
+        if destinataire_defaut and adresse != destinataire_defaut.adresse:
             destinataire = Destinataire.objects.create(categorie="saisie_libre", adresse=adresse, valeurs=destinataire_defaut.valeurs)
             for document in destinataire_defaut.documents.all():
                 document_joint = DocumentJoint.objects.create(nom=document.nom, fichier=document.fichier)

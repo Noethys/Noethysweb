@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, time, re, datetime, mimetypes, json
+import logging, time, re, datetime, mimetypes, json, os
 logger = logging.getLogger(__name__)
 from django.conf import settings
 from django.core import mail as djangomail
@@ -174,13 +174,18 @@ def Envoyer_model_mail(idmail=None, request=None):
         # Création des images intégrées
         index = 0
         for image in images:
-            fp = open(settings.BASE_DIR + image, 'rb')
-            msg_img = MIMEImage(fp.read())
-            fp.close()
-            msg_img.add_header("Content-ID", "<image%d>" % index)
-            msg_img.add_header('Content-Disposition', 'inline', filename="image%d" % index)
-            message.attach(msg_img)
-            index += 1
+            try:
+                if "http" in image:
+                    image = os.path.join("media", image.split("media/")[1])
+                fp = open(os.path.join(settings.BASE_DIR, image), 'rb')
+                msg_img = MIMEImage(fp.read())
+                fp.close()
+                msg_img.add_header("Content-ID", "<image%d>" % index)
+                msg_img.add_header('Content-Disposition', 'inline', filename="image%d" % index)
+                message.attach(msg_img)
+                index += 1
+            except Exception as err:
+                logger.error("Erreur sur l'insertion d'une image intégrée dans un email : %s" % err)
 
         # Rattachement des pièces jointes
         for piece in mail.pieces_jointes.all():

@@ -5,7 +5,7 @@
 
 from django.urls import reverse_lazy
 from core.views import crud
-from core.models import Famille
+from core.models import Famille, Utilisateur
 from fiche_famille.forms.famille_portail import Formulaire
 from fiche_famille.views.famille import Onglet
 from fiche_famille.utils import utils_internet
@@ -96,7 +96,7 @@ class Modifier(Consulter):
 
         # Si changement de l'identifiant
         if internet_identifiant != famille.internet_identifiant:
-            if Famille.objects.filter(internet_identifiant=internet_identifiant).exclude(famille=famille).exists():
+            if Utilisateur.objects.filter(username__iexact=internet_identifiant).exists():
                 messages.add_message(request, messages.ERROR, "Cet identifiant a déjà été attribué à une autre famille !")
                 return self.render_to_response(self.get_context_data(form=form))
             famille.internet_identifiant = internet_identifiant

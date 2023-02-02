@@ -641,6 +641,7 @@ class Facturation():
 
                 monnaie = utils_preferences.Get_monnaie()
 
+                dictCompte["facture"] = facture
                 dictCompte["{IDFACTURE}"] = str(facture.pk)
                 dictCompte["num_facture"] = numeroStr
                 dictCompte["num_codeBarre"] = numeroStr
@@ -838,9 +839,9 @@ def Calculer_datamatrix(dictCompte):
     # 92-115 : Référence de l'opération (24 caractères)
     id_poste = "%06d" % int(piece_pes.lot.modele.id_poste)
 
-    num_dette = "%015d" % int(dictCompte["num_facture"])
+    num_dette = "%015d" % int(dictCompte["facture"].numero)
 
-    cle2 = Get_cle_modulo_23((str(piece_pes.lot.exercice)[-2:], str(piece_pes.lot.mois), "00", u"{:0>13}".format(dictCompte["num_facture"])))
+    cle2 = Get_cle_modulo_23((str(piece_pes.lot.exercice)[-2:], str(piece_pes.lot.mois), "00", u"{:0>13}".format(dictCompte["facture"].numero)))
     alphabet = "ABCDEFGHJKLMNPQRSTUVWXY"
     cle2 = "%02d" % (alphabet.index(cle2) + 1)
 
