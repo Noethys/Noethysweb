@@ -235,6 +235,6 @@ LISTE_CITATIONS = [
     ("Toutes les vérités sont bonnes à dire, mais c'est nous qui ne sommes pas tous bons pour les entendre.", u"Alfred Capus"),
     ("La culture c'est comme la confiture, moins on en a, plus on étale...", u"Clément Derrien"),
     ("Il paraît que la crise rend les riches plus riches et les pauvres plus pauvres. Je ne vois pas en quoi c'est une crise. Depuis que je suis petit, c'est comme ça.", u"Coluche"),
+    ("Personne n’éduque personne, personne ne s’éduque seul, les Hommes s’éduquent ensemble par l’intermédiaire du monde.", u"Paulo FREIRE"),
 
 ]
-
