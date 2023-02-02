@@ -1,3 +1,7 @@
+Version 1.1.1.8 (02/02/2023) :
+
+- Correction de petits bugs
+
 Version 1.1.1.7 (30/01/2023) :
 
 - Ajout de la librairie pystrich
