@@ -49,30 +49,30 @@ def Get_anomalies():
     # Recherche les doublons dans les consommations (pour un individu sur une même date avec la même unité)
     qs = Consommation.objects.select_related("individu", "inscription").annotate(doublon_id=Concat(F("individu_id"), Value("_"), F("inscription_id"), Value("_"), F("unite_id"), Value("_"), F("date"), Value("_"), F("evenement_id"), output_field=CharField()))
     doublons = qs.values("individu__nom", "individu__prenom", "individu__pk", "inscription__famille_id", "activite__pk", "date", "doublon_id").annotate(nbre_doublons=Count("doublon_id")).filter(nbre_doublons__gt=1)
-    data["Doublons de consommations"] = [Anomalie(
+    data["Doublons de consommations (%d)" % len(doublons)] = [Anomalie(
         label="%s %s : %d doublons le %s." % (d["individu__nom"], d["individu__prenom"], d["nbre_doublons"], d["date"]),
         idcategorie="doublons_consommations", idfamille=d["inscription__famille_id"], idindividu=d["individu__pk"], idactivite=d["activite__pk"], date_min=d["date"], date_max=d["date"],
-        corrigeable=False)
+        corrigeable=True)
         for d in doublons]
 
     # Recherche les doublons dans les prestations (pour un individu sur une même date avec le même tarif de prestation)
     qs = Prestation.objects.select_related("individu").annotate(doublon_id=Concat(F("individu_id"), Value("_"), F("famille_id"), Value("_"), F("tarif_id"), Value("_"), F("date"), output_field=CharField()))
-    doublons = qs.values("individu__nom", "individu__prenom", "date", "individu__pk", "famille__pk", "activite__pk", "doublon_id").annotate(nbre_doublons=Count("doublon_id")).filter(nbre_doublons__gt=1)
-    data["Doublons de prestations"] = [Anomalie(
+    doublons = qs.values("individu__nom", "individu__prenom", "date", "individu__pk", "famille__pk", "activite__pk", "doublon_id").annotate(nbre_doublons=Count("doublon_id")).filter(nbre_doublons__gt=1, categorie="consommation")
+    data["Doublons de prestations (%d)" % len(doublons)] = [Anomalie(
         label="%s %s : %d doublons le %s." % (d["individu__nom"], d["individu__prenom"], d["nbre_doublons"], d["date"]),
         idcategorie="doublons_prestations", idfamille=d["famille__pk"], idindividu=d["individu__pk"], idactivite=d["activite__pk"], date_min=d["date"], date_max=d["date"])
         for d in doublons]
 
     # Recherche les consommations gratuites
     resultats = Consommation.objects.values("activite__nom").filter(prestation_id=None, etat__in=("reservation", "present", "absenti")).annotate(nbre=Count("pk"), min_date=Min("date"), max_date=Max("date"))
-    data["Consommations gratuites"] = [Anomalie(
+    data["Consommations gratuites (%d)" % len(resultats)] = [Anomalie(
         label="%s : %s consommations (Du %s au %s)." % (r["activite__nom"], r["nbre"], r["min_date"].strftime("%d/%m/%Y"), r["max_date"].strftime("%d/%m/%Y")),
         idcategorie="conso_gratuites", corrigeable=False)
         for r in resultats]
 
     # Recherche les prestations sans consommations associées
     resultats = Prestation.objects.select_related("individu").values("individu__nom", "individu__prenom", "individu__pk", "famille__pk", "activite__pk", "label").filter(consommation__isnull=True, tarif__isnull=False, categorie="consommation", forfait_date_debut__isnull=True).annotate(nbre=Count("pk"), min_date=Min("date"), max_date=Max("date")).order_by("individu__nom", "individu__prenom")
-    data["Prestations sans consommations associées"] = [Anomalie(
+    data["Prestations sans consommations associées (%d)" % len(resultats)] = [Anomalie(
         label="%s %s : %s %s (Du %s au %s)." % (r["individu__nom"], r["individu__prenom"], r["nbre"], r["label"], r["min_date"].strftime("%d/%m/%Y"), r["max_date"].strftime("%d/%m/%Y")),
         idcategorie="presta_sans_conso", idfamille=r["famille__pk"], idindividu=r["individu__pk"], idactivite=r["activite__pk"], date_min=r["min_date"], date_max=r["max_date"])
         for r in resultats]
@@ -101,6 +101,18 @@ def Corrige_anomalies(request=None, anomalies=[]):
             for prestation in Prestation.objects.filter(conditions, facture__isnull=True, consommation__isnull=True, tarif__isnull=False, categorie="consommation", forfait_date_debut__isnull=True):
                 Ventilation.objects.filter(prestation=prestation).delete()
                 prestation.delete()
+
+        # Suppression des consommations en doublon
+        if anomalie.idcategorie == "doublons_consommations":
+            logger.debug("Tentative de correction de l'anomalie : idfamille=%d, idindividu=%d, idactivite=%d, date_min=%s, date_max=%s." % (anomalie.idfamille, anomalie.idindividu, anomalie.idactivite, anomalie.date_min, anomalie.date_max))
+            conditions = Q(inscription__famille_id=anomalie.idfamille, individu_id=anomalie.idindividu, activite_id=anomalie.idactivite, date__gte=anomalie.date_min, date__lte=anomalie.date_max)
+            temp = []
+            for conso in Consommation.objects.filter(conditions).order_by("-pk"):
+                key = (conso.unite_id, conso.evenement_id, conso.prestation_id)
+                if key not in temp:
+                    temp.append(key)
+                else:
+                    conso.delete()
 
 
 class View(CustomView, TemplateView):
