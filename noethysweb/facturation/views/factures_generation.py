@@ -109,9 +109,7 @@ def Generation_factures(request):
     liste_factures = Get_factures(form.cleaned_data)
 
     # Recherche le prochain numéro de facture
-    numero = (Facture.objects.filter(prefixe=form.cleaned_data["prefixe"]).aggregate(Max('numero')))['numero__max']
-    if not numero: numero = 0
-    numero += 1
+    numero = int(form.cleaned_data["prochain_numero"])
 
     liste_factures_generees = []
     liste_id_factures = []
