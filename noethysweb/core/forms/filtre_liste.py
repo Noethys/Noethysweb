@@ -92,6 +92,7 @@ def Ajouter_filtre(request):
 
     if valeurs["champ"].startswith("ipresent") or valeurs["champ"].startswith("iscolarise"): valeurs["label_champ"] = "L'individu"
     if valeurs["champ"].startswith("fpresent") or valeurs["champ"].startswith("fscolarise"): valeurs["label_champ"] = "L'un des membres de la famille"
+    if valeurs["champ"].startswith("fprelevement_actif"): valeurs["label_champ"] = "Le prélèvement activé pour la famille"
     if dict_resultat["condition"] == "INSCRIT" and len(dict_resultat["criteres"]) == 0:
         return JsonResponse({"erreur": "Vous devez cocher au moins une ligne dans la liste"}, status=401)
     if dict_resultat["condition"] == "PRESENT" and len(dict_resultat["criteres"]) == 2:
@@ -160,6 +161,7 @@ class Formulaire(FormulaireBase, forms.Form):
         'fpresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
         'iscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_date", "critere_ecoles"], "CLASSES": ["critere_classes"], "NIVEAUX": ["critere_date", "critere_niveaux"]}},
         'fscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_date", "critere_ecoles"], "CLASSES": ["critere_classes"], "NIVEAUX": ["critere_date", "critere_niveaux"]}},
+        'fprelevement_actif': {'condition': 'condition3', 'criteres': {"VRAI": [], "FAUX": []}},
     }
 
     critere = forms.CharField(label="Critère", required=False)
@@ -196,6 +198,7 @@ class Formulaire(FormulaireBase, forms.Form):
                 if nom_filtre == "fpresent": nom_champ = "Famille : Inscrit/présent"
                 if nom_filtre == "iscolarise": nom_champ = "Individu : Scolarisé"
                 if nom_filtre == "fscolarise": nom_champ = "Famille : Scolarisé"
+                if nom_filtre == "fprelevement_actif": nom_champ = "Famille : Prélèvement actif"
                 # Mémorisation du champ
                 dict_champs[filtre] = {'type': nom_filtre, 'label': nom_champ}
                 choix_champs.append((filtre, nom_champ))

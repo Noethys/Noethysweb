@@ -59,6 +59,10 @@ class Liste_commun():
                 champ = filtre["champ"]
                 criteres = filtre.get("criteres", [])
 
+                # Filtre spécial : Prélèvement actif
+                if "fprelevement_actif" in champ:
+                    champ = champ.split(":")[1]
+
                 # Filtres génériques
                 if filtre["condition"] == "EGAL": conditions &= Q(**{champ: criteres[0]})
                 if filtre["condition"] == "DIFFERENT": conditions &= ~Q(**{champ: criteres[0]})
