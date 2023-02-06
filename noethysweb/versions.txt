@@ -1,3 +1,10 @@
+Version 1.1.1.9 (06/02/2023) :
+
+- Ajout du filtre de liste Prélèvement activé
+- Ajout des unités liées dans le paramétrage des unités de consommations
+- Ajout de la suppression des doublons de consommations dans le correcteur
+- Correction du prochain numéro dans la génération des factures
+
 Version 1.1.1.8 (02/02/2023) :
 
 - Correction de petits bugs
