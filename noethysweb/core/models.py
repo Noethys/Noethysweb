@@ -1231,6 +1231,7 @@ class Unite(models.Model):
     visible_portail = models.BooleanField(verbose_name="Visible sur le portail", default=True)
     equiv_journees = models.FloatField(verbose_name="Equivalence en journées", blank=True, null=True)
     equiv_heures = models.TimeField(verbose_name="Equivalence en heures", blank=True, null=True)
+    dependances = models.ManyToManyField("self", verbose_name="Unités liées", blank=True, symmetrical=False)
 
     class Meta:
         db_table = 'unites'

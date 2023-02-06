@@ -39,14 +39,20 @@ class Formulaire(FormulaireBase, ModelForm):
     # Incompatibilités
     incompatibilites = forms.ModelMultipleChoiceField(label="Incompatibilités", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(), required=False)
 
+    # Dépendances
+    dependances = forms.ModelMultipleChoiceField(label="Unités liées", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(), required=False)
+
     class Meta:
         model = Unite
         fields = ["ordre", "activite", "nom", "abrege", "type", "heure_debut", "heure_fin", "heure_debut_fixe", "heure_fin_fixe",
                   "repas", "restaurateur", "touche_raccourci", "date_debut", "date_fin", "groupes", "incompatibilites", "visible_portail",
-                  "heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "equiv_journees", "equiv_heures"]
+                  "heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "equiv_journees", "equiv_heures", "dependances"]
         help_texts = {
             "equiv_journees": "Saisissez l'équivalence en journées (utile uniquement pour l'état global et l'état nominatif). Ex : une journée=1, une demi-journée=0.5, etc...",
             "equiv_heures": "Saisissez l'équivalence en heures (utile uniquement pour l'état global et l'état nominatif). Format : HH:MM.",
+            "dependances": "Cette unité héritera de l'état des unités liées et sera supprimée en cas d'absence de l'une des unités liées. Par exemple, un repas ne peut exister seul s'il n'y pas de journée, de matinée ou d'après-midi saisies.",
+            "incompatibilites": "Sélectionnez les unités qui ne peuvent être saisies en même temps que cette unité.",
+            "touche_raccourci": "Il suffira de conserver cette touche enfoncée pour saisir une consommation de cette unité en même temps qu'une autre dans la grille des consommations.",
         }
         widgets = {
             "equiv_heures": forms.TimeInput(attrs={'type': 'time'}),
@@ -71,6 +77,9 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Incompatibilités
         self.fields['incompatibilites'].queryset = Unite.objects.filter(activite=activite).exclude(pk=self.instance.pk)
+
+        # Dépendances
+        self.fields['dependances'].queryset = Unite.objects.filter(activite=activite).exclude(pk=self.instance.pk)
 
         # Importe la durée de validité
         if self.instance.date_fin in (None, datetime.date(2999, 1, 1)):
@@ -110,6 +119,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("repas"),
                 Field("restaurateur"),
                 Field("touche_raccourci"),
+                Field("dependances"),
                 Field("visible_portail"),
             ),
             Fieldset("Heure de début",

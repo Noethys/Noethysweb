@@ -1367,9 +1367,38 @@ function afficher_loader_facturation(etat) {
     }
 };
 
+function search_unites_liees(case_tableau) {
+    $.each(dict_cases, function (key, valeurs) {
+        if (valeurs.date === case_tableau.date && valeurs.inscription === case_tableau.inscription) {
+            for (var conso of valeurs.consommations) {
+                dependances_unite = dict_unites[conso.unite].dependances;
+                if (dependances_unite.length > 0) {
+                    // Recherche les états des unités dépendantes
+                    var conso_trouvees = [];
+                    for (var idunite_dependance of dependances_unite) {
+                        let key_unite_dependance = conso.date + "_" + conso.inscription + "_" + idunite_dependance;
+                        if (key_unite_dependance in dict_cases) {
+                            var case_dependance = dict_cases[key_unite_dependance]
+                            for (var conso_unite_dependance of case_dependance.consommations) {
+                                dict_cases[key].modifier_conso({etat: conso_unite_dependance.etat}, false);
+                                conso_trouvees.push(conso_unite_dependance);
+                            }
+                        }
+                    }
+                    // Si aucune conso dépendante, on supprime la conso
+                    if (conso_trouvees.length === 0) {
+                        dict_cases[key].supprimer();
+                    }
+                }
+            }
+        }
+    })
+}
+
 function facturer(case_tableau) {
     // Si mode portail, on évite le calcul de la facturation
     if (mode === "portail") {
+        search_unites_liees(case_tableau);
         return false;
     }
     // Si mode pointeuse, on affiche un loader

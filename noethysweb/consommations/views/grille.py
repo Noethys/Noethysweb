@@ -256,7 +256,7 @@ def Get_generic_data(data={}):
     # Importation des unités de conso
     groupes_utilises = list({inscription.groupe: True for inscription in data['liste_inscriptions']}.keys()) + data.get("selection_groupes", [])
     conditions = (Q(groupes__in=groupes_utilises) | Q(groupes__isnull=True))
-    data["liste_unites"] = Unite.objects.select_related('activite').prefetch_related('groupes', 'incompatibilites').filter(conditions, activite=data['selection_activite']).distinct().order_by("ordre")
+    data["liste_unites"] = Unite.objects.select_related('activite').prefetch_related('groupes', 'incompatibilites', 'dependances').filter(conditions, activite=data['selection_activite']).distinct().order_by("ordre")
 
     # Sélection des unités visibles
     data["liste_unites_visibles"] = [unite for unite in data["liste_unites"] if unite.visible_portail or data["mode"] != "portail"]
@@ -277,7 +277,8 @@ def Get_generic_data(data={}):
             "groupes": [groupe.pk for groupe in unite.groupes.all()], "incompatibilites": [u.pk for u in unite.incompatibilites.all()],
             "visible_portail": unite.visible_portail, "unites_remplissage": dict_unites_remplissage_unites.get(unite.pk, []),
             "heure_debut_min": str(unite.heure_debut_min), "heure_debut_max": str(unite.heure_debut_max),
-            "heure_fin_min": str(unite.heure_fin_min), "heure_fin_max": str(unite.heure_fin_max)}})
+            "heure_fin_min": str(unite.heure_fin_min), "heure_fin_max": str(unite.heure_fin_max),
+            "dependances": [u.pk for u in unite.dependances.all()]}})
     data['liste_unites_json'] = json.dumps(liste_unites_json)
 
     # Conversion au format json
