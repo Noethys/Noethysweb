@@ -94,9 +94,9 @@ class Impression(utils_impression.Impression):
                     dateDebut = dictValeur["date_debut"]
                     dateFin = dictValeur["date_fin"]
 
-                    if dictValeur["{NOM_LOT}"] and "PORTAGE" in dictValeur["{NOM_LOT}"].upper():
-                        dateFin = dateDebut - datetime.timedelta(days=1)
-                        dateDebut = datetime.date(year=dateFin.year, month=dateFin.month, day=1)
+                    # if dictValeur["{NOM_LOT}"] and "PORTAGE" in dictValeur["{NOM_LOT}"].upper():
+                    #     dateFin = dateDebut - datetime.timedelta(days=1)
+                    #     dateDebut = datetime.date(year=dateFin.year, month=dateFin.month, day=1)
 
                     if self.dict_options["afficher_periode"] == True:
                         dataTableau.append((u"Période du %s au %s" % (utils_dates.ConvertDateENGtoFR(str(dateDebut)), utils_dates.ConvertDateENGtoFR(str(dateFin))),))

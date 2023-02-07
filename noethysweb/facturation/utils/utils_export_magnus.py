@@ -76,8 +76,8 @@ class Exporter():
             montant_unitaire = prestation.montant / prestation.quantite
 
             # Spécial
-            if "portage" in prestation.activite.nom.lower():
-                prestation.date = prestation.date - relativedelta(months=1)
+            # if "portage" in prestation.activite.nom.lower():
+            #     prestation.date = prestation.date - relativedelta(months=1)
 
             # Définit le label
             libelle = self.lot.modele.prestation_libelle
