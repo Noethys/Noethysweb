@@ -47,7 +47,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Pièces à fournir",
                 Field("pieces"),
             ),
-            Fieldset("Cotisations à jour",
+            Fieldset("Adhésions à jour",
                 Field("cotisations"),
             ),
             Fieldset("Consentements internet nécessaires",
