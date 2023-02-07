@@ -1,3 +1,7 @@
+Version 1.1.2.3 (07/02/2023) :
+
+- Correction de la réinitialisation des codes
+
 Version 1.1.2.2 (07/02/2023) :
 
 - Ajout du widget Adhésions manquantes pour le tableau de bord
