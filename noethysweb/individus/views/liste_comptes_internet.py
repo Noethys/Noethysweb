@@ -140,6 +140,7 @@ def Reinitialiser_identifiant(request):
         if famille.pk in coches:
             internet_identifiant = utils_internet.CreationIdentifiant(IDfamille=famille.pk)
             famille.internet_identifiant = internet_identifiant
+            famille.utilisateur.username = internet_identifiant
             if not famille.utilisateur:
                 utilisateur = Utilisateur(username=internet_identifiant, categorie="famille", force_reset_password=True)
                 utilisateur.save()
@@ -147,6 +148,7 @@ def Reinitialiser_identifiant(request):
                 utilisateur.save()
                 famille.utilisateur = utilisateur
             famille.save()
+            famille.utilisateur.save()
 
     # Réactualisation de la page
     messages.add_message(request, messages.SUCCESS, "%d identifiants ont été réinitialisés avec succès" % len(coches))
