@@ -537,10 +537,12 @@ class Exporter():
                         ligne_tsol[idx] = ConvertToTexte(valeur[:50], majuscules=True)
 
                 # Codepostal - Texte (10)
-                ligne_tsol[9] = ConvertToTexte(piece.famille.tiers_solidaire.cp_resid[:10])
+                if piece.famille.tiers_solidaire.cp_resid:
+                    ligne_tsol[9] = ConvertToTexte(piece.famille.tiers_solidaire.cp_resid[:10])
 
                 # Ville - Texte (50)
-                ligne_tsol[10] = ConvertToTexte(piece.famille.tiers_solidaire.ville_resid[:50])
+                if piece.famille.tiers_solidaire.ville_resid:
+                    ligne_tsol[10] = ConvertToTexte(piece.famille.tiers_solidaire.ville_resid[:50])
 
                 # Catégorie Tiers PES
                 ligne_tsol[19] = ConvertToTexte("01")
