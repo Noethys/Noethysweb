@@ -1,0 +1,41 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    <style>
+        .tableau_cotisations_manquantes td {
+            padding: 6px !important;
+        }
+    </style>
+{% endblock %}
+
+{% block contenu_page %}
+
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline card-comments{% endblock %}
+        {% block box_titre %}<i class="fa fa-folder-o margin-r-5"></i> Adhésions manquantes{% endblock %}
+        {% block box_outils %}
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Diminuer"><i class="fa fa-minus"></i></button>
+        {% endblock %}
+        {% block card_body_classe %}p-0{% endblock %}
+        {% block box_contenu %}
+            <table class="tableau_cotisations_manquantes table">
+                <tbody>
+                    {% for ligne in cotisations_manquantes %}
+                        <tr class="text-center" style="padding: 10px !important;">
+                            <td style="text-align: left;padding: 6px !important;">
+                                <span class="badge bg-info" title="Nom de la famille">{{ ligne.titre }}</span>
+                                {{ ligne.detail }}
+                            </td>
+                            <td style="width: 90px;text-align: right;padding: 6px !important;">
+                                <a type="button" class="btn-xs" href="{% url 'famille_resume' idfamille=ligne.idfamille %}" title="Ouvrir la fiche famille"><i class="fa fa-fw fa-users"></i></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endblock %}
+    {% endembed %}
+
+{% endblock %}
