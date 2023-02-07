@@ -690,7 +690,6 @@ class Facturation():
                 # Infos PES ORMC
                 piece_pes = dict_pes.get(facture.pk, None)
                 dictCompte["piece_pes"] = piece_pes
-                dictCompte["{PES_DATAMATRIX}"] = Calculer_datamatrix(dictCompte) if piece_pes else ""
                 dictCompte["{PES_IDPIECE}"] = str(facture.pk)
                 dictCompte["{PES_IDLOT}"] = piece_pes.lot_id if piece_pes else ""
                 dictCompte["{PES_NOM_LOT}"] = piece_pes.lot.nom if piece_pes else ""
@@ -699,6 +698,14 @@ class Facturation():
                 # dictCompte["{PES_LOT_OBJET}"] = dictPes[IDfacture]["pes_lot_objet"]
                 dictCompte["{PES_LOT_ID_BORDEREAU}"] = piece_pes.lot.id_bordereau if piece_pes else ""
                 # dictCompte["{PES_LOT_CODE_PRODUIT}"] = dictPes[IDfacture]["pes_lot_code_produit"]
+
+                # Datamatrix
+                dictCompte["{PES_DATAMATRIX}"] = ""
+                if piece_pes:
+                    try:
+                        dictCompte["{PES_DATAMATRIX}"] = Calculer_datamatrix(dictCompte)
+                    except:
+                        pass
 
                 # Champs de fusion pour Email
                 dictChampsFusion[facture.pk] = {}
