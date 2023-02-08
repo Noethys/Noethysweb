@@ -52,6 +52,7 @@ class Exporter():
 
         dict_resultats = {}
         dict_prestations_factures = {}
+        liste_dates_prestations = []
         for prestation in prestations:
 
             # Recherche le code compta et le code prod local
@@ -75,9 +76,9 @@ class Exporter():
             # Définit le montant
             montant_unitaire = prestation.montant / prestation.quantite
 
-            # Spécial
-            # if "portage" in prestation.activite.nom.lower():
-            #     prestation.date = prestation.date - relativedelta(months=1)
+            # Mémorise la date de la prestation
+            if prestation.date not in liste_dates_prestations:
+                liste_dates_prestations.append(prestation.date)
 
             # Définit le label
             libelle = self.lot.modele.prestation_libelle
@@ -110,6 +111,10 @@ class Exporter():
                     dict_resultats2[facture].append({"libelle": libelle, "quantite": quantite, "montant": montant})
                 dict_resultats2[facture].sort(key=lambda x: x["libelle"])
 
+        # Mémorise les dates extrêmes des prestations
+        self.prestation_date_min = min(liste_dates_prestations)
+        self.prestation_date_max = max(liste_dates_prestations)
+
         return dict_resultats2, dict_prestations_factures
 
     def Get_erreurs_html(self):
@@ -124,13 +129,25 @@ class Exporter():
         return html
 
     def Formate_libelle(self, texte="", piece=None):
+        # Général
         texte = texte.replace("{NOM_ORGANISATEUR}", self.organisateur.nom)
         texte = texte.replace("{NUM_FACTURE}", str(piece.facture.numero))
+
+        # Période du lot
         texte = texte.replace("{MOIS}", str(self.lot.mois))
         texte = texte.replace("{MOIS_LETTRES}", self.lot.get_mois_display())
         texte = texte.replace("{ANNEE}", str(self.lot.exercice))
         texte = texte.replace("{DATE_DEBUT_MOIS}", datetime.date(self.lot.exercice, self.lot.mois, 1).strftime('%d/%m/%Y'))
         texte = texte.replace("{DATE_FIN_MOIS}", datetime.date(self.lot.exercice, self.lot.mois, calendar.monthrange(self.lot.exercice, self.lot.mois)[1]).strftime('%d/%m/%Y'))
+
+        # Période des prestations
+        texte = texte.replace("{PRESTATION_DATE_MIN}", self.prestation_date_min.strftime("%d/%m/%Y"))
+        texte = texte.replace("{PRESTATION_DATE_MAX}", self.prestation_date_max.strftime("%d/%m/%Y"))
+        texte = texte.replace("{PRESTATION_DEBUT_MOIS}", datetime.date(self.prestation_date_min.year, self.prestation_date_min.month, 1).strftime("%d/%m/%Y"))
+        texte = texte.replace("{PRESTATION_FIN_MOIS}", datetime.date(self.prestation_date_min.year, self.prestation_date_min.month, calendar.monthrange(self.prestation_date_min.year, self.prestation_date_min.month)[1]).strftime("%d/%m/%Y"))
+        texte = texte.replace("{PRESTATION_MOIS}", {num: label for (num, label) in LISTE_MOIS}[self.prestation_date_min.month])
+        texte = texte.replace("{PRESTATION_ANNEE}", str(self.prestation_date_min.year))
+
         return texte
 
     def Generation_pieces_jointes(self, repertoire=""):
@@ -178,7 +195,7 @@ class Exporter():
             if not dict_pieces_jointes:
                 return False
 
-        # Calcul des dates extrêmes du mois
+        # Calcul des dates extrêmes du mois du lot
         date_min = datetime.date(self.lot.exercice, self.lot.mois, 1)
         date_max = datetime.date(self.lot.exercice, self.lot.mois, calendar.monthrange(self.lot.exercice, self.lot.mois)[1])
 
