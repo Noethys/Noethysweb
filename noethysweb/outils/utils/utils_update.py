@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, os, datetime, codecs, zipfile
+import logging, os, datetime, codecs, zipfile, requests
 logger = logging.getLogger(__name__)
 from urllib.request import urlopen, urlretrieve
 from noethysweb import version
@@ -30,9 +30,16 @@ def Get_update_for_accueil(request=None):
 
 def Recherche_update():
     # Lecture de la version disponible en ligne
-    fichier = urlopen("https://raw.githubusercontent.com/Noethys/Noethysweb/master/noethysweb/versions.txt", timeout=5)
-    changelog = fichier.read().decode('utf-8')
-    fichier.close()
+    url = "https://raw.githubusercontent.com/Noethys/Noethysweb/master/noethysweb/versions.txt"
+
+    # Ancienne version avec urlopen
+    # fichier = urlopen(url, timeout=5)
+    # changelog = fichier.read().decode('utf-8')
+    # fichier.close()
+
+    # Nouvelle version avec requests
+    data = requests.get(url)
+    changelog = data.text
 
     # Lecture du numéro de version online
     pos_debut_numVersion = changelog.find("n")
