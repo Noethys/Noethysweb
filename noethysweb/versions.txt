@@ -1,3 +1,7 @@
+Version 1.1.2.4 (08/02/2023) :
+
+- Correction de la mise à jour de l'application
+
 Version 1.1.2.3 (07/02/2023) :
 
 - Correction de la réinitialisation des codes
