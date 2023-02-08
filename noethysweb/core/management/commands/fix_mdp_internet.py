@@ -4,7 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.core.management.base import BaseCommand
-from core.models import Utilisateur
+from core.models import Famille, Utilisateur
 
 
 class Command(BaseCommand):
@@ -12,17 +12,30 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         """ Associe de nouveau les codes familles avec la table utilisateur """
-        for utilisateur in Utilisateur.objects.select_related("famille").filter(categorie="famille"):
+        for famille in Famille.objects.select_related("utilisateur"):
 
-            # Correction de l'identifiant
-            if utilisateur.username != utilisateur.famille.internet_identifiant:
-                utilisateur.username = utilisateur.famille.internet_identifiant
+            if not famille.utilisateur:
 
-            # Correction du mot de passe
-            if not utilisateur.famille.internet_mdp.startswith("custom"):
-                utilisateur.set_password(utilisateur.famille.internet_mdp)
-                utilisateur.force_reset_password = True
+                # Création de l'utilisateur s'il n'existe pas déjà
+                utilisateur = Utilisateur(username=famille.internet_identifiant, categorie="famille", force_reset_password=True)
+                utilisateur.save()
+                utilisateur.set_password(famille.internet_mdp)
+                utilisateur.save()
+                famille.utilisateur = utilisateur
+                famille.save()
+                famille.utilisateur.save()
 
-            utilisateur.save()
+            else:
+
+                # Correction de l'identifiant
+                if famille.utilisateur.username != famille.internet_identifiant:
+                    famille.utilisateur.username = famille.internet_identifiant
+
+                # Correction du mot de passe
+                if not famille.internet_mdp.startswith("custom"):
+                    famille.utilisateur.set_password(famille.internet_mdp)
+                    famille.utilisateur.force_reset_password = True
+
+                famille.utilisateur.save()
 
         self.stdout.write(self.style.SUCCESS("Correction des mdp internet OK"))
