@@ -1,3 +1,7 @@
+Version 1.1.2.5 (13/02/2023) :
+
+- Correction des impayés sur les factures
+
 Version 1.1.2.4 (08/02/2023) :
 
 - Correction de la mise à jour de l'application
