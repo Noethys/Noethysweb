@@ -233,7 +233,8 @@ class Facturation():
         dictComptesPayeursFactures = {}
         for prestation in prestations:
             dictComptesPayeursFactures.setdefault(prestation.famille_id, [])
-            dictComptesPayeursFactures[prestation.famille_id].append(prestation.facture_id)
+            if prestation.facture_id not in dictComptesPayeursFactures[prestation.famille_id]:
+                dictComptesPayeursFactures[prestation.famille_id].append(prestation.facture_id)
 
             if len(liste_factures) == 0:
                 ID = prestation.famille_id
@@ -485,12 +486,10 @@ class Facturation():
             montant_ventilation = Decimal(dictVentilationReports.get(prestation.pk, 0))
             montant_impaye = prestation.montant - montant_ventilation
             periode = (prestation.date.year, prestation.date.month)
-
             if montant_ventilation != prestation.montant:
 
                 if len(liste_factures) == 0:
 
-                    #if dictComptes.has_key(IDcompte_payeur) :
                     if prestation.famille_id in dictComptes and prestation.pk not in dictComptes[prestation.famille_id]["listeIDprestations"]:
                         if periode not in dictComptes[prestation.famille_id]["reports"]:
                             dictComptes[prestation.famille_id]["reports"][periode] = Decimal(0)
@@ -508,7 +507,7 @@ class Facturation():
                                 dictComptes[IDfacture]["reports"][periode] += montant_impaye
                                 dictComptes[IDfacture]["total_reports"] += montant_impaye
                                 dictComptes[IDfacture]["{TOTAL_REPORTS}"] = "%.02f %s" % (dictComptes[IDfacture]["total_reports"], utils_preferences.Get_symbole_monnaie())
-        
+
         # Ajout des impayés au solde
         for ID, dictValeurs in dictComptes.items():
             dictComptes[ID]["solde_avec_reports"] = dictComptes[ID]["solde"] + dictComptes[ID]["total_reports"]
