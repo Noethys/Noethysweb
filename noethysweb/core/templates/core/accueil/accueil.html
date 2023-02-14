@@ -98,7 +98,9 @@
                                 <div class="col-md-{{ colonne.0 }}">
                                 {% for item in colonne|slice:"1:" %}
                                     {% with nom_template="core/accueil/widgets/"|add:item|add:".html" %}
-                                        {% include nom_template %}
+                                        {% if nom_template|template_exists %}
+                                            {% include nom_template %}
+                                        {% endif %}
                                     {% endwith %}
                                 {% endfor %}
                                 </div>

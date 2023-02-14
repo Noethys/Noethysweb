@@ -5,9 +5,21 @@
 from django.template.defaulttags import register
 from django.db import models
 from django.utils.safestring import mark_safe
+from django import template
+from django.template.defaultfilters import stringfilter
 from core.utils import utils_dates
 from core.utils import utils_preferences
 import os, re, datetime
+
+
+@register.filter
+@stringfilter
+def template_exists(value):
+    try:
+        template.loader.get_template(value)
+        return True
+    except template.TemplateDoesNotExist:
+        return False
 
 
 @register.filter

@@ -33,8 +33,11 @@ class Accueil(CustomView, TemplateView):
 
         # Importation des widgets
         for nom_widget in liste_widgets:
-            module = importlib.import_module("core.views.accueil_widgets.%s" % nom_widget)
-            widget = module.Widget(request=self.request, context=context)
-            widget.init_context_data()
+            try:
+                module = importlib.import_module("core.views.accueil_widgets.%s" % nom_widget)
+                widget = module.Widget(request=self.request, context=context)
+                widget.init_context_data()
+            except:
+                pass
 
         return context
