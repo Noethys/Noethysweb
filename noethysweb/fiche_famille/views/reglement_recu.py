@@ -44,7 +44,7 @@ def Impression_pdf(request):
         "{SIGNATAIRE}": signataire,
         "{DESTINATAIRE_NOM}": infos_famille["nom"],
         "{DESTINATAIRE_RUE}": infos_famille["rue"],
-        "{DESTINATAIRE_VILLE}": infos_famille["cp"] + " " + infos_famille["ville"],
+        "{DESTINATAIRE_VILLE}": "%s %s" % (infos_famille["cp"] or "", infos_famille["ville"] or ""),
         "{NUM_RECU}": numero,
         "{IDREGLEMENT}": str(reglement.pk),
         "{DATE_REGLEMENT}": utils_dates.ConvertDateToFR(reglement.date) if reglement.date else "",

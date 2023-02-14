@@ -154,8 +154,8 @@ def Envoyer_model_mail(idmail=None, request=None):
             valeurs = {}
         valeurs.update(valeurs_defaut)
         for motcle, valeur in valeurs.items():
-            html = html.replace(motcle, valeur)
-            objet = objet.replace(motcle, valeur)
+            html = html.replace(motcle, valeur or "")
+            objet = objet.replace(motcle, valeur or "")
 
         # Recherche les images intégrées
         images = re.findall('src="([^"]+)"', html)

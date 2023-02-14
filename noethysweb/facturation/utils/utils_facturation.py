@@ -283,7 +283,7 @@ class Facturation():
                     "{FAMILLE}": nomsTitulairesAvecCivilite,
                     "{DESTINATAIRE_NOM}": nomsTitulairesAvecCivilite,
                     "{DESTINATAIRE_RUE}": rue_resid,
-                    "{DESTINATAIRE_VILLE}": cp_resid + " " + ville_resid,
+                    "{DESTINATAIRE_VILLE}": "%s %s" % (cp_resid or "", ville_resid or ""),
                     "individus": {},
                     "listePrestations": [],
                     "listeIDprestations": [],
