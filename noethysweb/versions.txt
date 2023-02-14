@@ -1,3 +1,8 @@
+Version 1.1.2.6 (14/02/2023) :
+
+- Correction sur widgets accueil si manquants
+- Petits correctifs
+
 Version 1.1.2.5 (13/02/2023) :
 
 - Correction des impayés sur les factures
