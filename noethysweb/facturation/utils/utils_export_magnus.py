@@ -95,6 +95,8 @@ class Exporter():
             libelle = libelle.replace("{ANNEE}", str(self.lot.exercice))
             libelle = libelle.replace("{DATE_DEBUT_MOIS}", datetime.date(prestation.date.year, prestation.date.month, 1).strftime('%d/%m/%Y'))
             libelle = libelle.replace("{DATE_FIN_MOIS}", datetime.date(prestation.date.year, prestation.date.month, calendar.monthrange(prestation.date.year, prestation.date.month)[1]).strftime('%d/%m/%Y'))
+            libelle = libelle.replace("{PRESTATION_DEBUT_MOIS}", datetime.date(prestation.date.year, prestation.date.month, 1).strftime('%d/%m/%Y'))
+            libelle = libelle.replace("{PRESTATION_FIN_MOIS}", datetime.date(prestation.date.year, prestation.date.month, calendar.monthrange(prestation.date.year, prestation.date.month)[1]).strftime('%d/%m/%Y'))
 
             # Mémorisation du label et de la quantité
             libelle = (libelle, montant_unitaire)
