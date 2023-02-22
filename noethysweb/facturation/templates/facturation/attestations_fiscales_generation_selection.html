@@ -1,0 +1,50 @@
+{% load static %}
+
+
+<div class="buttonHolder commandes">
+    <button id="bouton_generer_attestations_fiscales" type="button" class="btn btn-primary" onclick="generer_attestations_fiscales()" title="Générer les attestations fiscales"><i class="fa fa-check margin-r-5"></i>Générer les attestations fiscales sélectionnées</button>
+    <a class="btn btn-danger" href="{% url 'facturation_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+    <button type="button" class="btn btn-default" onclick="revenir_page_parametres()" title="Revenir aux paramètres"><i class="fa fa-reply margin-r-5"></i>Revenir aux paramètres</button>
+</div>
+
+<div class="btn-toolbar mb-2">
+    <div class="btn-group mr-2 btn-group-sm">
+        <button type="button" class="btn btn-default" onclick="tout_cocher()" ><i class="fa fa-check-square-o"></i> Tout cocher</button>
+        <button type="button" class="btn btn-default" onclick="cocher_si_solde_nul()"><i class="fa fa-check-square-o"></i> Cocher si solde nul</button>
+        <button type="button" class="btn btn-default" onclick="tout_decocher()"><i class="fa fa-square-o"></i> Tout décocher</button>
+    </div>
+</div>
+
+<div id="div_table_attestations_fiscales" class="div_table_attestations_fiscales margin-bottom">
+    <table id="table_attestations_fiscales" class="table table-bordered table_attestations_fiscales">
+
+        <thead>
+            <tr>
+                <th>Famille</th>
+                <th>Total</th>
+                <th>Réglé</th>
+                <th>Solde</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for famille, detail in attestations_fiscales %}
+                <tr>
+                    <td>
+                        <div class="form-inline">
+                            <input class="check_attestation_fiscale" type="checkbox" data-solde="{{ detail.solde }}" value="{{ famille.pk }}" checked>
+                            <span style="margin-left:5px;margin-right:20px;">{{ famille.nom }}</span>
+                        </div>
+                    </td>
+                    <td style="text-align: center;">{{ detail.total|montant }}</td>
+                    <td style="text-align: center;">{{ detail.regle|montant }}</td>
+                    <td style="text-align: center;">{{ detail.solde|montant }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+
+{# Affichage des messages en mémoire #}
+{% include 'core/messages.html' %}

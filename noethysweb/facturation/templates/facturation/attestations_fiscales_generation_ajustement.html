@@ -1,0 +1,55 @@
+{% load static %}
+
+
+<div class="buttonHolder commandes">
+    <button id="bouton_rechercher_attestations_fiscales" type="button" class="btn btn-primary" onclick="rechercher_attestations_fiscales()" title="Rechercher les attestations fiscales"><i class="fa fa-check margin-r-5"></i>Rechercher les attestations fiscales</button>
+    <a class="btn btn-danger" href="{% url 'facturation_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+    <button type="button" class="btn btn-default" onclick="revenir_page_parametres()" title="Revenir aux paramètres"><i class="fa fa-reply margin-r-5"></i>Revenir aux paramètres</button>
+</div>
+
+<div class="btn-toolbar mb-2">
+    <div class="btn-group mr-2 btn-group-sm">
+        <button type="button" class="btn btn-default" onclick="tout_cocher_prestation()" ><i class="fa fa-check-square-o"></i> Tout cocher</button>
+        <button type="button" class="btn btn-default" onclick="tout_decocher_prestation()"><i class="fa fa-square-o"></i> Tout décocher</button>
+    </div>
+</div>
+
+<div id="div_table_attestations_fiscales" class="div_table_attestations_fiscales margin-bottom">
+    <table id="table_attestations_fiscales" class="table table-bordered table_attestations_fiscales">
+
+        <thead>
+            <tr>
+                <th>Prestation</th>
+                <th>Activité</th>
+                <th>Total</th>
+                <th>Réglé</th>
+                <th>Quantité</th>
+                <th>Ajustement</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for prestation in liste_prestations %}
+                <tr>
+                    <td>
+                        <div class="form-inline">
+                            <input class="check_prestation" type="checkbox" value="{{ prestation.label }}" data-index="{{ forloop.counter0 }}" checked>
+                            <span style="margin-left:5px;margin-right:20px;">{{ prestation.label }}</span>
+                        </div>
+                    </td>
+                    <td style="text-align: center;">{{ prestation.activite__nom }}</td>
+                    <td style="text-align: center;">{{ prestation.total|montant }}</td>
+                    <td style="text-align: center;">{{ prestation.regle|montant }}</td>
+                    <td style="text-align: center;">{{ prestation.nbre }}</td>
+                    <td style="text-align: center;">
+                        <input type="number" value="0.00" step="0.01" class="numberinput form-control form-control-sm" id="ajustement_{{ forloop.counter0 }}">
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+
+{# Affichage des messages en mémoire #}
+{% include 'core/messages.html' %}

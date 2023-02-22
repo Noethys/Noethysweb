@@ -29,6 +29,10 @@ class View(Onglet, DetailView):
                     {"titre": "Générer une lettre de rappel", "url": reverse_lazy("rappels_generation", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                     {"titre": "Liste des lettres de rappel générées", "url": reverse_lazy("famille_rappels_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                 ]},
+                {"titre": "Attestations fiscales", "items": [
+                    {"titre": "Générer une attestation fiscale", "url": reverse_lazy("attestations_fiscales_generation", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+                    {"titre": "Liste des attestations fiscales générées", "url": reverse_lazy("famille_attestations_fiscales_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+                ]},
             ],
             [
                 {"titre": "Historique", "items": [

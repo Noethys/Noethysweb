@@ -1,0 +1,274 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+
+    <style>
+        .div_table_attestations_fiscales {
+            display: inline-block;
+            height: 400px;
+            overflow-y: scroll;
+            width: 100%;
+            border: solid 1px #e5e5e5;
+        }
+        .table_attestations_fiscales th, td{
+            /*font-size: 12px;*/
+            padding: 5px;
+        }
+        .table_attestations_fiscales th {
+            background-color: #f1f1f1;
+            font-weight: bold;
+            text-align: center;
+            vertical-align: middle;
+        }
+        #table_attestations_fiscales td {
+            vertical-align: middle;
+        }
+        .montant {
+            text-align: right;
+        }
+
+    </style>
+{% endblock styles %}
+
+
+
+{% block contenu_page %}
+{% embed 'core/box.html' %}
+    {% block box_theme %}card-outline card-lightblue{% endblock %}
+    {% block box_titre %}{{ box_titre }}{% endblock %}
+    {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+    {% block box_contenu %}
+
+        <div id="div_form">
+            {% crispy form %}
+        </div>
+
+        <div id="div_loader_recherche" style="display: none;text-align: center;margin: 50px;" class="text-primary">
+            <h4><i class='fa fa-spinner fa-spin'></i> <strong>Recherche des données en cours</strong></h4>
+            <p>Veuillez patienter...</p>
+        </div>
+
+        <div id="div_loader_generation" style="display: none;text-align: center;margin: 50px;" class="text-primary">
+            <h4><i class='fa fa-spinner fa-spin margin-r-5'></i> <strong>Génération des attestations fiscales en cours</strong></h4>
+            <p>Veuillez patienter...</p>
+        </div>
+
+        <div id="div_selection_attestations_fiscales" style="display: none;">
+        </div>
+
+        <div id="div_actions_attestations_fiscales" style="display: none;">
+        </div>
+
+    {% endblock %}
+
+{% endembed %}
+{% endblock contenu_page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+
+    <script>
+    var maj_lot_checkboxes = false;
+
+        function init_page_parametres() {
+
+            $("#form_attestations_fiscales_generation").on('submit', function (event) {
+                event.preventDefault();
+                $("#div_form").hide();
+                $("#div_loader_recherche").show();
+                $("#box_introduction").html("")
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_ajuster_attestations_fiscales' %}",
+                    data: $("#form_attestations_fiscales_generation").serialize(),
+                    datatype: "json",
+                    success: function(data){
+                        $("#div_selection_attestations_fiscales").html(data);
+                        $("#div_selection_attestations_fiscales").show();
+                        $("#div_loader_recherche").hide();
+                        $("#box_introduction").html("Cochez les prestations à inclure et cliquez sur le bouton Rechercher les attestations fiscales. Notez que vous pouvez saisir une valeur d'ajustement négative ou positive qui viendra modifier le montant de chaque prestation.");
+                        init_page_selection();
+                    },
+                    error: function(data) {
+                        $("#div_form").html(data.html);
+                        $("#div_form").show();
+                        $("#div_loader_recherche").hide();
+                        $("#box_introduction").html("<span class='text-red'>" + data.responseJSON.erreur + "</span>");
+                        toastr.error(data.responseJSON.erreur);
+                    }
+                });
+            });
+
+        };
+
+        function init_page_selection() {
+            $("#div_table_attestations_fiscales").freezeTable({
+                'scrollable': true,
+            });
+
+            $('.check_attestation_fiscale').on('change', function () {
+                if (maj_lot_checkboxes == false) {
+                    maj_bouton_generer(get_attestations_fiscales_cochees().length);
+                };
+            });
+
+        };
+
+        function tout_cocher_prestation() {
+            $(".check_prestation").each(function (index) {
+                $(this).prop("checked", true);
+            });
+        };
+        function tout_decocher_prestation() {
+            $(".check_prestation").each(function (index) {
+                $(this).prop("checked", false);
+            });
+        };
+
+        function maj_bouton_generer(nbre_attestations_fiscales) {
+            $("#bouton_generer_attestations_fiscales").text("Générer les " + nbre_attestations_fiscales + " attestations fiscales sélectionnées")
+        };
+        function tout_cocher() {
+            maj_lot_checkboxes = true;
+            $(".check_attestation_fiscale").each(function (index) {
+                $(this).prop("checked", true);
+            });
+            maj_lot_checkboxes = false;
+            maj_bouton_generer(get_attestations_fiscales_cochees().length);
+        };
+        function tout_decocher() {
+            maj_lot_checkboxes = true;
+            $(".check_attestation_fiscale").each(function (index) {
+                $(this).prop("checked", false);
+            });
+            maj_lot_checkboxes = false;
+            maj_bouton_generer(get_attestations_fiscales_cochees().length);
+        };
+        function cocher_si_solde_nul() {
+            maj_lot_checkboxes = true;
+            $(".check_attestation_fiscale").each(function (index) {
+                $(this).prop("checked", false);
+                if (parseFloat(this.dataset.solde) === 0.0) {$(this).prop("checked", true)};
+            });
+            maj_lot_checkboxes = false;
+            maj_bouton_generer(get_attestations_fiscales_cochees().length);
+        };
+
+        function get_attestations_fiscales_cochees() {
+            var liste_attestations_fiscales = [];
+            $(".check_attestation_fiscale").each(function (index) {
+                var idfamille = parseInt($(this).val());
+                if (($(this).prop("checked")) && (!(liste_attestations_fiscales.includes(idfamille)))) {
+                    liste_attestations_fiscales.push(idfamille);
+                }
+            });
+            return liste_attestations_fiscales;
+        };
+
+        function revenir_page_parametres() {
+            $("#div_selection_attestations_fiscales").hide();
+            $("#div_actions_attestations_fiscales").hide();
+            $("#div_form").show();
+            $("#box_introduction").html("{{ box_introduction|safe }}");
+        };
+
+        function get_prestations_cochees() {
+            var liste_prestations = [];
+            $(".check_prestation").each(function (index) {
+                var index_prestation = parseInt(this.dataset.index);
+                if (($(this).prop("checked")) && (!(liste_prestations.includes($(this).val())))) {
+                    var ajustement = $("#ajustement_" + index_prestation).val();
+                    liste_prestations.push([$(this).val(), ajustement]);
+                }
+            });
+            return liste_prestations;
+        };
+
+        function rechercher_attestations_fiscales() {
+            $('input[name=liste_prestations_json]').val(JSON.stringify(get_prestations_cochees()));
+            $("#div_selection_attestations_fiscales").hide();
+            $("#div_loader_recherche").show();
+            $("#box_introduction").html("")
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_recherche_attestations_fiscales' %}",
+                data: $("#form_attestations_fiscales_generation").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $("#div_actions_attestations_fiscales").html(data);
+                    $("#div_actions_attestations_fiscales").show();
+                    $("#div_loader_recherche").hide();
+                    maj_bouton_generer(get_attestations_fiscales_cochees().length);
+                    $("#box_introduction").html("Cochez les attestations fiscales à générer puis cliquez sur le bouton Générer.");
+                    init_page_selection();
+                },
+                error: function(data) {
+                    $("#box_introduction").html("Une erreur a été rencontrée durant la recherche des attestations fiscales : " + data.responseJSON.erreur);
+                    $("#div_loader_recherche").hide();
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        };
+
+        function generer_attestations_fiscales() {
+            bootbox.dialog({
+                title: "Confirmation",
+                message: "Confirmez-vous la génération des attestations fiscales sélectionnées ?",
+                buttons: {
+                    ok: {
+                        label: "<i class='fa fa-check'></i> Valider",
+                        className: 'btn-primary',
+                        callback: function(){
+                            generer()
+                        }
+                    },
+                    cancel: {
+                        label: "<i class='fa fa-ban'></i> Annuler",
+                        className: 'btn-danger',
+                    }
+                }
+            });
+        };
+
+        function generer() {
+            $('input[name=liste_attestations_fiscales_json]').val(JSON.stringify(get_attestations_fiscales_cochees()));
+            $("#div_actions_attestations_fiscales").hide();
+            $("#div_loader_generation").show();
+            $("#box_introduction").html("")
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_generation_attestations_fiscales' %}",
+                data: $("#form_attestations_fiscales_generation").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $("#div_actions_attestations_fiscales").html(data);
+                    $("#div_actions_attestations_fiscales").show();
+                    $("#div_loader_generation").hide();
+                    $("#box_introduction").html("Les attestations fiscales ont été générées avec succès.");
+                    init_page_selection();
+                },
+                error: function(data) {
+                    $("#box_introduction").html("Une erreur a été rencontrée durant la génération : " + data.responseJSON.erreur);
+                    $("#div_loader_generation").hide();
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        };
+
+        $(document).ready(function() {
+            init_page_parametres();
+        });
+
+    </script>
+
+
+{% endblock scripts %}

@@ -8,7 +8,8 @@ from core.decorators import secure_ajax
 from fiche_famille.views import famille, famille_questionnaire, famille_notes, famille_ajouter, famille_pieces, famille_cotisations, famille_caisse, famille_aides, famille_quotients, famille_divers, \
                             famille_prestations, famille_reglements, famille_consommations, famille_factures, famille_voir_facture, famille_voir_cotisation, famille_abo_factures_email, \
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, famille_sms, \
-                            famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats, famille_voir_mandat, famille_prestations_modele
+                            famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats, famille_voir_mandat, famille_prestations_modele, \
+                            famille_attestations_fiscales, famille_voir_attestation_fiscale
 
 urlpatterns = [
 
@@ -107,6 +108,10 @@ urlpatterns = [
     path('individus/familles/rappels/liste/<int:idfamille>', famille_rappels.Liste.as_view(), name='famille_rappels_liste'),
     path('individus/familles/rappels/voir/<int:idfamille>/<int:idrappel>', famille_voir_rappel.View.as_view(), name='famille_voir_rappel'),
 
+    path('individus/familles/attestations_fiscales/liste/<int:idfamille>', famille_attestations_fiscales.Liste.as_view(), name='famille_attestations_fiscales_liste'),
+    path('individus/familles/attestations_fiscales/supprimer/<int:idfamille>/<int:pk>', famille_attestations_fiscales.Supprimer.as_view(), name='famille_attestations_fiscales_supprimer'),
+    path('individus/familles/attestations_fiscales/voir/<int:idfamille>/<int:idattestation>', famille_voir_attestation_fiscale.View.as_view(), name='famille_voir_attestation_fiscale'),
+
     path('individus/familles/portail/<int:idfamille>', famille_portail.Consulter.as_view(), name='famille_portail'),
     path('individus/familles/portail/modifier/<int:idfamille>', famille_portail.Modifier.as_view(), name='famille_portail_modifier'),
 
@@ -151,5 +156,6 @@ urlpatterns = [
     path('individus/codes_internet_impression_pdf', secure_ajax(famille_portail.Envoyer_codes), name='ajax_codes_internet_envoyer'),
     path('individus/ajax_get_tarifs_prestation', secure_ajax(famille_prestations.Get_tarifs), name='ajax_get_tarifs_prestation'),
     path('individus/ajax_get_activites_prestation', secure_ajax(famille_prestations.Get_activites), name='ajax_get_activites_prestation'),
+    path('individus/attestation_fiscale_impression_pdf', secure_ajax(famille_voir_attestation_fiscale.Impression_pdf), name='ajax_attestation_fiscale_impression_pdf'),
 
 ]

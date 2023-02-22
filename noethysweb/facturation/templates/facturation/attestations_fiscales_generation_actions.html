@@ -1,0 +1,63 @@
+{% load static %}
+
+
+<style>
+    .div_table_attestations_fiscales {
+        display: inline-block;
+        height: 300px;
+        overflow-y: scroll;
+        width: 100%;
+        border: solid 1px #e5e5e5;
+    }
+    .actions {
+        margin: 5px;
+    }
+</style>
+
+<div id="div_table_attestations_fiscales" class="div_table_attestations_fiscales margin-bottom">
+    <table id="table_attestations_fiscales" class="table table-bordered table_attestations_fiscales">
+
+        <thead>
+            <tr>
+                <th>Famille</th>
+                <th>Numéro</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for attestation in attestations_fiscales %}
+                <tr>
+                    <td>{{ attestation.famille.nom }}</td>
+                    <td><center>{{ attestation.numero }}</center></td>
+                    <td class="montant">{{ attestation.total|montant }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+
+
+<div>
+    Que souhaitez-vous faire maintenant ?
+</div>
+<div style="margin: 10px;">
+    <a class="btn btn-app actions" href="{% url 'attestations_fiscales_email' %}"><i class="fa fa-envelope-o"></i> Envoyer par Email</a>
+    <i class="fa fa-caret-right actions"></i>
+    <a class="btn btn-app actions" href="{% url 'attestations_fiscales_impression' %}"><i class="fa fa-print"></i> Imprimer</a>
+</div>
+<div style="font-size: 11px;color: #7a869d;">
+    <ul>
+        <li>Il est conseillé d'effectuer ces actions dans l'ordre indiqué par les flèches noires.</li>
+        <li>Ces actions sont également accessibles depuis le menu Facturation.</li>
+        <li>Les attestations qui viennent d'être générées sont automatiquement sélectionnés.</li>
+    </ul>
+</div>
+
+<div class="buttonHolder pull-right">
+    <a class="btn btn-default" href="{% url 'facturation_toc' %}">Revenir au menu Facturation</a>
+</div>
+
+{# Affichage des messages en mémoire #}
+{% include 'core/messages.html' %}

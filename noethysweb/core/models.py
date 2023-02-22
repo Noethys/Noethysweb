@@ -3599,3 +3599,38 @@ class Tache(models.Model):
 
     def __str__(self):
         return "Tâche du %s" % self.date.strftime('%d/%m/%Y')
+
+
+class LotAttestationsFiscales(models.Model):
+    idlot = models.AutoField(verbose_name="ID", db_column='IDlot', primary_key=True)
+    nom = models.CharField(verbose_name="Nom du lot", max_length=200)
+
+    class Meta:
+        db_table = 'lots_attestations_fiscales'
+        verbose_name = "lot d'attestations fiscales"
+        verbose_name_plural = "lots d'attestations fiscales'"
+
+    def __str__(self):
+        return self.nom if self.nom else "Nouveau lot d'attestations fiscales"
+
+
+class AttestationFiscale(models.Model):
+    idattestation = models.AutoField(verbose_name="ID", db_column='IDattestation', primary_key=True)
+    numero = models.IntegerField(verbose_name="Numéro", blank=True, null=True)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
+    date_edition = models.DateField(verbose_name="Date d'édition")
+    activites = models.CharField(verbose_name="Activités associées", max_length=200, blank=True, null=True)
+    individus = models.CharField(verbose_name="Individus associés", max_length=200, blank=True, null=True)
+    date_debut = models.DateField(verbose_name="Date de début")
+    date_fin = models.DateField(verbose_name="Date de fin")
+    lot = models.ForeignKey(LotAttestationsFiscales, verbose_name="Lot d'attestations fiscales", on_delete=models.PROTECT, blank=True, null=True)
+    total = models.DecimalField(verbose_name="Total", max_digits=10, decimal_places=2, default=0.0)
+    detail = models.TextField(verbose_name="Détail", blank=True, null=True)
+
+    class Meta:
+        db_table = 'attestations_fiscales'
+        verbose_name = "attestation fiscale"
+        verbose_name_plural = "attestations fiscales"
+
+    def __str__(self):
+        return "Attestation fiscale ID%d" % self.idattestation

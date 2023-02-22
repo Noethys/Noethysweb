@@ -314,6 +314,13 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_rappels.Add(code="rappels_impression", titre="Imprimer des lettres de rappel", icone="file-text-o")
     menu_rappels.Add(code="rappels_email", titre="Envoyer des lettres de rappel par Email", icone="file-text-o")
 
+    # Attestations fiscales
+    menu_attestations_fiscales = menu_facturation.Add(titre="Attestations fiscales")
+    menu_attestations_fiscales.Add(code="attestations_fiscales_generation", titre="Génération des attestations fiscales", icone="file-text-o")
+    menu_attestations_fiscales.Add(code="liste_attestations_fiscales", titre="Liste des attestations fiscales", icone="file-text-o")
+    menu_attestations_fiscales.Add(code="attestations_fiscales_impression", titre="Imprimer des attestations fiscales", icone="file-text-o")
+    menu_attestations_fiscales.Add(code="attestations_fiscales_email", titre="Envoyer des attestations fiscales par Email", icone="file-text-o")
+
     # Tarifs
     menu_tarifs = menu_facturation.Add(titre="Tarifs")
     menu_tarifs.Add(code="liste_tarifs", titre="Liste des tarifs", icone="file-text-o")

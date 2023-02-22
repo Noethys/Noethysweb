@@ -10,7 +10,8 @@ from core.decorators import secure_ajax
 from facturation.views import factures_generation, liste_prestations, liste_factures, liste_deductions, liste_soldes, synthese_impayes, \
                                 synthese_prestations, liste_tarifs, rappels_generation, liste_rappels, factures_impression, factures_email, \
                                 rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations, \
-                                lots_prelevements, lots_prelevements_factures
+                                lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
+                                attestations_fiscales_email, liste_attestations_fiscales
 
 urlpatterns = [
 
@@ -31,6 +32,15 @@ urlpatterns = [
     path('facturation/liste_rappels', liste_rappels.Liste.as_view(), name='liste_rappels'),
     path('facturation/rappels_impression', Verifie_ventilation(rappels_impression.Liste.as_view()), name='rappels_impression'),
     path('facturation/rappels_email', Verifie_ventilation(rappels_email.Liste.as_view()), name='rappels_email'),
+
+    # Attestations fiscales
+    path('facturation/attestations_fiscales_generation', Verifie_ventilation(attestations_fiscales_generation.View.as_view()), name='attestations_fiscales_generation'),
+    path('facturation/attestations_fiscales_generation/<int:idfamille>', attestations_fiscales_generation.View.as_view(), name='attestations_fiscales_generation'),
+    path('facturation/liste_attestations_fiscales', liste_attestations_fiscales.Liste.as_view(), name='liste_attestations_fiscales'),
+    path('facturation/attestations_fiscales_impression', Verifie_ventilation(attestations_fiscales_impression.Liste.as_view()), name='attestations_fiscales_impression'),
+    path('facturation/attestations_fiscales_email', Verifie_ventilation(attestations_fiscales_email.Liste.as_view()), name='attestations_fiscales_email'),
+    path('facturation/attestations_fiscales_email/supprimer/<int:pk>', liste_attestations_fiscales.Supprimer.as_view(), name='attestations_fiscales_supprimer'),
+    path('facturation/attestations_fiscales_supprimer_plusieurs/<str:listepk>', liste_attestations_fiscales.Supprimer_plusieurs.as_view(), name='attestations_fiscales_supprimer_plusieurs'),
 
     # Lots PES
     path('facturation/lots_pes/liste', lots_pes.Liste.as_view(), name='lots_pes_liste'),
@@ -88,5 +98,11 @@ urlpatterns = [
     path('facturation/lots_prelevements_impression_pdf', secure_ajax(lots_prelevements.Impression_pdf), name='ajax_lots_prelevements_impression_pdf'),
     path('facturation/ajax_recalculer_prestations', secure_ajax(recalculer_prestations.Recalculer), name='ajax_recalculer_prestations'),
     path('facturation/edition_prestations/generer_pdf', secure_ajax(edition_prestations.Generer_pdf), name='ajax_edition_prestations_generer_pdf'),
+    path('facturation/modifier_lot_attestations_fiscales', secure_ajax(attestations_fiscales_generation.Modifier_lot_attestations_fiscales), name='ajax_modifier_lot_attestations_fiscales'),
+    path('facturation/ajuster_attestations_fiscales', secure_ajax(attestations_fiscales_generation.Ajuster_attestations_fiscales), name='ajax_ajuster_attestations_fiscales'),
+    path('facturation/recherche_attestations_fiscales', secure_ajax(attestations_fiscales_generation.Recherche_attestations_fiscales), name='ajax_recherche_attestations_fiscales'),
+    path('facturation/generation_attestations_fiscales', secure_ajax(attestations_fiscales_generation.Generation_attestations_fiscales), name='ajax_generation_attestations_fiscales'),
+    path('facturation/attestations_fiscales_impression_pdf', secure_ajax(attestations_fiscales_impression.Impression_pdf), name='ajax_attestations_fiscales_impression_pdf'),
+    path('facturation/attestations_fiscales_email_pdf', secure_ajax(attestations_fiscales_email.Impression_pdf), name='ajax_attestations_fiscales_email_pdf'),
 
 ]

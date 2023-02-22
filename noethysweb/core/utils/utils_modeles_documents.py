@@ -584,21 +584,10 @@ class Attestation_fiscale(Categorie):
             (u"Date de début", "10/07/2011", "{DATE_DEBUT}"),
             (u"Date de fin", "21/12/2011", "{DATE_FIN}"),
 
-            (u"Montant facturé", "20.00 €", "{MONTANT_FACTURE}"),
-            (u"Montant réglé", "20.00 €", "{MONTANT_REGLE}"),
-            (u"Montant impayé", "20.00 €", "{MONTANT_IMPAYE}"),
-            (u"Montant facturé en lettres", "Vingt Euros", "{MONTANT_FACTURE_LETTRES}"),
-            (u"Montant réglé en lettres", "Vingt Euros", "{MONTANT_REGLE_LETTRES}"),
-            (u"Montant impayé en lettres", "Vingt Euros", "{MONTANT_IMPAYE_LETTRES}"),
-
-            (u"Texte d'introduction", "Veuillez trouver ici le montant...", "{INTRO}"),
-
-            (u"Détail enfant 1", "10.00 € pour Lucie DUPOND née le 01/02/2005", "{TXT_ENFANT_1}"),
-            (u"Détail enfant 2", "10.00 € pour Lucie DUPOND née le 01/02/2005", "{TXT_ENFANT_2}"),
-            (u"Détail enfant 3", "10.00 € pour Lucie DUPOND née le 01/02/2005", "{TXT_ENFANT_3}"),
-            (u"Détail enfant 4", "10.00 € pour Lucie DUPOND née le 01/02/2005", "{TXT_ENFANT_4}"),
-            (u"Détail enfant 5", "10.00 € pour Lucie DUPOND née le 01/02/2005", "{TXT_ENFANT_5}"),
-            (u"Détail enfant 6", "10.00 € pour Lucie DUPOND née le 01/02/2005", "{TXT_ENFANT_6}"),
+            (u"Numéro", "123", "{NUM_ATTESTATION}"),
+            (u"Nom du lot", "Année 2023", "{NOM_LOT}"),
+            (u"Montant total", "20.00 €", "{TOTAL}"),
+            (u"Montant total en lettres", "Vingt Euros", "{TOTAL_LETTRES}"),
 
         ]
 
