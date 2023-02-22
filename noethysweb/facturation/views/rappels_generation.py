@@ -100,7 +100,11 @@ def Generation_rappels(request):
         return JsonResponse({"html": "ERREUR!", "erreur": "Veuillez renseigner les paramètres manquants"}, status=401)
 
     liste_rappels_coches = json.loads(request.POST.get("liste_rappels_json"))
-    dict_rappels_coches = {int(idfamille): int(idtexte) for idfamille, idtexte in liste_rappels_coches}
+    dict_rappels_coches = {}
+    for idfamille, idtexte in liste_rappels_coches:
+        if not idtexte:
+            return JsonResponse({"html": "ERREUR!", "erreur": "Vous devez sélectionner un texte de rappel pour chaque ligne cochée"}, status=401)
+        dict_rappels_coches[int(idfamille)] = int(idtexte)
 
     # Recherche des factures à générer
     liste_rappels = Get_rappels(form.cleaned_data)

@@ -209,7 +209,8 @@
                     init_page_selection();
                 },
                 error: function(data) {
-                    $("#box_introduction").html("Une erreur a été rencontrée durant la génération.");
+                    $("#box_introduction").html("Une erreur a été rencontrée durant la génération : " + data.responseJSON.erreur);
+                    $("#div_loader_generation").hide();
                     toastr.error(data.responseJSON.erreur);
                 }
             });
