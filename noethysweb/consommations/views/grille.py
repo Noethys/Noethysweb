@@ -49,9 +49,11 @@ def Get_periode(data):
     return data
 
 
-def Maj_tarifs_fratries(activite=None, prestations=[]):
+def Maj_tarifs_fratries(activite=None, prestations=[], liste_IDprestation_existants=[]):
     liste_tarifs_speciaux = Tarif.objects.filter(activite=activite, methode__contains="nbre_ind")
     if liste_tarifs_speciaux:
+        prestations += list(Prestation.objects.filter(pk__in=liste_IDprestation_existants, facture__isnull=True))
+
         # Recherche les individu à modifier
         liste_modifications = []
         liste_id_tarif = [tarif.pk for tarif in liste_tarifs_speciaux]
@@ -314,6 +316,7 @@ def Save_grille(request=None, donnees={}):
     # Enregistrement des prestations
     dict_idprestation = {}
     liste_nouvelles_prestations = []
+    liste_IDprestation_existants = []
     for IDprestation, dict_prestation in donnees["prestations"].items():
 
         prestation_temp = {
@@ -343,8 +346,11 @@ def Save_grille(request=None, donnees={}):
                                          "famille_id": dict_prestation["famille"], "individu_id": dict_prestation["individu"], "objet": "Déduction", "idobjet": deduction.pk, "classe": "Deduction"})
 
         # Modification de prestations
-        if "-" not in IDprestation and dict_prestation.get("dirty", False):
-            Prestation.objects.filter(pk=int(IDprestation)).update(**prestation_temp)
+        if "-" not in IDprestation:
+            liste_IDprestation_existants.append(IDprestation)
+
+            if dict_prestation.get("dirty", False):
+                Prestation.objects.filter(pk=int(IDprestation)).update(**prestation_temp)
 
     # ---------------------------------- CONSOMMATIONS -------------------------------------
 
@@ -442,7 +448,7 @@ def Save_grille(request=None, donnees={}):
 
     # ------------------ TRAITEMENT DES TARIFS SELON NBRE INDIVIDUS PRESENTS -------------------
 
-    Maj_tarifs_fratries(activite=donnees.get("selection_activite", None) or donnees.get("activite", None), prestations=liste_nouvelles_prestations + liste_prestations_suppr)
+    Maj_tarifs_fratries(activite=donnees.get("selection_activite", None) or donnees.get("activite", None), prestations=liste_nouvelles_prestations + liste_prestations_suppr, liste_IDprestation_existants=liste_IDprestation_existants)
 
     # ---------------------------------- MEMOS JOURNALIERS -------------------------------------
 
