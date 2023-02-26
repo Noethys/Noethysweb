@@ -1,3 +1,10 @@
+Version 1.1.2.7 (26/02/2023) :
+
+- Ajout des attestations fiscales
+- Ajout de mots-clés à l'export magnus
+- Améliorations sur la génération des rappels
+- Correction sur le calcul du tarif selon le nombre d'individus
+
 Version 1.1.2.6 (14/02/2023) :
 
 - Correction sur widgets accueil si manquants
