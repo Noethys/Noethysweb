@@ -216,6 +216,7 @@ class Grille_virtuelle():
         self.data_initial["prestations"].update(donnees_retour["nouvelles_prestations"])
 
         donnees_save = {
+            "selection_activite": self.data_initial["selection_activite"],
             "prestations": self.data_initial["prestations"],
             "consommations": self.data_initial["consommations"],
             "suppressions": {
