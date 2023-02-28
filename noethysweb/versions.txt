@@ -1,3 +1,7 @@
+Version 1.1.2.9 (28/02/2023) :
+
+- Correction des évènements à tarif simple
+
 Version 1.1.2.8 (26/02/2023) :
 
 - Correction de la date de référence dans la grille virtuelle
