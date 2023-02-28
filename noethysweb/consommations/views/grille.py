@@ -714,6 +714,7 @@ class Facturation():
                         # Recherche un tarif spécial évènement
                         if evenement:
                             tarif = None
+                            # tarif avancé
                             for tarif_evenement in Tarif.objects.filter(evenement=evenement).order_by("date_debut"):
                                 if self.Recherche_tarif_valide(tarif_evenement, case_tableau):
                                     tarif = tarif_evenement
@@ -722,6 +723,9 @@ class Facturation():
                                     tarif.penalite_pourcentage = tarif_base.penalite_pourcentage
                                     tarif.penalite_label = tarif_base.penalite_label
                                     logger.debug("Un tarif spécial événement a été trouvé : IDtarif " + str(tarif.pk))
+                            # Tarif simple
+                            if not tarif and evenement.montant:
+                                tarif = tarif_base
 
                         # Forfait crédit
                         forfait_credit = getattr(tarif, "credit", None)
