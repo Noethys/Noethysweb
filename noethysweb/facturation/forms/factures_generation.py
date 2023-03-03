@@ -7,6 +7,7 @@ import datetime
 from django import forms
 from django.contrib import messages
 from django.db.models import Max
+from django.conf import settings
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML, Hidden
 from crispy_forms.bootstrap import Field
@@ -51,7 +52,15 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.field_class = 'col-md-10'
 
         # Prochain numéro
-        numero = (Facture.objects.filter(prefixe=None).aggregate(Max('numero')))['numero__max']
+        mode_prochain_numero = getattr(settings, "PROCHAIN_NUMERO_FACTURES", "MAX")
+        if mode_prochain_numero == "MAX":
+            # Mode "MAX"
+            numero = (Facture.objects.filter(prefixe=None).aggregate(Max('numero')))['numero__max']
+        else:
+            # Mode "DERNIER"
+            numero = Facture.objects.filter(prefixe=None).last()
+            numero = numero.numero if numero else None
+
         if not numero: numero = 0
         self.fields["prochain_numero"].initial = numero + 1
 
