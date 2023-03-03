@@ -7,7 +7,7 @@ import logging, datetime
 logger = logging.getLogger(__name__)
 from core.utils import utils_dates, utils_impression, utils_preferences
 from decimal import Decimal
-
+from operator import itemgetter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 # from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, NextPageTemplate
@@ -384,7 +384,7 @@ class Impression(utils_impression.Impression):
                                     listeDictPrestations = []
                                     for dictPrestation in prestations:
                                         listeDictPrestations.append((dictPrestation["label"], dictPrestation))
-                                    listeDictPrestations.sort() 
+                                    listeDictPrestations = sorted(listeDictPrestations, key=itemgetter(0))
                                     
                                     for labelTemp, dictPrestation in listeDictPrestations:
                                         label = dictPrestation["label"]
