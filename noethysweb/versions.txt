@@ -1,3 +1,11 @@
+Version 1.1.3.0 (03/03/2023) :
+
+- Ajout du mode dernier numéro de facture
+- Ajout de la correction d'anomalies au cron
+- Correction du tri des prestations dans les factures
+- Correction de la vérification des périodes dans la grille
+- Correction du filtre prélèvement activé
+
 Version 1.1.2.9 (28/02/2023) :
 
 - Correction des évènements à tarif simple
