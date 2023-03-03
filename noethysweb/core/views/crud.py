@@ -62,6 +62,9 @@ class Liste_commun():
                 # Filtre spécial : Prélèvement actif
                 if "fprelevement_actif" in champ:
                     champ = champ.split(":")[1]
+                    if filtre["condition"] == "FAUX":
+                        conditions &= ~Q(**{champ: True})
+                        filtre["condition"] = ""
 
                 # Filtres génériques
                 if filtre["condition"] == "EGAL": conditions &= Q(**{champ: criteres[0]})
