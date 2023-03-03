@@ -499,7 +499,7 @@ def CompareDict(dict1={}, dict2={}, keys=[]):
 def Facturer(request=None):
     donnees_aller = json.loads(request.POST.get("donnees", "{}"))
     logger.debug("============== Facturation ================")
-    #logger.debug("données aller : " + str(donnees_aller))
+    logger.debug("données aller : " + str(donnees_aller))
     facturation = Facturation(donnees=donnees_aller)
     donnees_retour = facturation.Facturer()
     #logger.debug("données retour : " + str(donnees_retour))
@@ -1038,18 +1038,13 @@ class Facturation():
 
     def Verification_periodes(self, jours_scolaires, jours_vacances, date):
         """ Vérifie si jour est scolaire ou vacances """
-        def EstEnVacances(date_temp=None):
-            for vac_debut, vac_fin in self.donnees["liste_vacances"]:
-                if vac_debut <= str(date_temp) <= vac_fin:
-                    return True
-            return False
         date = utils_dates.ConvertDateENGtoDate(date)
         valide = False
         if jours_scolaires:
-            if not EstEnVacances(date) and str(date.weekday()) in [x for x in jours_scolaires]:
+            if not utils_dates.EstEnVacances(date, self.donnees["liste_vacances"]) and str(date.weekday()) in [x for x in jours_scolaires]:
                 valide = True
         if jours_vacances:
-            if EstEnVacances(date) and str(date.weekday()) in [x for x in jours_vacances]:
+            if utils_dates.EstEnVacances(date, self.donnees["liste_vacances"]) and str(date.weekday()) in [x for x in jours_vacances]:
                 valide = True
         return valide
 
