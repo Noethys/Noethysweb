@@ -128,6 +128,33 @@
             })
         };
 
+        function Actualiser_page() {
+            var table = new $.fn.dataTable.Api('.datatable');
+            var index_page = table.page();
+            table.ajax.reload();
+            table.page(index_page).draw('page');
+        };
+
+        function action_prelevement(num_action) {
+            var listepk = get_coches();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_lots_prelevements_actions' %}",
+                data: {
+                    "action": num_action,
+                    "liste_prelevements": JSON.stringify(listepk),
+                },
+                datatype: "json",
+                success: function (data) {
+                    Actualiser_page();
+                },
+                error: function(data) {
+                    Actualiser_page();
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
     </script>
 
 {% endblock contenu_page %}

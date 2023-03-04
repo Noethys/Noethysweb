@@ -45,7 +45,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_modeles.Add(code="modeles_rappels_liste", titre="Modèles de lettres de rappel", icone="file-text-o")
     menu_modeles.Add(code="modeles_pes_liste", titre="Modèles d'exports vers le Trésor Public", icone="file-text-o")
     menu_modeles.Add(code="modeles_prestations_liste", titre="Modèles de prestations", icone="file-text-o")
-    # menu_modeles.Add(code="modeles_prelevements_liste", titre="Modèles de prélèvements", icone="file-text-o")
+    menu_modeles.Add(code="modeles_prelevements_liste", titre="Modèles de prélèvements", icone="file-text-o")
 
     # Comptabilité
     menu_comptabilite = menu_parametrage.Add(titre="Comptabilité")

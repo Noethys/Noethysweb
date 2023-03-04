@@ -3,15 +3,71 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import json, importlib
+import json, datetime
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Sum, Count
 from django.http import HttpResponseRedirect, JsonResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import PrelevementsLot, Prelevements, Facture, Mandat, FiltreListe
+from core.models import PrelevementsLot, Prelevements, Facture, FiltreListe, Reglement, Payeur, Prestation, Ventilation
 from core.utils import utils_texte
 from facturation.forms.lots_prelevements import Formulaire, Formulaire_creation, Formulaire_piece
+
+
+def Actions(request):
+    """ Appliquer une action """
+    num_action = int(request.POST["action"])
+    liste_pk = json.loads(request.POST["liste_prelevements"])
+
+    # Importation des prélèvements
+    liste_prelevements = Prelevements.objects.select_related("facture", "lot", "lot__modele", "famille").filter(pk__in=liste_pk)
+
+    # Changement de statut du prélèvement
+    if num_action in (1, 2, 3):
+        statuts = {1: "attente", 2: "valide", 3: "refus"}
+        liste_prelevements.update(statut=statuts[num_action])
+
+    # Si règlement automatique
+    if num_action == 2:
+        if liste_prelevements.first().lot.modele.reglement_auto:
+            num_action = 4
+
+    # Régler
+    if num_action == 4:
+        for prelevement in liste_prelevements:
+
+            if not prelevement.lot.modele.mode:
+                return JsonResponse({"erreur": "Vous devez définir un mode de règlement dans le modèle de prélèvements"}, status=401)
+
+            if not prelevement.reglement:
+
+                # Récupération du payeur de la famille
+                dernier_reglement = Reglement.objects.select_related("payeur").filter(famille=prelevement.famille).last()
+                if dernier_reglement:
+                    payeur = dernier_reglement.payeur
+                else:
+                    payeur = Payeur.objects.create(famille=prelevement.famille, nom=prelevement.famille.nom)
+
+                # Création du règlement
+                reglement = Reglement.objects.create(
+                    famille=prelevement.famille, date=datetime.date.today(), mode=prelevement.lot.modele.mode,
+                    montant=prelevement.montant, payeur=payeur, observations="Règlement automatique", compte=prelevement.lot.modele.compte)
+
+                # Associe le règlement à la pièce
+                prelevement.reglement = reglement
+                prelevement.save()
+
+                # Création des ventilations
+                for prestation in Prestation.objects.filter(facture=prelevement.facture):
+                    Ventilation.objects.create(famille=prelevement.famille, reglement=reglement, prestation=prestation, montant=prestation.montant)
+
+    # Ne pas régler
+    if num_action == 5:
+        for prelevement in liste_prelevements:
+            if prelevement.reglement:
+                prelevement.reglement.delete()
+
+    return JsonResponse({"resultat": "ok"})
 
 
 class Page(crud.Page):
@@ -140,11 +196,18 @@ class Consulter(Page, crud.Liste):
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Consulter un lot"
-        context['box_introduction'] = "Vous pouvez ici ajouter des pièces au lot, modifier les paramètres de l'export ou générer le fichier d'export du format sélectionné."
+        context['box_introduction'] = "Vous pouvez ici ajouter des pièces au lot, modifier les paramètres de l'export ou générer le fichier d'export du format sélectionné. Cochez des lignes pour accéder aux actions complémentaires."
         context['onglet_actif'] = "lots_prelevements_liste"
         context['active_checkbox'] = True
         # context["hauteur_table"] = "400px"
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={"idlot": self.kwargs["pk"], "listepk": "xxx"})
+        context['boutons_coches'] = json.dumps([
+            {"id": "bouton_attente", "action": "action_prelevement(1)", "title": "Mettre en attente", "label": "Attente"},
+            {"id": "bouton_valide", "action": "action_prelevement(2)", "title": "Valider", "label": "Valide"},
+            {"id": "bouton_refus", "action": "action_prelevement(3)", "title": "Refuser", "label": "Refus"},
+            {"id": "bouton_regler", "action": "action_prelevement(4)", "title": "Régler", "label": "Régler"},
+            {"id": "bouton_ne_pas_regler", "action": "action_prelevement(5)", "title": "Ne pas régler", "label": "Ne pas régler"},
+        ])
         context['lot'] = PrelevementsLot.objects.select_related("modele").get(pk=self.kwargs["pk"])
         context["stats"] = Prelevements.objects.filter(lot_id=self.kwargs["pk"]).aggregate(total=Sum("montant"), nbre=Count("idprelevement"))
         return context
@@ -163,10 +226,11 @@ class Consulter(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idprelevement", "famille", "montant", "facture", "statut", "sequence", "mandat", "iban", "bic", "actions"]
+            columns = ["check", "idprelevement", "famille", "montant", "facture", "statut", "reglement", "mandat", "iban", "bic", "actions"]
             hidden_columns = ["iban", "bic"]
             processors = {
                 "montant": "Formate_montant",
+                "reglement": "Formate_reglement",
             }
             ordering = ["famille"]
 
@@ -188,6 +252,12 @@ class Consulter(Page, crud.Liste):
 
         def Formate_montant(self, instance, **kwargs):
             return utils_texte.Formate_montant(instance.montant)
+
+        def Formate_reglement(self, instance, **kwargs):
+            if instance.reglement:
+                return "<span class='badge bg-success'><i class='fa fa-check margin-r-5'></i>Oui</span>"
+            else:
+                return "<span class='badge bg-danger'><i class='fa fa-close margin-r-5'></i>Non</span>"
 
 
 class Modifier_piece(Page, crud.Modifier):
