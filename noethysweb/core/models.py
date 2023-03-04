@@ -3235,6 +3235,7 @@ class PesPiece(models.Model):
     prelevement_mandat = models.ForeignKey(Mandat, verbose_name="Mandat", blank=True, null=True, on_delete=models.PROTECT)
     prelevement_sequence = models.CharField(verbose_name="Séquence", blank=True, null=True, choices=[("OOFF", "Prélèvement ponctuel (OOFF)"), ("FRST", "Premier prélèvement d'une série (FRST)"), ("RCUR", "Prélèvement suivant d'une série (RCUR)"), ('FNAL', "Dernier prélèvement d'une série (FNAL)")], max_length=100)
     prelevement_statut = models.CharField(verbose_name="Statut du prélèvement", choices=[("valide", "Valide"), ("refus", "Refus"), ("attente", "Attente")], default="attente", max_length=100)
+    prelevement_reglement = models.ForeignKey(Reglement, verbose_name="Règlement", on_delete=models.SET_NULL, blank=True, null=True)
     titulaire_helios = models.ForeignKey(Individu, verbose_name="Titulaire Hélios", related_name="piece_titulaire_helios", on_delete=models.PROTECT)
     tiers_solidaire = models.ForeignKey(Individu, verbose_name="Tiers solidaire", related_name="piece_tiers_solidaire", on_delete=models.PROTECT, blank=True, null=True)
     type = models.CharField(verbose_name="Type de pièce", choices=[("facture", "Facture"), ("manuel", "Manuel")], max_length=100, default="facture")

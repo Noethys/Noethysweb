@@ -16,5 +16,6 @@
     var url_hidden_columns = "{% url 'ajax_memorise_hidden_columns' %}";
     var url_page_length = "{% url 'ajax_memorise_page_length' %}";
     var nom_view = "{{ view }}";
+    var boutons_coches = {% if boutons_coches %}JSON.parse('{{ boutons_coches|escapejs }}'){% else %}[]{% endif %};
 </script>
 

@@ -3,15 +3,71 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import json, importlib
+import json, importlib, datetime
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Sum, Count
 from django.http import HttpResponseRedirect, JsonResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import PesLot, PesPiece, Facture, Mandat, FiltreListe
+from core.models import PesLot, PesPiece, Facture, FiltreListe, Reglement, Payeur, Ventilation, Prestation
 from core.utils import utils_texte
 from facturation.forms.lots_pes import Formulaire, Formulaire_creation, Formulaire_piece
+
+
+def Actions(request):
+    """ Appliquer une action """
+    num_action = int(request.POST["action"])
+    liste_pk = json.loads(request.POST["liste_pieces"])
+
+    # Importation des pièces
+    liste_pieces = PesPiece.objects.select_related("facture", "lot", "lot__modele", "famille").filter(pk__in=liste_pk)
+
+    # Changement de statut du prélèvement
+    if num_action in (1, 2, 3):
+        statuts = {1: "attente", 2: "valide", 3: "refus"}
+        liste_pieces.update(prelevement_statut=statuts[num_action])
+
+    # Si règlement automatique
+    if num_action == 2:
+        if liste_pieces.first().lot.modele.reglement_auto:
+            num_action = 4
+
+    # Régler
+    if num_action == 4:
+        for piece in liste_pieces:
+
+            if not piece.lot.modele.mode:
+                return JsonResponse({"erreur": "Vous devez définir un mode de règlement dans le modèle de l'export"}, status=401)
+
+            if not piece.prelevement_reglement:
+
+                # Récupération du payeur de la famille
+                dernier_reglement = Reglement.objects.select_related("payeur").filter(famille=piece.famille).last()
+                if dernier_reglement:
+                    payeur = dernier_reglement.payeur
+                else:
+                    payeur = Payeur.objects.create(famille=piece.famille, nom=piece.famille.nom)
+
+                # Création du règlement
+                reglement = Reglement.objects.create(
+                    famille=piece.famille, date=datetime.date.today(), mode=piece.lot.modele.mode,
+                    montant=piece.montant, payeur=payeur, observations="Règlement automatique", compte=piece.lot.modele.compte)
+
+                # Associe le règlement à la pièce
+                piece.prelevement_reglement = reglement
+                piece.save()
+
+                # Création des ventilations
+                for prestation in Prestation.objects.filter(facture=piece.facture):
+                    Ventilation.objects.create(famille=piece.famille, reglement=reglement, prestation=prestation, montant=prestation.montant)
+
+    # Ne pas régler
+    if num_action == 5:
+        for piece in liste_pieces:
+            if piece.prelevement_reglement:
+                piece.prelevement_reglement.delete()
+
+    return JsonResponse({"resultat": "ok"})
 
 
 class Page(crud.Page):
@@ -140,11 +196,18 @@ class Consulter(Page, crud.Liste):
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Consulter un export"
-        context['box_introduction'] = "Vous pouvez ici ajouter des pièces à l'export, modifier les paramètres de l'export ou générer le fichier d'export du format sélectionné."
+        context['box_introduction'] = "Vous pouvez ici ajouter des pièces à l'export, modifier les paramètres de l'export ou générer le fichier d'export du format sélectionné. Cochez des pièces pour accéder aux actions complémentaires."
         context['onglet_actif'] = "lots_pes_liste"
         context['active_checkbox'] = True
         # context["hauteur_table"] = "400px"
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={"idlot": self.kwargs["pk"], "listepk": "xxx"})
+        context['boutons_coches'] = json.dumps([
+            {"id": "bouton_attente", "action": "action_piece(1)", "title": "Mettre en attente", "label": "Attente"},
+            {"id": "bouton_valide", "action": "action_piece(2)", "title": "Valider", "label": "Valide"},
+            {"id": "bouton_refus", "action": "action_piece(3)", "title": "Refuser", "label": "Refus"},
+            {"id": "bouton_regler", "action": "action_piece(4)", "title": "Régler", "label": "Régler"},
+            {"id": "bouton_ne_pas_regler", "action": "action_piece(5)", "title": "Ne pas régler", "label": "Ne pas régler"},
+        ])
         context['lot'] = PesLot.objects.select_related("modele").get(pk=self.kwargs["pk"])
         context["stats"] = PesPiece.objects.filter(lot_id=self.kwargs["pk"]).aggregate(
             total=Sum("montant"), nbre=Count("idpiece"),
@@ -167,11 +230,12 @@ class Consulter(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idpiece", "famille", "montant", "facture", "prelevement", "prelevement_statut", "prelevement_sequence", "mandat", "titulaire_helios", "iban", "bic", "actions"]
+            columns = ["check", "idpiece", "famille", "montant", "facture", "prelevement", "prelevement_statut", "prelevement_reglement", "mandat", "titulaire_helios", "iban", "bic", "actions"]
             hidden_columns = ["iban", "bic"]
             processors = {
                 "montant": "Formate_montant",
                 "prelevement": "Formate_prelevement",
+                "prelevement_reglement": "Formate_reglement",
             }
             ordering = ["famille"]
 
@@ -199,6 +263,12 @@ class Consulter(Page, crud.Liste):
                 return "<span class='badge bg-success'><i class='fa fa-check margin-r-5'></i>Activé</span>"
             else:
                 return "<span class='badge bg-danger'><i class='fa fa-close margin-r-5'></i>Non activé</span>"
+
+        def Formate_reglement(self, instance, **kwargs):
+            if instance.prelevement_reglement:
+                return "<span class='badge bg-success'><i class='fa fa-check margin-r-5'></i>Oui</span>"
+            else:
+                return "<span class='badge bg-danger'><i class='fa fa-close margin-r-5'></i>Non</span>"
 
 
 class Modifier_piece(Page, crud.Modifier):

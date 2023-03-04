@@ -278,10 +278,15 @@ $(document).ready(function() {
     // Si coche ou décoche ligne
     $('.datatable').on('select.dt deselect.dt',  function (evtObj) {
         if(bouton_supprimer) {
-            var bouton = "<button id='bouton_supprimer_plusieurs' class='btn btn-danger pull-left' onclick='supprimer_selections()' title='Supprimer les lignes sélectionnées' tabindex='0' aria-controls='DataTables_Table_0' type='button'><span><i class='fa fa-level-down fa-flip-horizontal margin-r-5'></i>Supprimer</span></button>"
+            var bouton = "<button id='bouton_supprimer_plusieurs' class='btn btn-danger pull-left' style='margin-right: 4px;' onclick='supprimer_selections()' title='Supprimer les lignes sélectionnées' tabindex='0' aria-controls='DataTables_Table_0' type='button'><span><i class='fa fa-level-down fa-flip-horizontal margin-r-5'></i>Supprimer</span></button>"
             if (!($("#bouton_supprimer_plusieurs").length) && (table.rows(".selected").nodes().length)) {$(".barre_menu_dt_gauche").append(bouton)};
             if (($("#bouton_supprimer_plusieurs").length) && !(table.rows(".selected").nodes().length)) {$("#bouton_supprimer_plusieurs").remove()};
         }
+        $.each(boutons_coches, function(index, valeurs) {
+            var bouton = "<button id='" + valeurs.id +"' class='btn btn-default pull-left' style='margin-right: 4px;' onclick='" + valeurs.action + "' title='" + valeurs.title + "' type='button'><span>" + valeurs.label + "</span></button>"
+            if (!($("#" + valeurs.id).length) && (table.rows(".selected").nodes().length)) {$(".barre_menu_dt_gauche").append(bouton)};
+            if (($("#" + valeurs.id).length) && !(table.rows(".selected").nodes().length)) {$("#" + valeurs.id).remove()};
+        });
     });
 
     $('.datatable').on( 'length.dt', function (e, settings, len) {
