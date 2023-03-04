@@ -192,6 +192,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_gestion_individus.Add(code="individus_detaches_liste", titre="Liste des individus détachés", icone="file-text-o")
     menu_gestion_individus.Add(code="individus_doublons_liste", titre="Liste des individus en doublon", icone="file-text-o")
     menu_gestion_individus.Add(code="individus_recherche_avancee", titre="Recherche avancée d'individus", icone="file-text-o")
+    menu_gestion_individus.Add(code="effacer_familles", titre="Effacer des fiches familles", icone="file-text-o")
 
     # Inscriptions
     menu_inscriptions = menu_individus.Add(titre="Inscriptions")

@@ -1,0 +1,93 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+    <div class="row">
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder">
+                        <button class="btn btn-primary" onclick="effacer_1()" title="Effacer les fiches familles cochées"><i class="fa fa-trash-o margin-r-5"></i>Effacer les familles cochées</button>
+                        <a class="btn btn-danger" href="{% url 'individus_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                    </div>
+
+                    {# Liste des familles #}
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+
+    </div>
+
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+
+    <script>
+
+        function effacer_1() {
+
+            let locale = {
+                OK: "OK",
+                CONFIRM: "<i class='fa fa-check'></i> Je confirme l'effacement",
+                CANCEL: "<i class='fa fa-ban'></i> Annuler"
+            };
+            bootbox.addLocale('custom', locale);
+
+            var dialog_effacer_1 = bootbox.prompt({
+                title: "Effacer les fiches familles cochées",
+                message: "<b>Confirmez-vous l'effacement des fiches familles sélectionnées ?</b><br><br>Attention cette action est irréversible !<br>Cochez les 3 cases ci-dessous pour confirmer :<br><br>",
+                inputType: 'checkbox',
+                locale: 'custom',
+                inputOptions: [
+                    {text: "Je comprends que les fiches seront anonymisées", value: '1'},
+                    {text: "Je comprends que cette action est irréversible", value: '2'},
+                    {text: "Je confirme que je souhaite procéder à l'effacement", value: '3'}
+                ],
+                callback: function (resultats) {
+                    if (resultats) {
+                        if (resultats.length === 3) {
+                            bootbox.dialog({
+                                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> L'opération peut durer plusieurs minutes. Veuillez patienter...</p>",
+                                closeButton: false
+                            });
+                            exec_effacer(dialog_effacer_1);
+                        } else {
+                            toastr.warning("L'effacement est annulé : Vous n'avez pas coché les 3 cases !");
+                        }
+                    }
+                }
+            });
+        };
+
+        function exec_effacer(dialogbox) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_effacer_familles' %}",
+                data: {
+                    coches: JSON.stringify(get_coches()),
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                datatype: "json",
+                success: function(data){
+                    window.location.href = data.url;
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                    dialogbox.modal('hide');
+                }
+            })
+        };
+
+    </script>
+
+{% endblock contenu_page %}
