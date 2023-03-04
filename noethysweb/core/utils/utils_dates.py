@@ -17,8 +17,12 @@ LISTE_MOIS_ABREGES = ("janv.", "fév.", "mars", "avril", "mai", "juin", "juil.",
 
 def EstEnVacances(date=None, liste_vacances=None):
     for vacance in liste_vacances:
-        if vacance.date_debut <= date <= vacance.date_fin:
-            return vacance
+        if isinstance(vacance, list):
+            if vacance[0] <= str(date) <= vacance[1]:
+                return vacance
+        else:
+            if vacance.date_debut <= date <= vacance.date_fin:
+                return vacance
     return None
 
 def EstFerie(date=None, liste_feries=None):
