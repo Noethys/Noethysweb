@@ -92,6 +92,7 @@ INSTALLED_APPS = [
     'upload_form',
     'dbbackup',
     'django_crontab',
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 # Ajouté pour permettre l'affichage de la debugtoolbar

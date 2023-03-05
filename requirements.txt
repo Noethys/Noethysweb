@@ -18,6 +18,7 @@ django-upload-form
 django-dbbackup
 django-storages
 django-crontab
+django-cleanup
 dropbox
 numpy
 opencv-python
