@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, json, datetime
+import logging, json, datetime, time
 logger = logging.getLogger(__name__)
 from decimal import Decimal
 from django.urls import reverse_lazy, reverse
@@ -23,10 +23,22 @@ def Effacer_attributs(objet=None, attributs=[]):
 
 
 def Effacer(request):
+    time.sleep(1)
+
     # Récupération des comptes cochés
     coches = json.loads(request.POST.get("coches"))
     if not coches:
         return JsonResponse({"erreur": "Veuillez cocher au moins une famille dans la liste"}, status=401)
+
+    # Vérifications
+    liste_anomalies = []
+    for famille in Famille.objects.filter(pk__in=coches).annotate(derniere_prestation=Max("prestation__date"), derniere_facture=Max("facture__date_edition")):
+        if famille not in liste_anomalies and famille.derniere_prestation and (datetime.date.today() - famille.derniere_prestation).days < 60:
+            liste_anomalies.append(famille)
+        if famille not in liste_anomalies and famille.derniere_facture and (datetime.date.today() - famille.derniere_facture).days < 60:
+            liste_anomalies.append(famille)
+    if liste_anomalies:
+        return JsonResponse({"erreur": "Procédure annulée : Les familles suivantes ont une activité trop récente : %s." % ", ".join([famille.nom for famille in liste_anomalies])}, status=401)
 
     # Effacer les fiches familles
     for famille in Famille.objects.filter(pk__in=coches):
