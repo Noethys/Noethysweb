@@ -104,6 +104,9 @@ class Liste_commun():
                     # Recherche les inscrits ou les présents
                     if filtre["condition"] == "INSCRIT":
                         donnee = "famille" if type_champ == "fpresent" else "individu"
+                        if len(criteres) > 1:
+                            date_reference = criteres[1]
+                            condition &= Q(date_debut__lte=date_reference) & (Q(date_fin__gte=date_reference) | Q(date_fin__isnull=True))
                         resultats = [resultat[donnee] for resultat in Inscription.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
                     if filtre["condition"] == "PRESENT":
                         donnee = "inscription__famille" if type_champ == "fpresent" else "individu"
