@@ -703,8 +703,8 @@ class Facturation():
                 if piece_pes:
                     try:
                         dictCompte["{PES_DATAMATRIX}"] = Calculer_datamatrix(dictCompte)
-                    except:
-                        pass
+                    except Exception as err:
+                        logger.error("Erreur génération datamatrix : %s" % err)
 
                 # Champs de fusion pour Email
                 dictChampsFusion[facture.pk] = {}
@@ -845,9 +845,9 @@ def Calculer_datamatrix(dictCompte):
     # 92-115 : Référence de l'opération (24 caractères)
     id_poste = "%06d" % int(piece_pes.lot.modele.id_poste)
 
-    num_dette = "%015d" % int(dictCompte["facture"].numero)
+    num_dette = str(dictCompte["facture"].numero).zfill(15)
 
-    cle2 = Get_cle_modulo_23((str(piece_pes.lot.exercice)[-2:], str(piece_pes.lot.mois), "00", u"{:0>13}".format(dictCompte["facture"].numero)))
+    cle2 = Get_cle_modulo_23((str(piece_pes.lot.exercice)[-2:], str(piece_pes.lot.mois), "00", str(dictCompte["facture"].numero).zfill(13)))
     alphabet = "ABCDEFGHJKLMNPQRSTUVWXY"
     cle2 = "%02d" % (alphabet.index(cle2) + 1)
 
