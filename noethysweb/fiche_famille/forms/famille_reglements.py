@@ -19,8 +19,8 @@ import datetime
 
 class Formulaire(FormulaireBase, ModelForm):
     date = forms.DateField(label="Date", required=True, widget=DatePickerWidget())
-    mode = forms.ModelChoiceField(label="Mode de règlement", queryset=ModeReglement.objects.all(), widget=Selection_mode_reglement(), required=True)
-    emetteur = forms.ModelChoiceField(label="Emetteur", queryset=Emetteur.objects.all(), widget=Selection_emetteur(), required=False)
+    mode = forms.ModelChoiceField(label="Mode de règlement", queryset=ModeReglement.objects.all().order_by("label"), widget=Selection_mode_reglement(), required=True)
+    emetteur = forms.ModelChoiceField(label="Emetteur", queryset=Emetteur.objects.all().order_by("nom"), widget=Selection_emetteur(), required=False)
     payeur = forms.ModelChoiceField(label="Payeur", queryset=Payeur.objects.none(), widget=Select_avec_commandes(), required=True)
     observations = forms.CharField(label="Observations", widget=forms.Textarea(attrs={'rows': 1}), required=False)
     date_differe = forms.DateField(label="Encaissement différé", required=False, widget=DatePickerWidget())
@@ -41,18 +41,15 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
-        # Définit la famille associée
-        # famille = Famille.objects.get(pk=idfamille)
-
         # Date
         if not self.instance.idreglement:
             self.fields['date'].initial = datetime.date.today()
 
         # Mode
-        self.fields["mode"].choices = [(None, "---------")] + [(mode.pk, mode.label) for mode in ModeReglement.objects.all().order_by("label")]
+        # self.fields["mode"].choices = [(None, "---------")] + [(mode.pk, mode.label) for mode in ModeReglement.objects.all().order_by("label")]
 
         # Emetteur
-        self.fields["emetteur"].choices = [(None, "---------")] + [(emetteur.pk, emetteur.nom) for emetteur in Emetteur.objects.all().order_by("nom")]
+        #self.fields["emetteur"].choices = [(None, "---------")] + [(emetteur.pk, emetteur.nom) for emetteur in Emetteur.objects.all().order_by("nom")]
 
         # Payeur
         self.fields['payeur'].queryset = Payeur.objects.filter(famille_id=idfamille).order_by("nom")
