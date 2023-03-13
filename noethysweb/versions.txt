@@ -1,3 +1,9 @@
+Version 1.1.3.4 (13/03/2023) :
+
+- Ajout de la date de référence dans le filtre Inscrits
+- Ajout des vérifications dans l'effacement des familles
+- Correction du datamatrix avec numdette alpha
+
 Version 1.1.3.3 (05/03/2023) :
 
 - Ajout de l'effacement des familles
