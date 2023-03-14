@@ -16,7 +16,6 @@ setup_windows.bat
 build.bat
 upload.bat
 upload.py
-dist/
 media/
 settings_production.py
 TODO.txt
