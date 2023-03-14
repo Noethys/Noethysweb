@@ -1,3 +1,10 @@
+Version 1.1.3.5 (14/03/2023) :
+
+- Ajout du module Locations
+- Ajout du plugin fullcalendar
+- Ajout du div commandes statique
+- Correction de la sélection de l'émetteur dans le règlement
+
 Version 1.1.3.4 (13/03/2023) :
 
 - Ajout de la date de référence dans le filtre Inscrits
