@@ -84,8 +84,8 @@ LISTE_METHODES_TARIFS = [
     # { "code": "psu_qf", "label":u"Barême PSU selon QF"), "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "taux", "montant_min", "montant_max", "ajustement"), "champs_obligatoires": ("qf_min", "qf_max", "taux"), "tarifs_compatibles": ("BAREME",) },
 
     # Lignes PRODUITS
-    # {"code": "produit_montant_unique", "label":u"Montant unique"), "type": "unitaire", "nbre_lignes_max": 1, "entete": None, "champs": ("montant_unique",), "champs_obligatoires": ("montant_unique",), "tarifs_compatibles": ("PRODUIT",)},
-    # {"code": "produit_proportionnel_quantite", "label":u"Montant proportionnel à la quantité"), "type": "unitaire", "nbre_lignes_max": 1, "entete": None, "champs": ("montant_unique",), "champs_obligatoires": ("montant_unique",), "tarifs_compatibles": ("PRODUIT",)},
+    # {"code": "produit_montant_unique", "label":u"Montant unique", "type": "unitaire", "nbre_lignes_max": 1, "entete": None, "champs": ("montant_unique",), "champs_obligatoires": ("montant_unique",), "tarifs_compatibles": ("PRODUIT",)},
+    # {"code": "produit_proportionnel_quantite", "label":u"Montant proportionnel à la quantité", "type": "unitaire", "nbre_lignes_max": 1, "entete": None, "champs": ("montant_unique",), "champs_obligatoires": ("montant_unique",), "tarifs_compatibles": ("PRODUIT",)},
 
 ]
 
@@ -975,6 +975,63 @@ class MenuLegende(models.Model):
         return self.nom
 
 
+class CategorieProduit(models.Model):
+    idcategorie = models.AutoField(verbose_name="ID", db_column='IDcategorie', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
+
+    class Meta:
+        db_table = 'produits_categories'
+        verbose_name = "Catégorie de produits"
+        verbose_name_plural = "Catégories de produits"
+
+    def __str__(self):
+        return self.nom
+
+
+class Produit(models.Model):
+    idproduit = models.AutoField(verbose_name="ID", db_column='IDproduit', primary_key=True)
+    categorie = models.ForeignKey(CategorieProduit, verbose_name="Catégorie", on_delete=models.PROTECT)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
+    quantite = models.IntegerField(verbose_name="Quantité", default=1)
+    montant = models.DecimalField(verbose_name="Montant", blank=True, null=True, max_digits=10, decimal_places=2, default=0.0)
+    couleur = models.CharField(verbose_name="Couleur", max_length=100, default="#3c8dbc")
+
+    class Meta:
+        db_table = "produits"
+        verbose_name = "produit"
+        verbose_name_plural = "produits"
+
+    def __str__(self):
+        return self.nom
+
+
+class TarifProduit(models.Model):
+    idtarif = models.AutoField(verbose_name="ID", db_column='IDtarif', primary_key=True)
+    produit = models.ForeignKey(Produit, verbose_name="Produit", on_delete=models.CASCADE)
+    date_debut = models.DateField(verbose_name="Date de début")
+    date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
+    description = models.CharField(verbose_name="Description", max_length=400, blank=True, null=True)
+    observations = models.CharField(verbose_name="Observations", max_length=400, blank=True, null=True)
+    tva = models.DecimalField(verbose_name="Taux TVA", max_digits=10, decimal_places=2, blank=True, null=True)
+    label_prestation = models.CharField(verbose_name="Label de la prestation", max_length=300, blank=True, null=True)
+    code_compta = models.CharField(verbose_name="Code comptable", max_length=200, blank=True, null=True)
+    choix_methode = [("produit_montant_unique", "Montant unique"), ("produit_proportionnel_quantite", "Montant proportionnel à la quantité")]
+    methode = models.CharField(verbose_name="Méthode", max_length=200, choices=choix_methode, default="montant_unique")
+    montant = models.DecimalField(verbose_name="Montant", blank=True, null=True, max_digits=10, decimal_places=2, default=0.0)
+
+    class Meta:
+        db_table = 'produits_tarifs'
+        verbose_name = "tarif de produit"
+        verbose_name_plural = "tarifs de produit"
+
+    def __str__(self):
+        return "Tarif de produit ID%d" % self.idtarif if self.idtarif else "Nouveau tarif"
+
+
 class TypeGroupeActivite(models.Model):
     idtype_groupe_activite = models.AutoField(verbose_name="ID", db_column='IDtype_groupe_activite', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=200)
@@ -1376,7 +1433,7 @@ class Tarif(models.Model):
     etats = MultiSelectField(verbose_name="Etats conditionnels", max_length=200, choices=LISTE_ETATS_CONSO, blank=True, null=True)
     label_prestation = models.CharField(verbose_name="Label de la prestation", max_length=300, blank=True, null=True)
     evenement = models.ForeignKey(Evenement, verbose_name="Evénement", blank=True, null=True, on_delete=models.CASCADE)
-    # idproduit = models.IntegerField(db_column='IDproduit', blank=True, null=True)  # Field name made lowercase.
+    produit = models.ForeignKey(Produit, verbose_name="Produit", blank=True, null=True, on_delete=models.CASCADE)
     categories_tarifs = models.ManyToManyField(CategorieTarif, verbose_name="Catégories de tarifs", related_name="tarif_categories_tarifs")
     groupes = models.ManyToManyField(Groupe, verbose_name="Groupes", blank=True, related_name="tarif_groupes")
     cotisations = models.ManyToManyField(TypeCotisation, verbose_name="Cotisations", blank=True, related_name="tarif_cotisations")
@@ -2010,6 +2067,26 @@ class Piece(models.Model):
             return self.type_piece.nom
 
 
+class Location(models.Model):
+    idlocation = models.AutoField(verbose_name="ID", db_column="IDlocation", primary_key=True)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
+    produit = models.ForeignKey(Produit, verbose_name="Produit", on_delete=models.PROTECT)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    date_saisie = models.DateField(verbose_name="Date de saisie", auto_now_add=True)
+    date_debut = models.DateTimeField(verbose_name="Début", blank=True, null=True)
+    date_fin = models.DateTimeField(verbose_name="Fin", blank=True, null=True)
+    quantite = models.IntegerField(verbose_name="Quantité", default=1)
+    serie = models.CharField(verbose_name="Série", max_length=200, blank=True, null=True)
+
+    class Meta:
+        db_table = "locations"
+        verbose_name = "location"
+        verbose_name_plural = "locations"
+
+    def __str__(self):
+        return "Location ID%d" % self.idlocation if self.idlocation else "Nouvelle location"
+
+
 class LotFactures(models.Model):
     idlot = models.AutoField(verbose_name="ID", db_column='IDlot', primary_key=True)
     nom = models.CharField(verbose_name="Nom du lot", max_length=200)
@@ -2095,7 +2172,7 @@ class Facture(models.Model):
 class Prestation(models.Model):
     idprestation = models.AutoField(verbose_name="ID", db_column='IDprestation', primary_key=True)
     date = models.DateField(verbose_name="Date")
-    categorie_choix = [("cotisation", "Adhésion"), ("consommation", "Consommation"), ("autre", "Autre")]
+    categorie_choix = [("cotisation", "Adhésion"), ("consommation", "Consommation"), ("location", "Location"), ("autre", "Autre")]
     categorie = models.CharField(verbose_name="Catégorie", max_length=100, choices=categorie_choix, default="autre")
     label = models.CharField(verbose_name="Label", max_length=200)
     montant_initial = models.DecimalField(verbose_name="Montant initial", max_digits=10, decimal_places=2, default=0.0)
@@ -2119,6 +2196,7 @@ class Prestation(models.Model):
     # iddonnee = models.IntegerField(db_column='IDdonnee', blank=True, null=True)  # Field name made lowercase.
     code_produit_local = models.CharField(verbose_name="Code produit local", max_length=200, blank=True, null=True)
     tarif_ligne = models.ForeignKey(TarifLigne, verbose_name="Ligne de tarif", on_delete=models.SET_NULL, blank=True, null=True)
+    location = models.ForeignKey(Location, verbose_name="Location", on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         db_table = 'prestations'
@@ -2367,7 +2445,7 @@ class QuestionnaireReponse(models.Model):
     individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.CASCADE)
     famille = models.ForeignKey(Famille, verbose_name="Famille", blank=True, null=True, on_delete=models.CASCADE)
     reponse = models.CharField(verbose_name="Réponse", max_length=450, blank=True, null=True)
-    # type = models.CharField(verbose_name="Type", max_length=200, choices=LISTE_CATEGORIES_QUESTIONNAIRES)
+    # type = models.CharField(verbose_name="Type", max_length=200, choices=LISTE_CATEGORIES_QUESTIONNAIRES, blank=True, null=True)
     donnee = models.IntegerField(verbose_name="Donnée associée", db_column='IDdonnee', blank=True, null=True)
 
     class Meta:
@@ -2400,25 +2478,6 @@ class QuestionnaireReponse(models.Model):
         if self.question.controle in ("decimal", "montant"):
             return float(decimal.Decimal(self.reponse))
         return ""
-
-
-
-# class QuestionnaireFiltre(models.Model):
-#     idfiltre = models.AutoField(verbose_name="ID", db_column='IDfiltre', primary_key=True)
-#     idquestion = models.IntegerField(db_column='IDquestion', blank=True, null=True)  # Field name made lowercase.
-#     categorie = models.CharField(blank=True, null=True)
-#     choix = models.CharField(blank=True, null=True)
-#     criteres = models.CharField(blank=True, null=True)
-#     idtarif = models.IntegerField(db_column='IDtarif', blank=True, null=True)  # Field name made lowercase.
-#     iddonnee = models.IntegerField(db_column='IDdonnee', blank=True, null=True)  # Field name made lowercase.
-#
-#     class Meta:
-#         db_table = 'questionnaire_filtres'
-#         verbose_name = "filtre de questionnaire"
-#         verbose_name_plural = "filtres de questionnaires"
-#
-#     def __str__(self):
-#         return self.nom
 
 
 class MemoJournee(models.Model):
@@ -3636,3 +3695,19 @@ class AttestationFiscale(models.Model):
 
     def __str__(self):
         return "Attestation fiscale ID%d" % self.idattestation
+
+
+# class LocationsDemandes(models.Model):
+#     iddemande = models.AutoField(db_column='IDdemande', primary_key=True, blank=True, null=True)  # Field name made lowercase.
+#     date = models.DateTimeField(blank=True, null=True)
+#     idfamille = models.IntegerField(db_column='IDfamille', blank=True, null=True)  # Field name made lowercase.
+#     observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+#     categories = models.CharField(blank=True, null=True)
+#     produits = models.CharField(blank=True, null=True)
+#     statut = models.CharField(blank=True, null=True)
+#     motif_refus = models.CharField(blank=True, null=True)
+#     idlocation = models.IntegerField(db_column='IDlocation', blank=True, null=True)  # Field name made lowercase.
+#
+#     class Meta:
+#         managed = False
+#         db_table = 'locations_demandes'

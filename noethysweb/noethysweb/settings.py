@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'fiche_famille.apps.FicheFamille',
     'fiche_individu.apps.FicheIndividu',
     'individus.apps.Individus',
+    'locations.apps.Locations',
     'cotisations.apps.Cotisations',
     'consommations.apps.Consommations',
     'facturation.apps.Facturation',
@@ -249,6 +250,7 @@ CSP_IMG_SRC = (
 
 CSP_FONT_SRC = (
     "'self'",
+    "data:",
     "https://fonts.gstatic.com",
 )
 

@@ -291,6 +291,9 @@ class Formulaire(FormulaireBase, ModelForm):
         if not self.instance.pk:
             self.fields['etats'].initial = ["reservation", "present", "absenti"]
 
+        # Méthode
+        self.fields["methode"].choices = [(dict_methode["code"], dict_methode["label"]) for dict_methode in LISTE_METHODES_TARIFS if "PRODUIT" not in dict_methode["tarifs_compatibles"]]
+
         # Paramètres du tarif
         if self.instance.methode:
             liste_colonnes = []

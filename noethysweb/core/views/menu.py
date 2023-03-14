@@ -126,6 +126,11 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_portail.Add(code="images_fond_liste", titre="Banque d'images de fond", icone="file-text-o")
     menu_portail.Add(code="portail_documents_liste", titre="Documents à télécharger", icone="file-text-o")
 
+    # Locations
+    menu_locations = menu_parametrage.Add(titre="Locations")
+    menu_locations.Add(code="categories_produits_liste", titre="Catégories de produits", icone="file-text-o")
+    menu_locations.Add(code="produits_liste", titre="Produits", icone="file-text-o")
+
 
     # ------------------------------------ Outils ------------------------------------
     menu_outils = menu.Add(code="outils_toc", titre="Outils", icone="wrench")
@@ -248,6 +253,20 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_photos_individus.Add(code="importation_photos", titre="Importer des photos individuelles", icone="file-text-o")
 
 
+    # ------------------------------------ Locations ------------------------------------
+    menu_locations = menu.Add(code="locations_toc", titre="Locations", icone="shopping-cart")
+
+    # Etat
+    menu_etat_locations = menu_locations.Add(titre="Etat des locations")
+    menu_etat_locations.Add(code="locations_liste", titre="Liste des locations", icone="file-text-o")
+    menu_etat_locations.Add(code="locations_impression", titre="Imprimer des locations", icone="file-text-o")
+    menu_etat_locations.Add(code="locations_email", titre="Envoyer des locations par Email", icone="file-text-o")
+
+    # Gestion
+    menu_gestion_locations = menu_locations.Add(titre="Gestion des locations")
+    menu_gestion_locations.Add(code="planning_locations", titre="Planning des locations", icone="file-text-o")
+
+
     # ------------------------------------ Cotisations ------------------------------------
     menu_cotisations = menu.Add(code="cotisations_toc", titre="Adhésions", icone="folder-o")
 
@@ -277,6 +296,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_gestion_conso.Add(code="edition_liste_conso", titre="Edition de la liste des consommations", icone="file-text-o")
     menu_gestion_conso.Add(code="gestionnaire_conso", titre="Gestionnaire des consommations", icone="file-text-o")
     menu_gestion_conso.Add(code="pointeuse_conso", titre="Pointeuse en temps réel", icone="file-text-o")
+    # menu_gestion_conso.Add(code="pointeuse_barcodes", titre="Pointeuse avec codes-barres", icone="file-text-o")
     menu_gestion_conso.Add(code="suivi_consommations", titre="Suivi des consommations", icone="file-text-o")
     menu_gestion_conso.Add(code="liste_consommations", titre="Liste des consommations", icone="file-text-o")
 

@@ -22,7 +22,8 @@ from parametrage.views import organisateur, structures, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
     portail_parametres, types_regimes_alimentaires, assureurs, categories_compte_internet, modeles_pes, \
     types_consentements, unites_consentements, articles, images_articles, albums, images_fond, portail_documents, portail_parametres_renseignements, \
-    configurations_sms, perceptions, modeles_prelevements, taches_recurrentes, modeles_prestations
+    configurations_sms, perceptions, modeles_prelevements, taches_recurrentes, modeles_prestations, \
+    categories_produits, produits, produits_tarifs
 
 
 urlpatterns = [
@@ -484,6 +485,23 @@ urlpatterns = [
     path('parametrage/portail_documents/ajouter', portail_documents.Ajouter.as_view(), name='portail_documents_ajouter'),
     path('parametrage/portail_documents/modifier/<int:pk>', portail_documents.Modifier.as_view(), name='portail_documents_modifier'),
     path('parametrage/portail_documents/supprimer/<int:pk>', portail_documents.Supprimer.as_view(), name='portail_documents_supprimer'),
+
+    # Catégories de produits
+    path('parametrage/categories_produits/liste', categories_produits.Liste.as_view(), name='categories_produits_liste'),
+    path('parametrage/categories_produits/ajouter', categories_produits.Ajouter.as_view(), name='categories_produits_ajouter'),
+    path('parametrage/categories_produits/modifier/<int:pk>', categories_produits.Modifier.as_view(), name='categories_produits_modifier'),
+    path('parametrage/categories_produits/supprimer/<int:pk>', categories_produits.Supprimer.as_view(), name='categories_produits_supprimer'),
+
+    # Produits
+    path('parametrage/produits/liste', produits.Liste.as_view(), name='produits_liste'),
+    path('parametrage/produits/ajouter', produits.Ajouter.as_view(), name='produits_ajouter'),
+    path('parametrage/produits/modifier/<int:pk>', produits.Modifier.as_view(), name='produits_modifier'),
+    path('parametrage/produits/supprimer/<int:pk>', produits.Supprimer.as_view(), name='produits_supprimer'),
+
+    path('parametrage/produits/tarifs_produits/liste/<int:idproduit>', produits_tarifs.Liste.as_view(), name='produits_tarifs_liste'),
+    path('parametrage/produits/tarifs_produits/ajouter/<int:idproduit>', produits_tarifs.Ajouter.as_view(), name='produits_tarifs_ajouter'),
+    path('parametrage/produits/tarifs_produits/modifier/<int:idproduit>/<int:pk>', produits_tarifs.Modifier.as_view(), name='produits_tarifs_modifier'),
+    path('parametrage/produits/tarifs_produits/supprimer/<int:idproduit>/<int:pk>', produits_tarifs.Supprimer.as_view(), name='produits_tarifs_supprimer'),
 
 
     # AJAX

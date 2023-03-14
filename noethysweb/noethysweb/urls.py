@@ -18,6 +18,7 @@ urlpatterns = [
     path(settings.URL_BUREAU, include('fiche_famille.urls')),
     path(settings.URL_BUREAU, include('fiche_individu.urls')),
     path(settings.URL_BUREAU, include('cotisations.urls')),
+    path(settings.URL_BUREAU, include('locations.urls')),
     path(settings.URL_BUREAU, include('consommations.urls')),
     path(settings.URL_BUREAU, include('facturation.urls')),
     path(settings.URL_BUREAU, include('reglements.urls')),

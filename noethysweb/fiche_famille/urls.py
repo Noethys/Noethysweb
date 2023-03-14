@@ -9,7 +9,7 @@ from fiche_famille.views import famille, famille_questionnaire, famille_notes, f
                             famille_prestations, famille_reglements, famille_consommations, famille_factures, famille_voir_facture, famille_voir_cotisation, famille_abo_factures_email, \
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, famille_sms, \
                             famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats, famille_voir_mandat, famille_prestations_modele, \
-                            famille_attestations_fiscales, famille_voir_attestation_fiscale
+                            famille_attestations_fiscales, famille_voir_attestation_fiscale, famille_locations, famille_voir_location
 
 urlpatterns = [
 
@@ -37,6 +37,13 @@ urlpatterns = [
     path('individus/familles/pieces/supprimer/<int:idfamille>/<int:pk>', famille_pieces.Supprimer.as_view(), name='famille_pieces_supprimer'),
     path('individus/familles/pieces/supprimer_plusieurs/<int:idfamille>/<str:listepk>', famille_pieces.Supprimer_plusieurs.as_view(), name='famille_pieces_supprimer_plusieurs'),
     path('individus/familles/pieces/saisie_rapide/<int:idfamille>/<int:idtype_piece>/<int:idindividu>', famille_pieces.Saisie_rapide.as_view(), name='famille_pieces_saisie_rapide'),
+
+    path('individus/familles/locations/liste/<int:idfamille>', famille_locations.Liste.as_view(), name='famille_locations_liste'),
+    path('individus/familles/locations/ajouter/<int:idfamille>', famille_locations.Ajouter.as_view(), name='famille_locations_ajouter'),
+    path('individus/familles/locations/modifier/<int:idfamille>/<int:pk>', famille_locations.Modifier.as_view(), name='famille_locations_modifier'),
+    path('individus/familles/locations/supprimer/<int:idfamille>/<int:pk>', famille_locations.Supprimer.as_view(), name='famille_locations_supprimer'),
+    path('individus/familles/locations/supprimer_plusieurs/<int:idfamille>/<str:listepk>', famille_locations.Supprimer_plusieurs.as_view(), name='famille_locations_supprimer_plusieurs'),
+    path('individus/familles/locations/voir/<int:idfamille>/<int:idlocation>', famille_voir_location.View.as_view(), name='famille_voir_location'),
 
     path('individus/familles/cotisations/liste/<int:idfamille>', famille_cotisations.Liste.as_view(), name='famille_cotisations_liste'),
     path('individus/familles/cotisations/ajouter/<int:idfamille>', famille_cotisations.Ajouter.as_view(), name='famille_cotisations_ajouter'),
@@ -157,5 +164,7 @@ urlpatterns = [
     path('individus/ajax_get_tarifs_prestation', secure_ajax(famille_prestations.Get_tarifs), name='ajax_get_tarifs_prestation'),
     path('individus/ajax_get_activites_prestation', secure_ajax(famille_prestations.Get_activites), name='ajax_get_activites_prestation'),
     path('individus/attestation_fiscale_impression_pdf', secure_ajax(famille_voir_attestation_fiscale.Impression_pdf), name='ajax_attestation_fiscale_impression_pdf'),
+    path('individus/location_impression_pdf', secure_ajax(famille_voir_location.Impression_pdf), name='ajax_location_impression_pdf'),
+    path('individus/location_get_tarif_location', secure_ajax(famille_locations.Get_tarif_location), name='ajax_get_tarif_location'),
 
 ]

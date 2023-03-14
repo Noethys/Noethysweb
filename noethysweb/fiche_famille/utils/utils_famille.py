@@ -8,6 +8,7 @@ LISTE_ONGLETS = [
     {"code": "resume", "label": "Résumé", "icone": "fa-home", "url": "famille_resume"},
     {"code": "questionnaire", "label": "Questionnaire", "icone": "fa-question", "url": "famille_questionnaire"},
     {"code": "pieces", "label": "Pièces", "icone": "fa-file-text-o", "url": "famille_pieces_liste"},
+    {"code": "locations", "label": "Locations", "icone": "fa-shopping-cart", "url": "famille_locations_liste"},
     {"code": "cotisations", "label": "Adhésions", "icone": "fa-folder-o", "url": "famille_cotisations_liste"},
     {"code": "caisse", "label": "Caisse", "icone": "fa-institution ", "url": "famille_caisse"},
     {"code": "aides", "label": "Aides", "icone": "fa-euro", "url": "famille_aides_liste"},
