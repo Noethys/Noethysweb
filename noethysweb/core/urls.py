@@ -4,7 +4,7 @@
 
 from django.urls import include, path
 from django.contrib.auth import views as auth_views
-from core.views import login, accueil, accueil_configuration, recherche, base, profil_configuration, profil_utilisateur, change_password_utilisateur
+from core.views import login, accueil, accueil_configuration, recherche, base, profil_configuration, profil_utilisateur, change_password_utilisateur, select_avec_commandes_advanced
 from core.forms import filtre_liste
 from core.decorators import secure_ajax
 from core.utils import utils_graphique_individus
@@ -37,6 +37,7 @@ urlpatterns = [
     path('core/modifier_profil_configuration', secure_ajax(profil_configuration.Modifier_profil_configuration), name='ajax_modifier_profil_configuration'),
     path('core/graphique_individus_get_parametres', secure_ajax(utils_graphique_individus.Get_parametres), name='ajax_graphique_individus_get_parametres'),
     path('core/graphique_individus_set_parametres', secure_ajax(utils_graphique_individus.Set_parametres), name='ajax_graphique_individus_set_parametres'),
+    path('core/select_avec_commandes_advanced', secure_ajax(select_avec_commandes_advanced.Modifier), name='ajax_select_avec_commandes_advanced'),
 
 ]
 

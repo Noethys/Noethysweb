@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'facturation.apps.Facturation',
     'outils.apps.Outils',
     'reglements.apps.Reglements',
+    'comptabilite.apps.Comptabilite',
     'aide.apps.Aide',
     'portail.apps.Portail',
 

@@ -1,0 +1,118 @@
+{% extends "core/crud/liste_in_box.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/moment/moment-with-locales.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/chartjs/chart.umd.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/chartjs/chartjs-adapter-moment.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/chartjs/chartjs-plugin-annotation.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+    {% embed 'core/box.html' %}
+        {% block box_titre %}{{ box_titre }}{% endblock %}
+        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+        {% block box_contenu %}
+
+            {# Sélection de la catégorie #}
+            <p>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">{{ label_categorie }}</span>
+                    </div>
+                    <select id="choix_categorie" class="form-control">
+                        {% for code, label in liste_categories %}
+                            <option {% if code == categorie %}selected{% endif %} value="{% if not code %}{% url 'suivi_tresorerie' %}{% else %}{% url 'suivi_tresorerie' categorie=code %}{% endif %}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </p>
+
+            <script>
+                function On_change_categorie() {
+                    window.location.href=$(this).val();
+                }
+                $(document).ready(function() {
+                    $('#choix_categorie').change(On_change_categorie);
+                });
+            </script>
+
+
+
+            {# Chart Inscriptions #}
+            <canvas id="chart_inscriptions" width="400" height="165"></canvas>
+            <script>
+                let data_graphique = {labels: [], valeurs: []}
+                {% for item in donnees %}
+                    data_graphique.labels.push(moment("{{ item.0|date:'Y-m-d' }}"))
+                    data_graphique.valeurs.push(parseFloat({{ item.1 }}))
+                {% endfor %}
+
+                moment.locale('fr');
+
+                var ctx_inscriptions = document.getElementById('chart_inscriptions').getContext('2d');
+                var chart_inscriptions = new Chart(ctx_inscriptions, {
+                    type: 'line',
+                    data: {
+                        labels: data_graphique.labels,
+                        datasets: [{
+                            label: data_graphique.labels,
+                            data: data_graphique.valeurs,
+                            stepped: true,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        title: {
+                            display: false
+                        },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                gridLines: {
+                                    display: true
+                                },
+                                time: {
+                                    unit: 'day',
+                                    tooltipFormat: 'D MMM, YYYY',
+                                    displayFormats: {
+                                        day: 'D MMM'
+                                    },
+                                    distribution: 'series'
+                                },
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false,
+                            },
+                            tooltip: {
+                                enabled: false,
+                            },
+                            annotation: {
+                                annotations: {
+                                    line1: {
+                                        type: "line",
+                                        xMin: moment("{% now "Y-m-d" %}"),
+                                        xMax: moment("{% now "Y-m-d" %}"),
+                                        borderWidth: 1,
+                                        borderColor: "red",
+                                        borderDash: [2, 6],
+                                    }
+                                }
+                            },
+                        },
+                    }
+                });
+            </script>
+
+        {% endblock box_contenu %}
+        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+    {% endembed %}
+{% endblock contenu_page %}

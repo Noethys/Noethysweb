@@ -1,0 +1,159 @@
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock %}
+
+<style>
+    .input-group-nowrap {
+        -webkit-flex-wrap: nowrap;
+        -ms-flex-wrap: nowrap;
+        flex-wrap: nowrap;
+    }
+</style>
+
+<div class="input-group input-group-nowrap">
+    {% if icon %}
+        <div class="input-group-prepend">
+            <i class="fa {{ icon }} input-group-text"></i>
+        </div>
+    {% endif %}
+    <select id="{{ id }}" name="{{ name }}" data-minimum-input-length="0" data-width="100%" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2">
+        {% for choix in choices %}
+            <option value="{{ choix.0 }}" {% if value == choix.0 %}selected{% endif %}>{{ choix.1 }}</option>
+        {% endfor %}
+    </select>
+    <div class="input-group-append">
+        <button id="{{ id }}_bouton_ajouter" title="Ajouter" class="btn btn-default input-group-text" type="button"><i class="fa fa-plus"></i></button>
+        <button id="{{ id }}_bouton_modifier" title="Modifier" class="btn btn-default input-group-text" type="button"><i class="fa fa-pencil"></i></button>
+        <button id="{{ id }}_bouton_supprimer" title="Supprimer" class="btn btn-default input-group-text" type="button"><i class="fa fa-trash"></i></button>
+    </div>
+</div>
+
+{# Modal de modification #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}{{ id }}_modal_modification{% endblock %}
+    {% block modal_titre %}{% endblock %}
+    {% block modal_classe %}modal-lg{% endblock %}
+    {% block modal_body %}
+        <div id="id_div_form_{{ id }}">
+        </div>
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" onclick="valider_form_{{ id }}()"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+
+    {% endblock %}
+{% endembed %}
+
+<script>
+
+    {% include 'core/csrftoken.html' %}
+
+    $(document).ready(function() {
+
+        $("#{{ id }}_bouton_ajouter").on("click",function(event) {
+            $('#{{ id }}_modal_modification .modal-title').html("Ajouter {{ nom_objet }}");
+            get_form_{{ id }}("ajouter", "")
+        });
+
+        $("#{{ id }}_bouton_modifier").on("click",function(event) {
+            var selection = $('#{{ id }}').find('option:selected');
+            if (selection.val() === '') {
+                toastr.error("Vous n'avez sélectionné aucun élément à modifier");
+                return false;
+            }
+            $('#{{ id }}_modal_modification .modal-title').html("Modifier {{ nom_objet }}");
+            get_form_{{ id }}("modifier", selection.val())
+        });
+
+        $("#{{ id }}_bouton_supprimer").on("click",function(event){
+            var selection = $('#{{ id }}').find('option:selected');
+            if (selection.val() === '') {
+                toastr.error("Vous n'avez sélectionné aucun élément à supprimer");
+                return false;
+            }
+            bootbox.dialog({
+                title: "Confirmation",
+                message: "Confirmez-vous la suppression ?",
+                buttons: {
+                    ok: {
+                        label: "<i class='fa fa-trash'></i> Supprimer",
+                        className: 'btn-warning',
+                        callback: function(){
+                            supprimer_{{ id }}(selection.val())
+                        }
+                    },
+                    cancel: {
+                        label: "<i class='fa fa-ban'></i> Annuler",
+                        className: 'btn-danger',
+                    }
+                }
+            });
+        });
+
+        function supprimer_{{ id }}(pk) {
+            $.ajax({
+                url: "{% url url_ajax %}",
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    action: "supprimer",
+                    module_form: "{{ module_form }}",
+                    champ_nom: "{{ champ_nom }}",
+                    pk: pk,
+                },
+                success: function (data) {
+                    $("#{{ id }} option[value='" + data.id + "']").remove();
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
+        function get_form_{{ id }}(action, pk) {
+            $.ajax({
+                url: "{% url url_ajax %}",
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    action: action,
+                    module_form: "{{ module_form }}",
+                    champ_nom: "{{ champ_nom }}",
+                    pk: pk,
+                },
+                success: function (data) {
+                    $("#{{ id_form }}").remove();
+                    $("#id_div_form_{{ id }}").append(data['form_html']);
+                    $("#{{ id }}_modal_modification").modal("show");
+                }
+            });
+        };
+    });
+
+    function valider_form_{{ id }}() {
+        $.ajax({
+            type: "POST",
+            url: "{% url url_ajax %}",
+            data: $("#{{ id_form }}").serialize() + "&module_form={{ module_form }}"+ "&champ_nom={{ champ_nom }}",
+            datatype: "json",
+            success: function(data){
+                if (data.action === "ajouter") {
+                    $("#{{ id }}").append("<option value='" + data.id + "'>" + data.nom + "</option>").val(data.id);
+                }
+                if (data.action === "modifier") {
+                    $('#{{ id }}').find('option:selected').text(data.nom).select2().trigger('change');
+                }
+                $("#{{ id }}_modal_modification").modal("hide");
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        });
+    }
+
+</script>

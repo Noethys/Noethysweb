@@ -38,7 +38,6 @@ class Liste_commun():
 
     def Get_condition_structure(self):
         """ Retourne une condition sql pour sélectionner les données associées à une structure ou toutes les structures """
-        # condition = Q(structure=self.request.user.structure_actuelle) | Q(structure__isnull=True)
         condition = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
         return condition
 
@@ -200,6 +199,11 @@ class BaseView():
         if next:
             return next
         return reverse_lazy(self.url_liste)
+
+    def Get_condition_structure(self):
+        """ Retourne une condition sql pour sélectionner les données associées à une structure ou toutes les structures """
+        condition = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
+        return condition
 
     def save_historique(self, instance=None, titre=None, detail=None, form=None):
         # Titre

@@ -23,7 +23,7 @@ from parametrage.views import organisateur, structures, \
     portail_parametres, types_regimes_alimentaires, assureurs, categories_compte_internet, modeles_pes, \
     types_consentements, unites_consentements, articles, images_articles, albums, images_fond, portail_documents, portail_parametres_renseignements, \
     configurations_sms, perceptions, modeles_prelevements, taches_recurrentes, modeles_prestations, \
-    categories_produits, produits, produits_tarifs
+    categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets
 
 
 urlpatterns = [
@@ -166,6 +166,36 @@ urlpatterns = [
     path('parametrage/emetteurs/ajouter', emetteurs.Ajouter.as_view(), name='emetteurs_ajouter'),
     path('parametrage/emetteurs/modifier/<int:pk>', emetteurs.Modifier.as_view(), name='emetteurs_modifier'),
     path('parametrage/emetteurs/supprimer/<int:pk>', emetteurs.Supprimer.as_view(), name='emetteurs_supprimer'),
+
+    # Postes analytiques
+    path('parametrage/postes_analytiques/liste', postes_analytiques.Liste.as_view(), name='postes_analytiques_liste'),
+    path('parametrage/postes_analytiques/ajouter', postes_analytiques.Ajouter.as_view(), name='postes_analytiques_ajouter'),
+    path('parametrage/postes_analytiques/modifier/<int:pk>', postes_analytiques.Modifier.as_view(), name='postes_analytiques_modifier'),
+    path('parametrage/postes_analytiques/supprimer/<int:pk>', postes_analytiques.Supprimer.as_view(), name='postes_analytiques_supprimer'),
+
+    # Comptes comptables
+    path('parametrage/comptes_comptables/liste', comptes_comptables.Liste.as_view(), name='comptes_comptables_liste'),
+    path('parametrage/comptes_comptables/ajouter', comptes_comptables.Ajouter.as_view(), name='comptes_comptables_ajouter'),
+    path('parametrage/comptes_comptables/modifier/<int:pk>', comptes_comptables.Modifier.as_view(), name='comptes_comptables_modifier'),
+    path('parametrage/comptes_comptables/supprimer/<int:pk>', comptes_comptables.Supprimer.as_view(), name='comptes_comptables_supprimer'),
+
+    # Catégories comptables
+    path('parametrage/categories_comptables/liste', categories_comptables.Liste.as_view(), name='categories_comptables_liste'),
+    path('parametrage/categories_comptables/ajouter', categories_comptables.Ajouter.as_view(), name='categories_comptables_ajouter'),
+    path('parametrage/categories_comptables/modifier/<int:pk>', categories_comptables.Modifier.as_view(), name='categories_comptables_modifier'),
+    path('parametrage/categories_comptables/supprimer/<int:pk>', categories_comptables.Supprimer.as_view(), name='categories_comptables_supprimer'),
+
+    # Tiers
+    path('parametrage/tiers/liste', tiers.Liste.as_view(), name='tiers_liste'),
+    path('parametrage/tiers/ajouter', tiers.Ajouter.as_view(), name='tiers_ajouter'),
+    path('parametrage/tiers/modifier/<int:pk>', tiers.Modifier.as_view(), name='tiers_modifier'),
+    path('parametrage/tiers/supprimer/<int:pk>', tiers.Supprimer.as_view(), name='tiers_supprimer'),
+
+    # Budgets
+    path('parametrage/budgets/liste', budgets.Liste.as_view(), name='budgets_liste'),
+    path('parametrage/budgets/ajouter', budgets.Ajouter.as_view(), name='budgets_ajouter'),
+    path('parametrage/budgets/modifier/<int:pk>', budgets.Modifier.as_view(), name='budgets_modifier'),
+    path('parametrage/budgets/supprimer/<int:pk>', budgets.Supprimer.as_view(), name='budgets_supprimer'),
 
     # Lots de factures
     path('parametrage/lots_factures/liste', lots_factures.Liste.as_view(), name='lots_factures_liste'),

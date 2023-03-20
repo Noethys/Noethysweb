@@ -3711,3 +3711,198 @@ class AttestationFiscale(models.Model):
 #     class Meta:
 #         managed = False
 #         db_table = 'locations_demandes'
+
+
+class ComptaAnalytique(models.Model):
+    idanalytique = models.AutoField(verbose_name="ID", db_column="IDanalytique", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    abrege = models.CharField(verbose_name="Abrégé", max_length=50, blank=True, null=True)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = "compta_analytiques"
+        verbose_name = "poste analytique"
+        verbose_name_plural = "postes analytiques"
+
+    def __str__(self):
+        return self.nom if self.nom else "Nouveau poste analytique"
+
+
+class ComptaCompteComptable(models.Model):
+    idcompte = models.AutoField(verbose_name="ID", db_column="IDcompte", primary_key=True)
+    numero = models.CharField(verbose_name="Numéro", max_length=50, blank=True, null=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+
+    class Meta:
+        db_table = "compta_comptes_comptables"
+        verbose_name = "compte comptable"
+        verbose_name_plural = "comptes comptables"
+
+    def __str__(self):
+        return self.nom if self.nom else "Nouveau compte comptable"
+
+
+class ComptaCategorie(models.Model):
+    idcategorie = models.AutoField(verbose_name="ID", db_column="IDcategorie", primary_key=True)
+    type = models.CharField(verbose_name="Type", max_length=50, choices=[("debit", "Débit"), ("credit", "Crédit")])
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    abrege = models.CharField(verbose_name="Abrégé", max_length=50, blank=True, null=True)
+    # journal = models.CharField(verbose_name="Journal", max_length=10, blank=True, null=True)
+    compte_comptable = models.ForeignKey(ComptaCompteComptable, verbose_name="Compte comptable", on_delete=models.PROTECT, blank=True, null=True)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = "compta_categories"
+        verbose_name = "catégorie comptable"
+        verbose_name_plural = "catégories comptables"
+
+    def __str__(self):
+        return self.nom if self.nom else "Nouvelle catégorie comptable"
+
+
+class ComptaTiers(models.Model):
+    idtiers = models.AutoField(verbose_name="ID", db_column="IDtiers", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    # idcode_comptable = models.IntegerField(db_column='IDcode_comptable', blank=True, null=True)  # Field name made lowercase.
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = "compta_tiers"
+        verbose_name = "tiers"
+        verbose_name_plural = "tiers"
+
+    def __str__(self):
+        return self.nom if self.nom else "Nouveau tiers"
+
+
+class ComptaReleve(models.Model):
+    idreleve = models.AutoField(verbose_name="ID", db_column="IDreleve", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    date_debut = models.DateField(verbose_name="Date de début")
+    date_fin = models.DateField(verbose_name="Date de fin")
+    compte = models.ForeignKey(CompteBancaire, verbose_name="Compte bancaire", on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = "compta_releves"
+        verbose_name = "relevé de compte"
+        verbose_name_plural = "relevés de compte"
+
+    def __str__(self):
+        return "Relevé de compte ID%d" % self.idreleve
+
+
+class ComptaVirement(models.Model):
+    idvirement = models.AutoField(verbose_name="ID", db_column="IDvirement", primary_key=True)
+    date = models.DateField(verbose_name="Date")
+    libelle = models.CharField(verbose_name="Libellé", max_length=200, blank=True, null=True)
+    montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    compte_debit = models.ForeignKey(CompteBancaire, verbose_name="Compte débiteur", related_name="virement_compte_debit", on_delete=models.CASCADE)
+    compte_credit = models.ForeignKey(CompteBancaire, verbose_name="Compte créditeur", related_name="virement_compte_credit", on_delete=models.CASCADE)
+    releve_debit = models.ForeignKey(ComptaReleve, verbose_name="Relevé débiteur", related_name="virement_releve_debit", on_delete=models.CASCADE, blank=True, null=True)
+    releve_credit = models.ForeignKey(ComptaReleve, verbose_name="Relevé créditeur", related_name="virement_releve_credit", on_delete=models.CASCADE, blank=True, null=True)
+    operation_debit = models.ForeignKey("ComptaOperation", verbose_name="Opération au débit", related_name="virement_operation_debit", on_delete=models.CASCADE, blank=True, null=True)
+    operation_credit = models.ForeignKey("ComptaOperation", verbose_name="Opération au crédit", related_name="virement_operation_credit", on_delete=models.CASCADE, blank=True, null=True)
+
+    class Meta:
+        db_table = "compta_virements"
+        verbose_name = "virement"
+        verbose_name_plural = "virements"
+
+    def __str__(self):
+        return "Virement ID%d" % self.idvirement
+
+
+class ComptaOperation(models.Model):
+    idoperation = models.AutoField(verbose_name="ID", db_column="IDoperation", primary_key=True)
+    type = models.CharField(verbose_name="Type", max_length=50, choices=[("debit", "Débit"), ("credit", "Crédit")])
+    date = models.DateField(verbose_name="Date")
+    libelle = models.CharField(verbose_name="Libellé", max_length=200)
+    tiers = models.ForeignKey(ComptaTiers, verbose_name="Tiers", on_delete=models.PROTECT, blank=True, null=True)
+    mode = models.ForeignKey(ModeReglement, verbose_name="Mode de règlement", on_delete=models.PROTECT, blank=True, null=True)
+    num_piece = models.CharField(verbose_name="Numéro de pièce", max_length=200, blank=True, null=True)
+    ref_piece = models.CharField(verbose_name="Référence pièce", max_length=200, blank=True, null=True)
+    compte = models.ForeignKey(CompteBancaire, verbose_name="Compte bancaire", on_delete=models.PROTECT)
+    releve = models.ForeignKey(ComptaReleve, verbose_name="Relevé bancaire", on_delete=models.PROTECT, blank=True, null=True)
+    montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    virement = models.ForeignKey(ComptaVirement, verbose_name="Virement", on_delete=models.CASCADE, blank=True, null=True)
+
+    class Meta:
+        db_table = "compta_operations"
+        verbose_name = "Opération de trésorerie"
+        verbose_name_plural = "opérations de trésorerie"
+
+    def __str__(self):
+        return "Opération ID%d" % self.idoperation
+
+
+class ComptaVentilation(models.Model):
+    idventilation = models.AutoField(verbose_name="ID", db_column="IDventilation", primary_key=True)
+    operation = models.ForeignKey(ComptaOperation, verbose_name="Opération", on_delete=models.CASCADE)
+    categorie = models.ForeignKey(ComptaCategorie, verbose_name="Catégorie", on_delete=models.PROTECT)
+    analytique = models.ForeignKey(ComptaAnalytique, verbose_name="Analytique", on_delete=models.PROTECT)
+    libelle = models.CharField(verbose_name="Libellé", max_length=200, blank=True, null=True)
+    montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0)
+    date_budget = models.DateField(verbose_name="Date budget")
+
+    class Meta:
+        db_table = "compta_ventilation"
+        verbose_name = "Ventilation d'une opération"
+        verbose_name_plural = "ventilations d'opérations"
+
+    def __str__(self):
+        return "Ventilation ID%d" % self.idventilation
+
+
+class ComptaOperationBudgetaire(models.Model):
+    idoperation_budgetaire = models.AutoField(verbose_name="ID", db_column="IDoperation_budgetaire", primary_key=True)
+    type = models.CharField(verbose_name="Type", max_length=50, choices=[("debit", "Débit"), ("credit", "Crédit")])
+    date_budget = models.DateField(verbose_name="Date budget")
+    compte = models.ForeignKey(CompteBancaire, verbose_name="Compte bancaire", on_delete=models.PROTECT, blank=True, null=True)
+    categorie = models.ForeignKey(ComptaCategorie, verbose_name="Catégorie", on_delete=models.PROTECT)
+    analytique = models.ForeignKey(ComptaAnalytique, verbose_name="Analytique", on_delete=models.PROTECT)
+    libelle = models.CharField(verbose_name="Libellé", max_length=200, blank=True, null=True)
+    montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0)
+
+    class Meta:
+        db_table = "compta_operations_budgetaires"
+        verbose_name = "opération budgétaire"
+        verbose_name_plural = "opérations budgétaires"
+
+    def __str__(self):
+        return "Opération budgétaire ID%d" % self.idoperation_budgetaire
+
+
+class ComptaBudget(models.Model):
+    idbudget = models.AutoField(verbose_name="ID", db_column="IDbudget", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    date_debut = models.DateField(verbose_name="Date de début")
+    date_fin = models.DateField(verbose_name="Date de fin")
+    analytiques = models.ManyToManyField(ComptaAnalytique, verbose_name="Poste analytiques", related_name="postes_analytiques")
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = "compta_budgets"
+        verbose_name = "budget"
+        verbose_name_plural = "budgets"
+
+    def __str__(self):
+        return "Budget ID%d" % self.idbudget
+
+
+class ComptaCategorieBudget(models.Model):
+    idcategorie_budget = models.AutoField(verbose_name="ID", db_column="IDcategorie_budget", primary_key=True)
+    budget = models.ForeignKey(ComptaBudget, verbose_name="Budget", on_delete=models.CASCADE)
+    categorie = models.ForeignKey(ComptaCategorie, verbose_name="Catégorie", on_delete=models.PROTECT)
+    montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0)
+
+    class Meta:
+        db_table = "compta_categories_budget"
+        verbose_name = "catégorie budgétaire"
+        verbose_name_plural = "catégories budgétaires"
+
+    def __str__(self):
+        return "Catégorie budgétaire ID%s" % (self.idcategorie_budget or "Nouvelle catégorie budgétaire")

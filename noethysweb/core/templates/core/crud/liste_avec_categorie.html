@@ -37,6 +37,6 @@
             {% endembed %}
 
         {% endblock box_contenu %}
-        {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
     {% endembed %}
 {% endblock contenu_page %}

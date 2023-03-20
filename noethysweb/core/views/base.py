@@ -97,6 +97,12 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
             logger.debug("Interdiction d'accéder à cette page : Fonction incompatible avec le mode démo.")
             return False
 
+        # Vérification spéciale d'une page
+        if hasattr(self, "test_func_page"):
+            if not self.test_func_page():
+                logger.debug("Interdiction d'accéder à la page '%s' : Pas de permission pour cette donnée." % getattr(self, "menu_code", None))
+                return False
+
         return True
 
     def get_context_data(self, **kwargs):

@@ -1,0 +1,139 @@
+{% load static %}
+{% load embed %}
+
+<table class="table table-bordered">
+    <thead>
+        <tr class="text-center">
+            <th>Date budget</th>
+            <th>Analytique</th>
+            <th>Catégorie</th>
+            <th>Montant</th>
+            <th style="width: 90px;">Actions</th>
+        </tr>
+    </thead>
+    <tbody id="contenu_tableau">
+    </tbody>
+</table>
+
+<input type="text" id="ventilation" name="ventilation" hidden>
+
+<button type="button" class="btn btn-success btn-sm" onclick="Ajouter_ventilation()"><i class="fa fa-plus"></i> Ajouter une ligne</button>
+
+{# Modal ventilation #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_ventilation{% endblock %}
+    {% block modal_titre %}{% endblock %}
+    {% block modal_classe %}modal-lg{% endblock %}
+    {% block modal_body %}
+        <div id="id_div_form_ventilation">
+        </div>
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" onclick="valider_form_ventilation()"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+    {% endblock %}
+{% endembed %}
+
+<script>
+
+    var valeurs = JSON.parse("{{ value|escapejs }}");
+    var dict_analytiques = JSON.parse("{{ analytiques|escapejs }}");
+    var dict_categories = JSON.parse("{{ categories|escapejs }}");
+
+    $(document).ready(function() {
+        maj_tableau();
+    })
+
+    function maj_tableau() {
+        var html = "";
+        $.each(valeurs, function (index, dict_ventilation) {
+            var colonnes = [];
+            colonnes.push("<input name='ventilation' value='" + JSON.stringify(dict_ventilation) + "' hidden>");
+            colonnes.push("<td>" + dict_ventilation["date_budget"].split('-').reverse().join('/') + "</td>");
+            colonnes.push("<td>" + dict_analytiques[dict_ventilation["analytique"]] + "</td>");
+            colonnes.push("<td>" + dict_categories[dict_ventilation["categorie"]] + "</td>");
+            colonnes.push("<td>" + parseFloat(dict_ventilation["montant"]).toFixed(2) + "</td>");
+            html += "<tr class='text-center'>" + colonnes.join() + "<td>";
+            html += "<a type='button' class='btn btn-default btn-xs' onclick='Modifier_ventilation(" + index + ")' title='Modifier'><i class='fa fa-fw fa-pencil'></i></a> ";
+            html += "<a type='button' class='btn btn-default btn-xs' onclick='Supprimer_ventilation(" + index + ")' title='Supprimer'><i class='fa fa-fw fa-trash'></i></a>";
+            html += "</td>";
+        })
+        $("#contenu_tableau").html(html)
+        $("#ventilation").val(JSON.stringify(valeurs))
+    }
+
+    function Ajouter_ventilation() {
+        $('#modal_ventilation .modal-title').html("Ajouter une ventilation");
+        get_form_ventilation("ajouter", null)
+    }
+
+    function Modifier_ventilation(index) {
+        $('#modal_ventilation .modal-title').html("Modifier une ventilation");
+        get_form_ventilation("modifier", index)
+    }
+
+    function Supprimer_ventilation(index) {
+        bootbox.dialog({
+            title: "Confirmation",
+            message: "Confirmez-vous la suppression de cette ventilation ?",
+            buttons: {
+                ok: {
+                    label: "<i class='fa fa-trash'></i> Supprimer",
+                    className: 'btn-warning',
+                    callback: function(){
+                        valeurs.splice(index, 1);
+                        maj_tableau();
+                    }
+                },
+                cancel: {
+                    label: "<i class='fa fa-ban'></i> Annuler",
+                    className: 'btn-danger',
+                }
+            }
+        });
+    }
+
+    function get_form_ventilation(action, index) {
+        $.ajax({
+            url: "{% url 'ajax_operations_tresorerie_form_ventilation' %}",
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+                action: action,
+                valeur: JSON.stringify(valeurs[index]),
+                index: index,
+                date_operation: $("#id_date").val(),
+                type_operation: $("input[name='type']").val()
+            },
+            success: function (data) {
+                $("#ventilation_tresorerie_form").remove();
+                $("#id_div_form_ventilation").append(data['form_html']);
+                $("#modal_ventilation").modal("show");
+            }
+        });
+    }
+
+    function valider_form_ventilation() {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_operations_tresorerie_form_ventilation' %}",
+            data: $("#ventilation_tresorerie_form").serialize(),
+            datatype: "json",
+            success: function(data){
+                $("#modal_ventilation").modal("hide");
+                if (data.index) {
+                    valeurs[data.index] = data.valeur;
+                } else {
+                    valeurs.push(data.valeur);
+                }
+                maj_tableau();
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        });
+    }
+
+</script>

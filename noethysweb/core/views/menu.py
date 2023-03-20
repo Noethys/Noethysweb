@@ -52,6 +52,11 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_comptabilite.Add(code="comptes_bancaires_liste", titre="Comptes bancaires", icone="file-text-o")
     menu_comptabilite.Add(code="modes_reglements_liste", titre="Modes de règlements", icone="file-text-o")
     menu_comptabilite.Add(code="emetteurs_liste", titre="Emetteurs de règlements", icone="file-text-o")
+    menu_comptabilite.Add(code="postes_analytiques_liste", titre="Postes analytiques", icone="file-text-o")
+    menu_comptabilite.Add(code="comptes_comptables_liste", titre="Comptes comptables", icone="file-text-o")
+    menu_comptabilite.Add(code="categories_comptables_liste", titre="Catégories comptables", icone="file-text-o")
+    menu_comptabilite.Add(code="tiers_liste", titre="Tiers", icone="file-text-o")
+    menu_comptabilite.Add(code="budgets_liste", titre="Budgets", icone="file-text-o")
 
     # Renseignements
     menu_renseignements = menu_parametrage.Add(titre="Renseignements")
@@ -387,9 +392,24 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_ventilation.Add(code="corriger_ventilation", titre="Corriger la ventilation", icone="file-text-o")
 
 
+    # ------------------------------------ Comptabilité ------------------------------------
+    menu_comptabilite = menu.Add(code="comptabilite_toc", titre="Comptabilité", icone="line-chart")
+
+    # Opérations
+    menu_comptabilite_operations = menu_comptabilite.Add(titre="Opérations")
+    menu_comptabilite_operations.Add(code="comptabilite_liste_comptes", titre="Liste des comptes", icone="file-text-o")
+    menu_comptabilite_operations.Add(code="operations_tresorerie_liste", titre="Liste des opérations de trésorerie", icone="file-text-o")
+    menu_comptabilite_operations.Add(code="operations_budgetaires_liste", titre="Liste des opérations budgétaires", icone="file-text-o")
+    menu_comptabilite_operations.Add(code="virements_liste", titre="Liste des virements", icone="file-text-o")
+
+    # Analyse
+    menu_comptabilite_analyse = menu_comptabilite.Add(titre="Analyse")
+    menu_comptabilite_analyse.Add(code="suivi_tresorerie", titre="Suivi de la trésorerie", icone="file-text-o")
+    menu_comptabilite_analyse.Add(code="suivi_budget", titre="Suivi du budget", icone="file-text-o")
+
+
     # ------------------------------------ Aide ------------------------------------
     menu_aide = menu.Add(code="aide_toc", titre="Aide", icone="support", toujours_afficher=True)
-
 
 
 
