@@ -749,6 +749,8 @@ class Facturation():
                                     quantite = dictQuantites[idunite]
 
                         # Calcul du tarif
+                        if not tarif and evenement:
+                            continue
                         if not tarif:
                             break
                         resultat = self.Calcule_tarif(tarif, tarif_base.combi_retenue, case_tableau, temps_facture, quantite, evenement, modeSilencieux, action)
