@@ -32,6 +32,7 @@ class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
     texte_confirmation = "Le document a bien été transmis"
     titre_historique = "Ajouter une pièce"
+    template_name = "portail/edit.html"
 
     def Get_detail_historique(self, instance):
         return "Famille=%s, Pièce=%s" % (instance.famille, instance.Get_nom())

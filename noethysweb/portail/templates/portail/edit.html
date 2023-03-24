@@ -1,0 +1,18 @@
+{% extends "portail/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+{% embed 'core/box.html' %}
+    {% block box_theme %}card-outline card-lightblue{% endblock %}
+    {% block box_titre %}{{ box_titre }}{% endblock %}
+    {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+    {% block box_contenu %}
+        {% include 'core/erreurs_form.html' %}
+        {% crispy form %}
+    {% endblock %}
+
+{% endembed %}
+{% endblock contenu_page %}
