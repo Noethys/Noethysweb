@@ -36,9 +36,11 @@
                                 {% if parametres_portail.reglements_afficher_encaissement %}
                                     <th>Encaissé</th>
                                 {% endif %}
+{% comment %}
                                 {% if parametres_portail.reglements_autoriser_telechargement_recu %}
                                     <th style="width: 90px;">Actions</th>
                                 {% endif %}
+{% endcomment %}
                             </tr>
                         </thead>
                         <tbody>
@@ -57,9 +59,11 @@
                                             {% endif %}
                                         </td>
                                     {% endif %}
+{% comment %}
                                     {% if parametres_portail.reglements_autoriser_telechargement_recu %}
                                         <td><a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_accueil' %}" title="Télécharger le reçu"><i class="fa fa-fw fa-download"></i></a></td>
                                     {% endif %}
+{% endcomment %}
                                 </tr>
                             {% endfor %}
                         </tbody>
