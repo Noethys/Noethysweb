@@ -1,3 +1,9 @@
+Version 1.1.3.8 (25/03/2023) :
+
+- Ajout de la page Activités sur le portail
+- Ajout de l'inscription à une nouvelle activité depuis le portail
+- Correction du template de la page Transmettre une pièce du portail
+
 Version 1.1.3.7 (20/03/2023) :
 
 - Ajout du module Comptabilité
