@@ -7,10 +7,11 @@ import json, datetime
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.db.models import Q
+from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import PortailRenseignement, TypeSieste, Caisse, Individu, Secteur, CategorieTravail, RegimeAlimentaire, TypeMaladie, \
-                        Medecin, ContactUrgence, Assurance, Information, QuestionnaireQuestion, Vaccin
+                        Medecin, ContactUrgence, Assurance, Information, QuestionnaireQuestion, Vaccin, Activite, Groupe
 from core.data import data_civilites
 from core.utils import utils_dates, utils_parametres
 from portail.utils import utils_champs
@@ -19,6 +20,8 @@ from portail.utils import utils_champs
 def Appliquer_modification(request):
     iddemande = int(request.POST["iddemande"])
     etat = request.POST["etat"]
+
+    redirection = None
 
     # Importation de la demande à modifier
     demande = PortailRenseignement.objects.select_related("famille", "individu").get(pk=iddemande)
@@ -61,13 +64,19 @@ def Appliquer_modification(request):
         if demande.categorie == "individu_maladies":
             demande.individu.maladies.set(nouvelle_valeur)
 
+        # Inscription à une activité
+        if demande.code == "inscrire_activite":
+            idactivite, idgroupe = nouvelle_valeur.split(";")
+            redirection = reverse_lazy("individu_inscriptions_ajouter", kwargs={"idfamille": demande.famille_id, "idindividu": demande.individu_id, "idactivite": int(idactivite), "idgroupe": int(idgroupe)})
+            messages.add_message(request, messages.WARNING, "Vous avez été redirigé vers la fiche famille afin de vérifier et confirmer l'inscription")
+
     # Modifie l'état de la demande
     demande.traitement_date = datetime.datetime.now()
     demande.traitement_utilisateur = request.user
     demande.etat = etat
     demande.save()
 
-    return JsonResponse({"succes": True})
+    return JsonResponse({"succes": True, "redirection": redirection})
 
 
 def Get_labels():
@@ -152,6 +161,9 @@ class Liste(Page, crud.Liste):
             if instance.categorie == "individu_coords" and instance.code in ("type_adresse", "ville_resid"):
                 warning = True
             if instance.categorie == "individu_identite" and instance.code in ("nom", "prenom"):
+                warning = True
+            if instance.code == "inscrire_activite":
+                label = "Inscription à une activité"
                 warning = True
             if warning:
                 label = "<i class='fa fa-warning text-yellow' title='Information importante'></i> " + label
@@ -291,5 +303,13 @@ class Liste(Page, crud.Liste):
                 if not hasattr(self, "dict_medecins"):
                     self.dict_medecins = {medecin.pk: medecin.Get_nom() for medecin in Medecin.objects.all()}
                 return self.dict_medecins.get(int(valeur), "?")
+
+            # Inscription à une activité
+            if instance.code == "inscrire_activite":
+                if not hasattr(self, "dict_activites"):
+                    self.dict_activites = {activite.pk: activite.nom for activite in Activite.objects.all()}
+                    self.dict_groupes = {groupe.pk: groupe.nom for groupe in Groupe.objects.all()}
+                idactivite, idgroupe = valeur.split(";")
+                return "%s (%s)" % (self.dict_activites.get(int(idactivite), "?"), self.dict_groupes.get(int(idgroupe), "?"))
 
             return valeur

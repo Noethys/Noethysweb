@@ -61,9 +61,14 @@
                 },
                 datatype: "json",
                 success: function(data){
-                    // Recharge la liste
-                    var table = $('.datatable').DataTable()
-                    table.ajax.reload(null, false);
+                    if (data.redirection) {
+                        // Redirection
+                        window.location.href = data.redirection;
+                    } else {
+                        // Recharge la liste
+                        var table = $('.datatable').DataTable()
+                        table.ajax.reload(null, false);
+                    }
                 },
                 error: function(data) {
                     toastr.error("Erreur");

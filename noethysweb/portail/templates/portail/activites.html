@@ -1,0 +1,108 @@
+{% extends "portail/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .card-individu .nav > li:first-child > a {
+            border-left: 0px solid;
+        }
+        .card-individu .list-group a {
+            border-radius: 0.25rem;
+        }
+        .card-individu {
+            border-radius: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block contenu_page %}
+
+    {# Texte d'introduction #}
+    {% if parametres_portail.activites_intro %}
+        <div style="margin-bottom: 20px;">
+            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.activites_intro }}
+        </div>
+    {% endif %}
+
+    {% if activites_ouvertes_inscription %}
+        <p>
+            <a title="Cliquez ici pour inscrire un individu à une nouvelle activité" href="{% url 'portail_inscrire_activite' %}" class="btn btn-success mb-2" type="button"><i class="fa fa-plus margin-r-5"></i>Inscrire à une nouvelle activité</a>
+        </p>
+    {% endif %}
+
+    {% for individu in liste_individus %}
+        <div class="card card-individu mb-4">
+
+            <!-- Nom de l'individu -->
+            <div class="user-block card-footer m-0" style="padding: .6rem 1rem;">
+                <img class="img-circle" src="{{ individu.Get_photo }}" alt="Individu Image">
+                <span class="username">{{ individu.prenom }}</span>
+                {% if individu.Get_age %}<span class="description">{{ individu.Get_age }} ans</span>{% endif %}
+            </div>
+
+            <!-- Liste des activités -->
+            <div class="p-2" style="background-color: #00000008;">
+                <div>
+                    <table class="table table-bordered table-sm mb-0"  style="background-color: #FFFFFF;">
+                        <thead>
+                            <tr class="text-center">
+                                <th>Activité</th>
+                                <th>Groupe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for inscription in individu.inscriptions %}
+                                <tr class="text-center">
+                                    <td>{{ inscription.activite.nom }}</td>
+                                    <td>{{ inscription.groupe.nom }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% for demande in demandes_inscriptions_attente|get_item:individu.pk %}
+                        demande={{ demande }}
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+    {% if demandes_inscriptions_attente %}
+        <div class="card card-individu bg-warning">
+
+            <!-- Nom de l'individu -->
+            <div class="user-block card-footer m-0" style="padding: .6rem 1rem;">
+                <span class=""><b><i class="fa fa-hourglass-half margin-r-5"></i> Demandes d'inscription en attente de traitement</b></span>
+            </div>
+
+            <div class="p-2" style="background-color: #00000008;">
+                <div>
+                    <table class="table table-bordered table-sm mb-0"  style="background-color: #FFFFFF;">
+                        <thead>
+                            <tr class="text-center">
+                                <th>Individu à inscrire</th>
+                                <th>Activité souhaitée</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for demande in demandes_inscriptions_attente %}
+                                <tr class="text-center">
+                                    <td>{{ demande.individu.prenom }}</td>
+                                    <td>{{ demande.nom_activite }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
+{% endblock contenu_page %}

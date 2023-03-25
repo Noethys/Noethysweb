@@ -36,6 +36,8 @@ class Formulaire(FormulaireBase, ModelForm):
     def __init__(self, *args, **kwargs):
         idindividu = kwargs.pop("idindividu", None)
         idfamille = kwargs.pop("idfamille", None)
+        idactivite = kwargs.pop("idactivite", None)
+        idgroupe = kwargs.pop("idgroupe", None)
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'individu_inscriptions_form'
@@ -53,6 +55,13 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Liste les activités liées à la structure actuelle
         self.fields['activite'].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_debut")
+
+        # Si c'est un ajout avec présélection de l'activité et du groupe
+        # (utilisé surtout pour les demandes d'inscription depuis le portail)
+        if idactivite:
+            self.fields["activite"].initial = idactivite
+        if idgroupe:
+            self.fields["groupe"].initial = idgroupe
 
         # Si modification
         nbre_conso = 0

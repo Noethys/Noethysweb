@@ -69,7 +69,7 @@ def Get_pieces_manquantes(famille=None, date_reference=None, only_invalides=Fals
 
 
 def Get_liste_pieces_manquantes(date_reference=None, activites=None, presents=None, only_concernes=True, liste_familles=[]):
-    """ Retourne les pièces manquantes d'un ensembles de familles inscrites ou présentes """
+    """ Retourne les pièces manquantes d'un ensemble de familles inscrites ou présentes """
     if not date_reference:
         date_reference = datetime.date.today()
 
@@ -152,3 +152,34 @@ def Get_liste_pieces_manquantes(date_reference=None, activites=None, presents=No
 
     return dict_final
 
+
+def Get_liste_pieces_necessaires(date_reference=None, activite=None, famille=None, individu=None):
+    """ Retourne les pièces nécessaires à l'inscription d'un individu sur une activité donnée pour une famille et un individu donné """
+    if not date_reference:
+        date_reference = datetime.date.today()
+
+    # Importation des pièces existantes de la famille
+    dict_pieces = {}
+    for piece in Piece.objects.select_related("type_piece").filter(famille=famille, date_debut__lte=date_reference, date_fin__gte=date_reference):
+        if piece.type_piece:
+            key = "famille_%d_%d" % (piece.famille_id, piece.type_piece_id) if piece.type_piece.public == "famille" else "individu_%d_%d" % (piece.individu_id, piece.type_piece_id)
+            dict_pieces.setdefault(key, [])
+            dict_pieces[key].append(piece)
+
+    liste_pieces_necessaires = []
+    for type_piece in activite.pieces.all():
+        # Vérifie si la pièce existe
+        valide = False
+        key = "famille_%d_%d" % (famille.pk, type_piece.pk) if type_piece.public == "famille" else "individu_%d_%d" % (individu.pk, type_piece.pk)
+        for piece in dict_pieces.get(key, []):
+            if type_piece.public == "famille" and piece.famille_id == famille.pk:
+                valide = True
+            if type_piece.public == "individu" and piece.individu_id == individu.pk:
+                if type_piece.valide_rattachement == True:
+                    valide = True
+                elif piece.famille_id == famille.pk:
+                    valide = True
+
+        liste_pieces_necessaires.append({"type_piece": type_piece, "valide": valide, "document": type_piece.type_piece_document.first()})
+
+    return liste_pieces_necessaires

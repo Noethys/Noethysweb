@@ -1137,6 +1137,7 @@ class Activite(models.Model):
     portail_inscriptions_affichage = models.CharField(verbose_name="Inscriptions autorisées", max_length=100, choices=choix_affichage_inscriptions, default="JAMAIS")
     portail_inscriptions_date_debut = models.DateTimeField(verbose_name="Date de début d'affichage", blank=True, null=True)
     portail_inscriptions_date_fin = models.DateTimeField(verbose_name="Date de fin d'affichage", blank=True, null=True)
+    portail_inscriptions_imposer_pieces = models.BooleanField(verbose_name="Imposer le téléchargement des pièces à fournir", default=False)
     choix_affichage_reservations = [("JAMAIS", "Ne pas autoriser"), ("TOUJOURS", "Autoriser")]
     portail_reservations_affichage = models.CharField(verbose_name="Réservations autorisées", max_length=100, choices=choix_affichage_reservations, default="JAMAIS")
     portail_reservations_limite = models.CharField(verbose_name="Date limite de modification d'une réservation", max_length=200, blank=True, null=True)
@@ -3442,6 +3443,7 @@ class PortailDocument(models.Model):
     couleur_fond = models.CharField(verbose_name="Couleur de fond", max_length=100, choices=choix_couleur, default="primary", help_text="Couleur de fond de l'icône. Bleu foncé par défaut.")
     document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, help_text="Privilégiez un document au format PDF.")
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+    type_piece = models.ForeignKey(TypePiece, verbose_name="Type de pièce", related_name="type_piece_document", on_delete=models.PROTECT, blank=True, null=True, help_text="Si ce document correspond à un type de pièce existant, sélectionnez-le dans la liste proposée.")
 
     class Meta:
         db_table = 'portail_documents'

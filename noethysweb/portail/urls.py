@@ -10,7 +10,7 @@ from consommations.views import grille
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
                             individu_regimes_alimentaires, individu_coords, individu_medecin, individu_informations, individu_assurances, individu_vaccinations, \
                             famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents, \
-                            transmettre_piece
+                            transmettre_piece, activites, inscrire_activite
 from core.decorators import secure_ajax_portail
 
 
@@ -90,6 +90,10 @@ urlpatterns = [
     path('documents', documents.View.as_view(), name='portail_documents'),
     path('documents/transmettre', transmettre_piece.Ajouter.as_view(), name='portail_transmettre_piece'),
 
+    # Activités
+    path('activites', activites.View.as_view(), name='portail_activites'),
+    path('activites/inscrire', inscrire_activite.Ajouter.as_view(), name='portail_inscrire_activite'),
+
     # Réservations
     path('reservations', reservations.View.as_view(), name='portail_reservations'),
     path('planning/<int:idindividu>/<int:idactivite>/<int:idperiode>', planning.View.as_view(), name='portail_planning'),
@@ -121,5 +125,6 @@ urlpatterns = [
     path('individus/ajouter_maladie', secure_ajax_portail(individu_maladies.Ajouter_maladie), name='portail_ajax_ajouter_maladie'),
     path('individus/ajouter_medecin', secure_ajax_portail(individu_medecin.Ajouter_medecin), name='portail_ajax_ajouter_medecin'),
     path('individus/ajouter_assureur', secure_ajax_portail(individu_assurances.Ajouter_assureur), name='portail_ajax_ajouter_assureur'),
-
+    path('activites/get_form_extra', secure_ajax_portail(inscrire_activite.Get_form_extra), name='portail_ajax_inscrire_get_form_extra'),
+    path('activites/validation_form', secure_ajax_portail(inscrire_activite.Valid_form), name='portail_ajax_inscrire_valid_form'),
 ]

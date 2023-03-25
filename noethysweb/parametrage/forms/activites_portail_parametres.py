@@ -45,9 +45,14 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Activite
         fields = ["portail_inscriptions_affichage", "portail_inscriptions_date_debut", "portail_inscriptions_date_fin", "portail_reservations_affichage",
-                  "portail_reservations_limite", "portail_afficher_dates_passees",
+                  "portail_reservations_limite", "portail_afficher_dates_passees", "portail_inscriptions_imposer_pieces",
                   # "portail_reservations_absenti", "portail_unites_multiples",
                   ]
+        help_texts = {
+            "portail_inscriptions_affichage": "Sélectionnez Autoriser pour permettre aux usagers de demander une inscription à cette activité depuis le portail. Cette demande devra être validée par un utilisateur.",
+            "portail_reservations_affichage": "Sélectionnez Autoriser pour permettre aux usagers de gérer leurs réservations pour cette activité sur le portail.",
+            "portail_inscriptions_imposer_pieces": "Cochez cette case si vous souhaitez que l'usager fournisse obligatoirement les pièces manquantes depuis le portail pour valider sa demande d'inscription.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -91,6 +96,7 @@ class Formulaire(FormulaireBase, ModelForm):
                     Field("portail_inscriptions_date_fin"),
                     id="bloc_inscriptions_periode"
                 ),
+                Field("portail_inscriptions_imposer_pieces"),
             ),
             Fieldset("Réservations",
                 Field("portail_reservations_affichage"),

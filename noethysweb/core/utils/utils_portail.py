@@ -87,6 +87,10 @@ LISTE_PARAMETRES = [
     Parametre(code="documents_afficher_page", label="Afficher la page", type="boolean", valeur=True),
     Parametre(code="documents_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez ici consulter ou transmettre des documents."),
 
+    # Activités
+    Parametre(code="activites_afficher_page", label="Afficher la page", type="boolean", valeur=True),
+    Parametre(code="activites_intro", label="Texte d'introduction", type="char_2lignes", valeur="Cette page liste des activités auxquelles sont actuellement inscrits les membres de la famille."),
+
     # Réservations
     Parametre(code="reservations_afficher_page", label="Afficher la page", type="boolean", valeur=True),
     Parametre(code="reservations_intro", label="Texte d'introduction", type="char_2lignes", valeur="Sélectionnez une activité puis cliquez sur une des périodes disponibles pour accéder au calendrier des réservations correspondant."),
