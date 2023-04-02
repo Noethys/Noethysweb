@@ -1,3 +1,9 @@
+Version 1.1.3.9 (02/04/2023) :
+
+- Ajout du module Collaborateurs
+- Ajout des équivalences en heures dans l'état global
+- Correction de l'affichage du planning des locations
+
 Version 1.1.3.8 (25/03/2023) :
 
 - Ajout de la page Activités sur le portail
