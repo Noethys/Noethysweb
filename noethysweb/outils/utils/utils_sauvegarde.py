@@ -48,7 +48,10 @@ def Restauration(form=None, nom_fichier=None, mdp=None, conserve_mdp_internet=Fa
     fichier_decrypte = os.path.join(rep_destination, "decrypte.nweb")
     if form:
         mdp = form.cleaned_data["mdp"]
-    utils_cryptage_fichier.DecrypterFichier(fichier_destination, fichier_decrypte, mdp)
+    if mdp:
+        utils_cryptage_fichier.DecrypterFichier(fichier_destination, fichier_decrypte, mdp)
+    else:
+        shutil.copy(fichier_destination, fichier_decrypte)
 
     # Vérifie que le fichier décrypté est bien un zip
     if not zipfile.is_zipfile(fichier_decrypte):
