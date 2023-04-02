@@ -45,12 +45,14 @@
                         {% if mail.verrouillage_destinataires %}
                             {% if categories.individu %}<a class="list-group-item list-group-item-action"><i class="fa fa-user fa-fw margin-r-5"></i>Individus <span class="float-right badge bg-blue">{{ categories.individu }}</span></a>{% endif %}
                             {% if categories.famille %}<a class="list-group-item list-group-item-action"><i class="fa fa-users fa-fw margin-r-5"></i>Familles <span class="float-right badge bg-blue">{{ categories.famille }}</span></a>{% endif %}
+                            {% if categories.collaborateur %}<a class="list-group-item list-group-item-action"><i class="fa fa-users fa-fw margin-r-5"></i>Collaborateurs <span class="float-right badge bg-blue">{{ categories.collaborateur }}</span></a>{% endif %}
                             {% if categories.contact %}<a class="list-group-item list-group-item-action"><i class="fa fa-phone-square fa-fw margin-r-5"></i>Contacts <span class="float-right badge bg-blue">{{ categories.contact }}</span></a>{% endif %}
                             {% if categories.liste_diffusion %}<a class="list-group-item list-group-item-action"><i class="fa fa-list-ul fa-fw margin-r-5"></i>Listes de diffusion <span class="float-right badge bg-blue">{{ categories.liste_diffusion }}</span></a>{% endif %}
                             {% if categories.saisie_libre %}<a class="list-group-item list-group-item-action"><i class="fa fa-edit fa-fw margin-r-5"></i>Saisie libre <span class="float-right badge bg-blue">{{ categories.saisie_libre }}</span></a>{% endif %}
                         {% else %}
                             <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_individus');$('#form_editeur_emails').submit();" title="Sélectionner des individus"><i class="fa fa-user fa-fw margin-r-5"></i>Individus <span class="float-right badge bg-blue">{{ categories.individu }}</span></a>
                             <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_familles');$('#form_editeur_emails').submit();" title="Sélectionner des familles"><i class="fa fa-users fa-fw margin-r-5"></i>Familles <span class="float-right badge bg-blue">{{ categories.famille }}</span></a>
+                            <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_collaborateurs');$('#form_editeur_emails').submit();" title="Sélectionner des collaborateurs"><i class="fa fa-users fa-fw margin-r-5"></i>Collaborateurs <span class="float-right badge bg-blue">{{ categories.collaborateur }}</span></a>
                             <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_contacts');$('#form_editeur_emails').submit();" title="Sélectionner des contacts"><i class="fa fa-phone-square fa-fw margin-r-5"></i>Contacts <span class="float-right badge bg-blue">{{ categories.contact }}</span></a>
                             <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_diffusion');$('#form_editeur_emails').submit();" title="Sélectionner des listes de diffusion"><i class="fa fa-list-ul fa-fw margin-r-5"></i>Listes de diffusion <span class="float-right badge bg-blue">{{ categories.liste_diffusion }}</span></a>
                             <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_saisie_libre');$('#form_editeur_emails').submit();" title="Saisir des adresses mail"><i class="fa fa-edit fa-fw margin-r-5"></i>Saisie libre <span class="float-right badge bg-blue">{{ categories.saisie_libre }}</span></a>
@@ -86,6 +88,7 @@
                                         </div>
                                         <div><span style="color: #d2d2d2;font-size: 12px;">
                                             {% if destinataire.famille %}{{ destinataire.famille.nom }}{% endif %}
+                                            {% if destinataire.collaborateur %}{{ destinataire.collaborateur.Get_nom }}{% endif %}
                                             {% if destinataire.individu %}{{ destinataire.individu.Get_nom }}{% endif %}
                                             {% if destinataire.contact %}{{ destinataire.contact.Get_nom }}{% endif %}
                                         </span></div>

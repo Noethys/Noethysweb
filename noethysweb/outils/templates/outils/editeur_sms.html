@@ -45,10 +45,12 @@
                         {% if sms.verrouillage_destinataires %}
                             {% if categories.individu %}<a class="list-group-item list-group-item-action"><i class="fa fa-user fa-fw margin-r-5"></i>Individus <span class="float-right badge bg-blue">{{ categories.individu }}</span></a>{% endif %}
                             {% if categories.famille %}<a class="list-group-item list-group-item-action"><i class="fa fa-users fa-fw margin-r-5"></i>Familles <span class="float-right badge bg-blue">{{ categories.famille }}</span></a>{% endif %}
+                            {% if categories.collaborateur %}<a class="list-group-item list-group-item-action"><i class="fa fa-users fa-fw margin-r-5"></i>Collaborateurs <span class="float-right badge bg-blue">{{ categories.collaborateur }}</span></a>{% endif %}
                             {% if categories.saisie_libre %}<a class="list-group-item list-group-item-action"><i class="fa fa-edit fa-fw margin-r-5"></i>Saisie libre <span class="float-right badge bg-blue">{{ categories.saisie_libre }}</span></a>{% endif %}
                         {% else %}
                             <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_individus');$('#form_editeur_sms').submit();" title="Sélectionner des individus"><i class="fa fa-user fa-fw margin-r-5"></i>Individus <span class="float-right badge bg-blue">{{ categories.individu }}</span></a>
                             <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_familles');$('#form_editeur_sms').submit();" title="Sélectionner des familles"><i class="fa fa-users fa-fw margin-r-5"></i>Familles <span class="float-right badge bg-blue">{{ categories.famille }}</span></a>
+                            <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_collaborateurs');$('#form_editeur_sms').submit();" title="Sélectionner des collaborateurs"><i class="fa fa-users fa-fw margin-r-5"></i>Collaborateurs <span class="float-right badge bg-blue">{{ categories.collaborateur }}</span></a>
                             <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_saisie_libre');$('#form_editeur_sms').submit();" title="Saisir des numéros de téléphone"><i class="fa fa-edit fa-fw margin-r-5"></i>Saisie libre <span class="float-right badge bg-blue">{{ categories.saisie_libre }}</span></a>
                         {% endif %}
                     </ul>
@@ -83,6 +85,7 @@
                                         <div><span style="color: #d2d2d2;font-size: 12px;">
                                             {% if destinataire.famille %}{{ destinataire.famille.nom }}{% endif %}
                                             {% if destinataire.individu %}{{ destinataire.individu.Get_nom }}{% endif %}
+                                            {% if destinataire.collaborateur %}{{ destinataire.collaborateur.Get_nom }}{% endif %}
                                         </span></div>
                                     </td>
                                 </tr>

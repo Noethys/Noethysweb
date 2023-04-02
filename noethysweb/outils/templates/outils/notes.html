@@ -16,6 +16,7 @@
                     {% if mode_notes == 'accueil' %}
                         {% if note.famille %}<span class="badge bg-info">{{ note.famille }}</span>{% endif %}
                         {% if note.individu %}<span class="badge bg-info">{{ note.individu }}</span>{% endif %}
+                        {% if note.collaborateur %}<span class="badge bg-warning">{{ note.collaborateur }}</span>{% endif %}
                     {% endif %}
                     {{ note.texte }}
                 </td>
@@ -31,6 +32,10 @@
                     {% if mode_notes == 'individu' %}
                         <a type="button" class="btn-xs" href="{% url 'individu_notes_modifier' idfamille=idfamille idindividu=note.individu_id pk=note.pk %}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
                         <a type="button" class="btn-xs" href="{% url 'individu_notes_supprimer' idfamille=idfamille idindividu=note.individu_id pk=note.pk %}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
+                    {% endif %}
+                    {% if mode_notes == 'collaborateur' %}
+                        <a type="button" class="btn-xs" href="{% url 'collaborateur_notes_modifier' idcollaborateur=note.collaborateur_id pk=note.pk %}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
+                        <a type="button" class="btn-xs" href="{% url 'collaborateur_notes_supprimer' idcollaborateur=note.collaborateur_id pk=note.pk %}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
                     {% endif %}
                 </td>
             </tr>

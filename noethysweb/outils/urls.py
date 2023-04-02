@@ -7,10 +7,10 @@ from django.urls import include, path
 from core.views import toc
 from core.decorators import secure_ajax
 from outils.views import editeur_emails, editeur_emails_express, historique, update, sauvegarde_creer, statistiques, contacts, \
-                        editeur_emails_familles, editeur_emails_individus, editeur_emails_contacts, editeur_emails_listes_diffusion, \
+                        editeur_emails_familles, editeur_emails_individus, editeur_emails_collaborateurs, editeur_emails_contacts, editeur_emails_listes_diffusion, \
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
                         demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur, editeur_sms, editeur_sms_familles, \
-                        editeur_sms_individus, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures, editeur_sms_express, taches
+                        editeur_sms_individus, editeur_sms_collaborateurs, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures, editeur_sms_express, taches
 
 urlpatterns = [
 
@@ -32,6 +32,7 @@ urlpatterns = [
     path('outils/editeur_emails/<int:pk>', editeur_emails.Modifier.as_view(), name='editeur_emails'),
     path('outils/editeur_emails/familles/<int:idmail>', editeur_emails_familles.Liste.as_view(), name='editeur_emails_familles'),
     path('outils/editeur_emails/individus/<int:idmail>', editeur_emails_individus.Liste.as_view(), name='editeur_emails_individus'),
+    path('outils/editeur_emails/collaborateurs/<int:idmail>', editeur_emails_collaborateurs.Liste.as_view(), name='editeur_emails_collaborateurs'),
     path('outils/editeur_emails/contacts/<int:idmail>', editeur_emails_contacts.Liste.as_view(), name='editeur_emails_contacts'),
     path('outils/editeur_emails/listes_diffusion/<int:idmail>', editeur_emails_listes_diffusion.Liste.as_view(), name='editeur_emails_listes_diffusion'),
     path('outils/editeur_emails/saisie_libre/<int:idmail>', editeur_emails_saisie_libre.Liste.as_view(), name='editeur_emails_saisie_libre'),
@@ -45,6 +46,7 @@ urlpatterns = [
     path('outils/editeur_sms/<int:pk>', editeur_sms.Modifier.as_view(), name='editeur_sms'),
     path('outils/editeur_sms/familles/<int:idsms>', editeur_sms_familles.Liste.as_view(), name='editeur_sms_familles'),
     path('outils/editeur_sms/individus/<int:idsms>', editeur_sms_individus.Liste.as_view(), name='editeur_sms_individus'),
+    path('outils/editeur_sms/collaborateurs/<int:idsms>', editeur_sms_collaborateurs.Liste.as_view(), name='editeur_sms_collaborateurs'),
     path('outils/editeur_sms/saisie_libre/<int:idsms>', editeur_sms_saisie_libre.Liste.as_view(), name='editeur_sms_saisie_libre'),
 
     path('outils/sms/liste', sms.Liste.as_view(), name='sms_liste'),

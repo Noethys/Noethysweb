@@ -1,0 +1,144 @@
+{% load static %}
+{% load embed %}
+
+<table class="table table-bordered">
+    <thead>
+        <tr class="text-center">
+            <th>Jour</th>
+            <th>Période</th>
+            <th>Début</th>
+            <th>Fin</th>
+            <th>Catégorie</th>
+            <th>Titre</th>
+            <th style="width: 90px;">Actions</th>
+        </tr>
+    </thead>
+    <tbody id="contenu_tableau">
+    </tbody>
+</table>
+
+<input type="text" id="lignes" name="lignes" hidden>
+
+<button type="button" class="btn btn-success btn-sm" onclick="Ajouter_ligne()"><i class="fa fa-plus"></i> Ajouter un évènement</button>
+
+{# Modal ligne de modèle #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_ligne{% endblock %}
+    {% block modal_titre %}{% endblock %}
+    {% block modal_classe %}modal-lg{% endblock %}
+    {% block modal_body %}
+        <div id="id_div_form_ligne">
+        </div>
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" onclick="valider_form_ligne()"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+    {% endblock %}
+{% endembed %}
+
+<script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+
+<script>
+    {% include 'core/csrftoken.html' %}
+
+    var valeurs = JSON.parse("{{ value|escapejs }}");
+    var dict_types_evenements = JSON.parse("{{ types_evenements|escapejs }}");
+    var dict_jours_semaine = JSON.parse("{{ jours_semaine|escapejs }}");
+
+    $(document).ready(function() {
+        maj_tableau();
+    })
+
+    function maj_tableau() {
+        var html = "";
+        $.each(valeurs, function (index, dict_ligne) {
+            var colonnes = [];
+            colonnes.push("<input name='ligne' value='" + JSON.stringify(dict_ligne) + "' hidden>");
+            colonnes.push("<td>" + dict_jours_semaine[dict_ligne["jour"]] + "</td>");
+            colonnes.push("<td>" + dict_ligne["periode"] + "</td>");
+            colonnes.push("<td>" + dict_ligne["heure_debut"].slice(0, -3) + "</td>");
+            colonnes.push("<td>" + dict_ligne["heure_fin"].slice(0, -3) + "</td>");
+            colonnes.push("<td>" + dict_types_evenements[dict_ligne["type_evenement"]] + "</td>");
+            colonnes.push("<td>" + (dict_ligne["titre"] ? dict_ligne["titre"]: "") + "</td>");
+            html += "<tr class='text-center'>" + colonnes.join() + "<td>";
+            html += "<a type='button' class='btn btn-default btn-xs' onclick='Modifier_ligne(" + index + ")' title='Modifier'><i class='fa fa-fw fa-pencil'></i></a> ";
+            html += "<a type='button' class='btn btn-default btn-xs' onclick='Supprimer_ligne(" + index + ")' title='Supprimer'><i class='fa fa-fw fa-trash'></i></a>";
+            html += "</td>";
+        })
+        $("#contenu_tableau").html(html)
+        $("#lignes").val(JSON.stringify(valeurs))
+    }
+
+    function Ajouter_ligne() {
+        $('#modal_ligne .modal-title').html("Ajouter un évènement");
+        get_form_ligne("ajouter", null)
+    }
+
+    function Modifier_ligne(index) {
+        $('#modal_ligne .modal-title').html("Modifier un évènement");
+        get_form_ligne("modifier", index)
+    }
+
+    function Supprimer_ligne(index) {
+        bootbox.dialog({
+            title: "Confirmation",
+            message: "Confirmez-vous la suppression de cet évènement ?",
+            buttons: {
+                ok: {
+                    label: "<i class='fa fa-trash'></i> Supprimer",
+                    className: 'btn-warning',
+                    callback: function(){
+                        valeurs.splice(index, 1);
+                        maj_tableau();
+                    }
+                },
+                cancel: {
+                    label: "<i class='fa fa-ban'></i> Annuler",
+                    className: 'btn-danger',
+                }
+            }
+        });
+    }
+
+    function get_form_ligne(action, index) {
+        $.ajax({
+            url: "{% url 'ajax_modeles_plannings_collaborateurs_form_ligne' %}",
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+                action: action,
+                valeur: JSON.stringify(valeurs[index]),
+                index: index,
+            },
+            success: function (data) {
+                $("#ligne_form").remove();
+                $("#id_div_form_ligne").append(data['form_html']);
+                $("#modal_ligne").modal("show");
+            }
+        });
+    }
+
+    function valider_form_ligne() {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_modeles_plannings_collaborateurs_form_ligne' %}",
+            data: $("#ligne_form").serialize(),
+            datatype: "json",
+            success: function(data){
+                $("#modal_ligne").modal("hide");
+                if (data.index) {
+                    valeurs[data.index] = data.valeur;
+                } else {
+                    valeurs.push(data.valeur);
+                }
+                maj_tableau();
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        });
+    }
+
+</script>

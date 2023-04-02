@@ -40,3 +40,18 @@ class ParametresTarifs(Widget):
         context = self.get_context(name, value, attrs)
         return mark_safe(loader.render_to_string(self.template_name, context))
 
+
+class Ligne_modele_planning(Widget):
+    template_name = "parametrage/widgets/ligne_modele_planning.html"
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        context["name"] = name
+        context["value"] = value
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))

@@ -134,6 +134,7 @@ LISTE_CATEGORIES_QUESTIONNAIRES = [
     ("location", "Location"),
     ("location_demande", "Demande de location"),
     ("inscription", "Inscription"),
+    ("collaborateur", "Collaborateur"),
     ]
 
 LISTE_ETATS_CONSO = [
@@ -1363,6 +1364,7 @@ class Evenement(models.Model):
     heure_debut = models.TimeField(verbose_name="Heure de début", blank=True, null=True)
     heure_fin = models.TimeField(verbose_name="Heure de fin", blank=True, null=True)
     montant = models.DecimalField(verbose_name="Montant", blank=True, null=True, max_digits=10, decimal_places=2, default=0.0)
+    equiv_heures = models.TimeField(verbose_name="Equivalence en heures", blank=True, null=True)
 
     class Meta:
         db_table = 'evenements'
@@ -1999,6 +2001,7 @@ class Note(models.Model):
     rappel = models.BooleanField(verbose_name="Rappel à l'ouverture de Noethys", default=False)
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE, blank=True, null=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE, blank=True, null=True)
+    collaborateur = models.ForeignKey("Collaborateur", verbose_name="Collaborateur", blank=True, null=True, on_delete=models.CASCADE)
     texte = models.TextField(verbose_name="Texte", help_text="Saisissez ici le texte de la note.")
     afficher_facture = models.BooleanField(verbose_name="Afficher sur la facture", default=False)
     rappel_famille = models.BooleanField(verbose_name="Rappel à l'ouverture de la fiche famille", default=False)
@@ -2445,6 +2448,7 @@ class QuestionnaireReponse(models.Model):
     question = models.ForeignKey(QuestionnaireQuestion, verbose_name="Question", on_delete=models.CASCADE)
     individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.CASCADE)
     famille = models.ForeignKey(Famille, verbose_name="Famille", blank=True, null=True, on_delete=models.CASCADE)
+    collaborateur = models.ForeignKey("Collaborateur", verbose_name="Collaborateur", blank=True, null=True, on_delete=models.CASCADE)
     reponse = models.CharField(verbose_name="Réponse", max_length=450, blank=True, null=True)
     # type = models.CharField(verbose_name="Type", max_length=200, choices=LISTE_CATEGORIES_QUESTIONNAIRES, blank=True, null=True)
     donnee = models.IntegerField(verbose_name="Donnée associée", db_column='IDdonnee', blank=True, null=True)
@@ -2733,6 +2737,7 @@ class Historique(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.PROTECT)
     famille = models.ForeignKey(Famille, verbose_name="Famille", blank=True, null=True, on_delete=models.CASCADE)
     individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.CASCADE)
+    collaborateur = models.ForeignKey("Collaborateur", verbose_name="Collaborateur", blank=True, null=True, on_delete=models.CASCADE)
     titre = models.CharField(verbose_name="Action", max_length=300, blank=True, null=True)
     detail = encrypt(models.TextField(verbose_name="Détail", blank=True, null=True))
     old = encrypt(models.TextField(verbose_name="Ancienne valeur", blank=True, null=True))
@@ -2901,6 +2906,7 @@ class Destinataire(models.Model):
     categorie = models.CharField(verbose_name="Catégorie", max_length=300, blank=True, null=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.CASCADE)
     famille = models.ForeignKey(Famille, verbose_name="Famille", blank=True, null=True, on_delete=models.CASCADE)
+    collaborateur = models.ForeignKey("Collaborateur", verbose_name="Collaborateur", blank=True, null=True, on_delete=models.CASCADE)
     contact = models.ForeignKey(Contact, verbose_name="Contact", blank=True, null=True, on_delete=models.CASCADE)
     liste_diffusion = models.ForeignKey(ListeDiffusion, verbose_name="Liste de diffusion", blank=True, null=True, on_delete=models.CASCADE)
     adresse = encrypt(models.EmailField(verbose_name="Email", max_length=300, blank=True, null=True))
@@ -3462,6 +3468,7 @@ class DestinataireSMS(models.Model):
     categorie = models.CharField(verbose_name="Catégorie", max_length=300, blank=True, null=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.CASCADE)
     famille = models.ForeignKey(Famille, verbose_name="Famille", blank=True, null=True, on_delete=models.CASCADE)
+    collaborateur = models.ForeignKey("Collaborateur", verbose_name="Collaborateur", blank=True, null=True, on_delete=models.CASCADE)
     contact = models.ForeignKey(Contact, verbose_name="Contact", blank=True, null=True, on_delete=models.CASCADE)
     mobile = encrypt(models.EmailField(verbose_name="Mobile", max_length=300, blank=True, null=True))
     date_envoi = models.DateTimeField(verbose_name="Date d'envoi", blank=True, null=True)
@@ -3908,3 +3915,205 @@ class ComptaCategorieBudget(models.Model):
 
     def __str__(self):
         return "Catégorie budgétaire ID%s" % (self.idcategorie_budget or "Nouvelle catégorie budgétaire")
+
+
+class TypeQualificationCollaborateur(models.Model):
+    idtype_qualification = models.AutoField(verbose_name="ID", db_column="IDtype_qualification", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=300)
+
+    class Meta:
+        db_table = "types_qualifications"
+        verbose_name = "type de qualification"
+        verbose_name_plural = "types de qualifications"
+
+    def __str__(self):
+        return self.nom
+
+
+class TypePosteCollaborateur(models.Model):
+    idtype_poste = models.AutoField(verbose_name="ID", db_column="IDtype_poste", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=300)
+
+    class Meta:
+        db_table = "types_postes_collaborateur"
+        verbose_name = "type de poste"
+        verbose_name_plural = "types de postes"
+
+    def __str__(self):
+        return self.nom
+
+
+class TypePieceCollaborateur(models.Model):
+    idtype_piece = models.AutoField(verbose_name="ID", db_column='IDtype_piece', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    duree_validite = models.CharField(verbose_name="Durée de validité", max_length=100, blank=True, null=True)
+    obligatoire = models.CharField(verbose_name="Obligatoire", max_length=50, choices=[("OUI", "Oui"), ("NON", "Non"), ("QUALIFICATIONS", "Obligatoire pour les qualifications suivantes"), ("POSTES", "Obligatoire pour les postes suivants")], default="NON")
+    qualifications = models.ManyToManyField(TypeQualificationCollaborateur, verbose_name="Qualifications associées", related_name="type_piece_qualifications", blank=True)
+    postes = models.ManyToManyField(TypePosteCollaborateur, verbose_name="Postes associés", related_name="type_piece_postes", blank=True)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = 'types_pieces_collaborateur'
+        verbose_name = "type de pièce"
+        verbose_name_plural = "types de pièce"
+
+    def __str__(self):
+        return self.nom
+
+    def Get_duree(self):
+        return utils_dates.ConvertDureeStrToDuree(self.duree_validite)
+
+    def Get_date_fin_validite(self, date_reference=None):
+        if not date_reference:
+            date_reference = datetime.date.today()
+        if not self.duree_validite:
+            return datetime.date(2999, 1, 1)
+        else:
+            return date_reference + self.Get_duree()
+
+
+class Collaborateur(models.Model):
+    idcollaborateur = models.AutoField(verbose_name="ID", db_column='IDcollaborateur', primary_key=True)
+    civilite = models.CharField(verbose_name="Civilité", max_length=50, choices=[("M", "M."), ("MME", "Mme")], default="M")
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    nom_jfille = models.CharField(verbose_name="Nom de naissance", max_length=200, blank=True, null=True)
+    prenom = models.CharField(verbose_name="Prénom", max_length=200, blank=True, null=True)
+    rue_resid = encrypt(models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True))
+    cp_resid = encrypt(models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True))
+    ville_resid = encrypt(models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True))
+    travail_tel = encrypt(models.CharField(verbose_name="Téléphone pro.", max_length=100, blank=True, null=True))
+    travail_mail = encrypt(models.EmailField(verbose_name="Email pro.", max_length=300, blank=True, null=True))
+    tel_domicile = encrypt(models.CharField(verbose_name="Tél domicile", max_length=100, blank=True, null=True))
+    tel_mobile = encrypt(models.CharField(verbose_name="Tél portable", max_length=100, blank=True, null=True))
+    mail = encrypt(models.EmailField(verbose_name="Email personnel", max_length=300, blank=True, null=True))
+    memo = models.TextField(verbose_name="Mémo", blank=True, null=True)
+    date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
+    etat = models.CharField(verbose_name="Etat", max_length=50, blank=True, null=True)
+    photo = models.ImageField(verbose_name="Photo", upload_to=get_uuid_path, blank=True, null=True)
+    qualifications = models.ManyToManyField(TypeQualificationCollaborateur, verbose_name="Qualifications", related_name="collaborateur_qualifications", blank=True)
+
+    class Meta:
+        db_table = "collaborateurs"
+        verbose_name = "collaborateur"
+        verbose_name_plural = "collaborateurs"
+
+    def __str__(self):
+        return self.Get_nom()
+
+    def Get_nom(self):
+        return "%s %s" % (self.nom, self.prenom)
+
+    def Get_photo(self, forTemplate=True):
+        if self.photo:
+            return self.photo.url
+        nom_image = "homme.png" if self.civilite == "homme" else "femme.png"
+        return static("images/" + nom_image) if forTemplate else settings.STATIC_ROOT + "/images/" + nom_image
+
+
+class PieceCollaborateur(models.Model):
+    idpiece = models.AutoField(verbose_name="ID", db_column='IDpiece', primary_key=True)
+    type_piece = models.ForeignKey(TypePieceCollaborateur, verbose_name="Type de pièce", on_delete=models.PROTECT, blank=True, null=True)
+    collaborateur = models.ForeignKey(Collaborateur, verbose_name="Collaborateur", on_delete=models.CASCADE, blank=True, null=True)
+    date_debut = models.DateField(verbose_name="Date de début", blank=True, null=True)
+    date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
+    document = models.FileField(verbose_name="Document", storage=get_storage("piece_collaborateur"), upload_to=get_uuid_path, blank=True, null=True)
+    titre = models.CharField(verbose_name="Titre", max_length=200, blank=True, null=True)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+
+    class Meta:
+        db_table = 'pieces_collaborateur'
+        verbose_name = "pièce"
+        verbose_name_plural = "pièces"
+
+    def __str__(self):
+        return self.Get_nom()
+
+    def Get_nom(self):
+        if not self.type_piece:
+            return self.titre
+        return self.type_piece.nom
+
+
+class TypeEvenementCollaborateur(models.Model):
+    idtype_evenement = models.AutoField(verbose_name="ID", db_column='IDtype_evenement', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    type = models.CharField(verbose_name="Type", max_length=100, choices=[("ADDITION", "Temps comptabilisé"), ("NEUTRE", "Temps non comptabilisé"), ("SOUSTRACTION", "Temps soustrait")])
+    chevauchement_possible = models.BooleanField(verbose_name="Chevauchement possible", default=False)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    couleur = models.CharField(verbose_name="Couleur", max_length=100, default="#3c8dbc")
+
+    class Meta:
+        db_table = "types_evenements_collaborateur"
+        verbose_name = "catégorie d'évènement"
+        verbose_name_plural = "catégories d'évènements"
+
+    def __str__(self):
+        return self.nom
+
+
+class EvenementCollaborateur(models.Model):
+    idevenement = models.AutoField(verbose_name="ID", db_column="IDevenement", primary_key=True)
+    collaborateur = models.ForeignKey(Collaborateur, verbose_name="Collaborateur", on_delete=models.PROTECT, blank=True, null=True)
+    type_evenement = models.ForeignKey(TypeEvenementCollaborateur, verbose_name="Catégorie", on_delete=models.PROTECT, blank=True, null=True)
+    date_debut = models.DateTimeField(verbose_name="Début", blank=True, null=True)
+    date_fin = models.DateTimeField(verbose_name="Fin", blank=True, null=True)
+    titre = models.CharField(verbose_name="Titre", max_length=200, blank=True, null=True)
+
+    class Meta:
+        db_table = "evenements_collaborateur"
+        verbose_name = "évènement d'un collaborateur"
+        verbose_name_plural = "évènements d'un collaborateur"
+
+    def __str__(self):
+        return "Evenement ID%d" % self.idevenement if self.idevenement else "Nouvel évènement"
+
+
+class ContratCollaborateur(models.Model):
+    idcontrat = models.AutoField(verbose_name="ID", db_column="IDcontrat", primary_key=True)
+    collaborateur = models.ForeignKey(Collaborateur, verbose_name="Collaborateur", on_delete=models.PROTECT)
+    type_poste = models.ForeignKey(TypePosteCollaborateur, verbose_name="Poste", on_delete=models.PROTECT)
+    date_debut = models.DateField(verbose_name="Date de début")
+    date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+
+    class Meta:
+        db_table = "contrats_collaborateur"
+        verbose_name = "contrat d'un collaborateur"
+        verbose_name_plural = "contrats d'un collaborateur"
+
+    def __str__(self):
+        return "Contrat ID%d" % self.idcontrat if self.idcontrat else "Nouveau contrat"
+
+
+class ModelePlanningCollaborateur(models.Model):
+    idmodele = models.AutoField(verbose_name="ID", db_column="IDmodele", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=300)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    inclure_feries = models.BooleanField(verbose_name="Inclure les jours fériés", default=False)
+
+    class Meta:
+        db_table = "modeles_planning_collaborateur"
+        verbose_name = "modèle de planning"
+        verbose_name_plural = "modèles de plannings"
+
+    def __str__(self):
+        return self.nom
+
+
+class LigneModelePlanningCollaborateur(models.Model):
+    idligne = models.AutoField(verbose_name="ID", db_column="IDligne", primary_key=True)
+    modele = models.ForeignKey(ModelePlanningCollaborateur, verbose_name="Modèle de planning", on_delete=models.CASCADE)
+    jour = models.IntegerField(verbose_name="Jour", choices=JOURS_COMPLETS_SEMAINE)
+    periode = models.CharField(verbose_name="Période", max_length=50, choices=[("TOUTES", "Toutes les périodes"), ("SCOLAIRES", "Période scolaire"), ("VACANCES", "Période de vacances")], default="TOUTES")
+    heure_debut = models.TimeField(verbose_name="Début")
+    heure_fin = models.TimeField(verbose_name="Fin")
+    type_evenement = models.ForeignKey(TypeEvenementCollaborateur, verbose_name="Catégorie", on_delete=models.PROTECT, blank=True, null=True)
+    titre = models.CharField(verbose_name="Titre", max_length=200, blank=True, null=True)
+
+    class Meta:
+        db_table = "lignes_modeles_planning_collaborateur"
+        verbose_name = "ligne de modèle de planning"
+        verbose_name_plural = "lignes de modèles de planning"
+
+    def __str__(self):
+        return "Ligne de modèle ID%d" % self.idligne if self.idligne else "Nouvelle ligne de modèle"

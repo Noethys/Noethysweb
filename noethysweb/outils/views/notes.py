@@ -31,7 +31,7 @@ class Liste(Page, crud.Liste):
 
     def get_queryset(self):
         conditions = (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
-        return Note.objects.select_related("famille", "individu").filter(conditions, self.Get_filtres("Q"))
+        return Note.objects.select_related("famille", "individu", "collaborateur").filter(conditions, self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

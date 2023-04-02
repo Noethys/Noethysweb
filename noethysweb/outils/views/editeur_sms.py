@@ -9,7 +9,7 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.db.models import Q, Count
 from django.contrib import messages
 from core.views import crud
-from core.models import SMS, DestinataireSMS, Famille, Individu, ModeleSMS
+from core.models import SMS, DestinataireSMS, Famille, Individu, Collaborateur, ModeleSMS
 from core.utils import utils_texte
 from outils.forms.editeur_sms import Formulaire
 from outils.utils import utils_sms
@@ -39,7 +39,7 @@ class Page(crud.Page):
         destinataires, adresses_temp = [], []
         nbre_envois_attente, nbre_envois_reussis, nbre_envois_echec = 0, 0, 0
         if self.Get_idsms():
-            for destinataire in DestinataireSMS.objects.select_related("famille", "individu").filter(sms=self.Get_idsms()).order_by("mobile"):
+            for destinataire in DestinataireSMS.objects.select_related("famille", "individu", "collaborateur").filter(sms=self.Get_idsms()).order_by("mobile"):
                 if True:#destinataire.adresse not in adresses_temp:
                     destinataires.append(destinataire)
                     adresses_temp.append(destinataire.mobile)
@@ -105,6 +105,7 @@ class Page(crud.Page):
         action = request.POST.get("action")
         if action == "ajouter_familles": return HttpResponseRedirect(reverse_lazy("editeur_sms_familles", kwargs={"idsms": sms.pk}))
         if action == "ajouter_individus": return HttpResponseRedirect(reverse_lazy("editeur_sms_individus", kwargs={"idsms": sms.pk}))
+        if action == "ajouter_collaborateurs": return HttpResponseRedirect(reverse_lazy("editeur_sms_collaborateurs", kwargs={"idsms": sms.pk}))
         if action == "ajouter_saisie_libre": return HttpResponseRedirect(reverse_lazy("editeur_sms_saisie_libre", kwargs={"idsms": sms.pk}))
 
         # Envoyer
@@ -155,6 +156,8 @@ class Page_destinataires(crud.Page):
             dict_numeros = {famille.pk: famille.mobile for famille in Famille.objects.all()}
         if self.categorie == "individu":
             dict_numeros = {individu.pk: individu.tel_mobile for individu in Individu.objects.all()}
+        if self.categorie == "collaborateur":
+            dict_numeros = {collaborateur.pk: collaborateur.tel_mobile for collaborateur in Collaborateur.objects.all()}
 
         # Importe la liste des destinataires actuels
         destinataires = DestinataireSMS.objects.filter(categorie=self.categorie, sms=sms)

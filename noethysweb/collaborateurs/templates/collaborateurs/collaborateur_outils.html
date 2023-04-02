@@ -1,0 +1,43 @@
+{% extends "collaborateurs/collaborateur_liste.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_collaborateur %}
+    <div class="col-md-9">
+
+        <div class="card">
+            <div class="card-header with-border">
+                <h3 class="card-title">Outils</h3>
+            </div>
+            <div class="card-body">
+                <p>Cliquez ci-dessous sur l'outil souhaité.</p>
+            </div>
+        </div>
+
+        <div class="row">
+        {% for liste in items_menu %}
+            <div class="col-md-6">
+                {% for submenu in liste %}
+                    <div class="card card-solid">
+                        {% if submenu.titre %}
+                            <div class="card-header">
+                                <h3 class="card-title">{{ submenu.titre }}</h3>
+                            </div>
+                        {% endif %}
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                {% for item in submenu.items %}
+                                    <a class="list-group-item list-group-item-action" href="{{ item.url }}"><i class="fa fa-{{ item.icone }} mr-1"></i> {{ item.titre }}</a>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        </div>
+
+    </div>
+{% endblock %}

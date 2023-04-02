@@ -136,6 +136,14 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_locations.Add(code="categories_produits_liste", titre="Catégories de produits", icone="file-text-o")
     menu_locations.Add(code="produits_liste", titre="Produits", icone="file-text-o")
 
+    # Collaborateurs
+    menu_collaborateurs = menu_parametrage.Add(titre="Collaborateurs")
+    menu_collaborateurs.Add(code="types_qualifications_collaborateurs_liste", titre="Types de qualifications", icone="file-text-o")
+    menu_collaborateurs.Add(code="types_pieces_collaborateurs_liste", titre="Types de pièces", icone="file-text-o")
+    menu_collaborateurs.Add(code="types_evenements_collaborateurs_liste", titre="Catégories d'évènements", icone="file-text-o")
+    menu_collaborateurs.Add(code="types_postes_collaborateurs_liste", titre="Types de postes", icone="file-text-o")
+    menu_collaborateurs.Add(code="modeles_plannings_collaborateurs_liste", titre="Modèles de plannings", icone="file-text-o")
+
 
     # ------------------------------------ Outils ------------------------------------
     menu_outils = menu.Add(code="outils_toc", titre="Outils", icone="wrench")
@@ -406,6 +414,21 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_comptabilite_analyse = menu_comptabilite.Add(titre="Analyse")
     menu_comptabilite_analyse.Add(code="suivi_tresorerie", titre="Suivi de la trésorerie", icone="file-text-o")
     menu_comptabilite_analyse.Add(code="suivi_budget", titre="Suivi du budget", icone="file-text-o")
+
+
+    # ------------------------------------ Collaborateurs ------------------------------------
+    menu_collaborateurs = menu.Add(code="collaborateurs_toc", titre="Collaborateurs", icone="users")
+
+    # Liste des collaborateurs
+    menu_gestion_collaborateurs = menu_collaborateurs.Add(titre="Gestion des collaborateurs")
+    menu_gestion_collaborateurs.Add(code="collaborateur_liste", titre="Liste des collaborateurs", icone="file-text-o")
+    menu_gestion_collaborateurs.Add(code="contrats_liste", titre="Liste des contrats", icone="file-text-o")
+
+    # Gestion des évènements
+    menu_gestion_evenements_collaborateurs = menu_collaborateurs.Add(titre="Gestion des évènements")
+    menu_gestion_evenements_collaborateurs.Add(code="appliquer_modele_planning", titre="Appliquer un modèle de planning", icone="file-text-o")
+    menu_gestion_evenements_collaborateurs.Add(code="planning_collaborateurs", titre="Planning des évènements", icone="file-text-o")
+
 
 
     # ------------------------------------ Aide ------------------------------------

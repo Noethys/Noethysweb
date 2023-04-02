@@ -99,6 +99,7 @@ DATABASES = {
 # STORAGE_QUOTIENT = "django.core.files.storage.FileSystemStorage"
 # STORAGE_ASSURANCE = "django.core.files.storage.FileSystemStorage"
 # STORAGE_PHOTO = "django.core.files.storage.FileSystemStorage"
+# STORAGE_PIECE_COLLABORATEUR = "django.core.files.storage.FileSystemStorage"
 
 # Si l'un des champs ci-dessus utilise Dropbox, renseignez le token Dropbox ci-dessous :
 # DROPBOX_OAUTH2_TOKEN = "XXXXXXXXXXXXXXX"

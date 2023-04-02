@@ -54,9 +54,17 @@ class Formulaire(FormulaireBase, ModelForm):
         # Destinataire
         if self.instance:
             destinataire = self.instance.destinataires.first()
-            rattachements = Rattachement.objects.select_related("individu").filter(famille=destinataire.famille, titulaire=True).order_by("individu__nom", "individu__prenom")
-            self.fields["destinataire"].choices = [(None, "---------")] + [(rattachement.individu.tel_mobile, "%s (%s)" % (rattachement.individu.tel_mobile, rattachement.individu.Get_nom())) for rattachement in rattachements if rattachement.individu.tel_mobile]
-            self.fields["destinataire"].initial = destinataire.famille.mobile
+
+            if destinataire.famille:
+                rattachements = Rattachement.objects.select_related("individu").filter(famille=destinataire.famille, titulaire=True).order_by("individu__nom", "individu__prenom")
+                self.fields["destinataire"].choices = [(None, "---------")] + [(rattachement.individu.tel_mobile, "%s (%s)" % (rattachement.individu.tel_mobile, rattachement.individu.Get_nom())) for rattachement in rattachements if rattachement.individu.tel_mobile]
+                self.fields["destinataire"].initial = destinataire.famille.mobile
+
+            if destinataire.collaborateur:
+                self.fields["destinataire"].choices = [(None, "---------")]
+                if destinataire.collaborateur.tel_mobile:
+                    self.fields["destinataire"].choices.append((destinataire.collaborateur.tel_mobile, "%s (%s)" % (destinataire.collaborateur.tel_mobile, destinataire.collaborateur.Get_nom())))
+                    self.fields["destinataire"].initial = destinataire.collaborateur.tel_mobile
 
         # Affichage
         self.helper.layout = Layout(

@@ -1,0 +1,233 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+{% endblock styles %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static 'lib/fullcalendar/dist/index.global.min.js' %}"></script>
+    <script src="{% static 'lib/moment/moment.min.js' %}" type="text/javascript"></script>
+    <script src="{% static 'lib/select2/js/select2.min.js' %}" type="text/javascript"></script>
+    <script src="{% static 'lib/select2/js/i18n/fr.js' %}" type="text/javascript"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    <div style="height: 75vh;">
+        <div id="calendar"></div>
+    </div>
+
+    <script>
+        var calendar;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+                height: window.innerHeight - 165,
+                windowResize: function(arg) {
+                    calendar.setOption("height", window.innerHeight - 165);
+                },
+                themeSystem: 'bootstrap',
+                editable: true,
+                selectable: true,
+                nowIndicator: true,
+
+                customButtons: {
+                    bouton_outils: {
+                        text: "Outils",
+                        click: function() {
+                            alert("En cours de développement !");
+                        }
+                    }
+                },
+                headerToolbar: {
+                    left: 'today prev,next bouton_outils',
+                    center: 'title',
+                    right: 'resourceTimelineDay,resourceTimelineWeek,dayGridMonth,multiMonthYear,timeGridWeek,listWeek'
+                },
+                buttonText: {
+                    today: "Aujourd'hui",
+                    month: "Mois",
+                    week: "Agenda",
+                    day: "Jour",
+                    multiMonthYear: "Année",
+                    resourceTimelineWeek: "Semaine",
+                    list: "Liste"
+                },
+                slotDuration: "00:15:00",
+                slotMinWidth: 15,
+                initialView: 'resourceTimelineDay',
+                firstDay: 1,
+                allDaySlot: false,
+
+                displayEventTime: true,
+                defaultRangeSeparator: "-",
+
+                resourceAreaWidth: 300,
+                resourceAreaHeaderContent: 'Collaborateurs',
+                resourceAreaColumns: [
+                    {
+                        field: 'nom_collaborateur',
+                        headerContent: 'Nom',
+                    },
+                    {
+                        field: 'duree',
+                        headerContent: 'Durée',
+                        width: 70
+                    }
+                ],
+                refetchResourcesOnNavigate: true,
+                //resourceGroupField: 'categorie',
+                resources: function (fetchInfo, successCallback, failureCallback) {
+                    $.ajax({
+                        url: "{% url 'ajax_planning_collaborateurs_get_collaborateurs' %}",
+                        type: "POST",
+                        data: {
+                            date_debut: moment(fetchInfo.start).format('YYYY-MM-DD HH:mm'),
+                            date_fin: moment(fetchInfo.end).format('YYYY-MM-DD HH:mm'),
+                            csrfmiddlewaretoken: "{{ csrf_token }}"
+                        }
+                    }).done(function(data) {
+                        successCallback(data.collaborateurs);
+                    });
+                },
+                events: function (fetchInfo, successCallback, failureCallback) {
+                    $.ajax({
+                        url: "{% url 'ajax_planning_collaborateurs_get_evenements' %}",
+                        type: "POST",
+                        data: {
+                            date_debut: moment(fetchInfo.start).format('YYYY-MM-DD HH:mm'),
+                            date_fin: moment(fetchInfo.end).format('YYYY-MM-DD HH:mm'),
+                            csrfmiddlewaretoken: "{{ csrf_token }}"
+                        }
+                    }).done(function(data) {
+                        successCallback(data.evenements);
+                    });
+                },
+                select: function(selectionInfo) {
+                    if (selectionInfo.resource.id.indexOf("categorie") >= 0) {
+                        return false;
+                    }
+                    data_event = {
+                        "collaborateur": selectionInfo.resource.id,
+                        "date_debut": moment(selectionInfo.start).format('YYYY-MM-DD HH:mm'),
+                        "date_fin": moment(selectionInfo.end).format('YYYY-MM-DD HH:mm')
+                    }
+                    ouvre_modal_detail(null, data_event);
+                },
+                eventClick: function(event) {
+                    ouvre_modal_detail(event.event.id);
+                },
+                eventAllow: function(dropInfo, draggedEvent) {
+                    return dropInfo.resource.id.indexOf("categorie") < 0;
+                },
+                eventDrop: function(eventDropInfo) {
+                    modifier_event({
+                        "idevenement": eventDropInfo.event.id,
+                        "collaborateur": eventDropInfo.newResource ? eventDropInfo.newResource.id: 0,
+                        "date_debut": moment(eventDropInfo.event.start).format('YYYY-MM-DD HH:mm'),
+                        "date_fin": moment(eventDropInfo.event.end).format('YYYY-MM-DD HH:mm')
+                    })
+                },
+                eventResize: function (eventResizeInfo) {
+                    modifier_event({
+                        "idevenement": eventResizeInfo.event.id,
+                        "date_debut": moment(eventResizeInfo.event.start).format('YYYY-MM-DD HH:mm'),
+                        "date_fin": moment(eventResizeInfo.event.end).format('YYYY-MM-DD HH:mm')
+                    })
+                },
+            });
+            calendar.setOption('locale', 'fr');
+            calendar.render();
+        });
+
+        function modifier_event(data_event) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_planning_collaborateurs_modifier_evenement' %}",
+                data: {
+                    "data_event": JSON.stringify(data_event),
+                    "csrfmiddlewaretoken": "{{ csrf_token }}"
+                },
+                datatype: "json",
+                success: function(data){
+                    calendar.refetchEvents();
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
+        function ouvre_modal_detail(idevenement, data_event) {
+            $("#modal_detail_evenement").off('submit');
+            $.ajax({
+                url: "{% url 'ajax_planning_collaborateurs_get_form_detail_evenement' %}",
+                type: "POST",
+                data: {
+                    idevenement: idevenement,
+                    data_event: JSON.stringify(data_event),
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function (data) {
+                    $("#id_div_form_detail_evenement").html(data['form_html']);
+                    $("#modal_detail_evenement").modal("show");
+                    $("#modal_detail_evenement").on('submit', submit_form);
+                }
+            });
+        }
+
+        function submit_form(event) {
+            event.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_planning_collaborateurs_valid_form_detail_evenement' %}",
+                data: $("#collaborateurs_evenements_form").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $("#modal_detail_evenement").modal("hide");
+                    calendar.refetchEvents();
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
+        function supprimer_evenement(idevenement) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_planning_collaborateurs_supprimer_evenement' %}",
+                data: {"idevenement": idevenement},
+                datatype: "json",
+                success: function(data){
+                    $("#modal_detail_evenement").modal("hide");
+                    calendar.refetchEvents();
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
+    </script>
+
+    {# Modal Détail d'un évènement #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_detail_evenement{% endblock %}
+        {% block modal_titre %}Détail d'un évènement{% endblock %}
+        {% block modal_classe %}modal-lg{% endblock %}
+        {% block modal_body %}
+            <div id="id_div_form_detail_evenement">
+            </div>
+        {% endblock %}
+    {% endembed %}
+
+{% endblock contenu_page %}

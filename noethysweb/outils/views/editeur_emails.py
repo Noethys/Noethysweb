@@ -9,7 +9,7 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.db.models import Q, Count
 from django.contrib import messages
 from core.views import crud
-from core.models import ModeleEmail, Mail, PieceJointe, Destinataire, Famille, Individu, Contact, SignatureEmail
+from core.models import ModeleEmail, Mail, PieceJointe, Destinataire, Famille, Individu, Collaborateur, Contact, SignatureEmail
 from core.utils import utils_texte
 from outils.forms.editeur_emails import Formulaire
 from outils.utils import utils_email
@@ -49,7 +49,7 @@ class Page(crud.Page):
         destinataires, adresses_temp = [], []
         nbre_envois_attente, nbre_envois_reussis, nbre_envois_echec = 0, 0, 0
         if self.Get_idmail():
-            for destinataire in Destinataire.objects.select_related("famille", "individu", "contact").prefetch_related("documents").filter(mail=self.Get_idmail()).order_by("adresse"):
+            for destinataire in Destinataire.objects.select_related("famille", "individu", "contact", "collaborateur").prefetch_related("documents").filter(mail=self.Get_idmail()).order_by("adresse"):
                 if True:#destinataire.adresse not in adresses_temp:
                     destinataires.append(destinataire)
                     adresses_temp.append(destinataire.adresse)
@@ -128,6 +128,7 @@ class Page(crud.Page):
         action = request.POST.get("action")
         if action == "ajouter_familles": return HttpResponseRedirect(reverse_lazy("editeur_emails_familles", kwargs={"idmail": mail.pk}))
         if action == "ajouter_individus": return HttpResponseRedirect(reverse_lazy("editeur_emails_individus", kwargs={"idmail": mail.pk}))
+        if action == "ajouter_collaborateurs": return HttpResponseRedirect(reverse_lazy("editeur_emails_collaborateurs", kwargs={"idmail": mail.pk}))
         if action == "ajouter_contacts": return HttpResponseRedirect(reverse_lazy("editeur_emails_contacts", kwargs={"idmail": mail.pk}))
         if action == "ajouter_diffusion": return HttpResponseRedirect(reverse_lazy("editeur_emails_listes_diffusion", kwargs={"idmail": mail.pk}))
         if action == "ajouter_saisie_libre": return HttpResponseRedirect(reverse_lazy("editeur_emails_saisie_libre", kwargs={"idmail": mail.pk}))
@@ -182,6 +183,8 @@ class Page_destinataires(crud.Page):
             dict_adresses = {famille.pk: famille.mail for famille in Famille.objects.all()}
         if self.categorie == "individu":
             dict_adresses = {individu.pk: individu.mail for individu in Individu.objects.all()}
+        if self.categorie == "collaborateur":
+            dict_adresses = {collaborateur.pk: collaborateur.mail for collaborateur in Collaborateur.objects.all()}
         if self.categorie == "contact":
             dict_adresses = {contact.pk: contact.mail for contact in Contact.objects.all()}
 

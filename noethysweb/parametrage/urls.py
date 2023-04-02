@@ -23,7 +23,9 @@ from parametrage.views import organisateur, structures, \
     portail_parametres, types_regimes_alimentaires, assureurs, categories_compte_internet, modeles_pes, \
     types_consentements, unites_consentements, articles, images_articles, albums, images_fond, portail_documents, portail_parametres_renseignements, \
     configurations_sms, perceptions, modeles_prelevements, taches_recurrentes, modeles_prestations, \
-    categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets
+    categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
+    types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
+    modeles_plannings_collaborateurs
 
 
 urlpatterns = [
@@ -533,6 +535,36 @@ urlpatterns = [
     path('parametrage/produits/tarifs_produits/modifier/<int:idproduit>/<int:pk>', produits_tarifs.Modifier.as_view(), name='produits_tarifs_modifier'),
     path('parametrage/produits/tarifs_produits/supprimer/<int:idproduit>/<int:pk>', produits_tarifs.Supprimer.as_view(), name='produits_tarifs_supprimer'),
 
+    # Types de qualifications collaborateurs
+    path('parametrage/types_qualifications_collaborateurs/liste', types_qualifications_collaborateurs.Liste.as_view(), name='types_qualifications_collaborateurs_liste'),
+    path('parametrage/types_qualifications_collaborateurs/ajouter', types_qualifications_collaborateurs.Ajouter.as_view(), name='types_qualifications_collaborateurs_ajouter'),
+    path('parametrage/types_qualifications_collaborateurs/modifier/<int:pk>', types_qualifications_collaborateurs.Modifier.as_view(), name='types_qualifications_collaborateurs_modifier'),
+    path('parametrage/types_qualifications_collaborateurs/supprimer/<int:pk>', types_qualifications_collaborateurs.Supprimer.as_view(), name='types_qualifications_collaborateurs_supprimer'),
+
+    # Types de pièces collaborateurs
+    path('parametrage/types_pieces_collaborateurs/liste', types_pieces_collaborateurs.Liste.as_view(), name='types_pieces_collaborateurs_liste'),
+    path('parametrage/types_pieces_collaborateurs/ajouter', types_pieces_collaborateurs.Ajouter.as_view(), name='types_pieces_collaborateurs_ajouter'),
+    path('parametrage/types_pieces_collaborateurs/modifier/<int:pk>', types_pieces_collaborateurs.Modifier.as_view(), name='types_pieces_collaborateurs_modifier'),
+    path('parametrage/types_pieces_collaborateurs/supprimer/<int:pk>', types_pieces_collaborateurs.Supprimer.as_view(), name='types_pieces_collaborateurs_supprimer'),
+
+    # Types d'évènements collaborateurs
+    path('parametrage/types_evenements_collaborateurs/liste', types_evenements_collaborateurs.Liste.as_view(), name='types_evenements_collaborateurs_liste'),
+    path('parametrage/types_evenements_collaborateurs/ajouter', types_evenements_collaborateurs.Ajouter.as_view(), name='types_evenements_collaborateurs_ajouter'),
+    path('parametrage/types_evenements_collaborateurs/modifier/<int:pk>', types_evenements_collaborateurs.Modifier.as_view(), name='types_evenements_collaborateurs_modifier'),
+    path('parametrage/types_evenements_collaborateurs/supprimer/<int:pk>', types_evenements_collaborateurs.Supprimer.as_view(), name='types_evenements_collaborateurs_supprimer'),
+
+    # Types de postes collaborateurs
+    path('parametrage/types_postes_collaborateurs/liste', types_postes_collaborateurs.Liste.as_view(), name='types_postes_collaborateurs_liste'),
+    path('parametrage/types_postes_collaborateurs/ajouter', types_postes_collaborateurs.Ajouter.as_view(), name='types_postes_collaborateurs_ajouter'),
+    path('parametrage/types_postes_collaborateurs/modifier/<int:pk>', types_postes_collaborateurs.Modifier.as_view(), name='types_postes_collaborateurs_modifier'),
+    path('parametrage/types_postes_collaborateurs/supprimer/<int:pk>', types_postes_collaborateurs.Supprimer.as_view(), name='types_postes_collaborateurs_supprimer'),
+
+    # Modèles de plannings collaborateurs
+    path('parametrage/modeles_plannings_collaborateurs/liste', modeles_plannings_collaborateurs.Liste.as_view(), name='modeles_plannings_collaborateurs_liste'),
+    path('parametrage/modeles_plannings_collaborateurs/ajouter', modeles_plannings_collaborateurs.Ajouter.as_view(), name='modeles_plannings_collaborateurs_ajouter'),
+    path('parametrage/modeles_plannings_collaborateurs/modifier/<int:pk>', modeles_plannings_collaborateurs.Modifier.as_view(), name='modeles_plannings_collaborateurs_modifier'),
+    path('parametrage/modeles_plannings_collaborateurs/supprimer/<int:pk>', modeles_plannings_collaborateurs.Supprimer.as_view(), name='modeles_plannings_collaborateurs_supprimer'),
+
 
     # AJAX
     path('parametrage/get_calendrier', calendrier.Get_calendrier, name='ajax_get_calendrier'),
@@ -551,5 +583,6 @@ urlpatterns = [
     path('parametrage/adresses_mail/envoyer_mail_test', secure_ajax(adresses_mail.Envoyer_mail_test), name='ajax_envoyer_mail_test'),
     path('parametrage/configurations_sms/envoyer_sms_test', secure_ajax(configurations_sms.Envoyer_sms_test), name='ajax_envoyer_sms_test'),
     path('parametrage/albums/importer_photos_album', secure_ajax(albums.Importer_photos_album), name="ajax_importer_photos_album"),
+    path('parametrage/modeles_plannings_collaborateurs/get_form_ligne', secure_ajax(modeles_plannings_collaborateurs.Get_form_ligne), name='ajax_modeles_plannings_collaborateurs_form_ligne'),
 
 ]

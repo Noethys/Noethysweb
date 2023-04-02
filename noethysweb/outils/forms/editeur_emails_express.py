@@ -5,29 +5,22 @@
 
 from django import forms
 from django.forms import ModelForm, HiddenInput
-from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, ButtonHolder, Div, Button
-from crispy_forms.bootstrap import Field, StrictButton
-from core.utils.utils_commandes import Commandes
-from core.models import ModeleEmail, Mail, AdresseMail, Rattachement
+from crispy_forms.layout import Layout, Hidden, HTML
+from crispy_forms.bootstrap import Field
 from django_summernote.widgets import SummernoteInplaceWidget
-from outils.widgets import Documents_joints
 from django_select2.forms import Select2TagWidget
-from outils.forms.editeur_emails import EXTRA_HTML
+from core.forms.base import FormulaireBase
+from core.models import Mail, AdresseMail, Rattachement
 from core.utils.utils_commandes import Commandes
-
-# class MyWidget(ModelSelect2TagWidget):
-#     def label_from_instance(*args):
-#         instance = args[1]
-#         return instance.individu.Get_nom()
+from outils.widgets import Documents_joints
+from outils.forms.editeur_emails import EXTRA_HTML
 
 
 class Formulaire(FormulaireBase, ModelForm):
     objet = forms.CharField(label="Objet", required=False)
     html = forms.CharField(label="Texte", widget=SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '200px'}}), required=False)
     documents = forms.CharField(label="Documents", required=False, widget=Documents_joints())
-    # dest = forms.ModelMultipleChoiceField(label="Destinataires", required=False, widget=MyWidget(model=Rattachement, search_fields=['individu__nom__icontains', 'individu__prenom__icontains'], attrs={"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=Rattachement.objects.none().order_by("individu__nom", "individu__prenom"))
     dest = forms.MultipleChoiceField(label="Destinataires", required=False, widget=Select2TagWidget(attrs={"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0, "title": "Sélectionnez une adresse dans la liste ou tapez-la directement"}), choices=[])
 
     class Meta:
@@ -55,13 +48,24 @@ class Formulaire(FormulaireBase, ModelForm):
             destinataire = self.instance.destinataires.first()
             liste_dest = []
             selection_defaut = None
-            for rattachement in Rattachement.objects.select_related("individu").filter(famille=destinataire.famille):
-                for mail in (rattachement.individu.mail, rattachement.individu.travail_mail):
+
+            if destinataire.famille:
+                for rattachement in Rattachement.objects.select_related("individu").filter(famille=destinataire.famille):
+                    for mail in (rattachement.individu.mail, rattachement.individu.travail_mail):
+                        if mail:
+                            dest = "%s <%s>" % (rattachement.individu.Get_nom(), mail)
+                            if mail == destinataire.adresse:
+                                selection_defaut = dest
+                            liste_dest.append(dest)
+
+            if destinataire.collaborateur:
+                for mail in (destinataire.collaborateur.mail, destinataire.collaborateur.travail_mail):
                     if mail:
-                        dest = "%s <%s>" % (rattachement.individu.Get_nom(), mail)
-                        if mail == destinataire.adresse:
-                            selection_defaut = dest
+                        dest = "%s <%s>" % (destinataire.collaborateur.Get_nom(), mail)
                         liste_dest.append(dest)
+                        if not selection_defaut:
+                            selection_defaut = dest
+
             self.fields['dest'].choices = [(dest, dest) for dest in liste_dest]
             if selection_defaut:
                 self.fields['dest'].initial = selection_defaut

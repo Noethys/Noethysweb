@@ -1,0 +1,100 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+
+    <style>
+        .widget-user-2 .widget-user-username, .widget-user-2 .widget-user-desc {
+            margin-left: 0px;
+        }
+        .card-rubriques .card-footer {
+            border-radius: 0 0 0.25rem 0.25rem;
+        }
+        .card-rubriques .list-group a:last-child {
+            border-radius: 0 0 0.25rem 0.25rem;
+        }
+    </style>
+
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-3">
+
+            <div class="card card-widget widget-user-2 card-rubriques">
+
+                {# Nom du collaborateur #}
+                <div class="widget-user-header bg-lightblue">
+                    <h3 class="widget-user-username">{{ collaborateur.nom }} {{ collaborateur.prenom }}</h3>
+                </div>
+
+                {# Onglets du collaborateur #}
+                <div class="card-footer p-0 bg-white">
+                    <ul class="list-group list-group-flush">
+                        {% for onglet in liste_onglets %}
+                            <a class="list-group-item list-group-item-action {% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% url onglet.url idcollaborateur=idcollaborateur %}">
+                                <i class="fa {{ onglet.icone }} text-light-blue fa-fw"></i> {{ onglet.label }}
+                            </a>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Box PHOTO -->
+            {% if collaborateur.photo %}
+                <div class="card card-outline card-lightblue d-none d-sm-block">
+                    <div class="card-header">
+                        <h3 class="card-title">Photo</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if collaborateur.photo %}<center><img class="img-fluid img-thumbnail rounded-circle" src="{{ MEDIA_URL }}{{ collaborateur.photo }}"></center>{% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {# Box Informations sur le collaborateur #}
+            <div class="card card-outline card-lightblue d-none d-sm-block">
+                <div class="card-header">
+                    <h3 class="card-title">Informations</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <strong><i class="fa fa-file-text-o margin-r-5"></i>Détails de la fiche</strong>
+                    <p class="text-muted">Créée le {{ collaborateur.date_creation|date:"j F Y" }}<br>ID collaborateur : {{ collaborateur.pk }}</p>
+                </div>
+            </div>
+
+        </div>
+
+        {% block detail_collaborateur %}
+            <div class="col-md-9">
+                {% embed 'core/box.html' %}
+                    {% block box_theme %}card-outline card-lightblue{% endblock %}
+                    {% block box_titre %}{{ box_titre }}{% endblock %}
+                    {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+                    {% block box_contenu %}
+                    {% endblock %}
+
+                {% endembed %}
+            </div>
+        {% endblock %}
+
+    </div>
+
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+{% endblock scripts %}

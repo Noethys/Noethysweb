@@ -245,7 +245,11 @@ class BaseView():
         individu = getattr(instance, "individu_id", None)
         if classe == "Individu":
             individu = instance.pk
-        utils_historique.Ajouter(titre=titre, detail=detail, utilisateur=utilisateur, famille=famille, individu=individu, objet=objet, idobjet=idobjet, classe=classe)
+        collaborateur = getattr(instance, "collaborateur_id", None)
+        if classe == "Collaborateur":
+            collaborateur = instance.pk
+        utils_historique.Ajouter(titre=titre, detail=detail, utilisateur=utilisateur, famille=famille, individu=individu,
+                                 collaborateur=collaborateur, objet=objet, idobjet=idobjet, classe=classe)
 
         # Ecriture dans le log
         if famille:

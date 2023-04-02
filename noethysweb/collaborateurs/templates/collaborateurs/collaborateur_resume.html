@@ -1,0 +1,68 @@
+{% extends "collaborateurs/collaborateur.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_collaborateur %}
+    <div class="col-md-9">
+
+        {# Caractéristiques #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Caractéristiques{% endblock %}
+            {% block box_contenu %}
+                <dl class="row caracteristiques">
+                    <dt class="col-sm-4">Nom</dt><dd class="col-sm-8">{{ collaborateur.nom }}</dd>
+                    {% if collaborateur.prenom %}<dt class="col-sm-4">Prénom</dt><dd class="col-sm-8">{{ collaborateur.prenom|default:"" }}</dd>{% endif %}
+                    {% if collaborateur.date_naiss %}<dt class="col-sm-4">Date de naissance</dt><dd class="col-sm-8">{{ collaborateur.date_naiss }} ({{ collaborateur.Get_age }} ans)</dd>{% endif %}
+                    {% if collaborateur.Get_adresse_complete %}<dt class="col-sm-4">Adresse</dt><dd class="col-sm-8">{{ collaborateur.Get_adresse_complete }}</dd>{% endif %}
+                    <dt class="col-sm-4">Date de création</dt><dd class="col-sm-8">{{ collaborateur.date_creation|date:"j F Y" }}</dd>
+                    <dt class="col-sm-4">ID collaborateur</dt><dd class="col-sm-8">{{ collaborateur.pk }}</dd>
+                    {% if collaborateur.deces %}
+                        <dt class="col-sm-4">Décès</dt><dd class="col-sm-8 text-bold text-red">{% if collaborateur.annee_deces %}collaborateur décédé en {{ collaborateur.annee_deces }}{% else %}collaborateur décédé{% endif %}</dd>
+                    {% endif %}
+                    {% if inscriptions %}
+                        <dt class="col-sm-4">Inscriptions actuelles</dt><dd class="col-sm-8">{{ inscriptions }}</dd>
+                    {% endif %}
+                </dl>
+            {% endblock %}
+        {% endembed %}
+
+        {# Alertes #}
+        {% if nbre_alertes %}
+            {% embed 'core/box.html' %}
+                {% block box_theme %}box-warning{% endblock %}
+                {% block box_titre %}Alertes{% endblock %}
+                {% block box_contenu %}
+                    {# Pièces à fournir #}
+                    {% if pieces_fournir %}
+                        {% embed "individus/alerte.html" with items=pieces_fournir titre="Pièces à fournir"%}{% endembed %}
+                    {% endif %}
+                {% endblock %}
+            {% endembed %}
+        {% endif %}
+
+        {# Notes #}
+        <style>
+            .todo-list > li .text {
+                display: inline;
+                margin-left: 0px;
+                font-weight: 400;
+            }
+        </style>
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Notes{% endblock %}
+            {% block box_outils %}
+                <a type="button" class="btn btn-success btn-xs" title="Ajouter une note" style="margin-right: 10px;" href="{% url 'collaborateur_notes_ajouter' idcollaborateur=idcollaborateur %}"><i class="fa fa-plus"></i> Ajouter</a>
+            {% endblock %}
+            {% block card_body_classe %}p-0{% endblock %}
+            {% block box_contenu %}
+                    {% embed "outils/notes.html" with mode_notes='collaborateur' %}
+                    {% endembed %}
+            {% endblock %}
+        {% endembed %}
+
+    </div>
+{% endblock %}

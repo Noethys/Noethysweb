@@ -212,7 +212,7 @@ def Envoyer_model_mail(idmail=None, request=None):
 
             # Mémorise l'envoi dans l'historique
             utils_historique.Ajouter(titre="Envoi d'un email", detail=objet, utilisateur=request.user if request else None, famille=destinataire.famille_id,
-                                     individu=destinataire.individu_id, objet="Email", idobjet=mail.pk, classe="Mail")
+                                     individu=destinataire.individu_id, collaborateur=destinataire.collaborateur_id, objet="Email", idobjet=mail.pk, classe="Mail")
 
         # Pause si envoi par lot activé
         if nbre_mails_lot and len(destinataires) > 1:

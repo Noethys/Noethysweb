@@ -23,6 +23,7 @@ urlpatterns = [
     path(settings.URL_BUREAU, include('facturation.urls')),
     path(settings.URL_BUREAU, include('reglements.urls')),
     path(settings.URL_BUREAU, include('comptabilite.urls')),
+    path(settings.URL_BUREAU, include('collaborateurs.urls')),
     path(settings.URL_BUREAU, include('aide.urls')),
     path('select2/', include('django_select2.urls')),
     path('summernote/', include('django_summernote.urls')),

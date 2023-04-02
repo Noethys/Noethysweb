@@ -8,10 +8,10 @@ logger = logging.getLogger(__name__)
 from core.models import Historique
 
 
-def Ajouter(titre="", detail="", utilisateur=None, famille=None, individu=None, objet=None, idobjet=None, classe=None, old=None, portail=False):
+def Ajouter(titre="", detail="", utilisateur=None, famille=None, individu=None, collaborateur=None, objet=None, idobjet=None, classe=None, old=None, portail=False):
     try:
-        Historique.objects.create(titre=titre, detail=detail, utilisateur=utilisateur, famille_id=famille,
-                                  individu_id=individu, objet=objet, idobjet=idobjet, classe=classe, old=old, portail=portail)
+        Historique.objects.create(titre=titre, detail=detail, utilisateur=utilisateur, famille_id=famille, individu_id=individu,
+                                  collaborateur_id=collaborateur, objet=objet, idobjet=idobjet, classe=classe, old=old, portail=portail)
     except Exception as err:
         logger.error("Erreur dans ajout historique : %s" % err)
 

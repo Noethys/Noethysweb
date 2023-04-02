@@ -27,7 +27,7 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Note
         fields = "__all__"
-        exclude = ["famille", "individu"]
+        exclude = ["famille", "individu", "collaborateur"]
         widgets = {
             'texte': forms.Textarea(attrs={'rows': 4}),
         }
@@ -64,6 +64,9 @@ class Formulaire(FormulaireBase, ModelForm):
         if self.instance.individu:
             texte_intro = "<p>Note pour l'individu : %s</p>" % self.instance.individu
             options += [Field("afficher_accueil"), Field("afficher_liste"), Field("afficher_commande"),]
+        if self.instance.collaborateur:
+            texte_intro = "<p>Note pour le collaborateur : %s</p>" % self.instance.collaborateur
+            options += [Field("afficher_accueil"),]
 
         # Accès publication
         self.fields["structure"].empty_label = "-------"

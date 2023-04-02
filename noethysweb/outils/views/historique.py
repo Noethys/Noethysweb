@@ -33,7 +33,7 @@ class Liste(Page, crud.Liste):
         self.afficher_dernier_mois = utils_parametres.Get(nom="afficher_dernier_mois", categorie="historique", utilisateur=self.request.user, valeur=True)
         if self.afficher_dernier_mois:
             conditions &= Q(horodatage__date__gte=datetime.date.today() - datetime.timedelta(days=10))
-        return Historique.objects.select_related("famille", "individu", "utilisateur").filter(conditions, self.Get_filtres("Q"))
+        return Historique.objects.select_related("famille", "individu", "collaborateur", "utilisateur").filter(conditions, self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -48,10 +48,11 @@ class Liste(Page, crud.Liste):
         utilisateur = columns.TextColumn("Utilisateur", sources=["utilisateur__username"], processor='Formate_utilisateur')
         famille = columns.TextColumn("Famille", sources=["famille__nom"])
         individu = columns.TextColumn("Individu", sources=["individu__nom", "individu__prenom"], processor='Formate_individu')
+        collaborateur = columns.TextColumn("Collaborateur", sources=["collaborateur__nom", "collaborateur__prenom"], processor='Formate_collaborateur')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idaction', 'horodatage', 'utilisateur', 'titre', 'detail', 'famille', 'individu', "objet", "idobjet"]
+            columns = ['idaction', 'horodatage', 'utilisateur', 'titre', 'detail', 'famille', 'individu', "collaborateur", "objet", "idobjet"]
             processors = {
                 'horodatage': helpers.format_date('%d/%m/%Y %H:%M'),
             }
@@ -62,6 +63,9 @@ class Liste(Page, crud.Liste):
 
         def Formate_individu(self, instance, **kwargs):
             return instance.individu.Get_nom() if instance.individu else ""
+
+        def Formate_collaborateur(self, instance, **kwargs):
+            return instance.collaborateur.Get_nom() if instance.collaborateur else ""
 
         def Formate_utilisateur(self, instance, **kwargs):
             if instance.utilisateur.categorie == "utilisateur":

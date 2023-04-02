@@ -19,4 +19,4 @@ class Widget(accueil_widget.Widget):
 
     def Get_notes(self):
         conditions = Q(date_parution__lte=datetime.date.today()) & (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
-        return Note.objects.select_related('famille', 'individu').filter(conditions, afficher_accueil=True).order_by("date_parution")
+        return Note.objects.select_related('famille', 'individu', 'collaborateur').filter(conditions, afficher_accueil=True).order_by("date_parution")

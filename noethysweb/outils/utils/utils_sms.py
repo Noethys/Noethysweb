@@ -86,7 +86,7 @@ def Envoyer_model_sms(idsms=None, request=None):
             if reponse.ok:
                 # Mémorise l'envoi dans l'historique
                 utils_historique.Ajouter(titre="Envoi d'un SMS", detail=sms.objet, utilisateur=request.user if request else None, famille=destinataire.famille_id,
-                                         individu=destinataire.individu_id, objet="SMS", idobjet=sms.pk, classe="SMS")
+                                         individu=destinataire.individu_id, collaborateur=destinataire.collaborateur_id, objet="SMS", idobjet=sms.pk, classe="SMS")
 
     # Enregistre le solde du compte prépayé
     if liste_envois_succes:

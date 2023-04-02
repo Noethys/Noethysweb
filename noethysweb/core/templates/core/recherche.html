@@ -64,6 +64,32 @@
 {% endif %}
 
 
+{# Collaborateurs #}
+{% if data.collaborateurs %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Collaborateurs</h3><small class="text-gray" style="margin-left: 5px;">({% if data.collaborateurs|length == 50 %}Limité à {% endif %}{{ data.collaborateurs|length }} résultat{{ data.collaborateurs|length|pluralize }})</small>
+        </div>
+        <div class="card-body table-responsive p-0">
+            <table class="table table-hover" style="cursor: pointer;">
+                <thead>
+                    <tr>
+                        <th>Collaborateur</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data.collaborateurs %}
+                        <tr data-url="{% url 'collaborateur_resume' idcollaborateur=item.pk %}" data-idcollaborateur="{{ item.pk }}" data-nomcollaborateur="{{ item.Get_nom }}">
+                            <td>{{ item.Get_nom|surligner:data.texte }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endif %}
+
+
 {# Individus #}
 {% if data.rattachements %}
     <div class="card">
@@ -131,7 +157,7 @@
 {% endif %}
 
 {# Si recherche infructueuse #}
-{% if not data.rattachements and not data.payeurs and not data.commandes %}
+{% if not data.rattachements and not data.payeurs and not data.commandes  and not data.collaborateurs %}
     Aucun résultat pour cette recherche.
 {% endif %}
 
