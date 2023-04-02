@@ -30,7 +30,10 @@
             var calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
-                height: "100%",
+                height: window.innerHeight - 165,
+                windowResize: function(arg) {
+                    calendar.setOption("height", window.innerHeight - 165);
+                },
                 themeSystem: 'bootstrap',
                 editable: true,
                 selectable: true,
@@ -50,6 +53,7 @@
                     list: "Liste"
                 },
                 slotDuration: "00:30:00",
+                slotMinWidth: 15,
                 initialView: 'resourceTimelineDay',
                 firstDay: 1,
                 allDaySlot: false,
