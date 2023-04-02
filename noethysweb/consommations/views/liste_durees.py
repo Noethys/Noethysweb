@@ -49,11 +49,13 @@ class View(CustomView, TemplateView):
             .filter(activite=parametres["activite"], date__gte=date_debut, date__lte=date_fin, etat__in=parametres["etats"]) \
             .order_by("date") \
             .annotate(doublon_id=Concat(F("date"), Value("_"), F("heure_debut"), Value("_"), F("heure_fin"), Value("_"), F("unite"), F("evenement"), output_field=CharField()))
-        resultats = qs.values("date", "heure_debut", "heure_fin", "unite__nom", "evenement__nom").annotate(nbre_doublons=Count("doublon_id"))
+        resultats = qs.values("date", "heure_debut", "heure_fin", "unite__nom", "evenement__nom", "evenement__equiv_heures").annotate(nbre_doublons=Count("doublon_id"))
 
         liste_lignes = []
         for r in resultats:
-            if r["heure_debut"] and r["heure_fin"]:
+            if r["evenement__equiv_heures"] and parametres["utiliser_equiv_heures"]:
+                duree = utils_dates.TimeEnDelta(r["evenement__equiv_heures"])
+            elif r["heure_debut"] and r["heure_fin"]:
                 duree = utils_dates.TimeEnDelta(r["heure_fin"]) - utils_dates.TimeEnDelta(r["heure_debut"])
             else:
                 duree = datetime.timedelta(minutes=0)

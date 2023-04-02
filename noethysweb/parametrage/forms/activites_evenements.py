@@ -53,6 +53,12 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Evenement
         fields = "__all__"
+        widgets = {
+            "equiv_heures": forms.TimeInput(attrs={'type': 'time'}),
+        }
+        help_texts = {
+            "equiv_heures": "Saisissez l'équivalence en heures (utile uniquement pour l'état global et l'état nominatif). Format : HH:MM.",
+        }
 
     def __init__(self, *args, **kwargs):
         idactivite = kwargs.pop("idactivite")
@@ -120,6 +126,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("description"),
                 Field("heure_debut"),
                 Field("heure_fin"),
+                Field("equiv_heures"),
             ),
             Fieldset("Limitation du nombre de places",
                 Field("type_nbre_places"),

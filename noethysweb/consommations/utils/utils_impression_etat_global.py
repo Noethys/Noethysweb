@@ -3,16 +3,15 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, datetime, re
 logger = logging.getLogger(__name__)
-from core.utils import utils_dates, utils_impression, utils_preferences, utils_infos_individus, utils_dictionnaires
 from reportlab.platypus import Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
+from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires
 from core.models import Evenement, Regime, Vacance, Activite, Quotient, TarifLigne, Consommation, Unite
-import datetime
-import re
+
 
 # Regex pour formule
 REGEX_UNITES = re.compile(r"unite[0-9]+")
@@ -25,6 +24,7 @@ class Unite():
         self.fin = utils_dates.TimeEnDelta(heure_fin)
         self.duree = self.fin - self.debut
 
+
 def FormateValeur(valeur, mode="decimal"):
     heures = (valeur.days * 24) + (valeur.seconds / 3600)
     minutes = valeur.seconds % 3600 / 60
@@ -34,13 +34,13 @@ def FormateValeur(valeur, mode="decimal"):
     if mode == "horaire":
         return "%dh%02d" % (heures, minutes)
 
+
 def GetQF(dictQuotientsFamiliaux={}, IDfamille=None, date=None):
     if IDfamille in dictQuotientsFamiliaux:
         for date_debut, date_fin, quotient in dictQuotientsFamiliaux[IDfamille]:
             if date >= date_debut and date <= date_fin :
                 return quotient
     return None
-
 
 
 class Impression(utils_impression.Impression):
@@ -190,7 +190,7 @@ class Impression(utils_impression.Impression):
 
         # Récupération des consommations
         self.dict_unites = {}
-        liste_conso = Consommation.objects.select_related("unite", "activite", "groupe", "prestation", "categorie_tarif", "inscription", "inscription__famille", "individu", "inscription__famille__caisse").filter(date__gte=date_debut, date__lte=date_fin, unite__in=liste_idunite).order_by("date")
+        liste_conso = Consommation.objects.select_related("unite", "activite", "groupe", "prestation", "categorie_tarif", "inscription", "inscription__famille", "individu", "inscription__famille__caisse", "evenement").filter(date__gte=date_debut, date__lte=date_fin, unite__in=liste_idunite).order_by("date")
         for conso in liste_conso:
             self.dict_unites.setdefault(conso.date, {})
             self.dict_unites[conso.date]["unite%d" % conso.unite_id] = Unite(conso.unite_id, conso.heure_debut, conso.heure_fin, conso.etat, conso.quantite)
@@ -368,12 +368,6 @@ class Impression(utils_impression.Impression):
 
                         # Calcul de la durée
                         valeur = datetime.timedelta(hours=heure_fin.hour, minutes=heure_fin.minute) - datetime.timedelta(hours=heure_debut.hour, minutes=heure_debut.minute)
-                        # if "day" in str(valeur):
-                        #     dlg = wx.MessageDialog(self, _("Les horaires de cette consommation sont incorrectes : IDconso=%d | IDindividu=%d | IDfamille=%d | date=%s.") % (IDconso, IDindividu, IDfamille, date), _(u"Erreur"),
-                        #                            wx.OK | wx.ICON_ERROR)
-                        #     dlg.ShowModal()
-                        #     dlg.Destroy()
-                        #     return False
 
                         # Si un arrondi est demandé
                         arrondi = dictCalcul["arrondi"]
@@ -418,6 +412,14 @@ class Impression(utils_impression.Impression):
                     except Exception as err:
                         self.erreurs.append("La formule saisie pour l'unité %s ne semble pas valide" % conso.unite.nom)
                         return False
+
+                elif dictCalcul["type"] == "4":
+                    # Si c'est selon l'équivalence en heures paramétrée :
+                    valeur = datetime.timedelta(hours=0, minutes=0)
+                    if conso.unite.equiv_heures:
+                        valeur = utils_dates.TimeEnDelta(conso.unite.equiv_heures)
+                    if conso.evenement and conso.evenement.equiv_heures:
+                        valeur = utils_dates.TimeEnDelta(conso.evenement.equiv_heures)
 
                 # Options plafond journalier par individu (valable pour l'ensemble des activités)
                 plafond_journalier_individu = dict_options["plafond_journalier_individu"]

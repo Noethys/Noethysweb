@@ -123,8 +123,9 @@ def DeltaEnTime(varTimedelta) :
     heure = HeureStrEnTime(heureStr)
     return heure
 
-def DeltaEnStr(heureDelta, separateur="h"):
-    if not heureDelta: return None
+def DeltaEnStr(heureDelta, separateur="h", si_null=None):
+    if not heureDelta:
+        return si_null
     if heureDelta < datetime.timedelta(0):
         signe = "-"
         heureDelta = -heureDelta
