@@ -3972,9 +3972,23 @@ class TypePieceCollaborateur(models.Model):
             return date_reference + self.Get_duree()
 
 
+class GroupeCollaborateurs(models.Model):
+    idgroupe = models.AutoField(verbose_name="ID", db_column='IDgroupe', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    superviseurs = models.ManyToManyField(Utilisateur, verbose_name="Superviseurs", related_name="superviseurs_groupe_collaborateurs")
+
+    class Meta:
+        db_table = "groupes_collaborateurs"
+        verbose_name = "groupe de collaborateurs"
+        verbose_name_plural = "groupes de collaborateurs"
+
+    def __str__(self):
+        return self.nom if self.idgroupe else "Nouveau groupe de collaborateurs"
+
+
 class Collaborateur(models.Model):
     idcollaborateur = models.AutoField(verbose_name="ID", db_column='IDcollaborateur', primary_key=True)
-    civilite = models.CharField(verbose_name="Civilité", max_length=50, choices=[("M", "M."), ("MME", "Mme")], default="M")
+    civilite = models.CharField(verbose_name="Civilité", max_length=50, choices=[("M", "Monsieur"), ("MME", "Madame")], default="M")
     nom = models.CharField(verbose_name="Nom", max_length=200)
     nom_jfille = models.CharField(verbose_name="Nom de naissance", max_length=200, blank=True, null=True)
     prenom = models.CharField(verbose_name="Prénom", max_length=200, blank=True, null=True)
@@ -3991,6 +4005,7 @@ class Collaborateur(models.Model):
     etat = models.CharField(verbose_name="Etat", max_length=50, blank=True, null=True)
     photo = models.ImageField(verbose_name="Photo", upload_to=get_uuid_path, blank=True, null=True)
     qualifications = models.ManyToManyField(TypeQualificationCollaborateur, verbose_name="Qualifications", related_name="collaborateur_qualifications", blank=True)
+    groupes = models.ManyToManyField(GroupeCollaborateurs, verbose_name="Groupes associés", related_name="collaborateur_groupes", blank=True)
 
     class Meta:
         db_table = "collaborateurs"

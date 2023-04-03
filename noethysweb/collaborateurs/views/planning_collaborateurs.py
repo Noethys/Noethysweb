@@ -14,6 +14,8 @@ from core.views.base import CustomView
 from core.utils import utils_dates
 from collaborateurs.forms.collaborateur_evenements import Formulaire
 from collaborateurs.views.collaborateur_evenements import Form_valid_ajouter, Form_valid_modifier
+from collaborateurs.forms.appliquer_modele_planning import Formulaire as Formulaire_appliquer_modele
+from collaborateurs.views.appliquer_modele_planning import Form_valid_appliquer_modele
 
 
 def Get_collaborateurs(request):
@@ -23,6 +25,7 @@ def Get_collaborateurs(request):
 
     resultats = []
     conditions = Q(contratcollaborateur__date_debut__lte=date_fin) & (Q(contratcollaborateur__date_fin__isnull=True) | Q(contratcollaborateur__date_fin__gte=date_debut))
+    conditions &= (Q(groupes__superviseurs=request.user) | Q(groupes__superviseurs__isnull=True))
     collaborateurs = Collaborateur.objects.filter(conditions).order_by("nom", "prenom").annotate(
             duree=Sum(ExpressionWrapper(F("evenementcollaborateur__date_fin") - F("evenementcollaborateur__date_debut"), output_field=DurationField()),
                       filter=Q(evenementcollaborateur__date_fin__gte=date_debut, evenementcollaborateur__date_debut__lte=date_fin))
@@ -43,7 +46,8 @@ def Get_evenements(request):
     date_fin = datetime.datetime.strptime(request.POST["date_fin"], "%Y-%m-%d %H:%M").date()
 
     # Importation des évènements
-    evenements = EvenementCollaborateur.objects.select_related("collaborateur", "type_evenement").filter(date_debut__lte=date_fin, date_fin__gte=date_debut)
+    conditions = (Q(collaborateur__groupes__superviseurs=request.user) | Q(collaborateur__groupes__superviseurs__isnull=True))
+    evenements = EvenementCollaborateur.objects.select_related("collaborateur", "type_evenement").filter(conditions, date_debut__lte=date_fin, date_fin__gte=date_debut)
     resultats = []
     for evenement in evenements:
         resultats.append({
@@ -57,6 +61,23 @@ def Get_evenements(request):
         })
 
     return JsonResponse({"evenements": resultats})
+
+
+def Get_form_appliquer_modele(request):
+    """ Retourne un form pour appliquer modèle """
+    form = Formulaire_appliquer_modele(request=request)
+    return JsonResponse({"form_html": render_crispy_form(form, context=csrf(request))})
+
+
+def Valid_form_appliquer_modele(request):
+    # Validation du form
+    retour = Form_valid_appliquer_modele(request=request)
+
+    # Retour de la réponse
+    if retour["resultat"]:
+        return JsonResponse({"succes": True, "messages": retour["messages"]})
+    else:
+        return JsonResponse({"succes": False, "messages": retour["messages"]}, status=401)
 
 
 def Get_form_detail_evenement(request):

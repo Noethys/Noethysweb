@@ -23,7 +23,7 @@ class View(Onglet, TemplateView):
         context['box_introduction'] = "Sélectionnez une période d'application et le ou les modèles à appliquer."
         context['onglet_actif'] = "evenements"
         context['idcollaborateur'] = kwargs.get("idcollaborateur")
-        context['form'] = Formulaire()
+        context['form'] = Formulaire(request=self.request)
         return context
 
     def post(self, request, idcollaborateur):

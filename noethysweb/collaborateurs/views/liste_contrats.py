@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse
+from django.db.models import Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import ContratCollaborateur
@@ -22,7 +23,8 @@ class Liste(Page, crud.Liste):
     model = ContratCollaborateur
 
     def get_queryset(self):
-        return ContratCollaborateur.objects.select_related("collaborateur", "type_poste").filter(self.Get_filtres("Q"))
+        conditions = (Q(collaborateur__groupes__superviseurs=self.request.user) | Q(collaborateur__groupes__superviseurs__isnull=True))
+        return ContratCollaborateur.objects.select_related("collaborateur", "type_poste").filter(conditions, self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

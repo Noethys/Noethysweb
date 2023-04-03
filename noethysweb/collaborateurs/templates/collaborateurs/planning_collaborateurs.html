@@ -7,12 +7,14 @@
 
 {% block styles %}
     {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/select2/css/select2.min.css' %}">
 {% endblock styles %}
 
 {% block scripts %}
     {{ block.super }}
     <script src="{% static 'lib/fullcalendar/dist/index.global.min.js' %}"></script>
     <script src="{% static 'lib/moment/moment.min.js' %}" type="text/javascript"></script>
+    <script src="{% static 'django_select2/django_select2.js' %}" type="text/javascript" ></script>
     <script src="{% static 'lib/select2/js/select2.min.js' %}" type="text/javascript"></script>
     <script src="{% static 'lib/select2/js/i18n/fr.js' %}" type="text/javascript"></script>
 {% endblock scripts %}
@@ -43,7 +45,7 @@
                     bouton_outils: {
                         text: "Outils",
                         click: function() {
-                            alert("En cours de développement !");
+                            $('#modal_outils').modal('show');
                         }
                     }
                 },
@@ -167,7 +169,7 @@
         }
 
         function ouvre_modal_detail(idevenement, data_event) {
-            $("#modal_detail_evenement").off('submit');
+            $("#modal_detail").off('submit');
             $.ajax({
                 url: "{% url 'ajax_planning_collaborateurs_get_form_detail_evenement' %}",
                 type: "POST",
@@ -177,14 +179,15 @@
                     csrfmiddlewaretoken: "{{ csrf_token }}"
                 },
                 success: function (data) {
-                    $("#id_div_form_detail_evenement").html(data['form_html']);
-                    $("#modal_detail_evenement").modal("show");
-                    $("#modal_detail_evenement").on('submit', submit_form);
+                    $("#id_div_form_detail").html(data['form_html']);
+                    $("#myModalLabel").html("<strong>Détail d'un évènement</strong>");
+                    $("#modal_detail").modal("show");
+                    $("#modal_detail").on('submit', submit_form_evenement);
                 }
             });
         }
 
-        function submit_form(event) {
+        function submit_form_evenement(event) {
             event.preventDefault();
             $.ajax({
                 type: "POST",
@@ -192,7 +195,7 @@
                 data: $("#collaborateurs_evenements_form").serialize(),
                 datatype: "json",
                 success: function(data){
-                    $("#modal_detail_evenement").modal("hide");
+                    $("#modal_detail").modal("hide");
                     calendar.refetchEvents();
                 },
                 error: function(data) {
@@ -208,7 +211,7 @@
                 data: {"idevenement": idevenement},
                 datatype: "json",
                 success: function(data){
-                    $("#modal_detail_evenement").modal("hide");
+                    $("#modal_detail").modal("hide");
                     calendar.refetchEvents();
                 },
                 error: function(data) {
@@ -217,16 +220,77 @@
             });
         }
 
+        function ouvre_modal_appliquer_modele() {
+            $.ajax({
+                url: "{% url 'ajax_planning_collaborateurs_get_form_appliquer_modele' %}",
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function (data) {
+                    $("#id_div_form_detail").html(data['form_html']);
+                    $("#myModalLabel").html("<strong>Appliquer un modèle de planning</strong>");
+                    $("#modal_detail").modal("show");
+                    $("#modal_detail").on('submit', submit_form_appliquer_planning);
+                }
+            });
+        }
+
+        function submit_form_appliquer_planning(event) {
+            event.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_planning_collaborateurs_valid_form_appliquer_modele' %}",
+                data: $("#form_appliquer_modele_planning").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $("#modal_detail").modal("hide");
+                    affichage_messages(data.messages);
+                    calendar.refetchEvents();
+                },
+                error: function(data) {
+                    affichage_messages(data.responseJSON.messages);
+                }
+            });
+        }
+
+        function affichage_messages(messages) {
+            messages.forEach(function (message) {
+                if (message[0] == "SUCCESS") {
+                    toastr.success(message[1]);
+                } else {
+                    toastr.error(message[1]);
+                }
+            })
+        }
+
     </script>
 
-    {# Modal Détail d'un évènement #}
+    {# Modal Détail #}
     {% embed 'core/modal.html' %}
-        {% block modal_id %}modal_detail_evenement{% endblock %}
-        {% block modal_titre %}Détail d'un évènement{% endblock %}
+        {% block modal_id %}modal_detail{% endblock %}
+        {% block modal_titre %}Détail{% endblock %}
         {% block modal_classe %}modal-lg{% endblock %}
         {% block modal_body %}
-            <div id="id_div_form_detail_evenement">
+            <div id="id_div_form_detail">
             </div>
+        {% endblock %}
+    {% endembed %}
+
+    {# Modal Outils #}
+    {% embed 'core/modal.html' with modal_footer=True %}
+        {% block modal_id %}modal_outils{% endblock %}
+        {% block modal_titre %}Outils{% endblock %}
+        {% block modal_body %}
+            <p>Cliquez sur l'outil souhaité.</p>
+            <div>
+                <a class="btn btn-app" onclick="$('#modal_outils').modal('hide');ouvre_modal_appliquer_modele();"><i class="fa fa-calendar-check-o"></i> Appliquer un modèle de planning</a>
+{#                <a class="btn btn-app" onclick="$('#modal_outils').modal('hide');impression_pdf();"><i class="fa fa-file-pdf-o"></i> Imprimer</a>#}
+{#                <a class="btn btn-app" onclick="$('#modal_outils').modal('hide');impression_pdf(true);"><i class="fa fa-send-o"></i> Envoyer par email</a>#}
+            </div>
+        {% endblock %}
+        {% block modal_footer %}
+            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
         {% endblock %}
     {% endembed %}
 

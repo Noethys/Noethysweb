@@ -6,6 +6,7 @@
 LISTE_ONGLETS = [
     {"code": "resume", "label": "Résumé", "icone": "fa-home", "url": "collaborateur_resume"},
     {"code": "identite", "label": "Identité", "icone": "fa-user", "url": "collaborateur_identite"},
+    {"code": "groupes", "label": "Groupes", "icone": "fa-users", "url": "collaborateur_groupes"},
     {"code": "questionnaire", "label": "Questionnaire", "icone": "fa-question", "url": "collaborateur_questionnaire"},
     {"code": "coords", "label": "Coordonnées", "icone": "fa-map-marker", "url": "collaborateur_coords"},
     {"code": "qualifications", "label": "Qualifications", "icone": "fa-graduation-cap", "url": "collaborateur_qualifications"},

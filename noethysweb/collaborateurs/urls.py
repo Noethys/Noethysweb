@@ -9,7 +9,7 @@ from core.decorators import secure_ajax
 from collaborateurs.views import collaborateur, collaborateur_identite, collaborateur_questionnaire, collaborateur_coords, collaborateur_qualifications, \
                                 collaborateur_pieces, collaborateur_notes, collaborateur_contrats, collaborateur_evenements, planning_collaborateurs, \
                                 collaborateur_appliquer_modele_planning, liste_contrats, collaborateur_outils, collaborateur_historique, \
-                                collaborateur_emails, collaborateur_sms, appliquer_modele_planning
+                                collaborateur_emails, collaborateur_sms, appliquer_modele_planning, collaborateur_groupes
 
 
 urlpatterns = [
@@ -25,6 +25,9 @@ urlpatterns = [
 
     path('collaborateurs/collaborateurs/identite/<int:idcollaborateur>', collaborateur_identite.Consulter.as_view(), name='collaborateur_identite'),
     path('collaborateurs/collaborateurs/identite/modifier/<int:idcollaborateur>', collaborateur_identite.Modifier.as_view(), name='collaborateur_identite_modifier'),
+
+    path('collaborateurs/collaborateurs/groupes/<int:idcollaborateur>', collaborateur_groupes.Consulter.as_view(), name='collaborateur_groupes'),
+    path('collaborateurs/collaborateurs/groupes/modifier/<int:idcollaborateur>', collaborateur_groupes.Modifier.as_view(), name='collaborateur_groupes_modifier'),
 
     path('collaborateurs/collaborateurs/questionnaire/<int:idcollaborateur>', collaborateur_questionnaire.Consulter.as_view(), name='collaborateur_questionnaire'),
     path('collaborateurs/collaborateurs/questionnaire/modifier/<int:idcollaborateur>', collaborateur_questionnaire.Modifier.as_view(), name='collaborateur_questionnaire_modifier'),
@@ -77,5 +80,8 @@ urlpatterns = [
     path('collaborateurs/planning/valid_form_detail_evenement', secure_ajax(planning_collaborateurs.Valid_form_detail_evenement), name='ajax_planning_collaborateurs_valid_form_detail_evenement'),
     path('collaborateurs/planning/modifier_evenement', secure_ajax(planning_collaborateurs.Modifier_evenement), name='ajax_planning_collaborateurs_modifier_evenement'),
     path('collaborateurs/planning/supprimer_evenement', secure_ajax(planning_collaborateurs.Supprimer_evenement), name='ajax_planning_collaborateurs_supprimer_evenement'),
+    path('collaborateurs/planning/get_form_appliquer_modele', secure_ajax(planning_collaborateurs.Get_form_appliquer_modele), name='ajax_planning_collaborateurs_get_form_appliquer_modele'),
+    path('collaborateurs/planning/valid_form_appliquer_modele', secure_ajax(planning_collaborateurs.Valid_form_appliquer_modele), name='ajax_planning_collaborateurs_valid_form_appliquer_modele'),
+
 
 ]

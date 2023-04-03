@@ -35,10 +35,11 @@ class Liste(Page, crud.Liste):
     model = Collaborateur
 
     def get_queryset(self):
+        conditions = (Q(groupes__superviseurs=self.request.user) | Q(groupes__superviseurs__isnull=True))
         try:
-            return Collaborateur.objects.filter(self.Get_filtres("Q"))
+            return Collaborateur.objects.filter(conditions, self.Get_filtres("Q"))
         except:
-            return Collaborateur.objects.all()
+            return Collaborateur.objects.filter(conditions)
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -104,6 +105,13 @@ class Onglet(CustomView):
         context['idcollaborateur'] = self.kwargs['idcollaborateur']
         context['collaborateur'] = Collaborateur.objects.get(pk=self.kwargs['idcollaborateur'])
         return context
+
+    def test_func_page(self):
+        # Vérifie que l'utilisateur a une permission d'accéder à ce collaborateur
+        idcollaborateur = self.Get_idcollaborateur()
+        if idcollaborateur and not Collaborateur.objects.filter((Q(groupes__superviseurs=self.request.user) | Q(groupes__superviseurs__isnull=True)), pk=idcollaborateur).exists():
+            return False
+        return True
 
     def Get_idcollaborateur(self):
         return self.kwargs.get('idcollaborateur', None)

@@ -143,6 +143,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_collaborateurs.Add(code="types_evenements_collaborateurs_liste", titre="Catégories d'évènements", icone="file-text-o")
     menu_collaborateurs.Add(code="types_postes_collaborateurs_liste", titre="Types de postes", icone="file-text-o")
     menu_collaborateurs.Add(code="modeles_plannings_collaborateurs_liste", titre="Modèles de plannings", icone="file-text-o")
+    menu_collaborateurs.Add(code="groupes_collaborateurs_liste", titre="Groupes de collaborateurs", icone="file-text-o")
 
 
     # ------------------------------------ Outils ------------------------------------

@@ -25,7 +25,7 @@ from parametrage.views import organisateur, structures, \
     configurations_sms, perceptions, modeles_prelevements, taches_recurrentes, modeles_prestations, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
-    modeles_plannings_collaborateurs
+    modeles_plannings_collaborateurs, groupes_collaborateurs
 
 
 urlpatterns = [
@@ -564,6 +564,12 @@ urlpatterns = [
     path('parametrage/modeles_plannings_collaborateurs/ajouter', modeles_plannings_collaborateurs.Ajouter.as_view(), name='modeles_plannings_collaborateurs_ajouter'),
     path('parametrage/modeles_plannings_collaborateurs/modifier/<int:pk>', modeles_plannings_collaborateurs.Modifier.as_view(), name='modeles_plannings_collaborateurs_modifier'),
     path('parametrage/modeles_plannings_collaborateurs/supprimer/<int:pk>', modeles_plannings_collaborateurs.Supprimer.as_view(), name='modeles_plannings_collaborateurs_supprimer'),
+
+    # Groupes de collaborateurs
+    path('parametrage/groupes_collaborateurs/liste', groupes_collaborateurs.Liste.as_view(), name='groupes_collaborateurs_liste'),
+    path('parametrage/groupes_collaborateurs/ajouter', groupes_collaborateurs.Ajouter.as_view(), name='groupes_collaborateurs_ajouter'),
+    path('parametrage/groupes_collaborateurs/modifier/<int:pk>', groupes_collaborateurs.Modifier.as_view(), name='groupes_collaborateurs_modifier'),
+    path('parametrage/groupes_collaborateurs/supprimer/<int:pk>', groupes_collaborateurs.Supprimer.as_view(), name='groupes_collaborateurs_supprimer'),
 
 
     # AJAX
