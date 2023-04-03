@@ -38,7 +38,11 @@ def Recherche_update():
     # fichier.close()
 
     # Nouvelle version avec requests
-    data = requests.get(url)
+    try:
+        data = requests.get(url)
+    except:
+        logger.debug("Le fichier des versions n'a pas pu être téléchargé sur Github.")
+        return False, False
     changelog = data.text
 
     # Lecture du numéro de version online
