@@ -1,3 +1,9 @@
+Version 1.1.4.0 (04/04/2023) :
+
+- Ajout des groupes de collaborateurs
+- Correction de la recherche du fichier des versions hors ligne
+- Petites corrections
+
 Version 1.1.3.9 (02/04/2023) :
 
 - Ajout du module Collaborateurs
