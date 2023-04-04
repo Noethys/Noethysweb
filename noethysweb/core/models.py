@@ -2957,31 +2957,6 @@ class Mail(models.Model):
         super().delete(*args, **kwargs)
 
 
-# class PortailUnite(models.Model):
-#     idunite = models.AutoField(verbose_name='ID', db_column='IDunite', primary_key=True)
-#     activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.PROTECT)
-#     nom = models.CharField(verbose_name="Nom", max_length=200)
-#     unites_principales = models.ManyToManyField(Unite, verbose_name="Unités principales", related_name="unites_principales", blank=True)
-#     unites_secondaires = models.ManyToManyField(Unite, verbose_name="Unités secondaires", related_name="unites_secondaires", blank=True)
-#     ordre = models.IntegerField(verbose_name="Ordre")
-#
-#     class Meta:
-#         db_table = 'portail_unites'
-#         verbose_name = "unité de réservation"
-#         verbose_name_plural = "unités de réservation"
-#
-#     def __str__(self):
-#         return "Unité de réservation %s" % self.nom if self.nom else "Nouveau"
-#
-#     def delete(self, *args, **kwargs):
-#         # Après la suppression, on rectifie l'ordre des unités
-#         super().delete(*args, **kwargs)
-#         for ordre, objet in enumerate(PortailUnite.objects.filter(activite=self.activite).order_by("ordre"), start=1):
-#             if objet.ordre != ordre:
-#                 objet.ordre = ordre
-#                 objet.save()
-
-
 class PortailPeriode(models.Model):
     idperiode = models.AutoField(verbose_name='ID', db_column='IDperiode', primary_key=True)
     activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.PROTECT)
@@ -3046,8 +3021,8 @@ class PortailParametre(models.Model):
 class PortailRenseignement(models.Model):
     idrenseignement = models.AutoField(verbose_name="ID", db_column='IDrenseignement', primary_key=True)
     date = models.DateTimeField(verbose_name="Date de modification", auto_now_add=True)
-    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
-    individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.PROTECT)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE)
+    individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.CASCADE)
     categorie = models.CharField(verbose_name="Catégorie", max_length=200)
     code = models.CharField(verbose_name="Code", max_length=200)
     nouvelle_valeur = encrypt(models.TextField(verbose_name="Nouvelle valeur", blank=True, null=True))
@@ -3089,8 +3064,8 @@ class PortailChamp(models.Model):
 
 class PortailMessage(models.Model):
     idmessage = models.AutoField(verbose_name="ID", db_column='IDmessage', primary_key=True)
-    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
-    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.CASCADE)
     utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.PROTECT)
     texte = models.TextField(verbose_name="Texte")
     date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
@@ -3120,8 +3095,8 @@ class ContactUrgence(models.Model):
     lien = encrypt(models.CharField(verbose_name="Lien avec l'individu", max_length=200))
     autorisation_sortie = models.BooleanField(verbose_name="Autorisé à récupérer l'individu", default=True)
     autorisation_appel = models.BooleanField(verbose_name="A contacter en cas d'urgence", default=True)
-    individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.PROTECT)
-    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
+    individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'contacts_urgence'
