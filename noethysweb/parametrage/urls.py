@@ -54,6 +54,7 @@ urlpatterns = [
     path('parametrage/activites/ajouter', activites.Ajouter.as_view(), name='activites_ajouter'),
     path('parametrage/activites/supprimer/<int:idactivite>', activites.Supprimer.as_view(), name='activites_supprimer'),
     path('parametrage/activites/resume/<int:idactivite>', activites.Resume.as_view(), name='activites_resume'),
+    path('parametrage/activites/dupliquer/<int:pk>', activites.Dupliquer.as_view(), name='activites_dupliquer'),
 
     path('parametrage/activites/generalites/<int:idactivite>', activites_generalites.Consulter.as_view(), name='activites_generalites'),
     path('parametrage/activites/generalites/modifier/<int:idactivite>', activites_generalites.Modifier.as_view(), name='activites_generalites_modifier'),

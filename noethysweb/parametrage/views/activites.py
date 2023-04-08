@@ -3,15 +3,17 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+from copy import deepcopy
 from django.urls import reverse_lazy, reverse
-from core.views.mydatatableview import MyDatatable, columns, helpers
-from core.views import crud
-from core.models import Activite, Inscription
-from django.views.generic.detail import DetailView
-from parametrage.forms.activites import Formulaire
-from core.views.base import CustomView
 from django.contrib import messages
 from django.db.models import Q, Count
+from django.views.generic.detail import DetailView
+from core.views.mydatatableview import MyDatatable, columns, helpers
+from core.views import crud
+from core.models import Activite, Inscription, ResponsableActivite, Agrement, Groupe, Evenement, CategorieTarif, NomTarif, \
+                        Unite, UniteRemplissage, Tarif, TarifLigne, CombiTarif, Ouverture, Remplissage, PortailPeriode
+from core.views.base import CustomView
+from parametrage.forms.activites import Formulaire
 
 
 class Page(crud.Page):
@@ -20,6 +22,7 @@ class Page(crud.Page):
     url_ajouter = "activites_ajouter"
     url_modifier = "activites_resume"
     url_supprimer = "activites_supprimer"
+    url_dupliquer = "activites_dupliquer"
     description_liste = "Voici ci-dessous la liste des activités."
     description_saisie = "Saisissez toutes les informations concernant l'activité à saisir et cliquez sur le bouton Enregistrer."
     objet_singulier = "une activité"
@@ -46,13 +49,13 @@ class Liste(Page, crud.Liste):
     class datatable_class(MyDatatable):
         filtres = ["idactivite", "nom", "date_debut", "date_fin"]
         groupes = columns.TextColumn("Groupes d'activités", sources=None, processor='Get_groupes')
-        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         periode = columns.DisplayColumn("Validité", sources="date_fin", processor='Get_validite')
         nbre_inscrits = columns.TextColumn("Inscrits", sources="nbre_inscrits")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idactivite", "nom", "periode", "groupes", "nbre_inscrits"]
+            columns = ["idactivite", "nom", "periode", "groupes", "nbre_inscrits", "actions"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
@@ -67,6 +70,15 @@ class Liste(Page, crud.Liste):
 
         def Get_groupes(self, instance, *args, **kwargs):
             return ", ".join([groupe.nom for groupe in instance.groupes_activites.all()])
+
+        def Get_actions_speciales(self, instance, *args, **kwargs):
+            """ Inclut la duplication dans les boutons d'actions """
+            html = [
+                self.Create_bouton_modifier(url=reverse(kwargs["view"].url_modifier, args=[instance.pk])),
+                self.Create_bouton_supprimer(url=reverse(kwargs["view"].url_supprimer, args=[instance.pk])),
+                self.Create_bouton_dupliquer(url=reverse(kwargs["view"].url_dupliquer, args=[instance.pk])),
+            ]
+            return self.Create_boutons_actions(html)
 
 
 class Ajouter(Page, crud.Ajouter):
@@ -84,8 +96,6 @@ class Supprimer(Page, crud.Supprimer):
 
     def get_object(self):
         return Activite.objects.get(pk=self.kwargs['idactivite'])
-
-
 
 
 class Onglet(CustomView):
@@ -110,7 +120,6 @@ class Onglet(CustomView):
         {"code": "tarifs", "label": "Tarifs", "icone": "fa-euro", "url": "activites_tarifs_liste"},
         {"rubrique": "Portail"},
         {"code": "portail_parametres", "label": "Paramètres", "icone": "fa-gear", "url": "activites_portail_parametres"},
-        # {"code": "portail_unites", "label": "Unités de réservation", "icone": "fa-table", "url": "activites_portail_unites_liste"},
         {"code": "portail_periodes", "label": "Périodes de réservation", "icone": "fa-calendar", "url": "activites_portail_periodes_liste"},
     ]
 
@@ -123,9 +132,6 @@ class Onglet(CustomView):
 
     def Get_idactivite(self):
         return self.kwargs.get('idactivite', None)
-
-
-
 
 
 class Resume(Onglet, DetailView):
@@ -145,3 +151,74 @@ class Resume(Onglet, DetailView):
     def get_object(self):
         return Activite.objects.get(pk=self.kwargs['idactivite'])
 
+
+class Dupliquer(Page, crud.Dupliquer):
+    def post(self, request, **kwargs):
+        # Récupération de l'objet à dupliquer
+        activite = self.model.objects.get(pk=kwargs.get("pk", None))
+
+        # Duplication de l'objet Activite
+        nouvelle_activite = deepcopy(activite)
+        nouvelle_activite.pk = None
+        nouvelle_activite.nom = "Copie de %s" % activite.nom
+        nouvelle_activite.save()
+        nouvelle_activite.groupes_activites.set(activite.groupes_activites.all())
+        nouvelle_activite.pieces.set(activite.pieces.all())
+        nouvelle_activite.cotisations.set(activite.cotisations.all())
+        nouvelle_activite.types_consentements.set(activite.types_consentements.all())
+
+        def Get_correspondances(correspondances={}, objet=None):
+            return {
+                "activite_id": nouvelle_activite.pk,
+                "unite_id": correspondances["Unite"][objet.unite_id] if getattr(objet, "unite_id", None) and "Unite" in correspondances else None,
+                "groupe_id": correspondances["Groupe"][objet.groupe_id] if getattr(objet, "groupe_id", None) and "Groupe" in correspondances else None,
+                "unite_remplissage_id": correspondances["UniteRemplissage"][objet.unite_remplissage_id] if getattr(objet, "unite_remplissage_id", None) and "UniteRemplissage" in correspondances else None,
+                "tarif_id": correspondances["Tarif"][objet.tarif_id] if getattr(objet, "tarif_id", None) and "Tarif" in correspondances else None,
+                "nom_tarif_id": correspondances["NomTarif"][objet.nom_tarif_id] if getattr(objet, "nom_tarif_id", None) and "NomTarif" in correspondances else None,
+                "evenement_id": correspondances["Evenement"][objet.evenement_id] if getattr(objet, "evenement_id", None) and "Evenement" in correspondances else None,
+            }
+
+        # Duplications simples
+        tables = [ResponsableActivite, Agrement, Groupe, Unite, Evenement, CategorieTarif, NomTarif,
+                  UniteRemplissage, Tarif, TarifLigne, Ouverture, Remplissage, PortailPeriode]
+        correspondances = {}
+        for classe in tables:
+            for objet in classe.objects.filter(activite=activite):
+                nouvel_objet = deepcopy(objet)
+                nouvel_objet.pk = None
+
+                # Traitement des ForeignKey
+                for key, valeur in Get_correspondances(correspondances, objet).items():
+                    setattr(nouvel_objet, key, valeur)
+                nouvel_objet.save()
+
+                # Mémorisation des correspondances
+                correspondances.setdefault(objet._meta.object_name, {})
+                correspondances[objet._meta.object_name][objet.pk] = nouvel_objet.pk
+
+                # Duplication des champs manytomany
+                for field in classe._meta.get_fields():
+                    if field.__class__.__name__ == "ManyToManyField":
+                        getattr(nouvel_objet, field.name).set(getattr(objet, field.name).all(), through_defaults=Get_correspondances(correspondances, objet))
+
+        # Unite de remplissage
+        for objet in UniteRemplissage.objects.filter(activite=nouvelle_activite):
+            objet.unites.set(Unite.objects.filter(pk__in=[correspondances["Unite"][obj.pk] for obj in objet.unites.all()]))
+
+        # Tarif
+        for objet in Tarif.objects.filter(activite=nouvelle_activite):
+            objet.categories_tarifs.set(CategorieTarif.objects.filter(pk__in=[correspondances["CategorieTarif"][obj.pk] for obj in objet.categories_tarifs.all()]))
+            objet.groupes.set(Groupe.objects.filter(pk__in=[correspondances["Groupe"][obj.pk] for obj in objet.groupes.all()]))
+
+        # CombiTarif
+        for objet in CombiTarif.objects.filter(tarif_id__in=correspondances["Tarif"]):
+            nouvel_objet = deepcopy(objet)
+            nouvel_objet.pk = None
+            nouvel_objet.tarif_id = correspondances["Tarif"][objet.tarif_id]
+            nouvel_objet.groupe_id = correspondances["Groupe"][objet.groupe_id] if objet.groupe_id else None
+            nouvel_objet.save()
+            nouvel_objet.unites.set(Unite.objects.filter(pk__in=[correspondances["Unite"][obj.pk] for obj in objet.unites.all()]))
+
+        # Redirection
+        url = reverse(self.url_modifier, args=[nouvelle_activite.pk,]) if "dupliquer_ouvrir" in request.POST else None
+        return self.Redirection(url=url)
