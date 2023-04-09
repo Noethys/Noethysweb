@@ -1,3 +1,11 @@
+Version 1.1.4.1 (09/04/2023) :
+
+- Ajout de la duplication d'une activité
+- Ajout de délais de réservations supplémentaires pour le portail
+- Ajout de select2 au formulaire d'une étape de scolarité
+- Correction du tarif selon un montant questionnaire
+- Petites corrections
+
 Version 1.1.4.0 (04/04/2023) :
 
 - Ajout des groupes de collaborateurs
