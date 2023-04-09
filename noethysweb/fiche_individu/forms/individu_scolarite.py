@@ -12,7 +12,7 @@ from crispy_forms.bootstrap import Field, StrictButton
 from core.utils.utils_commandes import Commandes
 from core.models import Scolarite, Individu, Ecole, Classe
 from core.widgets import DatePickerWidget
-from django_select2.forms import ModelSelect2Widget
+from django_select2.forms import ModelSelect2Widget, Select2Widget
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -22,6 +22,11 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Scolarite
         fields = "__all__"
+        widgets = {
+            "ecole": Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}),
+            "classe": Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}),
+            "niveau": Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}),
+        }
 
     def __init__(self, *args, **kwargs):
         idindividu = kwargs.pop("idindividu", None)
@@ -38,6 +43,9 @@ class Formulaire(FormulaireBase, ModelForm):
         # Individu
         if not idindividu:
             self.fields["individu"] = forms.ModelChoiceField(label="Individu", widget=ModelSelect2Widget(model=Individu, search_fields=['nom__icontains', 'prenom__icontains'], attrs={"lang": "fr", "data-width": "100%"}), queryset=Individu.objects.all().order_by("nom", "prenom"), required=True)
+
+        # Ecole
+        self.fields["ecole"].queryset = Ecole.objects.all().order_by("nom")
 
         # Récupération de l'école et des dates de la dernière classe saisie
         if self.instance.date_debut == None:
