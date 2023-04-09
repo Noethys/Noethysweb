@@ -68,10 +68,11 @@
                             {% with dict_colonne=dict_colonnes_tarifs|get_item:nom_champ %}
                                 {
                                     {# stop ajouté ci-dessous pour désactiver le calendar qui fait planter l'affichage de la date #}
-                                    type: '{% if dict_colonne.editeur == 'decimal' or dict_colonne.editeur == 'decimal4' %}numeric{% elif dict_colonne.editeur == 'date_stop' %}calendar{% else %}text{% endif %}',
+                                    type: '{% if dict_colonne.editeur == 'decimal' or dict_colonne.editeur == 'decimal4' %}numeric{% elif dict_colonne.editeur == 'date_stop' %}calendar{% elif dict_colonne.editeur == 'questionnaire' %}dropdown{% else %}text{% endif %}',
                                     title:'{{ dict_colonne.label }}',
                                     width:{{ dict_colonne.largeur }}*2,
-                                    mask:{% if dict_colonne.editeur == 'heure' %}'hh24:mi'{% elif dict_colonne.editeur == 'date' %}'dd/mm/yyyy'{% else %}null{% endif %}
+                                    mask:{% if dict_colonne.editeur == 'heure' %}'hh24:mi'{% elif dict_colonne.editeur == 'date' %}'dd/mm/yyyy'{% else %}null{% endif %},
+                                    source: {% if dict_colonne.editeur == 'questionnaire' %}JSON.parse("{{ questionnaires|escapejs }}"){% else %}null{% endif %}
                                 },
                             {% endwith %}
                         {% endfor %}

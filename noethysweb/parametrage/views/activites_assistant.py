@@ -11,7 +11,7 @@ from formtools.wizard.views import SessionWizardView
 from django import forms
 from django_select2.forms import Select2MultipleWidget
 from core.models import TypeGroupeActivite, TypePiece, TypeCotisation, TypeQuotient, LISTE_METHODES_TARIFS, DICT_COLONNES_TARIFS, \
-                        Activite, Agrement, ResponsableActivite, Groupe, CategorieTarif, TarifLigne, CombiTarif
+                        Activite, Agrement, ResponsableActivite, Groupe, CategorieTarif, TarifLigne, CombiTarif, QuestionnaireQuestion
 from parametrage.widgets import ParametresTarifs
 from parametrage.forms import activites_tarifs
 from django.contrib import messages
@@ -81,6 +81,7 @@ class Page_tarifs(forms.Form):
                 'id': index,
                 'id_tarifs_lignes_data': "id_tarifs-data_tarif_%d" % index,
                 'id_form': 'form_assistant',
+                'questionnaires': json.dumps([{"id": question.pk, "name": question.label} for question in QuestionnaireQuestion.objects.filter(controle="decimal")]),
             }
             self.fields["parametres_tarif_%d" % index] = forms.CharField(label="Paramètres du tarif%s" % texte_categorie, widget=ParametresTarifs(attrs=attrs), required=False, help_text="")
             self.fields["type_quotient_tarif_%d" % index] = forms.ModelChoiceField(label="Type de quotient à utiliser%s" % texte_categorie, queryset=TypeQuotient.objects.all(), required=False, help_text="Sélectionnez un type de quotient familial ou laissez le champ vide pour tenir compte de tous les types de quotients.")

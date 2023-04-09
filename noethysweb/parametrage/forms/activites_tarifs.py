@@ -14,7 +14,7 @@ from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, Div, But
 from crispy_forms.bootstrap import Field, PrependedText, TabHolder, Tab, InlineCheckboxes, StrictButton
 from core.utils.utils_commandes import Commandes
 from core.models import Tarif, CategorieTarif, Activite, Groupe, TypeCotisation, Caisse, NomTarif, TarifLigne, \
-                                LISTE_METHODES_TARIFS, DICT_COLONNES_TARIFS, CombiTarif, Unite, Evenement
+                                LISTE_METHODES_TARIFS, DICT_COLONNES_TARIFS, CombiTarif, Unite, Evenement, QuestionnaireQuestion
 from core.widgets import DatePickerWidget, Formset
 from django.forms import ValidationError
 from parametrage.widgets import ParametresTarifs
@@ -332,6 +332,7 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields['parametres_tarif'].widget.attrs.update({
                 'methode': methode,
                 'tarifs_lignes_data': mark_safe(json.dumps(tarifs_lignes_data)),
+                'questionnaires': json.dumps([{"id": question.pk, "name": question.label} for question in QuestionnaireQuestion.objects.filter(controle="decimal")]),
             })
 
         # Affichage

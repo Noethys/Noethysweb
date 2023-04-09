@@ -12,7 +12,7 @@ from django.utils.safestring import mark_safe
 from django.db.models import Q, Count
 from django.core import serializers
 from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite, Consommation, MemoJournee, Evenement, Groupe, Individu, Ventilation, \
-                        Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Ferie, Individu, Activite, Classe, Scolarite
+                        Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Ferie, Individu, Activite, Classe, Scolarite, QuestionnaireReponse
 from core.utils import utils_dates, utils_dictionnaires, utils_db, utils_texte, utils_decimal, utils_historique
 from consommations.utils import utils_consommations
 
@@ -1104,10 +1104,8 @@ class Facturation():
             lignes_calcul = Get_lignes_tarif()
             ligne_calcul = lignes_calcul.first()
             montant_tarif = ligne_calcul.montant_unique
-
-            # montant_questionnaire = self.GetQuestionnaire(lignes_calcul[0]["montant_questionnaire"], IDfamille, IDindividu)
-            # if montant_questionnaire not in (None, 0.0):
-            #     montant_tarif = montant_questionnaire
+            if ligne_calcul.montant_questionnaire:
+                montant_tarif = self.Get_montant_questionnaire(IDquestion=ligne_calcul.montant_questionnaire, case_tableau=case_tableau)
 
         # Recherche du montant à appliquer : QUOTIENT FAMILIAL
         if methode_calcul == "qf":
@@ -1139,12 +1137,11 @@ class Facturation():
                 qf_famille = self.Recherche_QF(tarif, case_tableau)
 
             for ligne_calcul in lignes_calcul:
-                # montant_questionnaire = self.GetQuestionnaire(ligneCalcul["montant_questionnaire"], IDfamille, IDindividu)
-                # if montant_questionnaire not in (None, 0.0):
-                #     montant_tarif_ligne = montant_questionnaire
-
                 if ligne_calcul.heure_debut_min <= heure_debut <= ligne_calcul.heure_debut_max and ligne_calcul.heure_fin_min <= heure_fin <= ligne_calcul.heure_fin_max:
                     montant_tarif = ligne_calcul.montant_unique
+                    if ligne_calcul.montant_questionnaire:
+                        montant_tarif = self.Get_montant_questionnaire(IDquestion=ligne_calcul.montant_questionnaire, case_tableau=case_tableau)
+
                     if ligne_calcul.temps_facture:
                         temps_facture = datetime.timedelta(hours=ligne_calcul.temps_facture.hour, minutes=ligne_calcul.temps_facture.minute)
                     else:
@@ -1182,12 +1179,11 @@ class Facturation():
                 qf_famille = self.Recherche_QF(tarif, case_tableau)
 
             for ligne_calcul in lignes_calcul:
-                # montant_questionnaire = self.GetQuestionnaire(ligneCalcul["montant_questionnaire"], IDfamille, IDindividu)
-                # if montant_questionnaire not in (None, 0.0):
-                #     montant_tarif_ligne = montant_questionnaire
-
                 if utils_dates.TimeEnDelta(ligne_calcul.duree_min) <= duree <= utils_dates.TimeEnDelta(ligne_calcul.duree_max):
                     montant_tarif = ligne_calcul.montant_unique
+                    if ligne_calcul.montant_questionnaire:
+                        montant_tarif = self.Get_montant_questionnaire(IDquestion=ligne_calcul.montant_questionnaire, case_tableau=case_tableau)
+
                     if ligne_calcul.temps_facture:
                         temps_facture = datetime.timedelta(hours=ligne_calcul.temps_facture.hour, minutes=ligne_calcul.temps_facture.minute)
                     else:
@@ -1524,6 +1520,14 @@ class Facturation():
         montant_tarif = utils_decimal.FloatToDecimal(montant_tarif, plusProche=True)
 
         return montant_tarif, nom_tarif, temps_facture, quantite, ligne_calcul
+
+    def Get_montant_questionnaire(self, IDquestion=None, case_tableau=None):
+        conditions = Q(question_id=IDquestion) & ((Q(question__categorie="famille") & Q(famille_id=case_tableau["famille"]) | Q(question__categorie="individu") & Q(individu_id=case_tableau["individu"])))
+        reponse = QuestionnaireReponse.objects.filter(conditions).first()
+        if reponse:
+            return decimal.Decimal(reponse.reponse or 0.0)
+        return decimal.Decimal(0.0)
+
 
 def Valider_traitement_lot(request):
     # Récupération des données générales
