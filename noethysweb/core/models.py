@@ -2470,7 +2470,7 @@ class QuestionnaireReponse(models.Model):
         if self.question.controle == "case_coche":
             return self.reponse == "True"
         if self.question.controle in ("decimal", "montant"):
-            return decimal.Decimal(self.reponse)
+            return decimal.Decimal(self.reponse or "0.0")
         return self.reponse
 
     def Get_reponse_fr(self):
@@ -2481,7 +2481,7 @@ class QuestionnaireReponse(models.Model):
         if self.question.controle == "case_coche":
             return "oui" if self.reponse == "True" else "non"
         if self.question.controle in ("decimal", "montant"):
-            return float(decimal.Decimal(self.reponse))
+            return float(decimal.Decimal(self.reponse or 0.0))
         return ""
 
 
@@ -2959,7 +2959,7 @@ class Mail(models.Model):
 
 class PortailPeriode(models.Model):
     idperiode = models.AutoField(verbose_name='ID', db_column='IDperiode', primary_key=True)
-    activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.PROTECT)
+    activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.CASCADE)
     nom = models.CharField(verbose_name="Nom de la période", max_length=200)
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin")
