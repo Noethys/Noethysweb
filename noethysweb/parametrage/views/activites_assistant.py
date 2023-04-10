@@ -81,7 +81,7 @@ class Page_tarifs(forms.Form):
                 'id': index,
                 'id_tarifs_lignes_data': "id_tarifs-data_tarif_%d" % index,
                 'id_form': 'form_assistant',
-                'questionnaires': json.dumps([{"id": question.pk, "name": question.label} for question in QuestionnaireQuestion.objects.filter(controle="decimal")]),
+                'questionnaires': json.dumps([{"id": question.pk, "name": question.label} for question in QuestionnaireQuestion.objects.filter(controle__in=("decimal", "montant"))]),
             }
             self.fields["parametres_tarif_%d" % index] = forms.CharField(label="Paramètres du tarif%s" % texte_categorie, widget=ParametresTarifs(attrs=attrs), required=False, help_text="")
             self.fields["type_quotient_tarif_%d" % index] = forms.ModelChoiceField(label="Type de quotient à utiliser%s" % texte_categorie, queryset=TypeQuotient.objects.all(), required=False, help_text="Sélectionnez un type de quotient familial ou laissez le champ vide pour tenir compte de tous les types de quotients.")

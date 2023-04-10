@@ -332,7 +332,7 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields['parametres_tarif'].widget.attrs.update({
                 'methode': methode,
                 'tarifs_lignes_data': mark_safe(json.dumps(tarifs_lignes_data)),
-                'questionnaires': json.dumps([{"id": question.pk, "name": question.label} for question in QuestionnaireQuestion.objects.filter(controle="decimal")]),
+                'questionnaires': json.dumps([{"id": question.pk, "name": question.label} for question in QuestionnaireQuestion.objects.filter(controle__in=("decimal", "montant"))]),
             })
 
         # Affichage
