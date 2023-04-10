@@ -45,7 +45,7 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Unite
         fields = ["ordre", "activite", "nom", "abrege", "type", "heure_debut", "heure_fin", "heure_debut_fixe", "heure_fin_fixe",
-                  "repas", "restaurateur", "touche_raccourci", "date_debut", "date_fin", "groupes", "incompatibilites", "visible_portail",
+                  "repas", "restaurateur", "touche_raccourci", "date_debut", "date_fin", "groupes", "incompatibilites", "visible_portail", "imposer_saisie_valeur",
                   "heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "equiv_journees", "equiv_heures", "dependances"]
         help_texts = {
             "equiv_journees": "Saisissez l'équivalence en journées (utile uniquement pour l'état global et l'état nominatif). Ex : une journée=1, une demi-journée=0.5, etc...",
@@ -121,6 +121,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("touche_raccourci"),
                 Field("dependances"),
                 Field("visible_portail"),
+                Field("imposer_saisie_valeur"),
             ),
             Fieldset("Heure de début",
                 Field("heure_debut"),

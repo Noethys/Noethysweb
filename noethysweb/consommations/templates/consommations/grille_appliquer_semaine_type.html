@@ -20,6 +20,7 @@
 {% embed 'core/modal.html' with modal_footer=True %}
     {% block modal_id %}modal_appliquer_semaine_type{% endblock %}
     {% block modal_titre %}Appliquer une semaine-type{% endblock %}
+    {% block modal_classe %}{% if data.liste_unites_visibles|length > 2 %}modal-lg{% endif %}{% endblock %}
     {% block modal_body %}
         <div id="modal_erreurs" class="text-red"></div>
         <form id="form_appliquer_semaine_type" method="post">
@@ -130,6 +131,9 @@ $(document).ready(function() {
                 };
             });
         };
+        $("input[name=unite_" + $(this).data("semaine") + "_" + $(this).data("unite") + "_" + $(this).data("jour") + "_fin]").prop("disabled", !this.checked);
+        $("input[name=unite_" + $(this).data("semaine") + "_" + $(this).data("unite") + "_" + $(this).data("jour") + "_debut]").prop("disabled", !this.checked);
+        $("input[name=unite_" + $(this).data("semaine") + "_" + $(this).data("unite") + "_" + $(this).data("jour") + "_quantite]").prop("disabled", !this.checked);
     });
 
     // Fonction Pair/Impair
@@ -147,15 +151,67 @@ $(document).ready(function() {
         var frequence = parseInt($("#id_frequence").val());
 
         // Récupération des jours de la semaine-type
+        var validation = true;
         var liste_resultats = [];
         $("input[name=case_semaine_type]:checked").each(function() {
             var semaine = parseInt($(this).attr('data-semaine'));
             var jour = parseInt($(this).attr('data-jour'));
             var idunite = parseInt($(this).attr('data-unite'));
+            var heure_debut = $("input[name=unite_" + semaine + "_" + idunite + "_" + jour + "_debut]").val();
+            var heure_fin = $("input[name=unite_" + semaine + "_" + idunite + "_" + jour + "_fin]").val();
+            var quantite = $("input[name=unite_" + semaine + "_" + idunite + "_" + jour + "_quantite]").val();
+
+            // Validation des horaires saisis
+            label_erreur = dict_unites[idunite].nom
+
+            if (heure_debut == false) {
+                    toastr.error("L'heure de début de l'unité " + label_erreur + " doit être renseignée");
+                    validation = false; return;
+            }
+            if (heure_debut) {
+                if (dict_unites[idunite].heure_debut_min && dict_unites[idunite].heure_debut_min !== "None" && heure_debut < dict_unites[idunite].heure_debut_min) {
+                    toastr.error("L'heure de début de l'unité " + label_erreur + " doit être supérieure ou égale à " + dict_unites[idunite].heure_debut_min);
+                    validation = false; return;
+                }
+                if (dict_unites[idunite].heure_debut_max && dict_unites[idunite].heure_debut_max !== "None" && heure_debut > dict_unites[idunite].heure_debut_max) {
+                    toastr.error("L'heure de début de l'unité " + label_erreur + " doit être inférieure ou égale à " + dict_unites[idunite].heure_debut_max);
+                    validation = false; return;
+                }
+            }
+
+            if (heure_fin == false) {
+                    toastr.error("L'heure de fin de l'unité " + label_erreur + " doit être renseignée");
+                    validation = false; return;
+            }
+            if (heure_fin) {
+                if (dict_unites[idunite].heure_fin_min && dict_unites[idunite].heure_fin_min !== "None" && heure_fin < dict_unites[idunite].heure_fin_min) {
+                    toastr.error("L'heure de fin de l'unité " + label_erreur + " doit être supérieure ou égale à " + dict_unites[idunite].heure_fin_min);
+                    validation = false; return;
+                }
+                if (dict_unites[idunite].heure_fin_max && dict_unites[idunite].heure_fin_max !== "None" && heure_fin > dict_unites[idunite].heure_fin_max) {
+                    toastr.error("L'heure de fin de l'unité " + label_erreur + " doit être inférieure ou égale à " + dict_unites[idunite].heure_fin_max);
+                    validation = false; return;
+                }
+            }
+            if (heure_debut && heure_fin && heure_debut > heure_fin) {
+                toastr.error("L'heure de fin de l'unité " + label_erreur + " doit être supérieure à l'heure de début");
+                validation = false; return;
+            }
+
+            // Validation de la quantité saisie
+            if ((quantite == false) || ((quantite) && (quantite < 1))) {
+                toastr.error("La quantité de l'unité " + label_erreur + " doit être supérieure ou égale à 1");
+                validation = false; return;
+            }
+
+            // Mémorisation
             if ((frequence === 0 && semaine === 0) || (frequence === 1 && (semaine === 1 || semaine === 2) ) || (frequence === 2 && (semaine === 4 || semaine === 5) )) {
-                liste_resultats.push({semaine: semaine, jour: jour, unite: idunite});
+                liste_resultats.push({semaine: semaine, jour: jour, unite: idunite, heure_debut: heure_debut, heure_fin: heure_fin, quantite: quantite});
             };
         });
+
+        // Stoppe si non validation
+        if (!(validation)) {return false;}
 
         // Application de la semaine-type
         touche_clavier = 17;
@@ -167,19 +223,25 @@ $(document).ready(function() {
 
                 // Recherche si la case est dans la liste des résultats
                 var valide = false;
+                var data = {};
                 for (var i = 0; i < liste_resultats.length; i++) {
                     if (liste_resultats[i].jour === jour_case && liste_resultats[i].unite === case_tableau.unite) {
+                        // Data à envoyer à la fonction Ajouter
+                        if (liste_resultats[i].heure_debut) {data["heure_debut"] = liste_resultats[i].heure_debut}
+                        if (liste_resultats[i].heure_fin) {data["heure_fin"] = liste_resultats[i].heure_fin}
+                        if (liste_resultats[i].quantite) {data["quantite"] = liste_resultats[i].quantite}
+
                         // Toutes les semaines
                         if (frequence === 0) {
-                            var valide = true;
+                            valide = true;
                         }
                         // 1 semaine sur 2
                         if (frequence === 1 && ((isPair(liste_resultats[i].semaine) !== isPair(num_semaine_case)) === isPair(num_semaine_debut))) {
-                            var valide = true;
+                            valide = true;
                         }
                         // Semaines paires/impaires
                         if (frequence === 2 && isPair(liste_resultats[i].semaine) === isPair(num_semaine_case)) {
-                            var valide = true;
+                            valide = true;
                         }
                     }
                 }
@@ -187,11 +249,15 @@ $(document).ready(function() {
                 // Application réservation
                 var active_facturation = !(mode === "portail");
                 if (valide === true) {
-                    case_tableau.ajouter(maj_facturation = active_facturation);
+                    if (case_tableau.has_conso()) {
+                        case_tableau.modifier_conso(data=data, maj_facturation=active_facturation);
+                    } else {
+                        case_tableau.ajouter(data=data, maj_facturation=active_facturation);
+                    }
                     cases_touchees.push(case_tableau.key);
                 } else {
                     if (case_tableau.consommations.length > 0) {
-                        case_tableau.supprimer(maj_facturation = active_facturation);
+                        case_tableau.supprimer(maj_facturation=active_facturation);
                         cases_touchees.push(case_tableau.key);
                     }
                 }

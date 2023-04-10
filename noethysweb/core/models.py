@@ -1288,6 +1288,7 @@ class Unite(models.Model):
     groupes = models.ManyToManyField(Groupe, blank=True)
     incompatibilites = models.ManyToManyField("self", verbose_name="Incompatibilités", blank=True)
     visible_portail = models.BooleanField(verbose_name="Visible sur le portail", default=True)
+    imposer_saisie_valeur = models.BooleanField(verbose_name="Imposer la saisie de la valeur aux usagers sur le portail (uniquement pour les unités de type horaire ou quantité)", default=False)
     equiv_journees = models.FloatField(verbose_name="Equivalence en journées", blank=True, null=True)
     equiv_heures = models.TimeField(verbose_name="Equivalence en heures", blank=True, null=True)
     dependances = models.ManyToManyField("self", verbose_name="Unités liées", blank=True, symmetrical=False)

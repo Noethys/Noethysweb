@@ -277,7 +277,8 @@ def Get_generic_data(data={}):
             "heure_debut": str(unite.heure_debut), "heure_fin": str(unite.heure_fin), "heure_debut_fixe": unite.heure_debut_fixe,
             "heure_fin_fixe": unite.heure_fin_fixe, "touche_raccourci": unite.touche_raccourci, "largeur": unite.largeur,
             "groupes": [groupe.pk for groupe in unite.groupes.all()], "incompatibilites": [u.pk for u in unite.incompatibilites.all()],
-            "visible_portail": unite.visible_portail, "unites_remplissage": dict_unites_remplissage_unites.get(unite.pk, []),
+            "visible_portail": unite.visible_portail, "imposer_saisie_valeur": unite.imposer_saisie_valeur,
+            "unites_remplissage": dict_unites_remplissage_unites.get(unite.pk, []),
             "heure_debut_min": str(unite.heure_debut_min), "heure_debut_max": str(unite.heure_debut_max),
             "heure_fin_min": str(unite.heure_fin_min), "heure_fin_max": str(unite.heure_fin_max),
             "dependances": [u.pk for u in unite.dependances.all()]}})

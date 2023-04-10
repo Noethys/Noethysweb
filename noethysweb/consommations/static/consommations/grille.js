@@ -393,11 +393,19 @@ class Case_standard extends Case_base {
                 $("#" + this.key + " .groupe").html(dict_groupes[conso.groupe].nom);
             };
             if (mode === "portail") {
-                if (conso.etat === "reservation") {$("#" + this.key + " .groupe").html("Réservé");}
-                if (conso.etat === "attente") {$("#" + this.key + " .groupe").html("Attente");}
-                if (conso.etat === "present") {$("#" + this.key + " .groupe").html("Présent");}
-                if (conso.etat === "refus") {$("#" + this.key + " .groupe").html("Refus");}
-                if ((conso.etat === "absenti") || (conso.etat === "absentj")) {$("#" + this.key + " .groupe").html("Absent");}
+                var texte = "";
+                if (conso.etat === "reservation") {texte= "Réservé"}
+                if (conso.etat === "attente") {texte= "Attente"}
+                if (conso.etat === "present") {texte= "Présent"}
+                if (conso.etat === "refus") {texte= "Refus"}
+                if ((conso.etat === "absenti") || (conso.etat === "absentj")) {texte= "Absent"}
+                if (dict_unites[this.unite].imposer_saisie_valeur && this.type_case === "horaire") {
+                    texte += " (" + conso.heure_debut.substring(0,5).replace(":", "h") + "-" + conso.heure_fin.substring(0,5).replace(":", "h") + ")";
+                }
+                if (dict_unites[this.unite].imposer_saisie_valeur && this.type_case === "quantite") {
+                    texte += " (" + conso.quantite + ")";
+                }
+                $("#" + this.key + " .groupe").html(texte);
             }
 
             // Dessine les icones
@@ -566,15 +574,13 @@ class Case_horaire extends Case_standard {
     ajouter(data={}, maj_facturation=true) {
         if (this.has_conso()) {return false};
 
-        // Vérifie la compatiblité avec les autres unités
+        // Vérifie la compatibilité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
 
         // Si saisie en mode portail
-        if ((mode === "portail") || (touche_clavier === 17)) {
-            data = {
-                heure_debut: dict_unites[this.unite].heure_debut,
-                heure_fin: dict_unites[this.unite].heure_fin,
-            }
+        if (((mode === "portail") && (dict_unites[this.unite].imposer_saisie_valeur === false)) || (touche_clavier === 17)) {
+            if (!("heure_debut" in data)) {data["heure_debut"] = dict_unites[this.unite].heure_debut};
+            if (!("heure_fin" in data)) {data["heure_fin"] = dict_unites[this.unite].heure_fin};
         };
 
         // Saisie directe si data donnée
@@ -614,7 +620,7 @@ class Case_horaire extends Case_standard {
     // Toggle une conso
     toggle() {
         if (this.has_conso()) {
-            if ((mode === "portail") || (touche_clavier === 17)) {
+            if (((mode === "portail") && (dict_unites[this.unite].imposer_saisie_valeur === false)) || (touche_clavier === 17)) {
                 this.supprimer();
             } else {
                 this.modifier();
@@ -640,10 +646,8 @@ class Case_quantite extends Case_standard {
         if (this.check_compatilites_unites() === false) {return false};
 
         // Si saisie en mode portail
-        if ((mode === "portail") || (touche_clavier === 17)) {
-            data = {
-                quantite: 1,
-            }
+        if (((mode === "portail") && (dict_unites[this.unite].imposer_saisie_valeur === false)) || (touche_clavier === 17)) {
+            if (!("quantite" in data)) {data["quantite"] = 1};
         };
 
         // Saisie directe si data donnée
@@ -678,7 +682,7 @@ class Case_quantite extends Case_standard {
     // Toggle une conso
     toggle() {
         if (this.has_conso()) {
-            if ((mode === "portail") || (touche_clavier === 17)) {
+            if (((mode === "portail") && (dict_unites[this.unite].imposer_saisie_valeur === false)) || (touche_clavier === 17)) {
                 this.supprimer();
             } else {
                 this.modifier();
