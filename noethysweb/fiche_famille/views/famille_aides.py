@@ -4,15 +4,14 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
-from core.views.mydatatableview import MyDatatable, columns, helpers
-from core.views import crud
-from core.models import Famille, Aide, CombiAide
-from fiche_famille.forms.famille_aides import Formulaire, FORMSET_COMBI, Formulaire_selection_activite
-from fiche_famille.views.famille import Onglet
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.db.models import Q
-from django.contrib import messages
+from core.views.mydatatableview import MyDatatable, columns, helpers
+from core.views import crud
+from core.models import Aide, CombiAide
+from fiche_famille.forms.famille_aides import Formulaire, FORMSET_COMBI, Formulaire_selection_activite
+from fiche_famille.views.famille import Onglet
 
 
 class Page(Onglet):
@@ -42,6 +41,7 @@ class Page(Onglet):
         form_kwargs = super(Page, self).get_form_kwargs(**kwargs)
         form_kwargs["idfamille"] = self.Get_idfamille()
         form_kwargs["idactivite"] = self.kwargs.get("idactivite", None)
+        form_kwargs["idmodele"] = self.kwargs.get("idmodele", None)
         return form_kwargs
 
     def get_success_url(self):
@@ -58,7 +58,7 @@ class Liste(Page, crud.Liste):
     template_name = "fiche_famille/famille_liste.html"
 
     def get_queryset(self):
-        return Aide.objects.select_related("activite", "activite__structure").filter(Q(famille=self.Get_idfamille()) & self.Get_filtres("Q"))
+        return Aide.objects.select_related("caisse", "activite", "activite__structure").prefetch_related("individus").filter(Q(famille=self.Get_idfamille()) & self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -68,11 +68,10 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idaide", "date_debut", "date_fin", "caisse__nom", "activite__nom"]
-
-        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         beneficiaires = columns.TextColumn("Bénéficiaires", sources=None, processor='Get_beneficiaires')
         caisse = columns.TextColumn("Caisse", sources=["caisse__nom"])
         activite = columns.TextColumn("Activité", sources=["activite__nom"])
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
@@ -110,17 +109,26 @@ class ClasseCommune(Page):
 
     def get_context_data(self, *args, **kwargs):
         context_data = super(ClasseCommune, self).get_context_data(**kwargs)
+        context_data["modeles"] = Aide.objects.filter(famille__isnull=True)
 
         # Traitement du Combi aides
-        if self.request.POST:
+        if "idactivite" in self.kwargs:
             activite = self.kwargs["idactivite"]
+        else:
+            activite = self.object.activite.idactivite
+
+        if self.request.POST:
             context_data['formset_combi'] = FORMSET_COMBI(self.request.POST, instance=self.object, form_kwargs={'activite': activite})
         else:
-            if "idactivite" in self.kwargs:
-                activite = self.kwargs["idactivite"]
-            else:
-                activite = self.object.activite.idactivite
             context_data['formset_combi'] = FORMSET_COMBI(instance=self.object, form_kwargs={'activite': activite})
+
+            # Importation du modèle d'aide
+            idmodele = self.kwargs.get("idmodele", None)
+            if idmodele:
+                modele_aide = Aide.objects.get(pk=idmodele)
+                combinaisons = CombiAide.objects.filter(aide=modele_aide)
+                context_data['formset_combi'].initial = [{"montant": combi.montant, "unites": combi.unites.all()} for combi in combinaisons]
+                context_data['formset_combi'].extra = max(combinaisons.count() - 1, 0)
 
         return context_data
 
@@ -172,14 +180,15 @@ class Selection_activite(Onglet, TemplateView):
         context = super(Selection_activite, self).get_context_data(**kwargs)
         if not hasattr(self, "verbe_action"):
             context['box_titre'] = "Aides"
-        context['box_introduction'] = "Vous devez commencer par sélectionner l'activité associée à l'aide que vous souhaitez créer."
+        context['box_introduction'] = "Vous devez commencer par sélectionner l'activité associée à l'aide que vous souhaitez créer. Vous pouvez éventuellement sélectionner un modèle d'aide existant à appliquer."
         context['onglet_actif'] = "aides"
         context['form'] = Formulaire_selection_activite(request=self.request)
         return context
 
     def post(self, request, **kwargs):
         idactivite = int(request.POST.get("activite"))
-        return HttpResponseRedirect(reverse_lazy("famille_aides_configurer", args=(self.Get_idfamille(), idactivite)))
+        idmodele = int(request.POST.get("modele_aide")) if request.POST.get("modele_aide") else 0
+        return HttpResponseRedirect(reverse_lazy("famille_aides_configurer", args=(self.Get_idfamille(), idactivite, idmodele)))
 
     def Get_annuler_url(self):
         return reverse_lazy("famille_aides_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)})

@@ -46,6 +46,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_modeles.Add(code="modeles_pes_liste", titre="Modèles d'exports vers le Trésor Public", icone="file-text-o")
     menu_modeles.Add(code="modeles_prestations_liste", titre="Modèles de prestations", icone="file-text-o")
     menu_modeles.Add(code="modeles_prelevements_liste", titre="Modèles de prélèvements", icone="file-text-o")
+    menu_modeles.Add(code="modeles_aides_liste", titre="Modèles d'aides", icone="file-text-o")
 
     # Comptabilité
     menu_comptabilite = menu_parametrage.Add(titre="Comptabilité")
@@ -356,10 +357,6 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_attestations_fiscales.Add(code="attestations_fiscales_impression", titre="Imprimer des attestations fiscales", icone="file-text-o")
     menu_attestations_fiscales.Add(code="attestations_fiscales_email", titre="Envoyer des attestations fiscales par Email", icone="file-text-o")
 
-    # Tarifs
-    menu_tarifs = menu_facturation.Add(titre="Tarifs")
-    menu_tarifs.Add(code="liste_tarifs", titre="Liste des tarifs", icone="file-text-o")
-
     # Prestations
     menu_prestations = menu_facturation.Add(titre="Prestations")
     menu_prestations.Add(code="liste_prestations", titre="Liste des prestations", icone="file-text-o")
@@ -369,10 +366,17 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_prestations.Add(code="edition_prestations", titre="Edition des prestations", icone="file-text-o")
     menu_prestations.Add(code="recalculer_prestations", titre="Recalculer des prestations", icone="file-text-o")
 
+    # Aides
+    menu_aides = menu_facturation.Add(titre="Aides")
+    menu_aides.Add(code="aides_liste", titre="Liste des aides", icone="file-text-o")
+
     # Impayés
     menu_impayes = menu_facturation.Add(titre="Impayés")
     menu_impayes.Add(code="synthese_impayes", titre="Synthèse des impayés", icone="file-text-o")
 
+    # Tarifs
+    menu_tarifs = menu_facturation.Add(titre="Tarifs")
+    menu_tarifs.Add(code="liste_tarifs", titre="Liste des tarifs", icone="file-text-o")
 
 
 

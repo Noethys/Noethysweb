@@ -9,14 +9,13 @@ from core.forms.base import FormulaireBase
 from django.db.models import Q
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
-from crispy_forms.bootstrap import Field, StrictButton, PrependedText, InlineCheckboxes
+from crispy_forms.bootstrap import Field, PrependedText, InlineCheckboxes
 from core.utils.utils_commandes import Commandes
-from core.models import Famille, Aide, CombiAide, Rattachement, JOURS_SEMAINE, Rattachement, Individu, CombiAide, Unite, Activite
+from core.models import Famille, Aide, JOURS_SEMAINE, Rattachement, Individu, CombiAide, Unite, Activite
 from core.widgets import DatePickerWidget, Formset
-from django_select2.forms import Select2MultipleWidget, Select2Widget
+from django_select2.forms import Select2MultipleWidget, Select2Widget, ModelSelect2Widget
 from django.forms.models import inlineformset_factory, BaseInlineFormSet
 from core.utils import utils_preferences
-
 
 
 class CombiAideForm(forms.ModelForm):
@@ -94,8 +93,9 @@ class Formulaire(FormulaireBase, ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        idfamille = kwargs.pop("idfamille")
-        idactivite = kwargs.pop("idactivite")
+        idfamille = kwargs.pop("idfamille", None)
+        idactivite = kwargs.pop("idactivite", None)
+        idmodele = kwargs.pop("idmodele", None)
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'famille_aides_form'
@@ -106,7 +106,8 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.field_class = 'col-md-10'
 
         # Définit la famille associée
-        famille = Famille.objects.get(pk=idfamille)
+        if self.instance.pk:
+            idfamille = self.instance.famille_id
 
         # Activité
         if self.instance.idaide != None:
@@ -116,12 +117,24 @@ class Formulaire(FormulaireBase, ModelForm):
         self.fields["activite"].disabled = True
 
         # Individus bénéficiaires
-        individus = [rattachement.individu_id for rattachement in Rattachement.objects.filter(famille=famille)]
+        individus = [rattachement.individu_id for rattachement in Rattachement.objects.filter(famille_id=idfamille)]
         self.fields['individus'].queryset = Individu.objects.filter(pk__in=individus).order_by("nom")
 
         # Jours
         self.fields["jours_scolaires"].initial = [0, 1, 2, 3, 4]
         self.fields["jours_vacances"].initial = [0, 1, 2, 3, 4]
+
+        # Importation d'une aide
+        if idmodele:
+            modele_aide = Aide.objects.get(pk=idmodele)
+            self.fields["nom"].initial = modele_aide.nom
+            self.fields["caisse"].initial = modele_aide.caisse
+            self.fields["date_debut"].initial = modele_aide.date_debut
+            self.fields["date_fin"].initial = modele_aide.date_fin
+            self.fields["jours_scolaires"].initial = modele_aide.jours_scolaires
+            self.fields["jours_vacances"].initial = modele_aide.jours_vacances
+            self.fields["montant_max"].initial = modele_aide.montant_max
+            self.fields["nbre_dates_max"].initial = modele_aide.nbre_dates_max
 
         # Affichage
         self.helper.layout = Layout(
@@ -161,26 +174,25 @@ class Formulaire(FormulaireBase, ModelForm):
         return self.cleaned_data
 
 
-
-
 class Formulaire_selection_activite(FormulaireBase, forms.Form):
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Activite.objects.none(), required=True)
+    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=Activite.objects.none(), required=True)
+    modele_aide = forms.ModelChoiceField(label="Modèle d'aide", widget=ModelSelect2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom__icontains'], dependent_fields={"activite": "activite"}), queryset=Aide.objects.filter(famille__isnull=True), required=False)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire_selection_activite, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'
 
-        # Liste les
+        # Liste les activités
         condition_structure = Q(structure__in=self.request.user.structures.all())
         self.fields['activite'].queryset = Activite.objects.filter(condition_structure).order_by("-date_debut")
 
         self.helper.layout = Layout(
             Field('activite'),
+            Field('modele_aide'),
             ButtonHolder(
                 Submit('submit', 'Valider', css_class='btn-primary'),
                 HTML("""<a class="btn btn-danger" href="{{ view.Get_annuler_url }}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>"""),
                 css_class="pull-right",
             )
         )
-

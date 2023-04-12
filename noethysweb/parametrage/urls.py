@@ -25,7 +25,7 @@ from parametrage.views import organisateur, structures, \
     configurations_sms, perceptions, modeles_prelevements, taches_recurrentes, modeles_prestations, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
-    modeles_plannings_collaborateurs, groupes_collaborateurs
+    modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides
 
 
 urlpatterns = [
@@ -243,6 +243,13 @@ urlpatterns = [
     path('parametrage/modeles_prelevements/ajouter/<str:format>', modeles_prelevements.Ajouter.as_view(), name='modeles_prelevements_ajouter'),
     path('parametrage/modeles_prelevements/modifier/<int:pk>', modeles_prelevements.Modifier.as_view(), name='modeles_prelevements_modifier'),
     path('parametrage/modeles_prelevements/supprimer/<int:pk>', modeles_prelevements.Supprimer.as_view(), name='modeles_prelevements_supprimer'),
+
+    # Modèles d'aide
+    path('parametrage/modeles_aides/liste', modeles_aides.Liste.as_view(), name='modeles_aides_liste'),
+    path('parametrage/modeles_aides/creer', modeles_aides.Creer.as_view(), name='modeles_aides_creer'),
+    path('parametrage/modeles_aides/ajouter/<int:activite>', modeles_aides.Ajouter.as_view(), name='modeles_aides_ajouter'),
+    path('parametrage/modeles_aides/modifier/<int:pk>', modeles_aides.Modifier.as_view(), name='modeles_aides_modifier'),
+    path('parametrage/modeles_aides/supprimer/<int:pk>', modeles_aides.Supprimer.as_view(), name='modeles_aides_supprimer'),
 
     # Types de pièces
     path('parametrage/types_pieces/liste', types_pieces.Liste.as_view(), name='types_pieces_liste'),

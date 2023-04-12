@@ -11,7 +11,7 @@ from facturation.views import factures_generation, liste_prestations, liste_fact
                                 synthese_prestations, liste_tarifs, rappels_generation, liste_rappels, factures_impression, factures_email, \
                                 rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations, \
                                 lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
-                                attestations_fiscales_email, liste_attestations_fiscales
+                                attestations_fiscales_email, liste_attestations_fiscales, liste_aides
 
 urlpatterns = [
 
@@ -77,6 +77,9 @@ urlpatterns = [
     path('facturation/synthese_prestations', synthese_prestations.View.as_view(), name='synthese_prestations'),
     path('facturation/edition_prestations', edition_prestations.View.as_view(), name='edition_prestations'),
     path('facturation/recalculer_prestations', recalculer_prestations.View.as_view(), name='recalculer_prestations'),
+
+    # Aides
+    path('facturation/aides/liste', liste_aides.Liste.as_view(), name='aides_liste'),
 
     # Impayés
     path('facturation/synthese_impayes', Verifie_ventilation(synthese_impayes.View.as_view()), name='synthese_impayes'),

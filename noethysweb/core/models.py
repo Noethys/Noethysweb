@@ -2308,7 +2308,7 @@ class Cotisation(models.Model):
 
 class Aide(models.Model):
     idaide = models.AutoField(verbose_name="ID", db_column='IDaide', primary_key=True)
-    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", blank=True, null=True, on_delete=models.PROTECT)
     activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.PROTECT)
     nom = models.CharField(verbose_name="Nom", max_length=200)
     date_debut = models.DateField(verbose_name="Date de début")
@@ -2318,7 +2318,7 @@ class Aide(models.Model):
     nbre_dates_max = models.IntegerField(verbose_name="Quantité plafond", blank=True, null=True)
     jours_scolaires = MultiSelectField(verbose_name="Jours sur les périodes scolaires", max_length=100, choices=JOURS_SEMAINE, blank=True, null=True)
     jours_vacances = MultiSelectField(verbose_name="Jours sur les périodes de vacances", max_length=100, choices=JOURS_SEMAINE, blank=True, null=True)
-    individus = models.ManyToManyField(Individu, verbose_name="Bénéficiaires")
+    individus = models.ManyToManyField(Individu, verbose_name="Bénéficiaires", blank=True)
 
     class Meta:
         db_table = 'aides'

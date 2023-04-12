@@ -58,7 +58,7 @@ urlpatterns = [
 
     path('individus/familles/aides/liste/<int:idfamille>', famille_aides.Liste.as_view(), name='famille_aides_liste'),
     path('individus/familles/aides/selection_activite/<int:idfamille>', famille_aides.Selection_activite.as_view(), name='famille_aides_ajouter'),
-    path('individus/familles/aides/ajouter/<int:idfamille>/<int:idactivite>', famille_aides.Ajouter.as_view(), name='famille_aides_configurer'),
+    path('individus/familles/aides/ajouter/<int:idfamille>/<int:idactivite>/<int:idmodele>', famille_aides.Ajouter.as_view(), name='famille_aides_configurer'),
     path('individus/familles/aides/modifier/<int:idfamille>/<int:pk>', famille_aides.Modifier.as_view(), name='famille_aides_modifier'),
     path('individus/familles/aides/supprimer/<int:idfamille>/<int:pk>', famille_aides.Supprimer.as_view(), name='famille_aides_supprimer'),
 
