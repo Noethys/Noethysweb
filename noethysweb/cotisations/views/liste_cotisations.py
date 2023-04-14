@@ -3,12 +3,12 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse
+from django.db.models import Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Cotisation
 from core.utils import utils_dates
-from django.db.models import Q
 
 
 class Page(crud.Page):
@@ -19,7 +19,6 @@ class Page(crud.Page):
     objet_singulier = "une adhésion"
     objet_pluriel = "des adhésions"
     url_supprimer_plusieurs = "cotisations_supprimer_plusieurs"
-
 
 
 class Liste(Page, crud.Liste):
@@ -37,18 +36,23 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille", "idcotisation", "date_saisie", "date_creation_carte", 'famille__nom', 'individu__nom', 'individu__prenom', "numero", "date_debut", "date_fin", "observations", "type_cotisation__nom", "unite_cotisation__nom", "depot_cotisation__date"]
-
+        filtres = ["ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille", "idcotisation", "date_saisie", "date_creation_carte",
+                   'famille__nom', 'individu__nom', 'individu__prenom', "numero", "date_debut", "date_fin", "observations", "type_cotisation__nom",
+                   "unite_cotisation__nom", "depot_cotisation__date", "famille__rue_resid", "famille__cp_resid", "famille__ville_resid"]
         check = columns.CheckBoxSelectColumn(label="")
-        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         individu = columns.CompoundColumn("Individu", sources=['individu__nom', 'individu__prenom'])
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         nom_cotisation = columns.TextColumn("Nom", sources=['type_cotisation__nom', 'unite_cotisation__nom'], processor='Get_nom_cotisation')
         depot = columns.TextColumn("Dépôt", sources=['depot_cotisation__date'], processor='Get_date_depot')
+        rue_resid = columns.TextColumn("Rue", sources=['famille__rue_resid'], processor='Get_rue_resid')
+        cp_resid = columns.TextColumn("CP", sources=['famille__cp_resid'], processor='Get_cp_resid')
+        ville_resid = columns.TextColumn("Ville", sources=['famille__ville_resid'], processor='Get_ville_resid')
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idcotisation', 'date_debut', 'date_fin', 'famille', 'individu', 'nom_cotisation', 'numero', 'depot']
+            columns = ['check', 'idcotisation', 'date_debut', 'date_fin', 'famille', 'individu', 'nom_cotisation', 'numero', 'depot', "rue_resid", "cp_resid", "ville_resid"]
+            hidden_columns = ["rue_resid", "cp_resid", "ville_resid"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
@@ -76,6 +80,15 @@ class Liste(Page, crud.Liste):
             if instance.depot_cotisation:
                 return utils_dates.ConvertDateToFR(instance.depot_cotisation.date)
             return ""
+
+        def Get_rue_resid(self, instance, *args, **kwargs):
+            return instance.famille.rue_resid
+
+        def Get_cp_resid(self, instance, *args, **kwargs):
+            return instance.famille.cp_resid
+
+        def Get_ville_resid(self, instance, *args, **kwargs):
+            return instance.famille.ville_resid
 
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
