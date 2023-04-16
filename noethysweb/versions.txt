@@ -1,3 +1,9 @@
+Version 1.1.4.3 (16/04/2023) :
+
+- Ajout des modèles d'aides dans le menu Paramétrage
+- Ajout des colonnes cachées adresse dans la liste des adhésions
+- Correction du montant questionnaire dans la tarification
+
 Version 1.1.4.2 (10/04/2023) :
 
 - Ajout de la saisie des horaires ou quantités par l'usager depuis le portail
