@@ -1,0 +1,61 @@
+{% extends "fiche_individu/individu.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+    {% embed 'core/widgets/datatableview/styles.html' %}
+    {% endembed %}
+{% endblock styles %}
+
+{% block extra_head %}
+    {{ block.super }}
+    {% embed 'core/widgets/datatableview/extra_head.html' %}
+    {% endembed %}
+{% endblock %}
+
+
+{% block detail_individu %}
+    <div class="col-md-9">
+
+        {# Transports programmés #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Programmations de transports{% endblock %}
+            {% block box_introduction %}{% endblock %}
+            {% block box_contenu %}
+                <div class="btn-group">
+                    {% for bouton in boutons_liste_progtransports %}
+                        <a class="{{ bouton.classe }}" href="{{ bouton.href }}"><i class="{{ bouton.icone }}"></i> {{ bouton.label }}</a>
+                    {% endfor %}
+                </div>
+                {{ progtransports_datatable }}
+            {% endblock box_contenu %}
+        {% endembed %}
+
+        {# Transports #}
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}Transports{% endblock %}
+            {% block box_introduction %}{% endblock %}
+            {% block box_contenu %}
+                <div class="btn-group">
+                    {% for bouton in boutons_liste_transports %}
+                        <a class="{{ bouton.classe }}" href="{{ bouton.href }}"><i class="{{ bouton.icone }}"></i> {{ bouton.label }}</a>
+                    {% endfor %}
+                </div>
+                {{ transports_datatable }}
+            {% endblock box_contenu %}
+        {% endembed %}
+
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    {% embed 'core/widgets/datatableview/scripts.html' %}
+    {% endembed %}
+{% endblock scripts %}

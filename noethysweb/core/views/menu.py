@@ -146,6 +146,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_collaborateurs.Add(code="modeles_plannings_collaborateurs_liste", titre="Modèles de plannings", icone="file-text-o")
     menu_collaborateurs.Add(code="groupes_collaborateurs_liste", titre="Groupes de collaborateurs", icone="file-text-o")
 
+    # Transports
+    menu_parametrage_transports = menu_parametrage.Add(titre="Transports")
+    menu_parametrage_transports.Add(code="parametrage_transports", titre="Paramètres des transports", icone="file-text-o")
+
 
     # ------------------------------------ Outils ------------------------------------
     menu_outils = menu.Add(code="outils_toc", titre="Outils", icone="wrench")
@@ -266,6 +270,11 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_photos_individus = menu_individus.Add(titre="Photos")
     menu_photos_individus.Add(code="liste_photos_manquantes", titre="Liste des photos manquantes", icone="file-text-o")
     menu_photos_individus.Add(code="importation_photos", titre="Importer des photos individuelles", icone="file-text-o")
+
+    # Transports
+    menu_transports = menu_individus.Add(titre="Transports")
+    menu_transports.Add(code="progtransports_liste", titre="Liste des programmations de transports", icone="file-text-o")
+    menu_transports.Add(code="transports_liste", titre="Liste des transports", icone="file-text-o")
 
 
     # ------------------------------------ Locations ------------------------------------

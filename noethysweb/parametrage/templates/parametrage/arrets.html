@@ -1,0 +1,42 @@
+{% extends "core/crud/liste_in_box.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+    {% embed 'core/box.html' %}
+        {% block box_titre %}{{ box_titre }}{% endblock %}
+        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+        {% block box_contenu %}
+
+            {# Sélection du regroupement #}
+            <p>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">{{ label_regroupement }}</span>
+                    </div>
+                    <select id="choix_regroupement" class="form-control">
+                        {% for idregroupement, label in liste_regroupements %}
+                            <option {% if idregroupement == idligne %}selected{% endif %} value="{% if not idregroupement %}{% url url_liste categorie=categorie %}{% else %}{% url url_liste categorie=categorie idligne=idregroupement %}{% endif %}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </p>
+
+            <script>
+                function On_change_regroupement() {
+                    window.location.href=$(this).val();
+                }
+                $(document).ready(function() {
+                    $('#choix_regroupement').change(On_change_regroupement);
+                });
+            </script>
+
+            {% embed 'core/crud/liste.html' %}
+            {% endembed %}
+
+        {% endblock box_contenu %}
+        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+    {% endembed %}
+{% endblock contenu_page %}

@@ -2,23 +2,25 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime, decimal, uuid, os
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
-from multiselectfield import MultiSelectField
-from django.templatetags.static import static
 from django.db.models import Sum
-from core.data import data_civilites
-from core.utils import utils_texte, utils_dates
-from core.data.data_modeles_emails import CATEGORIES as CATEGORIES_MODELES_EMAILS
-from core.data.data_modeles_sms import CATEGORIES as CATEGORIES_MODELES_SMS
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.files.storage import get_storage_class
+from django.templatetags.static import static
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser, UserManager
 from django_resized import ResizedImageField
-import datetime, decimal, uuid, os
-from django.conf import settings
 from django_cryptography.fields import encrypt
+from multiselectfield import MultiSelectField
+from core.data import data_civilites
+from core.data.data_modeles_emails import CATEGORIES as CATEGORIES_MODELES_EMAILS
+from core.data.data_modeles_sms import CATEGORIES as CATEGORIES_MODELES_SMS
+from individus.utils.utils_transports import Get_liste_choix_categories
 from core.utils import utils_permissions
-from django.core.files.storage import get_storage_class
+from core.utils import utils_texte, utils_dates
 
+CATEGORIES_TRANSPORTS = Get_liste_choix_categories()
 
 JOURS_SEMAINE = [(0, "L"), (1, "M"), (2, "M"), (3, "J"), (4, "V"), (5, "S"), (6, "D")]
 JOURS_COMPLETS_SEMAINE = [(0, "Lundi"), (1, "Mardi"), (2, "Mercredi"), (3, "Jeudi"), (4, "Vendredi"), (5, "Samedi"), (6, "Dimanche")]
@@ -4108,3 +4110,104 @@ class LigneModelePlanningCollaborateur(models.Model):
 
     def __str__(self):
         return "Ligne de modèle ID%d" % self.idligne if self.idligne else "Nouvelle ligne de modèle"
+
+
+class TransportLigne(models.Model):
+    idligne = models.AutoField(verbose_name="ID", db_column="IDligne", primary_key=True)
+    categorie = models.CharField(verbose_name="Catégorie", max_length=200, choices=CATEGORIES_TRANSPORTS)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+
+    class Meta:
+        db_table = "transports_lignes"
+        verbose_name = "ligne"
+        verbose_name_plural = "lignes"
+
+    def __str__(self):
+        return self.nom if self.idligne else "Nouvelle ligne"
+
+
+class TransportArret(models.Model):
+    idarret = models.AutoField(verbose_name="ID", db_column="IDarret", primary_key=True)
+    ligne = models.ForeignKey(TransportLigne, verbose_name="Ligne", on_delete=models.PROTECT)
+    ordre = models.IntegerField(verbose_name="Ordre")
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+
+    class Meta:
+        db_table = "transports_arrets"
+        verbose_name = "arrêt"
+        verbose_name_plural = "arrêts"
+
+    def __str__(self):
+        return self.nom if self.idarret else "Nouvel arrêt"
+
+
+class TransportCompagnie(models.Model):
+    idcompagnie = models.AutoField(verbose_name="ID", db_column="IDcompagnie", primary_key=True)
+    categorie = models.CharField(verbose_name="Catégorie", max_length=200, choices=CATEGORIES_TRANSPORTS)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    rue = models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True)
+    cp = models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True)
+    ville = models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True)
+    tel = models.CharField(verbose_name="Téléphone", max_length=200, blank=True, null=True)
+    mail = models.EmailField(verbose_name="Email", max_length=300, blank=True, null=True)
+
+    class Meta:
+        db_table = "transports_compagnies"
+        verbose_name = "compagnie"
+        verbose_name_plural = "compagnies"
+
+    def __str__(self):
+        return self.nom if self.idcompagnie else "Nouvelle compagnie"
+
+
+class TransportLieu(models.Model):
+    idlieu = models.AutoField(verbose_name="ID", db_column="IDlieu", primary_key=True)
+    categorie = models.CharField(verbose_name="Catégorie", max_length=200, choices=CATEGORIES_TRANSPORTS)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    cp = models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True)
+    ville = models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True)
+
+    class Meta:
+        db_table = "transports_lieux"
+        verbose_name = "compagnie"
+        verbose_name_plural = "compagnies"
+
+    def __str__(self):
+        return self.nom if self.idlieu else "Nouveau lieu"
+
+
+class Transport(models.Model):
+    idtransport = models.AutoField(verbose_name="ID", db_column="IDtransport", primary_key=True)
+    individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.PROTECT)
+    mode = models.CharField(verbose_name="Mode", max_length=100)
+    categorie = models.CharField(verbose_name="Catégorie", max_length=200, choices=CATEGORIES_TRANSPORTS)
+    compagnie = models.ForeignKey(TransportCompagnie, verbose_name="Compagnie", blank=True, null=True, on_delete=models.PROTECT)
+    ligne = models.ForeignKey(TransportLigne, verbose_name="Ligne", blank=True, null=True, on_delete=models.PROTECT)
+    numero = models.CharField(verbose_name="Numéro", max_length=200, blank=True, null=True)
+    details = models.CharField(verbose_name="Détails", max_length=200, blank=True, null=True)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    depart_date = models.DateField(verbose_name="Date de départ", blank=True, null=True)
+    depart_heure = models.TimeField(verbose_name="Heure de départ", blank=True, null=True)
+    depart_arret = models.ForeignKey(TransportArret, verbose_name="Arrêt", related_name="transport_depart_arret", blank=True, null=True, on_delete=models.PROTECT)
+    depart_lieu = models.ForeignKey(TransportLieu, verbose_name="Lieu", related_name="transport_depart_lieu", blank=True, null=True, on_delete=models.PROTECT)
+    depart_localisation = models.CharField(verbose_name="Localisation", max_length=200, blank=True, null=True)
+    arrivee_date = models.DateField(verbose_name="Date d'arrivée", blank=True, null=True)
+    arrivee_heure = models.TimeField(verbose_name="Heure d'arrivée", blank=True, null=True)
+    arrivee_arret = models.ForeignKey(TransportArret, verbose_name="Arrêt", related_name="transport_arrivee_arret", blank=True, null=True, on_delete=models.PROTECT)
+    arrivee_lieu = models.ForeignKey(TransportLieu, verbose_name="Lieu", related_name="transport_arrivee_lieu", blank=True, null=True, on_delete=models.PROTECT)
+    arrivee_localisation = models.CharField(verbose_name="Localisation", max_length=200, blank=True, null=True)
+    date_debut = models.DateField(verbose_name="Début", blank=True, null=True)
+    date_fin = models.DateField(verbose_name="Fin", blank=True, null=True)
+    actif = models.BooleanField(verbose_name="Actif", default=True)
+    jours_scolaires = MultiSelectField(verbose_name="Jours scolaires", max_length=100, choices=JOURS_SEMAINE, blank=True, null=True)
+    jours_vacances = MultiSelectField(verbose_name="Jours de vacances", max_length=100, choices=JOURS_SEMAINE, blank=True, null=True)
+    unites = models.ManyToManyField(Unite, verbose_name="Unités", related_name="unites_transports", blank=True)
+    prog = models.ForeignKey("self", verbose_name="Programmation", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = "transports"
+        verbose_name = "transport"
+        verbose_name_plural = "transports"
+
+    def __str__(self):
+        return "Transport ID%d" % self.idtransport if self.idtransport else "Nouveau transport"

@@ -25,7 +25,7 @@ from parametrage.views import organisateur, structures, \
     configurations_sms, perceptions, modeles_prelevements, taches_recurrentes, modeles_prestations, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
-    modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides
+    modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets
 
 
 urlpatterns = [
@@ -579,6 +579,34 @@ urlpatterns = [
     path('parametrage/groupes_collaborateurs/modifier/<int:pk>', groupes_collaborateurs.Modifier.as_view(), name='groupes_collaborateurs_modifier'),
     path('parametrage/groupes_collaborateurs/supprimer/<int:pk>', groupes_collaborateurs.Supprimer.as_view(), name='groupes_collaborateurs_supprimer'),
 
+    # Transports
+    path('parametrage/transports', transports.View.as_view(), name='parametrage_transports'),
+
+    # Compagnies
+    path('parametrage/transports/compagnies/liste/<str:categorie>', compagnies.Liste.as_view(), name='compagnies_liste'),
+    path('parametrage/transports/compagnies/ajouter/<str:categorie>', compagnies.Ajouter.as_view(), name='compagnies_ajouter'),
+    path('parametrage/transports/compagnies/modifier/<str:categorie>/<int:pk>', compagnies.Modifier.as_view(), name='compagnies_modifier'),
+    path('parametrage/transports/compagnies/supprimer/<str:categorie>/<int:pk>', compagnies.Supprimer.as_view(), name='compagnies_supprimer'),
+
+    # Lignes
+    path('parametrage/transports/lignes/liste/<str:categorie>', lignes.Liste.as_view(), name='lignes_liste'),
+    path('parametrage/transports/lignes/ajouter/<str:categorie>', lignes.Ajouter.as_view(), name='lignes_ajouter'),
+    path('parametrage/transports/lignes/modifier/<str:categorie>/<int:pk>', lignes.Modifier.as_view(), name='lignes_modifier'),
+    path('parametrage/transports/lignes/supprimer/<str:categorie>/<int:pk>', lignes.Supprimer.as_view(), name='lignes_supprimer'),
+
+    # Arrêts
+    path('parametrage/transports/arrets/liste/<str:categorie>', arrets.Liste.as_view(), name='arrets_liste'),
+    path('parametrage/transports/arrets/liste/<str:categorie>/<int:idligne>', arrets.Liste.as_view(), name='arrets_liste'),
+    path('parametrage/transports/arrets/ajouter/<str:categorie>/<int:idligne>', arrets.Ajouter.as_view(), name='arrets_ajouter'),
+    path('parametrage/transports/arrets/modifier/<str:categorie>/<int:idligne>/<int:pk>', arrets.Modifier.as_view(), name='arrets_modifier'),
+    path('parametrage/transports/arrets/supprimer/<str:categorie>/<int:idligne>/<int:pk>', arrets.Supprimer.as_view(), name='arrets_supprimer'),
+
+    # Lieux
+    path('parametrage/transports/lieux/liste/<str:categorie>', lieux.Liste.as_view(), name='lieux_liste'),
+    path('parametrage/transports/lieux/ajouter/<str:categorie>', lieux.Ajouter.as_view(), name='lieux_ajouter'),
+    path('parametrage/transports/lieux/modifier/<str:categorie>/<int:pk>', lieux.Modifier.as_view(), name='lieux_modifier'),
+    path('parametrage/transports/lieux/supprimer/<str:categorie>/<int:pk>', lieux.Supprimer.as_view(), name='lieux_supprimer'),
+
 
     # AJAX
     path('parametrage/get_calendrier', calendrier.Get_calendrier, name='ajax_get_calendrier'),
@@ -598,5 +626,9 @@ urlpatterns = [
     path('parametrage/configurations_sms/envoyer_sms_test', secure_ajax(configurations_sms.Envoyer_sms_test), name='ajax_envoyer_sms_test'),
     path('parametrage/albums/importer_photos_album', secure_ajax(albums.Importer_photos_album), name="ajax_importer_photos_album"),
     path('parametrage/modeles_plannings_collaborateurs/get_form_ligne', secure_ajax(modeles_plannings_collaborateurs.Get_form_ligne), name='ajax_modeles_plannings_collaborateurs_form_ligne'),
-
+    path('parametrage/transports/arrets/liste/bus/deplacer_lignes', secure_ajax(arrets.Deplacer.as_view()), name='ajax_deplacer_lignes_arrets_bus'),
+    path('parametrage/transports/arrets/liste/car/deplacer_lignes', secure_ajax(arrets.Deplacer.as_view()), name='ajax_deplacer_lignes_arrets_car'),
+    path('parametrage/transports/arrets/liste/navette/deplacer_lignes', secure_ajax(arrets.Deplacer.as_view()), name='ajax_deplacer_lignes_arrets_navette'),
+    path('parametrage/transports/arrets/liste/metro/deplacer_lignes', secure_ajax(arrets.Deplacer.as_view()), name='ajax_deplacer_lignes_arrets_metro'),
+    path('parametrage/transports/arrets/liste/pedibus/deplacer_lignes', secure_ajax(arrets.Deplacer.as_view()), name='ajax_deplacer_lignes_arrets_pedibus'),
 ]

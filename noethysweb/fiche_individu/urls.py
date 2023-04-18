@@ -7,7 +7,7 @@ from django.urls import include, path
 from core.decorators import secure_ajax
 from fiche_individu.views import individu, individu_identite, individu_coords, individu_questionnaire, individu_scolarite, individu_inscriptions, \
                                 individu_medical, individu_notes, individu_liens, individu_appliquer_forfait_date, individu_contacts, \
-                                individu_regimes_alimentaires, individu_assurances, individu_maladies
+                                individu_regimes_alimentaires, individu_assurances, individu_maladies, individu_transports
 
 urlpatterns = [
 
@@ -73,7 +73,15 @@ urlpatterns = [
     path('individus/individus/notes/modifier/<int:idfamille>/<int:idindividu>/<int:pk>', individu_notes.Modifier.as_view(), name='individu_notes_modifier'),
     path('individus/individus/notes/supprimer/<int:idfamille>/<int:idindividu>/<int:pk>', individu_notes.Supprimer.as_view(), name='individu_notes_supprimer'),
 
+    path('individus/individus/transports/liste/<int:idfamille>/<int:idindividu>', individu_transports.Liste.as_view(), name='individu_transports_liste'),
 
+    path('individus/individus/transports/ajouter_progtransport/<int:idfamille>/<int:idindividu>', individu_transports.Ajouter_progtransport.as_view(), name='individu_progtransports_ajouter'),
+    path('individus/individus/transports/modifier_progtransport/<int:idfamille>/<int:idindividu>/<int:pk>', individu_transports.Modifier_progtransport.as_view(), name='individu_progtransports_modifier'),
+    path('individus/individus/transports/supprimer_progtransport/<int:idfamille>/<int:idindividu>/<int:pk>', individu_transports.Supprimer_progtransport.as_view(), name='individu_progtransports_supprimer'),
+
+    path('individus/individus/transports/ajouter_transport/<int:idfamille>/<int:idindividu>', individu_transports.Ajouter_transport.as_view(), name='individu_transports_ajouter'),
+    path('individus/individus/transports/modifier_transport/<int:idfamille>/<int:idindividu>/<int:pk>', individu_transports.Modifier_transport.as_view(), name='individu_transports_modifier'),
+    path('individus/individus/transports/supprimer_transport/<int:idfamille>/<int:idindividu>/<int:pk>', individu_transports.Supprimer_transport.as_view(), name='individu_transports_supprimer'),
 
     # AJAX
     path('individus/get_classes', secure_ajax(individu_scolarite.Get_classes), name='ajax_get_classes'),
@@ -86,5 +94,6 @@ urlpatterns = [
     path('individus/ajouter_regime_alimentaire', secure_ajax(individu_regimes_alimentaires.Ajouter_regime_alimentaire), name='ajax_ajouter_regime_alimentaire'),
     path('individus/ajouter_maladie', secure_ajax(individu_maladies.Ajouter_maladie), name='ajax_ajouter_maladie'),
     path('individus/ajouter_assureur', secure_ajax(individu_assurances.Ajouter_assureur), name='ajax_ajouter_assureur'),
+    path('individus/get_info_transport', secure_ajax(individu_transports.Get_info_transport), name='ajax_get_info_transport'),
 
 ]

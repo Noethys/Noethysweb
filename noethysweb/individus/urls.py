@@ -12,7 +12,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             individus_detaches_liste, liste_mandats, liste_questionnaires_familles, liste_questionnaires_individus, liste_contacts_urgence, \
                             liste_regimes_alimentaires, liste_maladies, liste_informations, individus_doublons_liste, liste_familles_sans_inscriptions, \
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
-                            liste_titulaires_helios, inscriptions_activite_liste, effacer_familles
+                            liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports
 
 urlpatterns = [
 
@@ -126,8 +126,17 @@ urlpatterns = [
     path('individus/etiquettes_individus', etiquettes_individus.Liste.as_view(), name='etiquettes_individus'),
     path('individus/etiquettes_familles', etiquettes_familles.Liste.as_view(), name='etiquettes_familles'),
 
+    # Programmations de transports
+    path('individus/prog_transports', liste_progtransports.Liste.as_view(), name='progtransports_liste'),
+    path('individus/prog_transports/ajouter', liste_progtransports.Ajouter.as_view(), name='progtransports_ajouter'),
+    path('individus/prog_transports/modifier/<int:pk>', liste_progtransports.Modifier.as_view(), name='progtransports_modifier'),
+    path('individus/prog_transports/supprimer/<int:pk>', liste_progtransports.Supprimer.as_view(), name='progtransports_supprimer'),
 
-
+    # Transports
+    path('individus/transports', liste_transports.Liste.as_view(), name='transports_liste'),
+    path('individus/transports/ajouter', liste_transports.Ajouter.as_view(), name='transports_ajouter'),
+    path('individus/transports/modifier/<int:pk>', liste_transports.Modifier.as_view(), name='transports_modifier'),
+    path('individus/transports/supprimer/<int:pk>', liste_transports.Supprimer.as_view(), name='transports_supprimer'),
 
     # AJAX
     path('individus/get_suivi_inscriptions', secure_ajax(suivi_inscriptions.Get_suivi_inscriptions), name='ajax_get_suivi_inscriptions'),
