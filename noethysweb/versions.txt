@@ -1,3 +1,7 @@
+Version 1.1.4.4 (19/04/2023) :
+
+- Ajout du module des transports
+
 Version 1.1.4.3 (16/04/2023) :
 
 - Ajout des modèles d'aides dans le menu Paramétrage
