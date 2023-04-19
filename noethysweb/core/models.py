@@ -4202,7 +4202,7 @@ class Transport(models.Model):
     jours_scolaires = MultiSelectField(verbose_name="Jours scolaires", max_length=100, choices=JOURS_SEMAINE, blank=True, null=True)
     jours_vacances = MultiSelectField(verbose_name="Jours de vacances", max_length=100, choices=JOURS_SEMAINE, blank=True, null=True)
     unites = models.ManyToManyField(Unite, verbose_name="Unités", related_name="unites_transports", blank=True)
-    prog = models.ForeignKey("self", verbose_name="Programmation", on_delete=models.PROTECT, blank=True, null=True)
+    prog = models.ForeignKey("self", verbose_name="Programmation", on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         db_table = "transports"
