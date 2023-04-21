@@ -11,7 +11,7 @@ from facturation.views import factures_generation, liste_prestations, liste_fact
                                 synthese_prestations, liste_tarifs, rappels_generation, liste_rappels, factures_impression, factures_email, \
                                 rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations, \
                                 lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
-                                attestations_fiscales_email, liste_attestations_fiscales, liste_aides
+                                attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes
 
 urlpatterns = [
 
@@ -83,6 +83,7 @@ urlpatterns = [
 
     # Impayés
     path('facturation/synthese_impayes', Verifie_ventilation(synthese_impayes.View.as_view()), name='synthese_impayes'),
+    path('facturation/solder_impayes', solder_impayes.View.as_view(), name='solder_impayes'),
 
     # AJAX
     path('facturation/modifier_lot_factures', secure_ajax(factures_generation.Modifier_lot_factures), name='ajax_modifier_lot_factures'),
@@ -109,5 +110,6 @@ urlpatterns = [
     path('facturation/generation_attestations_fiscales', secure_ajax(attestations_fiscales_generation.Generation_attestations_fiscales), name='ajax_generation_attestations_fiscales'),
     path('facturation/attestations_fiscales_impression_pdf', secure_ajax(attestations_fiscales_impression.Impression_pdf), name='ajax_attestations_fiscales_impression_pdf'),
     path('facturation/attestations_fiscales_email_pdf', secure_ajax(attestations_fiscales_email.Impression_pdf), name='ajax_attestations_fiscales_email_pdf'),
+    path('facturation/ajax_solder_impayes', secure_ajax(solder_impayes.Solder), name='ajax_solder_impayes'),
 
 ]

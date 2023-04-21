@@ -382,6 +382,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Impayés
     menu_impayes = menu_facturation.Add(titre="Impayés")
     menu_impayes.Add(code="synthese_impayes", titre="Synthèse des impayés", icone="file-text-o")
+    menu_impayes.Add(code="solder_impayes", titre="Solder les impayés", icone="file-text-o")
 
     # Tarifs
     menu_tarifs = menu_facturation.Add(titre="Tarifs")
