@@ -1,3 +1,8 @@
+Version 1.1.4.6 (27/04/2023) :
+
+- Ajout command updater
+- Correction du calendrier des ouvertures avec idgroupe null
+
 Version 1.1.4.5 (21/04/2023) :
 
 - Ajout de la fonction Solder les impayés dans le menu Facturation
