@@ -75,8 +75,9 @@ def Get_calendrier_ouvertures(request=None):
 
     dict_remplissage = {}
     for remplissage in liste_remplissage:
-        key = "remplissage_%s_%d_%d" % (remplissage.date, remplissage.groupe_id, remplissage.unite_remplissage_id)
-        dict_remplissage[key] = remplissage.places
+        if remplissage.groupe_id:
+            key = "remplissage_%s_%d_%d" % (remplissage.date, remplissage.groupe_id, remplissage.unite_remplissage_id)
+            dict_remplissage[key] = remplissage.places
 
     context = {
         "dates": liste_dates, "unites": liste_unites, "groupes": liste_groupes, "unites_remplissage": liste_unites_remplissage,
