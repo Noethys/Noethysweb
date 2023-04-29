@@ -75,9 +75,9 @@ def Get_calendrier_ouvertures(request=None):
 
     dict_remplissage = {}
     for remplissage in liste_remplissage:
-        if remplissage.groupe_id:
-            key = "remplissage_%s_%d_%d" % (remplissage.date, remplissage.groupe_id, remplissage.unite_remplissage_id)
-            dict_remplissage[key] = remplissage.places
+        if not remplissage.groupe_id: remplissage.groupe_id = 0
+        key = "remplissage_%s_%d_%d" % (remplissage.date, remplissage.groupe_id, remplissage.unite_remplissage_id)
+        dict_remplissage[key] = remplissage.places
 
     context = {
         "dates": liste_dates, "unites": liste_unites, "groupes": liste_groupes, "unites_remplissage": liste_unites_remplissage,
@@ -344,6 +344,7 @@ def Valider_calendrier_ouvertures(request):
     liste_suppressions = []
     for remplissage in liste_remplissages:
         # Mémorisation pour ajout
+        if not remplissage.groupe_id: remplissage.groupe_id = 0
         key = "remplissage_%s_%d_%d" % (remplissage.date, remplissage.groupe_id, remplissage.unite_remplissage_id)
         dict_remplissages_existants[key] = remplissage
         # Suppression
