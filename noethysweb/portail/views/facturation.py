@@ -14,7 +14,7 @@ from django.shortcuts import render
 from django.db.models import Sum, Q
 from eopayment import Payment
 from portail.views.base import CustomView
-from core.models import Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur, ModeReglement, CompteBancaire, PortailRenseignement
+from core.models import Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur, ModeReglement, CompteBancaire, PortailRenseignement, Cotisation
 from core.utils import utils_portail, utils_fichiers, utils_dates, utils_texte
 
 ETATS_PAIEMENTS = {1: "RECEIVED", 2: "ACCEPTED", 3: "PAID", 4: "DENIED", 5: "CANCELLED", 6: "WAITING", 99: "ERROR"}
@@ -72,7 +72,7 @@ def effectuer_paiement_en_ligne(request):
         return JsonResponse({"erreur": "Le paiement en ligne nécessite un montant minimal de %.2f € !" % parametres_portail.paiement_ligne_montant_minimal}, status=401)
 
     # Mémorise les numéros de factures et la ventilation
-    dict_ventilation = {"facture": {}, "periode": {}}
+    dict_ventilation = {"facture": {}, "periode": {}, "cotisation": {}}
     for texte in liste_impayes:
         type_impaye, ID, solde = texte.split("##")
         dict_ventilation[type_impaye][int(ID)] = decimal.Decimal(solde)
@@ -82,10 +82,11 @@ def effectuer_paiement_en_ligne(request):
 
     # On mémorise la ventilation
     ventilation = []
-    for type_impaye in ["facture", "periode"]:
+    for type_impaye in ["facture", "periode", "cotisation"]:
         for ID, solde in dict_ventilation[type_impaye].items():
             if type_impaye == "facture" : prefixe = "F"
             if type_impaye == "periode": prefixe = "P"
+            if type_impaye == "cotisation": prefixe = "C"
             ventilation.append("%s%d#%s" % (prefixe, ID, solde))
     ventilation_str = ",".join(ventilation)
 
@@ -281,10 +282,11 @@ def Enregistrement_reglement(paiement=None, vads_payment_config=None):
     parametres_portail = utils_portail.Get_dict_parametres()
 
     # Analyse de la ventilation
-    dict_paiements = {"facture": {}, "periode": {}}
+    dict_paiements = {"facture": {}, "periode": {}, "cotisation": {}}
     for texte in paiement.ventilation.split(","):
         if texte[0] == "F": type_impaye = "facture"
         if texte[0] == "P": type_impaye = "periode"
+        if texte[0] == "C": type_impaye = "cotisation"
         ID, montant = texte[1:].split("#")
         dict_paiements[type_impaye][int(ID)] = float(montant)
 
@@ -317,6 +319,8 @@ def Enregistrement_reglement(paiement=None, vads_payment_config=None):
     conditions = Q(facture__in=factures)
     for periode in periodes:
         conditions |= Q(date__range=(periode.date_debut, periode.date_fin), activite_id=periode.activite_id)
+    if dict_paiements["cotisation"].keys():
+        conditions |= Q(pk__in=dict_paiements["cotisation"].keys())
     prestations = Prestation.objects.filter(Q(famille=paiement.famille), conditions).distinct().order_by("date")
 
     # Importation des ventilations existantes
@@ -397,7 +401,7 @@ class View(CustomView, TemplateView):
 
         # Importation des paiements PAYFIP en cours
         liste_paiements = Paiement.objects.filter(famille=self.request.user.famille, systeme_paiement="payfip", horodatage__lt=datetime.datetime.now() - datetime.timedelta(minutes=5))
-        dict_paiements = {"F": {}, "P": {}}
+        dict_paiements = {"F": {}, "P": {}, "C": {}}
         for paiement in liste_paiements:
             for texte in paiement.ventilation.split(","):
                 type_impaye = texte[0]
@@ -421,7 +425,7 @@ class View(CustomView, TemplateView):
         context['liste_factures_impayees'] = liste_factures_impayees
         context['liste_factures'] = liste_factures
 
-        # Importation de la préfacturation
+        # Importation de la préfacturation des périodes
         total_periodes_impayees = decimal.Decimal(0)
         liste_finale_periodes = []
         if context["parametres_portail"].get("paiement_ligne_systeme", None):
@@ -465,15 +469,38 @@ class View(CustomView, TemplateView):
 
         context["liste_periodes_prefacturation"] = liste_finale_periodes
 
+        # Importation de la préfacturation des cotisations
+        total_cotisations_impayees = decimal.Decimal(0)
+        liste_finale_cotisations = []
+        if context["parametres_portail"].get("paiement_ligne_systeme", None):
+            ventilations = Ventilation.objects.values("prestation").filter(famille=self.request.user.famille, prestation__cotisation__isnull=False).annotate(total=Sum("montant"))
+            dict_ventilations = {ventilation["prestation"]: ventilation["total"] for ventilation in ventilations}
+            for prestation in Prestation.objects.select_related("cotisation").filter(famille=self.request.user.famille, cotisation__isnull=False, facture__isnull=True, cotisation__unite_cotisation__prefacturation=True):
+                solde_prestation = prestation.montant - dict_ventilations.get(prestation.pk, decimal.Decimal(0))
+                if solde_prestation > decimal.Decimal(0):
+                    prestation.total = prestation.montant
+                    prestation.regle = dict_ventilations.get(prestation.pk, decimal.Decimal(0))
+                    prestation.solde = solde_prestation
+
+                    # Ajoute les paiements en cours
+                    if prestation.pk in dict_paiements["C"]:
+                        prestation.regle = prestation.total
+                        prestation.solde = decimal.Decimal(0)
+                    total_cotisations_impayees += prestation.solde
+                    if prestation.solde:
+                        liste_finale_cotisations.append(prestation)
+
+        context["liste_cotisations_prefacturation"] = liste_finale_cotisations
+
         # Création du texte de rappel des impayés
         liste_impayes = []
         texte_impayes = None
         if liste_factures_impayees:
             liste_impayes.append("1 facture à régler" if len(liste_factures_impayees) == 1 else "%d factures à régler" % len(liste_factures_impayees))
-        if liste_finale_periodes:
+        if liste_finale_periodes or liste_finale_cotisations:
             liste_impayes.append("des prestations à régler en avance")
         if liste_impayes:
-            texte_impayes = "Il reste %s pour un total de <strong>%s</strong>" % (utils_texte.Convert_liste_to_texte_virgules(liste_impayes), utils_texte.Formate_montant(total_factures_impayees + total_periodes_impayees))
+            texte_impayes = "Il reste %s pour un total de <strong>%s</strong>" % (utils_texte.Convert_liste_to_texte_virgules(liste_impayes), utils_texte.Formate_montant(total_factures_impayees + total_periodes_impayees + total_cotisations_impayees))
         context["texte_impayes"] = texte_impayes
 
         return context

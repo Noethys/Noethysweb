@@ -845,6 +845,7 @@ class UniteCotisation(models.Model):
     label_prestation = models.CharField(verbose_name="Label de la prestation", max_length=200, blank=True, null=True)
     defaut = models.BooleanField(verbose_name="Unité par défaut", default=False)
     tarifs = models.TextField(verbose_name="Tarifs", blank=True, null=True)
+    prefacturation = models.BooleanField(verbose_name="Activer la préfacturation pour cette unité", default=False, help_text="Cochez cette case pour que la famille puisse payer cette unité d'adhésion sur le portail même si aucune facture n'a été générée.")
 
     class Meta:
         db_table = 'unites_cotisations'

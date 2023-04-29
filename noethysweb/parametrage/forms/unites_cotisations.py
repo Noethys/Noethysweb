@@ -111,6 +111,9 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field('label_type'),
                 Field('label_perso'),
             ),
+            Fieldset("Préfacturation",
+                Field("prefacturation"),
+            ),
             HTML(EXTRA_SCRIPT),
         )
 

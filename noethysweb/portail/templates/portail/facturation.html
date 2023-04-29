@@ -87,6 +87,16 @@
                                     <td><span class="badge-pill bg-{% if periode.solde > 0.0 %}red{% else %}green{% endif %}">{{ periode.solde|montant }}</span></td>
                                 </tr>
                             {% endfor %}
+
+                            {% for prestation_cotisation in liste_cotisations_prefacturation %}
+                                <tr>
+                                    <td><input type="checkbox" class="check_impaye" name="check_impaye" value={{ prestation_cotisation.solde|stringformat:".2f" }} unchecked data-type='cotisation' data-id={{ prestation_cotisation.pk }} data-num="" data-solde={{ prestation_cotisation.solde|stringformat:".2f" }}></td>
+                                    <td>{{ prestation_cotisation.label }}</td>
+                                    <td>{{ prestation_cotisation.total|montant }}</td>
+                                    <td>{{ prestation_cotisation.regle|montant }}</td>
+                                    <td><span class="badge-pill bg-{% if prestation_cotisation.solde > 0.0 %}red{% else %}green{% endif %}">{{ prestation_cotisation.solde|montant }}</span></td>
+                                </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
 
