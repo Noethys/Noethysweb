@@ -380,7 +380,10 @@ class Case_standard extends Case_base {
             // Dessine les infos
             var infos = "";
             if ((this.type_case === "horaire" || this.type_case === "multi") && (mode !== "portail")) {
-                infos = conso.heure_debut.substring(0,5).replace(":", "h") + "-" + conso.heure_fin.substring(0,5).replace(":", "h");
+                var hdebut, hfin;
+                if (conso.heure_debut) {hdebut = conso.heure_debut.substring(0,5).replace(":", "h")} else {hdebut="?"};
+                if (conso.heure_fin) {hfin = conso.heure_fin.substring(0,5).replace(":", "h")} else {hfin="?"};
+                infos = hdebut + "-" + hfin
                 $("#" + this.key + " .infos").html(infos);
             };
             if ((this.type_case === "quantite") && (mode !== "portail")) {
