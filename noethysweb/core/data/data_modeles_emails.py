@@ -27,6 +27,7 @@ CATEGORIES = [
     ("portail_demande_recu_reglement", "Portail - Demande d'un reçu de règlement"),
     ("portail_demande_location", "Portail - Demande d'une location"),
     ("portail_places_disponibles", "Portail - Attribution de places disponibles"),
+    ("portail_confirmation_reservations", "Portail - Confirmation des réservations"),
     ("portail_notification_message", "Portail - Notification d'un message"),
     ("location", "Location"),
     ("location_demande", "Demande de location"),
@@ -210,6 +211,15 @@ MOTSCLES = {
 
     "portail_places_disponibles": [
         ("{DETAIL_PLACES}", "Détail des places disponibles"),
+        ("{INDIVIDU_NOM_COMPLET}", "Nom complet de l'individu"),
+        ("{INDIVIDU_NOM}", "Nom de famille de l'individu"),
+        ("{INDIVIDU_PRENOM}", "Prénom de l'individu"),
+    ],
+
+    "portail_confirmation_reservations": [
+        ("{DETAIL_MODIFICATIONS}", "Détail des modifications de réservations"),
+        ("{ACTIVITE_NOM}", "Nom de l'activité"),
+        ("{PERIODE_NOM}", "Nom de la période"),
         ("{INDIVIDU_NOM_COMPLET}", "Nom complet de l'individu"),
         ("{INDIVIDU_NOM}", "Nom de famille de l'individu"),
         ("{INDIVIDU_PRENOM}", "Prénom de l'individu"),

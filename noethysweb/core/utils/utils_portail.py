@@ -95,6 +95,7 @@ LISTE_PARAMETRES = [
     Parametre(code="reservations_afficher_page", label="Afficher la page", type="boolean", valeur=True),
     Parametre(code="reservations_intro", label="Texte d'introduction", type="char_2lignes", valeur="Sélectionnez une activité puis cliquez sur une des périodes disponibles pour accéder au calendrier des réservations correspondant."),
     Parametre(code="reservations_intro_planning", label="Texte d'introduction du planning", type="char_2lignes", valeur="Cliquez dans les cases pour ajouter ou supprimer des consommations avant de valider l'envoi des données."),
+    Parametre(code="reservations_adresse_exp", label="Adresse d'expédition pour confirmation par email", type="adresse_exp", valeur=None, help_text="Cette adresse mail est utilisée pour envoyer des mails de confirmation des modifications effectuées dans les réservations."),
 
     # Facturation
     Parametre(code="facturation_afficher_page", label="Afficher la page", type="boolean", valeur=True),

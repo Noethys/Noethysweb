@@ -11,7 +11,9 @@ from django.shortcuts import redirect
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from core.models import Individu, Inscription, PortailPeriode, Ouverture, Unite, Vacance, Ferie, Activite, JOURS_COMPLETS_SEMAINE
+from core.models import Individu, Inscription, PortailPeriode, Vacance, Ferie, Activite, JOURS_COMPLETS_SEMAINE, AdresseMail, ModeleEmail, Mail, Destinataire
+from core.utils import utils_portail
+from outils.utils import utils_email
 from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
 from consommations.forms.appliquer_semaine_type import Formulaire as form_appliquer_semaine_type
 from portail.templatetags.planning import is_modif_allowed
@@ -36,7 +38,13 @@ class View(CustomView, TemplateView):
 
     def post(self, request, *args, **kwargs):
         """ Sauvegarde de la grille """
-        Save_grille(request=request, donnees=json.loads(self.request.POST.get("donnees")))
+        resultat = Save_grille(request=request, donnees=json.loads(self.request.POST.get("donnees")))
+
+        # Envoi d'un mail de confirmation des modifications
+        idadresse_exp = utils_portail.Get_parametre(code="reservations_adresse_exp")
+        if idadresse_exp:
+            self.Envoi_mail_confirmation(request=request, resultat=resultat, idadresse_exp=idadresse_exp)
+
         return HttpResponseRedirect(reverse_lazy("portail_reservations"))
 
     def test_func(self):
@@ -138,3 +146,67 @@ class View(CustomView, TemplateView):
         data["jours_semaine_modifiables"] = list(jours.keys())
 
         return data
+
+    def Envoi_mail_confirmation(self, request=None, resultat=None, idadresse_exp=None):
+        """ Envoi d'un mail de confirmation des modifications """
+        # Importation des données
+        liste_historique = resultat["liste_historique"]
+        periode = PortailPeriode.objects.select_related("activite").prefetch_related("categories").get(pk=self.kwargs.get('idperiode'))
+        individu = Individu.objects.get(pk=self.kwargs.get('idindividu'))
+
+        # Création du texte des modifications
+        dict_historique = {"ajouts": [], "suppressions": []}
+        for historique in liste_historique:
+            if historique["titre"] == "Ajout d'une consommation": dict_historique["ajouts"].append(historique["detail"])
+            if historique["titre"] == "Suppression d'une consommation": dict_historique["suppressions"].append(historique["detail"])
+
+        items_identiques = list(set(dict_historique["ajouts"]).intersection(dict_historique["suppressions"]))
+        for item in items_identiques:
+            dict_historique["ajouts"].remove(item)
+            dict_historique["suppressions"].remove(item)
+
+        texte_detail = ""
+        for type_action in ("ajouts", "suppressions"):
+            if dict_historique[type_action]:
+                if type_action == "suppressions" and dict_historique["ajouts"]: texte_detail += "<br>"
+                texte_detail += "<b>%s de consommations :</b><br>" % type_action.capitalize()
+                texte_detail += "".join([" - %s<br>" % detail for detail in dict_historique[type_action]])
+
+        if not texte_detail:
+            return False
+
+        # Recherche de l'adresse d'expédition du mail
+        adresse_exp = None
+        if idadresse_exp:
+            adresse_exp = AdresseMail.objects.get(pk=idadresse_exp, actif=True)
+        if not adresse_exp:
+            logger.error("Aucune adresse d'expédition paramétrée pour l'envoi d'un mail de confirmation des réservations.")
+            return
+
+        # Création du mail
+        logger.debug("Création du mail de confirmation des modifications...")
+        modele_email = ModeleEmail.objects.filter(categorie="portail_confirmation_reservations", defaut=True).first()
+        if not modele_email:
+            logger.error("Erreur : Aucune modèle d'email de catégorie 'portail_confirmation_reservations' n'a été paramétré !")
+            return
+
+        mail = Mail.objects.create(
+            categorie="portail_confirmation_reservations",
+            objet=modele_email.objet if modele_email else "",
+            html=modele_email.html if modele_email else "",
+            adresse_exp=adresse_exp,
+            selection="NON_ENVOYE",
+            utilisateur=request.user if request else None,
+        )
+
+        # Fusion des valeurs
+        valeurs_fusion = {"{DETAIL_MODIFICATIONS}": texte_detail, "{ACTIVITE_NOM}": periode.activite.nom, "{PERIODE_NOM}": periode.nom,
+                          "{INDIVIDU_NOM}": individu.nom, "{INDIVIDU_PRENOM}": individu.prenom, "{INDIVIDU_NOM_COMPLET}": individu.Get_nom()}
+
+        # Création du destinataire
+        destinataire = Destinataire.objects.create(categorie="famille", famille=self.request.user.famille, adresse=self.request.user.famille.mail, valeurs=json.dumps(valeurs_fusion))
+        mail.destinataires.add(destinataire)
+
+        # Envoi du mail
+        logger.debug("Envoi du mail de confirmation des modifications de réservations.")
+        utils_email.Envoyer_model_mail(idmail=mail.pk, request=request)

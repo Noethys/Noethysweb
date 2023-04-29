@@ -486,7 +486,12 @@ def Save_grille(request=None, donnees={}):
     # Affiche le chrono
     logger.debug("Temps d'enregistrement de la grille : " + str(time.time() - chrono))
 
-    return dict_idprestation, dict_idconso
+    resultat = {
+        "dict_idprestation": dict_idprestation,
+        "dict_idconso": dict_idconso,
+        "liste_historique": liste_historique,
+    }
+    return resultat
 
 
 def CompareDict(dict1={}, dict2={}, keys=[]):
@@ -527,7 +532,9 @@ def Facturer(request=None):
                 "memos": [],
             },
         }
-        dict_idprestation, dict_idconso = Save_grille(request=request, donnees=donnees_save)
+        resultat = Save_grille(request=request, donnees=donnees_save)
+        dict_idprestation = resultat["dict_idprestation"]
+        dict_idconso = resultat["dict_idconso"]
         donnees_retour["modifications_idconso"] = dict_idconso
 
         # Attribue les nouvelles prestations aux consommations
