@@ -1,3 +1,11 @@
+Version 1.1.4.7 (30/04/2023) :
+
+- Ajout du paiement en ligne des adhésions
+- Ajout de l'option d'envoi de mails de confirmation des réservations
+- Correction de la consommation horaire sans heures par défaut
+- Correction de la fusion des champs organisateur si valeurs vides
+- Correction du remplissage sans id_groupe
+
 Version 1.1.4.6 (27/04/2023) :
 
 - Ajout command updater
