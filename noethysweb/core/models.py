@@ -351,6 +351,7 @@ class CustomUserManager(UserManager):
 class Utilisateur(AbstractUser):
     categorie = models.CharField(verbose_name="Catégorie", max_length=50, blank=True, null=True, default="utilisateur")
     force_reset_password = models.BooleanField(verbose_name="Force la mise à jour du mot de passe", default=False)
+    date_expiration_mdp = models.DateTimeField(verbose_name="Date d'expiration du mot de passe", blank=True, null=True)
     structures = models.ManyToManyField(Structure, verbose_name="Structures", related_name="utilisateur_structures", blank=True)
     adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Adresse d'expédition d'emails", related_name="utilisateur_adresse_exp", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez une adresse d'expédition d'emails favorite dans la liste. Il est possible de créer de nouvelles adresses depuis le menu Paramétrage > Adresses d'expédition.")
     signature = models.ForeignKey(SignatureEmail, verbose_name="Signature d'emails", related_name="utilisateur_signature", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez une signature d'emails favorite dans la liste. Il est possible de créer de nouvelles signatures depuis le menu Paramétrage > Signatures d'emails.")
@@ -1786,7 +1787,7 @@ class Famille(models.Model):
         verbose_name_plural = "familles"
 
     def __str__(self):
-        return self.nom if self.nom else "Famille ID%d" % self.pk
+        return self.nom if self.nom else "Famille ID%s" % self.pk
 
     def Maj_infos(self, maj_adresse=True, maj_mail=True, maj_mobile=True, maj_titulaire_helios=True, maj_tiers_solidaire=True, maj_code_compta=True):
         """ MAJ du nom des titulaires et de l'adresse de la famille """

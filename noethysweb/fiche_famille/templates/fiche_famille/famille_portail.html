@@ -27,6 +27,11 @@
 
         // Envoyer les codes
         function envoyer(mode="") {
+            var date_expiration_mdp = $("input[name='date_expiration_mdp']").val();
+            if ((date_expiration_mdp) && (Date.parse(date_expiration_mdp) < Date.now())) {
+                toastr.error("Le mot de passe a expiré. Vous devez en générer un nouveau.");
+                return false;
+            }
             $.ajax({
                 type: "POST",
                 url: "{% url 'ajax_codes_internet_envoyer' %}",

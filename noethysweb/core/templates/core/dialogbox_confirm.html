@@ -33,7 +33,6 @@
                 }
             }
         });
-
     };
 
     // Envoyer email
@@ -51,7 +50,7 @@
             },
             error: function(data) {
                 toastr.error(data.responseJSON.erreur);
-                dialogbox.modal('hide');
+                bootbox.hideAll();
             }
         })
     };

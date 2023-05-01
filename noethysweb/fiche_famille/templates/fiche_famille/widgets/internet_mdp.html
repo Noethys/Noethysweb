@@ -2,6 +2,15 @@
 
 <div class="input-group">
     <input id="{{ id }}" name="{{ name }}" value="{{ value }}" class="form-control" readonly>
+    {% if date_expiration_mdp and disabled %}
+        <div class="input-group-append">
+            {% if date_expiration_mdp < maintenant %}
+                <span class="input-group-text text-danger"><i class="fa fa-warning margin-r-5"></i> Expiré depuis le {{ date_expiration_mdp|date:'d/m/Y H:i' }}</span>
+            {% else %}
+                <span class="input-group-text text-success"><i class="fa fa-check margin-r-5"></i> Valide jusqu'au {{ date_expiration_mdp|date:'d/m/Y H:i' }}</span>
+            {% endif %}
+        </div>
+    {% endif %}
     {% if not disabled %}
         <div class="input-group-append">
             <button id="{{ id }}_generer_mdp" title="Générer un nouveau mot de passe" class="btn btn-default" type="button"><i class="fa fa-refresh"></i></button>
@@ -23,8 +32,6 @@
     };
 
     $(document).ready(function() {
-
-        {#verrouillage_ctrl()#}
 
         $("#{{ id }}_generer_mdp").on('click', function(event) {
             bootbox.dialog({

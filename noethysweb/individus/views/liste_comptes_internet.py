@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, json
+import logging, json, time
 logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
@@ -16,6 +16,8 @@ from fiche_famille.utils import utils_internet
 
 
 def Envoyer_email(request):
+    time.sleep(1)
+
     # Récupération des comptes cochés
     coches = json.loads(request.POST.get("coches"))
     if not coches:
@@ -72,6 +74,8 @@ def Envoyer_email(request):
 
 
 def Desactiver(request):
+    time.sleep(1)
+
     # Récupération des comptes cochés
     coches = json.loads(request.POST.get("coches"))
     if not coches:
@@ -89,6 +93,8 @@ def Desactiver(request):
 
 
 def Activer(request):
+    time.sleep(1)
+
     # Récupération des comptes cochés
     coches = json.loads(request.POST.get("coches"))
     if not coches:
@@ -106,6 +112,8 @@ def Activer(request):
 
 
 def Reinitialiser_mdp(request):
+    time.sleep(1)
+
     # Récupération des comptes cochés
     coches = json.loads(request.POST.get("coches"))
     if not coches:
@@ -114,14 +122,19 @@ def Reinitialiser_mdp(request):
     # Reinitialisation des comptes dans la DB
     for famille in Famille.objects.select_related("utilisateur").all():
         if famille.pk in coches:
-            internet_mdp = utils_internet.CreationMDP()
+            internet_mdp, date_expiration_mdp = utils_internet.CreationMDP()
             famille.internet_mdp = internet_mdp
             if not famille.utilisateur:
-                utilisateur = Utilisateur(username=famille.internet_identifiant, categorie="famille", force_reset_password=True)
+                utilisateur = Utilisateur(username=famille.internet_identifiant, categorie="famille", force_reset_password=True, date_expiration_mdp=date_expiration_mdp)
                 utilisateur.save()
                 utilisateur.set_password(internet_mdp)
                 utilisateur.save()
                 famille.utilisateur = utilisateur
+            else:
+                famille.utilisateur.set_password(internet_mdp)
+                famille.utilisateur.force_reset_password = True
+                famille.utilisateur.date_expiration_mdp = date_expiration_mdp
+                famille.utilisateur.save()
             famille.save()
 
     # Réactualisation de la page
@@ -130,6 +143,8 @@ def Reinitialiser_mdp(request):
 
 
 def Reinitialiser_identifiant(request):
+    time.sleep(1)
+
     # Récupération des comptes cochés
     coches = json.loads(request.POST.get("coches"))
     if not coches:
@@ -167,7 +182,7 @@ class Liste(Page, crud.Liste):
     model = Famille
 
     def get_queryset(self):
-        return Famille.objects.annotate(derniere_action=Max("historique__horodatage")).filter(self.Get_filtres("Q"))
+        return Famille.objects.select_related("utilisateur").annotate(derniere_action=Max("historique__horodatage")).filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -185,16 +200,16 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["fpresent:pk", "fscolarise:pk", "idfamille", 'nom', "internet_actif", "internet_identifiant", "internet_mdp", "derniere_action"]
-
         check = columns.CheckBoxSelectColumn(label="")
         internet_actif = columns.TextColumn("Activation", sources=["internet_actif"], processor='Get_internet_actif')
         internet_identifiant = columns.TextColumn("Identifiant", sources=[], processor='Get_internet_identifiant')
         internet_mdp = columns.TextColumn("Mot de passe", sources=[], processor='Get_internet_mdp')
+        date_expiration_mdp = columns.TextColumn("Expiration mdp", sources=["utilisateur__date_expiration_mdp"], processor=helpers.format_date("%d/%m/%Y %H:%M"))
         derniere_action = columns.TextColumn("Dernière action", sources=["derniere_action"], processor=helpers.format_date('%d/%m/%Y'))
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idfamille', 'nom', "internet_actif", "internet_identifiant", "internet_mdp", "derniere_action"]
+            columns = ['check', 'idfamille', 'nom', "internet_actif", "internet_identifiant", "internet_mdp", "date_expiration_mdp", "derniere_action"]
             ordering = ["nom"]
 
         def Get_internet_actif(self, instance, *args, **kwargs):

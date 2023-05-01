@@ -3,6 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from django.forms.widgets import Widget
 from django.template import loader
 from django.utils.safestring import mark_safe
@@ -105,6 +106,7 @@ class Internet_mdp(Widget):
         if attrs is not None:
             context.update(attrs)
         context['name'] = name
+        context['maintenant'] = datetime.datetime.now()
         if value is not None:
             context['value'] = value
         return context

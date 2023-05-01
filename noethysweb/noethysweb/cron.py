@@ -44,7 +44,7 @@ def Vider_rep_temp():
     logger.debug("%s : Lancement du vidage du répertoire temp..." % datetime.datetime.now())
     call_command("reset_rep_temp")
     Corriger_anomalies()
-
+    Purge_mdp_expires()
 
 def Corriger_anomalies():
     logger.debug("%s : Lancement de la correction automatique des anomalies..." % datetime.datetime.now())
@@ -54,3 +54,8 @@ def Corriger_anomalies():
 def Generer_taches():
     logger.debug("%s : Lancement de la génération des tâches récurrentes..." % datetime.datetime.now())
     call_command("generation_taches")
+
+
+def Purge_mdp_expires():
+    logger.debug("%s : Purge des mots de passe expirés..." % datetime.datetime.now())
+    call_command("purge_mdp_expires")

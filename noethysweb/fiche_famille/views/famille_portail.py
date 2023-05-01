@@ -4,13 +4,13 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy
+from django.http import JsonResponse, HttpResponseRedirect
+from django.contrib import messages
 from core.views import crud
 from core.models import Famille, Utilisateur
 from fiche_famille.forms.famille_portail import Formulaire
 from fiche_famille.views.famille import Onglet
 from fiche_famille.utils import utils_internet
-from django.http import JsonResponse, HttpResponseRedirect
-from django.contrib import messages
 
 
 def Envoyer_codes(request):
@@ -36,8 +36,8 @@ def Regenerer_identifiant(request):
 
 
 def Regenerer_mdp(request):
-    mdp = utils_internet.CreationMDP()
-    return JsonResponse({"mdp": mdp})
+    mdp, date_expiration_mdp = utils_internet.CreationMDP()
+    return JsonResponse({"mdp": mdp, "date_expiration_mdp": str(date_expiration_mdp)})
 
 
 class Consulter(Onglet, crud.Modifier):
@@ -88,6 +88,7 @@ class Modifier(Consulter):
         internet_identifiant = form.cleaned_data.get("internet_identifiant")
         mdp = form.cleaned_data.get("internet_mdp")
         internet_categorie = form.cleaned_data.get("internet_categorie")
+        date_expiration_mdp = form.cleaned_data.get("date_expiration_mdp")
 
         # Si changement de l'état actif
         if internet_actif != famille.internet_actif:
@@ -107,6 +108,7 @@ class Modifier(Consulter):
             famille.internet_mdp = mdp
             utilisateur.set_password(mdp)
             utilisateur.force_reset_password = True
+            utilisateur.date_expiration_mdp = date_expiration_mdp
 
         # Si changement de categorie
         if internet_categorie != famille.internet_categorie:

@@ -161,14 +161,14 @@ class Ajouter(crud.Ajouter):
 
         # Création et enregistrement des codes pour le portail
         internet_identifiant = utils_internet.CreationIdentifiant(IDfamille=famille.pk)
-        internet_mdp = utils_internet.CreationMDP()
+        internet_mdp, date_expiration_mdp = utils_internet.CreationMDP()
 
         # Mémorisation des codes internet dans la table familles
         famille.internet_identifiant = internet_identifiant
         famille.internet_mdp = internet_mdp
 
         # Création de l'utilisateur
-        utilisateur = Utilisateur(username=internet_identifiant, categorie="famille", force_reset_password=True)
+        utilisateur = Utilisateur(username=internet_identifiant, categorie="famille", force_reset_password=True, date_expiration_mdp=date_expiration_mdp)
         utilisateur.save()
         utilisateur.set_password(internet_mdp)
         utilisateur.save()

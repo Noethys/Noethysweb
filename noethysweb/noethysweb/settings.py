@@ -47,8 +47,9 @@ MY_UPLOAD_FORM_MAX_IMAGE_SIZE = 1920
 # DIVERS
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 AUTH_USER_MODEL = 'core.Utilisateur'
+DUREE_VALIDITE_MDP = 60*60*48
 
-# CONFIGURATION ACCEUIL
+# CONFIGURATION ACCUEIL
 CONFIG_ACCUEIL_DEFAUT = [
     [[6, "citation", "anniversaires"], [6, "celebrations", "anniversaires_demain"]],
     [[8, "notes", "taches", "suivi_consommations", "suivi_inscriptions"], [4, "graphe_individus", "messages"]],
@@ -176,6 +177,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # Crispy forms
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Summernote

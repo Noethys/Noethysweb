@@ -5,10 +5,10 @@
 
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
+from crispy_forms.layout import Layout, Hidden, HTML, Fieldset
+from crispy_forms.bootstrap import Field
+from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import Famille
 from fiche_famille.widgets import Internet_identifiant, Internet_mdp
@@ -17,6 +17,7 @@ from fiche_famille.widgets import Internet_identifiant, Internet_mdp
 class Formulaire(FormulaireBase, ModelForm):
     internet_identifiant = forms.CharField(label="Identifiant", required=False, widget=Internet_identifiant(), help_text="Cet identifiant est généré automatiquement, il est conseillé de ne pas le modifier.")
     internet_mdp = forms.CharField(label="Mot de passe", required=False, widget=Internet_mdp(), help_text="Des étoiles ***** apparaissent lorsque le mot de passe a été personnalisé par l'utilisateur lors de la première connexion au portail. Dans ce cas, il vous est impossible de récupérer le mot de passe personnalisé, vous devez en générer un nouveau.")
+    date_expiration_mdp = forms.DateTimeField(label="Date d'expiration", required=False)
 
     class Meta:
         model = Famille
@@ -28,8 +29,9 @@ class Formulaire(FormulaireBase, ModelForm):
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")
+        famille = Famille.objects.get(pk=idfamille)
         if "instance" not in kwargs:
-            self.instance = Famille.objects.get(pk=idfamille)
+            self.instance = famille
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'famille_portail_form'
@@ -38,6 +40,9 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
+
+        # Date d'expiration du mdp
+        self.fields["internet_mdp"].widget.attrs["date_expiration_mdp"] = famille.utilisateur.date_expiration_mdp
 
         # Création des boutons de commande
         autres_commandes = [HTML("""
@@ -54,12 +59,14 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.layout = Layout(
             commandes,
             Hidden("idfamille", value=idfamille),
+            Hidden("date_expiration_mdp", value=famille.utilisateur.date_expiration_mdp),
             Fieldset("Activation",
                 Field("internet_actif"),
             ),
             Fieldset("Codes d'accès",
                 Field("internet_identifiant"),
                 Field("internet_mdp"),
+                Field("date_expiration_mdp", type="hidden"),
             ),
             Fieldset("Options",
                 Field("internet_categorie"),
@@ -83,6 +90,7 @@ EXTRA_HTML = """
             },
             success: function (data) {
                 $('#id_internet_identifiant').val(data.identifiant);
+                toastr.success("Un nouvel identifiant a été généré");
             },
             error: function (data) {
                 toastr.error(data.responseJSON.erreur);
@@ -99,8 +107,10 @@ EXTRA_HTML = """
                 csrfmiddlewaretoken: "{{ csrf_token }}",
             },
             success: function (data) {
-                $('#id_internet_mdp').val(data.mdp);
+                $("#id_internet_mdp").val(data.mdp);
+                $("input[name='date_expiration_mdp']").val(data.date_expiration_mdp);
                 verrouillage_ctrl();
+                toastr.success("Un nouveau mot de passe a été généré");
             },
             error: function (data) {
                 toastr.error(data.responseJSON.erreur);
