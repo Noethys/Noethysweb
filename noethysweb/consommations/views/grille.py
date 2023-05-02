@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from django.utils.safestring import mark_safe
 from django.db.models import Q, Count
 from django.core import serializers
-from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite, Consommation, MemoJournee, Evenement, Groupe, Individu, Ventilation, \
+from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite, Consommation, MemoJournee, Evenement, Groupe, Individu, Ventilation, Famille, \
                         Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Ferie, Individu, Activite, Classe, Scolarite, QuestionnaireReponse
 from core.utils import utils_dates, utils_dictionnaires, utils_db, utils_texte, utils_decimal, utils_historique
 from consommations.utils import utils_consommations
@@ -991,8 +991,6 @@ class Facturation():
         if case_tableau["date"] < str(tarif.date_debut) or case_tableau["date"] > str(date_fin):
             return False
 
-        # todo: Autres conditions à coder :
-
         # Vérifie si groupe ok
         if tarif.groupes.exists():
             if case_tableau["groupe"] not in [groupe.pk for groupe in tarif.groupes.all()]:
@@ -1014,11 +1012,11 @@ class Facturation():
         #     if cotisationsValide == False:
         #         return False
 
-        # Vérifie si caisse à jour
-        # if dictTarif["caisses"] != None:
-        #     caissesValide = self.VerificationCaisses(listeCaisses=dictTarif["caisses"], IDfamille=IDfamille)
-        #     if caissesValide == False:
-        #         return False
+        # Vérifie si caisse ok
+        if tarif.caisses.exists():
+            famille = Famille.objects.prefetch_related("caisse").get(pk=case_tableau["famille"])
+            if famille.caisse_id not in [caisse.pk for caisse in tarif.caisses.all()]:
+                return False
 
         # Vérifie si période ok
         if tarif.jours_scolaires or tarif.jours_vacances:
