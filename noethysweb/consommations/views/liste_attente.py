@@ -67,7 +67,7 @@ def Get_resultats(parametres={}, etat="attente", request=None):
 
         # Récupération de la période
         listes_dates = []
-        if periode_reference["periode"]:
+        if periode_reference["periode"] and periode_reference["periode"].get("periodes", None):
             conditions_periodes = Q()
             for p in periode_reference["periode"]["periodes"]:
                 date_debut = utils_dates.ConvertDateENGtoDate(p.split(";")[0])
