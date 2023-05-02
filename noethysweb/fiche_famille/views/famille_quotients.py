@@ -89,7 +89,7 @@ class Page(Onglet):
 
     def Recalculer_prestations(self, date_min=None, date_max=None):
         # Recherche s'il y a des prestations à modifier sur la période
-        prestations = Prestation.objects.filter(famille_id=self.Get_idfamille(), date__range=(date_min, date_max), facture__isnull=True)
+        prestations = Prestation.objects.filter(famille_id=self.Get_idfamille(), date__range=(date_min, date_max), facture__isnull=True, activite__isnull=False)
         keys_prestations = list({(prestation.individu_id, prestation.activite_id): True for prestation in prestations}.keys())
 
         # Recalcule les prestations
