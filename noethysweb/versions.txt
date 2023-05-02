@@ -1,3 +1,10 @@
+Version 1.1.4.8 (02/05/2023) :
+
+- Ajout de l'expiration des mots de passe provisoires
+- Correction de la condition caisse dans la grille
+- Correction de la période de la liste d'attente
+- Correction de la maj des prestations après modification d'un qf
+
 Version 1.1.4.7 (30/04/2023) :
 
 - Ajout du paiement en ligne des adhésions
