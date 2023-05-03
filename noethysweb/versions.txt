@@ -1,3 +1,7 @@
+Version 1.1.4.9 (03/05/2023) :
+
+- Correction du blocage des places si attente
+
 Version 1.1.4.8 (02/05/2023) :
 
 - Ajout de l'expiration des mots de passe provisoires
