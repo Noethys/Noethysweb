@@ -220,7 +220,7 @@ def Traitement_lot_ouvertures(request):
                 valide = False
 
         # Vérifie si férié
-        if feries == False and utils_dates.EstFerie(date, liste_feries) == True:
+        if feries == False and utils_dates.EstFerie(date, liste_feries):
             valide = False
 
         # Application
