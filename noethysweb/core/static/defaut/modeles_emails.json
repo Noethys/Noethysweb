@@ -1,0 +1,171 @@
+[
+{
+    "model": "core.modeleemail",
+    "pk": 1,
+    "fields": {
+        "categorie": "portail_confirmation_reservations",
+        "nom": "Confirmation des réservations",
+        "description": null,
+        "objet": "Vos réservations",
+        "html": "<p>Bonjour,</p><p>Nous avons bien enregistré vos réservations pour {INDIVIDU_PRENOM} sur l'activité {ACTIVITE_NOM} pour la période {PERIODE_NOM} :</p><p>{DETAIL_MODIFICATIONS}</p><p>Cordialement,</p><p>{ORGANISATEUR_NOM}</p>",
+        "defaut": true,
+        "structure": null
+    }
+},
+{
+    "model": "core.modeleemail",
+    "pk": 2,
+    "fields": {
+        "categorie": "rappel_pieces_manquantes",
+        "nom": "Rappel de pièces manquantes",
+        "description": null,
+        "objet": "Rappel de pièces manquantes",
+        "html": "<p>Bonjour,</p><p></p><p>Après étude de votre dossier, il apparaît qu'il manque les pièces suivantes : <span style='font-weight: bolder;'>{LISTE_PIECES_MANQUANTES}</span>.</p><p></p><p>Merci de bien vouloir nous retourner ces pièces prochainement.</p><p></p><p>Cordialement,</p><p></p><p>{ORGANISATEUR_NOM}</p>",
+        "defaut": true,
+        "structure": null
+    }
+},
+{
+    "model": "core.modeleemail",
+    "pk": 3,
+    "fields": {
+        "categorie": "portail",
+        "nom": "Envoi des codes internet",
+        "description": null,
+        "objet": "Vos codes d'accès au portail famille",
+        "html": "<p>Bonjour,</p><p></p><p>Pour vous connecter à votre espace personnel, il vous suffit de vous rendre sur {URL_PORTAIL} et de saisir vos codes d'accès personnels :<br></p><p></p><p>Identifiant : <span style=\"font-weight: bolder;\">{IDENTIFIANT_INTERNET}</span><br>Mot de passe : <b>{MOTDEPASSE_INTERNET} </b>(validité 48h)<br></p><p>Lors de votre première connexion, il vous sera demandé de personnaliser le mot de passe. Vous devrez ensuite :</p><ol><li>Vérifier et corriger si besoin les informations de votre dossier dans la rubrique Renseignements.</li><li>Confirmer l'exactitude des fiches de renseignements et approuver le règlement des activités.</li><li>Ajouter, modifier et supprimer des réservations aux activités dans la rubrique Réservations.</li></ol><p>Conformément à la loi « informatique et libertés » du 6 janvier 1978 modifiée en 2004, vous bénéficiez d’un droit d’accès et de rectification aux informations qui vous concernent, que vous pouvez exercer en vous adressant à notre service. De même, vous pouvez demander la désactivation de votre espace personnel en formulant simplement votre souhait par Email.<br></p><p>Nous restons à votre disposition pour toute demande d'informations complémentaires.</p><p>Bonne réception,</p><p>{ORGANISATEUR_NOM}</p>",
+        "defaut": true,
+        "structure": null
+    }
+},
+{
+    "model": "core.modeleemail",
+    "pk": 4,
+    "fields": {
+        "categorie": "portail_places_disponibles",
+        "nom": "Attribution de places disponibles",
+        "description": null,
+        "objet": "Attribution de places disponibles",
+        "html": "<p>Bonjour,</p><p>Les places suivantes se sont libérées pour {INDIVIDU_PRENOM} :</p><p>{DETAIL_PLACES}</p><p>Elles ont été attribuées automatiquement à {INDIVIDU_PRENOM}.</p><p>Si ces places ne vous intéressent finalement plus, merci de bien vouloir les supprimer sur le portail.</p><p>Cordialement,</p><p>{ORGANISATEUR_NOM}</p>",
+        "defaut": true,
+        "structure": null
+    }
+},
+{
+    "model": "core.modeleemail",
+    "pk": 5,
+    "fields": {
+        "categorie": "portail_notification_message",
+        "nom": "Notification d'un message",
+        "description": null,
+        "objet": "Nouveau message sur le Portail Famille",
+        "html": "<p>Bonjour,</p><p>Vous avez reçu un nouveau message sur le Portail Famille. Pour le lire et y répondre, cliquez sur le lien suivant : {URL_MESSAGE}.</p><p>Cordialement,</p><p>{ORGANISATEUR_NOM}</p>",
+        "defaut": true,
+        "structure": null
+    }
+},
+{
+    "model": "core.modeleemail",
+    "pk": 6,
+    "fields": {
+        "categorie": "releve_prestations",
+        "nom": "Relevé de prestations",
+        "description": null,
+        "objet": "Votre relevé de prestations",
+        "html": "<p>Bonjour,</p><p>Veuillez trouver en pièce jointe un relevé de prestations à la date du {DATE_EDITION_RELEVE}.</p><p>Cordialement,</p><p>{ORGANISATEUR_NOM}<br></p>",
+        "defaut": true,
+        "structure": null
+    }
+},
+{
+    "model": "core.modeleemail",
+    "pk": 7,
+    "fields": {
+        "categorie": "recu_reglement",
+        "nom": "Reçu de règlement",
+        "description": null,
+        "objet": "Votre reçu de règlement",
+        "html": "<p>Bonjour,</p><p>Veuillez trouver ci-joint votre reçu pour le règlement de {MONTANT_REGLEMENT} par {MODE_REGLEMENT}.</p><p>Cordialement,</p><p>{ORGANISATEUR_NOM}</p>",
+        "defaut": true,
+        "structure": null
+    }
+},
+{
+    "model": "core.modeleemail",
+    "pk": 8,
+    "fields": {
+        "categorie": "facture",
+        "nom": "Facture",
+        "description": null,
+        "objet": "Votre facture",
+        "html": "<p>Bonjour,</p><p>Veuillez trouver ci-joint votre facture pour la période du {DATE_DEBUT} au {DATE_FIN}.</p><p>Cordialement,</p><p>{ORGANISATEUR_NOM}</p>",
+        "defaut": true,
+        "structure": null
+    }
+},
+{
+    "model": "core.modeleemail",
+    "pk": 9,
+    "fields": {
+        "categorie": "rappel",
+        "nom": "Rappel d'impayés",
+        "description": null,
+        "objet": "Rappel d'impayés",
+        "html": "<p>Bonjour,</p><p>Veuillez trouver ci-joint votre rappel d'impayés pour un montant de {SOLDE_CHIFFRES}.</p><p>Cordialement,</p><p>{ORGANISATEUR_NOM}</p>",
+        "defaut": true,
+        "structure": null
+    }
+},
+{
+    "model": "core.modeleemail",
+    "pk": 10,
+    "fields": {
+        "categorie": "attestation_presence",
+        "nom": "Attestation de présence",
+        "description": null,
+        "objet": "Votre attestation de présence",
+        "html": "<p>Bonjour,</p><p>Veuillez trouver ci-joint votre attestation de présence pour la période du {DATE_DEBUT} au {DATE_FIN} pour {INDIVIDUS_CONCERNES}.</p><p>Cordialement,</p><p>{ORGANISATEUR_NOM}</p>",
+        "defaut": true,
+        "structure": null
+    }
+},
+{
+    "model": "core.modeleemail",
+    "pk": 11,
+    "fields": {
+        "categorie": "attestation_fiscale",
+        "nom": "Attestation fiscale",
+        "description": null,
+        "objet": "Votre attestation fiscale",
+        "html": "<p>Bonjour,</p><p>Veuillez trouver ci-joint votre attestation fiscale pour la période du {DATE_DEBUT} au {DATE_FIN}.</p><p>Cordialement,</p><p>{ORGANISATEUR_NOM}</p>",
+        "defaut": true,
+        "structure": null
+    }
+},
+{
+    "model": "core.modeleemail",
+    "pk": 12,
+    "fields": {
+        "categorie": "mandat_sepa",
+        "nom": "Mandat SEPA",
+        "description": null,
+        "objet": "Votre mandat SEPA",
+        "html": "<p>Bonjour,</p><p>Veuillez trouver ci-joint votre mandat SEPA à signer et à nous retourner.</p><p>Cordialement,</p><p>{ORGANISATEUR_NOM}</p>",
+        "defaut": true,
+        "structure": null
+    }
+},
+{
+    "model": "core.modeleemail",
+    "pk": 13,
+    "fields": {
+        "categorie": "devis",
+        "nom": "Devis",
+        "description": null,
+        "objet": "Votre devis",
+        "html": "<p>Bonjour,</p><p></p><p>Veuillez trouver ci-joint votre devis pour la période du {DATE_DEBUT} au {DATE_FIN} pour {INDIVIDUS_CONCERNES}.</p><p></p><p>Cordialement,</p><p></p><p>{ORGANISATEUR_NOM}</p>",
+        "defaut": true,
+        "structure": null
+    }
+}
+]
