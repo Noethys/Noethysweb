@@ -5,13 +5,15 @@
 
 import logging, time, re, datetime, mimetypes, json, os
 logger = logging.getLogger(__name__)
+from django.urls import reverse_lazy, reverse
 from django.conf import settings
 from django.core import mail as djangomail
+from django.core.cache import cache
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.contrib import messages
 from email.mime.image import MIMEImage
-from core.models import Mail
+from core.models import Mail, Organisateur
 from core.utils import utils_dates, utils_historique, utils_texte
 
 
@@ -122,8 +124,21 @@ def Envoyer_model_mail(idmail=None, request=None):
             messages.add_message(request, messages.ERROR, "Vous avez demandé à intéger une signature d'emails alors que votre profil utilisateur n'est associé à aucune signature.")
             return
 
+    # Récupération de l'organisateur
+    organisateur = cache.get('organisateur', None)
+    if not organisateur:
+        organisateur = cache.get_or_set('organisateur', Organisateur.objects.filter(pk=1).first())
+
     # Valeurs de fusion par défaut
     valeurs_defaut = {
+        "{ORGANISATEUR_NOM}": organisateur.nom,
+        "{ORGANISATEUR_RUE}": organisateur.rue,
+        "{ORGANISATEUR_CP}": organisateur.cp,
+        "{ORGANISATEUR_VILLE}": organisateur.ville,
+        "{ORGANISATEUR_TEL}": organisateur.tel,
+        "{ORGANISATEUR_MAIL}": organisateur.mail,
+        "{ORGANISATEUR_SITE}": organisateur.site,
+        "{URL_PORTAIL}": request.build_absolute_uri(reverse("portail_accueil")),
         "{UTILISATEUR_NOM_COMPLET}": request.user.get_full_name() if request else "",
         "{UTILISATEUR_NOM}": request.user.last_name if request else "",
         "{UTILISATEUR_PRENOM}": request.user.first_name if request else "",

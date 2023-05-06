@@ -43,6 +43,14 @@ MOTSCLES_STANDARDS = [
     ("{UTILISATEUR_SIGNATURE}", "Signature de l'utilisateur"),
     ("{DATE_COURTE}", "Date du jour courte"),
     ("{DATE_LONGUE}", "Date du jour longue"),
+    ("{ORGANISATEUR_NOM}", "Nom de l'organisateur"),
+    ("{ORGANISATEUR_RUE}", "Rue de l'organisateur"),
+    ("{ORGANISATEUR_CP}", "CP de l'organisateur"),
+    ("{ORGANISATEUR_VILLE}", "Ville de l'organisateur"),
+    ("{ORGANISATEUR_TEL}", "Téléphone de l'organisateur"),
+    ("{ORGANISATEUR_MAIL}", "Email de l'organisateur"),
+    ("{ORGANISATEUR_SITE}", "Site internet de l'organisateur"),
+    ("{URL_PORTAIL}", "URL du portail famille"),
 ]
 
 MOTSCLES = {
