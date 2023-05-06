@@ -1521,7 +1521,7 @@ class TarifLigne(models.Model):
     unite_horaire = models.TimeField(verbose_name="Unité horaire", blank=True, null=True)
     duree_seuil = models.TimeField(verbose_name="Durée seuil", blank=True, null=True)
     duree_plafond = models.TimeField(verbose_name="Durée plafond", blank=True, null=True)
-    taux = models.DecimalField(verbose_name="Taux d'effort", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
+    taux = models.DecimalField(verbose_name="Taux d'effort", max_digits=10, decimal_places=6, default=0.0, blank=True, null=True)
     ajustement = models.DecimalField(verbose_name="Ajustement", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
     montant_questionnaire = models.CharField(verbose_name="Montant questionnaire", max_length=100, blank=True, null=True)
     revenu_min = models.DecimalField(verbose_name="Montant revenu min", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
