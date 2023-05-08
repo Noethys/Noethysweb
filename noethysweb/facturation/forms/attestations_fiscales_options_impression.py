@@ -19,6 +19,7 @@ class Formulaire(FormulaireBase, forms.Form):
     texte_introduction = forms.CharField(label="Texte d'introduction", initial="Veuillez trouver ci-dessous le montant réglé à notre organisme sur la période du {DATE_DEBUT} au {DATE_FIN} pour la garde de votre ou vos enfants de moins de 7 ans :", required=False)
 
     def __init__(self, *args, **kwargs):
+        self.memorisation = kwargs.pop("memorisation", True)
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'options_impression_form'
@@ -29,17 +30,15 @@ class Formulaire(FormulaireBase, forms.Form):
         # self.helper.field_class = 'col-md-8'
 
         # Importation des paramètres
-        parametres = {nom: field.initial for nom, field in self.fields.items()}
-        del parametres["memoriser_parametres"]
-        parametres = utils_parametres.Get_categorie(categorie="impression_attestation_fiscale", utilisateur=self.request.user, parametres=parametres)
-        for nom, valeur in parametres.items():
-            self.fields[nom].initial = valeur
+        if self.memorisation:
+            parametres = {nom: field.initial for nom, field in self.fields.items()}
+            del parametres["memoriser_parametres"]
+            parametres = utils_parametres.Get_categorie(categorie="impression_attestation_fiscale", utilisateur=self.request.user, parametres=parametres)
+            for nom, valeur in parametres.items():
+                self.fields[nom].initial = valeur
 
         # Affichage
         self.helper.layout = Layout(
-            Fieldset("Mémorisation",
-                Field("memoriser_parametres"),
-            ),
             Fieldset("Titre",
                 Field("afficher_titre"),
                 Field("texte_titre"),
@@ -49,8 +48,15 @@ class Formulaire(FormulaireBase, forms.Form):
             ),
         )
 
+        if self.memorisation:
+            self.helper.layout.insert(0,
+                Fieldset("Mémorisation",
+                    Field("memoriser_parametres"),
+                ),
+            )
+
     def clean(self):
-        if self.cleaned_data["memoriser_parametres"]:
+        if self.memorisation and self.cleaned_data["memoriser_parametres"]:
             parametres = copy.copy(self.cleaned_data)
             del parametres["memoriser_parametres"]
             utils_parametres.Set_categorie(categorie="impression_attestation_fiscale", utilisateur=self.request.user, parametres=parametres)

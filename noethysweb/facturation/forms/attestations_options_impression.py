@@ -3,14 +3,14 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import copy
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
+from crispy_forms.layout import Layout, Fieldset
+from crispy_forms.bootstrap import Field
 from core.widgets import ColorPickerWidget
 from core.utils import utils_parametres
 from core.forms.base import FormulaireBase
-import copy
 
 
 class Formulaire(FormulaireBase, forms.Form):
@@ -69,6 +69,7 @@ class Formulaire(FormulaireBase, forms.Form):
 
 
     def __init__(self, *args, **kwargs):
+        self.memorisation = kwargs.pop("memorisation", True)
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'options_impression_form'
@@ -79,17 +80,15 @@ class Formulaire(FormulaireBase, forms.Form):
         # self.helper.field_class = 'col-md-8'
 
         # Importation des paramètres
-        parametres = {nom: field.initial for nom, field in self.fields.items()}
-        del parametres["memoriser_parametres"]
-        parametres = utils_parametres.Get_categorie(categorie="impression_attestation", utilisateur=self.request.user, parametres=parametres)
-        for nom, valeur in parametres.items():
-            self.fields[nom].initial = valeur
+        if self.memorisation:
+            parametres = {nom: field.initial for nom, field in self.fields.items()}
+            del parametres["memoriser_parametres"]
+            parametres = utils_parametres.Get_categorie(categorie="impression_attestation", utilisateur=self.request.user, parametres=parametres)
+            for nom, valeur in parametres.items():
+                self.fields[nom].initial = valeur
 
         # Affichage
         self.helper.layout = Layout(
-            Fieldset("Mémorisation",
-                Field("memoriser_parametres"),
-            ),
             Fieldset("Eléments à afficher",
                 Field("affichage_solde"),
                 Field("afficher_impayes"),
@@ -149,8 +148,15 @@ class Formulaire(FormulaireBase, forms.Form):
             ),
         )
 
+        if self.memorisation:
+            self.helper.layout.insert(0,
+                Fieldset("Mémorisation",
+                    Field("memoriser_parametres"),
+                ),
+            )
+
     def clean(self):
-        if self.cleaned_data["memoriser_parametres"]:
+        if self.memorisation and self.cleaned_data["memoriser_parametres"]:
             parametres = copy.copy(self.cleaned_data)
             del parametres["memoriser_parametres"]
             utils_parametres.Set_categorie(categorie="impression_attestation", utilisateur=self.request.user, parametres=parametres)

@@ -25,7 +25,7 @@ from parametrage.views import organisateur, structures, \
     configurations_sms, perceptions, modeles_prelevements, taches_recurrentes, modeles_prestations, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
-    modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets
+    modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions
 
 
 urlpatterns = [
@@ -407,6 +407,14 @@ urlpatterns = [
     path('parametrage/modeles_documents/supprimer/<str:categorie>/<int:pk>', modeles_documents.Supprimer.as_view(), name='modeles_documents_supprimer'),
     path('parametrage/modeles_documents/dupliquer/<str:categorie>/<int:pk>', modeles_documents.Dupliquer.as_view(), name='modeles_documents_dupliquer'),
     path('parametrage/modeles_documents/creer/<str:categorie>', modeles_documents.Creer.as_view(), name='modeles_documents_creer'),
+
+    # Modèles d'impressions
+    path('parametrage/modeles_impressions/liste', modeles_impressions.Liste.as_view(), name='modeles_impressions_liste'),
+    path('parametrage/modeles_impressions/liste/<str:categorie>', modeles_impressions.Liste.as_view(), name='modeles_impressions_liste'),
+    path('parametrage/modeles_impressions/ajouter/<str:categorie>', modeles_impressions.Ajouter.as_view(), name='modeles_impressions_ajouter'),
+    path('parametrage/modeles_impressions/modifier/<str:categorie>/<int:pk>', modeles_impressions.Modifier.as_view(), name='modeles_impressions_modifier'),
+    path('parametrage/modeles_impressions/supprimer/<str:categorie>/<int:pk>', modeles_impressions.Supprimer.as_view(), name='modeles_impressions_supprimer'),
+    path('parametrage/modeles_impressions/dupliquer/<str:categorie>/<int:pk>', modeles_impressions.Dupliquer.as_view(), name='modeles_impressions_dupliquer'),
 
     # Modèles d'emails
     path('parametrage/modeles_emails/liste', modeles_emails.Liste.as_view(), name='modeles_emails_liste'),

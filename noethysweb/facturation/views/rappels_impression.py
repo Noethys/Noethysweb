@@ -3,15 +3,16 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
+import json
+from django.urls import reverse
+from django.http import JsonResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Rappel, Ventilation
+from core.models import Rappel, ModeleImpression
 from core.utils import utils_texte
 from facturation.forms.rappels_options_impression import Formulaire as Form_parametres
 from facturation.forms.rappels_choix_modele import Formulaire as Form_modele
-from django.http import JsonResponse
-import json
+from facturation.forms.choix_modele_impression import Formulaire as Form_modele_impression
 
 
 def Impression_pdf(request):
@@ -20,20 +21,29 @@ def Impression_pdf(request):
     if not rappels_coches:
         return JsonResponse({"erreur": "Veuillez cocher au moins une lettre de rappel dans la liste"}, status=401)
 
-    # Récupération du modèle de document
-    valeurs_form_modele = json.loads(request.POST.get("form_modele"))
-    form_modele = Form_modele(valeurs_form_modele)
-    if not form_modele.is_valid():
-        return JsonResponse({"erreur": "Veuillez sélectionner un modèle de document"}, status=401)
+    # Récupération du modèle d'impression
+    valeurs_form_modele_impression = json.loads(request.POST.get("form_modele_impression"))
+    IDmodele_impression = int(valeurs_form_modele_impression.get("modele_impression", 0))
 
-    # Récupération des options d'impression
-    valeurs_form_parametres = json.loads(request.POST.get("form_parametres"))
-    form_parametres = Form_parametres(valeurs_form_parametres, request=request)
-    if not form_parametres.is_valid():
-        return JsonResponse({"erreur": "Veuillez compléter les options d'impression"}, status=401)
+    if IDmodele_impression:
+        modele_impression = ModeleImpression.objects.get(pk=IDmodele_impression)
+        dict_options = json.loads(modele_impression.options)
+        dict_options["modele"] = modele_impression.modele_document
+    else:
+        # Récupération du modèle de document
+        valeurs_form_modele = json.loads(request.POST.get("form_modele_document"))
+        form_modele = Form_modele(valeurs_form_modele)
+        if not form_modele.is_valid():
+            return JsonResponse({"erreur": "Veuillez sélectionner un modèle de document"}, status=401)
 
-    dict_options = form_parametres.cleaned_data
-    dict_options.update(form_modele.cleaned_data)
+        # Récupération des options d'impression
+        valeurs_form_parametres = json.loads(request.POST.get("form_parametres"))
+        form_parametres = Form_parametres(valeurs_form_parametres, request=request)
+        if not form_parametres.is_valid():
+            return JsonResponse({"erreur": "Veuillez compléter les options d'impression"}, status=401)
+
+        dict_options = form_parametres.cleaned_data
+        dict_options.update(form_modele.cleaned_data)
 
     # Création du PDF
     from facturation.utils import utils_rappels
@@ -42,7 +52,6 @@ def Impression_pdf(request):
     if not resultat:
         return JsonResponse({"success": False}, status=401)
     return JsonResponse({"nom_fichier": resultat["nom_fichier"]})
-
 
 
 class Page(crud.Page):
@@ -69,14 +78,14 @@ class Liste(Page, crud.Liste):
         context['active_checkbox'] = True
         context['bouton_supprimer'] = False
         context["hauteur_table"] = "400px"
-        context['form_modele'] = Form_modele()
+        context['form_modele_document'] = Form_modele()
+        context['form_modele_impression'] = Form_modele_impression(categorie="rappel")
         context['form_parametres'] = Form_parametres(request=self.request)
         context['afficher_menu_brothers'] = True
         return context
 
     class datatable_class(MyDatatable):
         filtres = ["fpresent:famille", "fscolarise:famille", 'idrappel', 'date_edition', 'numero', 'famille', 'date_reference', 'solde', 'date_min', 'date_max', 'lot__nom']
-
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
@@ -100,5 +109,3 @@ class Liste(Page, crud.Liste):
                 self.Create_bouton_imprimer(url=reverse("famille_voir_rappel", kwargs={"idfamille": instance.famille_id, "idrappel": instance.pk}), title="Imprimer ou envoyer par email la lettre de rappel"),
             ]
             return self.Create_boutons_actions(html)
-
-

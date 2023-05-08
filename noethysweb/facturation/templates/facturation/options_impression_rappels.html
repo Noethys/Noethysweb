@@ -6,20 +6,41 @@
 <div style="margin-top: 30px;">
     <ul class="nav nav-tabs">
         <li class="nav-item active">
-            <a class="nav-link active" href="#tab_1" data-toggle="tab">Modèle de document</a>
+            <a class="nav-link active" href="#tab_1" data-toggle="tab">Modèle d'impression</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#tab_2" data-toggle="tab">Options d'impression</a>
+        <li class="nav-item" id="idtab2">
+            <a class="nav-link" href="#tab_2" data-toggle="tab">Modèle de document</a>
+        </li>
+        <li class="nav-item" id="idtab3">
+            <a class="nav-link" href="#tab_3" data-toggle="tab">Options d'impression</a>
         </li>
     </ul>
     <div class="tab-content">
-        <div class="tab-pane p-2 {% if not messages %}active{% endif %}" id="tab_1">
-            {% crispy form_modele %}
+        <div class="tab-pane active p-2" id="tab_1">
+            {% crispy form_modele_impression %}
         </div>
         <div class="tab-pane p-2" id="tab_2">
+            {% crispy form_modele_document %}
+        </div>
+        <div class="tab-pane p-2" id="tab_3">
             {% crispy form_parametres %}
         </div>
     </div>
 </div>
 
+<script>
 
+    function On_change_modele_impression() {
+        $("#idtab2").hide();
+        $("#idtab3").hide();
+        if($(this).val() == 0) {
+            $('#idtab2').show();
+            $('#idtab3').show();
+        };
+    }
+    $(document).ready(function() {
+        $("#id_modele_impression").change(On_change_modele_impression);
+        On_change_modele_impression.call($("#id_modele_impression").get(0));
+    });
+
+</script>

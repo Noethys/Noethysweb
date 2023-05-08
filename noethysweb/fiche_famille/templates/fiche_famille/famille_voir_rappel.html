@@ -18,28 +18,15 @@
             {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
             {% block box_contenu %}
 
-                <div class="nav-tabs-custom">
-                    <ul class="nav nav-tabs">
-                        <li class="active"><a href="#tab_1" data-toggle="tab">Modèle de document</a></li>
-                        <li><a href="#tab_2" data-toggle="tab">Options d'impression</a></li>
-                    </ul>
-                    <div class="tab-content">
-                        <div class="tab-pane active" id="tab_1">
-                            {% crispy form_modele %}
-                        </div>
-                        <div class="tab-pane" id="tab_2">
-                            {% crispy form_parametres %}
-                        </div>
-                    </div>
-                </div>
-
                 {# Boutons de commandes #}
-                <div class="buttonHolder pull-right">
+                <div class="buttonHolder">
                     <button class="btn btn-primary" onclick="impression_pdf()" title="Aperçu PDF de la lettre de rappel"><i class='fa fa-file-pdf-o margin-r-5'></i> Aperçu PDF</button>
                     <button class="btn btn-primary" onclick="impression_pdf(true)" title="Envoyer la lettre de rappel par Email"><i class='fa fa-envelope-o margin-r-5'></i> Envoyer par Email</button>
                     <a class="btn btn-danger" href="{% url 'famille_rappels_liste' idfamille=idfamille %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
                 </div>
 
+                {% embed 'facturation/options_impression_rappels.html' %}
+                {% endembed %}
 
             {% endblock box_contenu %}
             {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
@@ -59,7 +46,8 @@
                 type: "POST",
                 url: "{% url 'ajax_rappel_impression_pdf' %}",
                 data: {
-                    form_modele: JSON.stringify($("#choix_modele_form").serializeObject()),
+                    form_modele_impression: JSON.stringify($("#choix_modele_impression_form").serializeObject()),
+                    form_modele_document: JSON.stringify($("#choix_modele_form").serializeObject()),
                     form_parametres: JSON.stringify($("#options_impression_form").serializeObject()),
                     idrappel: {{ idrappel }},
                     idfamille: {{ idfamille }},
@@ -82,4 +70,3 @@
     </script>
 
 {% endblock %}
-

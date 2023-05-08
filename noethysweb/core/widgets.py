@@ -567,6 +567,8 @@ class FormIntegreWidget(Widget):
         context['name'] = name
         if value is not None:
             context['value'] = value
+        if "hauteur" not in context:
+            context["hauteur"] = 200
         return context
 
     def render(self, name, value, attrs=None, renderer=None):

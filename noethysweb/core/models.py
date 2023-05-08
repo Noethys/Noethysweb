@@ -14,6 +14,7 @@ from django_resized import ResizedImageField
 from django_cryptography.fields import encrypt
 from multiselectfield import MultiSelectField
 from core.data import data_civilites
+from core.data.data_modeles_impressions import CATEGORIES as CATEGORIES_MODELES_IMPRESSIONS
 from core.data.data_modeles_emails import CATEGORIES as CATEGORIES_MODELES_EMAILS
 from core.data.data_modeles_sms import CATEGORIES as CATEGORIES_MODELES_SMS
 from individus.utils.utils_transports import Get_liste_choix_categories
@@ -4213,3 +4214,32 @@ class Transport(models.Model):
 
     def __str__(self):
         return "Transport ID%d" % self.idtransport if self.idtransport else "Nouveau transport"
+
+
+class ModeleImpression(models.Model):
+    idmodele = models.AutoField(verbose_name="ID", db_column='IDmodele', primary_key=True)
+    categorie = models.CharField(verbose_name="Catégorie", max_length=200, choices=CATEGORIES_MODELES_IMPRESSIONS)
+    nom = models.CharField(verbose_name="Nom", max_length=250)
+    description = models.CharField(verbose_name="Description", max_length=400, blank=True, null=True)
+    modele_document = models.ForeignKey(ModeleDocument, verbose_name="Modèle de document", on_delete=models.PROTECT, blank=True, null=True)
+    options = models.TextField(verbose_name="Options", blank=True, null=True)
+    defaut = models.BooleanField(verbose_name="Modèle par défaut", default=False)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = "modeles_impressions"
+        verbose_name = "modèle d'impression"
+        verbose_name_plural = "modèles d'impressions"
+
+    def __str__(self):
+        return self.nom if self.idmodele else "Nouveau modèle"
+
+    def delete(self, *args, **kwargs):
+        # Supprime l'objet
+        super().delete(*args, **kwargs)
+        # Si le défaut a été supprimé, on le réattribue à une autre objet
+        if len(ModeleImpression.objects.filter(categorie=self.categorie, defaut=True)) == 0:
+            objet = ModeleImpression.objects.filter(categorie=self.categorie).first()
+            if objet != None:
+                objet.defaut = True
+                objet.save()

@@ -48,7 +48,8 @@
                     type: "POST",
                     url: "{% url 'ajax_attestations_fiscales_impression_pdf' %}",
                     data: {
-                        form_modele: JSON.stringify($("#choix_modele_form").serializeObject()),
+                        form_modele_impression: JSON.stringify($("#choix_modele_impression_form").serializeObject()),
+                        form_modele_document: JSON.stringify($("#choix_modele_form").serializeObject()),
                         form_parametres: JSON.stringify($("#options_impression_form").serializeObject()),
                         attestations_fiscales_coches: JSON.stringify(get_coches()),
                         csrfmiddlewaretoken: '{{ csrf_token }}',

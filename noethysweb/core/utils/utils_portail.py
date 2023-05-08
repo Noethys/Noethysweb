@@ -5,7 +5,7 @@
 
 import decimal
 from django import forms
-from core.models import PortailParametre, AdresseMail, ImageFond, ModeReglement, CompteBancaire
+from core.models import PortailParametre, AdresseMail, ImageFond, ModeReglement, CompteBancaire, ModeleImpression
 from django_summernote.widgets import SummernoteInplaceWidget
 from django.template.loader import render_to_string
 
@@ -35,6 +35,8 @@ class Parametre():
             return forms.ChoiceField(label=self.label, choices=[(None, "Aucun")] + [(compte.pk, compte.nom) for compte in CompteBancaire.objects.all().order_by("nom")], required=self.required, help_text=self.help_text)
         if self.type == "modes_reglements":
             return forms.ChoiceField(label=self.label, choices=[(None, "Aucun")] + [(mode.pk, mode.label) for mode in ModeReglement.objects.all().order_by("label")], required=self.required, help_text=self.help_text)
+        if self.type == "modeles_impressions_factures":
+            return forms.ChoiceField(label=self.label, choices=[(None, "Aucun")] + [(modele.pk, modele.nom) for modele in ModeleImpression.objects.filter(categorie="facture").order_by("nom")], required=self.required, help_text=self.help_text)
         if self.type == "choix":
             return forms.ChoiceField(label=self.label, choices=self.choix, required=self.required, help_text=self.help_text)
         if self.type == "decimal":
@@ -104,6 +106,7 @@ LISTE_PARAMETRES = [
     Parametre(code="facturation_afficher_solde_facture", label="Afficher le solde actuel des factures", type="boolean", valeur=True),
     Parametre(code="facturation_autoriser_detail_facture", label="Afficher le détail des factures", type="boolean", valeur=True),
     Parametre(code="facturation_autoriser_telechargement_facture", label="Autoriser le téléchargement des factures", type="boolean", valeur=True),
+    Parametre(code="facturation_modele_impression_facture", label="Modèle d'impression des factures", type="modeles_impressions_factures", valeur=None, help_text="Vous devez au préalable créer un modèle d'impression pour la catégorie facture depuis le menu Paramétrage > Modèles d'impressions."),
 
     # Paiement en ligne
     Parametre(code="paiement_ligne_systeme", label="Paiement en ligne", type="choix", valeur=None, choix=[(None, "Aucun"), ("payfip", "PayFIP"), ("payzen", "Payzen"), ("demo", "Mode démo")], help_text="Sélectionnez un système de paiement en ligne."),
