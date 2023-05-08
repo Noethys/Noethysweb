@@ -14,7 +14,7 @@ from django.shortcuts import render
 from django.db.models import Sum, Q
 from eopayment import Payment
 from portail.views.base import CustomView
-from core.models import Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur, ModeReglement, CompteBancaire, PortailRenseignement, Cotisation
+from core.models import Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur, ModeReglement, CompteBancaire, PortailRenseignement, ModeleImpression
 from core.utils import utils_portail, utils_fichiers, utils_dates, utils_texte
 
 ETATS_PAIEMENTS = {1: "RECEIVED", 2: "ACCEPTED", 3: "PAID", 4: "DENIED", 5: "CANCELLED", 6: "WAITING", 99: "ERROR"}
@@ -389,6 +389,24 @@ def get_detail_facture(request):
         "parametres_portail": utils_portail.Get_dict_parametres(),
     }
     return render(request, 'portail/detail_facture.html', context)
+
+
+def imprimer_facture(request):
+    """ Imprimer une facture au format PDF """
+    idfacture = int(request.POST.get("idfacture", 0))
+    idmodele_impression = int(request.POST.get("idmodele_impression", 0))
+
+    # Importation des options d'impression
+    modele_impression = ModeleImpression.objects.get(pk=idmodele_impression)
+    dict_options = json.loads(modele_impression.options)
+    dict_options["modele"] = modele_impression.modele_document
+
+    # Création du PDF
+    from facturation.utils import utils_facturation
+    facturation = utils_facturation.Facturation()
+    resultat = facturation.Impression(liste_factures=[idfacture,], dict_options=dict_options)
+
+    return JsonResponse({"nom_fichier": resultat["nom_fichier"]})
 
 
 class View(CustomView, TemplateView):

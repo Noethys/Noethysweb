@@ -250,11 +250,9 @@
                                             {% if parametres_portail.facturation_autoriser_detail_facture %}
                                                 <button data-idfacture="{{ facture.pk }}" class="btn btn-primary btn-xs bouton_detail_facture" title="Afficher le détail de la facture"><i class="fa fa-fw fa-search"></i></button>
                                             {% endif %}
-{% comment %}
-                                            {% if parametres_portail.facturation_autoriser_telechargement_facture %}
-                                                <a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_accueil' %}" title="Télécharger la facture"><i class="fa fa-fw fa-download"></i></a>
+                                            {% if parametres_portail.facturation_autoriser_telechargement_facture and parametres_portail.facturation_modele_impression_facture %}
+                                                <button data-idfacture="{{ facture.pk }}" class="btn btn-primary btn-xs bouton_imprimer_facture" title="Télécharger la facture"><i class="fa fa-fw fa-download"></i></button>
                                             {% endif %}
-{% endcomment %}
                                         </td>
                                     {% endif %}
                                 </tr>
@@ -265,6 +263,9 @@
                     <div style="padding: 12px;">Aucune facture</div>
                 {% endif %}
             </div>
+
+            {# Lien de téléchargement de la facture #}
+            <a id="download" download></a>
 
         {% endblock box_contenu %}
         {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
@@ -299,6 +300,25 @@
                     },
                 });
             });
+
+            // Impression du PDF
+            $(".bouton_imprimer_facture").on('click', function(e) {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'portail_ajax_imprimer_facture' %}",
+                    data: {
+                        idfacture: $(this).data("idfacture"),
+                        idmodele_impression: "{{ parametres_portail.facturation_modele_impression_facture }}",
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    },
+                    datatype: "json",
+                    success: function(data){
+                        $("#download").attr("href", data.nom_fichier);
+                        document.getElementById("download").click();
+                    },
+                })
+            });
+
         });
     </script>
 
