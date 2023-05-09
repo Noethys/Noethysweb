@@ -1367,7 +1367,7 @@ class Facturation():
 
                     # Application de l'ajustement (majoration ou déduction)
                     if ligne_calcul.ajustement:
-                        montant_tarif = montant_tarif + ligne_calcul.ajustement
+                        montant_tarif = montant_tarif + float(ligne_calcul.ajustement)
                         if montant_tarif < 0.0:
                             montant_tarif = 0.0
 
@@ -1426,7 +1426,7 @@ class Facturation():
 
                     # Application de l'ajustement (majoration ou déduction)
                     if ligne_calcul.ajustement:
-                        montant_tarif = montant_tarif + ligne_calcul.ajustement
+                        montant_tarif = montant_tarif + float(ligne_calcul.ajustement)
                         if montant_tarif < 0.0:
                             montant_tarif = 0.0
 
@@ -1484,7 +1484,7 @@ class Facturation():
 
                     # Application de l'ajustement (majoration ou déduction)
                     if ligne_calcul.ajustement:
-                        montant_tarif = montant_tarif + ligne_calcul.ajustement
+                        montant_tarif = montant_tarif + float(ligne_calcul.ajustement)
                         if montant_tarif < 0.0:
                             montant_tarif = 0.0
 
