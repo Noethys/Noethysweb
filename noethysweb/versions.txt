@@ -1,3 +1,13 @@
+Version 1.1.5.0 (09/05/2023) :
+
+- Ajout des modèles d'impression
+- Ajout de l'impression des factures sur le portail
+- Ajout des champs organisateur aux modèles d'emails
+- Ajout de la commande complete_initial_data
+- Correction des fériés dans la saisie d'ouvertures par lot
+- Correction des décimales dans le tarif par taux d'effort
+- Correction de la majoration dans les lignes tarifaires
+
 Version 1.1.4.9 (03/05/2023) :
 
 - Correction du blocage des places si attente
