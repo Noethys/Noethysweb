@@ -1,3 +1,8 @@
+Version 1.1.5.1 (14/05/2023) :
+
+- Ajout de la commande fix_types_vaccins
+- Correction de l'objet manquant dans les modèles d'emails
+
 Version 1.1.5.0 (09/05/2023) :
 
 - Ajout des modèles d'impression
