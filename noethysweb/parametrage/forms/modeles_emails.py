@@ -33,6 +33,9 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
+        # Objet
+        self.fields["objet"].required = True
+
         # Définir comme valeur par défaut
         self.fields['defaut'].label = "Définir comme modèle par défaut"
         if len(ModeleEmail.objects.filter(categorie=categorie)) == 0 or self.instance.defaut == True:

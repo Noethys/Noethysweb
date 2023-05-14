@@ -161,6 +161,8 @@ def Envoyer_model_mail(idmail=None, request=None):
     for destinataire in destinataires:
         html = mail.html
         objet = mail.objet
+        if objet == None:
+            objet = ""
 
         # Remplacement des mots-clés
         try:
