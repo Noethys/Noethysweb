@@ -1,3 +1,7 @@
+Version 1.1.5.2 (14/05/2023) :
+
+- Correction du correcteur
+
 Version 1.1.5.1 (14/05/2023) :
 
 - Ajout de la commande fix_types_vaccins
