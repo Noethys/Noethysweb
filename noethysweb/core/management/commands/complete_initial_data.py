@@ -22,4 +22,8 @@ class Command(BaseCommand):
                 objet_json.save()
         fixture.close()
 
+        # Modification des types de vaccins et types de maladies
+        from individus.utils import utils_vaccinations
+        utils_vaccinations.Importation_vaccins()
+
         self.stdout.write(self.style.SUCCESS("Compléments installés"))
