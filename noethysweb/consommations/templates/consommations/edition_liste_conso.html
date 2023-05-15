@@ -50,14 +50,14 @@
     <script>
 
         // Générer le PDF
-        function generer_pdf() {
+        function generer_pdf(telechargement=false) {
             $.ajax({
                 type: "POST",
                 url: "{% url 'ajax_edition_liste_conso_generer_pdf' %}",
                 data: $("#form_general").serialize(),
                 datatype: "json",
                 success: function(data){
-                    charge_pdf(data);
+                    charge_pdf(data, telechargement);
                 },
                 error: function(data) {
                     toastr.error(data.responseJSON.erreur);

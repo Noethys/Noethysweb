@@ -122,7 +122,17 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'consommations_toc' %}", enregistrer=False, ajouter=False,
                 commandes_principales=[
-                    HTML("""<a type='button' class="btn btn-primary margin-r-5" onclick="generer_pdf()" title="Génération du PDF"><i class='fa fa-file-pdf-o margin-r-5'></i> Générer le PDF</a>""")
+                    HTML("""
+                        <div class="btn-group margin-r-5">
+                            <a type='button' class="btn btn-primary" onclick="generer_pdf()" title="Générer le PDF"><i class='fa fa-file-pdf-o margin-r-5'></i> Générer le PDF</a>
+                            <button type="button" class="btn btn-primary dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                <span class="sr-only">Ouvrir le menu</span>
+                            </button>
+                            <div class="dropdown-menu" role="menu">
+                                <a type='button' class="btn" onclick="generer_pdf(telechargement=true)" title="Télécharger le PDF"><i class='fa fa-download margin-r-5'></i> Télécharger le PDF</a>
+                            </div>
+                        </div>
+                    """)
                 ]
             ),
             Field('profil'),
