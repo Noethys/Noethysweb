@@ -1,3 +1,8 @@
+Version 1.1.5.3 (15/05/2023) :
+
+- Ajout de la validation par lot dans le traitement des demandes du portail
+- Ajout du téléchargement direct du PDF de la liste des consommations
+
 Version 1.1.5.2 (14/05/2023) :
 
 - Correction du correcteur
