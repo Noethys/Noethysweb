@@ -17,14 +17,9 @@ from core.utils import utils_dates, utils_parametres
 from portail.utils import utils_champs
 
 
-def Appliquer_modification(request):
-    iddemande = int(request.POST["iddemande"])
-    etat = request.POST["etat"]
-
+def Traiter_demande(request=None, demande=None, etat=None):
+    """ Traitement d'une demande donnée """
     redirection = None
-
-    # Importation de la demande à modifier
-    demande = PortailRenseignement.objects.select_related("famille", "individu").get(pk=iddemande)
 
     if etat == "VALIDE":
         # Récupération de la nouvelle valeur
@@ -76,7 +71,28 @@ def Appliquer_modification(request):
     demande.etat = etat
     demande.save()
 
+    return redirection
+
+def Appliquer_modification(request):
+    iddemande = int(request.POST["iddemande"])
+    etat = request.POST["etat"]
+
+    # Importation et traitement de la demande
+    demande = PortailRenseignement.objects.select_related("famille", "individu").get(pk=iddemande)
+    redirection = Traiter_demande(request=request, demande=demande, etat=etat)
+
     return JsonResponse({"succes": True, "redirection": redirection})
+
+
+def Tout_valider(request):
+    liste_pk = json.loads(request.POST["liste_demandes"])
+
+    # Importation et traitement de chaque demande cochée
+    for demande in PortailRenseignement.objects.select_related("famille", "individu").filter(pk__in=liste_pk):
+        if demande.code != "inscrire_activite":
+            Traiter_demande(request=request, demande=demande, etat="VALIDE")
+
+    return JsonResponse({"resultat": "ok"})
 
 
 def Get_labels():
@@ -119,10 +135,16 @@ class Liste(Page, crud.Liste):
         context['box_titre'] = "Liste des modifications effectuées sur le portail"
         context['afficher_menu_brothers'] = True
         context['afficher_renseignements_attente'] = self.afficher_renseignements_attente
+        context['active_checkbox'] = True
+        context['bouton_supprimer'] = False
+        context['boutons_coches'] = json.dumps([
+            {"id": "bouton_tout_valider", "action": "tout_valider()", "title": "Tout valider les demandes cochées", "label": "<i class='fa fa-check margin-r-5'></i>Tout valider"},
+        ])
         return context
 
     class datatable_class(MyDatatable):
         filtres = ['idrenseignement', 'famille__nom', 'individu__nom', 'categorie']
+        check = columns.CheckBoxSelectColumn(label="")
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         individu = columns.TextColumn("Individu", sources=["individu__nom", "individu__prenom"], processor='Formate_individu')
         code = columns.TextColumn("Donnée", sources=['code'], processor='Formate_code')
@@ -135,7 +157,7 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idrenseignement", "date", "famille", "individu", "code", "nouvelle_valeur", "ancienne_valeur",
+            columns = ["check", "idrenseignement", "date", "famille", "individu", "code", "nouvelle_valeur", "ancienne_valeur",
                        "etat", "traitement", "boutons_validation", "actions"]
             ordering = ['date']
             labels = {

@@ -107,6 +107,7 @@ urlpatterns = [
     path('outils/get_modele_sms', secure_ajax(editeur_sms.Get_modele_sms), name='ajax_get_modele_sms'),
     path('outils/get_calendrier_annuel', secure_ajax(calendrier_annuel.Get_calendrier_annuel), name='ajax_get_calendrier_annuel'),
     path('outils/portail/demandes/', secure_ajax(demandes_portail.Appliquer_modification), name='ajax_appliquer_modification_portail'),
+    path('outils/portail/tout_valider/', secure_ajax(demandes_portail.Tout_valider), name='ajax_tout_valider_portail'),
     path('outils/sauvegarder_db/', secure_ajax(sauvegarde_creer.Sauvegarder_db), name='ajax_sauvegarder_db'),
     path('outils/sauvegarder_media/', secure_ajax(sauvegarde_creer.Sauvegarder_media), name='ajax_sauvegarder_media'),
     path('outils/sauvegarder_liste/', secure_ajax(sauvegarde_creer.Get_liste_sauvegardes), name='ajax_get_liste_sauvegardes'),

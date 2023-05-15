@@ -75,6 +75,28 @@
                 }
             })
         };
+
+        function tout_valider() {
+            var listepk = get_coches();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_tout_valider_portail' %}",
+                data: {
+                    "liste_demandes": JSON.stringify(listepk),
+                },
+                datatype: "json",
+                success: function (data) {
+                    var table = $('.datatable').DataTable()
+                    table.ajax.reload(null, false);
+                },
+                error: function(data) {
+                    var table = $('.datatable').DataTable()
+                    table.ajax.reload(null, false);
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
     </script>
 
 {% endblock scripts %}
