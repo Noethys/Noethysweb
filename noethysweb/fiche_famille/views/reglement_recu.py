@@ -66,7 +66,7 @@ def Impression_pdf(request):
         dict_donnees["prestations"] = prestations
 
     # Récupération des infos de base individus et familles
-    infosIndividus = utils_infos_individus.Informations()
+    infosIndividus = utils_infos_individus.Informations(liste_familles=[idfamille,])
     dict_donnees.update(infosIndividus.GetDictValeurs(mode="famille", ID=reglement.famille_id, formatChamp=True))
 
     # Récupération des questionnaires
