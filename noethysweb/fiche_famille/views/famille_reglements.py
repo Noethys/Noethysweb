@@ -40,7 +40,7 @@ def Get_ventilation(request):
         ventilation_reglement = dict_ventilations_reglement.get(prestation.pk, Decimal(0))
         montant_ventile = ventilation_anterieure + ventilation_reglement
 
-        if (prestation.montant >= Decimal(0) and montant_ventile < prestation.montant) or (prestation.montant < Decimal(0) and montant_ventile > prestation.montant) or ventilation_reglement > Decimal(0):
+        if (prestation.montant >= Decimal(0) and montant_ventile < prestation.montant) or (prestation.montant < Decimal(0) and montant_ventile > prestation.montant) or ventilation_reglement != Decimal(0):
             prestation.ventilation_anterieure = ventilation_anterieure
             prestation.ventilation_reglement = ventilation_reglement
             prestation.reste_ventilation = prestation.montant - ventilation_reglement - ventilation_anterieure

@@ -195,7 +195,7 @@
         $.each(dict_lignes, function (key, ligne) {
             total += ligne.ventilation_reglement;
         });
-        return total;
+        return total.toFixed(2);
     };
 
     function get_credit() {
@@ -238,7 +238,7 @@
     function get_resultats_json() {
         var resultats = [];
         $.each(dict_lignes, function (key, ligne) {
-            if (this.ventilation_reglement > 0) {
+            if (this.ventilation_reglement !== 0) {
                 resultats.push({"idprestation": this.idprestation, "montant": this.ventilation_reglement});
             };
         });
