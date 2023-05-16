@@ -274,7 +274,9 @@ class AdresseMail(models.Model):
         verbose_name_plural = "adresses Mail"
 
     def __str__(self):
-        return self.adresse if self.adresse else "Adresse mail"
+        if self.adresse:
+            return "%s (%s)" % (self.adresse, self.get_moteur_display())
+        return "Adresse mail"
 
     def Get_parametre(self, nom=""):
         try:
