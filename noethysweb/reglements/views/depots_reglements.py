@@ -35,7 +35,7 @@ class Liste(Page, crud.Liste):
     model = Depot
 
     def get_queryset(self):
-        return Depot.objects.filter(self.Get_filtres("Q"))
+        return Depot.objects.filter(self.Get_filtres("Q")).annotate(nbre_reglements=Count("reglement"), montant_reglements=Sum("reglement__montant"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -48,18 +48,19 @@ class Liste(Page, crud.Liste):
         filtres = ["iddepot", 'verrouillage', 'date', 'nom', 'montant', 'compte', 'observations']
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         verrouillage = columns.TextColumn("Verrouillage", sources=["montant"], processor='Get_verrouillage')
+        nbre_reglements = columns.TextColumn("Nbre", sources="nbre_reglements")
+        montant_reglements = columns.TextColumn("Total", sources="montant_reglements", processor="Formate_montant")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['iddepot', 'verrouillage', 'date', 'nom', 'montant', 'compte', 'observations']
+            columns = ['iddepot', 'verrouillage', 'date', 'nom', 'nbre_reglements', 'montant_reglements', 'compte', 'observations']
             processors = {
                 "date": helpers.format_date("%d/%m/%Y"),
-                "montant": "Formate_montant",
             }
             ordering = ["date"]
 
         def Formate_montant(self, instance, **kwargs):
-            return "%0.2f %s" % (instance.montant or 0.0, utils_preferences.Get_symbole_monnaie())
+            return utils_texte.Formate_montant(instance.montant_reglements)
 
         def Get_verrouillage(self, instance, **kwargs):
             if instance.verrouillage:
