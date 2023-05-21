@@ -6,12 +6,12 @@
 from decimal import Decimal
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Sum, Count
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Depot, Reglement, FiltreListe
-from core.utils import utils_texte, utils_preferences
+from core.models import Depot, Reglement
+from core.utils import utils_texte
 from reglements.forms.depots_reglements import Formulaire
 
 
@@ -203,3 +203,13 @@ class Supprimer_plusieurs_reglements(Page, crud.Supprimer_plusieurs):
 
     def get_success_url(self):
         return reverse_lazy(self.url_consulter, kwargs={"pk": self.kwargs["iddepot"]})
+
+
+def Impression_pdf(request):
+    """ Impression du dépôt """
+    from reglements.utils import utils_impression_depot_reglements
+    impression = utils_impression_depot_reglements.Impression(titre="Dépôt de règlements", dict_donnees={"iddepot": int(request.POST.get("iddepot"))})
+    if impression.erreurs:
+        return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
+    nom_fichier = impression.Get_nom_fichier()
+    return JsonResponse({"nom_fichier": nom_fichier})
