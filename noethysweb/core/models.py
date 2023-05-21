@@ -2986,6 +2986,7 @@ class PortailPeriode(models.Model):
     choix_villes = [("TOUTES", "Toutes les villes de résidence"), ("SELECTION", "Uniquement les familles résidant sur les villes suivantes"), ("SELECTION_INVERSE", "Uniquement les familles ne résidant pas sur les villes suivantes")]
     types_villes = models.CharField(verbose_name="Filtre villes", max_length=100, choices=choix_villes, default="TOUTES")
     villes = models.CharField(verbose_name="Sélection de villes", max_length=400, blank=True, null=True)
+    mode_consultation = models.BooleanField(verbose_name="Mode consultation", default=False, help_text="Cochez cette case pour que les familles puissent uniquement consulter les réservations de la période sans pouvoir les modifier.")
 
     class Meta:
         db_table = 'portail_periodes'

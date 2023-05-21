@@ -25,6 +25,11 @@ def is_modif_allowed(date, data):
     if data["mode"] != "portail":
         return True
 
+    # Mode consultation only pour le portail
+    if "periode_reservation" in data:
+        if data["periode_reservation"].mode_consultation:
+            return False
+
     # On vérifie que la modification est autorisée sur cette date
     activite = data["selection_activite"]
     if activite.portail_reservations_limite:
