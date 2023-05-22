@@ -129,6 +129,12 @@ def Envoyer_model_mail(idmail=None, request=None):
     if not organisateur:
         organisateur = cache.get_or_set('organisateur', Organisateur.objects.filter(pk=1).first())
 
+    # Récupération de l'URL du portail
+    try:
+        url_portail = request.build_absolute_uri(reverse("portail_accueil")) if request else settings.ALLOWED_HOSTS[1]
+    except:
+        url_portail = ""
+
     # Valeurs de fusion par défaut
     valeurs_defaut = {
         "{ORGANISATEUR_NOM}": organisateur.nom,
@@ -138,7 +144,7 @@ def Envoyer_model_mail(idmail=None, request=None):
         "{ORGANISATEUR_TEL}": organisateur.tel,
         "{ORGANISATEUR_MAIL}": organisateur.mail,
         "{ORGANISATEUR_SITE}": organisateur.site,
-        "{URL_PORTAIL}": request.build_absolute_uri(reverse("portail_accueil")),
+        "{URL_PORTAIL}": url_portail,
         "{UTILISATEUR_NOM_COMPLET}": request.user.get_full_name() if request else "",
         "{UTILISATEUR_NOM}": request.user.last_name if request else "",
         "{UTILISATEUR_PRENOM}": request.user.first_name if request else "",
