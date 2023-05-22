@@ -10,6 +10,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse
 from django.template.context_processors import csrf
 from django.contrib import messages
+from django.db.models import Q, Count
 from crispy_forms.utils import render_crispy_form
 from core.views import crud
 from core.models import PortailRenseignement, Piece, TypePiece, Inscription
@@ -46,18 +47,35 @@ def Valid_form(request):
     if not form_extra.is_valid():
         return JsonResponse({"erreur": "L'un des fichiers n'est pas valide. Vérifiez que le fichier est bien de type pdf, jpg ou png."}, status=401)
 
+    # Récupération des données
+    famille = form.cleaned_data["famille"]
+    individu = form.cleaned_data["individu"]
+    activite = form.cleaned_data["activite"]
+    groupe = form_extra.cleaned_data["groupe"]
+
     # Vérifie que l'individu n'est pas déjà inscrit à cette activité
-    if Inscription.objects.filter(famille=form.cleaned_data["famille"], individu=form.cleaned_data["individu"], activite=form.cleaned_data["activite"]).exists():
+    if Inscription.objects.filter(famille=famille, individu=individu, activite=activite).exists():
         return JsonResponse({"erreur": "Cet individu est déjà inscrit à cette activité"}, status=401)
 
     # Vérifie qu'il n'y a pas déjà une demande en attente pour la même activité et le même individu
-    for demande in PortailRenseignement.objects.filter(famille=form.cleaned_data["famille"], individu=form.cleaned_data["individu"], etat="ATTENTE", code="inscrire_activite"):
-        if int(json.loads(demande.nouvelle_valeur).split(";")[0]) == form.cleaned_data["activite"].pk:
+    for demande in PortailRenseignement.objects.filter(famille=famille, individu=individu, etat="ATTENTE", code="inscrire_activite"):
+        if int(json.loads(demande.nouvelle_valeur).split(";")[0]) == activite.pk:
             return JsonResponse({"erreur": "Une demande en attente de traitement existe déjà pour cet individu et cette activité"}, status=401)
+
+    # Vérifie s'il reste de la place
+    if activite.portail_inscriptions_bloquer_si_complet:
+        places_prises = Inscription.objects.filter(activite=activite).aggregate(
+            total=Count("pk", filter=Q(statut="ok")), attente=Count("pk", filter=Q(statut="attente")),
+            total_groupe=Count("pk", filter=Q(statut="ok", groupe=groupe)), attente_groupe=Count("pk", filter=Q(statut="attente", groupe=groupe)),
+        )
+        if activite.nbre_inscrits_max and places_prises["total"] >= activite.nbre_inscrits_max:
+            return JsonResponse({"erreur": "Cette activité est déjà complète"}, status=401)
+        if groupe.nbre_inscrits_max and places_prises["total_groupe"] >= groupe.nbre_inscrits_max:
+            return JsonResponse({"erreur": "Ce groupe est déjà complet"}, status=401)
 
     # Enregistrement de la demande
     demande = form.save()
-    demande.nouvelle_valeur = json.dumps("%d;%d" % (form.cleaned_data["activite"].pk, form_extra.cleaned_data["groupe"].pk), cls=DjangoJSONEncoder)
+    demande.nouvelle_valeur = json.dumps("%d;%d" % (activite.pk, groupe.pk), cls=DjangoJSONEncoder)
     demande.save()
 
     # Enregistrement des pièces
