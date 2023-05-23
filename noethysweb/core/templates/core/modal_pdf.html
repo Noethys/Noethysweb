@@ -36,8 +36,9 @@
             ctrl.parentNode.replaceChild(clone, ctrl)
             $('#modal_pdf').modal('show');
         } else {
-            $("#download").attr("href", donnees.nom_fichier);
-            document.getElementById("download").click();
+            window.location = "{{ MEDIA_URL }}" + donnees.nom_fichier;
+            // $("#download").attr("href", donnees.nom_fichier);
+            // document.getElementById("download").click();
         }
     };
 
