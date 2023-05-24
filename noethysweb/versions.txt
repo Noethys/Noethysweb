@@ -1,3 +1,9 @@
+Version 1.1.5.6 (24/05/2023) :
+
+- Ajout du blocage des inscriptions sur le portail si activité complète
+- Correction de l'évitement de la vérification de la ventilation
+- Correction de l'ouverture des PDF sur Android
+
 Version 1.1.5.5 (22/05/2023) :
 
 - Ajout de l'impression du dépôt de règlements
