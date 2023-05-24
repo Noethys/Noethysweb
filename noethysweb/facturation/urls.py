@@ -23,22 +23,22 @@ urlpatterns = [
     path('facturation/factures_generation/<int:idfamille>', factures_generation.View.as_view(), name='factures_generation'),
     path('facturation/liste_factures', liste_factures.Liste.as_view(), name='liste_factures'),
     path('facturation/factures_supprimer_plusieurs/<str:listepk>', liste_factures.Supprimer_plusieurs.as_view(), name='factures_supprimer_plusieurs'),
-    path('facturation/factures_impression', Verifie_ventilation(factures_impression.Liste.as_view()), name='factures_impression'),
-    path('facturation/factures_email', Verifie_ventilation(factures_email.Liste.as_view()), name='factures_email'),
+    path('facturation/factures_impression', factures_impression.Liste.as_view(), name='factures_impression'),
+    path('facturation/factures_email', factures_email.Liste.as_view(), name='factures_email'),
 
     # Rappels
     path('facturation/rappels_generation', Verifie_ventilation(rappels_generation.View.as_view()), name='rappels_generation'),
     path('facturation/rappels_generation/<int:idfamille>', rappels_generation.View.as_view(), name='rappels_generation'),
     path('facturation/liste_rappels', liste_rappels.Liste.as_view(), name='liste_rappels'),
-    path('facturation/rappels_impression', Verifie_ventilation(rappels_impression.Liste.as_view()), name='rappels_impression'),
-    path('facturation/rappels_email', Verifie_ventilation(rappels_email.Liste.as_view()), name='rappels_email'),
+    path('facturation/rappels_impression', rappels_impression.Liste.as_view(), name='rappels_impression'),
+    path('facturation/rappels_email', rappels_email.Liste.as_view(), name='rappels_email'),
 
     # Attestations fiscales
     path('facturation/attestations_fiscales_generation', Verifie_ventilation(attestations_fiscales_generation.View.as_view()), name='attestations_fiscales_generation'),
     path('facturation/attestations_fiscales_generation/<int:idfamille>', attestations_fiscales_generation.View.as_view(), name='attestations_fiscales_generation'),
     path('facturation/liste_attestations_fiscales', liste_attestations_fiscales.Liste.as_view(), name='liste_attestations_fiscales'),
-    path('facturation/attestations_fiscales_impression', Verifie_ventilation(attestations_fiscales_impression.Liste.as_view()), name='attestations_fiscales_impression'),
-    path('facturation/attestations_fiscales_email', Verifie_ventilation(attestations_fiscales_email.Liste.as_view()), name='attestations_fiscales_email'),
+    path('facturation/attestations_fiscales_impression', attestations_fiscales_impression.Liste.as_view(), name='attestations_fiscales_impression'),
+    path('facturation/attestations_fiscales_email', attestations_fiscales_email.Liste.as_view(), name='attestations_fiscales_email'),
     path('facturation/attestations_fiscales_email/supprimer/<int:pk>', liste_attestations_fiscales.Supprimer.as_view(), name='attestations_fiscales_supprimer'),
     path('facturation/attestations_fiscales_supprimer_plusieurs/<str:listepk>', liste_attestations_fiscales.Supprimer_plusieurs.as_view(), name='attestations_fiscales_supprimer_plusieurs'),
 
@@ -73,7 +73,7 @@ urlpatterns = [
     path('facturation/liste_prestations', liste_prestations.Liste.as_view(), name='liste_prestations'),
     path('facturation/prestations_supprimer_plusieurs/<str:listepk>', liste_prestations.Supprimer_plusieurs.as_view(), name='prestations_supprimer_plusieurs'),
     path('facturation/liste_deductions', liste_deductions.Liste.as_view(), name='liste_deductions'),
-    path('facturation/liste_soldes', Verifie_ventilation(liste_soldes.Liste.as_view()), name='liste_soldes'),
+    path('facturation/liste_soldes', liste_soldes.Liste.as_view(), name='liste_soldes'),
     path('facturation/synthese_prestations', synthese_prestations.View.as_view(), name='synthese_prestations'),
     path('facturation/edition_prestations', edition_prestations.View.as_view(), name='edition_prestations'),
     path('facturation/recalculer_prestations', recalculer_prestations.View.as_view(), name='recalculer_prestations'),

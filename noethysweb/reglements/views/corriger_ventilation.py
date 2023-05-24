@@ -3,15 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy
-from core.models import Famille
-from core.views.base import CustomView
-from django.views.generic import TemplateView
-from reglements.utils import utils_ventilation
+import json
 from django.shortcuts import render
 from django.contrib import messages
-import json
-
+from django.views.generic import TemplateView
+from core.models import Famille
+from core.views.base import CustomView
+from reglements.utils import utils_ventilation
 
 
 class View(CustomView, TemplateView):

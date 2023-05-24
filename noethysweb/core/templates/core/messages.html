@@ -3,7 +3,7 @@
      <script>
         toastr.options = {"progressBar": false, "preventDuplicates": true};
         {% for message in messages %}
-            toastr.{{ message.tags }}("{{ message }}");
+            {% if message.tags %}toastr.{{ message.tags }}("{{ message }}");{% endif %}
         {% endfor %}
     </script>
 
