@@ -1067,7 +1067,7 @@ class FactureRegie(models.Model):
     nom = models.CharField(verbose_name="Nom", max_length=300)
     numclitipi = models.CharField(verbose_name="Numéro de client TIPI", max_length=300)
     email_regisseur = models.EmailField(verbose_name="Email du régisseur", max_length=300)
-    compte_bancaire = models.ForeignKey(CompteBancaire, verbose_name="Compte bancaire associé", on_delete=models.PROTECT)
+    compte_bancaire = models.ForeignKey(CompteBancaire, verbose_name="Compte bancaire associé", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'factures_regies'
