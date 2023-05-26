@@ -50,13 +50,15 @@ class Formulaire(FormulaireBase, ModelForm):
         liste_adresses_existantes = []
         liste_adresses_autres = []
         if famille.email_factures:
-            liste_adresses = famille.email_factures_adresses.split("##")
-            for adresse in liste_adresses:
-                id, categorie, adresse_manuelle = adresse.split(";")
-                if id:
-                    liste_adresses_existantes.append(adresse)
-                else:
-                    liste_adresses_autres.append(adresse_manuelle)
+            if "##" in famille.email_factures_adresses:
+                liste_adresses = famille.email_factures_adresses.split("##")
+                for adresse in liste_adresses:
+                    print("adresse=", adresse)
+                    id, categorie, adresse_manuelle = adresse.split(";")
+                    if id:
+                        liste_adresses_existantes.append(adresse)
+                    else:
+                        liste_adresses_autres.append(adresse_manuelle)
 
         self.fields["adresses_individus"].initial = liste_adresses_existantes
         self.fields["adresses_autres"].initial = ";".join(liste_adresses_autres)
@@ -88,7 +90,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
             # Vérifie qu'au moins une adresse a été saisie
             if not liste_adresses:
-                self.add_error("activation", "Vous avez activé le service mais sans sélectionner d'adresse Email de destination.")
+                self.add_error("email_factures", "Vous avez activé le service mais sans sélectionner d'adresse Email de destination.")
                 return
 
             # Assemblage de toutes les adresses mail
