@@ -72,7 +72,7 @@ def Get_prestations(cleaned_data):
     # Regroupement des prestations par label
     dict_prestations = {}
     for prestation in liste_prestations:
-        if not cleaned_data["date_naiss_min"] or prestation.individu.date_naiss >= cleaned_data["date_naiss_min"]:
+        if not cleaned_data["date_naiss_min"] or (prestation.individu.date_naiss and prestation.individu.date_naiss >= cleaned_data["date_naiss_min"]):
             if prestation.label not in dict_prestations:
                 dict_prestations[prestation.label] = {"activite__nom": prestation.activite.nom, "idactivite": prestation.activite_id, "nbre": 0,
                                                      "total": decimal.Decimal(0), "regle": decimal.Decimal(0), "solde": decimal.Decimal(0)}
@@ -124,7 +124,7 @@ def Get_attestations_fiscales(cleaned_data={}, selection_prestations={}):
     # Regroupement des prestations par label
     dict_attestations = {}
     for prestation in liste_prestations:
-        if not cleaned_data["date_naiss_min"] or prestation.individu.date_naiss >= cleaned_data["date_naiss_min"]:
+        if not cleaned_data["date_naiss_min"] or (prestation.individu.date_naiss and prestation.individu.date_naiss >= cleaned_data["date_naiss_min"]):
             if prestation.famille not in dict_attestations:
                 dict_attestations[prestation.famille] = {"individus": {}, "activites": [], "total": decimal.Decimal(0), "regle": decimal.Decimal(0), "solde": decimal.Decimal(0)}
             if prestation.individu not in dict_attestations[prestation.famille]["individus"]:
