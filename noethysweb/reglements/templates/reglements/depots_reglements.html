@@ -68,11 +68,14 @@
 
         // Impression du PDF
         function impression_pdf() {
+            var table = $('.datatable').DataTable()
             $.ajax({
                 type: "POST",
                 url: "{% url 'ajax_depots_reglements_impression_pdf' %}",
                 data: {
                     iddepot: {{ depot.pk }},
+                    tri_colonne: $(table.column(table.order()[0][0]).header()).data("code"),
+                    tri_sens: table.order()[0][1],
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                 },
                 datatype: "json",

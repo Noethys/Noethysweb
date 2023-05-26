@@ -15,9 +15,20 @@ from core.utils import utils_impression, utils_texte
 
 class Impression(utils_impression.Impression):
     def Draw(self):
-        # Importation du dépôt et des règlements
+        # Importation du dépôt
         depot = Depot.objects.select_related("compte").get(pk=self.dict_donnees["iddepot"])
-        reglements = Reglement.objects.select_related("famille", "mode", "emetteur", "payeur").filter(depot=depot).order_by("date")
+
+        # Recherche du tri de la liste
+        tri_colonne = self.dict_donnees["tri_colonne"]
+        if tri_colonne == "mode": tri = "mode__label"
+        elif tri_colonne == "famille": tri = "famille__nom"
+        elif tri_colonne == "payeur": tri = "payeur__nom"
+        else: tri = tri_colonne
+        if self.dict_donnees["tri_sens"] == "desc":
+            tri = "-" + tri
+
+        # Importation des règlements
+        reglements = Reglement.objects.select_related("famille", "mode", "emetteur", "payeur").filter(depot=depot).order_by(tri)
 
         # Préparation des polices
         style_defaut = ParagraphStyle(name="defaut", fontName="Helvetica", fontSize=7, spaceAfter=0, leading=9)

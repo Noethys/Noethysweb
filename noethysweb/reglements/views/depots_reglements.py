@@ -208,7 +208,8 @@ class Supprimer_plusieurs_reglements(Page, crud.Supprimer_plusieurs):
 def Impression_pdf(request):
     """ Impression du dépôt """
     from reglements.utils import utils_impression_depot_reglements
-    impression = utils_impression_depot_reglements.Impression(titre="Dépôt de règlements", dict_donnees={"iddepot": int(request.POST.get("iddepot"))})
+    dict_donnees = {"iddepot": int(request.POST.get("iddepot")), "tri_colonne": request.POST.get("tri_colonne"), "tri_sens": request.POST.get("tri_sens")}
+    impression = utils_impression_depot_reglements.Impression(titre="Dépôt de règlements", dict_donnees=dict_donnees)
     if impression.erreurs:
         return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
     nom_fichier = impression.Get_nom_fichier()
