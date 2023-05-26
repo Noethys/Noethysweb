@@ -130,6 +130,7 @@ class View(CustomView, TemplateView):
         liste_lignes = []
 
         # Mémorisation des colonnes
+        listePeriodes.sort()
         dictColonnes = {}
         index = 1
         for periode in listePeriodes:
