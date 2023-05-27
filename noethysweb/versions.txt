@@ -1,3 +1,14 @@
+Version 1.1.5.7 (27/05/2023) :
+
+- Ajout des périodes prédéfinies au sélecteur de période
+- Ajout du tri dans l'édition des règlements d'un dépôt
+- Optimisation de l'affichage de la synthèse des impayés
+- Correction du compte obligatoire dans la régie
+- Correction du filtre rapide sur le choix des individus dans l'éditeur emails
+- Correction de l'activation des abonnements services internet
+- Correction de la génération des attestations fiscales si individu sans date de naissance
+- Correction de l'ordre des colonnes dans la synthèse des impayés
+
 Version 1.1.5.6 (24/05/2023) :
 
 - Ajout du blocage des inscriptions sur le portail si activité complète
