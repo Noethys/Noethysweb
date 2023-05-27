@@ -49,9 +49,9 @@
 
                     <table
                         id="table"
-{#                        data-height="700"#}
                         data-show-footer='true'
                         data-tree-show-field='col0'
+                        class="table table-sm"
                     >
                         <thead>
                             <tr>
@@ -80,16 +80,14 @@
                             if (colonne === "col0") {return "Total"}
                             var total = 0;
                             items.forEach(function(item) {
-                                if ($.isNumeric(item[colonne]) && (item.regroupement === false)) {
+                                if ($.isNumeric(item[colonne]) && (item.regroupement === true)) {
                                     total = total + item[colonne];
                                 };
                             });
                             return total.toFixed(2) + " €";
                         };
                         function formate_case(value, row, index) {
-                            if (row.regroupement === true) {
-                                return {classes: 'case_regroupement'};
-                            };
+                            {% if afficher_detail %}if (row.regroupement === true) {return {classes: 'case_regroupement'}}{% endif %}
                             return {};
                         };
                         function formate_montant(value, row, index) {

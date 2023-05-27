@@ -34,6 +34,7 @@ class View(CustomView, TemplateView):
             "form_parametres": form,
             "liste_colonnes": liste_colonnes,
             "liste_lignes": json.dumps(liste_lignes),
+            "afficher_detail": form.cleaned_data["afficher_detail"],
         }
         return self.render_to_response(self.get_context_data(**context))
 
@@ -192,47 +193,49 @@ class View(CustomView, TemplateView):
 
 
             # ----------------- Branches de niveau 2 -------------
-            if parametres["regroupement_lignes"] == "activites":
-                mode2 = "familles"
-            else:
-                mode2 = "activites"
 
-            listeLabels2 = []
-            if parametres["regroupement_lignes"] == "activites":
-                for periode, dictPeriode in dictResultats["activites"][ID1]["periodes"].items():
-                    for IDfamille, impayes in dictPeriode["familles"].items():
-                        if impayes > Decimal(0):
-                            label = GetNomFamille(IDfamille)
-                            if (label, IDfamille) not in listeLabels2:
-                                listeLabels2.append((label, IDfamille))
-            else:
-                for periode, dictPeriode in dictResultats["familles"][ID1]["periodes"].items():
-                    for IDactivite, impayes in dictPeriode["activites"].items():
-                        if impayes > Decimal(0):
-                            label = GetNomActivite(IDactivite)
-                            if (label, IDactivite) not in listeLabels2:
-                                listeLabels2.append((label, IDactivite))
-            listeLabels2.sort()
-
-            for label2, ID2 in listeLabels2:
-                id_detail = "detail_%d" % ID1
-                ligne = {"id": id_detail, "pid": id_regroupement, "col0": label2, "regroupement": False}
+            if parametres["afficher_detail"]:
                 if parametres["regroupement_lignes"] == "activites":
-                    ligne.update({"type": "famille", "IDfamille": ID2})
+                    mode2 = "familles"
+                else:
+                    mode2 = "activites"
 
-                # Colonnes périodes
-                totalLigne = Decimal(0)
-                for periode in listePeriodes:
-                    if periode in dictResultats[parametres["regroupement_lignes"]][ID1]["periodes"]:
-                        if ID2 in dictResultats[parametres["regroupement_lignes"]][ID1]["periodes"][periode][mode2]:
-                            valeur = dictResultats[parametres["regroupement_lignes"]][ID1]["periodes"][periode][mode2][ID2]
-                            totalLigne += valeur
-                            ligne[dictColonnes[periode]] = float(valeur)
+                listeLabels2 = []
+                if parametres["regroupement_lignes"] == "activites":
+                    for periode, dictPeriode in dictResultats["activites"][ID1]["periodes"].items():
+                        for IDfamille, impayes in dictPeriode["familles"].items():
+                            if impayes > Decimal(0):
+                                label = GetNomFamille(IDfamille)
+                                if (label, IDfamille) not in listeLabels2:
+                                    listeLabels2.append((label, IDfamille))
+                else:
+                    for periode, dictPeriode in dictResultats["familles"][ID1]["periodes"].items():
+                        for IDactivite, impayes in dictPeriode["activites"].items():
+                            if impayes > Decimal(0):
+                                label = GetNomActivite(IDactivite)
+                                if (label, IDactivite) not in listeLabels2:
+                                    listeLabels2.append((label, IDactivite))
+                listeLabels2.sort()
 
-                # Colonne Total
-                ligne[dictColonnes["total"]] = float(totalLigne)
+                for label2, ID2 in listeLabels2:
+                    id_detail = "detail_%d" % ID1
+                    ligne = {"id": id_detail, "pid": id_regroupement, "col0": label2, "regroupement": False}
+                    if parametres["regroupement_lignes"] == "activites":
+                        ligne.update({"type": "famille", "IDfamille": ID2})
 
-                liste_lignes.append(ligne)
+                    # Colonnes périodes
+                    totalLigne = Decimal(0)
+                    for periode in listePeriodes:
+                        if periode in dictResultats[parametres["regroupement_lignes"]][ID1]["periodes"]:
+                            if ID2 in dictResultats[parametres["regroupement_lignes"]][ID1]["periodes"][periode][mode2]:
+                                valeur = dictResultats[parametres["regroupement_lignes"]][ID1]["periodes"][periode][mode2][ID2]
+                                totalLigne += valeur
+                                ligne[dictColonnes[periode]] = float(valeur)
+
+                    # Colonne Total
+                    ligne[dictColonnes["total"]] = float(totalLigne)
+
+                    liste_lignes.append(ligne)
 
             id_regroupement += 1
 
