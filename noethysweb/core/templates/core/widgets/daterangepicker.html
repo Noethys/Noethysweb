@@ -9,11 +9,11 @@
             {% if afficher_periodes_predefinies %}
             ranges: {
                 "Aujourd'hui": [moment(), moment()],
-                'Cette semaine': [moment().startOf('isoweek'), moment().endOf('isoweek')],
-                'Les 7 derniers jours': [moment().subtract(6, 'days'), moment()],
-                'Les 30 derniers jours': [moment().subtract(29, 'days'), moment()],
-                'Ce mois': [moment().startOf('month'), moment().endOf('month')],
-                'Le mois dernier': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                "Cette semaine": [moment().startOf('isoweek'), moment().endOf('isoweek')],
+                "Ce mois": [moment().startOf('month'), moment().endOf('month')],
+                "Le mois dernier": [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                "Cette année": [moment().startOf('year'), moment().endOf('year')],
+                "L'année dernière": [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
             },
             {% endif %}
             locale: {

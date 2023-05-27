@@ -417,7 +417,7 @@ class DateRangePickerWidget(Widget):
             value = "%s - %s" % (date_debut, date_fin)
         context = dict(self.attrs.items())
         attrs["auto_application"] = "true" if attrs.get("auto_application", False) else "false"
-        attrs["afficher_periodes_predefinies"] = attrs.get("afficher_periodes_predefinies", False)
+        attrs["afficher_periodes_predefinies"] = attrs.get("afficher_periodes_predefinies", True)
         if attrs is not None:
             context.update(attrs)
         context['name'] = name
