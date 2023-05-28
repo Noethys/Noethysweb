@@ -2755,6 +2755,7 @@ class Historique(models.Model):
     classe = models.CharField(verbose_name="Classe objet", max_length=300, blank=True, null=True)
     portail = models.BooleanField(verbose_name="Portail", default=False)
     date_lecture = models.DateTimeField(verbose_name="Date de lecture", blank=True, null=True)
+    activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         db_table = 'historique'

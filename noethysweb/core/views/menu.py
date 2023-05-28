@@ -196,6 +196,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_portail.Add(code="messagerie_portail", titre="Messages non lus à traiter", icone="file-text-o")
     menu_portail.Add(code="messages_portail_liste", titre="Messages du portail", icone="file-text-o")
     menu_portail.Add(code="demandes_portail_liste", titre="Historique du portail", icone="file-text-o")
+    menu_portail.Add(code="suivi_reservations", titre="Suivi des réservations", icone="file-text-o")
 
     # Dépannage
     menu_depannage = menu_outils.Add(titre="Dépannage")

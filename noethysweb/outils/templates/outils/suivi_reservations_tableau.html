@@ -1,0 +1,36 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+<tbody>
+    {% for historique in data_suivi_reservations %}
+        <tr>
+            <td>
+                {{ historique.horodatage|date:"d/m/Y H:i" }}
+            </td>
+            <td>
+                {{ historique.individu.Get_nom }}
+            </td>
+            <td>
+                {% if "Ajout" in historique.titre %}<i class="fa fa-plus text-success margin-r-5"></i>{% endif %}
+                {% if "Suppression" in historique.titre %}<i class="fa fa-minus text-danger margin-r-5"></i>{% endif %}
+                {{ historique.detail }}
+            </td>
+            <td style="text-align: right;">
+                <a type="button" class="btn-xs" href="{% url 'famille_resume' idfamille=historique.famille_id %}" target="_blank" title="Ouvrir la fiche famille"><i class="fa fa-fw fa-users"></i></a>
+            </td>
+        </tr>
+    {% endfor %}
+</tbody>
+
+<script>
+    var activites_reservations_json = JSON.parse('{{ activites_reservations_json|escapejs }}');
+</script>
+
+<style>
+    #table-suivi_reservations td {
+        padding: 6px !important;
+        text-align: left;
+    }
+</style>

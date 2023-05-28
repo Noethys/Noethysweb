@@ -335,7 +335,7 @@ def Save_grille(request=None, donnees={}):
             liste_nouvelles_prestations.append(prestation)
 
             liste_historique.append({"titre": "Ajout d'une prestation", "detail": "%s du %s" % (dict_prestation["label"], utils_dates.ConvertDateToFR(dict_prestation["date"])), "utilisateur": request.user if request else None,
-                                     "famille_id": dict_prestation["famille"], "individu_id": dict_prestation["individu"], "objet": "Prestation", "idobjet": prestation.pk, "classe": "Prestation"})
+                                     "famille_id": dict_prestation["famille"], "individu_id": dict_prestation["individu"], "objet": "Prestation", "idobjet": prestation.pk, "classe": "Prestation", "activite_id": dict_prestation["activite"]})
 
             # Mémorise la correspondante du nouvel IDprestation avec l'ancien IDprestation
             dict_idprestation[IDprestation] = prestation.pk
@@ -344,7 +344,7 @@ def Save_grille(request=None, donnees={}):
             for dict_aide in dict_prestation["aides"]:
                 deduction = Deduction.objects.create(date=dict_prestation["date"], label=dict_aide["label"], aide_id=dict_aide["aide"], famille_id=dict_prestation["famille"], prestation=prestation, montant=dict_aide["montant"])
                 liste_historique.append({"titre": "Ajout d'une déduction", "detail": "%s du %s" % (dict_aide["label"], utils_dates.ConvertDateToFR(dict_prestation["date"])), "utilisateur": request.user if request else None,
-                                         "famille_id": dict_prestation["famille"], "individu_id": dict_prestation["individu"], "objet": "Déduction", "idobjet": deduction.pk, "classe": "Deduction"})
+                                         "famille_id": dict_prestation["famille"], "individu_id": dict_prestation["individu"], "objet": "Déduction", "idobjet": deduction.pk, "classe": "Deduction", "activite_id": dict_prestation["activite"]})
 
         # Modification de prestations
         if "-" not in IDprestation:
@@ -375,7 +375,7 @@ def Save_grille(request=None, donnees={}):
                 ))
                 logger.debug("Consommation à ajouter : " + str(dict_conso))
                 liste_historique.append({"titre": "Ajout d'une consommation", "detail": "%s du %s (%s)" % (dict_unites[dict_conso["unite"]].nom, utils_dates.ConvertDateToFR(dict_conso["date"]), utils_consommations.Get_label_etat(dict_conso["etat"])), "utilisateur": request.user if request else None,
-                                         "famille_id": dict_conso["famille"], "individu_id": dict_conso["individu"], "objet": "Consommation", "idobjet": None, "classe": "Consommation"})
+                                         "famille_id": dict_conso["famille"], "individu_id": dict_conso["individu"], "objet": "Consommation", "idobjet": None, "classe": "Consommation", "activite_id": dict_conso["activite"]})
 
                 # Mode pointeuse pour récupérer l'idconso
                 if donnees.get("mode", None) == "pointeuse":
@@ -387,7 +387,7 @@ def Save_grille(request=None, donnees={}):
                 dict_modifications[dict_conso["pk"]] = dict_conso
                 logger.debug("Consommation à modifier : " + str(dict_conso))
                 liste_historique.append({"titre": "Modification d'une consommation", "detail": "%s du %s (%s)" % (dict_unites[dict_conso["unite"]].nom, utils_dates.ConvertDateToFR(dict_conso["date"]), utils_consommations.Get_label_etat(dict_conso["etat"])), "utilisateur": request.user if request else None,
-                                         "famille_id": dict_conso["famille"], "individu_id": dict_conso["individu"], "objet": "Consommation", "idobjet": dict_conso["pk"], "classe": "Consommation"})
+                                         "famille_id": dict_conso["famille"], "individu_id": dict_conso["individu"], "objet": "Consommation", "idobjet": dict_conso["pk"], "classe": "Consommation", "activite_id": dict_conso["activite"]})
 
     # Récupère la liste des conso à modifier
     liste_modifications = []
@@ -421,7 +421,7 @@ def Save_grille(request=None, donnees={}):
         texte_notification.append("%s suppression%s" % (len(donnees["suppressions"]["consommations"]), "s" if len(donnees["suppressions"]["consommations"]) > 1 else ""))
         for conso in liste_conso_suppr:
             liste_historique.append({"titre": "Suppression d'une consommation", "detail": "%s du %s (%s)" % (conso.unite.nom, utils_dates.ConvertDateToFR(conso.date), conso.get_etat_display()),
-                                     "utilisateur": request.user if request else None, "famille_id": conso.inscription.famille_id, "individu_id": conso.individu_id, "objet": "Consommation", "idobjet": conso.pk, "classe": "Consommation"})
+                                     "utilisateur": request.user if request else None, "famille_id": conso.inscription.famille_id, "individu_id": conso.individu_id, "objet": "Consommation", "idobjet": conso.pk, "classe": "Consommation", "activite_id": conso.activite_id})
 
     # Notification d'enregistrement des consommations
     # if texte_notification and request:
@@ -445,7 +445,7 @@ def Save_grille(request=None, donnees={}):
 
         for prestation in liste_prestations_suppr:
             liste_historique.append({"titre": "Suppression d'une prestation", "detail": "%s du %s" % (prestation.label, utils_dates.ConvertDateToFR(prestation.date)),
-                                     "utilisateur": request.user if request else None, "famille_id": prestation.famille_id, "individu_id": prestation.individu_id, "objet": "Prestation", "idobjet": prestation.pk, "classe": "Prestation"})
+                                     "utilisateur": request.user if request else None, "famille_id": prestation.famille_id, "individu_id": prestation.individu_id, "objet": "Prestation", "idobjet": prestation.pk, "classe": "Prestation", "activite_id": prestation.activite_id})
 
     # ------------------ TRAITEMENT DES TARIFS SELON NBRE INDIVIDUS PRESENTS -------------------
 
