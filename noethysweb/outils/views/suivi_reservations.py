@@ -71,7 +71,8 @@ def Get_data(parametres={}, request=None):
     liste_activites = Activite.objects.filter(conditions)
 
     horodatage_min = datetime.datetime.now() - datetime.timedelta(hours=int(parametres.get("affichage", 12)))
-    conditions = Q(classe="Consommation") & Q(horodatage__gte=horodatage_min) & (Q(titre__icontains="Ajout") | Q(titre__icontains="Suppression")) & Q(activite__in=liste_activites)
+    conditions = Q(classe="Consommation") & Q(horodatage__gte=horodatage_min) & Q(utilisateur__categorie="famille")
+    conditions &= (Q(titre__icontains="Ajout") | Q(titre__icontains="Suppression")) & Q(activite__in=liste_activites)
     resultats = Historique.objects.select_related("famille", "individu").filter(conditions).order_by("-pk")
     return resultats
 
