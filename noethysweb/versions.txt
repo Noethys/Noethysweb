@@ -1,3 +1,7 @@
+Version 1.1.5.9 (28/05/2023) :
+
+- Correction du suivi des réservations
+
 Version 1.1.5.8 (28/05/2023) :
 
 - Ajout du suivi des réservations du portail dans le menu Outils
