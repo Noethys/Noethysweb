@@ -446,7 +446,7 @@ class View(CustomView, TemplateView):
         # Importation de la préfacturation des périodes
         total_periodes_impayees = decimal.Decimal(0)
         liste_finale_periodes = []
-        if context["parametres_portail"].get("paiement_ligne_systeme", None):
+        if True:#context["parametres_portail"].get("paiement_ligne_systeme", None):
 
             # Récupération des périodes de réservations
             liste_dates_extremes = []
@@ -490,7 +490,7 @@ class View(CustomView, TemplateView):
         # Importation de la préfacturation des cotisations
         total_cotisations_impayees = decimal.Decimal(0)
         liste_finale_cotisations = []
-        if context["parametres_portail"].get("paiement_ligne_systeme", None):
+        if True:#context["parametres_portail"].get("paiement_ligne_systeme", None):
             ventilations = Ventilation.objects.values("prestation").filter(famille=self.request.user.famille, prestation__cotisation__isnull=False).annotate(total=Sum("montant"))
             dict_ventilations = {ventilation["prestation"]: ventilation["total"] for ventilation in ventilations}
             for prestation in Prestation.objects.select_related("cotisation").filter(famille=self.request.user.famille, cotisation__isnull=False, facture__isnull=True, cotisation__unite_cotisation__prefacturation=True):

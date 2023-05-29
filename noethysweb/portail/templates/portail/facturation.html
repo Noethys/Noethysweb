@@ -26,6 +26,53 @@
         <div class="alert alert-danger">
             <i class='fa fa-exclamation-triangle margin-r-5'></i>{{ texte_impayes|safe }}
         </div>
+
+        {% embed 'core/box.html' with box_titre=True %}
+            {% block box_theme %}card-outline card-danger{% endblock %}
+            {% block box_titre %}Récapitulatif des impayés{% endblock %}
+            {% block card_body_classe %}p-0{% endblock %}
+            {% block box_contenu %}
+                <div>
+                    <table class="table-facturation table mb-0">
+                        <tbody>
+                            <tr>
+                                <th>Intitulé</th>
+                                <th>Montant</th>
+                                <th>Déjà réglé</th>
+                                <th>Reste à régler</th>
+                            </tr>
+
+                            {% for facture in liste_factures_impayees %}
+                                <tr>
+                                    <td>Facture n°{{ facture.numero }}</td>
+                                    <td>{{ facture.total|montant }}</td>
+                                    <td>{{ facture.Get_regle_actuel|montant }}</td>
+                                    <td><span class="badge-pill bg-{% if facture.en_cours_paiement %}yellow{% elif facture.solde_actuel > 0.0 %}red{% else %}green{% endif %}">{{ facture.solde_actuel|montant }}</span></td>
+                                </tr>
+                            {% endfor %}
+
+                            {% for periode in liste_periodes_prefacturation %}
+                                <tr>
+                                    <td>{{ periode.nom }}</td>
+                                    <td>{{ periode.total|montant }}</td>
+                                    <td>{{ periode.regle|montant }}</td>
+                                    <td><span class="badge-pill bg-{% if periode.solde > 0.0 %}red{% else %}green{% endif %}">{{ periode.solde|montant }}</span></td>
+                                </tr>
+                            {% endfor %}
+
+                            {% for prestation_cotisation in liste_cotisations_prefacturation %}
+                                <tr>
+                                    <td>{{ prestation_cotisation.label }}</td>
+                                    <td>{{ prestation_cotisation.total|montant }}</td>
+                                    <td>{{ prestation_cotisation.regle|montant }}</td>
+                                    <td><span class="badge-pill bg-{% if prestation_cotisation.solde > 0.0 %}red{% else %}green{% endif %}">{{ prestation_cotisation.solde|montant }}</span></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endblock box_contenu %}
+        {% endembed %}
     {% endif %}
 
     {# Paiement en ligne #}
@@ -216,7 +263,7 @@
             {# Liste des factures #}
             <div style="display: block;overflow-x: auto;white-space: nowrap;">
                 {% if liste_factures %}
-                    <table class="table projects">
+                    <table class="table projects mb-0">
                         <thead>
                             <tr class="text-center">
                                 <th>Du</th>
