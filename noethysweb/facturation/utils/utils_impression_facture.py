@@ -3,29 +3,16 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, datetime
+import logging
 logger = logging.getLogger(__name__)
-from core.utils import utils_dates, utils_impression, utils_preferences
 from decimal import Decimal
 from operator import itemgetter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
-# from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, NextPageTemplate
 from reportlab.platypus import Paragraph, Spacer, Table, TableStyle, PageBreak
-# from reportlab.platypus.flowables import ParagraphAndImage, Image
-# from reportlab.platypus.frames import Frame, ShowBoundaryValue
-# from reportlab.lib.pagesizes import A4
-# from reportlab.lib.units import inch, cm, mm
-# from reportlab.lib.utils import ImageReader
-# from reportlab.lib import colors
-# from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-# from reportlab.pdfgen.canvas import Canvas
-# from reportlab.graphics.barcode import code39, qr
-# from reportlab.graphics.shapes import Drawing
-# from reportlab.graphics import renderPDF
-from reportlab.platypus.flowables import DocAssign, Flowable
+from reportlab.platypus.flowables import DocAssign
 from core.models import MessageFacture
-
+from core.utils import utils_dates, utils_impression, utils_preferences
 
 
 def PeriodeComplete(mois, annee):
@@ -211,7 +198,7 @@ class Impression(utils_impression.Impression):
                         listeIDactivite = []
                         for IDactivite, dictActivites in dictIndividus["activites"].items():
                             listeIDactivite.append((dictActivites["texte"], IDactivite, dictActivites))
-                        listeIDactivite.sort() 
+                        listeIDactivite = sorted(listeIDactivite, key=itemgetter(0))
                         
                         for texteActivite, IDactivite, dictActivites in listeIDactivite:
 
