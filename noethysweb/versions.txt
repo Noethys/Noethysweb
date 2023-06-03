@@ -1,3 +1,8 @@
+Version 1.1.6.1 (03/06/2023) :
+
+- Ajout d'une colonne solde dans la liste des inscriptions à une activité
+- Correction du tri des activités dans l'impression d'une facture
+
 Version 1.1.6.0 (29/05/2023) :
 
 - Ajout du récapitulatif des impayés sur le portail
