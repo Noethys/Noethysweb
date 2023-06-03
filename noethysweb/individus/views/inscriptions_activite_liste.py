@@ -3,13 +3,14 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import datetime
+import datetime, decimal
 from django.urls import reverse_lazy, reverse
+from django.db.models import Q, Sum
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Inscription, Activite, Rattachement, Cotisation, Groupe
+from core.models import Inscription, Activite, Rattachement, Cotisation, Groupe, Prestation, Ventilation
+from core.utils import utils_texte
 from fiche_individu.forms.individu_inscriptions import Formulaire
-from django.db.models import Q
 
 
 class Page(crud.Page):
@@ -99,11 +100,12 @@ class Liste(Page, crud.Liste):
         portable = columns.CompoundColumn("Portable", sources=["individu__tel_mobile"])
         tel_parents = columns.TextColumn("Tél responsables", sources=None, processor="Get_tel_parents")
         num_cotisation = columns.TextColumn("N° adhésion", sources=None, processor="Get_num_cotisation")
+        solde = columns.TextColumn("Solde", sources=[], processor="Get_solde")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idinscription", "date_debut", "date_fin", "individu", "date_naiss", "age", "mail", "portable", "famille", "tel_parents", "groupe", "categorie_tarif", "individu_ville", "famille_ville", "num_cotisation", "statut"]
-            hidden_columns = ["idinscription", "date_debut", "date_fin", "mail", "famille", "categorie_tarif", "individu_ville", "famille_ville", "num_cotisation"]
+            columns = ["check", "idinscription", "date_debut", "date_fin", "individu", "date_naiss", "age", "mail", "portable", "famille", "tel_parents", "groupe", "categorie_tarif", "individu_ville", "famille_ville", "num_cotisation", "statut", "solde"]
+            hidden_columns = ["idinscription", "date_debut", "date_fin", "mail", "famille", "categorie_tarif", "individu_ville", "famille_ville", "num_cotisation", "solde"]
             page_length = 100
             processors = {
                 "date_debut": helpers.format_date("%d/%m/%Y"),
@@ -178,6 +180,24 @@ class Liste(Page, crud.Liste):
 
             return None
 
+        def Get_solde(self, instance, *args, **kwargs):
+            # Calcul du solde de l'activité pour l'individu
+            if not hasattr(self, "dict_soldes"):
+                dict_ventilations = {temp["prestation_id"]: temp["total"] for temp in Ventilation.objects.values("prestation_id").filter(prestation__activite_id=instance.activite_id).annotate(total=Sum("montant"))}
+                self.dict_soldes = {}
+                for prestation in Prestation.objects.values("famille_id", "individu_id", "pk").filter(activite_id=instance.activite_id).annotate(total=Sum("montant")):
+                    key = (prestation["famille_id"], prestation["individu_id"])
+                    self.dict_soldes.setdefault(key, decimal.Decimal(0))
+                    self.dict_soldes[key] += dict_ventilations.get(prestation["pk"], decimal.Decimal(0)) - prestation["total"]
+                del dict_ventilations
+            solde = self.dict_soldes.get((instance.famille_id, instance.individu_id), decimal.Decimal(0))
+            if solde == decimal.Decimal(0):
+                couleur = "success"
+            elif solde > decimal.Decimal(0):
+                couleur = "info"
+            else:
+                couleur = "danger"
+            return """<span class='badge badge-%s'>%s</span>""" % (couleur, utils_texte.Formate_montant(solde))
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
