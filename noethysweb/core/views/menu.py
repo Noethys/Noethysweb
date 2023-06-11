@@ -82,7 +82,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_facturation.Add(code="prefixes_factures_liste", titre="Préfixes de factures", icone="file-text-o")
     menu_facturation.Add(code="messages_factures_liste", titre="Messages de factures", icone="file-text-o")
     menu_facturation.Add(code="regies_liste", titre="Régies", icone="file-text-o")
-    # menu_facturation.Add(code="perceptions_liste", titre="Perceptions", icone="file-text-o")
+    menu_facturation.Add(code="perceptions_liste", titre="Perceptions", icone="file-text-o")
 
     # Scolarité
     menu_scolarite = menu_parametrage.Add(titre="Scolarité")
