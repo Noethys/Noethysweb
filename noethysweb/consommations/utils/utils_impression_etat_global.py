@@ -26,10 +26,10 @@ class Unite():
 
 
 def FormateValeur(valeur, mode="decimal"):
-    heures = (valeur.days * 24) + (valeur.seconds / 3600)
+    heures = int((valeur.days * 24) + (valeur.seconds / 3600))
     minutes = valeur.seconds % 3600 / 60
     if mode == "decimal":
-        minDecimal = int(minutes) * 100 / 60
+        minDecimal = int(int(minutes) * 100 / 60)
         return float("%s.%s" % (heures, minDecimal))
     if mode == "horaire":
         return "%dh%02d" % (heures, minutes)
