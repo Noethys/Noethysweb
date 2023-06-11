@@ -46,6 +46,10 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.field_class = 'col-md-10'
 
         # Affichage
+        self.fields["affichage_date_debut"].widget.attrs.update({"autocomplete": "off"})
+        self.fields["affichage_date_fin"].widget.attrs.update({"autocomplete": "off"})
+
+        # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{{ view.get_success_url }}"),
             Hidden('activite', value=idactivite),

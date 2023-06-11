@@ -56,16 +56,25 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ['idperiode', 'date_debut', 'date_fin', 'nom']
+        affichage = columns.DisplayColumn("Affichage", sources="affichage_date_debut", processor='Get_affichage')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idperiode', 'date_debut', 'date_fin', 'nom']
+            columns = ['idperiode', 'date_debut', 'date_fin', 'nom', 'affichage']
             ordering = ['date_debut']
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
             }
+
+        def Get_affichage(self, instance, **kwargs):
+            if instance.affichage == "TOUJOURS":
+                return "Toujours afficher"
+            elif instance.affichage == "JAMAIS":
+                return "Ne pas afficher"
+            else:
+                return "Du %s au %s" % (instance.affichage_date_debut.strftime("%d/%m/%Y %H:%M"), instance.affichage_date_fin.strftime("%d/%m/%Y %H:%M"))
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idactivite dans les boutons d'actions """
