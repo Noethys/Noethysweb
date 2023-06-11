@@ -360,8 +360,9 @@
                     },
                     datatype: "json",
                     success: function(data){
-                        $("#download").attr("href", data.nom_fichier);
-                        document.getElementById("download").click();
+                        window.location = "{{ MEDIA_URL }}" + data.nom_fichier;
+                        // $("#download").attr("href", data.nom_fichier);
+                        // document.getElementById("download").click();
                     },
                 })
             });
