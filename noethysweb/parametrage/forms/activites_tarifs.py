@@ -297,7 +297,8 @@ class Formulaire(FormulaireBase, ModelForm):
         # Paramètres du tarif
         if self.instance.methode:
             liste_colonnes = []
-            for nom_champ in GetDictMethode(self.instance.methode)["champs"]:
+            champs = GetDictMethode(self.instance.methode)["champs"] if GetDictMethode(self.instance.methode) else []
+            for nom_champ in champs:
                 liste_colonnes.append((nom_champ, DICT_COLONNES_TARIFS[nom_champ]))
 
             if tarifs_lignes_data:
