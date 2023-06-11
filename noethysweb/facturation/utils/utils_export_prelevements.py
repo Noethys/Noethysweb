@@ -21,7 +21,7 @@ class Exporter():
 
     def Generer(self):
         # Importation des données
-        self.lot = PrelevementsLot.objects.select_related("modele", "modele__compte", "modele__mode").get(pk=self.idlot)
+        self.lot = PrelevementsLot.objects.select_related("modele", "modele__compte", "modele__mode", "modele__perception").get(pk=self.idlot)
         self.pieces = Prelevements.objects.select_related("famille", "mandat", "facture").filter(lot=self.lot)
 
         # Création du répertoire de sortie
@@ -81,14 +81,16 @@ class Exporter():
     def Creation_fichiers(self):
         # Recherche les erreurs potentielles
         if not self.pieces: self.erreurs.append("Vous devez ajouter au moins une pièce.")
+        if not self.organisateur.num_siret: self.erreurs.append("Vous devez renseigner le SIRET de l'organisateur dans le menu Paramétrage > Organisateur.")
         if not self.lot.modele.compte.raison: self.erreurs.append("Vous devez renseigner la raison sociale dans le paramétrage du compte bancaire.")
         if not self.lot.modele.compte.iban: self.erreurs.append("Vous devez renseigner l'IBAN dans le paramétrage du compte bancaire.")
         if not self.lot.modele.compte.bic: self.erreurs.append("Vous devez renseigner le BIC dans le paramétrage du compte bancaire.")
         if not self.lot.modele.compte.dft_titulaire and self.lot.modele.format == "public_dft": self.erreurs.append("Vous devez renseigner le titulaire DFT dans le paramétrage du compte bancaire.")
         if not self.lot.modele.compte.dft_iban and self.lot.modele.format == "public_dft": self.erreurs.append("Vous devez renseigner l'IBAN DFT dans le paramétrage du compte bancaire.")
-        if not self.lot.modele.perception.rue_resid: self.erreurs.append("Vous devez renseigner la rue de la perception dans le paramétrage de la perception.")
-        if not self.lot.modele.perception.cp_resid: self.erreurs.append("Vous devez renseigner le code postal de la perception dans le paramétrage de la perception.")
-        if not self.lot.modele.perception.ville_resid: self.erreurs.append("Vous devez renseigner la ville de la perception dans le paramétrage de la perception.")
+        if self.lot.modele.perception:
+            if not self.lot.modele.perception.rue_resid: self.erreurs.append("Vous devez renseigner la rue de la perception dans le paramétrage de la perception.")
+            if not self.lot.modele.perception.cp_resid: self.erreurs.append("Vous devez renseigner le code postal de la perception dans le paramétrage de la perception.")
+            if not self.lot.modele.perception.ville_resid: self.erreurs.append("Vous devez renseigner la ville de la perception dans le paramétrage de la perception.")
 
         if self.erreurs:
             return False

@@ -6,6 +6,7 @@
 import json
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
+from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Prelevements, Facture, Mandat, Activite
@@ -62,7 +63,7 @@ class Liste(crud.Page, crud.Liste):
         return HttpResponseRedirect(reverse_lazy("lots_prelevements_consulter", kwargs={'pk': idlot}))
 
 
-def Generation_pieces(idlot=None, liste_idfacture=[]):
+def Generation_pieces(request=None, idlot=None, liste_idfacture=[]):
     # Importation des factures
     factures = Facture.objects.select_related("famille").filter(pk__in=liste_idfacture)
 
@@ -89,6 +90,8 @@ def Generation_pieces(idlot=None, liste_idfacture=[]):
             params.update({"mandat": mandat, "sequence": mandat.sequence})
             mandat.Actualiser(ajouter=True)
             liste_ajouts.append(Prelevements(**params))
+        else:
+            messages.add_message(request, messages.ERROR, "La famille %s n'a pas de mandat valide" % facture.famille.nom)
 
     # Enregistrement des pièces
     Prelevements.objects.bulk_create(liste_ajouts)

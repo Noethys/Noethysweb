@@ -167,7 +167,7 @@ class Ajouter(Page, crud.Ajouter):
         if factures:
             # Création automatique des pièces
             from facturation.views.lots_prelevements_factures import Generation_pieces
-            Generation_pieces(idlot=self.object.idlot, liste_idfacture=[facture.pk for facture in factures])
+            Generation_pieces(self.request, idlot=self.object.idlot, liste_idfacture=[facture.pk for facture in factures])
 
         return reverse_lazy(self.url_consulter, kwargs={'pk': self.object.idlot})
 
