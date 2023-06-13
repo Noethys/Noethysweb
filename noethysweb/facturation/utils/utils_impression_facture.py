@@ -197,7 +197,7 @@ class Impression(utils_impression.Impression):
                         # Insertion du nom de l'activité
                         listeIDactivite = []
                         for IDactivite, dictActivites in dictIndividus["activites"].items():
-                            listeIDactivite.append((dictActivites["texte"], IDactivite, dictActivites))
+                            listeIDactivite.append((dictActivites["texte"] or "", IDactivite, dictActivites))
                         listeIDactivite = sorted(listeIDactivite, key=itemgetter(0))
                         
                         for texteActivite, IDactivite, dictActivites in listeIDactivite:
