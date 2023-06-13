@@ -89,6 +89,7 @@ urlpatterns = [
     path('facturation/modifier_lot_factures', secure_ajax(factures_generation.Modifier_lot_factures), name='ajax_modifier_lot_factures'),
     path('facturation/recherche_factures', secure_ajax(factures_generation.Recherche_factures), name='ajax_recherche_factures'),
     path('facturation/generation_factures', secure_ajax(factures_generation.Generation_factures), name='ajax_generation_factures'),
+    path('facturation/generation_factures_previsualisation', secure_ajax(factures_generation.Previsualisation_pdf), name='ajax_generation_factures_previsualisation'),
     path('facturation/modifier_lot_rappels', secure_ajax(rappels_generation.Modifier_lot_rappels), name='ajax_modifier_lot_rappels'),
     path('facturation/recherche_rappels', secure_ajax(rappels_generation.Recherche_rappels), name='ajax_recherche_rappels'),
     path('facturation/generation_rappels', secure_ajax(rappels_generation.Generation_rappels), name='ajax_generation_rappels'),

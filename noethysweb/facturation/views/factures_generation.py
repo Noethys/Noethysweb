@@ -8,11 +8,10 @@ from django.views.generic import TemplateView
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.template import Template, RequestContext
-from django.db.models import Max
-from core.models import Activite, Facture, Prestation, LotFactures, FiltreListe
+from core.models import Activite, Facture, Prestation, LotFactures, FiltreListe, ModeleImpression
 from core.views.base import CustomView
-from core.utils import utils_dates, utils_dictionnaires, utils_parametres
-from facturation.utils import utils_facturation
+from core.utils import utils_dates, utils_parametres
+from facturation.utils import utils_facturation, utils_impression_facture
 from facturation.forms.factures_generation import Formulaire
 
 
@@ -46,14 +45,34 @@ def Modifier_lot_factures(request):
     return JsonResponse({"erreur": "Erreur !"}, status=401)
 
 
-def Get_factures(data={}):
+def Previsualisation_pdf(request):
+    # Récupération des variables
+    idfamille = int(request.POST.get("idfamille")) or None
+    form = Formulaire(request.POST, request=request)
+    form.is_valid()
+
+    # Recherche des données des factures
+    liste_factures = Get_factures(form.cleaned_data, IDfamille=idfamille)
+
+    # Récupération du modèle d'impression par défaut
+    modele_impression = ModeleImpression.objects.filter(categorie="facture", defaut=True).first()
+    if not modele_impression:
+        return JsonResponse({"erreur": "Vous devez au préalable créer un modèle d'impression par défaut depuis le menu Paramétrage > Modèles d'impression"}, status=401)
+    dict_options = json.loads(modele_impression.options)
+
+    # Génération du PDF
+    impression = utils_impression_facture.Impression(dict_donnees={item["idfamille"]: item for item in liste_factures}, dict_options=dict_options, IDmodele=modele_impression.modele_document_id)
+    nom_fichier = impression.Get_nom_fichier()
+    return JsonResponse({"nom_fichier": nom_fichier})
+
+
+def Get_factures(data={}, IDfamille=None):
     # Période
     date_debut = utils_dates.ConvertDateENGtoDate(data["periode"].split(";")[0])
     date_fin = utils_dates.ConvertDateENGtoDate(data["periode"].split(";")[1])
 
     # Sélection familles
-    IDfamille = None
-    if data["selection_familles"] == "FAMILLE":
+    if not IDfamille and data["selection_familles"] == "FAMILLE":
         IDfamille = data["famille"].pk
 
     # Activités

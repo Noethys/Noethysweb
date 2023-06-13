@@ -5,6 +5,7 @@
     <button id="bouton_generer_factures" type="button" class="btn btn-primary" onclick="generation_factures()" title="Générer les factures"><i class="fa fa-check margin-r-5"></i>Générer les factures sélectionnées</button>
     <a class="btn btn-danger" href="{% url 'facturation_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
     <button type="button" class="btn btn-default" onclick="revenir_page_parametres()" title="Revenir aux paramètres"><i class="fa fa-reply margin-r-5"></i>Revenir aux paramètres</button>
+    <button type="button" class="btn btn-default" onclick="impression_pdf(0)" title="Prévisualisation de toutes les factures"><i class="fa fa-file-pdf-o margin-r-5"></i>Prévisualisation des factures</button>
 </div>
 
 <div class="btn-toolbar mb-2">
@@ -32,6 +33,7 @@
                 <th>Dû période</th>
                 <th>Report impayés</th>
                 <th>Dû total</th>
+                <th>Actions</th>
             </tr>
         </thead>
 
@@ -49,6 +51,9 @@
                     <td class="montant">{{ facture.solde|montant }}</td>
                     <td class="montant">{{ facture.total_reports|montant }}</td>
                     <td class="montant">{{ facture.solde_avec_reports|montant }}</td>
+                    <td class="text-center">
+                        <button class="btn btn-default btn-xs" onclick="impression_pdf({{ facture.idfamille }})" title="Aperçu PDF de la facture"><i class="fa fa-file-pdf-o"></i></button>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -56,6 +61,30 @@
     </table>
 </div>
 
-
 {# Affichage des messages en mémoire #}
 {% include 'core/messages.html' %}
+
+{# Insertion des modals #}
+{% include 'core/modal_pdf.html' %}
+
+<script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+
+<script>
+
+    // Impression du PDF
+    function impression_pdf(idfamille) {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_generation_factures_previsualisation' %}",
+            data: $("#form_factures_generation").serialize() + '&idfamille=' + idfamille,
+            datatype: "json",
+            success: function(data){
+                charge_pdf(data);
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        })
+    };
+
+</script>
