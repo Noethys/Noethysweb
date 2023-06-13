@@ -1,3 +1,8 @@
+Version 1.1.6.3 (13/06/2023) :
+
+- Ajout de la prévisualisation des factures
+- Correction de l'impression des factures avec prestations sans individus associés
+
 Version 1.1.6.2 (11/06/2023) :
 
 - Ajout de la colonne affichage dans la liste des périodes de réservations
