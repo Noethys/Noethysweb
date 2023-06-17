@@ -28,7 +28,7 @@ class Formulaire(FormulaireBase, ModelForm):
     date = forms.DateField(label="Date", required=True, widget=DatePickerWidget())
     unite = forms.ModelChoiceField(label="Unité", queryset=Unite.objects.none(), required=True)
     groupe = forms.ModelChoiceField(label="Groupe", queryset=Groupe.objects.none(), required=True)
-    description = forms.CharField(label="Description", widget=forms.Textarea(attrs={'rows': 2}), required=False)
+    description = forms.CharField(label="Description", widget=forms.Textarea(attrs={'rows': 2}), required=False, help_text="<i class='fa fa-exclamation-triangle'></i> Cette description est visible pour les familles sur le portail.")
 
     # Heures
     heure_debut = forms.TimeField(label="Heure de début", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
