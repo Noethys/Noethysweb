@@ -1,3 +1,9 @@
+Version 1.1.6.4 (18/06/2023) :
+
+- Ajout de la description des évènements dans la grille des consommations
+- Ajout de l'enregistrement du nom de l'évènement dans l'historique
+- Correction du solde des factures dans les lots pes
+
 Version 1.1.6.3 (13/06/2023) :
 
 - Ajout de la prévisualisation des factures
