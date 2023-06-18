@@ -374,7 +374,8 @@ def Save_grille(request=None, donnees={}):
                     evenement_id=dict_conso["evenement"], badgeage_debut=dict_conso["badgeage_debut"], badgeage_fin=dict_conso["badgeage_fin"],
                 ))
                 logger.debug("Consommation à ajouter : " + str(dict_conso))
-                liste_historique.append({"titre": "Ajout d'une consommation", "detail": "%s du %s (%s)" % (dict_unites[dict_conso["unite"]].nom, utils_dates.ConvertDateToFR(dict_conso["date"]), utils_consommations.Get_label_etat(dict_conso["etat"])), "utilisateur": request.user if request else None,
+                label_conso = dict_conso["nom_evenement"] if "nom_evenement" in dict_conso else dict_unites[dict_conso["unite"]].nom
+                liste_historique.append({"titre": "Ajout d'une consommation", "detail": "%s du %s (%s)" % (label_conso, utils_dates.ConvertDateToFR(dict_conso["date"]), utils_consommations.Get_label_etat(dict_conso["etat"])), "utilisateur": request.user if request else None,
                                          "famille_id": dict_conso["famille"], "individu_id": dict_conso["individu"], "objet": "Consommation", "idobjet": None, "classe": "Consommation", "activite_id": dict_conso["activite"]})
 
                 # Mode pointeuse pour récupérer l'idconso
@@ -415,12 +416,13 @@ def Save_grille(request=None, donnees={}):
         texte_notification.append("%s modification%s" % (len(liste_modifications), "s" if len(liste_modifications) > 1 else ""))
     if donnees["suppressions"]["consommations"]:
         logger.debug("Consommations à supprimer : " + str(donnees["suppressions"]["consommations"]))
-        liste_conso_suppr = list(Consommation.objects.select_related("unite", "inscription").filter(pk__in=donnees["suppressions"]["consommations"]))
+        liste_conso_suppr = list(Consommation.objects.select_related("unite", "inscription", "evenement").filter(pk__in=donnees["suppressions"]["consommations"]))
         qs = Consommation.objects.filter(pk__in=donnees["suppressions"]["consommations"])
         qs._raw_delete(qs.db)
         texte_notification.append("%s suppression%s" % (len(donnees["suppressions"]["consommations"]), "s" if len(donnees["suppressions"]["consommations"]) > 1 else ""))
         for conso in liste_conso_suppr:
-            liste_historique.append({"titre": "Suppression d'une consommation", "detail": "%s du %s (%s)" % (conso.unite.nom, utils_dates.ConvertDateToFR(conso.date), conso.get_etat_display()),
+            label_conso = conso.evenement.nom if conso.evenement else conso.unite.nom
+            liste_historique.append({"titre": "Suppression d'une consommation", "detail": "%s du %s (%s)" % (label_conso, utils_dates.ConvertDateToFR(conso.date), conso.get_etat_display()),
                                      "utilisateur": request.user if request else None, "famille_id": conso.inscription.famille_id, "individu_id": conso.individu_id, "objet": "Consommation", "idobjet": conso.pk, "classe": "Consommation", "activite_id": conso.activite_id})
 
     # Notification d'enregistrement des consommations
