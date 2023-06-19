@@ -82,6 +82,7 @@
                 $('#div_form_filtre_liste').html(data.html);
                 $('#modal_filtre_liste .modal-title').html('<strong>Ajouter un filtre de liste</strong>');
                 $('#modal_filtre_liste').modal('show');
+                $('#id_critere_etats').select2({dropdownParent: $('#modal_filtre_liste')});
             },
             error: function(data) {
                 $("#modal_erreurs").html(data.responseJSON.erreur);
@@ -156,5 +157,7 @@
     {{ block.super }}
     {% embed 'core/widgets/datatableview/scripts.html' %}
     {% endembed %}
-
+    <script type="text/javascript" src="{% static 'django_select2/django_select2.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/select2/js/select2.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/select2/js/i18n/fr.js' %}"></script>
 {% endblock scripts %}
