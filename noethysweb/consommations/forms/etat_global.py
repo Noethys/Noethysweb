@@ -101,7 +101,7 @@ class Form_selection_options(FormulaireBase, forms.Form):
     # Filtres
     jours_hors_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, initial=[0, 1, 2, 3, 4, 5, 6], help_text="Sélectionnez les jours hors vacances à inclure dans les calculs.")
     jours_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, initial=[0, 1, 2, 3, 4, 5, 6], help_text="Sélectionnez les jours de vacances à inclure dans les calculs.")
-    etat_consommations = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=[("reservation", "Pointage en attente"), ("present", "Présent"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present", "absentj", "absenti"], help_text="Sélectionnez les états de consommations à inclure dans les calculs.")
+    etat_consommations = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=[("reservation", "Réservation"), ("present", "Présent"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present", "absentj", "absenti"], help_text="Sélectionnez les états de consommations à inclure dans les calculs.")
 
     # Affichage
     orientation = forms.ChoiceField(label="Orientation de la page", choices=[("portrait", "Portrait"), ("paysage", "Paysage")], initial="portrait", required=False, help_text="Sélectionnez l'orientation de la page.")
