@@ -98,8 +98,8 @@ class Impression(utils_impression.Impression):
 
             for prestation in prestations:
                 date = utils_dates.ConvertDateToFR(prestation["prestation__date"])
-                activite = prestation["prestation__activite__nom"]
-                individu = prestation["prestation__individu__prenom"]
+                activite = prestation["prestation__activite__nom"] or ""
+                individu = prestation["prestation__individu__prenom"] or ""
                 label = prestation["prestation__label"]
                 ventilation = prestation["total"]
                 dataTableau.append((
