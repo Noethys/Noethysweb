@@ -1,3 +1,9 @@
+Version 1.1.6.5 (19/06/2023) :
+
+- Ajout des états de consommations dans les filtres de liste
+- Correction sur les prestations sans activité dans l'impression de reçu
+- Correction de l'attribut défaut dans les modèles d'impression
+
 Version 1.1.6.4 (18/06/2023) :
 
 - Ajout de la description des évènements dans la grille des consommations
