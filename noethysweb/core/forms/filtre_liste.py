@@ -253,7 +253,10 @@ class Formulaire(FormulaireBase, forms.Form):
             # Saisit les critères
             ctrl_criteres = self.dict_types[type_champ]["criteres"][dict_filtre["condition"]]
             for index, nom_ctrl in enumerate(ctrl_criteres):
-                self.fields[nom_ctrl].initial = dict_filtre["criteres"][index]
+                try:
+                    self.fields[nom_ctrl].initial = dict_filtre["criteres"][index]
+                except:
+                    pass
 
         # Affichage
         self.helper.layout = Layout(
