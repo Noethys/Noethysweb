@@ -58,7 +58,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.fields['defaut'].label = "Définir comme modèle par défaut"
         if len(ModeleImpression.objects.filter(categorie=categorie)) == 0 or self.instance.defaut == True:
             self.fields['defaut'].initial = True
-            self.fields['defaut'].disabled = True
+            # self.fields['defaut'].disabled = True
 
         # Affichage
         self.helper.layout = Layout(
