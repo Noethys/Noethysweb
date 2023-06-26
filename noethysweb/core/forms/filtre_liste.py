@@ -72,7 +72,7 @@ def Ajouter_filtre(request):
                 dict_resultat["criteres"].append(str(utils_dates.ConvertDateFRtoDate(valeur)))
             else:
                 dict_resultat["criteres"].append(valeur)
-            if not valeur:
+            if not valeur and key != "critere_date":
                 return JsonResponse({"erreur": "Vous n'avez pas renseigné correctement le critère"}, status=401)
             if key != "critere_etats":
                 liste_labels_criteres.append("'%s'" % valeur)
