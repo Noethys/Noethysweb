@@ -1,3 +1,8 @@
+Version 1.1.6.6 (27/06/2023) :
+
+- Correction de l'import des filtres de liste
+- Correction de la date de référence dans le filtre Inscrits
+
 Version 1.1.6.5 (19/06/2023) :
 
 - Ajout des états de consommations dans les filtres de liste
