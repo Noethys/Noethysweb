@@ -446,67 +446,66 @@ class View(CustomView, TemplateView):
         # Importation de la préfacturation des périodes
         total_periodes_impayees = decimal.Decimal(0)
         liste_finale_periodes = []
-        if True:#context["parametres_portail"].get("paiement_ligne_systeme", None):
 
-            # Récupération des périodes de réservations
-            liste_dates_extremes = []
-            liste_periodes = []
-            for periode in PortailPeriode.objects.select_related("activite").prefetch_related("categories").filter(prefacturation=True):
-                if periode.Is_famille_authorized(famille=self.request.user.famille):
-                    periode.total = decimal.Decimal(0)
-                    periode.regle = decimal.Decimal(0)
-                    periode.solde = decimal.Decimal(0)
-                    liste_periodes.append(periode)
-                    liste_dates_extremes.append(periode.date_debut)
-                    liste_dates_extremes.append(periode.date_fin)
+        # Récupération des périodes de réservations
+        liste_dates_extremes = []
+        liste_periodes = []
+        for periode in PortailPeriode.objects.select_related("activite").prefetch_related("categories").filter(prefacturation=True):
+            if periode.Is_famille_authorized(famille=self.request.user.famille):
+                periode.total = decimal.Decimal(0)
+                periode.regle = decimal.Decimal(0)
+                periode.solde = decimal.Decimal(0)
+                liste_periodes.append(periode)
+                liste_dates_extremes.append(periode.date_debut)
+                liste_dates_extremes.append(periode.date_fin)
+        if liste_periodes:
+            date_min = min(liste_dates_extremes)
+            date_max = max(liste_dates_extremes)
+
+            # Recherche les impayés par période de réservations
             if liste_periodes:
-                date_min = min(liste_dates_extremes)
-                date_max = max(liste_dates_extremes)
+                ventilations = Ventilation.objects.values("prestation").filter(famille=self.request.user.famille, prestation__date__gte=date_min, prestation__date__lte=date_max).annotate(total=Sum("montant"))
+                dict_ventilations = {ventilation["prestation"]: ventilation["total"] for ventilation in ventilations}
+                for prestation in Prestation.objects.filter(famille=self.request.user.famille, date__gte=date_min, date__lte=date_max):
+                    solde_prestation = prestation.montant - dict_ventilations.get(prestation.pk, decimal.Decimal(0))
+                    if solde_prestation > decimal.Decimal(0):
+                        for periode in liste_periodes:
+                            if periode.date_debut <= prestation.date <= periode.date_fin and prestation.activite_id == periode.activite_id:
+                                periode.total += prestation.montant
+                                periode.regle += dict_ventilations.get(prestation.pk, decimal.Decimal(0))
+                                periode.solde += solde_prestation
 
-                # Recherche les impayés par période de réservations
-                if liste_periodes:
-                    ventilations = Ventilation.objects.values("prestation").filter(famille=self.request.user.famille, prestation__date__gte=date_min, prestation__date__lte=date_max).annotate(total=Sum("montant"))
-                    dict_ventilations = {ventilation["prestation"]: ventilation["total"] for ventilation in ventilations}
-                    for prestation in Prestation.objects.filter(famille=self.request.user.famille, date__gte=date_min, date__lte=date_max):
-                        solde_prestation = prestation.montant - dict_ventilations.get(prestation.pk, decimal.Decimal(0))
-                        if solde_prestation > decimal.Decimal(0):
-                            for periode in liste_periodes:
-                                if periode.date_debut <= prestation.date <= periode.date_fin:
-                                    periode.total += prestation.montant
-                                    periode.regle += dict_ventilations.get(prestation.pk, decimal.Decimal(0))
-                                    periode.solde += solde_prestation
-
-                    # Ajoute les paiements en cours
-                    for periode in liste_periodes:
-                        if periode.pk in dict_paiements["P"]:
-                            periode.regle = periode.total
-                            periode.solde = decimal.Decimal(0)
-                        total_periodes_impayees += periode.solde
-                        if periode.solde:
-                            liste_finale_periodes.append(periode)
+                # Ajoute les paiements en cours
+                for periode in liste_periodes:
+                    if periode.pk in dict_paiements["P"]:
+                        periode.regle = periode.total
+                        periode.solde = decimal.Decimal(0)
+                    total_periodes_impayees += periode.solde
+                    if periode.solde:
+                        liste_finale_periodes.append(periode)
 
         context["liste_periodes_prefacturation"] = liste_finale_periodes
 
         # Importation de la préfacturation des cotisations
         total_cotisations_impayees = decimal.Decimal(0)
         liste_finale_cotisations = []
-        if True:#context["parametres_portail"].get("paiement_ligne_systeme", None):
-            ventilations = Ventilation.objects.values("prestation").filter(famille=self.request.user.famille, prestation__cotisation__isnull=False).annotate(total=Sum("montant"))
-            dict_ventilations = {ventilation["prestation"]: ventilation["total"] for ventilation in ventilations}
-            for prestation in Prestation.objects.select_related("cotisation").filter(famille=self.request.user.famille, cotisation__isnull=False, facture__isnull=True, cotisation__unite_cotisation__prefacturation=True):
-                solde_prestation = prestation.montant - dict_ventilations.get(prestation.pk, decimal.Decimal(0))
-                if solde_prestation > decimal.Decimal(0):
-                    prestation.total = prestation.montant
-                    prestation.regle = dict_ventilations.get(prestation.pk, decimal.Decimal(0))
-                    prestation.solde = solde_prestation
 
-                    # Ajoute les paiements en cours
-                    if prestation.pk in dict_paiements["C"]:
-                        prestation.regle = prestation.total
-                        prestation.solde = decimal.Decimal(0)
-                    total_cotisations_impayees += prestation.solde
-                    if prestation.solde:
-                        liste_finale_cotisations.append(prestation)
+        ventilations = Ventilation.objects.values("prestation").filter(famille=self.request.user.famille, prestation__cotisation__isnull=False).annotate(total=Sum("montant"))
+        dict_ventilations = {ventilation["prestation"]: ventilation["total"] for ventilation in ventilations}
+        for prestation in Prestation.objects.select_related("cotisation").filter(famille=self.request.user.famille, cotisation__isnull=False, facture__isnull=True, cotisation__unite_cotisation__prefacturation=True):
+            solde_prestation = prestation.montant - dict_ventilations.get(prestation.pk, decimal.Decimal(0))
+            if solde_prestation > decimal.Decimal(0):
+                prestation.total = prestation.montant
+                prestation.regle = dict_ventilations.get(prestation.pk, decimal.Decimal(0))
+                prestation.solde = solde_prestation
+
+                # Ajoute les paiements en cours
+                if prestation.pk in dict_paiements["C"]:
+                    prestation.regle = prestation.total
+                    prestation.solde = decimal.Decimal(0)
+                total_cotisations_impayees += prestation.solde
+                if prestation.solde:
+                    liste_finale_cotisations.append(prestation)
 
         context["liste_cotisations_prefacturation"] = liste_finale_cotisations
 
