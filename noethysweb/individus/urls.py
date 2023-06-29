@@ -12,7 +12,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             individus_detaches_liste, liste_mandats, liste_questionnaires_familles, liste_questionnaires_individus, liste_contacts_urgence, \
                             liste_regimes_alimentaires, liste_maladies, liste_informations, individus_doublons_liste, liste_familles_sans_inscriptions, \
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
-                            liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports
+                            liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe
 
 urlpatterns = [
 
@@ -56,6 +56,9 @@ urlpatterns = [
 
     path('individus/inscriptions_modifier/selection_activite', inscriptions_modifier.Selection_activite.as_view(), name='inscriptions_modifier'),
     path('individus/inscriptions_modifier/liste/<int:idactivite>', inscriptions_modifier.Liste.as_view(), name='inscriptions_modifier_liste'),
+
+    path('individus/inscriptions_changer_groupe/selection_activite', inscriptions_changer_groupe.Selection_activite.as_view(), name='inscriptions_changer_groupe'),
+    path('individus/inscriptions_changer_groupe/liste/<int:idactivite>', inscriptions_changer_groupe.Liste.as_view(), name='inscriptions_changer_groupe_liste'),
 
     # Inscriptions scolaires
     path('individus/inscriptions_scolaires', inscriptions_scolaires.Liste.as_view(), name='inscriptions_scolaires_liste'),
@@ -163,5 +166,6 @@ urlpatterns = [
     path('individus/inscriptions_modifier', secure_ajax(inscriptions_modifier.Appliquer), name='ajax_inscriptions_modifier'),
     path('individus/liste_titulaires_helios/generer_tiers_solidaires', secure_ajax(liste_titulaires_helios.Generer_tiers_solidaires), name='ajax_liste_titulaires_helios_generer_tiers_solidaires'),
     path('individus/effacer_familles_effacer', secure_ajax(effacer_familles.Effacer), name='ajax_effacer_familles'),
+    path('individus/inscriptions_changer_groupe', secure_ajax(inscriptions_changer_groupe.Appliquer), name='ajax_inscriptions_changer_groupe'),
 
 ]
