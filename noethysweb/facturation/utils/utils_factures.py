@@ -37,3 +37,23 @@ def Maj_solde_actuel(liste_idprestation=[], liste_prestations=[]):
     factures = {prestation.facture: None for prestation in Prestation.objects.select_related("facture").filter(pk__in=liste_idprestation, facture__isnull=False)}
     for facture in factures.keys():
         facture.Maj_solde_actuel()
+
+
+def Maj_total_factures(IDfamille=None, IDfacture=None):
+    """ Vérifie les totaux mémorisés de toutes les factures OU des factures d'une famille uniquement """
+    conditions = Q()
+    if IDfamille:
+        conditions &= Q(famille_id=IDfamille)
+    if IDfacture:
+        conditions &= Q(pk=IDfacture)
+    factures = Facture.objects.filter(conditions).values("pk", "total", "regle", "solde", "solde_actuel").annotate(total_calcul=Sum("prestation__montant"))
+    for facture in factures:
+        total_calcul = "%.02f" % (facture["total_calcul"] or 0)
+        total = "%.02f" % (facture["total"] or 0)
+        if facture["total_calcul"] and total_calcul != total:
+            print("Anomalie =", facture)
+            facture = Facture.objects.get(pk=facture["pk"])
+            facture.total = Decimal(total_calcul)
+            facture.solde = facture.total - facture.regle
+            facture.save()
+            facture.Maj_solde_actuel()
