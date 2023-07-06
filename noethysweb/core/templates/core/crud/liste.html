@@ -83,6 +83,7 @@
                 $('#modal_filtre_liste .modal-title').html('<strong>Ajouter un filtre de liste</strong>');
                 $('#modal_filtre_liste').modal('show');
                 $('#id_critere_etats').select2({dropdownParent: $('#modal_filtre_liste')});
+                $('#id_critere_etats_inscriptions').select2({dropdownParent: $('#modal_filtre_liste')});
             },
             error: function(data) {
                 $("#modal_erreurs").html(data.responseJSON.erreur);

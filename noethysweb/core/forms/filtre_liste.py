@@ -74,7 +74,7 @@ def Ajouter_filtre(request):
                 dict_resultat["criteres"].append(valeur)
             if not valeur and key != "critere_date":
                 return JsonResponse({"erreur": "Vous n'avez pas renseigné correctement le critère"}, status=401)
-            if key != "critere_etats":
+            if key not in ("critere_etats", "critere_etats_inscriptions"):
                 liste_labels_criteres.append("'%s'" % valeur)
 
         if key.startswith("liste_"):
@@ -151,6 +151,8 @@ class Formulaire(FormulaireBase, forms.Form):
     critere_etats = forms.MultipleChoiceField(label="Etats", required=False, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
         choices=[("reservation", "Réservation"), ("present", "Présent"), ("attente", "Attente"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")],
         initial=["reservation", "present"])
+    critere_etats_inscriptions = forms.MultipleChoiceField(label="Statuts", required=False, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
+        choices=[("ok", "Validé"), ("attente", "En attente"), ("refus", "Refusé")], initial=["ok",])
 
     dict_types = {
         'BinaryField': {'condition': 'condition5', 'criteres': {"*EGAL": ["critere_texte"], "*DIFFERENT": ["critere_texte"], "*CONTIENT": ["critere_texte"], "*NE_CONTIENT_PAS": ["critere_texte"], "*EST_VIDE": [], "*EST_PAS_VIDE": []}},
@@ -162,8 +164,8 @@ class Formulaire(FormulaireBase, forms.Form):
         'AutoField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"]}},
         'IntegerField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"]}},
         'DecimalField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_decimal"], "DIFFERENT": ["critere_decimal"], "SUPERIEUR": ["critere_decimal"], "SUPERIEUR_EGAL": ["critere_decimal"], "INFERIEUR": ["critere_decimal"], "INFERIEUR_EGAL": ["critere_decimal"], "COMPRIS": ["critere_decimal_min", "critere_decimal_max"]}},
-        'ipresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
-        'fpresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
+        'ipresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date", "critere_etats_inscriptions"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
+        'fpresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date", "critere_etats_inscriptions"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
         'iscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_date", "critere_ecoles"], "CLASSES": ["critere_classes"], "NIVEAUX": ["critere_date", "critere_niveaux"]}},
         'fscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_date", "critere_ecoles"], "CLASSES": ["critere_classes"], "NIVEAUX": ["critere_date", "critere_niveaux"]}},
         'fprelevement_actif': {'condition': 'condition3', 'criteres': {"VRAI": [], "FAUX": []}},
@@ -288,6 +290,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("critere_classes"),
             Field("critere_niveaux"),
             Field("critere_etats"),
+            Field("critere_etats_inscriptions"),
             ButtonHolder(
                 Div(
                     HTML("""<button type="button" class="btn btn-primary" onclick="valider_ajout_filtre()"><i class="fa fa-check margin-r-5"></i>Valider</button>"""),
