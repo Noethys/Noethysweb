@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import json
+import json, time
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 from core.views.base import CustomView
@@ -36,6 +36,7 @@ def Generer_pdf(request):
     if impression.erreurs:
         return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
     nom_fichier = impression.Get_nom_fichier()
+    time.sleep(1)
     return JsonResponse({"nom_fichier": nom_fichier})
 
 
