@@ -1,3 +1,13 @@
+Version 1.1.6.8 (06/07/2023) :
+
+- Ajout du critère statut de l'inscription dans les filtres de liste
+- Ajout de la commande maj_total_factures
+- Correction dans la recherche des pièces manquantes
+- Correction wait dialog dans edition_informations
+- Correction recherche quantité dans la grille des consommations
+- Correction récupération famille dans transmettre_piece
+- Correction conversion date dans l'état nominatif
+
 Version 1.1.6.7 (29/06/2023) :
 
 - Ajout de la fonction Changer de groupe par lot dans le menu Individus
