@@ -656,7 +656,7 @@ class Facturation():
                                 # Recherche la quantité de conso déjà enregistrées dans la DB
                                 if "-" not in IDprestationForfait:
                                     for conso in Consommation.objects.filter(prestation_id=IDprestationForfait):
-                                        key = "%d_%d" % (conso.date, conso.inscription_id)
+                                        key = "%s_%d" % (conso.date, conso.inscription_id)
                                         dict_quantites.setdefault(key, [])
                                         dict_quantites[key].append(conso.unite_id)
                                         dict_quantites[key].sort()
