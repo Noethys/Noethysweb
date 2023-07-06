@@ -51,7 +51,7 @@ def ConvertDateFRtoDate(date=None):
 
 def ConvertDateToFR(date=None):
     # Si date vide
-    if not date:
+    if not date or date == "None":
         return None
     # Si date str anglaise
     if isinstance(date, str) and "-" in date:
