@@ -109,7 +109,7 @@ class Liste_commun():
                         if len(criteres) > 2:
                             condition &= Q(statut__in=criteres[2])
                         else:
-                            condition &= Q(etat__in=["ok",])
+                            condition &= Q(statut__in=["ok",])
                         resultats = [resultat[donnee] for resultat in Inscription.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
                     if filtre["condition"] == "PRESENT":
                         donnee = "inscription__famille" if type_champ == "fpresent" else "individu"
