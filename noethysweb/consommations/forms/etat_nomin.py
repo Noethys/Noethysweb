@@ -150,7 +150,7 @@ HTML_RESULTATS = """
                 if ($.isNumeric(item[colonne])) {
                     total = total + item[colonne];
                 } else {
-                    if (item[colonne].includes("h")) {
+                    if ((item[colonne]) && (item[colonne].includes("h"))) {
                         var heure = item[colonne].split("h");
                         var heures = parseInt(heure[0]);
                         var minutes = parseInt(heure[1]);
