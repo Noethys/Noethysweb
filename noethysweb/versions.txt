@@ -1,3 +1,9 @@
+Version 1.1.6.9 (10/07/2023) :
+
+- Ajout des prestations familiales aux devis
+- Correction filtre statut inscription
+- Correction impression état nomin si champ vide
+
 Version 1.1.6.8 (06/07/2023) :
 
 - Ajout du critère statut de l'inscription dans les filtres de liste
