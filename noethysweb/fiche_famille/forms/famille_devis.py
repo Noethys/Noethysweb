@@ -27,6 +27,8 @@ class Formulaire(FormulaireBase, ModelForm):
     modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=ModeleDocument.objects.filter(categorie="devis").order_by("nom"), required=True)
     signataire = forms.CharField(label="Signataire", required=True)
     options_impression = forms.CharField(label="Options d'impression", required=False, widget=FormIntegreWidget())
+    choix_categories = [("consommation", "Consommations"), ("cotisation", "Adhésions"), ("location", "Locations"), ("autre", "Autres"), ]
+    categories = forms.MultipleChoiceField(label="Catégories de prestations", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=choix_categories, required=True)
 
     class Meta:
         model = Devis
@@ -51,9 +53,9 @@ class Formulaire(FormulaireBase, ModelForm):
         inscriptions = Inscription.objects.select_related("activite", "individu").filter(famille_id=idfamille, activite__structure__in=utilisateur.structures.all())
 
         # Individus
-        liste_individus = list({(inscription.individu_id, inscription.individu.prenom): None for inscription in inscriptions}.keys())
+        liste_individus = [(0, "Prestations familiales"),] + list({(inscription.individu_id, inscription.individu.prenom): None for inscription in inscriptions}.keys())
         self.fields["individus"].choices = liste_individus
-        self.fields["individus"].initial = [id for id, nom in liste_individus]
+        self.fields["individus"].initial = [0,] + [id for id, nom in liste_individus]
 
         # Activités
         liste_activites = list({(inscription.activite_id, inscription.activite.nom): None for inscription in inscriptions}.keys())
@@ -84,6 +86,9 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields["activites"].initial = [int(idindividu) for idindividu in self.instance.activites.split(";")] if self.instance.activites else []
             self.fields["periode"].initial = "%s - %s" % (utils_dates.ConvertDateToFR(self.instance.date_debut), utils_dates.ConvertDateToFR(self.instance.date_fin))
 
+        # Catégories
+        self.fields["categories"].initial = ["consommation", "cotisation", "location", "autre"]
+
         # Options : Ajoute le request au form
         self.fields['options_impression'].widget.attrs.update({"form": Form_options_impression(request=self.request)})
 
@@ -103,11 +108,11 @@ class Formulaire(FormulaireBase, ModelForm):
             Field("date_edition"),
             Field("individus"),
             Field("activites"),
+            Field("categories"),
             Field("numero"),
             Field("modele"),
             Field("signataire"),
             Field("options_impression"),
-
             HTML(EXTRA_HTML),
         )
 

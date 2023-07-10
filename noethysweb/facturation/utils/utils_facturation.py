@@ -102,7 +102,11 @@ class Facturation():
             conditions = (Q(activite__in=liste_activites) | Q(activite=None)) & Q(date__gte=date_debut_temp) & Q(date__lte=date_fin) & Q(categorie__in=categories_prestations)
             if mode == "facture": conditions &= Q(facture_id=None)
             if IDfamille: conditions &= Q(famille_id=IDfamille)
-            if liste_IDindividus: conditions &= Q(individu_id__in=liste_IDindividus)
+            if liste_IDindividus:
+                if 0 in liste_IDindividus:
+                    conditions &= (Q(individu_id__in=liste_IDindividus) | Q(individu__isnull=True))
+                else:
+                    conditions &= Q(individu_id__in=liste_IDindividus)
         logger.debug("Recherche des prestations des factures...")
         prestations = Prestation.objects.select_related('famille', 'activite', 'individu', 'tarif', 'categorie_tarif', "tarif__nom_tarif").filter(conditions).order_by("date")
 

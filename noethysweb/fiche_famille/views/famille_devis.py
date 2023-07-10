@@ -40,7 +40,8 @@ def Impression_pdf(request):
     IDfamille = parametres["famille"].pk
     individus = [int(idindividu) for idindividu in parametres["individus"]]
     activites = [int(idactivite) for idactivite in parametres["activites"]]
-    dict_devis = facturation.GetDonnees(liste_activites=activites, date_debut=date_debut, date_fin=date_fin, mode="devis", IDfamille=IDfamille, liste_IDindividus=individus)
+    categories_prestations = parametres["categories"]
+    dict_devis = facturation.GetDonnees(liste_activites=activites, date_debut=date_debut, date_fin=date_fin, mode="devis", IDfamille=IDfamille, liste_IDindividus=individus, categories_prestations=categories_prestations)
 
     # Si aucun devis trouvé
     if not dict_devis:
