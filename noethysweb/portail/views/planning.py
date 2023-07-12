@@ -151,13 +151,17 @@ class View(CustomView, TemplateView):
         """ Envoi d'un mail de confirmation des modifications """
         # Importation des données
         liste_historique = resultat["liste_historique"]
+        detail_evenements = resultat["detail_evenements"]
         periode = PortailPeriode.objects.select_related("activite").prefetch_related("categories").get(pk=self.kwargs.get('idperiode'))
         individu = Individu.objects.get(pk=self.kwargs.get('idindividu'))
 
         # Création du texte des modifications
         dict_historique = {"ajouts": [], "suppressions": []}
-        for historique in liste_historique:
-            if historique["titre"] == "Ajout d'une consommation": dict_historique["ajouts"].append(historique["detail"])
+        for idx, historique in enumerate(liste_historique):
+            label_ajout = historique["detail"]
+            if idx in detail_evenements and detail_evenements[idx]:
+                label_ajout += " : %s" % detail_evenements[idx]
+            if historique["titre"] == "Ajout d'une consommation": dict_historique["ajouts"].append(label_ajout)
             if historique["titre"] == "Suppression d'une consommation": dict_historique["suppressions"].append(historique["detail"])
 
         items_identiques = list(set(dict_historique["ajouts"]).intersection(dict_historique["suppressions"]))

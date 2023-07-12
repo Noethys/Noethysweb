@@ -311,6 +311,7 @@ def Save_grille(request=None, donnees={}):
     chrono = time.time()
 
     liste_historique = []
+    detail_evenements = {}
 
     # ----------------------------------- PRESTATIONS --------------------------------------
 
@@ -377,6 +378,7 @@ def Save_grille(request=None, donnees={}):
                 label_conso = dict_conso["nom_evenement"] if "nom_evenement" in dict_conso else dict_unites[dict_conso["unite"]].nom
                 liste_historique.append({"titre": "Ajout d'une consommation", "detail": "%s du %s (%s)" % (label_conso, utils_dates.ConvertDateToFR(dict_conso["date"]), utils_consommations.Get_label_etat(dict_conso["etat"])), "utilisateur": request.user if request else None,
                                          "famille_id": dict_conso["famille"], "individu_id": dict_conso["individu"], "objet": "Consommation", "idobjet": None, "classe": "Consommation", "activite_id": dict_conso["activite"]})
+                detail_evenements[len(liste_historique)-1] = dict_conso.get("description_evenement", None)
 
                 # Mode pointeuse pour récupérer l'idconso
                 if donnees.get("mode", None) == "pointeuse":
@@ -492,6 +494,7 @@ def Save_grille(request=None, donnees={}):
         "dict_idprestation": dict_idprestation,
         "dict_idconso": dict_idconso,
         "liste_historique": liste_historique,
+        "detail_evenements": detail_evenements,
     }
     return resultat
 

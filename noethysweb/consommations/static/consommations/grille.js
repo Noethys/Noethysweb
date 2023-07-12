@@ -1443,7 +1443,10 @@ function get_donnees_for_facturation(keys_cases_touchees) {
             };
             for (var conso of case_tableau.consommations) {
                 conso["key_case"] = case_tableau.key;
-                if (conso.evenement) {conso["nom_evenement"] = dict_cases[case_tableau.key].evenement.nom}
+                if (conso.evenement) {
+                    conso["nom_evenement"] = dict_cases[case_tableau.key].evenement.nom;
+                    conso["description_evenement"] = dict_cases[case_tableau.key].evenement.description;
+                }
                 dict_conso_facturation[key].push(conso);
             };
         };
