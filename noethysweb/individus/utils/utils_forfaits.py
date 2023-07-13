@@ -60,7 +60,7 @@ class Forfaits():
 
             if hasattr(tarif, "combinaisons") and len(tarif.combinaisons) > 0:
                 # Si combinaisons personnalisées
-                liste_dates = [combinaison.date for combinaison in tarif.combinaisons]
+                liste_dates = [combinaison.date for combinaison in tarif.combinaisons if combinaison.date]
                 if liste_dates:
                     tarif.date_debut_forfait, tarif.date_fin_forfait = min(liste_dates), max(liste_dates)
 

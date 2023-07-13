@@ -57,7 +57,10 @@ class SelectionForfaitsDatesWidget(Widget):
             for tarif in getattr(activite, "tarifs", []):
                 context['dict_branches2'].setdefault(IDactivite, [])
                 description = "- %s " % tarif.description if tarif.description else ""
-                label = "%s %s(%s - %s)" % (tarif.nom_tarif.nom, description, utils_dates.ConvertDateToFR(tarif.date_debut_forfait), utils_dates.ConvertDateToFR(tarif.date_fin_forfait))
+                if tarif.date_debut_forfait and tarif.date_fin_forfait:
+                    label = "%s %s(%s - %s)" % (tarif.nom_tarif.nom, description, utils_dates.ConvertDateToFR(tarif.date_debut_forfait), utils_dates.ConvertDateToFR(tarif.date_fin_forfait))
+                else:
+                    label = "%s %s" % (tarif.nom_tarif.nom, description)
                 context['dict_branches2'][IDactivite].append({"pk": tarif.pk, "label": label})
 
         # Branches 1
