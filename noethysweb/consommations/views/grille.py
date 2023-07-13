@@ -1115,7 +1115,7 @@ class Facturation():
             lignes_calcul = Get_lignes_tarif()
             ligne_calcul = lignes_calcul.first()
             montant_tarif = ligne_calcul.montant_unique
-            if ligne_calcul.montant_questionnaire:
+            if ligne_calcul.montant_questionnaire and ligne_calcul.montant_questionnaire != "0":
                 montant_tarif = self.Get_montant_questionnaire(IDquestion=ligne_calcul.montant_questionnaire, case_tableau=case_tableau)
 
         # Recherche du montant à appliquer : QUOTIENT FAMILIAL
