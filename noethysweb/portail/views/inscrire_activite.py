@@ -53,14 +53,16 @@ def Valid_form(request):
     activite = form.cleaned_data["activite"]
     groupe = form_extra.cleaned_data["groupe"]
 
-    # Vérifie que l'individu n'est pas déjà inscrit à cette activité
-    if Inscription.objects.filter(famille=famille, individu=individu, activite=activite).exists():
-        return JsonResponse({"erreur": "Cet individu est déjà inscrit à cette activité"}, status=401)
+    if not activite.inscriptions_multiples:
 
-    # Vérifie qu'il n'y a pas déjà une demande en attente pour la même activité et le même individu
-    for demande in PortailRenseignement.objects.filter(famille=famille, individu=individu, etat="ATTENTE", code="inscrire_activite"):
-        if int(json.loads(demande.nouvelle_valeur).split(";")[0]) == activite.pk:
-            return JsonResponse({"erreur": "Une demande en attente de traitement existe déjà pour cet individu et cette activité"}, status=401)
+        # Vérifie que l'individu n'est pas déjà inscrit à cette activité
+        if Inscription.objects.filter(famille=famille, individu=individu, activite=activite).exists():
+            return JsonResponse({"erreur": "Cet individu est déjà inscrit à cette activité"}, status=401)
+
+        # Vérifie qu'il n'y a pas déjà une demande en attente pour la même activité et le même individu
+        for demande in PortailRenseignement.objects.filter(famille=famille, individu=individu, etat="ATTENTE", code="inscrire_activite"):
+            if int(json.loads(demande.nouvelle_valeur).split(";")[0]) == activite.pk:
+                return JsonResponse({"erreur": "Une demande en attente de traitement existe déjà pour cet individu et cette activité"}, status=401)
 
     # Vérifie s'il reste de la place
     if activite.portail_inscriptions_bloquer_si_complet:
