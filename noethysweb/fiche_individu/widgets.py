@@ -41,7 +41,7 @@ class SelectionForfaitsDatesWidget(Widget):
         context['name'] = name
 
         # Définit la hauteur du ctrl
-        context['hauteur'] = "300px"
+        context['hauteur'] = "500px"
 
         # Récupère les sélections initiales
         context['selections'] = []
@@ -54,7 +54,8 @@ class SelectionForfaitsDatesWidget(Widget):
         # Branches 2
         context['dict_branches2'] = {}
         for IDactivite, activite in dict_forfaits.items():
-            for tarif in getattr(activite, "tarifs", []):
+            tarifs = sorted(getattr(activite, "tarifs", []), key=lambda x: x.nom_tarif.nom)
+            for tarif in tarifs:
                 context['dict_branches2'].setdefault(IDactivite, [])
                 description = "- %s " % tarif.description if tarif.description else ""
                 if tarif.date_debut_forfait and tarif.date_fin_forfait:
