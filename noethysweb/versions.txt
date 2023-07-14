@@ -1,3 +1,13 @@
+Version 1.1.7.0 (14/07/2023) :
+
+- Ajout de la description des événements dans le mail de confirmation des réservations
+- Ajout de l'importation des familles depuis dominoweb
+- Amélioration de la sélection des forfaits datés à appliquer
+- Correction de l'inscription depuis le portail si option inscriptions multiples activée
+- Correction de l'application des forfaits datés sans consommations
+- Correction des tarifs selon montant questionnaire
+- Correction de la bootbox dans l'envoi des factures par email
+
 Version 1.1.6.9 (10/07/2023) :
 
 - Ajout des prestations familiales aux devis
