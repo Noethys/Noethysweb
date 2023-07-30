@@ -29,6 +29,7 @@ urlpatterns = [
     path('summernote/', include('django_summernote.urls')),
     path('captcha/', include('captcha.urls')),
     path('locked/', erreurs.erreur_axes, name="locked_out"),
+    path('deblocage/<str:code>', erreurs.deblocage, name="deblocage"),
 ]
 
 # Ajout de l'URL du portail
