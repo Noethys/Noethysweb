@@ -1,3 +1,8 @@
+Version 1.1.7.1 (31/07/2023) :
+
+- Ajout du déblocage axes par url
+- Correction de l'export magnus avec prestations sans activité
+
 Version 1.1.7.0 (14/07/2023) :
 
 - Ajout de la description des événements dans le mail de confirmation des réservations
