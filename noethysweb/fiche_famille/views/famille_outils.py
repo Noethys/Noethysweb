@@ -23,7 +23,7 @@ class View(Onglet, DetailView):
                 ]},
                 {"titre": "Devis", "items": [
                     {"titre": "Générer un devis", "url": reverse_lazy("famille_devis_ajouter", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
-                    {"titre": "Liste des devis générés", "url": reverse_lazy("famille_devis_ajouter", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+                    {"titre": "Liste des devis générés", "url": reverse_lazy("famille_devis_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                 ]},
                 {"titre": "Lettres de rappels", "items": [
                     {"titre": "Générer une lettre de rappel", "url": reverse_lazy("rappels_generation", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
