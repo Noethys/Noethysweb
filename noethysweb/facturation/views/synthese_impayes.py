@@ -44,17 +44,17 @@ class View(CustomView, TemplateView):
         param_activites = json.loads(parametres["activites"])
         conditions_periode = Q(date__gte=date_debut) & Q(date__lte=date_fin)
         if param_activites["type"] == "groupes_activites":
-            condition_activites = Q(activite__groupes_activites__in=param_activites["ids"])
+            condition_activites = (Q(activite__groupes_activites__in=param_activites["ids"]) | Q(activite__isnull=True))
             liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
         if param_activites["type"] == "activites":
-            condition_activites = Q(activite__in=param_activites["ids"])
+            condition_activites = (Q(activite__in=param_activites["ids"]) | Q(activite__isnull=True))
             liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
 
         # Importation des activités
         dictActivites = {activite.pk: {"nom": activite.nom, "abrege": activite.abrege} for activite in liste_activites}
 
         # Importation des prestations
-        conditions_ventilations = Q(prestation__date__gte=date_debut) & Q(prestation__date__lte=date_fin) & Q(prestation__activite__in=liste_activites)
+        conditions_ventilations = Q(prestation__date__gte=date_debut) & Q(prestation__date__lte=date_fin) & (Q(prestation__activite__in=liste_activites) | Q(prestation__activite__isnull=True))
 
         if parametres["filtre_reglements_saisis"]:
             date_debut_saisie = utils_dates.ConvertDateENGtoDate(parametres["filtre_reglements_saisis"].split(";")[0])
