@@ -60,12 +60,13 @@ class Exporter():
             code_prodloc = self.lot.modele.code_prodloc
             service1 = self.lot.modele.service1
             service2 = self.lot.modele.service2
-            if prestation.activite.code_comptable: id_poste = prestation.activite.code_comptable
-            if prestation.activite.code_produit_local: code_prodloc = prestation.activite.code_produit_local
+            if prestation.activite:
+                if prestation.activite.code_comptable: id_poste = prestation.activite.code_comptable
+                if prestation.activite.code_produit_local: code_prodloc = prestation.activite.code_produit_local
+                if prestation.activite.service1: service1 = prestation.activite.service1
+                if prestation.activite.service2: service2 = prestation.activite.service2
             if prestation.code_compta: id_poste = prestation.code_compta
             if prestation.code_produit_local: code_prodloc = prestation.code_produit_local
-            if prestation.activite.service1: service1 = prestation.activite.service1
-            if prestation.activite.service2: service2 = prestation.activite.service2
 
             dict_prestations_factures.setdefault(prestation.facture, [])
             dict_prestations_factures[prestation.facture].append({
@@ -82,14 +83,14 @@ class Exporter():
 
             # Définit le label
             libelle = self.lot.modele.prestation_libelle
-            libelle = libelle.replace("{ACTIVITE_NOM}", prestation.activite.nom)
-            libelle = libelle.replace("{ACTIVITE_ABREGE}", prestation.activite.abrege if prestation.activite.abrege else "")
+            libelle = libelle.replace("{ACTIVITE_NOM}", prestation.activite.nom if prestation.activite else "")
+            libelle = libelle.replace("{ACTIVITE_ABREGE}", prestation.activite.abrege if prestation.activite and prestation.activite.abrege else "")
             libelle = libelle.replace("{PRESTATION_LABEL}", prestation.label)
             libelle = libelle.replace("{PRESTATION_QUANTITE}", str(prestation.quantite))
             libelle = libelle.replace("{PRESTATION_MOIS}", {num: label for (num, label) in LISTE_MOIS}[prestation.date.month])
             libelle = libelle.replace("{PRESTATION_ANNEE}", str(prestation.date.year))
-            libelle = libelle.replace("{INDIVIDU_PRENOM}", prestation.individu.prenom or prestation.individu.nom)
-            libelle = libelle.replace("{INDIVIDU_NOM}", prestation.individu.nom if prestation.individu.nom else "")
+            libelle = libelle.replace("{INDIVIDU_PRENOM}", prestation.individu.prenom or prestation.individu.nom if prestation.individu else "")
+            libelle = libelle.replace("{INDIVIDU_NOM}", prestation.individu.nom if prestation.individu and prestation.individu.nom else "")
             libelle = libelle.replace("{MOIS}", str(self.lot.mois))
             libelle = libelle.replace("{MOIS_LETTRES}", self.lot.get_mois_display())
             libelle = libelle.replace("{ANNEE}", str(self.lot.exercice))
