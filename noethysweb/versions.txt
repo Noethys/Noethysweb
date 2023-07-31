@@ -1,3 +1,9 @@
+Version 1.1.7.2 (31/07/2023) :
+
+- Ajout du récapitulatif des factures dans le menu Facturation
+- Correction des prestations sans activité dans la synthèse des prestations
+- Correction de l'url d'accès à la liste des devis d'une famille
+
 Version 1.1.7.1 (31/07/2023) :
 
 - Ajout du déblocage axes par url
