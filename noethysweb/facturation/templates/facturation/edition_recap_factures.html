@@ -1,0 +1,51 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+{% embed 'core/box.html' %}
+    {% block box_theme %}card-outline card-lightblue{% endblock %}
+    {% block box_titre %}{{ box_titre }}{% endblock %}
+    {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+    {% block box_contenu %}
+        {% crispy form %}
+    {% endblock %}
+
+{% endembed %}
+
+    {% include 'core/modal_pdf.html' %}
+
+    <script>
+
+        // Générer le PDF
+        function generer_pdf() {
+            var box = bootbox.dialog({
+                    message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Génération du PDF en cours</b><br><br>Veuillez patienter...</p>",
+                    closeButton: false
+                });
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_edition_recap_factures_generer_pdf' %}",
+                data: $("#form_parametres").serialize(),
+                datatype: "json",
+                success: function(data){
+                    bootbox.hideAll();
+                    charge_pdf(data);
+                },
+                error: function(data) {
+                    bootbox.hideAll();
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+    </script>
+
+{% endblock contenu_page %}

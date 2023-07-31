@@ -11,7 +11,7 @@ from facturation.views import factures_generation, liste_prestations, liste_fact
                                 synthese_prestations, liste_tarifs, rappels_generation, liste_rappels, factures_impression, factures_email, \
                                 rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations, \
                                 lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
-                                attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes
+                                attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes, edition_recap_factures
 
 urlpatterns = [
 
@@ -25,6 +25,7 @@ urlpatterns = [
     path('facturation/factures_supprimer_plusieurs/<str:listepk>', liste_factures.Supprimer_plusieurs.as_view(), name='factures_supprimer_plusieurs'),
     path('facturation/factures_impression', factures_impression.Liste.as_view(), name='factures_impression'),
     path('facturation/factures_email', factures_email.Liste.as_view(), name='factures_email'),
+    path('facturation/edition_recap_factures', edition_recap_factures.View.as_view(), name='edition_recap_factures'),
 
     # Rappels
     path('facturation/rappels_generation', Verifie_ventilation(rappels_generation.View.as_view()), name='rappels_generation'),
@@ -95,6 +96,7 @@ urlpatterns = [
     path('facturation/generation_rappels', secure_ajax(rappels_generation.Generation_rappels), name='ajax_generation_rappels'),
     path('facturation/factures_impression_pdf', secure_ajax(factures_impression.Impression_pdf), name='ajax_factures_impression_pdf'),
     path('facturation/factures_email_pdf', secure_ajax(factures_email.Impression_pdf), name='ajax_factures_email_pdf'),
+    path('facturation/edition_recap_factures/generer_pdf', secure_ajax(edition_recap_factures.Generer_pdf), name='ajax_edition_recap_factures_generer_pdf'),
     path('facturation/rappels_impression_pdf', secure_ajax(rappels_impression.Impression_pdf), name='ajax_rappels_impression_pdf'),
     path('facturation/rappels_email_pdf', secure_ajax(rappels_email.Impression_pdf), name='ajax_rappels_email_pdf'),
     path('facturation/lots_pes_exporter', secure_ajax(lots_pes.Exporter), name='ajax_lots_pes_exporter'),

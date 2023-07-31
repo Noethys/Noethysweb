@@ -247,3 +247,8 @@ def FormateMois(donnee):
     else:
         annee, mois = donnee
         return u"%s %d" % (LISTE_MOIS[mois-1].capitalize(), annee)
+
+def ConvertDateRangePicker(periode=""):
+    date_debut = ConvertDateENGtoDate(periode.split(";")[0])
+    date_fin = ConvertDateENGtoDate(periode.split(";")[1])
+    return (date_debut, date_fin)
