@@ -211,7 +211,7 @@ class Dupliquer(Page, crud.Dupliquer):
             objet.groupes.set(Groupe.objects.filter(pk__in=[correspondances["Groupe"][obj.pk] for obj in objet.groupes.all()]))
 
         # CombiTarif
-        for objet in CombiTarif.objects.filter(tarif_id__in=correspondances["Tarif"]):
+        for objet in CombiTarif.objects.filter(tarif_id__in=correspondances.get("Tarif", [])):
             nouvel_objet = deepcopy(objet)
             nouvel_objet.pk = None
             nouvel_objet.tarif_id = correspondances["Tarif"][objet.tarif_id]
