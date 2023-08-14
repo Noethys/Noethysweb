@@ -428,7 +428,7 @@ class Exporter():
                 # Nm
                 Nm = doc.createElement("Nm")
                 Dbtr.appendChild(Nm)
-                titulaire = transaction.mandat.individu.Get_nom() if transaction.mandat.individu else transaction.mandat.individu.nom
+                titulaire = transaction.mandat.individu.Get_nom() if transaction.mandat.individu else transaction.mandat.individu_nom
                 Nm.appendChild(doc.createTextNode(utils_texte.Supprimer_accents(titulaire[:70])))
 
                 # DbtrAcct
