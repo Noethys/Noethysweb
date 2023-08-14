@@ -1,3 +1,12 @@
+Version 1.1.7.3 (14/08/2023) :
+
+- Ajout de la mémorisation du gabarit des étiquettes
+- Ajout de la suppression des consommations associées à une prestation
+- Correction de l'affichage des niveaux scolaires dans la grille des consommations
+- Correction de la duplication d'une activité sans combinaisons tarifaires
+- Correction de l'export de prélèvements si titulaire manuel
+- Correction des options d'affichage du total des devis
+
 Version 1.1.7.2 (31/07/2023) :
 
 - Ajout du récapitulatif des factures dans le menu Facturation
