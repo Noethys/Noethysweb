@@ -188,6 +188,7 @@ class Consommations_prestation(Widget):
             context.update(attrs)
         consommations = Consommation.objects.select_related("unite").filter(prestation_id=value) if value else None
         context['consommations'] = consommations
+        context['idprestation'] = value
         return context
 
     def render(self, name, value, attrs=None, renderer=None):

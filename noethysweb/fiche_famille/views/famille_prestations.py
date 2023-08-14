@@ -6,12 +6,31 @@
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q
 from django.template import Template, RequestContext
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Prestation, Tarif, Inscription
+from core.models import Famille, Prestation, Tarif, Inscription, Consommation
 from fiche_famille.forms.famille_prestations import Formulaire, FORMSET_DEDUCTIONS
 from fiche_famille.views.famille import Onglet
+
+
+def Supprimer_consommation(request):
+    """ Supprime les ou une consommation associée à la prestation """
+    idconso = int(request.POST.get("idconso"))
+    idprestation = int(request.POST.get("idprestation"))
+    if idconso == 0:
+        # Suppression de toutes les consommations associées à la prestation
+        for conso in Consommation.objects.filter(prestation_id=idprestation).order_by("date"):
+            if conso.etat in ("present", "absenti", "absentj"):
+                return JsonResponse({"erreur": "Vous ne pouvez pas supprimer la consommation ID%d car elle est déjà pointée" % conso.pk}, status=401)
+            conso.delete()
+    else:
+        # Suppression de la consommation sélectionnée
+        conso = Consommation.objects.get(pk=idconso)
+        if conso.etat in ("present", "absenti", "absentj"):
+            return JsonResponse({"erreur": "Vous ne pouvez pas supprimer une consommation déjà pointée"}, status=401)
+        conso.delete()
+    return JsonResponse({"resultat": True})
 
 
 def Get_activites(request):

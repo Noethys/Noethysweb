@@ -19,6 +19,7 @@
                 <th>Heure début</th>
                 <th>Heure fin</th>
                 <th>Etat</th>
+                <th>Actions</th>
             </tr>
         </thead>
 
@@ -31,12 +32,62 @@
                     <td>{{ conso.heure_debut|default:'' }}</td>
                     <td>{{ conso.heure_fin|default:'' }}</td>
                     <td>{{ conso.get_etat_display }}</td>
+                    <td><button type="button" class="btn btn-default btn-xs" onclick="confirmation_supprimer_consommation({{ conso.pk }})" title="Supprimer"><i class="fa fa-fw fa-trash"></i></button></td>
                 </tr>
             {% endfor %}
         </tbody>
 
     </table>
+    <div class="text-right">
+        <button type="button" class="btn btn-default btn-xs" onclick="confirmation_supprimer_consommation(0)" title="Supprimer toutes les consommations associées"><i class="fa fa-fw fa-trash margin-r-5"></i>Supprimer toutes les consommations associées</button>
+    </div>
 
 {% else %}
     <div style="vertical-align: middle;margin-top: 7px;">Aucune consommation associée.</div>
 {% endif %}
+
+<script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+
+<script>
+
+    function confirmation_supprimer_consommation(idconso) {
+        var box = bootbox.dialog({
+            title: "Suppression",
+            message: "Confirmez-vous la suppression de la ou des consommations souhaitées ?",
+            buttons: {
+                ok: {
+                    label: "<i class='fa fa-trash'></i> Supprimer",
+                    className: 'btn-warning',
+                    callback: function(){
+                        supprimer_consommation(idconso);
+                    }
+                },
+                cancel: {
+                    label: "<i class='fa fa-ban'></i> Annuler",
+                    className: 'btn-danger',
+                }
+            }
+        });
+    };
+
+    function supprimer_consommation(idconso) {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_supprimer_conso_prestation' %}",
+            data: {
+                idconso: idconso,
+                idprestation: "{{ idprestation }}",
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+            datatype: "json",
+            success: function(data){
+                location.reload();
+                toastr.success("La consommation a bien été supprimée");
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        })
+    };
+
+</script>

@@ -163,6 +163,7 @@ urlpatterns = [
     path('individus/codes_internet_impression_pdf', secure_ajax(famille_portail.Envoyer_codes), name='ajax_codes_internet_envoyer'),
     path('individus/ajax_get_tarifs_prestation', secure_ajax(famille_prestations.Get_tarifs), name='ajax_get_tarifs_prestation'),
     path('individus/ajax_get_activites_prestation', secure_ajax(famille_prestations.Get_activites), name='ajax_get_activites_prestation'),
+    path('individus/ajax_supprimer_conso_prestation', secure_ajax(famille_prestations.Supprimer_consommation), name='ajax_supprimer_conso_prestation'),
     path('individus/attestation_fiscale_impression_pdf', secure_ajax(famille_voir_attestation_fiscale.Impression_pdf), name='ajax_attestation_fiscale_impression_pdf'),
     path('individus/location_impression_pdf', secure_ajax(famille_voir_location.Impression_pdf), name='ajax_location_impression_pdf'),
     path('individus/location_get_tarif_location', secure_ajax(famille_locations.Get_tarif_location), name='ajax_get_tarif_location'),
