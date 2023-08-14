@@ -596,7 +596,7 @@ class Impression(utils_impression.Impression):
                 largeurColonneLabel = 110
                 largeursColonnes = [self.taille_cadre[2] - largeurColonneMontantTTC - largeurColonneLabel, largeurColonneLabel, largeurColonneMontantTTC]
 
-                if self.mode == "devis" or (not self.dict_options["afficher_deja_paye"] and not self.dict_options["afficher_reste_regler"]):
+                if not self.dict_options["afficher_deja_paye"] and not self.dict_options["afficher_reste_regler"]:
                     dataTableau.append((listeMessages, "Total :", "%.02f %s" % (dictValeur["total"], utils_preferences.Get_symbole_monnaie())))
                 else:
                     dataTableau.append((listeMessages, "Total période :", u"%.02f %s" % (dictValeur["total"], utils_preferences.Get_symbole_monnaie())))
