@@ -3,12 +3,11 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
-from core.views import crud
-from individus.forms.etiquettes import Formulaire_categorie, Formulaire_parametres
+import json
 from django.shortcuts import redirect
 from django.http import JsonResponse
-import json
+from core.views import crud
+from individus.forms.etiquettes import Formulaire_categorie, Formulaire_parametres
 
 
 def Impression_pdf(request):
@@ -21,7 +20,7 @@ def Impression_pdf(request):
     categorie = form_categorie.cleaned_data["categorie"]
 
     # Paramètres
-    form_parametres = Formulaire_parametres(valeurs_form, categorie=categorie)
+    form_parametres = Formulaire_parametres(valeurs_form, categorie=categorie, request=request)
     if not form_parametres.is_valid():
         return JsonResponse({"erreur": "Veuillez compléter les paramètres"}, status=401)
     if not form_parametres.cleaned_data["modele"]:
@@ -51,7 +50,7 @@ class Page(crud.Page):
         context['page_titre'] = "Edition d'étiquettes et de badges"
         context["categorie"] = "famille" if "etiquettes_familles" in str(context["view"]) else "individu"
         context['form_categorie'] = Formulaire_categorie(categorie=context["categorie"])
-        context['form_parametres'] = Formulaire_parametres(categorie=context["categorie"])
+        context['form_parametres'] = Formulaire_parametres(categorie=context["categorie"], request=self.request)
         return context
 
     def post(self, request, **kwargs):
@@ -59,4 +58,3 @@ class Page(crud.Page):
         form_categorie = Formulaire_categorie(request.POST)
         form_categorie.is_valid()
         return redirect("etiquettes_%ss" % form_categorie.cleaned_data["categorie"])
-

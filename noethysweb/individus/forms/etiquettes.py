@@ -3,13 +3,15 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import copy
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
+from crispy_forms.layout import Layout, HTML
 from crispy_forms.bootstrap import Field, PrependedText
-from core.utils.utils_commandes import Commandes
 from django_select2.forms import Select2Widget
 from core.models import ModeleDocument
+from core.utils import utils_parametres
+from core.forms.base import FormulaireBase
 
 
 class Formulaire_categorie(forms.Form):
@@ -33,7 +35,7 @@ class Formulaire_categorie(forms.Form):
         )
 
 
-class Formulaire_parametres(forms.Form):
+class Formulaire_parametres(FormulaireBase, forms.Form):
     modele = forms.ModelChoiceField(label="Modèle", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=ModeleDocument.objects.all(), required=False)
     largeur = forms.IntegerField(label="Largeur de la page", initial=210, min_value=0, required=True)
     hauteur = forms.IntegerField(label="Hauteur de la page", initial=297, min_value=0, required=True)
@@ -65,6 +67,11 @@ class Formulaire_parametres(forms.Form):
         self.fields["marge_droite"].label = False
         self.fields["nbre_copies"].label = False
 
+        # Importation des paramètres
+        parametres = utils_parametres.Get_categorie(categorie="gabarit_etiquettes", utilisateur=self.request.user, parametres={nom: field.initial for nom, field in self.fields.items()})
+        for nom, valeur in parametres.items():
+            self.fields[nom].initial = valeur
+
         self.fields['modele'].queryset = ModeleDocument.objects.filter(categorie=categorie).order_by("nom")
 
         self.helper.layout = Layout(
@@ -81,3 +88,8 @@ class Formulaire_parametres(forms.Form):
             Field('contours'),
             Field('reperes'),
         )
+
+    def clean(self):
+        parametres = copy.copy(self.cleaned_data)
+        del parametres["modele"]
+        utils_parametres.Set_categorie(categorie="gabarit_etiquettes", utilisateur=self.request.user, parametres=parametres)
