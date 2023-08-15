@@ -3,8 +3,9 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+from decimal import Decimal
 from django.urls import reverse_lazy, reverse
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.template import Template, RequestContext
 from django.http import HttpResponse, JsonResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
@@ -12,6 +13,7 @@ from core.views import crud
 from core.models import Famille, Prestation, Tarif, Inscription, Consommation
 from fiche_famille.forms.famille_prestations import Formulaire, FORMSET_DEDUCTIONS
 from fiche_famille.views.famille import Onglet
+from core.utils import utils_texte
 
 
 def Supprimer_consommation(request):
@@ -117,7 +119,7 @@ class Liste(Page, crud.Liste):
     template_name = "fiche_famille/famille_liste.html"
 
     def get_queryset(self):
-        return Prestation.objects.select_related("individu", "activite", "activite__structure", "facture").filter(Q(famille__pk=self.Get_idfamille()) & self.Get_filtres("Q"))
+        return Prestation.objects.select_related("individu", "activite", "activite__structure", "facture").annotate(ventile=Sum("ventilation__montant")).filter(Q(famille__pk=self.Get_idfamille()) & self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -134,6 +136,7 @@ class Liste(Page, crud.Liste):
         activite = columns.TextColumn("Activité", sources=['activite__nom'])
         label = columns.TextColumn("Label", sources=['label'])
         individu = columns.TextColumn("Individu", sources=["individu__nom", "individu__prenom"], processor="Formate_individu")
+        montant = columns.TextColumn("Montant", sources=["montant"], processor='Formate_montant')
 
         class Meta:
             structure_template = MyDatatable.structure_template
@@ -143,6 +146,19 @@ class Liste(Page, crud.Liste):
                 'montant': "Formate_montant_standard",
             }
             ordering = ['date']
+
+        def Formate_montant(self, instance, **kwargs):
+            ventile = Decimal(instance.ventile or 0.0)
+            if ventile == Decimal(0):
+                classe = "text-red"
+                title = "Prestation impayée"
+            elif ventile == instance.montant:
+                classe = "text-green"
+                title = "Prestation totalement payée"
+            else:
+                classe = "text-orange"
+                title = "Prestation partiellement payée (%s)" % utils_texte.Formate_montant(ventile)
+            return "<span title='%s' class='%s'>%s</span>" % (title, classe, utils_texte.Formate_montant(instance.montant))
 
         def Formate_individu(self, instance, **kwargs):
             return instance.individu.Get_nom() if instance.individu else ""
