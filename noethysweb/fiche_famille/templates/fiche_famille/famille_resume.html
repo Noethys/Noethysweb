@@ -47,7 +47,7 @@
                     <span class="info-box-icon bg-{% if solde > 0 %}red{% else %}gray-light{% endif %}"><i class="fa fa-euro"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Solde</span>
-                        <span class="info-box-number">{{ solde|montant }}</span>
+                        <span class="info-box-number {% if solde > 0 %}text-red{% endif %}">{{ solde|montant }}</span>
                     </div>
                 </div>
             </div>
