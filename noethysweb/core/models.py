@@ -138,6 +138,7 @@ LISTE_CATEGORIES_QUESTIONNAIRES = [
     ("location_demande", "Demande de location"),
     ("inscription", "Inscription"),
     ("collaborateur", "Collaborateur"),
+    ("contrat_collaborateur", "Contrat collaborateur"),
     ]
 
 LISTE_ETATS_CONSO = [

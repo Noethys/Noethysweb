@@ -6,13 +6,15 @@
 from django import forms
 from django.forms import ModelForm
 from django_select2.forms import Select2Widget
+from django.db.models import Q
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Fieldset
 from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import ContratCollaborateur
+from core.models import ContratCollaborateur, QuestionnaireQuestion, QuestionnaireReponse
 from core.widgets import DatePickerWidget
+from parametrage.forms import questionnaires
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -57,9 +59,45 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
         )
 
+        # Création des champs des questionnaires
+        condition_structure = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
+        questions = QuestionnaireQuestion.objects.filter(condition_structure, categorie="contrat_collaborateur", visible=True).order_by("ordre")
+        if questions:
+            liste_fields = []
+            for question in questions:
+                nom_controle, ctrl = questionnaires.Get_controle(question)
+                if ctrl:
+                    self.fields[nom_controle] = ctrl
+                    liste_fields.append(Field(nom_controle))
+            self.helper.layout.append(Fieldset("Questionnaire", *liste_fields))
+
+            # Importation des réponses
+            for reponse in QuestionnaireReponse.objects.filter(donnee=self.instance.pk, question__categorie="contrat_collaborateur"):
+                key = "question_%d" % reponse.question_id
+                if key in self.fields:
+                    self.fields[key].initial = reponse.Get_reponse_for_ctrl()
+
     def clean(self):
         # Période
         if self.cleaned_data["date_fin"] and self.cleaned_data["date_fin"] < self.cleaned_data["date_debut"]:
             self.add_error("date_fin", "La date de fin doit être supérieure à la date de début de contrat")
             return
+
+        # Questionnaires
+        for key, valeur in self.cleaned_data.items():
+            if key.startswith("question_"):
+                if isinstance(valeur, list):
+                    self.cleaned_data[key] = ";".join(valeur)
+
         return self.cleaned_data
+
+    def save(self):
+        instance = super(Formulaire, self).save()
+
+        # Enregistrement des réponses du questionnaire
+        for key, valeur in self.cleaned_data.items():
+            if key.startswith("question_"):
+                idquestion = int(key.split("_")[1])
+                QuestionnaireReponse.objects.update_or_create(donnee=instance.pk, question_id=idquestion, defaults={'reponse': valeur})
+
+        return instance
