@@ -3,14 +3,11 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import datetime, uuid
 from django.urls import reverse_lazy, reverse
-from django.http import JsonResponse, HttpResponseRedirect
 from django.db.models import Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import ContratCollaborateur
-from core.utils import utils_dates
 from collaborateurs.forms.collaborateur_contrats import Formulaire
 from collaborateurs.views.collaborateur import Onglet
 
@@ -87,7 +84,7 @@ class Liste(Page, crud.Liste):
             html = [
                 self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
                 self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
-            ]
+                self.Create_bouton_word(url=reverse("collaborateur_voir_contrat", kwargs={"idcollaborateur": kwargs["idcollaborateur"], "idcontrat": instance.pk})), ]
             return self.Create_boutons_actions(html)
 
 

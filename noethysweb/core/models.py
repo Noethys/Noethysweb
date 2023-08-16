@@ -17,6 +17,7 @@ from core.data import data_civilites
 from core.data.data_modeles_impressions import CATEGORIES as CATEGORIES_MODELES_IMPRESSIONS
 from core.data.data_modeles_emails import CATEGORIES as CATEGORIES_MODELES_EMAILS
 from core.data.data_modeles_sms import CATEGORIES as CATEGORIES_MODELES_SMS
+from core.data.data_modeles_word import CATEGORIES as CATEGORIES_MODELES_WORD
 from individus.utils.utils_transports import Get_liste_choix_categories
 from core.utils import utils_permissions
 from core.utils import utils_texte, utils_dates
@@ -4246,6 +4247,33 @@ class ModeleImpression(models.Model):
         # Si le défaut a été supprimé, on le réattribue à une autre objet
         if len(ModeleImpression.objects.filter(categorie=self.categorie, defaut=True)) == 0:
             objet = ModeleImpression.objects.filter(categorie=self.categorie).first()
+            if objet != None:
+                objet.defaut = True
+                objet.save()
+
+
+class ModeleWord(models.Model):
+    idmodele = models.AutoField(verbose_name="ID", db_column='IDmodele', primary_key=True)
+    categorie = models.CharField(verbose_name="Catégorie", max_length=200, choices=CATEGORIES_MODELES_WORD)
+    nom = models.CharField(verbose_name="Nom", max_length=250)
+    description = models.CharField(verbose_name="Description", max_length=400, blank=True, null=True)
+    fichier = models.FileField(verbose_name="Fichier", upload_to=get_uuid_path)
+    defaut = models.BooleanField(verbose_name="Modèle par défaut", default=False)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = 'modeles_word'
+        verbose_name = "modèle de document Word"
+        verbose_name_plural = "modèles de documents Word"
+
+    def __str__(self):
+        return self.nom if self.idmodele else "Nouveau modèle"
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        # Si le défaut a été supprimé, on le réattribue à une autre objet
+        if len(ModeleEmail.objects.filter(categorie=self.categorie, defaut=True)) == 0:
+            objet = ModeleEmail.objects.first(categorie=self.categorie)
             if objet != None:
                 objet.defaut = True
                 objet.save()

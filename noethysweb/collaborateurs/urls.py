@@ -9,7 +9,8 @@ from core.decorators import secure_ajax
 from collaborateurs.views import collaborateur, collaborateur_identite, collaborateur_questionnaire, collaborateur_coords, collaborateur_qualifications, \
                                 collaborateur_pieces, collaborateur_notes, collaborateur_contrats, collaborateur_evenements, planning_collaborateurs, \
                                 collaborateur_appliquer_modele_planning, liste_contrats, collaborateur_outils, collaborateur_historique, \
-                                collaborateur_emails, collaborateur_sms, appliquer_modele_planning, collaborateur_groupes
+                                collaborateur_emails, collaborateur_sms, appliquer_modele_planning, collaborateur_groupes, collaborateur_voir_contrat, \
+                                fusionner_contrats_word
 
 
 urlpatterns = [
@@ -49,6 +50,7 @@ urlpatterns = [
     path('collaborateurs/collaborateurs/contrats/ajouter/<int:idcollaborateur>', collaborateur_contrats.Ajouter.as_view(), name='collaborateur_contrats_ajouter'),
     path('collaborateurs/collaborateurs/contrats/modifier/<int:idcollaborateur>/<int:pk>', collaborateur_contrats.Modifier.as_view(), name='collaborateur_contrats_modifier'),
     path('collaborateurs/collaborateurs/contrats/supprimer/<int:idcollaborateur>/<int:pk>', collaborateur_contrats.Supprimer.as_view(), name='collaborateur_contrats_supprimer'),
+    path('collaborateurs/collaborateurs/contrats/voir/<int:idcollaborateur>/<int:idcontrat>', collaborateur_voir_contrat.View.as_view(), name='collaborateur_voir_contrat'),
 
     path('collaborateurs/collaborateurs/evenements/liste/<int:idcollaborateur>', collaborateur_evenements.Liste.as_view(), name='collaborateur_evenements_liste'),
     path('collaborateurs/collaborateurs/evenements/ajouter/<int:idcollaborateur>', collaborateur_evenements.Ajouter.as_view(), name='collaborateur_evenements_ajouter'),
@@ -68,6 +70,8 @@ urlpatterns = [
 
     path('collaborateurs/liste_contrats', liste_contrats.Liste.as_view(), name='contrats_liste'),
 
+    path('collaborateurs/fusionner_contrats_word', fusionner_contrats_word.Liste.as_view(), name='fusionner_contrats_word'),
+
     # Gestion des évènements
     path('collaborateurs/appliquer_modele_planning', appliquer_modele_planning.View.as_view(), name='appliquer_modele_planning'),
     path('collaborateurs/planning_collaborateurs', planning_collaborateurs.View.as_view(), name='planning_collaborateurs'),
@@ -82,6 +86,7 @@ urlpatterns = [
     path('collaborateurs/planning/supprimer_evenement', secure_ajax(planning_collaborateurs.Supprimer_evenement), name='ajax_planning_collaborateurs_supprimer_evenement'),
     path('collaborateurs/planning/get_form_appliquer_modele', secure_ajax(planning_collaborateurs.Get_form_appliquer_modele), name='ajax_planning_collaborateurs_get_form_appliquer_modele'),
     path('collaborateurs/planning/valid_form_appliquer_modele', secure_ajax(planning_collaborateurs.Valid_form_appliquer_modele), name='ajax_planning_collaborateurs_valid_form_appliquer_modele'),
-
+    path('collaborateurs/contrats/collaborateur_fusionner_contrat', secure_ajax(collaborateur_voir_contrat.Fusionner), name='ajax_collaborateur_fusionner_contrat'),
+    path('collaborateurs/contrats/collaborateur_fusionner_contrats', secure_ajax(fusionner_contrats_word.Fusionner), name='ajax_collaborateur_fusionner_contrats'),
 
 ]

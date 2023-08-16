@@ -1,0 +1,68 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+    <div class="row">
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder">
+                        <button class="btn btn-primary" id="bouton_fusionner_word" title="Fusionner"><i class='fa fa-file-word-o margin-r-5'></i> Fusionner vers Word</button>
+                        <a class="btn btn-danger" href="{% url 'collaborateurs_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                    </div>
+
+                    {# Liste des contrats #}
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+
+                    <br>
+
+                    {# Options d'impression #}
+                    {% crispy form_modele %}
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+
+        {# Lien de téléchargement direct #}
+        <a id="download" download></a>
+
+        <script>
+
+            $("#bouton_fusionner_word").on('click', function(e) {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_collaborateur_fusionner_contrats' %}",
+                    data: {
+                        form_modele: JSON.stringify($("#choix_modele_form").serializeObject()),
+                        contrats_coches: JSON.stringify(get_coches()),
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                    },
+                    success: function (data) {
+                        $("#download").attr("href", data.nom_fichier);
+                        document.getElementById("download").click();
+                    },
+                    error: function(data) {
+                        toastr.error(data.responseJSON.erreur);
+                    }
+                });
+            });
+
+        </script>
+
+    </div>
+
+{% endblock contenu_page %}

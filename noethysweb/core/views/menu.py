@@ -41,6 +41,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_modeles = menu_parametrage.Add(titre="Modèles")
     menu_modeles.Add(code="modeles_documents_liste", titre="Modèles de documents", icone="file-text-o")
     menu_modeles.Add(code="modeles_impressions_liste", titre="Modèles d'impressions", icone="file-text-o")
+    menu_modeles.Add(code="modeles_word_liste", titre="Modèles de documents Word", icone="file-text-o")
     menu_modeles.Add(code="modeles_emails_liste", titre="Modèles d'emails", icone="file-text-o")
     menu_modeles.Add(code="modeles_sms_liste", titre="Modèles de SMS", icone="file-text-o")
     menu_modeles.Add(code="modeles_rappels_liste", titre="Modèles de lettres de rappel", icone="file-text-o")
@@ -441,7 +442,11 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Liste des collaborateurs
     menu_gestion_collaborateurs = menu_collaborateurs.Add(titre="Gestion des collaborateurs")
     menu_gestion_collaborateurs.Add(code="collaborateur_liste", titre="Liste des collaborateurs", icone="file-text-o")
-    menu_gestion_collaborateurs.Add(code="contrats_liste", titre="Liste des contrats", icone="file-text-o")
+
+    # Liste des collaborateurs
+    menu_gestion_contrats = menu_collaborateurs.Add(titre="Gestion des contrats")
+    menu_gestion_contrats.Add(code="contrats_liste", titre="Liste des contrats", icone="file-text-o")
+    menu_gestion_contrats.Add(code="fusionner_contrats_word", titre="Fusionner des contrats vers Word", icone="file-text-o")
 
     # Gestion des évènements
     menu_gestion_evenements_collaborateurs = menu_collaborateurs.Add(titre="Gestion des évènements")

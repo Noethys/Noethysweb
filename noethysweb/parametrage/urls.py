@@ -25,7 +25,8 @@ from parametrage.views import organisateur, structures, \
     configurations_sms, perceptions, modeles_prelevements, taches_recurrentes, modeles_prestations, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
-    modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions
+    modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
+    modeles_word
 
 
 urlpatterns = [
@@ -415,6 +416,13 @@ urlpatterns = [
     path('parametrage/modeles_impressions/modifier/<str:categorie>/<int:pk>', modeles_impressions.Modifier.as_view(), name='modeles_impressions_modifier'),
     path('parametrage/modeles_impressions/supprimer/<str:categorie>/<int:pk>', modeles_impressions.Supprimer.as_view(), name='modeles_impressions_supprimer'),
     path('parametrage/modeles_impressions/dupliquer/<str:categorie>/<int:pk>', modeles_impressions.Dupliquer.as_view(), name='modeles_impressions_dupliquer'),
+
+    # Modèles de documents Word
+    path('parametrage/modeles_word/liste', modeles_word.Liste.as_view(), name='modeles_word_liste'),
+    path('parametrage/modeles_word/liste/<str:categorie>', modeles_word.Liste.as_view(), name='modeles_word_liste'),
+    path('parametrage/modeles_word/ajouter/<str:categorie>', modeles_word.Ajouter.as_view(), name='modeles_word_ajouter'),
+    path('parametrage/modeles_word/modifier/<str:categorie>/<int:pk>', modeles_word.Modifier.as_view(), name='modeles_word_modifier'),
+    path('parametrage/modeles_word/supprimer/<str:categorie>/<int:pk>', modeles_word.Supprimer.as_view(), name='modeles_word_supprimer'),
 
     # Modèles d'emails
     path('parametrage/modeles_emails/liste', modeles_emails.Liste.as_view(), name='modeles_emails_liste'),

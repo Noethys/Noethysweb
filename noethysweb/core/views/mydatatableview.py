@@ -79,6 +79,9 @@ class MyDatatable(Datatable):
     def Create_bouton_imprimer(self, url=None, title="Imprimer"):
         return self.Create_bouton(url=url, title=title, icone="fa-file-pdf-o")
 
+    def Create_bouton_word(self, url=None, title="Fusionner vers un fichier Word"):
+        return self.Create_bouton(url=url, title=title, icone="fa-file-word-o")
+
     def Create_bouton_modifier(self, url=None, title="Modifier"):
         return self.Create_bouton(url=url, title=title, icone="fa-pencil")
 

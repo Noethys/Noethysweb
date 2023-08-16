@@ -42,8 +42,8 @@ class Liste(Page, crud.Liste):
             structure_template = MyDatatable.structure_template
             columns = ["idcontrat", "date_debut", "date_fin", "collaborateur", "type_poste"]
             processors = {
-                'date_debut': helpers.format_date('%d/%m/%Y %H:%M'),
-                'date_fin': helpers.format_date('%d/%m/%Y %H:%M'),
+                'date_debut': helpers.format_date('%d/%m/%Y'),
+                'date_fin': helpers.format_date('%d/%m/%Y'),
             }
             labels = {
                 "date_debut": "Début",
@@ -61,5 +61,6 @@ class Liste(Page, crud.Liste):
             html = [
                 self.Create_bouton_modifier(url=reverse("collaborateur_contrats_modifier", kwargs={"idcollaborateur": instance.collaborateur_id, "pk": instance.pk})),
                 self.Create_bouton_supprimer(url=reverse("collaborateur_contrats_supprimer", kwargs={"idcollaborateur": instance.collaborateur_id, "pk": instance.pk})),
+                self.Create_bouton_word(url=reverse("collaborateur_voir_contrat", kwargs={"idcollaborateur": instance.collaborateur_id, "idcontrat": instance.pk})),
             ]
             return self.Create_boutons_actions(html)
