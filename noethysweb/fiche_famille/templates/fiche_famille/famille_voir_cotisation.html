@@ -18,15 +18,15 @@
             {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
             {% block box_contenu %}
 
-                {# Sélection du modèle de document #}
-                {% crispy form_modele %}
-
                 {# Boutons de commandes #}
-                <div class="buttonHolder pull-right">
+                <div class="buttonHolder mb-4">
                     <button class="btn btn-primary" onclick="impression_pdf()" title="Aperçu PDF de l'adhésion"><i class='fa fa-file-pdf-o'></i> Aperçu PDF</button>
                     <button class="btn btn-primary" onclick="impression_pdf(true)" title="Envoyer l'adhésion par Email"><i class='fa fa-envelope-o'></i> Envoyer par Email</button>
                     <a class="btn btn-danger" href="{% url 'famille_cotisations_liste' idfamille=idfamille %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
                 </div>
+
+                {# Sélection du modèle de document #}
+                {% crispy form_modele %}
 
             {% endblock box_contenu %}
             {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
