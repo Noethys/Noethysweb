@@ -1,3 +1,11 @@
+Version 1.1.7.4 (16/08/2023) :
+
+- Ajout de la fusion des contrats collaborateurs vers Word
+- Ajout du module de fusion vers Word
+- Ajout des questionnaires aux contrats collaborateurs
+- Ajout de la colorisation du montant des prestations selon la ventilation
+- Ajout de la colorisation du solde famille en rouge
+
 Version 1.1.7.3 (14/08/2023) :
 
 - Ajout de la mémorisation du gabarit des étiquettes
