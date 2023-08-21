@@ -1,3 +1,9 @@
+Version 1.1.7.7 (21/08/2023) :
+
+- Ajout de la modification des factures par lot
+- Ajout de la colonne régie dans la liste des factures
+- Correction de l'enregistrement de la régie dans les factures
+
 Version 1.1.7.6 (21/08/2023) :
 
 - Correction de l'affichage des places en attente
