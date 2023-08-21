@@ -141,7 +141,8 @@ def Get_data(parametres={}, request=None):
     # Rajoute un groupe Total
     if afficher_totaux:
         for activite in liste_activites:
-            dict_groupes[activite].append(Total())
+            if activite in dict_groupes:
+                dict_groupes[activite].append(Total())
 
     # Importation des places prises
     liste_places = Consommation.objects.values('date', 'unite', 'groupe', 'quantite', 'evenement').annotate(nbre=Count('pk')).filter(conditions_periodes & Q(activite__in=liste_activites) & Q(etat__in=("reservation", "present")))

@@ -113,48 +113,19 @@ def Get_resultats(parametres={}, etat="attente", request=None):
     })
 
     # Importation des consommations en attente
-    consommations = Consommation.objects.select_related('unite', 'activite', 'groupe', 'evenement', 'inscription', 'individu').filter(conditions_periodes, condition_activites, etat=etat)
+    consommations = Consommation.objects.select_related('unite', 'activite', 'groupe', 'evenement', 'inscription', 'individu', "inscription__individu").filter(conditions_periodes, condition_activites, etat=etat)
 
     dictConso = {}
-    dictActivites = {}
-    dictGroupes = {}
-    dictIndividus = {}
-    dictEvenements = {}
     for conso in consommations:
 
-        # Date
-        if (conso.date in dictConso) == False:
-            dictConso[conso.date] = {}
-        # Activité
-        if (conso.activite_id in dictConso[conso.date]) == False:
-            dictConso[conso.date][conso.activite_id] = {}
-        # Groupe
-        if (conso.groupe_id in dictConso[conso.date][conso.activite_id]) == False:
-            dictConso[conso.date][conso.activite_id][conso.groupe_id] = {}
-        # Evènement
-        if (conso.evenement_id in dictConso[conso.date][conso.activite_id][conso.groupe_id]) == False:
-            dictConso[conso.date][conso.activite_id][conso.groupe_id][conso.evenement_id] = {}
-        # Individu
-        if (conso.individu_id in dictConso[conso.date][conso.activite_id][conso.groupe_id][conso.evenement_id]) == False:
-            dictConso[conso.date][conso.activite_id][conso.groupe_id][conso.evenement_id][conso.individu_id] = []
+        utils_dictionnaires.DictionnaireImbrique(dictionnaire=dictConso, cles=[conso.date, conso.activite, conso.groupe, conso.evenement, conso.inscription], valeur=[])
 
         dictTemp = {"IDconso": conso.pk, "IDindividu": conso.individu_id, "IDactivite": conso.activite_id, "date": conso.date, "IDunite": conso.unite_id,
                     "IDgroupe": conso.groupe_id, "etat": conso.etat, "date_saisie": conso.date_saisie, "nomUnite": conso.unite.nom, "ordreUnite": conso.unite.ordre,
-                    "IDfamille": conso.inscription.famille_id, "IDevenement": conso.evenement_id, "nom_activite": conso.activite.nom,
+                    "IDfamille": conso.inscription.famille_id, "IDevenement": conso.evenement_id, "nom_activite": conso.activite.nom, "inscription": conso.inscription,
                     "nomEvenement": conso.evenement.nom if conso.evenement else None}
 
-        dictConso[conso.date][conso.activite_id][conso.groupe_id][conso.evenement_id][conso.individu_id].append(dictTemp)
-
-        if (conso.activite_id in dictActivites) == False:
-            dictActivites[conso.activite_id] = conso.activite.nom
-        if (conso.groupe_id in dictGroupes) == False:
-            dictGroupes[conso.groupe_id] = conso.groupe.nom
-        if (conso.individu_id in dictIndividus) == False:
-            dictIndividus[conso.individu_id] = {"nomIndividu": conso.individu.Get_nom(), "IDfamille": conso.inscription.famille_id}
-
-        if (conso.evenement_id in dictEvenements) == False and conso.evenement_id != None:
-            dictEvenements[conso.evenement_id] = conso.evenement.nom if conso.evenement else None
-
+        dictConso[conso.date][conso.activite][conso.groupe][conso.evenement][conso.inscription].append(dictTemp)
 
     # Remplissage
     dictPlacesRestantes = {}
@@ -173,51 +144,39 @@ def Get_resultats(parametres={}, etat="attente", request=None):
         listeActivites = list(dictConso[date].keys())
         listeActivites.sort()
 
-        for IDactivite in listeActivites:
+        for activite in listeActivites:
 
-            id_activite = "%s_activite_%d" % (date, IDactivite)
+            id_activite = "%s_activite_%d" % (date, activite.pk)
             if len(listeActivites) > 1:
-                liste_resultats.append({"id": id_activite, "pid": id_date, "type": "activite", "label": dictActivites[IDactivite], "unites": "", "date_saisie": "", "action": ""})
+                liste_resultats.append({"id": id_activite, "pid": id_date, "type": "activite", "label": activite.nom, "unites": "", "date_saisie": "", "action": ""})
             else:
-                # niveauActivite = niveauDate
                 id_activite = id_date
 
             # Branches Groupe
-            listeGroupes = list(dictConso[date][IDactivite].keys())
+            listeGroupes = list(dictConso[date][activite].keys())
             listeGroupes.sort()
 
-            for IDgroupe in listeGroupes:
-                id_groupe = "%s_groupe_%d" % (date, IDgroupe)
-                if len(listeActivites) > 1:
-                    label_groupe = dictGroupes[IDgroupe]
-                else:
-                    label_groupe = "%s - %s" % (dictActivites[IDactivite], dictGroupes[IDgroupe])
+            for groupe in listeGroupes:
+                id_groupe = "%s_groupe_%d" % (date, groupe.pk)
+                label_groupe = groupe.nom if len(listeActivites) > 1 else "%s - %s" % (activite.nom, groupe.nom)
                 liste_resultats.append({"id": id_groupe, "pid": id_activite, "type": "groupe", "label": label_groupe, "unites": "", "date_saisie": "", "action": ""})
 
                 # Parcourt les évènements
-                for IDevenement, dictTemp in dictConso[date][IDactivite][IDgroupe].items():
+                for evenement, dictTemp in dictConso[date][activite][groupe].items():
 
-                    id_evenement = "%s_evenement_%d" % (date, IDevenement if IDevenement else 0)
-                    if IDevenement != None:
-                        liste_resultats.append({"id": id_evenement, "pid": id_groupe, "type": "evenement", "label": dictEvenements[IDevenement], "unites": "", "date_saisie": "", "action": ""})
+                    id_evenement = "%s_evenement_%d" % (date, evenement.pk if evenement else 0)
+                    if evenement:
+                        liste_resultats.append({"id": id_evenement, "pid": id_groupe, "type": "evenement", "label": evenement.nom, "unites": "", "date_saisie": "", "action": ""})
                     else:
                         id_evenement = id_groupe
 
-                    # Branches Individus
-                    listeIndividus = []
-                    for IDindividu, listeConso in dictTemp.items():
-                        listeIDconso = []
-                        for dictConsoIndividu in listeConso:
-                            listeIDconso.append(dictConsoIndividu["IDconso"])
-                        IDconsoMin = min(listeIDconso)
-                        listeIndividus.append((IDconsoMin, IDindividu))
-                    listeIndividus.sort()
+                    # Branches inscriptions
+                    listeInscriptions = [(min([dictConsoIndividu["IDconso"] for dictConsoIndividu in listeConso]), inscription) for inscription, listeConso in dictTemp.items()]
+                    listeInscriptions.sort()
 
                     num = 1
-                    for ordreIndividu, IDindividu in listeIndividus:
-                        nomIndividu = dictIndividus[IDindividu]["nomIndividu"]
-                        texteIndividu = u"%d. %s" % (num, nomIndividu)
-                        IDfamille = dictIndividus[IDindividu]["IDfamille"]
+                    for ordreIndividu, inscription in listeInscriptions:
+                        texteIndividu = "%d. %s" % (num, inscription.individu.Get_nom())
 
                         # Détail pour l'individu
                         texteUnites = ""
@@ -225,13 +184,13 @@ def Get_resultats(parametres={}, etat="attente", request=None):
                         placeDispo = True
                         listeIDunite = []
                         listeIDconso = []
-                        for dictUnite in dictConso[date][IDactivite][IDgroupe][IDevenement][IDindividu]:
+                        for dictUnite in dictConso[date][activite][groupe][evenement][inscription]:
 
                             IDunite = dictUnite["IDunite"]
                             date_saisie = dictUnite["date_saisie"]
                             nomUnite = dictUnite["nomUnite"]
-                            if IDevenement != None:
-                                nomUnite = dictEvenements[IDevenement]
+                            if evenement:
+                                nomUnite = evenement.nom
                             texteUnites += nomUnite + " + "
                             if dateSaisie == None or date_saisie < dateSaisie:
                                 dateSaisie = date_saisie
@@ -242,20 +201,20 @@ def Get_resultats(parametres={}, etat="attente", request=None):
                                 for IDuniteRemplissage in data_remplissage["dict_unites_remplissage_unites"][IDunite]:
 
                                     # Récupère les places restantes du suivi des conso
-                                    key_unite_remplissage = "%s_%s_%s" % (date, IDuniteRemplissage, IDgroupe)
+                                    key_unite_remplissage = "%s_%s_%s" % (date, IDuniteRemplissage, groupe.pk)
                                     dict_places_unite_remplissage = data_remplissage["dict_cases"].get(key_unite_remplissage, None)
 
                                     # Enlève les places réattribuées
                                     if dict_places_unite_remplissage:
                                         nbre_places_restantes = None
-                                        if IDevenement:
-                                            for evenement in dict_places_unite_remplissage["evenements"]:
-                                                if evenement.pk == IDevenement:
+                                        if evenement:
+                                            for evenement_tmp in dict_places_unite_remplissage["evenements"]:
+                                                if evenement_tmp.pk == evenement.pk:
                                                     nbre_places_restantes = evenement.restantes
                                         else:
                                             nbre_places_restantes = dict_places_unite_remplissage["restantes"]
 
-                                        key = (date, IDactivite, IDgroupe, IDuniteRemplissage, IDevenement)
+                                        key = (date, activite, groupe, IDuniteRemplissage, evenement)
                                         if nbre_places_restantes is not None:
                                             nbre_places_restantes -= dictPlacesRestantes.get(key, 0)
                                             listePlacesRestantes.append(nbre_places_restantes)
@@ -265,13 +224,13 @@ def Get_resultats(parametres={}, etat="attente", request=None):
 
                         # S'il reste finalement une place dispo, on change le nbre de places restantes
                         if placeDispo == True:
-                            for dictUnite in dictConso[date][IDactivite][IDgroupe][IDevenement][IDindividu]:
+                            for dictUnite in dictConso[date][activite][groupe][evenement][inscription]:
                                 IDunite = dictUnite["IDunite"]
                                 listeIDunite.append(IDunite)
                                 listeIDconso.append(dictUnite["IDconso"])
                                 if IDunite in data_remplissage["dict_unites_remplissage_unites"]:
                                     for IDuniteRemplissage in data_remplissage["dict_unites_remplissage_unites"][IDunite]:
-                                        key = (date, IDactivite, IDgroupe, IDuniteRemplissage, IDevenement)
+                                        key = (date, activite, groupe, IDuniteRemplissage, evenement)
                                         dictPlacesRestantes.setdefault(key, 0)
                                         dictPlacesRestantes[key] += 1
 
@@ -283,14 +242,14 @@ def Get_resultats(parametres={}, etat="attente", request=None):
 
                         # URL fiche famille
                         action = " ".join([
-                            "<a type='button' title='Accéder à la fiche famille' class='btn btn-default btn-xs' href='%s'><i class='fa fa-folder-open-o'></i></a>" % reverse("famille_resume", args=[IDfamille]),
-                            "<a type='button' title='Accéder aux consommations' class='btn btn-default btn-xs' href='%s'><i class='fa fa-fw fa-calendar'></i></a>" % reverse("famille_consommations", args=[IDfamille, IDindividu]),
+                            "<a type='button' title='Accéder à la fiche famille' class='btn btn-default btn-xs' href='%s'><i class='fa fa-folder-open-o'></i></a>" % reverse("famille_resume", args=[inscription.famille_id]),
+                            "<a type='button' title='Accéder aux consommations' class='btn btn-default btn-xs' href='%s'><i class='fa fa-fw fa-calendar'></i></a>" % reverse("famille_consommations", args=[inscription.famille_id, inscription.individu_id]),
                         ])
 
                         liste_resultats.append({
-                            "id": "individu_%s" % IDindividu, "pid": id_evenement, "type": "individu", "label": label, "idfamille": IDfamille, "idindividu": IDindividu,
-                            "unites": texteUnites[:-3], "date_saisie": utils_dates.DateComplete(dateSaisie), "action": action, "idactivite": IDactivite,
-                            "liste_IDunite": listeIDunite, "date": str(date), "place_dispo": placeDispo, "nom_activite": dictActivites[IDactivite], "liste_IDconso": listeIDconso,
+                            "id": "individu_%s" % inscription.individu_id, "pid": id_evenement, "type": "individu", "label": label, "idfamille": inscription.famille_id, "idindividu": inscription.individu_id,
+                            "unites": texteUnites[:-3], "date_saisie": utils_dates.DateComplete(dateSaisie), "action": action, "idactivite": activite.pk,
+                            "liste_IDunite": listeIDunite, "date": str(date), "place_dispo": placeDispo, "nom_activite": activite.nom, "liste_IDconso": listeIDconso,
                         })
 
                         num += 1
