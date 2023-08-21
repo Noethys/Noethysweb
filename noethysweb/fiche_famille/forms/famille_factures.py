@@ -23,7 +23,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Facture
-        fields = ["date_edition", "date_echeance", "lot"]
+        fields = ["date_edition", "date_echeance", "lot", "regie", "prefixe", "numero"]
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")
@@ -42,5 +42,8 @@ class Formulaire(FormulaireBase, ModelForm):
             Hidden('famille', value=idfamille),
             Field('date_edition'),
             Field('date_echeance'),
+            Field('prefixe'),
+            Field('numero'),
             Field('lot'),
+            Field('regie'),
         )
