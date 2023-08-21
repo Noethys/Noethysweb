@@ -783,7 +783,7 @@ class Facturation():
                         # Recherche si une aide est valable à cette date et pour cet individu et pour cette activité
                         key_aide = "%d_%d_%d" % (case_tableau["famille"], case_tableau["individu"], case_tableau["activite"])
                         if key_aide not in self.dict_aides:
-                            self.dict_aides[key_aide] = Aide.objects.filter(famille_id=case_tableau["famille"], individus__pk=case_tableau["individu"], activite_id=case_tableau["activite"])
+                            self.dict_aides[key_aide] = Aide.objects.select_related("caisse").filter(famille_id=case_tableau["famille"], individus__pk=case_tableau["individu"], activite_id=case_tableau["activite"])
 
                         liste_aide_retenues = []
                         if key_aide in self.dict_aides:
