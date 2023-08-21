@@ -25,7 +25,7 @@ class Liste(Page, crud.Liste):
     model = Facture
 
     def get_queryset(self):
-        return Facture.objects.select_related('famille', 'lot', 'prefixe').filter(self.Get_filtres("Q"))
+        return Facture.objects.select_related('famille', 'lot', 'prefixe', 'regie').filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -35,17 +35,18 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "fscolarise:famille", 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'lot__nom']
+        filtres = ["fpresent:famille", "fscolarise:famille", 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'lot__nom', "regie__nom"]
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         solde_actuel = columns.TextColumn("Solde actuel", sources=['solde_actuel'], processor='Get_solde_actuel')
         lot = columns.TextColumn("Lot", sources=['lot__nom'])
         numero = columns.CompoundColumn("Numéro", sources=['prefixe__prefixe', 'numero'])
+        regie = columns.TextColumn("Régie", sources=['regie__nom'])
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idfacture', 'date_edition', 'numero', 'date_debut', 'date_fin', 'famille', 'total', 'solde', 'solde_actuel', 'lot']
+            columns = ['check', 'idfacture', 'date_edition', 'numero', 'date_debut', 'date_fin', 'famille', 'total', 'solde', 'solde_actuel', 'lot', 'regie']
             processors = {
                 'date_edition': helpers.format_date('%d/%m/%Y'),
                 'date_debut': helpers.format_date('%d/%m/%Y'),
@@ -53,6 +54,7 @@ class Liste(Page, crud.Liste):
                 'date_echeance': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ["date_edition"]
+            hidden_columns = ["regie"]
 
         def Get_solde_actuel(self, instance, **kwargs):
             icone = "fa-check text-green" if instance.solde_actuel == 0 else "fa-close text-red"
@@ -60,6 +62,7 @@ class Liste(Page, crud.Liste):
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             html = [
+                self.Create_bouton_modifier(url=reverse("famille_factures_modifier", kwargs={"idfamille": instance.famille_id, "pk": instance.pk})),
                 self.Create_bouton_imprimer(url=reverse("famille_voir_facture", kwargs={"idfamille": instance.famille_id, "idfacture": instance.pk}), title="Imprimer ou envoyer par email la facture"),
             ]
             return self.Create_boutons_actions(html)
