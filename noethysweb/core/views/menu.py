@@ -356,6 +356,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_factures.Add(code="factures_email", titre="Envoyer des factures par Email", icone="file-text-o")
     menu_factures.Add(code="liste_factures", titre="Liste des factures", icone="file-text-o")
     menu_factures.Add(code="edition_recap_factures", titre="Edition du récapitulatif des factures", icone="file-text-o")
+    menu_factures.Add(code="factures_modifier", titre="Modifier des factures par lot", icone="file-text-o")
 
     # Rappels
     menu_rappels = menu_facturation.Add(titre="Rappels")

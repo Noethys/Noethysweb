@@ -11,7 +11,8 @@ from facturation.views import factures_generation, liste_prestations, liste_fact
                                 synthese_prestations, liste_tarifs, rappels_generation, liste_rappels, factures_impression, factures_email, \
                                 rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations, \
                                 lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
-                                attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes, edition_recap_factures
+                                attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes, edition_recap_factures, \
+                                factures_modifier
 
 urlpatterns = [
 
@@ -26,6 +27,7 @@ urlpatterns = [
     path('facturation/factures_impression', factures_impression.Liste.as_view(), name='factures_impression'),
     path('facturation/factures_email', factures_email.Liste.as_view(), name='factures_email'),
     path('facturation/edition_recap_factures', edition_recap_factures.View.as_view(), name='edition_recap_factures'),
+    path('facturation/factures_modifier', factures_modifier.Liste.as_view(), name='factures_modifier'),
 
     # Rappels
     path('facturation/rappels_generation', Verifie_ventilation(rappels_generation.View.as_view()), name='rappels_generation'),
@@ -114,5 +116,6 @@ urlpatterns = [
     path('facturation/attestations_fiscales_impression_pdf', secure_ajax(attestations_fiscales_impression.Impression_pdf), name='ajax_attestations_fiscales_impression_pdf'),
     path('facturation/attestations_fiscales_email_pdf', secure_ajax(attestations_fiscales_email.Impression_pdf), name='ajax_attestations_fiscales_email_pdf'),
     path('facturation/ajax_solder_impayes', secure_ajax(solder_impayes.Solder), name='ajax_solder_impayes'),
+    path('facturation/ajax_factures_modifier', secure_ajax(factures_modifier.Appliquer), name='ajax_factures_modifier'),
 
 ]

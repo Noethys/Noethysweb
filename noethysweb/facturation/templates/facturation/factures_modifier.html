@@ -1,0 +1,86 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+    <div class="row">
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder mb-3">
+                        <button class="btn btn-primary" onclick="appliquer()" title="Appliquer les modifications"><i class='fa fa-bolt margin-r-5'></i>Appliquer les modifications</button>
+                        <a class="btn btn-danger" href="{% url 'facturation_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                    </div>
+
+                    {# Options #}
+                    {% crispy form_options %}
+
+                    {# Liste des factures existantes #}
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+
+        {# Insertion des modals #}
+        {% include 'core/modal_pdf.html' %}
+
+        <script>
+
+            // Impression du PDF
+            function appliquer() {
+                bootbox.dialog({
+                    title: "Confirmation",
+                    message: "Confirmez-vous l'application des modifications ?<br><font color='red'>Attention, cette action est irréversible !</font>",
+                    buttons: {
+                        ok: {
+                            label: "<i class='fa fa-check'></i> Valider",
+                            className: 'btn-primary',
+                            callback: function(){
+                                $.ajax({
+                                    type: "POST",
+                                    url: "{% url 'ajax_factures_modifier' %}",
+                                    data: {
+                                        form_options: JSON.stringify($("#options_facture").serializeObject()),
+                                        factures_cochees: JSON.stringify(get_coches()),
+                                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                                    },
+                                    datatype: "json",
+                                    success: function(data){
+                                        toastr.success("Les modifications ont été appliquées avec succès");
+                                        var table = $('.datatable').DataTable()
+                                        table.ajax.reload(null, false);
+                                    },
+                                    error: function(data) {
+                                        toastr.error(data.responseJSON.erreur);
+                                    }
+                                })
+                            }
+                        },
+                        cancel: {
+                            label: "<i class='fa fa-ban'></i> Annuler",
+                            className: 'btn-danger',
+                        }
+                    }
+                });
+            };
+
+        </script>
+
+    </div>
+
+{% endblock contenu_page %}
