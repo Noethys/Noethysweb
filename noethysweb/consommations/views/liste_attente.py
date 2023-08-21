@@ -141,8 +141,7 @@ def Get_resultats(parametres={}, etat="attente", request=None):
         liste_resultats.append({"id": id_date, "pid": 0, "type": "date", "label": utils_dates.DateComplete(date), "unites": "", "date_saisie": "", "action": ""})
 
         # Branches Activités
-        listeActivites = list(dictConso[date].keys())
-        listeActivites.sort()
+        listeActivites = sorted(list(dictConso[date].keys()), key=lambda activite: activite.nom)
 
         for activite in listeActivites:
 
@@ -153,8 +152,7 @@ def Get_resultats(parametres={}, etat="attente", request=None):
                 id_activite = id_date
 
             # Branches Groupe
-            listeGroupes = list(dictConso[date][activite].keys())
-            listeGroupes.sort()
+            listeGroupes = sorted(list(dictConso[date][activite].keys()), key=lambda groupe: groupe.nom)
 
             for groupe in listeGroupes:
                 id_groupe = "%s_groupe_%d" % (date, groupe.pk)
@@ -210,7 +208,7 @@ def Get_resultats(parametres={}, etat="attente", request=None):
                                         if evenement:
                                             for evenement_tmp in dict_places_unite_remplissage["evenements"]:
                                                 if evenement_tmp.pk == evenement.pk:
-                                                    nbre_places_restantes = evenement.restantes
+                                                    nbre_places_restantes = evenement_tmp.restantes
                                         else:
                                             nbre_places_restantes = dict_places_unite_remplissage["restantes"]
 
