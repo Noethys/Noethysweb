@@ -1,3 +1,9 @@
+Version 1.1.7.5 (21/08/2023) :
+
+- Correction de la recherche des places en attente pour les individus rattachés à plusieurs familles
+- Correction select_related sur les aides dans la grille des consommations
+- Correction de la purge des mdp
+
 Version 1.1.7.4 (16/08/2023) :
 
 - Ajout de la fusion des contrats collaborateurs vers Word
