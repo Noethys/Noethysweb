@@ -130,11 +130,20 @@ def Generation_factures(request):
     # Recherche le prochain numéro de facture
     numero = int(form.cleaned_data["prochain_numero"])
 
+    # Recherche des régies
+    dict_regies = {activite.pk: activite.regie for activite in Activite.objects.select_related("regie").filter(regie__isnull=False)}
+
     liste_factures_generees = []
     liste_id_factures = []
     dict_reports = {}
     for dict_facture in liste_factures:
         if dict_facture["IDfamille"] in liste_factures_cochees:
+            # Recherche de la régie associée
+            regie = None
+            if dict_facture["liste_activites"]:
+                regie = dict_regies.get(dict_facture["liste_activites"][0], None)
+
+            # Enregistrement de la facture
             facture = Facture.objects.create(
                 prefixe=form.cleaned_data["prefixe"],
                 numero=numero,
@@ -151,7 +160,7 @@ def Generation_factures(request):
                 solde_actuel=dict_facture["solde"],
                 lot=form.cleaned_data["lot_factures"],
                 prestations=";".join(form.cleaned_data["categories"]),
-                regie=None, #todo: régie à ajouter
+                regie=regie,
             )
             liste_factures_generees.append(facture)
             liste_id_factures.append(facture.pk)
