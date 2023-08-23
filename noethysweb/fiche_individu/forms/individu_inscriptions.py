@@ -118,6 +118,10 @@ class Formulaire(FormulaireBase, ModelForm):
             self.add_error('date_fin', "La date de fin doit être supérieure à la date de début")
             return
 
+        if self.cleaned_data["activite"].date_fin and self.cleaned_data["date_debut"] > self.cleaned_data["activite"].date_fin:
+            self.add_error('date_debut', "La date de début doit être inférieure à la date de fin de l'activité")
+            return
+
         return self.cleaned_data
 
 
