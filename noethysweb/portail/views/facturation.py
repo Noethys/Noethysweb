@@ -122,20 +122,21 @@ def effectuer_paiement_en_ligne(request):
             logger.debug(u"Page EFFECTUER_PAIEMENT_EN_LIGNE TIPI (%s): Aucune régie n'a été paramétrée.", request.user.famille)
             return JsonResponse({"erreur": "Aucune régie n'a été paramétrée. Contactez l'administrateur du portail."}, status=401)
 
-        p = Payment("tipi_regie", {'numcli': facture.regie.numclitipi})
+        p = Payment("tipi", {'numcli': facture.regie.numclitipi})
+        objet = "Paiement %s" % utils_texte.Supprimer_accents(facture.regie.nom)
         requete = p.request(
             amount=str(montant_reglement),
             exer=str(facture.date_debut.year),
-            refdet=facture.numero,
-            objet="Paiement %s" % utils_texte.Supprimer_accents(facture.regie.nom),
-            email=request.user.famille.email,
+            refdet="%06d" % facture.numero,
+            objet=objet,
+            email=request.user.famille.mail,
             urlcl=request.build_absolute_uri(reverse("retour_payfip")),
             saisie=saisie)
         logger.debug(u"Page EFFECTUER_PAIEMENT_EN_LIGNE (%s): requete: %s // systeme_paiement(%s)", request.user.famille, requete, "payfip")
 
         # Enregistrement du paiement
         Paiement.objects.create(famille=request.user.famille, systeme_paiement="payfip", idtransaction=requete[0],
-                                refdet=facture.numero, montant=montant_reglement, objet=requete[3], saisie=saisie, ventilation=ventilation_str)
+                                refdet=facture.numero, montant=montant_reglement, objet=objet, saisie=saisie, ventilation=ventilation_str)
 
         return JsonResponse({"systeme_paiement": "payfip", "urltoredirect": requete[2]})
 
@@ -190,7 +191,7 @@ def retour_payfip(request):
     heurtrans = request.get("heurtrans", 0)
 
     # Récupération des données et calcul de la signature
-    p = Payment("tipi_regie", {})
+    p = Payment("tipi", {})
     reponse = p.response(data.urlencode())
 
     # Recherche l'état du paiement
@@ -418,7 +419,7 @@ class View(CustomView, TemplateView):
         context['page_titre'] = "Facturation"
 
         # Importation des paiements PAYFIP en cours
-        liste_paiements = Paiement.objects.filter(famille=self.request.user.famille, systeme_paiement="payfip", horodatage__lt=datetime.datetime.now() - datetime.timedelta(minutes=5))
+        liste_paiements = Paiement.objects.filter(famille=self.request.user.famille, systeme_paiement="payfip", horodatage__gt=datetime.datetime.now() - datetime.timedelta(minutes=5))
         dict_paiements = {"F": {}, "P": {}, "C": {}}
         for paiement in liste_paiements:
             for texte in paiement.ventilation.split(","):
