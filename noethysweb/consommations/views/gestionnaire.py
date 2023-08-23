@@ -100,11 +100,11 @@ class View(CustomView, TemplateView):
         conditions = Q(date=data["date_min"])
         if data["selection_activite"] != None: conditions &= Q(activite=data["selection_activite"])
         if data["selection_groupes"] != None: conditions &= Q(groupe__in=data["selection_groupes"])
-        liste_conso = Consommation.objects.filter(conditions)
-        data["liste_conso_json"] = serializers.serialize('json', liste_conso)
+        data["liste_conso"] = Consommation.objects.filter(conditions)
+        data["liste_conso_json"] = serializers.serialize('json', data["liste_conso"])
 
         # Recherche les individus présents
-        liste_idinscriptions = list({conso.inscription_id:None for conso in liste_conso}.keys())
+        liste_idinscriptions = list({conso.inscription_id:None for conso in data["liste_conso"]}.keys())
 
         # Ajoute les éventuelles inscriptions des individus ajoutés manuellement
         selection_idactivite = data["selection_activite"].pk if data["selection_activite"] else None

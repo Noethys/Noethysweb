@@ -145,9 +145,6 @@ def Get_generic_data(data={}):
 
     # Importation des consommations existantes
     if "liste_conso_json" not in data:
-        liste_inscriptions = []
-        # for key_individu, inscriptions in data['dict_inscriptions_by_individu'].items():
-        #     liste_inscriptions.extend(inscriptions)
         liste_conso = Consommation.objects.select_related("inscription").filter(data["conditions_periodes"] & Q(inscription__in=data["liste_inscriptions"]))
         data["liste_conso"] = liste_conso
         data["liste_conso_json"] = serializers.serialize('json', liste_conso)
@@ -163,7 +160,7 @@ def Get_generic_data(data={}):
         dict_deductions[deduction.prestation_id].append({"label": deduction.label, "date": str(deduction.date), "aide": deduction.aide_id, "montant": float(deduction.montant)})
 
     # Importation des prestations
-    conditions = Q(categorie="consommation") & (data["conditions_periodes"] | (Q(forfait_date_debut__lte=data["date_max"]) & Q(forfait_date_fin__gte=data["date_min"])))
+    conditions = Q(pk__in=[conso.prestation_id for conso in data.get("liste_conso", [])]) | Q(categorie="consommation") & (data["conditions_periodes"] | (Q(forfait_date_debut__lte=data["date_max"]) & Q(forfait_date_fin__gte=data["date_min"])))
     if data["mode"] in ("individu", "portail"):
         conditions &= Q(famille_id=data["idfamille"]) & Q(individu__in=data["liste_individus"])
     liste_prestations = Prestation.objects.filter(conditions)
