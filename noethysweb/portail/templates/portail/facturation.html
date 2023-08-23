@@ -86,7 +86,7 @@
                     <p>Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PayZen. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.</p>
                 {% else %}
                     <img src="{% static "images/payfip.jpg" %}" class="pull-right" alt="Logo Payfip">
-                    <p>Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne TIPI. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.</p>
+                    <p>Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PAYFIP. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.</p>
                 {% endif %}
                 <div>
                     <a href="#" class="btn btn-success" data-toggle="modal" data-target="#modal_selection_factures" title="Payer en ligne avec une carte bancaire"><i class="fa fa-credit-card margin-r-5"></i>Payer en ligne</a>
@@ -168,6 +168,8 @@
 
         {% endembed %}
 
+        <a id="lien_externe"></a>
+
         <script>
             // Reset des champs de saisie de la fenêtre modale
             $('#modal_selection_factures').on('show.bs.modal', function (event) {
@@ -237,8 +239,8 @@
                             }
                             if (data.systeme_paiement === "payfip") {
                                 $('#modal_paiement_factures').modal('hide');
-                                $('#valider_montant').attr('href', data.urltoredirect);
-                                location.href = "{% url 'portail_facturation' %}"
+                                $("#lien_externe").attr("href", "javascript:window.open('" + data.urltoredirect + "', '_blank', 'height=700, width=900, toolbar=no, menubar=no, scrollbars=no, resizable=yes, location=no, directories=no, status=no');");
+                                document.getElementById("lien_externe").click();
                             }
                         },
                         error: function(data) {
