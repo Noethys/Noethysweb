@@ -1,3 +1,9 @@
+Version 1.1.7.8 (23/08/2023) :
+
+- Ajout de la vérification de la date de début lors de l'ajout d'une inscription
+- Correction de l'importation des prestations des forfaits datés dans le gestionnaire
+- Correction sur le paiement en ligne avec Payfip
+
 Version 1.1.7.7 (21/08/2023) :
 
 - Ajout de la modification des factures par lot
