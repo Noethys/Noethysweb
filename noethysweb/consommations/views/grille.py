@@ -1538,116 +1538,20 @@ class Facturation():
 
 
 def Valider_traitement_lot(request):
-    # Récupération des données générales
-    action = request.POST.get("action_type")
-    date_debut = utils_dates.ConvertDateFRtoDate(request.POST.get("date_debut"))
-    date_fin = utils_dates.ConvertDateFRtoDate(request.POST.get("date_fin"))
-    jours_scolaires = request.POST.getlist("jours_scolaires")
-    jours_vacances = request.POST.getlist("jours_vacances")
-    semaines = request.POST.get("frequence_type")
-    feries = request.POST.get("inclure_feries") == "on"
-
-    # Vérification des données
-    erreurs = []
-    if not date_debut: erreurs.append("date de début")
-    if not date_fin: erreurs.append("date de fin")
-    if date_debut and date_fin and date_fin < date_debut: erreurs.append("date de début supérieure à la date de début")
-    if not jours_scolaires and not jours_vacances: erreurs.append("jours")
-
-    # Récupération des unités
-    dict_unites = {}
-    for key, valeur in request.POST.items():
-        if key.startswith("unite_"):
-            chaine = key.split("_")
-            IDunite = int(chaine[1])
-            if len(chaine) == 2:
-                dict_unites.setdefault(IDunite, {})
-            if len(chaine) == 3 and IDunite in dict_unites:
-                option = chaine[2]
-                if option == "debut":
-                    option = "heure_debut"
-                    if utils_dates.HeureStrEnTime(valeur) == datetime.time(0, 0):
-                        erreurs.append("l'heure de début n'est pas valide")
-                if option == "fin":
-                    option = "heure_fin"
-                    if utils_dates.HeureStrEnTime(valeur) == datetime.time(0, 0):
-                        erreurs.append("l'heure de fin n'est pas valide")
-                if option == "quantite":
-                    try:
-                        valeur = int(valeur)
-                    except:
-                        erreurs.append("La quantité n'est pas valide")
-                dict_unites[IDunite][option] = valeur
-
-    if not dict_unites:
-        erreurs.append("unités")
-
-    # Affichage des erreurs
-    if erreurs:
-        return JsonResponse({"erreur": "Les champs suivants ne sont pas valides : %s." % ", ".join(erreurs)}, status=401)
-
-    # Importation de données
-    liste_vacances = Vacance.objects.filter(date_fin__gte=date_debut, date_debut__lte=date_fin)
-    liste_feries = Ferie.objects.all()
-
-    # Génération des dates
-    listeDates = [date_debut,]
-    tmp = date_debut
-    while tmp < date_fin:
-        tmp += datetime.timedelta(days=1)
-        listeDates.append(tmp)
-
-    donnees = {}
-    liste_dates_valides = []
-    date = date_debut
-    numSemaine = int(semaines)
-    dateTemp = date
-    for date in listeDates:
-
-        # Vérifie période et jour
-        valide = False
-        if utils_dates.EstEnVacances(date, liste_vacances):
-            if str(date.weekday()) in jours_vacances:
-                valide = True
-        else:
-            if str(date.weekday()) in jours_scolaires:
-                valide = True
-
-        # Calcul le numéro de semaine
-        if listeDates:
-            if date.weekday() < dateTemp.weekday():
-                numSemaine += 1
-
-        # Fréquence semaines
-        if semaines in (2, 3, 4):
-            if numSemaine % semaines != 0:
-                valide = False
-
-        # Semaines paires et impaires
-        if valide and semaines in (5, 6):
-            numSemaineAnnee = date.isocalendar()[1]
-            if numSemaineAnnee % 2 == 0 and semaines == 6:
-                valide = False
-            if numSemaineAnnee % 2 != 0 and semaines == 5:
-                valide = False
-
-        # Vérifie si férié
-        if not feries and utils_dates.EstFerie(date, liste_feries):
-            valide = False
-
-        if valide:
-            liste_dates_valides.append(date)
-
-        dateTemp = date
-
-    # Données renvoyées vers la page
-    donnees = {
-        "success": True,
-        "action": action,
-        "dates": liste_dates_valides,
-        "unites": dict_unites,
+    parametres = {
+        "action_type": request.POST.get("action_type"),
+        "date_debut": utils_dates.ConvertDateFRtoDate(request.POST.get("date_debut")),
+        "date_fin": utils_dates.ConvertDateFRtoDate(request.POST.get("date_fin")),
+        "jours_scolaires": request.POST.getlist("jours_scolaires"),
+        "jours_vacances": request.POST.getlist("jours_vacances"),
+        "frequence_type": request.POST.get("frequence_type"),
+        "inclure_feries": request.POST.get("inclure_feries") == "on",
     }
-    return JsonResponse(donnees)
+    from consommations.utils import utils_traitement_lot
+    resultat = utils_traitement_lot.Calculer(request=request, parametres=parametres)
+    if "erreur" in resultat:
+        return JsonResponse(resultat, status=401)
+    return JsonResponse(resultat)
 
 
 def Impression_pdf(request):

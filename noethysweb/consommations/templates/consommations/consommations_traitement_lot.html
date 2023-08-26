@@ -1,0 +1,87 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+    <div class="row">
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder mb-3">
+                        <button class="btn btn-primary" onclick="appliquer()" title="Appliquer le traitement par lot"><i class='fa fa-bolt margin-r-5'></i>Appliquer</button>
+                        <a class="btn btn-danger" href="{% url 'consommations_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                    </div>
+
+                    {# Options #}
+                    {% crispy form_options %}
+
+                    {# Liste des individus #}
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+
+        <script>
+
+            // Application
+            function appliquer() {
+                bootbox.dialog({
+                    title: "Confirmation",
+                    message: "Confirmez-vous l'application du traitement par lot ?",
+                    buttons: {
+                        ok: {
+                            label: "<i class='fa fa-check'></i> Valider",
+                            className: 'btn-primary',
+                            callback: function(){
+                                $("[name=individus_coches]").val(JSON.stringify(get_coches()));
+                                $("[name=idactivite]").val("{{ idactivite }}");
+                                var box = bootbox.dialog({
+                                    message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Traitement par lot en cours</b><br><br>Veuillez patienter...</p>",
+                                    closeButton: false
+                                });
+                                $.ajax({
+                                    type: "POST",
+                                    url: "{% url 'ajax_consommations_traitement_lot' %}",
+                                    data: $("#grille_traitement_lot").serialize(),
+                                    datatype: "json",
+                                    success: function(data){
+                                        bootbox.hideAll();
+                                        toastr.success("Le traitement par lot a été appliqué avec succès");
+                                        var table = $('.datatable').DataTable()
+                                        table.ajax.reload();
+                                    },
+                                    error: function(data) {
+                                        bootbox.hideAll();
+                                        toastr.error(data.responseJSON.erreur);
+                                    }
+                                })
+                            }
+                        },
+                        cancel: {
+                            label: "<i class='fa fa-ban'></i> Annuler",
+                            className: 'btn-danger',
+                        }
+                    }
+                });
+            };
+
+        </script>
+
+    </div>
+
+{% endblock contenu_page %}

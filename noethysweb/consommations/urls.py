@@ -8,7 +8,7 @@ from core.views import toc
 from parametrage.views import calendrier
 from consommations.forms import grille_forfaits
 from consommations.views import grille, gestionnaire, suivi_consommations, etat_global, synthese_consommations, liste_attente, liste_absences, edition_liste_conso, \
-                                pointeuse, liste_consommations, liste_repas, etat_nomin, liste_durees
+                                pointeuse, liste_consommations, liste_repas, etat_nomin, liste_durees, consommations_traitement_lot #, pointeuse_barcodes
 from core.decorators import secure_ajax
 
 
@@ -21,12 +21,16 @@ urlpatterns = [
     path('consommations/edition_liste_conso', edition_liste_conso.View.as_view(), name='edition_liste_conso'),
     path('consommations/gestionnaire_consommations', gestionnaire.View.as_view(), name='gestionnaire_conso'),
     path('consommations/pointeuse_consommations', pointeuse.View.as_view(), name='pointeuse_conso'),
+    # path('consommations/pointeuse_barcodes', pointeuse_barcodes.View.as_view(), name='pointeuse_barcodes'),
     path('consommations/suivi_consommations', suivi_consommations.View.as_view(), name='suivi_consommations'),
 
     path('consommations/liste_consommations', liste_consommations.Liste.as_view(), name='liste_consommations'),
     path('consommations/liste_consommations/modifier/<int:pk>', liste_consommations.Modifier.as_view(), name='liste_consommations_modifier'),
     path('consommations/liste_consommations/supprimer/<int:pk>', liste_consommations.Supprimer.as_view(), name='liste_consommations_supprimer'),
     path('consommations/consommations_supprimer_plusieurs/<str:listepk>', liste_consommations.Supprimer_plusieurs.as_view(), name='consommations_supprimer_plusieurs'),
+
+    path('consommations/consommations_traitement_lot/selection_activite', consommations_traitement_lot.Selection_activite.as_view(), name='consommations_traitement_lot'),
+    path('consommations/consommations_traitement_lot/liste/<int:idactivite>', consommations_traitement_lot.Liste.as_view(), name='consommations_traitement_lot_liste'),
 
     # Listes par état
     path('consommations/liste_attente', liste_attente.View.as_view(etat="attente"), name='liste_attente'),
@@ -55,6 +59,7 @@ urlpatterns = [
     path('consommations/etat_global/appliquer_parametres', secure_ajax(etat_global.Appliquer_parametres), name='ajax_etat_global_appliquer_parametres'),
     path('consommations/etat_global/generer_pdf', secure_ajax(etat_global.Generer_pdf), name='ajax_etat_global_generer_pdf'),
     path('consommations/edition_liste_conso/generer_pdf', secure_ajax(edition_liste_conso.Generer_pdf), name='ajax_edition_liste_conso_generer_pdf'),
-
+    # path('consommations/pointeuse_barcodes/on_scan_individu', secure_ajax(pointeuse_barcodes.On_scan_individu), name='ajax_consommations_on_scan_individu'),
+    path('consommations/consommations_traitement_lot', secure_ajax(consommations_traitement_lot.Appliquer), name='ajax_consommations_traitement_lot'),
 
 ]

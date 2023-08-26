@@ -5,7 +5,7 @@
 
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, Submit, HTML, ButtonHolder
+from crispy_forms.layout import Layout, Fieldset, Submit, HTML, ButtonHolder, Hidden
 from crispy_forms.bootstrap import Field, InlineCheckboxes, Div
 from core.widgets import DatePickerWidget
 from core.models import JOURS_SEMAINE
@@ -30,7 +30,12 @@ class Formulaire(FormulaireBase, forms.Form):
                         (5, "Les semaines paires"), (6, "Les semaines impaires")]
     frequence_type = forms.TypedChoiceField(label="Fréquence", choices=choix_frequence, initial=1, required=False)
 
+    # Pour le traitement par lot global
+    individus_coches = forms.CharField(label="Individus_coches", required=False)
+    idactivite = forms.CharField(label="idactivite", required=False)
+
     def __init__(self, *args, **kwargs):
+        mode = kwargs.pop("mode", "grille")
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'grille_traitement_lot'
@@ -54,21 +59,26 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("frequence_type", id="traitement_lot_frequence"),
             Field("inclure_feries", id="traitement_lot_feries"),
             HTML(EXTRA_HTML),
-            ButtonHolder(
-                Div(
-                    Submit('submit', 'Valider', css_class='btn-primary'),
-                    HTML("""<button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>"""),
-                    css_class="modal-footer", style="padding-bottom:0px;padding-right:0px;"),
-            ),
+            Hidden("individus_coches", ""),
+            Hidden("idactivite", ""),
         )
 
-    def clean(self):
-        # Action
-        if self.cleaned_data["action_type"] == "COPIER_DATE":
-            if self.cleaned_data["date_modele"] == None:
-                self.add_error("date_modele", 'Vous devez saisir une date à recopier')
-                return
+        # Si mode grille, ajout des boutons de commande
+        if mode == "grille":
+            self.helper.layout.append(
+                ButtonHolder(
+                    Div(
+                        Submit('submit', 'Valider', css_class='btn-primary'),
+                        HTML("""<button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>"""),
+                        css_class="modal-footer", style="padding-bottom:0px;padding-right:0px;"),
+                ),
+            )
 
+        if mode == "consommations_traitement_lot":
+            self.helper.layout.insert(0, Fieldset("Paramètres"))
+            self.helper.layout.append(Fieldset("Sélection des individus concernés"))
+
+    def clean(self):
         # Période d'application
         if self.cleaned_data["date_debut"] == None:
             self.add_error('date_debut', "Vous devez sélectionner une date de début")

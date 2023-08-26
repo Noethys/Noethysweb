@@ -3,12 +3,11 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, uuid, json, time
 logger = logging.getLogger(__name__)
+from django.forms.models import model_to_dict
 from core.models import Inscription, Activite, Consommation
 from consommations.views.grille import Get_periode, Get_generic_data, Save_grille, Facturation
-from django.forms.models import model_to_dict
-import datetime, json, time
 
 
 class Grille_virtuelle():
@@ -125,11 +124,13 @@ class Grille_virtuelle():
                 conso = Consommation()
                 dict_conso = model_to_dict(conso)
                 dict_conso.update(dict_case)
-                dict_conso["pk"] = conso.idconso
+                dict_conso["pk"] = uuid.uuid4()
                 dict_conso["key_case"] = key_case
                 dict_conso["etat"] = parametres.get("etat", "reservation")
                 dict_conso["dirty"] = True
                 dict_conso["evenement"] = dict_case["evenement"]
+                dict_conso["heure_debut"] = parametres.get("heure_debut", None)
+                dict_conso["heure_fin"] = parametres.get("heure_fin", None)
 
                 logger.debug("Ajout d'une nouvelle conso : %s" % dict_conso)
 
