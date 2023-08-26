@@ -238,7 +238,7 @@
                                 $("#form_paiement").submit()
                             }
                             if (data.systeme_paiement === "payfip") {
-                                $('#modal_paiement_factures').modal('hide');
+                                $('#modal_selection_factures').modal('hide');
                                 $("#lien_externe").attr("href", "javascript:window.open('" + data.urltoredirect + "', '_blank', 'height=700, width=900, toolbar=no, menubar=no, scrollbars=no, resizable=yes, location=no, directories=no, status=no');");
                                 document.getElementById("lien_externe").click();
                             }

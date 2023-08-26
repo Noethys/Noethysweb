@@ -122,7 +122,7 @@ def effectuer_paiement_en_ligne(request):
             logger.debug(u"Page EFFECTUER_PAIEMENT_EN_LIGNE TIPI (%s): Aucune régie n'a été paramétrée.", request.user.famille)
             return JsonResponse({"erreur": "Aucune régie n'a été paramétrée. Contactez l'administrateur du portail."}, status=401)
 
-        p = Payment("tipi", {'numcli': facture.regie.numclitipi})
+        p = Payment("tipi", {'numcli': facture.regie.numclitipi, "automatic_return_url": request.build_absolute_uri(reverse("retour_payfip"))})
         objet = "Paiement %s" % utils_texte.Supprimer_accents(facture.regie.nom)
         requete = p.request(
             amount=str(montant_reglement),
@@ -130,7 +130,6 @@ def effectuer_paiement_en_ligne(request):
             refdet="%06d" % facture.numero,
             objet=objet,
             email=request.user.famille.mail,
-            urlcl=request.build_absolute_uri(reverse("retour_payfip")),
             saisie=saisie)
         logger.debug(u"Page EFFECTUER_PAIEMENT_EN_LIGNE (%s): requete: %s // systeme_paiement(%s)", request.user.famille, requete, "payfip")
 
@@ -185,10 +184,10 @@ def retour_payfip(request):
     data = request.POST
 
     # Extraction des champs non traités par eopayment
-    resultrans = request.get("resultrans", 0)
-    numauto = request.get("numauto", 0)
-    dattrans = request.get("dattrans", 0)
-    heurtrans = request.get("heurtrans", 0)
+    resultrans = data.get("resultrans", 0)
+    numauto = data.get("numauto", 0)
+    dattrans = data.get("dattrans", 0)
+    heurtrans = data.get("heurtrans", 0)
 
     # Récupération des données et calcul de la signature
     p = Payment("tipi", {})
