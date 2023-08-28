@@ -9,7 +9,7 @@ from decimal import Decimal
 from django.db.models import Q, Sum
 from core.models import Prestation, Ventilation, Deduction, Consommation, Reglement, Agrement, Facture, Quotient, PesPiece
 from core.data import data_codes_etab
-from core.utils import utils_preferences, utils_dates, utils_conversion, utils_impression, utils_infos_individus, utils_questionnaires
+from core.utils import utils_preferences, utils_dates, utils_conversion, utils_impression, utils_infos_individus, utils_questionnaires, utils_texte
 from facturation.utils import utils_impression_facture
 from facturation.utils.utils_export_pes import Get_cle_modulo_23
 
@@ -516,7 +516,7 @@ class Facturation():
         for ID, dictValeurs in dictComptes.items():
             dictComptes[ID]["solde_avec_reports"] = dictComptes[ID]["solde"] + dictComptes[ID]["total_reports"]
             dictComptes[ID]["{SOLDE_AVEC_REPORTS}"] = "%.02f %s" % (dictComptes[ID]["solde_avec_reports"], utils_preferences.Get_symbole_monnaie())
-            dictComptes[ID]["{INDIVIDUS_CONCERNES}"] = ", ".join(dictComptes[ID]["{INDIVIDUS_CONCERNES}"])
+            dictComptes[ID]["{INDIVIDUS_CONCERNES}"] = utils_texte.Convert_liste_to_texte_virgules(dictComptes[ID]["{INDIVIDUS_CONCERNES}"])
             dictComptes[ID]["{NOMS_INDIVIDUS}"] = dictComptes[ID]["{INDIVIDUS_CONCERNES}"]
 
         logger.debug("Fin de la récupération des données de facturation.")

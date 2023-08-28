@@ -232,6 +232,9 @@ class Impression(utils_impression.Impression):
                                           spaceBefore=0,
                                           spaceAfter=0)
 
+                            paraStyleDatesForfait = ParagraphStyle(name="prestation", fontName="Helvetica", fontSize=int(self.dict_options["taille_texte_prestation"]),
+                                                                   leading=int(self.dict_options["taille_texte_prestation"]), spaceBefore=2, spaceAfter=0)
+
                             if self.dict_options["affichage_prestations"] != "0":
                                 
                                 # -------------- MODE REGROUPE ----------------
@@ -406,8 +409,8 @@ class Impression(utils_impression.Impression):
                                             date_debut = listeDatesUnite[0]
                                             date_fin = listeDatesUnite[-1]
                                             nbreDates = len(listeDatesUnite)
-                                            label = "<BR/><font size=5>Du %s au %s soit %d jours</font>" % (utils_dates.ConvertDateENGtoFR(date_debut), utils_dates.ConvertDateENGtoFR(date_fin), nbreDates)
-                                            listeIntitules.append(Paragraph(label, paraStyle)) 
+                                            label = "<font size=5>Du %s au %s soit %d jours</font>" % (utils_dates.ConvertDateENGtoFR(date_debut), utils_dates.ConvertDateENGtoFR(date_fin), nbreDates)
+                                            listeIntitules.append(Paragraph(label, paraStyleDatesForfait))
                                                                                 
                                         # TVA
                                         if activeTVA == True:
