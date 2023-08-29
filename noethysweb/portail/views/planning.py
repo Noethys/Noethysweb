@@ -51,7 +51,7 @@ class View(CustomView, TemplateView):
         """ Vérifie que l'utilisateur peut se connecter à cette page """
         if not super(View, self).test_func():
             return False
-        inscription = Inscription.objects.filter(famille=self.request.user.famille, individu_id=self.kwargs.get('idindividu'))
+        inscription = Inscription.objects.filter(famille=self.request.user.famille, individu_id=self.kwargs.get('idindividu'), activite_id=self.kwargs["idactivite"])
         if not inscription:
             return False
         if not inscription.first().internet_reservations:
