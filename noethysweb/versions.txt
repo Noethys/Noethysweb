@@ -1,3 +1,7 @@
+Version 1.1.8.0 (29/08/2023) :
+
+- Correction erreur 403 sur planning portail
+
 Version 1.1.7.9 (28/08/2023) :
 
 - Ajout du traitement par lot global
