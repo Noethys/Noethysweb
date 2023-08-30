@@ -1,3 +1,7 @@
+Version 1.1.8.2 (30/08/2023) :
+
+- Correction solde de la période de préfacturation
+
 Version 1.1.8.1 (30/08/2023) :
 
 - Correction calcul solde famille après correction ventilation
