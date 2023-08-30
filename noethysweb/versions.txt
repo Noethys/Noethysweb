@@ -1,3 +1,7 @@
+Version 1.1.8.1 (30/08/2023) :
+
+- Correction calcul solde famille après correction ventilation
+
 Version 1.1.8.0 (29/08/2023) :
 
 - Correction erreur 403 sur planning portail
