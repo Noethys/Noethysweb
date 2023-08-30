@@ -8,6 +8,8 @@ logger = logging.getLogger(__name__)
 from decimal import Decimal
 from django.db.models import Q, Sum
 from core.models import Prestation, Reglement, Ventilation
+from facturation.utils import utils_factures
+
 
 def xDecimal(valeur=0.0):
     """ Arrondit un Decimal """
@@ -136,5 +138,8 @@ def Ventilation_auto(IDfamille=None):
                             dictVentilationsPrestation[prestation.pk].append(ventilation.pk)
                             ResteAVentiler -= montant
                             credit -= montant
+
+    # Ajuster les soldes des factures de la famille
+    utils_factures.Maj_solde_actuel_factures(IDfamille=IDfamille)
 
     return True
