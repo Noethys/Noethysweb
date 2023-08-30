@@ -466,7 +466,7 @@ class View(CustomView, TemplateView):
             if liste_periodes:
                 ventilations = Ventilation.objects.values("prestation").filter(famille=self.request.user.famille, prestation__date__gte=date_min, prestation__date__lte=date_max).annotate(total=Sum("montant"))
                 dict_ventilations = {ventilation["prestation"]: ventilation["total"] for ventilation in ventilations}
-                for prestation in Prestation.objects.filter(famille=self.request.user.famille, date__gte=date_min, date__lte=date_max):
+                for prestation in Prestation.objects.filter(famille=self.request.user.famille, date__gte=date_min, date__lte=date_max, facture__isnull=True):
                     solde_prestation = prestation.montant - dict_ventilations.get(prestation.pk, decimal.Decimal(0))
                     if solde_prestation > decimal.Decimal(0):
                         for periode in liste_periodes:
