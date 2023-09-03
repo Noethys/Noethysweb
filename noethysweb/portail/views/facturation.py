@@ -208,7 +208,7 @@ def retour_payfip(request):
     paiement.numauto = numauto
     paiement.dattrans = dattrans
     paiement.heurtrans = heurtrans
-    paiement.message = reponse.bank_status.decode("utf8")
+    paiement.message = reponse.bank_status
     paiement.save()
 
     # Réponse dans le log
@@ -217,6 +217,8 @@ def retour_payfip(request):
     # Enregistrement du résultat et redirection
     if resultat == "PAID":
         Enregistrement_reglement(paiement=paiement)
+
+    return HttpResponse("Notification processed")
 
 
 @csrf_exempt
@@ -412,7 +414,7 @@ class View(CustomView, TemplateView):
         context['page_titre'] = "Facturation"
 
         # Importation des paiements PAYFIP en cours
-        context['liste_paiements'] = Paiement.objects.filter(famille=self.request.user.famille, systeme_paiement="payfip", horodatage__gt=datetime.datetime.now() - datetime.timedelta(minutes=5))
+        context['liste_paiements'] = Paiement.objects.filter(famille=self.request.user.famille, systeme_paiement="payfip", resultat__isnull=True, horodatage__gt=datetime.datetime.now() - datetime.timedelta(minutes=5))
         dict_paiements = {"F": {}, "P": {}, "C": {}}
         for paiement in context['liste_paiements']:
             for texte in paiement.ventilation.split(","):
