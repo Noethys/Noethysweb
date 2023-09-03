@@ -1,3 +1,7 @@
+Version 1.1.8.3 (03/09/2023) :
+
+- Ajout de la notification à l'utilisateur du paiement payfip
+
 Version 1.1.8.2 (30/08/2023) :
 
 - Correction solde de la période de préfacturation
