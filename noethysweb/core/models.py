@@ -3613,6 +3613,7 @@ class Paiement(models.Model):
     ventilation = models.TextField(verbose_name="ventilation", blank=True, null=True)
     horodatage = models.DateTimeField(verbose_name="Horodatage", auto_now_add=True)
     reglements = models.ManyToManyField(Reglement, verbose_name="Règlements", blank=True)
+    notification = models.DateTimeField(verbose_name="Horodatage de la notification à l'utilisateur", blank=True, null=True)
 
     class Meta:
         db_table = 'paiements'

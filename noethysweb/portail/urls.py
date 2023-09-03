@@ -10,7 +10,7 @@ from consommations.views import grille
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
                             individu_regimes_alimentaires, individu_coords, individu_medecin, individu_informations, individu_assurances, individu_vaccinations, \
                             famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents, \
-                            transmettre_piece, activites, inscrire_activite
+                            transmettre_piece, activites, inscrire_activite, attente_paiement
 from core.decorators import secure_ajax_portail
 
 
@@ -106,6 +106,7 @@ urlpatterns = [
     path('retour_payzen_success', facturation.View_retour_paiement.as_view(etat="success"), name='retour_payzen_success'),
     path('ipn_payzen', facturation.ipn_payzen, name='ipn_payzen'),
     path('retour_payfip', facturation.retour_payfip, name='retour_payfip'),
+    path('attente_paiement', attente_paiement.View.as_view(), name='portail_attente_paiement'),
 
     # Règlements
     path('reglements', reglements.View.as_view(), name='portail_reglements'),

@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import render
 from django.db.models import Sum, Q
+from django.contrib import messages
 from eopayment import Payment
 from portail.views.base import CustomView
 from core.models import Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur, ModeReglement, CompteBancaire, PortailRenseignement, ModeleImpression
@@ -197,9 +198,9 @@ def retour_payfip(request):
     resultat = ETATS_PAIEMENTS[reponse.result]
 
     # Modification du paiement préenregistré
-    paiement = Paiement.objects.get(idtransaction=reponse.transaction_id)
+    paiement = Paiement.objects.filter(idtransaction=reponse.transaction_id).last()
     if not paiement:
-        logger.debug("Page RETOUR_PAYFIP: le paiement pre-enregistre n'a pas ete trouve.")
+        logger.debug("Page RETOUR_PAYFIP: le paiement pre-enregistre n'a pas été trouvé.")
         return
 
     paiement.resultrans = resultrans
@@ -216,13 +217,6 @@ def retour_payfip(request):
     # Enregistrement du résultat et redirection
     if resultat == "PAID":
         Enregistrement_reglement(paiement=paiement)
-    #     return redirect(url_for('retour_paiement_success'))
-    # elif resultat == "DENIED":
-    #     return redirect(url_for('retour_paiement_refused'))
-    # elif resultat == "CANCELLED":
-    #     return redirect(url_for('retour_paiement_cancel'))
-    # else :
-    #     return redirect(url_for('retour_paiement_error'))
 
 
 @csrf_exempt
@@ -418,15 +412,28 @@ class View(CustomView, TemplateView):
         context['page_titre'] = "Facturation"
 
         # Importation des paiements PAYFIP en cours
-        liste_paiements = Paiement.objects.filter(famille=self.request.user.famille, systeme_paiement="payfip", horodatage__gt=datetime.datetime.now() - datetime.timedelta(minutes=5))
+        context['liste_paiements'] = Paiement.objects.filter(famille=self.request.user.famille, systeme_paiement="payfip", horodatage__gt=datetime.datetime.now() - datetime.timedelta(minutes=5))
         dict_paiements = {"F": {}, "P": {}, "C": {}}
-        for paiement in liste_paiements:
+        for paiement in context['liste_paiements']:
             for texte in paiement.ventilation.split(","):
                 type_impaye = texte[0]
                 ID, montant = texte[1:].split("#")
                 ID, montant = int(ID), decimal.Decimal(montant)
                 dict_paiements[type_impaye].setdefault(ID, decimal.Decimal(0))
                 dict_paiements[type_impaye][ID] += montant
+
+        # Affichage des notifications de paiements récents
+        for paiement in Paiement.objects.filter(famille=self.request.user.famille, notification__isnull=True, horodatage__gt=datetime.datetime.now() - datetime.timedelta(hours=1)):
+            if paiement.resultat == "PAID":
+                messages.add_message(self.request, messages.SUCCESS, "Le paiement en ligne de %.2f Euros a été enregistré avec succès" % paiement.montant)
+            elif paiement.resultat == "DENIED":
+                messages.add_message(self.request, messages.ERROR, "Le paiement en ligne de %.2f Euros a été refusé" % paiement.montant)
+            elif paiement.resultat == "CANCELLED":
+                messages.add_message(self.request, messages.ERROR, "Le paiement en ligne de %.2f Euros a été annulé" % paiement.montant)
+            else:
+                messages.add_message(self.request, messages.ERROR, "Le paiement en ligne de %.2f Euros a rencontré une erreur" % paiement.montant)
+            paiement.notification = datetime.datetime.now()
+            paiement.save()
 
         # Importation des factures impayées
         liste_factures = []

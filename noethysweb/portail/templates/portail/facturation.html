@@ -21,12 +21,28 @@
         </div>
     {% endif %}
 
-    {# Récapitulatif des factures impayées #}
+    {# Texte impayés #}
     {% if texte_impayes and parametres_portail.facturation_afficher_solde_facture %}
         <div class="alert alert-danger">
             <i class='fa fa-exclamation-triangle margin-r-5'></i>{{ texte_impayes|safe }}
         </div>
+    {% endif %}
 
+    {# Paiements en cours #}
+    {% if liste_paiements %}
+        <div class="alert alert-warning">
+            <i class='fa fa-exclamation-triangle margin-r-5'></i>
+            {% if liste_paiements|length == 1 %}
+                Un paiement est en attente.
+            {% else %}
+                {{ liste_paiements|length }} paiements sont en attente.
+            {% endif %}
+            Si vous avez interrompu la procédure de paiement, vous devez attendre quelques minutes avant de réactualiser cette page pour voir de nouveau la facture impayée apparaître ci-dessous.
+        </div>
+    {% endif %}
+
+    {# Récapitulatif des factures impayées #}
+    {% if texte_impayes and parametres_portail.facturation_afficher_solde_facture %}
         {% embed 'core/box.html' with box_titre=True %}
             {% block box_theme %}card-outline card-danger{% endblock %}
             {% block box_titre %}Récapitulatif des impayés{% endblock %}
@@ -239,8 +255,8 @@
                             }
                             if (data.systeme_paiement === "payfip") {
                                 $('#modal_selection_factures').modal('hide');
-                                $("#lien_externe").attr("href", "javascript:window.open('" + data.urltoredirect + "', '_blank', 'height=700, width=900, toolbar=no, menubar=no, scrollbars=no, resizable=yes, location=no, directories=no, status=no');");
-                                document.getElementById("lien_externe").click();
+                                window.open(data.urltoredirect, '_blank', 'height=700, width=900, toolbar=no, menubar=no, scrollbars=no, resizable=yes, location=no, directories=no, status=no');
+                                window.location.href = "{% url 'portail_attente_paiement' %}"
                             }
                         },
                         error: function(data) {
