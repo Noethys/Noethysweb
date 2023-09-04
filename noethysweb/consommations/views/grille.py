@@ -125,7 +125,7 @@ def Get_generic_data(data={}):
             inscription.infos.append("%d ans" % inscription.individu.Get_age())
         if data["options"].get("afficher_groupe", "non") == "oui":
             inscription.infos.append(inscription.groupe.nom)
-        if data["options"].get("afficher_classe", "non") == "oui" and inscription.individu in dict_scolarites:
+        if data["options"].get("afficher_classe", "non") == "oui" and inscription.individu in dict_scolarites and dict_scolarites[inscription.individu].classe:
             inscription.infos.append(dict_scolarites[inscription.individu].classe.nom)
         if data["options"].get("afficher_niveau_scolaire", "non") == "oui" and inscription.individu in dict_scolarites and dict_scolarites[inscription.individu].niveau:
             inscription.infos.append(dict_scolarites[inscription.individu].niveau.abrege)
