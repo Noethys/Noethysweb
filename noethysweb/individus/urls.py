@@ -12,7 +12,8 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             individus_detaches_liste, liste_mandats, liste_questionnaires_familles, liste_questionnaires_individus, liste_contacts_urgence, \
                             liste_regimes_alimentaires, liste_maladies, liste_informations, individus_doublons_liste, liste_familles_sans_inscriptions, \
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
-                            liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe
+                            liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
+                            abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter
 
 urlpatterns = [
 
@@ -112,6 +113,13 @@ urlpatterns = [
     path('individus/informations/supprimer/<int:pk>', liste_informations.Supprimer.as_view(), name='informations_supprimer'),
 
     path('individus/edition_informations', edition_informations.View.as_view(), name='edition_informations'),
+
+    # Abonnés aux listes de diffusion
+    path('individus/abonnes_listes_diffusion/liste', abonnes_listes_diffusion.Liste.as_view(), name='abonnes_listes_diffusion_liste'),
+    path('individus/abonnes_listes_diffusion/liste/<str:categorie>', abonnes_listes_diffusion.Liste.as_view(), name='abonnes_listes_diffusion_liste'),
+    path('individus/abonnes_listes_diffusion/supprimer/<str:categorie>/<int:pk>', abonnes_listes_diffusion.Supprimer.as_view(), name='abonnes_listes_diffusion_supprimer'),
+    path('individus/abonnes_listes_diffusion/supprimer_plusieurs/<int:idliste_diffusion>/<str:listepk>', abonnes_listes_diffusion.Supprimer_plusieurs.as_view(), name='abonnes_listes_diffusion_supprimer_plusieurs'),
+    path('individus/abonnes_listes_diffusion/ajouter/<int:idliste_diffusion>', abonnes_listes_diffusion_ajouter.Liste.as_view(), name='abonnes_listes_diffusion_ajouter'),
 
     # photos
     path('individus/liste_photos_manquantes', liste_photos_manquantes.Liste.as_view(), name='liste_photos_manquantes'),

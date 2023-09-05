@@ -341,6 +341,7 @@ def Formate_liste_objets(objets=[]):
 class Supprimer(BaseView, DeleteView):
     template_name = "core/crud/confirm_delete_in_box.html"
     verbe_action = "Supprimer"
+    check_protections = True
     manytomany_associes = []
 
     def get_context_data(self, **kwargs):
@@ -348,30 +349,32 @@ class Supprimer(BaseView, DeleteView):
         context['box_introduction'] = None
         context['erreurs_protection'] = []
 
-        # Recherche si des protections existent
-        collector = NestedObjects(using='default')
-        collector.collect([self.get_object()])
-        protected_objects = collector.protected
+        if self.check_protections:
 
-        if hasattr(self, "Get_objets_supprimables"):
-            for objet_supprimable in self.Get_objets_supprimables(objet=self.get_object()):
-                if objet_supprimable in protected_objects:
-                    protected_objects.remove(objet_supprimable)
+            # Recherche si des protections existent
+            collector = NestedObjects(using='default')
+            collector.collect([self.get_object()])
+            protected_objects = collector.protected
 
-        if protected_objects:
-            context['erreurs_protection'].append("Il est rattaché aux données suivantes : %s." % Formate_liste_objets(objets=protected_objects))
+            if hasattr(self, "Get_objets_supprimables"):
+                for objet_supprimable in self.Get_objets_supprimables(objet=self.get_object()):
+                    if objet_supprimable in protected_objects:
+                        protected_objects.remove(objet_supprimable)
 
-        # Autres protections
-        if hasattr(self, "Check_protections"):
-            protections = self.Check_protections(objet=self.get_object())
-            if protections:
-                context['erreurs_protection'].append("Protection contre la suppression : %s." % utils_texte.Convert_liste_to_texte_virgules(protections))
+            if protected_objects:
+                context['erreurs_protection'].append("Il est rattaché aux données suivantes : %s." % Formate_liste_objets(objets=protected_objects))
 
-        # Vérifie si des champs ManyToMany ne sont pas associés
-        for label, related_name in self.manytomany_associes:
-            resultat = self.model.objects.filter(pk=self.get_object().pk).aggregate(nbre=Count(related_name))
-            if resultat["nbre"] > 0:
-                context['erreurs_protection'].append("Il est rattaché aux données suivantes : %d %s." % (resultat["nbre"], label))
+            # Autres protections
+            if hasattr(self, "Check_protections"):
+                protections = self.Check_protections(objet=self.get_object())
+                if protections:
+                    context['erreurs_protection'].append("Protection contre la suppression : %s." % utils_texte.Convert_liste_to_texte_virgules(protections))
+
+            # Vérifie si des champs ManyToMany ne sont pas associés
+            for label, related_name in self.manytomany_associes:
+                resultat = self.model.objects.filter(pk=self.get_object().pk).aggregate(nbre=Count(related_name))
+                if resultat["nbre"] > 0:
+                    context['erreurs_protection'].append("Il est rattaché aux données suivantes : %d %s." % (resultat["nbre"], label))
 
         return context
 
@@ -438,6 +441,7 @@ class Supprimer(BaseView, DeleteView):
 class Supprimer_plusieurs(BaseView, CustomView, TemplateView):
     template_name = "core/crud/confirm_delete_in_box.html"
     verbe_action = "Supprimer"
+    check_protections = True
 
     def get_context_data(self, **kwargs):
         context = super(Supprimer_plusieurs, self).get_context_data(**kwargs)
@@ -448,17 +452,19 @@ class Supprimer_plusieurs(BaseView, CustomView, TemplateView):
         context['model'] = self.model
         context['erreurs_protection'] = []
 
-        # Recherche si des protections existent
-        collector = NestedObjects(using='default')
-        collector.collect(self.get_objets())
-        if collector.protected:
-            context['erreurs_protection'].append("Ils sont rattachés aux données suivantes : %s." % Formate_liste_objets(objets=collector.protected))
+        if self.check_protections:
 
-        # Autres protections
-        if hasattr(self, "Check_protections"):
-            protections = self.Check_protections(objets=self.get_objets())
-            if protections:
-                context['erreurs_protection'].append("Protection contre la suppression : %s." % utils_texte.Convert_liste_to_texte_virgules(protections))
+            # Recherche si des protections existent
+            collector = NestedObjects(using='default')
+            collector.collect(self.get_objets())
+            if collector.protected:
+                context['erreurs_protection'].append("Ils sont rattachés aux données suivantes : %s." % Formate_liste_objets(objets=collector.protected))
+
+            # Autres protections
+            if hasattr(self, "Check_protections"):
+                protections = self.Check_protections(objets=self.get_objets())
+                if protections:
+                    context['erreurs_protection'].append("Protection contre la suppression : %s." % utils_texte.Convert_liste_to_texte_virgules(protections))
 
         return context
 

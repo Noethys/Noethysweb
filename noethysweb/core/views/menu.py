@@ -280,6 +280,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_transports.Add(code="progtransports_liste", titre="Liste des programmations de transports", icone="file-text-o")
     menu_transports.Add(code="transports_liste", titre="Liste des transports", icone="file-text-o")
 
+    # Liste de diffusion
+    menu_listes_diffusion = menu_individus.Add(titre="Listes de diffusion")
+    menu_listes_diffusion.Add(code="abonnes_listes_diffusion_liste", titre="Gestion des abonnés", icone="file-text-o")
+
 
     # ------------------------------------ Locations ------------------------------------
     menu_locations = menu.Add(code="locations_toc", titre="Locations", icone="shopping-cart")

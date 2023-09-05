@@ -1,0 +1,41 @@
+{% extends "core/crud/liste_in_box.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    <form id="form_selections" method="POST">
+                        <input type="hidden" name="selections" value="">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                        <div class="buttonHolder" style="margin-top: 10px;">
+                            <div>
+                                <button class="btn btn-primary btn-primary" id="bouton_valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                                <a class="btn btn-danger" href="{% url 'abonnes_listes_diffusion_liste' categorie=idliste_diffusion %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                            </div>
+                        </div>
+                    </form>
+
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+
+                    <script>
+                        $("#bouton_valider").on("click",function(event) {
+                            $("[name=selections]").val(JSON.stringify(get_coches()));
+                            $('#form_selections').submit();
+                        });
+
+                    </script>
+
+                {% endblock box_contenu %}
+            {% endembed %}
+        </div>
+    </div>
+{% endblock contenu_page %}
