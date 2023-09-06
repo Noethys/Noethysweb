@@ -3,7 +3,6 @@
 {% block styles %}
 
 <style>
-
     .div_table_activites {
         display: inline-block;
         height: 180px;
@@ -19,16 +18,16 @@
         background-color: #e0e0e0;
         font-weight: bold;
     }
-
     .boutons_radios {
         margin-bottom: 8px;
         margin-left: 5px;
     }
-
     .masquer {
         display: none;
     }
-
+    #table_groupes td {
+        padding: 5px;
+    }
 </style>
 
 {% endblock styles %}
@@ -101,7 +100,7 @@
                         </td>
                         {% if afficher_colonne_detail %}
                             <td>
-                                <span style="margin-left: 5px;margin-right:20px;">{{ activite.nom }}</span>
+                                <span style="font-size: 12px; color: #cbcbcb;">{{ activite.nom }}</span>
                             </td>
                         {% endif %}
                     </tr>
