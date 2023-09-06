@@ -16,7 +16,7 @@ from django.http import HttpResponseRedirect
 from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatableView, MyMultipleDatatableView
 from core.utils import utils_texte, utils_historique
-from core.models import FiltreListe, Consommation, Inscription, Scolarite
+from core.models import FiltreListe, Consommation, Inscription, Scolarite, Individu
 
 
 class Page(CustomView):
@@ -81,7 +81,7 @@ class Liste_commun():
                 if filtre["condition"] == "FAUX": conditions &= Q(**{champ: False})
 
                 # Filtres spéciaux : Inscrit/Présent et Scolarisé
-                if filtre["condition"] in ("INSCRIT", "PRESENT", "SANS_RESA", "ECOLES", "CLASSES", "NIVEAUX"):
+                if filtre["condition"] in ("INSCRIT", "PRESENT", "SANS_RESA", "ECOLES", "CLASSES", "NIVEAUX", "NON_SCOLARISE"):
                     type_champ, champ = champ.split(":")
                     try:
                         if filtre["condition"] in ("ECOLES", "NIVEAUX"):
@@ -129,6 +129,10 @@ class Liste_commun():
                     if filtre["condition"] in ("ECOLES", "CLASSES", "NIVEAUX"):
                         donnee = "individu__rattachement__famille" if type_champ == "fscolarise" else "individu"
                         resultats = [resultat[donnee] for resultat in Scolarite.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
+                    if filtre["condition"] == "NON_SCOLARISE":
+                        date_reference = criteres[0]
+                        donnee = "rattachement__famille" if type_champ == "fscolarise" else "pk"
+                        resultats = [resultat[donnee] for resultat in Individu.objects.values(donnee).exclude(Q(scolarite__date_debut__lte=date_reference, scolarite__date_fin__gte=date_reference)).annotate(nbre=Count('pk'))]
 
                     # Création de la condition
                     conditions &= Q(**{champ + "__in": resultats})
