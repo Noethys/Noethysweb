@@ -203,7 +203,7 @@ def Get_resultats(parametres={}, etat="attente", request=None):
                                     dict_places_unite_remplissage = data_remplissage["dict_cases"].get(key_unite_remplissage, None)
 
                                     # Enlève les places réattribuées
-                                    if dict_places_unite_remplissage:
+                                    if dict_places_unite_remplissage and dict_places_unite_remplissage["initiales"] > 0:
                                         nbre_places_restantes = None
                                         if evenement:
                                             for evenement_tmp in dict_places_unite_remplissage["evenements"]:
