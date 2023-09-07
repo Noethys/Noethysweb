@@ -1,3 +1,10 @@
+Version 1.1.8.5 (07/09/2023) :
+
+- Ajout de la gestion des abonnés aux listes de diffusion
+- Ajout de l'adresse de facturation alternative
+- Ajout du filtre de liste Non scolarisé
+- Ajustement du css du filtre groupes
+
 Version 1.1.8.4 (05/09/2023) :
 
 - Correction affichage scolarité sans classe dans grille
