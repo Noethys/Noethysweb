@@ -298,7 +298,7 @@ def Valider_calendrier_ouvertures(request):
 
     # Importe les ouvertures et remplissages existants
     dict_temp = dict(ouvertures_modifications)
-    dict(dict_temp).update(remplissages_modifications)
+    dict_temp.update(remplissages_modifications)
     if len(dict_temp) > 0:
         date_min = utils_dates.ConvertDateENGtoDate(min(dict_temp.keys()).split("_")[1])
         date_max = utils_dates.ConvertDateENGtoDate(max(dict_temp.keys()).split("_")[1])
