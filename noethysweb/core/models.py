@@ -1786,6 +1786,10 @@ class Famille(models.Model):
     mobile = encrypt(models.CharField(verbose_name="Portable favori", max_length=100, blank=True, null=True))
     utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, null=True)
     certification_date = models.DateTimeField(verbose_name="Date de certification", blank=True, null=True)
+    facturation_nom = models.CharField(verbose_name="Nom", max_length=300, blank=True, null=True)
+    facturation_rue_resid = encrypt(models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True))
+    facturation_cp_resid = encrypt(models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True))
+    facturation_ville_resid = encrypt(models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True))
 
     class Meta:
         db_table = 'familles'

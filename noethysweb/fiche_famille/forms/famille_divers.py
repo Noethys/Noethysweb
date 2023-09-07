@@ -19,9 +19,11 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Famille
-        fields = ["mail", "mobile", "memo", "code_compta", "titulaire_helios", "tiers_solidaire", "idtiers_helios", "natidtiers_helios", "reftiers_helios", "cattiers_helios", "natjur_helios"]
+        fields = ["mail", "mobile", "memo", "code_compta", "titulaire_helios", "tiers_solidaire", "idtiers_helios", "natidtiers_helios", "reftiers_helios",
+                  "cattiers_helios", "natjur_helios", "facturation_nom", "facturation_rue_resid", "facturation_cp_resid", "facturation_ville_resid"]
         widgets = {
             "memo": forms.Textarea(attrs={'rows': 3}),
+            "facturation_rue_resid": forms.Textarea(attrs={'rows': 2}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -73,6 +75,12 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("reftiers_helios"),
                 Field("cattiers_helios"),
                 Field("natjur_helios"),
+            ),
+            Fieldset("Autre adresse de facturation",
+                Field("facturation_nom"),
+                Field("facturation_rue_resid"),
+                Field("facturation_cp_resid"),
+                Field("facturation_ville_resid"),
             ),
         )
 

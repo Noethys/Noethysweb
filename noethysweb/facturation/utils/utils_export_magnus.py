@@ -259,16 +259,19 @@ class Exporter():
                         ligne[11] = ConvertToTexte(piece.famille.titulaire_helios.prenom[:50], majuscules=True)
 
                     # AdrLig1, AdrLig2, et AdrLig3 - Texte (50)
-                    if piece.famille.titulaire_helios.rue_resid:
-                        lignes_rue = piece.famille.titulaire_helios.rue_resid.split("\n")
+                    rue_resid = piece.famille.facturation_rue_resid or piece.famille.titulaire_helios.rue_resid
+                    if rue_resid:
+                        lignes_rue = rue_resid.split("\n")
                         for idx, valeur in enumerate(lignes_rue[:3], 12):
                             ligne[idx] = ConvertToTexte(valeur[:50], majuscules=True)
 
                     # Codepostal - Texte (10)
-                    ligne[15] = ConvertToTexte(piece.famille.titulaire_helios.cp_resid[:10])
+                    cp_resid = piece.famille.facturation_cp_resid or piece.famille.titulaire_helios.cp_resid or ""
+                    ligne[15] = ConvertToTexte(cp_resid[:10])
 
                     # Ville - Texte (50)
-                    ligne[16] = ConvertToTexte(piece.famille.titulaire_helios.ville_resid[:50])
+                    ville_resid = piece.famille.facturation_ville_resid or piece.famille.titulaire_helios.ville_resid or ""
+                    ligne[16] = ConvertToTexte(ville_resid[:50])
 
                     # Libelle1 - Texte (50)
                     ligne[18] = ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece, piece=piece)[:50], majuscules=True)

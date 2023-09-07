@@ -259,6 +259,12 @@ class Facturation():
                 cp_resid = prestation.famille.cp_resid if prestation.famille.cp_resid else ""
                 ville_resid = prestation.famille.ville_resid if prestation.famille.ville_resid else ""
 
+                # Adresse de facturation
+                destinataire_nom = prestation.famille.facturation_nom or nomsTitulairesAvecCivilite
+                destinataire_rue = prestation.famille.facturation_rue_resid or rue_resid
+                destinataire_cp = prestation.famille.facturation_cp_resid or cp_resid
+                destinataire_ville = prestation.famille.facturation_ville_resid or ville_resid
+
                 # Recherche des règlements
                 if prestation.famille_id in dictReglements:
                     dictReglementsCompte = dictReglements[prestation.famille_id]
@@ -277,17 +283,18 @@ class Facturation():
                     "date_debut": date_debut,
                     "date_fin": date_fin,
                     "liste_activites": liste_activites,
-                    "{FAMILLE_NOM}": nomsTitulairesAvecCivilite,
+                    "{FAMILLE_NOM}": destinataire_nom,
                     "nomSansCivilite": nomsTitulairesSansCivilite,
                     "IDfamille": prestation.famille_id,
                     "{IDFAMILLE}": str(prestation.famille_id),
-                    "{FAMILLE_RUE}": rue_resid,
-                    "{FAMILLE_CP}": cp_resid,
-                    "{FAMILLE_VILLE}": ville_resid,
+                    "{FAMILLE_RUE}": destinataire_rue,
+                    "{FAMILLE_CP}": destinataire_cp,
+                    "{FAMILLE_VILLE}": destinataire_ville,
                     "{FAMILLE}": nomsTitulairesAvecCivilite,
-                    "{DESTINATAIRE_NOM}": nomsTitulairesAvecCivilite,
-                    "{DESTINATAIRE_RUE}": rue_resid,
-                    "{DESTINATAIRE_VILLE}": "%s %s" % (cp_resid or "", ville_resid or ""),
+                    "{DESTINATAIRE_NOM}": destinataire_nom,
+                    "{DESTINATAIRE_RUE}": destinataire_rue,
+                    "{DESTINATAIRE_CP}": destinataire_cp,
+                    "{DESTINATAIRE_VILLE}": destinataire_ville,
                     "individus": {},
                     "listePrestations": [],
                     "listeIDprestations": [],
@@ -344,7 +351,6 @@ class Facturation():
                 # Ajoute les messages familiaux
                 # if IDfamille in self.dictMessageFamiliaux :
                 #     dictComptes[ID]["messages_familiaux"] = self.dictMessageFamiliaux[IDfamille]
-                    
                     
             # Insert les montants pour le compte payeur
             if prestation.pk in dictVentilationPrestations :
@@ -663,7 +669,9 @@ class Facturation():
                 dictCompte["{NOM_LOT}"] = facture.lot.nom if facture.lot else ""
 
                 # Ajoute les informations de base famille
-                dictCompte.update(infosIndividus.GetDictValeurs(mode="famille", ID=facture.famille_id, formatChamp=True))
+                for key, valeur in infosIndividus.GetDictValeurs(mode="famille", ID=facture.famille_id, formatChamp=True).items():
+                    if key not in ("{FAMILLE_NOM}", "{FAMILLE_RUE}", "{FAMILLE_CP}", "{FAMILLE_VILLE}"):
+                        dictCompte[key] = valeur
 
                 for IDindividu, dictIndividu in dictCompte["individus"].items():
                     dictIndividu["select"] = True
