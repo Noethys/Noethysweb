@@ -13,6 +13,9 @@
             <dt>Nom d'utilisateur</dt>
             <dd>{% firstof request.user request.user.get_full_name request.user.get_short_name %}</dd>
 
+            <dt>ID utilisateur</dt>
+            <dd>{{ request.user.pk }}</dd>
+
             <dt>Dernière connexion</dt>
             <dd>{{ request.user.last_login }}</dd>
 
@@ -37,12 +40,19 @@
 
     {% embed 'core/box.html' %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}Mot de passe{% endblock %}
+        {% block box_titre %}Paramètres{% endblock %}
         {% block box_contenu %}
             <dd><a type='button' class='btn btn-primary' href="{% url 'change_password_utilisateur' %}"><i class="fa fa-pencil margin-r-5"></i>Modifier le mot de passe</a></dd>
+            <dd><button class="btn btn-warning" onclick="purger_filtres_listes()" title="Supprimer les filtres de listes"><i class="fa fa-trash-o margin-r-5"></i>Purger les filtres de listes</button></dd>
         {% endblock %}
     {% endembed %}
 
+    {# Dialogbox Purger les filtres de listes #}
+    {% embed "core/dialogbox_confirm.html" with id="purger_filtres_listes" titre="Supprimer les filtres de listes" message="Confirmez-vous la suppression des filtres de listes de cet utilisateur ?" label_bouton="Purger les filtres de listes" url_exec="ajax_purger_filtres_listes" %}{% endembed %}
+
+    <script>
+        // Pour la fonction dialogbox_confirm
+        function get_coches() {return []}
+    </script>
+
 {% endblock %}
-
-

@@ -3,10 +3,22 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, time
 logger = logging.getLogger(__name__)
-from core.views.base import CustomView
+from django.urls import reverse_lazy
+from django.http import JsonResponse
 from django.views.generic import TemplateView
+from django.contrib import messages
+from core.views.base import CustomView
+
+
+def Purger_filtres_listes(request):
+    """ Supprime tous les filtres de listes de l'utilisateur """
+    time.sleep(2)
+    from core.models import FiltreListe
+    FiltreListe.objects.filter(utilisateur=request.user).delete()
+    messages.add_message(request, messages.SUCCESS, "Tous les filtres de listes de l'utilisateur ont été supprimés")
+    return JsonResponse({"url": reverse_lazy("profil_utilisateur")})
 
 
 class View(CustomView, TemplateView):

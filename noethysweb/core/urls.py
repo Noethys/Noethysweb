@@ -38,6 +38,6 @@ urlpatterns = [
     path('core/graphique_individus_get_parametres', secure_ajax(utils_graphique_individus.Get_parametres), name='ajax_graphique_individus_get_parametres'),
     path('core/graphique_individus_set_parametres', secure_ajax(utils_graphique_individus.Set_parametres), name='ajax_graphique_individus_set_parametres'),
     path('core/select_avec_commandes_advanced', secure_ajax(select_avec_commandes_advanced.Modifier), name='ajax_select_avec_commandes_advanced'),
+    path('core/purger_filtres_listes', secure_ajax(profil_utilisateur.Purger_filtres_listes), name='ajax_purger_filtres_listes'),
 
 ]
-
