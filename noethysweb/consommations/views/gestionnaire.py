@@ -10,6 +10,7 @@ from django.core import serializers
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.contrib import messages
 from core.models import Inscription, Activite, Ouverture, Consommation, Famille, Classe, NiveauScolaire
 from core.views.base import CustomView
 from core.utils import utils_dates, utils_dictionnaires, utils_parametres
@@ -117,9 +118,12 @@ class View(CustomView, TemplateView):
         ajouter_individu = self.request.POST.get("donnees_ajouter_individu")
         if ajouter_individu and not ajouter_individu.startswith("INSCRITS"):
             selection_ajouter_individu = [int(idindividu) for idindividu in ajouter_individu.split(";")]
-            for inscription in Inscription.objects.filter(individu_id__in=selection_ajouter_individu, activite=data["selection_activite"]):
-                if inscription.pk not in liste_idinscriptions and inscription.Is_inscription_in_periode(data["date_min"], data["date_max"]):
-                    liste_idinscriptions.append(inscription.pk)
+            for inscription in Inscription.objects.select_related("individu").filter(individu_id__in=selection_ajouter_individu, activite=data["selection_activite"]):
+                if inscription.pk not in liste_idinscriptions:
+                    if inscription.Is_inscription_in_periode(data["date_min"], data["date_max"]):
+                        liste_idinscriptions.append(inscription.pk)
+                    else:
+                        messages.add_message(self.request, messages.INFO, "L'inscription de %s n'est pas active sur cette date" % inscription.individu.Get_nom())
 
         # Importation des classes
         liste_classes = Classe.objects.select_related("ecole").filter(date_debut__lte=data["date_min"], date_fin__gte=data["date_min"]).order_by("ecole__nom", "niveaux__ordre", "nom")
@@ -141,12 +145,13 @@ class View(CustomView, TemplateView):
             data['selection_classes'] = [classe.pk for classe in data['liste_classes']]
 
         # Importation des inscriptions
+        conditions = Q(date_debut__lte=data["date_min"]) & (Q(date_fin__isnull=True) | Q(date_fin__gte=data["date_max"]))
         if ajouter_individu == "INSCRITS_TOUS":
-            conditions = Q(activite=data["selection_activite"])
+            conditions &= Q(activite=data["selection_activite"])
         elif ajouter_individu and ajouter_individu.startswith("INSCRITS_GROUPE"):
-            conditions = Q(activite=data["selection_activite"], groupe_id=int(ajouter_individu.split(":")[1])) | Q(pk__in=liste_idinscriptions)
+            conditions &= Q(activite=data["selection_activite"], groupe_id=int(ajouter_individu.split(":")[1])) | Q(pk__in=liste_idinscriptions)
         else:
-            conditions = Q(pk__in=liste_idinscriptions)
+            conditions &= Q(pk__in=liste_idinscriptions)
 
         if len(data["selection_classes"]) < len(data["liste_classes"]):
             conditions &= Q(individu__scolarite__classe_id__in=data["selection_classes"])
