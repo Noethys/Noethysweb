@@ -32,6 +32,10 @@ urlpatterns = [
     path('deblocage/<str:code>', erreurs.deblocage, name="deblocage"),
 ]
 
+# Intégration des plugins
+for nom_plugin in settings.PLUGINS:
+    urlpatterns.append(path(settings.URL_BUREAU, include("plugins.%s.urls" % nom_plugin)))
+
 # Ajout de l'URL du portail
 if settings.PORTAIL_ACTIF:
     urlpatterns.append(path(settings.URL_PORTAIL, include('portail.urls')))

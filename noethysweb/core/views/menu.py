@@ -3,8 +3,9 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import copy
+import copy, importlib
 from django.urls import reverse_lazy
+from django.conf import settings
 
 
 def GetMenuPrincipal(organisateur=None, user=None):
@@ -464,6 +465,17 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # ------------------------------------ Aide ------------------------------------
     menu_aide = menu.Add(code="aide_toc", titre="Aide", icone="support", toujours_afficher=True)
 
+
+    # ---------------------------------- Plugins ----------------------------------
+
+    for nom_plugin in settings.PLUGINS:
+        module = importlib.import_module("plugins.%s.apps" % nom_plugin)
+        app_config = getattr(module, nom_plugin)
+        menu_plugin = menu.Add(code="%s_toc" % nom_plugin, titre=app_config.titre, icone=getattr(app_config, "icone", "puzzle-piece"), toujours_afficher=True)
+        for titre_rubrique, items_rubrique in app_config.menu:
+            rubrique = menu_plugin.Add(titre=titre_rubrique)
+            for item in items_rubrique:
+                rubrique.Add(code=item["url"], titre=item["titre"], icone=item.get("icone", "file-text-o"))
 
 
     if user:

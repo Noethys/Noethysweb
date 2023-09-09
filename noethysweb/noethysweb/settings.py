@@ -100,6 +100,9 @@ INSTALLED_APPS = [
     'django_cleanup.apps.CleanupConfig',
 ]
 
+# Liste des plugins
+PLUGINS = []
+
 # Ajouté pour permettre l'affichage de la debugtoolbar
 INTERNAL_IPS = [
     '127.0.0.1',
@@ -287,3 +290,7 @@ try:
     from .settings_production import *
 except:
     print("Settings en production non trouvés : Utilisation des settings par défaut.")
+
+# Intégration des plugins
+for nom_plugin in PLUGINS:
+    INSTALLED_APPS.append("plugins.%s.apps.%s" % (nom_plugin, nom_plugin))
