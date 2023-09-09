@@ -26,6 +26,11 @@
             {% block box_contenu %}
                 <div class="mt-2">
 
+                    {# Créer un remboursement #}
+                    <a class="btn btn-app" href="{% url 'famille_remboursement_ajouter' idfamille=idfamille %}" title="Créer un remboursement" style="font-size: 12px !important;">
+                        <i class="fa fa-money"></i>Remboursement
+                    </a>
+
                     {# Liste des reçus #}
                     <a class="btn btn-app" href="{% url 'famille_recus_liste' idfamille=idfamille %}" title="Liste des reçus de règlements" style="font-size: 12px !important;">
                         <i class="fa fa-file-text-o"></i>Liste des reçus

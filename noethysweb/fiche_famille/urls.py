@@ -9,7 +9,7 @@ from fiche_famille.views import famille, famille_questionnaire, famille_notes, f
                             famille_prestations, famille_reglements, famille_consommations, famille_factures, famille_voir_facture, famille_voir_cotisation, famille_abo_factures_email, \
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, famille_sms, \
                             famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats, famille_voir_mandat, famille_prestations_modele, \
-                            famille_attestations_fiscales, famille_voir_attestation_fiscale, famille_locations, famille_voir_location
+                            famille_attestations_fiscales, famille_voir_attestation_fiscale, famille_locations, famille_voir_location, famille_remboursement
 
 urlpatterns = [
 
@@ -101,6 +101,8 @@ urlpatterns = [
     path('individus/familles/mandats/modifier/<int:idfamille>/<int:pk>', famille_mandats.Modifier.as_view(), name='famille_mandats_modifier'),
     path('individus/familles/mandats/supprimer/<int:idfamille>/<int:pk>', famille_mandats.Supprimer.as_view(), name='famille_mandats_supprimer'),
     path('individus/familles/mandats/voir/<int:idfamille>/<int:idmandat>', famille_voir_mandat.View.as_view(), name='famille_voir_mandat'),
+
+    path('individus/familles/remboursement/ajouter/<int:idfamille>', famille_remboursement.Ajouter.as_view(), name='famille_remboursement_ajouter'),
 
     path('individus/familles/attestations/liste/<int:idfamille>', famille_attestations.Liste.as_view(), name='famille_attestations_liste'),
     path('individus/familles/attestations/ajouter/<int:idfamille>', famille_attestations.Ajouter.as_view(), name='famille_attestations_ajouter'),
