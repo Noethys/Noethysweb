@@ -1,3 +1,11 @@
+Version 1.1.8.7 (10/09/2023) :
+
+- Ajout de la gestion des plugins
+- Ajout de la création de remboursements
+- Ajout de la colonne Caisse dans la liste des déductions
+- Masque les inscriptions non valides dans le gestionnaire
+- Correction du filtre de liste date si vide
+
 Version 1.1.8.6 (07/09/2023) :
 
 - Ajout de la purge des filtres de liste pour un utilisateur
