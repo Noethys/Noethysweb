@@ -72,6 +72,8 @@ class Liste_commun():
                 if filtre["condition"] == "NE_CONTIENT_PAS": conditions &= ~Q(**{champ + "__icontains": criteres[0]})
                 if filtre["condition"] == "EST_VIDE": conditions &= (Q(**{champ: ''}) | Q(**{champ + "__isnull": True}))
                 if filtre["condition"] == "EST_PAS_VIDE": conditions &= (~Q(**{champ: ''}) & Q(**{champ + "__isnull": False}))
+                if filtre["condition"] == "EST_NUL": conditions &= Q(**{champ + "__isnull": True})
+                if filtre["condition"] == "EST_PAS_NUL": conditions &= Q(**{champ + "__isnull": False})
                 if filtre["condition"] == "SUPERIEUR": conditions &= Q(**{champ + "__gt": criteres[0]})
                 if filtre["condition"] == "SUPERIEUR_EGAL": conditions &= Q(**{champ + "__gte": criteres[0]})
                 if filtre["condition"] == "INFERIEUR": conditions &= Q(**{champ + "__lt": criteres[0]})
@@ -150,6 +152,8 @@ class Liste_commun():
                     if filtre["condition"] == "*NE_CONTIENT_PAS": resultats = [objet.pk for objet in tous_objets if criteres[0] not in (attrgetter(".".join(champs_temp))(objet) or "")]
                     if filtre["condition"] == "*EST_VIDE": resultats = [objet.pk for objet in tous_objets if attrgetter(".".join(champs_temp))(objet) in ("", None)]
                     if filtre["condition"] == "*EST_PAS_VIDE": resultats = [objet.pk for objet in tous_objets if attrgetter(".".join(champs_temp))(objet) not in ("", None)]
+                    if filtre["condition"] == "*EST_NUL": resultats = [objet.pk for objet in tous_objets if attrgetter(".".join(champs_temp))(objet) == None]
+                    if filtre["condition"] == "*EST_PAS_NUL": resultats = [objet.pk for objet in tous_objets if attrgetter(".".join(champs_temp))(objet) != None]
                     conditions &= Q(pk__in=resultats)
 
             return conditions

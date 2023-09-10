@@ -72,7 +72,7 @@ def Ajouter_filtre(request):
                 dict_resultat["criteres"].append(str(utils_dates.ConvertDateFRtoDate(valeur)))
             else:
                 dict_resultat["criteres"].append(valeur)
-            if not valeur and key != "critere_date":
+            if not valeur and key != "critere_date_optionnelle":
                 return JsonResponse({"erreur": "Vous n'avez pas renseigné correctement le critère"}, status=401)
             if key not in ("critere_etats", "critere_etats_inscriptions"):
                 liste_labels_criteres.append("'%s'" % valeur)
@@ -90,6 +90,7 @@ def Ajouter_filtre(request):
         "SANS_RESA": "est sans réservations sur une sélection d'activités entre", "EST_VIDE": "est vide", "EST_PAS_VIDE": "n'est pas vide",
         "ECOLES": "est scolarisé sur une sélection d'écoles au", "CLASSES": "est scolarisé sur une sélection de classes",
         "NIVEAUX": "est scolarisé sur une sélection de niveaux scolaires au", "NON_SCOLARISE": "n'est pas scolarisé au",
+        "EST_NUL": "est vide", "EST_PAS_NUL": "n'est pas vide",
     }
 
     if valeurs["champ"].startswith("ipresent") or valeurs["champ"].startswith("iscolarise"): valeurs["label_champ"] = "L'individu"
@@ -126,13 +127,14 @@ def Supprimer_filtre(request, idfiltre=None):
 
 class Formulaire(FormulaireBase, forms.Form):
     condition1 = forms.ChoiceField(label="Condition", choices=[("EGAL", "Est égal à"), ("DIFFERENT", "Est différent de"), ("CONTIENT", "Contient"), ("NE_CONTIENT_PAS", "Ne contient pas"), ("EST_VIDE", "Est vide"), ("EST_PAS_VIDE", "N'est pas vide")], required=False)
-    condition2 = forms.ChoiceField(label="Condition", choices=[("EGAL", "Est égal à"), ("DIFFERENT", "Est différent de"), ("SUPERIEUR", "Est supérieur à"), ("SUPERIEUR_EGAL", "Est supérieur ou égal à"), ("INFERIEUR", "Est inférieur à"), ("INFERIEUR_EGAL", "Est inférieur ou égal à"), ("COMPRIS", "Est compris entre")], required=False)
+    condition2 = forms.ChoiceField(label="Condition", choices=[("EGAL", "Est égal à"), ("DIFFERENT", "Est différent de"), ("SUPERIEUR", "Est supérieur à"), ("SUPERIEUR_EGAL", "Est supérieur ou égal à"), ("INFERIEUR", "Est inférieur à"), ("INFERIEUR_EGAL", "Est inférieur ou égal à"), ("COMPRIS", "Est compris entre"), ("EST_NUL", "Est vide"), ("EST_PAS_NUL", "N'est pas vide")], required=False)
     condition3 = forms.ChoiceField(label="Condition", choices=[("VRAI", "Est vrai"), ("FAUX", "Est faux")], required=False)
     condition4 = forms.ChoiceField(label="Condition", choices=[("INSCRIT", "Est inscrit sur l'une des activités suivantes"), ("PRESENT", "Est présent sur l'une des activités suivantes"), ("SANS_RESA", "Est sans réservations sur l'une des activités suivantes")], required=False)
     condition5 = forms.ChoiceField(label="Condition", choices=[("*EGAL", "Est égal à"), ("*DIFFERENT", "Est différent de"), ("*CONTIENT", "Contient"), ("*NE_CONTIENT_PAS", "Ne contient pas"), ("*EST_VIDE", "Est vide"), ("*EST_PAS_VIDE", "N'est pas vide")], required=False)
     condition6 = forms.ChoiceField(label="Condition", choices=[("ECOLES", "Est scolarisé dans l'une des écoles suivantes"), ("CLASSES", "Est scolarisé dans l'une des classes suivantes"), ("NIVEAUX", "Est scolarisé dans l'un des niveaux suivants"), ("NON_SCOLARISE", "N'est pas scolarisé")], required=False)
     critere_texte = forms.CharField(label="Texte", required=False)
     critere_date = forms.DateField(label="Date", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
+    critere_date_optionnelle = forms.DateField(label="Date", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
     critere_date_min = forms.DateField(label="Date min", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
     critere_date_max = forms.DateField(label="Date max", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
     critere_heure = forms.TimeField(label="Heure", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
@@ -159,11 +161,11 @@ class Formulaire(FormulaireBase, forms.Form):
         'CharField': {'condition': 'condition1', 'criteres': {"EGAL": ["critere_texte"], "DIFFERENT": ["critere_texte"], "CONTIENT": ["critere_texte"], "NE_CONTIENT_PAS": ["critere_texte"], "EST_VIDE": [], "EST_PAS_VIDE": []}},
         'TextField': {'condition': 'condition1', 'criteres': {"EGAL": ["critere_texte"], "DIFFERENT": ["critere_texte"], "CONTIENT": ["critere_texte"], "NE_CONTIENT_PAS": ["critere_texte"], "EST_VIDE": [], "EST_PAS_VIDE": []}},
         'BooleanField': {'condition': 'condition3', 'criteres': {"VRAI": [], "FAUX": []}},
-        'DateField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_date"], "DIFFERENT": ["critere_date"], "SUPERIEUR": ["critere_date"], "SUPERIEUR_EGAL": ["critere_date"], "INFERIEUR": ["critere_date"], "INFERIEUR_EGAL": ["critere_date"], "COMPRIS": ["critere_date_min", "critere_date_max"]}},
-        'TimeField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_heure"], "DIFFERENT": ["critere_heure"], "SUPERIEUR": ["critere_heure"], "SUPERIEUR_EGAL": ["critere_heure"], "INFERIEUR": ["critere_heure"], "INFERIEUR_EGAL": ["critere_heure"], "COMPRIS": ["critere_heure_min", "critere_heure_max"]}},
-        'AutoField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"]}},
-        'IntegerField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"]}},
-        'DecimalField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_decimal"], "DIFFERENT": ["critere_decimal"], "SUPERIEUR": ["critere_decimal"], "SUPERIEUR_EGAL": ["critere_decimal"], "INFERIEUR": ["critere_decimal"], "INFERIEUR_EGAL": ["critere_decimal"], "COMPRIS": ["critere_decimal_min", "critere_decimal_max"]}},
+        'DateField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_date"], "DIFFERENT": ["critere_date"], "SUPERIEUR": ["critere_date"], "SUPERIEUR_EGAL": ["critere_date"], "INFERIEUR": ["critere_date"], "INFERIEUR_EGAL": ["critere_date"], "COMPRIS": ["critere_date_min", "critere_date_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
+        'TimeField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_heure"], "DIFFERENT": ["critere_heure"], "SUPERIEUR": ["critere_heure"], "SUPERIEUR_EGAL": ["critere_heure"], "INFERIEUR": ["critere_heure"], "INFERIEUR_EGAL": ["critere_heure"], "COMPRIS": ["critere_heure_min", "critere_heure_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
+        'AutoField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
+        'IntegerField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
+        'DecimalField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_decimal"], "DIFFERENT": ["critere_decimal"], "SUPERIEUR": ["critere_decimal"], "SUPERIEUR_EGAL": ["critere_decimal"], "INFERIEUR": ["critere_decimal"], "INFERIEUR_EGAL": ["critere_decimal"], "COMPRIS": ["critere_decimal_min", "critere_decimal_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
         'ipresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date", "critere_etats_inscriptions"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
         'fpresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date", "critere_etats_inscriptions"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
         'iscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_date", "critere_ecoles"], "CLASSES": ["critere_classes"], "NIVEAUX": ["critere_date", "critere_niveaux"], "NON_SCOLARISE": ["critere_date"]}},
@@ -275,6 +277,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("critere_activites"),
             Field("critere_texte"),
             Field("critere_date"),
+            Field("critere_date_optionnelle"),
             Field("critere_date_min"),
             Field("critere_date_max"),
             Field("critere_heure"),
