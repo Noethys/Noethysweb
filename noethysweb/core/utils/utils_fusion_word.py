@@ -64,9 +64,10 @@ class Fusionner():
         # Préparation des valeurs
         if not isinstance(self.valeurs, list):
             self.valeurs = [self.valeurs]
-        for dict_valeurs in self.valeurs:
+        for index, dict_valeurs in enumerate(self.valeurs):
             dict_valeurs = copy.deepcopy(dict_valeurs)
             dict_valeurs.update(Get_motscles_defaut(request=self.request))
+            self.valeurs[index] = dict_valeurs
 
         # Fusion du document
         from mailmerge import MailMerge

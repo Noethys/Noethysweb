@@ -54,7 +54,7 @@ def Fusionner(request):
 
         # Ajout des questionnaires
         questionnaires_collaborateurs = (utils_questionnaires.ChampsEtReponses(categorie="collaborateur", filtre_reponses=Q(collaborateur_id=contrat.collaborateur_id)), contrat.collaborateur_id)
-        questionnaires_contrats = (utils_questionnaires.ChampsEtReponses(categorie="contrat_collaborateur", filtre_reponses=Q(pk=contrat.pk)), contrat.pk)
+        questionnaires_contrats = (utils_questionnaires.ChampsEtReponses(categorie="contrat_collaborateur", filtre_reponses=Q(donnee=contrat.pk)), contrat.pk)
         for questionnaire, donnee in (questionnaires_collaborateurs, questionnaires_contrats):
             for dictReponse in questionnaire.GetDonnees(donnee):
                 valeurs_contrat[dictReponse["champ"]] = dictReponse["reponse"]

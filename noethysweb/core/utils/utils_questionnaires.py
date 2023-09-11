@@ -97,6 +97,7 @@ class Questionnaires():
         texteReponse = u""
         if filtre == "texte" : texteReponse = reponse
         if filtre == "entier" : texteReponse = int(reponse)
+        if filtre == "decimal": texteReponse = float(reponse)
         if filtre == "montant" : texteReponse = float(reponse)#decimal.Decimal(reponse)
         if filtre == "choix" :
             if reponse != None :
@@ -146,7 +147,7 @@ class Questionnaires():
         if filtre:
             filtres_reponses &= filtre
 
-        # Importation des questions
+        # Importation des réponses
         liste_reponses = QuestionnaireReponse.objects.select_related('question').filter(filtres_reponses)
         dictReponses = {}
         for reponse in liste_reponses:
