@@ -99,12 +99,13 @@ class Liste(Page, crud.Liste):
         mail = columns.CompoundColumn("Email", sources=["individu__mail"])
         portable = columns.CompoundColumn("Portable", sources=["individu__tel_mobile"])
         tel_parents = columns.TextColumn("Tél responsables", sources=None, processor="Get_tel_parents")
+        mail_parents = columns.TextColumn("Mail responsables", sources=None, processor="Get_mail_parents")
         num_cotisation = columns.TextColumn("N° adhésion", sources=None, processor="Get_num_cotisation")
         solde = columns.TextColumn("Solde", sources=[], processor="Get_solde")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idinscription", "date_debut", "date_fin", "individu", "date_naiss", "age", "mail", "portable", "famille", "tel_parents", "groupe", "categorie_tarif", "individu_ville", "famille_ville", "num_cotisation", "statut", "solde"]
+            columns = ["check", "idinscription", "date_debut", "date_fin", "individu", "date_naiss", "age", "mail", "portable", "famille", "tel_parents", "mail_parents", "groupe", "categorie_tarif", "individu_ville", "famille_ville", "num_cotisation", "statut", "solde"]
             hidden_columns = ["idinscription", "date_debut", "date_fin", "mail", "famille", "categorie_tarif", "individu_ville", "famille_ville", "num_cotisation", "solde"]
             page_length = 100
             processors = {
@@ -145,25 +146,22 @@ class Liste(Page, crud.Liste):
             return instance.famille.ville_resid
 
         def Get_tel_parents(self, instance, *args, **kwargs):
-            # Importation initiale des parents
-            if not hasattr(self, "dict_parents"):
-                self.dict_parents = {}
-                self.liste_enfants = []
-                for rattachement in Rattachement.objects.select_related("individu").all():
-                    if rattachement.categorie == 1:
-                        self.dict_parents.setdefault(rattachement.famille_id, [])
-                        self.dict_parents[rattachement.famille_id].append(rattachement.individu)
-                    if rattachement.categorie == 2:
-                        self.liste_enfants.append((rattachement.famille_id, rattachement.individu_id))
-
-            # Recherche des parents
+            self.Init_dict_parents()
             liste_tel = []
             if (instance.famille_id, instance.individu_id) in self.liste_enfants:
                 for individu in self.dict_parents.get(instance.famille_id, []):
                     if individu.tel_mobile and individu != instance.individu:
                         liste_tel.append("%s : %s" % (individu.prenom, individu.tel_mobile))
-
             return " | ".join(liste_tel)
+
+        def Get_mail_parents(self, instance, *args, **kwargs):
+            self.Init_dict_parents()
+            liste_mail = []
+            if (instance.famille_id, instance.individu_id) in self.liste_enfants:
+                for individu in self.dict_parents.get(instance.famille_id, []):
+                    if individu.mail and individu != instance.individu:
+                        liste_mail.append("%s : %s" % (individu.prenom, individu.mail))
+            return " | ".join(liste_mail)
 
         def Get_num_cotisation(self, instance, *args, **kwargs):
             # Importation initiale des cotisations
@@ -198,6 +196,18 @@ class Liste(Page, crud.Liste):
             else:
                 couleur = "danger"
             return """<span class='badge badge-%s'>%s</span>""" % (couleur, utils_texte.Formate_montant(solde))
+
+        def Init_dict_parents(self):
+            # Importation initiale des parents
+            if not hasattr(self, "dict_parents"):
+                self.dict_parents = {}
+                self.liste_enfants = []
+                for rattachement in Rattachement.objects.select_related("individu").all():
+                    if rattachement.categorie == 1:
+                        self.dict_parents.setdefault(rattachement.famille_id, [])
+                        self.dict_parents[rattachement.famille_id].append(rattachement.individu)
+                    if rattachement.categorie == 2:
+                        self.liste_enfants.append((rattachement.famille_id, rattachement.individu_id))
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
