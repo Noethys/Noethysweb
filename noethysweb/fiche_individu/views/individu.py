@@ -49,12 +49,16 @@ class Liste(Page, crud.Liste):
     class datatable_class(MyDatatable):
         filtres = ['idrattachement', "ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille",
                    'individu__pk', "individu__nom", "individu__prenom", "famille__nom", "individu__date_naiss", "individu__rue_resid",
-                   "individu__cp_resid", "individu__ville_resid"]
+                   "individu__tel_domicile", "individu__tel_mobile", "individu__mail", "individu__cp_resid", "individu__ville_resid", "genre"]
         idindividu = columns.IntegerColumn("ID", sources=['individu__pk'])
         nom = columns.TextColumn("Nom", sources=['individu__nom'])
         prenom = columns.TextColumn("Prénom", sources=['individu__prenom'])
+        genre = columns.TextColumn("Genre", sources=None, processor='Get_genre')
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         profil = columns.TextColumn("Profil", sources=['Get_profil'])
+        tel_domicile = columns.TextColumn("Tél domicile", sources=['individu__tel_domicile'])
+        tel_mobile = columns.TextColumn("Tél portable", sources=['individu__tel_mobile'])
+        mail = columns.TextColumn("Email", sources=['individu__mail'])
         date_naiss = columns.TextColumn("Date naiss.", processor="Get_date_naiss")
         age = columns.TextColumn("Age", sources=['Get_age'], processor="Get_age")
         rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
@@ -64,8 +68,8 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idrattachement', 'idindividu', "nom", "prenom", "profil", "famille", "age", "date_naiss", "rue_resid", "cp_resid", "ville_resid"]
-            hidden_columns = ["idrattachement"]
+            columns = ['idrattachement', 'idindividu', "nom", "prenom", "profil", "famille", "age", "date_naiss", "genre", "rue_resid", "cp_resid", "ville_resid", "tel_domicile", "tel_mobile", "mail"]
+            hidden_columns = ["idrattachement", "tel_domicile", "tel_mobile", "mail", "genre"]
             ordering = ["nom", "prenom"]
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
@@ -90,6 +94,9 @@ class Liste(Page, crud.Liste):
 
         def Get_ville_resid(self, instance, *args, **kwargs):
             return instance.individu.ville_resid
+
+        def Get_genre(self, instance, *args, **kwargs):
+            return instance.individu.Get_sexe()
 
 
 # class Supprimer(Page, crud.Supprimer):
