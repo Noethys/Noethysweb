@@ -145,7 +145,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['idscolarite', 'date_debut', 'date_fin', 'ecole__nom', 'classe__nom', 'niveau__abrege', 'individu__nom', 'individu__prenom', 'individu__date_naiss']
+        filtres = ['idscolarite', 'date_debut', 'date_fin', 'ecole__nom', 'classe__nom', 'niveau__abrege', 'individu__nom', 'individu__prenom', 'datenaiss:individu']
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         nom = columns.TextColumn("Nom", sources=["individu__nom"])

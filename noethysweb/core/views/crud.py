@@ -65,6 +65,13 @@ class Liste_commun():
                         conditions &= ~Q(**{champ: True})
                         filtre["condition"] = ""
 
+                # Filtre spécial : Date de naissance
+                if filtre["champ"].startswith("datenaiss:"):
+                    type_champ, champ = champ.split(":")
+                    resultats = [individu for individu in Individu.objects.all() if self.appliquer_condition(valeur=str(individu.date_naiss or ""), criteres=criteres, filtre=filtre)]
+                    conditions &= Q(**{champ + "__in": resultats})
+                    filtre["condition"] = ""
+
                 # Filtres génériques
                 if filtre["condition"] == "EGAL": conditions &= Q(**{champ: criteres[0]})
                 if filtre["condition"] == "DIFFERENT": conditions &= ~Q(**{champ: criteres[0]})
@@ -159,6 +166,23 @@ class Liste_commun():
             return conditions
         else:
             return self.filtres_liste
+
+    def appliquer_condition(self, valeur=None, criteres=[], filtre=None):
+        """ Sert au filtre spécial date de naissance """
+        if filtre["condition"] == "EGAL": return valeur == criteres[0]
+        if filtre["condition"] == "DIFFERENT": return valeur != criteres[0]
+        if filtre["condition"] == "CONTIENT": return criteres[0] in valeur
+        if filtre["condition"] == "NE_CONTIENT_PAS": return criteres[0] not in valeur
+        if filtre["condition"] == "EST_VIDE": return valeur in (None, "")
+        if filtre["condition"] == "EST_PAS_VIDE": return valeur not in (None, "")
+        if filtre["condition"] == "EST_NUL": return valeur in (None, "")
+        if filtre["condition"] == "EST_PAS_NUL": return valeur not in (None, "")
+        if filtre["condition"] == "SUPERIEUR": return valeur > criteres[0]
+        if filtre["condition"] == "SUPERIEUR_EGAL": return valeur >= criteres[0]
+        if filtre["condition"] == "INFERIEUR": return valeur < criteres[0]
+        if filtre["condition"] == "INFERIEUR_EGAL": return valeur <= criteres[0]
+        if filtre["condition"] == "COMPRIS": return criteres[0] <= valeur <= criteres[1]
+        return False
 
     def Get_selections_filtres(self, noms=[], filtres=[]):
         conditions = Q()
