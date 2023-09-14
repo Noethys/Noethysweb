@@ -24,9 +24,9 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.form_id = 'individu_questionnaire_form'
         self.helper.form_method = 'post'
 
-        self.helper.form_class = 'form-horizontal'
-        self.helper.label_class = 'col-md-2'
-        self.helper.field_class = 'col-md-10'
+        # self.helper.form_class = 'form-horizontal'
+        # self.helper.label_class = 'col-md-2'
+        # self.helper.field_class = 'col-md-10'
         # self.helper.use_custom_control = False
 
         # Importation des renseignements en attente de validation

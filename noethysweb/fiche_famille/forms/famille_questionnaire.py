@@ -23,9 +23,9 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.form_id = 'famille_questionnaire_form'
         self.helper.form_method = 'post'
 
-        self.helper.form_class = 'form-horizontal'
-        self.helper.label_class = 'col-md-2'
-        self.helper.field_class = 'col-md-10'
+        # self.helper.form_class = 'form-horizontal'
+        # self.helper.label_class = 'col-md-2'
+        # self.helper.field_class = 'col-md-10'
 
         # Création des champs
         condition_structure = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
