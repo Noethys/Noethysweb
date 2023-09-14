@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 import json, datetime
+import dateutil.parser
 from operator import itemgetter
 from django import forms
 from django.http import JsonResponse
@@ -17,7 +18,7 @@ from django_select2.forms import Select2MultipleWidget
 from core.forms.base import FormulaireBase
 from core.utils import utils_dates
 from core.models import FiltreListe
-from core.widgets import DatePickerWidget, SelectionActivitesWidget
+from core.widgets import DatePickerWidget, SelectionActivitesWidget, DateTimePickerWidget
 from consommations.widgets import SelectionEcolesWidget, SelectionClassesWidget, SelectionNiveauxWidget
 
 
@@ -68,7 +69,9 @@ def Ajouter_filtre(request):
 
         if key.startswith("critere"):
             type_critere = key.replace("critere_", "")
-            if "date" in type_critere:
+            if "datetime" in type_critere:
+                dict_resultat["criteres"].append(str(dateutil.parser.parse(valeur, dayfirst=False)))
+            elif "date" in type_critere:
                 dict_resultat["criteres"].append(str(utils_dates.ConvertDateFRtoDate(valeur)))
             else:
                 dict_resultat["criteres"].append(valeur)
@@ -138,6 +141,9 @@ class Formulaire(FormulaireBase, forms.Form):
     critere_date_optionnelle = forms.DateField(label="Date", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
     critere_date_min = forms.DateField(label="Date min", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
     critere_date_max = forms.DateField(label="Date max", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
+    critere_datetime = forms.DateTimeField(label="Date et heure", widget=DateTimePickerWidget(), required=False)
+    critere_datetime_min = forms.DateField(label="Date et heure min", widget=DateTimePickerWidget(), required=False)
+    critere_datetime_max = forms.DateField(label="Date et heure max", widget=DateTimePickerWidget(), required=False)
     critere_heure = forms.TimeField(label="Heure", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
     critere_heure_min = forms.TimeField(label="Heure min", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
     critere_heure_max = forms.TimeField(label="Heure max", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
@@ -163,6 +169,7 @@ class Formulaire(FormulaireBase, forms.Form):
         'TextField': {'condition': 'condition1', 'criteres': {"EGAL": ["critere_texte"], "DIFFERENT": ["critere_texte"], "CONTIENT": ["critere_texte"], "NE_CONTIENT_PAS": ["critere_texte"], "EST_VIDE": [], "EST_PAS_VIDE": []}},
         'BooleanField': {'condition': 'condition3', 'criteres': {"VRAI": [], "FAUX": []}},
         'DateField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_date"], "DIFFERENT": ["critere_date"], "SUPERIEUR": ["critere_date"], "SUPERIEUR_EGAL": ["critere_date"], "INFERIEUR": ["critere_date"], "INFERIEUR_EGAL": ["critere_date"], "COMPRIS": ["critere_date_min", "critere_date_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
+        'DateTimeField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_datetime"], "DIFFERENT": ["critere_datetime"], "SUPERIEUR": ["critere_datetime"], "SUPERIEUR_EGAL": ["critere_datetime"], "INFERIEUR": ["critere_datetime"], "INFERIEUR_EGAL": ["critere_datetime"], "COMPRIS": ["critere_datetime_min", "critere_datetime_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
         'TimeField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_heure"], "DIFFERENT": ["critere_heure"], "SUPERIEUR": ["critere_heure"], "SUPERIEUR_EGAL": ["critere_heure"], "INFERIEUR": ["critere_heure"], "INFERIEUR_EGAL": ["critere_heure"], "COMPRIS": ["critere_heure_min", "critere_heure_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
         'AutoField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
         'IntegerField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
@@ -260,6 +267,10 @@ class Formulaire(FormulaireBase, forms.Form):
             # Saisit les critères
             ctrl_criteres = self.dict_types[type_champ]["criteres"][dict_filtre["condition"]]
             for index, nom_ctrl in enumerate(ctrl_criteres):
+                # Si datetime
+                if "-" in dict_filtre["criteres"][index] and ":" in dict_filtre["criteres"][index]:
+                    dict_filtre["criteres"][index] = datetime.datetime.strptime(dict_filtre["criteres"][index], "%Y-%m-%d %H:%M:%S")
+                # Importation de la valeur par défaut
                 try:
                     self.fields[nom_ctrl].initial = dict_filtre["criteres"][index]
                 except:
@@ -283,6 +294,9 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("critere_date_optionnelle"),
             Field("critere_date_min"),
             Field("critere_date_max"),
+            Field("critere_datetime"),
+            Field("critere_datetime_min"),
+            Field("critere_datetime_max"),
             Field("critere_heure"),
             Field("critere_heure_min"),
             Field("critere_heure_max"),

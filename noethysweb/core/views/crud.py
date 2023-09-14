@@ -6,6 +6,7 @@
 import logging, json, datetime
 from operator import attrgetter
 logger = logging.getLogger(__name__)
+import dateutil.parser
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, TemplateView
 from django.urls import reverse_lazy, reverse
@@ -71,6 +72,11 @@ class Liste_commun():
                     resultats = [individu for individu in Individu.objects.all() if self.appliquer_condition(valeur=str(individu.date_naiss or ""), criteres=criteres, filtre=filtre)]
                     conditions &= Q(**{champ + "__in": resultats})
                     filtre["condition"] = ""
+
+                # Filtre générique : datetime
+                for index_critere, critere in enumerate(criteres):
+                    if isinstance(critere, str) and "-" in critere and ":" in critere:
+                        criteres[index_critere] = dateutil.parser.parse(critere, dayfirst=False)
 
                 # Filtres génériques
                 if filtre["condition"] == "EGAL": conditions &= Q(**{champ: criteres[0]})
