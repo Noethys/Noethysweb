@@ -1,3 +1,13 @@
+Version 1.1.8.8 (14/09/2023) :
+
+- Ajout du filtre de liste datetime
+- Ajout du filtre de liste spécial date de naissance
+- Ajout des colonnes mail et genre dans la liste des individus rattachés
+- Ajout d'une colonne Email dans la liste des inscriptions par activité
+- Correction de la fusion des valeurs dans Word
+- Correction de la liste des questionnaires individuels
+- Retrait de la pagination dans le recalcul des prestations
+
 Version 1.1.8.7 (10/09/2023) :
 
 - Ajout de la gestion des plugins
