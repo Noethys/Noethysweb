@@ -62,7 +62,6 @@ class CustomDatatable():
 
                         if colonne.classe == "BooleanField":
                             valeur = True if valeur in (True, "True") else False
-                            criteres = [utils_dates.ConvertDateENGtoDate(critere) for critere in criteres]
 
                         # Comparaison
                         if condition == "EGAL" and not valeur == criteres[0]: valide = False

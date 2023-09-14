@@ -5,7 +5,7 @@
 
 from django.db.models import Q
 from core.models import QuestionnaireReponse
-from core.views.customdatatable import CustomDatatable, Colonne, ColonneAction
+from core.views.customdatatable import CustomDatatable, Colonne
 from core.views import crud, liste_questionnaires_base
 
 
@@ -38,4 +38,4 @@ class Liste(Page, liste_questionnaires_base.Liste):
                 reponse.individu.prenom,
                 self.Formate_reponse(reponse.Get_reponse_fr()),
             ])
-        return CustomDatatable(colonnes=self.colonnes, lignes=lignes, filtres=self.Get_filtres())
+        return CustomDatatable(colonnes=self.colonnes, lignes=lignes)#, filtres=self.Get_filtres())

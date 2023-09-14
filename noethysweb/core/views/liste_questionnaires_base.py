@@ -33,7 +33,7 @@ class Liste(crud.CustomListe):
         context["datatable"] = self.Get_customdatatable() if question else ""
 
         # Ajustement de la classe de la réponse
-        self.colonnes[1].classe = self.Get_classe_reponse(question=question)
+        self.colonnes[len(self.colonnes)-1].classe = self.Get_classe_reponse(question=question)
 
         # Suppression des filtres associés à une autre question
         if self.Get_categorie():
@@ -65,6 +65,6 @@ class Liste(crud.CustomListe):
         return classe
 
     def Formate_reponse(self, reponse=None):
-        if reponse == "oui": return "<small class='badge badge-pill badge-success'><i class='fa fa-check margin-r-5'></i>Oui</small>"
-        if reponse == "non": return "<small class='badge badge-pill badge-danger'><i class='fa fa-remove margin-r-5'></i>Non</small>"
+        if reponse and reponse.lower() == "oui": return "<small class='badge badge-pill badge-success'><i class='fa fa-check margin-r-5'></i>Oui</small>"
+        if reponse and reponse.lower() == "non": return "<small class='badge badge-pill badge-danger'><i class='fa fa-remove margin-r-5'></i>Non</small>"
         return reponse
