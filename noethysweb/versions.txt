@@ -1,3 +1,8 @@
+Version 1.1.8.9 (15/09/2023) :
+
+- Ajout de la consultation et modification de la facture
+- Transformation des questionnaires en formulaire vertical
+
 Version 1.1.8.8 (14/09/2023) :
 
 - Ajout du filtre de liste datetime
