@@ -61,7 +61,7 @@ class Liste(Onglet, crud.Liste):
         idfacture = self.kwargs.get("pk")
         liste_selections = json.loads(request.POST.get("selections"))
         Enregistrement_prestations(idfacture=idfacture, liste_idprestation=liste_selections)
-        return HttpResponseRedirect(reverse_lazy("famille_factures_consulter", kwargs={"idfamille": idfacture, "pk": idfacture}))
+        return HttpResponseRedirect(reverse_lazy("famille_factures_consulter", kwargs={"idfamille": self.kwargs["idfamille"], "pk": idfacture}))
 
 
 def Enregistrement_prestations(idfacture=None, liste_idprestation=[]):
