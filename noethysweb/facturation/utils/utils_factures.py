@@ -51,7 +51,6 @@ def Maj_total_factures(IDfamille=None, IDfacture=None):
         total_calcul = "%.02f" % (facture["total_calcul"] or 0)
         total = "%.02f" % (facture["total"] or 0)
         if facture["total_calcul"] and total_calcul != total:
-            print("Anomalie =", facture)
             facture = Facture.objects.get(pk=facture["pk"])
             facture.total = Decimal(total_calcul)
             facture.solde = facture.total - facture.regle

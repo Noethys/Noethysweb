@@ -9,7 +9,7 @@ from fiche_famille.views import famille, famille_questionnaire, famille_notes, f
                             famille_prestations, famille_reglements, famille_consommations, famille_factures, famille_voir_facture, famille_voir_cotisation, famille_abo_factures_email, \
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, famille_sms, \
                             famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats, famille_voir_mandat, famille_prestations_modele, \
-                            famille_attestations_fiscales, famille_voir_attestation_fiscale, famille_locations, famille_voir_location, famille_remboursement
+                            famille_attestations_fiscales, famille_voir_attestation_fiscale, famille_locations, famille_voir_location, famille_remboursement, famille_factures_consulter, famille_factures_selection
 
 urlpatterns = [
 
@@ -77,9 +77,13 @@ urlpatterns = [
 
     path('individus/familles/factures/liste/<int:idfamille>', famille_factures.Liste.as_view(), name='famille_factures_liste'),
     path('individus/familles/factures/ajouter/<int:idfamille>', famille_factures.Ajouter.as_view(), name='famille_factures_ajouter'),
-    path('individus/familles/factures/modifier/<int:idfamille>/<int:pk>', famille_factures.Modifier.as_view(), name='famille_factures_modifier'),
+    path('individus/familles/factures/modifier/<int:idfamille>/<int:pk>', famille_factures_consulter.Modifier.as_view(), name='famille_factures_modifier'),
+    path('individus/familles/factures/consulter/<int:idfamille>/<int:pk>', famille_factures_consulter.Consulter.as_view(), name='famille_factures_consulter'),
+    path('individus/familles/factures/supprimer_prestations/<int:idfamille>/<int:idfacture>/<int:pk>', famille_factures_consulter.Supprimer_prestation.as_view(), name='famille_factures_supprimer_prestation'),
+    path('individus/familles/factures/supprimer_plusieurs_prestations/<int:idfamille>/<int:idfacture>/<str:listepk>', famille_factures_consulter.Supprimer_plusieurs_prestations.as_view(), name='famille_factures_supprimer_plusieurs_prestations'),
     path('individus/familles/factures/supprimer/<int:idfamille>/<int:pk>', famille_factures.Supprimer.as_view(), name='famille_factures_supprimer'),
     path('individus/familles/factures/supprimer_plusieurs/<int:idfamille>/<str:listepk>', famille_factures.Supprimer_plusieurs.as_view(), name='famille_factures_supprimer_plusieurs'),
+    path('individus/familles/factures/ajouter_prestations/<int:idfamille>/<int:pk>', famille_factures_selection.Liste.as_view(), name='famille_factures_selection'),
     path('individus/familles/factures/voir/<int:idfamille>/<int:idfacture>', famille_voir_facture.View.as_view(), name='famille_voir_facture'),
     path('individus/familles/factures/abo_factures_email/<int:idfamille>', famille_abo_factures_email.Modifier.as_view(), name='famille_abo_factures_email'),
 

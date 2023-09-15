@@ -1,0 +1,61 @@
+{% extends "fiche_famille/famille_liste.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_famille %}
+    <div class="col-md-9">
+
+        {% embed 'core/box.html' %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+
+                {# Boutons de commandes #}
+                <div class="buttonHolder">
+                    <a class="btn btn-danger" href="{% url 'famille_factures_liste' idfamille=facture.famille_id %}"><i class='fa fa-times margin-r-5'></i>Fermer</a>
+                    <a class="btn btn-default" href="{% url 'famille_factures_selection' idfamille=facture.famille_id pk=facture.pk %}"><i class='fa fa-plus margin-r-5'></i>Ajouter des prestations</a>
+                    <a class="btn btn-default" href="{% url 'famille_factures_modifier' idfamille=facture.famille_id pk=facture.pk %}"><i class="fa fa-pencil margin-r-5"></i>Modifier les caractéristiques</a>
+                    <a class="btn btn-default" href="#" target="_blank" title="Consulter l'aide"><i class="fa fa-life-saver margin-r-5"></i>Aide</a>
+                </div>
+
+                {# Paramètres de la facture #}
+                <div class="card bg-light d-flex flex-fill mb-0 mt-3">
+                    <div class="card-body pt-0 p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <h2 class="lead"><b>Facture n°{{ facture.numero }} du {{ facture.date_debut|date:'d/m/Y' }} au {{ facture.date_fin|date:'d/m/Y' }}</b></h2>
+                                {% if facture.lot %}
+                                    <div class="text-muted border-bottom-0">
+                                        <div class="mt-1"><span>{{ facture.lot.nom }}</div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-4">
+                                <ul class="ml-4 mb-0 fa-ul text-muted">
+                                    <li class="small"><span><i class="fa fa-xs fa-calendar-times-o"></i></span> Date émission : {{ facture.date_edition|date:'d/m/Y' }}</li>
+                                    <li class="small"><span><i class="fa fa-xs fa-calendar-times-o"></i></span> Date échéance : {{ facture.date_echeance|date:'d/m/Y'|default:"Aucune" }}</li>
+                                    <li class="small"><span><i class="fa fa-xs fa-calendar-times-o"></i></span> Régie : {{ depot.regie.nom|default:"Aucune" }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row text-center">
+                            <div class="col-12">{{ stats|safe }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Liste des prestations #}
+                {% embed 'core/crud/liste.html' %}
+                {% endembed %}
+
+            {% endblock box_contenu %}
+            {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+        {% endembed %}
+
+    </div>
+
+{% endblock detail_famille %}

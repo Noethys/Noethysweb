@@ -3,24 +3,22 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+from django.db.models import Q
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Facture, Ventilation
+from core.models import Facture
+from core.utils import utils_preferences
 from fiche_famille.forms.famille_factures import Formulaire
 from fiche_famille.views.famille import Onglet
-from django.db.models import Sum, Q
-from core.utils import utils_preferences
-from decimal import Decimal
 
 
 class Page(Onglet):
     model = Facture
     url_liste = "famille_factures_liste"
-    url_modifier = "famille_factures_modifier"
     url_supprimer = "famille_factures_supprimer"
     url_supprimer_plusieurs = "famille_factures_supprimer_plusieurs"
-    description_liste = "Saisissez ici les factures de la famille."
+    description_liste = "Vous pouvez consulter ici les factures de la famille. Les boutons d'action vous permettent de modifier le contenu d'une facture, de la supprimer ou de la visualiser au format PDF ou de l'envoyer par email."
     description_saisie = "Saisissez toutes les informations concernant la facture et cliquez sur le bouton Enregistrer."
     objet_singulier = "une facture"
     objet_pluriel = "des factures"
@@ -48,7 +46,6 @@ class Page(Onglet):
         if "SaveAndNew" in self.request.POST:
             url = self.url_ajouter
         return reverse_lazy(url, kwargs={'idfamille': self.kwargs.get('idfamille', None)})
-
 
 
 class Liste(Page, crud.Liste):
@@ -88,13 +85,10 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
-            # Récupération idfamille
             kwargs = view.kwargs
-
-            # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
             html = [
-                self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
+                self.Create_bouton(url=reverse("famille_factures_consulter", kwargs={"idfamille": kwargs["idfamille"], "pk": instance.pk}), title="Consulter", icone="fa-search"),
                 self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
                 self.Create_bouton_imprimer(url=reverse("famille_voir_facture", kwargs={"idfamille": kwargs["idfamille"], "idfacture": instance.pk}), title="Imprimer ou envoyer par email la facture"),
             ]
@@ -115,11 +109,6 @@ class ClasseCommune(Page):
 
 
 class Ajouter(ClasseCommune, crud.Ajouter):
-    form_class = Formulaire
-    template_name = "fiche_famille/famille_edit.html"
-
-
-class Modifier(ClasseCommune, crud.Modifier):
     form_class = Formulaire
     template_name = "fiche_famille/famille_edit.html"
 
