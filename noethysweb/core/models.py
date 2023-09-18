@@ -826,6 +826,7 @@ class TypeCotisation(models.Model):
     type = models.CharField(verbose_name="Type", max_length=100, choices=type_cotisation, default="famille")
     carte = models.BooleanField(verbose_name="Carte d'adhérent", default=False)
     code_comptable = models.CharField(verbose_name="Code comptable", max_length=200, blank=True, null=True)
+    code_analytique = models.CharField(verbose_name="Code analytique", max_length=200, blank=True, null=True)
     code_produit_local = models.CharField(verbose_name="Code produit local", max_length=200, blank=True, null=True)
     defaut = models.BooleanField(verbose_name="Type par défaut", default=False)
     activite = models.ForeignKey("Activite", verbose_name="Activité associée", on_delete=models.PROTECT, blank=True, null=True)
@@ -1138,6 +1139,7 @@ class Activite(models.Model):
     date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
     nbre_inscrits_max = models.IntegerField(verbose_name="Nombre d'inscrits maximal", blank=True, null=True)
     code_comptable = models.CharField(verbose_name="Code comptable", max_length=200, blank=True, null=True)
+    code_analytique = models.CharField(verbose_name="Code analytique", max_length=200, blank=True, null=True)
     # psu_activation = models.IntegerField(blank=True, null=True)
     # psu_unite_prevision = models.IntegerField(blank=True, null=True)
     # psu_unite_presence = models.IntegerField(blank=True, null=True)
@@ -1465,7 +1467,7 @@ class Tarif(models.Model):
         verbose_name_plural = "tarifs"
 
     def __str__(self):
-        return "Tarif ID%d" % self.idtarif if self.idtarif else "Nouveau tarif"
+        return "Tarif ID%d - %s - à partir du %s" % (self.idtarif, self.nom_tarif.nom, self.date_debut.strftime("%d/%m/%Y")) if self.idtarif else "Nouveau tarif"
 
 
 class ModelePrestation(models.Model):
@@ -1541,7 +1543,7 @@ class TarifLigne(models.Model):
         verbose_name_plural = "lignes de tarif"
 
     def __str__(self):
-        return "Tarif %s - IDligne %d" % (self.tarif.nom_tarif, self.idligne)
+        return "Ligne tarifaire ID%d - Tarif %s" % ( self.idligne, self.tarif.nom_tarif)
 
 
 class CombiTarif(models.Model):
@@ -2210,6 +2212,7 @@ class Prestation(models.Model):
     # reglement_frais = models.IntegerField(blank=True, null=True)
     tva = models.DecimalField(verbose_name="Taux de TVA", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
     code_compta = models.CharField(verbose_name="Code comptable", max_length=200, blank=True, null=True)
+    code_analytique = models.CharField(verbose_name="Code analytique", max_length=200, blank=True, null=True)
     # idcontrat = models.IntegerField(db_column='IDcontrat', blank=True, null=True)  # Field name made lowercase.
     date_valeur = models.DateField(verbose_name="Date de valeur", auto_now_add=True)
     # iddonnee = models.IntegerField(db_column='IDdonnee', blank=True, null=True)  # Field name made lowercase.

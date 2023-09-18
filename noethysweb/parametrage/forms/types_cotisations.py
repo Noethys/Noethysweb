@@ -49,6 +49,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset('Options',
                 Field('activite'),
                 Field('code_comptable'),
+                Field('code_analytique'),
                 Field("code_produit_local"),
             ),
             Fieldset('Structure associée',
