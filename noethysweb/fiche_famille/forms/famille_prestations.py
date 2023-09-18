@@ -6,16 +6,17 @@
 import datetime
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
+from django.forms.models import inlineformset_factory, BaseInlineFormSet
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML, Fieldset, Div
 from crispy_forms.bootstrap import Field, PrependedText
+from django_select2.forms import ModelSelect2Widget, Select2Widget
+from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import Famille, Prestation, Deduction, Individu, Rattachement, Inscription, Activite
+from core.models import Prestation, Deduction, Rattachement, Inscription, Activite, CategorieTarif, Tarif , TarifLigne
 from core.widgets import DatePickerWidget, Formset
-from django.forms.models import inlineformset_factory, BaseInlineFormSet
 from core.utils import utils_preferences
-from fiche_famille.widgets import Facture_prestation, Consommations_prestation, Ligne_tarif, Texte_simple
+from fiche_famille.widgets import Facture_prestation, Consommations_prestation
 
 
 class DeductionForm(forms.ModelForm):
@@ -67,6 +68,20 @@ class Formulaire(FormulaireBase, ModelForm):
     quantite = forms.IntegerField(label="Quantité", initial=1, min_value=1, required=True)
     montant_unitaire = forms.DecimalField(label="Montant unitaire", max_digits=6, decimal_places=2, initial=0.0, required=True)
     consommations = forms.CharField(label="Consommations", widget=Consommations_prestation(), required=False)
+    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr", "data-width": "100%"}),
+                                      queryset=Activite.objects.all().order_by("-date_fin"), required=False)
+    categorie_tarif = forms.ModelChoiceField(label="Catégorie de tarif", widget=ModelSelect2Widget(
+        {"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom__icontains'],
+        dependent_fields={"activite": "activite"}), queryset=CategorieTarif.objects.all(), required=False,
+        help_text="Attention, modifier ici la catégorie de tarif ne changera pas automatiquement le montant de la prestation.")
+    tarif = forms.ModelChoiceField(label="Tarif", widget=ModelSelect2Widget(
+        {"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom_tarif__nom__icontains'],
+        dependent_fields={"activite": "activite"}), queryset=Tarif.objects.all().order_by("date_debut"), required=False,
+        help_text="Attention, modifier ici le tarif ne changera pas automatiquement le montant de la prestation.")
+    tarif_ligne = forms.ModelChoiceField(label="Ligne tarifaire", widget=ModelSelect2Widget(
+        {"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom_tarif__nom__icontains'],
+        dependent_fields={"tarif": "tarif"}), queryset=TarifLigne.objects.all(), required=False,
+        help_text="Attention, modifier ici la ligne tarifaire ne changera pas automatiquement le montant de la prestation.")
 
     class Meta:
         model = Prestation
@@ -74,10 +89,6 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             "date": DatePickerWidget(),
             "facture": Facture_prestation(),
-            "activite": Texte_simple(),
-            "categorie_tarif": Texte_simple(),
-            "tarif": Texte_simple(),
-            "tarif_ligne": Texte_simple(),
         }
         labels = {
             "montant_initial": "Montant initial",
@@ -107,15 +118,9 @@ class Formulaire(FormulaireBase, ModelForm):
         rattachements = Rattachement.objects.select_related("individu").filter(famille_id=idfamille).order_by("individu__nom", "individu__prenom")
         self.fields["individu"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
 
-        # # Activité
-        # activites = {inscription.activite_id: inscription.activite.nom for inscription in Inscription.objects.select_related("activite").filter(famille_id=idfamille)}
-        # self.fields["activite"].choices = [(None, "---------")] + [(idactivite, nom_activite) for idactivite, nom_activite in activites.items()]
-
-        # Tarif
-        self.fields["activite"].widget.attrs["texte"] = str(self.instance.activite) if self.instance and self.instance.activite else "Aucune activité"
-        self.fields["categorie_tarif"].widget.attrs["texte"] = str(self.instance.categorie_tarif) if self.instance and self.instance.categorie_tarif else "Aucune catégorie"
-        self.fields["tarif"].widget.attrs["texte"] = "ID%d - %s - A partir du %s" % (self.instance.tarif.pk, self.instance.tarif.nom_tarif, self.instance.tarif.date_debut.strftime("%d/%m/%Y")) if self.instance and self.instance.tarif else "Aucun tarif"
-        self.fields["tarif_ligne"].widget.attrs["texte"] = "ID%d - Ligne %s (%s-%s)" % (self.instance.tarif_ligne.pk, self.instance.tarif_ligne.num_ligne+1, self.instance.tarif_ligne.qf_min, self.instance.tarif_ligne.qf_max) if self.instance and self.instance.tarif_ligne else "Aucune ligne de tarif"
+        # Activité
+        activites = {inscription.activite_id: inscription.activite.nom for inscription in Inscription.objects.select_related("activite").filter(famille_id=idfamille)}
+        self.fields["activite"].choices = [(None, "---------")] + [(idactivite, nom_activite) for idactivite, nom_activite in activites.items()]
 
         # Si prestation facturée
         if self.instance.facture:
@@ -124,7 +129,6 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.fields[champ].help_text = "Ce champ n'est pas modifiable car la prestation est déjà facturée."
 
         self.fields["consommations"].initial = self.instance.pk
-
 
         # Affichage
         self.helper.layout = Layout(
@@ -152,6 +156,7 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Comptabilité",
                 Field('code_compta'),
+                Field('code_analytique'),
                 Field('code_produit_local'),
             ),
             Fieldset("Facturation",
@@ -177,6 +182,12 @@ class Formulaire(FormulaireBase, ModelForm):
         )
 
     def clean(self):
+        if not self.cleaned_data["activite"]:
+            self.cleaned_data["categorie_tarif"] = None
+        if not self.cleaned_data["categorie_tarif"]:
+            self.cleaned_data["tarif"] = None
+        if not self.cleaned_data["tarif"]:
+            self.cleaned_data["tarif_ligne"] = None
         return self.cleaned_data
 
 EXTRA_HTML = """
@@ -220,21 +231,12 @@ $(document).ready(function() {
 function On_change_activite() {
     var idactivite = $("#id_activite").val();
     var idcategorie_tarif = $("#id_categorie_tarif").val();
-    $.ajax({ 
-        type: "POST",
-        url: "{% url 'ajax_get_categories_tarifs' %}",
-        data: {'idactivite': idactivite},
-        success: function (data) { 
-            $("#id_categorie_tarif").html(data); 
-            $("#id_categorie_tarif").val(idcategorie_tarif);
-            if (data == '') {
-                $("#div_id_categorie_tarif").hide()
-            } else {
-                $("#div_id_categorie_tarif").show()
-            }
-            On_change_categorie_tarif();
-        }
-    });
+    if (idactivite == '') {
+        $("#div_id_categorie_tarif").hide()
+    } else {
+        $("#div_id_categorie_tarif").show()
+    }
+    On_change_categorie_tarif();
 };
 $(document).ready(function() {
     $('#id_activite').change(On_change_activite);
@@ -247,28 +249,35 @@ function On_change_categorie_tarif() {
     var idactivite = $("#id_activite").val();
     var idcategorie_tarif = $("#id_categorie_tarif").val();
     var idtarif = $("#id_tarif").val();
-    $.ajax({ 
-        type: "POST",
-        url: "{% url 'ajax_get_tarifs_prestation' %}",
-        data: {
-            'idactivite': idactivite, 
-            'idcategorie_tarif': idcategorie_tarif
-        },
-        success: function (data) { 
-            $("#id_tarif").html(data); 
-            $("#id_tarif").val(idtarif);
-            if (data == '') {
-                $("#div_id_tarif").hide()
-            } else {
-                $("#div_id_tarif").show()
-            }
-        }
-    });
+    if ((idactivite == '') | (idcategorie_tarif == '')) {
+        $("#div_id_tarif").hide();
+    } else {
+        $("#div_id_tarif").show();
+    };
+    On_change_tarif();
 };
 $(document).ready(function() {
     $('#id_categorie_tarif').change(On_change_categorie_tarif);
     On_change_categorie_tarif.call($('#id_categorie_tarif').get(0));
 });
+
+
+// Actualise la liste des lignes de tarifs
+function On_change_tarif() {
+    var idtarif = $("#id_tarif").val();
+    var idactivite = $("#id_activite").val();
+    var idcategorie_tarif = $("#id_categorie_tarif").val();
+    if ((idactivite == '') | (idtarif == '') | (idcategorie_tarif == '')) {
+        $("#div_id_tarif_ligne").hide()
+    } else {
+        $("#div_id_tarif_ligne").show()
+    }
+};
+$(document).ready(function() {
+    $('#id_tarif').change(On_change_tarif);
+    On_change_tarif.call($('#id_tarif').get(0));
+});
+
 
 // Calcul du total des déductions
 
