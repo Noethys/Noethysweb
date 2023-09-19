@@ -400,6 +400,9 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_tarifs = menu_facturation.Add(titre="Tarifs")
     menu_tarifs.Add(code="liste_tarifs", titre="Liste des tarifs", icone="file-text-o")
 
+    # Export des écritures comptables
+    menu_export_ecritures = menu_facturation.Add(titre="Export des écritures comptables")
+    menu_export_ecritures.Add(code="export_ecritures_cloe", titre="Exporter vers Cloé", icone="file-text-o")
 
 
     # ------------------------------------ Règlements ------------------------------------

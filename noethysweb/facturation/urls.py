@@ -12,7 +12,7 @@ from facturation.views import factures_generation, liste_prestations, liste_fact
                                 rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations, \
                                 lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
                                 attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes, edition_recap_factures, \
-                                factures_modifier
+                                factures_modifier, export_ecritures_cloe
 
 urlpatterns = [
 
@@ -88,11 +88,15 @@ urlpatterns = [
     path('facturation/synthese_impayes', Verifie_ventilation(synthese_impayes.View.as_view()), name='synthese_impayes'),
     path('facturation/solder_impayes', solder_impayes.View.as_view(), name='solder_impayes'),
 
+    # Export des écritures
+    path('facturation/export_ecritures_cloe', export_ecritures_cloe.View.as_view(), name='export_ecritures_cloe'),
+
     # AJAX
     path('facturation/modifier_lot_factures', secure_ajax(factures_generation.Modifier_lot_factures), name='ajax_modifier_lot_factures'),
     path('facturation/recherche_factures', secure_ajax(factures_generation.Recherche_factures), name='ajax_recherche_factures'),
     path('facturation/generation_factures', secure_ajax(factures_generation.Generation_factures), name='ajax_generation_factures'),
     path('facturation/generation_factures_previsualisation', secure_ajax(factures_generation.Previsualisation_pdf), name='ajax_generation_factures_previsualisation'),
+    path('facturation/generation_factures_numero', secure_ajax(factures_generation.Get_prochain_numero), name='ajax_generation_factures_numero'),
     path('facturation/modifier_lot_rappels', secure_ajax(rappels_generation.Modifier_lot_rappels), name='ajax_modifier_lot_rappels'),
     path('facturation/recherche_rappels', secure_ajax(rappels_generation.Recherche_rappels), name='ajax_recherche_rappels'),
     path('facturation/generation_rappels', secure_ajax(rappels_generation.Generation_rappels), name='ajax_generation_rappels'),
@@ -117,5 +121,6 @@ urlpatterns = [
     path('facturation/attestations_fiscales_email_pdf', secure_ajax(attestations_fiscales_email.Impression_pdf), name='ajax_attestations_fiscales_email_pdf'),
     path('facturation/ajax_solder_impayes', secure_ajax(solder_impayes.Solder), name='ajax_solder_impayes'),
     path('facturation/ajax_factures_modifier', secure_ajax(factures_modifier.Appliquer), name='ajax_factures_modifier'),
+    path('facturation/export_ecritures_cloe/exporter', secure_ajax(export_ecritures_cloe.Exporter), name='ajax_export_ecritures_cloe_exporter'),
 
 ]
