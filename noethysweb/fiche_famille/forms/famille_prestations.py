@@ -124,7 +124,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Si prestation facturée
         if self.instance.facture:
-            for champ in ("date", "categorie", "individu", "activite", "categorie_tarif", "tarif", "quantite", "montant_unitaire", "montant_initial", "montant", "tva"):
+            for champ in ("date", "categorie", "individu", "activite", "categorie_tarif", "tarif", "quantite", "montant_unitaire", "montant_initial", "montant", "tva", "tarif_ligne"):
                 self.fields[champ].disabled = True
                 self.fields[champ].help_text = "Ce champ n'est pas modifiable car la prestation est déjà facturée."
 
