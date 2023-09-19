@@ -2165,7 +2165,7 @@ class Facture(models.Model):
     solde_actuel = models.DecimalField(verbose_name="Solde actuel", max_digits=10, decimal_places=2, default=0.0)
     lot = models.ForeignKey(LotFactures, verbose_name="Lot de factures", on_delete=models.PROTECT, blank=True, null=True)
     prestations = models.CharField(verbose_name="Types de prestations", max_length=200, blank=True, null=True)
-    #etat = models.CharField(blank=True, null=True)
+    etat = models.CharField(verbose_name="Etat de la facture", max_length=100, blank=True, null=True)
     prefixe = models.ForeignKey(PrefixeFacture, verbose_name="Préfixe", on_delete=models.PROTECT, blank=True, null=True)
     regie = models.ForeignKey(FactureRegie, verbose_name="Régie", on_delete=models.PROTECT, blank=True, null=True)
 
@@ -2178,6 +2178,8 @@ class Facture(models.Model):
         return "Facture ID%d" % self.idfacture
 
     def Maj_solde_actuel(self):
+        if self.etat == "annulation":
+            return
         montant_regle = Ventilation.objects.filter(prestation__facture=self.idfacture).aggregate(Sum('montant'))["montant__sum"]
         if not montant_regle:
             montant_regle = decimal.Decimal(0)

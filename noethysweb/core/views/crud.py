@@ -379,6 +379,7 @@ def Formate_liste_objets(objets=[]):
 class Supprimer(BaseView, DeleteView):
     template_name = "core/crud/confirm_delete_in_box.html"
     verbe_action = "Supprimer"
+    nom_action = "Suppression"
     check_protections = True
     manytomany_associes = []
 
@@ -386,6 +387,8 @@ class Supprimer(BaseView, DeleteView):
         context = super(Supprimer, self).get_context_data(**kwargs)
         context['box_introduction'] = None
         context['erreurs_protection'] = []
+        context['verbe_action'] = self.verbe_action
+        context['nom_action'] = self.nom_action
 
         if self.check_protections:
 
@@ -479,6 +482,7 @@ class Supprimer(BaseView, DeleteView):
 class Supprimer_plusieurs(BaseView, CustomView, TemplateView):
     template_name = "core/crud/confirm_delete_in_box.html"
     verbe_action = "Supprimer"
+    nom_action = "Suppression"
     check_protections = True
 
     def get_context_data(self, **kwargs):
@@ -489,6 +493,8 @@ class Supprimer_plusieurs(BaseView, CustomView, TemplateView):
         context['liste_objets'] = self.get_objets()
         context['model'] = self.model
         context['erreurs_protection'] = []
+        context['verbe_action'] = self.verbe_action
+        context['nom_action'] = self.nom_action
 
         if self.check_protections:
 

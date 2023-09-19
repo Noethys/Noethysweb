@@ -3,11 +3,14 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
 from django.db.models import Q
 from django.urls import reverse_lazy, reverse
+from django.http import HttpResponseRedirect
+from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Facture
+from core.models import Facture, Prestation
 from core.utils import utils_preferences
 from fiche_famille.forms.famille_factures import Formulaire
 from fiche_famille.views.famille import Onglet
@@ -60,6 +63,9 @@ class Liste(Page, crud.Liste):
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
         context['active_checkbox'] = True
+        context['boutons_coches'] = json.dumps([
+            {"id": "bouton_tout_annuler", "action": "tout_annuler()", "title": "Annuler les factures cochées", "label": "<i class='fa fa-times margin-r-5'></i>Annuler"},
+        ])
         return context
 
     class datatable_class(MyDatatable):
@@ -89,13 +95,15 @@ class Liste(Page, crud.Liste):
             kwargs["pk"] = instance.pk
             html = [
                 self.Create_bouton(url=reverse("famille_factures_consulter", kwargs={"idfamille": kwargs["idfamille"], "pk": instance.pk}), title="Consulter", icone="fa-search"),
-                self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
+                """<a type='button' class='btn btn-default btn-xs' href='#' onclick="ouvrir_modal_supprimer_facture(%d);" title='Supprimer ou annuler'><i class="fa fa-fw fa-times"></i></a>""" % instance.pk,
                 self.Create_bouton_imprimer(url=reverse("famille_voir_facture", kwargs={"idfamille": kwargs["idfamille"], "idfacture": instance.pk}), title="Imprimer ou envoyer par email la facture"),
             ]
             return self.Create_boutons_actions(html)
 
         def Get_solde_actuel(self, instance, **kwargs):
-            icone = "fa-check text-green" if instance.solde_actuel == 0 else "fa-close text-red"
+            if instance.etat == "annulation":
+                return "<span class='text-red'><i class='fa fa-trash'></i> Annulée</span>"
+            icone = "fa-check text-green" if instance.solde_actuel == 0 else ""
             return "<i class='fa %s margin-r-5'></i>  %0.2f %s" % (icone, instance.solde_actuel, utils_preferences.Get_symbole_monnaie())
 
 
@@ -119,3 +127,37 @@ class Supprimer(Page, crud.Supprimer):
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
     template_name = "fiche_famille/famille_delete.html"
+
+
+class Annuler(Page, crud.Supprimer):
+    template_name = "fiche_famille/famille_delete.html"
+    verbe_action = "Annuler"
+    nom_action = "Annulation"
+
+    def delete(self, request, *args, **kwargs):
+        # Annulation de la facture
+        facture = Facture.objects.get(pk=kwargs["pk"])
+        facture.etat = "annulation"
+        facture.save()
+        Prestation.objects.filter(facture=facture).update(facture=None)
+
+        # Confirmation de la suppression
+        messages.add_message(self.request, messages.SUCCESS, "La facture a été annulée avec succès")
+        return HttpResponseRedirect(reverse_lazy(self.url_liste, kwargs={"idfamille": kwargs["idfamille"]}))
+
+
+class Annuler_plusieurs(Page, crud.Supprimer_plusieurs):
+    template_name = "fiche_famille/famille_delete.html"
+    verbe_action = "Annuler"
+    nom_action = "Annulation"
+
+    def post(self, request, **kwargs):
+        # Annulation des factures
+        for facture in self.get_objets():
+            facture.etat = "annulation"
+            facture.save()
+            Prestation.objects.filter(facture=facture).update(facture=None)
+
+        # Confirmation de la suppression
+        messages.add_message(self.request, messages.SUCCESS, "Les factures ont été annulées avec succès")
+        return HttpResponseRedirect(reverse_lazy(self.url_liste, kwargs={"idfamille": kwargs["idfamille"]}))

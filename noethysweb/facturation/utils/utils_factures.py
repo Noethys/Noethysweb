@@ -20,7 +20,7 @@ def Maj_solde_actuel_factures(IDfamille=None):
     dict_ventilations = {ventilation['prestation__facture']: ventilation['total'] for ventilation in ventilations}
     # Importation des factures
     conditions_factures = Q(famille_id=IDfamille) if IDfamille else Q()
-    for facture in Facture.objects.filter(conditions_factures):
+    for facture in Facture.objects.filter(conditions_factures).exclude(etat="annulation"):
         solde_actuel = facture.total - dict_ventilations.get(facture.pk, Decimal(0))
         if solde_actuel != facture.solde_actuel:
             facture.solde_actuel = solde_actuel
@@ -46,7 +46,7 @@ def Maj_total_factures(IDfamille=None, IDfacture=None):
         conditions &= Q(famille_id=IDfamille)
     if IDfacture:
         conditions &= Q(pk=IDfacture)
-    factures = Facture.objects.filter(conditions).values("pk", "total", "regle", "solde", "solde_actuel").annotate(total_calcul=Sum("prestation__montant"))
+    factures = Facture.objects.filter(conditions).values("pk", "total", "regle", "solde", "solde_actuel").exclude(etat="annulation").annotate(total_calcul=Sum("prestation__montant"))
     for facture in factures:
         total_calcul = "%.02f" % (facture["total_calcul"] or 0)
         total = "%.02f" % (facture["total"] or 0)

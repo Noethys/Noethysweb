@@ -5,8 +5,8 @@
     {% if erreurs_protection %}
 
         <div class="alert alert-danger alert-dismissible">
-            <h5><i class="icon fa fa-ban"></i> Suppression impossible</h5>
-            <div class="p-1">La suppression de l'élément '{{ object }}' est impossible :</div>
+            <h5><i class="icon fa fa-ban"></i> {{ nom_action }} impossible</h5>
+            <div class="p-1">{{ verbe_action }} l'élément '{{ object }}' est impossible :</div>
             <ul>
                 {% for erreur in erreurs_protection %}
                     <li class="p-1">{{ erreur }}</li>
@@ -18,9 +18,9 @@
     {% else %}
 
         <form method="post">{% csrf_token %}
-            <p>Voulez-vous vraiment supprimer l'élément '{{ object }}' ?</p><br>
+            <p>Voulez-vous vraiment {{ verbe_action|lower }} l'élément '{{ object }}' ?</p><br>
             <div class="pull-right">
-                <button type="submit" title="Supprimer" class='btn btn-warning'><i class="fa fa-trash margin-r-5"></i>Supprimer</button>
+                <button type="submit" title="{{ verbe_action }}" class='btn btn-warning'><i class="fa fa-trash margin-r-5"></i>{{ verbe_action }}</button>
                 <input type='hidden' name='next' value='{{ request.GET.next }}'>
                 <a class="btn btn-danger" href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{{ view.get_success_url }}{% endif %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
             </div>

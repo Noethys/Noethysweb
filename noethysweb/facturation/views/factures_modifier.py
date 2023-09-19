@@ -96,6 +96,8 @@ class Liste(Page, crud.Liste):
             ordering = ["date_edition"]
 
         def Get_solde_actuel(self, instance, **kwargs):
+            if instance.etat == "annulation":
+                return "<span class='text-red'><i class='fa fa-trash'></i> Annulée</span>"
             icone = "fa-check text-green" if instance.solde_actuel == 0 else "fa-close text-red"
             return "<i class='fa %s margin-r-5'></i>  %0.2f %s" % (icone, instance.solde_actuel, utils_preferences.Get_symbole_monnaie())
 
