@@ -8,11 +8,22 @@ from django.views.generic import TemplateView
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.template import Template, RequestContext
-from core.models import Activite, Facture, Prestation, LotFactures, FiltreListe, ModeleImpression
+from core.models import Activite, Facture, Prestation, LotFactures, FiltreListe, ModeleImpression, PrefixeFacture
 from core.views.base import CustomView
 from core.utils import utils_dates, utils_parametres
 from facturation.utils import utils_facturation, utils_impression_facture
-from facturation.forms.factures_generation import Formulaire
+from facturation.forms.factures_generation import Formulaire, Calc_prochain_numero
+
+
+def Get_prochain_numero(request):
+    """ Renvoie le prochain numéro de facture """
+    idprefixe = request.POST.get("idprefixe", None)
+    if idprefixe:
+        prefixe = PrefixeFacture.objects.get(pk=idprefixe)
+    else:
+        prefixe = None
+    numero = Calc_prochain_numero(prefixe)
+    return JsonResponse({"numero": numero})
 
 
 def Modifier_lot_factures(request):

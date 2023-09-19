@@ -215,6 +215,22 @@
 
         $(document).ready(function() {
             init_page_parametres();
+
+            $("#id_prefixe").on("change", function(e) {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_generation_factures_numero' %}",
+                    data: {"idprefixe": $("#id_prefixe").val()},
+                    datatype: "json",
+                    success: function(data){
+                        $("#input_id_prochain_numero").val(data.numero)
+                    },
+                    error: function(data) {
+                        toastr.error("Le prochain numéro de facture n'a pas réussi à être calculé");
+                    }
+                });
+            });
+
         });
 
     </script>

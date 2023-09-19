@@ -20,6 +20,19 @@ from core.utils import utils_parametres
 from facturation.widgets import ChampAutomatiqueWidget
 
 
+def Calc_prochain_numero(prefixe=None):
+    mode_prochain_numero = getattr(settings, "PROCHAIN_NUMERO_FACTURES", "MAX")
+    if mode_prochain_numero == "MAX":
+        # Mode "MAX"
+        numero = (Facture.objects.filter(prefixe=prefixe).aggregate(Max('numero')))['numero__max']
+    else:
+        # Mode "DERNIER"
+        numero = Facture.objects.filter(prefixe=prefixe).last()
+        numero = numero.numero if numero else None
+    if not numero: numero = 0
+    return numero + 1
+
+
 class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     lot_factures = forms.ModelChoiceField(label="Lot de factures", queryset=LotFactures.objects.all().order_by("-pk"), required=False, widget=Select_avec_commandes({
@@ -52,17 +65,7 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.field_class = 'col-md-10'
 
         # Prochain numéro
-        mode_prochain_numero = getattr(settings, "PROCHAIN_NUMERO_FACTURES", "MAX")
-        if mode_prochain_numero == "MAX":
-            # Mode "MAX"
-            numero = (Facture.objects.filter(prefixe=None).aggregate(Max('numero')))['numero__max']
-        else:
-            # Mode "DERNIER"
-            numero = Facture.objects.filter(prefixe=None).last()
-            numero = numero.numero if numero else None
-
-        if not numero: numero = 0
-        self.fields["prochain_numero"].initial = numero + 1
+        self.fields["prochain_numero"].initial = Calc_prochain_numero()
 
         # Date d'émission
         self.fields["date_emission"].initial = datetime.date.today()
