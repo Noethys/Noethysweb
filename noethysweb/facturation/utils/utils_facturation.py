@@ -7,22 +7,12 @@ import logging
 logger = logging.getLogger(__name__)
 from decimal import Decimal
 from django.db.models import Q, Sum
-from core.models import Prestation, Ventilation, Deduction, Consommation, Reglement, Agrement, Facture, Quotient, PesPiece
+from core.models import Prestation, Ventilation, Deduction, Consommation, Reglement, Agrement, Facture, Quotient, PesPiece, Prelevements
 from core.data import data_codes_etab
 from core.utils import utils_preferences, utils_dates, utils_conversion, utils_impression, utils_infos_individus, utils_questionnaires, utils_texte
 from facturation.utils import utils_impression_facture
 from facturation.utils.utils_export_pes import Get_cle_modulo_23
 
-
-# def FormateMaj(nom_titulaires):
-#     """ Formate nom de fichier en majuscules et sans caractères spéciaux """
-#     nom_titulaires = UTILS_Texte.Supprime_accent(nom_titulaires)
-#     resultat = ""
-#     for caract in nom_titulaires :
-#         if caract in " abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" :
-#             resultat += caract.upper()
-#     resultat = resultat.replace(" ", "_")
-#     return resultat
 
 
 class Facturation():
@@ -43,7 +33,7 @@ class Facturation():
         #     self.dictMessageFamiliaux[IDfamille].append({"IDmessage":IDmessage, "IDcategorie":IDcategorie, "date_parution":date_parution, "priorite":priorite, "nom":nom, "texte":texte})
         #
 
-        # # Recherche des numéros d'agréments
+        # Recherche des numéros d'agréments
         logger.debug("Recherche tous les agréments...")
         self.listeAgrements = Agrement.objects.all()
 
@@ -534,86 +524,14 @@ class Facturation():
         """ Impression des factures """
         logger.debug("Recherche toutes les factures...")
         factures = Facture.objects.select_related("lot").filter(idfacture__in=liste_factures)
-
-        # # Récupération des prélèvements
-        # req = """SELECT
-        # prelevements.IDprelevement, prelevements.prelevement_numero, prelevements.prelevement_iban,
-        # prelevements.IDfacture, prelevements.montant, prelevements.statut,
-        # comptes_payeurs.IDcompte_payeur, lots_prelevements.date,
-        # prelevement_reference_mandat, comptes_bancaires.code_ics
-        # FROM prelevements
-        # LEFT JOIN lots_prelevements ON lots_prelevements.IDlot = prelevements.IDlot
-        # LEFT JOIN comptes_payeurs ON comptes_payeurs.IDfamille = prelevements.IDfamille
-        # LEFT JOIN comptes_bancaires ON comptes_bancaires.IDcompte = lots_prelevements.IDcompte
-        # WHERE prelevements.IDfacture IN %s
-        # ;""" % conditions
-        # DB.ExecuterReq(req)
-        # listePrelevements = DB.ResultatReq()
-        listePrelevements = [] #todo: prélèvements à intégrer
-
-        # Pièces PES ORMC
-        # req = """SELECT
-        # pes_pieces.IDpiece, pes_pieces.numero, pes_pieces.prelevement_iban, pes_pieces.IDfacture,
-        # pes_pieces.montant, pes_pieces.prelevement_statut, comptes_payeurs.IDcompte_payeur,
-        # pes_lots.date_prelevement, pes_pieces.prelevement_IDmandat, comptes_bancaires.code_ics
-        # FROM pes_pieces
-        # LEFT JOIN pes_lots ON pes_lots.IDlot = pes_pieces.IDlot
-        # LEFT JOIN comptes_payeurs ON comptes_payeurs.IDfamille = pes_pieces.IDfamille
-        # LEFT JOIN comptes_bancaires ON comptes_bancaires.IDcompte = pes_lots.IDcompte
-        # WHERE pes_pieces.prelevement_IDmandat IS NOT NULL AND pes_pieces.prelevement=1 AND pes_pieces.IDfacture IN %s
-        # ;""" % conditions
-        # DB.ExecuterReq(req)
-        # listePieces = DB.ResultatReq()
-        # dictPrelevements = {}
-        # for listeDonneesPrel in (listePrelevements, listePieces):
-        #     for IDprelevement, numero_compte, iban, IDfacture, montant, statut, IDcompte_payeur, datePrelevement, rum, code_ics in (listeDonneesPrel):
-        #         datePrelevement = UTILS_Dates.DateEngEnDateDD(datePrelevement)
-        #         dictPrelevements[IDfacture] = {
-        #             "IDprelevement": IDprelevement, "numero_compte": numero_compte, "montant": montant,
-        #             "statut": statut, "IDcompte_payeur": IDcompte_payeur, "datePrelevement": datePrelevement,
-        #             "iban": iban, "rum": rum, "code_ics": code_ics,
-        #         }
-        # todo: à intégrer
-
-
-        # Infos PES ORMC
-        dict_pes = {piece.facture_id: piece for piece in PesPiece.objects.select_related("lot", "lot__modele").filter(facture_id__in=liste_factures)}
-
-        # req = """SELECT
-        # pes_pieces.IDlot, pes_pieces.IDfacture, pes_lots.nom, pes_lots.exercice, pes_lots.mois, pes_lots.objet_piece, pes_lots.id_bordereau, pes_lots.code_prodloc,
-        # pes_lots.code_collectivite, pes_lots.id_collectivite, pes_lots.id_poste
-        # FROM pes_pieces
-        # LEFT JOIN pes_lots ON pes_lots.IDlot = pes_pieces.IDlot
-        # WHERE pes_pieces.IDfacture IN %s
-        # ;""" % conditions
-        # DB.ExecuterReq(req)
-        # listeInfosPes = DB.ResultatReq()
-        # dictPes = {}
-        # for IDlot_pes, IDfacture, nom_lot_pes, exercice, mois, objet, id_bordereau, code_produit, code_collectivite, id_collectivite, id_poste in (listeInfosPes):
-        #     dictPes[IDfacture] = {
-        #         "pes_IDlot": IDlot_pes, "pes_nom_lot": nom_lot_pes, "pes_lot_exercice": exercice, "pes_lot_mois": mois,
-        #         "pes_lot_objet": objet, "pes_lot_id_bordereau": id_bordereau, "pes_lot_code_produit": code_produit,
-        #         "pes_lot_code_collectivite": code_collectivite, "pes_lot_id_collectivite": id_collectivite,
-        #         "pes_lot_id_poste": id_poste,
-        #     }
-        # todo: à intégrer
-
         if not factures:
             return False
 
-        # listeFactures = []
-        # for facture in factures:
-        #     liste_prestations = facture.prestations.split(";") if facture.prestations else []
-        #     liste_activites = [int(x) for x in facture.activites.split(";")] if facture.activites else []
-        #     liste_individus = [int(x) for x in facture.individus.split(";")] if facture.individus else []
-        #
-        #     dictFacture = {
-        #         "IDfacture": facture.pk, "IDprefixe": facture.prefixe_id, "prefixe": facture.prefixe, "numero": facture.numero, "IDfamille": facture.famille_id,
-        #         "date_edition": facture.date_edition, "date_echeance": facture.date_echeance, "IDutilisateur": None, "date_debut": facture.date_debut,
-        #         "date_fin": facture.date_fin, "total": facture.total, "regle": facture.regle, "solde": facture.solde, "activites": liste_activites,
-        #         "individus": liste_individus, "prestations": liste_prestations,
-        #         }
-        #     listeFactures.append(dictFacture)
+        # Prélèvements
+        dict_prelevements = {prelevement.facture_id: prelevement for prelevement in Prelevements.objects.select_related("lot", "lot__modele__compte", "mandat").filter(facture_id__in=liste_factures)}
+
+        # Infos PES ORMC
+        dict_pes = {piece.facture_id: piece for piece in PesPiece.objects.select_related("lot", "lot__modele").filter(facture_id__in=liste_factures)}
 
         # Recherche la liste des familles concernées
         liste_idfamille = [facture.famille_id for facture in factures]
@@ -667,6 +585,8 @@ class Facturation():
                 dictCompte["{SOLDE_AVEC_REPORTS}"] = u"%.2f %s" % (dictCompte["solde_avec_reports"], utils_preferences.Get_symbole_monnaie())
                 dictCompte["{SOLDE_AVEC_REPORTS_LETTRES}"] = utils_conversion.trad(facture.solde+dictCompte["total_reports"]).strip().capitalize()
                 dictCompte["{NOM_LOT}"] = facture.lot.nom if facture.lot else ""
+                dictCompte["{DATE_PRELEVEMENT}"] = ""
+                dictCompte["prelevement"] = None
 
                 # Ajoute les informations de base famille
                 for key, valeur in infosIndividus.GetDictValeurs(mode="famille", ID=facture.famille_id, formatChamp=True).items():
@@ -677,26 +597,16 @@ class Facturation():
                     dictIndividu["select"] = True
 
                 # Recherche de prélèvements
-                # if IDfacture in dictPrelevements :
-                #     if datePrelevement < dictCompte["date_edition"] :
-                #         verbe = _(u"a été")
-                #     else :
-                #         verbe = _(u"sera")
-                #     montant = dictPrelevements[IDfacture]["montant"]
-                #     datePrelevement = dictPrelevements[IDfacture]["datePrelevement"]
-                #     iban = dictPrelevements[IDfacture]["iban"]
-                #     rum = dictPrelevements[IDfacture]["rum"]
-                #     code_ics = dictPrelevements[IDfacture]["code_ics"]
-                #     dictCompte["{DATE_PRELEVEMENT}"] = UTILS_Dates.DateEngFr(str(datePrelevement))
-                #     if iban != None :
-                #         dictCompte["prelevement"] = _(u"La somme de %.2f %s %s prélevée le %s sur le compte ***%s") % (montant, utils_preferences.Get_symbole_monnaie(), verbe, UTILS_Dates.DateEngFr(str(datePrelevement)), iban[-7:])
-                #     else :
-                #         dictCompte["prelevement"] = _(u"La somme de %.2f %s %s prélevée le %s") % (montant, utils_preferences.Get_symbole_monnaie(), verbe, UTILS_Dates.DateEngFr(str(datePrelevement)))
-                #     if rum != None :
-                #         dictCompte["prelevement"] += _(u"<br/>Réf. mandat unique : %s / Code ICS : %s") % (rum, code_ics)
-                # else :
-                #     dictCompte["prelevement"] = None
-                #     dictCompte["{DATE_PRELEVEMENT}"] = ""
+                prelevement = dict_prelevements.get(facture.pk, None)
+                if prelevement:
+                    verbe = "a été" if prelevement.lot.date < facture.date_edition else "sera"
+                    if prelevement.mandat.iban:
+                        dictCompte["prelevement"] = "La somme de %.2f %s %s prélevée le %s sur le compte ***%s" % (prelevement.montant, utils_preferences.Get_symbole_monnaie(), verbe, utils_dates.ConvertDateToFR(prelevement.lot.date), prelevement.mandat.iban[-7:])
+                    else :
+                        dictCompte["prelevement"] = "La somme de %.2f %s %s prélevée le %s" % (prelevement.montant, utils_preferences.Get_symbole_monnaie(), verbe, utils_dates.ConvertDateToFR(prelevement.lot.date))
+                    if prelevement.mandat.rum:
+                        dictCompte["prelevement"] += "<br/>Réf. mandat unique : %s / Code ICS : %s" % (prelevement.mandat.rum, prelevement.lot.modele.compte.code_ics)
+                    dictCompte["{DATE_PRELEVEMENT}"] = utils_dates.ConvertDateToFR(prelevement.lot.date)
 
                 # Infos PES ORMC
                 piece_pes = dict_pes.get(facture.pk, None)
@@ -728,7 +638,7 @@ class Facturation():
                 dictChampsFusion[facture.pk]["{SOLDE}"] = u"%.2f %s" % (dictCompte["solde"], utils_preferences.Get_symbole_monnaie())
                 dictChampsFusion[facture.pk]["{SOLDE_AVEC_REPORTS}"] = dictCompte["{SOLDE_AVEC_REPORTS}"]
                 dictChampsFusion[facture.pk]["{SOLDE_COMPTE}"] = dictCompte["{SOLDE_COMPTE}"]
-                # dictChampsFusion[facture.pk]["{DATE_PRELEVEMENT}"] = dictCompte["{DATE_PRELEVEMENT}"]
+                dictChampsFusion[facture.pk]["{DATE_PRELEVEMENT}"] = dictCompte["{DATE_PRELEVEMENT}"]
 
                 # Fusion pour textes personnalisés
                 dictCompte["texte_titre"] = self.RemplaceMotsCles(dict_options["texte_titre"], dictCompte)
@@ -777,35 +687,6 @@ class Facturation():
 
         logger.debug("Création des PDF terminée.")
         return {"champs": dictChampsFusion, "nom_fichier": nom_fichier, "noms_fichiers": noms_fichiers}
-
-
-
-
-
-
-# def SuppressionFacture(listeFactures=[], mode="suppression"):
-#     """ Suppression d'une facture """
-#     dlgAttente = wx.BusyInfo(_(u"%s des factures en cours...") % mode.capitalize(), None)
-#     if 'phoenix' not in wx.PlatformInfo:
-#         wx.Yield()
-#     DB = GestionDB.DB()
-#
-#     # Suppression
-#     if mode == "suppression" :
-#         for IDfacture in listeFactures :
-#             DB.ReqMAJ("prestations", [("IDfacture", None),], "IDfacture", IDfacture)
-#             DB.ReqDEL("factures", "IDfacture", IDfacture)
-#
-#     # Annulation
-#     if mode == "annulation" :
-#         for IDfacture in listeFactures :
-#             DB.ReqMAJ("prestations", [("IDfacture", None),], "IDfacture", IDfacture)
-#             DB.ReqMAJ("factures", [("etat", "annulation"),], "IDfacture", IDfacture)
-#
-#     DB.Close()
-#     del dlgAttente
-#     return True
-
 
 
 

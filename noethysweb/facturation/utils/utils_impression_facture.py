@@ -647,18 +647,17 @@ class Impression(utils_impression.Impression):
                 self.story.append(tableau)
                 
                 # ------------------------- PRELEVEMENTS --------------------
-                if "afficher_avis_prelevements" in self.dict_options and "prelevement" in dictValeur:
-                    if dictValeur["prelevement"] != None and self.dict_options["afficher_avis_prelevements"] == True:
-                        paraStyle = ParagraphStyle(name="intro",
-                              fontName="Helvetica",
-                              fontSize=8,
-                              leading=11,
-                              spaceBefore=2,
-                              spaceafter=2,
-                              alignment=1,
-                              backColor=couleurFondActivite)
-                        self.story.append(Spacer(0, 20))
-                        self.story.append(Paragraph(u"<para align='center'><i>%s</i></para>" % dictValeur["prelevement"], paraStyle))
+                if self.dict_options.get("afficher_avis_prelevements", False) and dictValeur.get("prelevement", False):
+                    paraStyle = ParagraphStyle(name="intro",
+                          fontName="Helvetica",
+                          fontSize=8,
+                          leading=11,
+                          spaceBefore=2,
+                          spaceafter=2,
+                          alignment=1,
+                          backColor=couleurFondActivite)
+                    self.story.append(Spacer(0, 20))
+                    self.story.append(Paragraph(u"<para align='center'><i>%s</i></para>" % dictValeur["prelevement"], paraStyle))
                 
                 # Texte conclusion
                 if self.dict_options["texte_conclusion"] != "":
