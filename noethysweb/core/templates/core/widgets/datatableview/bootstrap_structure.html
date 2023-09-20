@@ -1,7 +1,7 @@
 <table class="display datatable table table-striped table-bordered" data-source-url="{{ url }}" id="{{ config.id }}" style="width:100%;"
-       data-ajax-method="{{ config.request_method }}"
-       data-result-counter-id="{{ config.result_counter_id }}"
-       data-page-length="{{ config.page_length }}">
+    data-ajax-method="{{ config.request_method }}"
+    data-result-counter-id="{{ config.result_counter_id }}"
+    data-page-length="{{ config.page_length }}">
     <thead>
         <tr>
             {% for column in columns %}
@@ -17,7 +17,7 @@
         <tfoot>
             <tr>
                 {% for column in datatable %}
-                    <th>{{ column.label }}</th>
+                    <th>{% if column.label != "ID" and "<input" not in column.label %}{{ column.label }}{% endif %}</th>
                 {% endfor %}
             </tr>
         </tfoot>

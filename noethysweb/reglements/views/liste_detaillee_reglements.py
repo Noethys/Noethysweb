@@ -3,11 +3,11 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
+import json
+from django.db.models import Sum
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Reglement, Ventilation, Prestation
-from django.db.models import Sum
 from core.utils import utils_preferences
 
 
@@ -29,6 +29,7 @@ class Liste(Page, crud.Liste):
         context['box_introduction'] = "Voici ci-dessous la liste détaillée des règlements des familles."
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
+        context["totaux"] = json.dumps(["montant"])
         return context
 
     class datatable_class(MyDatatable):
@@ -49,6 +50,7 @@ class Liste(Page, crud.Liste):
                 'date': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ["date"]
+            footer = True
 
         def Get_factures(self, instance, *args, **kwargs):
             factures = Prestation.objects.values('facture__numero').filter(ventilation__reglement=instance.pk, facture__isnull=False).annotate(total=Sum("montant"))

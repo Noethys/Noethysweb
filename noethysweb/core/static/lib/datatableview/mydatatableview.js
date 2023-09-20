@@ -127,19 +127,27 @@ $(document).ready(function() {
         ],
         footerCallback: function ( row, data, start, end, display ) {
             var api = this.api();
+            var all_columns = table.settings().init().columns;
             nb_cols = api.columns().nodes().length;
             var j = 1;
-            while(j < nb_cols){
+            var label = "";
+            while (j < nb_cols) {
+                var nom_colonne = all_columns[j].undefined
                 var pageTotal = api
-                    .column( j, { page: 'current'} )
+                    .column(j, {page: 'current'})
                     .data()
-                    .reduce( function (a, b) {
-                return Number(a) + Number(b);
-            }, 0 );
-          // Update footer
-          $( api.column( j ).footer() ).html(pageTotal);
-            j++;
-        }},
+                    .reduce(function (a, b) {
+                        return Number(a) + Number(b);
+                    }, 0);
+                if ((jQuery.inArray(nom_colonne, totaux) > -1) && (pageTotal)) {
+                    label = parseFloat(pageTotal).toFixed(2);
+                } else {
+                    label = "";
+                };
+                $(api.column(j).footer()).html(label);
+                j++;
+            }
+        },
         language: {
             buttons: {
                 colvis: "Colonnes",

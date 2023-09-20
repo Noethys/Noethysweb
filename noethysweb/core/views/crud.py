@@ -206,6 +206,7 @@ class Liste_commun():
         context['box_titre'] = "Liste %s" % getattr(self, "objet_pluriel", "")
         context['impression_titre'] = "Liste %s" % getattr(self, "objet_pluriel", "")
         context['boutons_liste'] = getattr(self, "boutons_liste", [])
+        context['totaux'] = getattr(self, "totaux", [])
         context['active_deplacements'] = False
         context['colonne_regroupement'] = None
         context['filtres_liste'] = self.Get_filtres()

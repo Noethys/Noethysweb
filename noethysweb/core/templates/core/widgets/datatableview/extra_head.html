@@ -17,5 +17,6 @@
     var url_page_length = "{% url 'ajax_memorise_page_length' %}";
     var nom_view = "{{ view }}";
     var boutons_coches = {% if boutons_coches %}JSON.parse('{{ boutons_coches|escapejs }}'){% else %}[]{% endif %};
+    var totaux = {% if totaux %}JSON.parse('{{ totaux|escapejs }}'){% else %}[]{% endif %};
 </script>
 
