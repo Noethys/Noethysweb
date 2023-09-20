@@ -127,12 +127,20 @@ $(document).ready(function() {
         ],
         footerCallback: function ( row, data, start, end, display ) {
             var api = this.api();
-            var all_columns = table.settings().init().columns;
+            try {
+                var all_columns = table.settings().init().columns;
+            } catch(err) {
+                var all_columns = [];
+            }
             nb_cols = api.columns().nodes().length;
             var j = 1;
             var label = "";
             while (j < nb_cols) {
-                var nom_colonne = all_columns[j].undefined
+                try {
+                    var nom_colonne = all_columns[j].undefined
+                } catch(err) {
+                    var nom_colonne = "";
+                }
                 var pageTotal = api
                     .column(j, {page: 'current'})
                     .data()
