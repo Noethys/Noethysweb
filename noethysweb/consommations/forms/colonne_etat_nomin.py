@@ -8,6 +8,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
+from core.models import QuestionnaireQuestion
 
 
 class Formulaire(FormulaireBase, forms.Form):
@@ -29,7 +30,13 @@ class Formulaire(FormulaireBase, forms.Form):
         ("famille_num_allocataire", "Numéro d'allocataire de la famille"),
         ("famille_allocataire", "Nom de l'allocataire titulaire de la famille"),
         ("famille_caisse", "Nom de la caisse de la famille"),
+        ("famille_qf", "Quotient familial de la famille"),
     ]
+
+    # Ajout des questionnaires
+    for categorie in ("individu", "famille"):
+        for question in QuestionnaireQuestion.objects.filter(categorie=categorie, visible=True).order_by("ordre"):
+            liste_choix.append(("question_%d" % question.pk, question.label))
 
     # Ajout des champs spécifiques aux consommations
     for champ, label_champ in [("nbre_conso", "Nombre de consommations"), ("temps_conso", "Temps réel des consommations"), ("equiv_journees", "Equivalence journées"), ("equiv_heures", "Equivalences heures")]:

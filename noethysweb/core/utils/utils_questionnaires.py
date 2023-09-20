@@ -94,31 +94,16 @@ class Questionnaires():
 
     def FormatageReponse(self, reponse="", controle=""):
         filtre = self.GetFiltre(controle)
-        texteReponse = u""
+        texteReponse = ""
         if filtre == "texte" : texteReponse = reponse
         if filtre == "entier" : texteReponse = int(reponse)
         if filtre == "decimal": texteReponse = float(reponse)
         if filtre == "montant" : texteReponse = float(reponse)#decimal.Decimal(reponse)
         if filtre == "choix" :
-            if reponse != None :
-                if type(reponse) == int:
-                    listeTemp = [reponse,]
-                else:
-                    listeTemp = reponse.split(";")
-                listeTemp2 = []
-                for IDchoix in listeTemp :
-                    try :
-                        IDchoix = int(IDchoix)
-                        if IDchoix in self.dictChoix :
-                            listeTemp2.append(self.dictChoix[IDchoix])
-                    except :
-                        pass
-                texteReponse = ", ".join(listeTemp2)
+            if reponse:
+                texteReponse = ", ".join(reponse.split(";"))
         if filtre == "coche":
-            if reponse in (1, "1"):
-                texteReponse = "Oui"
-            else :
-                texteReponse = "Non"
+            texteReponse = "Oui" if reponse in (1, "1", True, "True") else "Non"
         if filtre == "date":
             texteReponse = DateEngEnDateDD(reponse)
         return texteReponse
