@@ -10,7 +10,7 @@ from django.db.models import Q, Sum, Count
 from reportlab.platypus import Spacer, Paragraph, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
-from core.models import Facture, Prestation
+from core.models import Facture, Prestation, Prelevements, PesPiece
 from core.utils import utils_impression, utils_texte
 
 
@@ -24,6 +24,10 @@ class Impression(utils_impression.Impression):
             filtres_factures = Q(date_edition__range=self.dict_donnees["date_edition"])
             titre = "Factures éditées entre le %s et le %s" % (self.dict_donnees["date_edition"][0].strftime("%d/%m/%Y"), self.dict_donnees["date_edition"][1].strftime("%d/%m/%Y"))
         factures = Facture.objects.select_related("famille").filter(filtres_factures).order_by("famille__nom")
+
+        # Prélèvements
+        dict_prelevements = {prelevement.facture_id: prelevement for prelevement in Prelevements.objects.filter(facture__in=factures)}
+        dict_pes = {piece.facture_id: piece for piece in PesPiece.objects.filter(facture__in=factures)}
 
         # Importation des prestations
         dict_prestations = {}
@@ -109,7 +113,10 @@ class Impression(utils_impression.Impression):
             ligne.append(Paragraph(texte, style_defaut))
 
             # Montant de la facture
-            ligne.append(Paragraph(utils_texte.Formate_montant(facture.total), style_centre))
+            texte_montant = utils_texte.Formate_montant(facture.total)
+            if facture.pk in dict_prelevements or facture.pk in dict_pes:
+                texte_montant += "<br/>(Prélevé)"
+            ligne.append(Paragraph(texte_montant, style_centre))
 
             # Libellé prestation
             ligne.append(Paragraph("<br/>".join([ligne_detail["libelle"] for ligne_detail in dict_prestations_facture[facture]]), style_defaut))
