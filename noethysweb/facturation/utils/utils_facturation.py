@@ -531,7 +531,7 @@ class Facturation():
         dict_prelevements = {prelevement.facture_id: prelevement for prelevement in Prelevements.objects.select_related("lot", "lot__modele__compte", "mandat").filter(facture_id__in=liste_factures)}
 
         # Infos PES ORMC
-        dict_pes = {piece.facture_id: piece for piece in PesPiece.objects.select_related("lot", "lot__modele").filter(facture_id__in=liste_factures)}
+        dict_pes = {piece.facture_id: piece for piece in PesPiece.objects.select_related("lot", "lot__modele", "lot__modele__compte", "prelevement_mandat").filter(facture_id__in=liste_factures)}
 
         # Recherche la liste des familles concernées
         liste_idfamille = [facture.famille_id for facture in factures]
@@ -610,6 +610,16 @@ class Facturation():
 
                 # Infos PES ORMC
                 piece_pes = dict_pes.get(facture.pk, None)
+                if piece_pes and piece_pes.prelevement:
+                    verbe = "a été" if piece_pes.lot.date_prelevement < facture.date_edition else "sera"
+                    if piece_pes.prelevement_mandat.iban:
+                        dictCompte["prelevement"] = "La somme de %.2f %s %s prélevée le %s sur le compte ***%s" % (piece_pes.montant, utils_preferences.Get_symbole_monnaie(), verbe, utils_dates.ConvertDateToFR(piece_pes.lot.date_prelevement), piece_pes.prelevement_mandat.iban[-7:])
+                    else :
+                        dictCompte["prelevement"] = "La somme de %.2f %s %s prélevée le %s" % (piece_pes.montant, utils_preferences.Get_symbole_monnaie(), verbe, utils_dates.ConvertDateToFR(piece_pes.lot.date_prelevement))
+                    if piece_pes.prelevement_mandat.rum:
+                        dictCompte["prelevement"] += "<br/>Réf. mandat unique : %s / Code ICS : %s" % (piece_pes.prelevement_mandat.rum, piece_pes.lot.modele.compte.code_ics)
+                    dictCompte["{DATE_PRELEVEMENT}"] = utils_dates.ConvertDateToFR(piece_pes.lot.date_prelevement)
+
                 dictCompte["piece_pes"] = piece_pes
                 dictCompte["{PES_IDPIECE}"] = str(facture.pk)
                 dictCompte["{PES_IDLOT}"] = piece_pes.lot_id if piece_pes else ""
