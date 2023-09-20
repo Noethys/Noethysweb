@@ -9,7 +9,7 @@ from django.views.generic import TemplateView
 from django.db.models import Q
 from core.views.base import CustomView
 from core.utils import utils_dates
-from core.models import Consommation, Vacance, Parametre
+from core.models import Consommation, Vacance, Parametre, Quotient
 from consommations.forms.etat_nomin import Formulaire
 
 
@@ -88,6 +88,10 @@ class View(CustomView, TemplateView):
         # Importation des vacances
         liste_vacances = Vacance.objects.filter(date_fin__gte=date_min, date_debut__lte=date_max)
 
+        # Importation des QF
+        conditions_qf = Q(famille__in=[conso.inscription.famille for conso in consommations]) & Q(date_debut__lte=date_max) & Q(date_fin__gte=date_min)
+        dict_quotients = {quotient.famille_id: quotient.quotient for quotient in Quotient.objects.filter(conditions_qf)}
+
         # Calcul des données
         resultats = {}
         for conso in consommations:
@@ -118,6 +122,7 @@ class View(CustomView, TemplateView):
                 resultats[key_individu]["famille_num_allocataire"] = conso.inscription.famille.num_allocataire
                 resultats[key_individu]["famille_allocataire"] = conso.inscription.famille.allocataire.Get_nom() if conso.inscription.famille.allocataire else None
                 resultats[key_individu]["famille_caisse"] = conso.inscription.famille.caisse.nom if conso.inscription.famille.caisse else None
+                resultats[key_individu]["famille_qf"] = int(dict_quotients.get(conso.inscription.famille_id, 0))
 
             # Recherche si date durant les vacances
             est_vacances = utils_dates.EstEnVacances(date=conso.date, liste_vacances=liste_vacances)
