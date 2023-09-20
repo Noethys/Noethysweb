@@ -1,3 +1,16 @@
+Version 1.1.9.0 (20/09/2023) :
+
+- Ajout de l'annulation de factures
+- Ajout des totaux de colonnes dans certaines listes
+- Correction de la sélection de l'activité dans la modification de prestations
+- Ajout du code analytique aux activités et aux prestations
+- Ajout de l'affichage des prélèvements dans l'édition du récap des factures
+- Ajout de l'affichage des prélèvements sur les factures
+- Affichage des forfaits crédit compatibles avec le groupe de l'inscrit
+- Correction du blocage du paiement en ligne si prélèvement actif
+- Correction du calcul du prochain numéro de facture si préfixe
+- Correction de l'url de retour après l'ajout de prestations dans une facture
+
 Version 1.1.8.9 (15/09/2023) :
 
 - Ajout de la consultation et modification de la facture
