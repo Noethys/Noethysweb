@@ -15,7 +15,7 @@ from django.db.models import Sum, Q
 from django.contrib import messages
 from eopayment import Payment
 from portail.views.base import CustomView
-from core.models import Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur, ModeReglement, CompteBancaire, PortailRenseignement, ModeleImpression
+from core.models import Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur, ModeReglement, CompteBancaire, PortailRenseignement, ModeleImpression, Mandat
 from core.utils import utils_portail, utils_fichiers, utils_dates, utils_texte
 
 ETATS_PAIEMENTS = {1: "RECEIVED", 2: "ACCEPTED", 3: "PAID", 4: "DENIED", 5: "CANCELLED", 6: "WAITING", 99: "ERROR"}
@@ -412,6 +412,10 @@ class View(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Facturation"
+
+        # Vérifie si la famille est abonnée au prélèvement automatique
+        context["prelevement_actif"] = Mandat.objects.filter(famille=self.request.user.famille, actif=True).exists()
+        context['paiement_actif'] = not (context['parametres_portail']["paiement_ligne_off_si_prelevement"] and context["prelevement_actif"])
 
         # Importation des paiements PAYFIP en cours
         context['liste_paiements'] = Paiement.objects.filter(famille=self.request.user.famille, systeme_paiement="payfip", resultat__isnull=True, horodatage__gt=datetime.datetime.now() - datetime.timedelta(minutes=5))

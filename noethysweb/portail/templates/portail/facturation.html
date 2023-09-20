@@ -28,6 +28,13 @@
         </div>
     {% endif %}
 
+    {# Prélèvement activé #}
+    {% if prelevement_actif %}
+        <div class="alert alert-info">
+            <i class='fa fa-info-circle margin-r-5'></i>Vous êtes abonné au prélèvement automatique.
+        </div>
+    {% endif %}
+
     {# Paiements en cours #}
     {% if liste_paiements %}
         <div class="alert alert-warning">
@@ -92,7 +99,7 @@
     {% endif %}
 
     {# Paiement en ligne #}
-    {% if texte_impayes and parametres_portail.paiement_ligne_systeme %}
+    {% if texte_impayes and parametres_portail.paiement_ligne_systeme and paiement_actif %}
         {% embed 'core/box.html' with box_titre=True %}
             {% block box_theme %}card-outline card-lightblue{% endblock %}
             {% block box_titre %}Payer en ligne{% endblock %}
