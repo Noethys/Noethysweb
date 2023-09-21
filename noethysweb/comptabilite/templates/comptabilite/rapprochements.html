@@ -1,0 +1,58 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+    <div class="row">
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder">
+                        <a class="btn btn-danger" href="{% url 'rapprochements_liste' %}"><i class='fa fa-times margin-r-5'></i>Fermer</a>
+                        <a class="btn btn-default" href="{% url 'rapprochements_ajouter_operation' idreleve=releve.pk %}"><i class='fa fa-plus margin-r-5'></i>Ajouter des opérations</a>
+                        <a class="btn btn-default" href="{% url 'rapprochements_modifier' pk=releve.pk %}"><i class="fa fa-pencil margin-r-5"></i>Modifier les paramètres</a>
+                        <a class="btn btn-default" href="#" target="_blank" title="Consulter l'aide"><i class="fa fa-life-saver margin-r-5"></i>Aide</a>
+                    </div>
+
+                    {# Paramètres du relevé #}
+                    <div class="card bg-light d-flex flex-fill mb-0 mt-3">
+                        <div class="card-body pt-0 p-3">
+                            <div class="row">
+                                <div class="col-8">
+                                    <h2 class="lead"><b>{{ releve.nom }}</b></h2>
+                                </div>
+                                <div class="col-4">
+                                    <ul class="ml-4 mb-0 fa-ul text-muted">
+                                        <li class="small"><span><i class="fa fa-xs fa-calendar-times-o"></i></span> Date début : {{ releve.date_debut|date }}</li>
+                                        <li class="small"><span><i class="fa fa-xs fa-calendar-times-o"></i></span> Date fin : {{ releve.date_fin|date }}</li>
+                                        <li class="small"><span><i class="fa fa-xs fa-bank"></i></span> Compte : {{ releve.compte.nom }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row text-center">
+                                <div class="col-12">{{ stats|safe }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Liste des opérations #}
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+
+    </div>
+
+{% endblock contenu_page %}

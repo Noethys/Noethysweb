@@ -61,6 +61,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_comptabilite.Add(code="categories_comptables_liste", titre="Catégories comptables", icone="file-text-o")
     menu_comptabilite.Add(code="tiers_liste", titre="Tiers", icone="file-text-o")
     menu_comptabilite.Add(code="budgets_liste", titre="Budgets", icone="file-text-o")
+    menu_comptabilite.Add(code="releves_bancaires_liste", titre="Relevés bancaires", icone="file-text-o")
 
     # Renseignements
     menu_renseignements = menu_parametrage.Add(titre="Renseignements")
@@ -444,6 +445,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_comptabilite_analyse = menu_comptabilite.Add(titre="Analyse")
     menu_comptabilite_analyse.Add(code="suivi_tresorerie", titre="Suivi de la trésorerie", icone="file-text-o")
     menu_comptabilite_analyse.Add(code="suivi_budget", titre="Suivi du budget", icone="file-text-o")
+
+    # Outils
+    menu_comptabilite_outils = menu_comptabilite.Add(titre="Outils")
+    menu_comptabilite_outils.Add(code="rapprochements_liste", titre="Rapprochement bancaire", icone="file-text-o")
 
 
     # ------------------------------------ Collaborateurs ------------------------------------

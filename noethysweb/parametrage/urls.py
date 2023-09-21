@@ -26,7 +26,7 @@ from parametrage.views import organisateur, structures, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
     modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
-    modeles_word
+    modeles_word, releves_bancaires
 
 
 urlpatterns = [
@@ -200,6 +200,12 @@ urlpatterns = [
     path('parametrage/budgets/ajouter', budgets.Ajouter.as_view(), name='budgets_ajouter'),
     path('parametrage/budgets/modifier/<int:pk>', budgets.Modifier.as_view(), name='budgets_modifier'),
     path('parametrage/budgets/supprimer/<int:pk>', budgets.Supprimer.as_view(), name='budgets_supprimer'),
+
+    # Relevés bancaires
+    path('parametrage/releves_bancaires/liste', releves_bancaires.Liste.as_view(), name='releves_bancaires_liste'),
+    path('parametrage/releves_bancaires/ajouter', releves_bancaires.Ajouter.as_view(), name='releves_bancaires_ajouter'),
+    path('parametrage/releves_bancaires/modifier/<int:pk>', releves_bancaires.Modifier.as_view(), name='releves_bancaires_modifier'),
+    path('parametrage/releves_bancaires/supprimer/<int:pk>', releves_bancaires.Supprimer.as_view(), name='releves_bancaires_supprimer'),
 
     # Lots de factures
     path('parametrage/lots_factures/liste', lots_factures.Liste.as_view(), name='lots_factures_liste'),

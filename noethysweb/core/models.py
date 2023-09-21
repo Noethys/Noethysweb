@@ -3796,7 +3796,7 @@ class ComptaReleve(models.Model):
         verbose_name_plural = "relevés de compte"
 
     def __str__(self):
-        return "Relevé de compte ID%d" % self.idreleve
+        return self.nom if self.nom else "Nouveau relevé"
 
 
 class ComptaVirement(models.Model):

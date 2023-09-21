@@ -6,7 +6,8 @@
 from django.urls import include, path
 from core.views import toc
 from core.decorators import secure_ajax
-from comptabilite.views import operations_tresorerie, operations_budgetaires, liste_comptes, liste_virements, suivi_budget, suivi_tresorerie
+from comptabilite.views import operations_tresorerie, operations_budgetaires, liste_comptes, liste_virements, suivi_budget, suivi_tresorerie, \
+                                rapprochements, rapprochements_selection
 
 
 urlpatterns = [
@@ -43,6 +44,16 @@ urlpatterns = [
     path('comptabilite/suivi_budget', suivi_budget.View.as_view(), name='suivi_budget'),
     path('comptabilite/suivi_tresorerie', suivi_tresorerie.View.as_view(), name='suivi_tresorerie'),
     path('comptabilite/suivi_tresorerie/<int:categorie>', suivi_tresorerie.View.as_view(), name='suivi_tresorerie'),
+
+    # Rapprochement bancaire
+    path('comptabilite/rapprochement/liste', rapprochements.Liste.as_view(), name='rapprochements_liste'),
+    path('comptabilite/rapprochement/ajouter', rapprochements.Ajouter.as_view(), name='rapprochements_ajouter'),
+    path('comptabilite/rapprochement/modifier/<int:pk>', rapprochements.Modifier.as_view(), name='rapprochements_modifier'),
+    path('comptabilite/rapprochement/supprimer/<int:pk>', rapprochements.Supprimer.as_view(), name='rapprochements_supprimer'),
+    path('comptabilite/rapprochement/consulter/<int:pk>', rapprochements.Consulter.as_view(), name='rapprochements_consulter'),
+    path('comptabilite/rapprochement/operations/ajouter/<int:idreleve>', rapprochements_selection.Liste.as_view(), name='rapprochements_ajouter_operation'),
+    path('comptabilite/rapprochement/operations/supprimer/<int:idreleve>/<int:pk>', rapprochements.Supprimer_operation.as_view(), name='rapprochements_supprimer_operation'),
+    path('comptabilite/rapprochement/operations/supprimer_plusieurs/<int:idreleve>/<str:listepk>', rapprochements.Supprimer_plusieurs_operations.as_view(), name='rapprochements_supprimer_plusieurs_operations'),
 
 
     # AJAX
