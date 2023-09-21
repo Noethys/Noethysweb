@@ -1,3 +1,11 @@
+Version 1.1.9.2 (21/09/2023) :
+
+- Ajout du rapprochement bancaire dans le menu comptabilité
+- Ajout de l'option d'impression impayés facturés pour les factures
+- Ajout du filtre prestations dans les attestations de présence
+- Ajout des questionnaires dans l'état nominatif
+- Ajout d'une colonne qf à l'état nominatif
+
 Version 1.1.9.1 (20/09/2023) :
 
 - Correction des totaux sur la liste des questionnaires individuels
