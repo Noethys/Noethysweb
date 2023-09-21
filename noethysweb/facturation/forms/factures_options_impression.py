@@ -15,7 +15,7 @@ from core.utils import utils_parametres
 
 VALEURS_DEFAUT = {
     "memoriser_parametres": False, "affichage_solde": "actuel", "afficher_impayes": True, "integrer_impayes": True, "afficher_deja_paye": True, "afficher_reste_regler": True,
-    "afficher_coupon_reponse": True, "afficher_messages": True,
+    "afficher_coupon_reponse": True, "afficher_messages": True, "impayes_factures": False,
     "afficher_codes_barres": True, "afficher_reglements": True, "afficher_avis_prelevements": False, "afficher_qf_dates": True, "afficher_titre": True, "texte_titre": "Facture",
     "taille_texte_titre": 19, "afficher_periode": True, "taille_texte_periode": 8, "affichage_prestations": "0", "intitules": "0", "couleur_fond_1": "#D9D9D9",
     "couleur_fond_2": "#F1F1F1", "largeur_colonne_date": 50, "largeur_colonne_montant_ht": 50, "largeur_colonne_montant_tva": 50, "largeur_colonne_montant_ttc": 70,
@@ -34,6 +34,7 @@ class Formulaire(FormulaireBase, forms.Form):
     affichage_solde = forms.ChoiceField(label="Afficher le solde", choices=[("0", "Actuel"), ("1", "Initial")], initial=VALEURS_DEFAUT["affichage_solde"], required=False)
     afficher_impayes = forms.BooleanField(label="Afficher le rappel des impayés", initial=VALEURS_DEFAUT["afficher_impayes"], required=False)
     integrer_impayes = forms.BooleanField(label="Intégrer les impayés au solde", initial=VALEURS_DEFAUT["integrer_impayes"], required=False)
+    impayes_factures = forms.BooleanField(label="Intégrer uniquement les impayés facturés", initial=VALEURS_DEFAUT["impayes_factures"], required=False)
     afficher_deja_paye = forms.BooleanField(label="Afficher la case du montant déjà réglé", initial=VALEURS_DEFAUT["afficher_deja_paye"], required=False)
     afficher_reste_regler = forms.BooleanField(label="Afficher la case du solde à régler", initial=VALEURS_DEFAUT["afficher_reste_regler"], required=False)
     afficher_coupon_reponse = forms.BooleanField(label="Afficher le coupon-réponse", initial=VALEURS_DEFAUT["afficher_coupon_reponse"], required=False)
@@ -107,6 +108,7 @@ class Formulaire(FormulaireBase, forms.Form):
                 Field("affichage_solde"),
                 Field("afficher_impayes"),
                 Field("integrer_impayes"),
+                Field("impayes_factures"),
                 Field("afficher_deja_paye"),
                 Field("afficher_reste_regler"),
                 Field("afficher_coupon_reponse"),

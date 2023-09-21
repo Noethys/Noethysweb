@@ -71,7 +71,7 @@ class Facturation():
 
     def GetDonnees(self, liste_factures=[], liste_activites=[], date_debut=None, date_fin=None, date_edition=None,
                    date_echeance=None, categories_prestations=["consommation", "cotisation", "location", "autre"],
-                   type_label="0", date_anterieure=None, mode="facture", IDfamille=None, liste_IDindividus=[], filtre_prestations=None):
+                   type_label="0", date_anterieure=None, mode="facture", IDfamille=None, liste_IDindividus=[], filtre_prestations=None, impayes_factures=False):
         """ Recherche des factures à créer """
         logger.debug("Recherche les données de facturation...")
 
@@ -153,10 +153,11 @@ class Facturation():
 
         # Recherche des anciennes prestations impayées (=le report antérieur)
         logger.debug("Recherche des prestations reportées...")
+        conditions = Q()
         if not liste_factures:
-            conditions = (Q(activite__in=liste_activites) | Q(activite=None)) & Q(date__lte=date_debut)
-        else:
-            conditions = Q()
+            conditions &= (Q(activite__in=liste_activites) | Q(activite=None)) & Q(date__lte=date_debut)
+        if impayes_factures:
+            conditions &= Q(facture__isnull=False)
         prestations_reports = Prestation.objects.filter(conditions, famille_id__in=liste_familles)
 
         # Recherche de la ventilation des reports
@@ -554,7 +555,7 @@ class Facturation():
         dict_motscles_defaut = utils_impression.Get_motscles_defaut()
 
         # Récupération des données de facturation
-        dictComptes = self.GetDonnees(liste_factures=liste_factures, type_label=dict_options["intitules"])
+        dictComptes = self.GetDonnees(liste_factures=liste_factures, type_label=dict_options["intitules"], impayes_factures=dict_options.get("impayes_factures", False))
 
         dictFactures = {}
         dictChampsFusion = {}
