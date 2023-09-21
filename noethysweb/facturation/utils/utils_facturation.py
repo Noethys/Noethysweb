@@ -71,7 +71,7 @@ class Facturation():
 
     def GetDonnees(self, liste_factures=[], liste_activites=[], date_debut=None, date_fin=None, date_edition=None,
                    date_echeance=None, categories_prestations=["consommation", "cotisation", "location", "autre"],
-                   type_label="0", date_anterieure=None, mode="facture", IDfamille=None, liste_IDindividus=[]):
+                   type_label="0", date_anterieure=None, mode="facture", IDfamille=None, liste_IDindividus=[], filtre_prestations=None):
         """ Recherche des factures à créer """
         logger.debug("Recherche les données de facturation...")
 
@@ -90,13 +90,23 @@ class Facturation():
             conditions = Q(facture_id__in=liste_factures)
         else:
             conditions = (Q(activite__in=liste_activites) | Q(activite=None)) & Q(date__gte=date_debut_temp) & Q(date__lte=date_fin) & Q(categorie__in=categories_prestations)
+            # Filtre facture
             if mode == "facture": conditions &= Q(facture_id=None)
+            # Filtre famille
             if IDfamille: conditions &= Q(famille_id=IDfamille)
+            # Filtre individus
             if liste_IDindividus:
                 if 0 in liste_IDindividus:
                     conditions &= (Q(individu_id__in=liste_IDindividus) | Q(individu__isnull=True))
                 else:
                     conditions &= Q(individu_id__in=liste_IDindividus)
+            # Filtre noms de prestation
+            if filtre_prestations:
+                conditions_prestation = Q()
+                for nom_prestation in filtre_prestations.split(";"):
+                    conditions_prestation |= Q(label__icontains=nom_prestation.strip())
+                conditions &= (conditions_prestation)
+
         logger.debug("Recherche des prestations des factures...")
         prestations = Prestation.objects.select_related('famille', 'activite', 'individu', 'tarif', 'categorie_tarif', "tarif__nom_tarif").filter(conditions).order_by("date")
 

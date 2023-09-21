@@ -3,25 +3,26 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import logging
+logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy, reverse
-from core.views.mydatatableview import MyDatatable, columns, helpers
-from core.views import crud
-from core.models import Famille, Attestation
-from fiche_famille.forms.famille_attestations import Formulaire as Form_parametres
-from fiche_famille.views.famille import Onglet
-from django.http import JsonResponse, HttpResponseRedirect
-from core.utils import utils_dates, utils_texte, utils_preferences
-from facturation.utils import utils_facturation, utils_impression_facture
 from django.contrib import messages
 from django.db.models import Q
+from django.http import JsonResponse, HttpResponseRedirect
+from core.views.mydatatableview import MyDatatable, columns, helpers
+from core.views import crud
+from core.models import Attestation
+from core.utils import utils_dates, utils_texte, utils_preferences
 from core.data import data_modeles_emails
-
+from fiche_famille.forms.famille_attestations import Formulaire as Form_parametres
+from fiche_famille.views.famille import Onglet
+from facturation.utils import utils_facturation, utils_impression_facture
 
 
 def Impression_pdf(request):
     # Récupération des données
     form_parametres = Form_parametres(request.POST, idfamille=int(request.POST.get("famille")), utilisateur=request.user, request=request)
-    if form_parametres.is_valid() == False:
+    if not form_parametres.is_valid():
         liste_erreurs = form_parametres.errors.as_data().keys()
         return JsonResponse({"erreur": "Veuillez renseigner les champs manquants : %s." % ", ".join(liste_erreurs)}, status=401)
     parametres = form_parametres.cleaned_data
@@ -40,7 +41,8 @@ def Impression_pdf(request):
     IDfamille = parametres["famille"].pk
     individus = [int(idindividu) for idindividu in parametres["individus"]]
     activites = [int(idactivite) for idactivite in parametres["activites"]]
-    dict_attestations = facturation.GetDonnees(liste_activites=activites, date_debut=date_debut, date_fin=date_fin, mode="attestation", IDfamille=IDfamille, liste_IDindividus=individus)
+    dict_attestations = facturation.GetDonnees(liste_activites=activites, date_debut=date_debut, date_fin=date_fin, mode="attestation", IDfamille=IDfamille,
+                                               liste_IDindividus=individus, filtre_prestations=parametres["filtre_prestations"])
 
     # Si aucune attestation trouvée
     if not dict_attestations:
@@ -73,8 +75,6 @@ def Impression_pdf(request):
     # Récupération des valeurs de fusion
     champs = {motcle: dict_attestations[IDfamille].get(motcle, "") for motcle, label in data_modeles_emails.Get_mots_cles("attestation_presence")}
     return JsonResponse({"infos": infos, "nom_fichier": nom_fichier, "categorie": "attestation_presence", "label_fichier": "Attestation de présence", "champs": champs, "idfamille": IDfamille})
-
-
 
 
 class Page(Onglet):
@@ -119,16 +119,19 @@ class Page(Onglet):
             return self.render_to_response(self.get_context_data(form=form))
 
         # Enregistre l'attestation
-        if not self.object:
+        if not self.object and not Attestation.objects.filter(numero=form.cleaned_data["numero"]).exists():
             Attestation.objects.create(numero=form.cleaned_data["numero"], date_edition=form.cleaned_data["date_edition"],
-                                     activites=form.cleaned_data["infos"]["activites"], individus=form.cleaned_data["infos"]["individus"],
+                                     activites=form.cleaned_data["infos"]["activites"], filtre_prestations=form.cleaned_data["filtre_prestations"],
+                                     individus=form.cleaned_data["infos"]["individus"], famille=form.cleaned_data["famille"],
                                      date_debut=form.cleaned_data["periode"].split(";")[0], date_fin=form.cleaned_data["periode"].split(";")[1],
                                      total=form.cleaned_data["infos"]["total"], regle=form.cleaned_data["infos"]["regle"],
-                                     solde=form.cleaned_data["infos"]["solde"], famille=form.cleaned_data["famille"])
-        else:
+                                     solde=form.cleaned_data["infos"]["solde"])
+        
+        if self.object:
             self.object.numero = form.cleaned_data["numero"]
             self.object.date_edition = form.cleaned_data["date_edition"]
             self.object.activites = form.cleaned_data["infos"]["activites"]
+            self.object.filtre_prestations = form.cleaned_data["filtre_prestations"]
             self.object.individus = form.cleaned_data["infos"]["individus"]
             self.object.date_debut = form.cleaned_data["periode"].split(";")[0]
             self.object.date_fin = form.cleaned_data["periode"].split(";")[1]
@@ -139,8 +142,6 @@ class Page(Onglet):
             self.object.save()
 
         return HttpResponseRedirect(self.get_success_url())
-
-
 
 
 class Liste(Page, crud.Liste):
@@ -191,15 +192,15 @@ class Liste(Page, crud.Liste):
             return self.Create_boutons_actions(html)
 
 
-
 class Ajouter(Page, crud.Ajouter):
     form_class = Form_parametres
     template_name = "fiche_famille/famille_edit.html"
+
 
 class Modifier(Page, crud.Modifier):
     form_class = Form_parametres
     template_name = "fiche_famille/famille_edit.html"
 
+
 class Supprimer(Page, crud.Supprimer):
     template_name = "fiche_famille/famille_delete.html"
-

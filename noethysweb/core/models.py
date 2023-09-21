@@ -2712,7 +2712,7 @@ class Attestation(models.Model):
     date_edition = models.DateField(verbose_name="Date d'édition")
     activites = models.CharField(verbose_name="Activités associées", max_length=200, blank=True, null=True)
     individus = models.CharField(verbose_name="Individus associés", max_length=200, blank=True, null=True)
-    # idutilisateur = models.IntegerField(verbose_name="ID", db_column='IDutilisateur', blank=True, null=True)  # Field name made lowercase.
+    filtre_prestations = models.CharField(verbose_name="Filtre prestations", max_length=300, blank=True, null=True)
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin")
     total = models.DecimalField(verbose_name="Total", max_digits=10, decimal_places=2, default=0.0)

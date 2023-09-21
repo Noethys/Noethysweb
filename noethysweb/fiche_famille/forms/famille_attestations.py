@@ -3,34 +3,37 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime, json
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
-from core.utils.utils_commandes import Commandes
-from core.models import Famille, Attestation, ModeleDocument, Inscription, Individu, Activite
-from core.widgets import DatePickerWidget, DateRangePickerWidget, FormIntegreWidget
+from crispy_forms.layout import Layout, Hidden, HTML
+from crispy_forms.bootstrap import Field
 from django_select2.forms import Select2Widget, Select2MultipleWidget
-import datetime, json
-from facturation.forms.attestations_options_impression import Formulaire as Form_options_impression
+from core.forms.base import FormulaireBase
+from core.utils.utils_commandes import Commandes
+from core.models import Attestation, ModeleDocument, Inscription
+from core.widgets import DatePickerWidget, DateRangePickerWidget, FormIntegreWidget
 from core.utils import utils_dates
+from facturation.forms.attestations_options_impression import Formulaire as Form_options_impression
 
 
 class Formulaire(FormulaireBase, ModelForm):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
-    date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
+    date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}), help_text="Par défaut la date du jour. Modifiez uniquement si nécessaire.")
     individus = forms.MultipleChoiceField(label="Individus", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=True)
     activites = forms.MultipleChoiceField(label="Activités", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=True)
-    numero = forms.IntegerField(label="Numéro", required=True)
+    numero = forms.IntegerField(label="Numéro", required=True, help_text="Ce numéro est attribué par défaut. Modifiez uniquement si nécessaire.")
     modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=ModeleDocument.objects.filter(categorie="attestation").order_by("nom"), required=True)
-    signataire = forms.CharField(label="Signataire", required=True)
+    signataire = forms.CharField(label="Signataire", required=True, help_text="Saisissez le nom du signataire du document (par défaut l'utilisateur en cours).")
     options_impression = forms.CharField(label="Options d'impression", required=False, widget=FormIntegreWidget())
 
     class Meta:
         model = Attestation
-        fields = ["famille", "numero"]
+        fields = ["famille", "numero", "filtre_prestations"]
+        help_texts = {
+            "filtre_prestations": "Si vous souhaitez uniquement certaines prestations, tapez leur nom ou une partie de leur nom, séparées par des points-virgules (;). Exemple : journées avec repas;piscine;matin.",
+        }
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")
@@ -44,7 +47,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
-        # # Date d'édition
+        # Date d'édition
         self.fields["date_edition"].initial = datetime.date.today()
 
         # Recherche les inscriptions de la famille
@@ -103,6 +106,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Field("date_edition"),
             Field("individus"),
             Field("activites"),
+            Field("filtre_prestations"),
             Field("numero"),
             Field("modele"),
             Field("signataire"),
@@ -110,14 +114,13 @@ class Formulaire(FormulaireBase, ModelForm):
             HTML(EXTRA_HTML),
         )
 
-
     def clean(self):
         if self.data.get("infos"):
             self.cleaned_data["infos"] = json.loads(self.data.get("infos"))
 
         # Vérification du formulaire des options d'impression
         form_options = Form_options_impression(self.data, request=self.request)
-        if form_options.is_valid() == False:
+        if not form_options.is_valid():
             liste_erreurs = form_options.errors.as_data().keys()
             self.add_error("options_impression", "Veuillez renseigner les champs manquants : %s." % ", ".join(liste_erreurs))
 
