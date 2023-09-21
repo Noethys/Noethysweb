@@ -126,7 +126,7 @@ class Page(Onglet):
                                      date_debut=form.cleaned_data["periode"].split(";")[0], date_fin=form.cleaned_data["periode"].split(";")[1],
                                      total=form.cleaned_data["infos"]["total"], regle=form.cleaned_data["infos"]["regle"],
                                      solde=form.cleaned_data["infos"]["solde"])
-        
+
         if self.object:
             self.object.numero = form.cleaned_data["numero"]
             self.object.date_edition = form.cleaned_data["date_edition"]
