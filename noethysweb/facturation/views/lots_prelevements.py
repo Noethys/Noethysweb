@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import json, datetime
+import json, datetime, time
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Sum, Count
 from django.http import HttpResponseRedirect, JsonResponse
@@ -296,6 +296,7 @@ class Supprimer_plusieurs_pieces(Page, crud.Supprimer_plusieurs):
 
 def Exporter(request):
     """ Générer le fichier d'export """
+    time.sleep(1)
     lot = PrelevementsLot.objects.get(pk=int(request.POST["idlot"]))
     from facturation.utils import utils_export_prelevements
     export = utils_export_prelevements.Exporter(idlot=lot.pk, request=request)

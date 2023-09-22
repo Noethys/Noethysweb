@@ -13,6 +13,7 @@ from facturation.forms.export_ecritures_cloe import Formulaire
 def Exporter(request):
     """ Générer le fichier d'export """
     # Récupération des options
+    time.sleep(1)
     form = Formulaire(request.POST, request=request)
     if not form.is_valid():
         return JsonResponse({"erreur": "Veuillez compléter les paramètres"}, status=401)
