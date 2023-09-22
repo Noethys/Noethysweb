@@ -42,6 +42,9 @@ class Exporter():
             if liste_transactions:
                 self.liste_lots.append({"sequence": sequence, "transactions": liste_transactions, "montant_total": montant_total})
 
+        # Vérifie qu'une séquence est bien définie pour chaque pièce
+        self.erreurs.extend(["La séquence n'a pas été définie pour la famille %s" % piece.famille.nom for piece in self.pieces if not piece.sequence])
+
         # Création du nom du fichier
         if self.lot.modele.format == "public_dft":
             today = datetime.date.today()

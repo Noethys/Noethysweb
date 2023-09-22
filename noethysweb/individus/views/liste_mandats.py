@@ -50,8 +50,9 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idmandat", "famille", "date", "rum", "iban", "bic", "actif"]
+            columns = ["idmandat", "famille", "date", "rum", "iban", "bic", "actif", "sequence"]
             ordering = ["date"]
+            hidden_columns = ["sequence"]
             processors = {
                 'date': helpers.format_date('%d/%m/%Y'),
             }

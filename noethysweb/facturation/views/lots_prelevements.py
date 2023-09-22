@@ -226,8 +226,8 @@ class Consulter(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idprelevement", "famille", "montant", "facture", "statut", "reglement", "mandat", "iban", "bic", "actions"]
-            hidden_columns = ["iban", "bic"]
+            columns = ["check", "idprelevement", "famille", "montant", "facture", "statut", "reglement", "mandat", "iban", "bic", "sequence", "actions"]
+            hidden_columns = ["iban", "bic", "sequence"]
             processors = {
                 "montant": "Formate_montant",
                 "reglement": "Formate_reglement",

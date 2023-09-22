@@ -66,11 +66,12 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idmandat", "date", "rum", "iban", "bic", "actif"]
+            columns = ["idmandat", "date", "rum", "iban", "bic", "actif", "sequence"]
             ordering = ["date"]
             processors = {
                 'date': helpers.format_date('%d/%m/%Y'),
             }
+            hidden_columns = ["sequence"]
 
         def Get_actif(self, instance, *args, **kwargs):
             return "<small class='badge badge-success'>Activé</small>" if instance.actif else "<small class='badge badge-danger'>Désactivé</small>"
