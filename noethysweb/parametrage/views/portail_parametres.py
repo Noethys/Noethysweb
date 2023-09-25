@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect
 from parametrage.forms.portail_parametres import Formulaire
 from core.views.base import CustomView
 from core.models import PortailParametre
+from core.utils import utils_portail
 
 
 class Modifier(CustomView, TemplateView):
@@ -30,8 +31,12 @@ class Modifier(CustomView, TemplateView):
             return self.render_to_response(self.get_context_data(form=form))
 
         # Enregistrement
+        valeurs_existantes = utils_portail.Get_dict_parametres()
         for code, valeur in form.cleaned_data.items():
-            PortailParametre.objects.update_or_create(code=code, defaults={'valeur': str(valeur)})
+            if code in valeurs_existantes and valeurs_existantes[code] != valeur:
+                PortailParametre.objects.filter(code=code).update(valeur=str(valeur))
+            else:
+                PortailParametre.objects.create(code=code, valeur=str(valeur))
 
         # Nettoyage du cache
         cache.delete("parametres_portail")
