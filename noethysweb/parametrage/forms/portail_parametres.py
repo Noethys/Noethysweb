@@ -19,6 +19,7 @@ LISTE_RUBRIQUES = [
     ("Page des renseignements", ["renseignements_afficher_page", "renseignements_intro", "validation_auto:famille_caisse", "validation_auto:individu_identite",
                                  "validation_auto:individu_coords", "validation_auto:individu_regimes_alimentaires", "validation_auto:individu_maladies",
                                  "validation_auto:individu_medecin"]),
+    ("Page des adhésions", ["cotisations_afficher_page", "cotisations_intro"]),
     ("Page des documents", ["documents_afficher_page", "documents_intro"]),
     ("Page des activités", ["activites_afficher_page", "activites_intro"]),
     ("Page des réservations", ["reservations_afficher_page", "reservations_intro", "reservations_intro_planning", "reservations_adresse_exp"]),

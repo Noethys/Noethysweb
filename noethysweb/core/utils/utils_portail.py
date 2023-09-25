@@ -86,6 +86,10 @@ LISTE_PARAMETRES = [
     Parametre(code="validation_auto:individu_medecin", label="Validation automatique de la page 'Médecin'", type="boolean", valeur=True),
 
     # Documents
+    Parametre(code="cotisations_afficher_page", label="Afficher la page", type="boolean", valeur=False),
+    Parametre(code="cotisations_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez ici consulter les informations au sujet des adhésions."),
+
+    # Documents
     Parametre(code="documents_afficher_page", label="Afficher la page", type="boolean", valeur=True),
     Parametre(code="documents_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez ici consulter ou transmettre des documents."),
 

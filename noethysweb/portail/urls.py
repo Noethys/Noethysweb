@@ -10,7 +10,7 @@ from consommations.views import grille
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
                             individu_regimes_alimentaires, individu_coords, individu_medecin, individu_informations, individu_assurances, individu_vaccinations, \
                             famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents, \
-                            transmettre_piece, activites, inscrire_activite, attente_paiement
+                            transmettre_piece, activites, inscrire_activite, attente_paiement, cotisations
 from core.decorators import secure_ajax_portail
 
 
@@ -85,6 +85,9 @@ urlpatterns = [
     path('renseignements/individu/contacts/modifier/<int:idrattachement>/<int:idcontact>', individu_contacts.Modifier.as_view(), name='portail_individu_contacts_modifier'),
     path('renseignements/individu/contacts/supprimer/<int:idrattachement>/<int:idcontact>', individu_contacts.Supprimer.as_view(), name='portail_individu_contacts_supprimer'),
     path('renseignements/individu/contacts/importer/<int:idrattachement>', individu_contacts.Importer.as_view(), name='portail_individu_contacts_importer'),
+
+    # Adhésions
+    path('cotisations', cotisations.View.as_view(), name='portail_cotisations'),
 
     # Documents
     path('documents', documents.View.as_view(), name='portail_documents'),

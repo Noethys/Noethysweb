@@ -95,6 +95,20 @@
                 </div>
             {% endif %}
 
+            {# Adhésions manquantes #}
+            {% if cotisations_manquantes %}
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>{{ cotisations_manquantes|length }}</h3>
+                            <p>Adhésion{{ cotisations_manquantes|pluralize }} manquante{{ cotisations_manquantes|pluralize }}</p>
+                        </div>
+                        <div class="icon"><i class="fa fa-file-text-o"></i></div>
+                        <a href="{% url 'portail_cotisations' %}" class="small-box-footer">Consulter <i class="fa fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            {% endif %}
+
             {# Approbations #}
             {% if nbre_approbations_requises %}
                 <div class="col-lg-3 col-6">

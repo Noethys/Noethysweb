@@ -9,6 +9,7 @@ from django.db.models import Q
 from portail.views.base import CustomView
 from portail.utils import utils_approbations
 from individus.utils import utils_pieces_manquantes, utils_vaccinations, utils_assurances
+from cotisations.utils import utils_cotisations_manquantes
 from core.models import PortailMessage, Article, Inscription, Consommation, Lecture
 
 
@@ -41,7 +42,11 @@ class Accueil(CustomView, TemplateView):
         # Assurances manquantes
         context["nbre_assurances_manquantes"] = len(utils_assurances.Get_assurances_manquantes_by_inscriptions(famille=self.request.user.famille, inscriptions=inscriptions))
 
-        # Articles
+        # Adhésions manquantes
+        if context["parametres_portail"].get("cotisations_afficher_page", False):
+            context["cotisations_manquantes"] = utils_cotisations_manquantes.Get_cotisations_manquantes(famille=self.request.user.famille)
+
+            # Articles
         conditions = Q(statut="publie") & Q(date_debut__lte=datetime.datetime.now()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.datetime.now()))
         conditions &= (Q(public__in=("toutes", "presents", "presents_groupes")) | (Q(public="inscrits") & Q(activites__in=activites)))
         articles = Article.objects.select_related("image_article", "album", "auteur").filter(conditions).distinct().order_by("-date_debut")
