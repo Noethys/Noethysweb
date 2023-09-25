@@ -647,7 +647,8 @@ class Facturation():
                     try:
                         dictCompte["{PES_DATAMATRIX}"] = Calculer_datamatrix(dictCompte)
                     except Exception as err:
-                        logger.error("Erreur génération datamatrix : %s" % err)
+                        pass
+                        #logger.error("Erreur génération datamatrix : %s" % err)
 
                 # Champs de fusion pour Email
                 dictChampsFusion[facture.pk] = {}
