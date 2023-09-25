@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import os, shutil
+import os, shutil, datetime
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
@@ -22,4 +22,4 @@ class Command(BaseCommand):
                     os.remove(nom_fichier_complet)
             except Exception as err:
                 pass
-        self.stdout.write(self.style.SUCCESS("Répertoire temp vidé."))
+        self.stdout.write(self.style.SUCCESS("[%s] Répertoire temp vidé." % datetime.datetime.now()))
