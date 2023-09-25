@@ -53,7 +53,7 @@ def Purge_mdp_expires():
     """ Efface tous les mdp expirés """
     utilisateurs = Utilisateur.objects.select_related("famille").filter(categorie="famille", date_expiration_mdp__lte=datetime.datetime.now() - datetime.timedelta(days=3))
     for utilisateur in utilisateurs:
-        if utilisateur.famille:
+        if getattr(utilisateur, "famille", None):
             logger.debug("Purge du mot de passe expiré de %s." % utilisateur.username)
             utilisateur.set_password(None)
             utilisateur.save()
