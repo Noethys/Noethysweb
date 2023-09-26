@@ -4,16 +4,15 @@
 #  Distribué sous licence GNU GPL.
 
 import datetime
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse
 from django.db.models import Q
 from django.views.generic.detail import DetailView
-from core.views.mydatatableview import MyDatatable, columns, helpers
+from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
 from core.views.base import CustomView
 from core.models import Individu, Famille, Note, Rattachement, Inscription
 from core.utils import utils_texte, utils_dates
 from fiche_individu.utils.utils_individu import LISTE_ONGLETS
-# from fiche_individu.forms.individu import Formulaire
 
 
 class Page(crud.Page):
@@ -26,9 +25,6 @@ class Page(crud.Page):
     description_saisie = "Saisissez ou sélectionnez le premier représentant de la famille à créer. Saisissez toutes les informations concernant l'individu à saisir et cliquez sur le bouton Enregistrer."
     objet_singulier = "un individu"
     objet_pluriel = "des individus"
-    # boutons_liste = [
-    #     {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
-    # ]
 
 
 class Liste(Page, crud.Liste):
@@ -56,9 +52,9 @@ class Liste(Page, crud.Liste):
         genre = columns.TextColumn("Genre", sources=None, processor='Get_genre')
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         profil = columns.TextColumn("Profil", sources=['Get_profil'])
-        tel_domicile = columns.TextColumn("Tél domicile", sources=['individu__tel_domicile'])
-        tel_mobile = columns.TextColumn("Tél portable", sources=['individu__tel_mobile'])
-        mail = columns.TextColumn("Email", sources=['individu__mail'])
+        tel_domicile = columns.TextColumn("Tél domicile", processor="Get_tel_domicile")
+        tel_mobile = columns.TextColumn("Tél portable", processor="Get_tel_mobile")
+        mail = columns.TextColumn("Email", processor="Get_mail")
         date_naiss = columns.TextColumn("Date naiss.", processor="Get_date_naiss")
         age = columns.TextColumn("Age", sources=['Get_age'], processor="Get_age")
         rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
@@ -80,6 +76,15 @@ class Liste(Page, crud.Liste):
             ]
             return self.Create_boutons_actions(html)
 
+        def Get_tel_domicile(self, instance, *args, **kwargs):
+            return instance.individu.tel_domicile
+
+        def Get_tel_mobile(self, instance, *args, **kwargs):
+            return instance.individu.tel_mobile
+
+        def Get_mail(self, instance, *args, **kwargs):
+            return instance.individu.mail
+
         def Get_age(self, instance, *args, **kwargs):
             return instance.individu.Get_age()
 
@@ -97,15 +102,6 @@ class Liste(Page, crud.Liste):
 
         def Get_genre(self, instance, *args, **kwargs):
             return instance.individu.Get_sexe()
-
-
-# class Supprimer(Page, crud.Supprimer):
-#     form_class = Formulaire
-#
-#     def get_object(self):
-#         return Individu.objects.get(pk=self.kwargs['idindividu'])
-
-
 
 
 class Onglet(CustomView):
