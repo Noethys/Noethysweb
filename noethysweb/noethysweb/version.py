@@ -9,7 +9,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def GetVersion():
     """ Recherche du numéro de version """
-    fichierVersion = open(os.path.join(BASE_DIR, "versions.txt"), "r")
+    fichierVersion = open(os.path.join(BASE_DIR, "versions.txt"), "r", encoding="utf8", errors="ignore")
     txtVersion = fichierVersion.readlines()[0]
     fichierVersion.close()
     pos_debut_numVersion = txtVersion.find("n")
