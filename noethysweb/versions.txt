@@ -1,3 +1,11 @@
+Version 1.1.9.4 (26/09/2023) :
+
+- Ajout de la page Adhésions sur le portail
+- Ajout du graphique de l'évolution des réservations
+- Ajout ignore errors sur lecture fichier versions
+- Optimisation de la page paramètres du portail
+- Correction de la recherche rapide de la liste des individus rattachés
+
 Version 1.1.9.3 (21/09/2023) :
 
 - Corrections sur les prélèvements SEPA
