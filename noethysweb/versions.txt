@@ -1,3 +1,7 @@
+Version 1.1.9.5 (27/09/2023) :
+
+- Ajout de l'évolution des réservations dans les statistiques
+
 Version 1.1.9.4 (26/09/2023) :
 
 - Ajout de la page Adhésions sur le portail
