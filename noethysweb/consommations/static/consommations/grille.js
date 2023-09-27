@@ -417,7 +417,7 @@ class Case_standard extends Case_base {
 
             // Dessine les icones
             var texte_icones = "";
-            if (conso.prestation && dict_prestations[conso.prestation].forfait_date_debut) {texte_icones += " <i class='fa fa-tag' style='color: " + dict_prestations[conso.prestation].couleur + ";' title='Forfait crédit'></i>"};
+            if (conso.prestation && dict_prestations[conso.prestation] && dict_prestations[conso.prestation].forfait_date_debut) {texte_icones += " <i class='fa fa-tag' style='color: " + dict_prestations[conso.prestation].couleur + ";' title='Forfait crédit'></i>"};
             if ((conso.prestation === null) && (mode !== "portail")) {texte_icones += " <i class='fa fa-exclamation-triangle text-orange' title='Aucune prestation'></i>"};
             if (conso.etat === "present") {texte_icones += " <i class='fa fa-check-circle-o text-green' title='Présent'></i>"};
             if (conso.etat === "absenti") {texte_icones += " <i class='fa fa-times-circle-o text-red' title='Absence injustifiée'></i>"};

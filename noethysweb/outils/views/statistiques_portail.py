@@ -144,21 +144,4 @@ class View(CustomView, TemplateView):
                         valeurs=[nbre for date, nbre in donnees],
                     ))
 
-                # Chart : Evolution des réservations
-                condition = (Q(titre="Ajout d'une consommation") | Q(titre="Suppression d'une consommation")) & Q(horodatage__range=dates, utilisateur__famille__isnull=False)
-                dict_temp = {}
-                for titre, date, nbre in Historique.objects.filter(condition).values_list("titre", "horodatage__date").annotate(nbre=Count("idaction", distinct=True)).order_by("horodatage__date"):
-                    dict_temp[date] = dict_temp.get(date, 0) + (-nbre if "Suppression" in titre else nbre)
-                donnees = []
-                x = 0
-                for date, nbre in dict_temp.items():
-                    x += nbre
-                    donnees.append((date, x))
-                donnees.sort()
-                data.append(Histogramme(
-                    titre="Evolution des réservations", type_chart="line", chronologie="date",
-                    labels=[str(date) for date, nbre in donnees],
-                    valeurs=[nbre for date, nbre in donnees],
-                ))
-
         return data
