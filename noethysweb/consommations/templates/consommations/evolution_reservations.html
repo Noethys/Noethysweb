@@ -1,0 +1,118 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/chartjs/ancienne_version/Chart.min.css' %}">
+{% endblock styles %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/chartjs/ancienne_version/Chart.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/moment/moment.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-3" >
+
+            <!-- Paramètres -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Paramètres</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% crispy form_parametres %}
+                    <button type="submit" form="form_evolution_frequentation" class="btn btn-primary btn-block" name="type_submit" title="Actualiser les résultats"><i class="fa fa-refresh margin-r-5"></i> Actualiser les résultats</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-9">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-caret-square-o-right margin-r-5"></i> Résultats</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    <p>Vous pouvez analyser ici l'évolution des réservations dans le temps pour une date ou une période. La courbe bleue représente le nombre d'individus prévus.
+                    Les barres vertes et rouges représentent respectivement les ajouts et les suppressions d'individus.</p>
+
+                    <canvas id="chart_evolution" style="margin-bottom: 30px;" height="150"></canvas>
+                    <script>
+                        var data = JSON.parse("{{ data|escapejs }}");
+                        var ctx = document.getElementById("chart_evolution").getContext("2d");
+                        var chart = new Chart(ctx, {
+                            type: "line",
+                            data: {
+                                labels: data.dates,
+                                datasets: [
+                                    {
+                                        label: "Individus",
+                                        data: data.total,
+                                        borderColor: 'rgba(60, 141, 188, 1)',
+                                        fill: false,
+                                        tension: 0
+                                    },
+                                    {
+                                        label: "Ajouts (" + data.nbre_ajouts + ")",
+                                        data: data.ajouts,
+                                        backgroundColor: "#73c686",
+                                        type: "bar",
+                                    },
+                                    {
+                                        label: "Suppressions (" + data.nbre_suppressions + ")",
+                                        data: data.suppressions,
+                                        backgroundColor: "#e87c86",
+                                        type: "bar",
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                legend: {
+                                    display: true
+                                },
+                                tooltips: {
+                                    callbacks: {
+                                        label: function (tooltipItem, data) {
+                                            return parseInt(tooltipItem.value)
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    xAxes: [{
+                                        type: 'time',
+                                        time: {
+                                            unit: 'day',
+                                            tooltipFormat: 'D MMM, YYYY',
+                                            displayFormats: {
+                                                day: 'D MMM'
+                                            },
+                                            distribution: 'series'
+                                        },
+                                        stacked: true,
+                                    }],
+                                }
+                            }
+                        });
+                    </script>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock contenu_page %}

@@ -8,7 +8,7 @@ from core.views import toc
 from parametrage.views import calendrier
 from consommations.forms import grille_forfaits
 from consommations.views import grille, gestionnaire, suivi_consommations, etat_global, synthese_consommations, liste_attente, liste_absences, edition_liste_conso, \
-                                pointeuse, liste_consommations, liste_repas, etat_nomin, liste_durees, consommations_traitement_lot #, pointeuse_barcodes
+                                pointeuse, liste_consommations, liste_repas, etat_nomin, liste_durees, consommations_traitement_lot, evolution_reservations #, pointeuse_barcodes
 from core.decorators import secure_ajax
 
 
@@ -44,6 +44,7 @@ urlpatterns = [
     path('consommations/etat_global', etat_global.View.as_view(), name='etat_global'),
     path('consommations/etat_nomin', etat_nomin.View.as_view(), name='etat_nomin'),
     path('consommations/synthese_consommations', synthese_consommations.View.as_view(), name='synthese_consommations'),
+    path('consommations/evolution_reservations', evolution_reservations.View.as_view(), name='evolution_reservations'),
 
     # AJAX
     path('consommations/get_vacances', secure_ajax(calendrier.Get_vacances), name='ajax_get_vacances'),
