@@ -1,3 +1,7 @@
+Version 1.1.9.6 (27/09/2023) :
+
+- Ajout de l'évolution des réservations dans le menu consommations
+
 Version 1.1.9.5 (27/09/2023) :
 
 - Ajout de l'évolution des réservations dans les statistiques
