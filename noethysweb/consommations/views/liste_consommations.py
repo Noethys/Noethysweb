@@ -3,10 +3,20 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
+from django.urls import reverse_lazy, reverse
+from django.http import JsonResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Consommation
 from consommations.forms.liste_consommations import Formulaire
+
+
+def Dissocier_prestation(request):
+    """ Dissocier les prestations des consommations cochées """
+    liste_lignes = json.loads(request.POST["liste_lignes"])
+    Consommation.objects.filter(pk__in=liste_lignes).update(prestation=None)
+    return JsonResponse({"resultat": "ok"})
 
 
 class Page(crud.Page):
@@ -34,6 +44,9 @@ class Liste(Page, crud.Liste):
         context['impression_conclusion'] = ""
         context['afficher_menu_brothers'] = True
         context['active_checkbox'] = True
+        context['boutons_coches'] = json.dumps([
+            {"id": "bouton_dissocier_prestation", "action": """action_bouton_coche("%s")""" % reverse("ajax_consommations_dissocier_prestation"), "title": "Dissocier la prestation", "label": "Dissocier la prestation"},
+        ])
         return context
 
     class datatable_class(MyDatatable):

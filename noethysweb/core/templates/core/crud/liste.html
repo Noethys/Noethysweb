@@ -149,6 +149,31 @@
         })
     };
 
+    function Actualiser_page_liste() {
+        var table = new $.fn.dataTable.Api('.datatable');
+        var index_page = table.page();
+        table.ajax.reload();
+        table.page(index_page).draw('page');
+    };
+
+    function action_bouton_coche(url) {
+        var listepk = get_coches();
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {
+                "liste_lignes": JSON.stringify(listepk),
+            },
+            datatype: "json",
+            success: function (data) {
+                Actualiser_page_liste();
+            },
+            error: function(data) {
+                Actualiser_page_liste();
+                toastr.error(data.responseJSON.erreur);
+            }
+        });
+    }
 
 </script>
 {% endblock %}
