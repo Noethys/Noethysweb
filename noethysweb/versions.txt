@@ -1,3 +1,7 @@
+Version 1.1.9.7 (29/09/2023) :
+
+- Ajout de la dissociation de la prestation dans la liste des consommations
+
 Version 1.1.9.6 (27/09/2023) :
 
 - Ajout de l'évolution des réservations dans le menu consommations
