@@ -37,10 +37,12 @@ class Formulaire(FormulaireBase, ModelForm):
     groupes = forms.ModelMultipleChoiceField(label="Sélection des groupes", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Groupe.objects.none(), required=False)
 
     # Incompatibilités
-    incompatibilites = forms.ModelMultipleChoiceField(label="Incompatibilités", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(), required=False)
+    incompatibilites = forms.ModelMultipleChoiceField(label="Incompatibilités", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(), required=False,
+                                                      help_text="Sélectionnez les unités qui ne peuvent être saisies en même temps que cette unité.")
 
     # Dépendances
-    dependances = forms.ModelMultipleChoiceField(label="Unités liées", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(), required=False)
+    dependances = forms.ModelMultipleChoiceField(label="Unités liées", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(), required=False,
+                                                 help_text="Cette unité héritera de l'état des unités liées et sera supprimée en cas d'absence de l'une des unités liées. Par exemple, un repas ne peut exister seul s'il n'y pas de journée, de matinée ou d'après-midi saisies.")
 
     class Meta:
         model = Unite
@@ -50,8 +52,6 @@ class Formulaire(FormulaireBase, ModelForm):
         help_texts = {
             "equiv_journees": "Saisissez l'équivalence en journées (utile uniquement pour l'état global et l'état nominatif). Ex : une journée=1, une demi-journée=0.5, etc...",
             "equiv_heures": "Saisissez l'équivalence en heures (utile uniquement pour l'état global et l'état nominatif). Format : HH:MM.",
-            "dependances": "Cette unité héritera de l'état des unités liées et sera supprimée en cas d'absence de l'une des unités liées. Par exemple, un repas ne peut exister seul s'il n'y pas de journée, de matinée ou d'après-midi saisies.",
-            "incompatibilites": "Sélectionnez les unités qui ne peuvent être saisies en même temps que cette unité.",
             "touche_raccourci": "Il suffira de conserver cette touche enfoncée pour saisir une consommation de cette unité en même temps qu'une autre dans la grille des consommations.",
         }
         widgets = {
