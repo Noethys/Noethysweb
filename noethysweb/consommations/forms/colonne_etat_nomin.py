@@ -39,11 +39,15 @@ class Formulaire(FormulaireBase, forms.Form):
             liste_choix.append(("question_%d" % question.pk, question.label))
 
     # Ajout des champs spécifiques aux consommations
-    for champ, label_champ in [("nbre_conso", "Nombre de consommations"), ("temps_conso", "Temps réel des consommations"), ("equiv_journees", "Equivalence journées"), ("equiv_heures", "Equivalences heures")]:
+    for champ, label_champ in [("*nbre_conso", "Nombre de consommations"), ("*temps_conso", "Temps réel des consommations"), ("*temps_facture", "Temps facturé"), ("*equiv_journees", "Equivalence journées"), ("*equiv_heures", "Equivalences heures")]:
         for suffixe, label_suffixe in [("", ""), ("_vacances", " durant les vacances"), ("_hors_vacances", " hors vacances")]:
             liste_choix.append((champ + suffixe, label_champ + label_suffixe))
 
     donnee = forms.ChoiceField(label="Donnée associée", choices=liste_choix, initial="aucun", required=False)
+
+    # Filtre sur les unités de consommations
+    filtre_unites = forms.TypedChoiceField(label="Filtre sur les unités de consommation", choices=[("TOUTES", "Toutes les unités"), ("SELECTION", "Uniquement les unités sélectionnées")], initial="TOUTES", required=False)
+    unites = forms.CharField(label="Sélection d'unités", required=False, help_text="Saisissez le nom des unités de consommations à inclure dans les résultats, séparés par des points-virgule. Exemple : 'Accueil du matin;Accueil du soir'.")
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -60,4 +64,6 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.layout = Layout(
             Field("nom"),
             Field("donnee"),
+            Field("filtre_unites"),
+            Field("unites"),
         )

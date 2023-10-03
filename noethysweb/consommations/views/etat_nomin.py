@@ -9,7 +9,7 @@ from django.views.generic import TemplateView
 from django.db.models import Q
 from core.views.base import CustomView
 from core.utils import utils_dates
-from core.models import Consommation, Vacance, Parametre, Quotient
+from core.models import Consommation, Vacance, Parametre, Quotient, Scolarite
 from core.utils import utils_questionnaires
 from consommations.forms.etat_nomin import Formulaire
 
@@ -41,7 +41,7 @@ class View(CustomView, TemplateView):
 
         # Form par défaut
         if "form_parametres" not in kwargs:
-            context['form_parametres'] = Formulaire(request=self.request);print(1)
+            context['form_parametres'] = Formulaire(request=self.request)
 
         # Application du profil de configuration
         profil = Parametre.objects.filter(idparametre=int(self.request.POST.get("profil"))).first() if self.request.POST.get("profil") else False
@@ -51,7 +51,7 @@ class View(CustomView, TemplateView):
             initial_data = json.loads(profil.parametre)
             [request_post.pop(key) for key in initial_data.keys() if key in request_post]
             request_post.update(initial_data)
-            context['form_parametres'] = Formulaire(initial=request_post, request=self.request);print(2)
+            context['form_parametres'] = Formulaire(initial=request_post, request=self.request)
 
         return context
 
@@ -66,6 +66,7 @@ class View(CustomView, TemplateView):
             "liste_colonnes": liste_colonnes,
             "liste_lignes": json.dumps(liste_lignes),
             "afficher_resultats": "type_submit" in request.POST,
+            "titre": form.cleaned_data.get("titre", "Etat nominatif"),
         }
         return self.render_to_response(self.get_context_data(**context))
 
@@ -86,6 +87,13 @@ class View(CustomView, TemplateView):
             conditions &= Q(inscription__famille__caisse_id__in=[int(idcaisse) for idcaisse in parametres["caisses"]])
         consommations = Consommation.objects.select_related("individu", "inscription", "inscription__famille", "inscription__famille__caisse", "inscription__famille__allocataire","prestation", "unite").filter(conditions)
 
+        # Importation des scolarités
+        dict_scolarites = {}
+        if parametres.get("filtre_ecoles") == "SELECTION":
+            for scolarite in Scolarite.objects.filter(ecole_id__in=[int(idecole) for idecole in parametres["ecoles"]], date_debut__lte=date_max, date_fin__gte=date_min):
+                dict_scolarites.setdefault(scolarite.individu, [])
+                dict_scolarites[scolarite.individu].append((scolarite.date_debut, scolarite.date_fin))
+
         # Importation des vacances
         liste_vacances = Vacance.objects.filter(date_fin__gte=date_min, date_debut__lte=date_max)
 
@@ -94,8 +102,22 @@ class View(CustomView, TemplateView):
         dict_quotients = {quotient.famille_id: quotient.quotient for quotient in Quotient.objects.filter(conditions_qf)}
 
         # Importation des questionnaires
-        questionnaires_individus = utils_questionnaires.ChampsEtReponses(categorie="individu", filtre_reponses=Q(individu__in=[conso.inscription.individu for conso in consommations]))
+        questionnaires_individus = utils_questionnaires.ChampsEtReponses(categorie="individu", filtre_reponses=Q(individu__in=[conso.individu for conso in consommations]))
         questionnaires_familles = utils_questionnaires.ChampsEtReponses(categorie="famille", filtre_reponses=Q(famille__in=[conso.inscription.famille for conso in consommations]))
+
+        # Récupération des colonnes
+        colonnes = json.loads(parametres["colonnes"])
+        dict_colonnes = {colonne["code"]: colonne for colonne in colonnes}
+
+        def Valide_conso(nom_colonne="", conso=None):
+            if nom_colonne in dict_colonnes:
+                unites = dict_colonnes[nom_colonne]["unites"]
+                if unites:
+                    for nom_unite in unites.split(";"):
+                        if conso.unite.nom.lower().strip() == nom_unite.lower().strip():
+                            return True
+                    return False
+            return True
 
         # Calcul des données
         resultats = {}
@@ -106,6 +128,16 @@ class View(CustomView, TemplateView):
                 if conso.individu.ville_resid not in parametres["villes"]:
                     continue
 
+            # Filtre écoles
+            if parametres.get("filtre_ecoles") == "SELECTION":
+                valide = False
+                for date_debut_scolarite, date_fin_scolarite in dict_scolarites.get(conso.individu, []):
+                    if date_debut_scolarite <= conso.date <= date_fin_scolarite:
+                        valide = True
+                if not valide:
+                    continue
+
+            # Création des valeurs des colonnes
             key_individu = (conso.individu, conso.inscription.famille)
             if key_individu not in resultats:
                 resultats[key_individu] = {}
@@ -141,28 +173,37 @@ class View(CustomView, TemplateView):
                 condition_suffixe = suffixe == "" or (suffixe == "_vacances" and est_vacances) or (suffixe == "_hors_vacances" and not est_vacances)
 
                 # Nombre de conso
-                resultats[key_individu].setdefault("nbre_conso" + suffixe, 0)
-                if condition_suffixe:
-                    resultats[key_individu]["nbre_conso" + suffixe] += 1
+                nom_colonne = "*nbre_conso" + suffixe
+                resultats[key_individu].setdefault(nom_colonne, 0)
+                if condition_suffixe and Valide_conso(nom_colonne, conso):
+                    resultats[key_individu][nom_colonne] += 1
 
                 # Durée réelle de la conso
-                resultats[key_individu].setdefault("temps_conso" + suffixe, datetime.timedelta(hours=0, minutes=0))
-                if condition_suffixe and conso.heure_debut and conso.heure_fin:
+                nom_colonne = "*temps_conso" + suffixe
+                resultats[key_individu].setdefault(nom_colonne, datetime.timedelta(hours=0, minutes=0))
+                if condition_suffixe and conso.heure_debut and conso.heure_fin and Valide_conso(nom_colonne, conso):
                     valeur = datetime.timedelta(hours=conso.heure_fin.hour, minutes=conso.heure_fin.minute) - datetime.timedelta(hours=conso.heure_debut.hour, minutes=conso.heure_debut.minute)
-                    resultats[key_individu]["temps_conso" + suffixe] += valeur
+                    resultats[key_individu][nom_colonne] += valeur
+
+                # Temps facturé
+                nom_colonne = "*temps_facture" + suffixe
+                resultats[key_individu].setdefault(nom_colonne, datetime.timedelta(hours=0, minutes=0))
+                if condition_suffixe and conso.prestation and conso.prestation.temps_facture and Valide_conso(nom_colonne, conso):
+                    resultats[key_individu][nom_colonne] += conso.prestation.temps_facture
 
                 # Equivalence journées
-                resultats[key_individu].setdefault("equiv_journees" + suffixe, 0.0)
-                if condition_suffixe and conso.unite.equiv_journees:
-                    resultats[key_individu]["equiv_journees" + suffixe] += conso.unite.equiv_journees
+                nom_colonne = "*equiv_journees" + suffixe
+                resultats[key_individu].setdefault(nom_colonne, 0.0)
+                if condition_suffixe and conso.unite.equiv_journees and Valide_conso(nom_colonne, conso):
+                    resultats[key_individu][nom_colonne] += conso.unite.equiv_journees
 
                 # Equivalence heures
-                resultats[key_individu].setdefault("equiv_heures" + suffixe, datetime.timedelta(0))
-                if condition_suffixe and conso.unite.equiv_heures:
-                    resultats[key_individu]["equiv_heures" + suffixe] += utils_dates.TimeEnDelta(conso.unite.equiv_heures)
+                nom_colonne = "*equiv_heures" + suffixe
+                resultats[key_individu].setdefault(nom_colonne, datetime.timedelta(0))
+                if condition_suffixe and conso.unite.equiv_heures and Valide_conso(nom_colonne, conso):
+                    resultats[key_individu][nom_colonne] += utils_dates.TimeEnDelta(conso.unite.equiv_heures)
 
         # Création des colonnes
-        colonnes = json.loads(parametres["colonnes"])
         liste_colonnes = [colonne["nom"] for colonne in colonnes]
 
         # Création des lignes

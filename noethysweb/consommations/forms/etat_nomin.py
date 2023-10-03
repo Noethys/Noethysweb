@@ -10,7 +10,7 @@ from crispy_forms.layout import Layout, HTML
 from crispy_forms.bootstrap import Field, TabHolder, Tab
 from django_select2.forms import Select2MultipleWidget
 from core.widgets import DateRangePickerWidget, SelectionActivitesWidget, Profil_configuration
-from core.models import Activite, Parametre, Individu, Caisse
+from core.models import Activite, Parametre, Individu, Caisse, Ecole
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from consommations.widgets import ColonnesEtatNominWidget
@@ -18,6 +18,7 @@ from consommations.widgets import ColonnesEtatNominWidget
 
 class Formulaire(FormulaireBase, forms.Form):
     profil = forms.ModelChoiceField(label="Profil de configuration", queryset=Parametre.objects.none(), widget=Profil_configuration({"categorie": "etat_nomin", "module": "consommations.views.etat_nomin"}), required=False)
+    titre = forms.CharField(label="Titre", required=True, help_text="Titre du document à l'impression.")
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
     etats = forms.MultipleChoiceField(required=True, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[("reservation", "Réservation"), ("present", "Présent"), ("attente", "Attente"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present"])
@@ -28,6 +29,9 @@ class Formulaire(FormulaireBase, forms.Form):
 
     filtre_caisses = forms.TypedChoiceField(label="Filtre sur les caisses", choices=[("TOUTES", "Toutes les caisses"), ("SELECTION", "Uniquement les caisses sélectionnées")], initial="TOUTES", required=False)
     caisses = forms.MultipleChoiceField(label="Sélection de caisses", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=False)
+
+    filtre_ecoles = forms.TypedChoiceField(label="Filtre sur les écoles", choices=[("TOUTES", "Toutes les écoles"), ("SELECTION", "Uniquement les écoles sélectionnées")], initial="TOUTES", required=False)
+    ecoles = forms.MultipleChoiceField(label="Sélection d'écoles", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=False)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -46,6 +50,9 @@ class Formulaire(FormulaireBase, forms.Form):
         # Sélectionne uniquement les activités autorisées
         self.fields["activites"].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("date_fin")
 
+        # Titre
+        self.fields["titre"].initial = "Etat nominatif"
+
         # Colonnes
         self.fields['colonnes'].label = False
 
@@ -55,6 +62,9 @@ class Formulaire(FormulaireBase, forms.Form):
 
         # Caisses
         self.fields["caisses"].choices = sorted([(caisse.pk, caisse.nom) for caisse in Caisse.objects.all().order_by("nom")])
+
+        # Ecoles
+        self.fields["ecoles"].choices = sorted([(ecole.pk, ecole.nom) for ecole in Ecole.objects.all().order_by("nom")])
 
         # Affichage
         self.helper.layout = Layout(
@@ -68,6 +78,7 @@ class Formulaire(FormulaireBase, forms.Form):
                 Tab("Généralités",
                     Field("periode"),
                     Field("activites"),
+                    Field("titre"),
                 ),
                 Tab("Filtres",
                     Field("etats"),
@@ -75,6 +86,8 @@ class Formulaire(FormulaireBase, forms.Form):
                     Field("villes"),
                     Field("filtre_caisses"),
                     Field("caisses"),
+                    Field("filtre_ecoles"),
+                    Field("ecoles"),
                 ),
                 Tab("Colonnes",
                     Field("colonnes"),
@@ -120,6 +133,17 @@ EXTRA_HTML = """
         On_change_caisses.call($('#id_filtre_caisses').get(0));
     });
 
+    function On_change_ecoles() {
+        $('#div_id_ecoles').hide();
+        if ($("#id_filtre_ecoles").val() == 'SELECTION') {
+            $('#div_id_ecoles').show();
+        };
+    }
+    $(document).ready(function() {
+        $('#id_filtre_ecoles').on('change', On_change_ecoles);
+        On_change_ecoles.call($('#id_filtre_ecoles').get(0));
+    });
+    
 </script>
 """
 

@@ -38,7 +38,10 @@
         $("#id_colonne_id").val("");
         $("#id_nom").val("");
         $("#id_donnee").val("aucun");
+        $("#id_filtre_unites").val("TOUTES");
+        $("#id_unites").val("");
         $("#modal_saisir_colonne").modal('show');
+        On_change_donnee();
     }
 
     function modifier_colonne(id) {
@@ -48,7 +51,15 @@
         var liste_colonnes = JSON.parse($("#{{ id }}").val());
         $("#id_nom").val(liste_colonnes[index].nom);
         $("#id_donnee").val(liste_colonnes[index].code);
+        if (liste_colonnes[index].unites) {
+            $("#id_filtre_unites").val("SELECTION");
+            $("#id_unites").val(liste_colonnes[index].unites);
+        } else {
+            $("#id_filtre_unites").val("TOUTES");
+            $("#id_unites").val("");
+        }
         $("#modal_saisir_colonne").modal('show');
+        On_change_donnee();
     }
 
     function supprimer_colonne(id) {
@@ -103,10 +114,19 @@
             var id = $("#id_colonne_id").val();
             var nom = $("#id_nom").val();
             var donnee = $("#id_donnee").val();
+            var filtre_unites = $("#id_filtre_unites").val();
+            var unites = $("#id_unites").val();
+            if (filtre_unites === "TOUTES") {
+                unites = "";
+            }
             var liste_colonnes = JSON.parse($("#{{ id }}").val());
 
             if (nom === "") {
                 toastr.error(("Vous devez saisir un nom pour cette colonne"));
+                return false;
+            }
+            if ((filtre_unites === "SELECTION") & (unites === "")) {
+                toastr.error(("Vous devez saisir un filtre d'unités"));
                 return false;
             }
 
@@ -114,10 +134,10 @@
                 // Modifie la colonne
                 var liste_items = $("#ul_{{ id }}").sortable("toArray");
                 var index = jQuery.inArray("colonne_" + id, liste_items);
-                liste_colonnes[index] = {"nom": nom, "code": donnee};
+                liste_colonnes[index] = {"nom": nom, "code": donnee, "unites": unites};
             } else {
                 // Ajoute la colonne
-                liste_colonnes.push({"nom": nom, "code": donnee});
+                liste_colonnes.push({"nom": nom, "code": donnee, "unites": unites});
             };
 
             // MAJ de la liste des colonnes
@@ -129,6 +149,31 @@
         // Dessine les colonnes
         afficher_colonnes();
 
+    });
+
+    function On_change_donnee() {
+        $('#div_id_filtre_unites').hide();
+        $('#div_id_unites').hide();
+        if ($("#id_donnee").val().indexOf("*") >= 0) {
+            $('#div_id_filtre_unites').show();
+            $('#div_id_unites').show();
+        }
+        On_change_unites();
+    }
+    $(document).ready(function() {
+        $('#id_donnee').on('change', On_change_donnee);
+        On_change_donnee.call($('#id_donnee').get(0));
+    });
+
+    function On_change_unites() {
+        $('#div_id_unites').hide();
+        if ($("#id_filtre_unites").val() == 'SELECTION') {
+            $('#div_id_unites').show();
+        }
+    }
+    $(document).ready(function() {
+        $('#id_filtre_unites').on('change', On_change_unites);
+        On_change_unites.call($('#id_filtre_unites').get(0));
     });
 
 </script>
