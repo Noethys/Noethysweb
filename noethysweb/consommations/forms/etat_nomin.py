@@ -10,7 +10,7 @@ from crispy_forms.layout import Layout, HTML
 from crispy_forms.bootstrap import Field, TabHolder, Tab
 from django_select2.forms import Select2MultipleWidget
 from core.widgets import DateRangePickerWidget, SelectionActivitesWidget, Profil_configuration
-from core.models import Activite, Parametre, Individu, Caisse, Ecole
+from core.models import Activite, Parametre, Individu, Caisse, Ecole, QuestionnaireQuestion
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from consommations.widgets import ColonnesEtatNominWidget
@@ -19,6 +19,8 @@ from consommations.widgets import ColonnesEtatNominWidget
 class Formulaire(FormulaireBase, forms.Form):
     profil = forms.ModelChoiceField(label="Profil de configuration", queryset=Parametre.objects.none(), widget=Profil_configuration({"categorie": "etat_nomin", "module": "consommations.views.etat_nomin"}), required=False)
     titre = forms.CharField(label="Titre", required=True, help_text="Titre du document à l'impression.")
+    tri = forms.ChoiceField(label="Tri", choices=[], required=False)
+    ordre = forms.ChoiceField(label="Ordre", choices=[("croissant", "Croissant"), ("decroissant", "Décroissant")], initial="croissant", required=False)
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
     etats = forms.MultipleChoiceField(required=True, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[("reservation", "Réservation"), ("present", "Présent"), ("attente", "Attente"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present"])
@@ -53,6 +55,20 @@ class Formulaire(FormulaireBase, forms.Form):
         # Titre
         self.fields["titre"].initial = "Etat nominatif"
 
+        # Tri
+        liste_choix = [
+            ("individu_nom_complet", "Nom de l'individu"),
+            ("individu_prenom", "Prénom de l'individu"),
+            ("individu_date_naiss", "Date de naissance de l'individu"),
+            ("individu_ville", "Ville de l'individu"),
+            ("famille_nom_complet", "Noms des titulaires de la famille"),
+        ]
+        for categorie in ("individu", "famille"):
+            for question in QuestionnaireQuestion.objects.filter(categorie=categorie, visible=True).order_by("ordre"):
+                liste_choix.append(("question_%d" % question.pk, question.label))
+        self.fields["tri"].choices = liste_choix
+        self.fields["tri"].default = "individu_nom_complet"
+
         # Colonnes
         self.fields['colonnes'].label = False
 
@@ -79,6 +95,8 @@ class Formulaire(FormulaireBase, forms.Form):
                     Field("periode"),
                     Field("activites"),
                     Field("titre"),
+                    Field("tri"),
+                    Field("ordre"),
                 ),
                 Tab("Filtres",
                     Field("etats"),
