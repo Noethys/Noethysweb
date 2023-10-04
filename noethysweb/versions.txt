@@ -1,3 +1,8 @@
+Version 1.1.9.8 (04/10/2023) :
+
+- Améliorations sur l'état nominatif
+- Divers correctifs
+
 Version 1.1.9.7 (29/09/2023) :
 
 - Ajout de la dissociation de la prestation dans la liste des consommations
