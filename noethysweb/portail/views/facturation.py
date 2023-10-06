@@ -449,7 +449,7 @@ class View(CustomView, TemplateView):
             if facture.pk in dict_paiements["F"]:
                 facture.regle = facture.total
                 facture.solde_actuel = decimal.Decimal(0)
-            if facture.solde_actuel:
+            if facture.solde_actuel and (not facture.date_limite_paiement or datetime.date.today() <= facture.date_limite_paiement):
                 liste_factures_impayees.append(facture)
                 total_factures_impayees += facture.solde_actuel
             liste_factures.append(facture)

@@ -30,7 +30,7 @@ def Appliquer(request):
 
     # Application des modifications
     liste_champs_modifier = []
-    for champ in ("date_edition", "date_echeance", "prefixe", "lot", "regie"):
+    for champ in ("date_edition", "date_echeance", "prefixe", "lot", "regie", "date_limite_paiement"):
         if form.cleaned_data["modifier_%s" % champ]:
             liste_champs_modifier.append(champ)
             logger.debug("Changement de %s pour %d factures..." % (champ, len(factures)))

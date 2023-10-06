@@ -25,6 +25,8 @@ class Formulaire(FormulaireBase, forms.Form):
     regie = forms.ModelChoiceField(label="Régie", queryset=FactureRegie.objects.all(), required=False)
     modifier_prefixe = forms.BooleanField(label="Modifier le préfixe", required=False)
     prefixe = forms.ModelChoiceField(label="Préfixe", queryset=PrefixeFacture.objects.all(), required=False)
+    modifier_date_limite_paiement = forms.BooleanField(label="Modifier la date limite de paiement en ligne", required=False)
+    date_limite_paiement = forms.DateField(label="Date limite paiement en ligne", required=False, widget=DatePickerWidget())
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -43,6 +45,8 @@ class Formulaire(FormulaireBase, forms.Form):
                 Field('date_edition'),
                 Field('modifier_date_echeance'),
                 Field('date_echeance'),
+                Field('modifier_date_limite_paiement'),
+                Field('date_limite_paiement'),
                 Field('modifier_prefixe'),
                 Field('prefixe'),
                 Field('modifier_lot'),
@@ -88,6 +92,18 @@ function On_change_date_echeance() {
 $(document).ready(function() {
     $('#id_modifier_date_echeance').change(On_change_date_echeance);
     On_change_date_echeance.call($('#id_modifier_date_echeance').get(0));
+});
+
+// Date limite de paiement en ligne
+function On_change_date_limite_paiement() {
+    $('#div_id_date_limite_paiement').hide();
+    if ($(this).prop("checked")) {
+        $('#div_id_date_limite_paiement').show();
+    }
+}
+$(document).ready(function() {
+    $('#id_modifier_date_limite_paiement').change(On_change_date_limite_paiement);
+    On_change_date_limite_paiement.call($('#id_modifier_date_limite_paiement').get(0));
 });
 
 // préfixe

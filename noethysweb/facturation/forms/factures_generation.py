@@ -50,6 +50,7 @@ class Formulaire(FormulaireBase, forms.Form):
     choix_selection_familles = [("TOUTES", "Toutes les familles"), ("FAMILLE", "Uniquement la famille sélectionnée")]
     selection_familles = forms.TypedChoiceField(label="Sélection des familles", choices=choix_selection_familles, initial="TOUTES", required=False)
     famille = forms.ModelChoiceField(label="Famille", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Famille.objects.all().order_by("nom"), required=False)
+    date_limite_paiement = forms.DateField(label="Date limite paiement en ligne", required=False, widget=DatePickerWidget({"afficher_check": True, "label_checkbox": "Interdire le paiement en ligne après le"}))
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -99,6 +100,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Fieldset('Options',
                 Field('categories'),
                 Field('prestations_anterieures'),
+                Field('date_limite_paiement'),
                 Field('selection_familles'),
                 Field('famille'),
             ),

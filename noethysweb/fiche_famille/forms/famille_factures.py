@@ -19,13 +19,14 @@ class Formulaire(FormulaireBase, ModelForm):
     date_fin = forms.DateField(label="Date de fin", required=True, widget=DatePickerWidget())
     date_edition = forms.DateField(label="Date d'émission", required=True, widget=DatePickerWidget())
     date_echeance = forms.DateField(label="Date d'échéance", required=False, widget=DatePickerWidget())
+    date_limite_paiement = forms.DateField(label="Date limite de paiement en ligne", required=False, widget=DatePickerWidget())
     lot = forms.ModelChoiceField(label="Lot de factures", queryset=LotFactures.objects.all(), required=False, widget=Select_avec_commandes(
                       {"donnees_extra": {}, "url_ajax": "ajax_modifier_lot_factures",
                        "textes": {"champ": "Nom du lot", "ajouter": "Saisir un lot de factures", "modifier": "Modifier un lot de factures"}}))
 
     class Meta:
         model = Facture
-        fields = ["date_debut", "date_fin", "date_edition", "date_echeance", "lot", "regie", "prefixe", "numero"]
+        fields = ["date_debut", "date_fin", "date_edition", "date_echeance", "lot", "regie", "prefixe", "numero", "date_limite_paiement"]
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")
@@ -49,6 +50,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Dates",
                 Field('date_edition'),
                 Field('date_echeance'),
+                Field('date_limite_paiement'),
             ),
             Fieldset("Numéro",
                 Field('prefixe'),

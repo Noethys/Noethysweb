@@ -2168,6 +2168,7 @@ class Facture(models.Model):
     etat = models.CharField(verbose_name="Etat de la facture", max_length=100, blank=True, null=True)
     prefixe = models.ForeignKey(PrefixeFacture, verbose_name="Préfixe", on_delete=models.PROTECT, blank=True, null=True)
     regie = models.ForeignKey(FactureRegie, verbose_name="Régie", on_delete=models.PROTECT, blank=True, null=True)
+    date_limite_paiement = models.DateField(verbose_name="Date limite paiement en ligne", blank=True, null=True)
 
     class Meta:
         db_table = 'factures'
