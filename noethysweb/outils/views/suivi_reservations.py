@@ -10,8 +10,9 @@ from django.db.models import Q
 from django.shortcuts import render
 from core.models import Activite, Historique
 from core.views.base import CustomView
-from core.utils import utils_parametres
+from core.utils import utils_parametres, utils_dates
 from core.forms.selection_activites import Formulaire as Form_activites
+from outils.forms.suivi_reservations_periode import Formulaire as Form_periode
 
 
 def Get_form_activites(request):
@@ -21,6 +22,14 @@ def Get_form_activites(request):
     return render(request, "outils/suivi_reservations_activites.html", context)
 
 
+def Get_form_periode(request):
+    """ Renvoie le form choix de la période """
+    periode_historique = request.POST.get("periode_historique", 12)
+    periode_reservations = request.POST.get("periode_reservations", None)
+    context = {"form_periode": Form_periode(request=request, initial={"periode_historique": periode_historique, "periode_reservations": periode_reservations})}
+    return render(request, "outils/suivi_reservations_periode.html", context)
+
+
 def Valider_form_activites(request):
     form = Form_activites(request.POST)
     if not form.is_valid():
@@ -28,13 +37,23 @@ def Valider_form_activites(request):
     return JsonResponse({"activites": form.cleaned_data["activites"]})
 
 
+def Valider_form_periode(request):
+    form = Form_periode(request.POST)
+    if not form.is_valid():
+        return JsonResponse({"erreur": "Il y a une erreur dans la sélection de la période"}, status=401)
+    return JsonResponse({"periode_historique": form.cleaned_data["periode_historique"], "periode_reservations": form.cleaned_data["periode_reservations"]})
+
+
 def Get_parametres(request=None):
     """ Renvoie les paramètres d'affichage """
     parametres = utils_parametres.Get_categorie(categorie="suivi_reservations", utilisateur=request.user, parametres={
         "activites": {},
-        "affichage": "12",
+        "periode_historique": "12",
+        "periode_reservations": None,
     })
     parametres["activites_reservations_json"] = json.dumps(parametres["activites"])
+    parametres["periode_historique"] = parametres["periode_historique"]
+    parametres["periode_reservations"] = parametres["periode_reservations"]
     return parametres
 
 
@@ -70,9 +89,20 @@ def Get_data(parametres={}, request=None):
         conditions &= Q(pk__in=activites["ids"])
     liste_activites = Activite.objects.filter(conditions)
 
-    horodatage_min = datetime.datetime.now() - datetime.timedelta(hours=int(parametres.get("affichage", 12)))
+    # Recherche des actions dans l'historique
+    periode_historique = parametres.get("periode_historique", 12)
+    if parametres.get("affichage", None):
+        periode_historique = parametres["affichage"]
+
+    horodatage_min = datetime.datetime.now() - datetime.timedelta(hours=int(periode_historique))
     conditions = Q(classe="Consommation") & Q(horodatage__gte=horodatage_min) & Q(utilisateur__categorie="famille")
     conditions &= (Q(titre__icontains="Ajout") | Q(titre__icontains="Suppression")) & Q(activite__in=liste_activites)
+
+    # Filtrage sur la période des réservations
+    if parametres["periode_reservations"] and parametres["periode_reservations"] != "None":
+        periode = utils_dates.ConvertDateRangePicker(parametres["periode_reservations"])
+        conditions &= (Q(date__gte=periode[0]) & Q(date__lte=periode[1]))
+
     resultats = Historique.objects.select_related("famille", "individu").filter(conditions).order_by("-pk")
     return resultats
 

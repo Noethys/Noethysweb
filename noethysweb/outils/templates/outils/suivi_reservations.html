@@ -17,23 +17,12 @@
                     <button href="#" class="btn btn-tool" title="Ajuster les options" data-toggle="dropdown"><i class="fa fa-gear"></i></button>
                     <div id="choix_affichage" class="dropdown-menu dropdown-menu-right" role="menu">
                         <li><h6 class="dropdown-header"><strong>Données</strong></h6></li>
-                        <a class="dropdown-item" style="padding-left: 22px;" href="#" id="selection_activites_reservations" title="Sélectionner les activités à afficher">Sélectionner les activités</a>
-                        <li class="dropdown-divider"></li>
-                        <li><h6 class="dropdown-header"><strong>Période</strong></h6></li>
-                        <li><a href="#" data-valeur="3"><i class="fa fa-check"></i> <span>3 heures</span></a></li>
-                        <li><a href="#" data-valeur="6"><i class="fa fa-check"></i> <span>6 heures</span></a></li>
-                        <li><a href="#" data-valeur="12"><i class="fa fa-check"></i> <span>12 heures</span></a></li>
-                        <li><a href="#" data-valeur="24"><i class="fa fa-check"></i> <span>24 heures</span></a></li>
-                        <li><a href="#" data-valeur="48"><i class="fa fa-check"></i> <span>48 heures</span></a></li>
-                        <li><a href="#" data-valeur="72"><i class="fa fa-check"></i> <span>3 jours</span></a></li>
-                        <li><a href="#" data-valeur="120"><i class="fa fa-check"></i> <span>5 jours</span></a></li>
-                        <li><a href="#" data-valeur="168"><i class="fa fa-check"></i> <span>1 semaine</span></a></li>
-                        <li><a href="#" data-valeur="336"><i class="fa fa-check"></i> <span>2 semaines</span></a></li>
+                        <a class="dropdown-item" style="padding-left: 22px;" href="#" id="selection_activites_reservations" title="Sélectionner les activités">Sélectionner les activités</a>
+                        <a class="dropdown-item" style="padding-left: 22px;" href="#" id="selection_periode_reservations" title="Sélectionner la période">Sélectionner la période</a>
                     </div>
                 </div>
 
                 <button type="button" class="btn btn-tool" data-card-widget="maximize" title="Agrandir/Réduire"><i class="fa fa-expand"></i></button>
-
                 <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
 
             </div>
@@ -44,30 +33,16 @@
             </table>
         </div>
 
-        <style>
-            #choix_affichage > li{
-                margin-left: 5px;
-            }
-            #choix_affichage > li > a > .fa{
-                visibility:hidden;
-            }
-            #choix_affichage > li > a.selected > .fa{
-                visibility:visible;
-            }
-        </style>
     </div>
 
     {# Ajout de la modal sélection des activités #}
     <div id="div_modal_selection_activites_reservations"></div>
 
+    {# Ajout de la modal sélection de la période #}
+    <div id="div_modal_selection_periode_reservations"></div>
+
 <script>
     $(document).ready(function() {
-
-        $('#choix_affichage > li > a').click(function(e){
-            $('#choix_affichage > li > a').removeClass('selected');
-            $(this).addClass('selected');
-            maj_affichage_reservations(update_parametres=true);
-        });
 
         // Bouton MAJ affichage
         $("#bouton_maj_affichage_reservations").on('click', function(event) {
@@ -76,7 +51,6 @@
         });
 
         $("#selection_activites_reservations").on("click", function(event){
-            var affichage = $("#choix_affichage .selected").data("valeur");
             event.preventDefault();
             $.ajax({
                 type: "POST",
@@ -92,11 +66,25 @@
             });
         });
 
+        $("#selection_periode_reservations").on("click", function(event){
+            event.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_reservations_get_form_periode' %}",
+                data: {
+                    periode_historique: periode_historique,
+                    periode_reservations: periode_reservations,
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                },
+                success: function (data) {
+                    $("#div_modal_selection_periode_reservations").html(data);
+                    $('#modal_selection_periode_reservations').modal('show');
+                }
+            });
+        });
+
         // MAJ de l'affichage au chargement de la page
         maj_affichage_reservations();
-
-        // MAJ de la valeur affichage dans le menu dropdown
-        $("#choix_affichage [data-valeur='{{ suivi_reservations_parametres.affichage }}']").addClass("selected");
 
     });
 
@@ -105,7 +93,8 @@
         if (update_parametres) {
             parametres = {
                 activites: activites_reservations_json,
-                affichage: $("#choix_affichage .selected").data("valeur"),
+                periode_historique: periode_historique,
+                periode_reservations: periode_reservations,
             };
         }
         $.ajax({

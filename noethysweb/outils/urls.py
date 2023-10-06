@@ -117,6 +117,8 @@ urlpatterns = [
     path('outils/messages/marquer_lu/', secure_ajax(messagerie_portail.Marquer_lu), name='ajax_message_marquer_lu'),
     path('outils/get_suivi_reservations', secure_ajax(suivi_reservations.Get_suivi_reservations), name='ajax_get_suivi_reservations'),
     path('outils/reservations_get_form_activites', secure_ajax(suivi_reservations.Get_form_activites), name='ajax_reservations_get_form_activites'),
+    path('outils/reservations_get_form_periode', secure_ajax(suivi_reservations.Get_form_periode), name='ajax_reservations_get_form_periode'),
     path('outils/reservations_valider_form_activites', secure_ajax(suivi_reservations.Valider_form_activites), name='ajax_reservations_valider_form_activites'),
+    path('outils/reservations_valider_form_periode', secure_ajax(suivi_reservations.Valider_form_periode), name='ajax_reservations_valider_form_periode'),
 
 ]

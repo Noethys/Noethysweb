@@ -1,0 +1,50 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{# Model Sélection de la période #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_selection_periode_reservations{% endblock %}
+    {% block modal_titre %}Sélection de la période{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+
+        {% crispy form_periode %}
+
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" id="definir_periode_valider_reservations"/><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+
+        </form>
+    {% endblock %}
+{% endembed %}
+
+<script>
+
+$(document).ready(function() {
+
+    // Validation de la modal
+    $("#definir_periode_valider_reservations").on('click', function(e) {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_reservations_valider_form_periode' %}",
+            data: $("#form_periode_reservations_parametres").serialize(),
+            datatype: "json",
+            success: function(data){
+                periode_historique = data.periode_historique;
+                periode_reservations = data.periode_reservations;
+                maj_affichage_reservations(update_parametres=true);
+                $('#modal_selection_periode_reservations').modal('hide');
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        })
+    });
+
+});
+
+</script>
