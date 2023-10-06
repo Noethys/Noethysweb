@@ -1,3 +1,10 @@
+Version 1.1.9.9 (06/10/2023) :
+
+- Ajout de la date limite de paiement en ligne
+- Amélioration du widget Suivi des réservations
+- Correction de l'enregistrement des paramètres du portail
+- Correction du check de sélection dans la génération des factures
+
 Version 1.1.9.8 (04/10/2023) :
 
 - Améliorations sur l'état nominatif
