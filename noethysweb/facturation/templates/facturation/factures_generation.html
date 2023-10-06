@@ -110,9 +110,10 @@
         };
 
         function init_page_selection() {
-            $("#div_table_factures").freezeTable({
-                'scrollable': true,
-            });
+            // Désactivé car les checkbox n'étaient pas bien détectées par get_factures_cochees
+            // $("#div_table_factures").freezeTable({
+            //     'scrollable': true,
+            // });
 
             $('.check_facture').on('change', function () {
                 if (maj_lot_checkboxes == false) {
