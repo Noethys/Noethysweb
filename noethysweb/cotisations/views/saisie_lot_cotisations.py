@@ -3,126 +3,170 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json, logging
+logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
-from core.views.base import CustomView
-from django.views.generic import TemplateView
-from core.utils import utils_texte
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
-import json
-from fiche_famille.forms.famille_cotisations import Formulaire
-from django.contrib import messages
-from core.models import Famille, Rattachement, Cotisation, Prestation, Activite
+from django.http import JsonResponse, HttpResponseRedirect
+from core.views.mydatatableview import MyDatatable, columns
+from core.views import crud
+from core.models import TypeCotisation, Famille, Rattachement, Prestation, Cotisation
+from core.utils import utils_dates, utils_texte
+from fiche_famille.forms.famille_cotisations import Formulaire_type_cotisation, Formulaire
 
 
+def Appliquer(request):
+    logger.debug("Saisie de cotisations par lot...")
 
-def Get_table_beneficiaires(request):
-    """ Renvoie le contenu de la table """
-    categorie = request.POST.get("categorie")
-    liste_selections = request.POST.get("liste_selections")
-    if len(liste_selections) == 0:
-        liste_selections = []
+    # Récupération du type de cotisation
+    type_cotisation = TypeCotisation.objects.get(pk=request.POST.get("idtype_cotisation"))
+
+    # Récupération des options
+    valeurs_form_options = json.loads(request.POST.get("form_options"))
+    form = Formulaire(valeurs_form_options, request=request, idtype_cotisation=type_cotisation.pk)
+    if not form.is_valid():
+        max_errors = 1 if type_cotisation.type == "famille" else 2
+        if len(form.errors.as_data().keys()) > max_errors:
+            return JsonResponse({"erreur": "Veuillez renseigner correctement les paramètres"}, status=401)
+
+    # Récupération des lignes cochées
+    lignes_cochees = json.loads(request.POST.get("lignes_cochees"))
+    if not lignes_cochees:
+        return JsonResponse({"erreur": "Veuillez cocher au moins un bénéficiaire dans la liste"}, status=401)
+    if type_cotisation.type == "famille":
+        liste_objets = Famille.objects.filter(pk__in=lignes_cochees)
     else:
-        liste_selections = [int(id) for id in liste_selections.split(";")]
+        liste_objets = Rattachement.objects.select_related("individu", "famille").filter(pk__in=lignes_cochees)
 
-    lignes = []
+    # Récupération des paramètres de la cotisation
+    numero = form.cleaned_data["numero"]
 
-    if categorie == "familles":
-        for famille in Famille.objects.all().order_by("nom"):
-            lignes.append({
-                "pk": famille.pk,
-                "famille": famille.nom,
-                "rue_resid": famille.rue_resid,
-                "cp_resid": famille.cp_resid,
-                "ville_resid": famille.ville_resid,
-            })
-    else:
-        for rattachement in Rattachement.objects.select_related('individu', 'famille').all().order_by("individu__nom", "individu__prenom"):
-            lignes.append({
-                "pk": rattachement.pk,
-                "individu": rattachement.individu.Get_nom(),
-                "famille": rattachement.famille.nom,
-                "rue_resid": rattachement.individu.rue_resid,
-                "cp_resid": rattachement.individu.cp_resid,
-                "ville_resid": rattachement.individu.ville_resid,
-            })
+    for objet in liste_objets:
+        if type_cotisation.type == "famille":
+            famille = objet
+            individu = None
+        else:
+            famille = objet.famille
+            individu = objet.individu
 
-    context = {"resultats": json.dumps(lignes), "categorie": categorie, "selections": json.dumps(liste_selections)}
-    return render(request, "cotisations/selection_beneficiaires.html", context)
+        # Création de la prestation
+        prestation = None
+        if form.cleaned_data["facturer"]:
+            prestation = Prestation.objects.create(date=form.cleaned_data["date_facturation"], categorie="cotisation",
+                                                   label=form.cleaned_data["label_prestation"], famille=famille,
+                                                   montant_initial=form.cleaned_data["montant"], individu=individu,
+                                                   montant=form.cleaned_data["montant"],
+                                                   activite=form.cleaned_data["type_cotisation"].activite)
+
+        # Création de la cotisation
+        cotisation = Cotisation.objects.create(date_creation_carte=form.cleaned_data["date_creation_carte"],
+            numero=numero, date_debut=form.cleaned_data["date_debut"], date_fin=form.cleaned_data["date_fin"],
+            observations=form.cleaned_data["observations"], famille=famille, individu=individu, prestation=prestation,
+            type_cotisation=form.cleaned_data["type_cotisation"],
+            unite_cotisation=form.cleaned_data["unite_cotisation"], )
+        if form.cleaned_data["activites"]:
+            cotisation.activites.set(form.cleaned_data["activites"])
+        if numero:
+            numero = utils_texte.Incrementer(numero)
+
+    logger.debug("Saisie par lot des cotisations terminée.")
+    return JsonResponse({"success": True})
 
 
-
-class View(CustomView, TemplateView):
+class Page(crud.Page):
+    template_name = "cotisations/saisie_lot_cotisations.html"
+    url_liste = "saisie_lot_cotisations"
     menu_code = "saisie_lot_cotisations"
+
+    def get_context_data(self, **kwargs):
+        context = super(Page, self).get_context_data(**kwargs)
+        context["page_titre"] = "Saisir un lot d'adhésions"
+        context["box_titre"] = "Sélection des paramètres"
+        context["box_introduction"] = "Vous pouvez ici créer un lot d'adhésions familiales ou individuelles. Commencez par cocher les bénéficiaires dans la liste au bas de la page puis renseignez les paramètres des adhésions. Terminez en cliquant sur le bouton Générer."
+        context["onglet_actif"] = "saisie_lot_cotisations"
+        context["impression_introduction"] = ""
+        context["impression_conclusion"] = ""
+        context["active_checkbox"] = True
+        context["bouton_supprimer"] = False
+        context["hauteur_table"] = "400px"
+        context["form_options"] = Formulaire(request=self.request, idtype_cotisation=self.kwargs.get("idtype_cotisation", None))
+        context["idtype_cotisation"] = self.kwargs.get("idtype_cotisation", None)
+        context["afficher_menu_brothers"] = True
+        return context
+
+
+class Liste_individus(Page, crud.Liste):
+    model = Rattachement
+
+    def get_queryset(self):
+        return Rattachement.objects.select_related("individu", "famille").filter(self.Get_filtres("Q"))
+
+    class datatable_class(MyDatatable):
+        filtres = ["ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille",
+                   'individu__pk', "individu__nom", "individu__prenom", "famille__nom", "individu__date_naiss", "individu__rue_resid",
+                   "individu__cp_resid", "individu__ville_resid"]
+        check = columns.CheckBoxSelectColumn(label="")
+        nom = columns.TextColumn("Nom", sources=['individu__nom'])
+        prenom = columns.TextColumn("Prénom", sources=['individu__prenom'])
+        famille = columns.TextColumn("Famille", sources=['famille__nom'])
+        date_naiss = columns.TextColumn("Date naiss.", processor="Get_date_naiss")
+        age = columns.TextColumn("Age", sources=['Get_age'], processor="Get_age")
+
+        class Meta:
+            structure_template = MyDatatable.structure_template
+            columns = ["check", "idrattachement", "nom", "prenom", "age", "date_naiss", "famille"]
+            ordering = ["nom", "prenom"]
+
+        def Get_age(self, instance, *args, **kwargs):
+            return instance.individu.Get_age()
+
+        def Get_date_naiss(self, instance, *args, **kwargs):
+            return utils_dates.ConvertDateToFR(instance.individu.date_naiss)
+
+
+class Liste_familles(Page, crud.Liste):
+    model = Famille
+
+    def get_queryset(self):
+        return Famille.objects.filter(self.Get_filtres("Q"))
+
+    class datatable_class(MyDatatable):
+        filtres = ["fpresent:pk", "fscolarise:pk", "idfamille", "nom", "rue_resid", "cp_resid", "ville_resid", "mail", "caisse__nom"]
+        check = columns.CheckBoxSelectColumn(label="")
+        mail = columns.TextColumn("Email", processor='Get_mail')
+        rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
+        cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')
+        ville_resid = columns.TextColumn("Ville",  sources=None, processor='Get_ville_resid')
+
+        class Meta:
+            structure_template = MyDatatable.structure_template
+            columns = ["check", "idfamille", "nom", "mail", "rue_resid", "cp_resid", "ville_resid"]
+            ordering = ["nom"]
+
+        def Get_mail(self, instance, *args, **kwargs):
+            return instance.mail
+
+        def Get_rue_resid(self, instance, *args, **kwargs):
+            return instance.rue_resid
+
+        def Get_cp_resid(self, instance, *args, **kwargs):
+            return instance.cp_resid
+
+        def Get_ville_resid(self, instance, *args, **kwargs):
+            return instance.ville_resid
+
+
+class Selection_type_cotisation(Page, crud.Ajouter):
+    form_class = Formulaire_type_cotisation
     template_name = "core/crud/edit.html"
 
     def get_context_data(self, **kwargs):
-        context = super(View, self).get_context_data(**kwargs)
-        context['page_titre'] = "Saisir un lot d'adhésions"
-        context['box_titre'] = "Saisir un lot d'adhésions"
-        context['box_introduction'] = "Renseignez les paramètres des cotisations à générer et sélectionnez les familles ou individus concernés."
-        if "form" not in kwargs:
-            context['form'] = Formulaire(request=self.request)
+        context = super(Selection_type_cotisation, self).get_context_data(**kwargs)
+        context["box_introduction"] = "Vous devez sélectionner un type d'adhésion."
+        context["page_titre"] = "Saisir un lot d'adhésions"
+        context["box_titre"] = "Saisir un lot d'adhésions"
         return context
 
     def post(self, request, **kwargs):
-        form = Formulaire(request.POST, request=self.request)
-        if form.is_valid() == False:
-            if len(form.errors.as_data().keys()) > 1:
-                return self.render_to_response(self.get_context_data(form=form))
-
-        # Récupère la liste des bénéficiaires
-        if form.cleaned_data.get("type_cotisation").type == "famille":
-            mode = "familles"
-            liste_beneficiaires = form.cleaned_data.get("beneficiaires_familles")
-        else:
-            liste_beneficiaires = form.cleaned_data.get("beneficiaires_individus")
-            mode = "individus"
-        liste_beneficiaires = [int(id) for id in liste_beneficiaires.split(";")] if liste_beneficiaires else []
-        if len(liste_beneficiaires) == 0:
-            messages.add_message(request, messages.ERROR, "Vous devez sélectionner au moins un bénéficiaire")
-            return self.render_to_response(self.get_context_data(form=form))
-
-        if mode == "familles":
-            liste_objets = Famille.objects.filter(pk__in=liste_beneficiaires)
-        else:
-            liste_objets = Rattachement.objects.select_related('famille', 'individu').filter(pk__in=liste_beneficiaires)
-
-        # Récupération des paramètres de la cotisation
-        numero = form.cleaned_data["numero"]
-
-        for objet in liste_objets:
-            if mode == "familles":
-                famille = objet
-                individu = None
-            else:
-                famille = objet.famille
-                individu = objet.individu
-
-            # Création de la prestation
-            prestation = None
-            if form.cleaned_data["facturer"]:
-                prestation = Prestation.objects.create(date=form.cleaned_data["date_facturation"], categorie="cotisation",
-                                                       label=form.cleaned_data["label_prestation"], famille=famille,
-                                                       montant_initial=form.cleaned_data["montant"], montant=form.cleaned_data["montant"],
-                                                       activite=form.cleaned_data["type_cotisation"].activite)
-
-            # Création de la cotisation
-            cotisation = Cotisation.objects.create(
-                date_creation_carte=form.cleaned_data["date_creation_carte"],
-                numero=numero,
-                date_debut=form.cleaned_data["date_debut"],
-                date_fin=form.cleaned_data["date_fin"],
-                observations=form.cleaned_data["observations"],
-                famille=famille,
-                individu=individu,
-                prestation=prestation,
-                type_cotisation=form.cleaned_data["type_cotisation"],
-                unite_cotisation=form.cleaned_data["unite_cotisation"],
-            )
-            if form.cleaned_data["activites"]:
-                cotisation.activites.set(form.cleaned_data["activites"])
-            numero = utils_texte.Incrementer(numero)
-
-        messages.add_message(request, messages.SUCCESS, "%d adhésions ont été créées avec succès" % len(liste_objets))
-        return HttpResponseRedirect(reverse_lazy("cotisations_toc"))
+        idtype_cotisation = request.POST.get("type_cotisation")
+        type_cotisation = TypeCotisation.objects.get(pk=idtype_cotisation)
+        return HttpResponseRedirect(reverse_lazy("saisie_lot_cotisations_%ss" % type_cotisation.type, kwargs={"idtype_cotisation": idtype_cotisation}))

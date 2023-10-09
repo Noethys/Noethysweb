@@ -7,7 +7,7 @@
 import datetime
 from django import forms
 from django.forms import ModelForm
-from django_select2.forms import Select2MultipleWidget
+from django_select2.forms import Select2MultipleWidget, Select2Widget
 from django.db.models import Q, Max
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
@@ -42,7 +42,7 @@ class Formulaire(FormulaireBase, ModelForm):
         model = Cotisation
         fields = "__all__"
         widgets = {
-            'observations': forms.Textarea(attrs={'rows': 4}),
+            'observations': forms.Textarea(attrs={'rows': 3}),
             'date_debut': DatePickerWidget(),
             'date_fin': DatePickerWidget(),
             'date_creation_carte': DatePickerWidget(),
@@ -157,7 +157,7 @@ class Formulaire(FormulaireBase, ModelForm):
                     Field('date_facturation'),
                     Field('label_prestation'),
                     PrependedText('montant', utils_preferences.Get_symbole_monnaie()),
-                    Field('prestation'),
+                    Field('prestation', type="hidden" if not idfamille else None),
                     id="div_facturer"
                 ),
             ),
@@ -170,15 +170,9 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Si c'est pour une saisie par lot
         if not idfamille:
+            self.fields["type_cotisation"].disabled = True
             self.helper.layout.pop(0)
-            self.helper.layout.append(Fieldset("Bénéficiaires", Field('beneficiaires_familles'), Field('beneficiaires_individus')))
-            self.helper.layout.insert(0,
-                    ButtonHolder(StrictButton("<i class='fa fa-check margin-r-5'></i>Générer les adhésions", id="bouton_generer_cotisations", css_class='btn-primary'),
-                    HTML("""<a class="btn btn-danger" href="{% url 'cotisations_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>"""),
-                    css_class="commandes",
-                )
-            )
-
+            self.helper.layout.append(Fieldset("Bénéficiaires"))
 
     def clean(self):
         # Individu
@@ -395,3 +389,23 @@ $(document).ready(function() {
 
 </script>
 """
+
+class Formulaire_type_cotisation(FormulaireBase, forms.Form):
+    type_cotisation = forms.ModelChoiceField(label="Type d'adhésion", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=TypeCotisation.objects.none().order_by("nom"), required=True)
+
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.pop("instance", None)
+        super(Formulaire_type_cotisation, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+
+        # Sélectionne uniquement les activités autorisées
+        condition_structure = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
+        self.fields["type_cotisation"].queryset = TypeCotisation.objects.filter(condition_structure).order_by("nom")
+
+        self.helper.layout = Layout(
+            Commandes(enregistrer_label="<i class='fa fa-check margin-r-5'></i>Valider", ajouter=False, annuler_url="{{ view.get_success_url }}"),
+            Fieldset("Sélection du type d'adhésion",
+                Field("type_cotisation"),
+            ),
+        )

@@ -1,0 +1,88 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+    <div class="row">
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder mb-3">
+                        <button class="btn btn-primary" onclick="appliquer()" title="Générer les adhésions"><i class='fa fa-bolt margin-r-5'></i>Générer les adhésions</button>
+                        <a class="btn btn-danger" href="{% url 'cotisations_toc' %}"><i class='fa fa-ban margin-r-5'></i>Fermer</a>
+                    </div>
+
+                    {# Options #}
+                    {% crispy form_options %}
+
+                    {# Liste des bénéficiaires #}
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+
+        {# Insertion des modals #}
+        {% include 'core/modal_pdf.html' %}
+
+        <script>
+
+            // Application
+            function appliquer() {
+                bootbox.dialog({
+                    title: "Confirmation",
+                    message: "Confirmez-vous la création des adhésions ?",
+                    buttons: {
+                        ok: {
+                            label: "<i class='fa fa-check'></i> Valider",
+                            className: 'btn-primary',
+                            callback: function(){
+                                $.ajax({
+                                    type: "POST",
+                                    url: "{% url 'ajax_saisie_lot_cotisations_appliquer' %}",
+                                    data: {
+                                        form_options: JSON.stringify($("#famille_cotisations_form").serializeObject()),
+                                        lignes_cochees: JSON.stringify(get_coches()),
+                                        idtype_cotisation: {{ idtype_cotisation }},
+                                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                                    },
+                                    datatype: "json",
+                                    success: function(data){
+                                        toastr.success("La procédure est terminée");
+                                        var table = $('.datatable').DataTable()
+                                        table.ajax.reload();
+                                    },
+                                    error: function(data) {
+                                        toastr.error(data.responseJSON.erreur);
+                                    }
+                                })
+                            }
+                        },
+                        cancel: {
+                            label: "<i class='fa fa-ban'></i> Annuler",
+                            className: 'btn-danger',
+                        }
+                    }
+                });
+            };
+
+        </script>
+
+    </div>
+
+{% endblock contenu_page %}

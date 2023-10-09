@@ -23,7 +23,9 @@ urlpatterns = [
     path('individus/liste_cotisations_manquantes', liste_cotisations_manquantes.Liste.as_view(), name='liste_cotisations_manquantes'),
 
     # Gestion des cotisations
-    path('cotisations/saisie_lot_cotisations', saisie_lot_cotisations.View.as_view(), name='saisie_lot_cotisations'),
+    path('cotisations/saisie_lot_cotisations', saisie_lot_cotisations.Selection_type_cotisation.as_view(), name='saisie_lot_cotisations'),
+    path('cotisations/saisie_lot_cotisations/individus/<int:idtype_cotisation>', saisie_lot_cotisations.Liste_individus.as_view(), name='saisie_lot_cotisations_individus'),
+    path('cotisations/saisie_lot_cotisations/familles/<int:idtype_cotisation>', saisie_lot_cotisations.Liste_familles.as_view(), name='saisie_lot_cotisations_familles'),
 
     # Dépôts de cotisations
     path('cotisations/liste_cotisations_disponibles', liste_cotisations_disponibles.Liste.as_view(), name='liste_cotisations_disponibles'),
@@ -38,7 +40,7 @@ urlpatterns = [
     path('cotisations/depots_cotisations/cotisations/supprimer_plusieurs/<int:iddepot>/<str:listepk>', depots_cotisations.Supprimer_plusieurs_cotisations.as_view(), name='depots_cotisations_supprimer_plusieurs_cotisations'),
 
     # AJAX
-    path('cotisations/get_table_beneficiaires', secure_ajax(saisie_lot_cotisations.Get_table_beneficiaires), name='ajax_get_table_beneficiaires'),
+    path('cotisations/saisie_lot_cotisations/appliquer', secure_ajax(saisie_lot_cotisations.Appliquer), name='ajax_saisie_lot_cotisations_appliquer'),
     path('cotisations/cotisations_impression_pdf', secure_ajax(cotisations_impression.Impression_pdf), name='ajax_cotisations_impression_pdf'),
     path('cotisations/cotisations_email_pdf', secure_ajax(cotisations_email.Impression_pdf), name='ajax_cotisations_email_pdf'),
 
