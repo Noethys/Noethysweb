@@ -71,7 +71,8 @@ class Facturation():
 
     def GetDonnees(self, liste_factures=[], liste_activites=[], date_debut=None, date_fin=None, date_edition=None,
                    date_echeance=None, categories_prestations=["consommation", "cotisation", "location", "autre"],
-                   type_label="0", date_anterieure=None, mode="facture", IDfamille=None, liste_IDindividus=[], filtre_prestations=None, impayes_factures=False):
+                   type_label="0", date_anterieure=None, mode="facture", IDfamille=None, liste_IDindividus=[], filtre_prestations=None, exclusions_prestations=None,
+                   impayes_factures=False):
         """ Recherche des factures à créer """
         logger.debug("Recherche les données de facturation...")
 
@@ -106,6 +107,10 @@ class Facturation():
                 for nom_prestation in filtre_prestations.split(";"):
                     conditions_prestation |= Q(label__icontains=nom_prestation.strip())
                 conditions &= (conditions_prestation)
+            # Exclusions noms de prestations
+            if exclusions_prestations:
+                for nom_prestation in exclusions_prestations.split(";"):
+                    conditions &= ~Q(label__icontains=nom_prestation.strip())
 
         logger.debug("Recherche des prestations des factures...")
         prestations = Prestation.objects.select_related('famille', 'activite', 'individu', 'tarif', 'categorie_tarif', "tarif__nom_tarif").filter(conditions).order_by("date")

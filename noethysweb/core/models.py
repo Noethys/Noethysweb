@@ -2714,6 +2714,7 @@ class Attestation(models.Model):
     activites = models.CharField(verbose_name="Activités associées", max_length=200, blank=True, null=True)
     individus = models.CharField(verbose_name="Individus associés", max_length=200, blank=True, null=True)
     filtre_prestations = models.CharField(verbose_name="Filtre prestations", max_length=300, blank=True, null=True)
+    exclusions_prestations = models.CharField(verbose_name="Exclusion prestations", max_length=300, blank=True, null=True)
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin")
     total = models.DecimalField(verbose_name="Total", max_digits=10, decimal_places=2, default=0.0)

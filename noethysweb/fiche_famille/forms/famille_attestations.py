@@ -30,9 +30,10 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Attestation
-        fields = ["famille", "numero", "filtre_prestations"]
+        fields = ["famille", "numero", "filtre_prestations", "exclusions_prestations"]
         help_texts = {
             "filtre_prestations": "Si vous souhaitez uniquement certaines prestations, tapez leur nom ou une partie de leur nom, séparées par des points-virgules (;). Exemple : journées avec repas;piscine;matin.",
+            "exclusions_prestations": "Si vous souhaitez exclure certaines prestations, tapez leur nom ou une partie de leur nom, séparées par des points-virgules (;). Exemple : journées avec repas;piscine;matin.",
         }
 
     def __init__(self, *args, **kwargs):
@@ -107,6 +108,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Field("individus"),
             Field("activites"),
             Field("filtre_prestations"),
+            Field("exclusions_prestations"),
             Field("numero"),
             Field("modele"),
             Field("signataire"),

@@ -42,7 +42,7 @@ def Impression_pdf(request):
     individus = [int(idindividu) for idindividu in parametres["individus"]]
     activites = [int(idactivite) for idactivite in parametres["activites"]]
     dict_attestations = facturation.GetDonnees(liste_activites=activites, date_debut=date_debut, date_fin=date_fin, mode="attestation", IDfamille=IDfamille,
-                                               liste_IDindividus=individus, filtre_prestations=parametres["filtre_prestations"])
+                                               liste_IDindividus=individus, filtre_prestations=parametres["filtre_prestations"], exclusions_prestations=parametres["exclusions_prestations"])
 
     # Si aucune attestation trouvée
     if not dict_attestations:
@@ -120,7 +120,7 @@ class Page(Onglet):
 
         # Enregistre l'attestation
         if not self.object and not Attestation.objects.filter(numero=form.cleaned_data["numero"]).exists():
-            Attestation.objects.create(numero=form.cleaned_data["numero"], date_edition=form.cleaned_data["date_edition"],
+            Attestation.objects.create(numero=form.cleaned_data["numero"], date_edition=form.cleaned_data["date_edition"], exclusions_prestations=form.cleaned_data["exclusions_prestations"],
                                      activites=form.cleaned_data["infos"]["activites"], filtre_prestations=form.cleaned_data["filtre_prestations"],
                                      individus=form.cleaned_data["infos"]["individus"], famille=form.cleaned_data["famille"],
                                      date_debut=form.cleaned_data["periode"].split(";")[0], date_fin=form.cleaned_data["periode"].split(";")[1],
@@ -132,6 +132,7 @@ class Page(Onglet):
             self.object.date_edition = form.cleaned_data["date_edition"]
             self.object.activites = form.cleaned_data["infos"]["activites"]
             self.object.filtre_prestations = form.cleaned_data["filtre_prestations"]
+            self.object.exclusions_prestations = form.cleaned_data["exclusions_prestations"]
             self.object.individus = form.cleaned_data["infos"]["individus"]
             self.object.date_debut = form.cleaned_data["periode"].split(";")[0]
             self.object.date_fin = form.cleaned_data["periode"].split(";")[1]
