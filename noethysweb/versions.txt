@@ -1,3 +1,8 @@
+Version 1.2.0.0 (11/10/2023) :
+
+- Ajout des exclusions de prestations dans la génération des attestations de présence
+- Ajout des filtres de liste dans la saisie d'adhésions par lot
+
 Version 1.1.9.9 (06/10/2023) :
 
 - Ajout de la date limite de paiement en ligne
