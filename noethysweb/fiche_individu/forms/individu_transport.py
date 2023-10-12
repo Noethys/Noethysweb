@@ -258,10 +258,10 @@ $(document).ready(function() {
 // Ligne
 function On_change_ligne() {
     var selection = $("#id_depart_arret").val();
-    Maj_champ($('#id_categorie').val(), "depart_arret");
+    Maj_champ("depart_arret");
     $("#id_depart_arret").val(selection);
     var selection = $("#id_arrivee_arret").val();
-    Maj_champ($('#id_categorie').val(), "arrivee_arret");
+    Maj_champ("arrivee_arret");
     $("#id_arrivee_arret").val(selection);
 }
 $(document).ready(function() {
