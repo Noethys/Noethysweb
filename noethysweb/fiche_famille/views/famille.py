@@ -213,6 +213,7 @@ class Resume(Onglet, DetailView):
 
         # Inscriptions actuelles
         conditions = Q(famille_id=idfamille) & Q(date_debut__lte=datetime.date.today()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
+        conditions &= (Q(activite__date_fin__isnull=True) | Q(activite__date_fin__gte=datetime.date.today()))
         dict_inscriptions_actuelles = {}
         for inscription in Inscription.objects.select_related("activite").filter(conditions).order_by("date_debut"):
             dict_inscriptions_actuelles.setdefault(inscription.individu_id, [])

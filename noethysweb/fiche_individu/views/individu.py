@@ -159,6 +159,7 @@ class Resume(Onglet, DetailView):
 
         # Activités actuelles
         conditions = Q(individu_id=self.Get_idindividu()) & Q(date_debut__lte=datetime.date.today()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
+        conditions &= (Q(activite__date_fin__isnull=True) | Q(activite__date_fin__gte=datetime.date.today()))
         liste_activites = {inscription.activite.nom: True for inscription in Inscription.objects.select_related("activite").filter(conditions).order_by("date_debut")}
         context['inscriptions'] = utils_texte.Convert_liste_to_texte_virgules(list(liste_activites.keys()))
 
