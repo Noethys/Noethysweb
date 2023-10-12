@@ -1506,7 +1506,7 @@ class TarifLigne(models.Model):
     tranche = models.CharField(verbose_name="Nom de la tranche", max_length=50, blank=True, null=True)
     qf_min = models.DecimalField(verbose_name="QF min", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
     qf_max = models.DecimalField(verbose_name="QF max", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
-    montant_unique = models.DecimalField(verbose_name="Montant unique", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
+    montant_unique = models.DecimalField(verbose_name="Montant unique", max_digits=10, decimal_places=3, default=0.0, blank=True, null=True)
     montant_enfant_1 = models.DecimalField(verbose_name="Montant enfant 1", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
     montant_enfant_2 = models.DecimalField(verbose_name="Montant enfant 2", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
     montant_enfant_3 = models.DecimalField(verbose_name="Montant enfant 3", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
