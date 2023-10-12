@@ -8,7 +8,8 @@ from core.views import toc
 from parametrage.views import calendrier
 from consommations.forms import grille_forfaits
 from consommations.views import grille, gestionnaire, suivi_consommations, etat_global, synthese_consommations, liste_attente, liste_absences, edition_liste_conso, \
-                                pointeuse, liste_consommations, liste_repas, etat_nomin, liste_durees, consommations_traitement_lot, evolution_reservations #, pointeuse_barcodes
+                                pointeuse, liste_consommations, liste_repas, etat_nomin, liste_durees, consommations_traitement_lot, evolution_reservations, \
+                                detail_consommations #, pointeuse_barcodes
 from core.decorators import secure_ajax
 
 
@@ -23,6 +24,7 @@ urlpatterns = [
     path('consommations/pointeuse_consommations', pointeuse.View.as_view(), name='pointeuse_conso'),
     # path('consommations/pointeuse_barcodes', pointeuse_barcodes.View.as_view(), name='pointeuse_barcodes'),
     path('consommations/suivi_consommations', suivi_consommations.View.as_view(), name='suivi_consommations'),
+    path('consommations/detail_consommations/<str:donnee>', detail_consommations.View.as_view(), name='detail_consommations'),
 
     path('consommations/liste_consommations', liste_consommations.Liste.as_view(), name='liste_consommations'),
     path('consommations/liste_consommations/modifier/<int:pk>', liste_consommations.Modifier.as_view(), name='liste_consommations_modifier'),
