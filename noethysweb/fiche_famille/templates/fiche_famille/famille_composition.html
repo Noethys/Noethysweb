@@ -172,6 +172,17 @@
                                                 <li>
                                                     {% if rattachement.individu.tel_domicile %}<span style="white-space: nowrap;"><i class="fa fa-phone"></i> {{ rattachement.individu.tel_domicile }}</span>{% endif %}
                                                     {% if rattachement.individu.tel_mobile %}<span style="white-space: nowrap;"><i class="fa fa-mobile"></i> {{ rattachement.individu.tel_mobile }}</span>{% endif %}
+                                                    {% if rattachement.individu.mail %}<span style="white-space: nowrap;"><i class="fa fa-envelope-o"></i> {{ rattachement.individu.mail }}</span>{% endif %}
+                                                </li>
+                                            {% endif %}
+
+                                            {% if rattachement.individu_id in inscriptions_actuelles %}
+                                                <li>
+                                                    <span style="white-space: nowrap;" title="{{ inscriptions_actuelles|get_item:rattachement.individu_id|Convert_liste_to_texte_virgules }}">
+                                                        <i class="fa fa-ticket text-gray"></i> {{ inscriptions_actuelles|get_item:rattachement.individu_id|length }}
+                                                        inscription{{ inscriptions_actuelles|get_item:rattachement.individu_id|length|pluralize }}
+                                                        active{{ inscriptions_actuelles|get_item:rattachement.individu_id|length|pluralize }}
+                                                    </span>
                                                 </li>
                                             {% endif %}
 

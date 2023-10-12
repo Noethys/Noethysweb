@@ -3,6 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from decimal import Decimal
 from django.urls import reverse_lazy, reverse
 from django.db.models import Sum, Q
@@ -12,7 +13,8 @@ from django.views.generic.detail import DetailView
 from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Note, Rattachement, CATEGORIES_RATTACHEMENT, Prestation, Reglement, PortailMessage
+from core.models import Famille, Note, Rattachement, CATEGORIES_RATTACHEMENT, Prestation, Reglement, PortailMessage, Inscription
+from core.utils import utils_texte
 from individus.utils import utils_pieces_manquantes
 from fiche_individu.forms.individu import Formulaire
 from fiche_famille.utils.utils_famille import LISTE_ONGLETS
@@ -208,6 +210,15 @@ class Resume(Onglet, DetailView):
         total_du = total_prestations["total"] if total_prestations["total"] else Decimal(0)
         total_regle = total_reglements["total"] if total_reglements["total"] else Decimal(0)
         context['solde'] = total_du - total_regle
+
+        # Inscriptions actuelles
+        conditions = Q(famille_id=idfamille) & Q(date_debut__lte=datetime.date.today()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
+        dict_inscriptions_actuelles = {}
+        for inscription in Inscription.objects.select_related("activite").filter(conditions).order_by("date_debut"):
+            dict_inscriptions_actuelles.setdefault(inscription.individu_id, [])
+            if inscription.activite.nom not in dict_inscriptions_actuelles[inscription.individu_id]:
+                dict_inscriptions_actuelles[inscription.individu_id].append(inscription.activite.nom)
+        context["inscriptions_actuelles"] = dict_inscriptions_actuelles
 
         return context
 

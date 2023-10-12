@@ -7,7 +7,7 @@ from django.db import models
 from django.utils.safestring import mark_safe
 from django import template
 from django.template.defaultfilters import stringfilter
-from core.utils import utils_dates
+from core.utils import utils_dates, utils_texte
 from core.utils import utils_preferences
 import os, re, datetime
 
@@ -109,3 +109,7 @@ def calc_delai(date=None, nbre_jours=2):
 @register.simple_tag
 def get_item_defaut(dictionnaire, key, defaut=None):
     return dictionnaire.get(key, defaut)
+
+@register.filter
+def Convert_liste_to_texte_virgules(liste):
+    return utils_texte.Convert_liste_to_texte_virgules(liste)
