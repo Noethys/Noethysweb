@@ -108,6 +108,7 @@ LISTE_PARAMETRES = [
     # Facturation
     Parametre(code="facturation_afficher_page", label="Afficher la page", type="boolean", valeur=True),
     Parametre(code="facturation_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez consulter ici les données de facturation."),
+    Parametre(code="facturation_afficher_solde_famille", label="Afficher le solde de la famille", type="boolean", valeur=False),
     Parametre(code="facturation_afficher_numero_facture", label="Afficher le numéro des factures", type="boolean", valeur=True),
     Parametre(code="facturation_afficher_solde_facture", label="Afficher le solde actuel des factures", type="boolean", valeur=True),
     Parametre(code="facturation_autoriser_detail_facture", label="Afficher le détail des factures", type="boolean", valeur=True),

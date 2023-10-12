@@ -533,4 +533,12 @@ class View(CustomView, TemplateView):
             texte_impayes = "Il reste %s pour un total de <strong>%s</strong>" % (utils_texte.Convert_liste_to_texte_virgules(liste_impayes), utils_texte.Formate_montant(total_factures_impayees + total_periodes_impayees + total_cotisations_impayees))
         context["texte_impayes"] = texte_impayes
 
+        # Calcul du solde
+        if context["parametres_portail"].get("facturation_afficher_solde_famille", False):
+            total_prestations = Prestation.objects.values('famille_id').filter(famille=self.request.user.famille).aggregate(total=Sum("montant"))
+            total_reglements = Reglement.objects.values('famille_id').filter(famille=self.request.user.famille).aggregate(total=Sum("montant"))
+            total_du = total_prestations["total"] if total_prestations["total"] else decimal.Decimal(0)
+            total_regle = total_reglements["total"] if total_reglements["total"] else decimal.Decimal(0)
+            context["solde_famille"] = total_du - total_regle
+
         return context

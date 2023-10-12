@@ -21,6 +21,13 @@
         </div>
     {% endif %}
 
+    {# Solde famille #}
+    {% if parametres_portail.facturation_afficher_solde_famille %}
+        <div class="alert alert-{% if solde_famille > 0 %}danger{% else %}success{% endif %}">
+            <i class='fa fa-{% if solde_famille > 0 %}exclamation-triangle{% else %}check-circle{% endif %} margin-r-5'></i>Solde du compte : Il reste à régler un total de <b>{{ solde_famille|montant }}</b>
+        </div>
+    {% endif %}
+
     {# Texte impayés #}
     {% if texte_impayes and parametres_portail.facturation_afficher_solde_facture %}
         <div class="alert alert-danger">
