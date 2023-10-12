@@ -48,6 +48,8 @@ class Formulaire(FormulaireBase, ModelForm):
             nom_module = "facturation.forms.devis_options_impression"
         if categorie == "rappel":
             nom_module = "facturation.forms.rappels_options_impression"
+        if categorie == "reglement":
+            nom_module = "parametrage.forms.modele_impression_recu"
 
         module = importlib.import_module(nom_module)
         self.form_options = getattr(module, "Formulaire")

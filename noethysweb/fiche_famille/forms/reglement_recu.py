@@ -3,17 +3,17 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
-from core.utils.utils_commandes import Commandes
-from core.models import Famille, Recu, ModeleDocument
-from core.widgets import DatePickerWidget
 from django_select2.forms import Select2Widget
-import datetime
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Hidden, HTML
+from crispy_forms.bootstrap import Field
+from core.forms.base import FormulaireBase
+from core.utils.utils_commandes import Commandes
+from core.models import Recu, ModeleDocument
+from core.widgets import DatePickerWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -29,8 +29,8 @@ class Formulaire(FormulaireBase, ModelForm):
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")
-        idreglement = kwargs.pop("idreglement")
-        utilisateur = kwargs.pop("utilisateur")
+        idreglement = kwargs.pop("idreglement", None)
+        utilisateur = kwargs.pop("utilisateur", None)
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'recu_reglements_form'
@@ -39,6 +39,9 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
+
+        # Utilisateur
+        self.fields["utilisateur"].initial = self.request.user
 
         # Date d'édition
         self.fields["date_edition"].initial = datetime.date.today()
@@ -56,7 +59,8 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields["modele"].initial = modele_defaut
 
         # Signataire
-        self.fields["signataire"].initial = utilisateur.get_full_name() or utilisateur.get_short_name() or utilisateur
+        if utilisateur:
+            self.fields["signataire"].initial = utilisateur.get_full_name() or utilisateur.get_short_name() or utilisateur
 
         # Introduction
         self.fields["intro"].initial = "Je soussigné(e) {SIGNATAIRE}, certifie avoir reçu pour la famille de {FAMILLE} la somme de {MONTANT}."
@@ -78,15 +82,6 @@ class Formulaire(FormulaireBase, ModelForm):
             Field("intro"),
             Field("afficher_prestations"),
             HTML(EXTRA_HTML),
-            # ButtonHolder(
-            #     HTML("""<a type='button' class='btn btn-default pull-left' title="Envoyer par Email" onclick="impression_pdf(email=true)" href='#'><i class="fa fa-file-pdf-o"></i> Envoyer par email</a>"""),
-            #     HTML("""<a type='button' class='btn btn-default pull-left' title="Aperçu PDF" href='#' onclick="impression_pdf()" style="margin-left: 5px;"><i class="fa fa-file-pdf-o"></i> Aperçu PDF</a>"""),
-            #     Div(
-            #         Submit('submit', 'Enregistrer le reçu', css_class='btn-primary'),
-            #         HTML("""<a class="btn btn-default" href="{% url 'famille_reglements_liste' idfamille=idfamille %}">Annuler</a>"""),
-            #         css_class="pull-right"
-            #     ),
-            # ),
         )
 
     def clean(self):

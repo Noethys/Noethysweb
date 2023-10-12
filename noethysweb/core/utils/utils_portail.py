@@ -37,6 +37,8 @@ class Parametre():
             return forms.ChoiceField(label=self.label, choices=[(None, "Aucun")] + [(mode.pk, mode.label) for mode in ModeReglement.objects.all().order_by("label")], required=self.required, help_text=self.help_text)
         if self.type == "modeles_impressions_factures":
             return forms.ChoiceField(label=self.label, choices=[(None, "Aucun")] + [(modele.pk, modele.nom) for modele in ModeleImpression.objects.filter(categorie="facture").order_by("nom")], required=self.required, help_text=self.help_text)
+        if self.type == "modeles_impressions_recus":
+            return forms.ChoiceField(label=self.label, choices=[(None, "Aucun")] + [(modele.pk, modele.nom) for modele in ModeleImpression.objects.filter(categorie="reglement").order_by("nom")], required=self.required, help_text=self.help_text)
         if self.type == "choix":
             return forms.ChoiceField(label=self.label, choices=self.choix, required=self.required, help_text=self.help_text)
         if self.type == "decimal":
@@ -131,6 +133,7 @@ LISTE_PARAMETRES = [
     Parametre(code="reglements_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez consulter ici la liste de vos règlements."),
     Parametre(code="reglements_afficher_encaissement", label="Afficher la date d'encaissement", type="boolean", valeur=True),
     Parametre(code="reglements_autoriser_telechargement_recu", label="Autoriser le téléchargement du reçu", type="boolean", valeur=True),
+    Parametre(code="reglements_modele_impression_recu", label="Modèle d'impression des reçus", type="modeles_impressions_recus", valeur=None, help_text="Vous devez au préalable créer un modèle d'impression pour la catégorie reçu depuis le menu Paramétrage > Modèles d'impressions."),
 
     # Contact
     Parametre(code="contact_afficher_page", label="Afficher la page", type="boolean", valeur=True),

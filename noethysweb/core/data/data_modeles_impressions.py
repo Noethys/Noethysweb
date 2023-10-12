@@ -10,4 +10,5 @@ CATEGORIES = [
     # ("attestation_presence", "Attestation de présence"),
     ("attestation_fiscale", "Attestation fiscale"),
     # ("devis", "Devis"),
+    ("reglement", "Reçu de règlement"),
 ]

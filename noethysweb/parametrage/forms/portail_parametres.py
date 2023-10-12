@@ -28,7 +28,7 @@ LISTE_RUBRIQUES = [
     ("Paiement en ligne", ["paiement_ligne_systeme", "paiement_ligne_mode_reglement", "paiement_ligne_compte_bancaire", "paiement_ligne_montant_minimal",
                            "paiement_ligne_multi_factures", "paiement_ligne_off_si_prelevement", "payfip_mode", "payzen_site_id", "payzen_certificat_test",
                            "payzen_certificat_production", "payzen_mode", "payzen_echelonnement"]),
-    ("Page des règlements", ["reglements_afficher_page", "reglements_intro", "reglements_afficher_encaissement", "reglements_autoriser_telechargement_recu"]),
+    ("Page des règlements", ["reglements_afficher_page", "reglements_intro", "reglements_afficher_encaissement", "reglements_autoriser_telechargement_recu", "reglements_modele_impression_recu"]),
     ("Page contact", ["contact_afficher_page", "contact_intro", "messagerie_intro", "messagerie_envoyer_notification_famille", "messagerie_envoyer_notification_admin", "contact_afficher_coords_structures", "contact_afficher_coords_organisateur"]),
     ("Page des mentions légales", ["mentions_afficher_page", "mentions_intro", "mentions_conditions_generales"]),
 ]

@@ -4,48 +4,32 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
-from core.views.mydatatableview import MyDatatable, columns, helpers
-from core.views import crud
-from core.models import Famille, Recu, Reglement, Prestation, Ventilation
-from fiche_famille.forms.reglement_recu import Formulaire
-from fiche_famille.views.famille import Onglet
 from django.http import JsonResponse
 from django.db.models import Sum, Q
+from core.views.mydatatableview import MyDatatable, columns, helpers
+from core.views import crud
+from core.models import Recu, Reglement, Ventilation
 from core.utils import utils_texte, utils_preferences, utils_questionnaires, utils_infos_individus, utils_dates
 from core.data import data_modeles_emails
+from fiche_famille.forms.reglement_recu import Formulaire
+from fiche_famille.views.famille import Onglet
 
 
-
-def Impression_pdf(request):
-    # Récupération des données du formulaire
-    date_edition = request.POST.get("date_edition")
-    numero = request.POST.get("numero")
-    IDreglement = int(request.POST.get("idreglement"))
-    IDmodele = request.POST.get("modele")
-    idfamille = int(request.POST.get("idfamille"))
-    signataire = request.POST.get("signataire")
-    intro = request.POST.get("intro")
-    afficher_prestations = request.POST.get("afficher_prestations") == 'true'
-
-    # Validation des données
-    if not IDmodele: return JsonResponse({"erreur": "Vous devez sélectionner un modèle de document"}, status=401)
-    if not numero: return JsonResponse({"erreur": "Vous devez saisir un numéro de reçu"}, status=401)
-    if not date_edition: return JsonResponse({"erreur": "Vous devez saisir une date d'édition"}, status=401)
-
+def Generer_recu(donnees={}):
     # Importation des données
-    reglement = Reglement.objects.get(pk=IDreglement)
+    reglement = Reglement.objects.get(pk=donnees["idreglement"])
     infos_famille = reglement.famille.Get_infos()
 
     # Préparation des valeurs de fusion
     dict_donnees = {
         "{IDFAMILLE}": str(reglement.famille_id),
         "{FAMILLE}": infos_famille["nom"],
-        "{DATE_EDITION}": utils_dates.ConvertDateToFR(date_edition),
-        "{SIGNATAIRE}": signataire,
+        "{DATE_EDITION}": utils_dates.ConvertDateToFR(donnees["date_edition"]),
+        "{SIGNATAIRE}": donnees["signataire"],
         "{DESTINATAIRE_NOM}": infos_famille["nom"],
         "{DESTINATAIRE_RUE}": infos_famille["rue"],
         "{DESTINATAIRE_VILLE}": "%s %s" % (infos_famille["cp"] or "", infos_famille["ville"] or ""),
-        "{NUM_RECU}": numero,
+        "{NUM_RECU}": donnees["numero"],
         "{IDREGLEMENT}": str(reglement.pk),
         "{DATE_REGLEMENT}": utils_dates.ConvertDateToFR(reglement.date) if reglement.date else "",
         "{MODE_REGLEMENT}": reglement.mode.label,
@@ -61,12 +45,12 @@ def Impression_pdf(request):
         "prestations": [],
         }
 
-    if afficher_prestations:
-        prestations = Ventilation.objects.values('prestation', 'prestation__date', 'prestation__label', 'prestation__activite__nom', 'prestation__individu__prenom').filter(reglement_id=IDreglement).annotate(total=Sum("montant"))
+    if donnees["afficher_prestations"]:
+        prestations = Ventilation.objects.values('prestation', 'prestation__date', 'prestation__label', 'prestation__activite__nom', 'prestation__individu__prenom').filter(reglement_id=donnees["idreglement"]).annotate(total=Sum("montant"))
         dict_donnees["prestations"] = prestations
 
     # Récupération des infos de base individus et familles
-    infosIndividus = utils_infos_individus.Informations(liste_familles=[idfamille,])
+    infosIndividus = utils_infos_individus.Informations(liste_familles=[donnees["idfamille"],])
     dict_donnees.update(infosIndividus.GetDictValeurs(mode="famille", ID=reglement.famille_id, formatChamp=True))
 
     # Récupération des questionnaires
@@ -77,17 +61,38 @@ def Impression_pdf(request):
             dict_donnees["{CODEBARRES_QUESTION_%d}" % dictReponse["IDquestion"]] = dictReponse["reponse"]
 
     # Fusion des mots-clés dans le texte d'introduction
-    dict_donnees["intro"] = utils_texte.Fusionner_motscles(intro, dict_donnees)
+    dict_donnees["intro"] = utils_texte.Fusionner_motscles(donnees["intro"], dict_donnees)
 
     # Création du PDF
     from fiche_famille.utils import utils_impression_recu
-    impression = utils_impression_recu.Impression(titre="Reçu de règlement", dict_donnees=dict_donnees, IDmodele=int(IDmodele))
+    impression = utils_impression_recu.Impression(titre="Reçu de règlement", dict_donnees=dict_donnees, IDmodele=int(donnees["idmodele"]))
     nom_fichier = impression.Get_nom_fichier()
 
     # Récupération des valeurs de fusion
     champs = {motcle: dict_donnees.get(motcle, "") for motcle, label in data_modeles_emails.Get_mots_cles("recu_reglement")}
-    return JsonResponse({"nom_fichier": nom_fichier, "categorie": "recu_reglement", "label_fichier": "Reçu de règlement", "champs": champs, "idfamille": idfamille})
+    return {"nom_fichier": nom_fichier, "categorie": "recu_reglement", "label_fichier": "Reçu de règlement", "champs": champs, "idfamille": donnees["idfamille"]}
 
+
+def Impression_pdf(request):
+    # Récupération des données du formulaire
+    date_edition = request.POST.get("date_edition")
+    numero = request.POST.get("numero")
+    idreglement = int(request.POST.get("idreglement"))
+    idmodele = request.POST.get("modele")
+    idfamille = int(request.POST.get("idfamille"))
+    signataire = request.POST.get("signataire")
+    intro = request.POST.get("intro")
+    afficher_prestations = request.POST.get("afficher_prestations") == 'true'
+
+    # Validation des données
+    if not idmodele: return JsonResponse({"erreur": "Vous devez sélectionner un modèle de document"}, status=401)
+    if not numero: return JsonResponse({"erreur": "Vous devez saisir un numéro de reçu"}, status=401)
+    if not date_edition: return JsonResponse({"erreur": "Vous devez saisir une date d'édition"}, status=401)
+
+    # Génération du reçu
+    resultat = Generer_recu(donnees={"idreglement": idreglement, "date_edition": date_edition, "numero": numero, "idmodele": idmodele, "idfamille": idfamille,
+                                      "signataire": signataire, "intro": intro, "afficher_prestations": afficher_prestations})
+    return JsonResponse(resultat)
 
 
 class Page(Onglet):
@@ -137,16 +142,21 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ['idrecu', 'numero', 'date_edition']
-
+        utilisateur = columns.TextColumn("Utilisateur", sources=None, processor='Formate_utilisateur')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idrecu', 'numero', 'date_edition', 'actions']
+            columns = ['idrecu', 'numero', 'date_edition', 'utilisateur', 'actions']
             processors = {
                 'date_edition': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ['date_edition']
+
+        def Formate_utilisateur(self, instance, **kwargs):
+            if instance.utilisateur:
+                return instance.utilisateur.get_full_name() or instance.utilisateur.get_short_name() or instance.utilisateur
+            return ""
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idactivite dans les boutons d'actions """

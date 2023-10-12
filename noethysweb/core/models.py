@@ -2694,7 +2694,7 @@ class Recu(models.Model):
     numero = models.IntegerField(verbose_name="Numéro")
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
     date_edition = models.DateField(verbose_name="Date d'édition")
-    # idutilisateur = models.IntegerField(verbose_name="ID", db_column='IDutilisateur', blank=True, null=True)  # Field name made lowercase.
+    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.PROTECT)
     reglement = models.ForeignKey(Reglement, verbose_name="Règlement", on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
