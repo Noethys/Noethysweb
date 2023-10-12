@@ -102,11 +102,12 @@ class Liste(Page, crud.Liste):
         mail_parents = columns.TextColumn("Mail responsables", sources=None, processor="Get_mail_parents")
         num_cotisation = columns.TextColumn("N° adhésion", sources=None, processor="Get_num_cotisation")
         solde = columns.TextColumn("Solde", sources=[], processor="Get_solde")
+        mail_famille = columns.TextColumn("Email famille", processor='Get_mail_famille')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idinscription", "date_debut", "date_fin", "individu", "date_naiss", "age", "mail", "portable", "famille", "tel_parents", "mail_parents", "groupe", "categorie_tarif", "individu_ville", "famille_ville", "num_cotisation", "statut", "solde"]
-            hidden_columns = ["idinscription", "date_debut", "date_fin", "mail", "famille", "categorie_tarif", "individu_ville", "famille_ville", "num_cotisation", "solde"]
+            columns = ["check", "idinscription", "date_debut", "date_fin", "individu", "date_naiss", "age", "mail", "portable", "famille", "tel_parents", "mail_parents", "mail_famille", "groupe", "categorie_tarif", "individu_ville", "famille_ville", "num_cotisation", "statut", "solde"]
+            hidden_columns = ["idinscription", "date_debut", "date_fin", "mail", "famille", "categorie_tarif", "individu_ville", "famille_ville", "num_cotisation", "solde", "mail_famille"]
             page_length = 100
             processors = {
                 "date_debut": helpers.format_date("%d/%m/%Y"),
@@ -162,6 +163,9 @@ class Liste(Page, crud.Liste):
                     if individu.mail and individu != instance.individu:
                         liste_mail.append("%s : %s" % (individu.prenom, individu.mail))
             return " | ".join(liste_mail)
+
+        def Get_mail_famille(self, instance, *args, **kwargs):
+            return instance.famille.mail
 
         def Get_num_cotisation(self, instance, *args, **kwargs):
             # Importation initiale des cotisations

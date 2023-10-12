@@ -49,11 +49,12 @@ class Liste(Page, crud.Liste):
         famille = columns.TextColumn("Famille", sources=["famille__nom"])
         individu_ville = columns.TextColumn("Ville de l'individu", processor="Get_ville_individu")
         famille_ville = columns.TextColumn("Ville de la famille", processor="Get_ville_famille")
+        mail_famille = columns.TextColumn("Email famille", processor='Get_mail_famille')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idinscription", "date_debut", "date_fin", "individu", "famille", "activite", "groupe", "categorie_tarif", "individu_ville", "famille_ville", "statut"]
-            hidden_columns = ["famille_ville"]
+            columns = ["check", "idinscription", "date_debut", "date_fin", "individu", "famille", "activite", "groupe", "categorie_tarif", "individu_ville", "famille_ville", "mail_famille", "statut"]
+            hidden_columns = ["famille_ville", "mail_famille"]
             processors = {
                 "date_debut": helpers.format_date("%d/%m/%Y"),
                 "date_fin": helpers.format_date("%d/%m/%Y"),
@@ -92,6 +93,9 @@ class Liste(Page, crud.Liste):
 
         def Get_ville_famille(self, instance, *args, **kwargs):
             return instance.famille.ville_resid
+
+        def Get_mail_famille(self, instance, *args, **kwargs):
+            return instance.famille.mail
 
 
 class Ajouter(Page, crud.Ajouter):
