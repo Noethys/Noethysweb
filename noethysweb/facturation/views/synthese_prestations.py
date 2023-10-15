@@ -199,7 +199,7 @@ class View(CustomView, TemplateView):
 
                 # QF
                 if key_code.startswith("qf"):
-                    key = None
+                    key, key_tri, key_label = (0, 0), (0, 0), "- QF inconnu -"
                     if "FAMILLE_QF_ACTUEL_INT" in dictInfosFamilles[prestation.famille_id]:
                         qf = dictInfosFamilles[prestation.famille_id]["FAMILLE_QF_ACTUEL_INT"]
 
@@ -207,7 +207,7 @@ class View(CustomView, TemplateView):
                         if key_code == "qf_100":
                             for x in range(0, 10000, 100):
                                 min, max = x, x + 99
-                                if qf >= min and qf <= max:
+                                if min <= qf <= max:
                                     key = (min, max)
                                     key_tri = key
                                     key_label = "%s - %s" % (min, max)
@@ -215,7 +215,7 @@ class View(CustomView, TemplateView):
                         # Tranches paramétrées
                         if key_code == "qf_tarifs":
                             for min, max in liste_tranches:
-                                if qf >= min and qf <= max:
+                                if min <= qf <= max:
                                     key = (min, max)
                                     key_tri = key
                                     key_label = "%s - %s" % (min, max)
