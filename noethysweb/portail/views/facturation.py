@@ -437,7 +437,7 @@ class View(CustomView, TemplateView):
             elif paiement.resultat == "CANCELLED":
                 messages.add_message(self.request, messages.ERROR, "Le paiement en ligne de %.2f Euros a été annulé" % paiement.montant)
             else:
-                messages.add_message(self.request, messages.ERROR, "Le paiement en ligne de %.2f Euros a rencontré une erreur" % paiement.montant)
+                messages.add_message(self.request, messages.ERROR, "Le paiement en ligne de %.2f Euros a rencontré une erreur. La notification de paiement semble absente." % paiement.montant)
             paiement.notification = datetime.datetime.now()
             paiement.save()
 
