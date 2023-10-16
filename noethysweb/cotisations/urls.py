@@ -7,7 +7,7 @@ from django.urls import include, path
 from core.views import toc
 from core.decorators import secure_ajax
 from cotisations.views import liste_cotisations, liste_cotisations_disponibles, depots_cotisations, saisie_lot_cotisations, liste_cotisations_manquantes, \
-                            cotisations_impression, cotisations_email, depots_cotisations_selection
+                            cotisations_impression, cotisations_email, depots_cotisations_selection, saisie_lot_cotisations_individus, saisie_lot_cotisations_familles
 
 urlpatterns = [
 
@@ -24,8 +24,8 @@ urlpatterns = [
 
     # Gestion des cotisations
     path('cotisations/saisie_lot_cotisations', saisie_lot_cotisations.Selection_type_cotisation.as_view(), name='saisie_lot_cotisations'),
-    path('cotisations/saisie_lot_cotisations/individus/<int:idtype_cotisation>', saisie_lot_cotisations.Liste_individus.as_view(), name='saisie_lot_cotisations_individus'),
-    path('cotisations/saisie_lot_cotisations/familles/<int:idtype_cotisation>', saisie_lot_cotisations.Liste_familles.as_view(), name='saisie_lot_cotisations_familles'),
+    path('cotisations/saisie_lot_cotisations/individus/<int:idtype_cotisation>', saisie_lot_cotisations_individus.Liste.as_view(), name='saisie_lot_cotisations_individus'),
+    path('cotisations/saisie_lot_cotisations/familles/<int:idtype_cotisation>', saisie_lot_cotisations_familles.Liste.as_view(), name='saisie_lot_cotisations_familles'),
 
     # Dépôts de cotisations
     path('cotisations/liste_cotisations_disponibles', liste_cotisations_disponibles.Liste.as_view(), name='liste_cotisations_disponibles'),

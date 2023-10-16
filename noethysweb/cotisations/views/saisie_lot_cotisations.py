@@ -7,10 +7,9 @@ import json, logging
 logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponseRedirect
-from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
 from core.models import TypeCotisation, Famille, Rattachement, Prestation, Cotisation
-from core.utils import utils_dates, utils_texte
+from core.utils import utils_texte
 from fiche_famille.forms.famille_cotisations import Formulaire_type_cotisation, Formulaire
 
 
@@ -92,67 +91,6 @@ class Page(crud.Page):
         context["idtype_cotisation"] = self.kwargs.get("idtype_cotisation", None)
         context["afficher_menu_brothers"] = True
         return context
-
-
-class Liste_individus(Page, crud.Liste):
-    model = Rattachement
-
-    def get_queryset(self):
-        return Rattachement.objects.select_related("individu", "famille").filter(self.Get_filtres("Q"))
-
-    class datatable_class(MyDatatable):
-        filtres = ["ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille",
-                   'individu__pk', "individu__nom", "individu__prenom", "famille__nom", "individu__date_naiss", "individu__rue_resid",
-                   "individu__cp_resid", "individu__ville_resid"]
-        check = columns.CheckBoxSelectColumn(label="")
-        nom = columns.TextColumn("Nom", sources=['individu__nom'])
-        prenom = columns.TextColumn("Prénom", sources=['individu__prenom'])
-        famille = columns.TextColumn("Famille", sources=['famille__nom'])
-        date_naiss = columns.TextColumn("Date naiss.", processor="Get_date_naiss")
-        age = columns.TextColumn("Age", sources=['Get_age'], processor="Get_age")
-
-        class Meta:
-            structure_template = MyDatatable.structure_template
-            columns = ["check", "idrattachement", "nom", "prenom", "age", "date_naiss", "famille"]
-            ordering = ["nom", "prenom"]
-
-        def Get_age(self, instance, *args, **kwargs):
-            return instance.individu.Get_age()
-
-        def Get_date_naiss(self, instance, *args, **kwargs):
-            return utils_dates.ConvertDateToFR(instance.individu.date_naiss)
-
-
-class Liste_familles(Page, crud.Liste):
-    model = Famille
-
-    def get_queryset(self):
-        return Famille.objects.filter(self.Get_filtres("Q"))
-
-    class datatable_class(MyDatatable):
-        filtres = ["fpresent:pk", "fscolarise:pk", "idfamille", "nom", "rue_resid", "cp_resid", "ville_resid", "mail", "caisse__nom"]
-        check = columns.CheckBoxSelectColumn(label="")
-        mail = columns.TextColumn("Email", processor='Get_mail')
-        rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
-        cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')
-        ville_resid = columns.TextColumn("Ville",  sources=None, processor='Get_ville_resid')
-
-        class Meta:
-            structure_template = MyDatatable.structure_template
-            columns = ["check", "idfamille", "nom", "mail", "rue_resid", "cp_resid", "ville_resid"]
-            ordering = ["nom"]
-
-        def Get_mail(self, instance, *args, **kwargs):
-            return instance.mail
-
-        def Get_rue_resid(self, instance, *args, **kwargs):
-            return instance.rue_resid
-
-        def Get_cp_resid(self, instance, *args, **kwargs):
-            return instance.cp_resid
-
-        def Get_ville_resid(self, instance, *args, **kwargs):
-            return instance.ville_resid
 
 
 class Selection_type_cotisation(Page, crud.Ajouter):
