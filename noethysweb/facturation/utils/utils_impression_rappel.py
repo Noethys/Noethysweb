@@ -5,12 +5,11 @@
 
 import logging
 logger = logging.getLogger(__name__)
-from core.utils import utils_dates, utils_impression, utils_preferences
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
 from reportlab.platypus import Paragraph, Spacer, Table, TableStyle, PageBreak
-from reportlab.platypus.flowables import DocAssign, Flowable
-
+from reportlab.platypus.flowables import DocAssign
+from core.utils import utils_dates, utils_impression, utils_texte
 
 
 class Impression(utils_impression.Impression):
@@ -51,20 +50,15 @@ class Impression(utils_impression.Impression):
                 paraStyle = ParagraphStyle(name="contenu", fontName="Helvetica", fontSize=11, spaceBefore=0,
                                            spaceafter=0, leftIndent=6, rightIndent=6)
 
-                texte = dictValeur["texte"]
-                texte = texte.replace("<p", "<para")
-                texte = texte.replace("</p>", "</para>")
-                texte = texte.replace("<br>", "")
-                texte = texte.replace("></para>", "> </para>")
+                # Conversion html en str si nécessaire
+                texte = dictValeur["texte"].replace("<br>", "\n\n")
+                texte = texte.replace("&nbsp;", " ")
+                texte = utils_texte.Textify(texte)
 
-                listeParagraphes = texte.split("</para>")
-                for paragraphe in listeParagraphes:
-                    if "<para" in paragraphe:
-                        paragraphe = "%s</para>" % paragraphe
-                        textePara = Paragraph(paragraphe, paraStyle)
-                        self.story.append(textePara)
-                        if "> </para" in paragraphe:
-                            self.story.append(Spacer(0, 13))
+                for ligne in texte.splitlines():
+                    if ligne == "":
+                        ligne = "&nbsp;"
+                    self.story.append(Paragraph("<para>%s</para>" % ligne, paraStyle))
 
                 # Saut de page
                 self.story.append(PageBreak())

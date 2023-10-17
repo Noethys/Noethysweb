@@ -7,26 +7,17 @@ from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, ButtonHolder, Fieldset, Div
-from crispy_forms.bootstrap import Field, StrictButton
+from crispy_forms.layout import Layout, HTML, Fieldset, Div
+from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.models import ModeleRappel
 from core.widgets import ColorPickerWidget
-from django_summernote.widgets import SummernoteInplaceWidget
+from core.utils import utils_texte
 
 
 class Formulaire(FormulaireBase, ModelForm):
     couleur = forms.CharField(label="Couleur", required=False, widget=ColorPickerWidget(), initial="#FFFFFF")
-    html = forms.CharField(label="Texte", widget=SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '400px', 'toolbar': [
-            # ['style', ['style']],
-            ['font', ['bold', 'underline', 'clear']],
-            # ['fontname', ['fontname']],
-            # ['color', ['color']],
-            # ['para', ['ul', 'ol', 'paragraph']],
-            # ['table', ['table']],
-            # ['insert', ['link', 'picture', 'video']],
-            # ['view', ['fullscreen', 'codeview', 'help']],
-    ]}}))
+    html = forms.CharField(label="Texte", widget=forms.Textarea(attrs={"rows": 12}), required=True)
 
     class Meta:
         model = ModeleRappel
@@ -50,6 +41,12 @@ class Formulaire(FormulaireBase, ModelForm):
             ("{SOLDE_LETTRES}", "solde_lettres"), ("{DATE_MIN}", "date_min"), ("{DATE_MAX}", "date_max"),
             ("{NUM_DOCUMENT}", "num_rappel"),
         ]
+
+        # Convertit l'ancien format HTML en texte simple
+        if self.instance.pk and self.instance.html:
+            texte = self.instance.html.replace("<br>", "\n\n")
+            texte = texte.replace("&nbsp;", " ")
+            self.initial["html"] = utils_texte.Textify(texte)
 
         # Affichage
         self.helper.layout = Layout(
@@ -95,7 +92,7 @@ def Get_html_mots_cles(liste_mots_cles=[]):
             margin-bottom: 0px;
         }
     </style>
-    <div class='card'>
+    <div class='card mt-2'>
         <div class='card-body liste_mots_cles m-0'>
             <div style='color: #b4b4b4;margin-bottom: 5px;'>
                 <i class='fa fa-lightbulb-o'></i> Cliquez sur un mot-clé pour l'insérer dans le texte
@@ -110,7 +107,11 @@ def Get_html_mots_cles(liste_mots_cles=[]):
     <script>
         $(".mot_cle").on('click', function(event) {
             event.preventDefault();
-            $('#id_html').summernote('pasteHTML', this.name);
+            var cursorPos = $('#id_html').prop('selectionStart');
+            var v = $('#id_html').val();
+            var textBefore = v.substring(0,  cursorPos);
+            var textAfter  = v.substring(cursorPos, v.length);
+            $('#id_html').val(textBefore + this.name + textAfter);
         });
     </script>
     """ % "".join(html_detail)
