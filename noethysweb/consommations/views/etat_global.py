@@ -3,17 +3,15 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy
-from core.views.base import CustomView
+import json, time
 from django.views.generic import TemplateView
-from core.utils import utils_dates, utils_dictionnaires
 from django.http import JsonResponse
 from django.shortcuts import render
-import json
+from django.db.models import Q
+from core.views.base import CustomView
+from core.utils import utils_dates
+from core.models import Unite
 from consommations.forms.etat_global import Form_selection_periode, Form_selection_activites, Form_selection_options, Form_profil_configuration
-from django.db.models import Q, Count
-from core.models import Unite, Activite
-from django.views.decorators.csrf import csrf_exempt
 
 
 def Appliquer_parametres(request):
@@ -53,6 +51,8 @@ def Appliquer_parametres(request):
 
 
 def Generer_pdf(request):
+    time.sleep(1)
+
     # Récupération des options
     form = Form_selection_options(request.POST)
     if not form.is_valid():
@@ -84,9 +84,6 @@ def Generer_pdf(request):
         return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
     nom_fichier = impression.Get_nom_fichier()
     return JsonResponse({"nom_fichier": nom_fichier})
-
-
-
 
 
 class View(CustomView, TemplateView):

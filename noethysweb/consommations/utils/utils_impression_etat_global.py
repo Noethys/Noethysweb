@@ -10,7 +10,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
 from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires
-from core.models import Evenement, Regime, Vacance, Activite, Quotient, TarifLigne, Consommation, Unite
+from core.models import Evenement, Regime, Vacance, Activite, Quotient, TarifLigne, Consommation, Famille, Individu
 
 
 # Regex pour formule
@@ -62,6 +62,10 @@ class Impression(utils_impression.Impression):
                                                             cotisationsManquantes=False, piecesManquantes=False, questionnaires=True, scolarite=True)
         dictInfosIndividus = infosIndividus.GetDictValeurs(mode="individu", ID=None, formatChamp=False)
         dictInfosFamilles = infosIndividus.GetDictValeurs(mode="famille", ID=None, formatChamp=False)
+
+        # Récupération des familles et des individus
+        dict_familles = {famille.pk: famille for famille in Famille.objects.select_related("caisse").all()}
+        dict_individus = {individu.pk: individu for individu in Individu.objects.all()}
 
         # Récupération des activités
         liste_idunite = [int(idunite) for idunite in dict_parametres.keys()]
@@ -190,7 +194,7 @@ class Impression(utils_impression.Impression):
 
         # Récupération des consommations
         self.dict_unites = {}
-        liste_conso = Consommation.objects.select_related("unite", "activite", "groupe", "prestation", "categorie_tarif", "inscription", "inscription__famille", "individu", "inscription__famille__caisse", "evenement").filter(date__gte=date_debut, date__lte=date_fin, unite__in=liste_idunite).order_by("date")
+        liste_conso = Consommation.objects.select_related("unite", "activite", "groupe", "prestation", "categorie_tarif", "inscription", "evenement").filter(date__gte=date_debut, date__lte=date_fin, unite__in=liste_idunite)
         for conso in liste_conso:
             self.dict_unites.setdefault(conso.date, {})
             self.dict_unites[conso.date]["unite%d" % conso.unite_id] = Unite(conso.unite_id, conso.heure_debut, conso.heure_fin, conso.etat, conso.quantite)
@@ -200,6 +204,7 @@ class Impression(utils_impression.Impression):
         dict_temps_journalier_individu = {}
         dict_stats = {"individus": [], "familles": []}
         for conso in liste_conso:
+            individu = dict_individus[conso.individu_id]
             mois = conso.date.month
             annee = conso.date.year
 
@@ -215,7 +220,7 @@ class Impression(utils_impression.Impression):
                 if dict_options["regroupement_principal"] == "groupe": regroupement = conso.groupe.nom
                 if dict_options["regroupement_principal"] == "evenement": regroupement = conso.evenement_id
                 if dict_options["regroupement_principal"] == "evenement_date": regroupement = conso.evenement_id
-                if dict_options["regroupement_principal"] == "categorie_tarif": regroupement = conso.prestation.categorie_tarif.nom
+                if dict_options["regroupement_principal"] == "categorie_tarif": regroupement = conso.categorie_tarif.nom
                 if dict_options["regroupement_principal"] == "unite_conso": regroupement = conso.unite.nom
                 if dict_options["regroupement_principal"] == "ville_residence": regroupement = dictInfosIndividus[conso.individu_id]["INDIVIDU_VILLE"]
                 if dict_options["regroupement_principal"] == "secteur": regroupement = dictInfosIndividus[conso.individu_id]["INDIVIDU_SECTEUR"]
@@ -430,8 +435,8 @@ class Impression(utils_impression.Impression):
                     dict_temps_journalier_individu[conso.individu_id][conso.date] += valeur
 
                 # Calcule l'âge de l'individu
-                if conso.individu.date_naiss:
-                    age = (conso.date.year - conso.individu.date_naiss.year) - int((conso.date.month, conso.date.day) < (conso.individu.date_naiss.month, conso.individu.date_naiss.day))
+                if individu.date_naiss:
+                    age = (conso.date.year - individu.date_naiss.year) - int((conso.date.month, conso.date.day) < (individu.date_naiss.month, individu.date_naiss.day))
                 else:
                     age = -1
 
@@ -450,12 +455,13 @@ class Impression(utils_impression.Impression):
 
                 # Mémorisation du résultat
                 if valeur != datetime.timedelta(hours=0, minutes=0) or valeur != datetime.timedelta(hours=0, minutes=0):
-                    if conso.inscription.famille.caisse:
-                        IDregime = conso.inscription.famille.caisse.regime_id
+                    famille = dict_familles[conso.inscription.famille_id]
+                    if famille.caisse:
+                        IDregime = famille.caisse.regime_id
                     else:
                         IDregime = 0
                         if dict_options["afficher_regime_inconnu"] == True:
-                            self.erreurs.append("Attention, le régime d'appartenance n'a pas été renseigné pour la famille de %s. Remarque : Vous pouvez masquer cette erreur dans les options." % conso.individu.Get_nom())
+                            self.erreurs.append("Attention, le régime d'appartenance n'a pas été renseigné pour la famille de %s. Remarque : Vous pouvez masquer cette erreur dans les options." % individu.Get_nom())
                             return False
 
                     # Si régime inconnu :

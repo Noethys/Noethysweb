@@ -165,6 +165,7 @@
     {{ block.super }}
     <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
 
     <script>
 
@@ -262,6 +263,10 @@
             var parametres = get_parametres();
             parametres["periode"] = $("[name=selection_periode]").val();
             $('input[name=liste_parametres]').val(JSON.stringify(parametres));
+            var box = bootbox.dialog({
+                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Génération du PDF en cours</b><br><br>Veuillez patienter...</p>",
+                closeButton: false
+            });
             $.ajax({
                 type: "POST",
                 url: "{% url 'ajax_etat_global_generer_pdf' %}",
@@ -269,9 +274,11 @@
                 data: JSON.stringify($("#form_selection_options").serialize()),
                 datatype: "json",
                 success: function(data){
+                    bootbox.hideAll();
                     charge_pdf(data);
                 },
                 error: function(data) {
+                    bootbox.hideAll();
                     toastr.error(data.responseJSON.erreur);
                 }
             })
