@@ -1,3 +1,12 @@
+Version 1.2.0.2 (17/10/2023) :
+
+- Conversion du modèle de rappel html en str
+- Ajout message erreur si notification payfip absente
+- Optimisation de la génération du pdf dans l'état global
+- Correction du filtre dans la saisie d'adhésions par lot
+- Correction du regroupement par quotient dans la synthèse des consommations
+- Correction de l'affichage des activités obsolètes dans les inscriptions actuelles
+
 Version 1.2.0.1 (12/10/2023) :
 
 - Ajout du téléchargement des reçus de règlements sur le portail
