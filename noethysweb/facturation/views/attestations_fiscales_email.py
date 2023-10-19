@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, json
+import logging, json, time
 logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
@@ -18,6 +18,8 @@ from facturation.forms.choix_modele_impression import Formulaire as Form_modele_
 
 
 def Impression_pdf(request):
+    time.sleep(1)
+
     # Récupération des attestations fiscales cochées
     attestations_fiscales_coches = json.loads(request.POST.get("attestations_fiscales_coches"))
     if not attestations_fiscales_coches:
