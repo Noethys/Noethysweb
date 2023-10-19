@@ -100,9 +100,8 @@ class Formulaire(FormulaireBase, ModelForm):
         self.fields["date_facturation"].initial = datetime.date.today()
 
         # Numéro
-        numero = Cotisation.objects.aggregate(Max('numero'))['numero__max']
-        if numero == None:
-            numero = 0
+        derniere_cotisation = Cotisation.objects.last()
+        numero = derniere_cotisation.numero if derniere_cotisation else 0
         self.fields["numero"].initial = utils_texte.Incrementer(str(numero))
 
         # Importation

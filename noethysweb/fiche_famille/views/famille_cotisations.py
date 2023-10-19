@@ -56,9 +56,8 @@ def On_change_unite_cotisation(request):
     date_creation_carte = datetime.date.today()
 
     # Numéro
-    numero = Cotisation.objects.aggregate(Max('numero'))['numero__max']
-    if numero == None:
-        numero = 0
+    derniere_cotisation = Cotisation.objects.last()
+    numero = derniere_cotisation.numero if derniere_cotisation else 0
     numero = utils_texte.Incrementer(numero)
 
     # Tarif
