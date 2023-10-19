@@ -285,8 +285,10 @@ $(document).ready(function() {
     $("#checkbox_all").on("change", function(){
         if ($("#checkbox_all").prop("checked")) {
             $('.datatable').DataTable().rows().select();
+            $('.custom-datatable').DataTable().rows().select();
         } else {
             $('.datatable').DataTable().rows().deselect();
+            $('.custom-datatable').DataTable().rows().deselect();
         };
     });
 

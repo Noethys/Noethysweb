@@ -3,7 +3,6 @@
 {% load static %}
 {% load embed %}
 
-
 {% block contenu_page %}
 
     <div class="row">
@@ -36,6 +35,11 @@
                 </div>
                 <div class="card-body">
 
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder">
+                        <button class="btn btn-primary" onclick="envoi_emails()" title="Envoyer des rappels par Email"><i class='fa fa-send-o margin-r-5'></i>Envoyer des rappels par Email</button>
+                    </div>
+
                     {% embed 'core/crud/liste.html' %}
                     {% endembed %}
 
@@ -45,5 +49,33 @@
         </div>
     </div>
 
-{% endblock contenu_page %}
+    <script>
 
+        function envoi_emails() {
+            var table = $('.custom-datatable').DataTable()
+            var lignes = table.rows({selected: true});
+            var data = lignes.data().toArray();
+            var listepk = [];
+            $.each(data, function(index, valeurs) {
+                listepk.push([parseInt(valeurs[1]), valeurs[3]]);
+            });
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_liste_pieces_manquantes_emails' %}",
+                data: {
+                    familles_coches: JSON.stringify(listepk),
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                datatype: "json",
+                success: function(data){
+                    window.location.href = data.url;
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+    </script>
+
+{% endblock contenu_page %}
