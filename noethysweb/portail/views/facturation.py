@@ -203,6 +203,14 @@ def retour_payfip(request):
         logger.debug("Page RETOUR_PAYFIP: le paiement pre-enregistre n'a pas été trouvé.")
         return
 
+    # Réponse dans le log
+    logger.debug("Page RETOUR_PAYFIP: reponse=%s refdet=%s)", reponse, paiement.refdet)
+
+    # Si le paiement est déjà PAID
+    if paiement.resultat == "PAID":
+        logger.debug("Page RETOUR_PAYFIP: Le paiement est déjà PAID.")
+        return
+
     paiement.resultrans = resultrans
     paiement.resultat = resultat
     paiement.numauto = numauto
@@ -210,9 +218,6 @@ def retour_payfip(request):
     paiement.heurtrans = heurtrans
     paiement.message = reponse.bank_status
     paiement.save()
-
-    # Réponse dans le log
-    logger.debug("Page RETOUR_PAYFIP: reponse=%s refdet=%s)", reponse, paiement.refdet)
 
     # Enregistrement du résultat et redirection
     if resultat == "PAID":
