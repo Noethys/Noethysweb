@@ -1,3 +1,11 @@
+Version 1.2.0.3 (21/10/2023) :
+
+- Ajout des rappels par email de pièces manquantes
+- Modification décimales colonne ajustement dans ligne tarifaire
+- Correction de l'incrémentation des numéros d'adhésion
+- Correction modification sur paiement payfip déjà payé
+- Correction détection existence forfaits crédit
+
 Version 1.2.0.2 (17/10/2023) :
 
 - Conversion du modèle de rappel html en str
