@@ -57,7 +57,7 @@ def On_change_unite_cotisation(request):
 
     # Numéro
     derniere_cotisation = Cotisation.objects.last()
-    numero = derniere_cotisation.numero if derniere_cotisation else 0
+    numero = derniere_cotisation.numero if derniere_cotisation and derniere_cotisation.numero else 0
     numero = utils_texte.Incrementer(numero)
 
     # Tarif

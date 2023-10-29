@@ -101,7 +101,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Numéro
         derniere_cotisation = Cotisation.objects.last()
-        numero = derniere_cotisation.numero if derniere_cotisation else 0
+        numero = derniere_cotisation.numero if derniere_cotisation and derniere_cotisation.numero else 0
         self.fields["numero"].initial = utils_texte.Incrementer(str(numero))
 
         # Importation
