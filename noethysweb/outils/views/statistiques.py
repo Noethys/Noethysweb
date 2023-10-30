@@ -6,7 +6,7 @@
 from django.urls import reverse_lazy, reverse
 from core.views.base import CustomView
 from django.db.models import Q, Count, F
-from core.models import Activite, Consommation, Inscription, Famille, Individu, Vacance, Scolarite, LISTE_MOIS, Historique
+from core.models import Activite, Consommation, Inscription, Famille, Individu, Vacance, Scolarite, LISTE_MOIS, Historique, TarifLigne, Quotient
 from django.views.generic import TemplateView
 from outils.forms.statistiques import Formulaire
 from core.utils import utils_dates
@@ -449,6 +449,49 @@ class View(CustomView, TemplateView):
                 data.append(Camembert(titre="Composition des familles",
                     labels=[item[0] for item in familles],
                     valeurs=[item[1] for item in familles], ))
+
+            # ---------------------------- FAMILLES : QF -------------------------------
+
+            if rubrique == "familles_qf":
+
+                # Récupération des tranches de qf
+                dict_tranches = {None: 0}
+                try:
+                    for tranche in parametres["tranches_qf"].split(";"):
+                        qf_min, qf_max = tranche.split("-")
+                        dict_tranches[(int(qf_min), int(qf_max))] = 0
+                except:
+                    data.append(Texte("Erreur : Les tranches de QF saisies semblent erronées."))
+
+                # Recherche des qf des familles
+                familles = Famille.objects.filter(condition).distinct()
+                condition_qf = Q(famille__in=familles, date_debut__lte=presents[1], date_fin__gte=presents[0]) if presents else Q(famille__in=familles)
+                dict_quotients = {quotient.famille_id: quotient.quotient for quotient in Quotient.objects.filter(condition_qf).order_by("date_debut")}
+
+                # Regroupement des qf par tranche
+                for famille in familles:
+                    quotient = dict_quotients.get(famille.pk, None)
+                    found = False
+                    if quotient:
+                        for tranche, nbre in dict_tranches.items():
+                            if tranche and tranche[0] <= quotient <= tranche[1]:
+                                dict_tranches[tranche] += 1
+                                found = True
+                    if not found:
+                        dict_tranches[None] += 1
+
+                def Formate_tranche(tranche):
+                    return "%d - %d" % tranche if tranche else "Autre ou inconnu"
+
+                # Tableau : QF des familles
+                data.append(Tableau(titre="Quotients familiaux des familles",
+                    colonnes=["Tranches de QF", "Nombre de familles"],
+                    lignes=[(Formate_tranche(tranche), nbre) for tranche, nbre in dict_tranches.items()]))
+
+                # Camembert : QF des familles
+                data.append(Camembert(titre="Quotients familiaux des familles",
+                    labels=[Formate_tranche(tranche) for tranche, nbre in dict_tranches.items()],
+                    valeurs=[nbre for tranche, nbre in dict_tranches.items()]))
 
             # ---------------------------- CONSOMMATIONS : Saisie -------------------------------
 

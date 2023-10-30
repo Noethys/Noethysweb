@@ -28,6 +28,7 @@ class Formulaire(FormulaireBase, forms.Form):
             ("familles_nombre", "Nombre de familles"),
             ("familles_caisse", "Caisse des familles"),
             ("familles_composition", "Composition des familles"),
+            ("familles_qf", "Quotients familiaux des familles"),
         )),
         ("Consommations", (
             ("consommations_saisie", "Saisie des consommations"),
@@ -42,6 +43,7 @@ class Formulaire(FormulaireBase, forms.Form):
     mois = forms.ChoiceField(label="Mois", choices=LISTE_MOIS, required=False)
     annee = forms.IntegerField(label="Année", required=False, initial=datetime.date.today().year)
     periode = forms.CharField(label="Période", required=False, widget=DateRangePickerWidget())
+    tranches_qf = forms.CharField(label="Tranches de QF", required=False, help_text="Saisissez les tranches à étudier de la façon suivante : 0-500;501-1000;etc...")
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -51,6 +53,7 @@ class Formulaire(FormulaireBase, forms.Form):
 
         self.helper.layout = Layout(
             Field('rubrique'),
+            Field('tranches_qf'),
             Field('activites'),
             Field('donnees'),
             Field('vacances'),
@@ -72,6 +75,18 @@ class Formulaire(FormulaireBase, forms.Form):
 
 EXTRA_SCRIPT = """
 <script>
+
+// Rubrique
+function On_change_rubrique() {
+    $('#div_id_tranches_qf').hide();
+    if($(this).val() == 'familles_qf') {
+        $('#div_id_tranches_qf').show();
+    };
+}
+$(document).ready(function() {
+    $('#id_rubrique').change(On_change_rubrique);
+    On_change_rubrique.call($('#id_rubrique').get(0));
+});
 
 // Données
 function On_change_donnees() {
