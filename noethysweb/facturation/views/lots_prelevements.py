@@ -61,11 +61,15 @@ def Actions(request):
                 for prestation in Prestation.objects.filter(facture=prelevement.facture):
                     Ventilation.objects.create(famille=prelevement.famille, reglement=reglement, prestation=prestation, montant=prestation.montant)
 
+                # MAJ solde facture
+                prelevement.facture.Maj_solde_actuel()
+
     # Ne pas régler
     if num_action == 5:
         for prelevement in liste_prelevements:
             if prelevement.reglement:
                 prelevement.reglement.delete()
+                prelevement.facture.Maj_solde_actuel()
 
     return JsonResponse({"resultat": "ok"})
 
