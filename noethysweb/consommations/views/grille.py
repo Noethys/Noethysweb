@@ -172,7 +172,7 @@ def Get_generic_data(data={}):
                 "famille": p.famille_id, "individu": p.individu_id, "categorie_tarif": p.categorie_tarif_id, "temps_facture": utils_dates.DeltaEnStr(p.temps_facture, separateur=":"),
                 "quantite": p.quantite, "tarif_ligne": p.tarif_ligne_id, "tva": float(p.tva) if p.tva else None, "code_compta": p.code_compta, "aides": [],
                 "forfait_date_debut": str(p.forfait_date_debut) if p.forfait_date_debut else None, "forfait_date_fin": str(p.forfait_date_fin) if p.forfait_date_fin else None,
-                "dirty": False,
+                "forfait": p.forfait, "dirty": False,
             }
             if p.pk in dict_deductions:
                 data["prestations"][p.pk]["aides"] = dict_deductions[p.pk]
@@ -895,7 +895,7 @@ class Facturation():
                 # 8 - Supprime des prestations qui ne sont plus utilisées sur la ligne
                 for idprestation, dict_prestation in self.donnees["prestations"].items():
                     if dict_prestation["date"] == case_tableau["date"] and dict_prestation["famille"] == case_tableau["famille"] and dict_prestation["individu"] == case_tableau["individu"] and dict_prestation["activite"] == case_tableau["activite"]:
-                        if idprestation not in dictUnitesPrestations.values() and idprestation not in self.liste_anciennes_prestations and not dict_prestation["forfait_date_debut"]:
+                        if idprestation not in dictUnitesPrestations.values() and idprestation not in self.liste_anciennes_prestations and not dict_prestation["forfait_date_debut"] and not dict_prestation["forfait"]:
                             logger.debug("La prestation suivante ne semble plus utilisée, on la supprime : " + str(idprestation))
                             self.liste_anciennes_prestations.append(idprestation)
 

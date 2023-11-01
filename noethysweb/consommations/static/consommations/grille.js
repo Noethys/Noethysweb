@@ -524,7 +524,7 @@ class Case_standard extends Case_base {
             toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation déjà pointée");
             return true;
         }
-        if ((this.consommations.length > 0) && (this.consommations[0].forfait === 2)) {
+        if ((this.consommations.length > 0) && (this.consommations[0].forfait)) {
             toastr.error("Vous ne pouvez pas supprimer cette consommation car elle est associée à un forfait daté");
             return true;
         }
