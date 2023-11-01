@@ -1,3 +1,12 @@
+Version 1.2.0.4 (01/11/2023) :
+
+- Ajout de la liste des règlements associés à un lot de factures
+- Ajout de la page des quotients dans les statistiques
+- Ajout de la date limite de paiement en ligne
+- Correction du calcul du solde de facture dans les prélèvements
+- Correction forfait daté dans grille des consommations
+- Correction du calcul du dernier numéro de cotisation
+
 Version 1.2.0.3 (21/10/2023) :
 
 - Ajout des rappels par email de pièces manquantes
