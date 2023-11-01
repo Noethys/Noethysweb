@@ -78,7 +78,7 @@ class View(CustomView, TemplateView):
             total += montant
 
         # Recherche des avoirs
-        if depot.montant > total:
+        if (depot.montant or Decimal(0)) > total:
             montant_avoirs = depot.montant - total
             dict_prestations[80000] = {"prestations": {}, "quantite": 0, "total": montant_avoirs}
 
