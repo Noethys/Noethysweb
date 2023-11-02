@@ -290,12 +290,15 @@ class AdresseMail(models.Model):
 
 class ConfigurationSMS(models.Model):
     idconfiguration = models.AutoField(verbose_name="ID", db_column='IDconfiguration', primary_key=True)
-    moteur = models.CharField(verbose_name="Moteur", max_length=200, choices=[("mailjet", "Mailjet"),], help_text="Sélectionnez un moteur d'expédition.")
+    moteur = models.CharField(verbose_name="Moteur", max_length=200, choices=[("mailjet", "Mailjet"), ("ovh", "OVH")], help_text="Sélectionnez un moteur d'expédition.")
     token = encrypt(models.CharField(verbose_name="Token", max_length=300, blank=True, null=True, help_text="Saisissez le token qui vous a été communiqué par votre fournisseur."))
     nom_exp = models.CharField(verbose_name="Nom de l'expéditeur", max_length=11, blank=True, null=True, help_text="Saisissez le nom d'expéditeur qui doit apparaître dans le SMS (11 caractères max).")
     nbre_caracteres = models.IntegerField(verbose_name="Nbre caractères max.", default=160, help_text="Précisez le nombre de caractères maximal accepté pour un SMS (160 par défaut).")
     montant_unitaire = models.DecimalField(verbose_name="Montant unitaire", max_digits=10, decimal_places=4, default=0.0, help_text="Indiquez le coût unitaire d'un SMS.")
     solde = models.IntegerField(verbose_name="Solde de SMS", blank=True, null=True, help_text="Précisez le nombre approximatif de SMS restants sur votre compte prépayé.")
+    nom_compte = models.CharField(verbose_name="Nom du compte", max_length=200, blank=True, null=True, help_text="Saisissez le nom du compte.")
+    identifiant = models.CharField(verbose_name="Identifiant", max_length=200, blank=True, null=True, help_text="Saisissez l'identifiant de l'utilisateur.")
+    motdepasse = encrypt(models.CharField(verbose_name="Mot de passe", max_length=200, blank=True, null=True, help_text="Saisissez le mot de passe de l'utilisateur."))
 
     class Meta:
         db_table = 'configurations_sms'
@@ -582,8 +585,6 @@ class NiveauScolaire(models.Model):
                 objet.ordre = ordre
                 objet.save()
             ordre += 1
-
-
 
 
 class Organisateur(models.Model):

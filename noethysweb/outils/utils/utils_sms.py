@@ -41,31 +41,26 @@ def Envoyer_model_sms(idsms=None, request=None):
     # Envoi
     liste_envois_succes = []
 
-    # Envoi avec MAILJET
-    if sms.configuration_sms.moteur == "mailjet":
+    # Envoi des SMS
+    for destinataire in destinataires:
+        texte = sms.texte.replace("\n", "")
+        numero = destinataire.mobile.replace(".", "")
+        numero = "+33" + numero[1:]
+        resultat_envoi = None
 
-        # Préparation de l'envoi
-        headers = {"Authorization": "Bearer {api_token}".format(api_token=sms.configuration_sms.token), "Content-Type": "application/json"}
-        api_url = "https://api.mailjet.com/v4/sms-send"
+        # Remplacement des mots-clés
+        try:
+            valeurs = json.loads(destinataire.valeurs)
+        except:
+            valeurs = {}
+        valeurs.update(valeurs_defaut)
+        for motcle, valeur in valeurs.items():
+            texte = texte.replace(motcle, valeur)
 
-        # Envoi des SMS
-        for destinataire in destinataires:
-            texte = sms.texte.replace("\n", "")
-            numero = destinataire.mobile.replace(".", "")
-            numero = "+33" + numero[1:]
-
-            # Remplacement des mots-clés
-            try:
-                valeurs = json.loads(destinataire.valeurs)
-            except:
-                valeurs = {}
-            valeurs.update(valeurs_defaut)
-            for motcle, valeur in valeurs.items():
-                texte = texte.replace(motcle, valeur)
-
-            # Création du message JSON
-            message_data = {"From": sms.configuration_sms.nom_exp, "To": numero, "Text": texte}
-            reponse = requests.post(api_url, headers=headers, json=message_data)
+        # Envoi avec MAILJET
+        if sms.configuration_sms.moteur == "mailjet":
+            headers = {"Authorization": "Bearer {api_token}".format(api_token=sms.configuration_sms.token), "Content-Type": "application/json"}
+            reponse = requests.post("https://api.mailjet.com/v4/sms-send", headers=headers, json={"From": sms.configuration_sms.nom_exp, "To": numero, "Text": texte})
             if reponse.ok:
                 liste_envois_succes.append(destinataire)
                 resultat_envoi = "ok"
@@ -73,20 +68,31 @@ def Envoyer_model_sms(idsms=None, request=None):
                 logger.debug("Erreur envoi SMS : %s" % reponse.text)
                 dict_erreur = json.loads(reponse.text)
                 resultat_envoi = dict_erreur["ErrorMessage"]
-
                 if "API key authentication/authorization failure" in resultat_envoi:
                     messages.add_message(request, messages.ERROR, "Impossible de se connecter au serveur d'envoi : Le token semble erroné")
                     return []
 
-            # Mémorise le résultat de l'envoi dans la DB
-            destinataire.date_envoi = datetime.datetime.now()
-            destinataire.resultat_envoi = resultat_envoi
-            destinataire.save()
+        # Envoi avec OVH
+        if sms.configuration_sms.moteur == "ovh":
+            params = {"account": sms.configuration_sms.nom_compte, "login": sms.configuration_sms.identifiant, "password": sms.configuration_sms.motdepasse,
+                      "from": sms.configuration_sms.nom_exp, "to": numero, "message": texte, "noStop": 1, "contentType": "text/json"}
+            r = requests.get("https://www.ovh.com/cgi-bin/sms/http2sms.cgi", params=params)
+            reponse = r.json()
+            if reponse["status"] == 100:
+                liste_envois_succes.append(destinataire)
+                resultat_envoi = "ok"
+            else:
+                resultat_envoi = reponse["message"]
 
-            if reponse.ok:
-                # Mémorise l'envoi dans l'historique
-                utils_historique.Ajouter(titre="Envoi d'un SMS", detail=sms.objet, utilisateur=request.user if request else None, famille=destinataire.famille_id,
-                                         individu=destinataire.individu_id, collaborateur=destinataire.collaborateur_id, objet="SMS", idobjet=sms.pk, classe="SMS")
+        # Mémorise le résultat de l'envoi dans la DB
+        destinataire.date_envoi = datetime.datetime.now()
+        destinataire.resultat_envoi = resultat_envoi
+        destinataire.save()
+
+        if resultat_envoi == "ok":
+            # Mémorise l'envoi dans l'historique
+            utils_historique.Ajouter(titre="Envoi d'un SMS", detail=sms.objet, utilisateur=request.user if request else None, famille=destinataire.famille_id,
+                                     individu=destinataire.individu_id, collaborateur=destinataire.collaborateur_id, objet="SMS", idobjet=sms.pk, classe="SMS")
 
     # Enregistre le solde du compte prépayé
     if liste_envois_succes:
@@ -100,10 +106,12 @@ def Envoyer_sms_test(request=None, dict_options={}):
     """ Pour tester une configuration SMS en envoyant un SMS de test """
     logger.debug("Envoi d'un SMS de test...")
 
+    # Préparation du numéro du destinataire de test
+    numero = dict_options["numero_destination"].replace(".", "")
+
     # Envoi avec MAILJET
     if dict_options["moteur"] == "mailjet":
         headers = {"Authorization": "Bearer {api_token}".format(api_token=dict_options["token"]), "Content-Type": "application/json"}
-        numero = dict_options["numero_destination"].replace(".", "")
         message_data = {"From": dict_options["nom_exp"], "To": "+33" + numero[1:], "Text": "Ceci est un SMS de test."}
         reponse = requests.post("https://api.mailjet.com/v4/sms-send", headers=headers, json=message_data)
         if reponse.ok:
@@ -111,5 +119,17 @@ def Envoyer_sms_test(request=None, dict_options={}):
         else:
             dict_erreur = json.loads(reponse.text)
             return dict_erreur["ErrorMessage"]
+
+    # Envoi avec OVH
+    if dict_options["moteur"] == "ovh":
+        params = {"account": dict_options["nom_compte"], "login": dict_options["identifiant"], "password": dict_options["motdepasse"],
+                  "from": dict_options["nom_exp"], "to": "+33" + numero[1:], "message": "Ceci est un SMS de test", "noStop": 1, "contentType": "text/json"}
+        r = requests.get("https://www.ovh.com/cgi-bin/sms/http2sms.cgi", params=params)
+        reponse = r.json()
+        if reponse["status"] == 100:
+            credit_restant = int(float(reponse["creditLeft"]))
+            return "Message envoyé avec succès. Crédit restant : %d SMS." % credit_restant
+        else:
+            return reponse["message"]
 
     return "Aucun moteur sélectionné"

@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.forms import ModelForm
+from django.forms import ModelForm, TextInput
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset
@@ -16,6 +16,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = ConfigurationSMS
         fields = "__all__"
+        widgets = {
+            "motdepasse": TextInput(attrs={"type": "password"})
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -38,6 +41,9 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset('Paramètres',
                 Field('token'),
                 Field('nom_exp'),
+                Field('nom_compte'),
+                Field('identifiant'),
+                Field('motdepasse'),
             ),
             Fieldset('Options',
                 Field('nbre_caracteres'),
@@ -49,14 +55,24 @@ class Formulaire(FormulaireBase, ModelForm):
         )
 
     def clean(self):
-        if self.cleaned_data["moteur"] == "mailjet":
 
+        if self.cleaned_data["moteur"] == "mailjet":
             if not self.cleaned_data["token"]:
                 self.add_error("token", "Vous devez renseigner le token communiqué par le fournisseur")
                 return
-
             if not self.cleaned_data["nom_exp"]:
                 self.add_error("nom_exp", "Vous devez renseigner un nom d'expéditeur")
+                return
+
+        if self.cleaned_data["moteur"] == "ovh":
+            if not self.cleaned_data["nom_compte"]:
+                self.add_error("nom_compte", "Vous devez renseigner le nom du compte")
+                return
+            if not self.cleaned_data["identifiant"]:
+                self.add_error("identifiant", "Vous devez renseigner l'identifiant")
+                return
+            if not self.cleaned_data["motdepasse"]:
+                self.add_error("motdepasse", "Vous devez renseigner le mot de passe")
                 return
 
         return self.cleaned_data
@@ -76,10 +92,20 @@ EXTRA_SCRIPT = """
 function On_change_moteur() {
     $('#div_id_token').hide();
     $('#div_id_nom_exp').hide();
+    $('#div_id_nom_compte').hide();
+    $('#div_id_identifiant').hide();
+    $('#div_id_motdepasse').hide();
 
-    if($(this).val() == 'mailjet') {
+    if ($(this).val() == 'mailjet') {
         $('#div_id_token').show();
         $('#div_id_nom_exp').show();
+    }
+    
+    if ($(this).val() == 'ovh') {
+        $('#div_id_nom_exp').show();
+        $('#div_id_nom_compte').show();
+        $('#div_id_identifiant').show();
+        $('#div_id_motdepasse').show();
     }
 
 }
