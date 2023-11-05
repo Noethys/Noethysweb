@@ -17,6 +17,7 @@
     <script type="text/javascript" src="{% static 'lib/bootstrap-table/extensions/treegrid/bootstrap-table-treegrid.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'lib/table-export/tableExport.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'lib/table-export/libs/jsPDF/jspdf.umd.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/table-export/libs/js-xlsx/xlsx.core.min.js' %}"></script>
 
     <script>
     $(document).ready(function() {
@@ -27,7 +28,7 @@
             $table.bootstrapTable({
                 locale: "fr-FR",
                 exportDataType: $(this).val(),
-                exportTypes: ['json', 'xml', 'csv', 'txt', 'sql', 'png', 'doc', 'excel', 'pdf'],
+                exportTypes: ['json', 'xml', 'csv', 'txt', 'png', 'doc', 'xlsx', 'pdf'],
                 // iconSize: 'md',
                 iconsPrefix: 'fa',
                 icons: {
