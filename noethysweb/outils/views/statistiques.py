@@ -260,37 +260,48 @@ class View(CustomView, TemplateView):
                 ))
 
                 # Calcul des années de naissance
-                individus = Individu.objects.filter(condition).values_list('date_naiss__year').annotate(nbre=Count('idindividu', distinct=True)).order_by('date_naiss__year')
+                annees_naiss = {}
+                for individu in Individu.objects.filter(condition).distinct():
+                    if individu.date_naiss:
+                        annees_naiss.setdefault(individu.date_naiss.year, 0)
+                        annees_naiss[individu.date_naiss.year] += 1
+                liste_annees_naiss = [(annee, nbre) for annee, nbre in annees_naiss.items()]
+                liste_annees_naiss.sort()
 
-                # Tableau : Répartition par âge
+                # Tableau : Répartition par année de naissance
                 data.append(Tableau(
                     titre="Répartition par année de naissance",
                     colonnes=["Année", "Nombre d'individus"],
-                    lignes=[(age, nbre) for age, nbre in individus if age],
+                    lignes=[(annee, nbre) for annee, nbre in liste_annees_naiss],
                 ))
 
-                # Chart : Répartition par âge
+                # Chart : Répartition par année de naissance
                 data.append(Histogramme(titre="Répartition par année de naissance", type_chart="bar",
-                    labels=[annee for annee, nbre in individus if annee],
-                    valeurs=[nbre for annee, nbre in individus if annee],
+                    labels=[annee for annee, nbre in liste_annees_naiss],
+                    valeurs=[nbre for annee, nbre in liste_annees_naiss],
                 ))
 
             # ---------------------------- INDIVIDUS : Coordonnées -------------------------------
             if rubrique == "individus_coordonnees":
 
                 # Tableau : Répartition des individus par ville de résidence
-                individus = Individu.objects.filter(condition).values_list("ville_resid").annotate(nbre=Count("idindividu", distinct=True)).order_by("-nbre")
+                villes = {}
+                for ville, nbre in Individu.objects.filter(condition).values_list("ville_resid").annotate(nbre=Count("idindividu", distinct=True)).order_by("ville_resid"):
+                    villes.setdefault(ville, 0)
+                    villes[ville] += nbre
+                liste_villes = [(ville, nbre) for ville, nbre in villes.items()]
+
                 data.append(Tableau(
                     titre="Répartition des individus par ville de résidence",
                     colonnes=["Ville de résidence", "Nombre d'individus"],
-                    lignes=[(item[0] if item[0] else "Ville non renseignée", item[1]) for item in individus]
+                    lignes=[(item[0] if item[0] else "Ville non renseignée", item[1]) for item in liste_villes]
                 ))
 
                 # Camembert : Répartition des individus par ville de résidence
                 data.append(Camembert(
                     titre="Répartition des individus par ville de résidence",
-                    labels=[item[0] if item[0] else "Ville non renseignée" for item in individus],
-                    valeurs=[item[1] for item in individus],
+                    labels=[item[0] if item[0] else "Ville non renseignée" for item in liste_villes],
+                    valeurs=[item[1] for item in liste_villes],
                 ))
 
 
