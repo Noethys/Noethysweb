@@ -1,9 +1,9 @@
 /**
  * @preserve tableExport.jquery.plugin
  *
- * Version 1.21.0
+ * Version 1.28.0
  *
- * Copyright (c) 2015-2021 hhurz,
+ * Copyright (c) 2015-2023 hhurz,
  *   https://github.com/hhurz/tableExport.jquery.plugin
  *
  * Based on https://github.com/kayalshri/tableExport.jquery.plugin
@@ -82,8 +82,13 @@
         worksheetName: '',
         xlsx: {                         // Specific Excel 2007 XML format settings:
           formatId: {                   // XLSX format (id) used to format excel cells. See readme.md: data-tableexport-xlsxformatid
-            date: 14,                   // formatId or format string (e.g. 'm/d/yy') or function(cell, row, col) {return formatId}
-            numbers: 2                  // formatId or format string (e.g. '\"T\"\ #0.00') or function(cell, row, col) {return formatId}
+            date: 14,                   // The default format id, or a format string (e.g. 'm/d/yy'), or a function(cell, row, col)
+            numbers: 2,                 // The default Format id, or a format string (e.g. '\"T\"\ #0.00'), or a function(cell, row, col)
+            currency: 164               // This id is used by "data-tableexport-xlsxformatid" to allow you to export a cell in currency format (see below)
+          },
+          format: {
+            currency: '$#,##0.00;[Red]-$#,##0.00' // The format string to be used for the export for the currency format 
+                                                  // Euro format: '#,##0.00 €;[Red](#,##0.00) €'
           },
           onHyperlink: null             // function($cell, row, col, href, content, hyperlink): Return what to export for hyperlinks
         }
@@ -206,10 +211,10 @@
       'plain': {header: {fontStyle: 'bold'}}
     };
 
-    const jsPdfDefaultStyles = { // Base style for all themes
+    let jsPdfDefaultStyles = { // Base style for all themes
       cellPadding: 5,
       fontSize: 10,
-      font: "helvetica",         // helvetica, times, courier
+      fontName: "helvetica",     // helvetica, times, courier, malgun
       lineColor: 200,
       lineWidth: 0.1,
       fontStyle: 'normal',       // normal, bold, italic, bolditalic
@@ -801,6 +806,7 @@
         $head_rows = collectHeadRows($table);
         $($head_rows).each(function () {
           const $row = $(this);
+          const rowStyles = document.defaultView.getComputedStyle($row[0], null);
           trData = '';
           ForEachVisibleCell(this, 'th,td', rowIndex, $head_rows.length,
             function (cell, row, col) {
@@ -810,15 +816,15 @@
                 trData += '<th';
                 if (defaults.mso.styles.length) {
                   const cellStyles = document.defaultView.getComputedStyle(cell, null);
-                  const rowStyles = document.defaultView.getComputedStyle($row[0], null);
 
                   for (let cssStyle in defaults.mso.styles) {
-                    let thCss = cellStyles[defaults.mso.styles[cssStyle]];
+                    const stylePropertyName = defaults.mso.styles[cssStyle];
+                    let thCss = getStyle(cellStyles, stylePropertyName);
                     if (thCss === '')
-                      thCss = rowStyles[defaults.mso.styles[cssStyle]];
+                      thCss = getStyle(rowStyles, stylePropertyName);
                     if (thCss !== '' && thCss !== '0px none rgb(0, 0, 0)' && thCss !== 'rgba(0, 0, 0, 0)') {
                       thStyle += (thStyle === '') ? 'style="' : ';';
-                      thStyle += defaults.mso.styles[cssStyle] + ':' + thCss;
+                      thStyle += stylePropertyName + ':' + thCss;
                     }
                   }
                 }
@@ -846,6 +852,8 @@
         $rows = collectRows($table);
         $($rows).each(function () {
           const $row = $(this);
+          let cellStyles = null;
+          let rowStyles = null;
           trData = '';
           ForEachVisibleCell(this, 'td,th', rowIndex, $head_rows.length + $rows.length,
             function (cell, row, col) {
@@ -861,17 +869,21 @@
                   tdStyle = 'style="mso-number-format:\'' + tdCss + '\'';
 
                 if (defaults.mso.styles.length) {
-                  const cellStyles = document.defaultView.getComputedStyle(cell, null);
-                  const rowStyles = document.defaultView.getComputedStyle($row[0], null);
+                  cellStyles = document.defaultView.getComputedStyle(cell, null);
+                  rowStyles = null;
 
                   for (let cssStyle in defaults.mso.styles) {
-                    tdCss = cellStyles[defaults.mso.styles[cssStyle]];
-                    if (tdCss === '')
-                      tdCss = rowStyles[defaults.mso.styles[cssStyle]];
+                    const stylePropertyName = defaults.mso.styles[cssStyle];
+                    tdCss = getStyle(cellStyles, stylePropertyName);
 
+                    if (tdCss === '') {
+                      if (rowStyles === null)
+                        rowStyles = document.defaultView.getComputedStyle($row[0], null);
+                      tdCss = getStyle(rowStyles, stylePropertyName);
+                    }
                     if (tdCss !== '' && tdCss !== '0px none rgb(0, 0, 0)' && tdCss !== 'rgba(0, 0, 0, 0)') {
                       tdStyle += (tdStyle === '') ? 'style="' : ';';
-                      tdStyle += defaults.mso.styles[cssStyle] + ':' + tdCss;
+                      tdStyle += stylePropertyName + ':' + tdCss;
                     }
                   }
                 }
@@ -909,8 +921,8 @@
 
       //noinspection XmlUnusedNamespaceDeclaration
       let docFile = '<html xmlns:o="urn:schemas-microsoft-com:office:office" ' + MSDocSchema + ' xmlns="http://www.w3.org/TR/REC-html40">';
-      docFile += '<meta http-equiv="content-type" content="application/vnd.ms-' + MSDocType + '; charset=UTF-8">';
       docFile += '<head>';
+      docFile += '<meta http-equiv="content-type" content="application/vnd.ms-' + MSDocType + '; charset=UTF-8">';
       if (MSDocType === 'excel') {
         docFile += '<!--[if gte mso 9]>';
         docFile += '<xml>';
@@ -1163,7 +1175,7 @@
         // pdf output using jsPDF AutoTable plugin
         // https://github.com/simonbengtsson/jsPDF-AutoTable
 
-        const teOptions = defaults.jspdf.autotable.tableExport;
+        let teOptions = defaults.jspdf.autotable.tableExport;
 
         // When setting jspdf.format to 'bestfit' tableExport tries to choose
         // the minimum required paper format and orientation in which the table
@@ -1203,14 +1215,16 @@
         // thus it can be accessed from any callback function
         if (teOptions.doc == null) {
           teOptions.doc = new jspdf.jsPDF(defaults.jspdf.orientation,
-            defaults.jspdf.unit,
-            defaults.jspdf.format);
+                                          defaults.jspdf.unit,
+                                          defaults.jspdf.format);
           teOptions.wScaleFactor = 1;
           teOptions.hScaleFactor = 1;
 
           if (typeof defaults.jspdf.onDocCreated === 'function')
             defaults.jspdf.onDocCreated(teOptions.doc);
         }
+
+        jsPdfDefaultStyles.fontName = teOptions.doc.getFont().fontName;
 
         if (teOptions.outputImages === true)
           teOptions.images = {};
@@ -1485,7 +1499,7 @@
             if (typeof teOptions.onBeforeAutotable === 'function')
               teOptions.onBeforeAutotable($(this), teOptions.columns, teOptions.rows, atOptions);
 
-            jsPdfAutoTable(teOptions.doc, teOptions.columns, teOptions.rows, atOptions);
+            jsPdfAutoTable(atOptions.tableExport.doc, teOptions.columns, teOptions.rows, atOptions);
 
             // onAfterAutotable: optional callback function after returning
             // from jsPDF AutoTable that can be used to modify the AutoTable options
@@ -1742,11 +1756,16 @@
         return;
       }
 
+      const fileName = defaults.fileName + '.pdf';
+
       try {
         const blob = doc.output('blob')
-        saveAs(blob, defaults.fileName + '.pdf');
+        saveAs(blob, fileName);
+
+        if (typeof defaults.onAfterSaveToFile === 'function')
+          defaults.onAfterSaveToFile(blob, fileName);
       } catch (e) {
-        downloadFile(defaults.fileName + '.pdf',
+        downloadFile(fileName,
           'data:application/pdf' + (hasimages ? '' : ';base64') + ',',
           hasimages ? doc.output('blob') : doc.output());
       }
@@ -2076,7 +2095,7 @@
             $cell.data('teUserDefText', 1);
           }
           else if (htmlData !== '') {
-            const html = $.parseHTML(htmlData);
+            const html = $.parseHTML('<div>' + htmlData + '</div>', null, false);
             let inputIndex = 0;
             let selectIndex = 0;
 
@@ -2278,7 +2297,12 @@
       try {
         if (window.getComputedStyle) { // gecko and webkit
           prop = prop.replace(/([a-z])([A-Z])/, hyphenate);  // requires hyphenated, not camel
-          return window.getComputedStyle(target, null).getPropertyValue(prop);
+
+          if (typeof target === 'object' && target.nodeType !== undefined)
+            return window.getComputedStyle(target, null).getPropertyValue(prop);
+          if (typeof target === 'object' && target.length)
+            return target.getPropertyValue(prop);
+          return '';
         }
         if (target.currentStyle) { // ie
           return target.currentStyle[prop];
@@ -2384,18 +2408,18 @@
           let v = parseString(elt, _R, _C + CSOffset, cellInfo);
           let o = {t: 's', v: v};
           let _t = '';
-          const cellFormat = $(elt).attr('data-tableexport-cellformat') || '';
+          const cellFormat = $(elt).attr('data-tableexport-cellformat') || undefined;
 
           if (cellFormat !== '') {
             ssfId = parseInt($(elt).attr('data-tableexport-xlsxformatid') || 0);
 
             if (ssfId === 0 &&
-              typeof defaults.mso.xslx.formatId.numbers === 'function')
-              ssfId = defaults.mso.xslx.formatId.numbers($(elt), _R, _C + CSOffset);
+              typeof defaults.mso.xlsx.formatId.numbers === 'function')
+              ssfId = defaults.mso.xlsx.formatId.numbers($(elt), _R, _C + CSOffset);
 
             if (ssfId === 0 &&
-              typeof defaults.mso.xslx.formatId.date === 'function')
-              ssfId = defaults.mso.xslx.formatId.date($(elt), _R, _C + CSOffset);
+              typeof defaults.mso.xlsx.formatId.date === 'function')
+              ssfId = defaults.mso.xlsx.formatId.date($(elt), _R, _C + CSOffset);
 
             if (ssfId === 49 || ssfId === '@')
               _t = 's';
@@ -2429,19 +2453,22 @@
             }
             else if (_t === 'n' || isFinite(xlsxToNumber(v, defaults.numbers.output))) { // yes, defaults.numbers.output is right
               const vn = xlsxToNumber(v, defaults.numbers.output);
-              if (ssfId === 0 && typeof defaults.mso.xslx.formatId.numbers !== 'function') {
-                ssfId = defaults.mso.xslx.formatId.numbers;
+              if (ssfId === 0 && typeof defaults.mso.xlsx.formatId.numbers !== 'function') {
+                ssfId = defaults.mso.xlsx.formatId.numbers;
               }
               if (isFinite(vn) || isFinite(v))
                 o = {
                   t: 'n',
                   v: (isFinite(vn) ? vn : v),
-                  z: (typeof ssfId === 'string') ? ssfId : (ssfId in ssfTable ? ssfTable[ssfId] : '0.00')
+                  z: (typeof ssfId === 'string') ? ssfId :
+                      (ssfId in ssfTable ? ssfTable[ssfId] :
+                          ssfId === defaults.mso.xlsx.formatId.currency ? defaults.mso.xlsx.format.currency :
+                              '0.00')
                 };
             }
             else if ((vd = parseDateUTC(v)) !== false || _t === 'd') {
-              if (ssfId === 0 && typeof defaults.mso.xslx.formatId.date !== 'function') {
-                ssfId = defaults.mso.xslx.formatId.date;
+              if (ssfId === 0 && typeof defaults.mso.xlsx.formatId.date !== 'function') {
+                ssfId = defaults.mso.xlsx.formatId.date;
               }
               o = {
                 t: 'd',
@@ -2560,8 +2587,11 @@
 
       if (saveIt) {
         try {
-          blob = new Blob([data], {type: type + ';charset=' + charset});
-          saveAs(blob, fileName, bom === false);
+          if (bom)
+            blob = new Blob([String.fromCharCode(0xFEFF), [data]], { type: type + ';charset=' + charset});
+          else
+            blob = new Blob([data], {type: type + ';charset=' + charset});
+          saveAs(blob, fileName, {autoBom: false});
 
           if (typeof defaults.onAfterSaveToFile === 'function')
             defaults.onAfterSaveToFile(data, fileName);
@@ -2731,7 +2761,8 @@
       const userStyles = {
         textColor: 30, // Setting text color to dark gray as it can't be obtained from jsPDF
         fontSize: jsPdfDoc.internal.getFontSize(),
-        fontStyle: jsPdfDoc.internal.getFont().fontStyle
+        fontStyle: jsPdfDoc.internal.getFont().fontStyle,
+        fontName: jsPdfDoc.internal.getFont().fontName
       };
 
       // Create the table model with its columns, rows and cells
