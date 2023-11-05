@@ -84,7 +84,7 @@
                                     total = total + item[colonne];
                                 };
                             });
-                            return total.toFixed(2) + " €";
+                            return total.toFixed(2);
                         };
                         function formate_case(value, row, index) {
                             {% if afficher_detail %}if (row.regroupement === true) {return {classes: 'case_regroupement'}}{% endif %}
@@ -92,7 +92,7 @@
                         };
                         function formate_montant(value, row, index) {
                             try {
-                                return value.toFixed(2) + " €";
+                                return value.toFixed(2);
                             } catch (error) {
                                 return ""
                             };

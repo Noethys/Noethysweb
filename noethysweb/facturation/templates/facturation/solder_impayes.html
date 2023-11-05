@@ -85,12 +85,12 @@
                                         total = "";
                                     };
                                 });
-                                if (colonne === "2") {total = total.toFixed(2) + " €";};
+                                if (colonne === "2") {total = total.toFixed(2);};
                                 return total;
                             };
                             function formate_montant(value, row, index) {
                                 try {
-                                    return value.toFixed(2) + " €";
+                                    return value.toFixed(2);
                                 } catch (error) {
                                     return ""
                                 };

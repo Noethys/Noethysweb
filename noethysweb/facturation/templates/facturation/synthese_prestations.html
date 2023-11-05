@@ -86,7 +86,7 @@
                                 };
                             });
                             if (!($("#id_donnee_case").val().includes("nbre"))) {
-                                total = total.toFixed(2) + " €";
+                                total = total.toFixed(2);
                             }
                             return total;
                         };
@@ -99,7 +99,7 @@
                         function formate_montant(value, row, index) {
                             try {
                                 if (!($("#id_donnee_case").val().includes("nbre"))) {
-                                    return value.toFixed(2) + " €";
+                                    return value.toFixed(2);
                                 } else {
                                     return value;
                                 }

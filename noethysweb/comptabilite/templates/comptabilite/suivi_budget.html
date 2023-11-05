@@ -69,7 +69,7 @@
 
                         function formate_montant(value, row, index) {
                             try {
-                                return value.toFixed(2) + " €";
+                                return value.toFixed(2);
                             } catch (error) {
                                 return ""
                             };
@@ -78,7 +78,7 @@
                         function formate_montant_avec_signe(value, row, index) {
                             var signe = value > 0 ? "+" : "";
                             try {
-                                return signe + value.toFixed(2) + " €";
+                                return signe + value.toFixed(2);
                             } catch (error) {
                                 return ""
                             };
