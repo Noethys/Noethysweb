@@ -194,34 +194,42 @@ def Get_resultats(parametres={}, etat="attente", request=None):
                                 dateSaisie = date_saisie
 
                             # Etat des places
-                            listePlacesRestantes = []
-                            if IDunite in data_remplissage["dict_unites_remplissage_unites"]:
-                                for IDuniteRemplissage in data_remplissage["dict_unites_remplissage_unites"][IDunite]:
+                            if evenement and evenement.capacite_max:
+                                nbre_places_restantes = data_remplissage["dict_all_evenements"][evenement.pk].restantes
+                                if nbre_places_restantes <= 0:
+                                    placeDispo = False
+                                if placeDispo:
+                                    data_remplissage["dict_all_evenements"][evenement.pk].restantes -= 1
 
-                                    # Récupère les places restantes du suivi des conso
-                                    key_unite_remplissage = "%s_%s_%s" % (date, IDuniteRemplissage, groupe.pk)
-                                    dict_places_unite_remplissage = data_remplissage["dict_cases"].get(key_unite_remplissage, None)
+                            else:
+                                listePlacesRestantes = []
+                                if IDunite in data_remplissage["dict_unites_remplissage_unites"]:
+                                    for IDuniteRemplissage in data_remplissage["dict_unites_remplissage_unites"][IDunite]:
 
-                                    # Enlève les places réattribuées
-                                    if dict_places_unite_remplissage and dict_places_unite_remplissage["initiales"] > 0:
-                                        nbre_places_restantes = None
-                                        if evenement:
-                                            for evenement_tmp in dict_places_unite_remplissage["evenements"]:
-                                                if evenement_tmp.pk == evenement.pk:
-                                                    nbre_places_restantes = evenement_tmp.restantes
-                                        else:
-                                            nbre_places_restantes = dict_places_unite_remplissage["restantes"]
+                                        # Récupère les places restantes du suivi des conso
+                                        key_unite_remplissage = "%s_%s_%s" % (date, IDuniteRemplissage, groupe.pk)
+                                        dict_places_unite_remplissage = data_remplissage["dict_cases"].get(key_unite_remplissage, None)
 
-                                        key = (date, activite, groupe, IDuniteRemplissage, evenement)
-                                        if nbre_places_restantes is not None:
-                                            nbre_places_restantes -= dictPlacesRestantes.get(key, 0)
-                                            listePlacesRestantes.append(nbre_places_restantes)
+                                        # Enlève les places réattribuées
+                                        if dict_places_unite_remplissage and dict_places_unite_remplissage["initiales"] > 0:
+                                            nbre_places_restantes = None
+                                            if evenement:
+                                                for evenement_tmp in dict_places_unite_remplissage["evenements"]:
+                                                    if evenement_tmp.pk == evenement.pk:
+                                                        nbre_places_restantes = evenement_tmp.restantes
+                                            else:
+                                                nbre_places_restantes = dict_places_unite_remplissage["restantes"]
 
-                            if listePlacesRestantes and min(listePlacesRestantes) <= 0:
-                                placeDispo = False
+                                            key = (date, activite, groupe, IDuniteRemplissage, evenement)
+                                            if nbre_places_restantes is not None:
+                                                nbre_places_restantes -= dictPlacesRestantes.get(key, 0)
+                                                listePlacesRestantes.append(nbre_places_restantes)
+
+                                if listePlacesRestantes and min(listePlacesRestantes) <= 0:
+                                    placeDispo = False
 
                         # S'il reste finalement une place dispo, on change le nbre de places restantes
-                        if placeDispo == True:
+                        if placeDispo:
                             for dictUnite in dictConso[date][activite][groupe][evenement][inscription]:
                                 IDunite = dictUnite["IDunite"]
                                 listeIDunite.append(IDunite)
@@ -233,7 +241,7 @@ def Get_resultats(parametres={}, etat="attente", request=None):
                                         dictPlacesRestantes[key] += 1
 
                         # Icone
-                        if placeDispo == True:
+                        if placeDispo:
                             label = "<i class='fa fa-check margin-r-5 text-green'></i> %s <small class='badge badge-pill badge-success'>Disponible</small>" % texteIndividu
                         else:
                             label = "<i class='fa fa-remove margin-r-5 text-red'></i> %s" % texteIndividu

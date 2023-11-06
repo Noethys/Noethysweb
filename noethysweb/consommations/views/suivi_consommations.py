@@ -176,6 +176,7 @@ def Get_data(parametres={}, request=None):
     liste_evenements = Evenement.objects.filter(conditions_periodes & Q(activite__in=liste_activites)).order_by("date", "heure_debut")
 
     dict_evenements = {}
+    dict_all_evenements = {}
     for evenement in liste_evenements:
         for id_unite_remplissage in dict_unites_remplissage_unites.get(evenement.unite_id, []):
             key = "%s_%d_%d" % (evenement.date, id_unite_remplissage, evenement.groupe_id)
@@ -198,6 +199,7 @@ def Get_data(parametres={}, request=None):
                 if mode in ("places_initiales", "places_restantes"):
                     evenement.valeur = ""
             dict_evenements[key].append(evenement)
+            dict_all_evenements[evenement.pk] = evenement
 
     dict_cases = {}
     for date in liste_dates:
@@ -243,6 +245,7 @@ def Get_data(parametres={}, request=None):
     data = {
         "dict_cases": dict_cases,
         "dict_evenements": dict_evenements,
+        "dict_all_evenements": dict_all_evenements,
         "dict_colonnes": dict_colonnes,
         "liste_vacances": liste_vacances,
         "liste_dates": liste_dates,
