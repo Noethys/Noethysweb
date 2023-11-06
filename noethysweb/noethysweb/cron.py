@@ -15,7 +15,6 @@ def Test():
     logger.debug("Executable de python : %s" % sys.executable)
     logger.debug("Fin du TEST cron")
 
-
 def Sauvegarder_db():
     """ Sauvegarde de la base de données """
     logger.debug("%s : Lancement de dbbackup..." % datetime.datetime.now())
@@ -23,7 +22,6 @@ def Sauvegarder_db():
     utils_gnupg.Importation_cles()
     call_command("dbbackup", "--encrypt", "--clean", verbosity=1)
     logger.debug("Fin de la sauvegarde db")
-
 
 def Sauvegarder_media():
     """ Sauvegarde du répertoire media """
@@ -33,12 +31,10 @@ def Sauvegarder_media():
     call_command("mediabackup", "--encrypt", "--clean", verbosity=3)
     logger.debug("Fin de la sauvegarde media")
 
-
 def Traiter_attentes():
     logger.debug("%s : Lancement du traitement des attentes..." % datetime.datetime.now())
     from consommations.utils import utils_traitement_attentes
     utils_traitement_attentes.Traiter_attentes(request=None)
-
 
 def Vider_rep_temp():
     logger.debug("%s : Lancement du vidage du répertoire temp..." % datetime.datetime.now())
@@ -50,12 +46,15 @@ def Corriger_anomalies():
     logger.debug("%s : Lancement de la correction automatique des anomalies..." % datetime.datetime.now())
     call_command("corrige_anomalies")
 
-
 def Generer_taches():
     logger.debug("%s : Lancement de la génération des tâches récurrentes..." % datetime.datetime.now())
     call_command("generation_taches")
 
-
 def Purge_mdp_expires():
     logger.debug("%s : Purge des mots de passe expirés..." % datetime.datetime.now())
     call_command("purge_mdp_expires")
+
+def Recalculer_prestations_mois_precedent():
+    logger.debug("%s : Recalculer les prestations du mois précédent..." % datetime.datetime.now())
+    from dateutil.relativedelta import relativedelta
+    call_command("recalculer_prestations", mois=format(datetime.date.today() - relativedelta(months=1), "%Y-%m"))
