@@ -1,3 +1,19 @@
+Version 1.2.0.5 (07/11/2023) :
+
+ATTENTION, si vous souhaitez continuer à utiliser la réattribution automatique des places disponibles,
+vous devez désormais l'activer depuis le paramétrage de l'activité > Rubrique Portail > Paramètres.
+
+- Ajout de l'envoi de SMS avec OVH
+- Ajout du format XLSX à l'export des listes bootstrap-table
+- Correction de l'affichage d'une réponse de questionnaire si texte
+- Correction de l'affichage d'un individu sans prénom dans la facture
+- Correction des mots-clés non remplacés dans les impressions
+- Correction et amélioration de la réattribution automatique des places
+- Correction des graphiques age et villes de résidence des statistiques
+- Retrait des symboles euros des listes bootstrap-table
+- Autorise les montants d'adhésions nuls
+- Update bootstrap-table 1.22.1
+
 Version 1.2.0.4 (01/11/2023) :
 
 - Ajout de la liste des règlements associés à un lot de factures
