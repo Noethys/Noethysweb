@@ -3,9 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from core.utils import utils_infos_individus, utils_dates, utils_resolveur_formule
-from core.models import ModeleDocument, Organisateur
-import json, os, datetime
+import json, os, datetime, re
 from io import BytesIO
 from django.conf import settings
 from django.core.cache import cache
@@ -18,6 +16,8 @@ from reportlab.graphics.barcode.code39 import Extended39, Standard39
 from reportlab.graphics.barcode.code93 import Extended93, Standard93
 from reportlab.graphics.barcode.usps import FIM, POSTNET
 from reportlab.graphics.barcode import createBarcodeDrawing
+from core.utils import utils_infos_individus, utils_dates, utils_resolveur_formule
+from core.models import ModeleDocument, Organisateur
 
 
 class Categorie():
@@ -869,7 +869,7 @@ class Modele_doc():
                     if nomChamp in texte:
                         texte = texte.replace(nomChamp, valeur)
             # Remplace également les mots-clés non utilisés par des chaînes vides
-            # texte = re.sub(r"\{[A-Za-z0-9_-]*?\}", "", texte)
+            texte = re.sub(r"\{[A-Za-z0-9_-]*?\}", "", texte)
 
             valeur = texte
 
