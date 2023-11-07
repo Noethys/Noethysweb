@@ -141,7 +141,7 @@ class Cotisations():
                 dictDonnee.update(self.infosIndividus.GetDictValeurs(mode="individu", ID=cotisation.individu_id, formatChamp=True))
             if cotisation.famille:
                 dictDonnee.update(self.infosIndividus.GetDictValeurs(mode="famille", ID=cotisation.famille_id, formatChamp=True))
-            
+
             # Ajoute les réponses des questionnaires
             for dictReponse in self.questionnaires.GetDonnees(cotisation.famille_id):
                 dictDonnee[dictReponse["champ"]] = dictReponse["reponse"]
