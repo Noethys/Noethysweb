@@ -2508,7 +2508,7 @@ class QuestionnaireReponse(models.Model):
             return "oui" if self.reponse == "True" else "non"
         if self.question.controle in ("decimal", "montant"):
             return float(decimal.Decimal(self.reponse or 0.0))
-        return ""
+        return self.reponse or ""
 
 
 class MemoJournee(models.Model):
