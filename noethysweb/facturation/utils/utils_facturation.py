@@ -391,7 +391,7 @@ class Facturation():
                             texteDateNaiss = ", né le %s" % utils_dates.ConvertDateToFR(prestation.individu.date_naiss)
                         else:
                             texteDateNaiss = ", née le %s" % utils_dates.ConvertDateToFR(prestation.individu.date_naiss)
-                    texteIndividu = "<b>%s %s</b><font size=6>%s</font>" % (prestation.individu.nom, prestation.individu.prenom, texteDateNaiss)
+                    texteIndividu = "<b>%s %s</b><font size=6>%s</font>" % (prestation.individu.nom, prestation.individu.prenom or "", texteDateNaiss)
 
                     nom = prestation.individu.Get_nom()
 
