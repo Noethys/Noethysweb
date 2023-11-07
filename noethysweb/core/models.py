@@ -1169,6 +1169,10 @@ class Activite(models.Model):
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT)
     service1 = models.CharField(verbose_name="Service axe 1", max_length=15, blank=True, null=True, help_text="Premier axe analytique.")
     service2 = models.CharField(verbose_name="Service axe 2", max_length=10, blank=True, null=True, help_text="Second axe analytique.")
+    reattribution_auto = models.BooleanField(verbose_name="Réattribution automatique des places disponibles", default=False, help_text="Cochez cette case pour laisser Noethysweb réattribuer les places en attente automatiquement chaque nuit.")
+    reattribution_adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Adresse d'expédition", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez l'adresse d'expédition d'emails qui sera utilisée pour envoyer une notification de réattribution de places à la famille.")
+    reattribution_delai = models.IntegerField(verbose_name="Délai de réattribution", blank=True, null=True, choices=[(1, "1 jour"), (2, "2 jours"), (3, "3 jours"), (4, "4 jours"), (5, "5 jours"), (7, "1 semaine"), (14, "2 semaines")], default=2, help_text="Sélectionnez le nombre de jours jusqu'auquel il est possible de réattribuer des places.")
+    reattribution_modele_email = models.ForeignKey("ModeleEmail", verbose_name="Modèle d'Email", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez le modèle d'email qui sera utilisé pour notifier les familles par email de la réattribution.")
 
     class Meta:
         db_table = 'activites'
@@ -2538,7 +2542,7 @@ class ModeleEmail(models.Model):
         verbose_name_plural = "modèles d'emails"
 
     def __str__(self):
-        return "ModeleEmail ID%d" % self.idmodele if self.idmodele else "Nouveau modèle"
+        return self.nom if self.idmodele else "Nouveau modèle"
 
     def delete(self, *args, **kwargs):
         # Supprime l'objet

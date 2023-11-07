@@ -11,7 +11,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset, Div
 from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
-from core.models import Activite
+from core.models import Activite, ModeleEmail
 from core.widgets import DateTimePickerWidget
 
 
@@ -41,18 +41,11 @@ class Formulaire(FormulaireBase, ModelForm):
     exclure_weekends = forms.BooleanField(label="Exclure les weeks-ends", required=False, initial=False)
     exclure_feries = forms.BooleanField(label="Exclure les jours fériés", required=False, initial=False)
 
-    # Absence injustifiée
-    # liste_choix = [(None, "Aucun"), (0, "Jour J")]
-    # for x in range(1, 31):
-    #     liste_choix.append((x, "Jour J-%d" % x))
-    # absenti_delai = forms.TypedChoiceField(label="Délai de facturation", choices=liste_choix, initial=None, required=False, help_text="L'état Absence injustifiée est attribué aux réservations modifiées ou supprimées après...")
-    # absenti_heure = forms.TimeField(label="Heure limite", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-
     class Meta:
         model = Activite
         fields = ["portail_inscriptions_affichage", "portail_inscriptions_date_debut", "portail_inscriptions_date_fin", "portail_reservations_affichage",
                   "portail_reservations_limite", "portail_afficher_dates_passees", "portail_inscriptions_bloquer_si_complet", "portail_inscriptions_imposer_pieces",
-                  # "portail_reservations_absenti", "portail_unites_multiples",
+                  "reattribution_auto", "reattribution_adresse_exp", "reattribution_delai", "reattribution_modele_email"
                   ]
         help_texts = {
             "portail_inscriptions_affichage": "Sélectionnez Autoriser pour permettre aux usagers de demander une inscription à cette activité depuis le portail. Cette demande devra être validée par un utilisateur.",
@@ -80,11 +73,8 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields["exclure_weekends"].initial = "exclure_weekends" in self.instance.portail_reservations_limite
             self.fields["exclure_feries"].initial = "exclure_feries" in self.instance.portail_reservations_limite
 
-        # Absenti
-        # if self.instance.portail_reservations_absenti:
-        #     parametres_absenti = self.instance.portail_reservations_absenti.split("#")
-        #     self.fields["absenti_delai"].initial = int(parametres_absenti[0])
-        #     self.fields["absenti_heure"].initial = datetime.datetime.strptime(parametres_absenti[1], '%H:%M')
+        # Modèle d'email de réattribution
+        self.fields["reattribution_modele_email"].queryset = ModeleEmail.objects.filter(categorie="portail_places_disponibles")
 
         # Création des boutons de commande
         if self.mode == "CONSULTATION":
@@ -115,11 +105,14 @@ class Formulaire(FormulaireBase, ModelForm):
                     Field("exclure_feries"),
                     id="bloc_limite"
                 ),
-                # Field("absenti_delai"),
-                # Field("absenti_heure"),
                 Field("portail_afficher_dates_passees"),
-                # Field("portail_unites_multiples"),
                 ),
+            Fieldset("Réattribution automatique des places disponibles",
+                Field("reattribution_auto"),
+                Field("reattribution_adresse_exp"),
+                Field("reattribution_delai"),
+                Field("reattribution_modele_email"),
+            ),
             HTML(EXTRA_SCRIPT),
         )
 
@@ -151,14 +144,14 @@ class Formulaire(FormulaireBase, ModelForm):
         else:
             self.cleaned_data["portail_reservations_limite"] = None
 
-        # Absenti
-        # if self.cleaned_data["absenti_delai"]:
-        #     if not self.cleaned_data["absenti_heure"]:
-        #         self.add_error('absenti_heure', "Vous devez spécifier une heure limite")
-        #         return
-        #     self.cleaned_data["portail_reservations_absenti"] = "#".join([self.cleaned_data["absenti_delai"], self.cleaned_data["absenti_heure"].strftime('%H:%M')])
-        # else:
-        #     self.cleaned_data["portail_reservations_absenti"] = None
+        # Réattribution de places disponibles
+        if self.cleaned_data["reattribution_auto"]:
+            if not self.cleaned_data["reattribution_adresse_exp"]:
+                self.add_error("reattribution_adresse_exp", "Vous devez sélectionner une adresse d'expédition d'emails")
+                return
+            if not self.cleaned_data["reattribution_modele_email"]:
+                self.add_error("reattribution_modele_email", "Vous devez sélectionner un modèle d'emails")
+                return
 
         return self.cleaned_data
 

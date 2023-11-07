@@ -14,103 +14,103 @@ from consommations.utils.utils_grille_virtuelle import Grille_virtuelle
 
 def Traiter_attentes(request=None, test=False):
     logger.debug("Recherche de places en attente à réattribuer...")
-    date_min = datetime.date.today() + datetime.timedelta(2)
-    date_max = date_min + datetime.timedelta(365)
 
-    # Recherche les places disponibles
-    liste_resultats = Get_resultats(parametres={
-        "donnees": "traitement_attente",
-        "date_min": date_min,
-        "date_max": date_max,
-        "activites": Activite.objects.all(),
-    })
+    for activite in Activite.objects.filter(reattribution_auto=True):
+        date_min = datetime.date.today() + datetime.timedelta(activite.reattribution_delai)
+        date_max = date_min + datetime.timedelta(365)
 
-    # Regroupement des résultats par famille, individu, date
-    dict_resultats_familles = {}
-    for resultat in liste_resultats:
-        if resultat.get("place_dispo", False) == True:
-            idfamille = resultat["idfamille"]
-            idindividu = resultat["idindividu"]
-            date = utils_dates.ConvertDateENGtoDate(resultat["date"])
-            dict_resultats_familles.setdefault(idfamille, {})
-            dict_resultats_familles[idfamille].setdefault(idindividu, {})
-            dict_resultats_familles[idfamille][idindividu].setdefault(date, [])
-            dict_resultats_familles[idfamille][idindividu][date].append({
-                "nom_unites": resultat["unites"],
-                "unites": resultat["liste_IDunite"],
-                "consommations": resultat["liste_IDconso"],
-                "nom_activite": resultat["nom_activite"],
-                "idactivite": resultat["idactivite"],
-            })
+        # Recherche les places disponibles
+        liste_resultats = Get_resultats(parametres={
+            "donnees": "traitement_attente",
+            "date_min": date_min,
+            "date_max": date_max,
+            "activites": [activite,],
+        })
 
-    logger.debug("Nombre de familles concernées par la réattribution de places en attente : %d." % len(dict_resultats_familles))
+        # Regroupement des résultats par famille, individu, date
+        dict_resultats_familles = {}
+        for resultat in liste_resultats:
+            if resultat.get("place_dispo", False) == True:
+                idfamille = resultat["idfamille"]
+                idindividu = resultat["idindividu"]
+                date = utils_dates.ConvertDateENGtoDate(resultat["date"])
+                dict_resultats_familles.setdefault(idfamille, {})
+                dict_resultats_familles[idfamille].setdefault(idindividu, {})
+                dict_resultats_familles[idfamille][idindividu].setdefault(date, [])
+                dict_resultats_familles[idfamille][idindividu][date].append({
+                    "nom_unites": resultat["unites"],
+                    "unites": resultat["liste_IDunite"],
+                    "consommations": resultat["liste_IDconso"],
+                    "nom_activite": resultat["nom_activite"],
+                    "idactivite": resultat["idactivite"],
+                })
 
-    # Si aucune famille concernée, on abandonne la procédure
-    if not len(dict_resultats_familles):
-        return
+        logger.debug("Nombre de familles concernées par la réattribution de places en attente : %d." % len(dict_resultats_familles))
 
-    # Recherche de l'adresse d'expédition du mail
-    idadresse_exp = utils_portail.Get_parametre(code="connexion_adresse_exp")
-    adresse_exp = None
-    if idadresse_exp:
-        adresse_exp = AdresseMail.objects.get(pk=idadresse_exp, actif=True)
-    if not adresse_exp:
-        logger.error("Aucune adresse d'expédition paramétrée pour l'envoi des places disponibles.")
-        return
+        # Si aucune famille concernée, on abandonne la procédure
+        if not len(dict_resultats_familles):
+            continue
 
-    # Création du mail
-    logger.debug("Création du mail des places en attente à réattribuer...")
-    modele_email = ModeleEmail.objects.filter(categorie="portail_places_disponibles", defaut=True).first()
-    if not modele_email:
-        logger.error("Erreur : Aucune modèle d'email de catégorie 'portail_places_disponibles' n'a été paramétré !")
-        return
+        # Recherche de l'adresse d'expédition du mail
+        if not activite.reattribution_adresse_exp:
+            logger.error("Aucune adresse d'expédition paramétrée pour l'envoi des places disponibles.")
+            continue
+        if not activite.reattribution_adresse_exp.actif:
+            logger.error("L'adresse d'expédition paramétrée n'est pas activée.")
+            continue
 
-    mail = Mail.objects.create(
-        categorie="portail_places_disponibles",
-        objet=modele_email.objet if modele_email else "",
-        html=modele_email.html if modele_email else "",
-        adresse_exp=adresse_exp,
-        selection="NON_ENVOYE",
-        utilisateur=request.user if request else None,
-    )
+        # Création du mail
+        logger.debug("Création du mail des places en attente à réattribuer...")
+        if not activite.reattribution_modele_email:
+            logger.error("Erreur : Aucun modèle d'email de catégorie 'portail_places_disponibles' n'a été paramétré !")
+            continue
 
-    # Préparation de chaque mail à envoyer
-    for idfamille, dict_individus in dict_resultats_familles.items():
-        famille = Famille.objects.get(pk=idfamille)
-        for idindividu, dict_dates in dict_individus.items():
-            individu = Individu.objects.get(pk=idindividu)
-            logger.debug("Préparation du mail pour %s..." % individu)
+        mail = Mail.objects.create(
+            categorie="portail_places_disponibles",
+            objet=activite.reattribution_modele_email.objet if activite.reattribution_modele_email else "",
+            html=activite.reattribution_modele_email.html if activite.reattribution_modele_email else "",
+            adresse_exp=activite.reattribution_adresse_exp,
+            selection="NON_ENVOYE",
+            utilisateur=request.user if request else None,
+        )
 
-            # Préparation du texte de l'email
-            liste_dates = list(dict_dates.keys())
-            liste_dates.sort()
-            texte_detail = ""
-            for date in liste_dates:
-                texte_detail += "<b>%s</b> :<br>" % utils_dates.DateComplete(date)
-                for dict_temp in dict_dates[date]:
-                    texte_detail += " - %s (%s)<br>" % (dict_temp["nom_unites"], dict_temp["nom_activite"])
-            logger.debug("Détail = %s" % texte_detail)
+        # Préparation de chaque mail à envoyer
+        for idfamille, dict_individus in dict_resultats_familles.items():
+            famille = Famille.objects.get(pk=idfamille)
+            for idindividu, dict_dates in dict_individus.items():
+                individu = Individu.objects.get(pk=idindividu)
+                logger.debug("Préparation du mail pour %s..." % individu)
 
-            valeurs_fusion = {"{DETAIL_PLACES}": texte_detail, "{INDIVIDU_NOM}": individu.nom, "{INDIVIDU_PRENOM}": individu.prenom, "{INDIVIDU_NOM_COMPLET}": individu.Get_nom()}
-            destinataire = Destinataire.objects.create(categorie="famille", famille=famille, adresse=famille.mail, valeurs=json.dumps(valeurs_fusion))
-            mail.destinataires.add(destinataire)
+                # Préparation du texte de l'email
+                liste_dates = list(dict_dates.keys())
+                liste_dates.sort()
+                texte_detail = ""
+                for date in liste_dates:
+                    texte_detail += "<b>%s</b> :<br>" % utils_dates.DateComplete(date)
+                    for dict_temp in dict_dates[date]:
+                        texte_detail += " - %s (%s)<br>" % (dict_temp["nom_unites"], dict_temp["nom_activite"])
+                logger.debug("Détail = %s" % texte_detail)
 
-    # Envoi du mail
-    logger.debug("Envoi du mail de réattribution des places en attente.")
-    if not test:
-        utils_email.Envoyer_model_mail(idmail=mail.pk, request=request)
+                valeurs_fusion = {"{DETAIL_PLACES}": texte_detail, "{INDIVIDU_NOM}": individu.nom, "{INDIVIDU_PRENOM}": individu.prenom, "{INDIVIDU_NOM_COMPLET}": individu.Get_nom()}
+                destinataire = Destinataire.objects.create(categorie="famille", famille=famille, adresse=famille.mail, valeurs=json.dumps(valeurs_fusion))
+                mail.destinataires.add(destinataire)
 
-    # Transformation des consommations Attente en Réservation
-    logger.debug("Transformation des consommations attente en réservation...")
-    for idfamille, dict_individus in dict_resultats_familles.items():
-        for idindividu, dict_dates in dict_individus.items():
-            for date, liste_temp in dict_dates.items():
-                for dict_temp in liste_temp:
-                    grille = Grille_virtuelle(request=request, idfamille=idfamille, idindividu=idindividu, idactivite=dict_temp["idactivite"], date_min=date, date_max=date)
-                    logger.debug("Transformation des consommations : %s..." % str(dict_temp["consommations"]))
-                    for idconso in dict_temp["consommations"]:
-                        grille.Modifier(criteres={"idconso": idconso, "etat": "attente"}, modifications={"etat": "reservation"})
-                    if not test:
-                        grille.Enregistrer()
+        # Envoi du mail
+        logger.debug("Envoi du mail de réattribution des places en attente.")
+        if not test:
+            utils_email.Envoyer_model_mail(idmail=mail.pk, request=request)
+
+        # Transformation des consommations Attente en Réservation
+        logger.debug("Transformation des consommations attente en réservation...")
+        for idfamille, dict_individus in dict_resultats_familles.items():
+            for idindividu, dict_dates in dict_individus.items():
+                for date, liste_temp in dict_dates.items():
+                    for dict_temp in liste_temp:
+                        grille = Grille_virtuelle(request=request, idfamille=idfamille, idindividu=idindividu, idactivite=dict_temp["idactivite"], date_min=date, date_max=date)
+                        logger.debug("Transformation des consommations : %s..." % str(dict_temp["consommations"]))
+                        for idconso in dict_temp["consommations"]:
+                            grille.Modifier(criteres={"idconso": idconso, "etat": "attente"}, modifications={"etat": "reservation"})
+                        if not test:
+                            grille.Enregistrer()
 
     logger.debug("Fin de la procédure de réattribution des places en attente.")
