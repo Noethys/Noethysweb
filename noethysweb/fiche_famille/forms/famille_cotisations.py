@@ -202,9 +202,9 @@ class Formulaire(FormulaireBase, ModelForm):
             if not self.cleaned_data["label_prestation"]:
                 self.add_error("label_prestation", "Vous devez saisir un label pour la prestation à générer")
                 return
-            if not self.cleaned_data["montant"]:
-                self.add_error("montant", "Vous devez saisir un montant pour la prestation à générer")
-                return
+            # if not self.cleaned_data["montant"]:
+            #     self.add_error("montant", "Vous devez saisir un montant pour la prestation à générer")
+            #     return
         else:
             self.cleaned_data["date_facturation"] = None
             self.cleaned_data["label_prestation"] = None
