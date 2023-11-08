@@ -189,7 +189,7 @@ class Assistant_base(CustomView, SessionWizardView):
             for index in range(1, nbre_groupes + 1):
                 nom_groupe = donnees.get("nom_groupe_%d" % index, None)
                 abrege_groupe = CreationAbrege(nom_groupe)
-                nbre_inscrits_max = donnees.get("nbre_inscrits_max_%d" % index, None)
+                nbre_inscrits_max = donnees.get("nbre_inscrits_max_groupe_%d" % index, None)
                 groupe = Groupe.objects.create(activite=activite, nom=nom_groupe, abrege=abrege_groupe, ordre=index, nbre_inscrits_max=nbre_inscrits_max)
                 donnees["groupes"].append(groupe)
 

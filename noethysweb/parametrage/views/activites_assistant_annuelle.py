@@ -47,7 +47,7 @@ class Page_groupes_noms(forms.Form):
         for index in range(1, nbre_groupes+1):
             if nbre_groupes > 1:
                 self.fields["nom_groupe_%d" % index] = forms.CharField(label="Quel est le nom du groupe ou de la séance n°%d ?" % index, max_length=300, help_text="Exemples : 'Lundi 18h15', 'Samedi 10h', 'Séniors', etc...")
-                self.fields["nbre_inscrits_max_groupe_%d" % index] = forms.IntegerField(label="Quel est le nombre maximal d'inscrits du groupe  ou de la séance n°%d ?" % index, initial=0, min_value=0, help_text="S'il n'existe aucune limitation du nombre d'inscrits, laisser la valeur à 0.")
+                self.fields["nbre_inscrits_max_groupe_%d" % index] = forms.IntegerField(label="Quel est le nombre maximal d'inscrits du groupe ou de la séance n°%d ?" % index, initial=0, min_value=0, help_text="S'il n'existe aucune limitation du nombre d'inscrits, laisser la valeur à 0.")
             if has_consommations == "oui":
                 choix_jours = [
                     ("SCOL_0", "Semaine scolaire : Lundi"), ("SCOL_1", "Semaine scolaire : Mardi"),
