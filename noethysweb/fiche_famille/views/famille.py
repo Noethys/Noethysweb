@@ -215,10 +215,10 @@ class Resume(Onglet, DetailView):
         conditions = Q(famille_id=idfamille) & Q(date_debut__lte=datetime.date.today()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
         conditions &= (Q(activite__date_fin__isnull=True) | Q(activite__date_fin__gte=datetime.date.today()))
         dict_inscriptions_actuelles = {}
-        for inscription in Inscription.objects.select_related("activite").filter(conditions).order_by("date_debut"):
+        for inscription in Inscription.objects.select_related("activite", "groupe").filter(conditions).order_by("date_debut"):
             dict_inscriptions_actuelles.setdefault(inscription.individu_id, [])
             if inscription.activite.nom not in dict_inscriptions_actuelles[inscription.individu_id]:
-                dict_inscriptions_actuelles[inscription.individu_id].append(inscription.activite.nom)
+                dict_inscriptions_actuelles[inscription.individu_id].append("%s (%s)\n" % (inscription.activite.nom, inscription.groupe.nom))
         context["inscriptions_actuelles"] = dict_inscriptions_actuelles
 
         return context

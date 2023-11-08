@@ -178,7 +178,7 @@
 
                                             {% if rattachement.individu_id in inscriptions_actuelles %}
                                                 <li>
-                                                    <span style="white-space: nowrap;" title="{{ inscriptions_actuelles|get_item:rattachement.individu_id|Convert_liste_to_texte_virgules }}">
+                                                    <span style="white-space: nowrap;" title="{{ inscriptions_actuelles|get_item:rattachement.individu_id|join:"" }}">
                                                         <i class="fa fa-ticket text-gray"></i> {{ inscriptions_actuelles|get_item:rattachement.individu_id|length }}
                                                         inscription{{ inscriptions_actuelles|get_item:rattachement.individu_id|length|pluralize }}
                                                         active{{ inscriptions_actuelles|get_item:rattachement.individu_id|length|pluralize }}
