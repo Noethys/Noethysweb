@@ -290,7 +290,7 @@ class AdresseMail(models.Model):
 
 class ConfigurationSMS(models.Model):
     idconfiguration = models.AutoField(verbose_name="ID", db_column='IDconfiguration', primary_key=True)
-    moteur = models.CharField(verbose_name="Moteur", max_length=200, choices=[("mailjet", "Mailjet"), ("ovh", "OVH")], help_text="Sélectionnez un moteur d'expédition.")
+    moteur = models.CharField(verbose_name="Moteur", max_length=200, choices=[("mailjet", "Mailjet"), ("ovh", "OVH"), ("brevo", "Brevo")], help_text="Sélectionnez un moteur d'expédition.")
     token = encrypt(models.CharField(verbose_name="Token", max_length=300, blank=True, null=True, help_text="Saisissez le token qui vous a été communiqué par votre fournisseur."))
     nom_exp = models.CharField(verbose_name="Nom de l'expéditeur", max_length=11, blank=True, null=True, help_text="Saisissez le nom d'expéditeur qui doit apparaître dans le SMS (11 caractères max).")
     nbre_caracteres = models.IntegerField(verbose_name="Nbre caractères max.", default=160, help_text="Précisez le nombre de caractères maximal accepté pour un SMS (160 par défaut).")

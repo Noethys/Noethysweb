@@ -84,6 +84,19 @@ def Envoyer_model_sms(idsms=None, request=None):
             else:
                 resultat_envoi = reponse["message"]
 
+        # Envoi avec BREVO
+        if sms.configuration_sms.moteur == "brevo":
+            headers = {"accept": "application/json", "api-key": sms.configuration_sms.token, "Content-Type": "application/json"}
+            data = {"sender": sms.configuration_sms.nom_exp, "recipient": numero, "content": texte, "type": "transactional"}
+            reponse = requests.post("https://api.brevo.com/v3/transactionalSMS/sms", headers=headers, json=data)
+            dict_reponse = reponse.json()
+            if reponse.status_code == 201:
+                liste_envois_succes.append(destinataire)
+                resultat_envoi = "ok"
+            else:
+                resultat_envoi = "%s : %s" % (dict_reponse["code"], dict_reponse["message"])
+                logger.debug("Erreur envoi SMS : %s" % resultat_envoi)
+
         # Mémorise le résultat de l'envoi dans la DB
         destinataire.date_envoi = datetime.datetime.now()
         destinataire.resultat_envoi = resultat_envoi
@@ -131,5 +144,16 @@ def Envoyer_sms_test(request=None, dict_options={}):
             return "Message envoyé avec succès. Crédit restant : %d SMS." % credit_restant
         else:
             return reponse["message"]
+
+    # Envoi avec Brevo
+    if dict_options["moteur"] == "brevo":
+        headers = {"accept": "application/json", "api-key": dict_options["token"], "Content-Type": "application/json"}
+        data = {"sender": dict_options["nom_exp"], "recipient": "+33" + numero[1:], "content": "Ceci est un SMS de test", "type": "transactional"}
+        reponse = requests.post("https://api.brevo.com/v3/transactionalSMS/sms", headers=headers, json=data)
+        dict_reponse = reponse.json()
+        if reponse.status_code == 201:
+            return "Message envoyé avec succès."
+        else:
+            return "%s : %s" % (dict_reponse["code"], dict_reponse["message"])
 
     return "Aucun moteur sélectionné"

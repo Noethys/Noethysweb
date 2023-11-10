@@ -75,6 +75,14 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.add_error("motdepasse", "Vous devez renseigner le mot de passe")
                 return
 
+        if self.cleaned_data["moteur"] == "brevo":
+            if not self.cleaned_data["token"]:
+                self.add_error("token", "Vous devez renseigner le token communiqué par le fournisseur")
+                return
+            if not self.cleaned_data["nom_exp"]:
+                self.add_error("nom_exp", "Vous devez renseigner un nom d'expéditeur")
+                return
+
         return self.cleaned_data
 
 
@@ -108,6 +116,11 @@ function On_change_moteur() {
         $('#div_id_motdepasse').show();
     }
 
+    if ($(this).val() == 'brevo') {
+        $('#div_id_token').show();
+        $('#div_id_nom_exp').show();
+    }
+    
 }
 $(document).ready(function() {
     $('#id_moteur').change(On_change_moteur);
