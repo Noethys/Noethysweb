@@ -124,8 +124,7 @@ class Impression(utils_impression.Impression):
         liste_classes = [int(idclasse) for idclasse in self.dict_donnees["classes"].split(";")] if self.dict_donnees["classes"] else []
 
         dictConso = {}
-        # dictIndividus = {}
-        # listeIndividus = []
+        liste_inscriptions = []
         for conso in liste_conso:
             valide = True
 
@@ -161,14 +160,6 @@ class Impression(utils_impression.Impression):
 
             if valide:
                 for IDetiquette in [None,]:#listeEtiquettes :
-
-                    # Mémorisation du IDindividu
-                    # if conso.individu not in listeIndividus:
-                    #     listeIndividus.append(conso.individu)
-
-                    # Dict Individu
-                    # dictIndividus[conso.individu_id] = {"IDcivilite": conso.individu.civilite, "IDfamille": conso.inscription.famille_id, "individu": conso.individu}
-
                     utils_dictionnaires.DictionnaireImbrique(dictionnaire=dictConso,
                                                              cles=[conso.activite_id, IDgroupe, scolarite, IDevenement, IDetiquette, conso.inscription],
                                                              valeur={"IDcivilite": conso.individu.civilite, "nom": conso.individu.nom, "prenom": conso.individu.prenom, "date_naiss": conso.individu.date_naiss, "age": conso.individu.Get_age(), "listeConso": {}})
@@ -179,12 +170,20 @@ class Impression(utils_impression.Impression):
 
                     detail_conso = {"heure_debut": conso.heure_debut, "heure_fin": conso.heure_fin, "etat": conso.etat, "quantite": conso.quantite, "IDfamille": conso.inscription.famille_id, "evenement": conso.evenement}  #, "etiquettes": etiquettes}
                     dictConso[conso.activite_id][IDgroupe][scolarite][IDevenement][IDetiquette][conso.inscription]["listeConso"][conso.date][conso.unite_id].append(detail_conso)
+                    if conso.inscription.pk not in liste_inscriptions:
+                        liste_inscriptions.append(conso.inscription.pk)
 
+        # Masquer les présents
+        if self.dict_donnees["masquer_presents"]:
+            dictConso = {}
 
         # Intégration de tous les inscrits
         if self.dict_donnees["afficher_inscrits"]:
 
             conditions = Q(activite__in=liste_activites) & Q(statut="ok") & (Q(date_fin__isnull=True) | Q(date_fin__gte=max(self.dict_donnees["dates"])))
+            if self.dict_donnees["masquer_presents"]:
+                conditions &= ~Q(idinscription__in=liste_inscriptions)
+
             inscriptions = Inscription.objects.select_related('individu', 'activite', 'famille', 'individu__type_sieste').prefetch_related("individu__regimes_alimentaires").filter(conditions)
 
             for inscription in inscriptions:
@@ -214,13 +213,6 @@ class Impression(utils_impression.Impression):
                 IDevenement = None
 
                 if valide:
-                    # Mémorisation du IDindividu
-                    # if inscription.individu not in listeIndividus:
-                    #     listeIndividus.append(inscription.individu)
-
-                    # Dict Individu
-                    # dictIndividus[inscription.individu_id] = {"IDcivilite": inscription.individu.civilite, "IDfamille": inscription.famille_id, "individu": inscription.individu}
-
                     utils_dictionnaires.DictionnaireImbrique(dictionnaire=dictConso,
                                                              cles=[inscription.activite_id, IDgroupe, scolarite, IDevenement, IDetiquette, inscription],
                                                              valeur={"IDcivilite": inscription.individu.civilite, "nom": inscription.individu.nom, "prenom": inscription.individu.prenom, "date_naiss": inscription.individu.date_naiss, "age": inscription.individu.Get_age(), "listeConso": {}})

@@ -49,6 +49,7 @@ class Formulaire(FormulaireBase, forms.Form):
     ordre = forms.ChoiceField(label="Ordre", choices=[("croissant", "Croissant"), ("decroissant", "Décroissant")], initial="croissant", required=False)
     nbre_lignes_vierges = forms.IntegerField(label="Lignes vierges", initial=3, min_value=0, required=True)
     afficher_inscrits = forms.BooleanField(label="Afficher tous les inscrits", initial=False, required=False)
+    masquer_presents = forms.BooleanField(label="Masquer les présents", initial=False, required=False)
     liste_choix_hauteur = [("automatique", "Automatique")] + [(str(x), "%d pixels" % x) for x in range(5, 205, 5)]
     hauteur_ligne_individu = forms.ChoiceField(label="Hauteur de la ligne Individu", choices=liste_choix_hauteur, initial="automatique", required=False)
     couleur_fond_titre = forms.CharField(label="Couleur ligne de titre", required=True, widget=ColorPickerWidget(), initial="#D0D0D0")
@@ -171,6 +172,7 @@ class Formulaire(FormulaireBase, forms.Form):
                         Field('ordre'),
                         Field('nbre_lignes_vierges'),
                         Field('afficher_inscrits'),
+                        Field('masquer_presents'),
                         Field('hauteur_ligne_individu'),
                         Field('couleur_fond_titre'),
                         Field('couleur_fond_entetes'),
