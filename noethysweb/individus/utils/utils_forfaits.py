@@ -30,6 +30,9 @@ class Forfaits():
         # Recherche des activités
         dict_activites = {activite.pk: activite for activite in Activite.objects.filter(pk__in=self.selection_activites)}
 
+        # Recherche les catégories de tarifs des individus
+        liste_categories_tarifs = [inscription.categorie_tarif_id for inscription in Inscription.objects.filter(individu_id__in=self.selection_individus)]
+
         # Recherche des ouvertures
         for ouverture in Ouverture.objects.select_related("unite").filter(activite__in=self.selection_activites):
             if not hasattr(dict_activites[ouverture.activite_id], "ouvertures"): dict_activites[ouverture.activite_id].ouvertures = []
@@ -53,6 +56,10 @@ class Forfaits():
         dict_resultats = {}
         for IDtarif, tarif in dict_tarifs.items():
             inclure = True
+
+            # Recherche si les individus ont une catégorie de tarif commune avec celles du tarif
+            if not set(liste_categories_tarifs).intersection([cat.pk for cat in tarif.categories_tarifs.all()]):
+                inclure = False
 
             # Recherche si ce tarif a des combinaisons d'unités
             tarif.date_debut_forfait = None
