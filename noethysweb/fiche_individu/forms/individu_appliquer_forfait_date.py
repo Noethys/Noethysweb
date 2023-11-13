@@ -52,7 +52,7 @@ EXTRA_HTML = """
     $(document).ready(function() {
         $("#id_afficher_forfaits_obsoletes").on("change", function (event) {
             $("[name=action]").val("afficher_forfaits_obsoletes");
-            $("#individu_forfaits_form").submit();
+            $("[name=submit]").click();
         });
     });
 </script>

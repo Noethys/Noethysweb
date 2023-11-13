@@ -70,8 +70,9 @@ class Forfaits():
                 if liste_dates:
                     tarif.date_debut_forfait, tarif.date_fin_forfait = min(liste_dates), max(liste_dates)
 
-            if masquer_forfaits_obsoletes and tarif.date_fin_forfait and tarif.date_fin_forfait < datetime.date.today():
-                inclure = False
+            if masquer_forfaits_obsoletes:
+                if (tarif.date_fin_forfait and tarif.date_fin_forfait < datetime.date.today()) or (tarif.date_fin and tarif.date_fin < datetime.date.today()):
+                    inclure = False
 
             # Mémorisation de ce tarif
             if inclure:
