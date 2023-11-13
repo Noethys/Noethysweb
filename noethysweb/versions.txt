@@ -1,3 +1,11 @@
+Version 1.2.0.6 (13/11/2023) :
+
+- Ajout de l'envoi de SMS avec BREVO
+- Ajout noms de groupes aux inscriptions actives dans la vignette individuelle
+- Ajout de l'option Masquer les présents dans l'édition des consommations
+- Correction du masquage des forfaits datés obsolètes
+- Correction de la capacité max des groupes dans l'assistant de paramétrage
+
 Version 1.2.0.5 (07/11/2023) :
 
 ATTENTION, si vous souhaitez continuer à utiliser la réattribution automatique des places disponibles,
