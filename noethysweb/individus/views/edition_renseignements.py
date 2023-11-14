@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import json, logging
+import json, logging, time
 logger = logging.getLogger(__name__)
 from django.http import JsonResponse
 from core.views.mydatatableview import MyDatatable, columns
@@ -13,6 +13,8 @@ from individus.forms.edition_renseignements import Formulaire
 
 
 def Generer_pdf(request):
+    time.sleep(1)
+
     # Récupération des options
     valeurs_form_options = json.loads(request.POST.get("form_options"))
     form = Formulaire(valeurs_form_options, request=request)
@@ -21,10 +23,10 @@ def Generer_pdf(request):
     options = form.cleaned_data
 
     # Récupération des rattachements cochés
-    rattachements_coches = json.loads(request.POST.get("rattachements_coches"))
-    if not rattachements_coches:
+    rattachements = json.loads(request.POST.get("rattachements"))
+    if not rattachements:
         return JsonResponse({"erreur": "Veuillez cocher au moins une ligne dans la liste"}, status=401)
-    options["rattachements_coches"] = rattachements_coches
+    options["rattachements"] = rattachements
 
     # Création du PDF
     from individus.utils import utils_impression_renseignements

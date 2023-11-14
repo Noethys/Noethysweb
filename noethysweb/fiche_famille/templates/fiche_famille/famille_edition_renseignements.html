@@ -1,0 +1,61 @@
+{% extends "fiche_famille/famille_liste.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+{% endblock styles %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block detail_famille %}
+
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+
+                {% crispy form %}
+
+            {% endblock box_contenu %}
+            {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+        {% endembed %}
+
+    </div>
+
+    {# Insertion des modals #}
+    {% include 'core/modal_pdf.html' %}
+
+    <script>
+
+        // Générer le PDF
+        function generer_pdf() {
+            var box = bootbox.dialog({
+                    message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Génération du PDF en cours</b><br><br>Veuillez patienter...</p>",
+                    closeButton: false
+                });
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_famille_edition_renseignements_generer_pdf' %}",
+                data: $("#form_parametres").serialize(),
+                datatype: "json",
+                success: function(data){
+                    bootbox.hideAll();
+                    charge_pdf(data);
+                },
+                error: function(data) {
+                    bootbox.hideAll();
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+    </script>
+
+{% endblock %}

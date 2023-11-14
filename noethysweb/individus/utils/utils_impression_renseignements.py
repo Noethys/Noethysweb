@@ -26,7 +26,7 @@ class Impression(utils_impression.Impression):
 
     def Draw(self):
         # Importation des rattachements
-        conditions = Q(pk__in=self.dict_donnees["rattachements_coches"])
+        conditions = Q(pk__in=self.dict_donnees["rattachements"])
         rattachements = Rattachement.objects.select_related("individu", "famille", "individu__medecin").prefetch_related("individu__regimes_alimentaires", "individu__maladies").filter(conditions).distinct().order_by("individu__nom", "individu__prenom")
         if not rattachements:
             self.erreurs.append("Aucun individu n'a été trouvé avec les paramètres donnés")

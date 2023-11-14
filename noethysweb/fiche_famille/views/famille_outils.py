@@ -37,6 +37,9 @@ class View(Onglet, DetailView):
             [
                 {"titre": "Historique", "items": [
                     {"titre": "Historique", "url": reverse_lazy("famille_historique", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+                ]},
+                {"titre": "Renseignements", "items": [
+                    {"titre": "Edition des fiches de renseignements", "url": reverse_lazy("famille_edition_renseignements", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                     {"titre": "Export XML", "url": reverse_lazy("famille_export_xml", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                 ]},
                 {"titre": "Communication", "items": [

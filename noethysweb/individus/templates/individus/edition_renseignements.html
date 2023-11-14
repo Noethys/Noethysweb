@@ -46,7 +46,7 @@
                     url: "{% url 'ajax_edition_renseignements_generer_pdf' %}",
                     data: {
                         form_options: JSON.stringify($("#form_parametres").serializeObject()),
-                        rattachements_coches: JSON.stringify(get_coches()),
+                        rattachements: JSON.stringify(get_coches()),
                         csrfmiddlewaretoken: '{{ csrf_token }}',
                     },
                     datatype: "json",
