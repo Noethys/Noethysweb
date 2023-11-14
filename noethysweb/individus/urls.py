@@ -82,7 +82,7 @@ urlpatterns = [
     path('individus/pieces_supprimer_plusieurs/<str:listepk>', liste_pieces_fournies.Supprimer_plusieurs.as_view(), name='pieces_supprimer_plusieurs'),
 
     # Informations
-    path('individus/edition_renseignements', edition_renseignements.View.as_view(), name='edition_renseignements'),
+    path('individus/edition_renseignements', edition_renseignements.Liste.as_view(), name='edition_renseignements'),
 
     path('individus/liste_anniversaires', liste_anniversaires.View.as_view(), name='liste_anniversaires'),
     path('individus/liste_regimes_caisses', liste_regimes_caisses.Liste.as_view(), name='liste_regimes_caisses'),

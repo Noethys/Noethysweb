@@ -3,51 +3,86 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import json
+import json, logging
+logger = logging.getLogger(__name__)
 from django.http import JsonResponse
-from django.views.generic import TemplateView
-from core.views.base import CustomView
-from core.utils import utils_dates
+from core.views.mydatatableview import MyDatatable, columns
+from core.views import crud
+from core.models import Rattachement
 from individus.forms.edition_renseignements import Formulaire
 
 
 def Generer_pdf(request):
     # Récupération des options
-    form = Formulaire(request.POST, request=request)
+    valeurs_form_options = json.loads(request.POST.get("form_options"))
+    form = Formulaire(valeurs_form_options, request=request)
     if not form.is_valid():
         return JsonResponse({"erreur": "Veuillez compléter les paramètres"}, status=401)
     options = form.cleaned_data
 
-    # Récupération des paramètres
-    options["activites"] = json.loads(options["activites"])
-    if not options["activites"]["ids"]:
-        return JsonResponse({"erreur": "Veuillez cocher au moins une activité"}, status=401)
-
-    # Récupération de la période
-    if options["presents"]:
-        presents = options.get("presents")
-        date_debut = utils_dates.ConvertDateENGtoDate(presents.split(";")[0])
-        date_fin = utils_dates.ConvertDateENGtoDate(presents.split(";")[1])
-        options["presents"] = (date_debut, date_fin)
+    # Récupération des rattachements cochés
+    rattachements_coches = json.loads(request.POST.get("rattachements_coches"))
+    if not rattachements_coches:
+        return JsonResponse({"erreur": "Veuillez cocher au moins une ligne dans la liste"}, status=401)
+    options["rattachements_coches"] = rattachements_coches
 
     # Création du PDF
     from individus.utils import utils_impression_renseignements
-    impression = utils_impression_renseignements.Impression(titre="Edition des contacts", dict_donnees=options)
+    impression = utils_impression_renseignements.Impression(titre="Renseignements", dict_donnees=options)
     if impression.erreurs:
         return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
     nom_fichier = impression.Get_nom_fichier()
     return JsonResponse({"nom_fichier": nom_fichier})
 
 
-class View(CustomView, TemplateView):
+class Page(crud.Page):
+    model = Rattachement
+    url_liste = "edition_renseignements"
     menu_code = "edition_renseignements"
+
+
+class Liste(Page, crud.Liste):
     template_name = "individus/edition_renseignements.html"
+    model = Rattachement
+
+    def get_queryset(self):
+        return Rattachement.objects.select_related("famille", "individu").filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
-        context = super(View, self).get_context_data(**kwargs)
-        context['page_titre'] = "Edition des renseignements"
-        context['box_titre'] = "Edition des renseignements"
-        context['box_introduction'] = "Renseignez les paramètres et cliquez sur le bouton Générer le PDF. La génération du document peut nécessiter quelques instants d'attente."
-        if "form" not in kwargs:
-            context['form'] = Formulaire(request=self.request)
+        context = super(Liste, self).get_context_data(**kwargs)
+        context["page_titre"] = "Edition des renseignements"
+        context["box_titre"] = "Edition des renseignements"
+        context["box_introduction"] = "Cochez les individus souhaités, précisez si besoin les options et cliquez sur le bouton Générer le PDF. Utilisez le bouton Filtrer pour affiner la liste d'individus."
+        context["onglet_actif"] = "edition_renseignements"
+        context["impression_introduction"] = ""
+        context["impression_conclusion"] = ""
+        context["active_checkbox"] = True
+        context["bouton_supprimer"] = False
+        context["hauteur_table"] = "400px"
+        context["form_options"] = Formulaire(request=self.request)
+        context["afficher_menu_brothers"] = True
         return context
+
+    class datatable_class(MyDatatable):
+        filtres = ["fpresent:famille", "fscolarise:famille", "ipresent:individu", "iscolarise:individu", "famille__nom", "individu__nom", "individu__prenom",
+                   "individu__rue_resid", "individu__cp_resid", "individu__ville_resid"]
+        check = columns.CheckBoxSelectColumn(label="")
+        individu = columns.CompoundColumn("Individu", sources=["individu__nom", "individu__prenom"])
+        famille = columns.TextColumn("Famille", sources=["famille__nom"])
+        rue_resid = columns.TextColumn("Rue", sources=None, processor="Get_rue_resid")
+        cp_resid = columns.TextColumn("CP", sources=None, processor="Get_cp_resid")
+        ville_resid = columns.TextColumn("Ville", sources=None, processor="Get_ville_resid")
+
+        class Meta:
+            structure_template = MyDatatable.structure_template
+            columns = ["check", "idrattachement", "individu", "famille", "rue_resid", "cp_resid", "ville_resid"]
+            ordering = ["individu__nom", "individu__prenom"]
+
+        def Get_rue_resid(self, instance, *args, **kwargs):
+            return instance.individu.rue_resid
+
+        def Get_cp_resid(self, instance, *args, **kwargs):
+            return instance.individu.cp_resid
+
+        def Get_ville_resid(self, instance, *args, **kwargs):
+            return instance.individu.ville_resid

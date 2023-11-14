@@ -9,11 +9,11 @@ logging.getLogger('PIL').setLevel(logging.WARNING)
 from django.conf import settings
 from django.db.models import Q
 from django.core.cache import cache
-from reportlab.platypus import Spacer, Paragraph, Table, TableStyle, PageBreak
+from reportlab.platypus import Paragraph, Table, TableStyle, PageBreak
 from reportlab.platypus.flowables import Image
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
-from core.models import Activite, Lien, Rattachement, ContactUrgence, Information, Vaccin, Assurance, Organisateur, Scolarite
+from core.models import Lien, Rattachement, ContactUrgence, Information, Assurance, Organisateur, Scolarite
 from core.data.data_liens import DICT_TYPES_LIENS
 from core.data import data_civilites
 from core.utils import utils_dates, utils_impression
@@ -25,15 +25,8 @@ class Impression(utils_impression.Impression):
         utils_impression.Impression.__init__(self, *args, **kwds)
 
     def Draw(self):
-        # Importation des individus rattachés
-        param_activites = self.dict_donnees["activites"]
-        if param_activites["type"] == "groupes_activites":
-            liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
-        if param_activites["type"] == "activites":
-            liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
-        conditions = Q(individu__inscription__activite__in=liste_activites)
-        if self.dict_donnees["presents"]:
-            conditions &= Q(individu__inscription__consommation__date__gte=self.dict_donnees["presents"][0], individu__inscription__consommation__date__lte=self.dict_donnees["presents"][1])
+        # Importation des rattachements
+        conditions = Q(pk__in=self.dict_donnees["rattachements_coches"])
         rattachements = Rattachement.objects.select_related("individu", "famille", "individu__medecin").prefetch_related("individu__regimes_alimentaires", "individu__maladies").filter(conditions).distinct().order_by("individu__nom", "individu__prenom")
         if not rattachements:
             self.erreurs.append("Aucun individu n'a été trouvé avec les paramètres donnés")
