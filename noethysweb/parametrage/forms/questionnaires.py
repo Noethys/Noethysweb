@@ -92,6 +92,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Field('structure'),
             Field('visible'),
             Field('visible_portail'),
+            Field('visible_fiche_renseignement'),
             HTML(EXTRA_SCRIPT),
         )
 

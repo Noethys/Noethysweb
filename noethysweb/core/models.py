@@ -2445,6 +2445,7 @@ class QuestionnaireQuestion(models.Model):
     choix = models.CharField(verbose_name="Choix", max_length=500, blank=True, null=True, help_text="Saisissez les choix possibles séparés par un point-virgule. Exemple : 'Bananes;Pommes;Poires'")
     options = models.CharField(verbose_name="Options", max_length=250, blank=True, null=True)
     visible_portail = models.BooleanField(verbose_name="Visible sur le portail", default=False)
+    visible_fiche_renseignement = models.BooleanField(verbose_name="Visible sur les fiches de renseignements", default=False)
     texte_aide = models.CharField(verbose_name="Texte d'aide", max_length=500, blank=True, null=True, help_text="Vous pouvez saisir un texte d'aide qui apparaîtra sous le champ de saisie.")
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
 

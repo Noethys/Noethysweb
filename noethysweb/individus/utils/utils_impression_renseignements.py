@@ -16,7 +16,7 @@ from reportlab.lib import colors
 from core.models import Lien, Rattachement, ContactUrgence, Information, Assurance, Organisateur, Scolarite
 from core.data.data_liens import DICT_TYPES_LIENS
 from core.data import data_civilites
-from core.utils import utils_dates, utils_impression
+from core.utils import utils_dates, utils_impression, utils_questionnaires
 from individus.utils import utils_vaccinations
 
 
@@ -67,6 +67,10 @@ class Impression(utils_impression.Impression):
 
         # Importation des vaccinations
         dict_vaccinations = utils_vaccinations.Get_tous_vaccins()
+
+        # Importation des questionnaires
+        questionnaires_individus = utils_questionnaires.ChampsEtReponses(categorie="individu", filtre_reponses=Q(individu__in=[r.individu for r in rattachements]))
+        questionnaires_familles = utils_questionnaires.ChampsEtReponses(categorie="famille", filtre_reponses=Q(famille__in=[r.famille for r in rattachements]))
 
         # Préparation des polices
         style_defaut = ParagraphStyle(name="defaut", fontName="Helvetica", fontSize=7, spaceAfter=0, leading=9)
@@ -313,6 +317,17 @@ class Impression(utils_impression.Impression):
             if not self.dict_donnees["mode_condense"]:
                 texte_vaccinations.append("<br/><br/><br/>")
             self.story.append(Tableau(titre="Autres vaccinations".upper(), aide="Indiquer les autres vaccinations en précisant la date de rappel", contenu=[Paragraph(", ".join(texte_vaccinations), style_defaut)]))
+
+            # Questionnaires
+            questions_famille = questionnaires_familles.GetDonnees(rattachement.famille_id)
+            if questions_famille:
+                contenu_tableau = [Paragraph("%s : <b>%s</b>" % (question["label"], question["reponse"]), style_defaut) for question in questions_famille]
+                self.story.append(Tableau(titre="Questionnaire familial".upper(), aide="", contenu=contenu_tableau))
+
+            questions_individu = questionnaires_individus.GetDonnees(rattachement.individu_id)
+            if questions_individu:
+                contenu_tableau = [Paragraph("%s : <b>%s</b>" % (question["label"], question["reponse"]), style_defaut) for question in questions_individu]
+                self.story.append(Tableau(titre="Questionnaire individuel".upper(), aide="", contenu=contenu_tableau))
 
             # Certification
             if rattachement.certification_date:
