@@ -120,7 +120,8 @@ class Questionnaires():
             for question in liste_questions:
                 if not avec_filtre or self.GetFiltre(question.controle):
                     liste_resultats.append({"IDquestion": question.pk, "label": question.label, "categorie": question.categorie,
-                                            "controle": question.controle, "filtre": self.GetFiltre(question.controle)})
+                                            "controle": question.controle, "filtre": self.GetFiltre(question.controle),
+                                            "visible_fiche_renseignement": question.visible_fiche_renseignement})
         except:
             pass
         return liste_resultats
@@ -175,7 +176,7 @@ class ChampsEtReponses():
             champ = "{QUESTION_%d}" % dictQuestion["IDquestion"]
             dictReponse = {
                 "champ": champ, "reponse":reponse, "IDquestion": dictQuestion["IDquestion"], "label": dictQuestion["label"],
-                "categorie": dictQuestion["categorie"], "controle": dictQuestion["controle"],
+                "categorie": dictQuestion["categorie"], "controle": dictQuestion["controle"], "visible_fiche_renseignement": dictQuestion["visible_fiche_renseignement"],
                 #"defaut": dictQuestion["defaut"]
                 }
             listeDonnees.append(dictReponse)
