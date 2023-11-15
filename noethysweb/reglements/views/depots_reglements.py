@@ -160,7 +160,7 @@ class Consulter(Page, crud.Liste):
             return self.Create_boutons_actions(html)
 
         def Formate_montant(self, instance, **kwargs):
-            return utils_texte.Formate_montant(instance.montant)
+            return "%0.2f" % instance.montant
 
 
 class Supprimer_reglement(Page, crud.Supprimer):
