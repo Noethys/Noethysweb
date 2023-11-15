@@ -87,24 +87,34 @@
             <li class="nav-item dropdown">
                 <a href="#" class="nav-link" data-toggle="dropdown" title="Actions rapides"><i class="fa fa-star-o"></i></a>
                 <ul class="dropdown-menu" role="menu">
-                    <h6 class="dropdown-header"><strong>Individus</strong></h6>
-                    <li class="dropdown-item"><a href="{% url 'famille_ajouter' %}">Ajouter une famille</a></li>
-                    <li class="dropdown-divider"></li>
-                    <h6 class="dropdown-header"><strong>Consommations</strong></h6>
-                    <li class="dropdown-item"><a href="{% url 'edition_liste_conso' %}">Editer une liste des consommations</a></li>
-                    <li class="dropdown-item"><a href="{% url 'gestionnaire_conso' %}">Pointer des consommations</a></li>
-                    <li class="dropdown-item"><a href="{% url 'liste_attente' %}">Consulter la liste d'attente</a></li>
-                    <li class="dropdown-divider"></li>
-                    <h6 class="dropdown-header"><strong>Facturation</strong></h6>
-                    <li class="dropdown-item"><a href="{% url 'factures_generation' %}">Générer des factures</a></li>
-                    <li class="dropdown-item"><a href="{% url 'rappels_generation' %}">Générer des lettres de rappel</a></li>
-                    <li class="dropdown-divider"></li>
-                    <h6 class="dropdown-header"><strong>Règlements</strong></h6>
-                    <li class="dropdown-item"><a href="{% url 'depots_reglements_liste' %}">Déposer des règlements</a></li>
-                    <li class="dropdown-divider"></li>
-                    <h6 class="dropdown-header"><strong>Collaborateurs</strong></h6>
-                    <li class="dropdown-item"><a href="{% url 'collaborateur_ajouter' %}">Ajouter un collaborateur</a></li>
-                    <li class="dropdown-item"><a href="{% url 'planning_collaborateurs' %}">Planning des évènements</a></li>
+                    {% if perms.core.famille_ajouter %}
+                        <h6 class="dropdown-header"><strong>Individus</strong></h6>
+                        <li class="dropdown-item"><a href="{% url 'famille_ajouter' %}">Ajouter une famille</a></li>
+                    {% endif %}
+                    {% if perms.core.edition_liste_conso or perms.core.gestionnaire_conso or perms.core.liste_attente %}
+                        <li class="dropdown-divider"></li>
+                        <h6 class="dropdown-header"><strong>Consommations</strong></h6>
+                        {% if perms.core.edition_liste_conso %}<li class="dropdown-item"><a href="{% url 'edition_liste_conso' %}">Editer une liste des consommations</a></li>{% endif %}
+                        {% if perms.core.gestionnaire_conso %}<li class="dropdown-item"><a href="{% url 'gestionnaire_conso' %}">Pointer des consommations</a></li>{% endif %}
+                        {% if perms.core.liste_attente %}<li class="dropdown-item"><a href="{% url 'liste_attente' %}">Consulter la liste d'attente</a></li>{% endif %}
+                    {% endif %}
+                    {% if perms.core.factures_generation or perms.core.rappels_generation %}
+                        <li class="dropdown-divider"></li>
+                        <h6 class="dropdown-header"><strong>Facturation</strong></h6>
+                        {% if perms.core.factures_generation %}<li class="dropdown-item"><a href="{% url 'factures_generation' %}">Générer des factures</a></li>{% endif %}
+                        {% if perms.core.rappels_generation %}<li class="dropdown-item"><a href="{% url 'rappels_generation' %}">Générer des lettres de rappel</a></li>{% endif %}
+                    {% endif %}
+                    {% if perms.core.depots_reglements_liste %}
+                        <li class="dropdown-divider"></li>
+                        <h6 class="dropdown-header"><strong>Règlements</strong></h6>
+                        {% if perms.core.depots_reglements_liste %}<li class="dropdown-item"><a href="{% url 'depots_reglements_liste' %}">Déposer des règlements</a></li>{% endif %}
+                    {% endif %}
+                    {% if perms.core.collaborateur_ajouter or perms.core.planning_collaborateurs %}
+                        <li class="dropdown-divider"></li>
+                        <h6 class="dropdown-header"><strong>Collaborateurs</strong></h6>
+                        {% if perms.core.collaborateur_ajouter %}<li class="dropdown-item"><a href="{% url 'collaborateur_ajouter' %}">Ajouter un collaborateur</a></li>{% endif %}
+                        {% if perms.core.planning_collaborateurs %}<li class="dropdown-item"><a href="{% url 'planning_collaborateurs' %}">Planning des évènements</a></li>{% endif %}
+                    {% endif %}
                 </ul>
             </li>
 
