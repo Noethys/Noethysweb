@@ -29,6 +29,10 @@
 
     // Affichage du PDF
     function charge_pdf(donnees={}, telechargement=false) {
+        if ( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+            // Si mobile, on passe en mode téléchargement
+            telechargement = true;
+        }
         if (telechargement === false) {
             var ctrl = document.getElementById("fichier_pdf");
             var clone = ctrl.cloneNode(true);
