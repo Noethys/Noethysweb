@@ -56,7 +56,7 @@ def Envoyer_email(request):
             for document in destinataire_defaut.documents.all():
                 document_joint = DocumentJoint.objects.create(nom=document.nom, fichier=document.fichier)
                 destinataire.documents.add(document_joint)
-                mail.destinataires.add(destinataire)
+            mail.destinataires.add(destinataire)
         else:
             destinataire_defaut_found = True
     if not destinataire_defaut_found:
