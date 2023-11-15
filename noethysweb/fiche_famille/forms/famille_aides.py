@@ -185,7 +185,7 @@ class Formulaire_selection_activite(FormulaireBase, forms.Form):
 
         # Liste les activités
         condition_structure = Q(structure__in=self.request.user.structures.all())
-        self.fields['activite'].queryset = Activite.objects.filter(condition_structure).order_by("-date_debut")
+        self.fields['activite'].queryset = Activite.objects.filter(condition_structure).order_by("-date_fin")
 
         self.helper.layout = Layout(
             Field('activite'),

@@ -54,7 +54,7 @@ class Formulaire(FormulaireBase, ModelForm):
             individu = self.instance.individu
 
         # Liste les activités liées à la structure actuelle
-        self.fields['activite'].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_debut")
+        self.fields['activite'].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom")
 
         # Si c'est un ajout avec présélection de l'activité et du groupe
         # (utilisé surtout pour les demandes d'inscription depuis le portail)
