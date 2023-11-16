@@ -4,8 +4,10 @@
 
 <input type="text" class="{{ class }}" data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}" value="{{ value }}" {% if disabled %}disabled="disabled"{% endif %}/>
 
-<script>
-$(function () {
-    $('#{{ id }}').inputmask('99.99.99.99.99.', { 'placeholder': '__.__.__.__.__.' })
-});
-</script>
+{% if TELEPHONE_FORMAT_FR %}
+    <script>
+        $(function () {
+            $('#{{ id }}').inputmask('99.99.99.99.99.', { 'placeholder': '__.__.__.__.__.' })
+        });
+    </script>
+{% endif %}

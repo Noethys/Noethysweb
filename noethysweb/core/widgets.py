@@ -193,6 +193,7 @@ class Telephone(Widget):
         context['name'] = name
         if value is not None:
             context['value'] = value
+        context["TELEPHONE_FORMAT_FR"] = settings.TELEPHONE_FORMAT_FR
         return context
 
     def render(self, name, value, attrs=None, renderer=None):

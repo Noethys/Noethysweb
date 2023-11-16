@@ -100,6 +100,10 @@ INSTALLED_APPS = [
     'django_cleanup.apps.CleanupConfig',
 ]
 
+# import crispy_forms
+# if int(crispy_forms.__version__.split(".")[0]) >= 2:
+#     INSTALLED_APPS.append("crispy_bootstrap4")
+
 # Liste des plugins
 PLUGINS = []
 
@@ -171,6 +175,7 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = False
 DATE_FORMAT = "d/m/Y"
+TELEPHONE_FORMAT_FR = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
