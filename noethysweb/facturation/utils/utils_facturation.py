@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 from decimal import Decimal
 from django.db.models import Q, Sum
-from core.models import Prestation, Ventilation, Deduction, Consommation, Reglement, Agrement, Facture, Quotient, PesPiece, Prelevements
+from core.models import Prestation, Ventilation, Deduction, Consommation, Reglement, Agrement, Facture, Quotient, PesPiece, Prelevements, Note
 from core.data import data_codes_etab
 from core.utils import utils_preferences, utils_dates, utils_conversion, utils_impression, utils_infos_individus, utils_questionnaires, utils_texte
 from facturation.utils import utils_impression_facture
@@ -18,20 +18,6 @@ from facturation.utils.utils_export_pes import Get_cle_modulo_23
 class Facturation():
     def __init__(self):
         """ Récupération de toutes les données de base """
-
-        # # Récupération de tous les messages familiaux à afficher
-        # req = """SELECT IDmessage, IDcategorie, date_parution, priorite, IDfamille, nom, texte
-        # FROM messages
-        # WHERE afficher_facture=1 AND IDfamille IS NOT NULL;"""
-        # DB.ExecuterReq(req)
-        # listeMessagesFamiliaux = DB.ResultatReq()
-        # self.dictMessageFamiliaux = {}
-        # for IDmessage, IDcategorie, date_parution, priorite, IDfamille, nom, texte in listeMessagesFamiliaux :
-        #     date_parution = UTILS_Dates.DateEngEnDateDD(date_parution)
-        #     if (IDfamille in self.dictMessageFamiliaux) == False :
-        #         self.dictMessageFamiliaux[IDfamille] = []
-        #     self.dictMessageFamiliaux[IDfamille].append({"IDmessage":IDmessage, "IDcategorie":IDcategorie, "date_parution":date_parution, "priorite":priorite, "nom":nom, "texte":texte})
-        #
 
         # Recherche des numéros d'agréments
         logger.debug("Recherche tous les agréments...")
@@ -120,6 +106,12 @@ class Facturation():
         for prestation in prestations:
             if prestation.famille_id not in liste_familles:
                 liste_familles.append(prestation.famille_id)
+
+        # Importation des notes à afficher sur la facture
+        dict_notes = {}
+        for note in Note.objects.filter(afficher_facture=True, famille_id__in=liste_familles):
+            dict_notes.setdefault(note.famille_id, [])
+            dict_notes[note.famille_id].append(note)
 
         # Recherche de la ventilation des prestations
         if liste_factures:
@@ -317,7 +309,7 @@ class Facturation():
                     "{SOLDE_AVEC_REPORTS}": u"0.00 %s" % utils_preferences.Get_symbole_monnaie(),
                     "{SOLDE_COMPTE}": solde_compte,
                     "select": True,
-                    "messages_familiaux": [],
+                    "messages_familiaux": dict_notes.get(prestation.famille_id, []),
                     "{NOM_LOT}": "",
                     "reglements": dictReglementsCompte,
                     "texte_introduction": "",
@@ -353,11 +345,7 @@ class Facturation():
                     dictComptes[ID][dictReponse["champ"]] = dictReponse["reponse"]
                     if dictReponse["controle"] == "codebarres":
                         dictComptes[ID]["{CODEBARRES_QUESTION_%d}" % dictReponse["IDquestion"]] = dictReponse["reponse"]
-                
-                # Ajoute les messages familiaux
-                # if IDfamille in self.dictMessageFamiliaux :
-                #     dictComptes[ID]["messages_familiaux"] = self.dictMessageFamiliaux[IDfamille]
-                    
+
             # Insert les montants pour le compte payeur
             if prestation.pk in dictVentilationPrestations :
                 montant_ventilation = Decimal(dictVentilationPrestations[prestation.pk])

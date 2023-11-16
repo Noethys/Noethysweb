@@ -583,9 +583,8 @@ class Impression(utils_impression.Impression):
                     if self.dict_options["afficher_messages"] == True:
                         for message in messages_factures:
                             listeMessages.append(Paragraph(message, paraStyle))
-
-                        for message_familial in dictValeur["messages_familiaux"]:
-                            texte = message_familial["texte"]
+                        for note in dictValeur["messages_familiaux"]:
+                            texte = note.texte
                             if len(texte) > 0 and texte[-1] not in ".!?":
                                 texte = texte + "."
                             texte = "<b>Message : </b>%s" % texte
