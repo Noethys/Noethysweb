@@ -51,7 +51,7 @@ def Get_suivi_consommations(request):
 
 class Total():
     def __init__(self):
-        self.pk = 0
+        self.pk = 999999
         self.nom = "Total"
 
 
@@ -129,7 +129,7 @@ def Get_data(parametres={}, request=None):
 
     # Importation des remplissages
     liste_remplissage = Remplissage.objects.filter(conditions_periodes & Q(activite__in=liste_activites))
-    dict_capacite = {'%s_%d_%d' % (r.date, r.unite_remplissage_id, r.groupe_id): r.places for r in liste_remplissage if r.groupe_id}
+    dict_capacite = {'%s_%d_%d' % (r.date, r.unite_remplissage_id, r.groupe_id or 0): r.places for r in liste_remplissage}
 
     # Importation des groupes
     liste_groupes = Groupe.objects.select_related('activite').filter(activite__in=liste_activites).order_by("ordre")
@@ -148,13 +148,14 @@ def Get_data(parametres={}, request=None):
     liste_places = Consommation.objects.values('date', 'unite', 'groupe', 'quantite', 'evenement').annotate(nbre=Count('pk')).filter(conditions_periodes & Q(activite__in=liste_activites) & Q(etat__in=("reservation", "present")))
     dict_places = {}
     for p in liste_places:
-        for id_unite_remplissage in dict_unites_remplissage_unites.get(p["unite"], []):
-            key = "%s_%d_%d" % (p["date"], id_unite_remplissage, p["groupe"])
-            quantite = p["nbre"] * p["quantite"] if p["quantite"] else p["nbre"]
-            dict_places[key] = dict_places.get(key, 0) + quantite
-            if p["evenement"]:
-                key += "_%d" % p["evenement"]
+        for idgroupe in [p["groupe"], 0]:
+            for id_unite_remplissage in dict_unites_remplissage_unites.get(p["unite"], []):
+                key = "%s_%d_%d" % (p["date"], id_unite_remplissage, idgroupe)
+                quantite = p["nbre"] * p["quantite"] if p["quantite"] else p["nbre"]
                 dict_places[key] = dict_places.get(key, 0) + quantite
+                if p["evenement"]:
+                    key += "_%d" % p["evenement"]
+                    dict_places[key] = dict_places.get(key, 0) + quantite
 
     # Colonnes
     dict_colonnes = {"activites": [], "groupes": [], "unites": []}
@@ -208,7 +209,7 @@ def Get_data(parametres={}, request=None):
             case_valide = False
             evenements = dict_evenements.get(key_case, [])
 
-            if colonne["groupe"].pk == 0:
+            if colonne["groupe"].pk == 999999:
                 # Case TOTAL
                 classe = "total"
                 initiales = 0
@@ -225,7 +226,13 @@ def Get_data(parametres={}, request=None):
 
             elif key_case in liste_ouvertures:
                 # Case normale
-                initiales = dict_capacite.get(key_case, 0)
+                liste_initiales = []
+                for idgroupe in [colonne["groupe"].pk, 0]:
+                    key = "%s_%s_%s" % (date, colonne["unite"].pk, idgroupe)
+                    if key in dict_capacite:
+                        liste_initiales.append(dict_capacite.get(key, 0))
+
+                initiales = min(liste_initiales) if liste_initiales else 0
                 prises = dict_places.get(key_case, 0)
                 restantes = initiales - prises
 

@@ -15,6 +15,10 @@ from django.shortcuts import render
 import datetime, calendar, json
 
 
+class Groupe_total():
+    def __init__(self):
+        self.pk = 0
+        self.nom = "Total"
 
 
 def Get_calendrier_ouvertures(request=None):
@@ -35,7 +39,7 @@ def Get_calendrier_ouvertures(request=None):
     # Importe les données sur l'activité
     liste_unites = Unite.objects.filter(activite_id=idactivite).order_by("ordre")
     liste_unites_remplissage = UniteRemplissage.objects.filter(activite_id=idactivite).order_by("ordre")
-    liste_groupes = Groupe.objects.filter(activite_id=idactivite).order_by("ordre")
+    liste_groupes = list(Groupe.objects.filter(activite_id=idactivite).order_by("ordre")) + [Groupe_total,]
     liste_ouvertures = Ouverture.objects.filter(activite_id=idactivite, date__gte=date_min, date__lte=date_max)
     liste_remplissage = Remplissage.objects.filter(activite_id=idactivite, date__gte=date_min, date__lte=date_max)
     liste_vacances = Vacance.objects.filter(date_fin__gte=date_min, date_debut__lte=date_max)
@@ -366,7 +370,7 @@ def Valider_calendrier_ouvertures(request):
                 remplissage = Remplissage(
                     activite_id=idactivite,
                     unite_remplissage=dict_unites_remplissage[int(idunite_remplissage)],
-                    groupe=dict_groupes[int(idgroupe)],
+                    groupe=dict_groupes[int(idgroupe)] if int(idgroupe) != 0 else None,
                     date=utils_dates.ConvertDateENGtoDate(date),
                     places=valeur,
                 )

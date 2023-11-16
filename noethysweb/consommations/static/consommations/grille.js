@@ -305,25 +305,26 @@ class Case_base {
 
         // Recherche pour chaque unité de remplissage les valeurs
         for (var idunite_remplissage of dict_unites[this.unite].unites_remplissage) {
+            for (var idgroupe of [this.groupe, 0]) {
+                // Recherche la capacité max sur le groupe
+                var key1 = this.date + "_" + idunite_remplissage + "_" + idgroupe;
+                if (key1 in dict_capacite) {var capacite_max = dict_capacite[key1]} else {var capacite_max = null};
 
-            // Recherche la capacité max sur le groupe
-            var key1 = this.date + "_" + idunite_remplissage + "_" + this.groupe;
-            if (key1 in dict_capacite) {var capacite_max = dict_capacite[key1]} else {var capacite_max = null};
-
-            if (capacite_max) {
-                // Recherche le nbre de places prises
-                var nbre_places_prises = 0;
-                for (var idunite_conso of dict_unites_remplissage[idunite_remplissage]["unites_conso"]) {
-                    var key2 = this.date + "_" + idunite_conso + "_" + this.groupe;
-                    if (key2 in dict_places_prises) {
-                        nbre_places_prises += dict_places_prises[key2]
+                if (capacite_max) {
+                    // Recherche le nbre de places prises
+                    var nbre_places_prises = 0;
+                    for (var idunite_conso of dict_unites_remplissage[idunite_remplissage]["unites_conso"]) {
+                        var key2 = this.date + "_" + idunite_conso + "_" + idgroupe;
+                        if (key2 in dict_places_prises) {
+                            nbre_places_prises += dict_places_prises[key2]
+                        };
                     };
-                };
 
-                // Calcule le nombre de places disponibles
-                liste_places_initiales.push(capacite_max)
-                liste_places_restantes.push(capacite_max - nbre_places_prises);
-                liste_seuils.push(dict_unites_remplissage[idunite_remplissage]["seuil_alerte"]);
+                    // Calcule le nombre de places disponibles
+                    liste_places_initiales.push(capacite_max)
+                    liste_places_restantes.push(capacite_max - nbre_places_prises);
+                    liste_seuils.push(dict_unites_remplissage[idunite_remplissage]["seuil_alerte"]);
+                };
             };
         };
 
@@ -1130,16 +1131,18 @@ function maj_remplissage(date) {
             for (var conso of case_tableau.consommations) {
                 // Mémorise les places pour chaque conso
                 if (conso.etat === "reservation" || conso.etat === "present") {
-                    var key = conso.date + "_" + conso.unite + "_" + conso.groupe;
-                    if (!(key in dict_places_prises)) {dict_places_prises[key] = 0};
-                    if (conso.quantite) {var quantite = conso.quantite} else {quantite = 1};
-                    dict_places_prises[key] += quantite;
-
-                    // Mémorise également les événements
-                    if (conso.evenement) {
-                        key += "_" + conso.evenement;
+                    for (var idgroupe of [conso.groupe, 0]) {
+                        var key = conso.date + "_" + conso.unite + "_" + idgroupe;
                         if (!(key in dict_places_prises)) {dict_places_prises[key] = 0};
-                        dict_places_prises[key] += 1;
+                        if (conso.quantite) {var quantite = conso.quantite} else {quantite = 1};
+                        dict_places_prises[key] += quantite;
+
+                        // Mémorise également les événements
+                        if (conso.evenement) {
+                            key += "_" + conso.evenement;
+                            if (!(key in dict_places_prises)) {dict_places_prises[key] = 0};
+                            dict_places_prises[key] += 1;
+                        };
                     };
                 };
             };

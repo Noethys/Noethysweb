@@ -70,7 +70,9 @@
         color: #ffffff;
         opacity: 0.6;
     }
-
+    .verrouille {
+        background-color: #ececec;
+    }
     .masquer {
         display: none;
     }
@@ -100,6 +102,7 @@
             this.ouvert = false;
             this.nbre_conso = 0;
             this.nbre_evenements = 0;
+            this.idgroupe = 0;
 
             // Remplit à partir du dict data fourni
             if (data) {Object.assign(this, data)};
@@ -139,6 +142,7 @@
         };
 
         set_etat(statut) {
+            if (this.idgroupe === 0) {return}
             if (statut === true) {
                 this.ouvrir()
             } else {

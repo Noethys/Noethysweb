@@ -235,13 +235,13 @@ def Get_generic_data(data={}):
     liste_places = Consommation.objects.values('date', 'unite', 'groupe', 'quantite', 'evenement').annotate(nbre=Count('pk')).filter(data["conditions_periodes"] & Q(activite=data['selection_activite']) & Q(etat__in=("reservation", "present", "attente"))).exclude(inscription__in=data["liste_inscriptions"])
     dict_places = {}
     for p in liste_places:
-        key = "%s_%d_%d" % (p["date"], p["unite"], p["groupe"])
-        quantite = p["nbre"] * p["quantite"] if p["quantite"] else p["nbre"]
-        dict_places[key] = dict_places.get(key, 0) + quantite
-        if p["evenement"]:
-            key += "_%d" % p["evenement"]
+        for idgroupe in [p["groupe"], 0]:
+            key = "%s_%d_%d" % (p["date"], p["unite"], idgroupe)
+            quantite = p["nbre"] * p["quantite"] if p["quantite"] else p["nbre"]
             dict_places[key] = dict_places.get(key, 0) + quantite
-
+            if p["evenement"]:
+                key += "_%d" % p["evenement"]
+                dict_places[key] = dict_places.get(key, 0) + quantite
     data['dict_places_json'] = mark_safe(json.dumps(dict_places))
 
     # Importation des groupes

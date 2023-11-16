@@ -56,18 +56,19 @@
                         {# Case ouverture #}
                         {% for unite in unites %}
 
-                            {% creation_string_key "ouverture" dict_date.date groupe unite as key %}
+                            {% creation_string_key "ouverture" dict_date.date groupe.pk unite as key %}
                             {% with ouverture=ouvertures|get_item:key %}
                             {% with nbre_consommations=dict_conso|get_item:key %}
                             {% with nbre_evenements=dict_evenements|get_item:key %}
 
                                 {# Création de la case ouverture #}
-                                <td class="case fermeture" id="{{ key }}"></td>
+                                <td class="case fermeture {% if not groupe.pk %}verrouille{% endif %}" id="{{ key }}"></td>
 
                                 <script>
                                     {# Mémorisation des infos de la case #}
                                     var case_ouverture = new Case_ouverture({
                                         key: "{{ key }}",
+                                        idgroupe: {{ groupe.pk }},
                                         ouvert: {% if ouverture == True %}true{% else %}false{% endif %},
                                         nbre_conso: {% if nbre_consommations %}{{ nbre_consommations }}{% else %}0{% endif %},
                                         nbre_evenements: {% if nbre_evenements %}{{ nbre_evenements }}{% else %}0{% endif %},
@@ -90,7 +91,7 @@
                         {# Case remplissage #}
                         {% for unite_remplissage in unites_remplissage %}
                             <td>
-                                {% creation_string_key "remplissage" dict_date.date groupe unite_remplissage as key %}
+                                {% creation_string_key "remplissage" dict_date.date groupe.pk unite_remplissage as key %}
                                 {% with remplissage=remplissages|get_item:key %}
 
                                     <input type="number" class="case_remplissage" value="{% if remplissage %}{{ remplissage }}{% else %}{% endif %}" id="{{ key }}" style="width:60px;text-align: center;">
