@@ -11,11 +11,11 @@ from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Row, Column,
 from crispy_forms.bootstrap import Field, FormActions, PrependedText
 from core.utils.utils_commandes import Commandes
 from core.models import ModeleDocument
-from django_select2.forms import Select2Widget
+from core.forms.select2 import Select2Widget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    champs = forms.ModelChoiceField(label="Champs", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=ModeleDocument.objects.all(), required=False)
+    champs = forms.ModelChoiceField(label="Champs", widget=Select2Widget(), queryset=ModeleDocument.objects.all(), required=False)
     objets = forms.CharField(required=False)
 
     class Meta:

@@ -14,7 +14,7 @@ from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import Unite, Groupe, Activite
 from core.widgets import DatePickerWidget
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -34,14 +34,14 @@ class Formulaire(FormulaireBase, ModelForm):
     # Groupes
     choix_groupes = [("TOUS", "Tous les groupes"), ("SELECTION", "Uniquement certains groupes")]
     groupes_type = forms.TypedChoiceField(label="Groupes associés", choices=choix_groupes, initial='TOUS', required=True)
-    groupes = forms.ModelMultipleChoiceField(label="Sélection des groupes", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Groupe.objects.none(), required=False)
+    groupes = forms.ModelMultipleChoiceField(label="Sélection des groupes", widget=Select2MultipleWidget(), queryset=Groupe.objects.none(), required=False)
 
     # Incompatibilités
-    incompatibilites = forms.ModelMultipleChoiceField(label="Incompatibilités", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(), required=False,
+    incompatibilites = forms.ModelMultipleChoiceField(label="Incompatibilités", widget=Select2MultipleWidget(), queryset=Unite.objects.none(), required=False,
                                                       help_text="Sélectionnez les unités qui ne peuvent être saisies en même temps que cette unité.")
 
     # Dépendances
-    dependances = forms.ModelMultipleChoiceField(label="Unités liées", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(), required=False,
+    dependances = forms.ModelMultipleChoiceField(label="Unités liées", widget=Select2MultipleWidget(), queryset=Unite.objects.none(), required=False,
                                                  help_text="Cette unité héritera de l'état des unités liées et sera supprimée en cas d'absence de l'une des unités liées. Par exemple, un repas ne peut exister seul s'il n'y pas de journée, de matinée ou d'après-midi saisies.")
 
     class Meta:

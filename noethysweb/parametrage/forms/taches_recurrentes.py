@@ -10,7 +10,7 @@ from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset, Div
 from crispy_forms.bootstrap import Field
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.utils.utils_commandes import Commandes
 from core.models import Tache_recurrente, Structure, LISTE_MOIS, LISTE_VACANCES
 from core.widgets import DatePickerWidget
@@ -37,18 +37,18 @@ class Formulaire(FormulaireBase, ModelForm):
     interval_vacances = forms.ChoiceField(label="Répétition", choices=choix_interval_vacances, initial=0, required=False)
 
     choix_weeklyday = [("MO", "Lundi"), ("TU", "Mardi"), ("WE", "Mercredi"), ("TH", "Jeudi"), ("FR", "Vendredi"), ("SA", "Samedi"), ("SU", "Dimanche")]
-    repeat_weeklyday = forms.MultipleChoiceField(label="Jours", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=choix_weeklyday, required=False)
+    repeat_weeklyday = forms.MultipleChoiceField(label="Jours", widget=Select2MultipleWidget(), choices=choix_weeklyday, required=False)
 
     repeat_yearly_month = forms.ChoiceField(label="Mois", choices=LISTE_MOIS, initial=0, required=False)
 
     choix_monthlydate = [(1, "Le 1er jour du mois")] + [(x, "Le %dème jour du mois" % x) for x in range(2, 32)]
-    repeat_monthlydate = forms.MultipleChoiceField(label="Jour", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=choix_monthlydate, required=False)
+    repeat_monthlydate = forms.MultipleChoiceField(label="Jour", widget=Select2MultipleWidget(), choices=choix_monthlydate, required=False)
 
     choix_monthlyday = []
     for num, label_num in [(1, "Premier"), (2, "Deuxième"), (3, "Troisième"), (4, "Quatrième"), (5, "Cinquième"), (-1, "Dernier")]:
         for code_jour, label_jour in choix_weeklyday:
             choix_monthlyday.append(("%d%s" % (num, code_jour), "%s %s" % (label_num, label_jour.lower())))
-    repeat_monthlyday = forms.MultipleChoiceField(label="Jour", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=choix_monthlyday, required=False)
+    repeat_monthlyday = forms.MultipleChoiceField(label="Jour", widget=Select2MultipleWidget(), choices=choix_monthlyday, required=False)
 
     choix_repeat_vacances = [("FIRST", "Le 1er jour des vacances"), ("LAST", "Le dernier jour des vacances"),
                              ("BEFORE_FIRST", "X jours avant le premier jour des vacances"), ("AFTER_FIRST", "X jours après le premier jour des vacances"),

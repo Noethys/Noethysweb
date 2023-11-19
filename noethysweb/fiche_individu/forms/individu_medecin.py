@@ -11,7 +11,7 @@ from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Butto
 from crispy_forms.bootstrap import Field, InlineCheckboxes, FormActions, StrictButton
 from core.utils.utils_commandes import Commandes
 from core.models import Individu, Medecin
-from django_select2.forms import Select2Widget, ModelSelect2Widget
+from django_select2.forms import ModelSelect2Widget
 
 
 class Widget_medecin(ModelSelect2Widget):

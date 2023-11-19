@@ -7,7 +7,7 @@
 import datetime
 from django import forms
 from django.forms import ModelForm
-from django_select2.forms import Select2MultipleWidget, Select2Widget
+from core.forms.select2 import Select2MultipleWidget, Select2Widget
 from django.db.models import Q, Max
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
@@ -32,7 +32,7 @@ class Formulaire(FormulaireBase, ModelForm):
     montant = forms.DecimalField(label="Montant", max_digits=6, decimal_places=2, initial=0.0, required=False)
 
     # Activités
-    activites = forms.ModelMultipleChoiceField(label="Activités", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Activite.objects.all(), required=False)
+    activites = forms.ModelMultipleChoiceField(label="Activités", widget=Select2MultipleWidget(), queryset=Activite.objects.all(), required=False)
 
     # Bénéficiaires pour la saisie par lot
     beneficiaires_familles = forms.CharField(label="Familles", required=False, widget=Selection_beneficiaires_cotisation(attrs={"categorie": "familles"}))
@@ -390,7 +390,7 @@ $(document).ready(function() {
 """
 
 class Formulaire_type_cotisation(FormulaireBase, forms.Form):
-    type_cotisation = forms.ModelChoiceField(label="Type d'adhésion", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=TypeCotisation.objects.none().order_by("nom"), required=True)
+    type_cotisation = forms.ModelChoiceField(label="Type d'adhésion", widget=Select2Widget(), queryset=TypeCotisation.objects.none().order_by("nom"), required=True)
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.pop("instance", None)

@@ -12,7 +12,7 @@ from crispy_forms.bootstrap import Field, FormActions, StrictButton
 from core.utils.utils_commandes import Commandes
 from core.models import PortailPeriode, ModeleEmail, CategorieCompteInternet
 from core.widgets import DatePickerWidget, DateTimePickerWidget
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -22,7 +22,7 @@ class Formulaire(FormulaireBase, ModelForm):
     affichage_date_debut = forms.DateTimeField(label="Date de début*", required=False, widget=DateTimePickerWidget())
     affichage_date_fin = forms.DateTimeField(label="Date de fin*", required=False, widget=DateTimePickerWidget())
     modele = forms.ModelChoiceField(label="Modèle d'Email", queryset=ModeleEmail.objects.filter(categorie="portail_demande_reservation"), required=False, help_text="Laissez vide si vous souhaitez que le modèle par défaut soit automatiquement sélectionné.")
-    categories = forms.ModelMultipleChoiceField(label="Sélection de catégories", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
+    categories = forms.ModelMultipleChoiceField(label="Sélection de catégories", widget=Select2MultipleWidget(),
                                                 queryset=CategorieCompteInternet.objects.all().order_by("nom"), required=False,
                                                 help_text="Sélectionnez une ou plusieurs catégories de compte internet.")
     class Meta:

@@ -9,7 +9,7 @@ from django.db.models import Q
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset, Div
 from crispy_forms.bootstrap import Field, PrependedText, InlineCheckboxes
-from django_select2.forms import Select2Widget, Select2MultipleWidget
+from core.forms.select2 import Select2Widget, Select2MultipleWidget
 from core.widgets import DatePickerWidget, Formset
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
@@ -18,7 +18,7 @@ from core.models import Activite, Aide, JOURS_SEMAINE
 
 
 class Formulaire_creation(FormulaireBase, forms.Form):
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Activite.objects.none(), required=True)
+    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget(), queryset=Activite.objects.none(), required=True)
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.pop("instance", None)

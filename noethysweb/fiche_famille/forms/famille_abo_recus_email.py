@@ -11,13 +11,13 @@ from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Field
 from crispy_forms.bootstrap import Field, StrictButton
 from core.utils.utils_commandes import Commandes
 from core.models import Famille, Rattachement
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 import re
 
 
 class Formulaire(FormulaireBase, ModelForm):
     email_recus = forms.BooleanField(label="Activer l'envoi des reçus de règlements par Email", required=False, initial=False)
-    adresses_individus = forms.MultipleChoiceField(label="Adresses existantes", help_text="Sélectionnez une ou plusieurs adresses parmi la liste des adresses de la famille.", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=False)
+    adresses_individus = forms.MultipleChoiceField(label="Adresses existantes", help_text="Sélectionnez une ou plusieurs adresses parmi la liste des adresses de la famille.", widget=Select2MultipleWidget(), choices=[], required=False)
     adresses_autres = forms.CharField(label="Autres adresses", help_text="Saisissez une ou plusieurs autres adresses en les séparant par des points-virgules.", required=False)
 
     class Meta:

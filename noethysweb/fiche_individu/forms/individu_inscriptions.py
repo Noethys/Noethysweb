@@ -12,12 +12,12 @@ from crispy_forms.bootstrap import Field, StrictButton
 from core.utils.utils_commandes import Commandes
 from core.models import Inscription, Individu, Activite, Consommation
 from core.widgets import DatePickerWidget
-from django_select2.forms import Select2Widget
+from core.forms.select2 import Select2Widget
 import datetime
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Activite.objects.none(), required=True)
+    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget(), queryset=Activite.objects.none(), required=True)
     date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
     date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(), help_text="Laissez vide la date de fin si vous ne connaissez pas la durée de l'inscription.")
     action_conso = forms.ChoiceField(label="Action", required=False, choices=[

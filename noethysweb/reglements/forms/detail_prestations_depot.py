@@ -8,12 +8,12 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
 from crispy_forms.bootstrap import Field
 from core.models import Depot
-from django_select2.forms import Select2Widget
+from core.forms.select2 import Select2Widget
 from core.forms.base import FormulaireBase
 
 
 class Formulaire(FormulaireBase, forms.Form):
-    depot = forms.ModelChoiceField(label="Dépôt", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Depot.objects.all().order_by("-date"), required=True)
+    depot = forms.ModelChoiceField(label="Dépôt", widget=Select2Widget(), queryset=Depot.objects.all().order_by("-date"), required=True)
     afficher_tarif_unitaire = forms.BooleanField(label="Afficher détail par tarif unitaire", initial=True, required=False)
 
     def __init__(self, *args, **kwargs):

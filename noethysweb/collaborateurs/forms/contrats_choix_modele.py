@@ -7,13 +7,13 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset
 from crispy_forms.bootstrap import Field
-from django_select2.forms import Select2Widget
+from core.forms.select2 import Select2Widget
 from core.models import ModeleWord
 from core.forms.base import FormulaireBase
 
 
 class Formulaire(FormulaireBase, forms.Form):
-    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=ModeleWord.objects.filter(categorie="contrat_collaborateur").order_by("nom"), required=True)
+    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget(), queryset=ModeleWord.objects.filter(categorie="contrat_collaborateur").order_by("nom"), required=True)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

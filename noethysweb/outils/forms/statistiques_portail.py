@@ -8,7 +8,7 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML
 from crispy_forms.bootstrap import Field
-from django_select2.forms import Select2Widget
+from core.forms.select2 import Select2Widget
 from core.widgets import DateRangePickerWidget
 from core.models import Vacance, LISTE_VACANCES, LISTE_MOIS
 from core.forms.base import FormulaireBase
@@ -20,7 +20,7 @@ class Formulaire(FormulaireBase, forms.Form):
         ("renseignements", "Renseignements"),
         ("reservations", "Réservations"),
     ]
-    rubrique = forms.ChoiceField(label="Rubrique", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), choices=choix_rubrique, required=True)
+    rubrique = forms.ChoiceField(label="Rubrique", widget=Select2Widget(), choices=choix_rubrique, required=True)
     choix_periodes = [
         ("ANNEE", "Année"),
         ("MOIS", "Mois"),

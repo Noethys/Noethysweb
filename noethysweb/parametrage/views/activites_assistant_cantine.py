@@ -5,7 +5,7 @@
 
 from django import forms
 import datetime
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.models import TypeGroupeActivite, Unite, UniteRemplissage, Ouverture, Remplissage, NomTarif, Tarif, Structure
 from parametrage.views.activites_assistant import Assistant_base, Page_responsable, Page_responsable, Page_renseignements, Page_categories, \
                                                     Page_categories_nombre, Page_tarifs
@@ -17,7 +17,7 @@ class Page_introduction(forms.Form):
 class Page_generalites(forms.Form):
     nom_activite = forms.CharField(label="Quel est le nom de la cantine ?", required=True, max_length=300, help_text="Exemple: 'Cantine scolaire'.")
     structure = forms.ModelChoiceField(label="Quelle est la structure associée à ce séjour ?", queryset=Structure.objects.all(), required=True, help_text="Sélectionnez une structure dans la liste proposée.")
-    groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à cette activité", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
+    groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à cette activité", widget=Select2MultipleWidget(), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
 
 class Page_groupes(forms.Form):
     has_groupes = forms.ChoiceField(label="Le temps de cantine est-il constitué de plusieurs services ?", choices=[("oui", "Oui"), ("non", "Non")], widget=forms.RadioSelect, initial="non", help_text="Exemple : Service 1 et service 2.")

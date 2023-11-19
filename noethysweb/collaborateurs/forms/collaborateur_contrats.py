@@ -5,7 +5,7 @@
 
 from django import forms
 from django.forms import ModelForm
-from django_select2.forms import Select2Widget
+from core.forms.select2 import Select2Widget
 from django.db.models import Q
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Fieldset
@@ -24,7 +24,7 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             "date_debut": DatePickerWidget(),
             "date_fin": DatePickerWidget(),
-            "type_poste": Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}),
+            "type_poste": Select2Widget({"data-minimum-input-length": 0}),
             "observations": forms.Textarea(attrs={'rows': 3}),
         }
         help_texts = {

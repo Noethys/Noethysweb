@@ -11,7 +11,7 @@ from crispy_forms.layout import Layout, Hidden, Submit, HTML, Div, Column, Field
 from crispy_forms.bootstrap import Field, FormActions, PrependedText, StrictButton, InlineRadios
 from core.utils.utils_commandes import Commandes
 from core.models import Individu, Rattachement, CATEGORIES_RATTACHEMENT
-from django_select2.forms import Select2Widget
+from core.forms.select2 import Select2Widget
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -20,7 +20,7 @@ class Formulaire(FormulaireBase, ModelForm):
     titulaire = forms.BooleanField(label="Titulaire du dossier", initial=True, required=False)
     nom = forms.CharField(label="Nom*", required=False, help_text="Saisissez le nom de famille en majuscules. Ex : DUPOND.")
     prenom = forms.CharField(label="Prénom*", required=False, help_text="Saisissez le prénom en minuscules avec la première lettre en majuscule. Ex : Kévin.")
-    individu = forms.ModelChoiceField(label="Individu*", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Individu.objects.all().order_by("nom", "prenom"), required=False)
+    individu = forms.ModelChoiceField(label="Individu*", widget=Select2Widget(), queryset=Individu.objects.all().order_by("nom", "prenom"), required=False)
 
     class Meta:
         model = Individu

@@ -7,7 +7,7 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset
 from crispy_forms.bootstrap import Field
-from django_select2.forms import Select2Widget
+from core.forms.select2 import Select2Widget
 from core.models import LotFactures
 from core.utils.utils_commandes import Commandes
 from core.widgets import DateRangePickerWidget
@@ -17,7 +17,7 @@ from core.forms.base import FormulaireBase
 class Formulaire(FormulaireBase, forms.Form):
     choix_type_selection = [("LOT", "Selon le lot de factures"), ("DATE_EDITION", "Selon la date d'édition")]
     type_selection = forms.TypedChoiceField(label="Type de sélection", choices=choix_type_selection, initial="LOT", required=False)
-    lot = forms.ModelChoiceField(label="Lot de factures", widget=Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}),
+    lot = forms.ModelChoiceField(label="Lot de factures", widget=Select2Widget({"data-minimum-input-length": 0}),
                                            queryset=LotFactures.objects.all().order_by("-pk"), required=False)
     date_edition = forms.CharField(label="Date d'édition", widget=DateRangePickerWidget(attrs={"afficher_check": False}), required=False)
 

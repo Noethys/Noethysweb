@@ -9,7 +9,7 @@ from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, HTML, Fieldset
 from crispy_forms.bootstrap import Field
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.utils.utils_commandes import Commandes
 from core.models import TypePieceCollaborateur
 from core.widgets import DatePickerWidget
@@ -28,8 +28,8 @@ class Formulaire(FormulaireBase, ModelForm):
         model = TypePieceCollaborateur
         fields = "__all__"
         widgets = {
-            "qualifications": Select2MultipleWidget({"lang": "fr", "data-minimum-input-length": 0, "data-width": "100%"}),
-            "postes": Select2MultipleWidget({"lang": "fr", "data-minimum-input-length": 0, "data-width": "100%"}),
+            "qualifications": Select2MultipleWidget({"data-minimum-input-length": 0}),
+            "postes": Select2MultipleWidget({"data-minimum-input-length": 0}),
         }
         help_texts = {
             "obligatoire": "Précisez si cette pièce est obligatoire pour les collaborateurs",

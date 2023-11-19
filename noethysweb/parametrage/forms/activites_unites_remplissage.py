@@ -14,7 +14,7 @@ from core.models import UniteRemplissage, Unite, Activite
 from django.db.models import Max
 from core.widgets import DatePickerWidget
 import datetime
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -25,7 +25,7 @@ class Formulaire(FormulaireBase, ModelForm):
     validite_date_fin = forms.DateField(label="Date de fin*", required=False, widget=DatePickerWidget())
 
     # Unités
-    unites = forms.ModelMultipleChoiceField(label="Unités de consommation associées", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(), required=True)
+    unites = forms.ModelMultipleChoiceField(label="Unités de consommation associées", widget=Select2MultipleWidget(), queryset=Unite.objects.none(), required=True)
 
     # Plage horaire
     heure_min = forms.TimeField(label="Heure min", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="La plage horaire permet de comptabiliser uniquement les consommations appartenant à la plage horaire renseignée.")

@@ -12,11 +12,11 @@ from crispy_forms.bootstrap import Field, FormActions, PrependedText, StrictButt
 from core.utils.utils_commandes import Commandes
 from core.models import Ecole, Secteur
 from core.widgets import Telephone, CodePostal, Ville
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    secteurs = forms.ModelMultipleChoiceField(label="Secteurs géographiques associés", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Secteur.objects.all(), required=False)
+    secteurs = forms.ModelMultipleChoiceField(label="Secteurs géographiques associés", widget=Select2MultipleWidget(), queryset=Secteur.objects.all(), required=False)
 
     class Meta:
         model = Ecole

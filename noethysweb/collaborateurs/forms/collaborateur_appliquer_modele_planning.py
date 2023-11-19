@@ -4,7 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from crispy_forms.bootstrap import Field
@@ -16,7 +16,7 @@ from core.models import ModelePlanningCollaborateur
 
 class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget(), help_text="Sélectionnez la période sur laquelle appliquer les modèles.")
-    modeles = forms.ModelMultipleChoiceField(label="Modèles", required=True, widget=Select2MultipleWidget({"lang": "fr", "data-minimum-input-length": 0, "data-width": "100%"}),
+    modeles = forms.ModelMultipleChoiceField(label="Modèles", required=True, widget=Select2MultipleWidget({"data-minimum-input-length": 0}),
                                              queryset=ModelePlanningCollaborateur.objects.none(), help_text="Sélectionnez un ou plusieurs modèles de planning à appliquer.")
 
     def __init__(self, *args, **kwargs):

@@ -12,7 +12,7 @@ from crispy_forms.bootstrap import Field, FormActions, PrependedText, StrictButt
 from core.utils.utils_commandes import Commandes
 from core.models import Activite, TypeGroupeActivite
 from core.widgets import DatePickerWidget
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 import datetime
 from core.widgets import Telephone, CodePostal, Ville, Selection_image
 
@@ -25,7 +25,7 @@ class Formulaire(FormulaireBase, ModelForm):
     validite_date_fin = forms.DateField(label="Date de fin*", required=False, widget=DatePickerWidget())
 
     # Groupes d'activités
-    groupes_activites = forms.ModelMultipleChoiceField(label="Groupes d'activités", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeGroupeActivite.objects.all(), required=False)
+    groupes_activites = forms.ModelMultipleChoiceField(label="Groupes d'activités", widget=Select2MultipleWidget(), queryset=TypeGroupeActivite.objects.all(), required=False)
 
     # Nombre max d'inscrits
     choix_nbre_inscrits = [("NON", "Sans limitation du nombre d'inscrits"), ("OUI", "Avec limitation du nombre d'inscrits")]

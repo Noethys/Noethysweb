@@ -12,11 +12,11 @@ from crispy_forms.bootstrap import Field, FormActions, PrependedText, StrictButt
 from core.utils.utils_commandes import Commandes
 from core.widgets import DatePickerWidget
 from core.models import Classe, NiveauScolaire
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    niveaux = forms.ModelMultipleChoiceField(label="Niveaux scolaires", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=NiveauScolaire.objects.all(), required=False)
+    niveaux = forms.ModelMultipleChoiceField(label="Niveaux scolaires", widget=Select2MultipleWidget(), queryset=NiveauScolaire.objects.all(), required=False)
 
     class Meta:
         model = Classe

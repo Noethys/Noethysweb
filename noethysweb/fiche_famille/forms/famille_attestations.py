@@ -9,7 +9,7 @@ from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML
 from crispy_forms.bootstrap import Field
-from django_select2.forms import Select2Widget, Select2MultipleWidget
+from core.forms.select2 import Select2Widget, Select2MultipleWidget
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import Attestation, ModeleDocument, Inscription
@@ -21,10 +21,10 @@ from facturation.forms.attestations_options_impression import Formulaire as Form
 class Formulaire(FormulaireBase, ModelForm):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}), help_text="Par défaut la date du jour. Modifiez uniquement si nécessaire.")
-    individus = forms.MultipleChoiceField(label="Individus", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=True)
-    activites = forms.MultipleChoiceField(label="Activités", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=True)
+    individus = forms.MultipleChoiceField(label="Individus", widget=Select2MultipleWidget(), choices=[], required=True)
+    activites = forms.MultipleChoiceField(label="Activités", widget=Select2MultipleWidget(), choices=[], required=True)
     numero = forms.IntegerField(label="Numéro", required=True, help_text="Ce numéro est attribué par défaut. Modifiez uniquement si nécessaire.")
-    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=ModeleDocument.objects.filter(categorie="attestation").order_by("nom"), required=True)
+    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget(), queryset=ModeleDocument.objects.filter(categorie="attestation").order_by("nom"), required=True)
     signataire = forms.CharField(label="Signataire", required=True, help_text="Saisissez le nom du signataire du document (par défaut l'utilisateur en cours).")
     options_impression = forms.CharField(label="Options d'impression", required=False, widget=FormIntegreWidget())
 

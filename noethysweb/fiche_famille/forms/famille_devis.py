@@ -12,7 +12,7 @@ from crispy_forms.bootstrap import Field, StrictButton
 from core.utils.utils_commandes import Commandes
 from core.models import Famille, Devis, ModeleDocument, Inscription, Individu, Activite
 from core.widgets import DatePickerWidget, DateRangePickerWidget, FormIntegreWidget
-from django_select2.forms import Select2Widget, Select2MultipleWidget
+from core.forms.select2 import Select2Widget, Select2MultipleWidget
 import datetime, json
 from facturation.forms.devis_options_impression import Formulaire as Form_options_impression
 from core.utils import utils_dates
@@ -21,14 +21,14 @@ from core.utils import utils_dates
 class Formulaire(FormulaireBase, ModelForm):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
-    individus = forms.MultipleChoiceField(label="Individus", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=True)
-    activites = forms.MultipleChoiceField(label="Activités", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=True)
+    individus = forms.MultipleChoiceField(label="Individus", widget=Select2MultipleWidget(), choices=[], required=True)
+    activites = forms.MultipleChoiceField(label="Activités", widget=Select2MultipleWidget(), choices=[], required=True)
     numero = forms.IntegerField(label="Numéro", required=True)
-    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=ModeleDocument.objects.filter(categorie="devis").order_by("nom"), required=True)
+    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget(), queryset=ModeleDocument.objects.filter(categorie="devis").order_by("nom"), required=True)
     signataire = forms.CharField(label="Signataire", required=True)
     options_impression = forms.CharField(label="Options d'impression", required=False, widget=FormIntegreWidget())
     choix_categories = [("consommation", "Consommations"), ("cotisation", "Adhésions"), ("location", "Locations"), ("autre", "Autres"), ]
-    categories = forms.MultipleChoiceField(label="Catégories de prestations", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=choix_categories, required=True)
+    categories = forms.MultipleChoiceField(label="Catégories de prestations", widget=Select2MultipleWidget(), choices=choix_categories, required=True)
 
     class Meta:
         model = Devis

@@ -7,7 +7,7 @@ from django import forms
 import datetime
 from dateutil import rrule
 from core.widgets import DatePickerWidget
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.models import TypeGroupeActivite, Unite, UniteRemplissage, Ouverture, Remplissage, NomTarif, Tarif, Structure
 from parametrage.views.activites_assistant import Assistant_base, Page_responsable, Page_responsable, Page_renseignements, Page_categories, \
                                                     Page_categories_nombre, Page_tarifs, Page_conclusion, Page_groupes_nombre, Page_groupes_noms
@@ -22,7 +22,7 @@ class Page_generalites(forms.Form):
     date_fin = forms.DateField(label="Quelle est la date de fin du stage ?", required=True, widget=DatePickerWidget(), help_text="Saisissez la date de fin du stage.")
     nbre_inscrits_max = forms.IntegerField(label="Quel est le nombre maximal d'inscrits ?", initial=0, min_value=0, required=False, help_text="S'il n'existe aucune limitation du nombre d'inscrits, laisser la valeur à 0.")
     structure = forms.ModelChoiceField(label="Quelle est la structure associée à ce séjour ?", queryset=Structure.objects.all(), required=True, help_text="Sélectionnez une structure dans la liste proposée.")
-    groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à ce stage", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
+    groupes_activites = forms.ModelMultipleChoiceField(label="Sélectionnez les groupes d'activités associés à ce stage", widget=Select2MultipleWidget(), queryset=TypeGroupeActivite.objects.all(), required=False, help_text="Les groupes d'activités permettent une sélection rapide d'un ensemble d'activités.")
 
     def clean(self):
         if self.cleaned_data["date_debut"] > self.cleaned_data["date_fin"]:

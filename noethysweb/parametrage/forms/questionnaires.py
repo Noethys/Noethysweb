@@ -10,7 +10,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, ButtonHolder, Fieldset
 from crispy_forms.bootstrap import Field, FormActions, PrependedText, StrictButton
 from core.utils.utils_commandes import Commandes
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.models import QuestionnaireQuestion
 from core.widgets import DatePickerWidget, ColorPickerWidget, SliderWidget
 from django.db.models import Max
@@ -35,7 +35,7 @@ def Get_controle(question=None):
         ctrl = forms.TypedChoiceField(label=question.label, choices=liste_choix, initial=None, required=False, help_text=question.texte_aide)
     elif question.controle == "liste_coches":
         liste_choix = [(choix, choix) for choix in question.choix.split(";")]
-        ctrl = forms.TypedMultipleChoiceField(label=question.label, choices=liste_choix, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), required=False, help_text=question.texte_aide)
+        ctrl = forms.TypedMultipleChoiceField(label=question.label, choices=liste_choix, widget=Select2MultipleWidget(), required=False, help_text=question.texte_aide)
     elif question.controle == "case_coche":
         ctrl = forms.BooleanField(label=question.label, required=False, help_text=question.texte_aide)
     elif question.controle == "date":

@@ -13,7 +13,7 @@ from core.utils.utils_commandes import Commandes
 from core.utils import utils_texte
 from core.models import Mandat, Famille, Rattachement
 from core.widgets import DatePickerWidget, Telephone, CodePostal, Ville
-from django_select2.forms import Select2Widget, Select2MultipleWidget
+from core.forms.select2 import Select2Widget, Select2MultipleWidget
 from facturation.widgets import ChampAutomatiqueWidget
 from facturation.utils import utils_prelevements
 import datetime
@@ -32,7 +32,7 @@ class Formulaire(FormulaireBase, ModelForm):
             'individu_ville': Ville(attrs={"id_codepostal": "id_individu_cp"}),
             'memo': forms.Textarea(attrs={'rows': 3}),
             'rum': ChampAutomatiqueWidget(attrs={"label_checkbox": "Automatique", "title": "Saisissez un numéro unique"}),
-            "structures": Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
+            "structures": Select2MultipleWidget(),
         }
         labels = {
             "structures": "Sélection des structures",

@@ -18,7 +18,7 @@ from core.widgets import DateTimePickerWidget, DateRangePickerWidget
 from core.widgets import Crop_image
 from core.utils import utils_images, utils_dates
 from portail.widgets import Selection_image_article
-from django_select2.forms import Select2MultipleWidget, Select2Widget
+from core.forms.select2 import Select2MultipleWidget, Select2Widget
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -35,8 +35,8 @@ class Formulaire(FormulaireBase, ModelForm):
             "texte": SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '220px'}}),
             "image": Crop_image(attrs={"largeur_min": 447, "hauteur_min": 167, "ratio": "447/167"}),
             "image_article": Selection_image_article(),
-            "activites": Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
-            "groupes": Select2MultipleWidget({"lang": "fr", "data-minimum-input-length": 0, "data-width": "100%"}),
+            "activites": Select2MultipleWidget(),
+            "groupes": Select2MultipleWidget({"data-minimum-input-length": 0}),
             "album": Select2Widget({"lang": "fr", "data-width": "100%"}),
             "texte_popup": SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '180px'}}),
         }

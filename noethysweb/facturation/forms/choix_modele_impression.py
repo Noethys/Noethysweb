@@ -4,7 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django_select2.forms import Select2Widget
+from core.forms.select2 import Select2Widget
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset
 from crispy_forms.bootstrap import Field
@@ -13,7 +13,7 @@ from core.models import ModeleImpression
 
 
 class Formulaire(FormulaireBase, forms.Form):
-    modele_impression = forms.ChoiceField(label="Modèle d'impression", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), choices=[], required=True)
+    modele_impression = forms.ChoiceField(label="Modèle d'impression", widget=Select2Widget(), choices=[], required=True)
 
     def __init__(self, *args, **kwargs):
         categorie = kwargs.pop("categorie", None)

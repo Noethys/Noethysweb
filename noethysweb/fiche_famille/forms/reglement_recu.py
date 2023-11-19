@@ -6,7 +6,7 @@
 import datetime
 from django import forms
 from django.forms import ModelForm
-from django_select2.forms import Select2Widget
+from core.forms.select2 import Select2Widget
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML
 from crispy_forms.bootstrap import Field
@@ -18,7 +18,7 @@ from core.widgets import DatePickerWidget
 
 class Formulaire(FormulaireBase, ModelForm):
     date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
-    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=ModeleDocument.objects.filter(categorie="reglement").order_by("nom"), required=True)
+    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget(), queryset=ModeleDocument.objects.filter(categorie="reglement").order_by("nom"), required=True)
     signataire = forms.CharField(label="Signataire", required=True)
     intro = forms.CharField(label="Introduction", widget=forms.Textarea(attrs={'rows': 4}), required=True)
     afficher_prestations = forms.BooleanField(label="Inclure la liste des prestations payées avec ce règlement", required=False)

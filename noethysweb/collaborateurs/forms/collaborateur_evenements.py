@@ -6,7 +6,7 @@
 import datetime
 from django import forms
 from django.forms import ModelForm
-from django_select2.forms import Select2Widget
+from core.forms.select2 import Select2Widget
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML, Fieldset, Div
 from crispy_forms.bootstrap import Field, InlineCheckboxes
@@ -18,7 +18,7 @@ from core.widgets import DatePickerWidget, DateTimePickerWidget
 
 class Formulaire(FormulaireBase, ModelForm):
     # Collaborateur
-    collaborateur = forms.ModelChoiceField(label="Collaborateur", widget=Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}),
+    collaborateur = forms.ModelChoiceField(label="Collaborateur", widget=Select2Widget({"data-minimum-input-length": 0}),
                                      queryset=Collaborateur.objects.all().order_by("nom", "prenom"), required=True)
 
     # Période

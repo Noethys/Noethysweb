@@ -10,7 +10,7 @@ from django.db.models import Q
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, Div
 from crispy_forms.bootstrap import Field, PrependedText
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.utils import utils_preferences
@@ -67,7 +67,7 @@ FORMSET_CATEGORIES = inlineformset_factory(ComptaBudget, ComptaCategorieBudget, 
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    analytiques = forms.ModelMultipleChoiceField(label="Postes analytiques", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=ComptaAnalytique.objects.all(), required=True)
+    analytiques = forms.ModelMultipleChoiceField(label="Postes analytiques", widget=Select2MultipleWidget(), queryset=ComptaAnalytique.objects.all(), required=True)
 
     class Meta:
         model = ComptaBudget

@@ -9,7 +9,7 @@ from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Field
 from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.widgets import DateRangePickerWidget, SelectionActivitesWidget
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.utils import utils_questionnaires
 from core.forms.base import FormulaireBase
 
@@ -53,7 +53,7 @@ def Get_modes():
 class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
-    donnees = forms.MultipleChoiceField(label="Type de prestation", required=True, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[("cotisation", "Cotisations"), ("consommation", "Consommations"), ("location", "Locations"), ("autre", "Autres")], initial=["cotisation", "consommation", "location", "autre"])
+    donnees = forms.MultipleChoiceField(label="Type de prestation", required=True, widget=Select2MultipleWidget(), choices=[("cotisation", "Cotisations"), ("consommation", "Consommations"), ("location", "Locations"), ("autre", "Autres")], initial=["cotisation", "consommation", "location", "autre"])
     filtre_reglements_saisis = forms.CharField(label="Règlements saisis sur une période", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
     filtre_reglements_deposes = forms.CharField(label="Règlements déposés sur une période", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
     donnee_ligne = forms.ChoiceField(label="Ligne", choices=Get_regroupements(), initial="activite", required=False)

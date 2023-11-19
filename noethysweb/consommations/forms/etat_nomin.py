@@ -8,7 +8,7 @@ from django.db.models import Q
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML
 from crispy_forms.bootstrap import Field, TabHolder, Tab
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.widgets import DateRangePickerWidget, SelectionActivitesWidget, Profil_configuration
 from core.models import Activite, Parametre, Individu, Caisse, Ecole, QuestionnaireQuestion
 from core.forms.base import FormulaireBase
@@ -23,17 +23,17 @@ class Formulaire(FormulaireBase, forms.Form):
     ordre = forms.ChoiceField(label="Ordre", choices=[("croissant", "Croissant"), ("decroissant", "Décroissant")], initial="croissant", required=False)
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
-    etats = forms.MultipleChoiceField(required=True, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[("reservation", "Réservation"), ("present", "Présent"), ("attente", "Attente"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present"])
+    etats = forms.MultipleChoiceField(required=True, widget=Select2MultipleWidget(), choices=[("reservation", "Réservation"), ("present", "Présent"), ("attente", "Attente"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present"])
     colonnes = forms.CharField(label="Sélection des colonnes", required=False, widget=ColonnesEtatNominWidget())
 
     filtre_villes = forms.TypedChoiceField(label="Filtre sur les villes", choices=[("TOUTES", "Toutes les villes"), ("SELECTION", "Uniquement les villes sélectionnées")], initial="TOUTES", required=False)
-    villes = forms.MultipleChoiceField(label="Sélection de villes", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=False)
+    villes = forms.MultipleChoiceField(label="Sélection de villes", widget=Select2MultipleWidget(), choices=[], required=False)
 
     filtre_caisses = forms.TypedChoiceField(label="Filtre sur les caisses", choices=[("TOUTES", "Toutes les caisses"), ("SELECTION", "Uniquement les caisses sélectionnées")], initial="TOUTES", required=False)
-    caisses = forms.MultipleChoiceField(label="Sélection de caisses", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=False)
+    caisses = forms.MultipleChoiceField(label="Sélection de caisses", widget=Select2MultipleWidget(), choices=[], required=False)
 
     filtre_ecoles = forms.TypedChoiceField(label="Filtre sur les écoles", choices=[("TOUTES", "Toutes les écoles"), ("SELECTION", "Uniquement les écoles sélectionnées")], initial="TOUTES", required=False)
-    ecoles = forms.MultipleChoiceField(label="Sélection d'écoles", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], required=False)
+    ecoles = forms.MultipleChoiceField(label="Sélection d'écoles", widget=Select2MultipleWidget(), choices=[], required=False)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

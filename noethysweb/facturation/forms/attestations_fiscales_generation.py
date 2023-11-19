@@ -6,7 +6,7 @@
 import datetime
 from django import forms
 from django.contrib import messages
-from django_select2.forms import Select2MultipleWidget, Select2Widget
+from core.forms.select2 import Select2Widget
 from django.db.models import Max
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML, Hidden

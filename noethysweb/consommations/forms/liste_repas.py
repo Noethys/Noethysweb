@@ -7,7 +7,7 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from crispy_forms.bootstrap import Field
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.widgets import DateRangePickerWidget, SelectionActivitesWidget
 from core.forms.base import FormulaireBase
 from core.models import CategorieInformation
@@ -16,7 +16,7 @@ from core.models import CategorieInformation
 class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
-    categories_informations = forms.MultipleChoiceField(label="Catégories d'informations", required=False, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[], initial=[], help_text="Sélectionnez les catégories à inclure.")
+    categories_informations = forms.MultipleChoiceField(label="Catégories d'informations", required=False, widget=Select2MultipleWidget(), choices=[], initial=[], help_text="Sélectionnez les catégories à inclure.")
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

@@ -11,7 +11,7 @@ from crispy_forms.layout import Layout, Fieldset
 from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.models import Activite, TypePiece, TypeCotisation, TypeConsentement
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -19,9 +19,9 @@ class Formulaire(FormulaireBase, ModelForm):
         model = Activite
         fields = ["pieces", "cotisations", "vaccins_obligatoires", "assurance_obligatoire", "types_consentements"]
         widgets = {
-            "pieces": Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
-            "cotisations": Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
-            "types_consentements": Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
+            "pieces": Select2MultipleWidget(),
+            "cotisations": Select2MultipleWidget(),
+            "types_consentements": Select2MultipleWidget(),
          }
 
     def __init__(self, *args, **kwargs):

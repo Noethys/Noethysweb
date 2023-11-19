@@ -12,7 +12,6 @@ from crispy_forms.bootstrap import Field, StrictButton
 from core.utils.utils_commandes import Commandes
 from core.models import Information, Individu
 from core.widgets import DatePickerWidget
-from django_select2.forms import Select2Widget
 
 
 class Formulaire(FormulaireBase, ModelForm):

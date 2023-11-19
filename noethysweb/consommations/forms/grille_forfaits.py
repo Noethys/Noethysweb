@@ -15,7 +15,7 @@ from django.utils.safestring import mark_safe
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, Submit, HTML, ButtonHolder, Hidden
 from crispy_forms.bootstrap import Field, Div
-from django_select2.forms import Select2Widget
+from core.forms.select2 import Select2Widget
 from core.widgets import DatePickerWidget
 from core.forms.base import FormulaireBase
 from core.models import Famille, Tarif, Inscription
@@ -145,7 +145,7 @@ def Get_forfaits_disponibles(request):
 
 
 class Formulaire(FormulaireBase, forms.Form):
-    famille = forms.ChoiceField(label="Famille", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), choices=[], required=True)
+    famille = forms.ChoiceField(label="Famille", widget=Select2Widget(), choices=[], required=True)
     date_debut = forms.DateField(label="Du", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': False}))
     date_fin = forms.DateField(label="Au", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': False}))
     forfait = forms.ChoiceField(label="Forfait", choices=[], initial="aucun", required=False)

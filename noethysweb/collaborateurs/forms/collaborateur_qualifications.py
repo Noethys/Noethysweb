@@ -8,7 +8,7 @@ from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from crispy_forms.bootstrap import Field
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.utils.utils_commandes import Commandes
 from core.models import Collaborateur
 
@@ -19,7 +19,7 @@ class Formulaire(FormulaireBase, ModelForm):
         model = Collaborateur
         fields = ["qualifications"]
         widgets = {
-            "qualifications": Select2MultipleWidget({"lang": "fr", "data-minimum-input-length": 0, "data-width": "100%"}),
+            "qualifications": Select2MultipleWidget({"data-minimum-input-length": 0}),
         }
 
     def __init__(self, *args, **kwargs):

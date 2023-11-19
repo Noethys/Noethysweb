@@ -10,13 +10,13 @@ from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from crispy_forms.bootstrap import Field
-from django_select2.forms import Select2Widget, Select2MultipleWidget
+from core.forms.select2 import Select2Widget, Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Activite.objects.none().order_by("-date_fin"), required=True)
-    etats = forms.MultipleChoiceField(required=True, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), choices=[("reservation", "Réservation"), ("present", "Présent"), ("attente", "Attente"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present"])
+    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget(), queryset=Activite.objects.none().order_by("-date_fin"), required=True)
+    etats = forms.MultipleChoiceField(required=True, widget=Select2MultipleWidget(), choices=[("reservation", "Réservation"), ("present", "Présent"), ("attente", "Attente"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present"])
     utiliser_equiv_heures = forms.BooleanField(label="Utiliser les équivalences en heures si elles existent", initial=True, required=False)
 
     def __init__(self, *args, **kwargs):

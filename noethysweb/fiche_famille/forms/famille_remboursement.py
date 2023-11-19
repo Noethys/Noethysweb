@@ -10,7 +10,7 @@ from django.db.models import Q, Sum
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Fieldset
 from crispy_forms.bootstrap import Field, PrependedText
-from django_select2.forms import Select2Widget
+from core.forms.select2 import Select2Widget
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import Reglement, ModeReglement, Payeur, CompteBancaire, Prestation
@@ -23,7 +23,7 @@ class Formulaire(FormulaireBase, ModelForm):
     date = forms.DateField(label="Date", required=True, widget=DatePickerWidget())
     montant = forms.DecimalField(label="Montant", max_digits=6, decimal_places=2, initial=0.0, required=True, help_text="Saisissez le montant du remboursement.")
     observations = forms.CharField(label="Observations", widget=forms.Textarea(attrs={'rows': 2}), required=False, help_text="Vous pouvez saisir un commentaire qui sera stocké dans le règlement généré.")
-    compte = forms.ModelChoiceField(label="Compte", widget=Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=CompteBancaire.objects.none(), required=True)
+    compte = forms.ModelChoiceField(label="Compte", widget=Select2Widget({"data-minimum-input-length": 0}), queryset=CompteBancaire.objects.none(), required=True)
     mode = forms.ModelChoiceField(label="Mode de règlement", queryset=ModeReglement.objects.all().order_by("label"), widget=Selection_mode_reglement(), required=True)
     payeur = forms.ModelChoiceField(label="Payeur", queryset=Payeur.objects.none(), widget=Select_avec_commandes(), required=True)
 

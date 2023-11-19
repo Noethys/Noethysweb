@@ -12,13 +12,13 @@ from crispy_forms.bootstrap import Field, FormActions, StrictButton
 from core.utils.utils_commandes import Commandes
 from core.models import PortailUnite, Unite, Activite
 from django.db.models import Max
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    unites_principales = forms.ModelMultipleChoiceField(label="Unités principales", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(),
+    unites_principales = forms.ModelMultipleChoiceField(label="Unités principales", widget=Select2MultipleWidget(), queryset=Unite.objects.none(),
                                                         required=True, help_text="L'unité de réservation est affichée sur une date donnée uniquement si toutes les unités principales associées sont ouvertes.")
-    unites_secondaires = forms.ModelMultipleChoiceField(label="Unités secondaires", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Unite.objects.none(),
+    unites_secondaires = forms.ModelMultipleChoiceField(label="Unités secondaires", widget=Select2MultipleWidget(), queryset=Unite.objects.none(),
                                                         required=False, help_text="Les unités secondaires ne conditionnent pas l'affichage de l'unité de réservation.")
 
     class Meta:

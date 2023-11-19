@@ -11,11 +11,11 @@ from crispy_forms.layout import Layout, Div, HTML, Fieldset
 from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.models import TypeVaccin, TypeMaladie
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    types_maladies = forms.ModelMultipleChoiceField(label="Types de maladies associées", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=TypeMaladie.objects.all())
+    types_maladies = forms.ModelMultipleChoiceField(label="Types de maladies associées", widget=Select2MultipleWidget(), queryset=TypeMaladie.objects.all())
 
     # Champs libres pour la durée de validité
     choix_validite = [("ILLIMITEE", "Validité illimitée"), ("DUREE", "Une durée")]

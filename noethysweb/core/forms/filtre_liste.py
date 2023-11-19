@@ -14,7 +14,7 @@ from django.utils.html import escapejs
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML, Div, ButtonHolder
 from crispy_forms.bootstrap import Field
-from django_select2.forms import Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.forms.base import FormulaireBase
 from core.utils import utils_dates
 from core.models import FiltreListe
@@ -157,10 +157,10 @@ class Formulaire(FormulaireBase, forms.Form):
     critere_ecoles = forms.CharField(label="Ecoles", required=False, widget=SelectionEcolesWidget(attrs={"name": "liste_ecoles"}))
     critere_classes = forms.CharField(label="Classes", required=False, widget=SelectionClassesWidget(attrs={"name": "liste_classes"}))
     critere_niveaux = forms.CharField(label="Niveaux", required=False, widget=SelectionNiveauxWidget(attrs={"name": "liste_niveaux"}))
-    critere_etats = forms.MultipleChoiceField(label="Etats", required=False, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
+    critere_etats = forms.MultipleChoiceField(label="Etats", required=False, widget=Select2MultipleWidget(),
         choices=[("reservation", "Réservation"), ("present", "Présent"), ("attente", "Attente"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")],
         initial=["reservation", "present"])
-    critere_etats_inscriptions = forms.MultipleChoiceField(label="Statuts", required=False, widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}),
+    critere_etats_inscriptions = forms.MultipleChoiceField(label="Statuts", required=False, widget=Select2MultipleWidget(),
         choices=[("ok", "Validé"), ("attente", "En attente"), ("refus", "Refusé")], initial=["ok",])
 
     dict_types = {

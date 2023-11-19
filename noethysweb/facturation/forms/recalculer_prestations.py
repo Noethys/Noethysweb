@@ -9,13 +9,13 @@ from crispy_forms.layout import Layout
 from crispy_forms.bootstrap import Field
 from core.widgets import DateRangePickerWidget, SelectionActivitesWidget, Profil_configuration
 from core.models import Activite
-from django_select2.forms import Select2Widget
+from core.forms.select2 import Select2Widget
 from core.forms.base import FormulaireBase
 
 
 class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Activite.objects.none().order_by("-date_fin"), required=True)
+    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget(), queryset=Activite.objects.none().order_by("-date_fin"), required=True)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
