@@ -1,3 +1,19 @@
+Version 1.2.0.7 (20/11/2023) :
+
+- Ajout du total max dans le calendrier des ouvertures
+- Ajout du thème bootstrap aux contrôles select2
+- Ajout de la sélection d'individus pour l'édition des renseignements
+- Ajout de l'édition de fiches de renseignements depuis la fiche famille
+- Ajout de la détection mobile pour l'affichage des PDF
+- Ajout des questionnaires aux fiches de renseignements
+- Ajout de la variable TELEPHONE_FORMAT_FR dans les settings
+- Activation des messages familiaux dans les factures
+- Correction des permissions dans le menu des actions rapides
+- Correction sélection destinataires dans envoi mail express
+- Correction export Excel des règlements d'un dépôt
+- Correction tri de plusieurs listes déroulantes
+- Correction de divers petits bugs
+
 Version 1.2.0.6 (13/11/2023) :
 
 - Ajout de l'envoi de SMS avec BREVO
