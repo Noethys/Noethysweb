@@ -80,7 +80,8 @@ class View(CustomView, TemplateView):
         # Recherche des avoirs
         if (depot.montant or Decimal(0)) > total:
             montant_avoirs = depot.montant - total
-            dict_prestations[80000] = {"prestations": {}, "quantite": 0, "total": montant_avoirs}
+            dict_prestations[80000] = {"prestations": {"Non ventilé": {"quantite": 1, "total": montant_avoirs, "detail": {montant_avoirs: {"quantite": 1, "total": montant_avoirs}}}},
+                                       "quantite": 1, "total": montant_avoirs}
 
         # Remplissage
         liste_lignes = []
@@ -91,7 +92,7 @@ class View(CustomView, TemplateView):
             if IDactivite in dict_activites: nomActivite = dict_activites[IDactivite]
             elif IDactivite == 90001: nomActivite = "Cotisations"
             elif IDactivite == 90002: nomActivite = "Locations"
-            elif IDactivite == 80000: nomActivite = "Avoirs"
+            elif IDactivite == 80000: nomActivite = "Non ventilé"
             else: nomActivite = "Activité inconnue"
             listeLabels.append((nomActivite, IDactivite, dictActivite))
         listeLabels.sort()

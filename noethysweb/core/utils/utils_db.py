@@ -7,6 +7,7 @@
 def Maj_infos():
     """ Met à jour des infos dans la DB """
     from individus.utils import utils_individus
+    from reglements.utils import utils_depots
 
     # MAJ des noms et des adresses des familles
     utils_individus.Maj_infos_toutes_familles()
@@ -19,3 +20,6 @@ def Maj_infos():
 
     # Met à jour les tarif_ligne dans chaque prestation
     utils_individus.Maj_lignes_tarifs_prestations()
+
+    # Met à jour les montants des dépôts
+    utils_depots.Maj_montant_depots()
