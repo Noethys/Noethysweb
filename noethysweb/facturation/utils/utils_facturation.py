@@ -722,8 +722,8 @@ def Calculer_datamatrix(dictCompte):
     # 68 : Code période (1 caractère)
     elements.append(str(piece_pes.lot.mois)[:1])
 
-    # 69-71 : Deux derniers chiffres du CodProdLoc (3 caractères)
-    elements.append("%03d" % int(piece_pes.lot.modele.code_prodloc[:2]))
+    # 69-71 : Deux premiers chiffres du CodProdLoc (3 caractères)
+    elements.append("%03d" % int(data_codes_etab.Rechercher(str(piece_pes.lot.modele.code_prodloc[:2]))))
 
     # 72-73 : deux zéros
     elements.append("00")
