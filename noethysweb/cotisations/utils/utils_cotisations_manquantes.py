@@ -36,9 +36,10 @@ def Get_cotisations_manquantes(famille=None, date_reference=None, utilisateur=No
     liste_traitees = []
     liste_resultats = []
     for inscription in inscriptions:
+        # Recherche au moins une cotisation existante pour cette inscription
+        valide = False
         for type_cotisation in inscription.activite.cotisations.all():
             # Vérifie si la cotisation existe
-            valide = False
             if type_cotisation.type == "famille":
                 key = "famille_%d_%d" % (inscription.famille_id, type_cotisation.pk)
             else:
@@ -49,35 +50,34 @@ def Get_cotisations_manquantes(famille=None, date_reference=None, utilisateur=No
                 if type_cotisation.type == "individu" and cotisation.individu_id == inscription.individu_id:
                     valide = True
 
-            # Création du label
-            if type_cotisation.type == "famille":
-                label = type_cotisation.nom
-            else:
-                label = "%s de %s" % (type_cotisation.nom, inscription.individu.prenom)
+        if not valide:
+            for type_cotisation in inscription.activite.cotisations.all():
+                # Création du label
+                if type_cotisation.type == "famille":
+                    label = type_cotisation.nom
+                else:
+                    label = "%s de %s" % (type_cotisation.nom, inscription.individu.prenom)
 
-            # Création du lien de création rapide
-            if valide:
-                href = None
-            else:
+                # Création du lien de création rapide
                 href = reverse_lazy("famille_cotisations_saisie_rapide", kwargs={'idfamille': inscription.famille_id, 'idtype_cotisation': type_cotisation.pk, 'idindividu': inscription.individu_id})
 
-            # Mémorise la cotisation à fournir
-            dict_temp = {
-                "label": label,
-                "valide": valide,
-                "type_cotisation": type_cotisation,
-                "titre": "Cliquez ici pour créer immédiatement cette adhésion",
-                "href": href,
-            }
-            if type_cotisation.type == "famille":
-                dict_temp["individu"] = None
-                temp = (type_cotisation, None, inscription.famille_id)
-            else:
-                dict_temp["individu"] = inscription.individu
-                temp = (type_cotisation, inscription.individu, inscription.famille_id)
-            if temp not in liste_traitees and not valide:
-                liste_traitees.append(temp)
-                liste_resultats.append(dict_temp)
+                # Mémorise la cotisation à fournir
+                dict_temp = {
+                    "label": label,
+                    "valide": False,
+                    "type_cotisation": type_cotisation,
+                    "titre": "Cliquez ici pour créer immédiatement cette adhésion",
+                    "href": href,
+                }
+                if type_cotisation.type == "famille":
+                    dict_temp["individu"] = None
+                    temp = (type_cotisation, None, inscription.famille_id)
+                else:
+                    dict_temp["individu"] = inscription.individu
+                    temp = (type_cotisation, inscription.individu, inscription.famille_id)
+                if temp not in liste_traitees:
+                    liste_traitees.append(temp)
+                    liste_resultats.append(dict_temp)
 
     return liste_resultats
 
@@ -113,9 +113,10 @@ def Get_liste_cotisations_manquantes(date_reference=None, activites=None, presen
     for inscription in inscriptions:
         dict_resultats.setdefault(inscription.famille, [])
 
+        # Recherche au moins une cotisation existante pour cette inscription
+        valide = False
         for type_cotisation in inscription.activite.cotisations.all():
             # Vérifie si la cotisation existe
-            valide = False
             if type_cotisation.type == "famille":
                 key = "famille_%d_%d" % (inscription.famille_id, type_cotisation.pk)
             else:
@@ -127,35 +128,30 @@ def Get_liste_cotisations_manquantes(date_reference=None, activites=None, presen
                     if cotisation.famille_id == inscription.famille_id:
                         valide = True
 
-            # Création du lien de création
-            # if valide:
-            #     href = None
-            # else:
-            #     href = reverse_lazy("famille_pieces_saisie_rapide", kwargs={'idfamille': inscription.famille_id, 'idtype_piece': type_piece.pk, 'idindividu': inscription.individu_id})
+        if not valide:
+            for type_cotisation in inscription.activite.cotisations.all():
+                # Création du label
+                if type_cotisation.type == "famille":
+                    label = type_cotisation.nom
+                else:
+                    label = "%s de %s" % (type_cotisation.nom, inscription.individu.prenom)
 
-            # Création du label
-            if type_cotisation.type == "famille":
-                label = type_cotisation.nom
-            else:
-                label = "%s de %s" % (type_cotisation.nom, inscription.individu.prenom)
-
-            # Mémorise la pièce à fournir
-            dict_temp = {
-                "label": label,
-                "valide": valide,
-                "type_cotisation": type_cotisation,
-                "titre": "Cliquez ici pour créer immédiatement cette adhésion",
-                # "href": href,
-            }
-            if type_cotisation.type == "famille":
-                dict_temp["individu"] = None
-                temp = (type_cotisation, None, inscription.famille_id)
-            else:
-                dict_temp["individu"] = inscription.individu
-                temp = (type_cotisation, inscription.individu, inscription.famille_id)
-            if temp not in liste_traitees and not valide:
-                liste_traitees.append(temp)
-                dict_resultats[inscription.famille].append(dict_temp)
+                # Mémorise la pièce à fournir
+                dict_temp = {
+                    "label": label,
+                    "valide": valide,
+                    "type_cotisation": type_cotisation,
+                    "titre": "Cliquez ici pour créer immédiatement cette adhésion",
+                }
+                if type_cotisation.type == "famille":
+                    dict_temp["individu"] = None
+                    temp = (type_cotisation, None, inscription.famille_id)
+                else:
+                    dict_temp["individu"] = inscription.individu
+                    temp = (type_cotisation, inscription.individu, inscription.famille_id)
+                if temp not in liste_traitees and not valide:
+                    liste_traitees.append(temp)
+                    dict_resultats[inscription.famille].append(dict_temp)
 
     # Tri et filtre des résultats
     dict_final = {}
