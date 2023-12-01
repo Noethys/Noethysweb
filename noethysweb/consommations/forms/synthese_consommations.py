@@ -38,7 +38,7 @@ class Formulaire(FormulaireBase, forms.Form):
             choix_regroupement.append((code, label))
     regroupement = forms.ChoiceField(label="Regroupement", widget=Select2Widget(), choices=choix_regroupement, required=True)
 
-    etats = forms.MultipleChoiceField(required=True, widget=Select2MultipleWidget(), choices=[("reservation", "Réservation"), ("present", "Présent"), ("attente", "Attente"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present"])
+    etats = forms.MultipleChoiceField(required=True, widget=Select2MultipleWidget(), choices=[("reservation", "Réservation"), ("present", "Présent"), ("attente", "Attente"), ("refus", "Refus"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present"])
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
