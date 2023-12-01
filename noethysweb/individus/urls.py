@@ -13,7 +13,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             liste_regimes_alimentaires, liste_maladies, liste_informations, individus_doublons_liste, liste_familles_sans_inscriptions, \
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
-                            abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter
+                            abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails
 
 urlpatterns = [
 
@@ -113,6 +113,8 @@ urlpatterns = [
     path('individus/informations/supprimer/<int:pk>', liste_informations.Supprimer.as_view(), name='informations_supprimer'),
 
     path('individus/edition_informations', edition_informations.View.as_view(), name='edition_informations'),
+
+    path('individus/mails/liste', liste_mails.Liste.as_view(), name='mails_liste'),
 
     # Abonnés aux listes de diffusion
     path('individus/abonnes_listes_diffusion/liste', abonnes_listes_diffusion.Liste.as_view(), name='abonnes_listes_diffusion_liste'),
