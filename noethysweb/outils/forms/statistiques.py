@@ -3,15 +3,15 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
+from crispy_forms.layout import Layout, HTML
 from crispy_forms.bootstrap import Field
-from core.widgets import SelectionActivitesWidget, DateRangePickerWidget, DatePickerWidget, MonthPickerWidget
-from core.models import Vacance, LISTE_VACANCES, LISTE_MOIS
-from core.forms.select2 import Select2Widget
+from core.widgets import SelectionActivitesWidget, DateRangePickerWidget
+from core.models import Vacance, LISTE_VACANCES, LISTE_MOIS, LISTE_ETATS_CONSO
+from core.forms.select2 import Select2Widget, Select2MultipleWidget
 from core.forms.base import FormulaireBase
-import datetime
 
 
 class Formulaire(FormulaireBase, forms.Form):
@@ -44,6 +44,7 @@ class Formulaire(FormulaireBase, forms.Form):
     annee = forms.IntegerField(label="Année", required=False, initial=datetime.date.today().year)
     periode = forms.CharField(label="Période", required=False, widget=DateRangePickerWidget())
     tranches_qf = forms.CharField(label="Tranches de QF", required=False, help_text="Saisissez les tranches à étudier de la façon suivante : 0-500;501-1000;etc...")
+    etats = forms.MultipleChoiceField(required=False, widget=Select2MultipleWidget(), choices=LISTE_ETATS_CONSO, initial=["reservation", "present"])
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -60,6 +61,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Field('mois'),
             Field('annee'),
             Field('periode'),
+            Field('etats'),
             HTML(EXTRA_SCRIPT),
         )
 
@@ -94,19 +96,24 @@ function On_change_donnees() {
     $('#div_id_mois').hide();
     $('#div_id_annee').hide();
     $('#div_id_periode').hide();
+    $('#div_id_etats').hide();
     if($(this).val() == 'VACANCES') {
         $('#div_id_vacances').show();
         $('#div_id_annee').show();
+        $('#div_id_etats').show();
     };
     if($(this).val() == 'MOIS') {
         $('#div_id_mois').show();
         $('#div_id_annee').show();
+        $('#div_id_etats').show();
     };
     if($(this).val() == 'ANNEE') {
         $('#div_id_annee').show();
+        $('#div_id_etats').show();
     };
     if($(this).val() == 'PERIODE') {
         $('#div_id_periode').show();
+        $('#div_id_etats').show();
     };
 }
 $(document).ready(function() {

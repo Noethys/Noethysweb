@@ -63,9 +63,9 @@ class Histogramme(Element):
 
 
 def Calcule_periodes_comparatives(parametres={}, presents=None, liste_activites=[]):
-    dates_extremes = Consommation.objects.filter(activite__in=liste_activites, etat__in=("reservation", "present")).aggregate(Min('date'), Max('date'))
+    dates_extremes = Consommation.objects.filter(activite__in=liste_activites, etat__in=parametres["etats"]).aggregate(Min('date'), Max('date'))
+    liste_periodes = []
     if dates_extremes["date__min"] and dates_extremes["date__max"]:
-        liste_periodes = []
 
         if parametres["donnees"] == "VACANCES":
             for vacance in Vacance.objects.filter(nom=parametres["vacances"], date_debut__gte=dates_extremes["date__min"], date_fin__lte=dates_extremes["date__max"]).order_by("date_debut"):
@@ -159,7 +159,7 @@ class View(CustomView, TemplateView):
 
             if rubrique.startswith("individus"):
                 if presents:
-                    condition = Q(consommation__activite__in=liste_activites, consommation__date__gte=presents[0], consommation__date__lte=presents[1], consommation__etat__in=("present", "reservation"))
+                    condition = Q(consommation__activite__in=liste_activites, consommation__date__gte=presents[0], consommation__date__lte=presents[1], consommation__etat__in=parametres["etats"])
                 else:
                     condition = Q(inscription__activite__in=liste_activites)
 
@@ -184,7 +184,7 @@ class View(CustomView, TemplateView):
                     if liste_periodes:
                         liste_labels, liste_valeurs = [], []
                         for dict_periode in liste_periodes:
-                            condition_temp = Q(consommation__activite__in=liste_activites, consommation__date__gte=dict_periode["date_debut"], consommation__date__lte=dict_periode["date_fin"], consommation__etat__in=("present", "reservation"))
+                            condition_temp = Q(consommation__activite__in=liste_activites, consommation__date__gte=dict_periode["date_debut"], consommation__date__lte=dict_periode["date_fin"], consommation__etat__in=parametres["etats"])
                             liste_labels.append(dict_periode["label"])
                             liste_valeurs.append(Individu.objects.filter(condition_temp).distinct().count())
                         data.append(Histogramme(titre="Evolution du nombre des individus", type_chart="bar", labels=liste_labels, valeurs=liste_valeurs))
@@ -383,7 +383,7 @@ class View(CustomView, TemplateView):
 
             if rubrique.startswith("familles"):
                 if presents:
-                    condition = Q(rattachement__individu__consommation__activite__in=liste_activites, rattachement__individu__consommation__date__gte=presents[0], rattachement__individu__consommation__date__lte=presents[1], rattachement__individu__consommation__etat__in=("present", "reservation"))
+                    condition = Q(rattachement__individu__consommation__activite__in=liste_activites, rattachement__individu__consommation__date__gte=presents[0], rattachement__individu__consommation__date__lte=presents[1], rattachement__individu__consommation__etat__in=parametres["etats"])
                 else:
                     condition = Q(rattachement__individu__inscription__activite__in=liste_activites)
 
@@ -407,7 +407,7 @@ class View(CustomView, TemplateView):
                     if liste_periodes:
                         liste_labels, liste_valeurs = [], []
                         for dict_periode in liste_periodes:
-                            condition_temp = Q(rattachement__individu__consommation__activite__in=liste_activites, rattachement__individu__consommation__date__gte=dict_periode["date_debut"], rattachement__individu__consommation__date__lte=dict_periode["date_fin"], rattachement__individu__consommation__etat__in=("present", "reservation"))
+                            condition_temp = Q(rattachement__individu__consommation__activite__in=liste_activites, rattachement__individu__consommation__date__gte=dict_periode["date_debut"], rattachement__individu__consommation__date__lte=dict_periode["date_fin"], rattachement__individu__consommation__etat__in=parametres["etats"])
                             liste_labels.append(dict_periode["label"])
                             liste_valeurs.append(Famille.objects.filter(condition_temp).distinct().count())
                         data.append(Histogramme(titre="Evolution du nombre des familles", type_chart="bar", labels=liste_labels, valeurs=liste_valeurs))
