@@ -22,7 +22,7 @@ class Formulaire(FormulaireBase, ModelForm):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
     individus = forms.MultipleChoiceField(label="Individus", widget=Select2MultipleWidget(), choices=[], required=True)
-    activites = forms.MultipleChoiceField(label="Activités", widget=Select2MultipleWidget(), choices=[], required=True)
+    activites = forms.MultipleChoiceField(label="Activités", widget=Select2MultipleWidget(), choices=[], required=False)
     numero = forms.IntegerField(label="Numéro", required=True)
     modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget(), queryset=ModeleDocument.objects.filter(categorie="devis").order_by("nom"), required=True)
     signataire = forms.CharField(label="Signataire", required=True)
@@ -123,7 +123,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Vérification du formulaire des options d'impression
         form_options = Form_options_impression(self.data, request=self.request)
-        if form_options.is_valid() == False:
+        if not form_options.is_valid():
             liste_erreurs = form_options.errors.as_data().keys()
             self.add_error("options_impression", "Veuillez renseigner les champs manquants : %s." % ", ".join(liste_erreurs))
 
