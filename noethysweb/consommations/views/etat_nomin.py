@@ -159,7 +159,7 @@ class View(CustomView, TemplateView):
                 resultats[key_individu]["famille_num_allocataire"] = conso.inscription.famille.num_allocataire
                 resultats[key_individu]["famille_allocataire"] = conso.inscription.famille.allocataire.Get_nom() if conso.inscription.famille.allocataire else None
                 resultats[key_individu]["famille_caisse"] = conso.inscription.famille.caisse.nom if conso.inscription.famille.caisse else None
-                resultats[key_individu]["famille_qf"] = int(dict_quotients.get(conso.inscription.famille_id, 0))
+                resultats[key_individu]["famille_qf"] = int(dict_quotients[conso.inscription.famille_id]) if conso.inscription.famille_id in dict_quotients else None
 
                 # Ajout des questionnaires
                 for reponse in questionnaires_individus.GetDonnees(conso.individu_id):
