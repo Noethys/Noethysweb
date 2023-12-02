@@ -97,7 +97,11 @@ class Impression(utils_impression.Impression):
                         self.dict_classes[classe.ecole].append(classe)
 
         # Importation des conso
-        conditions = Q(groupe_id__in=liste_groupes) & Q(date__in=self.dict_donnees["dates"]) & Q(etat__in=("reservation", "present")) & Q(inscription__statut="ok")
+        if self.dict_donnees["afficher_tous_etats"]:
+            liste_etats = ("reservation", "present", "refus", "attente", "absenti", "absentj")
+        else:
+            liste_etats = ("reservation", "present")
+        conditions = Q(groupe_id__in=liste_groupes) & Q(date__in=self.dict_donnees["dates"]) & Q(etat__in=liste_etats) & Q(inscription__statut="ok")
 
         liste_evenements = []
         dict_evenements = {}
@@ -679,6 +683,10 @@ class Impression(utils_impression.Impression):
                                                                     if typeUnite == "Quantite":
                                                                          label = str(quantite)
 
+                                                                    if self.dict_donnees["masquer_horaires"]:
+                                                                        label = "X"
+                                                                    if self.dict_donnees["afficher_tous_etats"]:
+                                                                        label += "<br/>%s" % self.Formate_etat(etat)
                                                                     if self.dict_donnees["masquer_consommations"]:
                                                                         label = ""
 
@@ -709,6 +717,7 @@ class Impression(utils_impression.Impression):
                                                                 if unite.pk in dictInscription["listeConso"][date]:
 
                                                                     for dictConsoTemp in dictInscription["listeConso"][date][unite.pk]:
+                                                                        etat = dictConsoTemp["etat"]
                                                                         quantite = dictConsoTemp["quantite"]
                                                                         # etiquettes = dictConsoTemp["etiquettes"]
                                                                         heure_debut = dictConsoTemp["heure_debut"]
@@ -747,6 +756,10 @@ class Impression(utils_impression.Impression):
                                                                             else:
                                                                                 label = "X"
 
+                                                                            if self.dict_donnees["masquer_horaires"]:
+                                                                                label = "X"
+                                                                            if self.dict_donnees["afficher_tous_etats"]:
+                                                                                label += "<br/>%s" % self.Formate_etat(etat)
                                                                             if self.dict_donnees["masquer_consommations"]:
                                                                                 label = ""
 
@@ -1187,3 +1200,12 @@ class Impression(utils_impression.Impression):
                 #         listeResultats.append({"IDecole": IDecole, "nomEcole": nomEcole, "nomClasse": nomClasse, "IDclasse": IDclasse, "date_debut": date_debut, "date_fin": date_fin})
 
         return listeResultats
+
+    def Formate_etat(self, etat=None):
+        if etat == "reservation": return "<FONT face='Helvetica' color='#FF9E1E'>(Résa)</FONT>"
+        if etat == "present": return "<FONT face='Helvetica' color='#28a745'>(Prés)</FONT>"
+        if etat == "attente": return "<FONT face='Helvetica' color='#abcbff'>(Att)</FONT>"
+        if etat == "refus": return "<FONT face='Helvetica' color='#ff1904'>(Refus)</FONT>"
+        if etat == "absenti": return "<FONT face='Helvetica' color='#a371ff'>(AbsI)</FONT>"
+        if etat == "absentj": return "<FONT face='Helvetica' color='#e83e8c'>(AbsJ)</FONT>"
+        return ""
