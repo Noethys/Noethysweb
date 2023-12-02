@@ -38,7 +38,7 @@
                             <td class="case ouvert {{ info_case.classe }}" id="{{ key_case }}">
                                 <table class='table table_evenements'><tbody><tr>
                                     {% for evenement in info_case.evenements %}
-                                        <td class="case ouvert {{ evenement.classe }}" id="event_{{ key_case }}_{{ evenement_pk }}" title="Places initiales : {{ evenement.capacite_max|default:"--- " }}&#013;Places prises : {{ evenement.prises }}&#013;Places restantes : {{ evenement.restantes|default_if_none:"---" }}&#013;&#013;Double-cliquez sur cette case pour&#013;accéder au détail des réservations">
+                                        <td class="case ouvert {{ evenement.classe }}" id="event_{{ key_case }}_{{ evenement.pk }}" title="Places initiales : {{ evenement.capacite_max|default:"--- " }}&#013;Places prises : {{ evenement.prises }}&#013;Places restantes : {{ evenement.restantes|default_if_none:"---" }}&#013;&#013;Double-cliquez sur cette case pour&#013;accéder au détail des réservations">
                                             <span style="font-size: 11px;">{{ evenement.nom|truncatechars:15 }}</span><br>
                                             <span>{{ evenement.valeur }}</span>
                                         </td>

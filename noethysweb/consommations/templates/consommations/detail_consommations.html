@@ -20,6 +20,9 @@
                 Date : {{ resultats.date|date:"l j F Y"|title }} |
                 Unité de remplissage : {{ resultats.unite_remplissage.nom }} |
                 Groupe : {{ resultats.groupe.nom }}
+                {% if resultats.evenement %}
+                    | Evénement : {{ resultats.evenement.nom }}
+                {% endif %}
 
                 <script>
                     var contenu_table = JSON.parse('{{ resultats.liste_lignes|escapejs }}');

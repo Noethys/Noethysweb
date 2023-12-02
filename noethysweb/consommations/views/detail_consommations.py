@@ -6,9 +6,10 @@
 import json
 from django.urls import reverse
 from django.views.generic import TemplateView
+from django.db.models import Q
 from core.views.base import CustomView
 from core.utils import utils_dates
-from core.models import Consommation, Groupe, UniteRemplissage
+from core.models import Consommation, Groupe, UniteRemplissage, Evenement
 
 
 class View(CustomView, TemplateView):
@@ -22,13 +23,22 @@ class View(CustomView, TemplateView):
         return context
 
     def Get_resultats(self, donnee=None):
-        date = utils_dates.ConvertDateENGtoDate(donnee.split("_")[0])
-        unite_remplissage = UniteRemplissage.objects.prefetch_related("unites").get(pk=int(donnee.split("_")[1]))
-        groupe = Groupe.objects.get(pk=int(donnee.split("_")[2]))
+        if "event" in donnee:
+            date = utils_dates.ConvertDateENGtoDate(donnee.split("_")[1])
+            unite_remplissage = UniteRemplissage.objects.prefetch_related("unites").get(pk=int(donnee.split("_")[2]))
+            groupe = Groupe.objects.get(pk=int(donnee.split("_")[3]))
+            evenement = Evenement.objects.get(pk=donnee.split("_")[4])
+            conditions = Q(evenement_id=evenement.pk)
+        else:
+            date = utils_dates.ConvertDateENGtoDate(donnee.split("_")[0])
+            unite_remplissage = UniteRemplissage.objects.prefetch_related("unites").get(pk=int(donnee.split("_")[1]))
+            groupe = Groupe.objects.get(pk=int(donnee.split("_")[2]))
+            evenement = None
+            conditions = Q(date=date) & Q(unite__in=unite_remplissage.unites.all()) & Q(groupe=groupe)
 
         # Importation des consommations associées à l'unité de remplissage
         dict_conso = {}
-        consommations = Consommation.objects.select_related('unite', 'activite', 'groupe', 'evenement', 'inscription', 'individu').filter(date=date, unite__in=unite_remplissage.unites.all(), groupe=groupe).order_by("individu__nom", "individu__prenom")
+        consommations = Consommation.objects.select_related('unite', 'activite', 'groupe', 'evenement', 'inscription', 'individu').filter(conditions).order_by("individu__nom", "individu__prenom")
         for conso in consommations:
             dict_conso.setdefault(conso.individu, [])
             dict_conso[conso.individu].append(conso)
@@ -45,4 +55,4 @@ class View(CustomView, TemplateView):
             ])
             liste_lignes.append({"label": label, "unites": unites, "date_saisie": date_saisie, "action": action})
 
-        return {"date": date, "unite_remplissage": unite_remplissage, "groupe": groupe, "liste_lignes": json.dumps(liste_lignes)}
+        return {"date": date, "unite_remplissage": unite_remplissage, "groupe": groupe, "evenement": evenement, "liste_lignes": json.dumps(liste_lignes)}
