@@ -292,25 +292,42 @@ class Supprimer_individu(Page, crud.Supprimer):
 
     def get_success_url(self):
         """ Renvoie vers la fiche famille après la suppression """
-        try:
-            self.famille = self.get_famille()
-            self.famille.Maj_infos()
-            return reverse_lazy("famille_resume", kwargs={'idfamille': self.Get_idfamille()})
-        except:
-            # Renvoie vers la liste des familles si la fiche famille a été supprimée
+        # Revient à la liste des familles si la famille n'existe plus
+        if not Famille.objects.filter(pk=self.kwargs['idfamille']).exists():
             return reverse_lazy("famille_liste")
 
+        # Revient à la page Résumé de la fiche famille
+        self.famille = self.get_famille()
+        self.famille.Maj_infos()
+        return reverse_lazy("famille_resume", kwargs={'idfamille': self.Get_idfamille()})
 
 
 class Detacher_individu(Supprimer_individu):
     form_class = Formulaire
     template_name = "fiche_famille/famille_detacher.html"
     mode = "détacher"
+    check_protections = False
 
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """
         context = super(Detacher_individu, self).get_context_data(**kwargs)
         context['box_titre'] = "Détacher un individu"
+
+        # Recherche si des protections existent sur cet individu
+        collector = NestedObjects(using='default')
+        collector.collect([self.get_object()])
+
+        # Exclusion des objets associés à d'autres fiches famille
+        liste_objets_proteges = []
+        for objet in collector.protected:
+            idfamille_objet = getattr(objet, "famille_id", None)
+            if idfamille_objet == self.get_famille().pk or not idfamille_objet:
+                liste_objets_proteges.append(objet)
+
+        # Affichage des protections trouvées
+        if liste_objets_proteges:
+            context['erreurs_protection'].append("Il est rattaché aux données suivantes : %s." % crud.Formate_liste_objets(objets=liste_objets_proteges))
+
         return context
 
     def delete(self, request, *args, **kwargs):
@@ -329,4 +346,5 @@ class Detacher_individu(Supprimer_individu):
             rattachement.delete()
         messages.add_message(self.request, messages.SUCCESS, "Détachement effectué avec succès")
         utils_historique.Ajouter(titre="Détachement d'un individu", detail="Détachement de %s" % individu.Get_nom(), utilisateur=self.request.user, famille=famille.pk)
+
         return HttpResponseRedirect(self.get_success_url())
