@@ -1,3 +1,18 @@
+Version 1.2.0.9 (03/12/2023) :
+
+- Ajout du filtre Refus à la synthèse des consommations
+- Ajout de la liste des mails au menu Individus
+- Ajout des états aux statistiques globales
+- Ajout de l'option Masquer les horaires dans la liste des consommations
+- Ajout de l'option Afficher tous les états dans la liste des consommations
+- Ajout de l'option afficher présents dans les totaux de la pointeuse
+- Correction du détail des consommations si évènement
+- Correction du détachement d'un individu
+- Correction de la génération du datamatrix
+- Correction de la recherche des adhésions manquantes
+- Correction du regroupement par qf dans la synthèse des consommations
+- Correction du devis si locations
+
 Version 1.2.0.8 (20/11/2023) :
 
 - Ajout de la commande de maj du montant des dépôts
