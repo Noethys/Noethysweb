@@ -104,6 +104,8 @@ var dict_memos = {};
 var pressepapiers_unites = {};
 var id_unique_multi = 1;
 var dict_places_prises = {};
+var dict_places_presents = {};
+var dict_places_temp = {};
 var cases_touchees = [];
 var chrono;
 var touche_clavier = null;
@@ -1125,6 +1127,7 @@ $(function () {
 // Calcul des places prises
 function maj_remplissage(date) {
     dict_places_prises = {};
+    dict_places_presents = {};
     // Recherche des places prises affichées
     $.each(dict_cases, function (key, case_tableau) {
         if (!(case_tableau.type_case === "evenement") && !(case_tableau.type_case === "multi")) {
@@ -1137,11 +1140,22 @@ function maj_remplissage(date) {
                         if (conso.quantite) {var quantite = conso.quantite} else {quantite = 1};
                         dict_places_prises[key] += quantite;
 
+                        // Mémorise uniquement les présents pour les totaux
+                        if (conso.etat === "present") {
+                            if (!(key in dict_places_presents)) {dict_places_presents[key] = 0};
+                            dict_places_presents[key] += quantite;
+                        }
+
                         // Mémorise également les événements
                         if (conso.evenement) {
                             key += "_" + conso.evenement;
                             if (!(key in dict_places_prises)) {dict_places_prises[key] = 0};
                             dict_places_prises[key] += 1;
+                            // Mémorise uniquement les présents pour les totaux
+                            if (conso.etat === "present") {
+                                if (!(key in dict_places_presents)) {dict_places_presents[key] = 0};
+                                dict_places_presents[key] += 1;
+                            }
                         };
                     };
                 };
@@ -1152,11 +1166,16 @@ function maj_remplissage(date) {
     // Ajout des places des individus non affichés
     Object.assign(dict_places_prises, dict_places);
 
+    dict_places_temp = dict_places_prises;
+    if ($("#id_afficher_presents_totaux").val() === "oui") {
+        dict_places_temp = dict_places_presents;
+    }
+
     // Maj de la box totaux
     $("#table_totaux td[id^='total_']").each(function() {
         var key = periode_json.selections.jour + "_" + this.id.slice(6);
-        if (key in dict_places_prises) {
-            $(this).html(dict_places_prises[key]);
+        if (key in dict_places_temp) {
+            $(this).html(dict_places_temp[key]);
         } else {
             $(this).html(0);
         };
@@ -1169,8 +1188,8 @@ function maj_remplissage(date) {
         if (idunite_remplissage in dict_unites_remplissage) {
             for (var idunite_conso of dict_unites_remplissage[idunite_remplissage]["unites_conso"]) {
                 var key = periode_json.selections.jour + "_" + idunite_conso + "_" + idgroupe;
-                if (key in dict_places_prises) {
-                    nbre_places_prises += dict_places_prises[key]
+                if (key in dict_places_temp) {
+                    nbre_places_prises += dict_places_temp[key]
                 };
             };
         };

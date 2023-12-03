@@ -17,6 +17,7 @@ class Formulaire(FormulaireBase, forms.Form):
     afficher_groupe = forms.ChoiceField(label="Afficher le groupe", choices=[("oui", "Oui"), ("non", "Non")], initial="non", required=False)
     afficher_classe = forms.ChoiceField(label="Afficher la classe", choices=[("oui", "Oui"), ("non", "Non")], initial="non", required=False)
     afficher_niveau_scolaire = forms.ChoiceField(label="Afficher le niveau scolaire", choices=[("oui", "Oui"), ("non", "Non")], initial="non", required=False)
+    afficher_presents_totaux = forms.ChoiceField(label="Afficher présents dans totaux", choices=[("oui", "Oui"), ("non", "Non")], initial="non", required=False)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -35,4 +36,5 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("afficher_groupe"),
             Field("afficher_classe"),
             Field("afficher_niveau_scolaire"),
+            Field("afficher_presents_totaux"),
         )
