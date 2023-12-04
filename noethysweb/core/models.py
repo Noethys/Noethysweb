@@ -670,12 +670,14 @@ class TypePiece(models.Model):
         return utils_dates.ConvertDureeStrToDuree(self.duree_validite)
 
     def Get_date_fin_validite(self, date_reference=None):
-        if date_reference == None:
+        if not date_reference:
             date_reference = datetime.date.today()
-        if self.duree_validite == None:
+        if not self.duree_validite:
             return datetime.date(2999, 1, 1)
-        else:
+        if self.duree_validite.startswith("j"):
             return date_reference + self.Get_duree()
+        if self.duree_validite.startswith("d"):
+            return utils_dates.ConvertDateENGtoDate(self.duree_validite[1:])
 
 
 class TypeQuotient(models.Model):
@@ -3975,8 +3977,10 @@ class TypePieceCollaborateur(models.Model):
             date_reference = datetime.date.today()
         if not self.duree_validite:
             return datetime.date(2999, 1, 1)
-        else:
+        if self.duree_validite.startswith("j"):
             return date_reference + self.Get_duree()
+        if self.duree_validite.startswith("d"):
+            return utils_dates.ConvertDateENGtoDate(self.duree_validite[1:])
 
 
 class GroupeCollaborateurs(models.Model):

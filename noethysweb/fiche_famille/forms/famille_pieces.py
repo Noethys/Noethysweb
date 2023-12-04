@@ -247,7 +247,7 @@ function On_change_piece() {
     } else {
         date_fin = dict_validite.TOUTES[index];
     };
-    if (date_fin == null){
+    if ((date_fin == null) || (date_fin == "01/01/2999")) {
         $('#id_validite_type').val('ILLIMITEE');
         $('#id_date_fin').datepicker("setDate", null);
     } else {
