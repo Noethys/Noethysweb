@@ -725,7 +725,7 @@ class Facturation():
                         if evenement:
                             tarif = None
                             # tarif avancé
-                            for tarif_evenement in Tarif.objects.filter(evenement=evenement).order_by("date_debut"):
+                            for tarif_evenement in Tarif.objects.filter(evenement=evenement, categories_tarifs=case_tableau["categorie_tarif"]).order_by("date_debut"):
                                 if self.Recherche_tarif_valide(tarif_evenement, case_tableau):
                                     tarif = tarif_evenement
                                     tarif.nom_evenement = evenement.nom
