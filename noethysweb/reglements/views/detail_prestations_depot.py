@@ -93,7 +93,7 @@ class View(CustomView, TemplateView):
             elif IDactivite == 90001: nomActivite = "Cotisations"
             elif IDactivite == 90002: nomActivite = "Locations"
             elif IDactivite == 80000: nomActivite = "Non ventilé"
-            else: nomActivite = "Activité inconnue"
+            else: nomActivite = "Autres prestations"
             listeLabels.append((nomActivite, IDactivite, dictActivite))
         listeLabels.sort()
 
@@ -102,7 +102,7 @@ class View(CustomView, TemplateView):
 
         # Niveau activité
         for nomActivite, IDactivite, dictActivite in listeLabels:
-            id_activite = "activite_%d" % IDactivite
+            id_activite = "activite_%d" % (IDactivite or 0)
             liste_lignes.append({"id": id_activite, "pid": 0, "regroupement": True, "label": nomActivite, "quantite": dictActivite["quantite"], "total": float(dictActivite["total"])})
 
             # Mémorise total général
