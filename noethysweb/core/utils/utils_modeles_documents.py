@@ -1113,7 +1113,8 @@ class ObjetPDF():
                         encoder = DataMatrixEncoder(valeur)
                         png = encoder.get_imagedata()
                         buf = BytesIO(png)
-                        canvas.drawImage(ImageReader(buf), self.left-3, self.top-3, largeur * 1.11, hauteur * 1.11, mask="auto", preserveAspectRatio=True)
+                        canvas.scale(1, -1)
+                        canvas.drawImage(ImageReader(buf), self.left-3, -self.top-3 - hauteur * 1.11, largeur * 1.11, hauteur * 1.11, mask="auto", preserveAspectRatio=True)
 
                     if self.cb_norme != "datamatrix":
                         canvas.scale(1, -1)
