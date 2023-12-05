@@ -1,3 +1,12 @@
+Version 1.2.1.0 (05/12/2023) :
+
+- Ajout de la colonne Date limite de paiement dans modifier factures
+- Correction de la date de fin de validité d'une pièce
+- Correction des tarifs avancés dans les évènements
+- Correction de la recherche rapide sur plusieurs listes
+- Correction du détail des prestations d'un dépôt si activité vide
+- Correction du datamatrix
+
 Version 1.2.0.9 (03/12/2023) :
 
 - Ajout du filtre Refus à la synthèse des consommations
