@@ -78,8 +78,8 @@ class Liste(Page, MultipleDatatableView):
 
     class progtransports_datatable_class(MyDatatable):
         categorie = columns.TextColumn("Catégorie", sources="categorie", processor="Get_categorie")
-        origine = columns.TextColumn("Origine", sources=["depart_lieu", "depart_arret"], processor="Get_origine")
-        destination = columns.TextColumn("Destination", sources=["arrivee_lieu", "arrivee_arret"], processor="Get_destination")
+        origine = columns.TextColumn("Origine", sources=None, processor="Get_origine")
+        destination = columns.TextColumn("Destination", sources=None, processor="Get_destination")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
@@ -120,14 +120,14 @@ class Liste(Page, MultipleDatatableView):
 
     class transports_datatable_class(MyDatatable):
         categorie = columns.TextColumn("Catégorie", sources="categorie", processor="Get_categorie")
-        origine = columns.TextColumn("Origine", sources=["depart_lieu", "depart_arret"], processor="Get_origine")
-        destination = columns.TextColumn("Destination", sources=["arrivee_lieu", "arrivee_arret"], processor="Get_destination")
+        origine = columns.TextColumn("Origine", sources=None, processor="Get_origine")
+        destination = columns.TextColumn("Destination", sources=None, processor="Get_destination")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             model = Transport
             structure_template = MyDatatable.structure_template
-            columns = ["idtransport", "categorie", "depart_date", "depart_heure", "origine", "arrivee_date", "arrivee_heure", "destination"]
+            columns = ["idtransport", "categorie"]#, "depart_date", "depart_heure", "origine", "arrivee_date", "arrivee_heure", "destination"]
             processors = {
                 "depart_date": helpers.format_date("%d/%m/%Y"),
                 "arrivee_date": helpers.format_date("%d/%m/%Y"),

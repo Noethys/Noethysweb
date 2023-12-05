@@ -91,6 +91,7 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idassurance", "assureur__nom", "num_contrat", "date_debut", "date_fin"]
+        num_contrat = columns.TextColumn("N° de contrat", processor="Get_num_contrat")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
@@ -101,6 +102,9 @@ class Liste(Page, crud.Liste):
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
             }
+
+        def Get_num_contrat(self, instance, *args, **kwargs):
+            return instance.num_contrat
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """

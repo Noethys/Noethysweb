@@ -90,6 +90,7 @@ class Liste(Page, MultipleDatatableView):
 
     class informations_datatable_class(MyDatatable):
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
+        intitule = columns.TextColumn("Intitulé", processor="Get_intitule")
         categorie = columns.CompoundColumn("Catégorie", sources=['categorie__nom'])
 
         class Meta:
@@ -98,6 +99,9 @@ class Liste(Page, MultipleDatatableView):
             columns = ['categorie', 'intitule']
             ordering = ['categorie', 'intitule']
             footer = False
+
+        def Get_intitule(self, instance, *args, **kwargs):
+            return instance.intitule
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """

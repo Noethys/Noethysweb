@@ -69,6 +69,10 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idcontact", "nom", "prenom", "rue_resid", "tel_domicile", "tel_mobile", "tel_travail", "autorisation_sortie", "autorisation_appel"]
+        tel_domicile = columns.TextColumn("Tél domicile", processor="Get_tel_domicile")
+        tel_mobile = columns.TextColumn("Tél portable", processor="Get_tel_mobile")
+        tel_travail = columns.TextColumn("Tél pro.", processor="Get_tel_travail")
+        lien = columns.TextColumn("Tél pro.", processor="Get_lien")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         autorisations = columns.TextColumn("Autorisations", sources=["autorisation_sortie", "autorisation_appel"], processor='Get_autorisations')
 
@@ -79,6 +83,18 @@ class Liste(Page, crud.Liste):
             labels = {
                 "lien": "Lien",
             }
+
+        def Get_tel_domicile(self, instance, *args, **kwargs):
+            return instance.tel_domicile
+
+        def Get_tel_mobile(self, instance, *args, **kwargs):
+            return instance.tel_mobile
+
+        def Get_tel_travail(self, instance, *args, **kwargs):
+            return instance.tel_travail
+
+        def Get_lien(self, instance, *args, **kwargs):
+            return instance.lien
 
         def Get_autorisations(self, instance, *args, **kwargs):
             return instance.Get_autorisations()
