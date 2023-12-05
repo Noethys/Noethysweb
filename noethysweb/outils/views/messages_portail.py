@@ -36,13 +36,12 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ['idmessage', 'famille__nom', 'structure__nom', 'date_creation', 'date_lecture']
-
         check = columns.CheckBoxSelectColumn(label="")
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         structure = columns.TextColumn("Structure", sources=['structure__nom'])
         texte = columns.TextColumn("Texte", sources=["texte"], processor='Get_texte')
         date_lecture = columns.TextColumn("Lu", sources=["date_lecture"], processor='Get_date_lecture')
-        auteur = columns.TextColumn("Auteur", sources=["famille", "utilisateur"], processor='Get_auteur')
+        auteur = columns.TextColumn("Auteur", sources=None, processor='Get_auteur')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions')
 
         class Meta:

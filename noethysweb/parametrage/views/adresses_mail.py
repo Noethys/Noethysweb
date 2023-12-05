@@ -65,6 +65,7 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ['idadresse', 'actif', 'adresse', 'moteur']
+        adresse = columns.TextColumn("Adresse", sources=None, processor='Get_adresse')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         actif = columns.TextColumn("Etat", sources=["actif"], processor='Get_actif')
 
@@ -72,6 +73,9 @@ class Liste(Page, crud.Liste):
             structure_template = MyDatatable.structure_template
             columns = ['idadresse', 'actif', 'adresse', 'moteur']
             ordering = ['adresse']
+
+        def Get_adresse(self, instance, **kwargs):
+            return instance.adresse
 
         def Get_default(self, instance, **kwargs):
             return "<i class='fa fa-check text-success'></i>" if instance.defaut else ""

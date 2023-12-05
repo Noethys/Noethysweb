@@ -52,8 +52,8 @@ class Liste(Page, crud.Liste):
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
-        context["page_titre"] = "Edition des renseignements"
-        context["box_titre"] = "Edition des renseignements"
+        context["page_titre"] = "Edition des fiches de renseignements"
+        context["box_titre"] = "Edition des fiches de renseignements"
         context["box_introduction"] = "Cochez les individus souhaités, précisez si besoin les options et cliquez sur le bouton Générer le PDF. Utilisez le bouton Filtrer pour affiner la liste d'individus."
         context["onglet_actif"] = "edition_renseignements"
         context["impression_introduction"] = ""

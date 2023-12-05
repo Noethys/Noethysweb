@@ -7,6 +7,7 @@ from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Individu
+from core.utils import utils_dates
 
 
 class Page(crud.Page):
@@ -33,12 +34,12 @@ class Liste(Page, crud.Liste):
     class datatable_class(MyDatatable):
         filtres = ['idindividu', "nom", "prenom", "date_naiss", "rue_resid", "cp_resid", "ville_resid"]
         idindividu = columns.IntegerColumn("ID", sources=['pk'])
-        nom = columns.TextColumn("Nom", sources=['nom'])
-        prenom = columns.TextColumn("Prénom", sources=['prenom'])
-        date_naiss = columns.TextColumn("Date naiss.", sources=['date_naiss'], processor=helpers.format_date('%d/%m/%Y'))
-        rue_resid = columns.TextColumn("Rue", sources=['rue_resid'])
-        cp_resid = columns.TextColumn("CP", sources=['cp_resid'])
-        ville_resid = columns.TextColumn("Ville", sources=['ville_resid'])
+        # nom = columns.TextColumn("Nom", sources=['nom'])
+        # prenom = columns.TextColumn("Prénom", sources=['prenom'])
+        date_naiss = columns.TextColumn("Date naiss.", sources=None, processor='Get_date_naiss')
+        rue_resid = columns.TextColumn("Rue", sources=None, processor='Get_rue_resid')
+        cp_resid = columns.TextColumn("CP", sources=None, processor='Get_cp_resid')
+        ville_resid = columns.TextColumn("Ville", sources=None, processor='Get_ville_resid')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
@@ -52,6 +53,18 @@ class Liste(Page, crud.Liste):
                 self.Create_bouton_supprimer(url=reverse(kwargs["view"].url_supprimer, args=[instance.pk])),
             ]
             return self.Create_boutons_actions(html)
+
+        def Get_date_naiss(self, instance, *args, **kwargs):
+            return utils_dates.ConvertDateToFR(instance.date_naiss)
+
+        def Get_rue_resid(self, instance, *args, **kwargs):
+            return instance.rue_resid
+
+        def Get_cp_resid(self, instance, *args, **kwargs):
+            return instance.cp_resid
+
+        def Get_ville_resid(self, instance, *args, **kwargs):
+            return instance.ville_resid
 
 
 class Supprimer(Page, crud.Supprimer):

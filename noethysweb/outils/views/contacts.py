@@ -41,13 +41,36 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idcontact", "nom", "prenom", "rue_resid", "cp_resid", "ville_resid", "tel_domicile", "tel_mobile", "mail"]
-
+        tel_domicile = columns.TextColumn("Tél domicile", processor="Get_tel_domicile")
+        tel_mobile = columns.TextColumn("Tél portable", processor="Get_tel_mobile")
+        mail = columns.TextColumn("Email", processor="Get_mail")
+        rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
+        cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')
+        ville_resid = columns.TextColumn("Ville",  sources=None, processor='Get_ville_resid')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
 
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ["idcontact", "nom", "prenom", "rue_resid", "cp_resid", "ville_resid", "tel_domicile", "tel_mobile", "mail"]
             ordering = ["nom", "prenom"]
+
+        def Get_tel_domicile(self, instance, *args, **kwargs):
+            return instance.tel_domicile
+
+        def Get_tel_mobile(self, instance, *args, **kwargs):
+            return instance.tel_mobile
+
+        def Get_mail(self, instance, *args, **kwargs):
+            return instance.mail
+
+        def Get_rue_resid(self, instance, *args, **kwargs):
+            return instance.rue_resid
+
+        def Get_cp_resid(self, instance, *args, **kwargs):
+            return instance.cp_resid
+
+        def Get_ville_resid(self, instance, *args, **kwargs):
+            return instance.ville_resid
 
 
 class Ajouter(Page, crud.Ajouter):

@@ -61,11 +61,19 @@ class Liste(Page, crud.Liste):
         categorie = columns.CompoundColumn("Catégorie", sources=['categorie__nom'])
         individu = columns.CompoundColumn("Individu", sources=['individu__nom', 'individu__prenom'])
         diffusion = columns.TextColumn("Diffusion", sources=[], processor='Get_diffusion')
+        intitule = columns.TextColumn("Intitulé", processor="Get_intitule")
+        description = columns.TextColumn("Description", processor="Get_description")
 
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ["idinformation", "individu", "categorie", "intitule", "description", "diffusion"]
             ordering = ["individu"]
+
+        def Get_intitule(self, instance, *args, **kwargs):
+            return instance.intitule
+
+        def Get_description(self, instance, *args, **kwargs):
+            return instance.description
 
         def Get_diffusion(self, instance, *args, **kwargs):
             html = []

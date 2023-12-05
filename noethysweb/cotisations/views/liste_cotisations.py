@@ -44,9 +44,9 @@ class Liste(Page, crud.Liste):
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         nom_cotisation = columns.TextColumn("Nom", sources=['type_cotisation__nom', 'unite_cotisation__nom'], processor='Get_nom_cotisation')
         depot = columns.TextColumn("Dépôt", sources=['depot_cotisation__date'], processor='Get_date_depot')
-        rue_resid = columns.TextColumn("Rue", sources=['famille__rue_resid'], processor='Get_rue_resid')
-        cp_resid = columns.TextColumn("CP", sources=['famille__cp_resid'], processor='Get_cp_resid')
-        ville_resid = columns.TextColumn("Ville", sources=['famille__ville_resid'], processor='Get_ville_resid')
+        rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
+        cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')
+        ville_resid = columns.TextColumn("Ville", processor='Get_ville_resid')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:

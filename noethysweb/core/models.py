@@ -2503,6 +2503,8 @@ class QuestionnaireReponse(models.Model):
         return self.reponse
 
     def Get_reponse_fr(self):
+        if not self.reponse:
+            return ""
         if self.question.controle in ("liste_deroulante", "liste_coches"):
             return ", ".join(self.reponse.split(";"))
         if self.question.controle in ("entier", "slider") and self.reponse:

@@ -43,7 +43,7 @@ class Liste(Page, crud.Liste):
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         nom = columns.TextColumn("Nom", sources=["individu__nom"])
         prenom = columns.TextColumn("Prénom", sources=["individu__prenom"])
-        date_naiss = columns.TextColumn("Date naiss.", sources=["individu__date_naiss"], processor=helpers.format_date('%d/%m/%Y'))
+        date_naiss = columns.TextColumn("Date naiss.", sources=None, processor=helpers.format_date('%d/%m/%Y'))
         ecole = columns.TextColumn("Ecole", sources=["ecole__nom"])
         classe = columns.TextColumn("Classe", sources=["classe__nom"])
         niveau = columns.TextColumn("Niveau", sources=["niveau__abrege"])

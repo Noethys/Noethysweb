@@ -34,16 +34,19 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["fpresent:pk", "fscolarise:pk", "idfamille", "nom", "caisse__regime__nom", "caisse__nom", "num_allocataire", "allocataire__nom"]
-
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         caisse = columns.TextColumn("Caisse", sources=['caisse__nom'])
         regime = columns.TextColumn("Régime", sources=['caisse__regime__nom'])
         allocataire = columns.TextColumn("Allocataire titulaire", sources=['allocataire__nom', 'allocataire__prenom'])
+        num_allocataire = columns.TextColumn("N° Allocataire", sources=None, processor='Get_num_allocataire')
 
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ["idfamille", "nom", "caisse", "regime", "num_allocataire", "allocataire"]
             ordering = ["nom"]
+
+        def Get_num_allocataire(self, instance, *args, **kwargs):
+            return instance.num_allocataire
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             html = [

@@ -40,12 +40,24 @@ class Liste(Page, crud.Liste):
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         individu = columns.CompoundColumn("Individu", sources=['individu__nom', 'individu__prenom'])
+        tel_domicile = columns.TextColumn("Tél domicile", processor="Get_tel_domicile")
+        tel_mobile = columns.TextColumn("Tél portable", processor="Get_tel_mobile")
+        tel_travail = columns.TextColumn("Tél pro.", processor="Get_tel_travail")
         autorisations = columns.TextColumn("Autorisations", sources=["autorisation_sortie", "autorisation_appel"], processor='Get_autorisations')
 
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ["idcontact", "famille", "individu", "nom", "prenom", "tel_domicile", "tel_mobile", "tel_travail", "autorisations", "actions"]
             ordering = ["famille", "individu"]
+
+        def Get_tel_domicile(self, instance, *args, **kwargs):
+            return instance.tel_domicile
+
+        def Get_tel_mobile(self, instance, *args, **kwargs):
+            return instance.tel_mobile
+
+        def Get_tel_travail(self, instance, *args, **kwargs):
+            return instance.tel_travail
 
         def Get_autorisations(self, instance, *args, **kwargs):
             return instance.Get_autorisations()
