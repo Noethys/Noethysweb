@@ -1362,10 +1362,10 @@ class Facturation():
                     # Montants seuil et plafond
                     if ligne_calcul.montant_min:
                         if montant_tarif < ligne_calcul.montant_min:
-                            montant_tarif = ligne_calcul.montant_min
+                            montant_tarif = float(ligne_calcul.montant_min)
                     if ligne_calcul.montant_max:
                         if montant_tarif > ligne_calcul.montant_max:
-                            montant_tarif = ligne_calcul.montant_max
+                            montant_tarif = float(ligne_calcul.montant_max)
 
                     # Application de l'ajustement (majoration ou déduction)
                     if ligne_calcul.ajustement:
@@ -1416,15 +1416,15 @@ class Facturation():
                         montant_tarif = float(decimal.Decimal(str(montant_tarif)))
                     else:
                         if ligne_calcul.montant_max:
-                            montant_tarif = ligne_calcul.montant_max
+                            montant_tarif = float(ligne_calcul.montant_max)
 
                     # Montants seuil et plafond
                     if ligne_calcul.montant_min:
                         if montant_tarif < ligne_calcul.montant_min:
-                            montant_tarif = ligne_calcul.montant_min
+                            montant_tarif = float(ligne_calcul.montant_min)
                     if ligne_calcul.montant_max:
                         if montant_tarif > ligne_calcul.montant_max:
-                            montant_tarif = ligne_calcul.montant_max
+                            montant_tarif = float(ligne_calcul.montant_max)
 
                     # Application de l'ajustement (majoration ou déduction)
                     if ligne_calcul.ajustement:
@@ -1474,15 +1474,15 @@ class Facturation():
                         montant_tarif = float(decimal.Decimal(str(montant_tarif)))
                     else:
                         if ligne_calcul.montant_max:
-                            montant_tarif = ligne_calcul.montant_max
+                            montant_tarif = float(ligne_calcul.montant_max)
 
                     # Montants seuil et plafond
                     if ligne_calcul.montant_min:
                         if montant_tarif < ligne_calcul.montant_min:
-                            montant_tarif = ligne_calcul.montant_min
+                            montant_tarif = float(ligne_calcul.montant_min)
                     if ligne_calcul.montant_max:
                         if montant_tarif > ligne_calcul.montant_max:
-                            montant_tarif = ligne_calcul.montant_max
+                            montant_tarif = float(ligne_calcul.montant_max)
 
                     # Application de l'ajustement (majoration ou déduction)
                     if ligne_calcul.ajustement:
