@@ -1,3 +1,8 @@
+Version 1.2.1.1 (06/12/2023) :
+
+- Correction du traitement par lot dans le calendrier des ouvertures
+- Correction du calcul du tarif au prorata avec ajustement
+
 Version 1.2.1.0 (05/12/2023) :
 
 - Ajout de la colonne Date limite de paiement dans modifier factures
