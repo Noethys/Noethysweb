@@ -173,7 +173,7 @@ def Traitement_lot_ouvertures(request):
 
     dict_remplissage = {}
     for remplissage in liste_remplissage:
-        key = "remplissage_%s_%d_%d" % (remplissage.date, remplissage.groupe_id, remplissage.unite_remplissage_id)
+        key = "remplissage_%s_%d_%d" % (remplissage.date, remplissage.groupe_id or 0, remplissage.unite_remplissage_id)
         dict_remplissage[key] = remplissage.places
 
     # Regroupement des consommations
@@ -230,17 +230,17 @@ def Traitement_lot_ouvertures(request):
         # Application
         if valide == True:
 
-            for groupe in liste_groupes:
+            for idgroupe in [0] + [groupe.pk for groupe in liste_groupes]:
 
                 # Ouvertures
-                if action in ("COPIER_DATE", "schema", "REINIT"):
+                if action in ("COPIER_DATE", "schema", "REINIT") and idgroupe:
 
                     for unite in liste_unites:
-                        key = "ouverture_%s_%d_%d" % (date, groupe.pk, unite.pk)
+                        key = "ouverture_%s_%d_%d" % (date, idgroupe, unite.pk)
 
                         etat = False
                         if action == "COPIER_DATE":
-                            key_modele = "ouverture_%s_%d_%d" % (date_modele, groupe.pk, unite.pk)
+                            key_modele = "ouverture_%s_%d_%d" % (date_modele, idgroupe, unite.pk)
                             if key_modele in dict_ouvertures:
                                 etat = dict_ouvertures[key_modele]
                             if key_modele in ouvertures_modifications:
@@ -256,11 +256,11 @@ def Traitement_lot_ouvertures(request):
                 if action in ("COPIER_DATE", "schema", "REINIT"):
 
                     for uniteRemplissage in liste_unites_remplissage:
-                        key = "remplissage_%s_%d_%d" % (date, groupe.pk, uniteRemplissage.pk)
+                        key = "remplissage_%s_%d_%d" % (date, idgroupe, uniteRemplissage.pk)
 
                         nbrePlaces = ""
                         if action == "COPIER_DATE":
-                            key_modele = "remplissage_%s_%d_%d" % (date_modele, groupe.pk, uniteRemplissage.pk)
+                            key_modele = "remplissage_%s_%d_%d" % (date_modele, idgroupe, uniteRemplissage.pk)
                             if key_modele in dict_remplissage:
                                 nbrePlaces = dict_remplissage[key_modele]
                             if key_modele in remplissages_modifications:
