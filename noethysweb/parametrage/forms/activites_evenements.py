@@ -3,6 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import re
 from django import forms
 from django.forms import ModelForm
 from django_select2.forms import ModelSelect2Widget
@@ -25,7 +26,9 @@ class Widget_copie_tarif_evenement(ModelSelect2Widget):
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    date = forms.DateField(label="Date", required=True, widget=DatePickerWidget())
+    mode_saisie = forms.TypedChoiceField(label="Mode de saisie", choices=[("UNIQUE", "Date unique"), ("MULTIPLE", "Dates multiples")], initial="UNIQUE", required=False, help_text="Sélectionnez le mode Dates multiples si vous souhaitez reproduire cet évènement sur plusieurs dates.")
+    date = forms.DateField(label="Date", required=False, widget=DatePickerWidget(), help_text="Sélectionnez la date de l'évènement.")
+    dates_multiples = forms.CharField(label="Dates", required=False, help_text="Saisissez les dates souhaitées séparées par des virgules ou des points-virgules. Exemple : 15/12/2023;16/12/2023;17/12/2023")
     unite = forms.ModelChoiceField(label="Unité", queryset=Unite.objects.none(), required=True)
     groupe = forms.ModelChoiceField(label="Groupe", queryset=Groupe.objects.none(), required=True)
     description = forms.CharField(label="Description", widget=forms.Textarea(attrs={'rows': 2}), required=False, help_text="<i class='fa fa-exclamation-triangle'></i> Cette description est visible pour les familles sur le portail.")
@@ -118,9 +121,13 @@ class Formulaire(FormulaireBase, ModelForm):
             Hidden('activite', value=activite.idactivite),
             Fieldset("Généralités",
                 Field("nom"),
-                Field("date"),
                 Field("unite"),
                 Field("groupe"),
+            ),
+            Fieldset("Date",
+                Field("mode_saisie", type="hidden" if kwargs.get("instance", None) else None),
+                Field("date"),
+                Field("dates_multiples", type="hidden" if kwargs.get("instance", None) else None),
             ),
             Fieldset("Options",
                 Field("description"),
@@ -158,6 +165,22 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.add_error('copie_evenement', "Vous devez sélectionner un événement existant dont les tarifs sont à dupliquer")
                 return
 
+        # Mode de saisie
+        if self.cleaned_data["mode_saisie"] == "UNIQUE" and not self.cleaned_data["date"]:
+            self.add_error("date", "Vous devez saisir une date pour cet évènement")
+            return
+        if self.cleaned_data["mode_saisie"] == "MULTIPLE":
+            if not self.cleaned_data["dates_multiples"]:
+                self.add_error("dates_multiples", "Vous devez saisir au mois une date pour cet évènement")
+            liste_dates = []
+            for datefr in re.split(';|,', self.cleaned_data["dates_multiples"]):
+                date = utils_dates.ConvertDateFRtoDate(datefr.strip())
+                if date:
+                    liste_dates.append(date)
+                else:
+                    self.add_error("dates_multiples", "La date '%s' semble erronée" % datefr)
+            self.cleaned_data["date"] = liste_dates[0]
+
         return self.cleaned_data
 
 
@@ -191,6 +214,22 @@ function On_change_type_tarification() {
 $(document).ready(function() {
     $('#id_type_tarification').change(On_change_type_tarification);
     On_change_type_tarification.call($('#id_type_tarification').get(0));
+});
+
+// Mode de saisie
+function On_change_mode_saisie() {
+    $('#div_id_date').hide();
+    $('#div_id_dates_multiples').hide();
+    if ($(this).val() == "UNIQUE") {
+        $('#div_id_date').show();
+    }
+    if ($(this).val() == "MULTIPLE") {
+        $('#div_id_dates_multiples').show();
+    }
+}
+$(document).ready(function() {
+    $('#id_mode_saisie').change(On_change_mode_saisie);
+    On_change_mode_saisie.call($('#id_mode_saisie').get(0));
 });
 
 </script>

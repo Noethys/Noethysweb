@@ -3,16 +3,18 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import re
 from copy import deepcopy
 from django.urls import reverse_lazy, reverse
-from core.views.mydatatableview import MyDatatable, columns, helpers
-from core.views import crud
-from core.utils import utils_preferences
-from parametrage.views.activites import Onglet
-from core.models import Evenement, Activite, Ouverture, Tarif, TarifLigne
-from parametrage.forms.activites_evenements import Formulaire
+from django.http import HttpResponseRedirect
 from django.db.models import Q
 from django.contrib import messages
+from core.views.mydatatableview import MyDatatable, columns, helpers
+from core.views import crud
+from core.utils import utils_preferences, utils_dates
+from core.models import Evenement, Ouverture, Tarif, TarifLigne
+from parametrage.views.activites import Onglet
+from parametrage.forms.activites_evenements import Formulaire
 
 
 class Page(Onglet):
@@ -136,17 +138,28 @@ class Ajouter(Page, crud.Ajouter):
     def form_valid(self, form):
         # Enregistre d'abord l'événement
         redirect = super(Ajouter, self).form_valid(form)
+        liste_evenements = [form.instance]
 
-        # Après l'ajout d'un événement, on ouvre le calendrier si besoin
-        evenement = form.instance
-        if Ouverture.objects.filter(date=evenement.date, groupe=evenement.groupe, unite=evenement.unite).count() == 0:
-            Ouverture.objects.create(date=evenement.date, activite=evenement.activite, groupe=evenement.groupe, unite=evenement.unite)
-            messages.add_message(self.request, messages.INFO, "Une ouverture a été créée automatiquement dans le calendrier")
+        # Si dates multiples, création de tous les évènements
+        if form.cleaned_data["mode_saisie"] == "MULTIPLE":
+            for date in [utils_dates.ConvertDateFRtoDate(datefr.strip()) for datefr in re.split(';|,', form.cleaned_data["dates_multiples"])][1:]:
+                nouveau_evenement = deepcopy(form.instance)
+                nouveau_evenement.pk = None
+                nouveau_evenement.date = date
+                nouveau_evenement.save()
+                liste_evenements.append(nouveau_evenement)
 
-        # Copie des tarifs d'un événement existant
-        if form.cleaned_data.get("type_tarification") == "EXISTANT":
-            copie_evenement = form.cleaned_data.get("copie_evenement")
-            self.Copie_tarifs_evenement_existant(evenement=self.object, copie_evenement=copie_evenement)
+        # Ouverture du calendrier et duplication de tarifs
+        for evenement in liste_evenements:
+            # Après l'ajout d'un événement, on ouvre le calendrier si besoin
+            if Ouverture.objects.filter(date=evenement.date, groupe=evenement.groupe, unite=evenement.unite).count() == 0:
+                Ouverture.objects.create(date=evenement.date, activite=evenement.activite, groupe=evenement.groupe, unite=evenement.unite)
+                messages.add_message(self.request, messages.INFO, "Une ouverture a été créée automatiquement dans le calendrier")
+
+            # Copie des tarifs d'un événement existant
+            if form.cleaned_data.get("type_tarification") == "EXISTANT":
+                copie_evenement = form.cleaned_data.get("copie_evenement")
+                self.Copie_tarifs_evenement_existant(evenement=evenement, copie_evenement=copie_evenement)
 
         return redirect
 
