@@ -15,6 +15,8 @@ from core.utils.utils_commandes import Commandes
 from core.models import Recu, ModeleDocument
 from core.widgets import DatePickerWidget
 
+TEXTE_INTRO_DEFAUT = "Je soussigné(e) {SIGNATAIRE}, certifie avoir reçu pour la famille de {FAMILLE} la somme de {MONTANT}."
+
 
 class Formulaire(FormulaireBase, ModelForm):
     date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
@@ -63,7 +65,7 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields["signataire"].initial = utilisateur.get_full_name() or utilisateur.get_short_name() or utilisateur
 
         # Introduction
-        self.fields["intro"].initial = "Je soussigné(e) {SIGNATAIRE}, certifie avoir reçu pour la famille de {FAMILLE} la somme de {MONTANT}."
+        self.fields["intro"].initial = TEXTE_INTRO_DEFAUT
         self.fields['intro'].help_text = "Mots-clés disponibles : {SIGNATAIRE}, {FAMILLE}, {MONTANT}, {DATE_REGLEMENT}, {MODE_REGLEMENT}, {NOM_PAYEUR}."
 
         # Affichage

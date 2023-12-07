@@ -1,0 +1,52 @@
+{% extends "fiche_famille/famille_liste.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_famille %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+
+                {# Boutons de commandes #}
+                <div class="buttonHolder">
+                    <button class="btn btn-primary" onclick="envoyer_recu()" title="Envoyer automatiquement"><i class='fa fa-envelope-o margin-r-5'></i> Envoyer automatiquement</button>
+                    <a class="btn btn-default" href="{% url 'famille_recus_ajouter' idfamille=idfamille idreglement=reglement.pk %}" title="Envoyer manuellement"><i class='fa fa-envelope-o margin-r-5'></i> Envoyer manuellement</a>
+                    <a class="btn btn-danger" href="{% url 'famille_reglements_liste' idfamille=idfamille %}"><i class='fa fa-ban margin-r-5'></i>Ne pas envoyer</a>
+                </div>
+
+            {% endblock box_contenu %}
+            {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+        {% endembed %}
+
+    </div>
+    
+    <script>
+
+        // Envoi du reçu par email automatiquement
+        function envoyer_recu() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_envoi_recu_auto' %}",
+                data: {
+                    idreglement: {{ reglement.pk }},
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                datatype: "json",
+                success: function(data){
+                    toastr.success("Le reçu a été envoyé avec succès");
+                    window.location.href = "{% url 'famille_reglements_liste' idfamille=idfamille %}";
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+    </script>
+
+{% endblock %}

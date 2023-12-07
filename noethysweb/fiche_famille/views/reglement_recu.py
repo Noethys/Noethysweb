@@ -35,7 +35,7 @@ def Generer_recu(donnees={}):
         "{MODE_REGLEMENT}": reglement.mode.label,
         "{NOM_EMETTEUR}": reglement.emetteur.nom if reglement.emetteur else "",
         "{NUM_PIECE}": reglement.numero_piece,
-        "{MONTANT_REGLEMENT}": reglement.montant,
+        "{MONTANT_REGLEMENT}": float(reglement.montant),
         "{MONTANT}": "%0.2f %s" % (reglement.montant, utils_preferences.Get_symbole_monnaie()),
         "{NOM_PAYEUR}": reglement.payeur.nom,
         "{NUM_QUITTANCIER}": reglement.numero_quittancier,

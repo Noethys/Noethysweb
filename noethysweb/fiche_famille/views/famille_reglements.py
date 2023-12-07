@@ -242,6 +242,15 @@ class Ajouter(ClasseCommune, crud.Ajouter):
     form_class = Formulaire
     template_name = "fiche_famille/famille_edit.html"
 
+    def get_success_url(self):
+        """ Renvoie vers la liste après le formulaire """
+        famille = Famille.objects.get(pk=self.kwargs.get('idfamille', None))
+        if famille.email_recus:
+            # Si famille abonnée à l'envoi des reçus par email
+            return reverse_lazy("reglement_recu_auto", kwargs={"idfamille": famille.pk, "idreglement": self.object.pk if self.object else 0})
+        url = self.url_ajouter if "SaveAndNew" in self.request.POST else self.url_liste
+        return reverse_lazy(url, kwargs={"idfamille": famille.pk})
+
 
 class Modifier(ClasseCommune, crud.Modifier):
     form_class = Formulaire

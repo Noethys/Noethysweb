@@ -10,7 +10,7 @@ from fiche_famille.views import famille, famille_questionnaire, famille_notes, f
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, famille_sms, \
                             famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats, famille_voir_mandat, famille_prestations_modele, \
                             famille_attestations_fiscales, famille_voir_attestation_fiscale, famille_locations, famille_voir_location, famille_remboursement, famille_factures_consulter, famille_factures_selection, \
-                            famille_edition_renseignements
+                            famille_edition_renseignements, reglement_recu_auto
 
 urlpatterns = [
 
@@ -97,6 +97,7 @@ urlpatterns = [
     path('individus/familles/reglements/supprimer_plusieurs/<int:idfamille>/<str:listepk>', famille_reglements.Supprimer_plusieurs.as_view(), name='famille_reglements_supprimer_plusieurs'),
     path('individus/familles/reglements/abo_recus_email/<int:idfamille>', famille_abo_recus_email.Modifier.as_view(), name='famille_abo_recus_email'),
     path('individus/familles/reglements/abo_depots_email/<int:idfamille>', famille_abo_depots_email.Modifier.as_view(), name='famille_abo_depots_email'),
+    path('individus/familles/reglements/recu_auto/<int:idfamille>/<int:idreglement>', reglement_recu_auto.View.as_view(), name='reglement_recu_auto'),
 
     path('individus/familles/recus_reglements/liste/<int:idfamille>', reglement_recu.Liste.as_view(), name='famille_recus_liste'),
     path('individus/familles/recus_reglements/ajouter/<int:idfamille>/<int:idreglement>', reglement_recu.Ajouter.as_view(), name='famille_recus_ajouter'),
@@ -178,5 +179,6 @@ urlpatterns = [
     path('individus/location_impression_pdf', secure_ajax(famille_voir_location.Impression_pdf), name='ajax_location_impression_pdf'),
     path('individus/location_get_tarif_location', secure_ajax(famille_locations.Get_tarif_location), name='ajax_get_tarif_location'),
     path('individus/famille_edition_renseignements/generer_pdf', secure_ajax(famille_edition_renseignements.Generer_pdf), name='ajax_famille_edition_renseignements_generer_pdf'),
+    path('individus/envoi_recu_auto', secure_ajax(reglement_recu_auto.Envoyer_recu_automatiquement), name='ajax_envoi_recu_auto'),
 
 ]
