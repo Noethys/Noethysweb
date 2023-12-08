@@ -2193,6 +2193,7 @@ class Facture(models.Model):
             montant_regle = decimal.Decimal(0)
         solde_actuel = self.total - montant_regle
         if solde_actuel != self.solde_actuel:
+            self.regle = montant_regle
             self.solde_actuel = solde_actuel
             self.save()
 

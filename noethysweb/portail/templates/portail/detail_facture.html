@@ -31,7 +31,7 @@
 <ul>
     <li>Total de la facture : <b>{{ facture.total|montant }}</b></li>
     {% if parametres_portail.facturation_afficher_solde_facture %}
-        <li>Total déjà réglé : <b>{{ facture.regle|montant }}</b></li>
+        <li>Total déjà réglé : <b>{{ facture.Get_regle_actuel|montant }}</b></li>
         <li>Solde actuel : <b>{{ facture.solde_actuel|montant }}</b></li>
     {% endif %}
 </ul>

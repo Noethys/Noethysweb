@@ -22,8 +22,10 @@ def Maj_solde_actuel_factures(IDfamille=None):
     conditions_factures = Q(famille_id=IDfamille) if IDfamille else Q()
     for facture in Facture.objects.filter(conditions_factures).exclude(etat="annulation"):
         solde_actuel = facture.total - dict_ventilations.get(facture.pk, Decimal(0))
-        if solde_actuel != facture.solde_actuel:
-            facture.solde_actuel = solde_actuel
+        regle = dict_ventilations.get(facture.pk, Decimal(0))
+        if solde_actuel != facture.solde_actuel or regle != facture.regle:
+            facture.regle = regle
+            facture.solde_actuel = facture.total - facture.regle
             facture.save()
 
 
