@@ -224,7 +224,7 @@
                 });
 
                 {# Sélection d'une seule facture si multi factures non actif #}
-                {% if parametres_portail.paiement_ligne_multi_factures %}
+                {% if not parametres_portail.paiement_ligne_multi_factures %}
                     $(".check_impaye").change(function() {
                         if ($(this).prop("checked") === true) {
                             $("#modal_selection_factures .check_impaye:checked").prop("checked", false);
