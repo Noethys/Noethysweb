@@ -3,6 +3,11 @@
 {% load static %}
 {% load embed %}
 
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
 {% block contenu_page %}
 
     {% embed 'core/box.html' %}
@@ -17,18 +22,16 @@
             {% else %}
                 <p>La version {{ version_disponible }} est disponible.</p>
                 <p>
-                    <textarea id="id_changelog" name="changelog" rows="10" class="textarea form-control" readonly>{{ changelog }}</textarea>
-                </p>
-                <p>
                     <form id="id_form_update" method="post">
                         {% csrf_token %}
                         <div id="id_bouton_update">
                             <button type="submit" class="btn btn-warning"><i class="fa fa-download"></i> &nbsp;&nbsp;Mettre à jour maintenant</button>
                         </div>
                     </form>
-
                 </p>
-
+                <p>
+                    <textarea id="id_changelog" name="changelog" rows="20" class="textarea form-control" readonly>{{ changelog }}</textarea>
+                </p>
             {% endif %}
 
         {% endblock %}
@@ -38,6 +41,10 @@
     <script type="text/javascript">
         $('#id_form_update').submit(function() {
             $("#id_bouton_update").html("<p class='text-yellow'><i class='fa fa-refresh fa-spin'></i> <strong>&nbsp;&nbsp;Installation en cours...</strong><p/>");
+            bootbox.dialog({
+                message: "<p class='text-center mb-0'><h4><i class='fa fa-spin fa-cog'></i> Installation en cours</h4><br>Veuillez patienter quelques instants...</p>",
+                closeButton: false
+            });
             return true;
         });
     </script>
