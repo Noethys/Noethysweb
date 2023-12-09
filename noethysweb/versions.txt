@@ -1,3 +1,13 @@
+Version 1.2.1.2 (09/12/2023) :
+
+- Ajout de l'envoi automatique des reçus de règlements
+- Ajout du paramétrage d'évènements par lot
+- Ajout des colonnes Date de naissance et Numéro d'allocataire dans la liste des déductions
+- Ajout de l'option Inclure adhésion sur famille présente dans la génération des factures
+- Ajout du nom du dépôt dans l'impression du détail des prestations d'un dépôt
+- Correction du montant réglé sur la facture
+- Correction du paiement multi factures sur le portail
+
 Version 1.2.1.1 (06/12/2023) :
 
 - Correction du traitement par lot dans le calendrier des ouvertures
