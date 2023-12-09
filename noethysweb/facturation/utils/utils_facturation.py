@@ -58,7 +58,7 @@ class Facturation():
     def GetDonnees(self, liste_factures=[], liste_activites=[], date_debut=None, date_fin=None, date_edition=None,
                    date_echeance=None, categories_prestations=["consommation", "cotisation", "location", "autre"],
                    type_label="0", date_anterieure=None, mode="facture", IDfamille=None, liste_IDindividus=[], filtre_prestations=None, exclusions_prestations=None,
-                   impayes_factures=False):
+                   impayes_factures=False, inclure_cotisations_si_conso=False):
         """ Recherche des factures à créer """
         logger.debug("Recherche les données de facturation...")
 
@@ -103,9 +103,12 @@ class Facturation():
 
         # Créé la liste des familles concernées
         liste_familles = []
+        liste_familles_has_prestations_activite = []
         for prestation in prestations:
             if prestation.famille_id not in liste_familles:
                 liste_familles.append(prestation.famille_id)
+            if prestation.categorie == "consommation" and prestation.famille_id not in liste_familles_has_prestations_activite:
+                liste_familles_has_prestations_activite.append(prestation.famille_id)
 
         # Importation des notes à afficher sur la facture
         dict_notes = {}
@@ -234,6 +237,11 @@ class Facturation():
         dictComptes = {}
         dictComptesPayeursFactures = {}
         for prestation in prestations:
+
+            # On passe sur cette prestation si c'est une cotisation et que la famille n'a pas de consommation sur cette facture
+            if inclure_cotisations_si_conso and prestation.categorie == "cotisation" and prestation.famille_id not in liste_familles_has_prestations_activite:
+                continue
+
             dictComptesPayeursFactures.setdefault(prestation.famille_id, [])
             if prestation.facture_id not in dictComptesPayeursFactures[prestation.famille_id]:
                 dictComptesPayeursFactures[prestation.famille_id].append(prestation.facture_id)
