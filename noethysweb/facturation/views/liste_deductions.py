@@ -6,6 +6,7 @@
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Deduction
+from core.utils import utils_dates
 
 
 class Page(crud.Page):
@@ -20,7 +21,7 @@ class Liste(Page, crud.Liste):
     model = Deduction
 
     def get_queryset(self):
-        return Deduction.objects.select_related('prestation', 'prestation__activite', 'prestation__facture').filter(self.Get_filtres("Q"))
+        return Deduction.objects.select_related('prestation', 'prestation__activite', 'prestation__facture', 'prestation__individu').filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -33,16 +34,24 @@ class Liste(Page, crud.Liste):
                    "famille__nom", "individu__nom", "montant", "prestation__code_compta"]
         activite = columns.TextColumn("Activité", sources=['prestation__activite__nom'])
         individu = columns.CompoundColumn("Individu", sources=['prestation__individu__nom', 'prestation__individu__prenom'])
+        date_naiss = columns.TextColumn("Date naiss.", processor="Get_date_naiss")
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         num_facture = columns.CompoundColumn("N° Facture", sources=['prestation__facture__numero'])
         code_compta_prestation = columns.CompoundColumn("Code compta presta.", sources=['prestation__code_compta'])
         caisse = columns.TextColumn("Caisse", sources=["aide__caisse__nom"])
+        allocataire = columns.TextColumn("Allocataire titulaire", sources=['allocataire__nom', 'allocataire__prenom'])
+        num_allocataire = columns.TextColumn("N° Allocataire", sources=None, processor='Get_num_allocataire')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["iddeduction", "date", "label", "famille", "individu", "montant", "activite", "num_facture", "code_compta_prestation"]
-            hidden_columns = ["caisse"]
+            columns = ["iddeduction", "date", "label", "famille", "individu", "date_naiss", "montant", "activite", "num_facture", "code_compta_prestation", "num_allocataire", "allocataire", "caisse"]
             processors = {
                 'date': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ["date"]
+
+        def Get_date_naiss(self, instance, *args, **kwargs):
+            return utils_dates.ConvertDateToFR(instance.prestation.individu.date_naiss) if instance.prestation.individu else ""
+
+        def Get_num_allocataire(self, instance, *args, **kwargs):
+            return instance.famille.num_allocataire
