@@ -33,6 +33,7 @@ class View(CustomView, TemplateView):
             "form_parametres": form,
             "afficher_tarif_unitaire": form.cleaned_data["afficher_tarif_unitaire"],
             "liste_lignes": json.dumps(liste_lignes),
+            "titre": form.cleaned_data["depot"].nom,
         }
         return self.render_to_response(self.get_context_data(**context))
 
