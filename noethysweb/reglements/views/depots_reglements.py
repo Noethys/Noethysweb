@@ -35,7 +35,7 @@ class Liste(Page, crud.Liste):
     model = Depot
 
     def get_queryset(self):
-        return Depot.objects.filter(self.Get_filtres("Q")).annotate(nbre_reglements=Count("reglement"), montant_reglements=Sum("reglement__montant"))
+        return Depot.objects.select_related("compte").filter(self.Get_filtres("Q")).annotate(nbre_reglements=Count("reglement"), montant_reglements=Sum("reglement__montant"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -45,7 +45,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["iddepot", 'verrouillage', 'date', 'nom', 'montant', 'compte', 'observations']
+        filtres = ["iddepot", 'verrouillage', 'date', 'nom', 'montant', 'compte__nom', 'observations']
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         verrouillage = columns.TextColumn("Verrouillage", sources=["montant"], processor='Get_verrouillage')
         nbre_reglements = columns.TextColumn("Nbre", sources="nbre_reglements")
@@ -142,7 +142,7 @@ class Consulter(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idreglement", "date", "mode", "emetteur", "numero_piece", "montant", "famille", "payeur", "date_differe", "actions"]
+            columns = ["check", "idreglement", "date", "mode", "emetteur", "numero_piece", "montant", "famille", "payeur", "date_differe", "numero_quittancier", "actions"]
             processors = {
                 "date": helpers.format_date("%d/%m/%Y"),
                 "date_differe": helpers.format_date('%d/%m/%Y'),
@@ -151,6 +151,7 @@ class Consulter(Page, crud.Liste):
             labels = {
                 "date_differe": "Différé",
             }
+            hidden_columns = ["numero_quittancier"]
             ordering = ["-idreglement"]
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
