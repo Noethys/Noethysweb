@@ -46,7 +46,8 @@ class MyDatatable(Datatable):
 
     def __init__(self, *args, **kwargs):
         nom_view = str(kwargs["view"])
-        nom_view = nom_view[1:nom_view.find(".Liste ")]
+        nom_view = nom_view[1:nom_view.find(" object at ")]
+        nom_view = nom_view.replace(".Liste", "")
         request = kwargs["view"].request
 
         # Importation des paramètres de la liste
@@ -70,7 +71,7 @@ class MyDatatable(Datatable):
         # vérifie que les hidden columns sont bien cachées
         if parametres.get("hidden_columns", None):
             for code, colonne in self.columns.items():
-                if colonne and self._meta.hidden_columns and code not in self._meta.hidden_columns:
+                if colonne and code not in getattr(self._meta, "hidden_columns", []):
                     colonne.visible = True
 
     def Create_boutons_actions(self, liste_boutons=[]):

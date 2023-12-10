@@ -45,7 +45,8 @@ class Liste_commun():
     def Get_filtres(self, mode=None):
         # Importe la liste des filtres
         if not hasattr(self, "filtres_liste"):
-            nom_liste = str(self)[1:str(self).find(".Liste")]
+            nom_liste = str(self)[1:str(self).find(" object ")]
+            nom_liste = nom_liste.replace(".Liste", "")
             self.filtres_liste = []
             for item in FiltreListe.objects.filter(nom=nom_liste, utilisateur=self.request.user):
                 dict_filtre = json.loads(item.parametres)

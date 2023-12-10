@@ -26,25 +26,35 @@ def Get_form_filtres(request):
     """ Renvoie le form par ajax """
     idfiltre = request.POST.get("idfiltre")
     nom_view = request.POST.get("view")
-    nom_view = nom_view[4:nom_view.find(".Liste ")]
+    nom_liste = nom_view[4:nom_view.find(" object at ")]
+
+    # Si liste classique
+    nom_view = nom_liste.replace(".Liste", "")
+    nom_classe = "Liste"
+
+    # Si liste de type Consulter
+    if ".Consulter" in nom_liste:
+        nom_view = nom_liste.replace(".Consulter", "")
+        nom_classe = "Consulter"
 
     # Importation de la view
     import importlib
     view = importlib.import_module(nom_view)
-    model = getattr(view.Liste, "model", None)
+    liste_view = getattr(view, nom_classe)
+    model = getattr(liste_view, "model", None)
 
     # Récupération des filtres
     filtres = colonnes = []
-    if hasattr(view.Liste, "datatable_class"):
-        filtres = getattr(view.Liste.datatable_class, "filtres", [])
+    if hasattr(liste_view, "datatable_class"):
+        filtres = getattr(liste_view.datatable_class, "filtres", [])
 
-    if hasattr(view.Liste, "colonnes"):
-        colonnes = view.Liste.colonnes
-        filtres = view.Liste.filtres
+    if hasattr(liste_view, "colonnes"):
+        colonnes = liste_view.colonnes
+        filtres = liste_view.filtres
 
     # Création du formulaire
     if filtres or colonnes:
-        form = Formulaire(model=model, filtres=filtres, colonnes=colonnes, nom_liste=nom_view, idfiltre=idfiltre, request=request)
+        form = Formulaire(model=model, filtres=filtres, colonnes=colonnes, nom_liste=nom_liste, idfiltre=idfiltre, request=request)
         html = "{% load crispy_forms_tags %} {% crispy form %}"
         data = Template(html).render(RequestContext(request, {"form": form}))
     else:
@@ -118,7 +128,9 @@ def Ajouter_filtre(request):
         filtre.parametres = json.dumps(dict_resultat)
         filtre.save()
     else:
-        FiltreListe.objects.create(nom=valeurs["nom_liste"], parametres=json.dumps(dict_resultat), utilisateur=request.user)
+        nom_liste = valeurs["nom_liste"]
+        nom_liste = nom_liste.replace(".Liste", "")
+        FiltreListe.objects.create(nom=nom_liste, parametres=json.dumps(dict_resultat), utilisateur=request.user)
     return JsonResponse({"success": True})
 
 
