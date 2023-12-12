@@ -6,6 +6,7 @@
 import logging, datetime, json
 logger = logging.getLogger(__name__)
 from django.db.models import Q
+from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 from core.models import Inscription, PortailRenseignement, Activite
 from portail.views.base import CustomView
@@ -17,7 +18,7 @@ class View(CustomView, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
-        context['page_titre'] = "Activités"
+        context['page_titre'] = _("Activités")
 
         # Importation des inscriptions
         conditions = Q(famille=self.request.user.famille) & Q(statut="ok") & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today())) & Q(individu__deces=False)

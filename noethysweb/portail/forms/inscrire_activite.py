@@ -8,6 +8,7 @@ from django import forms
 from django.forms import ModelForm
 from django.db.models import Q
 from django.core.validators import FileExtensionValidator
+from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML, Div
 from crispy_forms.bootstrap import Field
@@ -18,7 +19,7 @@ from individus.utils import utils_pieces_manquantes
 
 
 class Formulaire_extra(FormulaireBase, forms.Form):
-    groupe = forms.ModelChoiceField(label="Groupe", queryset=Groupe.objects.all(), required=True, help_text="Sélectionnez le groupe correspondant à l'individu dans la liste.")
+    groupe = forms.ModelChoiceField(label=_("Groupe"), queryset=Groupe.objects.all(), required=True, help_text=_("Sélectionnez le groupe correspondant à l'individu dans la liste."))
 
     def __init__(self, *args, **kwargs):
         activite = kwargs.pop("activite", None)
@@ -65,13 +66,16 @@ class Formulaire_extra(FormulaireBase, forms.Form):
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    activite = forms.ModelChoiceField(label="Activité", queryset=Activite.objects.none(), required=True, help_text="Sélectionnez l'activité souhaitée dans la liste.")
+    activite = forms.ModelChoiceField(label=_("Activité"), queryset=Activite.objects.none(), required=True, help_text=_("Sélectionnez l'activité souhaitée dans la liste."))
 
     class Meta:
         model = PortailRenseignement
         fields = "__all__"
+        labels = {
+            "individu": _("Individu"),
+        }
         help_texts = {
-            "individu": "Sélectionnez le membre de la famille à inscrire.",
+            "individu": _("Sélectionnez le membre de la famille à inscrire."),
         }
 
     def __init__(self, *args, **kwargs):
@@ -105,7 +109,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Field("activite"),
             Div(id="form_extra"),
             HTML(EXTRA_SCRIPT),
-            Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>Envoyer la demande d'inscription", annuler_url="{% url 'portail_activites' %}", ajouter=False, aide=False, css_class="pull-right"),
+            Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>%s" % _("Envoyer la demande d'inscription"), annuler_url="{% url 'portail_activites' %}", ajouter=False, aide=False, css_class="pull-right"),
         )
 
 

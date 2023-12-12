@@ -7,6 +7,7 @@ import logging, json
 logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
 from django.core.serializers.json import DjangoJSONEncoder
+from django.utils.translation import gettext_lazy as _
 from core.views import crud
 from core.models import PortailMessage, PortailRenseignement
 from portail.forms.transmettre_piece import Formulaire
@@ -19,9 +20,9 @@ class Page(CustomView):
 
     def get_context_data(self, **kwargs):
         context = super(Page, self).get_context_data(**kwargs)
-        context['page_titre'] = "Transmettre un document"
+        context['page_titre'] = _("Transmettre un document")
         context['box_titre'] = None
-        context['box_introduction'] = "Renseignez les caractéristiques du document et cliquez sur le bouton Envoyer."
+        context['box_introduction'] = _("Renseignez les caractéristiques du document et cliquez sur le bouton Envoyer.")
         return context
 
     def get_success_url(self):
@@ -30,8 +31,8 @@ class Page(CustomView):
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
-    texte_confirmation = "Le document a bien été transmis"
-    titre_historique = "Ajouter une pièce"
+    texte_confirmation = _("Le document a bien été transmis")
+    titre_historique = _("Ajouter une pièce")
     template_name = "portail/edit.html"
 
     def Get_detail_historique(self, instance):

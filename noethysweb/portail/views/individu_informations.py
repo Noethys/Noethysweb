@@ -8,6 +8,7 @@ from django.urls import reverse_lazy
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+from django.utils.translation import gettext as _
 from core.views import crud
 from core.models import PortailRenseignement, Information
 from portail.forms.individu_informations import Formulaire
@@ -21,10 +22,10 @@ class Page(Onglet):
     url_ajouter = "portail_individu_informations_ajouter"
     url_modifier = "portail_individu_informations_modifier"
     url_supprimer = "portail_individu_informations_supprimer"
-    description_liste = "Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle information."
-    description_saisie = "Saisissez les informations nécessaires et cliquez sur le bouton Enregistrer."
-    objet_singulier = "une information personnelle"
-    objet_pluriel = "des informations personnelles"
+    description_liste = _("Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle information.")
+    description_saisie = _("Saisissez les informations nécessaires et cliquez sur le bouton Enregistrer.")
+    objet_singulier = _("une information personnelle")
+    objet_pluriel = _("des informations personnelles")
     onglet_actif = "individu_informations"
     categorie = "individu_informations"
 
@@ -34,7 +35,7 @@ class Page(Onglet):
         context = super(Page, self).get_context_data(**kwargs)
         context['onglet_actif'] = self.onglet_actif
         if not self.get_dict_onglet_actif().validation_auto:
-            context['box_introduction'] = self.description_saisie + " Ces informations devront être validées par l'administrateur de l'application."
+            context['box_introduction'] = self.description_saisie + " " + _("Ces informations devront être validées par l'administrateur de l'application.")
         return context
 
     def get_object(self):
@@ -55,8 +56,8 @@ class Liste(Page, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
-        context['box_titre'] = "Informations personnelles"
-        context['box_introduction'] = "Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle information."
+        context['box_titre'] = _("Informations personnelles")
+        context['box_introduction'] = _("Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle information.")
         context['liste_informations'] = Information.objects.filter(individu=self.get_rattachement().individu).order_by("intitule")
         return context
 
@@ -75,7 +76,7 @@ class Ajouter(Page, crud.Ajouter):
                                             nouvelle_valeur=json.dumps(str(instance), cls=DjangoJSONEncoder), idobjet=instance.pk)
 
         # Message de confirmation
-        messages.add_message(self.request, messages.SUCCESS, "Votre ajout a été enregistré")
+        messages.add_message(self.request, messages.SUCCESS, _("Votre ajout a été enregistré"))
 
         # Demande une nouvelle certification
         self.Demande_nouvelle_certification()

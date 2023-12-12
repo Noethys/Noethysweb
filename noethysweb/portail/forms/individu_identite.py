@@ -3,14 +3,14 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+from django.utils.translation import gettext as _
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
-from core.models import Individu, PortailRenseignement
+from crispy_forms.layout import HTML
+from core.models import Individu
 from core.widgets import DatePickerWidget
-from core.widgets import Telephone, CodePostal, Ville
+from core.widgets import CodePostal, Ville
 from portail.forms.fiche import FormulaireBase
 
 
@@ -41,19 +41,19 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Help_texts pour le mode édition
         self.help_texts = {
-            "civilite": "Sélectionnez une civilité dans la liste déroulante.",
-            "nom": "Saisissez le nom de famille en majuscules.",
-            "prenom": "Saisissez le prénom en minuscules avec la première lettre majuscule.",
-            "date_naiss": "Saisissez la date de naissance au format JJ/MM/AAAA.",
-            "cp_naiss": "Saisissez le code postal, patientez une seconde et sélectionnez la ville dans la liste déroulante.",
-            "ville_naiss": "Saisissez le nom de la ville, patientez une seconde et sélectionnez la ville dans la liste déroulante."
+            "civilite": _("Sélectionnez une civilité dans la liste déroulante."),
+            "nom": _("Saisissez le nom de famille en majuscules."),
+            "prenom": _("Saisissez le prénom en minuscules avec la première lettre majuscule."),
+            "date_naiss": _("Saisissez la date de naissance au format JJ/MM/AAAA."),
+            "cp_naiss": _("Saisissez le code postal, patientez une seconde et sélectionnez la ville dans la liste déroulante."),
+            "ville_naiss": _("Saisissez le nom de la ville, patientez une seconde et sélectionnez la ville dans la liste déroulante."),
         }
 
         # Champs affichables
         self.liste_champs_possibles = [
-            {"titre": "Etat-civil", "champs": ["civilite", "nom", "prenom"]},
-            {"titre": "Naissance", "champs": ["date_naiss", "cp_naiss", "ville_naiss"]},
-            {"titre": "Divers", "champs": ["type_sieste"]},
+            {"titre": _("Etat-civil"), "champs": ["civilite", "nom", "prenom"]},
+            {"titre": _("Naissance"), "champs": ["date_naiss", "cp_naiss", "ville_naiss"]},
+            {"titre": _("Divers"), "champs": ["type_sieste"]},
         ]
 
         # Préparation du layout

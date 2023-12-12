@@ -5,15 +5,16 @@
 
 from django import forms
 from django.forms import ModelForm
+from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
-from core.models import Individu, PortailRenseignement, RegimeAlimentaire
+from core.models import Individu, RegimeAlimentaire
 from core.widgets import Select_many_avec_plus
 from portail.forms.fiche import FormulaireBase
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    regimes_alimentaires = forms.ModelMultipleChoiceField(label="Régimes alimentaires",
-                            widget=Select_many_avec_plus(attrs={"url_ajax": "portail_ajax_ajouter_regime_alimentaire", "afficher_bouton_ajouter": False, "textes": {"champ": "Nom du régime alimentaire", "ajouter": "Ajouter un nouveau régime alimentaire"}}),
+    regimes_alimentaires = forms.ModelMultipleChoiceField(label=_("Régimes alimentaires"),
+                            widget=Select_many_avec_plus(attrs={"url_ajax": "portail_ajax_ajouter_regime_alimentaire", "afficher_bouton_ajouter": False, "textes": {"champ": _("Nom du régime alimentaire"), "ajouter": _("Ajouter un nouveau régime alimentaire")}}),
                             queryset=RegimeAlimentaire.objects.all().order_by("nom"), required=False)
 
     class Meta:
@@ -36,12 +37,12 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Help_texts pour le mode édition
         self.help_texts = {
-            "regimes_alimentaires": "Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix et cliquez sur un ou plusieurs éléments dans la liste. <a href='#' class='ajouter_element'>Cliquez ici pour ajouter un régime manquant dans la liste de choix.</a>",
+            "regimes_alimentaires": _("Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix et cliquez sur un ou plusieurs éléments dans la liste") + ". <a href='#' class='ajouter_element'>" + _("Cliquez ici pour ajouter un régime manquant dans la liste de choix") + ".</a>",
         }
 
         # Champs affichables
         self.liste_champs_possibles = [
-            {"titre": "Régimes", "champs": ["regimes_alimentaires"]},
+            {"titre": _("Régimes"), "champs": ["regimes_alimentaires"]},
         ]
 
         # Préparation du layout

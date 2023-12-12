@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.db.models import Q
+from django.utils.translation import gettext as _
 from core.views import crud
 from core.models import Consentement, Rattachement, Inscription
 from individus.utils import utils_vaccinations, utils_assurances
@@ -24,7 +25,7 @@ class View(CustomView, crud.Modifier):
 
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
-        context['page_titre'] = "Renseignements"
+        context['page_titre'] = _("Renseignements")
         context['rattachements'] = Rattachement.objects.prefetch_related('individu').filter(famille=self.request.user.famille, individu__deces=False).order_by("individu__nom", "individu__prenom")
 
         # Récupération des activités de la famille
@@ -73,9 +74,9 @@ class View(CustomView, crud.Modifier):
 
         # Message de confirmation
         if nbre_coches == 0:
-            messages.add_message(self.request, messages.ERROR, "Aucune approbation n'a été cochée")
+            messages.add_message(self.request, messages.ERROR, _("Aucune approbation n'a été cochée"))
         elif nbre_coches == 1:
-            messages.add_message(self.request, messages.SUCCESS, "L'approbation cochée a bien été enregistrée")
+            messages.add_message(self.request, messages.SUCCESS, _("L'approbation cochée a bien été enregistrée"))
         else:
-            messages.add_message(self.request, messages.SUCCESS, "Les %d approbations cochées ont bien été enregistrées" % nbre_coches)
+            messages.add_message(self.request, messages.SUCCESS, _("Les %d approbations cochées ont bien été enregistrées") % nbre_coches)
         return HttpResponseRedirect(self.get_success_url())

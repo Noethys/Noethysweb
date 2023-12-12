@@ -1,4 +1,5 @@
 {% extends "portail/page.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -14,7 +15,7 @@
 
     {# Texte d'introduction #}
     <div style="margin-bottom: 20px;">
-        <i class="fa fa-info-circle margin-r-5"></i>Cliquez sur les photos pour les agrandir.
+        <i class="fa fa-info-circle margin-r-5"></i>{% blocktrans %}Cliquez sur les photos pour les agrandir.{% endblocktrans %}
     </div>
 
     {# Album #}

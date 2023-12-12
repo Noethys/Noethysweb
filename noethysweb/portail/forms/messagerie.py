@@ -5,17 +5,18 @@
 
 from re import UNICODE, compile
 from django.forms import ModelForm
+from django.utils.translation import gettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden
 from crispy_forms.bootstrap import Field
 from core.models import PortailMessage
+from core.utils.utils_commandes import Commandes
 from portail.forms.fiche import FormulaireBase
 from portail.utils.utils_summernote import SummernoteTextFormField
-from core.utils.utils_commandes import Commandes
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    texte = SummernoteTextFormField(label="Poster un message", attrs={'summernote': {'width': '100%', 'height': '200px', 'toolbar': [
+    texte = SummernoteTextFormField(label=_("Poster un message"), attrs={'summernote': {'width': '100%', 'height': '200px', 'toolbar': [
         ['font', ['bold', 'underline', 'clear']],
         ['color', ['color']],
         ['para', ['ul', 'ol', 'paragraph']],
@@ -39,7 +40,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Hidden('famille', value=self.request.user.famille.pk),
             Hidden('structure', value=idstructure),
             Field('texte'),
-            Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>Envoyer", annuler_url="{% url 'portail_contact' %}", ajouter=False, aide=False, css_class="pull-right"),
+            Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>%s" % _("Envoyer"), annuler_url="{% url 'portail_contact' %}", ajouter=False, aide=False, css_class="pull-right"),
         )
 
     def clean_texte(self):

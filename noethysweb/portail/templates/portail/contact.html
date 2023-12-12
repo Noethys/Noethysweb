@@ -1,4 +1,5 @@
 {% extends "portail/page.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -21,14 +22,14 @@
     {% embed 'core/box.html' with box_titre=True box_introduction=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
         {% block box_titre %}Messagerie{% endblock %}
-        {% block box_introduction %}Cliquez ci-dessous sur la structure ou le service avec lequel vous souhaitez converser.{% endblock %}
+        {% block box_introduction %}{% blocktrans %}Cliquez ci-dessous sur la structure ou le service avec lequel vous souhaitez converser{% endblocktrans %}.{% endblock %}
         {% block box_contenu %}
             {% for structure in liste_structures_messagerie %}
 
                 {% with dict_messages_non_lus|get_item:structure.pk as nbre_messages_non_lus %}
                 <a class="btn btn-app" href="{% url 'portail_messagerie' idstructure=structure.pk %}">
                     {% if nbre_messages_non_lus %}
-                        <span class="badge bg-danger">{{ nbre_messages_non_lus }} non lu{{ nbre_messages_non_lus|pluralize }}</span>
+                        <span class="badge bg-danger">{{ nbre_messages_non_lus }} {% if nbre_messages_non_lus == 1 %}{% blocktrans %}non lu{% endblocktrans %}{% else %}{% blocktrans %}non lus{% endblocktrans %}{% endif %}</span>
                     {% endif %}
                     <i class="fa fa-comments"></i>{{ structure.nom }}
                 </a>
@@ -44,7 +45,7 @@
     {% if parametres_portail.contact_afficher_coords_structures %}
         {% embed 'core/box.html' with box_titre=True box_introduction=False %}
             {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}Annuaire des structures ou services{% endblock %}
+            {% block box_titre %}{% blocktrans %}Annuaire des structures ou services{% endblocktrans %}{% endblock %}
             {% block box_contenu %}
                 <div class="row">
                     {% for structure in liste_structures_coords %}
@@ -65,7 +66,7 @@
     {% if parametres_portail.contact_afficher_coords_organisateur %}
         {% embed 'core/box.html' with box_titre=True box_introduction=False %}
             {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}Coordonnées de l'organisateur{% endblock %}
+            {% block box_titre %}{% blocktrans %}Coordonnées de l'organisateur{% endblocktrans %}{% endblock %}
             {% block box_contenu %}
                 <div class="m-2">
                     <div><strong>{{ organisateur.nom }}</strong></div>

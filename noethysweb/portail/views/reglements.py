@@ -7,6 +7,7 @@ import logging, json, datetime
 logger = logging.getLogger(__name__)
 from django.http import JsonResponse
 from django.views.generic import TemplateView
+from django.utils.translation import gettext as _
 from core.models import Reglement, ModeleImpression, Recu
 from portail.views.base import CustomView
 
@@ -50,6 +51,6 @@ class View(CustomView, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
-        context['page_titre'] = "Règlements"
+        context['page_titre'] = _("Règlements")
         context['liste_reglements'] = Reglement.objects.select_related("mode", "depot").filter(famille=self.request.user.famille).order_by("-date")
         return context

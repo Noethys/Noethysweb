@@ -7,6 +7,7 @@ import json
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
+from django.utils.translation import gettext_lazy as _
 from django.contrib import messages
 from django.core.serializers.json import DjangoJSONEncoder
 from core.views import crud
@@ -22,10 +23,10 @@ class Page(Onglet):
     url_ajouter = "portail_individu_contacts_ajouter"
     url_modifier = "portail_individu_contacts_modifier"
     url_supprimer = "portail_individu_contacts_supprimer"
-    description_liste = "Cliquez sur le bouton Ajouter au bas de la page pour ajouter un nouveau contact."
-    description_saisie = "Saisissez les informations concernant le contact et cliquez sur le bouton Enregistrer."
-    objet_singulier = "un contact d'urgence et de sortie"
-    objet_pluriel = "des contacts d'urgence et de sortie"
+    description_liste = _("Cliquez sur le bouton Ajouter au bas de la page pour ajouter un nouveau contact.")
+    description_saisie = _("Saisissez les informations concernant le contact et cliquez sur le bouton Enregistrer.")
+    objet_singulier = _("un contact d'urgence et de sortie")
+    objet_pluriel = _("des contacts d'urgence et de sortie")
     onglet_actif = "individu_contacts"
     categorie = "individu_contacts"
 
@@ -34,7 +35,7 @@ class Page(Onglet):
         context = super(Page, self).get_context_data(**kwargs)
         context['onglet_actif'] = self.onglet_actif
         if not self.get_dict_onglet_actif().validation_auto:
-            context['box_introduction'] = self.description_saisie + " Ces informations devront être validées par l'administrateur de l'application."
+            context['box_introduction'] = self.description_saisie + " " + _("Ces informations devront être validées par l'administrateur de l'application.")
         return context
 
     def get_object(self):
@@ -55,8 +56,8 @@ class Liste(Page, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
-        context['box_titre'] = "Contacts d'urgence et de sortie"
-        context['box_introduction'] = "Cliquez sur le bouton Ajouter au bas de la page pour ajouter un nouveau contact."
+        context['box_titre'] = _("Contacts d'urgence et de sortie")
+        context['box_introduction'] = _("Cliquez sur le bouton Ajouter au bas de la page pour ajouter un nouveau contact.")
         context['liste_contacts'] = ContactUrgence.objects.filter(famille=self.get_rattachement().famille, individu=self.get_rattachement().individu).order_by("nom", "prenom")
         return context
 
@@ -75,7 +76,7 @@ class Ajouter(Page, crud.Ajouter):
                                             nouvelle_valeur=json.dumps(instance.Get_nom(), cls=DjangoJSONEncoder), idobjet=instance.pk)
 
         # Message de confirmation
-        messages.add_message(self.request, messages.SUCCESS, "Votre ajout a été enregistré")
+        messages.add_message(self.request, messages.SUCCESS, _("Votre ajout a été enregistré"))
 
         # Demande une nouvelle certification
         self.Demande_nouvelle_certification()
@@ -109,8 +110,8 @@ class Importer(Page, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(Importer, self).get_context_data(**kwargs)
-        context['box_titre'] = "Importer les contacts d'une autre fiche"
-        context['box_introduction'] = "Cochez le ou les contacts à importer et cliquez sur le bouton Importer."
+        context['box_titre'] = _("Importer les contacts d'une autre fiche")
+        context['box_introduction'] = _("Cochez le ou les contacts à importer et cliquez sur le bouton Importer.")
         context['form'] = Formulaire_importer(idfamille=self.request.user.famille.pk, idindividu=self.get_individu().pk, idrattachement=self.get_rattachement().pk, request=self.request)
         return context
 
@@ -133,9 +134,9 @@ class Importer(Page, TemplateView):
                 PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code="Contact importé",
                                                     nouvelle_valeur=json.dumps(contact.Get_nom(), cls=DjangoJSONEncoder))
 
-            messages.add_message(self.request, messages.SUCCESS, "%d contacts importés avec succès" % len(liste_idcontact))
+            messages.add_message(self.request, messages.SUCCESS, _("%d contacts importés avec succès") % len(liste_idcontact))
 
         else:
-            messages.add_message(self.request, messages.INFO, "Aucun contact importé")
+            messages.add_message(self.request, messages.INFO, _("Aucun contact importé"))
 
         return HttpResponseRedirect(reverse_lazy("portail_individu_contacts", kwargs={"idrattachement": self.get_rattachement().pk}))

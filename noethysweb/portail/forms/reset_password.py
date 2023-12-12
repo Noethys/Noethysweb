@@ -7,6 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 from django import forms
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
+from django.utils.translation import gettext as _
 from django.forms import ValidationError
 from django.core.validators import validate_email
 from django.core import mail as djangomail
@@ -16,7 +17,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from core.models import Utilisateur, AdresseMail, Rattachement
+from core.models import Utilisateur, AdresseMail
 from core.utils.utils_captcha import CaptchaField, CustomCaptchaTextInput
 from core.utils import utils_portail
 from portail.utils import utils_secquest
@@ -26,11 +27,11 @@ class MySetPasswordForm(SetPasswordForm):
     def __init__(self, *args, **kwargs):
         super(MySetPasswordForm, self).__init__(*args, **kwargs)
         self.fields['new_password1'].widget.attrs['class'] = "form-control"
-        self.fields['new_password1'].widget.attrs['title'] = "Saisissez un nouveau mot de passe"
-        self.fields['new_password1'].widget.attrs['placeholder'] = "Saisissez un nouveau mot de passe"
+        self.fields['new_password1'].widget.attrs['title'] = _("Saisissez un nouveau mot de passe")
+        self.fields['new_password1'].widget.attrs['placeholder'] = _("Saisissez un nouveau mot de passe")
         self.fields['new_password2'].widget.attrs['class'] = "form-control"
-        self.fields['new_password2'].widget.attrs['title'] = "Saisissez le nouveau mot de passe une nouvelle fois"
-        self.fields['new_password2'].widget.attrs['placeholder'] = "Saisissez le nouveau mot de passe une nouvelle fois"
+        self.fields['new_password2'].widget.attrs['title'] = _("Saisissez le nouveau mot de passe une nouvelle fois")
+        self.fields['new_password2'].widget.attrs['placeholder'] = _("Saisissez le nouveau mot de passe une nouvelle fois")
 
         # Question
         if kwargs["user"].famille.internet_secquest:
@@ -45,13 +46,13 @@ class MyPasswordResetForm(PasswordResetForm):
     def __init__(self, *args, **kwargs):
         super(MyPasswordResetForm, self).__init__(*args, **kwargs)
         self.fields['identifiant'].widget.attrs['class'] = "form-control"
-        self.fields['identifiant'].widget.attrs['title'] = "Saisissez l'identifiant qui vous a été communiqué par l'organisme. Si vous avez oublié cet identifiant, contactez l'organisme."
-        self.fields['identifiant'].widget.attrs['placeholder'] = "Saisissez votre identifiant"
+        self.fields['identifiant'].widget.attrs['title'] = _("Saisissez l'identifiant qui vous a été communiqué par l'organisme. Si vous avez oublié cet identifiant, contactez l'organisme.")
+        self.fields['identifiant'].widget.attrs['placeholder'] = _("Saisissez votre identifiant")
         self.fields['email'].widget.attrs['class'] = "form-control"
-        self.fields['email'].widget.attrs['title'] = "Saisissez votre adresse Email"
-        self.fields['email'].widget.attrs['placeholder'] = "Saisissez votre adresse Email"
+        self.fields['email'].widget.attrs['title'] = _("Saisissez votre adresse Email")
+        self.fields['email'].widget.attrs['placeholder'] = _("Saisissez votre adresse Email")
         self.fields['captcha'].widget.attrs['class'] = "form-control"
-        self.fields['captcha'].widget.attrs['placeholder'] = "Recopiez le code de sécurité ci-contre"
+        self.fields['captcha'].widget.attrs['placeholder'] = _("Recopiez le code de sécurité ci-contre")
 
     def clean(self):
         identifiant = self.cleaned_data['identifiant']
@@ -61,7 +62,7 @@ class MyPasswordResetForm(PasswordResetForm):
         try:
             validate_email(email)
         except:
-            raise ValidationError("L'adresse Email n'est pas valide")
+            raise ValidationError(_("L'adresse Email n'est pas valide"))
 
         return self.cleaned_data
 
@@ -83,7 +84,7 @@ class MyPasswordResetForm(PasswordResetForm):
         utilisateur = Utilisateur.objects.filter(username__iexact=identifiant, is_active=True, categorie="famille").first()
         if not utilisateur or not utilisateur.famille.mail or utilisateur.famille.mail != email:
             logger.debug("Erreur : Pas de compte actif existant.")
-            return "Il n'existe pas de compte actif correspondant à cet identifiant et cette adresse Email."
+            return _("Il n'existe pas de compte actif correspondant à cet identifiant et cette adresse Email.")
 
         if not domain_override:
             current_site = get_current_site(request)
@@ -109,7 +110,7 @@ class MyPasswordResetForm(PasswordResetForm):
             adresse_exp = AdresseMail.objects.get(pk=idadresse_exp, actif=True)
         if not adresse_exp:
             logger.debug("Erreur : Pas d'adresse d'expédition paramétrée pour l'envoi du mail.")
-            return "L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur."
+            return _("L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur.")
 
         # Backend CONSOLE (Par défaut)
         backend = 'django.core.mail.backends.console.EmailBackend'
@@ -156,7 +157,7 @@ class MyPasswordResetForm(PasswordResetForm):
             logger.debug("Message de reset password envoyé.")
         if resultat == 0:
             logger.debug("Message de reset password non envoyé.")
-            return "L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur."
+            return _("L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur.")
 
         connection.close()
 

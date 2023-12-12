@@ -4,19 +4,19 @@
 #  Distribué sous licence GNU GPL.
 
 from django import forms
-from django.forms import ModelForm, ValidationError
+from django.utils.translation import gettext_lazy as _
+from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
-from core.models import Individu, PortailRenseignement, Rattachement
+from crispy_forms.layout import HTML
+from core.models import Individu, Rattachement
 from core.forms.select2 import Select2Widget
 from core.widgets import Telephone, CodePostal, Ville
 from portail.forms.fiche import FormulaireBase
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    type_adresse = forms.ChoiceField(label="Type d'adresse", widget=forms.RadioSelect, choices=[("RATTACHEE", "Adresse rattachée"), ("PROPRE", "Adresse propre")], required=False)
-    adresse_auto = forms.ModelChoiceField(label="Adresse rattachée", widget=Select2Widget(), queryset=Rattachement.objects.none(), required=False)
+    type_adresse = forms.ChoiceField(label=_("Type d'adresse"), widget=forms.RadioSelect, choices=[("RATTACHEE", _("Adresse rattachée")), ("PROPRE", _("Adresse propre"))], required=False)
+    adresse_auto = forms.ModelChoiceField(label=_("Adresse rattachée"), widget=Select2Widget(), queryset=Rattachement.objects.none(), required=False)
 
     class Meta:
         model = Individu
@@ -65,27 +65,27 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Help_texts pour le mode édition
         self.help_texts = {
-            "type_adresse": "Sélectionnez 'rattachée' pour faire le lien avec l'adresse d'un autre membre de la famille ou sélectionnez 'propre' pour saisir une adresse pour cet individu.",
-            "adresse_auto": "Sélectionnez l'individu dont vous souhaitez récupérer l'adresse.",
-            "rue_resid": "Saisissez le numéro et le nom de la voie. Exemple : 12 Rue des acacias.",
-            "cp_resid": "Saisissez le code postal de la ville de résidence, attendez une seconde et sélectionnez la ville dans la liste déroulante.",
-            "ville_resid": "Saisissez le nom de la ville en majuscules.",
-            "secteur": "Sélectionnez un secteur dans la liste déroulante.",
-            "tel_domicile": "Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx.",
-            "tel_mobile": "Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx.",
-            "mail": "Saisissez une adresse Email valide.",
-            "categorie_travail": "Sélectionnez une catégorie socio-professionnelle dans la liste déroulante.",
-            "profession": "Saisissez une profession.",
-            "employeur": "Saisissez le nom de l'employeur.",
-            "travail_tel": "Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx.",
-            "travail_mail": "Saisissez une adresse Email valide.",
+            "type_adresse": _("Sélectionnez 'rattachée' pour faire le lien avec l'adresse d'un autre membre de la famille ou sélectionnez 'propre' pour saisir une adresse pour cet individu."),
+            "adresse_auto": _("Sélectionnez l'individu dont vous souhaitez récupérer l'adresse."),
+            "rue_resid": _("Saisissez le numéro et le nom de la voie. Exemple : 12 Rue des acacias."),
+            "cp_resid": _("Saisissez le code postal de la ville de résidence, attendez une seconde et sélectionnez la ville dans la liste déroulante."),
+            "ville_resid": _("Saisissez le nom de la ville en majuscules."),
+            "secteur": _("Sélectionnez un secteur dans la liste déroulante."),
+            "tel_domicile": _("Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx."),
+            "tel_mobile": _("Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx."),
+            "mail": _("Saisissez une adresse Email valide."),
+            "categorie_travail": _("Sélectionnez une catégorie socio-professionnelle dans la liste déroulante."),
+            "profession": _("Saisissez une profession."),
+            "employeur": _("Saisissez le nom de l'employeur."),
+            "travail_tel": _("Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx."),
+            "travail_mail": _("Saisissez une adresse Email valide."),
         }
 
         # Champs affichables
         self.liste_champs_possibles = [
-            {"titre": "Adresse de résidence", "champs": ["type_adresse", "adresse_auto", "rue_resid", "cp_resid", "ville_resid", "secteur"]},
-            {"titre": "Coordonnées", "champs": ["tel_domicile", "tel_mobile", "mail"]},
-            {"titre": "Activité professionnelle", "champs": ["categorie_travail", "profession", "employeur", "travail_tel", "travail_mail"]},
+            {"titre": _("Adresse de résidence"), "champs": ["type_adresse", "adresse_auto", "rue_resid", "cp_resid", "ville_resid", "secteur"]},
+            {"titre": _("Coordonnées"), "champs": ["tel_domicile", "tel_mobile", "mail"]},
+            {"titre": _("Activité professionnelle"), "champs": ["categorie_travail", "profession", "employeur", "travail_tel", "travail_mail"]},
         ]
 
         # Finalisation du layout
@@ -102,7 +102,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 individu = self.cleaned_data["adresse_auto"]
                 self.cleaned_data["adresse_auto"] = individu.idindividu
             else:
-                self.add_error("adresse_auto", "Vous devez sélectionner un individu dont l'adresse est à rattacher")
+                self.add_error("adresse_auto", _("Vous devez sélectionner un individu dont l'adresse est à rattacher"))
                 return
 
         return self.cleaned_data

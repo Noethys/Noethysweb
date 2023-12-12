@@ -1,4 +1,5 @@
 {% extends "portail/page.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -16,17 +17,17 @@
     {# Liste des cotisations à fournir #}
     {% embed 'core/box.html' with box_titre=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}Adhésions à fournir{% endblock %}
+        {% block box_titre %}{% blocktrans %}Adhésions à fournir{% endblocktrans %}{% endblock %}
         {% block box_contenu %}
             {% if cotisations_fournir %}
-                <p>Les adhésions suivantes marquées d'une croix rouge sont manquantes :</p>
+                <p>{% blocktrans %}Les adhésions suivantes marquées d'une croix rouge sont manquantes{% endblocktrans %} :</p>
                 <ul class="list-unstyled">
                     {% for cotisation in cotisations_fournir %}
                         <li>{% if cotisation.valide %}<i class='fa fa-check fa-fw text-green'></i>{% else %}<i class='fa fa-close fa-fw text-red'></i>{% endif %} {{ cotisation.label }}</li>
                     {% endfor %}
                 </ul>
             {% else %}
-                Aucune adhésion manquante.
+                {% blocktrans %}Aucune adhésion manquante.{% endblocktrans %}
             {% endif %}
         {% endblock box_contenu %}
     {% endembed %}
@@ -34,7 +35,7 @@
     {# Liste des adhésions #}
     {% embed 'core/box.html' with box_titre=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}Liste des dernières adhésions{% endblock %}
+        {% block box_titre %}{% blocktrans %}Liste des dernières adhésions{% endblocktrans %}{% endblock %}
         {% block card_body_classe %}p-0{% endblock %}
         {% block box_contenu %}
 
@@ -44,11 +45,11 @@
                     <table class="table projects mb-0">
                         <thead>
                             <tr class="text-center">
-                                <th>Du</th>
-                                <th>Au</th>
-                                <th>Intitulé</th>
+                                <th>{% trans "Du" %}</th>
+                                <th>{% trans "Au" %}</th>
+                                <th>{% trans "Intitulé" %}</th>
                                 <th>N°</th>
-                                <th>Bénéficiaire</th>
+                                <th>{% trans "Bénéficiaire" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -58,13 +59,13 @@
                                     <td>{{ cotisation.date_fin|date:'d/m/Y' }}</td>
                                     <td>{{ cotisation.prestation.label }}</td>
                                     <td>{{ cotisation.numero|default:"" }}</td>
-                                    <td>{% if cotisation.individu %}{{ cotisation.individu.prenom }}{% else %}Famille{% endif %}</td>
+                                    <td>{% if cotisation.individu %}{{ cotisation.individu.prenom }}{% else %}{% trans "Famille" %}{% endif %}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 {% else %}
-                    <div style="padding: 12px;">Aucune adhésion</div>
+                    <div style="padding: 12px;">{% blocktrans %}Aucune adhésion{% endblocktrans %}</div>
                 {% endif %}
             </div>
 

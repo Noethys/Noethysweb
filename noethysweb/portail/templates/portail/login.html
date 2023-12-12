@@ -1,8 +1,9 @@
 {% extends "core/base_login.html" %}
+{% load i18n %}
 {% load static %}
 
 {% block titre_contenu %}
-    Connexion
+    {% trans "Connexion" %}
 {% endblock titre_contenu %}
 
 {% block contenu_page %}
@@ -28,7 +29,7 @@
 
         {% if form.captcha.errors %}
             <div class="alert alert-danger">
-                Vous devez recopier le code de sécurité ci-dessous
+                {% blocktrans %}Vous devez recopier le code de sécurité ci-dessous{% endblocktrans %}
             </div>
         {% endif %}
 
@@ -36,28 +37,28 @@
             {{ form.captcha }}
         </div>
 
-        <button name="login" id="login" class="btn btn-block btn-primary login-btn mb-4" type="submit">Se connecter</button>
+        <button name="login" id="login" class="btn btn-block btn-primary login-btn mb-4" type="submit">{% blocktrans %}Se connecter{% endblocktrans %}</button>
 
     </form>
 
     {# Mot de passe oublié #}
     {% if parametres_portail.connexion_adresse_exp %}
-        <a class="forgot-password-link" href="{% url 'reset_password' %}">Mot de passe oublié ?</a>
+        <a class="forgot-password-link" href="{% url 'reset_password' %}">{% blocktrans %}Mot de passe oublié ?{% endblocktrans %}</a>
     {% endif %}
 
     {# Pas de codes d'accès #}
-    <p class="login-card-footer-text"><a href="#" class="forgot-password-link" data-toggle="modal" data-target="#model_pas_codes">Pas de codes d'accès ?</a></p>
+    <p class="login-card-footer-text"><a href="#" class="forgot-password-link" data-toggle="modal" data-target="#model_pas_codes">{% blocktrans %}Pas de codes d'accès ?{% endblocktrans %}</a></p>
 
     {# Modal : Pas de codes d'accès #}
     <div class="modal" id="model_pas_codes">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Pas de codes d'accès ?</h4>
+                    <h4 class="modal-title">{% blocktrans %}Pas de codes d'accès ?{% endblocktrans %}</h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    Contactez directement l'organisme '{{ organisateur.nom }}' pour recevoir vos codes d'accès.
+                    {% blocktrans %}Contactez directement l'organisme{% endblocktrans %} '{{ organisateur.nom }}' {% blocktrans %}pour recevoir vos codes d'accès{% endblocktrans %}.
                 </div>
             </div>
         </div>

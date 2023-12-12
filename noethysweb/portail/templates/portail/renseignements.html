@@ -1,4 +1,5 @@
 {% extends "portail/page.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -76,15 +77,15 @@
     {% if form.fields %}
         {% embed 'core/box.html' with box_introduction=True %}
             {% block box_theme %}card-outline card-info{% endblock %}
-            {% block box_titre %}Approbations en attente{% endblock %}
-            {% block box_introduction %}L'accès aux réservations nécessite les approbations suivantes. Après avoir vérifié les fiches, cochez les cases puis cliquez sur le bouton Valider.{% endblock %}
+            {% block box_titre %}{% blocktrans %}Approbations en attente{% endblocktrans %}{% endblock %}
+            {% block box_introduction %}{% blocktrans %}L'accès aux réservations nécessite les approbations suivantes. Après avoir vérifié les fiches, cochez les cases puis cliquez sur le bouton Valider.{% endblocktrans %}{% endblock %}
             {% block box_contenu %}
                 <form id="famille_approbations_form" method="post">
                     {% csrf_token %}
                     <div class="card-columns">
                         {% crispy form %}
                     </div>
-                    <button type="submit" title="Enregistrer" class="btn btn-primary pull-right" value="Enregistrer"><i class="fa fa-check margin-r-5"></i>Valider les approbations cochées</button>
+                    <button type="submit" title="{% trans "Enregistrer" %}" class="btn btn-primary pull-right" value="Enregistrer"><i class="fa fa-check margin-r-5"></i>{% blocktrans %}Valider les approbations cochées{% endblocktrans %}</button>
                 </form>
             {% endblock %}
         {% endembed %}
@@ -117,7 +118,7 @@
     {# Liste des fiches de renseignements #}
     {% embed 'core/box.html' with box_titre=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}Fiches de renseignements{% endblock %}
+        {% block box_titre %}{% blocktrans %}Fiches de renseignements{% endblocktrans %}{% endblock %}
         {% block card_body_classe %}p-0{% endblock %}
         {% block box_contenu %}
 
@@ -128,24 +129,24 @@
                     <tr data-url="{% url 'portail_famille_caisse' %}">
                         <td>
                             <img src="{% static 'images/personne.png' %}" alt="user-avatar" class="img-circle img-fluid table-avatar" style="max-height: 80px">
-                            <span class="ml-2"><strong>Famille</strong></span>
+                            <span class="ml-2"><strong>{% trans "Famille" %}</strong></span>
                         </td>
                         <td>
-                            Fiche famille
+                            {% blocktrans %}Fiche famille{% endblocktrans %}
                         </td>
                         <td class="project-state">
                             <small>
                                 <ul class="list-unstyled">
                                     {% if request.user.famille.certification_date %}
-                                        <li class="text-success"><i class="fa fa-check margin-r-5"></i>Fiche certifiée exacte le {{ request.user.famille.certification_date|date:'d/m/Y' }}</li>
+                                        <li class="text-success"><i class="fa fa-check margin-r-5"></i>{% blocktrans %}Fiche certifiée exacte le{% endblocktrans %} {{ request.user.famille.certification_date|date:'d/m/Y' }}</li>
                                     {% else %}
-                                        <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>Fiche en attente de certification</li>
+                                        <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Fiche en attente de certification{% endblocktrans %}</li>
                                     {% endif %}
                                 </ul>
                             </small>
                         </td>
                         <td class="text-right">
-                            <a href="{% url 'portail_famille_caisse' %}" class="btn btn-sm btn-primary" title="Ouvrir la fiche">
+                            <a href="{% url 'portail_famille_caisse' %}" class="btn btn-sm btn-primary" title="{% trans "Ouvrir la fiche" %}">
                                 <i class="fa fa-pencil"></i>
                             </a>
                         </td>
@@ -159,15 +160,17 @@
                                 <span class="ml-2"><strong>{{ rattachement.individu.Get_nom }}</strong></span>
                             </td>
                             <td>
-                                Fiche {{ rattachement.get_categorie_display|lower }}
+                                {% if rattachement.categorie == 1 %}{% blocktrans %}Fiche représentant{% endblocktrans %}{% endif %}
+                                {% if rattachement.categorie == 2 %}{% blocktrans %}Fiche enfant{% endblocktrans %}{% endif %}
+                                {% if rattachement.categorie == 3 %}{% blocktrans %}Fiche contact{% endblocktrans %}{% endif %}
                             </td>
                             <td class="project-state">
                                 <small>
                                     <ul class="list-unstyled">
                                         {% if rattachement.certification_date %}
-                                            <li class="text-success"><i class="fa fa-check margin-r-5"></i>Fiche certifiée exacte le {{ rattachement.certification_date|date:'d/m/Y' }}</li>
+                                            <li class="text-success"><i class="fa fa-check margin-r-5"></i>{% blocktrans %}Fiche certifiée exacte le{% endblocktrans %} {{ rattachement.certification_date|date:'d/m/Y' }}</li>
                                         {% else %}
-                                            <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>Fiche en attente de certification</li>
+                                            <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Fiche en attente de certification{% endblocktrans %}</li>
                                         {% endif %}
                                         {% for renseignement in renseignements_manquants|get_item:rattachement.individu %}
                                             <li class="text-red"><i class="fa fa-remove margin-r-5"></i>{{ renseignement }}</li>
@@ -176,7 +179,7 @@
                                 </small>
                             </td>
                             <td class="text-right">
-                                <a href="{% url 'portail_individu_identite' idrattachement=rattachement.pk %}" class="btn btn-sm btn-primary" title="Ouvrir la fiche">
+                                <a href="{% url 'portail_individu_identite' idrattachement=rattachement.pk %}" class="btn btn-sm btn-primary" title="{% trans "Ouvrir la fiche" %}">
                                     <i class="fa fa-pencil"></i>
                                 </a>
                             </td>

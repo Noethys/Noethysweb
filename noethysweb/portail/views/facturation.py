@@ -7,6 +7,7 @@ import logging, decimal, sys, datetime, re, copy, json
 logger = logging.getLogger(__name__)
 from django.urls import reverse
 from django.http import JsonResponse, HttpResponse
+from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -50,7 +51,7 @@ class View_retour_paiement(CustomView, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(View_retour_paiement, self).get_context_data(**kwargs)
-        context['page_titre'] = "Facturation"
+        context['page_titre'] = _("Facturation")
         context['etat'] = self.etat
         return context
 
@@ -66,11 +67,11 @@ def effectuer_paiement_en_ligne(request):
 
     # Vérifie que le montant est supérieur à zéro
     if not montant_reglement:
-        return JsonResponse({"erreur": "Le montant doit être supérieur à zéro !"}, status=401)
+        return JsonResponse({"erreur": _("Le montant doit être supérieur à zéro !")}, status=401)
 
     # Vérifie que le montant est supérieur au montant minimal fixé
     if montant_reglement < decimal.Decimal(parametres_portail.get("paiement_ligne_montant_minimal", 0.0)):
-        return JsonResponse({"erreur": "Le paiement en ligne nécessite un montant minimal de %.2f € !" % parametres_portail.paiement_ligne_montant_minimal}, status=401)
+        return JsonResponse({"erreur": _("Le paiement en ligne nécessite un montant minimal de %.2f € !") % parametres_portail.paiement_ligne_montant_minimal}, status=401)
 
     # Mémorise les numéros de factures et la ventilation
     dict_ventilation = {"facture": {}, "periode": {}, "cotisation": {}}
@@ -531,11 +532,11 @@ class View(CustomView, TemplateView):
         liste_impayes = []
         texte_impayes = None
         if liste_factures_impayees:
-            liste_impayes.append("1 facture à régler" if len(liste_factures_impayees) == 1 else "%d factures à régler" % len(liste_factures_impayees))
+            liste_impayes.append(_("1 facture à régler") if len(liste_factures_impayees) == 1 else _("%d factures à régler") % len(liste_factures_impayees))
         if liste_finale_periodes or liste_finale_cotisations:
-            liste_impayes.append("des prestations à régler en avance")
+            liste_impayes.append(_("des prestations à régler en avance"))
         if liste_impayes:
-            texte_impayes = "Il reste %s pour un total de <strong>%s</strong>" % (utils_texte.Convert_liste_to_texte_virgules(liste_impayes), utils_texte.Formate_montant(total_factures_impayees + total_periodes_impayees + total_cotisations_impayees))
+            texte_impayes = _("Il reste %s pour un total de") % utils_texte.Convert_liste_to_texte_virgules(liste_impayes) + " <strong>%s</strong>" % utils_texte.Formate_montant(total_factures_impayees + total_periodes_impayees + total_cotisations_impayees)
         context["texte_impayes"] = texte_impayes
 
         # Calcul du solde

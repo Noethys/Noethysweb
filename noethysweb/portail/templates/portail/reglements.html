@@ -1,4 +1,5 @@
 {% extends "portail/page.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -20,7 +21,7 @@
     {# Liste des factures #}
     {% embed 'core/box.html' with box_titre=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}Liste des règlements{% endblock %}
+        {% block box_titre %}{% blocktrans %}Liste des règlements{% endblocktrans %}{% endblock %}
         {% block box_contenu %}
 
             {# Liste des règlements #}
@@ -29,15 +30,15 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr class="text-center">
-                                <th>Date</th>
-                                <th>Mode</th>
+                                <th>{% trans "Date" %}</th>
+                                <th>{% trans "Mode" %}</th>
                                 <th>N°</th>
-                                <th>Montant</th>
+                                <th>{% trans "Montant" %}</th>
                                 {% if parametres_portail.reglements_afficher_encaissement %}
-                                    <th>Encaissé</th>
+                                    <th>{% trans "Encaissé" %}</th>
                                 {% endif %}
                                 {% if parametres_portail.reglements_autoriser_telechargement_recu and parametres_portail.reglements_modele_impression_recu %}
-                                    <th style="width: 90px;">Actions</th>
+                                    <th style="width: 90px;">{% trans "Actions" %}</th>
                                 {% endif %}
                             </tr>
                         </thead>
@@ -59,7 +60,7 @@
                                     {% endif %}
                                     {% if parametres_portail.reglements_autoriser_telechargement_recu and parametres_portail.reglements_modele_impression_recu %}
                                         <td>
-                                            <button data-idreglement="{{ reglement.pk }}" class="btn btn-primary btn-xs bouton_imprimer_recu" title="Télécharger le reçu"><i class="fa fa-fw fa-download"></i></button>
+                                            <button data-idreglement="{{ reglement.pk }}" class="btn btn-primary btn-xs bouton_imprimer_recu" title="{% trans "Télécharger le reçu" %}"><i class="fa fa-fw fa-download"></i></button>
                                         </td>
                                     {% endif %}
                                 </tr>
@@ -67,7 +68,7 @@
                         </tbody>
                     </table>
                 {% else %}
-                    <b>Aucun règlement.</b>
+                    <b>{% blocktrans %}Aucun règlement.{% endblocktrans %}</b>
                 {% endif %}
             </div>
 

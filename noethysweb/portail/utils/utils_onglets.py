@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.core.cache import cache
+from django.utils.translation import gettext_lazy as _
 from core.models import PortailParametre
 from portail.utils import utils_champs
 
@@ -20,17 +21,17 @@ class Onglet():
         return self.code
 
 LISTE_ONGLETS = [
-    Onglet(code="famille_caisse", label="Caisse", icone="fa-institution", url="portail_famille_caisse", validation_auto=False),
-    Onglet(code="individu_identite", label="Identité", icone="fa-user", url="portail_individu_identite", validation_auto=False),
-    Onglet(code="individu_questionnaire", label="Questionnaire", icone="fa-question", url="portail_individu_questionnaire", validation_auto=True),
-    Onglet(code="individu_coords", label="Coordonnées", icone="fa-map-marker", url="portail_individu_coords", validation_auto=False),
-    Onglet(code="individu_regimes_alimentaires", label="Régimes alimentaires", icone="fa-cutlery", url="portail_individu_regimes_alimentaires", validation_auto=False),
-    Onglet(code="individu_maladies", label="Maladies", icone="fa-stethoscope", url="portail_individu_maladies", validation_auto=False),
-    Onglet(code="individu_medecin", label="Médecin", icone="fa-user-md", url="portail_individu_medecin", validation_auto=False),
-    Onglet(code="individu_vaccinations", label="Vaccinations", icone="fa-medkit", url="portail_individu_vaccinations", validation_auto=True),
-    Onglet(code="individu_informations", label="Informations", icone="fa-heartbeat", url="portail_individu_informations", validation_auto=True),
-    Onglet(code="individu_assurances", label="Assurances", icone="fa-shield", url="portail_individu_assurances", validation_auto=True),
-    Onglet(code="individu_contacts", label="Contacts", icone="fa-phone", url="portail_individu_contacts", validation_auto=True),
+    Onglet(code="famille_caisse", label=_("Caisse"), icone="fa-institution", url="portail_famille_caisse", validation_auto=False),
+    Onglet(code="individu_identite", label=_("Identité"), icone="fa-user", url="portail_individu_identite", validation_auto=False),
+    Onglet(code="individu_questionnaire", label=_("Questionnaire"), icone="fa-question", url="portail_individu_questionnaire", validation_auto=True),
+    Onglet(code="individu_coords", label=_("Coordonnées"), icone="fa-map-marker", url="portail_individu_coords", validation_auto=False),
+    Onglet(code="individu_regimes_alimentaires", label=_("Régimes alimentaires"), icone="fa-cutlery", url="portail_individu_regimes_alimentaires", validation_auto=False),
+    Onglet(code="individu_maladies", label=_("Maladies"), icone="fa-stethoscope", url="portail_individu_maladies", validation_auto=False),
+    Onglet(code="individu_medecin", label=_("Médecin"), icone="fa-user-md", url="portail_individu_medecin", validation_auto=False),
+    Onglet(code="individu_vaccinations", label=_("Vaccinations"), icone="fa-medkit", url="portail_individu_vaccinations", validation_auto=True),
+    Onglet(code="individu_informations", label=_("Informations"), icone="fa-heartbeat", url="portail_individu_informations", validation_auto=True),
+    Onglet(code="individu_assurances", label=_("Assurances"), icone="fa-shield", url="portail_individu_assurances", validation_auto=True),
+    Onglet(code="individu_contacts", label=_("Contacts"), icone="fa-phone", url="portail_individu_contacts", validation_auto=True),
 ]
 
 def Get_onglets(categorie=None):

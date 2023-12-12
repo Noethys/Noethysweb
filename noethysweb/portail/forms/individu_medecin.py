@@ -3,11 +3,11 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-
 from django import forms
 from django.forms import ModelForm
+from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
-from core.models import Individu, PortailRenseignement, Medecin
+from core.models import Individu, Medecin
 from portail.forms.fiche import FormulaireBase
 from core.widgets import Select_avec_commandes_form
 
@@ -20,7 +20,7 @@ class Form_choix_medecin(forms.ModelChoiceField):
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    medecin = Form_choix_medecin(label="Médecin", queryset=Medecin.objects.all().order_by("nom", "prenom"), required=False,
+    medecin = Form_choix_medecin(label=_("Médecin"), queryset=Medecin.objects.all().order_by("nom", "prenom"), required=False,
                                      widget=Select_avec_commandes_form(attrs={"url_ajax": "portail_ajax_ajouter_medecin", "id_form": "medecins_form", "afficher_bouton_ajouter": False,
                                                                               "textes": {"champ": "Nom du régime alimentaire", "ajouter": "Ajouter un médecin", "modifier": "Modifier un médecin"}}))
 
@@ -43,12 +43,12 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Help_texts pour le mode édition
         self.help_texts = {
-            "medecin": "Cliquez sur le champ ci-dessus pour sélectionner un médecin dans la liste déroulante. Vous pouvez faire une recherche par nom, par prénom ou par ville. <a href='#' class='ajouter_element'>Cliquez ici pour ajouter un médecin manquant dans la liste de choix.</a>",
+            "medecin": _("Cliquez sur le champ ci-dessus pour sélectionner un médecin dans la liste déroulante. Vous pouvez faire une recherche par nom, par prénom ou par ville") + ". <a href='#' class='ajouter_element'>" + _("Cliquez ici pour ajouter un médecin manquant dans la liste de choix") + ".</a>",
         }
 
         # Champs affichables
         self.liste_champs_possibles = [
-            {"titre": "Médecin traitant", "champs": ["medecin"]},
+            {"titre": _("Médecin traitant"), "champs": ["medecin"]},
         ]
 
         # Préparation du layout

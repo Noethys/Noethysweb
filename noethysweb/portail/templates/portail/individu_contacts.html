@@ -1,4 +1,5 @@
 {% extends "portail/fiche.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -17,11 +18,11 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr class="text-center">
-                                    <th>Nom</th>
-                                    <th>Prénom</th>
-                                    <th>Lien</th>
-                                    <th>Autorisations</th>
-                                    <th style="width: 90px;">Actions</th>
+                                    <th>{% trans "Nom" %}</th>
+                                    <th>{% trans "Prénom" %}</th>
+                                    <th>{% trans "Lien" %}</th>
+                                    <th>{% trans "Autorisations" %}</th>
+                                    <th style="width: 90px;">{% trans "Actions" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -32,20 +33,20 @@
                                         <td>{{ contact.lien }}</td>
                                         <td>{{ contact.Get_autorisations|safe }}</td>
                                         <td>
-                                            <a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_individu_contacts_modifier' idrattachement=rattachement.pk idcontact=contact.pk %}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
-                                            <a type="button" class="btn btn-danger btn-xs" href="{% url 'portail_individu_contacts_supprimer' idrattachement=rattachement.pk idcontact=contact.pk %}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
+                                            <a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_individu_contacts_modifier' idrattachement=rattachement.pk idcontact=contact.pk %}" title="{% trans "Modifier" %}"><i class="fa fa-fw fa-pencil"></i></a>
+                                            <a type="button" class="btn btn-danger btn-xs" href="{% url 'portail_individu_contacts_supprimer' idrattachement=rattachement.pk idcontact=contact.pk %}" title="{% trans "Supprimer" %}"><i class="fa fa-fw fa-trash"></i></a>
                                         </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     {% else %}
-                        <b>Aucun contact enregistré.</b>
+                        <b>{% blocktrans %}Aucun contact enregistré.{% endblocktrans %}</b>
                     {% endif %}
                 </div>
                 <div class="pull-right">
-                    <a class="btn btn-default" href="{% url 'portail_individu_contacts_importer' idrattachement=rattachement.pk %}" title="Importer des contacts depuis une autre fiche"><i class="fa fa-download margin-r-5"></i>Importer les contacts d'une autre fiche</a>
-                    <a class="btn btn-primary" href="{% url 'portail_individu_contacts_ajouter' idrattachement=rattachement.pk %}" title="Ajouter un contact"><i class="fa fa-plus margin-r-5"></i>Ajouter un contact</a>
+                    <a class="btn btn-default" href="{% url 'portail_individu_contacts_importer' idrattachement=rattachement.pk %}" title="{% trans "Importer des contacts depuis une autre fiche" %}"><i class="fa fa-download margin-r-5"></i>{% blocktrans %}Importer les contacts d'une autre fiche{% endblocktrans %}</a>
+                    <a class="btn btn-primary" href="{% url 'portail_individu_contacts_ajouter' idrattachement=rattachement.pk %}" title="{% trans "Ajouter un contact" %}"><i class="fa fa-plus margin-r-5"></i>{% blocktrans %}Ajouter un contact{% endblocktrans %}</a>
                 </div>
 
             {% endblock box_contenu %}

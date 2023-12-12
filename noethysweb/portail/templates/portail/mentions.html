@@ -1,4 +1,5 @@
 {% extends "portail/page.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -20,7 +21,7 @@
     {# Conditions générales d'utilisation #}
     {% embed 'core/box.html' with box_titre=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}Conditions générales d'utilisation{% endblock %}
+        {% block box_titre %}{% blocktrans %}Conditions générales d'utilisation{% endblocktrans %}{% endblock %}
         {% block box_contenu %}
             {{ texte_conditions|safe }}
         {% endblock box_contenu %}

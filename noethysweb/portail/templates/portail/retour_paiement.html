@@ -1,4 +1,5 @@
 {% extends "portail/page.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -9,34 +10,34 @@
 
 {% block contenu_page %}
     <p>
-		<a id="retour_factures" href="{% url 'portail_facturation' %}"><i class="fa fa-arrow-circle-o-left"></i> Revenir à la page de la facturation</a>
+		<a id="retour_factures" href="{% url 'portail_facturation' %}"><i class="fa fa-arrow-circle-o-left"></i> {% blocktrans %}Revenir à la page de la facturation{% endblocktrans %}</a>
 	</p>
 
 	{% if etat == "cancel" %}
         <div class="alert alert-danger alert-dismissible">
-            <h6><i class="icon fa fa-ban"></i> Vous avez annulé avant d'avoir procédé au paiement !</h6>
-            Vous pouvez revenir à la page des factures.
+            <h6><i class="icon fa fa-ban"></i> {% blocktrans %}Vous avez annulé avant d'avoir procédé au paiement !{% endblocktrans %}</h6>
+            {% blocktrans %}Vous pouvez revenir à la page des factures.{% endblocktrans %}
         </div>
 	{% endif %}
 
 	{% if etat == "error" %}
         <div class="alert alert-danger alert-dismissible">
-            <h6><i class="icon fa fa-ban"></i> Une erreur a été rencontrée par la plate-forme de paiement !</h6>
-            Vous pouvez revenir à la page des factures.
+            <h6><i class="icon fa fa-ban"></i> {% blocktrans %}Une erreur a été rencontrée par la plate-forme de paiement !{% endblocktrans %}</h6>
+            {% blocktrans %}Vous pouvez revenir à la page des factures.{% endblocktrans %}
         </div>
 	{% endif %}
 
 	{% if etat == "refused" %}
         <div class="alert alert-danger alert-dismissible">
-            <h6><i class="icon fa fa-ban"></i> Votre paiement a été refusé !</h6>
-            Vous pouvez revenir à la page des factures.
+            <h6><i class="icon fa fa-ban"></i> {% blocktrans %}Votre paiement a été refusé !{% endblocktrans %}</h6>
+            {% blocktrans %}Vous pouvez revenir à la page des factures.{% endblocktrans %}
         </div>
 	{% endif %}
 
 	{% if etat == "success" %}
         <div class="alert alert-success alert-dismissible">
-            <h6><i class="icon fa fa-check"></i> Votre paiement a bien été enregistré !</h6>
-            Vous pouvez revenir à la page des factures.
+            <h6><i class="icon fa fa-check"></i> {% blocktrans %}Votre paiement a bien été enregistré !{% endblocktrans %}</h6>
+            {% blocktrans %}Vous pouvez revenir à la page des factures.{% endblocktrans %}
         </div>
 	{% endif %}
 

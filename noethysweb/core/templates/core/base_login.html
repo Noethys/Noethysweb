@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -139,7 +140,11 @@
                 height: 110%;
                 box-shadow:inset 0 0 0 2000px rgba(0, 0, 0, 0.4);
             }
-
+            .selecteur_langues {
+                position: absolute;
+                top: 0px;
+                right: 0px;
+            }
         </style>
     {% endblock %}
 
@@ -188,6 +193,28 @@
             </div>
         </div>
     </main>
+
+    {% if parametres_portail.multilingue %}
+        <div class="selecteur_langues">
+            <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+                <input name="next" type="hidden" value="{{ redirect_to }}">
+                <ul class="d-inline-flex mr-1" style="list-style:none;">
+                    {% get_current_language as lang_actual %}
+                    {% get_available_languages as languages %}
+                    {% for lang_code, lang_name in languages %}
+                        <li>
+                            <button type="submit" name="language" title="{{ lang_name }}" value="{{ lang_code }}" class="btn nav-link pl-1 pr-0 {% if lang_code == lang_actual %}selected{% endif %}">
+                                {% with 'images/drapeaux/'|add:lang_code|add:'.png' as image_drapeau %}
+                                    <img src="{% static image_drapeau %}">
+                                {% endwith %}
+                            </button>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </form>
+        </div>
+    {% endif %}
+
 </body>
 
 </html>

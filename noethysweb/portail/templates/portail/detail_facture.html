@@ -1,3 +1,4 @@
+{% load i18n %}
 <style>
     #table-prestations td, #table-prestations th {
         vertical-align: middle;
@@ -8,11 +9,11 @@
 <table id="table-prestations" class="table table-bordered">
     <thead>
         <tr>
-            <th>Date</th>
-            <th>Individu</th>
-            <th>Activité</th>
-            <th>Intitulé</th>
-            <th>Montant</th>
+            <th>{% trans "Date" %}</th>
+            <th>{% trans "Individu" %}</th>
+            <th>{% trans "Activité" %}</th>
+            <th>{% trans "Intitulé" %}</th>
+            <th>{% trans "Montant" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -29,9 +30,9 @@
 </table>
 
 <ul>
-    <li>Total de la facture : <b>{{ facture.total|montant }}</b></li>
+    <li>{% blocktrans %}Total de la facture{% endblocktrans %} : <b>{{ facture.total|montant }}</b></li>
     {% if parametres_portail.facturation_afficher_solde_facture %}
-        <li>Total déjà réglé : <b>{{ facture.Get_regle_actuel|montant }}</b></li>
-        <li>Solde actuel : <b>{{ facture.solde_actuel|montant }}</b></li>
+        <li>{% blocktrans %}Total déjà réglé{% endblocktrans %} : <b>{{ facture.Get_regle_actuel|montant }}</b></li>
+        <li>{% blocktrans %}Solde actuel{% endblocktrans %} : <b>{{ facture.solde_actuel|montant }}</b></li>
     {% endif %}
 </ul>

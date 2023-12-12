@@ -1,4 +1,5 @@
 {% extends "portail/page.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -30,7 +31,7 @@
 
     {% if activites_ouvertes_inscription %}
         <p>
-            <a title="Cliquez ici pour inscrire un individu à une nouvelle activité" href="{% url 'portail_inscrire_activite' %}" class="btn btn-success mb-2" type="button"><i class="fa fa-plus margin-r-5"></i>Inscrire à une nouvelle activité</a>
+            <a title="{% trans "Cliquez ici pour inscrire un individu à une nouvelle activité" %}" href="{% url 'portail_inscrire_activite' %}" class="btn btn-success mb-2" type="button"><i class="fa fa-plus margin-r-5"></i>{% blocktrans %}Inscrire à une nouvelle activité{% endblocktrans %}</a>
         </p>
     {% endif %}
 
@@ -50,8 +51,8 @@
                     <table class="table table-bordered table-sm mb-0"  style="background-color: #FFFFFF;">
                         <thead>
                             <tr class="text-center">
-                                <th>Activité</th>
-                                <th>Groupe</th>
+                                <th>{% trans "Activité" %}</th>
+                                <th>{% trans "Groupe" %}</th>
                             </tr>
                         </thead>
                         <tbody>

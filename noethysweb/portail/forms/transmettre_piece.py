@@ -7,8 +7,9 @@ import datetime
 from django import forms
 from django.forms import ModelForm
 from django.core.validators import FileExtensionValidator
+from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, HTML, Fieldset
+from crispy_forms.layout import Layout, Hidden, HTML
 from crispy_forms.bootstrap import Field
 from core.models import Piece, Rattachement, Individu
 from core.utils.utils_commandes import Commandes
@@ -18,9 +19,9 @@ from individus.utils import utils_pieces_manquantes
 
 class Formulaire(FormulaireBase, ModelForm):
     # Type de pièce
-    selection_piece = forms.TypedChoiceField(label="Type de document", choices=[], required=True, help_text="Sélectionnez un type de document dans la liste. Sélectionnez 'Autre type' s'il ne s'agit pas d'un document prédéfini.")
-    choix_individu = forms.TypedChoiceField(label="Individu concerné", choices=[], required=False, help_text="Sélectionnez le nom de l'individu concerné ou la famille s'il s'agit d'un document qui concerne toute la famille.")
-    document = forms.FileField(label="Document", help_text="Sélectionnez un document à joindre (pdf, jpg ou png).", required=True, validators=[FileExtensionValidator(allowed_extensions=['pdf', 'png', 'jpg'])])
+    selection_piece = forms.TypedChoiceField(label=_("Type de document"), choices=[], required=True, help_text=_("Sélectionnez un type de document dans la liste. Sélectionnez 'Autre type' s'il ne s'agit pas d'un document prédéfini."))
+    choix_individu = forms.TypedChoiceField(label=_("Individu concerné"), choices=[], required=False, help_text=_("Sélectionnez le nom de l'individu concerné ou la famille s'il s'agit d'un document qui concerne toute la famille."))
+    document = forms.FileField(label=_("Document"), help_text=_("Sélectionnez un document à joindre (pdf, jpg ou png)."), required=True, validators=[FileExtensionValidator(allowed_extensions=['pdf', 'png', 'jpg'])])
 
     class Meta:
         model = Piece
@@ -29,11 +30,12 @@ class Formulaire(FormulaireBase, ModelForm):
             "observations": forms.Textarea(attrs={'rows': 3}),
         }
         labels = {
-            "titre": "Titre du document*",
+            "titre": _("Titre du document*"),
+            "observations": _("Observations"),
         }
         help_texts = {
-            "titre": "Saisissez un titre pour ce document. Ex : Certificat médical de Sophie...",
-            "observations": "Vous pouvez ajouter des observations si vous le souhaitez.",
+            "titre": _("Saisissez un titre pour ce document. Ex : Certificat médical de Sophie..."),
+            "observations": _("Vous pouvez ajouter des observations si vous le souhaitez."),
         }
 
     def __init__(self, *args, **kwargs):
@@ -70,7 +72,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Field('document'),
             Field('observations'),
             HTML(EXTRA_SCRIPT),
-            Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>Envoyer", annuler_url="{% url 'portail_documents' %}", ajouter=False, aide=False, css_class="pull-right"),
+            Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>%s" % _("Envoyer"), annuler_url="{% url 'portail_documents' %}", ajouter=False, aide=False, css_class="pull-right"),
         )
 
     def clean(self):

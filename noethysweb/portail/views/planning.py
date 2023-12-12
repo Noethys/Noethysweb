@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 from django.shortcuts import redirect
-from django.db.models import Q
+from django.utils.translation import gettext as _
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from core.models import Individu, Inscription, PortailPeriode, Vacance, Ferie, Activite, JOURS_COMPLETS_SEMAINE, AdresseMail, ModeleEmail, Mail, Destinataire
@@ -67,7 +67,7 @@ class View(CustomView, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
-        context['page_titre'] = "Planning"
+        context['page_titre'] = _("Planning")
         context['form_appliquer_semaine_type'] = form_appliquer_semaine_type
         context['jours_complets_semaine'] = JOURS_COMPLETS_SEMAINE
         context['data'] = self.Get_data_planning()

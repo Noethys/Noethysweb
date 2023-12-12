@@ -1,4 +1,5 @@
 {% extends "portail/fiche.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -20,9 +21,9 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr class="text-center">
-                                    <th>Type de vaccin</th>
-                                    <th>Date</th>
-                                    <th style="width: 90px;">Actions</th>
+                                    <th>{% blocktrans %}Type de vaccin{% endblocktrans %}</th>
+                                    <th>{% trans "Date" %}</th>
+                                    <th style="width: 90px;">{% trans "Actions" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -31,18 +32,18 @@
                                         <td>{{ vaccin.type_vaccin }}</td>
                                         <td>{{ vaccin.date|date:'d/m/Y' }}</td>
                                         <td>
-                                            <a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_individu_vaccinations_modifier' idrattachement=rattachement.pk idvaccin=vaccin.pk %}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
-                                            <a type="button" class="btn btn-danger btn-xs" href="{% url 'portail_individu_vaccinations_supprimer' idrattachement=rattachement.pk idvaccin=vaccin.pk %}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
+                                            <a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_individu_vaccinations_modifier' idrattachement=rattachement.pk idvaccin=vaccin.pk %}" title="{% trans "Modifier" %}"><i class="fa fa-fw fa-pencil"></i></a>
+                                            <a type="button" class="btn btn-danger btn-xs" href="{% url 'portail_individu_vaccinations_supprimer' idrattachement=rattachement.pk idvaccin=vaccin.pk %}" title="{% trans "Supprimer" %}"><i class="fa fa-fw fa-trash"></i></a>
                                         </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     {% else %}
-                        <b>Aucune vaccination enregistrée.</b>
+                        <b>{% blocktrans %}Aucune vaccination enregistrée.{% endblocktrans %}</b>
                     {% endif %}
                 </div>
-                <a class="btn btn-primary pull-right" href="{% url 'portail_individu_vaccinations_ajouter' idrattachement=rattachement.pk %}" title="Ajouter une vaccination"><i class="fa fa-plus margin-r-5"></i>Ajouter une vaccination</a>
+                <a class="btn btn-primary pull-right" href="{% url 'portail_individu_vaccinations_ajouter' idrattachement=rattachement.pk %}" title="{% trans "Ajouter une vaccination" %}"><i class="fa fa-plus margin-r-5"></i>{% blocktrans %}Ajouter une vaccination{% endblocktrans %}</a>
 
             {% endblock box_contenu %}
             {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}

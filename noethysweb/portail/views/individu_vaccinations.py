@@ -6,6 +6,7 @@
 import json
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 from django.contrib import messages
 from django.core.serializers.json import DjangoJSONEncoder
@@ -22,10 +23,10 @@ class Page(Onglet):
     url_ajouter = "portail_individu_vaccinations_ajouter"
     url_modifier = "portail_individu_vaccinations_modifier"
     url_supprimer = "portail_individu_vaccinations_supprimer"
-    description_liste = "Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle vaccination."
-    description_saisie = "Saisissez les informations concernant la vaccination et cliquez sur le bouton Enregistrer."
-    objet_singulier = "une vaccination"
-    objet_pluriel = "des vaccinations"
+    description_liste = _("Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle vaccination.")
+    description_saisie = _("Saisissez les informations concernant la vaccination et cliquez sur le bouton Enregistrer.")
+    objet_singulier = _("une vaccination")
+    objet_pluriel = _("des vaccinations")
     onglet_actif = "individu_vaccinations"
     categorie = "individu_vaccinations"
 
@@ -34,7 +35,7 @@ class Page(Onglet):
         context = super(Page, self).get_context_data(**kwargs)
         context['onglet_actif'] = self.onglet_actif
         if not self.get_dict_onglet_actif().validation_auto:
-            context['box_introduction'] = self.description_saisie + " Ces informations devront être validées par l'administrateur de l'application."
+            context['box_introduction'] = self.description_saisie + " " + _("Ces informations devront être validées par l'administrateur de l'application.")
         return context
 
     def get_object(self):
@@ -55,8 +56,8 @@ class Liste(Page, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
-        context['box_titre'] = "Vaccinations"
-        context['box_introduction'] = "Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle vaccination."
+        context['box_titre'] = _("Vaccinations")
+        context['box_introduction'] = _("Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle vaccination.")
         context['liste_vaccinations'] = Vaccin.objects.select_related("type_vaccin").filter(individu=self.get_rattachement().individu).order_by("date")
         context['vaccins_obligatoires'] = utils_vaccinations.Get_vaccins_obligatoires_individu(individu=self.get_rattachement().individu)
         return context
@@ -76,7 +77,7 @@ class Ajouter(Page, crud.Ajouter):
                                             nouvelle_valeur=json.dumps(str(instance), cls=DjangoJSONEncoder), idobjet=instance.pk)
 
         # Message de confirmation
-        messages.add_message(self.request, messages.SUCCESS, "Votre ajout a été enregistré")
+        messages.add_message(self.request, messages.SUCCESS, _("Votre ajout a été enregistré"))
 
         # Demande une nouvelle certification
         self.Demande_nouvelle_certification()

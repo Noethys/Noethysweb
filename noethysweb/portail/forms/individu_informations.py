@@ -5,10 +5,11 @@
 
 from django import forms
 from django.forms import ModelForm
+from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
-from core.models import Information, PortailRenseignement
+from crispy_forms.layout import Layout, Hidden, Fieldset
+from crispy_forms.bootstrap import Field
+from core.models import Information
 from core.utils.utils_commandes import Commandes
 from portail.forms.fiche import FormulaireBase
 
@@ -22,10 +23,10 @@ class Formulaire(FormulaireBase, ModelForm):
             'description': forms.Textarea(attrs={'rows': 4}),
         }
         help_texts = {
-            "categorie": "Sélectionnez une catégorie dans la liste proposée.",
-            "intitule": "Saisissez l'intitulé de l'information. Exemple : Allergie aux oeufs.",
-            "description": "Précisez si besoin une description détaillée.",
-            "document": "Vous pouvez ajouter un document si besoin (PDF ou image).",
+            "categorie": _("Sélectionnez une catégorie dans la liste proposée."),
+            "intitule": _("Saisissez l'intitulé de l'information. Exemple : Allergie aux oeufs."),
+            "description": _("Précisez si besoin une description détaillée."),
+            "document": _("Vous pouvez ajouter un document si besoin (PDF ou image)."),
         }
 
     def __init__(self, *args, **kwargs):
@@ -44,7 +45,7 @@ class Formulaire(FormulaireBase, ModelForm):
         # Affichage
         self.helper.layout = Layout(
             Hidden('individu', value=rattachement.individu_id),
-            Fieldset("Information",
+            Fieldset(_("Information"),
                 Field("categorie"),
                 Field("intitule"),
                 Field("description"),

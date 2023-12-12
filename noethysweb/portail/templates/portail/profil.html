@@ -1,4 +1,5 @@
 {% extends "portail/page.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -10,13 +11,13 @@
         {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
         {% block box_contenu %}
 
-            <dt>Nom d'utilisateur</dt>
+            <dt>{% blocktrans %}Nom d'utilisateur{% endblocktrans %}</dt>
             <dd>{% firstof request.user.famille %}</dd>
 
-            <dt>Dernière connexion</dt>
+            <dt>{% blocktrans %}Dernière connexion{% endblocktrans %}</dt>
             <dd>{{ request.user.last_login }}</dd>
 
-            <dt>Utilisateur depuis</dt>
+            <dt>{% blocktrans %}Utilisateur depuis{% endblocktrans %}</dt>
             <dd>{{ request.user.date_joined|date:"j F Y" }}</dd>
 
         {% endblock %}
@@ -24,9 +25,9 @@
 
     {% embed 'core/box.html' %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}Mot de passe{% endblock %}
+        {% block box_titre %}{% blocktrans %}Mot de passe{% endblocktrans %}{% endblock %}
         {% block box_contenu %}
-            <dd><a type='button' class='btn btn-primary' href="{% url 'portail_profil_password_change' %}"><i class="fa fa-pencil margin-r-5"></i>Modifier le mot de passe</a></dd>
+            <dd><a type='button' class='btn btn-primary' href="{% url 'portail_profil_password_change' %}"><i class="fa fa-pencil margin-r-5"></i>{% blocktrans %}Modifier le mot de passe{% endblocktrans %}</a></dd>
         {% endblock %}
     {% endembed %}
 

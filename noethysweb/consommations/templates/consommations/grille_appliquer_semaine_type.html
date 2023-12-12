@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -19,7 +20,7 @@
 {# Modal Appliquer une semaine type #}
 {% embed 'core/modal.html' with modal_footer=True %}
     {% block modal_id %}modal_appliquer_semaine_type{% endblock %}
-    {% block modal_titre %}Appliquer une semaine-type{% endblock %}
+    {% block modal_titre %}{% blocktrans %}Appliquer une semaine-type{% endblocktrans %}{% endblock %}
     {% block modal_classe %}{% if data.liste_unites_visibles|length > 2 %}modal-lg{% endif %}{% endblock %}
     {% block modal_body %}
         <div id="modal_erreurs" class="text-red"></div>
@@ -28,7 +29,7 @@
             {% crispy form_appliquer_semaine_type %}
 
             <!-- Tableau de la semaine-type -->
-            <label>Semaine-type</label>
+            <label>{% trans "Semaine-type" %}</label>
 
             <!-- Toutes les semaines -->
             <div id='tableau_semaine_type_0'>
@@ -60,10 +61,10 @@
                 <div class="nav-tabs-custom no-margin">
                     <ul class="nav nav-pills pb-1">
                         <li class="nav-item">
-                            <a id="tab_sem_4" class="nav-link active" href="#tab_4" data-toggle="tab" role="tab">Semaine paire</a>
+                            <a id="tab_sem_4" class="nav-link active" href="#tab_4" data-toggle="tab" role="tab">{% blocktrans %}Semaine paire{% endblocktrans %}</a>
                         </li>
                         <li class="nav-item">
-                            <a id="tab_sem_5" class="nav-link" href="#tab_5" data-toggle="tab" role="tab">Semaine impaire</a>
+                            <a id="tab_sem_5" class="nav-link" href="#tab_5" data-toggle="tab" role="tab">{% blocktrans %}Semaine impaire{% endblocktrans %}</a>
                         </li>
                     </ul>
                     <div class="tab-content no-padding">
@@ -80,8 +81,8 @@
         </form>
     {% endblock %}
     {% block modal_footer %}
-        <button type="button" class="btn btn-primary" id="bouton_valider_semaine_type"><i class="fa fa-check margin-r-5"></i>Valider</button>
-        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+        <button type="button" class="btn btn-primary" id="bouton_valider_semaine_type"><i class="fa fa-check margin-r-5"></i>{% trans "Valider" %}</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>{% trans "Annuler" %}</button>
     {% endblock %}
 {% endembed %}
 

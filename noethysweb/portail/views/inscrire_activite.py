@@ -6,6 +6,7 @@
 import logging, json, datetime
 logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
+from django.utils.translation import gettext as _
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse
 from django.template.context_processors import csrf
@@ -110,9 +111,9 @@ class Page(CustomView):
 
     def get_context_data(self, **kwargs):
         context = super(Page, self).get_context_data(**kwargs)
-        context['page_titre'] = "Inscrire à une nouvelle activité"
+        context['page_titre'] = _("Inscrire à une nouvelle activité")
         context['box_titre'] = None
-        context['box_introduction'] = "Renseignez les paramètres ci-dessous et cliquez sur le bouton Envoyer la demande d'inscription."
+        context['box_introduction'] = _("Renseignez les paramètres ci-dessous et cliquez sur le bouton Envoyer la demande d'inscription.")
         return context
 
     def get_success_url(self):
@@ -121,7 +122,7 @@ class Page(CustomView):
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
-    texte_confirmation = "La demande a bien été transmise"
+    texte_confirmation = _("La demande a bien été transmise")
     titre_historique = "Inscrire à une activité"
     template_name = "portail/edit.html"
 

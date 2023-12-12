@@ -3,8 +3,8 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django import forms
 from django.forms import ModelForm
+from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Fieldset
 from crispy_forms.bootstrap import Field
@@ -22,8 +22,8 @@ class Formulaire(FormulaireBase, ModelForm):
             'date': DatePickerWidget(),
         }
         help_texts = {
-            "type_vaccin": "Sélectionnez le type de vaccination dans la liste.",
-            "date": "Saisissez la date de la vaccination.",
+            "type_vaccin": _("Sélectionnez le type de vaccination dans la liste."),
+            "date": _("Saisissez la date de la vaccination."),
         }
 
     def __init__(self, *args, **kwargs):

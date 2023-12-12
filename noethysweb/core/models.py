@@ -12,6 +12,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser, UserManager
 from django_resized import ResizedImageField
 from django_cryptography.fields import encrypt
+from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 from core.data import data_civilites
 from core.data.data_modeles_impressions import CATEGORIES as CATEGORIES_MODELES_IMPRESSIONS
@@ -534,14 +535,14 @@ class Emetteur(models.Model):
 
 class Medecin(models.Model):
     idmedecin = models.AutoField(verbose_name="ID", db_column='IDmedecin', primary_key=True)
-    nom = models.CharField(verbose_name="Nom", max_length=200)
-    prenom = models.CharField(verbose_name="Prénom", max_length=200, blank=True, null=True)
-    rue_resid = models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True)
-    cp_resid = models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True)
-    ville_resid = models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True)
-    tel_cabinet = models.CharField(verbose_name="Téléphone fixe", max_length=200, blank=True, null=True)
-    tel_mobile = models.CharField(verbose_name="Téléphone mobile", max_length=200, blank=True, null=True)
-    memo = models.TextField(verbose_name="Mémo", blank=True, null=True)
+    nom = models.CharField(verbose_name=_("Nom"), max_length=200)
+    prenom = models.CharField(verbose_name=_("Prénom"), max_length=200, blank=True, null=True)
+    rue_resid = models.CharField(verbose_name=_("Rue"), max_length=200, blank=True, null=True)
+    cp_resid = models.CharField(verbose_name=_("Code postal"), max_length=50, blank=True, null=True)
+    ville_resid = models.CharField(verbose_name=_("Ville"), max_length=200, blank=True, null=True)
+    tel_cabinet = models.CharField(verbose_name=_("Téléphone fixe"), max_length=200, blank=True, null=True)
+    tel_mobile = models.CharField(verbose_name=_("Téléphone mobile"), max_length=200, blank=True, null=True)
+    memo = models.TextField(verbose_name=_("Mémo"), blank=True, null=True)
 
     class Meta:
         db_table = 'medecins'
@@ -1608,49 +1609,49 @@ class Remplissage(models.Model):
 
 class Individu(models.Model):
     idindividu = models.AutoField(verbose_name="ID", db_column='IDindividu', primary_key=True)
-    civilite = models.IntegerField(verbose_name="Civilité", db_column='IDcivilite', choices=data_civilites.GetListeCivilitesForModels(), default=1)
-    nom = models.CharField(verbose_name="Nom", max_length=200)
-    nom_jfille = models.CharField(verbose_name="Nom de naissance", max_length=200, blank=True, null=True)
-    prenom = models.CharField(verbose_name="Prénom", max_length=200, blank=True, null=True)
-    idnationalite = models.IntegerField(verbose_name="Nationalité", db_column='IDnationalite', blank=True, null=True)
-    date_naiss = encrypt(models.DateField(verbose_name="Date de naissance", blank=True, null=True))
-    idpays_naiss = models.IntegerField(verbose_name="Pays de naissance", db_column='IDpays_naiss', blank=True, null=True)
-    cp_naiss = encrypt(models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True))
-    ville_naiss = encrypt(models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True))
-    deces = models.BooleanField(verbose_name="Individu décédé", default=False)
-    annee_deces = models.IntegerField(verbose_name="Année de décès", blank=True, null=True)
-    adresse_auto = models.IntegerField(verbose_name="Adresse rattachée", blank=True, null=True)
-    rue_resid = encrypt(models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True))
-    cp_resid = encrypt(models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True))
-    ville_resid = encrypt(models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True))
-    secteur = models.ForeignKey(Secteur, verbose_name="Secteur", on_delete=models.PROTECT, blank=True, null=True)
-    categorie_travail = models.ForeignKey(CategorieTravail, verbose_name="Catégorie socio-professionnelle", on_delete=models.PROTECT, blank=True, null=True)
-    profession = encrypt(models.CharField(verbose_name="Profession", max_length=200, blank=True, null=True))
-    employeur = encrypt(models.CharField(verbose_name="Employeur", max_length=200, blank=True, null=True))
-    travail_tel = encrypt(models.CharField(verbose_name="Téléphone pro.", max_length=100, blank=True, null=True))
-    travail_fax = encrypt(models.CharField(verbose_name="Fax pro.", max_length=100, blank=True, null=True))
-    travail_mail = encrypt(models.EmailField(verbose_name="Email pro.", max_length=300, blank=True, null=True))
-    tel_domicile = encrypt(models.CharField(verbose_name="Tél domicile", max_length=100, blank=True, null=True))
-    tel_mobile = encrypt(models.CharField(verbose_name="Tél portable", max_length=100, blank=True, null=True))
-    tel_fax = encrypt(models.CharField(verbose_name="Fax personnel", max_length=100, blank=True, null=True))
-    mail = encrypt(models.EmailField(verbose_name="Email personnel", max_length=300, blank=True, null=True))
-    medecin = models.ForeignKey(Medecin, verbose_name="Médecin", on_delete=models.PROTECT, blank=True, null=True)
-    memo = models.TextField(verbose_name="Mémo", blank=True, null=True)
-    type_sieste = models.ForeignKey(TypeSieste, verbose_name="Sieste", on_delete=models.PROTECT, blank=True, null=True)
+    civilite = models.IntegerField(verbose_name=_("Civilité"), db_column='IDcivilite', choices=data_civilites.GetListeCivilitesForModels(), default=1)
+    nom = models.CharField(verbose_name=_("Nom"), max_length=200)
+    nom_jfille = models.CharField(verbose_name=_("Nom de naissance"), max_length=200, blank=True, null=True)
+    prenom = models.CharField(verbose_name=_("Prénom"), max_length=200, blank=True, null=True)
+    idnationalite = models.IntegerField(verbose_name=_("Nationalité"), db_column='IDnationalite', blank=True, null=True)
+    date_naiss = encrypt(models.DateField(verbose_name=_("Date de naissance"), blank=True, null=True))
+    idpays_naiss = models.IntegerField(verbose_name=_("Pays de naissance"), db_column='IDpays_naiss', blank=True, null=True)
+    cp_naiss = encrypt(models.CharField(verbose_name=_("Code postal"), max_length=50, blank=True, null=True))
+    ville_naiss = encrypt(models.CharField(verbose_name=_("Ville"), max_length=200, blank=True, null=True))
+    deces = models.BooleanField(verbose_name=_("Individu décédé"), default=False)
+    annee_deces = models.IntegerField(verbose_name=_("Année de décès"), blank=True, null=True)
+    adresse_auto = models.IntegerField(verbose_name=_("Adresse rattachée"), blank=True, null=True)
+    rue_resid = encrypt(models.CharField(verbose_name=_("Rue"), max_length=200, blank=True, null=True))
+    cp_resid = encrypt(models.CharField(verbose_name=_("Code postal"), max_length=50, blank=True, null=True))
+    ville_resid = encrypt(models.CharField(verbose_name=_("Ville"), max_length=200, blank=True, null=True))
+    secteur = models.ForeignKey(Secteur, verbose_name=_("Secteur"), on_delete=models.PROTECT, blank=True, null=True)
+    categorie_travail = models.ForeignKey(CategorieTravail, verbose_name=_("Catégorie socio-professionnelle"), on_delete=models.PROTECT, blank=True, null=True)
+    profession = encrypt(models.CharField(verbose_name=_("Profession"), max_length=200, blank=True, null=True))
+    employeur = encrypt(models.CharField(verbose_name=_("Employeur"), max_length=200, blank=True, null=True))
+    travail_tel = encrypt(models.CharField(verbose_name=_("Téléphone pro."), max_length=100, blank=True, null=True))
+    travail_fax = encrypt(models.CharField(verbose_name=_("Fax pro."), max_length=100, blank=True, null=True))
+    travail_mail = encrypt(models.EmailField(verbose_name=_("Email pro."), max_length=300, blank=True, null=True))
+    tel_domicile = encrypt(models.CharField(verbose_name=_("Tél domicile"), max_length=100, blank=True, null=True))
+    tel_mobile = encrypt(models.CharField(verbose_name=_("Tél portable"), max_length=100, blank=True, null=True))
+    tel_fax = encrypt(models.CharField(verbose_name=_("Fax personnel"), max_length=100, blank=True, null=True))
+    mail = encrypt(models.EmailField(verbose_name=_("Email personnel"), max_length=300, blank=True, null=True))
+    medecin = models.ForeignKey(Medecin, verbose_name=_("Médecin"), on_delete=models.PROTECT, blank=True, null=True)
+    memo = models.TextField(verbose_name=_("Mémo"), blank=True, null=True)
+    type_sieste = models.ForeignKey(TypeSieste, verbose_name=_("Sieste"), on_delete=models.PROTECT, blank=True, null=True)
     date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
     travail_tel_sms = models.BooleanField(verbose_name="Autoriser l'envoi de SMS vers le téléphone pro.", default=False)
     tel_domicile_sms = models.BooleanField(verbose_name="Autoriser l'envoi de SMS vers le téléphone du domicile", default=False)
     tel_mobile_sms = models.BooleanField(verbose_name="Autoriser l'envoi de SMS vers le téléphone portable", default=False)
     etat = models.CharField(verbose_name="Etat", max_length=50, blank=True, null=True)
-    photo = models.ImageField(verbose_name="Photo", upload_to=get_uuid_path, blank=True, null=True)
+    photo = models.ImageField(verbose_name=_("Photo"), upload_to=get_uuid_path, blank=True, null=True)
     listes_diffusion = models.ManyToManyField(ListeDiffusion, blank=True, related_name="individu_listes_diffusion")
-    regimes_alimentaires = models.ManyToManyField(RegimeAlimentaire, verbose_name="Régimes alimentaires", related_name="individu_regimes_alimentaires", blank=True)
-    maladies = models.ManyToManyField(TypeMaladie, verbose_name="Maladies contractées", related_name="individu_maladies", blank=True)
+    regimes_alimentaires = models.ManyToManyField(RegimeAlimentaire, verbose_name=_("Régimes alimentaires"), related_name="individu_regimes_alimentaires", blank=True)
+    maladies = models.ManyToManyField(TypeMaladie, verbose_name=_("Maladies contractées"), related_name="individu_maladies", blank=True)
     situation_familiale_choix = [(1, "Célibataires"), (2, "Mariés"), (3, "Divorcés"), (4, "Veuf(ve)"), (5, "En concubinage"), (6, "Séparés"), (7, "Pacsés"), (8, "En union libre"), (9, "Autre")]
-    situation_familiale = models.IntegerField(verbose_name="Situation des parents", choices=situation_familiale_choix, blank=True, null=True)
+    situation_familiale = models.IntegerField(verbose_name=_("Situation des parents"), choices=situation_familiale_choix, blank=True, null=True)
     type_garde_choix = [(1, "Mère"), (2, "Père"), (3, "Garde alternée"), (4, "Autre personne")]
-    type_garde = models.IntegerField(verbose_name="Type de garde", choices=type_garde_choix, blank=True, null=True)
-    info_garde = models.TextField(verbose_name="Information sur la garde", blank=True, null=True)
+    type_garde = models.IntegerField(verbose_name=_("Type de garde"), choices=type_garde_choix, blank=True, null=True)
+    info_garde = models.TextField(verbose_name=_("Information sur la garde"), blank=True, null=True)
 
     class Meta:
         db_table = 'individus'
@@ -1967,11 +1968,11 @@ class Inscription(models.Model):
 class Information(models.Model):
     idinformation = models.AutoField(verbose_name="ID", db_column='IDinformation', primary_key=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE)
-    categorie = models.ForeignKey(CategorieInformation, verbose_name="Catégorie", on_delete=models.PROTECT)
-    intitule = encrypt(models.CharField(verbose_name="Intitulé", max_length=200))
-    date_debut = models.DateField(verbose_name="Date de début", blank=True, null=True)
-    date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
-    description = encrypt(models.TextField(verbose_name="Description", blank=True, null=True))
+    categorie = models.ForeignKey(CategorieInformation, verbose_name=_("Catégorie"), on_delete=models.PROTECT)
+    intitule = encrypt(models.CharField(verbose_name=_("Intitulé"), max_length=200))
+    date_debut = models.DateField(verbose_name=_("Date de début"), blank=True, null=True)
+    date_fin = models.DateField(verbose_name=_("Date de fin"), blank=True, null=True)
+    description = encrypt(models.TextField(verbose_name=_("Description"), blank=True, null=True))
     traitement_medical = models.BooleanField(verbose_name="Traitement médical", default=False)
     description_traitement = encrypt(models.TextField(verbose_name="Traitement", blank=True, null=True))
     date_debut_traitement = models.DateField(verbose_name="Date de début du traitement", blank=True, null=True)
@@ -1982,7 +1983,7 @@ class Information(models.Model):
     diffusion_listing_enfants = models.BooleanField(verbose_name="Afficher sur la liste des informations personnelles", default=False)
     diffusion_listing_conso = models.BooleanField(verbose_name="Afficher sur la liste des consommations", default=False)
     diffusion_listing_repas = models.BooleanField(verbose_name="Afficher sur la commande des repas", default=False)
-    document = models.FileField(verbose_name="Document", storage=get_storage("probleme"), upload_to=get_uuid_path, blank=True, null=True, help_text="Vous pouvez ajouter un document.")
+    document = models.FileField(verbose_name=_("Document"), storage=get_storage("probleme"), upload_to=get_uuid_path, blank=True, null=True, help_text="Vous pouvez ajouter un document.")
 
     class Meta:
         db_table = 'informations'
@@ -1999,8 +2000,8 @@ class Information(models.Model):
 class Vaccin(models.Model):
     idvaccin = models.AutoField(verbose_name="ID", db_column='IDvaccin', primary_key=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE)
-    type_vaccin = models.ForeignKey(TypeVaccin, verbose_name="Type de vaccin", on_delete=models.PROTECT)
-    date = models.DateField(verbose_name="Date de vaccination")
+    type_vaccin = models.ForeignKey(TypeVaccin, verbose_name=_("Type de vaccin"), on_delete=models.PROTECT)
+    date = models.DateField(verbose_name=_("Date de vaccination"))
 
     class Meta:
         db_table = 'vaccins'
@@ -3118,19 +3119,19 @@ class PortailMessage(models.Model):
 
 class ContactUrgence(models.Model):
     idcontact = models.AutoField(verbose_name="ID", db_column='IDcontact', primary_key=True)
-    nom = models.CharField(verbose_name="Nom", max_length=200)
-    prenom = models.CharField(verbose_name="Prénom", max_length=200)
-    rue_resid = encrypt(models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True))
-    cp_resid = encrypt(models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True))
-    ville_resid = encrypt(models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True))
-    tel_domicile = encrypt(models.CharField(verbose_name="Tél domicile", max_length=100, blank=True, null=True))
-    tel_mobile = encrypt(models.CharField(verbose_name="Tél portable", max_length=100, blank=True, null=True))
-    tel_travail = encrypt(models.CharField(verbose_name="Tél travail", max_length=100, blank=True, null=True))
-    mail = encrypt(models.EmailField(verbose_name="Email", max_length=300, blank=True, null=True))
-    observations = encrypt(models.TextField(verbose_name="Observations", blank=True, null=True))
-    lien = encrypt(models.CharField(verbose_name="Lien avec l'individu", max_length=200))
-    autorisation_sortie = models.BooleanField(verbose_name="Autorisé à récupérer l'individu", default=True)
-    autorisation_appel = models.BooleanField(verbose_name="A contacter en cas d'urgence", default=True)
+    nom = models.CharField(verbose_name=_("Nom"), max_length=200)
+    prenom = models.CharField(verbose_name=_("Prénom"), max_length=200)
+    rue_resid = encrypt(models.CharField(verbose_name=_("Rue"), max_length=200, blank=True, null=True))
+    cp_resid = encrypt(models.CharField(verbose_name=_("Code postal"), max_length=50, blank=True, null=True))
+    ville_resid = encrypt(models.CharField(verbose_name=_("Ville"), max_length=200, blank=True, null=True))
+    tel_domicile = encrypt(models.CharField(verbose_name=_("Tél domicile"), max_length=100, blank=True, null=True))
+    tel_mobile = encrypt(models.CharField(verbose_name=_("Tél portable"), max_length=100, blank=True, null=True))
+    tel_travail = encrypt(models.CharField(verbose_name=_("Tél travail"), max_length=100, blank=True, null=True))
+    mail = encrypt(models.EmailField(verbose_name=_("Email"), max_length=300, blank=True, null=True))
+    observations = encrypt(models.TextField(verbose_name=_("Observations"), blank=True, null=True))
+    lien = encrypt(models.CharField(verbose_name=_("Lien avec l'individu"), max_length=200))
+    autorisation_sortie = models.BooleanField(verbose_name=_("Autorisé à récupérer l'individu"), default=True)
+    autorisation_appel = models.BooleanField(verbose_name=_("A contacter en cas d'urgence"), default=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE)
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE)
 
@@ -3161,11 +3162,11 @@ class Assurance(models.Model):
     idassurance = models.AutoField(verbose_name="ID", db_column='IDassurance', primary_key=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.PROTECT)
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
-    assureur = models.ForeignKey(Assureur, verbose_name="Assureur", on_delete=models.PROTECT)
-    num_contrat = encrypt(models.CharField(verbose_name="N° de contrat", max_length=200))
-    date_debut = models.DateField(verbose_name="Date de début")
-    date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
-    document = models.FileField(verbose_name="Document", storage=get_storage("assurance"), upload_to=get_uuid_path, blank=True, null=True, help_text="Vous pouvez ajouter un document (PDF ou image).")
+    assureur = models.ForeignKey(Assureur, verbose_name=_("Assureur"), on_delete=models.PROTECT)
+    num_contrat = encrypt(models.CharField(verbose_name=_("N° de contrat"), max_length=200))
+    date_debut = models.DateField(verbose_name=_("Date de début"))
+    date_fin = models.DateField(verbose_name=_("Date de fin"), blank=True, null=True)
+    document = models.FileField(verbose_name=_("Document"), storage=get_storage("assurance"), upload_to=get_uuid_path, blank=True, null=True, help_text="Vous pouvez ajouter un document (PDF ou image).")
 
     class Meta:
         db_table = 'assurances'

@@ -1,4 +1,5 @@
 {% extends "portail/page.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -18,14 +19,14 @@
 
     {# Lien de retour vers la page contact #}
 	<div class="d-print-none" style="margin-bottom: 10px;">
-        <a href="{% url 'portail_contact' %}"><i class="fa fa-arrow-circle-o-left"></i> Revenir à la page contact</a>
+        <a href="{% url 'portail_contact' %}"><i class="fa fa-arrow-circle-o-left"></i> {% blocktrans %}Revenir à la page contact{% endblocktrans %}</a>
 	</div>
 
     {# Messagerie #}
     {% embed 'core/box.html' with box_titre=True box_conclusion=True %}
         {% block box_theme %}card-outline card-lightblue direct-chat direct-chat-primary{% endblock %}
         {% block box_titre %}
-            Discussion avec '{{ structure }}'
+            {% blocktrans %}Discussion avec{% endblocktrans %} '{{ structure }}'
             {% if liste_messages_non_lus %}
                 <span class="badge bg-danger"><i class="fa fa-envelope margin-r-5"></i>{{ liste_messages_non_lus|length }} nouveau{{ liste_messages_non_lus|length|pluralize:"x" }} message{{ liste_messages_non_lus|length|pluralize }}</span>
             {% endif %}
@@ -34,7 +35,7 @@
 
             {% if not liste_messages %}
                 <div style="padding:20px;">
-                    Aucun message récent.
+                    {% blocktrans %}Aucun message récent.{% endblocktrans %}
                 </div>
             {% else %}
                 <div id="div_messages" class="direct-chat-messages" style="height: 300px; padding: 20px;">
@@ -47,7 +48,7 @@
                                 <div class="direct-chat-infos clearfix">
                                     <span class="direct-chat-name float-right">{% firstof message.utilisateur.get_full_name message.utilisateur message.utilisateur.get_short_name %}</span>
                                     <span class="direct-chat-timestamp float-left">{{ message.date_creation|date:"l j F Y H:i" }}</span>
-                                    {% if message in liste_messages_non_lus %}<span class="badge bg-danger ml-md-2">Nouveau</span>{% endif %}
+                                    {% if message in liste_messages_non_lus %}<span class="badge bg-danger ml-md-2">{% trans "Nouveau" %}</span>{% endif %}
                                 </div>
                                 <img class="direct-chat-img" src="{% static "images/user.png" %}">
                                 <div class="direct-chat-text">

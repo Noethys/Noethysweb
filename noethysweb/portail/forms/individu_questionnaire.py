@@ -3,14 +3,15 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
 from django import forms
+from django.utils.translation import gettext as _
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
+from crispy_forms.layout import Layout, HTML, ButtonHolder
 from crispy_forms.bootstrap import Field, StrictButton
-from core.models import Individu, QuestionnaireQuestion, QuestionnaireReponse, PortailRenseignement
+from core.models import QuestionnaireQuestion, QuestionnaireReponse, PortailRenseignement
 from parametrage.forms import questionnaires
 from portail.forms.fiche import FormulaireBase
-import json
 
 
 class Formulaire(FormulaireBase, forms.Form):
@@ -23,11 +24,6 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper = FormHelper()
         self.helper.form_id = 'individu_questionnaire_form'
         self.helper.form_method = 'post'
-
-        # self.helper.form_class = 'form-horizontal'
-        # self.helper.label_class = 'col-md-2'
-        # self.helper.field_class = 'col-md-10'
-        # self.helper.use_custom_control = False
 
         # Importation des renseignements en attente de validation
         renseignements = PortailRenseignement.objects.filter(categorie="individu_questionnaire", famille=rattachement.famille, individu=rattachement.individu, etat="ATTENTE", validation_auto=False).order_by("date")
@@ -55,21 +51,20 @@ class Formulaire(FormulaireBase, forms.Form):
             # Intégration des valeurs en attente de validation par l'admin
             if code in dict_renseignements and self.fields[code].initial != dict_renseignements[code]:
                 self.fields[code].initial = dict_renseignements[code]
-                self.fields[code].help_text = "<span class='text-orange'><i class='fa fa-exclamation-circle margin-r-5'></i>Modification en attente de validation par l'administrateur.</span>"
+                self.fields[code].help_text = "<span class='text-orange'><i class='fa fa-exclamation-circle margin-r-5'></i>%s</span>" % _("Modification en attente de validation par l'administrateur.")
             self.helper.layout.append(Field(code, css_class="text-orange" if code in dict_renseignements else None))
 
         if not self.fields:
             # Si aucun questionnaire paramétré
-            self.helper.layout.append(HTML("<strong>Aucun questionnaire n'a été paramétré.</strong>"))
+            self.helper.layout.append(HTML("<strong>%s</strong>" % _("Aucun questionnaire n'a été paramétré.")))
         else:
             # Ajout des commandes
             if mode == "CONSULTATION":
-                self.helper.layout.append(ButtonHolder(HTML("""<a class="btn btn-primary" href="{% url 'portail_individu_questionnaire_modifier' idrattachement=rattachement.pk %}" title="Modifier"><i class="fa fa-pencil margin-r-5"></i>Modifier cette page</a>"""), css_class="pull-right"))
+                self.helper.layout.append(ButtonHolder(HTML("""<a class="btn btn-primary" href="{{% url 'portail_individu_questionnaire_modifier' idrattachement=rattachement.pk %}}" title="{title}"><i class="fa fa-pencil margin-r-5"></i>{label}</a>""".format(title=_("Modifier"), label=_("Modifier cette page"))), css_class="pull-right"))
             if mode == "EDITION":
                 self.helper.layout.append(ButtonHolder(
-                        StrictButton("<i class='fa fa-check margin-r-5'></i>Enregistrer les modifications", title="Enregistrer", name="enregistrer", type="submit", css_class="btn-primary"),
-                        HTML("""<a class="btn btn-danger" href='{% url 'portail_individu_questionnaire' idrattachement=rattachement.pk %}' title="Annuler"><i class="fa fa-ban margin-r-5"></i>Annuler</a>"""),
-                        css_class="pull-right"))
+                        StrictButton("<i class='fa fa-check margin-r-5'></i>%s" % _("Enregistrer les modifications"), title=_("Enregistrer"), name="enregistrer", type="submit", css_class="btn-primary"),
+                        HTML("""<a class="btn btn-danger" href='{{% url 'portail_individu_questionnaire' idrattachement=rattachement.pk %}}' title="{title}"><i class="fa fa-ban margin-r-5"></i>{label}</a>""".format(title=_("Annuler"), label=_("Annuler"))), css_class="pull-right"))
 
     def clean(self):
         for key, valeur in self.cleaned_data.items():

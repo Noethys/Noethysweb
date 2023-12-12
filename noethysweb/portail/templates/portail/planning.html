@@ -1,4 +1,5 @@
 {% extends "portail/page.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -47,7 +48,7 @@
 
     {# Lien de retour vers liste des périodes #}
 	<div class="d-print-none" style="margin-bottom: 10px;">
-        <a id="retour_reservations" href="{% url 'portail_reservations' %}"><i class="fa fa-arrow-circle-o-left"></i> Revenir à la liste des périodes</a>
+        <a id="retour_reservations" href="{% url 'portail_reservations' %}"><i class="fa fa-arrow-circle-o-left"></i> {% blocktrans %}Revenir à la liste des périodes{% endblocktrans %}</a>
 	</div>
 
     {# Entête de l'individu #}
@@ -62,20 +63,20 @@
             <div class="row">
                 <div class="col-sm-4 border-right">
                     <div class="description-block">
-                        <h5 class="description-header"><small>Activité</small></h5>
+                        <h5 class="description-header"><small>{% trans "Activité" %}</small></h5>
                         <span class="description-text text-lightblue">{{ data.periode_reservation.activite.nom }}</span>
                     </div>
                 </div>
                 <div class="col-sm-4 border-right">
                     <div class="description-block">
-                        <h5 class="description-header"><small>Période</small></h5>
+                        <h5 class="description-header"><small>{% trans "Période" %}</small></h5>
                         <span class="description-text text-lightblue">{{ data.periode_reservation.nom }}</span>
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="description-block">
-                        <h5 class="description-header"><small>Dates</small></h5>
-                        <span class="description-text text-lightblue">Du {{ data.periode_reservation.date_debut|date:"d/m/Y" }} au {{ data.periode_reservation.date_fin|date:"d/m/Y" }}</span>
+                        <h5 class="description-header"><small>{% trans "Dates" %}</small></h5>
+                        <span class="description-text text-lightblue">{% trans "Du" %} {{ data.periode_reservation.date_debut|date:"d/m/Y" }} {% trans "au" %} {{ data.periode_reservation.date_fin|date:"d/m/Y" }}</span>
                     </div>
                 </div>
             </div>
@@ -104,13 +105,13 @@
                     {# Légende de la grille #}
                     <div class="legende_grille"><small>
                         <ul class="list-unstyled">
-                            <li><i class="fa fa-square margin-r-5" style="color: #FF9E1E;"></i>Réservation</li>
-                            <li><i class="fa fa-square margin-r-5" style="color: #abcbff;"></i>Attente</li>
-                            <li><i class="fa fa-square margin-r-5" style="color: rgba(227, 254, 219, 0.73);"></i>Disponible</li>
-                            <li><i class="fa fa-square margin-r-5" style="color: #FEFCDB;"></i>Dernières places</li>
-                            <li><i class="fa fa-square margin-r-5" style="color: rgba(247, 172, 178, 0.36);"></i>Complet</li>
-                            <li><i class="fa fa-check-circle-o text-green margin-r-5"></i>Présent</li>
-                            <li><i class="fa fa-lock text-red margin-r-5"></i>Non modifiable</li>
+                            <li><i class="fa fa-square margin-r-5" style="color: #FF9E1E;"></i>{% trans "Réservation" %}</li>
+                            <li><i class="fa fa-square margin-r-5" style="color: #abcbff;"></i>{% trans "Attente" %}</li>
+                            <li><i class="fa fa-square margin-r-5" style="color: rgba(227, 254, 219, 0.73);"></i>{% trans "Disponible" %}</li>
+                            <li><i class="fa fa-square margin-r-5" style="color: #FEFCDB;"></i>{% blocktrans %}Dernières places{% endblocktrans %}</li>
+                            <li><i class="fa fa-square margin-r-5" style="color: rgba(247, 172, 178, 0.36);"></i>{% trans "Complet" %}</li>
+                            <li><i class="fa fa-check-circle-o text-green margin-r-5"></i>{% trans "Présent" %}</li>
+                            <li><i class="fa fa-lock text-red margin-r-5"></i>{% blocktrans %}Non modifiable{% endblocktrans %}</li>
                         </ul>
                     </small></div>
 

@@ -32,6 +32,11 @@ urlpatterns = [
     path('deblocage/<str:code>', erreurs.deblocage, name="deblocage"),
 ]
 
+# URL pour le sélecteur de traduction
+urlpatterns += [
+    path("i18n/", include("django.conf.urls.i18n"))
+]
+
 # Intégration des plugins
 for nom_plugin in settings.PLUGINS:
     urlpatterns.append(path(settings.URL_BUREAU, include("plugins.%s.urls" % nom_plugin)))

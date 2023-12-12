@@ -1,4 +1,5 @@
 {% extends "portail/page.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -20,7 +21,7 @@
 
     {# Lien de retour vers la page des renseignements #}
 	<div class="d-print-none" style="margin-bottom: 10px;">
-        <a id="retour_renseignements" href="{% url 'portail_renseignements' %}"><i class="fa fa-arrow-circle-o-left"></i> Revenir à la page des renseignements</a>
+        <a id="retour_renseignements" href="{% url 'portail_renseignements' %}"><i class="fa fa-arrow-circle-o-left"></i> {% blocktrans %}Revenir à la page des renseignements{% endblocktrans %}</a>
 	</div>
 
     <div class="row">
@@ -32,7 +33,7 @@
                     <div class="text-center">
                         <img class="img-fluid img-circle elevation-2" src="{% if rattachement %}{{ rattachement.individu.Get_photo }}{% else %}{% static 'images/personne.png' %}{% endif %}" style="max-height: 80px">
                     </div>
-                    <h3 class="profile-username text-center">{% if rattachement %}{{ rattachement.individu.Get_nom }}{% else %}Famille de {{ famille }}{% endif %}</h3>
+                    <h3 class="profile-username text-center">{% if rattachement %}{{ rattachement.individu.Get_nom }}{% else %}{% blocktrans %}Famille de{% endblocktrans %} {{ famille }}{% endif %}</h3>
 {#                    <p class="text-muted text-center">{{ rattachement.get_categorie_display }}</p>#}
                 </div>
 

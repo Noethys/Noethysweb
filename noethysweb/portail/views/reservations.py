@@ -7,6 +7,7 @@ import logging, datetime
 logger = logging.getLogger(__name__)
 from django.db.models import Q
 from django.views.generic import TemplateView
+from django.utils.translation import gettext as _
 from core.models import Inscription, PortailPeriode
 from portail.views.base import CustomView
 from portail.utils import utils_approbations
@@ -18,7 +19,7 @@ class View(CustomView, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
-        context['page_titre'] = "Réservations"
+        context['page_titre'] = _("Réservations")
 
         # Vérifie que la famille est autorisée à faire des réservations
         if not self.request.user.famille.internet_reservations:

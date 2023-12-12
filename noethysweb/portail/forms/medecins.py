@@ -5,6 +5,7 @@
 
 from django import forms
 from django.forms import ModelForm
+from django.utils.translation import gettext as _
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Div, ButtonHolder
@@ -44,8 +45,8 @@ class Formulaire(FormulaireBase, ModelForm):
             Field('tel_cabinet'),
             ButtonHolder(
                 Div(
-                    HTML("""<button type="button" class="btn btn-primary" id="id_medecin_bouton_valider" title="Valider"><i class="fa fa-check margin-r-5"></i>Valider</button>"""),
-                    HTML("""<button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>"""),
+                    HTML("""<button type="button" class="btn btn-primary" id="id_medecin_bouton_valider" title="{label}"><i class="fa fa-check margin-r-5"></i>{label}</button>""".format(label=_("Valider"))),
+                    HTML("""<button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>{label}</button>""".format(label=_("Annuler"))),
                     css_class="modal-footer", style="padding-bottom:0px;padding-right:0px;"
                 ),
             ),

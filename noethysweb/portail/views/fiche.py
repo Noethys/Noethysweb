@@ -5,6 +5,7 @@
 
 import logging, json
 logger = logging.getLogger(__name__)
+from django.utils.translation import gettext as _
 from django.db import models
 from django.db.models.query import QuerySet
 from django.core.serializers.json import DjangoJSONEncoder
@@ -28,11 +29,11 @@ class Onglet(CustomView):
     def get_context_data(self, **kwargs):
         context = super(Onglet, self).get_context_data(**kwargs)
         if self.onglet_actif.startswith("individu_"):
-            context['page_titre'] = "Fiche individuelle"
+            context['page_titre'] = _("Fiche individuelle")
             context['rattachement'] = self.get_rattachement()
             context['liste_onglets'] = utils_onglets.Get_onglets(categorie=self.get_categorie_rattachement())
         else:
-            context['page_titre'] = "Fiche famille"
+            context['page_titre'] = _("Fiche famille")
             context['liste_onglets'] = utils_onglets.Get_onglets(categorie="famille")
         return context
 
@@ -118,9 +119,9 @@ class Onglet(CustomView):
     def form_valid(self, form):
         """ Enregistrement des modifications """
         if not form.changed_data:
-            messages.add_message(self.request, messages.INFO, "Aucune modification n'a été enregistrée")
+            messages.add_message(self.request, messages.INFO, _("Aucune modification n'a été enregistrée"))
         else:
-            texte_message = "Votre ajout a été enregistré" if self.verbe_action == "Ajouter" else "Votre modification a été enregistrée"
+            texte_message = _("Votre ajout a été enregistré") if self.verbe_action == "Ajouter" else _("Votre modification a été enregistrée")
             validation_auto = self.get_dict_onglet_actif().validation_auto
 
             # Enregistrement des valeurs si validation auto
@@ -129,7 +130,7 @@ class Onglet(CustomView):
                 idobjet = instance.pk if instance else None
             else:
                 idobjet = None
-                texte_message += " et transmis à l'administrateur" if self.verbe_action == "Ajouter" else " et transmise à l'administrateur"
+                texte_message += _(" et transmis à l'administrateur") if self.verbe_action == "Ajouter" else _(" et transmise à l'administrateur")
 
             # Mémorisation du renseignement
             for code in form.changed_data:

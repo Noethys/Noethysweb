@@ -7,6 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 from portail.views.base import CustomView
 from django.views.generic import TemplateView
+from django.utils.translation import gettext as _
 from individus.utils import utils_pieces_manquantes
 from portail.utils import utils_approbations
 from core.models import PortailDocument
@@ -19,7 +20,7 @@ class View(CustomView, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
-        context['page_titre'] = "Documents"
+        context['page_titre'] = _("Documents")
 
         # Pièces à fournir
         context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(famille=self.request.user.famille)

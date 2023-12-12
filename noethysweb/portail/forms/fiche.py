@@ -3,14 +3,12 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django import forms
-from django.forms import ModelForm, ValidationError
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
-from core.models import Individu, PortailRenseignement
-from portail.utils import utils_champs
 import json
+from django.utils.translation import gettext as _
+from crispy_forms.layout import Layout, HTML, Fieldset, ButtonHolder
+from crispy_forms.bootstrap import Field, StrictButton
+from core.models import PortailRenseignement
+from portail.utils import utils_champs
 
 
 class FormulaireBase():
@@ -58,13 +56,13 @@ class FormulaireBase():
                     # Recherche si une valeur existe déjà dans les renseignements modifiés
                     if code in dict_renseignements:# and self.initial.get(code, None) != dict_renseignements.get(code, None): Ne fonctionne pas sur la page famille_caisse !
                         self.initial[code] = dict_renseignements[code]
-                        self.fields[code].help_text = "<span class='text-orange'><i class='fa fa-exclamation-circle margin-r-5'></i>Modification en attente de validation par l'administrateur.</span>"
+                        self.fields[code].help_text = "<span class='text-orange'><i class='fa fa-exclamation-circle margin-r-5'></i>%s</span>" % _("Modification en attente de validation par l'administrateur.")
 
                     # Si champ en lecture seule
                     if dict_champs[code] == "AFFICHER":
                         self.fields[code].disabled = True
                         if self.mode == "EDITION":
-                            self.fields[code].help_text = "Ce champ n'est pas modifiable."
+                            self.fields[code].help_text = _("Ce champ n'est pas modifiable.")
 
                     # Génération du field
                     champs.append(Field(code, css_class="text-orange" if code in dict_renseignements else None))
@@ -83,9 +81,13 @@ class FormulaireBase():
         else:
             texte_kwargs = ""
         if self.mode == "CONSULTATION":
-            self.helper.layout.append(ButtonHolder(HTML("""<a class="btn btn-primary" href="{% url 'portail_""" + self.nom_page + """_modifier' """ + texte_kwargs + """ %}" title="Modifier"><i class="fa fa-pencil margin-r-5"></i>Modifier cette page</a>"""), css_class="pull-right"))
+            self.helper.layout.append(ButtonHolder(HTML("""<a class="btn btn-primary" href="{{% url 'portail_{nom_page}_modifier' {texte_kwargs} %}}" title="{title}"><i class="fa fa-pencil margin-r-5"></i>{label}</a>""".format(
+                nom_page=self.nom_page, texte_kwargs=texte_kwargs, title=_("Modifier"), label=_("Modifier cette page"))
+            ), css_class="pull-right"))
+
         if self.mode == "EDITION":
             self.helper.layout.append(ButtonHolder(
-                    StrictButton("<i class='fa fa-check margin-r-5'></i>Enregistrer les modifications", title="Enregistrer", name="enregistrer", type="submit", css_class="btn-primary"),
-                    HTML("""<a class="btn btn-danger" href='{% url 'portail_""" + self.nom_page + """' """ + texte_kwargs + """ %}' title="Annuler"><i class="fa fa-ban margin-r-5"></i>Annuler</a>"""),
-                    css_class="pull-right"))
+                    StrictButton("<i class='fa fa-check margin-r-5'></i>%s" % _("Enregistrer les modifications"), title=_("Enregistrer"), name="enregistrer", type="submit", css_class="btn-primary"),
+                    HTML("""<a class="btn btn-danger" href='{{% url 'portail_{nom_page}' {texte_kwargs} %}}' title="{title}"><i class="fa fa-ban margin-r-5"></i>{label}</a>""".format(
+                        nom_page=self.nom_page, texte_kwargs=texte_kwargs, title=_("Annuler"), label=_("Annuler"))
+                    ), css_class="pull-right"))

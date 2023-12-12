@@ -1,4 +1,5 @@
 {% extends "portail/page.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
@@ -20,13 +21,13 @@
 
     {# Texte bienvenue #}
     {% if parametres_portail.accueil_texte_bienvenue or parametres_portail.accueil_url_video %}
-        <h5 class="mb-2 text-secondary">Bienvenue</h5>
+        <h5 class="mb-2 text-secondary">{% trans "Bienvenue" %}</h5>
         <div class="card mb-4">
             <div class="card-body p-3">
                 {{ parametres_portail.accueil_texte_bienvenue|safe }}
                 {% if parametres_portail.accueil_url_video %}
                     {% if parametres_portail.accueil_texte_bienvenue %}<p></p>{% endif %}
-                    <a href="#" class="video-btn btn btn-outline-primary btn-sm" data-src="{{ parametres_portail.accueil_url_video }}" data-toggle="modal" data-target="#modal_video" title="Cliquez ici pour lancer la vidéo"><i class='fa fa-film margin-r-5'></i>{{ parametres_portail.accueil_titre_video }}</a>
+                    <a href="#" class="video-btn btn btn-outline-primary btn-sm" data-src="{{ parametres_portail.accueil_url_video }}" data-toggle="modal" data-target="#modal_video" title="{% trans "Cliquez ici pour lancer la vidéo" %}"><i class='fa fa-film margin-r-5'></i>{{ parametres_portail.accueil_titre_video }}</a>
                     {% embed 'core/accueil/video.html' %}{% endembed %}
                 {% endif %}
             </div>
@@ -36,7 +37,7 @@
 
     {# En attente #}
     {% if nbre_approbations_requises or nbre_messages_non_lus or nbre_pieces_manquantes %}
-        <h5 class="mb-2 text-secondary">En attente</h5>
+        <h5 class="mb-2 text-secondary">{% blocktrans %}En attente{% endblocktrans %}</h5>
         <div class="row mb-2">
 
             {# Messages #}
@@ -45,10 +46,12 @@
                     <div class="small-box bg-success">
                         <div class="inner">
                             <h3>{{ nbre_messages_non_lus }}</h3>
-                            <p>Nouveau{{ nbre_messages_non_lus|pluralize:"x" }} message{{ nbre_messages_non_lus|pluralize }}</p>
+                            <p>
+                                {% blocktranslate count counter=nbre_messages_non_lus %}Nouveau message{% plural %}Nouveaux messages{% endblocktranslate %}
+                            </p>
                         </div>
                         <div class="icon"><i class="fa fa-comments"></i></div>
-                        <a href="{% url 'portail_contact' %}" class="small-box-footer">Consulter <i class="fa fa-arrow-circle-right"></i></a>
+                        <a href="{% url 'portail_contact' %}" class="small-box-footer">{% trans "Consulter" %} <i class="fa fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
             {% endif %}
@@ -59,10 +62,12 @@
                     <div class="small-box bg-danger">
                         <div class="inner">
                             <h3>{{ nbre_pieces_manquantes }}</h3>
-                            <p>Pièce{{ nbre_pieces_manquantes|pluralize }} manquante{{ nbre_pieces_manquantes|pluralize }}</p>
+                            <p>
+                                {% blocktranslate count counter=nbre_pieces_manquantes %}Pièce manquante{% plural %}Pièces manquantes{% endblocktranslate %}
+                            </p>
                         </div>
                         <div class="icon"><i class="fa fa-file-text-o"></i></div>
-                        <a href="{% url 'portail_documents' %}" class="small-box-footer">Consulter <i class="fa fa-arrow-circle-right"></i></a>
+                        <a href="{% url 'portail_documents' %}" class="small-box-footer">{% trans "Consulter" %} <i class="fa fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
             {% endif %}
@@ -73,10 +78,12 @@
                     <div class="small-box bg-danger">
                         <div class="inner">
                             <h3>{{ nbre_vaccinations_manquantes }}</h3>
-                            <p>Vaccination{{ nbre_vaccinations_manquantes|pluralize }} manquante{{ nbre_vaccinations_manquantes|pluralize }}</p>
+                            <p>
+                                {% blocktranslate count counter=nbre_vaccinations_manquantes %}Vaccination manquante{% plural %}Vaccinations manquantes{% endblocktranslate %}
+                            </p>
                         </div>
                         <div class="icon"><i class="fa fa-medkit"></i></div>
-                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">Corriger <i class="fa fa-arrow-circle-right"></i></a>
+                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">{% trans "Corriger" %} <i class="fa fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
             {% endif %}
@@ -87,10 +94,12 @@
                     <div class="small-box bg-danger">
                         <div class="inner">
                             <h3>{{ nbre_assurances_manquantes }}</h3>
-                            <p>Assurance{{ nbre_assurances_manquantes|pluralize }} manquante{{ nbre_assurances_manquantes|pluralize }}</p>
+                            <p>
+                                {% blocktranslate count counter=nbre_assurances_manquantes %}Assurance manquante{% plural %}Assurances manquantes{% endblocktranslate %}
+                            </p>
                         </div>
                         <div class="icon"><i class="fa fa-shield"></i></div>
-                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">Corriger <i class="fa fa-arrow-circle-right"></i></a>
+                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">{% trans "Corriger" %} <i class="fa fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
             {% endif %}
@@ -101,10 +110,12 @@
                     <div class="small-box bg-danger">
                         <div class="inner">
                             <h3>{{ cotisations_manquantes|length }}</h3>
-                            <p>Adhésion{{ cotisations_manquantes|pluralize }} manquante{{ cotisations_manquantes|pluralize }}</p>
+                            <p>
+                                {% blocktranslate count counter=cotisations_manquantes|length %}Adhésion manquante{% plural %}Adhésions manquantes{% endblocktranslate %}
+                            </p>
                         </div>
                         <div class="icon"><i class="fa fa-file-text-o"></i></div>
-                        <a href="{% url 'portail_cotisations' %}" class="small-box-footer">Consulter <i class="fa fa-arrow-circle-right"></i></a>
+                        <a href="{% url 'portail_cotisations' %}" class="small-box-footer">{% trans "Consulter" %} <i class="fa fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
             {% endif %}
@@ -115,10 +126,12 @@
                     <div class="small-box bg-info">
                         <div class="inner">
                             <h3>{{ nbre_approbations_requises }}</h3>
-                            <p>Approbation{{ nbre_approbations_requises|pluralize }} en attente</p>
+                            <p>
+                                {% blocktranslate count counter=nbre_approbations_requises %}Approbation en attente{% plural %}Approbations en attente{% endblocktranslate %}
+                            </p>
                         </div>
                         <div class="icon"><i class="fa fa-edit"></i></div>
-                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">Corriger <i class="fa fa-arrow-circle-right"></i></a>
+                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">{% trans "Corriger" %} <i class="fa fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
             {% endif %}
@@ -129,13 +142,13 @@
 
     {# Actualités #}
     {% if articles %}
-        <h5 class="mb-2 text-secondary">Actualités</h5>
+        <h5 class="mb-2 text-secondary">{% trans "Actualités" %}</h5>
         <div class="card-columns">
             {% for article in articles %}
                 <div class="card mb-4 {% if article.couleur_fond %}bg-{{ article.couleur_fond }}{% endif %}" style="margin-top: 1px;">
                     {% if article.Get_anciennete <= 3 %}
                         <div class="ribbon-wrapper ribbon-lg">
-                            <div class="ribbon bg-warning">Nouveau</div>
+                            <div class="ribbon bg-warning">{% trans "Nouveau" %}</div>
                         </div>
                     {% endif %}
                     {% if article.image %}
@@ -148,14 +161,14 @@
                         <h5 class="card-title">{{ article.titre }}</h5>
                         <p class="card-text">{{ article.texte|safe }}</p>
                         {% if article.document %}
-                            <p class="mb-1"><small><a href="{{ article.document.url }}" style="text-decoration: none;" target="_blank" title="Cliquez ici pour ouvrir le document dans un nouvel onglet"><i class="fa fa-link margin-r-5"></i>{{ article.document_titre }}</a></small></p>
+                            <p class="mb-1"><small><a href="{{ article.document.url }}" style="text-decoration: none;" target="_blank" title="{% trans "Cliquez ici pour ouvrir le document dans un nouvel onglet" %}"><i class="fa fa-link margin-r-5"></i>{{ article.document_titre }}</a></small></p>
                         {% endif %}
                         {% if article.album %}
-                            <p class="mb-1"><small><a href="{% url 'portail_album' code=article.album.code %}" style="text-decoration: none;" title="Cliquez ici pour accéder à l'album"><i class="fa fa-photo margin-r-5"></i>Accéder à l'album '{{ article.album.titre }}'</a></small></p>
+                            <p class="mb-1"><small><a href="{% url 'portail_album' code=article.album.code %}" style="text-decoration: none;" title="{% trans "Cliquez ici pour accéder à l'album" %}"><i class="fa fa-photo margin-r-5"></i>{% blocktrans %}Accéder à l'album{% endblocktrans %} '{{ article.album.titre }}'</a></small></p>
                         {% endif %}
                     </div>
                     <div class="card-footer pl-3 pr-3 pb-1 pt-0 text-right">
-                        <span style="color: #cecece;font-size: 70%;">Publié le {{ article.date_debut|date:'d/m/Y' }} par {% firstof article.auteur.get_short_name article.auteur %}</span>
+                        <span style="color: #cecece;font-size: 70%;">{% blocktrans %}Publié le{% endblocktrans %} {{ article.date_debut|date:'d/m/Y' }} {% trans "par" %} {% firstof article.auteur.get_short_name article.auteur %}</span>
                     </div>
                 </div>
             {% endfor %}
@@ -168,7 +181,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header bg-lightblue">
-                        <h5 class="modal-title"><i class="fa fa-info-circle margin-r-5"></i>Informations</h5>
+                        <h5 class="modal-title"><i class="fa fa-info-circle margin-r-5"></i>{% trans "Informations" %}</h5>
                     </div>
                     <div class="modal-body">
                         {% for article in articles_popups %}
@@ -176,7 +189,7 @@
                         {% endfor %}
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">Fermer</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">{% trans "Fermer" %}</button>
                     </div>
                 </div>
             </div>

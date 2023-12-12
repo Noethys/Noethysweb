@@ -1,3 +1,4 @@
+{% load i18n %}
 <script>
 
 var multidate = {% if multidate %}true{% else %}false{% endif %};
@@ -159,7 +160,7 @@ function maj_datepicker(data){
             {% endif %}
             <span class="input-group-text"><i class="fa {% if icon %}{{ icon }}{% else %}fa-calendar{% endif %}"></i></span>
         </div>
-        <input type="text" autocomplete="off" placeholder="Sélectionner une date" class="{{ class }}" data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}" value="{{ value|date:djformat }}" {% if disabled %}disabled="disabled"{% endif %} {% if required %}required{% endif %}/>
+        <input type="text" autocomplete="off" placeholder="{% trans "Sélectionner une date" %}" class="{{ class }}" data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}" value="{{ value|date:djformat }}" {% if disabled %}disabled="disabled"{% endif %} {% if required %}required{% endif %}/>
         {% if afficher_fleches %}
             <div class="input-group-append">
                 <button id="datepicker_moins_{{ id }}" title="Sélectionner la veille" class="btn btn-default" type="button"><i class="fa fa-chevron-left"></i></button>

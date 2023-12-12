@@ -7,6 +7,7 @@ import json, datetime
 from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponseRedirect
 from django.views.generic import TemplateView
+from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib import messages
@@ -45,10 +46,10 @@ class Page(Onglet):
     url_ajouter = "portail_individu_assurances_ajouter"
     url_modifier = "portail_individu_assurances_modifier"
     url_supprimer = "portail_individu_assurances_supprimer"
-    description_liste = "Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle assurance."
-    description_saisie = "Saisissez les informations concernant l'assurance et cliquez sur le bouton Enregistrer."
-    objet_singulier = "une assurance"
-    objet_pluriel = "des assurances"
+    description_liste = _("Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle assurance.")
+    description_saisie = _("Saisissez les informations concernant l'assurance et cliquez sur le bouton Enregistrer.")
+    objet_singulier = _("une assurance")
+    objet_pluriel = _("des assurances")
     onglet_actif = "individu_assurances"
     categorie = "individu_assurances"
 
@@ -58,7 +59,7 @@ class Page(Onglet):
         context = super(Page, self).get_context_data(**kwargs)
         context['onglet_actif'] = self.onglet_actif
         if not self.get_dict_onglet_actif().validation_auto:
-            context['box_introduction'] = self.description_saisie + " Ces informations devront être validées par l'administrateur de l'application."
+            context['box_introduction'] = self.description_saisie + " " + _("Ces informations devront être validées par l'administrateur de l'application.")
         context['form_ajout'] = Formulaire_assureur()
         return context
 
@@ -80,8 +81,8 @@ class Liste(Page, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
-        context['box_titre'] = "Assurances"
-        context['box_introduction'] = "Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle assurance."
+        context['box_titre'] = _("Assurances")
+        context['box_introduction'] = _("Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle assurance.")
         context['liste_assurances'] = Assurance.objects.filter(famille=self.get_rattachement().famille, individu=self.get_rattachement().individu).order_by("-date_debut")
 
         # Recherche si l'assurance de l'individu est manquante
@@ -106,7 +107,7 @@ class Ajouter(Page, crud.Ajouter):
                                             nouvelle_valeur=json.dumps(str(instance), cls=DjangoJSONEncoder), idobjet=instance.pk)
 
         # Message de confirmation
-        messages.add_message(self.request, messages.SUCCESS, "Votre ajout a été enregistré")
+        messages.add_message(self.request, messages.SUCCESS, _("Votre ajout a été enregistré"))
 
         # Demande une nouvelle certification
         self.Demande_nouvelle_certification()
@@ -139,8 +140,8 @@ class Importer(Page, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(Importer, self).get_context_data(**kwargs)
-        context['box_titre'] = "Importer les assurances d'une autre fiche"
-        context['box_introduction'] = "Cochez la ou les assurances à importer et cliquez sur le bouton Importer."
+        context['box_titre'] = _("Importer les assurances d'une autre fiche")
+        context['box_introduction'] = _("Cochez la ou les assurances à importer et cliquez sur le bouton Importer.")
         context['form'] = Formulaire_importer(idfamille=self.request.user.famille.pk, idindividu=self.get_individu().pk, idrattachement=self.get_rattachement().pk, request=self.request)
         return context
 
@@ -163,9 +164,9 @@ class Importer(Page, TemplateView):
                 PortailRenseignement.objects.create(famille=self.get_famille(), individu=self.get_individu(), categorie=self.categorie, code="Assurance importée",
                                                     nouvelle_valeur=json.dumps(str(assurance), cls=DjangoJSONEncoder))
 
-            messages.add_message(self.request, messages.SUCCESS, "%d assurances importées avec succès" % len(liste_idassurance))
+            messages.add_message(self.request, messages.SUCCESS, _("%d assurances importées avec succès") % len(liste_idassurance))
 
         else:
-            messages.add_message(self.request, messages.INFO, "Aucune assurance importée")
+            messages.add_message(self.request, messages.INFO, _("Aucune assurance importée"))
 
         return HttpResponseRedirect(reverse_lazy("portail_individu_assurances", kwargs={"idrattachement": self.get_rattachement().pk}))

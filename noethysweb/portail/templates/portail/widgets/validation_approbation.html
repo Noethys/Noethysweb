@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load static %}
 
 <div class="card alert-default-secondary p-0 card_approbation">
@@ -9,23 +10,23 @@
                         <input type="checkbox" name="{{ name }}" class="checkboxinput custom-control-input" id="{{ id }}">
                         <label for="{{ id }}" class="custom-control-label" style="font-size: 13px;">
                             {% if unite_consentement %}
-                                J'ai lu et j'accepte les conditions décrites dans le document '{{ unite_consentement.type_consentement.nom }}'.
+                                {% blocktrans %}J'ai lu et j'accepte les conditions décrites dans le document{% endblocktrans %} '{{ unite_consentement.type_consentement.nom }}'.
                             {% endif %}
                             {% if rattachement %}
-                                Je certifie exact les renseignements de la fiche de {{ rattachement.individu.Get_nom }}.
+                                {% blocktrans %}Je certifie exact les renseignements de la fiche de{% endblocktrans %} {{ rattachement.individu.Get_nom }}.
                             {% endif %}
                             {% if famille %}
-                                Je certifie exact les renseignements de la fiche famille.
+                                {% blocktrans %}Je certifie exact les renseignements de la fiche famille.{% endblocktrans %}
                             {% endif %}
                         </label>
                         {% if unite_consentement %}
-                            <small class="form-text text-muted">Document mis à jour le {{ unite_consentement.date_debut|date:'d/m/Y' }}</small>
+                            <small class="form-text text-muted">{% blocktrans %}Document mis à jour le{% endblocktrans %} {{ unite_consentement.date_debut|date:'d/m/Y' }}</small>
                         {% endif %}
                     </div>
                 </td>
                 {% if unite_consentement %}
                     <td class="text-right py-0 pt-1">
-                        <a href="{{ unite_consentement.document.url }}" style="text-decoration: none;" target="_blank" class="btn btn-light btn-xs" title="Cliquez ici pour ouvrir le document dans un nouvel onglet"><i class="fa fa-search"></i></a>
+                        <a href="{{ unite_consentement.document.url }}" style="text-decoration: none;" target="_blank" class="btn btn-light btn-xs" title="{% trans "Cliquez ici pour ouvrir le document dans un nouvel onglet" %}"><i class="fa fa-search"></i></a>
                     </td>
                 {% endif %}
             </tr>

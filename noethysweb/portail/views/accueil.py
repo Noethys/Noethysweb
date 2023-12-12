@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 import datetime
+from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 from django.db.models import Q
 from portail.views.base import CustomView
@@ -19,7 +20,7 @@ class Accueil(CustomView, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(Accueil, self).get_context_data(**kwargs)
-        context['page_titre'] = "Accueil"
+        context['page_titre'] = _("Accueil")
 
         # Pièces manquantes
         context['nbre_pieces_manquantes'] = len(utils_pieces_manquantes.Get_pieces_manquantes(famille=self.request.user.famille, only_invalides=True))

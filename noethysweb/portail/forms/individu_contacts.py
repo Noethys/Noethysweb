@@ -5,10 +5,11 @@
 
 from django import forms
 from django.forms import ModelForm
+from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
-from core.models import ContactUrgence, PortailRenseignement
+from crispy_forms.layout import Layout, Hidden, Fieldset
+from crispy_forms.bootstrap import Field
+from core.models import ContactUrgence
 from core.widgets import Telephone, CodePostal, Ville
 from core.utils.utils_commandes import Commandes
 from portail.forms.fiche import FormulaireBase
@@ -29,11 +30,11 @@ class Formulaire(FormulaireBase, ModelForm):
             'observations': forms.Textarea(attrs={'rows': 3}),
         }
         help_texts = {
-            "nom": "Saisissez le nom de famille en majuscules.",
-            "prenom": "Saisissez le prénom en minuscules avec la première lettre majuscule.",
-            "lien": "Précisez le lien avec l'individu. Exemples : frère, voisin, tante, ami de la famille...",
-            "cp_resid": "Saisissez le code postal, patientez une seconde et sélectionnez la ville dans la liste déroulante.",
-            "ville_resid": "Saisissez le nom de la ville, patientez une seconde et sélectionnez la ville dans la liste déroulante."
+            "nom": _("Saisissez le nom de famille en majuscules."),
+            "prenom": _("Saisissez le prénom en minuscules avec la première lettre majuscule."),
+            "lien": _("Précisez le lien avec l'individu. Exemples : frère, voisin, tante, ami de la famille..."),
+            "cp_resid": _("Saisissez le code postal, patientez une seconde et sélectionnez la ville dans la liste déroulante."),
+            "ville_resid": _("Saisissez le nom de la ville, patientez une seconde et sélectionnez la ville dans la liste déroulante."),
         }
 
     def __init__(self, *args, **kwargs):
@@ -56,27 +57,27 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.layout = Layout(
             Hidden('famille', value=rattachement.famille_id),
             Hidden('individu', value=rattachement.individu_id),
-            Fieldset("Identité",
+            Fieldset(_("Identité"),
                 Field("nom"),
                 Field("prenom"),
                 Field("lien"),
             ),
-            Fieldset("Adresse de résidence",
+            Fieldset(_("Adresse de résidence"),
                 Field("rue_resid"),
                 Field("cp_resid"),
                 Field("ville_resid"),
             ),
-            Fieldset("Coordonnées",
+            Fieldset(_("Coordonnées"),
                 Field("tel_domicile"),
                 Field("tel_mobile"),
                 Field("tel_travail"),
                 Field("mail"),
             ),
-            Fieldset("Autorisations",
+            Fieldset(_("Autorisations"),
                 Field("autorisation_sortie"),
                 Field("autorisation_appel"),
             ),
-            Fieldset("Divers",
+            Fieldset(_("Divers"),
                 Field("observations"),
             ),
             Commandes(annuler_url="{% url 'portail_individu_contacts' idrattachement=rattachement.pk %}", aide=False, ajouter=False, css_class="pull-right"),

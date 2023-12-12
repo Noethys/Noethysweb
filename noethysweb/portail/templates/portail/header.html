@@ -13,9 +13,28 @@
 
         <ul class="navbar-nav ml-auto">
 
+            {% if parametres_portail.multilingue %}
+                <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+                    <input name="next" type="hidden" value="{{ redirect_to }}">
+                    <ul class="nav navbar-nav navbar-item pr-2">
+                        {% get_current_language as lang_actual %}
+                        {% get_available_languages as languages %}
+                        {% for lang_code, lang_name in languages %}
+                            <li>
+                                <button type="submit" name="language" title="{{ lang_name }}" value="{{ lang_code }}" class="btn nav-link pl-1 pr-0 {% if lang_code == lang_actual %}selected{% endif %}">
+                                    {% with 'images/drapeaux/'|add:lang_code|add:'.png' as image_drapeau %}
+                                        <img src="{% static image_drapeau %}">
+                                    {% endwith %}
+                                </button>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </form>
+            {% endif %}
+
             {# Utilisateur en cours #}
             <li class="dropdown user user-menu">
-                <a href="#" class="nav-link" data-toggle="dropdown" title="Paramètres du compte">
+                <a href="#" class="nav-link" data-toggle="dropdown" title="{% trans "Paramètres du compte" %}">
                     <img src="{% static "images/user.png" %}" class="user-image" alt="User Image">
                     <span class="d-none d-sm-inline">{{ request.user.famille }}</span>
                 </a>
@@ -29,7 +48,7 @@
 
                     <li class="user-footer">
                         <div>
-                            <a href="{% url 'portail_profil' %}" class="btn btn-block btn-default">Paramètres du compte</a>
+                            <a href="{% url 'portail_profil' %}" class="btn btn-block btn-default">{% blocktrans %}Paramètres du compte{% endblocktrans %}</a>
                         </div>
                     </li>
 
@@ -38,7 +57,7 @@
 
             {# Bouton de déconnexion #}
             <li class="nav-item">
-                <a href="{% url 'portail_deconnexion' %}" class="nav-link btn btn-danger" title="Déconnexion">
+                <a href="{% url 'portail_deconnexion' %}" class="nav-link btn btn-danger" title="{% trans "Déconnexion" %}">
                     <i class="fa fa-power-off"></i>
                 </a>
             </li>

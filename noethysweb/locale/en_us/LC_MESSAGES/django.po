@@ -1,0 +1,2093 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-12-12 22:29+0100\n"
+"PO-Revision-Date: 2023-12-12 22:32+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.1\n"
+
+#: .\consommations\templates\consommations\grille_appliquer_semaine_type.html:23
+#: .\portail\templates\portail\planning_commandes.html:8
+msgid "Appliquer une semaine-type"
+msgstr "Apply a model week"
+
+#: .\consommations\templates\consommations\grille_appliquer_semaine_type.html:32
+msgid "Semaine-type"
+msgstr "Model week"
+
+#: .\consommations\templates\consommations\grille_appliquer_semaine_type.html:64
+msgid "Semaine paire"
+msgstr "Even week"
+
+#: .\consommations\templates\consommations\grille_appliquer_semaine_type.html:67
+msgid "Semaine impaire"
+msgstr "Odd week"
+
+#: .\consommations\templates\consommations\grille_appliquer_semaine_type.html:84
+#: .\portail\forms\medecins.py:48
+#: .\portail\templates\portail\facturation.html:196
+#: .\portail\templates\portail\password_change_form.html:58
+#: .\portail\templates\portail\password_reset_confirm.html:59
+#: .\portail\templates\portail\profil_password_change.html:67
+msgid "Valider"
+msgstr "Confirm"
+
+#: .\consommations\templates\consommations\grille_appliquer_semaine_type.html:85
+#: .\core\utils\utils_commandes.py:40 .\portail\forms\fiche.py:92
+#: .\portail\forms\individu_assurances_importer.py:40
+#: .\portail\forms\individu_assurances_importer.py:46
+#: .\portail\forms\individu_contacts_importer.py:40
+#: .\portail\forms\individu_contacts_importer.py:46
+#: .\portail\forms\individu_questionnaire.py:67 .\portail\forms\medecins.py:49
+#: .\portail\templates\portail\facturation.html:197
+#: .\portail\templates\portail\planning_commandes.html:6
+#: .\portail\templates\portail\profil_password_change.html:68
+msgid "Annuler"
+msgstr "Cancel"
+
+#: .\core\models.py:538 .\core\models.py:1613 .\core\models.py:3122
+#: .\portail\templates\portail\individu_contacts.html:21
+msgid "Nom"
+msgstr "Name"
+
+#: .\core\models.py:539 .\core\models.py:1615 .\core\models.py:3123
+#: .\portail\templates\portail\individu_contacts.html:22
+msgid "Prénom"
+msgstr "First name"
+
+#: .\core\models.py:540 .\core\models.py:1624 .\core\models.py:3124
+msgid "Rue"
+msgstr "Street"
+
+#: .\core\models.py:541 .\core\models.py:1619 .\core\models.py:1625
+#: .\core\models.py:3125
+msgid "Code postal"
+msgstr "Postal code"
+
+#: .\core\models.py:542 .\core\models.py:1620 .\core\models.py:1626
+#: .\core\models.py:3126
+msgid "Ville"
+msgstr "City"
+
+#: .\core\models.py:543
+msgid "Téléphone fixe"
+msgstr "Home phone"
+
+#: .\core\models.py:544
+msgid "Téléphone mobile"
+msgstr "Mobile phone"
+
+#: .\core\models.py:545 .\core\models.py:1639
+msgid "Mémo"
+msgstr "Memo"
+
+#: .\core\models.py:1612
+msgid "Civilité"
+msgstr "Title"
+
+#: .\core\models.py:1614
+msgid "Nom de naissance"
+msgstr "Birth name"
+
+#: .\core\models.py:1616
+msgid "Nationalité"
+msgstr "Nationality"
+
+#: .\core\models.py:1617
+msgid "Date de naissance"
+msgstr "Date of birth"
+
+#: .\core\models.py:1618
+msgid "Pays de naissance"
+msgstr "Birth country"
+
+#: .\core\models.py:1621
+msgid "Individu décédé"
+msgstr "Deceased"
+
+#: .\core\models.py:1622
+msgid "Année de décès"
+msgstr "Year of death"
+
+#: .\core\models.py:1623 .\portail\forms\individu_coords.py:18
+#: .\portail\forms\individu_coords.py:19
+msgid "Adresse rattachée"
+msgstr "Address attached"
+
+#: .\core\models.py:1627
+msgid "Secteur"
+msgstr "Geographical area"
+
+#: .\core\models.py:1628
+msgid "Catégorie socio-professionnelle"
+msgstr "Socio-professional category"
+
+#: .\core\models.py:1629
+msgid "Profession"
+msgstr "Job"
+
+#: .\core\models.py:1630
+msgid "Employeur"
+msgstr "Employer"
+
+#: .\core\models.py:1631
+msgid "Téléphone pro."
+msgstr "Professional phone"
+
+#: .\core\models.py:1632
+msgid "Fax pro."
+msgstr "Professional fax"
+
+#: .\core\models.py:1633
+msgid "Email pro."
+msgstr "Professional email"
+
+#: .\core\models.py:1634 .\core\models.py:3127
+msgid "Tél domicile"
+msgstr "Home phone"
+
+#: .\core\models.py:1635 .\core\models.py:3128
+msgid "Tél portable"
+msgstr "Mobile phone"
+
+#: .\core\models.py:1636
+msgid "Fax personnel"
+msgstr "Fax"
+
+#: .\core\models.py:1637
+msgid "Email personnel"
+msgstr "Email"
+
+#: .\core\models.py:1638 .\portail\forms\individu_medecin.py:23
+#: .\portail\utils\utils_onglets.py:30
+msgid "Médecin"
+msgstr "Doctor"
+
+#: .\core\models.py:1640
+msgid "Sieste"
+msgstr "Nap"
+
+#: .\core\models.py:1646
+msgid "Photo"
+msgstr "Photo"
+
+#: .\core\models.py:1648
+#: .\fiche_individu\forms\individu_regimes_alimentaires.py:19
+#: .\portail\forms\individu_regimes_alimentaires.py:16
+#: .\portail\utils\utils_onglets.py:28
+#: .\portail\views\individu_regimes_alimentaires.py:31
+msgid "Régimes alimentaires"
+msgstr "Diets"
+
+#: .\core\models.py:1649 .\portail\forms\individu_maladies.py:45
+msgid "Maladies contractées"
+msgstr "Diseases contracted"
+
+#: .\core\models.py:1651
+msgid "Situation des parents"
+msgstr "Parents' situation"
+
+#: .\core\models.py:1653
+msgid "Type de garde"
+msgstr "Child custody"
+
+#: .\core\models.py:1654
+msgid "Information sur la garde"
+msgstr "Custody information"
+
+#: .\core\models.py:1971
+msgid "Catégorie"
+msgstr "Category"
+
+#: .\core\models.py:1972 .\portail\templates\portail\cotisations.html:50
+#: .\portail\templates\portail\detail_facture.html:15
+#: .\portail\templates\portail\facturation.html:70
+#: .\portail\templates\portail\facturation.html:143
+#: .\portail\templates\portail\individu_informations.html:21
+msgid "Intitulé"
+msgstr "Title"
+
+#: .\core\models.py:1973 .\core\models.py:3167
+#: .\portail\templates\portail\individu_assurances.html:26
+msgid "Date de début"
+msgstr "Start date"
+
+#: .\core\models.py:1974 .\core\models.py:3168
+#: .\portail\templates\portail\individu_assurances.html:27
+msgid "Date de fin"
+msgstr "End date"
+
+#: .\core\models.py:1975
+msgid "Description"
+msgstr "Description"
+
+#: .\core\models.py:1986 .\core\models.py:3169
+#: .\portail\forms\transmettre_piece.py:24
+msgid "Document"
+msgstr "Document"
+
+#: .\core\models.py:2003
+#: .\portail\templates\portail\individu_vaccinations.html:24
+msgid "Type de vaccin"
+msgstr "Type of vaccine"
+
+#: .\core\models.py:2004
+msgid "Date de vaccination"
+msgstr "Vaccination date"
+
+#: .\core\models.py:3129
+msgid "Tél travail"
+msgstr "Professionnal phone"
+
+#: .\core\models.py:3130
+msgid "Email"
+msgstr "Email"
+
+#: .\core\models.py:3131 .\portail\forms\transmettre_piece.py:34
+msgid "Observations"
+msgstr "Comments"
+
+#: .\core\models.py:3132
+msgid "Lien avec l'individu"
+msgstr "Link"
+
+#: .\core\models.py:3133
+msgid "Autorisé à récupérer l'individu"
+msgstr "Leaving with the person"
+
+#: .\core\models.py:3134
+msgid "A contacter en cas d'urgence"
+msgstr "To contact in case of emergency"
+
+#: .\core\models.py:3165 .\portail\forms\individu_assurances.py:27
+#: .\portail\templates\portail\individu_assurances.html:28
+msgid "Assureur"
+msgstr "Insurance company"
+
+#: .\core\models.py:3166
+msgid "N° de contrat"
+msgstr "Contract no."
+
+#: .\core\templates\core\captcha.html:18
+msgid "Play CAPTCHA as audio file"
+msgstr "Play CAPTCHA as audio file"
+
+#: .\core\templates\core\widgets\datepicker.html:163
+msgid "Sélectionner une date"
+msgstr "Select a date"
+
+#: .\core\utils\utils_commandes.py:11 .\core\utils\utils_commandes.py:23
+#: .\portail\forms\fiche.py:90 .\portail\forms\individu_questionnaire.py:66
+#: .\portail\templates\portail\planning_commandes.html:5
+#: .\portail\templates\portail\renseignements.html:88
+msgid "Enregistrer"
+msgstr "Save"
+
+#: .\core\utils\utils_commandes.py:28 .\portail\forms\fiche.py:85
+#: .\portail\forms\individu_questionnaire.py:63
+#: .\portail\templates\portail\individu_assurances.html:41
+#: .\portail\templates\portail\individu_contacts.html:36
+#: .\portail\templates\portail\individu_informations.html:30
+#: .\portail\templates\portail\individu_vaccinations.html:35
+msgid "Modifier"
+msgstr "Edit"
+
+#: .\core\utils\utils_commandes.py:28 .\portail\forms\fiche.py:85
+#: .\portail\forms\individu_questionnaire.py:63
+msgid "Modifier cette page"
+msgstr "Edit this page"
+
+#: .\core\utils\utils_commandes.py:36
+msgid "Enregistrer & Ajouter"
+msgstr "Save & Add"
+
+#: .\core\utils\utils_commandes.py:48
+msgid "Consulter l'aide"
+msgstr "Read help"
+
+#: .\core\utils\utils_commandes.py:48
+msgid "Aide"
+msgstr "Help"
+
+#: .\fiche_individu\forms\individu_regimes_alimentaires.py:20
+#: .\portail\forms\individu_regimes_alimentaires.py:17
+msgid "Nom du régime alimentaire"
+msgstr "Name of diet"
+
+#: .\fiche_individu\forms\individu_regimes_alimentaires.py:20
+#: .\portail\forms\individu_regimes_alimentaires.py:17
+msgid "Ajouter un nouveau régime alimentaire"
+msgstr "Add a new diet"
+
+#: .\fiche_individu\forms\individu_regimes_alimentaires.py:21
+msgid ""
+"Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix ou "
+"tapez les premières lettres du régime recherché. Cliquez sur le '+' pour "
+"ajouter un régime manquant dans la liste de choix."
+msgstr ""
+"Click on the field above to bring up the list of choices, or type in the "
+"first few letters of the diet you're looking for. Click on the '+' to add a "
+"missing diet to the list of choices."
+
+#: .\portail\forms\change_password.py:19 .\portail\forms\change_password.py:20
+#: .\portail\forms\profil_password_change.py:17
+#: .\portail\forms\profil_password_change.py:18
+#: .\portail\forms\reset_password.py:30 .\portail\forms\reset_password.py:31
+msgid "Saisissez un nouveau mot de passe"
+msgstr "Enter a new password"
+
+#: .\portail\forms\change_password.py:22 .\portail\forms\change_password.py:23
+#: .\portail\forms\profil_password_change.py:20
+#: .\portail\forms\profil_password_change.py:21
+#: .\portail\forms\reset_password.py:33 .\portail\forms\reset_password.py:34
+msgid "Saisissez le nouveau mot de passe une nouvelle fois"
+msgstr "Enter the new password again"
+
+#: .\portail\forms\fiche.py:59 .\portail\forms\individu_questionnaire.py:54
+msgid "Modification en attente de validation par l'administrateur."
+msgstr "Modification awaiting administrator approval."
+
+#: .\portail\forms\fiche.py:65
+msgid "Ce champ n'est pas modifiable."
+msgstr "This field is not editable."
+
+#: .\portail\forms\fiche.py:90 .\portail\forms\individu_questionnaire.py:66
+msgid "Enregistrer les modifications"
+msgstr "Save changes"
+
+#: .\portail\forms\individu_assurances.py:27
+msgid ""
+"Cliquez sur le champ ci-dessus pour sélectionner un assureur dans la liste "
+"déroulante. Vous pouvez faire une recherche par nom ou par ville."
+msgstr ""
+"Click on the field above to select an insurer from the drop-down list. You "
+"can search by name or city."
+
+#: .\portail\forms\individu_assurances.py:27
+msgid "Cliquez ici pour ajouter un assureur manquant dans la liste de choix"
+msgstr "Click here to add a missing insurer to the list of choices"
+
+#: .\portail\forms\individu_assurances.py:29
+msgid "Nom de l'assureur"
+msgstr "Name of insurer"
+
+#: .\portail\forms\individu_assurances.py:29
+msgid "Ajouter un assureur"
+msgstr "Add an insurer"
+
+#: .\portail\forms\individu_assurances.py:29
+msgid "Modifier un assureur"
+msgstr "Modifying an insurer"
+
+#: .\portail\forms\individu_assurances.py:39
+msgid "Sélectionnez un assureur dans la liste proposée."
+msgstr "Select an insurer from the list."
+
+#: .\portail\forms\individu_assurances.py:40
+msgid "Saisissez le numéro de contrat."
+msgstr "Enter the contract number."
+
+#: .\portail\forms\individu_assurances.py:41
+msgid "Saisissez la date de début d'effet du contrat."
+msgstr "Enter the start date of the contract."
+
+#: .\portail\forms\individu_assurances.py:42
+msgid "[Optionnel] Saisissez la date de fin du contrat."
+msgstr "[Optional] Enter the end date of the contract."
+
+#: .\portail\forms\individu_assurances.py:43
+msgid "Vous pouvez ajouter l'attestation d'assurance au format PDF ou image."
+msgstr "You can add the insurance certificate in PDF or image format."
+
+#: .\portail\forms\individu_assurances.py:76
+msgid "Vous devez sélectionner un assureur dans la liste déroulante"
+msgstr "You must select an insurer from the drop-down list"
+
+#: .\portail\forms\individu_assurances.py:79
+msgid "La date de fin doit être supérieure à la date de début"
+msgstr "The end date must be greater than the start date"
+
+#: .\portail\forms\individu_assurances_importer.py:17
+msgid "Assurances disponibles"
+msgstr "Available insurances"
+
+#: .\portail\forms\individu_assurances_importer.py:18
+msgid "Aucune assurance disponible"
+msgstr "No insurance available"
+
+#: .\portail\forms\individu_assurances_importer.py:40
+msgid "Importer les assurances cochées"
+msgstr "Import checked insurances"
+
+#: .\portail\forms\individu_contacts.py:33
+#: .\portail\forms\individu_identite.py:45
+msgid "Saisissez le nom de famille en majuscules."
+msgstr "Enter the surname in uppercase."
+
+#: .\portail\forms\individu_contacts.py:34
+#: .\portail\forms\individu_identite.py:46
+msgid "Saisissez le prénom en minuscules avec la première lettre majuscule."
+msgstr "Enter the first name in lower case with the first letter capitalized."
+
+#: .\portail\forms\individu_contacts.py:35
+msgid ""
+"Précisez le lien avec l'individu. Exemples : frère, voisin, tante, ami de la "
+"famille..."
+msgstr ""
+"Specify the link with the individual. Examples: brother, neighbor, aunt, "
+"family friend..."
+
+#: .\portail\forms\individu_contacts.py:36
+#: .\portail\forms\individu_identite.py:48
+msgid ""
+"Saisissez le code postal, patientez une seconde et sélectionnez la ville "
+"dans la liste déroulante."
+msgstr ""
+"Enter the postal code, wait a second and select the city from the drop-down "
+"list."
+
+#: .\portail\forms\individu_contacts.py:37
+#: .\portail\forms\individu_identite.py:49
+msgid ""
+"Saisissez le nom de la ville, patientez une seconde et sélectionnez la ville "
+"dans la liste déroulante."
+msgstr ""
+"Enter the city name, wait a second and select the city from the drop-down "
+"list."
+
+#: .\portail\forms\individu_contacts.py:60 .\portail\utils\utils_onglets.py:25
+#: .\portail\views\individu_identite.py:22
+msgid "Identité"
+msgstr "Identity"
+
+#: .\portail\forms\individu_contacts.py:65
+#: .\portail\forms\individu_coords.py:86
+msgid "Adresse de résidence"
+msgstr "Address"
+
+#: .\portail\forms\individu_contacts.py:70
+#: .\portail\forms\individu_coords.py:87 .\portail\utils\utils_onglets.py:27
+#: .\portail\views\individu_coords.py:22
+msgid "Coordonnées"
+msgstr "Contact details"
+
+#: .\portail\forms\individu_contacts.py:76
+#: .\portail\templates\portail\individu_contacts.html:24
+msgid "Autorisations"
+msgstr "Consents"
+
+#: .\portail\forms\individu_contacts.py:80
+#: .\portail\forms\individu_identite.py:56
+msgid "Divers"
+msgstr "Other"
+
+#: .\portail\forms\individu_contacts_importer.py:17
+msgid "Contacts disponibles"
+msgstr "Contacts available"
+
+#: .\portail\forms\individu_contacts_importer.py:18
+msgid "Aucun contact disponible"
+msgstr "No contact available"
+
+#: .\portail\forms\individu_contacts_importer.py:40
+msgid "Importer les contacts cochés"
+msgstr "Import checked contacts"
+
+#: .\portail\forms\individu_coords.py:18
+msgid "Type d'adresse"
+msgstr "Address type"
+
+#: .\portail\forms\individu_coords.py:18
+msgid "Adresse propre"
+msgstr "Own address"
+
+#: .\portail\forms\individu_coords.py:68
+msgid ""
+"Sélectionnez 'rattachée' pour faire le lien avec l'adresse d'un autre membre "
+"de la famille ou sélectionnez 'propre' pour saisir une adresse pour cet "
+"individu."
+msgstr ""
+"Select 'attached' to link to the address of another family member, or select "
+"'own' to enter an address for that individual."
+
+#: .\portail\forms\individu_coords.py:69
+msgid "Sélectionnez l'individu dont vous souhaitez récupérer l'adresse."
+msgstr "Select the individual whose address you wish to retrieve."
+
+#: .\portail\forms\individu_coords.py:70
+msgid "Saisissez le numéro et le nom de la voie. Exemple : 12 Rue des acacias."
+msgstr "Enter the street number and name. Example: 12 Rue des acacias."
+
+#: .\portail\forms\individu_coords.py:71
+msgid ""
+"Saisissez le code postal de la ville de résidence, attendez une seconde et "
+"sélectionnez la ville dans la liste déroulante."
+msgstr ""
+"Enter the postal code of your home town, wait a second and select the town "
+"from the drop-down list."
+
+#: .\portail\forms\individu_coords.py:72
+msgid "Saisissez le nom de la ville en majuscules."
+msgstr "Enter the city name in uppercase."
+
+#: .\portail\forms\individu_coords.py:73
+msgid "Sélectionnez un secteur dans la liste déroulante."
+msgstr "Select a geographical area from the drop-down list."
+
+#: .\portail\forms\individu_coords.py:74 .\portail\forms\individu_coords.py:75
+#: .\portail\forms\individu_coords.py:80
+msgid "Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx."
+msgstr "Enter a phone number"
+
+#: .\portail\forms\individu_coords.py:76 .\portail\forms\individu_coords.py:81
+msgid "Saisissez une adresse Email valide."
+msgstr "Enter a valid email address."
+
+#: .\portail\forms\individu_coords.py:77
+msgid ""
+"Sélectionnez une catégorie socio-professionnelle dans la liste déroulante."
+msgstr "Select a socio-professional category from the drop-down list."
+
+#: .\portail\forms\individu_coords.py:78
+msgid "Saisissez une profession."
+msgstr "Enter a job title."
+
+#: .\portail\forms\individu_coords.py:79
+msgid "Saisissez le nom de l'employeur."
+msgstr "Enter the employer's name."
+
+#: .\portail\forms\individu_coords.py:88
+msgid "Activité professionnelle"
+msgstr "Professional activity"
+
+#: .\portail\forms\individu_coords.py:105
+msgid "Vous devez sélectionner un individu dont l'adresse est à rattacher"
+msgstr "You must select an individual whose address is to be attached"
+
+#: .\portail\forms\individu_identite.py:44
+msgid "Sélectionnez une civilité dans la liste déroulante."
+msgstr "Select a title from the drop-down list."
+
+#: .\portail\forms\individu_identite.py:47
+msgid "Saisissez la date de naissance au format JJ/MM/AAAA."
+msgstr "Enter the date of birth in DD/MM/YYYY format."
+
+#: .\portail\forms\individu_identite.py:54
+msgid "Etat-civil"
+msgstr "Civil status"
+
+#: .\portail\forms\individu_identite.py:55
+msgid "Naissance"
+msgstr "Birth"
+
+#: .\portail\forms\individu_informations.py:26
+msgid "Sélectionnez une catégorie dans la liste proposée."
+msgstr "Select a category from the list."
+
+#: .\portail\forms\individu_informations.py:27
+msgid "Saisissez l'intitulé de l'information. Exemple : Allergie aux oeufs."
+msgstr "Enter the title of the information. Example: Egg allergy."
+
+#: .\portail\forms\individu_informations.py:28
+msgid "Précisez si besoin une description détaillée."
+msgstr "Give a detailed description if necessary."
+
+#: .\portail\forms\individu_informations.py:29
+msgid "Vous pouvez ajouter un document si besoin (PDF ou image)."
+msgstr "You can add a document if required (PDF or image)."
+
+#: .\portail\forms\individu_informations.py:48
+msgid "Information"
+msgstr "Information"
+
+#: .\portail\forms\individu_maladies.py:16 .\portail\utils\utils_onglets.py:29
+#: .\portail\views\individu_maladies.py:31
+msgid "Maladies"
+msgstr "Diseases"
+
+#: .\portail\forms\individu_maladies.py:17
+msgid "Nom de la maladie"
+msgstr "Disease name"
+
+#: .\portail\forms\individu_maladies.py:17
+msgid "Ajouter une maladie"
+msgstr "Add a disease"
+
+#: .\portail\forms\individu_maladies.py:40
+#: .\portail\forms\individu_regimes_alimentaires.py:40
+msgid ""
+"Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix et "
+"cliquez sur un ou plusieurs éléments dans la liste"
+msgstr ""
+"Click on the field above to display the list of choices and click on one or "
+"more items in the list"
+
+#: .\portail\forms\individu_maladies.py:40
+msgid "Cliquez ici pour ajouter une maladie manquante dans la liste de choix"
+msgstr "Click here to add a missing disease to the list of choices"
+
+#: .\portail\forms\individu_medecin.py:46
+msgid ""
+"Cliquez sur le champ ci-dessus pour sélectionner un médecin dans la liste "
+"déroulante. Vous pouvez faire une recherche par nom, par prénom ou par ville"
+msgstr ""
+"Click on the field above to select a doctor from the drop-down list. You can "
+"search by surname, first name or town."
+
+#: .\portail\forms\individu_medecin.py:46
+msgid "Cliquez ici pour ajouter un médecin manquant dans la liste de choix"
+msgstr "Click here to add a missing doctor to the list of choices"
+
+#: .\portail\forms\individu_medecin.py:51
+#: .\portail\views\individu_medecin.py:46
+msgid "Médecin traitant"
+msgstr "Doctor"
+
+#: .\portail\forms\individu_questionnaire.py:59
+msgid "Aucun questionnaire n'a été paramétré."
+msgstr "No questions have been set up."
+
+#: .\portail\forms\individu_regimes_alimentaires.py:40
+msgid "Cliquez ici pour ajouter un régime manquant dans la liste de choix"
+msgstr "Click here to add a missing plan to the list of choices"
+
+#: .\portail\forms\individu_regimes_alimentaires.py:45
+msgid "Régimes"
+msgstr "Diets"
+
+#: .\portail\forms\individu_vaccinations.py:25
+msgid "Sélectionnez le type de vaccination dans la liste."
+msgstr "Select the type of vaccination in the list."
+
+#: .\portail\forms\individu_vaccinations.py:26
+msgid "Saisissez la date de la vaccination."
+msgstr "Enter the vaccination date."
+
+#: .\portail\forms\inscrire_activite.py:22
+#: .\portail\templates\portail\activites.html:55
+msgid "Groupe"
+msgstr "Group"
+
+#: .\portail\forms\inscrire_activite.py:22
+msgid "Sélectionnez le groupe correspondant à l'individu dans la liste."
+msgstr "Select the group corresponding to the person from the list."
+
+#: .\portail\forms\inscrire_activite.py:69
+#: .\portail\templates\portail\activites.html:54
+#: .\portail\templates\portail\detail_facture.html:14
+#: .\portail\templates\portail\planning.html:66
+msgid "Activité"
+msgstr "Activity"
+
+#: .\portail\forms\inscrire_activite.py:69
+msgid "Sélectionnez l'activité souhaitée dans la liste."
+msgstr "Select the desired activity from the list."
+
+#: .\portail\forms\inscrire_activite.py:75
+#: .\portail\templates\portail\detail_facture.html:13
+msgid "Individu"
+msgstr "Person"
+
+#: .\portail\forms\inscrire_activite.py:78
+msgid "Sélectionnez le membre de la famille à inscrire."
+msgstr "Select the family member you wish to register."
+
+#: .\portail\forms\inscrire_activite.py:112
+msgid "Envoyer la demande d'inscription"
+msgstr "Send registration request"
+
+#: .\portail\forms\login.py:19
+msgid "Identifiant"
+msgstr "Username"
+
+#: .\portail\forms\login.py:21 .\portail\templates\portail\profil.html:28
+msgid "Mot de passe"
+msgstr "Password"
+
+#: .\portail\forms\login.py:23 .\portail\forms\reset_password.py:55
+msgid "Recopiez le code de sécurité ci-contre"
+msgstr "Please enter the security code below"
+
+#: .\portail\forms\login.py:27
+msgid "Ce compte a été désactivé"
+msgstr "This account has been deactivated"
+
+#: .\portail\forms\login.py:29
+msgid "Accès non autorisé"
+msgstr "Unauthorised access"
+
+#: .\portail\forms\login.py:31
+msgid "Ce mot de passe a expiré"
+msgstr "This password has expired"
+
+#: .\portail\forms\messagerie.py:19
+msgid "Poster un message"
+msgstr "Post a message"
+
+#: .\portail\forms\messagerie.py:43 .\portail\forms\transmettre_piece.py:75
+#: .\portail\templates\portail\reset_password.html:44
+msgid "Envoyer"
+msgstr "Send"
+
+#: .\portail\forms\reset_password.py:49
+msgid ""
+"Saisissez l'identifiant qui vous a été communiqué par l'organisme. Si vous "
+"avez oublié cet identifiant, contactez l'organisme."
+msgstr ""
+"Please enter the login you have been given by the organization. If you have "
+"forgotten your ID, please contact the organization."
+
+#: .\portail\forms\reset_password.py:50
+msgid "Saisissez votre identifiant"
+msgstr "Enter your login"
+
+#: .\portail\forms\reset_password.py:52 .\portail\forms\reset_password.py:53
+msgid "Saisissez votre adresse Email"
+msgstr "Enter your email address"
+
+#: .\portail\forms\reset_password.py:65
+msgid "L'adresse Email n'est pas valide"
+msgstr "Invalid email address"
+
+#: .\portail\forms\reset_password.py:87
+msgid ""
+"Il n'existe pas de compte actif correspondant à cet identifiant et cette "
+"adresse Email."
+msgstr ""
+"There is no active account corresponding to this login and email address."
+
+#: .\portail\forms\reset_password.py:113 .\portail\forms\reset_password.py:160
+msgid ""
+"L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur."
+msgstr ""
+"The email failed to be sent. Please report this incident to the organizer."
+
+#: .\portail\forms\transmettre_piece.py:22
+msgid "Type de document"
+msgstr "Document type"
+
+#: .\portail\forms\transmettre_piece.py:22
+msgid ""
+"Sélectionnez un type de document dans la liste. Sélectionnez 'Autre type' "
+"s'il ne s'agit pas d'un document prédéfini."
+msgstr ""
+"Select a document type from the list. Select 'Other type' if it's not a "
+"predefined document."
+
+#: .\portail\forms\transmettre_piece.py:23
+msgid "Individu concerné"
+msgstr "Person"
+
+#: .\portail\forms\transmettre_piece.py:23
+msgid ""
+"Sélectionnez le nom de l'individu concerné ou la famille s'il s'agit d'un "
+"document qui concerne toute la famille."
+msgstr ""
+"Select the name of the individual concerned, or the family if the document "
+"concerns the whole family."
+
+#: .\portail\forms\transmettre_piece.py:24
+msgid "Sélectionnez un document à joindre (pdf, jpg ou png)."
+msgstr "Select a document to attach (pdf, jpg or png)."
+
+#: .\portail\forms\transmettre_piece.py:33
+msgid "Titre du document*"
+msgstr "Document title*"
+
+#: .\portail\forms\transmettre_piece.py:37
+msgid ""
+"Saisissez un titre pour ce document. Ex : Certificat médical de Sophie..."
+msgstr "Enter a title for this document. Ex: Medical certificate for Sophie..."
+
+#: .\portail\forms\transmettre_piece.py:38
+msgid "Vous pouvez ajouter des observations si vous le souhaitez."
+msgstr "You can add comments if you wish."
+
+#: .\portail\templates\portail\accueil.html:24
+msgid "Bienvenue"
+msgstr "Welcome"
+
+#: .\portail\templates\portail\accueil.html:30
+msgid "Cliquez ici pour lancer la vidéo"
+msgstr "Click here to launch the video"
+
+#: .\portail\templates\portail\accueil.html:40
+msgid "En attente"
+msgstr "Waiting"
+
+#: .\portail\templates\portail\accueil.html:50
+msgid "Nouveau message"
+msgid_plural "Nouveaux messages"
+msgstr[0] "New message"
+msgstr[1] "New messages"
+
+#: .\portail\templates\portail\accueil.html:54
+#: .\portail\templates\portail\accueil.html:70
+#: .\portail\templates\portail\accueil.html:118
+msgid "Consulter"
+msgstr "Read"
+
+#: .\portail\templates\portail\accueil.html:66
+msgid "Pièce manquante"
+msgid_plural "Pièces manquantes"
+msgstr[0] "Missing document"
+msgstr[1] "Missing documents"
+
+#: .\portail\templates\portail\accueil.html:82
+msgid "Vaccination manquante"
+msgid_plural "Vaccinations manquantes"
+msgstr[0] "Missing vaccination"
+msgstr[1] "Missing vaccinations"
+
+#: .\portail\templates\portail\accueil.html:86
+#: .\portail\templates\portail\accueil.html:102
+#: .\portail\templates\portail\accueil.html:134
+msgid "Corriger"
+msgstr "Fix"
+
+#: .\portail\templates\portail\accueil.html:98
+msgid "Assurance manquante"
+msgid_plural "Assurances manquantes"
+msgstr[0] "Missing insurance"
+msgstr[1] "Missing insurances"
+
+#: .\portail\templates\portail\accueil.html:114
+msgid "Adhésion manquante"
+msgid_plural "Adhésions manquantes"
+msgstr[0] "Missing membership"
+msgstr[1] "Missing memberships"
+
+#: .\portail\templates\portail\accueil.html:130
+msgid "Approbation en attente"
+msgid_plural "Approbations en attente"
+msgstr[0] "Missing approval"
+msgstr[1] "Missing approvals"
+
+#: .\portail\templates\portail\accueil.html:145
+msgid "Actualités"
+msgstr "News"
+
+#: .\portail\templates\portail\accueil.html:151
+#: .\portail\templates\portail\messagerie.html:51
+msgid "Nouveau"
+msgstr "New"
+
+#: .\portail\templates\portail\accueil.html:164
+#: .\portail\templates\portail\widgets\validation_approbation.html:29
+msgid "Cliquez ici pour ouvrir le document dans un nouvel onglet"
+msgstr "Click here to open the document in a new tab"
+
+#: .\portail\templates\portail\accueil.html:167
+msgid "Cliquez ici pour accéder à l'album"
+msgstr "Click here to access the album"
+
+#: .\portail\templates\portail\accueil.html:167
+msgid "Accéder à l'album"
+msgstr "Go to album"
+
+#: .\portail\templates\portail\accueil.html:171
+msgid "Publié le"
+msgstr "Published on"
+
+#: .\portail\templates\portail\accueil.html:171
+msgid "par"
+msgstr "by"
+
+#: .\portail\templates\portail\accueil.html:184
+#: .\portail\utils\utils_onglets.py:32
+msgid "Informations"
+msgstr "Informations"
+
+#: .\portail\templates\portail\accueil.html:192
+msgid "Fermer"
+msgstr "Close"
+
+#: .\portail\templates\portail\activites.html:34
+msgid "Cliquez ici pour inscrire un individu à une nouvelle activité"
+msgstr "Click here to register an individual for a new activity"
+
+#: .\portail\templates\portail\activites.html:34
+#: .\portail\views\inscrire_activite.py:114
+msgid "Inscrire à une nouvelle activité"
+msgstr "Register for a new activity"
+
+#: .\portail\templates\portail\album.html:18
+msgid "Cliquez sur les photos pour les agrandir."
+msgstr "Click on photos to enlarge."
+
+#: .\portail\templates\portail\attente_paiement.html:13
+msgid ""
+"Une fois que vous avez fermé la fenêtre popup du paiement en ligne, cliquez "
+"sur le bouton ci-dessous pour rafraîchir la page de la facturation"
+msgstr ""
+"Once you have closed the online payment popup window, click on the button "
+"below to refresh the billing page"
+
+#: .\portail\templates\portail\attente_paiement.html:14
+msgid "Rafraichir la page"
+msgstr "Refresh the page"
+
+#: .\portail\templates\portail\attente_paiement.html:14
+msgid "Rafraîchir la page"
+msgstr "Refresh the page"
+
+#: .\portail\templates\portail\contact.html:25
+msgid ""
+"Cliquez ci-dessous sur la structure ou le service avec lequel vous souhaitez "
+"converser"
+msgstr ""
+"Click below on the structure or department with which you wish to converse"
+
+#: .\portail\templates\portail\contact.html:32
+msgid "non lu"
+msgstr "not read"
+
+#: .\portail\templates\portail\contact.html:32
+msgid "non lus"
+msgstr "not read"
+
+#: .\portail\templates\portail\contact.html:48
+msgid "Annuaire des structures ou services"
+msgstr "Directory of structures and services"
+
+#: .\portail\templates\portail\contact.html:69
+msgid "Coordonnées de l'organisateur"
+msgstr "Organizer's address"
+
+#: .\portail\templates\portail\cotisations.html:20
+msgid "Adhésions à fournir"
+msgstr "Memberships required"
+
+#: .\portail\templates\portail\cotisations.html:23
+msgid "Les adhésions suivantes marquées d'une croix rouge sont manquantes"
+msgstr "The following memberships marked with a red cross are missing"
+
+#: .\portail\templates\portail\cotisations.html:30
+msgid "Aucune adhésion manquante."
+msgstr "No missing memberships."
+
+#: .\portail\templates\portail\cotisations.html:38
+msgid "Liste des dernières adhésions"
+msgstr "Latest memberships"
+
+#: .\portail\templates\portail\cotisations.html:48
+#: .\portail\templates\portail\facturation.html:302
+#: .\portail\templates\portail\planning.html:79
+#: .\portail\templates\portail\reservations.html:68
+msgid "Du"
+msgstr "From"
+
+#: .\portail\templates\portail\cotisations.html:49
+#: .\portail\templates\portail\facturation.html:303
+msgid "Au"
+msgstr "To"
+
+#: .\portail\templates\portail\cotisations.html:52
+msgid "Bénéficiaire"
+msgstr "Beneficiary"
+
+#: .\portail\templates\portail\cotisations.html:62
+#: .\portail\templates\portail\renseignements.html:132
+msgid "Famille"
+msgstr "Family"
+
+#: .\portail\templates\portail\cotisations.html:68
+msgid "Aucune adhésion"
+msgstr "No membership"
+
+#: .\portail\templates\portail\detail_facture.html:12
+#: .\portail\templates\portail\individu_vaccinations.html:25
+#: .\portail\templates\portail\reglements.html:33
+msgid "Date"
+msgstr "Date"
+
+#: .\portail\templates\portail\detail_facture.html:16
+#: .\portail\templates\portail\facturation.html:71
+#: .\portail\templates\portail\facturation.html:144
+#: .\portail\templates\portail\facturation.html:307
+#: .\portail\templates\portail\reglements.html:36
+msgid "Montant"
+msgstr "Amount"
+
+#: .\portail\templates\portail\detail_facture.html:33
+msgid "Total de la facture"
+msgstr "Invoice total"
+
+#: .\portail\templates\portail\detail_facture.html:35
+msgid "Total déjà réglé"
+msgstr "Total already paid"
+
+#: .\portail\templates\portail\detail_facture.html:36
+msgid "Solde actuel"
+msgstr "Current balance"
+
+#: .\portail\templates\portail\documents.html:41
+msgid "Pièces à fournir"
+msgstr "Required documents"
+
+#: .\portail\templates\portail\documents.html:44
+msgid "Les pièces suivantes marquées d'une croix rouge sont à nous transmettre"
+msgstr "The following items marked with a red cross must be sent to us"
+
+#: .\portail\templates\portail\documents.html:51
+msgid "Aucune pièce à fournir."
+msgstr "No documents required."
+
+#: .\portail\templates\portail\documents.html:59
+#: .\portail\templates\portail\documents.html:62
+#: .\portail\views\transmettre_piece.py:23
+msgid "Transmettre un document"
+msgstr "Transmit a document"
+
+#: .\portail\templates\portail\documents.html:61
+msgid ""
+"Cliquez sur le bouton ci-dessous pour nous transmettre un document (une "
+"pièce du dossier, un certificat, une attestation, etc...)"
+msgstr ""
+"Click on the button below to send us a document (part of the file, "
+"certificate, attestation, etc.)."
+
+#: .\portail\templates\portail\documents.html:70
+msgid "Documents à télécharger"
+msgstr "Documents to download"
+
+#: .\portail\templates\portail\documents.html:72
+msgid "Cliquez sur le nom d'un document pour le télécharger"
+msgstr "Click on a document name to download it"
+
+#: .\portail\templates\portail\documents.html:88
+#: .\portail\templates\portail\documents.html:92
+msgid "Télécharger le document"
+msgstr "Download document"
+
+#: .\portail\templates\portail\facturation.html:28
+msgid "Solde du compte"
+msgstr "Account balance"
+
+#: .\portail\templates\portail\facturation.html:28
+msgid "Il reste à régler un total de"
+msgstr "You have to pay a total of"
+
+#: .\portail\templates\portail\facturation.html:42
+msgid "Vous êtes abonné au prélèvement automatique."
+msgstr "You subscribe to direct debit."
+
+#: .\portail\templates\portail\facturation.html:51
+msgid "Un paiement est en attente."
+msgstr "A payment is pending."
+
+#: .\portail\templates\portail\facturation.html:53
+msgid "paiements sont en attente."
+msgstr "payments are pending."
+
+#: .\portail\templates\portail\facturation.html:55
+msgid ""
+"Si vous avez interrompu la procédure de paiement, vous devez attendre "
+"quelques minutes avant de réactualiser cette page pour voir de nouveau la "
+"facture impayée apparaître ci-dessous."
+msgstr ""
+"If you've interrupted the payment procedure, you'll have to wait a few "
+"minutes before refreshing this page to see the unpaid invoice appear again "
+"below."
+
+#: .\portail\templates\portail\facturation.html:63
+msgid "Récapitulatif des impayés"
+msgstr "Summary of overdue items"
+
+#: .\portail\templates\portail\facturation.html:72
+#: .\portail\templates\portail\facturation.html:145
+msgid "Déjà réglé"
+msgstr "Already paid"
+
+#: .\portail\templates\portail\facturation.html:73
+#: .\portail\templates\portail\facturation.html:146
+#: .\portail\templates\portail\facturation.html:309
+msgid "Reste à régler"
+msgstr "Total payable"
+
+#: .\portail\templates\portail\facturation.html:78
+msgid "Facture"
+msgstr "Invoice"
+
+#: .\portail\templates\portail\facturation.html:113
+#: .\portail\templates\portail\facturation.html:123
+#: .\portail\templates\portail\facturation.html:132
+msgid "Payer en ligne"
+msgstr "Pay online"
+
+#: .\portail\templates\portail\facturation.html:117
+msgid ""
+"Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les "
+"transactions effectuées sur ce portail sont sécurisées par la plateforme de "
+"paiement en ligne PayZen. Cliquez sur le bouton ci-dessous pour sélectionner "
+"le montant à régler et accéder au site sécurisé de notre partenaire."
+msgstr ""
+"You can pay online using your credit card. Transactions carried out on this "
+"portal are secured by the PayZen online payment platform. Click on the "
+"button below to select the amount you wish to pay and access our partner's "
+"secure site."
+
+#: .\portail\templates\portail\facturation.html:120
+msgid ""
+"Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les "
+"transactions effectuées sur ce portail sont sécurisées par la plateforme de "
+"paiement en ligne PAYFIP. Cliquez sur le bouton ci-dessous pour sélectionner "
+"le montant à régler et accéder au site sécurisé de notre partenaire."
+msgstr ""
+"You can pay online using your credit card. Transactions carried out on this "
+"portal are secured by the PAYFIP online payment platform. Click on the "
+"button below to select the amount you wish to pay and access our partner's "
+"secure site."
+
+#: .\portail\templates\portail\facturation.html:135
+msgid ""
+"Cochez les sommes à payer et cliquez sur le bouton Valider pour accéder à la "
+"page de paiement sécurisée de notre partenaire."
+msgstr ""
+"Tick the amounts to be paid and click on the Validate button to access our "
+"partner's secure payment page."
+
+#: .\portail\templates\portail\facturation.html:142
+msgid "Sélection"
+msgstr "Selection"
+
+#: .\portail\templates\portail\facturation.html:182
+msgid "Montant du règlement"
+msgstr "Payment amount"
+
+#: .\portail\templates\portail\facturation.html:188
+msgid "Payer en 3 fois sans frais (Echelonnement sur 3 mois)"
+msgstr "Pay in 3 free instalments (over 3 months)"
+
+#: .\portail\templates\portail\facturation.html:292
+msgid "Liste des dernières factures"
+msgstr "List of latest invoices"
+
+#: .\portail\templates\portail\facturation.html:312
+#: .\portail\templates\portail\individu_assurances.html:30
+#: .\portail\templates\portail\individu_contacts.html:25
+#: .\portail\templates\portail\individu_informations.html:22
+#: .\portail\templates\portail\individu_vaccinations.html:26
+#: .\portail\templates\portail\reglements.html:41
+msgid "Actions"
+msgstr "Actions"
+
+#: .\portail\templates\portail\facturation.html:331
+msgid "Afficher le détail de la facture"
+msgstr "View invoice details"
+
+#: .\portail\templates\portail\facturation.html:334
+msgid "Télécharger la facture"
+msgstr "Download invoice"
+
+#: .\portail\templates\portail\facturation.html:343
+msgid "Aucune facture"
+msgstr "No invoice"
+
+#: .\portail\templates\portail\facturation.html:359
+msgid "Détail d'une facture"
+msgstr "Invoice details"
+
+#: .\portail\templates\portail\fiche.html:24
+msgid "Revenir à la page des renseignements"
+msgstr "Back to information page"
+
+#: .\portail\templates\portail\fiche.html:36
+msgid "Famille de"
+msgstr "Family of"
+
+#: .\portail\templates\portail\header.html:37
+#: .\portail\templates\portail\header.html:51 .\portail\views\profil.py:20
+msgid "Paramètres du compte"
+msgstr "Account settings"
+
+#: .\portail\templates\portail\header.html:60
+msgid "Déconnexion"
+msgstr "Logout"
+
+#: .\portail\templates\portail\individu_assurances.html:29
+msgid "contrat"
+msgstr "contract"
+
+#: .\portail\templates\portail\individu_assurances.html:42
+#: .\portail\templates\portail\individu_contacts.html:37
+#: .\portail\templates\portail\individu_informations.html:31
+#: .\portail\templates\portail\individu_vaccinations.html:36
+msgid "Supprimer"
+msgstr "Delete"
+
+#: .\portail\templates\portail\individu_assurances.html:49
+msgid "Aucune assurance enregistrée."
+msgstr "No insurance recorded."
+
+#: .\portail\templates\portail\individu_assurances.html:53
+msgid "Importer des assurances depuis une autre fiche"
+msgstr "Import insurance from another form"
+
+#: .\portail\templates\portail\individu_assurances.html:53
+#: .\portail\views\individu_assurances.py:143
+msgid "Importer les assurances d'une autre fiche"
+msgstr "Import insurance from another form"
+
+#: .\portail\templates\portail\individu_assurances.html:54
+msgid "Ajouter une assurance"
+msgstr "Add insurance"
+
+#: .\portail\templates\portail\individu_contacts.html:23
+msgid "Lien"
+msgstr "Link"
+
+#: .\portail\templates\portail\individu_contacts.html:44
+msgid "Aucun contact enregistré."
+msgstr "No contacts recorded."
+
+#: .\portail\templates\portail\individu_contacts.html:48
+msgid "Importer des contacts depuis une autre fiche"
+msgstr "Import contacts from another form"
+
+#: .\portail\templates\portail\individu_contacts.html:48
+#: .\portail\views\individu_contacts.py:113
+msgid "Importer les contacts d'une autre fiche"
+msgstr "Import contacts from another form"
+
+#: .\portail\templates\portail\individu_contacts.html:49
+msgid "Ajouter un contact"
+msgstr "Add a contact"
+
+#: .\portail\templates\portail\individu_informations.html:38
+msgid "Aucune information enregistrée."
+msgstr "No information recorded."
+
+#: .\portail\templates\portail\individu_informations.html:41
+msgid "Ajouter une information"
+msgstr "Add information"
+
+#: .\portail\templates\portail\individu_vaccinations.html:43
+msgid "Aucune vaccination enregistrée."
+msgstr "No vaccinations recorded."
+
+#: .\portail\templates\portail\individu_vaccinations.html:46
+msgid "Ajouter une vaccination"
+msgstr "Add a vaccination"
+
+#: .\portail\templates\portail\login.html:6
+msgid "Connexion"
+msgstr "Connection"
+
+#: .\portail\templates\portail\login.html:32
+#: .\portail\templates\portail\reset_password.html:36
+msgid "Vous devez recopier le code de sécurité ci-dessous"
+msgstr "Please enter the security code below"
+
+#: .\portail\templates\portail\login.html:40
+msgid "Se connecter"
+msgstr "Login"
+
+#: .\portail\templates\portail\login.html:46
+msgid "Mot de passe oublié ?"
+msgstr "Forgot your password ?"
+
+#: .\portail\templates\portail\login.html:50
+#: .\portail\templates\portail\login.html:57
+msgid "Pas de codes d'accès ?"
+msgstr "No access codes ?"
+
+#: .\portail\templates\portail\login.html:61
+msgid "Contactez directement l'organisme"
+msgstr "Contact us directly"
+
+#: .\portail\templates\portail\login.html:61
+msgid "pour recevoir vos codes d'accès"
+msgstr "to get your access codes"
+
+#: .\portail\templates\portail\mentions.html:24
+msgid "Conditions générales d'utilisation"
+msgstr "Terms and conditions of use"
+
+#: .\portail\templates\portail\messagerie.html:22
+msgid "Revenir à la page contact"
+msgstr "Back to contact page"
+
+#: .\portail\templates\portail\messagerie.html:29
+msgid "Discussion avec"
+msgstr "Discussion with"
+
+#: .\portail\templates\portail\messagerie.html:38
+msgid "Aucun message récent."
+msgstr "No recent messages."
+
+#: .\portail\templates\portail\page.html:33 .\portail\views\accueil.py:23
+#: .\portail\views\menu.py:14
+msgid "Accueil"
+msgstr "Home"
+
+#: .\portail\templates\portail\password_change_done.html:6
+#: .\portail\templates\portail\password_change_form.html:6
+msgid "Personnalisation du mot de passe"
+msgstr "Customize password"
+
+#: .\portail\templates\portail\password_change_done.html:11
+#: .\portail\templates\portail\password_reset_complete.html:11
+msgid "Votre nouveau mot de passe a bien été enregistré."
+msgstr "Your new password has been registered."
+
+#: .\portail\templates\portail\password_change_done.html:12
+msgid "Cliquez sur le bouton ci-dessous pour accéder au portail."
+msgstr "Click on the button below to access the portal."
+
+#: .\portail\templates\portail\password_change_done.html:14
+msgid "Accéder au portail"
+msgstr "Go to portal"
+
+#: .\portail\templates\portail\password_change_form.html:11
+msgid ""
+"Lors d'une première connexion ou après l'expiration d'un mot de passe, il "
+"est nécessaire de personnaliser votre accès. Veuillez saisir le mot de passe "
+"de votre choix"
+msgstr ""
+"When logging in for the first time or after a password has expired, it is "
+"necessary to personalize your access. Please enter the password of your "
+"choice"
+
+#: .\portail\templates\portail\password_change_form.html:49
+#: .\portail\templates\portail\password_reset_confirm.html:53
+msgid "Pour des raisons de sécurité, répondez à la question suivante"
+msgstr "For security reasons, please answer the following question"
+
+#: .\portail\templates\portail\password_change_form.html:56
+msgid "J'accepte les"
+msgstr "I accept"
+
+#: .\portail\templates\portail\password_change_form.html:56
+msgid "conditions d'utilisation"
+msgstr "terms of use"
+
+#: .\portail\templates\portail\password_change_form.html:62
+msgid "Se déconnecter"
+msgstr "Logout"
+
+#: .\portail\templates\portail\password_change_form.html:69
+msgid "Conditions d'utilisation"
+msgstr "Terms of use"
+
+#: .\portail\templates\portail\password_reset_complete.html:6
+#: .\portail\templates\portail\password_reset_confirm.html:6
+#: .\portail\templates\portail\password_reset_done.html:6
+#: .\portail\templates\portail\reset_password.html:6
+msgid "Réinitialiser votre mot de passe"
+msgstr "Reset your password"
+
+#: .\portail\templates\portail\password_reset_complete.html:12
+msgid ""
+"Vous pouvez vous connecter dès à présent en cliquant sur le bouton ci-dessous"
+msgstr "You can log in now by clicking on the button below"
+
+#: .\portail\templates\portail\password_reset_complete.html:15
+msgid "Aller à la page de connexion"
+msgstr "Go to login page"
+
+#: .\portail\templates\portail\password_reset_confirm.html:13
+msgid "Saisissez le nouveau mot de passe de votre choix et cliquez sur Valider"
+msgstr "Enter the new password of your choice and click on Validate"
+
+#: .\portail\templates\portail\password_reset_confirm.html:63
+msgid ""
+"Le lien que vous venez d'utiliser a expiré. Veuillez renouveler votre "
+"demande de réinitialisation."
+msgstr "The link you just used has expired. Please renew your reset request."
+
+#: .\portail\templates\portail\password_reset_confirm.html:69
+#: .\portail\templates\portail\reset_password.html:48
+msgid "Revenir à la page de connexion"
+msgstr "Back to login page"
+
+#: .\portail\templates\portail\password_reset_done.html:11
+msgid ""
+"Un mail vous a été envoyé. Vous devrez cliquer sur le lien indiqué dans "
+"l'Email."
+msgstr ""
+"An email has been sent to you. You must click on the link indicated in the e-"
+"mail."
+
+#: .\portail\templates\portail\password_reset_done.html:12
+msgid ""
+"Si vous n'avez toujours pas reçu le mail dans quelques minutes, pensez à "
+"regarder dans vos indésirables."
+msgstr ""
+"If you still haven't received the e-mail in a few minutes, check your junk "
+"mail folder."
+
+#: .\portail\templates\portail\password_reset_email.html:3
+msgid "Bonjour"
+msgstr "Hello"
+
+#: .\portail\templates\portail\password_reset_email.html:5
+msgid ""
+"Vous recevez ce message car vous avez demandé une réinitialisation de votre "
+"mot de passe sur le portail"
+msgstr ""
+"You are receiving this message because you have requested a password reset "
+"on the portal %(site_name)s"
+
+#: .\portail\templates\portail\password_reset_email.html:7
+msgid "Rendez-vous sur la page suivante pour saisir un nouveau mot de passe :"
+msgstr "Go to the next page to enter a new password :"
+
+#: .\portail\templates\portail\password_reset_email.html:12
+msgid "L'administrateur de"
+msgstr "administrator of"
+
+#: .\portail\templates\portail\password_reset_subject.txt:2
+msgid "Réinitialisation du mot de passe"
+msgstr "Reset password"
+
+#: .\portail\templates\portail\planning.html:51
+msgid "Revenir à la liste des périodes"
+msgstr "Return to the list of periods"
+
+#: .\portail\templates\portail\planning.html:72
+msgid "Période"
+msgstr "Period"
+
+#: .\portail\templates\portail\planning.html:78
+msgid "Dates"
+msgstr "Dates"
+
+#: .\portail\templates\portail\planning.html:79
+#: .\portail\templates\portail\reservations.html:68
+msgid "au"
+msgstr "to"
+
+#: .\portail\templates\portail\planning.html:108
+msgid "Réservation"
+msgstr "Reservation"
+
+#: .\portail\templates\portail\planning.html:109
+msgid "Attente"
+msgstr "Waiting"
+
+#: .\portail\templates\portail\planning.html:110
+msgid "Disponible"
+msgstr "Available"
+
+#: .\portail\templates\portail\planning.html:111
+msgid "Dernières places"
+msgstr "Last places"
+
+#: .\portail\templates\portail\planning.html:112
+msgid "Complet"
+msgstr "Complete"
+
+#: .\portail\templates\portail\planning.html:113
+msgid "Présent"
+msgstr "Present"
+
+#: .\portail\templates\portail\planning.html:114
+msgid "Non modifiable"
+msgstr "Not editable"
+
+#: .\portail\templates\portail\profil.html:14
+msgid "Nom d'utilisateur"
+msgstr "Username"
+
+#: .\portail\templates\portail\profil.html:17
+msgid "Dernière connexion"
+msgstr "Last login"
+
+#: .\portail\templates\portail\profil.html:20
+msgid "Utilisateur depuis"
+msgstr "User since"
+
+#: .\portail\templates\portail\profil.html:30
+msgid "Modifier le mot de passe"
+msgstr "Change password"
+
+#: .\portail\templates\portail\reglements.html:24
+msgid "Liste des règlements"
+msgstr "Payment list"
+
+#: .\portail\templates\portail\reglements.html:34
+msgid "Mode"
+msgstr "Payment type"
+
+#: .\portail\templates\portail\reglements.html:38
+msgid "Encaissé"
+msgstr "Cashed"
+
+#: .\portail\templates\portail\reglements.html:63
+msgid "Télécharger le reçu"
+msgstr "Download receipt"
+
+#: .\portail\templates\portail\reglements.html:71
+msgid "Aucun règlement."
+msgstr "No payment."
+
+#: .\portail\templates\portail\renseignements.html:80
+msgid "Approbations en attente"
+msgstr "Missing approvals"
+
+#: .\portail\templates\portail\renseignements.html:81
+msgid ""
+"L'accès aux réservations nécessite les approbations suivantes. Après avoir "
+"vérifié les fiches, cochez les cases puis cliquez sur le bouton Valider."
+msgstr ""
+"Access to reservations requires the following approvals. After checking the "
+"forms below, tick the boxes and click on the Validate button."
+
+#: .\portail\templates\portail\renseignements.html:88
+msgid "Valider les approbations cochées"
+msgstr "Validate checked approvals"
+
+#: .\portail\templates\portail\renseignements.html:121
+msgid "Fiches de renseignements"
+msgstr "Information forms"
+
+#: .\portail\templates\portail\renseignements.html:135
+#: .\portail\views\fiche.py:36
+msgid "Fiche famille"
+msgstr "Family form"
+
+#: .\portail\templates\portail\renseignements.html:141
+#: .\portail\templates\portail\renseignements.html:171
+msgid "Fiche certifiée exacte le"
+msgstr "Certified accurate on"
+
+#: .\portail\templates\portail\renseignements.html:143
+#: .\portail\templates\portail\renseignements.html:173
+msgid "Fiche en attente de certification"
+msgstr "Pending certification"
+
+#: .\portail\templates\portail\renseignements.html:149
+#: .\portail\templates\portail\renseignements.html:182
+msgid "Ouvrir la fiche"
+msgstr "Open form"
+
+#: .\portail\templates\portail\renseignements.html:163
+msgid "Fiche représentant"
+msgstr "Adult form"
+
+#: .\portail\templates\portail\renseignements.html:164
+msgid "Fiche enfant"
+msgstr "Child form"
+
+#: .\portail\templates\portail\renseignements.html:165
+msgid "Fiche contact"
+msgstr "Contact form"
+
+#: .\portail\templates\portail\reservations.html:34
+msgid ""
+"Avant d'accéder aux réservations, vous devez valider les approbations de la "
+"page"
+msgstr ""
+"Before accessing reservations, you must validate the approvals on the page"
+
+#: .\portail\templates\portail\reservations.html:34 .\portail\views\menu.py:15
+#: .\portail\views\renseignements.py:28
+msgid "Renseignements"
+msgstr "Information"
+
+#: .\portail\templates\portail\reservations.html:45
+msgid "ans"
+msgstr "years"
+
+#: .\portail\templates\portail\reservations.html:71
+msgid "Aucune période disponible"
+msgstr "No period available"
+
+#: .\portail\templates\portail\reservations.html:87
+msgid "Liste des périodes de réservations"
+msgstr "List of reservation periods"
+
+#: .\portail\templates\portail\reservations.html:90
+msgid "Aucune période de réservation disponible."
+msgstr "No reservation period available."
+
+#: .\portail\templates\portail\reset_password.html:11
+msgid ""
+"Saisissez votre identifiant et votre adresse Email puis cliquez sur Envoyer "
+"pour recevoir immédiatement un mail de réinitialisation."
+msgstr ""
+"Enter your login and email address, then click on Send to receive an "
+"immediate reset email."
+
+#: .\portail\templates\portail\reset_password.html:44
+msgid ""
+"Cliquez ici pour envoyer votre demande de réinitialisation du mot de passe"
+msgstr "Click here to send your password reset request"
+
+#: .\portail\templates\portail\retour_paiement.html:13
+msgid "Revenir à la page de la facturation"
+msgstr "Back to billing page"
+
+#: .\portail\templates\portail\retour_paiement.html:18
+msgid "Vous avez annulé avant d'avoir procédé au paiement !"
+msgstr "You've cancelled before making payment !"
+
+#: .\portail\templates\portail\retour_paiement.html:19
+#: .\portail\templates\portail\retour_paiement.html:26
+#: .\portail\templates\portail\retour_paiement.html:33
+#: .\portail\templates\portail\retour_paiement.html:40
+msgid "Vous pouvez revenir à la page des factures."
+msgstr "You can return to the invoice page."
+
+#: .\portail\templates\portail\retour_paiement.html:25
+msgid "Une erreur a été rencontrée par la plate-forme de paiement !"
+msgstr "The payment platform has encountered an error !"
+
+#: .\portail\templates\portail\retour_paiement.html:32
+msgid "Votre paiement a été refusé !"
+msgstr "Your payment has been refused !"
+
+#: .\portail\templates\portail\retour_paiement.html:39
+msgid "Votre paiement a bien été enregistré !"
+msgstr "Your payment has been Registered !"
+
+#: .\portail\templates\portail\widgets\validation_approbation.html:13
+msgid "J'ai lu et j'accepte les conditions décrites dans le document"
+msgstr "I have read and accept the conditions described in the document"
+
+#: .\portail\templates\portail\widgets\validation_approbation.html:16
+msgid "Je certifie exact les renseignements de la fiche de"
+msgstr "I certify that the information on the registration form is correct for"
+
+#: .\portail\templates\portail\widgets\validation_approbation.html:19
+msgid "Je certifie exact les renseignements de la fiche famille."
+msgstr "I certify that the information on the family form is correct."
+
+#: .\portail\templates\portail\widgets\validation_approbation.html:23
+msgid "Document mis à jour le"
+msgstr "Document updated on"
+
+#: .\portail\utils\utils_onglets.py:24 .\portail\views\famille_caisse.py:22
+msgid "Caisse"
+msgstr "Welfare office"
+
+#: .\portail\utils\utils_onglets.py:26
+#: .\portail\views\individu_questionnaire.py:22
+msgid "Questionnaire"
+msgstr "Questions"
+
+#: .\portail\utils\utils_onglets.py:31
+#: .\portail\views\individu_vaccinations.py:59
+msgid "Vaccinations"
+msgstr "Vaccinations"
+
+#: .\portail\utils\utils_onglets.py:33
+#: .\portail\views\individu_assurances.py:84
+msgid "Assurances"
+msgstr "Insurances"
+
+#: .\portail\utils\utils_onglets.py:34
+msgid "Contacts"
+msgstr "Contacts"
+
+#: .\portail\views\activites.py:21 .\portail\views\menu.py:17
+msgid "Activités"
+msgstr "Activities"
+
+#: .\portail\views\album.py:18
+msgid "Album"
+msgstr "Album"
+
+#: .\portail\views\attente_paiement.py:20
+msgid "Attente du paiement"
+msgstr "Waiting for payment"
+
+#: .\portail\views\attente_paiement.py:21
+msgid "Paiement en cours"
+msgstr "Payment in progress"
+
+#: .\portail\views\change_password.py:35
+msgid "La réponse à la question est erronée"
+msgstr "The answer to the question is wrong"
+
+#: .\portail\views\contact.py:21 .\portail\views\menu.py:22
+msgid "Contact"
+msgstr "Contact"
+
+#: .\portail\views\cotisations.py:21 .\portail\views\menu.py:16
+msgid "Adhésions"
+msgstr "Memberships"
+
+#: .\portail\views\documents.py:23 .\portail\views\menu.py:19
+msgid "Documents"
+msgstr "Documents"
+
+#: .\portail\views\facturation.py:54 .\portail\views\menu.py:20
+msgid "Facturation"
+msgstr "Billing"
+
+#: .\portail\views\facturation.py:70
+msgid "Le montant doit être supérieur à zéro !"
+msgstr "The amount must be greater than zero!"
+
+#: .\portail\views\facturation.py:74
+#, python-format
+msgid "Le paiement en ligne nécessite un montant minimal de %.2f € !"
+msgstr "Online payment requires a minimum amount of %.2f € !"
+
+#: .\portail\views\facturation.py:535
+msgid "1 facture à régler"
+msgstr "1 invoice to pay"
+
+#: .\portail\views\facturation.py:535
+#, python-format
+msgid "%d factures à régler"
+msgstr "%d invoices to pay"
+
+#: .\portail\views\facturation.py:537
+msgid "des prestations à régler en avance"
+msgstr "services to be prepaid"
+
+#: .\portail\views\facturation.py:539
+#, python-format
+msgid "Il reste %s pour un total de"
+msgstr "You have to pay %s for a total of"
+
+#: .\portail\views\famille_caisse.py:18
+msgid "Modifier la caisse"
+msgstr "Edit welfare office"
+
+#: .\portail\views\famille_caisse.py:23 .\portail\views\individu_coords.py:23
+#: .\portail\views\individu_identite.py:23
+#: .\portail\views\individu_maladies.py:32
+#: .\portail\views\individu_medecin.py:47
+#: .\portail\views\individu_questionnaire.py:23
+#: .\portail\views\individu_regimes_alimentaires.py:32
+msgid ""
+"Cliquez sur le bouton Modifier au bas de la page pour modifier une des "
+"informations ci-dessous."
+msgstr ""
+"Click on the Modify button at the bottom of the page to change any of the "
+"information below."
+
+#: .\portail\views\famille_caisse.py:36
+msgid ""
+"Renseignez les informations concernant la caisse d'allocation de la famille "
+"et cliquez sur le bouton Enregistrer."
+msgstr "Fill in the details of the family's welfare office and click on Save."
+
+#: .\portail\views\famille_caisse.py:38
+#: .\portail\views\individu_assurances.py:62
+#: .\portail\views\individu_contacts.py:38
+#: .\portail\views\individu_coords.py:39
+#: .\portail\views\individu_identite.py:38
+#: .\portail\views\individu_informations.py:38
+#: .\portail\views\individu_maladies.py:47
+#: .\portail\views\individu_medecin.py:62
+#: .\portail\views\individu_questionnaire.py:39
+#: .\portail\views\individu_regimes_alimentaires.py:48
+#: .\portail\views\individu_vaccinations.py:38
+msgid ""
+"Ces informations devront être validées par l'administrateur de l'application."
+msgstr "This information must be validated by the application administrator."
+
+#: .\portail\views\fiche.py:32
+msgid "Fiche individuelle"
+msgstr "Individual form"
+
+#: .\portail\views\fiche.py:122
+msgid "Aucune modification n'a été enregistrée"
+msgstr "No changes have been recorded"
+
+#: .\portail\views\fiche.py:124 .\portail\views\individu_assurances.py:110
+#: .\portail\views\individu_contacts.py:79
+#: .\portail\views\individu_informations.py:79
+#: .\portail\views\individu_vaccinations.py:80
+msgid "Votre ajout a été enregistré"
+msgstr "Your addition has been saved"
+
+#: .\portail\views\fiche.py:124
+msgid "Votre modification a été enregistrée"
+msgstr "Your change has been saved"
+
+#: .\portail\views\fiche.py:133
+msgid " et transmis à l'administrateur"
+msgstr " and sent to the administrator"
+
+#: .\portail\views\fiche.py:133
+msgid " et transmise à l'administrateur"
+msgstr " et transmis à l'administrateur"
+
+#: .\portail\views\individu_assurances.py:49
+#: .\portail\views\individu_assurances.py:85
+msgid ""
+"Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle "
+"assurance."
+msgstr ""
+"Click on the Add button at the bottom of the page to add a new insurance "
+"policy."
+
+#: .\portail\views\individu_assurances.py:50
+msgid ""
+"Saisissez les informations concernant l'assurance et cliquez sur le bouton "
+"Enregistrer."
+msgstr "Enter your insurance details and click on the Save button."
+
+#: .\portail\views\individu_assurances.py:51
+msgid "une assurance"
+msgstr "a insurance"
+
+#: .\portail\views\individu_assurances.py:52
+msgid "des assurances"
+msgstr "insurances"
+
+#: .\portail\views\individu_assurances.py:144
+msgid ""
+"Cochez la ou les assurances à importer et cliquez sur le bouton Importer."
+msgstr ""
+"Check the insurance policies to be imported and click on the Import button."
+
+#: .\portail\views\individu_assurances.py:167
+#, python-format
+msgid "%d assurances importées avec succès"
+msgstr "%d successfully imported insurances"
+
+#: .\portail\views\individu_assurances.py:170
+msgid "Aucune assurance importée"
+msgstr "No insurance recorded"
+
+#: .\portail\views\individu_contacts.py:26
+#: .\portail\views\individu_contacts.py:60
+msgid ""
+"Cliquez sur le bouton Ajouter au bas de la page pour ajouter un nouveau "
+"contact."
+msgstr ""
+"Click on the Add button at the bottom of the page to add a new contact."
+
+#: .\portail\views\individu_contacts.py:27
+msgid ""
+"Saisissez les informations concernant le contact et cliquez sur le bouton "
+"Enregistrer."
+msgstr "Enter the contact information and click on the Save button."
+
+#: .\portail\views\individu_contacts.py:28
+msgid "un contact d'urgence et de sortie"
+msgstr "an emergency and exit contact"
+
+#: .\portail\views\individu_contacts.py:29
+msgid "des contacts d'urgence et de sortie"
+msgstr "emergency and exit contacts"
+
+#: .\portail\views\individu_contacts.py:59
+msgid "Contacts d'urgence et de sortie"
+msgstr "Emergency and exit contacts"
+
+#: .\portail\views\individu_contacts.py:114
+msgid "Cochez le ou les contacts à importer et cliquez sur le bouton Importer."
+msgstr "Tick the contact(s) to be imported and click on the Import button."
+
+#: .\portail\views\individu_contacts.py:137
+#, python-format
+msgid "%d contacts importés avec succès"
+msgstr "%d contacts successfully imported"
+
+#: .\portail\views\individu_contacts.py:140
+msgid "Aucun contact importé"
+msgstr "No contacts recorded"
+
+#: .\portail\views\individu_coords.py:18
+msgid "Modifier les coordonnées"
+msgstr "Change contact details"
+
+#: .\portail\views\individu_coords.py:37
+msgid ""
+"Renseignez les informations concernant les coordonnées de l'individu et "
+"cliquez sur le bouton Enregistrer."
+msgstr "Enter the individual's contact details and click on the Save button."
+
+#: .\portail\views\individu_identite.py:36
+msgid ""
+"Renseignez les informations concernant l'identité de l'individu et cliquez "
+"sur le bouton Enregistrer."
+msgstr ""
+"Fill in the information concerning the individual's identity and click on "
+"the Save button."
+
+#: .\portail\views\individu_informations.py:25
+#: .\portail\views\individu_informations.py:60
+msgid ""
+"Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle "
+"information."
+msgstr ""
+"Click on the Add button at the bottom of the page to add new information."
+
+#: .\portail\views\individu_informations.py:26
+msgid ""
+"Saisissez les informations nécessaires et cliquez sur le bouton Enregistrer."
+msgstr "Enter the required information and click on the Save button."
+
+#: .\portail\views\individu_informations.py:27
+msgid "une information personnelle"
+msgstr "an information"
+
+#: .\portail\views\individu_informations.py:28
+msgid "des informations personnelles"
+msgstr "informations"
+
+#: .\portail\views\individu_informations.py:59
+msgid "Informations personnelles"
+msgstr "Informations"
+
+#: .\portail\views\individu_maladies.py:27
+msgid "Modifier les maladies"
+msgstr "Edit diseases"
+
+#: .\portail\views\individu_maladies.py:45
+msgid ""
+"Sélectionnez une ou plusieurs maladies dans le champ ci-dessous et cliquez "
+"sur le bouton Enregistrer."
+msgstr ""
+"Select one or more diseases in the field below and click on the Save button."
+
+#: .\portail\views\individu_medecin.py:42
+msgid "Modifier le médecin"
+msgstr "Edit doctor"
+
+#: .\portail\views\individu_medecin.py:60
+msgid ""
+"Sélectionnez un médecin dans le champ ci-dessous et cliquez sur le bouton "
+"Enregistrer."
+msgstr "Select a doctor in the field below and click on the Save button."
+
+#: .\portail\views\individu_questionnaire.py:37
+msgid ""
+"Renseignez le questionnaire de l'individu et cliquez sur le bouton "
+"Enregistrer."
+msgstr "Complete the questions and click on Save."
+
+#: .\portail\views\individu_regimes_alimentaires.py:27
+msgid "Modifier les régimes alimentaires"
+msgstr "Edit diets"
+
+#: .\portail\views\individu_regimes_alimentaires.py:46
+msgid ""
+"Sélectionnez un ou plusieurs régimes alimentaires dans le champ ci-dessous "
+"et cliquez sur le bouton Enregistrer."
+msgstr ""
+"Select one or more diets in the field below and click on the Save button."
+
+#: .\portail\views\individu_vaccinations.py:26
+#: .\portail\views\individu_vaccinations.py:60
+msgid ""
+"Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle "
+"vaccination."
+msgstr ""
+"Click on the Add button at the bottom of the page to add a new vaccination."
+
+#: .\portail\views\individu_vaccinations.py:27
+msgid ""
+"Saisissez les informations concernant la vaccination et cliquez sur le "
+"bouton Enregistrer."
+msgstr "Enter your vaccination details and click on Save."
+
+#: .\portail\views\individu_vaccinations.py:28
+msgid "une vaccination"
+msgstr "a vaccination"
+
+#: .\portail\views\individu_vaccinations.py:29
+msgid "des vaccinations"
+msgstr "vaccinations"
+
+#: .\portail\views\inscrire_activite.py:116
+msgid ""
+"Renseignez les paramètres ci-dessous et cliquez sur le bouton Envoyer la "
+"demande d'inscription."
+msgstr "Fill in the parameters below and click on the Send button."
+
+#: .\portail\views\inscrire_activite.py:125
+msgid "La demande a bien été transmise"
+msgstr "The request has been sent"
+
+#: .\portail\views\mentions.py:19 .\portail\views\menu.py:23
+msgid "Mentions légales"
+msgstr "Legal information"
+
+#: .\portail\views\menu.py:12
+msgid "Menu principal"
+msgstr "Main menu"
+
+#: .\portail\views\menu.py:18 .\portail\views\reservations.py:22
+msgid "Réservations"
+msgstr "Reservations"
+
+#: .\portail\views\menu.py:21 .\portail\views\reglements.py:54
+msgid "Règlements"
+msgstr "Payments"
+
+#: .\portail\views\messagerie.py:25
+msgid "Messagerie"
+msgstr "Messaging"
+
+#: .\portail\views\messagerie.py:52
+msgid "Le message a bien été envoyé"
+msgstr "The message has been sent"
+
+#: .\portail\views\planning.py:70
+msgid "Planning"
+msgstr "Planning"
+
+#: .\portail\views\profil.py:21
+msgid "Profil de l'utilisateur"
+msgstr "User profile"
+
+#: .\portail\views\profil_password_change.py:27
+msgid "Profil"
+msgstr "Profile"
+
+#: .\portail\views\profil_password_change.py:28
+msgid "Modification du mot de passe"
+msgstr "Password change"
+
+#: .\portail\views\profil_password_change.py:29
+msgid ""
+"Saisissez à deux reprises le mot de passe souhaité en tenant compte des "
+"caractéristiques énoncées ci-dessous."
+msgstr ""
+"Enter the desired password twice, taking into account the characteristics "
+"described below."
+
+#: .\portail\views\profil_password_change.py:41
+msgid "Le mot de passe a été modifié avec succès"
+msgstr "Password successfully changed"
+
+#: .\portail\views\renseignements.py:77
+msgid "Aucune approbation n'a été cochée"
+msgstr "No approval checked"
+
+#: .\portail\views\renseignements.py:79
+msgid "L'approbation cochée a bien été enregistrée"
+msgstr "The approval has been registered"
+
+#: .\portail\views\renseignements.py:81
+#, python-format
+msgid "Les %d approbations cochées ont bien été enregistrées"
+msgstr "The %d approvals checked have been recorded correctly"
+
+#: .\portail\views\transmettre_piece.py:25
+msgid ""
+"Renseignez les caractéristiques du document et cliquez sur le bouton Envoyer."
+msgstr "Fill in the document details and validate."
+
+#: .\portail\views\transmettre_piece.py:34
+msgid "Le document a bien été transmis"
+msgstr "The document has been sent"
+
+#: .\portail\views\transmettre_piece.py:35
+msgid "Ajouter une pièce"
+msgstr "Add a document"
+
+#~ msgid "Fiche"
+#~ msgstr "Form"
