@@ -85,7 +85,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
     def clean(self):
         # Vérification des données saisies
-        if not self.cleaned_data["adresse"]:
+        if not self.cleaned_data.get("adresse", None):
             self.add_error('adresse', "Vous devez renseigner l'adresse d'expédition")
             return
 
