@@ -13,6 +13,7 @@ from fiche_individu.views.individu import Onglet
 class Page(Onglet):
     model = Note
     url_liste = "individu_resume"
+    url_ajouter = "individu_notes_ajouter"
     description_saisie = "Saisissez les caractéristiques de la note et cliquez sur le bouton Enregistrer."
     objet_singulier = "une note"
     objet_pluriel = "des notes"
