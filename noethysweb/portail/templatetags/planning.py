@@ -55,6 +55,14 @@ def is_modif_allowed(date, data):
                 if "feries" in activite.portail_reservations_limite and utils_dates.EstFerie(date_limite, data["liste_feries"]):
                     date_valide = False
 
+                # Vérifie que la date est hors jours exclus
+                if "jours" in activite.portail_reservations_limite:
+                    for chaine in activite.portail_reservations_limite.split("#"):
+                        if "jours" in chaine:
+                            for num_jour in [int(num_jour) for num_jour in chaine.replace("exclure_jours", "")]:
+                                if date_limite.weekday() == num_jour:
+                                    date_valide = False
+
                 if date_valide == True:
                     x += 1
 

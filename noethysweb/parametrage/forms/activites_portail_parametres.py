@@ -9,9 +9,9 @@ from django.forms import ModelForm
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset, Div
-from crispy_forms.bootstrap import Field
+from crispy_forms.bootstrap import Field, InlineCheckboxes
 from core.utils.utils_commandes import Commandes
-from core.models import Activite, ModeleEmail
+from core.models import Activite, ModeleEmail, JOURS_SEMAINE
 from core.widgets import DateTimePickerWidget
 
 
@@ -40,6 +40,7 @@ class Formulaire(FormulaireBase, ModelForm):
     limite_heure = forms.TimeField(label="Heure limite", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
     exclure_weekends = forms.BooleanField(label="Exclure les weeks-ends", required=False, initial=False)
     exclure_feries = forms.BooleanField(label="Exclure les jours fériés", required=False, initial=False)
+    exclure_jours = forms.MultipleChoiceField(label="Exclure les jours", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
 
     class Meta:
         model = Activite
@@ -62,7 +63,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.use_custom_control = False
 
         self.helper.form_class = 'form-horizontal'
-        self.helper.label_class = 'col-md-3'
+        self.helper.label_class = 'col-md-3 col-form-label'
         self.helper.field_class = 'col-md-9'
 
         # Limite
@@ -72,6 +73,10 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields["limite_heure"].initial = datetime.datetime.strptime(parametres_limite[1], '%H:%M')
             self.fields["exclure_weekends"].initial = "exclure_weekends" in self.instance.portail_reservations_limite
             self.fields["exclure_feries"].initial = "exclure_feries" in self.instance.portail_reservations_limite
+            if "exclure_jours" in self.instance.portail_reservations_limite:
+                for chaine in self.instance.portail_reservations_limite.split("#"):
+                    if "exclure_jours" in chaine:
+                        self.fields["exclure_jours"].initial = [int(num_jour) for num_jour in chaine.replace("exclure_jours", "")]
 
         # Modèle d'email de réattribution
         self.fields["reattribution_modele_email"].queryset = ModeleEmail.objects.filter(categorie="portail_places_disponibles")
@@ -103,6 +108,7 @@ class Formulaire(FormulaireBase, ModelForm):
                     Field("limite_heure"),
                     Field("exclure_weekends"),
                     Field("exclure_feries"),
+                    InlineCheckboxes("exclure_jours"),
                     id="bloc_limite"
                 ),
                 Field("portail_afficher_dates_passees"),
@@ -140,6 +146,7 @@ class Formulaire(FormulaireBase, ModelForm):
             parametres_limite = [self.cleaned_data["limite_delai"], self.cleaned_data["limite_heure"].strftime('%H:%M')]
             if self.cleaned_data["exclure_weekends"]: parametres_limite.append("exclure_weekends")
             if self.cleaned_data["exclure_feries"]: parametres_limite.append("exclure_feries")
+            if self.cleaned_data["exclure_jours"]: parametres_limite.append("exclure_jours%s" % "".join(str(num_jour) for num_jour in self.cleaned_data["exclure_jours"]))
             self.cleaned_data["portail_reservations_limite"] = "#".join(parametres_limite)
         else:
             self.cleaned_data["portail_reservations_limite"] = None
