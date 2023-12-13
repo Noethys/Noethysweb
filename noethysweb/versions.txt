@@ -1,3 +1,7 @@
+Version 1.2.1.4 (13/12/2023) :
+
+- Correction du nom de répertoire des traductions
+
 Version 1.2.1.3 (13/12/2023) :
 
 - Ajout de l'interface multilingue pour le portail
