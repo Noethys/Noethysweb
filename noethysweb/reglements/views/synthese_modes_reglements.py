@@ -35,6 +35,7 @@ class View(CustomView, TemplateView):
             "form_parametres": form,
             "liste_colonnes": liste_colonnes,
             "liste_lignes": json.dumps(liste_lignes),
+            "titre": "Synthèse des modes de règlements",
         }
         return self.render_to_response(self.get_context_data(**context))
 

@@ -35,6 +35,7 @@ class View(CustomView, TemplateView):
             "liste_colonnes": liste_colonnes,
             "liste_lignes": json.dumps(liste_lignes),
             "afficher_detail": form.cleaned_data["afficher_detail"],
+            "titre": "Synthèse des impayés",
         }
         return self.render_to_response(self.get_context_data(**context))
 
@@ -74,7 +75,7 @@ class View(CustomView, TemplateView):
 
         # Récupération de toutes les prestations de la période
         conditions_prestations = conditions_periode & condition_activites & Q(categorie__in=parametres["donnees"])
-        prestations = Prestation.objects.select_related('famille').filter(conditions_prestations)
+        prestations = Prestation.objects.select_related('famille').filter(conditions_prestations).distinct()
 
         dictResultats = {"familles": {}, "activites": {}}
         listePeriodes = []

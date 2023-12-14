@@ -172,7 +172,7 @@ HTML_RESULTATS = """
         var affiche_pagination = false;
     </script>
 
-    <table id="table" class="table-sm" data-height="700" data-show-footer='true'>
+    <table id="table" class="table-sm table-xxs" data-height="700" data-show-footer='true'>
         <thead>
             <tr>
                 {% for colonne in liste_colonnes %}

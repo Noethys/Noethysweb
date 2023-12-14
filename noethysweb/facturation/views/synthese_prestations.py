@@ -34,6 +34,7 @@ class View(CustomView, TemplateView):
             "form_parametres": form,
             "liste_colonnes": liste_colonnes,
             "liste_lignes": json.dumps(liste_lignes),
+            "titre": "Synthèse des prestations",
         }
         return self.render_to_response(self.get_context_data(**context))
 
@@ -86,7 +87,7 @@ class View(CustomView, TemplateView):
             conditions_prestations &= Q(facture__isnull=False)
         if "nonfacturee" in mode_affichage:
             conditions_prestations &= Q(facture__isnull=True)
-        prestations = Prestation.objects.select_related('activite', 'categorie_tarif', 'famille', 'individu').filter(conditions_prestations)
+        prestations = Prestation.objects.select_related('activite', 'categorie_tarif', 'famille', 'individu').filter(conditions_prestations).distinct()
 
         # Récupération des tranches de QF
         liste_tranches = []
