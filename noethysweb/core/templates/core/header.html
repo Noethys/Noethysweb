@@ -87,7 +87,7 @@
             <li class="nav-item dropdown">
                 <a href="#" class="nav-link" data-toggle="dropdown" title="Actions rapides"><i class="fa fa-star-o"></i></a>
                 <ul class="dropdown-menu" role="menu">
-                    {% if perms.core.famille_ajouter %}
+                    {% if perms.core.famille_liste %}
                         <h6 class="dropdown-header"><strong>Individus</strong></h6>
                         <li class="dropdown-item"><a href="{% url 'famille_ajouter' %}">Ajouter une famille</a></li>
                     {% endif %}
