@@ -100,6 +100,7 @@
                                 text-align: center;
                                 vertical-align: middle;
                             }
+                            ${get_css_ligne()}
                         </style>
                         </head>
                         <title>{{ titre|default:'Impression de la liste' }}</title>
@@ -121,6 +122,17 @@
             $('.fixed-table-toolbar input[type="text"]').
                 attr('placeholder', 'Rechercher...').
                 css({'width':'180px', 'border-radius': '3px'});
+
+            function get_css_ligne() {
+                var texte_styles = ""
+                // Ajoute css aux lignes de regroupement durant l'impression
+                $.each(contenu_table, function (index, ligne) {
+                    if (ligne.regroupement === true) {
+                        texte_styles += "tbody tr:nth-child(" + (index+1) + ") {background-color: #efefef;font-weight: bold;-webkit-print-color-adjust: exact;} "
+                    }
+                })
+                return texte_styles
+            }
 
         })
 
