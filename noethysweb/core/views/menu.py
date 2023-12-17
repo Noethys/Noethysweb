@@ -421,6 +421,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Analyse
     menu_analyse_reglements = menu_reglements.Add(titre="Analyse")
     menu_analyse_reglements.Add(code="detail_prestations_depot", titre="Détail des prestations d'un dépôt", icone="file-text-o")
+    menu_analyse_reglements.Add(code="detail_ventilations_depots", titre="Détail des ventilations des dépôts", icone="file-text-o")
     menu_analyse_reglements.Add(code="synthese_modes_reglements", titre="Synthèse des modes de règlements", icone="file-text-o")
 
     # Dépôts

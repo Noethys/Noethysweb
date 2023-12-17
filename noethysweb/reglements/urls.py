@@ -9,7 +9,8 @@ from core.decorators import secure_ajax
 from core.decorators import Verifie_ventilation
 from reglements.views import liste_reglements, liste_recus, liste_detaillee_reglements, synthese_modes_reglements, \
                             depots_reglements, depots_reglements_selection, detail_prestations_depot, \
-                            liste_reglements_disponibles, corriger_ventilation, liste_paiements, reglements_lot_factures
+                            liste_reglements_disponibles, corriger_ventilation, liste_paiements, reglements_lot_factures, \
+                            detail_ventilations_depots
 
 
 urlpatterns = [
@@ -27,6 +28,7 @@ urlpatterns = [
 
     # Analyse
     path('reglements/detail_prestations_depot', Verifie_ventilation(detail_prestations_depot.View.as_view()), name='detail_prestations_depot'),
+    path('reglements/detail_ventilations_depots', Verifie_ventilation(detail_ventilations_depots.View.as_view()), name='detail_ventilations_depots'),
     path('reglements/synthese_modes_reglements', Verifie_ventilation(synthese_modes_reglements.View.as_view()), name='synthese_modes_reglements'),
 
     # Dépôts de règlements
