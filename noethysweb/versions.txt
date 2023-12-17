@@ -1,3 +1,10 @@
+Version 1.2.1.5 (17/12/2023) :
+
+- Ajout du détail des ventilations des dépôts
+- Ajout de la couleur dans les impressions des bootstrap tables
+- Amélioration des bootstrap tables
+- Correction du raccourci Ajouter une famille
+
 Version 1.2.1.4 (13/12/2023) :
 
 - Correction du nom de répertoire des traductions
