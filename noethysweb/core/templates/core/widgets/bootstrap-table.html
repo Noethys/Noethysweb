@@ -5,6 +5,17 @@
     <link rel="stylesheet" type="text/css" href="{% static 'lib/bootstrap-table/bootstrap-table.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'lib/jquery-treegrid/css/jquery.treegrid.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'lib/bootstrap-table/extensions/fixed-columns/bootstrap-table-fixed-columns.min.css' %}">
+    
+    <style>
+        .case_regroupement {
+            background-color: #efefef;
+            font-weight: bold;
+        }
+        #table td {
+            padding: 3px;
+        }
+    </style>
+    
 {% endblock styles %}
 
 {% block scripts %}
@@ -29,6 +40,12 @@
                 locale: "fr-FR",
                 exportDataType: $(this).val(),
                 exportTypes: ['json', 'xml', 'csv', 'txt', 'png', 'doc', 'xlsx', 'pdf'],
+                exportOptions: {
+                    fileName: function () {
+                        return "export"
+                    },
+                    excelstyles: ['background-color', 'color', 'font-size', 'font-weight'],
+                },
                 // iconSize: 'md',
                 iconsPrefix: 'fa',
                 icons: {
