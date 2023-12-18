@@ -418,16 +418,16 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_listes.Add(code="reglements_lot_factures", titre="Liste des règlements associés à un lot de factures", icone="file-text-o")
     menu_listes.Add(code="liste_paiements", titre="Liste des paiements en ligne", icone="file-text-o")
 
-    # Analyse
-    menu_analyse_reglements = menu_reglements.Add(titre="Analyse")
-    menu_analyse_reglements.Add(code="detail_prestations_depot", titre="Détail des prestations d'un dépôt", icone="file-text-o")
-    menu_analyse_reglements.Add(code="detail_ventilations_depots", titre="Détail des ventilations des dépôts", icone="file-text-o")
-    menu_analyse_reglements.Add(code="synthese_modes_reglements", titre="Synthèse des modes de règlements", icone="file-text-o")
-
     # Dépôts
     menu_depots_reglements = menu_reglements.Add(titre="Dépôts de règlements")
     menu_depots_reglements.Add(code="liste_reglements_disponibles", titre="Liste des règlements non déposés", icone="file-text-o")
+    menu_depots_reglements.Add(code="detail_prestations_depot", titre="Détail des prestations d'un dépôt", icone="file-text-o")
+    menu_depots_reglements.Add(code="detail_ventilations_depots", titre="Détail des ventilations des dépôts", icone="file-text-o")
     menu_depots_reglements.Add(code="depots_reglements_liste", titre="Dépôts de règlements", icone="file-text-o")
+
+    # Analyse
+    menu_analyse_reglements = menu_reglements.Add(titre="Analyse")
+    menu_analyse_reglements.Add(code="synthese_modes_reglements", titre="Synthèse des modes de règlements", icone="file-text-o")
 
     # Ventilation
     menu_ventilation = menu_reglements.Add(titre="Ventilation")
