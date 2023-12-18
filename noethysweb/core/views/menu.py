@@ -410,14 +410,13 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # ------------------------------------ Règlements ------------------------------------
     menu_reglements = menu.Add(code="reglements_toc", titre="Règlements", icone="money")
 
-    # Listes
-    menu_listes = menu_reglements.Add(titre="Listes")
-    menu_listes.Add(code="liste_recus", titre="Liste des reçus de règlements", icone="file-text-o")
+    # Règlements
+    menu_listes = menu_reglements.Add(titre="Règlements")
     menu_listes.Add(code="liste_reglements", titre="Liste des règlements", icone="file-text-o")
     menu_listes.Add(code="liste_detaillee_reglements", titre="Liste détaillée des règlements", icone="file-text-o")
-    menu_listes.Add(code="reglements_lot_factures", titre="Liste des règlements associés à un lot de factures", icone="file-text-o")
     menu_listes.Add(code="detail_ventilations_reglements", titre="Détail des ventilations des règlements", icone="file-text-o")
-    menu_listes.Add(code="liste_paiements", titre="Liste des paiements en ligne", icone="file-text-o")
+    menu_listes.Add(code="reglements_lot_factures", titre="Liste des règlements associés à un lot de factures", icone="file-text-o")
+    menu_listes.Add(code="synthese_modes_reglements", titre="Synthèse des modes de règlements", icone="file-text-o")
 
     # Dépôts
     menu_depots_reglements = menu_reglements.Add(titre="Dépôts de règlements")
@@ -426,9 +425,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_depots_reglements.Add(code="detail_ventilations_depots", titre="Détail des ventilations des dépôts", icone="file-text-o")
     menu_depots_reglements.Add(code="depots_reglements_liste", titre="Dépôts de règlements", icone="file-text-o")
 
-    # Analyse
-    menu_analyse_reglements = menu_reglements.Add(titre="Analyse")
-    menu_analyse_reglements.Add(code="synthese_modes_reglements", titre="Synthèse des modes de règlements", icone="file-text-o")
+    # Divers
+    menu_reglements_divers = menu_reglements.Add(titre="Divers")
+    menu_reglements_divers.Add(code="liste_recus", titre="Liste des reçus de règlements", icone="file-text-o")
+    menu_reglements_divers.Add(code="liste_paiements", titre="Liste des paiements en ligne", icone="file-text-o")
 
     # Ventilation
     menu_ventilation = menu_reglements.Add(titre="Ventilation")
