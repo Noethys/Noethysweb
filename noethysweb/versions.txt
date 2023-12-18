@@ -1,3 +1,10 @@
+Version 1.2.1.6 (18/12/2023) :
+
+- Ajout du détail des ventilations des règlements
+- Finalisation du détail des ventilations des dépôts
+- Réorganisation du menu Règlements
+- Correction sur l'édition des reçus de règlements
+
 Version 1.2.1.5 (17/12/2023) :
 
 - Ajout du détail des ventilations des dépôts
