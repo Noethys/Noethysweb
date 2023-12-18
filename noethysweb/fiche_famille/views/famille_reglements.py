@@ -245,7 +245,7 @@ class Ajouter(ClasseCommune, crud.Ajouter):
     def get_success_url(self):
         """ Renvoie vers la liste après le formulaire """
         famille = Famille.objects.get(pk=self.kwargs.get('idfamille', None))
-        if famille.email_recus:
+        if famille.email_recus and self.object:
             # Si famille abonnée à l'envoi des reçus par email
             return reverse_lazy("reglement_recu_auto", kwargs={"idfamille": famille.pk, "idreglement": self.object.pk if self.object else 0})
         url = self.url_ajouter if "SaveAndNew" in self.request.POST else self.url_liste

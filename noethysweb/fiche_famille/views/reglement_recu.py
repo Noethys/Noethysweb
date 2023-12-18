@@ -173,6 +173,10 @@ class Ajouter(Onglet, crud.Ajouter):
     objet_singulier = ""
     objet_pluriel = ""
     description_saisie = ""
+    titre_historique = "Ajouter un reçu de règlement"
+
+    def Get_detail_historique(self, instance):
+        return "Famille=%s, Règlement=ID%s" % (instance.famille, instance.pk)
 
     def get_context_data(self, **kwargs):
         context = super(Ajouter, self).get_context_data(**kwargs)
@@ -183,9 +187,6 @@ class Ajouter(Onglet, crud.Ajouter):
 
     def get_success_url(self):
         return reverse_lazy("famille_reglements_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)})
-
-    # def get_object(self):
-    #     return Famille.objects.get(pk=self.kwargs['idfamille'])
 
     def get_form_kwargs(self, **kwargs):
         """ Envoie l'idindividu au formulaire """

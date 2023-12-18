@@ -6,7 +6,7 @@
 import json, datetime
 from django.views.generic import TemplateView
 from django.http import JsonResponse
-from core.models import Reglement, Recu, ModeleDocument, ModeleEmail, Mail, Destinataire, DocumentJoint
+from core.models import Reglement, Recu, ModeleEmail, ModeleImpression, Mail, Destinataire, DocumentJoint
 from outils.utils import utils_email
 from fiche_famille.views.famille import Onglet
 
@@ -21,26 +21,23 @@ def Envoyer_recu_automatiquement(request):
     if dernier_recu:
         numero = dernier_recu.numero + 1
 
-    # Charge le modèle de document par défaut
-    modele_defaut = ModeleDocument.objects.filter(categorie="reglement", defaut=True).first()
-    if not modele_defaut:
-        return JsonResponse({"erreur": "Aucun modèle de document n'existe pour les règlements"}, status=401)
-
-    # Signataire
-    signataire = request.user.get_full_name() or request.user.get_short_name() or request.user
+    # Récupération du modèle d'impression
+    modele_impression = ModeleImpression.objects.filter(categorie="reglement", defaut=True).first()
+    if not modele_impression:
+        return JsonResponse({"erreur": "Vous devez au préalable créer un modèle d'impression par défaut depuis le menu Paramétrage > Modèles d'impression"}, status=401)
+    dict_options = json.loads(modele_impression.options)
 
     # Génération du reçu
     from fiche_famille.views.reglement_recu import Generer_recu
-    from fiche_famille.forms.reglement_recu import TEXTE_INTRO_DEFAUT
     resultat = Generer_recu(donnees={
         "idreglement": reglement.pk,
         "date_edition": datetime.date.today(),
         "numero": numero,
-        "idmodele": modele_defaut.pk,
+        "idmodele": modele_impression.modele_document_id,
         "idfamille": reglement.famille_id,
-        "signataire": signataire,
-        "intro": TEXTE_INTRO_DEFAUT,
-        "afficher_prestations": False}
+        "signataire": dict_options["signataire"],
+        "intro": dict_options["intro"],
+        "afficher_prestations": dict_options["afficher_prestations"]}
     )
 
     # Recherche de l'adresse d'expédition du mail
