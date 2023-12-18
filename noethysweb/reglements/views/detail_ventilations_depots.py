@@ -41,10 +41,13 @@ class View(CustomView, TemplateView):
         depots, liste_colonnes, liste_lignes = [], [], []
 
         # Récupération des dépôts
-        if parametres["type_selection"] == "date_depot":
+        if parametres["type_selection"] == "DATE_DEPOT":
             date_debut = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[0])
             date_fin = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[1])
             depots = Depot.objects.filter(date__gte=date_debut, date__lte=date_fin).order_by("date")
+
+        if parametres["type_selection"] == "SELECTION":
+            depots = parametres["depots"]
 
         # Récupération des ventilations
         ventilations = Ventilation.objects.select_related("reglement", "reglement__depot", "prestation", "prestation__activite").filter(reglement__depot__in=depots).order_by("prestation__date")
@@ -80,7 +83,17 @@ class View(CustomView, TemplateView):
         for depot in depots:
 
             # Ligne du dépôt
-            ligne_regroupement = {"id": id_regroupement, "pid": 0, "col0": "%s (%s - %s)" % (depot.nom, depot.date.strftime("%d/%m/%Y"), depot.montant or 0.0), "regroupement": parametres["afficher_detail"]}
+            nom_depot = depot.nom
+            detail_nom = []
+            if parametres["afficher_date_depot"]:
+                detail_nom.append(depot.date.strftime("%d/%m/%Y"))
+            if parametres["afficher_montant_depot"]:
+                detail_nom.append(str(depot.montant or 0.0))
+            if parametres["afficher_code_compta"] and depot.code_compta:
+                detail_nom.append(depot.code_compta)
+            if detail_nom:
+                nom_depot += " (%s)" % " - ".join(detail_nom)
+            ligne_regroupement = {"id": id_regroupement, "pid": 0, "col0": nom_depot, "regroupement": parametres["afficher_detail"]}
 
             # Colonnes de la ligne
             total_ligne = decimal.Decimal(0)
