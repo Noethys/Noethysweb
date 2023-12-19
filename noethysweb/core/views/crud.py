@@ -17,7 +17,7 @@ from django.http import HttpResponseRedirect
 from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatableView, MyMultipleDatatableView
 from core.utils import utils_texte, utils_historique
-from core.models import FiltreListe, Consommation, Inscription, Scolarite, Individu
+from core.models import FiltreListe, Consommation, Inscription, Scolarite, Individu, LISTE_ETATS_CONSO
 
 
 class Page(CustomView):
@@ -73,6 +73,12 @@ class Liste_commun():
                     resultats = [individu for individu in Individu.objects.all() if self.appliquer_condition(valeur=str(individu.date_naiss or ""), criteres=criteres, filtre=filtre)]
                     conditions &= Q(**{champ + "__in": resultats})
                     filtre["condition"] = ""
+
+                # Filtre spécial : Etat d'une consommation
+                if filtre["champ"] == "etat":
+                    for code, label in LISTE_ETATS_CONSO:
+                        if label == criteres[0]:
+                            criteres[0] = code
 
                 # Filtre générique : datetime
                 for index_critere, critere in enumerate(criteres):
