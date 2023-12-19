@@ -451,7 +451,7 @@ class View(CustomView, TemplateView):
         liste_factures = []
         liste_factures_impayees = []
         total_factures_impayees = decimal.Decimal(0)
-        for facture in Facture.objects.filter(famille=self.request.user.famille).order_by("-date_edition"):
+        for facture in Facture.objects.filter(famille=self.request.user.famille).exclude(etat="annulation").order_by("-date_edition"):
             if facture.pk in dict_paiements["F"]:
                 facture.regle = facture.total
                 facture.solde_actuel = decimal.Decimal(0)
