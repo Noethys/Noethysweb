@@ -39,6 +39,11 @@ def is_in_list(valeur, liste_str):
     return valeur in liste_str
 
 @register.filter
+def inverse_signe(valeur):
+    if not valeur: return 0.0
+    return -valeur
+
+@register.filter
 def montant(valeur):
     if not valeur: valeur = 0.0
     return "%0.2f %s" % (valeur, utils_preferences.Get_symbole_monnaie())
