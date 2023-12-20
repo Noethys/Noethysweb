@@ -94,7 +94,7 @@ class Onglet(CustomView):
         else:
             objet = self.get_famille()
         objet.certification_date = None
-        objet.save()
+        objet.save(update_fields=["certification_date"])
 
     def Formate_valeur(self, valeur=None):
         # Transforme une instance de model en pk
