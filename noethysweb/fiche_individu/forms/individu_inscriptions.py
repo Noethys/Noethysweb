@@ -3,17 +3,19 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
+from django.db.models import Q
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Div, HTML, Fieldset, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
+from crispy_forms.layout import Layout, Hidden, Div, HTML, Fieldset
+from crispy_forms.bootstrap import Field
+from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import Inscription, Individu, Activite, Consommation
+from core.models import Inscription, Individu, Activite, Consommation, QuestionnaireQuestion, QuestionnaireReponse
 from core.widgets import DatePickerWidget
 from core.forms.select2 import Select2Widget
-import datetime
+from parametrage.forms import questionnaires
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -113,6 +115,24 @@ class Formulaire(FormulaireBase, ModelForm):
                 ),
             )
 
+        # Création des champs des questionnaires
+        condition_structure = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
+        questions = QuestionnaireQuestion.objects.filter(condition_structure, categorie="inscription", visible=True).order_by("ordre")
+        if questions:
+            liste_fields = []
+            for question in questions:
+                nom_controle, ctrl = questionnaires.Get_controle(question)
+                if ctrl:
+                    self.fields[nom_controle] = ctrl
+                    liste_fields.append(Field(nom_controle))
+            self.helper.layout.append(Fieldset("Questionnaire", *liste_fields))
+
+            # Importation des réponses
+            for reponse in QuestionnaireReponse.objects.filter(donnee=self.instance.pk, question__categorie="inscription"):
+                key = "question_%d" % reponse.question_id
+                if key in self.fields:
+                    self.fields[key].initial = reponse.Get_reponse_for_ctrl()
+
     def clean(self):
         if self.cleaned_data["date_fin"] and self.cleaned_data["date_debut"] > self.cleaned_data["date_fin"]:
             self.add_error('date_fin', "La date de fin doit être supérieure à la date de début")
@@ -122,7 +142,23 @@ class Formulaire(FormulaireBase, ModelForm):
             self.add_error('date_debut', "La date de début doit être inférieure à la date de fin de l'activité")
             return
 
+        # Questionnaires
+        for key, valeur in self.cleaned_data.items():
+            if key.startswith("question_"):
+                if isinstance(valeur, list):
+                    self.cleaned_data[key] = ";".join(valeur)
+
         return self.cleaned_data
+
+    def save(self):
+        instance = super(Formulaire, self).save()
+
+        # Enregistrement des réponses du questionnaire
+        for key, valeur in self.cleaned_data.items():
+            if key.startswith("question_"):
+                QuestionnaireReponse.objects.update_or_create(donnee=instance.pk, question_id=int(key.split("_")[1]), defaults={'reponse': valeur})
+
+        return instance
 
 
 EXTRA_SCRIPT = """
