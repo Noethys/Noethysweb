@@ -357,6 +357,9 @@ class Exporter():
                 InfoTiers.appendChild(RefTiers)
 
             CatTiers = doc.createElement("CatTiers")
+            if not piece.famille.cattiers_helios:
+                self.erreurs.append("Vous devez renseigner la catégorie de tiers pour %s" % piece.famille)
+                return False
             CatTiers.setAttribute("V", "%02d" % piece.famille.cattiers_helios)
             InfoTiers.appendChild(CatTiers)
 
