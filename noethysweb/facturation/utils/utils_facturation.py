@@ -724,7 +724,7 @@ def Calculer_datamatrix(dictCompte):
     elements.append(" " * 24)
 
     # 65-67 : Code établissement (3 caractères)
-    code_etab = data_codes_etab.Rechercher(str(piece_pes.lot.modele.code_collectivite))
+    code_etab = data_codes_etab.Rechercher(str(piece_pes.lot.modele.code_etab))
     elements.append("%03d" % int(code_etab))
 
     # 68 : Code période (1 caractère)
@@ -745,7 +745,7 @@ def Calculer_datamatrix(dictCompte):
     elements.append(cle)
 
     # 77-82 : Code émetteur (6 caractères)
-    elements.append("%06d" % int(piece_pes.lot.modele.id_collectivite[:6]))
+    elements.append("940033")
 
     # 83-86 : Code établissement (=0001)
     elements.append("0001")
