@@ -3625,7 +3625,7 @@ class Paiement(models.Model):
     idtransaction = models.CharField(verbose_name="ID transaction", max_length=50, blank=True, null=True)
     refdet = models.CharField(verbose_name="refdet", max_length=50, blank=True, null=True)
     montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0)
-    objet = models.CharField(verbose_name="objet", max_length=50, blank=True, null=True)
+    objet = models.CharField(verbose_name="objet", max_length=200, blank=True, null=True)
     saisie = models.CharField(verbose_name="Mode", max_length=50, blank=True, null=True)
     resultrans = models.CharField(verbose_name="resultrans", max_length=50, blank=True, null=True)
     numauto = models.CharField(verbose_name="numauto", max_length=50, blank=True, null=True)
