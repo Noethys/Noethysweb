@@ -1,3 +1,12 @@
+Version 1.2.1.7 (20/12/2023) :
+
+- Ajout de colonnes à la liste des règlements
+- Correction du filtre sur l'état des consommations
+- Correction de l'affichage d'un solde créditeur sur le portail
+- Correction sur la taille de l'objet d'un paiement en ligne
+- Correction de l'affichage des factures annulées sur le portail
+- Correction sur la génération du datamatrix
+
 Version 1.2.1.6 (18/12/2023) :
 
 - Ajout du détail des ventilations des règlements
