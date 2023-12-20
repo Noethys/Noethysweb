@@ -35,20 +35,24 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "fscolarise:famille", "idreglement", "date", "mode__label", "emetteur__nom", "numero_piece", "famille__nom", "payeur__nom", "montant", "depot__nom"]
-
+        filtres = ["fpresent:famille", "fscolarise:famille", "idreglement", "date", "mode__label", "emetteur__nom", "numero_piece", "famille__nom", "payeur__nom", "montant",
+                   "observations", "numero_quittancier", "depot__nom", "compte__nom", "date_differe"]
         check = columns.CheckBoxSelectColumn(label="")
         mode = columns.TextColumn("Mode", sources=['mode__label'])
         emetteur = columns.CompoundColumn("Emetteur", sources=['emetteur__nom'])
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         payeur = columns.TextColumn("Payeur", sources=['payeur__nom'])
         depot = columns.TextColumn("Dépôt", sources=['depot__nom'])
+        compte = columns.TextColumn("Compte", sources=['compte__nom'])
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', "idreglement", "date", "mode", "emetteur", "numero_piece", "famille", "payeur", "montant", "depot"]
+            columns = ['check', "idreglement", "date", "mode", "emetteur", "numero_piece", "famille", "payeur", "montant", "depot", "observations", "numero_quittancier",
+                       "compte", "date_differe"]
+            hidden_columns = ["observations", "numero_quittancier", "compte", "date_differe"]
             processors = {
-                'date': helpers.format_date('%d/%m/%Y'),
+                "date": helpers.format_date("%d/%m/%Y"),
+                "date_differe": helpers.format_date("%d/%m/%Y"),
             }
             ordering = ["date"]
             footer = True
