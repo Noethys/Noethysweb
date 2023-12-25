@@ -20,7 +20,8 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Famille
         fields = ["mail", "mobile", "memo", "code_compta", "titulaire_helios", "tiers_solidaire", "idtiers_helios", "natidtiers_helios", "reftiers_helios",
-                  "cattiers_helios", "natjur_helios", "facturation_nom", "facturation_rue_resid", "facturation_cp_resid", "facturation_ville_resid"]
+                  "cattiers_helios", "natjur_helios", "facturation_nom", "facturation_rue_resid", "facturation_cp_resid", "facturation_ville_resid",
+                  "email_blocage", "mobile_blocage"]
         widgets = {
             "memo": forms.Textarea(attrs={'rows': 3}),
             "facturation_rue_resid": forms.Textarea(attrs={'rows': 2}),
@@ -62,7 +63,9 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Coordonnées",
                 Field("mail"),
+                Field("email_blocage"),
                 Field("mobile"),
+                Field("mobile_blocage"),
             ),
             Fieldset("Comptabilité",
                 Field("code_compta"),
@@ -86,4 +89,3 @@ class Formulaire(FormulaireBase, ModelForm):
 
     def clean(self):
         return self.cleaned_data
-

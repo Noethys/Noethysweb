@@ -180,7 +180,7 @@ class Page_destinataires(crud.Page):
         # Importe les adresses
         dict_adresses = {}
         if self.categorie == "famille":
-            dict_adresses = {famille.pk: famille.mail for famille in Famille.objects.all()}
+            dict_adresses = {famille.pk: famille.mail for famille in Famille.objects.filter(email_blocage=False)}
         if self.categorie == "individu":
             dict_adresses = {individu.pk: individu.mail for individu in Individu.objects.all()}
         if self.categorie == "collaborateur":

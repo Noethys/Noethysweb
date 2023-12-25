@@ -1800,6 +1800,8 @@ class Famille(models.Model):
     facturation_rue_resid = encrypt(models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True))
     facturation_cp_resid = encrypt(models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True))
     facturation_ville_resid = encrypt(models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True))
+    email_blocage = models.BooleanField(verbose_name="La famille ne souhaite pas recevoir de mails groupés", default=False, help_text="L'éditeur d'emails groupés du menu Outils ne proposera pas cette famille dans les destinataires.")
+    mobile_blocage = models.BooleanField(verbose_name="La famille ne souhaite pas recevoir de SMS groupés", default=False, help_text="L'éditeur de SMS groupés du menu Outils ne proposera pas cette famille dans les destinataires.")
 
     class Meta:
         db_table = 'familles'

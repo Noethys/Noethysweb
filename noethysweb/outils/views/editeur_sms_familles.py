@@ -41,6 +41,8 @@ class Liste(Page_destinataires, crud.Liste):
             ordering = ["nom"]
 
         def Get_mobile(self, instance, *args, **kwargs):
+            if instance.mobile_blocage:
+                return "<span class='text-red' title='La famille ne souhaite pas recevoir des SMS groupés'><i class='fa fa-ban'></i> %s</span>" % instance.mobile
             return instance.mobile
 
         def Get_rue_resid(self, instance, *args, **kwargs):

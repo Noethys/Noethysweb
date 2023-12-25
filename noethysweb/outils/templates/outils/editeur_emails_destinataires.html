@@ -43,9 +43,9 @@
                                 var table = new $.fn.dataTable.Api('.datatable');
                                 $.each(table.rows({selected: true}).data().toArray(), function (index, valeurs) {
                                     {% if categorie == "famille" %}
-                                        if (valeurs[3] == null | valeurs[3] == '') {liste_adresses_manquantes.push(valeurs[2]);};
+                                        if ((valeurs[3] == null) || (valeurs[3] === '') || (valeurs[3] != null && valeurs[3].indexOf("fa-ban") >= 0)) {liste_adresses_manquantes.push(valeurs[2]);};
                                     {% else %}
-                                        if (valeurs[4] == null | valeurs[4] == '') {liste_adresses_manquantes.push(valeurs[2] + " " + valeurs[3]);};
+                                        if ((valeurs[4] == null) || (valeurs[4] === '') || (valeurs[4] != null && valeurs[4].indexOf("fa-ban") >= 0)) {liste_adresses_manquantes.push(valeurs[2] + " " + valeurs[3]);};
                                     {% endif %}
                                 });
                             {% endif %}
@@ -54,7 +54,7 @@
                             if (liste_adresses_manquantes.length > 0) {
                                 var dialog = bootbox.dialog({
                                     title: "Avertissement",
-                                    message: "Les individus suivants ne possèdent pas d'adresses : " + liste_adresses_manquantes.join(", ") + ".",
+                                    message: "Les individus suivants ne possèdent pas d'adresses ou ne souhaitent pas recevoir de mails groupés : " + liste_adresses_manquantes.join(", ") + ".",
                                     buttons: {
                                         ok: {
                                             label: "<i class='fa fa-check'></i> Continuer quand même",

@@ -153,7 +153,7 @@ class Page_destinataires(crud.Page):
         # Importe les numéros
         dict_numeros = {}
         if self.categorie == "famille":
-            dict_numeros = {famille.pk: famille.mobile for famille in Famille.objects.all()}
+            dict_numeros = {famille.pk: famille.mobile for famille in Famille.objects.filter(mobile_blocage=False)}
         if self.categorie == "individu":
             dict_numeros = {individu.pk: individu.tel_mobile for individu in Individu.objects.all()}
         if self.categorie == "collaborateur":

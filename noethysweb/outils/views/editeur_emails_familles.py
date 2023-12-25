@@ -43,6 +43,8 @@ class Liste(Page_destinataires, crud.Liste):
             ordering = ["nom"]
 
         def Get_mail(self, instance, *args, **kwargs):
+            if instance.email_blocage:
+                return "<span class='text-red' title='La famille ne souhaite pas recevoir des emails groupés'><i class='fa fa-ban'></i> %s</span>" % instance.mail
             return instance.mail
 
         def Get_rue_resid(self, instance, *args, **kwargs):
