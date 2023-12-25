@@ -1,3 +1,10 @@
+Version 1.2.1.8 (25/12/2023) :
+
+- Ajout des questionnaires aux inscriptions
+- Ajout du blocage des envois groupés pour une famille
+- Correction du filtrage rapide de l'historique général
+- Correction de la validation manuelle des renseignements du portail
+
 Version 1.2.1.7 (20/12/2023) :
 
 - Ajout de colonnes à la liste des règlements
