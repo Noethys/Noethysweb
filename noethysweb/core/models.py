@@ -3428,6 +3428,7 @@ class Article(models.Model):
     present_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
     album = models.ForeignKey(Album, verbose_name="Album photos", blank=True, null=True, on_delete=models.SET_NULL, help_text="Sélectionnez un album photos existant à joindre à cet article.")
     texte_popup = models.TextField(verbose_name="Texte", blank=True, null=True, help_text="Ce texte sera affiché dans une fenêtre popup sur la page d'accueil. A utiliser uniquement pour les informations importantes.")
+    sondage = models.ForeignKey("Sondage", verbose_name="Sondage", blank=True, null=True, on_delete=models.SET_NULL, help_text="Sélectionnez un sondage existant à joindre à cet article.")
 
     class Meta:
         db_table = 'articles'
@@ -4306,3 +4307,115 @@ class ModeleWord(models.Model):
             if objet != None:
                 objet.defaut = True
                 objet.save()
+
+
+class Sondage(models.Model):
+    idsondage = models.AutoField(verbose_name="ID", db_column='IDsondage', primary_key=True)
+    titre = models.CharField(verbose_name="Titre", max_length=300)
+    description = models.TextField(verbose_name="Description", blank=True, null=True)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = 'sondages'
+        verbose_name = "sondage"
+        verbose_name_plural = "sondages"
+
+    def __str__(self):
+        return self.titre if self.titre else "Nouveau sondage"
+
+
+class SondagePage(models.Model):
+    idpage = models.AutoField(verbose_name="ID", db_column='IDpage', primary_key=True)
+    sondage = models.ForeignKey(Sondage, verbose_name="Sondage", on_delete=models.CASCADE)
+    titre = models.CharField(verbose_name="Titre", max_length=300)
+    description = models.TextField(verbose_name="Description", blank=True, null=True)
+    ordre = models.IntegerField(verbose_name="Ordre")
+
+    class Meta:
+        db_table = 'sondages_pages'
+        verbose_name = "page de sondage"
+        verbose_name_plural = "pages de sondage"
+
+    def __str__(self):
+        return self.titre if self.titre else "Nouvelle page de sondage"
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        # Après la suppression, on rectifie l'ordre
+        liste_objects = SondagePage.objects.filter(sondage=self.sondage).order_by("ordre")
+        ordre = 1
+        for objet in liste_objects:
+            if objet.ordre != ordre:
+                objet.ordre = ordre
+                objet.save()
+            ordre += 1
+
+
+class SondageQuestion(models.Model):
+    idquestion = models.AutoField(verbose_name="ID", db_column='IDquestion', primary_key=True)
+    page = models.ForeignKey(SondagePage, verbose_name="Page", on_delete=models.CASCADE)
+    ordre = models.IntegerField(verbose_name="Ordre")
+    label = models.CharField(verbose_name="Label", max_length=250)
+    controle = models.CharField(verbose_name="contrôle", max_length=200, choices=[(ctrl["code"], ctrl["label"]) for ctrl in LISTE_CONTROLES_QUESTIONNAIRES])
+    choix = models.CharField(verbose_name="Choix", max_length=500, blank=True, null=True, help_text="Saisissez les choix possibles séparés par un point-virgule. Exemple : 'Bananes;Pommes;Poires'")
+    texte_aide = models.CharField(verbose_name="Texte d'aide", max_length=500, blank=True, null=True, help_text="Vous pouvez saisir un texte d'aide qui apparaîtra sous le champ de saisie.")
+    obligatoire = models.BooleanField(verbose_name="Obligatoire", default=False, help_text="Cochez cette case si la famille doit obligatoirement répondre à cette question.")
+
+    class Meta:
+        db_table = 'sondages_questions'
+        verbose_name = "question de sondage"
+        verbose_name_plural = "questions de sondage"
+
+    def __str__(self):
+        return self.label
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        # Après la suppression, on rectifie l'ordre
+        liste_objects = SondageQuestion.objects.filter(page=self.page).order_by("ordre")
+        ordre = 1
+        for objet in liste_objects:
+            if objet.ordre != ordre:
+                objet.ordre = ordre
+                objet.save()
+            ordre += 1
+
+
+class SondageReponse(models.Model):
+    idreponse = models.AutoField(verbose_name="ID", db_column='IDreponse', primary_key=True)
+    question = models.ForeignKey(SondageQuestion, verbose_name="Question", on_delete=models.CASCADE)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", blank=True, null=True, on_delete=models.CASCADE)
+    reponse = models.CharField(verbose_name="Réponse", max_length=450, blank=True, null=True)
+
+    class Meta:
+        db_table = 'sondages_reponses'
+        verbose_name = "réponse de sondage"
+        verbose_name_plural = "réponses de sondages"
+
+    def __str__(self):
+        return self.reponse
+
+    def Get_reponse_for_ctrl(self):
+        if self.question.controle in ("liste_deroulante", "liste_coches"):
+            return self.reponse.split(";")
+        if self.question.controle in ("entier", "slider"):
+            if self.reponse:
+                return int(self.reponse)
+        if self.question.controle == "case_coche":
+            return self.reponse == "True"
+        if self.question.controle in ("decimal", "montant"):
+            return decimal.Decimal(self.reponse or "0.0")
+        return self.reponse
+
+    def Get_reponse_fr(self):
+        if not self.reponse:
+            return ""
+        if self.question.controle in ("liste_deroulante", "liste_coches"):
+            return ", ".join(self.reponse.split(";"))
+        if self.question.controle in ("entier", "slider") and self.reponse:
+            return str(self.reponse)
+        if self.question.controle == "case_coche":
+            return "oui" if self.reponse == "True" else "non"
+        if self.question.controle in ("decimal", "montant"):
+            return float(decimal.Decimal(self.reponse or 0.0))
+        return self.reponse or ""

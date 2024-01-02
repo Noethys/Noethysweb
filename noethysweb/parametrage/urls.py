@@ -26,7 +26,7 @@ from parametrage.views import organisateur, structures, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
     modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
-    modeles_word, releves_bancaires
+    modeles_word, releves_bancaires, sondages
 
 
 urlpatterns = [
@@ -536,6 +536,13 @@ urlpatterns = [
     path('parametrage/albums/photos/supprimer/<int:idalbum>/<int:pk>', albums.Supprimer_photo.as_view(), name='albums_supprimer_photo'),
     path('parametrage/albums/photos/supprimer_plusieurs/<int:idalbum>/<str:listepk>', albums.Supprimer_plusieurs_photos.as_view(), name='albums_supprimer_plusieurs_photos'),
 
+    # Sondages
+    path('parametrage/sondages/liste', sondages.Liste.as_view(), name='sondages_liste'),
+    path('parametrage/sondages/ajouter', sondages.Ajouter.as_view(), name='sondages_ajouter'),
+    path('parametrage/sondages/modifier/<int:pk>', sondages.Modifier.as_view(), name='sondages_modifier'),
+    path('parametrage/sondages/supprimer/<int:pk>', sondages.Supprimer.as_view(), name='sondages_supprimer'),
+    path('parametrage/sondages/consulter/<int:pk>', sondages.Consulter.as_view(), name='sondages_consulter'),
+
     # Images de fond
     path('parametrage/images_fond/liste', images_fond.Liste.as_view(), name='images_fond_liste'),
     path('parametrage/images_fond/ajouter', images_fond.Ajouter.as_view(), name='images_fond_ajouter'),
@@ -653,4 +660,11 @@ urlpatterns = [
     path('parametrage/transports/arrets/liste/navette/deplacer_lignes', secure_ajax(arrets.Deplacer.as_view()), name='ajax_deplacer_lignes_arrets_navette'),
     path('parametrage/transports/arrets/liste/metro/deplacer_lignes', secure_ajax(arrets.Deplacer.as_view()), name='ajax_deplacer_lignes_arrets_metro'),
     path('parametrage/transports/arrets/liste/pedibus/deplacer_lignes', secure_ajax(arrets.Deplacer.as_view()), name='ajax_deplacer_lignes_arrets_pedibus'),
+    path('parametrage/sondages/get_form_page', secure_ajax(sondages.Get_form_page), name='ajax_sondages_get_form_page'),
+    path('parametrage/sondages/valid_form_page', secure_ajax(sondages.Valid_form_page), name='ajax_sondages_valid_form_page'),
+    path('parametrage/sondages/supprimer_page', secure_ajax(sondages.Supprimer_page), name='ajax_sondages_supprimer_page'),
+    path('parametrage/sondages/get_form_question', secure_ajax(sondages.Get_form_question), name='ajax_sondages_get_form_question'),
+    path('parametrage/sondages/valid_form_question', secure_ajax(sondages.Valid_form_question), name='ajax_sondages_valid_form_question'),
+    path('parametrage/sondages/supprimer_question', secure_ajax(sondages.Supprimer_question), name='ajax_sondages_supprimer_question'),
+    path('parametrage/sondages/reorganiser', secure_ajax(sondages.Reorganiser), name='ajax_sondages_reorganiser'),
 ]

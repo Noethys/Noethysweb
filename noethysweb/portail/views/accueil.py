@@ -50,7 +50,7 @@ class Accueil(CustomView, TemplateView):
             # Articles
         conditions = Q(statut="publie") & Q(date_debut__lte=datetime.datetime.now()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.datetime.now()))
         conditions &= (Q(public__in=("toutes", "presents", "presents_groupes")) | (Q(public="inscrits") & Q(activites__in=activites)))
-        articles = Article.objects.select_related("image_article", "album", "auteur").filter(conditions).distinct().order_by("-date_debut")
+        articles = Article.objects.select_related("image_article", "album", "sondage", "auteur").filter(conditions).distinct().order_by("-date_debut")
         selection_articles = []
         popups = []
         for article in articles:

@@ -1,0 +1,356 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .item {
+            background-color: #dbd6d6;
+            cursor: move;
+            display: block;
+            margin-bottom: 4px;
+            padding: 6px;
+            color: #5a5a5a;
+            font-size: 12px;
+            border-radius: 5px;
+        }
+        .liste_items {
+            background-color: #fff;
+            list-style: none;
+            margin-bottom: 10px;
+            min-height: 30px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .liste_items:last-child {
+            margin-bottom: 0;
+        }
+        .ligne {
+            background-color: #eeeeee;
+        }
+        .ligne_header {
+            border-bottom: 0px;
+            padding: 8px 8px 0px 8px;
+        }
+        .ligne_body {
+            padding: 8px;
+        }
+        .questions_tools {
+            float: right;
+        }
+        .bouton-tool  {
+            vertical-align: baseline !important;
+        }
+    </style>
+{% endblock styles %}
+
+{% block contenu_page %}
+    <div class="row">
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder">
+                        <a class="btn btn-danger" href="{% url 'sondages_liste' %}"><i class='fa fa-times margin-r-5'></i>Fermer</a>
+                        <a class="btn btn-default" onclick="ajouter_ou_modifier_page()"><i class="fa fa-plus margin-r-5"></i>Ajouter une page</a>
+                        <a class="btn btn-default" href="{% url 'sondages_modifier' pk=sondage.pk %}"><i class="fa fa-pencil margin-r-5"></i>Modifier les paramètres</a>
+                        <a class="btn btn-default" href="#" target="_blank" title="Consulter l'aide"><i class="fa fa-life-saver margin-r-5"></i>Aide</a>
+                    </div>
+
+                    {# Paramètres du sondage #}
+                    <div class="card bg-light d-flex flex-fill mt-3">
+                        <div class="card-body pt-0 p-3">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h2 class="lead"><b>{{ sondage.titre }}</b></h2>
+                                    {% if sondage.description %}
+                                        <div class="text-muted border-bottom-0">
+                                            <div class="mt-1">{{ sondage.description|safe }}</div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {# Lignes #}
+                    <div id="liste_lignes"></div>
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+
+    </div>
+    
+    {# Modal Formulaire : Utilisé pour les pages et les questions #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_formulaire{% endblock %}
+        {% block modal_titre %}Titre{% endblock %}
+        {% block modal_classe %}modal-lg{% endblock %}
+        {% block modal_body %}
+            <div id="id_div_form_formulaire"></div>
+        {% endblock %}
+    {% endembed %}
+
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+    
+    <script>
+
+        $(document).ready(function(){
+            $("#liste_lignes").sortable({
+                items: ".ligne",
+                placeholder: 'sort-highlight',
+                forcePlaceholderSize: true,
+                update: function(event, ui) {
+                    reorganiser("page", $("#liste_lignes").sortable("toArray"))
+                }
+            });
+            active_events();
+            importer_donnees(JSON.parse('{{ donnees|escapejs }}'));
+        });
+
+        function reorganiser(donnee, nouvel_ordre) {
+            $.ajax({
+                url: "{% url 'ajax_sondages_reorganiser' %}",
+                type: "POST",
+                data: {
+                    donnee: donnee,
+                    nouvel_ordre: JSON.stringify(nouvel_ordre),
+                    idsondage: "{{ sondage.pk }}",
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+            });
+        }
+
+        function ajouter_ou_modifier_page(idpage) {
+            $("#modal_formulaire").off('submit');
+            $.ajax({
+                url: "{% url 'ajax_sondages_get_form_page' %}",
+                type: "POST",
+                data: {
+                    idsondage: "{{ sondage.pk }}",
+                    idpage: idpage,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function (data) {
+                    $("#id_div_form_formulaire").html(data['form_html']);
+                    if (idpage) {
+                        $("#myModalLabel").html("<strong>Modifier une page</strong>");
+                    } else {
+                        $("#myModalLabel").html("<strong>Ajouter une page</strong>");
+                    }
+                    $("#modal_formulaire").modal("show");
+                    $("#modal_formulaire").off().on('submit', submit_form_page);
+                }
+            });
+        }
+
+        function submit_form_page(event) {
+            event.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_sondages_valid_form_page' %}",
+                data: $("#pages_form").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $("#modal_formulaire").modal("hide");
+                    if (data.nouvelle_page) {
+                        // Création d'une nouvelle page
+                        creer_page(data.id_page, data.titre_page, []);
+                    } else {
+                        // Modification du titre de la page
+                        $("#titre_page_" + data.id_page).html(data.titre_page)
+                    }
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
+        function supprimer_page(idpage) {
+            bootbox.dialog({
+                title: "Suppression",
+                message: "Confirmez-vous la suppression de cette page ?",
+                buttons: {
+                    ok: {
+                        label: "<i class='fa fa-trash'></i> Supprimer",
+                        className: 'btn-warning',
+                        callback: function(){
+                            $.ajax({
+                                type: "POST",
+                                url: "{% url 'ajax_sondages_supprimer_page' %}",
+                                data: {"idpage": idpage, "csrfmiddlewaretoken": "{{ csrf_token }}"},
+                                datatype: "json",
+                                success: function(data){
+                                    $('#page_' + idpage).remove();
+                                },
+                                error: function(data) {
+                                    toastr.error(data.responseJSON.erreur);
+                                }
+                            });
+                        }
+                    },
+                    cancel: {
+                        label: "<i class='fa fa-ban'></i> Annuler",
+                        className: 'btn-danger',
+                    }
+                }
+            });
+        }
+
+        function ajouter_ou_modifier_question(idpage, idquestion) {
+            $("#modal_formulaire").off('submit');
+            $.ajax({
+                url: "{% url 'ajax_sondages_get_form_question' %}",
+                type: "POST",
+                data: {
+                    idpage: idpage,
+                    idquestion: idquestion,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function (data) {
+                    $("#id_div_form_formulaire").html(data['form_html']);
+                    if (idquestion) {
+                        $("#myModalLabel").html("<strong>Modifier une question</strong>");
+                    } else {
+                        $("#myModalLabel").html("<strong>Ajouter une question</strong>");
+                    }
+                    $("#modal_formulaire").modal("show");
+                    $("#modal_formulaire").off().on('submit', submit_form_question);
+                }
+            });
+        }
+
+        function submit_form_question(event) {
+            event.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_sondages_valid_form_question' %}",
+                data: $("#questions_form").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $("#modal_formulaire").modal("hide");
+                    if (data.nouvelle_question) {
+                        // Création d'une nouvelle question
+                        creer_question(data.id_page, data.id_question, data.titre_question)
+                    } else {
+                        // Modification du titre de la question
+                        $("#titre_question_" + data.id_question).html(data.titre_question)
+                    }
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
+        function supprimer_question(idquestion) {
+            bootbox.dialog({
+                title: "Suppression",
+                message: "Confirmez-vous la suppression de cette question ?",
+                buttons: {
+                    ok: {
+                        label: "<i class='fa fa-trash'></i> Supprimer",
+                        className: 'btn-warning',
+                        callback: function(){
+                            $.ajax({
+                                type: "POST",
+                                url: "{% url 'ajax_sondages_supprimer_question' %}",
+                                data: {"idquestion": idquestion, "csrfmiddlewaretoken": "{{ csrf_token }}"},
+                                datatype: "json",
+                                success: function(data){
+                                    $('#question_' + idquestion).remove();
+                                },
+                                error: function(data) {
+                                    toastr.error(data.responseJSON.erreur);
+                                }
+                            });
+                        }
+                    },
+                    cancel: {
+                        label: "<i class='fa fa-ban'></i> Annuler",
+                        className: 'btn-danger',
+                    }
+                }
+            });
+        }
+
+        function active_events() {
+            $('.liste_items').sortable({
+                connectWith: '.liste_items',
+                placeholder: 'sort-highlight',
+                forcePlaceholderSize: true,
+                update: function(event, ui) {
+                    var nouvel_ordre = [];
+                    $('.liste_items').each(function() {
+                        nouvel_ordre.push([$(this).data("idpage"), $(this).sortable("toArray")])
+                    })
+                    reorganiser("question", nouvel_ordre)
+                }
+            })
+            $('.bouton_modifier_page').off().on('click', function(event) {
+                ajouter_ou_modifier_page($(this).data("idpage"));
+            });
+            $('.bouton_supprimer_page').off().on('click', function(event) {
+                supprimer_page($(this).data("idpage"));
+            });
+            $('.bouton_ajouter_question').off().on('click', function(event) {
+                ajouter_ou_modifier_question($(this).data("idpage"), 0);
+            });
+            $('.bouton_modifier_question').off().on('click', function(event) {
+                ajouter_ou_modifier_question($(this).data("idpage"), $(this).data("idquestion"));
+            });
+            $('.bouton_supprimer_question').off().on('click', function(event) {
+                supprimer_question($(this).data("idquestion"));
+            });
+        }
+        
+        function importer_donnees(valeurs) {
+            valeurs.forEach(function(page) {
+                creer_page(page.id_page, page.titre_page, page.questions)
+            });
+        }
+
+        function creer_page(id_page, titre_page, questions) {
+            var texte = "";
+            texte += "<div class='card ligne' id='page_" + id_page + "' data-idpage='" + id_page + "'><div class='card-header ligne_header'><i class='fa fa-arrows mr-1'></i><b> <span id='titre_page_" + id_page + "'>" + titre_page + "</span></b>";
+            texte += "<div class='card-tools'>"
+            texte += "<button type='button' data-idpage='" + id_page + "' class='btn btn-tool bouton-tool bouton_ajouter_question' title='Ajouter une question'><i class='fa fa-plus'></i></button>"
+            texte += "<button type='button' data-idpage='" + id_page + "' class='btn btn-tool bouton-tool bouton_modifier_page' title='Modifier la page'><i class='fa fa-pencil'></i></button>"
+            texte += "<button type='button' data-idpage='" + id_page + "' class='btn btn-tool bouton-tool bouton_supprimer_page' title='Supprimer la page'><i class='fa fa-trash margin-r-5'></i></button>"
+            texte += "</div></div><div class='card-body ligne_body'><div class='row'>"
+            texte += "<div class='col-12'><ul id='questions_page_" + id_page + "' data-idpage='" + id_page + "' class='liste_items'>"
+            texte += "</ul></div>"
+            texte += "</div></div></div>"
+            $("#liste_lignes").append(texte);
+            questions.forEach(function(question) {
+                $("#questions_page_" + id_page).append(get_html_question(id_page, question.id_question, question.label_question))
+            });
+            active_events();
+        }
+
+        function creer_question(id_page, id_question, titre_question) {
+            $("#questions_page_" + id_page).append(get_html_question(id_page, id_question, titre_question));
+            active_events()
+        }
+
+        function get_html_question(id_page, id_question, label_question) {
+            texte = "<li class='item' id='question_" + id_question + "' data-idpage='" + id_page + "' data-idquestion='" + id_question + "'><i class='fa fa-arrows margin-r-5'></i> <span id='titre_question_" + id_question + "'>" + label_question + "</span></b>"; 
+            texte += "<div class='questions_tools'>"
+            texte += "<button type='button' data-idpage='" + id_page + "' data-idquestion='" + id_question + "' class='btn btn-tool bouton-tool bouton_modifier_question' title='Modifier la question'><i class='fa fa-pencil'></i></button>"
+            texte += "<button type='button' data-idquestion='" + id_question + "' class='btn btn-tool bouton-tool bouton_supprimer_question' title='Supprimer la question'><i class='fa fa-trash'></i></button>"
+            texte += "</div></li>"
+            return texte
+        }
+
+    </script>
+
+{% endblock contenu_page %}

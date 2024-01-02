@@ -12,7 +12,7 @@ from crispy_forms.layout import Layout, Fieldset, HTML
 from crispy_forms.bootstrap import Field
 from django_summernote.widgets import SummernoteInplaceWidget
 from core.forms.base import FormulaireBase
-from core.models import Article, ImageArticle, Album, Activite, Groupe
+from core.models import Article, ImageArticle, Album, Activite, Groupe, Sondage
 from core.utils.utils_commandes import Commandes
 from core.widgets import DateTimePickerWidget, DateRangePickerWidget
 from core.widgets import Crop_image
@@ -38,6 +38,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "activites": Select2MultipleWidget(),
             "groupes": Select2MultipleWidget({"data-minimum-input-length": 0}),
             "album": Select2Widget({"lang": "fr", "data-width": "100%"}),
+            "sondage": Select2Widget({"lang": "fr", "data-width": "100%"}),
             "texte_popup": SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '180px'}}),
         }
         labels = {
@@ -83,6 +84,10 @@ class Formulaire(FormulaireBase, ModelForm):
         condition = (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
         self.fields["album"].queryset = Album.objects.filter(condition).order_by("date_creation")
 
+        # Sondage
+        condition = (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
+        self.fields["sondage"].queryset = Sondage.objects.filter(condition).order_by("titre")
+
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'articles_liste' %}"),
@@ -109,6 +114,9 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Album photos joint",
                 Field("album"),
+            ),
+            Fieldset("Sondage joint",
+                Field("sondage"),
             ),
             Fieldset("Fenêtre popup",
                 Field("texte_popup"),
