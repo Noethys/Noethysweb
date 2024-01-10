@@ -178,7 +178,7 @@ class Liste(Page, crud.Liste):
                 label = self.dict_labels.get((instance.categorie, instance.code))
             # Insère une icône si donnée importante
             warning = False
-            if instance.categorie in ("individu_questionnaire", "individu_informations", "famille_pieces", "individu_regimes_alimentaires"):
+            if instance.categorie in ("individu_questionnaire", "famille_questionnaire", "individu_informations", "famille_pieces", "individu_regimes_alimentaires"):
                 warning = True
             if instance.categorie == "individu_coords" and instance.code in ("type_adresse", "ville_resid"):
                 warning = True
@@ -244,7 +244,7 @@ class Liste(Page, crud.Liste):
                 html.append(self.Create_bouton(url=reverse("individu_medical_liste", args=[instance.famille_id, instance.individu_id]), title="Modifier", icone="fa-pencil", args="target='_blank'"))
             elif instance.categorie in ("famille_pieces", "famille_reglements"):
                 html.append(self.Create_bouton(url=reverse("%s_modifier" % instance.categorie, args=[instance.famille_id, instance.idobjet]), title="Modifier", icone="fa-pencil", args="target='_blank'"))
-            elif instance.categorie in ("famille_caisse"):
+            elif instance.categorie in ("famille_caisse", "famille_questionnaire"):
                 html.append(self.Create_bouton(url=reverse("%s_modifier" % instance.categorie, args=[instance.famille_id]), title="Modifier", icone="fa-pencil", args="target='_blank'"))
 
             # Ouvrir la fiche famille

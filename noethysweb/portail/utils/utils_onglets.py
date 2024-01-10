@@ -3,6 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import copy
 from django.core.cache import cache
 from django.utils.translation import gettext_lazy as _
 from core.models import PortailParametre
@@ -22,6 +23,7 @@ class Onglet():
 
 LISTE_ONGLETS = [
     Onglet(code="famille_caisse", label=_("Caisse"), icone="fa-institution", url="portail_famille_caisse", validation_auto=False),
+    Onglet(code="famille_questionnaire", label=_("Questionnaire"), icone="fa-question", url="portail_famille_questionnaire", validation_auto=True),
     Onglet(code="individu_identite", label=_("Identité"), icone="fa-user", url="portail_individu_identite", validation_auto=False),
     Onglet(code="individu_questionnaire", label=_("Questionnaire"), icone="fa-question", url="portail_individu_questionnaire", validation_auto=True),
     Onglet(code="individu_coords", label=_("Coordonnées"), icone="fa-map-marker", url="portail_individu_coords", validation_auto=False),
@@ -54,7 +56,7 @@ def Get_onglets(categorie=None):
     return liste_onglets
 
 def Get_onglet(code=""):
-    for onglet in LISTE_ONGLETS:
+    for onglet in copy.copy(LISTE_ONGLETS):
         if onglet.code == code:
             # Récupération de la valeur validation_auto de l'onglet
             onglet.validation_auto = True

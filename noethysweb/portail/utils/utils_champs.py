@@ -3,6 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import copy
 from django.core.cache import cache
 from core.models import PortailChamp
 
@@ -27,6 +28,8 @@ LISTE_CHAMPS = [
     Champ(page="famille_caisse", code="num_allocataire", label="N° allocataire", famille="MODIFIABLE"),
     Champ(page="famille_caisse", code="allocataire", label="Nom de l'allocataire", famille="MODIFIABLE"),
     Champ(page="famille_caisse", code="autorisation_cafpro", label="Autorisation CAFPRO", famille="MODIFIABLE"),
+
+    Champ(page="famille_questionnaire", code="questionnaire", label="Questionnaire", famille="MODIFIABLE"),
 
     Champ(page="famille_consentements", code="consentements", label="Consentements", famille="MODIFIABLE"),
 
@@ -77,7 +80,7 @@ def Get_liste_champs():
         cache.set('parametres_portail_champs', dict_champs_db)
 
     liste_champs_temp = []
-    for champ in LISTE_CHAMPS:
+    for champ in copy.copy(LISTE_CHAMPS):
         key = "%s:%s" % (champ.page, champ.code)
         if key in dict_champs_db:
             champ.representant = dict_champs_db[key].representant
