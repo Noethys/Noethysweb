@@ -202,7 +202,7 @@ def Envoyer_model_mail(idmail=None, request=None):
             try:
                 if "http" in image:
                     image = os.path.join("media", image.split("media/")[1])
-                fp = open(os.path.join(settings.BASE_DIR, image), 'rb')
+                fp = open(settings.BASE_DIR + image, 'rb')
                 msg_img = MIMEImage(fp.read())
                 fp.close()
                 msg_img.add_header("Content-ID", "<image%d>" % index)
