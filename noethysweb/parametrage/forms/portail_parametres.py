@@ -28,7 +28,7 @@ LISTE_RUBRIQUES = [
                                 "facturation_autoriser_detail_facture", "facturation_autoriser_telechargement_facture", "facturation_modele_impression_facture"]),
     ("Paiement en ligne", ["paiement_ligne_systeme", "paiement_ligne_mode_reglement", "paiement_ligne_compte_bancaire", "paiement_ligne_montant_minimal",
                            "paiement_ligne_multi_factures", "paiement_ligne_off_si_prelevement", "payfip_mode", "payzen_site_id", "payzen_certificat_test",
-                           "payzen_certificat_production", "payzen_mode", "payzen_echelonnement"]),
+                           "payzen_certificat_production", "payzen_mode", "payzen_algo", "payzen_echelonnement"]),
     ("Page des règlements", ["reglements_afficher_page", "reglements_intro", "reglements_afficher_encaissement", "reglements_autoriser_telechargement_recu", "reglements_modele_impression_recu"]),
     ("Page contact", ["contact_afficher_page", "contact_intro", "messagerie_intro", "messagerie_envoyer_notification_famille", "messagerie_envoyer_notification_admin", "contact_afficher_coords_structures", "contact_afficher_coords_organisateur"]),
     ("Page des mentions légales", ["mentions_afficher_page", "mentions_intro", "mentions_conditions_generales"]),
@@ -98,6 +98,7 @@ EXTRA_HTML = """
         $('#div_id_payzen_certificat_test').hide();
         $('#div_id_payzen_certificat_production').hide();
         $('#div_id_payzen_mode').hide();
+        $('#div_id_payzen_algo').hide();
         $('#div_id_payzen_echelonnement').hide();
         if ($("#id_paiement_ligne_systeme").val()) {
             $('#div_id_paiement_ligne_compte_bancaire').show();
@@ -114,6 +115,7 @@ EXTRA_HTML = """
             $('#div_id_payzen_certificat_test').show();
             $('#div_id_payzen_certificat_production').show();
             $('#div_id_payzen_mode').show();
+            $('#div_id_payzen_algo').show();
             $('#div_id_payzen_echelonnement').show();
         };
     }

@@ -130,6 +130,7 @@ LISTE_PARAMETRES = [
     Parametre(code="payzen_certificat_test", label="Certificat de test", type="char_1ligne", valeur="", help_text="Saisissez le certificat de test que vous trouverez sur le backoffice Payzen."),
     Parametre(code="payzen_certificat_production", label="Certificat de production", type="char_1ligne", valeur="", help_text="Saisissez le certificat de production que vous trouverez sur le backoffice Payzen."),
     Parametre(code="payzen_mode", label="Mode de fonctionnement", type="choix", valeur="TEST", choix=[("TEST", "Test"), ("PRODUCTION", "Production")], help_text="Sélectionnez un mode de fonctionnement."),
+    Parametre(code="payzen_algo", label="Algorithme de signature", type="choix", valeur="sha1", choix=[("sha1", "SHA-1"), ("hmac_sha256", "HMAC-SHA-256")], help_text="Sélectionnez l'algorithme de signature qui a été paramétré sur votre backoffice Payzen."),
     Parametre(code="payzen_echelonnement", label="Proposer le paiement en 3 fois", type="boolean", valeur=False),
 
     # Règlements
