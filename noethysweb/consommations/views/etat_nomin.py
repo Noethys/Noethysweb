@@ -107,17 +107,6 @@ class View(CustomView, TemplateView):
 
         # Récupération des colonnes
         colonnes = json.loads(parametres["colonnes"])
-        dict_colonnes = {colonne["code"]: colonne for colonne in colonnes}
-
-        def Valide_conso(nom_colonne="", conso=None):
-            if nom_colonne in dict_colonnes:
-                unites = dict_colonnes[nom_colonne]["unites"]
-                if unites:
-                    for nom_unite in unites.split(";"):
-                        if conso.unite.nom.lower().strip() == nom_unite.lower().strip():
-                            return True
-                    return False
-            return True
 
         # Calcul des données
         resultats = {}
@@ -139,33 +128,55 @@ class View(CustomView, TemplateView):
 
             # Création des valeurs des colonnes
             key_individu = (conso.individu, conso.inscription.famille)
+
+            def Memorise_valeur(code_colonne="", valeur=None, ajouter_valeur=None, valeur_defaut=None, conso=None):
+                for index, colonne in enumerate(colonnes):
+                    if colonne["code"] == code_colonne:
+                        # Vérifie si valide
+                        valide = True
+                        if conso and colonne.get("unites", None):
+                            valide = False
+                            for nom_unite in colonne["unites"].split(";"):
+                                if conso.unite.nom.lower().strip() == nom_unite.lower().strip():
+                                    valide = True
+
+                        # Mémorisation de la valeur
+                        if valide:
+                            if ajouter_valeur:
+                                resultats[key_individu].setdefault(index, valeur_defaut)
+                                resultats[key_individu][index] += ajouter_valeur
+                            else:
+                                resultats[key_individu][index] = valeur
+                                # Mémorisation pour le tri uniquement
+                                resultats[key_individu][code_colonne] = valeur
+
             if key_individu not in resultats:
                 resultats[key_individu] = {}
 
                 # Individu
-                resultats[key_individu]["individu_nom_complet"] = conso.individu.Get_nom()
-                resultats[key_individu]["individu_nom"] = conso.individu.nom
-                resultats[key_individu]["individu_prenom"] = conso.individu.prenom
-                resultats[key_individu]["individu_sexe"] = conso.individu.Get_sexe()
-                resultats[key_individu]["individu_date_naiss"] = utils_dates.ConvertDateToFR(str(conso.individu.date_naiss))
-                resultats[key_individu]["individu_age"] = conso.individu.Get_age()
-                resultats[key_individu]["individu_adresse_complete"] = conso.individu.Get_adresse_complete()
-                resultats[key_individu]["individu_rue"] = conso.individu.rue_resid
-                resultats[key_individu]["individu_cp"] = conso.individu.cp_resid
-                resultats[key_individu]["individu_ville"] = conso.individu.ville_resid
+                Memorise_valeur("individu_nom_complet", conso.individu.Get_nom())
+                Memorise_valeur("individu_nom", conso.individu.nom)
+                Memorise_valeur("individu_prenom", conso.individu.prenom)
+                Memorise_valeur("individu_sexe", conso.individu.Get_sexe())
+                Memorise_valeur("individu_date_naiss", utils_dates.ConvertDateToFR(str(conso.individu.date_naiss)))
+                Memorise_valeur("individu_age", conso.individu.Get_age())
+                Memorise_valeur("individu_adresse_complete", conso.individu.Get_adresse_complete())
+                Memorise_valeur("individu_rue", conso.individu.rue_resid)
+                Memorise_valeur("individu_cp", conso.individu.cp_resid)
+                Memorise_valeur("individu_ville", conso.individu.ville_resid)
 
                 # Famille
-                resultats[key_individu]["famille_nom_complet"] = conso.inscription.famille.nom
-                resultats[key_individu]["famille_num_allocataire"] = conso.inscription.famille.num_allocataire
-                resultats[key_individu]["famille_allocataire"] = conso.inscription.famille.allocataire.Get_nom() if conso.inscription.famille.allocataire else None
-                resultats[key_individu]["famille_caisse"] = conso.inscription.famille.caisse.nom if conso.inscription.famille.caisse else None
-                resultats[key_individu]["famille_qf"] = int(dict_quotients[conso.inscription.famille_id]) if conso.inscription.famille_id in dict_quotients else None
+                Memorise_valeur("famille_nom_complet", conso.inscription.famille.nom)
+                Memorise_valeur("famille_num_allocataire", conso.inscription.famille.num_allocataire)
+                Memorise_valeur("famille_allocataire", conso.inscription.famille.allocataire.Get_nom() if conso.inscription.famille.allocataire else None)
+                Memorise_valeur("famille_caisse", conso.inscription.famille.caisse.nom if conso.inscription.famille.caisse else None)
+                Memorise_valeur("famille_qf", int(dict_quotients[conso.inscription.famille_id]) if conso.inscription.famille_id in dict_quotients else None)
 
                 # Ajout des questionnaires
                 for reponse in questionnaires_individus.GetDonnees(conso.individu_id):
-                    resultats[key_individu]["question_%d" % reponse["IDquestion"]] = reponse["reponse"]
+                    Memorise_valeur("question_%d" % reponse["IDquestion"], reponse["reponse"])
                 for reponse in questionnaires_familles.GetDonnees(conso.inscription.famille_id):
-                    resultats[key_individu]["question_%d" % reponse["IDquestion"]] = reponse["reponse"]
+                    Memorise_valeur("question_%d" % reponse["IDquestion"], reponse["reponse"])
 
             # Recherche si date durant les vacances
             est_vacances = utils_dates.EstEnVacances(date=conso.date, liste_vacances=liste_vacances)
@@ -173,35 +184,30 @@ class View(CustomView, TemplateView):
                 condition_suffixe = suffixe == "" or (suffixe == "_vacances" and est_vacances) or (suffixe == "_hors_vacances" and not est_vacances)
 
                 # Nombre de conso
-                nom_colonne = "*nbre_conso" + suffixe
-                resultats[key_individu].setdefault(nom_colonne, 0)
-                if condition_suffixe and Valide_conso(nom_colonne, conso):
-                    resultats[key_individu][nom_colonne] += 1
+                code_colonne = "*nbre_conso" + suffixe
+                if condition_suffixe:
+                    Memorise_valeur(code_colonne, ajouter_valeur=1, valeur_defaut=0, conso=conso)
 
                 # Durée réelle de la conso
-                nom_colonne = "*temps_conso" + suffixe
-                resultats[key_individu].setdefault(nom_colonne, datetime.timedelta(hours=0, minutes=0))
-                if condition_suffixe and conso.heure_debut and conso.heure_fin and Valide_conso(nom_colonne, conso):
+                code_colonne = "*temps_conso" + suffixe
+                if condition_suffixe and conso.heure_debut and conso.heure_fin:
                     valeur = datetime.timedelta(hours=conso.heure_fin.hour, minutes=conso.heure_fin.minute) - datetime.timedelta(hours=conso.heure_debut.hour, minutes=conso.heure_debut.minute)
-                    resultats[key_individu][nom_colonne] += valeur
+                    Memorise_valeur(code_colonne, ajouter_valeur=valeur, valeur_defaut=datetime.timedelta(hours=0, minutes=0), conso=conso)
 
                 # Temps facturé
-                nom_colonne = "*temps_facture" + suffixe
-                resultats[key_individu].setdefault(nom_colonne, datetime.timedelta(hours=0, minutes=0))
-                if condition_suffixe and conso.prestation and conso.prestation.temps_facture and Valide_conso(nom_colonne, conso):
-                    resultats[key_individu][nom_colonne] += conso.prestation.temps_facture
+                code_colonne = "*temps_facture" + suffixe
+                if condition_suffixe and conso.prestation and conso.prestation.temps_facture:
+                    Memorise_valeur(code_colonne, ajouter_valeur=conso.prestation.temps_facture, valeur_defaut=datetime.timedelta(hours=0, minutes=0), conso=conso)
 
                 # Equivalence journées
-                nom_colonne = "*equiv_journees" + suffixe
-                resultats[key_individu].setdefault(nom_colonne, 0.0)
-                if condition_suffixe and conso.unite.equiv_journees and Valide_conso(nom_colonne, conso):
-                    resultats[key_individu][nom_colonne] += conso.unite.equiv_journees
+                code_colonne = "*equiv_journees" + suffixe
+                if condition_suffixe and conso.unite.equiv_journees:
+                    Memorise_valeur(code_colonne, ajouter_valeur=conso.unite.equiv_journees, valeur_defaut=0.0, conso=conso)
 
                 # Equivalence heures
-                nom_colonne = "*equiv_heures" + suffixe
-                resultats[key_individu].setdefault(nom_colonne, datetime.timedelta(0))
-                if condition_suffixe and conso.unite.equiv_heures and Valide_conso(nom_colonne, conso):
-                    resultats[key_individu][nom_colonne] += utils_dates.TimeEnDelta(conso.unite.equiv_heures)
+                code_colonne = "*equiv_heures" + suffixe
+                if condition_suffixe and conso.unite.equiv_heures:
+                    Memorise_valeur(code_colonne, ajouter_valeur=utils_dates.TimeEnDelta(conso.unite.equiv_heures), valeur_defaut=datetime.timedelta(0), conso=conso)
 
         # Création des colonnes
         liste_colonnes = [colonne["nom"] for colonne in colonnes]
@@ -212,8 +218,8 @@ class View(CustomView, TemplateView):
         liste_lignes = []
         for key_individu in keys_individus:
             ligne = []
-            for colonne in colonnes:
-                valeur = resultats[key_individu].get(colonne["code"], None)
+            for index, colonne in enumerate(colonnes):
+                valeur = resultats[key_individu].get(index, None)
                 ligne.append(self.FormateValeur(valeur))
             liste_lignes.append(ligne)
 
