@@ -767,7 +767,7 @@ def Calculer_datamatrix(dictCompte):
     alphabet = "ABCDEFGHJKLMNPQRSTUVWXY"
     cle2 = "%02d" % (alphabet.index(cle2) + 1)
 
-    elements.append("".join([num_dette, cle2, id_poste, "4"]))
+    elements.append("".join([cle2, num_dette, id_poste, "4"]))
 
     # 116 : Code document (=9)
     elements.append("9")
