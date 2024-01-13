@@ -10,6 +10,9 @@
         .error {
             color: red;
         }
+        .active .bs-stepper-circle {
+            background-color: #ff851b;
+        }
     </style>
 {% endblock styles %}
 
@@ -32,6 +35,7 @@
                         {# Si une seule page dans le sondage #}
                         {% if pages.0.0.description %}<div class="mb-4">{{ pages.0.0.description }}</div>{% endif %}
                         {% crispy pages.0.1 %}
+                        <a type="button" class="btn btn-default" href="{% url 'portail_sondage' code=sondage.code %}"><i class="fa fa-home margin-r-5"></i>Début</a>
                         <div class="text-right"><button type="submit" class="btn btn-success" title="Valider" value="Valider"><i class="fa fa-send margin-r-5"></i>Envoyer</button></div>
 
                     {% else %}
@@ -55,6 +59,7 @@
                                         {% if page.description %}<div class="mb-4">{{ page.description }}</div>{% endif %}
                                         {% crispy form %}
                                         <div class="text-right">
+                                            <a type="button" class="btn btn-default" href="{% url 'portail_sondage' code=sondage.code %}"><i class="fa fa-home margin-r-5"></i>Début</a>
                                             {% if not forloop.first %}<button type="button" class="btn btn-default" onclick="stepper1.previous()"><i class="fa fa-chevron-circle-left margin-r-5"></i>Précédent</button>{% endif %}
                                             {% if not forloop.last %}<button type="button" class="btn btn-primary" onclick="stepper1.next()"><i class="fa fa-chevron-circle-right margin-r-5"></i>Suivant</button>{% endif %}
                                             {% if forloop.last %}<button type="submit" class="btn btn-success" title="Valider" value="Valider"><i class="fa fa-send margin-r-5"></i>Envoyer</button>{% endif %}

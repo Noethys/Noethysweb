@@ -22,7 +22,7 @@
                         <a type="button" class="btn btn-primary" href="{% url 'portail_sondage_questions' code=sondage.code %}"><i class="fa fa-edit margin-r-5"></i>Modifier</a>
                     </div>
                 {% else %}
-                    <div class="mb-3"><i>Vous avez déjà répondu à ce sondage et les réponses ne sont pas modifiables.</i></div>
+                    <div class="mb-3"><i>Vous avez déjà répondu à ce sondage.</i></div>
                     <a href="{% url 'portail_accueil' %}"><i class="fa fa-arrow-circle-o-left"></i> {% blocktrans %}Revenir à l'accueil{% endblocktrans %}</a>
                 {% endif %}
             {% else %}
@@ -47,7 +47,12 @@
                             <td class="project-state">
                                 <small>
                                     {% if rattachement.repondant %}
-                                        <span class="text-success"><i class="fa fa-check margin-r-5"></i>{% blocktrans %}Réponse enregistrée le{% endblocktrans %} {{ rattachement.repondant.date_creation|date:'d/m/Y' }}</span>
+                                        <span class="text-success"><i class="fa fa-check margin-r-5"></i>
+                                        {% if rattachement.repondant.date_modification %}
+                                            {% blocktrans %}Réponse modifiée le{% endblocktrans %} {{ rattachement.repondant.date_modification|date:'d/m/Y' }}</span>
+                                        {% else %}
+                                            {% blocktrans %}Réponse enregistrée le{% endblocktrans %} {{ rattachement.repondant.date_creation|date:'d/m/Y' }}</span>
+                                        {% endif %}
                                     {% else %}
                                         <span class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Non renseigné{% endblocktrans %}</span>
                                     {% endif %}

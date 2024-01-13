@@ -4312,12 +4312,12 @@ class ModeleWord(models.Model):
 class Sondage(models.Model):
     idsondage = models.AutoField(verbose_name="ID", db_column='IDsondage', primary_key=True)
     titre = models.CharField(verbose_name="Titre", max_length=300)
-    description = models.TextField(verbose_name="Description", blank=True, null=True)
-    conclusion = models.TextField(verbose_name="Texte après validation", blank=True, null=True)
+    description = models.TextField(verbose_name="Description", blank=True, null=True, help_text="Ce texte sera affiché comme introduction du formulaire de saisie.")
+    conclusion = models.TextField(verbose_name="Texte après validation", blank=True, null=True, help_text="Ce texte sera affiché après la validation de la réponse par la famille.")
     code = models.CharField(verbose_name="Code du sondage", max_length=300, default=get_uuid)
-    public = models.CharField(verbose_name="Public", max_length=50, choices=[("individu", "Individu"), ("famille", "Famille")], default="famille")
-    categories_rattachements = MultiSelectField(verbose_name="Catégories de rattachement", max_length=200, choices=CATEGORIES_RATTACHEMENT, blank=True, null=True)
-    modifiable = models.BooleanField(verbose_name="Modifiable", default=True)
+    public = models.CharField(verbose_name="Public", max_length=50, choices=[("individu", "Individu"), ("famille", "Famille")], default="famille", help_text="Indiquez si la réponse devra être unique pour la famille ou spécifique à un individu.")
+    categories_rattachements = MultiSelectField(verbose_name="Catégories de rattachement", max_length=200, choices=CATEGORIES_RATTACHEMENT, blank=True, null=True, help_text="Sélectionnez les catégories d'individus qui pourront être associés à ce sondage.")
+    modifiable = models.BooleanField(verbose_name="Réponses modifiables", default=True, help_text="Cochez cette case si vous souhaitez que les familles puissent modifier leurs réponses.")
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
@@ -4332,8 +4332,8 @@ class Sondage(models.Model):
 class SondagePage(models.Model):
     idpage = models.AutoField(verbose_name="ID", db_column='IDpage', primary_key=True)
     sondage = models.ForeignKey(Sondage, verbose_name="Sondage", on_delete=models.CASCADE)
-    titre = models.CharField(verbose_name="Titre", max_length=300)
-    description = models.TextField(verbose_name="Description", blank=True, null=True)
+    titre = models.CharField(verbose_name="Titre", max_length=300, help_text="Ce titre sera affiché uniquement si le sondage comporte plusieurs pages.")
+    description = models.TextField(verbose_name="Description", blank=True, null=True, help_text="Ce texte sera affiché sous le titre de la page.")
     ordre = models.IntegerField(verbose_name="Ordre")
 
     class Meta:
