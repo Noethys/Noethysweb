@@ -10,6 +10,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset, Hidden
 from crispy_forms.bootstrap import Field
 from django_summernote.widgets import SummernoteInplaceWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import Sondage, SondagePage, SondageQuestion
@@ -19,9 +20,11 @@ class Formulaire_sondage(FormulaireBase, ModelForm):
 
     class Meta:
         model = Sondage
-        fields = "__all__"
+        fields = ["titre", "description", "conclusion", "public", "categories_rattachements", "modifiable", "structure"]
         widgets = {
             "description": SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '200px'}}),
+            "conclusion": SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '200px'}}),
+            "categories_rattachements": Select2MultipleWidget(),
         }
 
     def __init__(self, *args, **kwargs):
@@ -34,17 +37,48 @@ class Formulaire_sondage(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
+        # Catégories de rattachements
+        self.fields["categories_rattachements"].initial = [1, 2, 3]
+
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'sondages_liste' %}", ajouter=False),
             Fieldset("Généralités",
                 Field("titre"),
                 Field("description"),
+                Field("conclusion"),
+                Field("public"),
+                Field("categories_rattachements"),
+                Field("modifiable"),
             ),
             Fieldset("Structure associée",
                 Field("structure"),
             ),
+            HTML(EXTRA_SCRIPT_SONDAGE),
         )
+
+    def clean(self):
+        if self.cleaned_data["public"] == "individu" and not self.cleaned_data["categories_rattachements"]:
+            self.add_error("categories_rattachements", "Vous devez sélectionner au moins une catégorie de rattachement")
+            return
+        return self.cleaned_data
+
+EXTRA_SCRIPT_SONDAGE = """
+<script>
+
+function On_change_public() {
+    $('#div_id_categories_rattachements').hide();
+    if ($("#id_public").val() == 'individu') {
+        $('#div_id_categories_rattachements').show();
+    };
+}
+$(document).ready(function() {
+    $('#id_public').on('change', On_change_public);
+    On_change_public.call($('#id_public').get(0));
+});
+
+</script>
+"""
 
 
 class Formulaire_page(FormulaireBase, ModelForm):
@@ -138,7 +172,7 @@ class Formulaire_question(FormulaireBase, ModelForm):
             Field("choix"),
             Field("texte_aide"),
             Field("obligatoire"),
-            HTML(EXTRA_SCRIPT),
+            HTML(EXTRA_SCRIPT_QUESTION),
         )
 
     def clean(self):
@@ -149,7 +183,7 @@ class Formulaire_question(FormulaireBase, ModelForm):
         return self.cleaned_data
 
 
-EXTRA_SCRIPT = """
+EXTRA_SCRIPT_QUESTION = """
 <script>
 
 // Lors de la sélection du type de contrôle

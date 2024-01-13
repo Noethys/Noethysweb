@@ -4313,6 +4313,11 @@ class Sondage(models.Model):
     idsondage = models.AutoField(verbose_name="ID", db_column='IDsondage', primary_key=True)
     titre = models.CharField(verbose_name="Titre", max_length=300)
     description = models.TextField(verbose_name="Description", blank=True, null=True)
+    conclusion = models.TextField(verbose_name="Texte après validation", blank=True, null=True)
+    code = models.CharField(verbose_name="Code du sondage", max_length=300, default=get_uuid)
+    public = models.CharField(verbose_name="Public", max_length=50, choices=[("individu", "Individu"), ("famille", "Famille")], default="famille")
+    categories_rattachements = MultiSelectField(verbose_name="Catégories de rattachement", max_length=200, choices=CATEGORIES_RATTACHEMENT, blank=True, null=True)
+    modifiable = models.BooleanField(verbose_name="Modifiable", default=True)
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
@@ -4381,10 +4386,27 @@ class SondageQuestion(models.Model):
             ordre += 1
 
 
+class SondageRepondant(models.Model):
+    idrepondant = models.AutoField(verbose_name="ID", db_column="IDrepondant", primary_key=True)
+    sondage = models.ForeignKey(Sondage, verbose_name="Sondage", on_delete=models.CASCADE)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", blank=True, null=True, on_delete=models.CASCADE)
+    individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.CASCADE)
+    date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
+    date_modification = models.DateTimeField(verbose_name="Date de modification", blank=True, null=True)
+
+    class Meta:
+        db_table = 'sondages_repondants'
+        verbose_name = "répondant de sondage"
+        verbose_name_plural = "répondants de sondages"
+
+    def __str__(self):
+        return "Répondant ID%d" % self.idrepondant if self.idrepondant else "Nouveau répondant"
+
+
 class SondageReponse(models.Model):
     idreponse = models.AutoField(verbose_name="ID", db_column='IDreponse', primary_key=True)
+    repondant = models.ForeignKey(SondageRepondant, verbose_name="Répondant", blank=True, null=True, on_delete=models.CASCADE)
     question = models.ForeignKey(SondageQuestion, verbose_name="Question", on_delete=models.CASCADE)
-    famille = models.ForeignKey(Famille, verbose_name="Famille", blank=True, null=True, on_delete=models.CASCADE)
     reponse = models.CharField(verbose_name="Réponse", max_length=450, blank=True, null=True)
 
     class Meta:

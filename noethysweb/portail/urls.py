@@ -10,7 +10,7 @@ from consommations.views import grille
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
                             individu_regimes_alimentaires, individu_coords, individu_medecin, individu_informations, individu_assurances, individu_vaccinations, \
                             famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents, \
-                            transmettre_piece, activites, inscrire_activite, attente_paiement, cotisations
+                            transmettre_piece, activites, inscrire_activite, attente_paiement, cotisations, sondage, famille_questionnaire
 from core.decorators import secure_ajax_portail
 
 
@@ -40,11 +40,20 @@ urlpatterns = [
     # Album photos
     path('album/<str:code>', album.View.as_view(), name='portail_album'),
 
+    # Sondage
+    path('sondage/<str:code>', sondage.View_introduction.as_view(), name='portail_sondage'),
+    path('sondage/questions/<str:code>', sondage.View_questions.as_view(), name='portail_sondage_questions'),
+    path('sondage/questions/<str:code>/<int:idindividu>', sondage.View_questions.as_view(), name='portail_sondage_questions'),
+    path('sondage/conclusion/<str:code>', sondage.View_conclusion.as_view(), name='portail_sondage_conclusion'),
+
     # Renseignements
     path('renseignements', renseignements.View.as_view(), name='portail_renseignements'),
 
     path('renseignements/famille/caisse', famille_caisse.Consulter.as_view(), name='portail_famille_caisse'),
     path('renseignements/famille/caisse/modifier', famille_caisse.Modifier.as_view(), name='portail_famille_caisse_modifier'),
+
+    path('renseignements/famille/questionnaire', famille_questionnaire.Consulter.as_view(), name='portail_famille_questionnaire'),
+    path('renseignements/famille/questionnaire/modifier', famille_questionnaire.Modifier.as_view(), name='portail_famille_questionnaire_modifier'),
 
     path('renseignements/individu/identite/<int:idrattachement>', individu_identite.Consulter.as_view(), name='portail_individu_identite'),
     path('renseignements/individu/identite/modifier/<int:idrattachement>', individu_identite.Modifier.as_view(), name='portail_individu_identite_modifier'),

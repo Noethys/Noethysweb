@@ -1,0 +1,72 @@
+{% extends "portail/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+{% embed 'core/box.html' with box_introduction=False %}
+    {% block box_theme %}card-outline card-lightblue{% endblock %}
+    {% block box_titre %}{{ box_titre }}{% endblock %}
+    {% block box_contenu %}
+
+        <div class="mb-4">
+            {{ sondage.description|safe }}
+        </div>
+
+        {% if sondage.public == "famille" %}
+            {% if sondages_existants %}
+                {% if sondage.modifiable %}
+                    <div class="mb-3"><i>Vous avez déjà répondu à ce sondage mais il est possible de modifier vos réponses en cliquant sur le bouton ci-dessous.</i></div>
+                    <div class="text-right">
+                        <a type="button" class="btn btn-primary" href="{% url 'portail_sondage_questions' code=sondage.code %}"><i class="fa fa-edit margin-r-5"></i>Modifier</a>
+                    </div>
+                {% else %}
+                    <div class="mb-3"><i>Vous avez déjà répondu à ce sondage et les réponses ne sont pas modifiables.</i></div>
+                    <a href="{% url 'portail_accueil' %}"><i class="fa fa-arrow-circle-o-left"></i> {% blocktrans %}Revenir à l'accueil{% endblocktrans %}</a>
+                {% endif %}
+            {% else %}
+                <div class="text-right">
+                    <a type="button" class="btn btn-primary" href="{% url 'portail_sondage_questions' code=sondage.code %}"><i class="fa fa-chevron-circle-right margin-r-5"></i>Commencer</a>
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {% if sondage.public == "individu" %}
+
+            <div class="mb-3"><i>Ce sondage est nominatif. Vous pouvez répondre au sondage pour chaque individu souhaité :</i></div>
+
+            <table id="table-fiches" class="table table-hover projects" style="cursor: pointer;">
+                <tbody>
+                    {% for rattachement in rattachements %}
+                        <tr>
+                            <td>
+                                <img src="{{ rattachement.individu.Get_photo }}" alt="user-avatar" class="img-circle img-fluid table-avatar" style="max-height: 80px">
+                                <span class="ml-2"><strong>{{ rattachement.individu.Get_nom }}</strong></span>
+                            </td>
+                            <td class="project-state">
+                                <small>
+                                    {% if rattachement.repondant %}
+                                        <span class="text-success"><i class="fa fa-check margin-r-5"></i>{% blocktrans %}Réponse enregistrée le{% endblocktrans %} {{ rattachement.repondant.date_creation|date:'d/m/Y' }}</span>
+                                    {% else %}
+                                        <span class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Non renseigné{% endblocktrans %}</span>
+                                    {% endif %}
+                                </small>
+                            </td>
+                            <td class="text-right">
+                                {% if rattachement.repondant and sondage.modifiable %}
+                                    <a type="button" class="btn btn-primary" href="{% url 'portail_sondage_questions' code=sondage.code idindividu=rattachement.individu_id %}"><i class="fa fa-edit margin-r-5"></i>Modifier</a>
+                                {% endif %}
+                                {% if not rattachement.repondant %}
+                                    <a type="button" class="btn btn-primary" href="{% url 'portail_sondage_questions' code=sondage.code idindividu=rattachement.individu_id %}"><i class="fa fa-chevron-circle-right margin-r-5"></i>Commencer</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        {% endif %}
+    {% endblock %}
+{% endembed %}
+{% endblock contenu_page %}

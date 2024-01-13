@@ -1,0 +1,18 @@
+{% extends "portail/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+{% embed 'core/box.html' with box_introduction=False %}
+    {% block box_theme %}card-outline card-lightblue{% endblock %}
+    {% block box_titre %}{{ box_titre }}{% endblock %}
+    {% block box_contenu %}
+
+        <div class="mb-5">{{ sondage.conclusion|safe }}</div>
+        <a href="{% url 'portail_accueil' %}"><i class="fa fa-arrow-circle-o-left"></i> {% blocktrans %}Revenir à l'accueil{% endblocktrans %}</a>
+
+    {% endblock %}
+{% endembed %}
+{% endblock contenu_page %}

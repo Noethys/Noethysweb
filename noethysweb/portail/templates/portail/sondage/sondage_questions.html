@@ -1,0 +1,118 @@
+{% extends "portail/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'lib/bs-stepper/bs-stepper.min.css' %}">
+    <style>
+        .error {
+            color: red;
+        }
+    </style>
+{% endblock styles %}
+
+{% block contenu_page %}
+{% embed 'core/box.html' with box_introduction=False %}
+    {% block box_theme %}card-outline card-lightblue{% endblock %}
+    {% block box_titre %}{{ box_titre }}{% endblock %}
+    {% block box_contenu %}
+        {% include 'core/erreurs_form.html' %}
+
+        {# Pages du sondage #}
+        <form id="form_sondage" method="post">
+            {% csrf_token %}
+
+            <div class="row">
+                <div class="col-md-12">
+
+                    {% if pages|length == 1 %}
+
+                        {# Si une seule page dans le sondage #}
+                        {% if pages.0.0.description %}<div class="mb-4">{{ pages.0.0.description }}</div>{% endif %}
+                        {% crispy pages.0.1 %}
+                        <div class="text-right"><button type="submit" class="btn btn-success" title="Valider" value="Valider"><i class="fa fa-send margin-r-5"></i>Envoyer</button></div>
+
+                    {% else %}
+
+                        {# Si plusieurs pages dans le sondage #}
+                        <div id="stepper-sondage" class="bs-stepper">
+                            <div class="bs-stepper-header">
+                                {% for page, form in pages %}
+                                    <div class="step" data-target="#page-{{ page.ordre }}">
+                                        <button type="button" class="btn step-trigger">
+                                            <span class="bs-stepper-circle">{{ page.ordre }}</span>
+                                            <span class="bs-stepper-label">{{ page.titre }}</span>
+                                        </button>
+                                    </div>
+                                    {% if not forloop.last %}<div class="line"></div>{% endif %}
+                                {% endfor %}
+                            </div>
+                            <div class="bs-stepper-content">
+                                {% for page, form in pages %}
+                                    <div id="page-{{ page.ordre }}" class="content">
+                                        {% if page.description %}<div class="mb-4">{{ page.description }}</div>{% endif %}
+                                        {% crispy form %}
+                                        <div class="text-right">
+                                            {% if not forloop.first %}<button type="button" class="btn btn-default" onclick="stepper1.previous()"><i class="fa fa-chevron-circle-left margin-r-5"></i>Précédent</button>{% endif %}
+                                            {% if not forloop.last %}<button type="button" class="btn btn-primary" onclick="stepper1.next()"><i class="fa fa-chevron-circle-right margin-r-5"></i>Suivant</button>{% endif %}
+                                            {% if forloop.last %}<button type="submit" class="btn btn-success" title="Valider" value="Valider"><i class="fa fa-send margin-r-5"></i>Envoyer</button>{% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <script type="text/javascript" src="{% static 'lib/bs-stepper/bs-stepper.min.js' %}"></script>
+                        
+                        <script>
+                            var stepper1Node = document.querySelector('#stepper-sondage')
+                            var stepper1 = new Stepper(document.querySelector('#stepper-sondage'), {
+                                animation: true
+                            })
+                            stepper1Node.addEventListener("show.bs-stepper", function (event) {
+                                if (!(validation_questions())) {
+                                    event.preventDefault();
+                                }
+                            })
+                
+                            $("#form_sondage").on("submit", function(event) {
+                                if (!(validation_questions())) {
+                                    event.preventDefault();
+                                }
+                            });
+                        </script>
+
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+
+        <script type="text/javascript" src="{% static 'lib/jquery-validation/jquery.validate.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'lib/jquery-validation/localization/messages_fr.min.js' %}"></script>
+
+        <script>
+            {# Submit du formulaire #}
+            $("#form_sondage").on("submit", function(event) {
+                if (!(validation_questions())) {
+                    event.preventDefault();
+                }
+            });
+
+            {# Validation des questions affichées #}
+            function validation_questions() {
+                var valide = true;
+                $("[name^='question_']:visible").each(function () {
+                    if (!($(this).valid())) {
+                        valide = false;
+                    }
+                });
+                return valide;
+            }
+        </script>
+
+    {% endblock %}
+
+{% endembed %}
+{% endblock contenu_page %}

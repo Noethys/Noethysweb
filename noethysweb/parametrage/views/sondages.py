@@ -133,12 +133,16 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["idsondage", "titre"]
+        filtres = ["idsondage", "titre", "public"]
+        public = columns.TextColumn("Public", sources="public", processor="Get_public")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idsondage", "titre"]
+            columns = ["idsondage", "titre", "public"]
+
+        def Get_public(self, instance, **kwargs):
+            return instance.get_public_display()
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             view = kwargs["view"]
