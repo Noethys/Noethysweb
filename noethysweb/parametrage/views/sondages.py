@@ -110,7 +110,7 @@ class Page(crud.Page):
     url_modifier = "sondages_modifier"
     url_supprimer = "sondages_supprimer"
     url_consulter = "sondages_consulter"
-    description_liste = "Voici ci-dessous la liste des sondages."
+    description_liste = "Voici ci-dessous la liste des sondages. <b>Attention, cette fonctionnalité est en cours de développement : La page des résultats du sondage n'est pas encore disponible.</b>"
     description_saisie = "Saisissez toutes les informations concernant le sondage à créer et cliquez sur le bouton Enregistrer."
     objet_singulier = "un sondage"
     objet_pluriel = "des sondages"
