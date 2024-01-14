@@ -1,3 +1,14 @@
+Version 1.2.1.9 (14/01/2024) :
+
+- Ajout des sondages sur le portail
+- Ajout de la rubrique questionnaire sur la fiche famille du portail
+- Ajout du choix de l'algorithme de signature Payzen
+- Ajout de colonnes à la liste détaillée des consommations
+- Amélioration de la liste des soldes du menu Facturation
+- Correction des colonnes avec code identique dans l'état nominatif
+- Correction du datamatrix inversion de la clé 2
+- Correction de l'image intégrée dans les emails
+
 Version 1.2.1.8 (25/12/2023) :
 
 - Ajout des questionnaires aux inscriptions
