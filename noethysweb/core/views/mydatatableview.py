@@ -104,4 +104,4 @@ class MyDatatable(Datatable):
         return self.Create_boutons_actions(html)
 
     def Formate_montant_standard(self, instance, **kwargs):
-        return utils_texte.Formate_montant(kwargs.get("default_value", 0.0))
+        return "%0.2f" % kwargs.get("default_value", 0.0)

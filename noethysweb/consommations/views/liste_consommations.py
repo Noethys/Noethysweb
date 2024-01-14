@@ -62,15 +62,19 @@ class Liste(Page, crud.Liste):
         famille = columns.TextColumn("Famille", sources=['inscription__famille__nom'])
         etat = columns.TextColumn("Etat", sources=['etat'], processor='Get_etat')
         prestation = columns.TextColumn("ID Prestation", sources=['prestation__idprestation'])
+        label_prestation = columns.TextColumn("Label prestation", sources=["prestation__label"])
+        montant_prestation = columns.TextColumn("Montant prestation", sources=["prestation__montant"])
 
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ["check","idconso", "date_saisie", "individu", "famille", "date", "unite", "groupe", "activite", "etat", "heure_debut", "heure_fin",
-                       "quantite", "categorie_tarif", "prestation", "actions"]
+                       "quantite", "categorie_tarif", "prestation", "label_prestation", "montant_prestation", "actions"]
             processors = {
                 "date": helpers.format_date('%d/%m/%Y'),
                 "date_saisie": helpers.format_date('%d/%m/%Y %H:%M'),
+                "montant_prestation": "Formate_montant_standard",
             }
+            hidden_columns = ["prestation", "label_prestation", "montant_prestation"]
             ordering = ["date_saisie"]
 
         def Get_etat(self, instance, **kwargs):
