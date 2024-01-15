@@ -6,6 +6,7 @@
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Deduction
+from django.urls import reverse
 from core.utils import utils_dates
 
 
@@ -21,7 +22,10 @@ class Liste(Page, crud.Liste):
     model = Deduction
 
     def get_queryset(self):
-        return Deduction.objects.select_related('prestation', 'prestation__activite', 'prestation__facture', 'prestation__individu').filter(self.Get_filtres("Q"))
+        #Filtrage en fonction des autorisations
+        activites_autorisees = self.request.user.structures.all()
+        return Deduction.objects.select_related('prestation', 'prestation__activite', 'prestation__facture', 'prestation__individu').filter(self.Get_filtres("Q"),prestation__activite__structure__in=activites_autorisees)
+        return Prestation.objects.select_related('activite', 'famille', 'individu', 'tarif', 'facture').filter(self.Get_filtres("Q"), activite__structure__in=activites_autorisees)
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -41,17 +45,27 @@ class Liste(Page, crud.Liste):
         caisse = columns.TextColumn("Caisse", sources=["aide__caisse__nom"])
         allocataire = columns.TextColumn("Allocataire titulaire", sources=['allocataire__nom', 'allocataire__prenom'])
         num_allocataire = columns.TextColumn("N° Allocataire", sources=None, processor='Get_num_allocataire')
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ["iddeduction", "date", "label", "famille", "individu", "date_naiss", "montant", "activite", "num_facture", "code_compta_prestation", "num_allocataire", "allocataire", "caisse"]
+            hidden_columns = []
             processors = {
                 'date': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ["date"]
-
+            
         def Get_date_naiss(self, instance, *args, **kwargs):
             return utils_dates.ConvertDateToFR(instance.prestation.individu.date_naiss) if instance.prestation.individu else ""
 
         def Get_num_allocataire(self, instance, *args, **kwargs):
             return instance.famille.num_allocataire
+            
+        #Bouton modification de la prestation
+        def Get_actions_speciales(self, instance, *args, **kwargs):
+            html = [
+                self.Create_bouton_modifier(url=reverse("famille_prestations_modifier", kwargs={"idfamille": instance.famille_id, "pk": instance.prestation.idprestation})),
+                ]
+
+            return self.Create_boutons_actions(html)
