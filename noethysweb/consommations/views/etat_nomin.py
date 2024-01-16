@@ -130,6 +130,8 @@ class View(CustomView, TemplateView):
             key_individu = (conso.individu, conso.inscription.famille)
 
             def Memorise_valeur(code_colonne="", valeur=None, ajouter_valeur=None, valeur_defaut=None, conso=None):
+                if valeur:
+                    resultats[key_individu][code_colonne] = valeur
                 for index, colonne in enumerate(colonnes):
                     if colonne["code"] == code_colonne:
                         # Vérifie si valide
@@ -147,8 +149,6 @@ class View(CustomView, TemplateView):
                                 resultats[key_individu][index] += ajouter_valeur
                             else:
                                 resultats[key_individu][index] = valeur
-                                # Mémorisation pour le tri uniquement
-                                resultats[key_individu][code_colonne] = valeur
 
             if key_individu not in resultats:
                 resultats[key_individu] = {}
