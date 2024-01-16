@@ -20,12 +20,12 @@ class Calendrier():
     def GetVacances(self):
         liste_items = []
         for item in self.data:
-            if item["fields"]["zones"] == "Zone %s" % self.zone.upper() and "end_date" in item["fields"] and u"Enseignants" not in item["fields"].get("population", ""):
-                description = item["fields"]["description"]
-                date_debut = utils_dates.ConvertDateENGtoDate(item["fields"]["start_date"])
+            if item["zones"] == "Zone %s" % self.zone.upper() and "end_date" in item and "Enseignants" not in item.get("population", ""):
+                description = item["description"]
+                date_debut = utils_dates.ConvertDateENGtoDate(item["start_date"])
                 if date_debut.weekday() != 5:
                     date_debut += datetime.timedelta(days=1)
-                date_fin = utils_dates.ConvertDateENGtoDate(item["fields"]["end_date"]) - datetime.timedelta(days=1)
+                date_fin = utils_dates.ConvertDateENGtoDate(item["end_date"]) - datetime.timedelta(days=1)
                 annee = date_debut.year
 
                 if u"Hiver" in description: nom = u"Février"
@@ -36,7 +36,7 @@ class Calendrier():
                 else: nom = None
 
                 periode = {"annee": annee, "nom": nom, "date_debut": date_debut, "date_fin": date_fin}
-                if nom and periode not in liste_items:
+                if nom and periode not in liste_items and date_fin > date_debut:
                     liste_items.append(periode)
 
         # Tri par date de début
