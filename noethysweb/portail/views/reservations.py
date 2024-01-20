@@ -3,12 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, datetime
+import logging, datetime, decimal
 logger = logging.getLogger(__name__)
 from django.db.models import Q
 from django.views.generic import TemplateView
 from django.utils.translation import gettext as _
 from core.models import Inscription, PortailPeriode
+from individus.utils import utils_familles
 from portail.views.base import CustomView
 from portail.utils import utils_approbations
 
@@ -61,5 +62,12 @@ class View(CustomView, TemplateView):
         # Approbations
         approbations_requises = utils_approbations.Get_approbations_requises(famille=self.request.user.famille)
         context['nbre_approbations_requises'] = approbations_requises["nbre_total"]
+
+        # Blocage si impayés
+        blocage_impayes = context["parametres_portail"].get("reservations_blocage_impayes", None)
+        context["blocage_impayes"] = False
+        if blocage_impayes:
+            if utils_familles.Get_solde_famille(idfamille=self.request.user.famille.pk) >= decimal.Decimal(blocage_impayes):
+                context["blocage_impayes"] = True
 
         return context
