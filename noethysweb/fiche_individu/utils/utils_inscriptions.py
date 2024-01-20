@@ -42,7 +42,7 @@ class Inscriptions():
             dictDonnee = {
                 "{IDINSCRIPTION}": str(inscription.pk),
                 "{DATE_DEBUT}": utils_dates.ConvertDateToFR(inscription.date_debut),
-                "{DATE_FIN}": utils_dates.ConvertDateToFR(inscription.date_fin),
+                "{DATE_FIN}": utils_dates.ConvertDateToFR(inscription.date_fin) or "",
 
                 "{IDINDIVIDU}": inscription.individu_id,
                 "{INDIVIDU_NOM}":  inscription.individu.nom,

@@ -431,8 +431,8 @@ class Inscription(Categorie):
             (u"Numéro d'allocataire de la famille", "0123456X", "{FAMILLE_NUMALLOC}"),
 
             (u"Numéro ID de l'inscription", "003", "{IDINSCRIPTION}"),
-            (u"Date de l'inscription", "01/01/2013", "{DATE_INSCRIPTION}"),
-            (u"Est parti", "Oui", "{EST_PARTI}"),
+            (u"Date de début de l'inscription", "01/01/2013", "{DATE_DEBUT}"),
+            (u"Date de fin de l'inscription", "01/01/2013", "{DATE_FIN}"),
 
             (u"Numéro ID de l'activité", "003", "{IDACTIVITE}"),
             (u"Nom de l'activité (long)", "Accueil de Loisirs", "{ACTIVITE_NOM_LONG}"),

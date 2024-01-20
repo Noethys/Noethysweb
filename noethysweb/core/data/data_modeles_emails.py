@@ -282,8 +282,8 @@ MOTSCLES = {
 
     "inscription": [
         ("{IDINSCRIPTION}", "ID de l'inscription"),
-        ("{DATE_INSCRIPTION}", "Date de l'inscription"),
-        ("{EST_PARTI}", "L'individu est parti"),
+        ("{DATE_DEBUT}", "Date de début de l'inscription"),
+        ("{DATE_FIN}", "Date de fin de l'inscription"),
         ("{ACTIVITE_NOM_LONG}", "Nom de l'activité long"),
         ("{ACTIVITE_NOM_COURT}", "Nom de l'activité abrégé"),
         ("{GROUPE_NOM_LONG}", "Nom du groupe long"),
