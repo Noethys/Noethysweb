@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 {% load embed %}
 
-<input id="{{ id }}" type="hidden" name="{{ name }}" value="{{ value }}">
+<input id="{{ id }}" type="hidden" name="{{ name }}" value="">
 
 <div id="div_{{ id }}">
     <ul id="ul_{{ id }}" class="todo-list">
@@ -129,7 +129,10 @@
             afficher_colonnes();
             $("#modal_saisir_colonne").modal('hide');
         });
-
+        
+        // Importation de la valeur par défaut
+        $("#{{ id }}").val(JSON.stringify(JSON.parse("{{ value|escapejs }}")));
+        
         // Dessine les colonnes
         afficher_colonnes();
 

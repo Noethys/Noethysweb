@@ -231,6 +231,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_inscriptions.Add(code="liste_inscriptions_refus", titre="Liste des inscriptions refusées", icone="file-text-o")
     menu_inscriptions.Add(code="inscriptions_activite_liste", titre="Liste des inscriptions à une activité", icone="file-text-o")
     menu_inscriptions.Add(code="liste_familles_sans_inscriptions", titre="Liste des familles sans inscriptions", icone="file-text-o")
+    menu_inscriptions.Add(code="imprimer_liste_inscrits", titre="Imprimer une liste d'inscrits", icone="file-text-o")
     menu_inscriptions.Add(code="suivi_inscriptions", titre="Suivi des inscriptions", icone="file-text-o")
     menu_inscriptions.Add(code="inscriptions_impression", titre="Imprimer des inscriptions", icone="file-text-o")
     menu_inscriptions.Add(code="inscriptions_email", titre="Envoyer des inscriptions par Email", icone="file-text-o")
