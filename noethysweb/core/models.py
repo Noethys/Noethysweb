@@ -2558,7 +2558,7 @@ class ModeleEmail(models.Model):
         super().delete(*args, **kwargs)
         # Si le défaut a été supprimé, on le réattribue à une autre objet
         if len(ModeleEmail.objects.filter(categorie=self.categorie, defaut=True)) == 0:
-            objet = ModeleEmail.objects.first(categorie=self.categorie)
+            objet = ModeleEmail.objects.filter(categorie=self.categorie).first()
             if objet != None:
                 objet.defaut = True
                 objet.save()
@@ -4302,8 +4302,8 @@ class ModeleWord(models.Model):
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
         # Si le défaut a été supprimé, on le réattribue à une autre objet
-        if len(ModeleEmail.objects.filter(categorie=self.categorie, defaut=True)) == 0:
-            objet = ModeleEmail.objects.first(categorie=self.categorie)
+        if len(ModeleWord.objects.filter(categorie=self.categorie, defaut=True)) == 0:
+            objet = ModeleWord.objects.filter(categorie=self.categorie).first()
             if objet != None:
                 objet.defaut = True
                 objet.save()
