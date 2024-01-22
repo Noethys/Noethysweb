@@ -20,6 +20,7 @@ def get_data_profil(donnees=None, request=None):
     data = form.cleaned_data
     data["activite"] = data["activite"].pk
     data.pop("profil")
+    data.pop("date_situation")
     return data
 
 

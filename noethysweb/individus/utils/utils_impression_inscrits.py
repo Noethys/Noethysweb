@@ -22,7 +22,8 @@ class Impression(utils_impression.Impression):
 
     def Draw(self):
         # Importation des inscriptions
-        inscriptions = Inscription.objects.select_related("famille", "individu", "groupe", "categorie_tarif", "activite", "activite__structure").filter(activite=self.dict_donnees["activite"]).order_by("individu__nom", "individu__prenom")
+        conditions = Q(activite=self.dict_donnees["activite"]) & (Q(date_fin__isnull=True) | Q(date_fin__gte=self.dict_donnees["date_situation"]))
+        inscriptions = Inscription.objects.select_related("famille", "individu", "groupe", "categorie_tarif", "activite", "activite__structure").filter(conditions).order_by("individu__nom", "individu__prenom")
 
         # Calcul des soldes
         dict_ventilations = {temp["prestation_id"]: temp["total"] for temp in Ventilation.objects.values("prestation_id").filter(prestation__activite=self.dict_donnees["activite"]).annotate(total=Sum("montant"))}
@@ -122,6 +123,7 @@ class Impression(utils_impression.Impression):
                 "tel_parents": Rechercher_tel_parents(inscription),
                 "mail_parents": Rechercher_mail_parents(inscription),
                 "individu_ville": inscription.individu.ville_resid,
+                "famille": inscription.famille.nom,
                 "famille_ville": inscription.famille.ville_resid,
                 "num_cotisation": Rechercher_cotisation(inscription),
                 "statut": inscription.get_statut_display(),
