@@ -47,6 +47,11 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
+        # Validité
+        self.fields["validite_jours"].widget.attrs.update({"min": 0})
+        self.fields["validite_mois"].widget.attrs.update({"min": 0})
+        self.fields["validite_annees"].widget.attrs.update({"min": 0})
+
         # Importe la durée de validité dans les champs libres
         if self.instance.duree_validite == None:
             # Durée illimitée
