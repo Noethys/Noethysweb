@@ -7,9 +7,9 @@ from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, ButtonHolder, Fieldset
-from crispy_forms.bootstrap import Field, FormActions, PrependedText, StrictButton
-from core.models import TypeCotisation
+from crispy_forms.layout import Layout, Fieldset
+from crispy_forms.bootstrap import Field
+from core.models import TypeCotisation, Cotisation
 from core.utils.utils_commandes import Commandes
 
 
@@ -30,6 +30,10 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
+
+        # Type
+        if self.instance and Cotisation.objects.filter(type_cotisation=self.instance):
+            self.fields["type"].disabled = True
 
         # Définir comme valeur par défaut
         self.fields['defaut'].label = "Définir comme type d'adhésion par défaut"
