@@ -1,3 +1,10 @@
+Version 1.2.2.1 (22/01/2024) :
+
+- Ajout de la date de situation à la liste des inscrits
+- Ajout des mots-clés INSCRIPTIONS_PERIODE dans impression des adhésions
+- Activation de la signature algo de Payzen
+- Correction blocage type dans paramétrage type d'adhésion
+
 Version 1.2.2.0 (21/01/2024) :
 
 - Ajout du blocage des réservations sur le portail si impayés
