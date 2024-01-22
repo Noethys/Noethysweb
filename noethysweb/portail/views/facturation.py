@@ -29,7 +29,7 @@ def GetPaymentPayzen(request=None, parametres_portail={}):
         'vads_ctx_mode': parametres_portail.get("payzen_mode"),
         'secret_test': parametres_portail.get("payzen_certificat_test"),
         'secret_production': parametres_portail.get("payzen_certificat_production"),
-        #'signature_algo': parametres_portail.get("payzen_algo"),
+        'signature_algo': parametres_portail.get("payzen_algo"),
         'vads_url_return': request.build_absolute_uri(reverse("portail_facturation")),
         'vads_url_cancel': request.build_absolute_uri(reverse("retour_payzen_cancel")),
         'vads_url_error': request.build_absolute_uri(reverse("retour_payzen_error")),
