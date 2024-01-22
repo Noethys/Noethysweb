@@ -90,12 +90,15 @@ class Liste(Page, crud.Liste):
 
         def Get_validite(self, instance, **kwargs):
             if instance.duree!= None:
-                jours, mois, annees = instance.duree.split("-")
-                jours, mois, annees = int(jours[1:]), int(mois[1:]), int(annees[1:])
                 liste_duree = []
-                if annees > 0: liste_duree.append("%d années" % annees)
-                if mois > 0: liste_duree.append("%d mois" % mois)
-                if jours > 0: liste_duree.append("%d jours" % jours)
+                try:
+                    jours, mois, annees = instance.duree.split("-")
+                    jours, mois, annees = int(jours[1:]), int(mois[1:]), int(annees[1:])
+                    if annees > 0: liste_duree.append("%d années" % annees)
+                    if mois > 0: liste_duree.append("%d mois" % mois)
+                    if jours > 0: liste_duree.append("%d jours" % jours)
+                except:
+                    pass
                 return ", ".join(liste_duree)
             else:
                 periode = "Du %s au %s" % (instance.date_debut.strftime('%d/%m/%Y'), instance.date_fin.strftime('%d/%m/%Y'))

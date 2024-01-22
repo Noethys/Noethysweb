@@ -55,6 +55,11 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
+        # Validité
+        self.fields["validite_jours"].widget.attrs.update({"min": 0})
+        self.fields["validite_mois"].widget.attrs.update({"min": 0})
+        self.fields["validite_annees"].widget.attrs.update({"min": 0})
+
         # Définir comme valeur par défaut
         self.fields['defaut'].label = "Définir comme unité d'adhésion par défaut"
         if len(UniteCotisation.objects.filter(type_cotisation=type_cotisation)) == 0 or self.instance.defaut == True:
@@ -65,10 +70,13 @@ class Formulaire(FormulaireBase, ModelForm):
         if self.instance.duree != None:
             # Si validité par durée
             self.fields['validite_type'].initial = "DUREE"
-            jours, mois, annees = self.instance.duree.split("-")
-            self.fields['validite_jours'].initial = int(jours[1:])
-            self.fields['validite_mois'].initial = int(mois[1:])
-            self.fields['validite_annees'].initial = int(annees[1:])
+            try:
+                jours, mois, annees = self.instance.duree.split("-")
+                self.fields['validite_jours'].initial = int(jours[1:])
+                self.fields['validite_mois'].initial = int(mois[1:])
+                self.fields['validite_annees'].initial = int(annees[1:])
+            except:
+                pass
 
         # Importe le label de la prestation
         if self.instance.label_prestation != None:
