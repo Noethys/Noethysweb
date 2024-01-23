@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.template import Template, RequestContext
 from django.db.models import Max, Q, Sum, Count
-from core.models import LotAttestationsFiscales, AttestationFiscale, FiltreListe, Activite, Prestation, Ventilation
+from core.models import LotAttestationsFiscales, AttestationFiscale, FiltreListe, Activite, Prestation, Ventilation, Famille, Individu
 from core.views.base import CustomView
 from core.utils import utils_dates
 from facturation.forms.attestations_fiscales_generation import Formulaire
@@ -58,10 +58,14 @@ def Get_prestations(cleaned_data):
 
     idfamille = cleaned_data["famille"] if cleaned_data["selection_familles"] == "FAMILLE" else None
 
+    # Importation des noms d'activités et des dates de naissance
+    dict_activites = {activite["pk"]: activite["nom"] for activite in Activite.objects.values("pk", "nom").all()}
+    dict_individus = {individu["pk"]: individu["date_naiss"] for individu in Individu.objects.values("pk", "date_naiss").all()}
+
     # Importation des prestations
     conditions = Q(date__gte=date_debut) & Q(date__lte=date_fin) & Q(activite__in=liste_activites) & Q(individu__isnull=False)
     if idfamille: conditions &= Q(famille=cleaned_data["famille"])
-    liste_prestations = Prestation.objects.select_related("activite", "individu").filter(conditions).order_by("label")
+    liste_prestations = Prestation.objects.values("pk", "label", "montant", "individu_id", "activite_id").filter(conditions).order_by("label")
 
     # Importation des ventilations
     conditions = Q(prestation__date__gte=date_debut) & Q(prestation__date__lte=date_fin) & Q(prestation__activite__in=liste_activites)
@@ -72,14 +76,14 @@ def Get_prestations(cleaned_data):
     # Regroupement des prestations par label
     dict_prestations = {}
     for prestation in liste_prestations:
-        if not cleaned_data["date_naiss_min"] or (prestation.individu.date_naiss and prestation.individu.date_naiss >= cleaned_data["date_naiss_min"]):
-            if prestation.label not in dict_prestations:
-                dict_prestations[prestation.label] = {"activite__nom": prestation.activite.nom, "idactivite": prestation.activite_id, "nbre": 0,
+        if not cleaned_data["date_naiss_min"] or (dict_individus.get(prestation["individu_id"], None) and dict_individus[prestation["individu_id"]] >= cleaned_data["date_naiss_min"]):
+            if prestation["label"] not in dict_prestations:
+                dict_prestations[prestation["label"]] = {"activite__nom": dict_activites.get(prestation["activite_id"], ""), "idactivite": prestation["activite_id"], "nbre": 0,
                                                      "total": decimal.Decimal(0), "regle": decimal.Decimal(0), "solde": decimal.Decimal(0)}
-            dict_prestations[prestation.label]["total"] += prestation.montant
-            dict_prestations[prestation.label]["regle"] += dict_ventilations.get(prestation.pk, decimal.Decimal(0))
-            dict_prestations[prestation.label]["solde"] = dict_prestations[prestation.label]["total"] - dict_prestations[prestation.label]["regle"]
-            dict_prestations[prestation.label]["nbre"] += 1
+            dict_prestations[prestation["label"]]["total"] += prestation["montant"]
+            dict_prestations[prestation["label"]]["regle"] += dict_ventilations.get(prestation["pk"], decimal.Decimal(0))
+            dict_prestations[prestation["label"]]["solde"] = dict_prestations[prestation["label"]]["total"] - dict_prestations[prestation["label"]]["regle"]
+            dict_prestations[prestation["label"]]["nbre"] += 1
 
     liste_prestations = [{**dict_prestation, **{"label": label}} for label, dict_prestation in dict_prestations.items()]
     return liste_prestations
@@ -110,10 +114,14 @@ def Get_attestations_fiscales(cleaned_data={}, selection_prestations={}):
 
     idfamille = cleaned_data["famille"] if cleaned_data["selection_familles"] == "FAMILLE" else None
 
+    # Importation des noms de famille et des dates de naissance
+    dict_familles = {famille["pk"]: famille["nom"] for famille in Famille.objects.values("pk", "nom").all()}
+    dict_individus = {individu["pk"]: individu["date_naiss"] for individu in Individu.objects.values("pk", "date_naiss").all()}
+
     # Importation des prestations
     conditions = Q(date__gte=date_debut) & Q(date__lte=date_fin) & Q(activite__in=liste_activites) & Q(individu__isnull=False) & Q(label__in=selection_prestations.keys())
     if idfamille: conditions &= Q(famille=cleaned_data["famille"])
-    liste_prestations = Prestation.objects.select_related("activite", "individu", "famille").filter(conditions).order_by("label")
+    liste_prestations = Prestation.objects.values("pk", "label", "montant", "famille_id", "individu_id", "activite_id").filter(conditions).order_by("label")
 
     # Importation des ventilations
     conditions = Q(prestation__date__gte=date_debut) & Q(prestation__date__lte=date_fin) & Q(prestation__activite__in=liste_activites)
@@ -124,25 +132,25 @@ def Get_attestations_fiscales(cleaned_data={}, selection_prestations={}):
     # Regroupement des prestations par label
     dict_attestations = {}
     for prestation in liste_prestations:
-        if not cleaned_data["date_naiss_min"] or (prestation.individu.date_naiss and prestation.individu.date_naiss >= cleaned_data["date_naiss_min"]):
-            if prestation.famille not in dict_attestations:
-                dict_attestations[prestation.famille] = {"individus": {}, "activites": [], "total": decimal.Decimal(0), "regle": decimal.Decimal(0), "solde": decimal.Decimal(0)}
-            if prestation.individu not in dict_attestations[prestation.famille]["individus"]:
-                dict_attestations[prestation.famille]["individus"][prestation.individu] = {"total": decimal.Decimal(0), "regle": decimal.Decimal(0), "solde": decimal.Decimal(0)}
-            if prestation.activite not in dict_attestations[prestation.famille]["activites"]:
-                dict_attestations[prestation.famille]["activites"].append(prestation.activite)
+        if not cleaned_data["date_naiss_min"] or (dict_individus.get(prestation["individu_id"], None) and dict_individus[prestation["individu_id"]] >= cleaned_data["date_naiss_min"]):
+            if prestation["famille_id"] not in dict_attestations:
+                dict_attestations[prestation["famille_id"]] = {"nom": dict_familles.get(prestation["famille_id"], ""), "individus": {}, "activites": [], "total": decimal.Decimal(0), "regle": decimal.Decimal(0), "solde": decimal.Decimal(0)}
+            if prestation["individu_id"] not in dict_attestations[prestation["famille_id"]]["individus"]:
+                dict_attestations[prestation["famille_id"]]["individus"][prestation["individu_id"]] = {"total": decimal.Decimal(0), "regle": decimal.Decimal(0), "solde": decimal.Decimal(0)}
+            if prestation["activite_id"] not in dict_attestations[prestation["famille_id"]]["activites"]:
+                dict_attestations[prestation["famille_id"]]["activites"].append(prestation["activite_id"])
 
-            ajustement = selection_prestations[prestation.label]
-            total = max(prestation.montant + ajustement, decimal.Decimal(0))
-            regle = max(dict_ventilations.get(prestation.pk, decimal.Decimal(0)) + ajustement, decimal.Decimal(0))
+            ajustement = selection_prestations[prestation["label"]]
+            total = max(prestation["montant"] + ajustement, decimal.Decimal(0))
+            regle = max(dict_ventilations.get(prestation["pk"], decimal.Decimal(0)) + ajustement, decimal.Decimal(0))
 
-            dict_attestations[prestation.famille]["individus"][prestation.individu]["total"] += total
-            dict_attestations[prestation.famille]["individus"][prestation.individu]["regle"] += regle
-            dict_attestations[prestation.famille]["individus"][prestation.individu]["solde"] = dict_attestations[prestation.famille]["individus"][prestation.individu]["total"] - dict_attestations[prestation.famille]["individus"][prestation.individu]["regle"]
+            dict_attestations[prestation["famille_id"]]["individus"][prestation["individu_id"]]["total"] += total
+            dict_attestations[prestation["famille_id"]]["individus"][prestation["individu_id"]]["regle"] += regle
+            dict_attestations[prestation["famille_id"]]["individus"][prestation["individu_id"]]["solde"] = dict_attestations[prestation["famille_id"]]["individus"][prestation["individu_id"]]["total"] - dict_attestations[prestation["famille_id"]]["individus"][prestation["individu_id"]]["regle"]
 
-            dict_attestations[prestation.famille]["total"] += total
-            dict_attestations[prestation.famille]["regle"] += regle
-            dict_attestations[prestation.famille]["solde"] = dict_attestations[prestation.famille]["total"] - dict_attestations[prestation.famille]["regle"]
+            dict_attestations[prestation["famille_id"]]["total"] += total
+            dict_attestations[prestation["famille_id"]]["regle"] += regle
+            dict_attestations[prestation["famille_id"]]["solde"] = dict_attestations[prestation["famille_id"]]["total"] - dict_attestations[prestation["famille_id"]]["regle"]
 
     return dict_attestations
 
@@ -160,7 +168,7 @@ def Recherche_attestations_fiscales(request):
 
     # Recherche des attestations fiscales à générer
     dict_attestations_fiscales = Get_attestations_fiscales(cleaned_data=form.cleaned_data, selection_prestations=selection_prestations)
-    liste_attestations_fiscales = sorted(dict_attestations_fiscales.items(), key=lambda x: x[0].nom)
+    liste_attestations_fiscales = sorted(dict_attestations_fiscales.items(), key=lambda x: x[1]["nom"])
 
     return render(request, "facturation/attestations_fiscales_generation_selection.html", {"attestations_fiscales": liste_attestations_fiscales})
 
@@ -186,23 +194,23 @@ def Generation_attestations_fiscales(request):
 
     # Recherche des attestations fiscales à générer
     dict_attestations_fiscales = Get_attestations_fiscales(cleaned_data=form.cleaned_data, selection_prestations=selection_prestations)
-    liste_attestations_fiscales = sorted(dict_attestations_fiscales.items(), key=lambda x: x[0].nom)
+    liste_attestations_fiscales = sorted(dict_attestations_fiscales.items(), key=lambda x: x[1]["nom"])
 
     liste_attestations_generees = []
     liste_id_attestations = []
-    for famille, detail in liste_attestations_fiscales:
-        if famille.pk in selection_attestations_fiscales:
+    for idfamille, detail in liste_attestations_fiscales:
+        if idfamille in selection_attestations_fiscales:
             attestation = AttestationFiscale.objects.create(
                 numero=prochain_numero,
-                famille=famille,
+                famille_id=idfamille,
                 date_edition=form.cleaned_data["date_emission"],
                 date_debut=date_debut,
                 date_fin=date_fin,
                 lot=form.cleaned_data["lot_attestations_fiscales"],
                 total=detail["total"] if form.cleaned_data["type_donnee"] == "FACTURE" else detail["regle"],
-                activites=[activite.pk for activite in detail["activites"]],
-                individus=[individu.pk for individu in detail["individus"]],
-                detail=json.dumps([{"idindividu": individu.pk, "montant": float(detail_individu["total"] if form.cleaned_data["type_donnee"] == "FACTURE" else detail_individu["regle"])} for individu, detail_individu in detail["individus"].items()]),
+                activites=detail["activites"],
+                individus=list(detail["individus"].keys()),
+                detail=json.dumps([{"idindividu": idindividu, "montant": float(detail_individu["total"] if form.cleaned_data["type_donnee"] == "FACTURE" else detail_individu["regle"])} for idindividu, detail_individu in detail["individus"].items()]),
             )
             liste_attestations_generees.append(attestation)
             liste_id_attestations.append(attestation.pk)
