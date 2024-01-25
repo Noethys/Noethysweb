@@ -67,7 +67,12 @@ class View(CustomView, TemplateView):
         blocage_impayes = context["parametres_portail"].get("reservations_blocage_impayes", None)
         context["blocage_impayes"] = False
         if blocage_impayes:
-            if utils_familles.Get_solde_famille(idfamille=self.request.user.famille.pk) >= decimal.Decimal(blocage_impayes):
+            blocage_impayes = decimal.Decimal(blocage_impayes)
+            factures = False
+            if blocage_impayes > decimal.Decimal(10000):
+                blocage_impayes -= decimal.Decimal(10000)
+                factures = True
+            if utils_familles.Get_solde_famille(idfamille=self.request.user.famille.pk, date_situation=datetime.date.today(), factures=factures) >= blocage_impayes:
                 context["blocage_impayes"] = True
 
         return context
