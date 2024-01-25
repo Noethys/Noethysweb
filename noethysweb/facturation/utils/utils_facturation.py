@@ -429,6 +429,7 @@ class Facturation():
                 dictComptes[ID]["listeDeductions"].append(dictDeduction)
 
             # Adaptation du label
+            label = prestation.label
             if type_label == "2" and prestation.tarif:
                 label = prestation.tarif.nom_tarif.nom
             if type_label == "3" and prestation.tarif:
@@ -445,7 +446,7 @@ class Facturation():
 
             # Mémorisation de la prestation
             dictPrestation = {
-                "IDprestation": prestation.pk, "date": prestation.date, "categorie": prestation.categorie_tarif, "label": prestation.label,
+                "IDprestation": prestation.pk, "date": prestation.date, "categorie": prestation.categorie_tarif, "label": label,
                 "montant_initial": prestation.montant_initial, "montant": prestation.montant, "tva": prestation.tva,
                 "IDtarif": prestation.tarif_id, "nomTarif": prestation.tarif.nom_tarif.nom if prestation.tarif else None,
                 "nomCategorieTarif": prestation.categorie_tarif.nom if prestation.categorie_tarif else None,
