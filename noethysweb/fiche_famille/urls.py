@@ -123,6 +123,7 @@ urlpatterns = [
     path('individus/familles/devis/supprimer/<int:idfamille>/<int:pk>', famille_devis.Supprimer.as_view(), name='famille_devis_supprimer'),
 
     path('individus/familles/rappels/liste/<int:idfamille>', famille_rappels.Liste.as_view(), name='famille_rappels_liste'),
+    path('individus/familles/rappels/supprimer/<int:idfamille>/<int:pk>', famille_rappels.Supprimer.as_view(), name='famille_rappels_supprimer'),
     path('individus/familles/rappels/voir/<int:idfamille>/<int:idrappel>', famille_voir_rappel.View.as_view(), name='famille_voir_rappel'),
 
     path('individus/familles/attestations_fiscales/liste/<int:idfamille>', famille_attestations_fiscales.Liste.as_view(), name='famille_attestations_fiscales_liste'),

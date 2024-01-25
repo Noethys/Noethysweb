@@ -4,22 +4,26 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
+from django.db.models import Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Rappel
+from core.models import Rappel
+from core.utils import utils_texte
 from fiche_famille.views.famille import Onglet
-from core.utils import utils_dates, utils_texte, utils_preferences
-from django.db.models import Q
-
 
 
 class Page(Onglet):
     model = Rappel
     url_liste = "famille_rappels_liste"
+    url_supprimer = "famille_rappels_supprimer"
     description_liste = "Voici ci-dessous la liste des lettres de rappel générées pour cette famille."
     objet_singulier = "une lettre de rappel"
     objet_pluriel = "des lettres de rappel"
 
+    def get_success_url(self):
+        """ Renvoie vers la liste après le formulaire """
+        url = self.url_ajouter if "SaveAndNew" in self.request.POST else self.url_liste
+        return reverse_lazy(url, kwargs={'idfamille': self.kwargs.get('idfamille', None)})
 
 
 class Liste(Page, crud.Liste):
@@ -59,5 +63,10 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             html = [
                 self.Create_bouton_imprimer(url=reverse("famille_voir_rappel", kwargs={"idfamille": instance.famille_id, "idrappel": instance.pk}), title="Imprimer ou envoyer par email la lettre de rappel"),
+                self.Create_bouton_supprimer(url=reverse(kwargs["view"].url_supprimer, kwargs={"idfamille": instance.famille_id, "pk": instance.pk})),
             ]
             return self.Create_boutons_actions(html)
+
+
+class Supprimer(Page, crud.Supprimer):
+    template_name = "fiche_famille/famille_delete.html"
