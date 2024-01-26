@@ -3,12 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.db.models import Sum, Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Recu, Reglement, Ventilation
+from core.models import Recu, Reglement, Ventilation, ModeleImpression
 from core.utils import utils_texte, utils_preferences, utils_questionnaires, utils_infos_individus, utils_dates
 from core.data import data_modeles_emails
 from fiche_famille.forms.reglement_recu import Formulaire
@@ -19,6 +20,12 @@ def Generer_recu(donnees={}):
     # Importation des données
     reglement = Reglement.objects.get(pk=donnees["idreglement"])
     infos_famille = reglement.famille.Get_infos()
+
+    # Importation du modèle d'impression
+    if donnees["idmodele_impression"]:
+        modele_impression = ModeleImpression.objects.get(pk=donnees["idmodele_impression"])
+        donnees["idmodele"] = modele_impression.modele_document_id
+        donnees.update(json.loads(modele_impression.options))
 
     # Préparation des valeurs de fusion
     dict_donnees = {
@@ -46,7 +53,7 @@ def Generer_recu(donnees={}):
         }
 
     if donnees["afficher_prestations"]:
-        prestations = Ventilation.objects.values('prestation', 'prestation__date', 'prestation__label', 'prestation__activite__nom', 'prestation__individu__prenom').filter(reglement_id=donnees["idreglement"]).annotate(total=Sum("montant"))
+        prestations = Ventilation.objects.values('prestation', 'prestation__date', 'prestation__label', 'prestation__activite__nom', 'prestation__individu__nom', 'prestation__individu__prenom').filter(reglement_id=donnees["idreglement"]).annotate(total=Sum("montant"))
         dict_donnees["prestations"] = prestations
 
     # Récupération des infos de base individus et familles
@@ -75,6 +82,7 @@ def Generer_recu(donnees={}):
 
 def Impression_pdf(request):
     # Récupération des données du formulaire
+    idmodele_impression = int(request.POST.get("idmodele_impression"))
     date_edition = request.POST.get("date_edition")
     numero = request.POST.get("numero")
     idreglement = int(request.POST.get("idreglement"))
@@ -90,7 +98,7 @@ def Impression_pdf(request):
     if not date_edition: return JsonResponse({"erreur": "Vous devez saisir une date d'édition"}, status=401)
 
     # Génération du reçu
-    resultat = Generer_recu(donnees={"idreglement": idreglement, "date_edition": date_edition, "numero": numero, "idmodele": idmodele, "idfamille": idfamille,
+    resultat = Generer_recu(donnees={"idmodele_impression": idmodele_impression, "idreglement": idreglement, "date_edition": date_edition, "numero": numero, "idmodele": idmodele, "idfamille": idfamille,
                                       "signataire": signataire, "intro": intro, "afficher_prestations": afficher_prestations})
     return JsonResponse(resultat)
 

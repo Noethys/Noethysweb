@@ -51,7 +51,7 @@ class Impression(utils_impression.Impression):
         # ------------------- TABLEAU CONTENU -----------------
 
         dataTableau = []
-        largeursColonnes = [120, 280]
+        largeursColonnes = [120, self.taille_cadre[2]-120]
 
         paraStyle = ParagraphStyle(name="detail", fontName="Helvetica-Bold", fontSize=9)
         dataTableau.append(("Caractéristiques du règlement", ""))
@@ -91,15 +91,15 @@ class Impression(utils_impression.Impression):
             self.story.append(Spacer(0, 20))
 
             dataTableau = [("Date", "Activité", "Individu", "Intitulé", "Part utilisée")]
-            largeursColonnes = [50, 95, 70, 135, 50]
+            largeur_temp = self.taille_cadre[2] - 50 - 50
+            largeursColonnes = [50, largeur_temp/3+5, largeur_temp/3-10, largeur_temp/3+5, 50]
 
-            paraStyle = ParagraphStyle(name="detail", fontName="Helvetica", fontSize=7, leading=7, spaceBefore=0,
-                                       spaceAfter=0, )
+            paraStyle = ParagraphStyle(name="detail", fontName="Helvetica", fontSize=7, leading=7, spaceBefore=0, spaceAfter=0, )
 
             for prestation in prestations:
                 date = utils_dates.ConvertDateToFR(prestation["prestation__date"])
                 activite = prestation["prestation__activite__nom"] or ""
-                individu = prestation["prestation__individu__prenom"] or ""
+                individu = ("%s %s" % (prestation["prestation__individu__nom"], prestation["prestation__individu__prenom"] or "")) if prestation["prestation__individu__nom"] else ""
                 label = prestation["prestation__label"]
                 ventilation = prestation["total"]
                 dataTableau.append((
