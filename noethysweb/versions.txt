@@ -1,3 +1,13 @@
+Version 1.2.2.2 (29/01/2024) :
+
+- Ajout de la suppression des lettres de rappel
+- Ajout des modèles d'impression pour les reçus de la fiche famille
+- Ajout de l'affichage de toutes les familles dans la liste des quotients
+- Optimisation de la recherche des attestations fiscales à générer
+- Correction des valeurs négatives dans la durée de validité d'une adhésion
+- Correction du blocage des réservations si impayés
+- Correction de l'affichage des absences injustifiées sur les factures
+
 Version 1.2.2.1 (22/01/2024) :
 
 - Ajout de la date de situation à la liste des inscrits
