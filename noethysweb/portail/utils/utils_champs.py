@@ -31,6 +31,9 @@ LISTE_CHAMPS = [
 
     Champ(page="famille_questionnaire", code="questionnaire", label="Questionnaire", famille="MODIFIABLE"),
 
+    Champ(page="famille_parametres", code="email_blocage", label="Blocage envois Emails", famille="MODIFIABLE"),
+    Champ(page="famille_parametres", code="mobile_blocage", label="Blocage envois SMS", famille="MODIFIABLE"),
+
     Champ(page="famille_consentements", code="consentements", label="Consentements", famille="MODIFIABLE"),
 
     Champ(page="individu_identite", code="nom", label="Nom de famille", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE"),
