@@ -3428,7 +3428,7 @@ class Article(models.Model):
     present_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
     album = models.ForeignKey(Album, verbose_name="Album photos", blank=True, null=True, on_delete=models.SET_NULL, help_text="Sélectionnez un album photos existant à joindre à cet article.")
     texte_popup = models.TextField(verbose_name="Texte", blank=True, null=True, help_text="Ce texte sera affiché dans une fenêtre popup sur la page d'accueil. A utiliser uniquement pour les informations importantes.")
-    sondage = models.ForeignKey("Sondage", verbose_name="Sondage", blank=True, null=True, on_delete=models.SET_NULL, help_text="Sélectionnez un sondage existant à joindre à cet article.")
+    sondage = models.ForeignKey("Sondage", verbose_name="Formulaire", blank=True, null=True, on_delete=models.SET_NULL, help_text="Sélectionnez un formulaire existant à joindre à cet article.")
 
     class Meta:
         db_table = 'articles'
@@ -4314,35 +4314,35 @@ class Sondage(models.Model):
     titre = models.CharField(verbose_name="Titre", max_length=300)
     description = models.TextField(verbose_name="Description", blank=True, null=True, help_text="Ce texte sera affiché comme introduction du formulaire de saisie.")
     conclusion = models.TextField(verbose_name="Texte après validation", blank=True, null=True, help_text="Ce texte sera affiché après la validation de la réponse par la famille.")
-    code = models.CharField(verbose_name="Code du sondage", max_length=300, default=get_uuid)
+    code = models.CharField(verbose_name="Code du formulaire", max_length=300, default=get_uuid)
     public = models.CharField(verbose_name="Public", max_length=50, choices=[("individu", "Individu"), ("famille", "Famille")], default="famille", help_text="Indiquez si la réponse devra être unique pour la famille ou spécifique à un individu.")
-    categories_rattachements = MultiSelectField(verbose_name="Catégories de rattachement", max_length=200, choices=CATEGORIES_RATTACHEMENT, blank=True, null=True, help_text="Sélectionnez les catégories d'individus qui pourront être associés à ce sondage.")
+    categories_rattachements = MultiSelectField(verbose_name="Catégories de rattachement", max_length=200, choices=CATEGORIES_RATTACHEMENT, blank=True, null=True, help_text="Sélectionnez les catégories d'individus qui pourront être associés à ce formulaire.")
     modifiable = models.BooleanField(verbose_name="Réponses modifiables", default=True, help_text="Cochez cette case si vous souhaitez que les familles puissent modifier leurs réponses.")
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = 'sondages'
-        verbose_name = "sondage"
-        verbose_name_plural = "sondages"
+        verbose_name = "formulaire"
+        verbose_name_plural = "formulaires"
 
     def __str__(self):
-        return self.titre if self.titre else "Nouveau sondage"
+        return self.titre if self.titre else "Nouveau formulaire"
 
 
 class SondagePage(models.Model):
     idpage = models.AutoField(verbose_name="ID", db_column='IDpage', primary_key=True)
-    sondage = models.ForeignKey(Sondage, verbose_name="Sondage", on_delete=models.CASCADE)
-    titre = models.CharField(verbose_name="Titre", max_length=300, help_text="Ce titre sera affiché uniquement si le sondage comporte plusieurs pages.")
+    sondage = models.ForeignKey(Sondage, verbose_name="Formulaire", on_delete=models.CASCADE)
+    titre = models.CharField(verbose_name="Titre", max_length=300, help_text="Ce titre sera affiché uniquement si le formulaire comporte plusieurs pages.")
     description = models.TextField(verbose_name="Description", blank=True, null=True, help_text="Ce texte sera affiché sous le titre de la page.")
     ordre = models.IntegerField(verbose_name="Ordre")
 
     class Meta:
         db_table = 'sondages_pages'
-        verbose_name = "page de sondage"
-        verbose_name_plural = "pages de sondage"
+        verbose_name = "page de formulaire"
+        verbose_name_plural = "pages de formulaire"
 
     def __str__(self):
-        return self.titre if self.titre else "Nouvelle page de sondage"
+        return self.titre if self.titre else "Nouvelle page de formulaire"
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
@@ -4368,8 +4368,8 @@ class SondageQuestion(models.Model):
 
     class Meta:
         db_table = 'sondages_questions'
-        verbose_name = "question de sondage"
-        verbose_name_plural = "questions de sondage"
+        verbose_name = "question de formulaire"
+        verbose_name_plural = "questions de formulaire"
 
     def __str__(self):
         return self.label
@@ -4388,7 +4388,7 @@ class SondageQuestion(models.Model):
 
 class SondageRepondant(models.Model):
     idrepondant = models.AutoField(verbose_name="ID", db_column="IDrepondant", primary_key=True)
-    sondage = models.ForeignKey(Sondage, verbose_name="Sondage", on_delete=models.CASCADE)
+    sondage = models.ForeignKey(Sondage, verbose_name="Formulaire", on_delete=models.CASCADE)
     famille = models.ForeignKey(Famille, verbose_name="Famille", blank=True, null=True, on_delete=models.CASCADE)
     individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.CASCADE)
     date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
@@ -4396,8 +4396,8 @@ class SondageRepondant(models.Model):
 
     class Meta:
         db_table = 'sondages_repondants'
-        verbose_name = "répondant de sondage"
-        verbose_name_plural = "répondants de sondages"
+        verbose_name = "répondant de formulaire"
+        verbose_name_plural = "répondants de formulaire"
 
     def __str__(self):
         return "Répondant ID%d" % self.idrepondant if self.idrepondant else "Nouveau répondant"
@@ -4411,8 +4411,8 @@ class SondageReponse(models.Model):
 
     class Meta:
         db_table = 'sondages_reponses'
-        verbose_name = "réponse de sondage"
-        verbose_name_plural = "réponses de sondages"
+        verbose_name = "réponse de formulaire"
+        verbose_name_plural = "réponses de formulaires"
 
     def __str__(self):
         return self.reponse

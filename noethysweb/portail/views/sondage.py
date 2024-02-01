@@ -26,7 +26,7 @@ class View_questions(CustomView, TemplateView):
         individu = Individu.objects.get(pk=idindividu) if idindividu else None
 
         context["sondage"] = sondage
-        context["page_titre"] = "Sondage"
+        context["page_titre"] = "Formulaire"
         context["box_titre"] = sondage.titre
         if individu:
             context["box_titre"] += " - %s" % individu.prenom
@@ -80,7 +80,7 @@ class View_introduction(CustomView, TemplateView):
         context = super(View_introduction, self).get_context_data(**kwargs)
         sondage = Sondage.objects.get(code=self.kwargs.get("code", None))
         context["sondage"] = sondage
-        context["page_titre"] = "Sondage"
+        context["page_titre"] = "Formulaire"
         context["box_titre"] = sondage.titre
 
         # Importation des sondages existants
@@ -106,6 +106,6 @@ class View_conclusion(CustomView, TemplateView):
         context = super(View_conclusion, self).get_context_data(**kwargs)
         sondage = Sondage.objects.get(code=self.kwargs.get("code", None))
         context["sondage"] = sondage
-        context["page_titre"] = "Sondage"
+        context["page_titre"] = "Formulaire"
         context["box_titre"] = sondage.titre
         return context
