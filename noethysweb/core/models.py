@@ -270,6 +270,7 @@ class AdresseMail(models.Model):
     moteur = models.CharField(verbose_name="Moteur", max_length=200, choices=[("smtp", "SMTP"), ("mailjet", "Mailjet"), ("console", "Console")], help_text="Sélectionnez un moteur d'expédition (Smtp ou Mailjet).")
     parametres = models.CharField(verbose_name="Paramètres", max_length=500, blank=True, null=True)
     actif = models.BooleanField(verbose_name="Actif", default=True, help_text="Décochez la case pour désactiver cette adresse.")
+    lien_desinscription = models.BooleanField(verbose_name="Insérer un lien de désinscription dans les mails groupés", default=True, help_text="Un lien de désinscription sera inséré à la fin de chaque mail envoyé par lot.")
 
     class Meta:
         db_table = 'adresses_mail'

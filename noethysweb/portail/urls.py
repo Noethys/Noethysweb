@@ -10,7 +10,7 @@ from consommations.views import grille
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
                             individu_regimes_alimentaires, individu_coords, individu_medecin, individu_informations, individu_assurances, individu_vaccinations, \
                             famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents, \
-                            transmettre_piece, activites, inscrire_activite, attente_paiement, cotisations, sondage, famille_questionnaire, famille_parametres
+                            transmettre_piece, activites, inscrire_activite, attente_paiement, cotisations, sondage, famille_questionnaire, famille_parametres, pages_speciales
 from core.decorators import secure_ajax_portail
 
 
@@ -132,6 +132,9 @@ urlpatterns = [
 
     # Mentions
     path('mentions', mentions.View.as_view(), name='portail_mentions'),
+
+    # Désinscription mails
+    path('desinscription/<str:valeur>', pages_speciales.desinscription_emails, name='desinscription'),
 
     # AJAX
     path('facturer', secure_ajax_portail(grille.Facturer), name='portail_ajax_facturer'),

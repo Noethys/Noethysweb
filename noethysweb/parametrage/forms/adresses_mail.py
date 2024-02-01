@@ -79,6 +79,9 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field('nbre_mails'),
                 Field('duree_pause'),
             ),
+            Fieldset("Options",
+                Field("lien_desinscription"),
+            ),
             # L'extrascript est placé à la fin pour ne pas perturber le bouton submit du form principal
             HTML(EXTRA_SCRIPT),
         )
