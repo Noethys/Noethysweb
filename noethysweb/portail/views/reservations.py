@@ -31,7 +31,7 @@ class View(CustomView, TemplateView):
         conditions = Q(famille=self.request.user.famille) & Q(statut="ok") & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
         conditions &= Q(activite__portail_reservations_affichage="TOUJOURS") & (Q(activite__date_fin__isnull=True) | Q(activite__date_fin__gte=datetime.date.today()))
         conditions &= Q(internet_reservations=True) & Q(individu__deces=False)
-        inscriptions = Inscription.objects.select_related("activite", "individu").filter(conditions)
+        inscriptions = Inscription.objects.select_related("activite", "individu").filter(conditions).exclude(individu__in=self.request.user.famille.individus_masques.all())
 
         # Récupération des individus
         context['liste_individus'] = sorted(list(set([inscription.individu for inscription in inscriptions])), key=lambda individu: individu.prenom)

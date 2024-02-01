@@ -8,9 +8,10 @@ from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML, Fieldset
 from crispy_forms.bootstrap import Field
+from django_select2.forms import Select2MultipleWidget
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import Famille
+from core.models import Famille, Individu, Rattachement
 from fiche_famille.widgets import Internet_identifiant, Internet_mdp
 
 
@@ -18,13 +19,15 @@ class Formulaire(FormulaireBase, ModelForm):
     internet_identifiant = forms.CharField(label="Identifiant", required=False, widget=Internet_identifiant(), help_text="Cet identifiant est généré automatiquement, il est conseillé de ne pas le modifier.")
     internet_mdp = forms.CharField(label="Mot de passe", required=False, widget=Internet_mdp(), help_text="Des étoiles ***** apparaissent lorsque le mot de passe a été personnalisé par l'utilisateur lors de la première connexion au portail. Dans ce cas, il vous est impossible de récupérer le mot de passe personnalisé, vous devez en générer un nouveau.")
     date_expiration_mdp = forms.DateTimeField(label="Date d'expiration", required=False)
+    individus_masques = forms.ModelMultipleChoiceField(label="Individus masqués", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Individu.objects.none(), required=False, help_text="Vous pouvez sélectionner des membres de la famille qui n'apparaitront pas sur le portail.")
 
     class Meta:
         model = Famille
-        fields = ["internet_actif", "internet_identifiant", "internet_mdp", "internet_categorie", "internet_reservations"]
+        fields = ["internet_actif", "internet_identifiant", "internet_mdp", "internet_categorie", "internet_reservations", "individus_masques"]
         help_texts = {
             "internet_categorie": "Les catégories permettent par exemple d'attribuer des périodes de réservations à certains comptes internet uniquement.",
-            "internet_reservations": "Décochez cette case pour interdire à cette famille d'accéder aux réservations sur le portail."
+            "internet_reservations": "Décochez cette case pour interdire à cette famille d'accéder aux réservations sur le portail.",
+            "individus_masques": "Vous pouvez sélectionner des membres de la famille qui n'apparaitront pas sur le portail."
         }
 
     def __init__(self, *args, **kwargs):
@@ -43,6 +46,10 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Date d'expiration du mdp
         self.fields["internet_mdp"].widget.attrs["date_expiration_mdp"] = famille.utilisateur.date_expiration_mdp
+
+        # Individus masqués
+        individus = [rattachement.individu_id for rattachement in Rattachement.objects.filter(famille_id=idfamille)]
+        self.fields["individus_masques"].queryset = Individu.objects.filter(pk__in=individus).order_by("nom")
 
         # Création des boutons de commande
         autres_commandes = [HTML("""
@@ -71,10 +78,10 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Options",
                 Field("internet_categorie"),
                 Field("internet_reservations"),
+                Field("individus_masques"),
             ),
             HTML(EXTRA_HTML),
         )
-
 
 EXTRA_HTML = """
 

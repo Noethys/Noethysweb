@@ -43,7 +43,7 @@ def Get_approbations_requises(famille=None, activites=None, idindividu=None, ave
             approbations_requises["consentements"].append(unite_consentement)
 
     # Recherche des approbations des rattachements
-    rattachements = Rattachement.objects.prefetch_related('individu').filter(famille=famille).order_by("individu__nom", "individu__prenom")
+    rattachements = Rattachement.objects.prefetch_related('individu').filter(famille=famille).exclude(individu__in=famille.individus_masques.all()).order_by("individu__nom", "individu__prenom")
     for rattachement in rattachements:
         if not idindividu or rattachement.individu_id == idindividu or rattachement.categorie == 1:
             if not rattachement.certification_date:
