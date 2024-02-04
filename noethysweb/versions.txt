@@ -1,3 +1,12 @@
+Version 1.2.2.3 (04/02/2024) :
+
+- Ajout du lien de désinscription dans les mails groupés
+- Ajout des individus masqués dans la rubrique Portail de la fiche famille
+- Ajout de l'onglet Paramètres de la famille sur le portail
+- Optimisation des requêtes dans l'état nominatif
+- Optimisation des requêtes dans la synthèse des consommations
+- Correction de la conversion des dates dans les questionnaires
+
 Version 1.2.2.2 (29/01/2024) :
 
 - Ajout de la suppression des lettres de rappel
