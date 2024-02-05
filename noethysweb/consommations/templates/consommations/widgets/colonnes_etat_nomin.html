@@ -64,7 +64,7 @@
 
     function supprimer_colonne(id) {
         var liste_items = $("#ul_{{ id }}").sortable("toArray");
-        var index = jQuery.inArray(id, liste_items);
+        var index = jQuery.inArray("colonne_" + id, liste_items);
         var liste_colonnes = JSON.parse($("#{{ id }}").val());
         liste_colonnes.splice(index, 1);
         $("#{{ id }}").val(JSON.stringify(liste_colonnes));
