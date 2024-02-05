@@ -178,7 +178,7 @@ class View(CustomView, TemplateView):
                 Memorise_valeur("famille_num_allocataire", famille.num_allocataire)
                 Memorise_valeur("famille_allocataire", famille.allocataire.Get_nom() if famille.allocataire else None)
                 Memorise_valeur("famille_caisse", famille.caisse.nom if famille.caisse else None)
-                Memorise_valeur("famille_qf", int(dict_quotients[famille.pk]) if famille.pk in dict_quotients else None)
+                Memorise_valeur("famille_qf", int(dict_quotients[famille.pk]) if famille.pk in dict_quotients and dict_quotients[famille.pk] else None)
 
                 # Ajout des questionnaires
                 for reponse in questionnaires_individus.GetDonnees(individu.pk):
