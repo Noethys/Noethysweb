@@ -1,3 +1,11 @@
+Version 1.2.2.4 (05/02/2024) :
+
+- Ajout de l'affichage décimal des durées dans l'état nominatif
+- Masque les unités de conso fermées dans la grille des consommations
+- Correction du dirty des combinaisons d'unités dans la pointeuse
+- Correction de la récupération des quotients dans l'état nominatif
+- Correction de la suppression de colonnes dans l'état nominatif
+
 Version 1.2.2.3 (04/02/2024) :
 
 - Ajout du lien de désinscription dans les mails groupés
