@@ -228,14 +228,17 @@ class View(CustomView, TemplateView):
             ligne = []
             for index, colonne in enumerate(colonnes):
                 valeur = resultats[key_individu].get(index, None)
-                ligne.append(self.FormateValeur(valeur))
+                ligne.append(self.FormateValeur(valeur, mode=parametres.get("format_durees", "horaire")))
             liste_lignes.append(ligne)
 
         return liste_colonnes, liste_lignes
 
-    def FormateValeur(self, valeur):
+    def FormateValeur(self, valeur, mode="horaire"):
         if isinstance(valeur, datetime.timedelta):
-            heures = (valeur.days*24) + (valeur.seconds/3600)
+            heures = (valeur.days*24) + (valeur.seconds//3600)
             minutes = valeur.seconds % 3600/60
+            if mode == "decimal":
+                minDecimal = int(int(minutes) * 100 / 60)
+                return float("%s.%s" % (heures, minDecimal))
             return "%dh%02d" % (heures, minutes)
         return valeur
