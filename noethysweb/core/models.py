@@ -2163,7 +2163,7 @@ class MessageFacture(models.Model):
 
 class Facture(models.Model):
     idfacture = models.AutoField(verbose_name="ID", db_column='IDfacture', primary_key=True)
-    numero = models.IntegerField(verbose_name="Numéro")
+    numero = models.BigIntegerField(verbose_name="Numéro")
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT, blank=True, null=True)
     date_edition = models.DateField(verbose_name="Date")
     date_echeance = models.DateField(verbose_name="Date d'échéance", blank=True, null=True)
