@@ -221,7 +221,7 @@ class View(CustomView, TemplateView):
         liste_colonnes = [colonne["nom"] for colonne in colonnes]
 
         # Création des lignes
-        keys_individus = sorted(list(resultats.keys()), key=lambda x: str(resultats[x][parametres["tri"]]), reverse=parametres["ordre"]=="decroissant")
+        keys_individus = sorted(list(resultats.keys()), key=lambda x: str(resultats[x].get(parametres["tri"], None)), reverse=parametres["ordre"]=="decroissant")
 
         liste_lignes = []
         for key_individu in keys_individus:
