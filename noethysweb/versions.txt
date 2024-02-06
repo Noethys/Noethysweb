@@ -1,3 +1,7 @@
+Version 1.2.2.5 (06/02/2024) :
+
+- Conversion du numéro de facture en BigInteger
+
 Version 1.2.2.4 (05/02/2024) :
 
 - Ajout de l'affichage décimal des durées dans l'état nominatif
