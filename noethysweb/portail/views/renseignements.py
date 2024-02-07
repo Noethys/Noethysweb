@@ -11,10 +11,12 @@ from django.urls import reverse_lazy
 from django.db.models import Q
 from django.utils.translation import gettext as _
 from core.views import crud
-from core.models import Consentement, Rattachement, Inscription
+from core.models import Consentement, Rattachement, Inscription, Famille
 from individus.utils import utils_vaccinations, utils_assurances
 from portail.views.base import CustomView
 from portail.forms.approbations import Formulaire
+from django.shortcuts import render
+
 
 
 class View(CustomView, crud.Modifier):
@@ -26,9 +28,12 @@ class View(CustomView, crud.Modifier):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = _("Renseignements")
-        context['rattachements'] = Rattachement.objects.prefetch_related('individu').filter(famille=self.request.user.famille, individu__deces=False) \
-                                    .exclude(individu__in=self.request.user.famille.individus_masques.all()) \
-                                    .order_by("individu__nom", "individu__prenom")
+        context['rattachements'] = Rattachement.objects.prefetch_related('individu').filter(famille=self.request.user.famille, individu__deces=False).order_by("individu__nom", "individu__prenom")
+
+        #Recherche ID famille
+        idfamille = self.request.user.famille
+        familleid = Famille.objects.filter(nom=idfamille).values('idfamille').first()
+        print(familleid)
 
         # Récupération des activités de la famille
         conditions = Q(famille=self.request.user.famille) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
@@ -46,6 +51,7 @@ class View(CustomView, crud.Modifier):
             renseignements_manquants[individu].append("Assurance manquante")
 
         context["renseignements_manquants"] = renseignements_manquants
+        context["familleid"] = familleid
 
         return context
 

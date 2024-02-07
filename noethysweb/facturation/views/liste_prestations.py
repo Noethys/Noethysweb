@@ -8,6 +8,8 @@ from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Prestation
 from core.utils import utils_preferences
+from django.db.models import Q
+
 
 
 class Page(crud.Page):
@@ -25,7 +27,9 @@ class Liste(Page, crud.Liste):
     model = Prestation
 
     def get_queryset(self):
-        return Prestation.objects.select_related('activite', 'famille', 'individu', 'tarif', 'facture').filter(self.Get_filtres("Q"))
+        #Filtrage en fonction des autorisations
+        activites_autorisees = self.request.user.structures.all()
+        return Prestation.objects.select_related('activite', 'famille', 'individu', 'tarif', 'facture').filter(self.Get_filtres("Q"), activite__structure__in=activites_autorisees)
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -45,6 +49,7 @@ class Liste(Page, crud.Liste):
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         tarif = columns.TextColumn("ID Tarif", sources=['tarif__idtarif'])
         tarif_date_debut = columns.TextColumn("Tarif Début", sources=['tarif__date_debut'], processor=helpers.format_date("%d/%m/%Y"))
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
@@ -54,7 +59,14 @@ class Liste(Page, crud.Liste):
                 "montant": "Formate_montant_standard",
             }
             ordering = ["date"]
+            
+        #Bouton modification de la prestation 
+        def Get_actions_speciales(self, instance, *args, **kwargs):
+            html = [
+                self.Create_bouton_modifier(url=reverse("famille_prestations_modifier", kwargs={"idfamille": instance.famille_id, "pk": instance.pk})),
+                ]
 
-
+            return self.Create_boutons_actions(html)
+            
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
     pass
