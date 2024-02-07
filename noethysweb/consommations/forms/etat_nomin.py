@@ -21,6 +21,8 @@ class Formulaire(FormulaireBase, forms.Form):
     titre = forms.CharField(label="Titre", required=True, help_text="Titre du document à l'impression.")
     tri = forms.ChoiceField(label="Tri", choices=[], required=False)
     ordre = forms.ChoiceField(label="Ordre", choices=[("croissant", "Croissant"), ("decroissant", "Décroissant")], initial="croissant", required=False)
+    format_durees = forms.ChoiceField(label="Format des durées", choices=[("horaire", "Horaire"), ("decimal", "Décimal")], initial="horaire", required=False, help_text="Choisissez le format d'affichage des données de temps: Horaire (Ex: 8h30) ou décimal (Ex: 8.5).")
+
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
     etats = forms.MultipleChoiceField(required=True, widget=Select2MultipleWidget(), choices=[("reservation", "Réservation"), ("present", "Présent"), ("attente", "Attente"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present"])
@@ -94,6 +96,7 @@ class Formulaire(FormulaireBase, forms.Form):
                 Tab("Généralités",
                     Field("periode"),
                     Field("activites"),
+                    Field("format_durees"),
                     Field("titre"),
                     Field("tri"),
                     Field("ordre"),

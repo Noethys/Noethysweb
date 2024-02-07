@@ -452,6 +452,7 @@ class SelectionActivitesWidget(Widget):
         if attrs is not None:
             context.update(attrs)
         context['name'] = name
+        context['id'] = attrs.get("id", 0)
         context['selection'] = {"type": "groupes_activites", "ids": []}
         context.setdefault('afficher_colonne_detail', True)
         if value:

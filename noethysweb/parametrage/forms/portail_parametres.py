@@ -23,7 +23,7 @@ LISTE_RUBRIQUES = [
     ("Page des adhésions", ["cotisations_afficher_page", "cotisations_intro"]),
     ("Page des documents", ["documents_afficher_page", "documents_intro"]),
     ("Page des activités", ["activites_afficher_page", "activites_intro"]),
-    ("Page des réservations", ["reservations_afficher_page", "reservations_intro", "reservations_intro_planning", "reservations_adresse_exp"]),
+    ("Page des réservations", ["reservations_afficher_page", "reservations_intro", "reservations_intro_planning", "reservations_adresse_exp", "reservations_blocage_impayes"]),
     ("Page de la facturation", ["facturation_afficher_page", "facturation_intro", "facturation_afficher_solde_famille", "facturation_afficher_numero_facture", "facturation_afficher_solde_facture",
                                 "facturation_autoriser_detail_facture", "facturation_autoriser_telechargement_facture", "facturation_modele_impression_facture"]),
     ("Paiement en ligne", ["paiement_ligne_systeme", "paiement_ligne_mode_reglement", "paiement_ligne_compte_bancaire", "paiement_ligne_montant_minimal",

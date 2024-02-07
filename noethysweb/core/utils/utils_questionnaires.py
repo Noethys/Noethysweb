@@ -7,6 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 from django.db.models import Q
 from core.models import LISTE_CONTROLES_QUESTIONNAIRES, QuestionnaireQuestion, QuestionnaireReponse
+from core.utils import utils_dates
 
 
 def Creation_reponses(categorie="famille", liste_instances=[], question=None):
@@ -105,7 +106,7 @@ class Questionnaires():
         if filtre == "coche":
             texteReponse = "Oui" if reponse in (1, "1", True, "True") else "Non"
         if filtre == "date":
-            texteReponse = DateEngEnDateDD(reponse)
+            texteReponse = utils_dates.ConvertDateToFR(reponse) or ""
         return texteReponse
 
     def GetQuestions(self, categorie="individu", avec_filtre=True):

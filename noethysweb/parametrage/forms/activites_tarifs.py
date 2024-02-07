@@ -267,6 +267,11 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.fields['date_facturation_forfait_type'].initial = "DATE"
                 self.fields['date_facturation_forfait'].initial = parse_date(self.instance.date_facturation[5:]).strftime('%d/%m/%Y')
 
+        # Validité
+        self.fields["validite_jours"].widget.attrs.update({"min": 0})
+        self.fields["validite_mois"].widget.attrs.update({"min": 0})
+        self.fields["validite_annees"].widget.attrs.update({"min": 0})
+
         # Forfait-crédit : Durée de validité
         if self.instance.forfait_duree != None:
             self.fields['validite_duree_forfait'].initial = "OUI"

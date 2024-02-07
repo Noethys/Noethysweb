@@ -17,12 +17,12 @@
         {% if sondage.public == "famille" %}
             {% if sondages_existants %}
                 {% if sondage.modifiable %}
-                    <div class="mb-3"><i>Vous avez déjà répondu à ce sondage mais il est possible de modifier vos réponses en cliquant sur le bouton ci-dessous.</i></div>
+                    <div class="mb-3"><i>Vous avez déjà répondu à ce formulaire mais il est possible de modifier vos réponses en cliquant sur le bouton ci-dessous.</i></div>
                     <div class="text-right">
                         <a type="button" class="btn btn-primary" href="{% url 'portail_sondage_questions' code=sondage.code %}"><i class="fa fa-edit margin-r-5"></i>Modifier</a>
                     </div>
                 {% else %}
-                    <div class="mb-3"><i>Vous avez déjà répondu à ce sondage.</i></div>
+                    <div class="mb-3"><i>Vous avez déjà répondu à ce formulaire.</i></div>
                     <a href="{% url 'portail_accueil' %}"><i class="fa fa-arrow-circle-o-left"></i> {% blocktrans %}Revenir à l'accueil{% endblocktrans %}</a>
                 {% endif %}
             {% else %}
@@ -34,7 +34,7 @@
 
         {% if sondage.public == "individu" %}
 
-            <div class="mb-3"><i>Ce sondage est nominatif. Vous pouvez répondre au sondage pour chaque individu souhaité :</i></div>
+            <div class="mb-3"><i>Ce formulaire est nominatif. Vous pouvez répondre au formulaire pour chaque individu souhaité :</i></div>
 
             <table id="table-fiches" class="table table-hover projects" style="cursor: pointer;">
                 <tbody>

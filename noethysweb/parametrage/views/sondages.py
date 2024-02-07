@@ -110,10 +110,10 @@ class Page(crud.Page):
     url_modifier = "sondages_modifier"
     url_supprimer = "sondages_supprimer"
     url_consulter = "sondages_consulter"
-    description_liste = "Voici ci-dessous la liste des sondages. <b>Attention, cette fonctionnalité est en cours de développement : La page des résultats du sondage n'est pas encore disponible.</b>"
-    description_saisie = "Saisissez toutes les informations concernant le sondage à créer et cliquez sur le bouton Enregistrer."
-    objet_singulier = "un sondage"
-    objet_pluriel = "des sondages"
+    description_liste = "Voici ci-dessous la liste des formulaires. <b>Attention, cette fonctionnalité est en cours de développement : La page des résultats n'est pas encore disponible.</b>"
+    description_saisie = "Saisissez toutes les informations concernant le formulaire à créer et cliquez sur le bouton Enregistrer."
+    objet_singulier = "un formulaire"
+    objet_pluriel = "des formulaires"
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
     ]
@@ -176,8 +176,8 @@ class Consulter(Page, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
-        context['box_titre'] = "Consulter un sondage"
-        context['box_introduction'] = "Vous pouvez ici ajouter des questions au sondage ou modifier les paramètres du sondage. Pour ajouter une page, cliquez sur + Ajouter une page, puis dans le cadre de la page, cliquez sur + pour ajouter une question."
+        context['box_titre'] = "Consulter un formulaire"
+        context['box_introduction'] = "Vous pouvez ici ajouter des questions au formulaire ou modifier les paramètres du formulaire. Pour ajouter une page, cliquez sur + Ajouter une page, puis dans le cadre de la page, cliquez sur + pour ajouter une question."
         context['onglet_actif'] = "sondages_liste"
 
         # Importation du sondage

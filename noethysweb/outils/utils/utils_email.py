@@ -8,12 +8,13 @@ logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy, reverse
 from django.conf import settings
 from django.core import mail as djangomail
+from django.core import signing
 from django.core.cache import cache
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.contrib import messages
 from email.mime.image import MIMEImage
-from core.models import Mail, Organisateur
+from core.models import Mail, Organisateur, Famille
 from core.utils import utils_dates, utils_historique, utils_texte
 
 
@@ -24,53 +25,6 @@ class Validation_adresse():
 
     def Check(self, adresse=""):
         return re.search(self.regex, adresse)
-
-
-
-# def Envoyer_rappel(destinataires, objet=None, html=None, pieces=[], document=None, remplacements={}):
-#     """ Envoyer un email """
-#
-#     # Remplacement des mots-clés
-#     for motcle, valeur in remplacements.items():
-#         html = html.replace(motcle, valeur)
-#
-#     # Recherche les images intégrées
-#     images = re.findall('src="([^"]+)"', html)
-#
-#     # Remplacement des liens des images intégrées
-#     index = 0
-#     for image in images:
-#         html = html.replace(image, "cid:image%d" % index)
-#         index += 1
-#
-#     # Création du message
-#     message = EmailMultiAlternatives(subject=objet, body=utils_texte.Textify(html), from_email=settings.EMAIL_HOST_USER, to=destinataires)
-#     message.mixed_subtype = 'related'
-#     message.attach_alternative(html, "text/html")
-#
-#     # Création des images intégrées
-#     index = 0
-#     for image in images:
-#         fp = open(settings.BASE_DIR + image, 'rb')
-#         msg_img = MIMEImage(fp.read())
-#         fp.close()
-#         msg_img.add_header("Content-ID", "<image%d>" % index)
-#         msg_img.add_header('Content-Disposition', 'inline', filename="image%d" % index)
-#         message.attach(msg_img)
-#         index += 1
-#
-#     # Création des pièces jointes
-#     for piece in pieces:
-#         message.attach(piece.name, piece.file.getvalue(), mimetypes.guess_type(piece.name)[0])
-#
-#     # Rattachement d'un fichier hébergé
-#     if document:
-#         message.attach_file(settings.MEDIA_ROOT + document)
-#
-#     # Envoi du mail
-#     resultat = message.send(fail_silently=True)
-#     return resultat
-
 
 
 def Envoyer_model_mail(idmail=None, request=None):
@@ -191,6 +145,10 @@ def Envoyer_model_mail(idmail=None, request=None):
             html = html.replace(image, "cid:image%d" % index)
             index += 1
 
+        # Ajout du lien de désinscription
+        if mail.adresse_exp.lien_desinscription and destinataire.famille_id and len(destinataires) > 1:
+            html += "<br><hr><p style='font-size: 12px;'>Si vous ne souhaitez plus recevoir nos mails groupés, cliquez sur le lien suivant : <a href='%s'>Désinscription</a></p>" % Generation_lien_desinscription(request=request, idfamille=destinataire.famille_id, adresse=destinataire.adresse)
+
         # Création du message
         message = EmailMultiAlternatives(subject=objet, body=utils_texte.Textify(html), from_email=mail.adresse_exp.adresse, to=[destinataire.adresse], connection=connection)
         message.mixed_subtype = 'related'
@@ -250,7 +208,6 @@ def Envoyer_model_mail(idmail=None, request=None):
     return liste_envois_succes
 
 
-
 def Envoyer_mail_test(request=None, dict_options={}):
     """ Pour tester une adresse d'expédition en envoyant un mail de test """
     logger.debug("Envoi d'un email de test...")
@@ -289,3 +246,24 @@ def Envoyer_mail_test(request=None, dict_options={}):
 
     connection.close()
     return "Message envoyé avec succès." if resultat else resultat
+
+
+def Generation_lien_desinscription(request=None, idfamille=None, adresse=None):
+    """ Génère un lien de désinscription aux mails groupés pour les emails """
+    valeur = signing.dumps({"pk": str(idfamille), "mail": adresse})
+    url = request.build_absolute_uri(reverse("desinscription", args=[valeur]))
+    return url
+
+
+def Desinscription(valeur=None):
+    """ Décrypte la valeur de l'URL pour désinscrire la famille des mails groupés"""
+    try:
+        data = signing.loads(valeur)
+        famille = Famille.objects.get(pk=int(data["pk"]))
+        if famille.mail == data["mail"]:
+            famille.email_blocage = True
+            famille.save()
+            return True
+    except:
+        pass
+    return False

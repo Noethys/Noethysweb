@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 import datetime
 from core.utils import utils_infos_individus, utils_texte, utils_conversion, utils_dates, utils_questionnaires
-from core.models import Cotisation, Prestation, Ventilation
+from core.models import Cotisation, Prestation, Ventilation, Inscription
 from django.db.models import Sum
 from decimal import Decimal
 from cotisations.utils import utils_impression_cotisation
@@ -42,6 +42,18 @@ class Cotisations():
 
         # Recherche les familles concernées
         liste_idfamille = [cotisation.famille_id for cotisation in cotisations]
+
+        # Recherche les inscriptions de la période
+        dict_inscriptions_periode = {}
+        dict_cotisations_famille = {}
+        for cotisation in cotisations:
+            dict_cotisations_famille.setdefault((cotisation.famille_id, cotisation.individu_id), [])
+            dict_cotisations_famille[(cotisation.famille_id, cotisation.individu_id)].append(cotisation)
+        for inscription in Inscription.objects.select_related("activite").filter(famille_id__in=liste_idfamille):
+            for cotisation in dict_cotisations_famille.get((inscription.famille_id, inscription.individu_id), []):
+                if cotisation.date_debut <= inscription.date_debut <= cotisation.date_fin:
+                    dict_inscriptions_periode.setdefault(cotisation, [])
+                    dict_inscriptions_periode[cotisation].append(inscription.activite.nom)
 
         # Récupération des infos de base individus et familles
         logger.debug("Recherche des données utils_infos_individus...")
@@ -121,6 +133,8 @@ class Cotisations():
                 "{DATE_REGLEMENT}": utils_dates.ConvertDateToFR(dateReglement),
                 "{MODE_REGLEMENT}": modeReglement,
                 "{ACTIVITES}": ", ".join([activite.nom for activite in cotisation.activites.all()]),
+                "{INSCRIPTIONS_PERIODE_LIGNE}": ", ".join(dict_inscriptions_periode.get(cotisation, [])),
+                "{INSCRIPTIONS_PERIODE_PARAGRAPHE}": "\n".join(dict_inscriptions_periode.get(cotisation, [])),
                 "{NOTES}": cotisation.observations if cotisation.observations else "",
                 "{IDINDIVIDU}": cotisation.individu_id,
                 "{BENEFICIAIRE_NOM}":  beneficiaires,

@@ -191,10 +191,13 @@ def Get_generic_data(data={}):
     list_groupes_inscriptions = list({inscription.groupe_id: None for inscription in data["liste_inscriptions"]}.keys())
     liste_ouvertures = []
     liste_dates = []
+    liste_unites_ouvertes = []
     for ouverture in Ouverture.objects.filter(data["conditions_periodes"] & Q(activite=data['selection_activite'])):
         liste_ouvertures.append("%s_%s_%s" % (ouverture.date, ouverture.groupe_id, ouverture.unite_id))
         if ouverture.date not in liste_dates and ouverture.groupe_id in list_groupes_inscriptions:
             liste_dates.append(ouverture.date)
+        if ouverture.unite_id not in liste_unites_ouvertes:
+            liste_unites_ouvertes.append(ouverture.unite_id)
     data['liste_ouvertures'] = liste_ouvertures
 
     # Récupération des dates
@@ -258,7 +261,7 @@ def Get_generic_data(data={}):
     data["liste_unites"] = Unite.objects.select_related('activite').prefetch_related('groupes', 'incompatibilites', 'dependances').filter(conditions, activite=data['selection_activite']).distinct().order_by("ordre")
 
     # Sélection des unités visibles
-    data["liste_unites_visibles"] = [unite for unite in data["liste_unites"] if unite.visible_portail or data["mode"] != "portail"]
+    data["liste_unites_visibles"] = [unite for unite in data["liste_unites"] if unite.pk in liste_unites_ouvertes and (unite.visible_portail or data["mode"] != "portail")]
 
     # Recherche s'il y a des forfaits crédit dans les tarifs de l'activité
     data["tarifs_credits_exists"] = False
@@ -521,6 +524,7 @@ def Facturer(request=None):
                 for dict_conso in liste_conso:
                     if dict_conso["key_case"] == key_case:
                         dict_conso["prestation"] = idprestation
+                        dict_conso["dirty"] = True
 
         # Ajouter les nouvelles prestations pour la sauvegarde
         donnees_aller["prestations"].update(donnees_retour["nouvelles_prestations"])
@@ -592,7 +596,7 @@ class Facturation():
                 # Mémorise les tarifs
                 key = (case_tableau["activite"], case_tableau["categorie_tarif"])
                 if key not in self.dict_tarifs:
-                    self.dict_tarifs[key] = Tarif.objects.prefetch_related('groupes').filter(activite_id=case_tableau["activite"], categories_tarifs=case_tableau["categorie_tarif"]).order_by("date_debut")
+                    self.dict_tarifs[key] = Tarif.objects.prefetch_related('groupes', 'caisses').filter(activite_id=case_tableau["activite"], categories_tarifs=case_tableau["categorie_tarif"]).order_by("date_debut")
 
                 # Recherche un tarif valable pour cette date
                 tarifs_valides1 = []

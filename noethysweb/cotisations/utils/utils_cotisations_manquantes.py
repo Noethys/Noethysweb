@@ -10,7 +10,7 @@ from core.models import Cotisation, Inscription
 from core.utils import utils_texte
 
 
-def Get_cotisations_manquantes(famille=None, date_reference=None, utilisateur=None):
+def Get_cotisations_manquantes(famille=None, date_reference=None, utilisateur=None, exclure_individus=[]):
     """ Retourne les cotisations manquantes d'une famille """
     if not date_reference:
         date_reference = datetime.date.today()
@@ -21,7 +21,7 @@ def Get_cotisations_manquantes(famille=None, date_reference=None, utilisateur=No
         conditions &= Q(activite__structure__in=utilisateur.structures.all())
 
     # Lecture de la db
-    inscriptions = Inscription.objects.select_related('activite', 'individu', 'famille').prefetch_related('activite__cotisations').filter(conditions).distinct()
+    inscriptions = Inscription.objects.select_related('activite', 'individu', 'famille').prefetch_related('activite__cotisations').filter(conditions).exclude(individu__in=exclure_individus).distinct()
     cotisations_existantes = Cotisation.objects.select_related('type_cotisation').filter(Q(famille=famille, date_debut__lte=date_reference, date_fin__gte=date_reference))
 
     dict_cotisations = {}

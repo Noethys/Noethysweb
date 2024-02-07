@@ -3,14 +3,14 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
-from core.views import crud
-from core.models import Activite, Inscription, Quotient
-from core.views.customdatatable import CustomDatatable, Colonne, ColonneAction
-from individus.forms.liste_quotients import Formulaire
-from core.utils import utils_dates
 import json
+from django.urls import reverse
 from django.db.models import Q
+from core.views import crud
+from core.models import Activite, Inscription, Quotient, Famille
+from core.views.customdatatable import CustomDatatable, Colonne
+from core.utils import utils_dates
+from individus.forms.liste_quotients import Formulaire
 
 
 class Page(crud.Page):
@@ -62,29 +62,35 @@ class Liste(Page, crud.CustomListe):
             # Récupération des paramètres
             date_situation = parametres["date"]
             type_quotient = parametres["type_quotient"]
-            filtre_familles = parametres["familles"]
+            filtre_qf = parametres["filtre"]
 
-            param_activites = json.loads(parametres["activites"])
-            if param_activites["type"] == "groupes_activites":
-                liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
-            if param_activites["type"] == "activites":
-                liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
+            # Si une sélection de familles uniquement
+            if parametres["familles"] == "SELECTION":
+                param_activites = json.loads(parametres["activites"])
+                if param_activites["type"] == "groupes_activites":
+                    liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
+                if param_activites["type"] == "activites":
+                    liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
 
-            if parametres["presents"]:
-                date_min = utils_dates.ConvertDateENGtoDate(parametres["presents"].split(";")[0])
-                date_max = utils_dates.ConvertDateENGtoDate(parametres["presents"].split(";")[1])
-                presents = (date_min, date_max)
-            else:
-                presents = None
+                if parametres["presents"]:
+                    date_min = utils_dates.ConvertDateENGtoDate(parametres["presents"].split(";")[0])
+                    date_max = utils_dates.ConvertDateENGtoDate(parametres["presents"].split(";")[1])
+                    presents = (date_min, date_max)
+                else:
+                    presents = None
 
-            # Importation des familles
-            conditions = Q(activite__in=liste_activites)
-            if presents:
-                conditions &= Q(consommation__date__gte=presents[0], consommation__date__lte=presents[1])
-            liste_familles = []
-            for inscription in Inscription.objects.select_related('famille').filter(conditions).distinct():
-                if inscription.famille not in liste_familles:
-                    liste_familles.append(inscription.famille)
+                # Importation des familles
+                conditions = Q(activite__in=liste_activites)
+                if presents:
+                    conditions &= Q(consommation__date__gte=presents[0], consommation__date__lte=presents[1])
+                liste_familles = []
+                for inscription in Inscription.objects.select_related('famille').filter(conditions).distinct():
+                    if inscription.famille not in liste_familles:
+                        liste_familles.append(inscription.famille)
+
+            # Si toutes les familles
+            if parametres["familles"] == "TOUTES":
+                liste_familles = Famille.objects.filter(etat__isnull=True)
 
             # Importation des quotients
             dict_quotients = {quotient.famille_id: quotient for quotient in Quotient.objects.filter(date_debut__lte=date_situation, date_fin__gte=date_situation, type_quotient=type_quotient)}
@@ -96,7 +102,7 @@ class Liste(Page, crud.CustomListe):
                 boutons = [
                     """<a type="button" class="btn btn-default btn-xs" href="%s" title="Ouvrir la fiche famille" target="_blank"><i class="fa fa-fw fa-users"></i></a>""" % reverse("famille_quotients_liste", args=[famille.pk]),
                 ]
-                if filtre_familles == "TOUTES" or (filtre_familles == "AVEC_QF" and quotient) or (filtre_familles == "SANS_QF" and not quotient):
+                if filtre_qf == "TOUTES" or (filtre_qf == "AVEC_QF" and quotient) or (filtre_qf == "SANS_QF" and not quotient):
                     lignes.append([
                         famille.nom,
                         "Oui" if famille.autorisation_cafpro else "",

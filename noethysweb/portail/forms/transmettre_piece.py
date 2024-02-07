@@ -50,7 +50,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.use_custom_control = False
 
         # Pièces à fournir
-        self.liste_pieces_fournir = utils_pieces_manquantes.Get_pieces_manquantes(famille=self.request.user.famille)
+        self.liste_pieces_fournir = utils_pieces_manquantes.Get_pieces_manquantes(famille=self.request.user.famille, exclure_individus=self.request.user.famille.individus_masques.all())
         self.fields['selection_piece'].choices = [(index, piece["label"]) for index, piece in enumerate(self.liste_pieces_fournir)] + [(9999, "Un autre type de pièce")]
         self.fields['selection_piece'].initial = None
 
@@ -59,7 +59,7 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields["auteur"].initial = self.request.user
 
         # Choix de l'individu
-        rattachements = Rattachement.objects.select_related("individu").filter(famille=self.request.user.famille).order_by("categorie")
+        rattachements = Rattachement.objects.select_related("individu").filter(famille=self.request.user.famille).exclude(individu__in=self.request.user.famille.individus_masques.all()).order_by("categorie")
         self.fields['choix_individu'].choices = [(None, "La famille")] + [(rattachement.individu_id, rattachement.individu.Get_nom()) for rattachement in rattachements]
 
         # Affichage

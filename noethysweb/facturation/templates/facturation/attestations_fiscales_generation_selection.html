@@ -28,12 +28,12 @@
         </thead>
 
         <tbody>
-            {% for famille, detail in attestations_fiscales %}
+            {% for idfamille, detail in attestations_fiscales %}
                 <tr>
                     <td>
                         <div class="form-inline">
-                            <input class="check_attestation_fiscale" type="checkbox" data-solde="{{ detail.solde }}" value="{{ famille.pk }}" checked>
-                            <span style="margin-left:5px;margin-right:20px;">{{ famille.nom }}</span>
+                            <input class="check_attestation_fiscale" type="checkbox" data-solde="{{ detail.solde }}" value="{{ idfamille }}" checked>
+                            <span style="margin-left:5px;margin-right:20px;">{{ detail.nom }}</span>
                         </div>
                     </td>
                     <td style="text-align: center;">{{ detail.total|montant }}</td>

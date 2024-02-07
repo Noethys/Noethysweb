@@ -431,8 +431,8 @@ class Inscription(Categorie):
             (u"Numéro d'allocataire de la famille", "0123456X", "{FAMILLE_NUMALLOC}"),
 
             (u"Numéro ID de l'inscription", "003", "{IDINSCRIPTION}"),
-            (u"Date de l'inscription", "01/01/2013", "{DATE_INSCRIPTION}"),
-            (u"Est parti", "Oui", "{EST_PARTI}"),
+            (u"Date de début de l'inscription", "01/01/2013", "{DATE_DEBUT}"),
+            (u"Date de fin de l'inscription", "01/01/2013", "{DATE_FIN}"),
 
             (u"Numéro ID de l'activité", "003", "{IDACTIVITE}"),
             (u"Nom de l'activité (long)", "Accueil de Loisirs", "{ACTIVITE_NOM_LONG}"),
@@ -503,7 +503,8 @@ class Cotisation(Categorie):
             (u"Nom de dépôt d'adhésions", "Dépôt Janvier 2014", "{NOM_DEPOT}"),
             (u"Montant facturé", "20.00 €", "{MONTANT_FACTURE}"),
             (u"Montant réglé", "20.00 €", "{MONTANT_REGLE}"), (u"Solde actuel", "20.00 €", "{SOLDE_ACTUEL}"),
-            (u"Activités associées", "Centre de loisirs, Cantine", "{ACTIVITES}"),
+            (u"Inscriptions sur la période de l'adhésion (en ligne)", "Centre de loisirs, Cantine", "{INSCRIPTIONS_PERIODE_LIGNE}"),
+            (u"Inscriptions sur la période de l'adhésion (en paragraphe)", "Centre de loisirs, Cantine", "{INSCRIPTIONS_PERIODE_PARAGRAPHE}"),
             (u"Notes", "Texte libre", "{NOTES}"),
             (u"Montant facturé en lettres", "Vingt Euros", "{MONTANT_FACTURE_LETTRES}"),
             (u"Montant réglé en lettres", "Vingt Euros", "{MONTANT_REGLE_LETTRES}"),

@@ -79,11 +79,12 @@ class Impression(utils_impression.Impression):
                 largeursColonnes = [100, self.taille_cadre[2] - 100]
                 paraStyle = ParagraphStyle(name="detail", fontName="Helvetica-Bold", fontSize=9)
                 dataTableau.append(("Nom", Paragraph(dictValeur["{INDIVIDU_NOM}"], paraStyle)))
-                dataTableau.append(("Prénom", Paragraph(dictValeur["{INDIVIDU_PRENOM}"], paraStyle)))
+                dataTableau.append(("Prénom", Paragraph(dictValeur["{INDIVIDU_PRENOM}"] or "", paraStyle)))
                 dataTableau.append(("Activité", Paragraph(dictValeur["{ACTIVITE_NOM_LONG}"], paraStyle)))
                 dataTableau.append(("Groupe", Paragraph(dictValeur["{GROUPE_NOM_LONG}"], paraStyle)))
                 dataTableau.append(("Catégorie", Paragraph(dictValeur["{NOM_CATEGORIE_TARIF}"], paraStyle)))
-                dataTableau.append(("Date d'inscription", Paragraph(dictValeur["{DATE_INSCRIPTION}"], paraStyle)))
+                dataTableau.append(("Date de début", Paragraph(dictValeur["{DATE_DEBUT}"], paraStyle)))
+                dataTableau.append(("Date de fin", Paragraph(dictValeur["{DATE_FIN}"], paraStyle)))
 
                 style = TableStyle([
                     ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),

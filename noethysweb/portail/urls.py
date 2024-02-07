@@ -10,7 +10,7 @@ from consommations.views import grille
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
                             individu_regimes_alimentaires, individu_coords, individu_medecin, individu_informations, individu_assurances, individu_vaccinations, \
                             famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents, \
-                            transmettre_piece, activites, inscrire_activite, attente_paiement, cotisations, sondage, famille_questionnaire
+                            transmettre_piece, activites, inscrire_activite, attente_paiement, cotisations, sondage, famille_questionnaire, famille_parametres, pages_speciales
 from core.decorators import secure_ajax_portail
 
 
@@ -54,6 +54,9 @@ urlpatterns = [
 
     path('renseignements/famille/questionnaire', famille_questionnaire.Consulter.as_view(), name='portail_famille_questionnaire'),
     path('renseignements/famille/questionnaire/modifier', famille_questionnaire.Modifier.as_view(), name='portail_famille_questionnaire_modifier'),
+
+    path('renseignements/famille/parametres', famille_parametres.Consulter.as_view(), name='portail_famille_parametres'),
+    path('renseignements/famille/parametres/modifier', famille_parametres.Modifier.as_view(), name='portail_famille_parametres_modifier'),
 
     path('renseignements/individu/identite/<int:idrattachement>', individu_identite.Consulter.as_view(), name='portail_individu_identite'),
     path('renseignements/individu/identite/modifier/<int:idrattachement>', individu_identite.Modifier.as_view(), name='portail_individu_identite_modifier'),
@@ -129,6 +132,9 @@ urlpatterns = [
 
     # Mentions
     path('mentions', mentions.View.as_view(), name='portail_mentions'),
+
+    # Désinscription mails
+    path('desinscription/<str:valeur>', pages_speciales.desinscription_emails, name='desinscription'),
 
     # AJAX
     path('facturer', secure_ajax_portail(grille.Facturer), name='portail_ajax_facturer'),

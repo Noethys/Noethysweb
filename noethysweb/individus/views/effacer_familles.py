@@ -134,10 +134,10 @@ class Liste(Page, crud.Liste):
     class datatable_class(MyDatatable):
         filtres = ["fpresent:pk", "fscolarise:pk", "idfamille", "nom", "derniere_action"]
         check = columns.CheckBoxSelectColumn(label="")
-        solde = columns.TextColumn("Solde", sources=[], processor="Get_solde")
-        rattachements = columns.TextColumn("Individus rattachés", sources=[], processor="Get_rattachements")
-        derniere_prestation = columns.TextColumn("Dernière prestation", sources=["derniere_prestation"], processor=helpers.format_date('%d/%m/%Y'))
-        derniere_action = columns.TextColumn("Dernière action", sources=["derniere_action"], processor=helpers.format_date('%d/%m/%Y'))
+        solde = columns.TextColumn("Solde", sources=None, processor="Get_solde")
+        rattachements = columns.TextColumn("Individus rattachés", sources=None, processor="Get_rattachements")
+        derniere_prestation = columns.TextColumn("Dernière prestation", sources=None, processor=helpers.format_date('%d/%m/%Y'))
+        derniere_action = columns.TextColumn("Dernière action", sources=None, processor=helpers.format_date('%d/%m/%Y'))
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:

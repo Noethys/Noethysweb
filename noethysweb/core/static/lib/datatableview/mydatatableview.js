@@ -62,6 +62,9 @@ $(document).ready(function() {
                 messageBottom: impression_conclusion,
                 autoPrint: true,
                 className: "btn-default",
+                exportOptions: {
+                    columns: ':visible'
+                },
                 customize: function ( win ) {
                     $(win.document.body)
                         .css( 'font-size', '7pt' )
@@ -79,6 +82,7 @@ $(document).ready(function() {
                     //     $(this).css('background-color', '#D0D0D0');
                     // });
                     $(win.document.body).find('h1').css('text-align','center');
+                    $(win.document.body).find('h1').css('font-size', '9pt');
                     }
             },
             {
@@ -94,11 +98,17 @@ $(document).ready(function() {
                         text: 'PDF (portrait)',
                         extend: 'pdf',
                         orientation: 'portrait',
+                        exportOptions: {
+                            columns: ':visible'
+                        },
                     },
                     {
                         text: 'PDF (paysage)',
                         extend: 'pdf',
                         orientation: 'landscape',
+                        exportOptions: {
+                            columns: ':visible'
+                        },
                     }
                 ]
             },

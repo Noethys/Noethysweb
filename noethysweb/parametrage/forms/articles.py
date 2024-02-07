@@ -115,7 +115,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Album photos joint",
                 Field("album"),
             ),
-            Fieldset("Sondage joint",
+            Fieldset("Formulaire joint",
                 Field("sondage"),
             ),
             Fieldset("Fenêtre popup",

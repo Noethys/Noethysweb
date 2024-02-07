@@ -1,0 +1,40 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+                    {% crispy form %}
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+    </div>
+    
+    {% include 'core/modal_pdf.html' %}
+
+    <script>
+        // Générer le PDF
+        function generer_pdf(telechargement=false) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_imprimer_liste_inscrits_generer_pdf' %}",
+                data: $("#form_parametres").serialize(),
+                datatype: "json",
+                success: function(data){
+                    charge_pdf(data, telechargement);
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+    </script>
+
+{% endblock contenu_page %}

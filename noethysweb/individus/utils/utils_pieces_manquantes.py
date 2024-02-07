@@ -10,7 +10,7 @@ from core.models import Famille, Individu, Piece, TypePiece, Inscription, Rattac
 from core.utils import utils_texte
 
 
-def Get_pieces_manquantes(famille=None, date_reference=None, only_invalides=False, utilisateur=None):
+def Get_pieces_manquantes(famille=None, date_reference=None, only_invalides=False, utilisateur=None, exclure_individus=[]):
     """ Retourne les pièces manquantes d'une famille """
     if not date_reference:
         date_reference = datetime.date.today()
@@ -21,7 +21,7 @@ def Get_pieces_manquantes(famille=None, date_reference=None, only_invalides=Fals
         conditions &= Q(activite__structure__in=utilisateur.structures.all())
 
     # Lecture de la db
-    inscriptions = Inscription.objects.select_related('activite', 'individu', 'activite__structure').prefetch_related('activite__pieces').filter(conditions)
+    inscriptions = Inscription.objects.select_related('activite', 'individu', 'activite__structure').prefetch_related('activite__pieces').filter(conditions).exclude(individu__in=exclure_individus)
     pieces_existantes = Piece.objects.select_related('type_piece').filter(Q(famille=famille) | Q(individu__in=[i.individu_id for i in inscriptions]))
 
     liste_traitees = []

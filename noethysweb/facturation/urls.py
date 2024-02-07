@@ -35,6 +35,8 @@ urlpatterns = [
     path('facturation/liste_rappels', liste_rappels.Liste.as_view(), name='liste_rappels'),
     path('facturation/rappels_impression', rappels_impression.Liste.as_view(), name='rappels_impression'),
     path('facturation/rappels_email', rappels_email.Liste.as_view(), name='rappels_email'),
+    path('facturation/rappels/supprimer/<int:pk>', liste_rappels.Supprimer.as_view(), name='rappels_supprimer'),
+    path('facturation/rappels/<str:listepk>', liste_rappels.Supprimer_plusieurs.as_view(), name='rappels_supprimer_plusieurs'),
 
     # Attestations fiscales
     path('facturation/attestations_fiscales_generation', Verifie_ventilation(attestations_fiscales_generation.View.as_view()), name='attestations_fiscales_generation'),

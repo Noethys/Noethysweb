@@ -12,13 +12,14 @@ from crispy_forms.layout import Layout, Hidden, HTML
 from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import Recu, ModeleDocument
+from core.models import Recu, ModeleDocument, ModeleImpression
 from core.widgets import DatePickerWidget
 
 TEXTE_INTRO_DEFAUT = "Je soussigné(e) {SIGNATAIRE}, certifie avoir reçu pour la famille de {FAMILLE} la somme de {MONTANT}."
 
 
 class Formulaire(FormulaireBase, ModelForm):
+    modele_impression = forms.ChoiceField(label="Modèle d'impression", widget=Select2Widget(), choices=[], required=True, help_text="Vous pouvez créer un modèle d'impression depuis le menu Paramétrage > Modèles d'impression.")
     date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
     modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget(), queryset=ModeleDocument.objects.filter(categorie="reglement").order_by("nom"), required=True)
     signataire = forms.CharField(label="Signataire", required=True)
@@ -39,8 +40,15 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_method = 'post'
 
         self.helper.form_class = 'form-horizontal'
-        self.helper.label_class = 'col-md-2'
-        self.helper.field_class = 'col-md-10'
+        self.helper.label_class = 'col-md-3'
+        self.helper.field_class = 'col-md-9'
+
+        # Modèle impression
+        # Charge les modèles disponibles
+        self.fields["modele_impression"].choices = [(0, "Aucun")] + [(modele.pk, modele.nom) for modele in ModeleImpression.objects.filter(categorie="reglement").order_by("nom")]
+        modele_defaut = ModeleImpression.objects.filter(categorie="reglement", defaut=True)
+        if modele_defaut:
+            self.fields["modele_impression"].initial = modele_defaut.first().pk
 
         # Utilisateur
         self.fields["utilisateur"].initial = self.request.user
@@ -77,6 +85,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 ]),
             Hidden('famille', value=idfamille),
             Hidden('reglement', value=idreglement),
+            Field("modele_impression"),
             Field("date_edition"),
             Field("numero"),
             Field("modele"),
@@ -104,6 +113,7 @@ function impression_pdf(email=false) {
         type: "POST",
         url: "{% url 'ajax_recu_impression_pdf' %}",
         data: {
+            idmodele_impression: $("#id_modele_impression").val(),
             idreglement: $("input:hidden[name='reglement']").val(),
             date_edition: $("#id_date_edition").val(),
             numero: $("#id_numero").val(),
@@ -128,6 +138,27 @@ function impression_pdf(email=false) {
     })
 };
 
-</script>
+function On_change_modele_impression() {
+    if (!($('#id_modele_impression').val() == 0)) {
+        $("#div_id_date_edition").hide();
+        $("#div_id_numero").hide();
+        $("#div_id_modele").hide();
+        $("#div_id_signataire").hide();
+        $("#div_id_intro").hide();
+        $("#div_id_afficher_prestations").hide()
+    } else {
+        $("#div_id_date_edition").show();
+        $("#div_id_numero").show();
+        $("#div_id_modele").show();
+        $("#div_id_signataire").show();
+        $("#div_id_intro").show();
+        $("#div_id_afficher_prestations").show()
+    }
+};
+$(document).ready(function() {
+    $('#id_modele_impression').change(On_change_modele_impression);
+    On_change_modele_impression.call($('#id_modele_impression').get(0));
+});
 
+</script>
 """

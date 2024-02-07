@@ -23,7 +23,7 @@ class View(CustomView, TemplateView):
         context['page_titre'] = _("Documents")
 
         # Pièces à fournir
-        context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(famille=self.request.user.famille)
+        context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(famille=self.request.user.famille, exclure_individus=self.request.user.famille.individus_masques.all())
 
         # Importation des documents à télécharger
         liste_documents = []

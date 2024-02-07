@@ -89,6 +89,7 @@ class Modifier(Consulter):
         mdp = form.cleaned_data.get("internet_mdp")
         internet_categorie = form.cleaned_data.get("internet_categorie")
         date_expiration_mdp = form.cleaned_data.get("date_expiration_mdp")
+        individus_masques = form.cleaned_data.get("individus_masques")
 
         # Si changement de l'état actif
         if internet_actif != famille.internet_actif:
@@ -117,5 +118,8 @@ class Modifier(Consulter):
         # Enregistrement
         utilisateur.save()
         famille.save()
+
+        # Enregistrement des individus masqués
+        famille.individus_masques.set(individus_masques)
 
         return HttpResponseRedirect(reverse_lazy("famille_portail", args=(self.kwargs['idfamille'],)))
