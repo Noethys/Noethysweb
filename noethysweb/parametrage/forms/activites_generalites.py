@@ -34,6 +34,10 @@ class Formulaire(FormulaireBase, ModelForm):
     # Logo
     choix_logo = [("ORGANISATEUR", "Identique à celui de l'organisateur"), ("SPECIFIQUE", "Logo spécifique à l'activité")]
     type_logo = forms.TypedChoiceField(label="Logo de l'activité", choices=choix_logo, initial="ORGANISATEUR", required=False)
+    
+    # Lien paiement 
+    choix_pay = [("NON", "Pas de lien de paiement direct"), ("OUI", "Lien de paiement direct")]
+    type_pay = forms.TypedChoiceField(label="Lien de paiement", choices=choix_pay, initial="NON", required=False)
 
     # Coordonnées
     choix_coords = [("ORGANISATEUR", "Identiques à celles de l'organisateur"), ("SPECIFIQUE", "Coordonnées spécifiques à l'activité")]
@@ -41,13 +45,13 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Activite
+        fields = ["pay", "nom", "abrege", "pay_org", "coords_org", "rue", "cp", "ville", "tel", "fax", "mail", "site", "logo_org", "logo", "code_produit_local", "service1", "service2",
                   "date_debut", "date_fin", "groupes_activites", "nbre_inscrits_max", "inscriptions_multiples", "regie", "code_comptable", "code_analytique", "structure"]
         widgets = {
             'tel': Telephone(),
             'fax': Telephone(),
             'rue': forms.Textarea(attrs={'rows': 2}),
             'cp': CodePostal(attrs={"id_ville": "id_ville"}),
-            'ville': Ville(attrs={"id_codepostal": "id_cp"}),
             'ville': Ville(attrs={"id_codepostal"   : "id_cp"}),
             'logo': Selection_image(),
         }
@@ -93,6 +97,12 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields['type_coords'].initial = "ORGANISATEUR"
         else:
             self.fields['type_coords'].initial = "SPECIFIQUE"
+        
+        # Importe le lien de paiement direct
+        if self.instance.pay_org ==  True :
+            self.fields['type_pay'].initial = "OUI"
+        else:
+            self.fields['type_pay'].initial = "NON"
 
         # Création des boutons de commande
         if self.mode == "CONSULTATION":
@@ -141,6 +151,10 @@ class Formulaire(FormulaireBase, ModelForm):
                     Field('site'),
                     id='bloc_coords',
                 ),
+            Fieldset("Paiement par lien",
+                Field("type_pay"),
+                Field("pay"),
+            ),
             ),
             Fieldset("Options",
                 Field("regie"),
@@ -154,6 +168,7 @@ class Formulaire(FormulaireBase, ModelForm):
         )
 
         # Durée de validité
+
         if self.cleaned_data["validite_type"] == "LIMITEE":
             if self.cleaned_data["validite_date_debut"] == None:
                 self.add_error('validite_date_debut', "Vous devez sélectionner une date de début")
@@ -197,11 +212,16 @@ class Formulaire(FormulaireBase, ModelForm):
         # Lien paiement
         if self.cleaned_data["type_pay"] == "OUI":
 #            self.cleaned_data["pay"] = self.cleaned_data.get("pay", "")
+            self.cleaned_data["pay_org"] = True
             
         else:
             self.cleaned_data["pay_org"] = False
             self.cleaned_data["pay"] = ""
     
+        print(f"Value of 'type_pay': {self.cleaned_data['type_pay']}")
+        print(f"Value of 'pay' after assignment: {self.cleaned_data['pay']}")
+        print(f"Value of 'type_pay' after assignment: {self.cleaned_data['type_pay']}")
+        print(f"Value of 'pay_org' after assignment: {self.cleaned_data['pay_org']}")
         print("Clean method finished.")
         return self.cleaned_data
 
@@ -244,6 +264,9 @@ $(document).ready(function() {
     On_change_type_logo.call($('#id_type_logo').get(0));
 });
 
+// type_pay
+function On_change_type_pay() {
+    $('#div_id_pay').hide();
     if($(this).val() == 'OUI') {
         $('#div_id_pay').show();
     }
