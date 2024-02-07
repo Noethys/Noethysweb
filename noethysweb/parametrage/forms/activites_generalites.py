@@ -41,7 +41,6 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Activite
-        fields = ["nom", "abrege", "coords_org", "rue", "cp", "ville", "tel", "fax", "mail", "site", "logo_org", "logo", "code_produit_local", "service1", "service2",
                   "date_debut", "date_fin", "groupes_activites", "nbre_inscrits_max", "inscriptions_multiples", "regie", "code_comptable", "code_analytique", "structure"]
         widgets = {
             'tel': Telephone(),
@@ -49,6 +48,7 @@ class Formulaire(FormulaireBase, ModelForm):
             'rue': forms.Textarea(attrs={'rows': 2}),
             'cp': CodePostal(attrs={"id_ville": "id_ville"}),
             'ville': Ville(attrs={"id_codepostal": "id_cp"}),
+            'ville': Ville(attrs={"id_codepostal"   : "id_cp"}),
             'logo': Selection_image(),
         }
         help_texts = {
@@ -153,7 +153,6 @@ class Formulaire(FormulaireBase, ModelForm):
             HTML(EXTRA_SCRIPT),
         )
 
-    def clean(self):
         # Durée de validité
         if self.cleaned_data["validite_type"] == "LIMITEE":
             if self.cleaned_data["validite_date_debut"] == None:
@@ -162,9 +161,10 @@ class Formulaire(FormulaireBase, ModelForm):
             if self.cleaned_data["validite_date_fin"] == None:
                 self.add_error('validite_date_fin', "Vous devez sélectionner une date de fin")
                 return
-            if self.cleaned_data["validite_date_debut"] > self.cleaned_data["validite_date_fin"] :
+            if self.cleaned_data["validite_date_debut"] > self.cleaned_data["validite_date_fin"]:
                 self.add_error('validite_date_fin', "La date de fin doit être supérieure à la date de début")
                 return
+
             self.cleaned_data["date_debut"] = self.cleaned_data["validite_date_debut"]
             self.cleaned_data["date_fin"] = self.cleaned_data["validite_date_fin"]
         else:
@@ -193,8 +193,17 @@ class Formulaire(FormulaireBase, ModelForm):
             self.cleaned_data["coords_org"] = True
         else:
             self.cleaned_data["coords_org"] = False
+    
+        # Lien paiement
+        if self.cleaned_data["type_pay"] == "OUI":
+#            self.cleaned_data["pay"] = self.cleaned_data.get("pay", "")
+            
+        else:
+            self.cleaned_data["pay_org"] = False
+            self.cleaned_data["pay"] = ""
+    
+        print("Clean method finished.")
         return self.cleaned_data
-
 
 EXTRA_SCRIPT = """
 <script>
@@ -233,6 +242,15 @@ function On_change_type_logo() {
 $(document).ready(function() {
     $('#id_type_logo').change(On_change_type_logo);
     On_change_type_logo.call($('#id_type_logo').get(0));
+});
+
+    if($(this).val() == 'OUI') {
+        $('#div_id_pay').show();
+    }
+}
+$(document).ready(function() {
+    $('#id_type_pay').change(On_change_type_pay);
+    On_change_type_pay.call($('#id_type_pay').get(0));
 });
 
 // type_coords

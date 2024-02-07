@@ -11,13 +11,17 @@ from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import Sum, Q
 from django.contrib import messages
 from eopayment import Payment
 from portail.views.base import CustomView
-from core.models import Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur, ModeReglement, CompteBancaire, PortailRenseignement, ModeleImpression, Mandat
+from core.models import Activite, Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur, ModeReglement, CompteBancaire, PortailRenseignement, ModeleImpression, Mandat
 from core.utils import utils_portail, utils_fichiers, utils_dates, utils_texte
+from django.core.serializers import serialize
+from django.views.decorators.http import require_POST
+from datetime import date
+
 
 ETATS_PAIEMENTS = {1: "RECEIVED", 2: "ACCEPTED", 3: "PAID", 4: "DENIED", 5: "CANCELLED", 6: "WAITING", 99: "ERROR"}
 
@@ -41,7 +45,6 @@ def GetPaymentPayzen(request=None, parametres_portail={}):
     # Modifie le répertoire temp si on est sous Windows
     if sys.platform.startswith("win"):
         p.backend.PATH = utils_fichiers.GetTempRep()
-
     return p
 
 
@@ -62,6 +65,11 @@ def effectuer_paiement_en_ligne(request):
     liste_impayes = request.POST.get("liste_impayes").split(",")
     montant_reglement = decimal.Decimal(request.POST.get("montant_reglement"))
     paiement_echelonne = int(request.POST.get("paiement_echelonne"))
+
+    # Ajout de la récupération de l'id de la facture
+    idfacture = int(request.POST.get("idfacture", 0))
+    activite_pay = int(request.POST.get("activite_pay", 0))
+
 
     # Récupération des paramètres généraux du portail
     parametres_portail = utils_portail.Get_dict_parametres()
@@ -177,6 +185,174 @@ def effectuer_paiement_en_ligne(request):
         form = form.replace("<form ", "<form id='form_paiement' ")
         return JsonResponse({"systeme_paiement": "payzen", "form_paiement": form})
 
+    # ----------------------- Paiement avec PAYASSO -------------------------
+    if parametres_portail.get("paiement_ligne_systeme") == "payasso":
+        # Vérifie s'il y a plus d'une facture sélectionnée
+        if len(dict_ventilation["facture"]) > 1:
+            logger.debug(
+                "Page EFFECTUER_PAIEMENT_EN_LIGNE (%s): Plus d'une facture sélectionnée pour PAYASSO NON TRAITÉ",
+                request.user.famille)
+            return JsonResponse({"erreur": "Paiement en ligne multi-factures impossible"}, status=401)
+
+        # On mémorise la ventilation
+        for type_impaye in "facture", "periode", "cotisation":
+            for ID, solde in dict_ventilation[type_impaye].items():
+                factureid = ID
+
+        logger.debug(
+            "Page EFFECTUER_PAIEMENT_EN_LIGNE MODE PAYASSO (Famille %s): montant=%s IDfacture=%s ",
+            request.user.famille, str(montant_reglement), factureid )
+
+        """ Cherhe le lien de paiement de l'activité  """
+        # Importation de la facture
+        factureact = Facture.objects.get(pk=factureid)
+
+        # ID activité
+        activite_ids = Facture.objects.filter(idfacture=factureid).values_list('activites', flat=True)
+
+        if len(activite_ids) != 1:
+            raise ValueError("Il y a plus d'une activité associée à cette facture.")
+        else:
+            activite_id = activite_ids[0]
+
+        logger.debug(
+            "Page EFFECTUER_PAIEMENT_EN_LIGNE MODE PAYASSO : Activite=%s ",
+            activite_id)
+
+        # Obtenez l'ID de l'activité associée à la facture
+        activite_id = Facture.objects.filter(idfacture=factureid).values('activites').first()
+
+        # Vérifiez si une activité unique est associée à la facture
+        activite_ids = Facture.objects.filter(idfacture=factureid).values_list('activites', flat=True)
+
+        if len(activite_ids) != 1 or ';' in activite_ids[0]:
+            return JsonResponse({"erreur": _("Cette facture ne peut être payée via PayAsso !")}, status=401)
+        else:
+            activite_id = activite_ids[0]
+
+        # Obtenez l'URL de paiement de l'activité
+        pay_activite = Activite.objects.filter(idactivite=activite_id).values('pay').first()
+
+        # Log pour déboguer
+        logger.debug("Page EFFECTUER_PAIEMENT_EN_LIGNE MODE PAYASSO : URL=%s", pay_activite)
+
+        # Récupérez l'URL de paiement
+        urlpayasso = pay_activite.get('pay') if pay_activite else None
+
+        # Vérifie que le montant est supérieur à zéro
+        if not urlpayasso:
+            return JsonResponse({"erreur": _("Cette facture ne peut être payer via PayAsso !")}, status=401)
+
+        #Numéro unique id transaction
+        sequence_of_digits = ''.join(char for char in datetime.datetime.now().strftime("%Y%m%d%H%M%S") if char.isdigit())
+
+        # Utilisez cette chaîne pour le numéro de transaction
+        transaction_id = "PAYASSO" + sequence_of_digits
+
+        # Enregistrement du paiement
+        Paiement.objects.create(famille=request.user.famille, systeme_paiement="payasso", idtransaction=transaction_id,
+                                refdet=factureid, montant=montant_reglement, objet=f"Paiement facture {factureid} via PayAsso", saisie="", ventilation=ventilation_str, resultat = "PAID", message = "Paiement validé sans vérification" )
+        logger.debug("Enreg. OK")
+
+#début enregistrement
+
+        logger.debug("Page règlement")
+        IDtransaction = transaction_id
+        paiement = Paiement.objects.get(idtransaction=transaction_id)
+
+        # Analyse de la ventilation
+        dict_paiements = {"facture": {}, "periode": {}, "cotisation": {}}
+        for texte in paiement.ventilation.split(","):
+            if texte[0] == "F": type_impaye = "facture"
+            if texte[0] == "P": type_impaye = "periode"
+            if texte[0] == "C": type_impaye = "cotisation"
+            ID, montant = texte[1:].split("#")
+            dict_paiements[type_impaye][int(ID)] = float(montant)
+
+        # Importation des périodes et des factures
+        periodes = PortailPeriode.objects.filter(pk__in=dict_paiements["periode"].keys())
+        factures = Facture.objects.select_related("regie", "regie__compte_bancaire").filter(
+            pk__in=dict_paiements["facture"].keys())
+
+        num_piece = ""
+        liste_paiements = [(paiement.montant, datetime.date.today())]
+        compte = CompteBancaire.objects.first()
+
+        # Recherche payeur
+        dernier_reglement = Reglement.objects.filter(famille=paiement.famille).last()
+        if dernier_reglement:
+            payeur = dernier_reglement.payeur
+        else:
+            payeur = Payeur.objects.create(famille=paiement.famille, nom=paiement.famille.nom)
+
+        # Importation des prestations à payer
+        conditions = Q(facture__in=factures)
+        for periode in periodes:
+            conditions |= Q(date__range=(periode.date_debut, periode.date_fin), activite_id=periode.activite_id)
+        if dict_paiements["cotisation"].keys():
+            conditions |= Q(pk__in=dict_paiements["cotisation"].keys())
+        prestations = Prestation.objects.filter(Q(famille=paiement.famille), conditions).distinct().order_by("date")
+
+        # Importation des ventilations existantes
+        ventilations = Ventilation.objects.values("prestation").filter(famille=paiement.famille,
+                                                                       prestation__in=prestations).annotate(
+            total=Sum("montant"))
+        dict_ventilations = {ventilation["prestation"]: ventilation["total"] for ventilation in ventilations}
+        for prestation in prestations:
+            prestation.solde = prestation.montant - dict_ventilations.get(prestation.pk, decimal.Decimal(0))
+            prestation.nouvelle_ventilation = decimal.Decimal(0)
+
+        # Création du règlement
+        for index, (montant_paiement, date_paiement) in enumerate(liste_paiements, start=1):
+
+            observations = "Transaction n°%s sur %s (IDpaiement %d)." % (
+            IDtransaction, paiement.systeme_paiement, paiement.pk)
+            if len(liste_paiements) > 1:
+                observations += " Paiement en %d fois du %s (%d/%d)." % (
+                len(liste_paiements), utils_dates.ConvertDateToFR(datetime.date.today()), index, len(liste_paiements))
+
+            reglement = Reglement.objects.create(
+                famille=paiement.famille,
+                date=datetime.date.today(),
+                mode=ModeReglement.objects.get(pk=int(parametres_portail.get("paiement_ligne_mode_reglement"))),
+                numero_piece=num_piece,
+                montant=decimal.Decimal(montant_paiement),
+                payeur=payeur,
+                observations=observations,
+                compte=compte,
+            )
+
+            # Associe le règlement créé au paiement
+            paiement.reglements.add(reglement)
+
+            # Ventilation du règlement
+            credit = copy.copy(montant_paiement)
+            for prestation in prestations:
+                if credit and prestation.solde:
+                    ventilation = min(prestation.solde, credit)
+                    prestation.nouvelle_ventilation = ventilation
+                    prestation.solde -= ventilation
+                    credit -= ventilation
+                    Ventilation.objects.create(famille=paiement.famille, reglement=reglement, prestation=prestation,
+                                               montant=ventilation)
+
+            # Mémorisation du paiement dans l'historique du portail
+            PortailRenseignement.objects.create(famille=paiement.famille, categorie="famille_reglements",
+                                                code="Nouveau paiement en ligne", validation_auto=True,
+                                                idobjet=reglement.pk,
+                                                nouvelle_valeur=json.dumps("Paiement %s de %s" % (
+                                                paiement.systeme_paiement,
+                                                utils_texte.Formate_montant(reglement.montant))))
+
+        # MAJ du solde des factures
+        for facture in factures:
+            facture.Maj_solde_actuel()
+
+    #fin enregistrement
+
+        # Renvoyer la réponse JSON
+        return JsonResponse({"systeme_paiement": "payasso", "urlpayasso": urlpayasso})
+
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -226,6 +402,7 @@ def retour_payfip(request):
         Enregistrement_reglement(paiement=paiement)
 
     return HttpResponse("Notification processed")
+    logger.debug("Vue retour_payasso ")
 
 
 @csrf_exempt
@@ -279,6 +456,7 @@ def ipn_payzen(request):
 
 
 def Enregistrement_reglement(paiement=None, vads_payment_config=None):
+    logger.debug("Page règlement")
     IDtransaction = paiement.idtransaction.split("_")[1] if "_" in paiement.idtransaction else paiement.idtransaction
 
     # Récupération des paramètres généraux du portail
@@ -419,6 +597,7 @@ class View(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Facturation"
+        logger.debug("Def context")
 
         # Vérifie si la famille est abonnée au prélèvement automatique
         context["prelevement_actif"] = Mandat.objects.filter(famille=self.request.user.famille, actif=True).exists()
@@ -426,6 +605,17 @@ class View(CustomView, TemplateView):
 
         # Importation des paiements PAYFIP en cours
         context['liste_paiements'] = Paiement.objects.filter(famille=self.request.user.famille, systeme_paiement="payfip", resultat__isnull=True, horodatage__gt=datetime.datetime.now() - datetime.timedelta(minutes=5))
+        dict_paiements = {"F": {}, "P": {}, "C": {}}
+        for paiement in context['liste_paiements']:
+            for texte in paiement.ventilation.split(","):
+                type_impaye = texte[0]
+                ID, montant = texte[1:].split("#")
+                ID, montant = int(ID), decimal.Decimal(montant)
+                dict_paiements[type_impaye].setdefault(ID, decimal.Decimal(0))
+                dict_paiements[type_impaye][ID] += montant
+
+        # Importation des paiements PAYASSO en cours
+        context['liste_paiements'] = Paiement.objects.filter(famille=self.request.user.famille, systeme_paiement="payasso", resultat__isnull=True, horodatage__gt=datetime.datetime.now() - datetime.timedelta(minutes=5))
         dict_paiements = {"F": {}, "P": {}, "C": {}}
         for paiement in context['liste_paiements']:
             for texte in paiement.ventilation.split(","):

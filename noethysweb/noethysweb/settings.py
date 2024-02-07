@@ -13,13 +13,16 @@ URL_BUREAU = "utilisateur/"
 URL_PORTAIL = ""
 PORTAIL_ACTIF = True
 
+MODE_DEMO = False
+
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'cle_secrete_a_modifier_imperativement'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1"]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 LOGIN_REDIRECT_URL = "accueil"
