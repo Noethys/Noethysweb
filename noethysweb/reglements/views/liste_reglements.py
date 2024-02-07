@@ -4,10 +4,12 @@
 #  Distribué sous licence GNU GPL.
 
 import json
+from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Reglement
-
+from core.utils import utils_preferences
+from django.db.models import Q
 
 class Page(crud.Page):
     model = Reglement
@@ -44,6 +46,7 @@ class Liste(Page, crud.Liste):
         payeur = columns.TextColumn("Payeur", sources=['payeur__nom'])
         depot = columns.TextColumn("Dépôt", sources=['depot__nom'])
         compte = columns.TextColumn("Compte", sources=['compte__nom'])
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
@@ -57,6 +60,11 @@ class Liste(Page, crud.Liste):
             ordering = ["date"]
             footer = True
 
+        def Get_actions_speciales(self, instance, *args, **kwargs):
+            html = [
+                self.Create_bouton_modifier(url=reverse("famille_reglements_modifier", kwargs={"idfamille": instance.famille_id, "pk": instance.pk})),
+            ]
+            return self.Create_boutons_actions(html)
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
     pass
