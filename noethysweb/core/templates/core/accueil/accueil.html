@@ -54,7 +54,7 @@
                 {% block contenu_page %}
 
                     {# Nouvelle version disponible #}
-                    {% if nouvelle_version %}
+                    {% if super_utilisateur and nouvelle_version %}
                         <div class="alert alert-warning">
                             <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
                             <h5><i class="icon fa fa-download"></i> Mise à jour</h5>
