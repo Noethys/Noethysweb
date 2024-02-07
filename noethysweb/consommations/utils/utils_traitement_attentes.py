@@ -5,32 +5,40 @@
 
 import logging, datetime, json
 logger = logging.getLogger(__name__)
-from core.models import Activite, Famille, Individu, Mail, ModeleEmail, Destinataire, AdresseMail
-from core.utils import utils_dates, utils_portail
+from django.db.models import Q
+from core.models import Activite, Famille, Individu, Mail, Destinataire
+from core.utils import utils_dates
 from outils.utils import utils_email
 from consommations.views.liste_attente import Get_resultats
 from consommations.utils.utils_grille_virtuelle import Grille_virtuelle
 
 
-def Traiter_attentes(request=None, test=False):
+def Traiter_attentes(request=None, selections=None, test=False):
     logger.debug("Recherche de places en attente à réattribuer...")
 
-    for activite in Activite.objects.filter(reattribution_auto=True):
-        date_min = datetime.date.today() + datetime.timedelta(activite.reattribution_delai)
-        date_max = date_min + datetime.timedelta(365)
+    if selections:
+        condition_activites = Q(pk__in=list({dict_temp["idactivite"]: True for dict_temp in selections}.keys()))
+    else:
+        condition_activites = Q(reattribution_auto=True)
 
-        # Recherche les places disponibles
-        liste_resultats = Get_resultats(parametres={
-            "donnees": "traitement_attente",
-            "date_min": date_min,
-            "date_max": date_max,
-            "activites": [activite,],
-        })
+    for activite in Activite.objects.filter(condition_activites):
+        if selections:
+            liste_resultats = [dict_temp for dict_temp in selections if dict_temp["idactivite"] == activite.pk]
+        else:
+            # Recherche les places disponibles
+            date_min = datetime.date.today() + datetime.timedelta(activite.reattribution_delai)
+            date_max = date_min + datetime.timedelta(365)
+            liste_resultats = Get_resultats(parametres={
+                "donnees": "traitement_attente",
+                "date_min": date_min,
+                "date_max": date_max,
+                "activites": [activite,],
+            })
 
         # Regroupement des résultats par famille, individu, date
         dict_resultats_familles = {}
         for resultat in liste_resultats:
-            if resultat.get("place_dispo", False) == True:
+            if resultat.get("place_dispo", False) == True or selections:
                 idfamille = resultat["idfamille"]
                 idindividu = resultat["idindividu"]
                 date = utils_dates.ConvertDateENGtoDate(resultat["date"])

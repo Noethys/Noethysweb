@@ -65,4 +65,5 @@ urlpatterns = [
     # path('consommations/pointeuse_barcodes/on_scan_individu', secure_ajax(pointeuse_barcodes.On_scan_individu), name='ajax_consommations_on_scan_individu'),
     path('consommations/consommations_traitement_lot', secure_ajax(consommations_traitement_lot.Appliquer), name='ajax_consommations_traitement_lot'),
     path('consommations/liste_consommations/dissocier_prestation', secure_ajax(liste_consommations.Dissocier_prestation), name='ajax_consommations_dissocier_prestation'),
+    path('consommations/attribution_manuelle', secure_ajax(liste_attente.Attribution_manuelle), name='liste_attente_attribution_manuelle'),
 ]

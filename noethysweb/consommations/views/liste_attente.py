@@ -7,7 +7,7 @@ import json, datetime
 from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.core.exceptions import PermissionDenied
 from core.views.base import CustomView
 from core.utils import utils_dates, utils_infos_individus, utils_dictionnaires
@@ -24,6 +24,14 @@ def Traitement_automatique(request):
     from consommations.utils import utils_traitement_attentes
     utils_traitement_attentes.Traiter_attentes(request=request)
     return HttpResponseRedirect(reverse_lazy("liste_attente"))
+
+
+def Attribution_manuelle(request):
+    """ Attribution manuelle des places sélectionnées """
+    selections = json.loads(request.POST.get("selections"))
+    from consommations.utils import utils_traitement_attentes
+    utils_traitement_attentes.Traiter_attentes(request=request, selections=selections)
+    return JsonResponse({"resultat": True})
 
 
 class View(CustomView, TemplateView):
