@@ -119,6 +119,7 @@ EXTRA_HTML = """
             $('#div_id_payzen_echelonnement').show();
         };
         if ($("#id_paiement_ligne_systeme").val() == "payasso") {
+            $('#div_id_paiement_ligne_mode_reglement').hide();
             $('#div_id_paiement_ligne_compte_bancaire').hide();
             $('#div_id_paiement_ligne_montant_minimal').hide();
             $('#div_id_paiement_ligne_multi_factures').hide();
