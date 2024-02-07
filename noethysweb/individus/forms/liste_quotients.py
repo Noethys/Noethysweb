@@ -17,7 +17,7 @@ class Formulaire(FormulaireBase, forms.Form):
     familles = forms.ChoiceField(label="Familles", choices=[("TOUTES", "Toutes les familles"), ("SELECTION", "Une sélection de familles")], required=True)
     type_quotient = forms.ModelChoiceField(label="Type de quotient", queryset=TypeQuotient.objects.all(), required=True)
     date = forms.DateField(label="Date de situation", required=True, widget=DatePickerWidget())
-    activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
+    activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"id": 2, "afficher_colonne_detail": False}))
     presents = forms.CharField(label="Uniquement les présents", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
     filtre = forms.ChoiceField(label="Filtre", choices=[("TOUTES", "Familles avec ou sans QF"), ("AVEC_QF", "Uniquement les familles avec QF"), ("SANS_QF", "Uniquement les familles sans QF")], required=True)
 
