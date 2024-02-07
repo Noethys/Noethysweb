@@ -158,3 +158,8 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+<<<<<<< Updated upstream
+=======
+*.sqlite3
+noethysweb/db.sqlite3
+>>>>>>> Stashed changes
