@@ -118,17 +118,16 @@
             {% block box_theme %}card-outline card-lightblue{% endblock %}
             {% block box_titre %}{% blocktrans %}Payer en ligne{% endblocktrans %}{% endblock %}
             {% block box_contenu %}
-{% if "payzen" in parametres_portail.paiement_ligne_systeme or "demo" in parametres_portail.paiement_ligne_systeme %}
+                {% if parametres_portail.paiement_ligne_systeme in ["payzen", "demo"] %}
     <img src="{% static "images/payzen.png" %}" class="pull-right" alt="Logo Payzen">
     <p>{% blocktrans %}Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PayZen. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.{% endblocktrans %}</p>
-{% elif "payfip" in parametres_portail.paiement_ligne_systeme %}
+{% elif parametres_portail.paiement_ligne_systeme == "payfip" %}
     <img src="{% static "images/payfip.jpg" %}" class="pull-right" alt="Logo Payfip">
     <p>{% blocktrans %}Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PAYFIP. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.{% endblocktrans %}</p>
-{% elif "payasso" in parametres_portail.paiement_ligne_systeme %}
+{% elif parametres_portail.paiement_ligne_systeme == "payasso" %}
     <img src="{% static "images/payasso.png" %}" class="pull-right" alt="Logo PayAsso">
     <p>{% blocktrans %}Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PAYASSO. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.{% endblocktrans %}</p>
 {% endif %}
-
 
 
                 <div>
@@ -284,12 +283,6 @@
                                 $('#modal_selection_factures').modal('hide');
                                 window.open(data.urltoredirect, '_blank', 'height=700, width=900, toolbar=no, menubar=no, scrollbars=no, resizable=yes, location=no, directories=no, status=no');
                                 window.location.href = "{% url 'portail_attente_paiement' %}"
-                            }
-
-                            if (data.systeme_paiement === "payasso") {
-                                $('#modal_selection_factures').modal('hide');
-                                window.open(data.urlpayasso, '_blank');
-                                window.location.href = "{% url 'portail_attente_paiement' %}";
                             }
                         },
                         error: function(data) {
