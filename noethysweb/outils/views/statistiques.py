@@ -308,10 +308,12 @@ class View(CustomView, TemplateView):
             # ---------------------------- INDIVIDUS : Scolarité -------------------------------
             if rubrique == "individus_scolarite":
 
+                date_reference = presents[0] if presents else datetime.date.today()
                 nbre_individus_total = Individu.objects.filter(condition).distinct().count()
 
                 # Recherche de l'école des individus
-                condition_temp = Q(scolarite__date_debut__lte=presents[0], scolarite__date_fin__gte=presents[0])
+
+                condition_temp = Q(scolarite__date_debut__lte=date_reference, scolarite__date_fin__gte=date_reference)
                 individus = list(Individu.objects.filter(condition, condition_temp).values_list("scolarite__ecole__nom").annotate(nbre=Count("idindividu", distinct=True)).order_by("nbre"))
                 nbre_individus_avec_scolarite = 0
                 for item in individus:
@@ -335,7 +337,7 @@ class View(CustomView, TemplateView):
                 ))
 
                 # Recherche du niveau des individus
-                condition_temp = Q(scolarite__date_debut__lte=presents[0], scolarite__date_fin__gte=presents[0], scolarite__niveau__nom__isnull=False)
+                condition_temp = Q(scolarite__date_debut__lte=date_reference, scolarite__date_fin__gte=date_reference, scolarite__niveau__nom__isnull=False)
                 individus = list(Individu.objects.filter(condition, condition_temp).values_list("scolarite__niveau__nom").annotate(nbre=Count("idindividu", distinct=True)).order_by("nbre"))
                 nbre_individus_avec_scolarite = 0
                 for item in individus:
