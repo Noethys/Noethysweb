@@ -1,3 +1,13 @@
+Version 1.2.2.6 (11/02/2024) :
+
+- Ajout de la réattribution manuelle des places en attente
+- Ajout de la consultation des réponses des formulaires
+- Ajout d'une colonne Secteur dans la liste des familles et la liste des individus rattachés
+- Ajout du numéro de quittancier dans le PDF des règlements d'un dépôt
+- Ajout du widget Astuce du jour sur la page d'accueil
+- Finalisation du module des formulaires
+- Correction de la page Scolarité de l'outil Statistiques
+
 Version 1.2.2.5 (06/02/2024) :
 
 - Conversion du numéro de facture en BigInteger
