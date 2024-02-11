@@ -10,7 +10,7 @@ from fiche_famille.views import famille, famille_questionnaire, famille_notes, f
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, famille_sms, \
                             famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats, famille_voir_mandat, famille_prestations_modele, \
                             famille_attestations_fiscales, famille_voir_attestation_fiscale, famille_locations, famille_voir_location, famille_remboursement, famille_factures_consulter, famille_factures_selection, \
-                            famille_edition_renseignements, reglement_recu_auto
+                            famille_edition_renseignements, reglement_recu_auto, famille_formulaires
 
 urlpatterns = [
 
@@ -129,6 +129,10 @@ urlpatterns = [
     path('individus/familles/attestations_fiscales/liste/<int:idfamille>', famille_attestations_fiscales.Liste.as_view(), name='famille_attestations_fiscales_liste'),
     path('individus/familles/attestations_fiscales/supprimer/<int:idfamille>/<int:pk>', famille_attestations_fiscales.Supprimer.as_view(), name='famille_attestations_fiscales_supprimer'),
     path('individus/familles/attestations_fiscales/voir/<int:idfamille>/<int:idattestation>', famille_voir_attestation_fiscale.View.as_view(), name='famille_voir_attestation_fiscale'),
+
+    path('individus/familles/formulaires/liste/<int:idfamille>', famille_formulaires.Liste.as_view(), name='famille_formulaires_liste'),
+    path('individus/familles/formulaires/supprimer/<int:idfamille>/<int:pk>', famille_formulaires.Supprimer.as_view(), name='famille_formulaires_supprimer'),
+    path('individus/familles/formulaires/voir/<int:idfamille>/<int:pk>', famille_formulaires.Voir.as_view(), name='famille_voir_formulaire'),
 
     path('individus/familles/portail/<int:idfamille>', famille_portail.Consulter.as_view(), name='famille_portail'),
     path('individus/familles/portail/modifier/<int:idfamille>', famille_portail.Modifier.as_view(), name='famille_portail_modifier'),

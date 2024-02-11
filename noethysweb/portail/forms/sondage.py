@@ -15,6 +15,7 @@ class Formulaire(FormulaireBase, forms.Form):
         page = kwargs.pop("page", None)
         questions = kwargs.pop("questions", [])
         reponses = kwargs.pop("reponses", [])
+        lecture_seule = kwargs.pop("lecture_seule", False)
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = "sondage_form"
@@ -29,6 +30,8 @@ class Formulaire(FormulaireBase, forms.Form):
                     self.fields[nom_controle] = ctrl
                     if question.obligatoire:
                         self.fields[nom_controle].required = True
+                    if lecture_seule:
+                        self.fields[nom_controle].disabled = True
 
         # Importation des réponses existantes
         for reponse in reponses:

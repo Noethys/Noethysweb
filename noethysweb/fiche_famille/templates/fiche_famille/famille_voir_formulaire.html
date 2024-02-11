@@ -1,0 +1,41 @@
+{% extends "fiche_famille/famille_liste.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_famille %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+
+                <a href="{% url 'famille_formulaires_liste' idfamille=repondant.famille_id %}"><i class="fa fa-arrow-circle-o-left mb-2"></i> Revenir à la liste des formulaires</a>
+
+                <div class="alert alert-secondary mb-0">
+                    <div class="d-flex flex-row">
+                        <span class="align-self-center mr-auto">
+                            {% if repondant.individu %}{{ repondant.individu.Get_nom }} : {% endif %}{{ repondant.sondage.titre }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="text-right mb-3 text-muted text-xs">
+                    Saisi le {{ repondant.date_creation }}{% if repondant.date_modification %} | Modifié le {{ repondant.date_modification }}{% endif %}
+                </div>
+
+                {% for page, form in pages %}
+                    <fieldset><legend>{{ page.titre }}</legend></fieldset>
+                    <div id="page-{{ page.ordre }}" class="content">
+                        {% crispy form %}
+                    </div>
+                {% endfor %}
+
+            {% endblock box_contenu %}
+            {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+        {% endembed %}
+
+    </div>
+{% endblock %}

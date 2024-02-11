@@ -1,0 +1,127 @@
+{% extends "individus/sondages/sondages_base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/chartjs/ancienne_version/Chart.min.css' %}">
+{% endblock styles %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/chartjs/ancienne_version/Chart.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/moment/moment.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_reponses %}
+    {% if data %}
+        {% for element in data %}
+
+            <h6>{{ element.titre }}</h6>
+            <span>{{ element.nbre_reponses }} réponse{{ element.nbre_reponses|pluralize }}</span>
+
+            {# Camembert #}
+            {% if element.categorie == "camembert" %}
+                <canvas id="chart_{{ element.id }}" style="margin-bottom: 30px;" height="60"></canvas>
+                <script>
+                    var data_camembert = {labels: [], valeurs: [], couleurs: []};
+                    {% for item in element.labels %}data_camembert.labels.push("{{ item }}");{% endfor %}
+                    {% for item in element.valeurs %}data_camembert.valeurs.push({{ item }});{% endfor %}
+                    {% for item in element.couleurs %}data_camembert.couleurs.push("{{ item }}");{% endfor %}
+
+                    var ctx = document.getElementById("chart_{{ element.id }}").getContext("2d");
+                    var chart = new Chart(ctx, {
+                        type: "pie",
+                        data: {
+                            datasets: [{
+                                data: data_camembert.valeurs,
+                                backgroundColor: data_camembert.couleurs,
+                            }],
+                            labels: data_camembert.labels
+                        },
+                        options: {
+                            responsive: true,
+                            legend: {
+                                position: 'top',
+                            },
+                        }
+                    });
+                </script>
+            {% endif %}
+
+            {# Histogramme #}
+            {% if element.categorie == "histogramme" %}
+                <canvas id="chart_{{ element.id }}" style="margin-bottom: 30px;" height="80"></canvas>
+                <script>
+                    var data_histogramme = {labels: [], valeurs: [], couleurs: []};
+                    {% for item in element.labels %}data_histogramme.labels.push("{{ item }}");{% endfor %}
+                    {% for item in element.valeurs %}data_histogramme.valeurs.push({{ item }});{% endfor %}
+                    {% for item in element.couleurs %}data_histogramme.couleurs.push("{{ item }}");{% endfor %}
+
+                    var ctx = document.getElementById("chart_{{ element.id }}").getContext("2d");
+                    var chart = new Chart(ctx, {
+                        type: "{{ element.type_chart }}",
+                        data: {
+                            labels: data_histogramme.labels,
+                            datasets: [{
+                                label: data_histogramme.labels,
+                                data: data_histogramme.valeurs,
+                                backgroundColor: data_histogramme.couleurs,
+                                pointRadius: 2,
+                                maxBarThickness: 15,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            legend: {
+                                display: false
+                            },
+                            tooltips: {
+                                callbacks: {
+                                    label: function (tooltipItem, data) {
+                                        return parseInt(tooltipItem.value)
+                                    }
+                                }
+                            },
+                            scales: {
+                                xAxes: [{
+                                    ticks: {
+                                        min: 0,
+                                    }
+                                }]
+                            }
+                        }
+                    });
+                </script>
+            {% endif %}
+
+            {# Tableau #}
+            {% if element.categorie == "tableau" %}
+                <table id="tableau_{{ element.id }}" class="table table-bordered" style="width:100%; margin-bottom: 30px;">
+                    {% if element.afficher_entetes_colonnes %}
+                        <thead>
+                            <tr style="background-color: #f9f9f9;">
+                                {% for colonne in element.colonnes %}
+                                    <th style="text-align: center;">{{ colonne }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                    {% endif %}
+                    <tbody>
+                        {% for ligne in element.lignes %}
+                            <tr>
+                            {% for valeur in ligne %}
+                                <td style="text-align: center;">{{ valeur|safe }}</td>
+                            {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+
+        {% endfor %}
+    {% else %}
+        Aucune réponse
+    {% endif %}
+{% endblock contenu_reponses %}
