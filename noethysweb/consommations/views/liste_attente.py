@@ -203,7 +203,7 @@ def Get_resultats(parametres={}, etat="attente", request=None):
 
                             # Etat des places
                             if evenement and evenement.capacite_max:
-                                nbre_places_restantes = data_remplissage["dict_all_evenements"][evenement.pk].restantes
+                                nbre_places_restantes = data_remplissage["dict_all_evenements"][evenement.pk].restantes if evenement.pk in data_remplissage["dict_all_evenements"] else 0
                                 if nbre_places_restantes <= 0:
                                     placeDispo = False
                                 if placeDispo:
