@@ -65,6 +65,22 @@
             })
         };
 
+        // Exporter vers Excel
+        function exporter_excel() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_edition_liste_conso_exporter_excel' %}",
+                data: $("#form_general").serialize(),
+                datatype: "json",
+                success: function(data){
+                    charge_pdf(data, true);
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
     </script>
 {% endblock contenu_page %}
 
