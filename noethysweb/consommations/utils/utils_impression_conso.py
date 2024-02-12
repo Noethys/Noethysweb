@@ -1219,11 +1219,13 @@ class Impression(utils_impression.Impression):
         rep_destination = os.path.join(settings.MEDIA_ROOT, rep_temp)
         if not os.path.isdir(rep_destination):
             os.makedirs(rep_destination)
-        self.nom_fichier = os.path.join(rep_destination, "%s.xlsx" % self.titre)
+        nom_fichier = "%s.xlsx" % self.titre
+        chemin_fichier = os.path.join(rep_destination, nom_fichier)
+        self.nom_fichier = os.path.join(rep_temp, nom_fichier)
 
         # Création du classeur
         import xlsxwriter
-        classeur = xlsxwriter.Workbook(self.nom_fichier)
+        classeur = xlsxwriter.Workbook(chemin_fichier)
 
         numFeuille = 1
         for dictFeuille in listeExport:
