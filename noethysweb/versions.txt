@@ -1,3 +1,9 @@
+Version 1.2.2.7 (12/02/2024) :
+
+- Ajout de l'export vers Excel de la liste des consommations
+- Ajout de la commande maj configuration accueil
+- Ajout des librairies xlrd et xlsxwriter
+
 Version 1.2.2.6 (11/02/2024) :
 
 - Ajout de la réattribution manuelle des places en attente
