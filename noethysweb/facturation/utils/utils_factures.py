@@ -52,7 +52,7 @@ def Maj_total_factures(IDfamille=None, IDfacture=None):
     for facture in factures:
         total_calcul = "%.02f" % (facture["total_calcul"] or 0)
         total = "%.02f" % (facture["total"] or 0)
-        if facture["total_calcul"] and total_calcul != total:
+        if total_calcul != total: # and facture["total_calcul"]
             facture = Facture.objects.get(pk=facture["pk"])
             facture.total = Decimal(total_calcul)
             facture.solde = facture.total - facture.regle
