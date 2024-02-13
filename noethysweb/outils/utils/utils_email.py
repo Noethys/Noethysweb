@@ -146,7 +146,7 @@ def Envoyer_model_mail(idmail=None, request=None):
             index += 1
 
         # Ajout du lien de désinscription
-        if mail.adresse_exp.lien_desinscription and destinataire.famille_id and len(destinataires) > 1:
+        if mail.adresse_exp.lien_desinscription and destinataire.famille_id and len(destinataires) > 1 and request:
             html += "<br><hr><p style='font-size: 12px;'>Si vous ne souhaitez plus recevoir nos mails groupés, cliquez sur le lien suivant : <a href='%s'>Désinscription</a></p>" % Generation_lien_desinscription(request=request, idfamille=destinataire.famille_id, adresse=destinataire.adresse)
 
         # Création du message
