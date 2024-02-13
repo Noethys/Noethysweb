@@ -16,7 +16,7 @@ def Get_cotisations_manquantes(famille=None, date_reference=None, utilisateur=No
         date_reference = datetime.date.today()
 
     # Importation des inscriptions
-    conditions = Q(famille=famille) & Q(individu__deces=False)
+    conditions = Q(famille=famille) & Q(individu__deces=False) & (Q(date_fin__isnull=True) | Q(date_fin__gte=date_reference))
     if utilisateur:
         conditions &= Q(activite__structure__in=utilisateur.structures.all())
 
