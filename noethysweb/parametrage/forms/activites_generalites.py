@@ -34,10 +34,10 @@ class Formulaire(FormulaireBase, ModelForm):
     # Logo
     choix_logo = [("ORGANISATEUR", "Identique à celui de l'organisateur"), ("SPECIFIQUE", "Logo spécifique à l'activité")]
     type_logo = forms.TypedChoiceField(label="Logo de l'activité", choices=choix_logo, initial="ORGANISATEUR", required=False)
-    
-    # Lien paiement 
-    choix_pay = [("NON", "Pas de lien de paiement direct"), ("OUI", "Lien de paiement direct")]
-    type_pay = forms.TypedChoiceField(label="Lien de paiement", choices=choix_pay, initial="NON", required=False)
+
+    # Lien paiement
+    choix_pay = [("NON", "Pas de paiement CB via lien externe"), ("OUI", "Paiement CB via lien externe")]
+    type_pay = forms.TypedChoiceField(label="Choix de l'option", choices=choix_pay, initial="NON", required=False)
 
     # Coordonnées
     choix_coords = [("ORGANISATEUR", "Identiques à celles de l'organisateur"), ("SPECIFIQUE", "Coordonnées spécifiques à l'activité")]
@@ -151,7 +151,7 @@ class Formulaire(FormulaireBase, ModelForm):
                     Field('site'),
                     id='bloc_coords',
                 ),
-            Fieldset("Paiement par lien",
+            Fieldset("Paiement CB via un lien externe",
                 Field("type_pay"),
                 Field("pay"),
             ),
@@ -167,8 +167,8 @@ class Formulaire(FormulaireBase, ModelForm):
             HTML(EXTRA_SCRIPT),
         )
 
+    def clean(self):
         # Durée de validité
-
         if self.cleaned_data["validite_type"] == "LIMITEE":
             if self.cleaned_data["validite_date_debut"] == None:
                 self.add_error('validite_date_debut', "Vous devez sélectionner une date de début")
@@ -176,10 +176,9 @@ class Formulaire(FormulaireBase, ModelForm):
             if self.cleaned_data["validite_date_fin"] == None:
                 self.add_error('validite_date_fin', "Vous devez sélectionner une date de fin")
                 return
-            if self.cleaned_data["validite_date_debut"] > self.cleaned_data["validite_date_fin"]:
+            if self.cleaned_data["validite_date_debut"] > self.cleaned_data["validite_date_fin"] :
                 self.add_error('validite_date_fin', "La date de fin doit être supérieure à la date de début")
                 return
-
             self.cleaned_data["date_debut"] = self.cleaned_data["validite_date_debut"]
             self.cleaned_data["date_fin"] = self.cleaned_data["validite_date_fin"]
         else:
