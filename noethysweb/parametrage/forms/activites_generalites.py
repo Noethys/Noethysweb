@@ -101,6 +101,7 @@ class Formulaire(FormulaireBase, ModelForm):
         # Importe le lien de paiement direct
         if self.instance.pay_org ==  True :
             self.fields['type_pay'].initial = "OUI"
+
         else:
             self.fields['type_pay'].initial = "NON"
 
@@ -210,7 +211,6 @@ class Formulaire(FormulaireBase, ModelForm):
     
         # Lien paiement
         if self.cleaned_data["type_pay"] == "OUI":
-#            self.cleaned_data["pay"] = self.cleaned_data.get("pay", "")
             self.cleaned_data["pay_org"] = True
             
         else:
