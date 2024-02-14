@@ -241,7 +241,7 @@ def effectuer_paiement_en_ligne(request):
 
         # Vérifie que le montant est supérieur à zéro
         if not urlpayasso:
-            return JsonResponse({"erreur": _("Cette facture ne peut être payer via PayAsso !")}, status=401)
+            return JsonResponse({"erreur": _("Cette facture ne peut être payée via PayAsso !")}, status=401)
 
         #Numéro unique id transaction
         sequence_of_digits = ''.join(char for char in datetime.datetime.now().strftime("%Y%m%d%H%M%S") if char.isdigit())
