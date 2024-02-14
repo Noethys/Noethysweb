@@ -126,7 +126,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Commandes(annuler_url="{% url 'consommations_toc' %}", enregistrer=False, ajouter=False,
                 commandes_principales=[
                     HTML("""
-                        <div class="btn-group margin-r-5">
+                        <div class="btn-group margin-r-3">
                             <a type='button' class="btn btn-primary" onclick="generer_pdf()" title="Générer le PDF"><i class='fa fa-file-pdf-o margin-r-5'></i> Générer le PDF</a>
                             <button type="button" class="btn btn-primary dropdown-toggle dropdown-icon" data-toggle="dropdown">
                                 <span class="sr-only">Ouvrir le menu</span>
@@ -135,8 +135,9 @@ class Formulaire(FormulaireBase, forms.Form):
                                 <a type='button' class="btn" onclick="generer_pdf(telechargement=true)" title="Télécharger le PDF"><i class='fa fa-download margin-r-5'></i> Télécharger le PDF</a>
                             </div>
                         </div>
-                    """)
-                ]
+                    """),
+                    HTML("""<a type='button' class="btn btn-default" onclick="exporter_excel()" title="Exporter vers Excel"><i class='fa fa-file-excel-o margin-r-5'></i> Exporter vers Excel</a> """)
+                ],
             ),
             Field('profil'),
             TabHolder(

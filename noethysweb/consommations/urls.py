@@ -62,7 +62,9 @@ urlpatterns = [
     path('consommations/etat_global/appliquer_parametres', secure_ajax(etat_global.Appliquer_parametres), name='ajax_etat_global_appliquer_parametres'),
     path('consommations/etat_global/generer_pdf', secure_ajax(etat_global.Generer_pdf), name='ajax_etat_global_generer_pdf'),
     path('consommations/edition_liste_conso/generer_pdf', secure_ajax(edition_liste_conso.Generer_pdf), name='ajax_edition_liste_conso_generer_pdf'),
+    path('consommations/edition_liste_conso/exporter_excel', secure_ajax(edition_liste_conso.Exporter_excel), name='ajax_edition_liste_conso_exporter_excel'),
     # path('consommations/pointeuse_barcodes/on_scan_individu', secure_ajax(pointeuse_barcodes.On_scan_individu), name='ajax_consommations_on_scan_individu'),
     path('consommations/consommations_traitement_lot', secure_ajax(consommations_traitement_lot.Appliquer), name='ajax_consommations_traitement_lot'),
     path('consommations/liste_consommations/dissocier_prestation', secure_ajax(liste_consommations.Dissocier_prestation), name='ajax_consommations_dissocier_prestation'),
+    path('consommations/attribution_manuelle', secure_ajax(liste_attente.Attribution_manuelle), name='liste_attente_attribution_manuelle'),
 ]

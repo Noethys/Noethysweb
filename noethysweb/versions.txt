@@ -1,3 +1,30 @@
+Version 1.2.2.9 (13/02/2024) :
+
+- Ajout d'une colonne Solde dans la liste des adhésions non déposées
+- Correction de l'intégration du lien de désinscription dans un email si tâche cron
+- Correction de la recherche des pièces et adhésions manquantes si inscription close
+- Correction du maj total factures si total prestations à zéro
+
+Version 1.2.2.8 (12/02/2024) :
+
+- Correction du chemin de l'export vers Excel de la liste des consommations
+
+Version 1.2.2.7 (12/02/2024) :
+
+- Ajout de l'export vers Excel de la liste des consommations
+- Ajout de la commande maj configuration accueil
+- Ajout des librairies xlrd et xlsxwriter
+
+Version 1.2.2.6 (11/02/2024) :
+
+- Ajout de la réattribution manuelle des places en attente
+- Ajout de la consultation des réponses des formulaires
+- Ajout d'une colonne Secteur dans la liste des familles et la liste des individus rattachés
+- Ajout du numéro de quittancier dans le PDF des règlements d'un dépôt
+- Ajout du widget Astuce du jour sur la page d'accueil
+- Finalisation du module des formulaires
+- Correction de la page Scolarité de l'outil Statistiques
+
 Version 1.2.2.5 (06/02/2024) :
 
 - Conversion du numéro de facture en BigInteger

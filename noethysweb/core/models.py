@@ -4442,6 +4442,8 @@ class SondageReponse(models.Model):
             return str(self.reponse)
         if self.question.controle == "case_coche":
             return "oui" if self.reponse == "True" else "non"
+        if self.question.controle == "date":
+            return utils_dates.ConvertDateToFR(self.reponse)
         if self.question.controle in ("decimal", "montant"):
             return float(decimal.Decimal(self.reponse or 0.0))
         return self.reponse or ""

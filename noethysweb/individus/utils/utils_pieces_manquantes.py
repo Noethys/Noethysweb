@@ -16,7 +16,7 @@ def Get_pieces_manquantes(famille=None, date_reference=None, only_invalides=Fals
         date_reference = datetime.date.today()
 
     # Conditions SQL
-    conditions = Q(famille=famille) & Q(individu__deces=False)
+    conditions = Q(famille=famille) & Q(individu__deces=False) & (Q(date_fin__isnull=True) | Q(date_fin__gte=date_reference))
     if utilisateur:
         conditions &= Q(activite__structure__in=utilisateur.structures.all())
 

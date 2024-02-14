@@ -32,13 +32,13 @@ def get_data_profil(donnees=None, request=None):
     return data
 
 
-def Generer_pdf(request):
+def Get_donnees(request):
     # Récupération des paramètres
     form_date = Form_date(request.POST)
     form_parametres = Form_parametres(request.POST, request=request)
 
     # Validation du form date
-    if form_date.is_valid() == False:
+    if not form_date.is_valid():
         return JsonResponse({"erreur": "Veuillez sélectionner une date dans le calendrier"}, status=401)
 
     # Récupération des dates sélectionnées
@@ -49,7 +49,7 @@ def Generer_pdf(request):
         dates = [utils_dates.ConvertDateENGtoDate(dates),]
 
     # Validation du form paramètres
-    if form_parametres.is_valid() == False:
+    if not form_parametres.is_valid():
         liste_erreurs = [erreur[0].message for field, erreur in form_parametres.errors.as_data().items()]
         return JsonResponse({"erreur": "Veuillez corriger les erreurs suivantes : %s" % ", ".join(liste_erreurs)}, status=401)
 
@@ -61,9 +61,28 @@ def Generer_pdf(request):
     if not dict_donnees["groupes"]:
         return JsonResponse({"erreur": "Vous devez cocher au moins une activité dans l'onglet Activités"}, status=401)
 
-    # Création du PDF
+    return dict_donnees
+
+
+def Generer_pdf(request):
+    dict_donnees = Get_donnees(request)
+    if not isinstance(dict_donnees, dict):
+        return dict_donnees
     from consommations.utils import utils_impression_conso
     impression = utils_impression_conso.Impression(titre="Liste des consommations", dict_donnees=dict_donnees)
+    if impression.erreurs:
+        return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
+    nom_fichier = impression.Get_nom_fichier()
+    return JsonResponse({"nom_fichier": nom_fichier})
+
+
+def Exporter_excel(request):
+    dict_donnees = Get_donnees(request)
+    if not isinstance(dict_donnees, dict):
+        return dict_donnees
+    from consommations.utils import utils_impression_conso
+    impression = utils_impression_conso.Impression(titre="Liste des consommations", dict_donnees=dict_donnees, generation_auto=False)
+    impression.Exporter_excel(dict_donnees=dict_donnees)
     if impression.erreurs:
         return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
     nom_fichier = impression.Get_nom_fichier()

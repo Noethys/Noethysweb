@@ -1,0 +1,57 @@
+{% extends "individus/sondages/sondages_base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{# jexcel et jsuite sont initialisé car sinon le mask de jexcel plante #}
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/jexcel/jexcel.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/jexcel/jsuites.css' %}">
+{% endblock styles %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/jexcel/jexcel.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/jexcel/jsuites.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_reponses %}
+    {% if lignes|length > 2 %}
+        <div style="overflow-x:auto; white-space: nowrap;margin-bottom: 10px;">
+            <div class="spread" id="tableau"></div>
+        </div>
+
+        <script>
+            var table = jexcel(document.getElementById("tableau"), {
+                data: {{ lignes }},
+                allowInsertColumn: false,
+                allowRenameColumn: false,
+                allowDeleteColumn: false,
+                tableOverflow: true,
+                allowInsertRow: false,
+                allowDeleteRow: false,
+                minDimensions: [{{ colonnes|length }}, 1],
+                columns: [
+                    {% for colonne in colonnes %}
+                        {
+                            type: "text",
+                            title: "{{ colonne.label }}",
+                            width: 130,
+                        },
+                    {% endfor %}
+                ],
+                text:{
+                    orderAscending:'Trier par ordre ascendant',
+                    orderDescending:'Trier par ordre descendant',
+                    copy:'Copier',
+                    paste:'Coller',
+                    saveAs:'Enregistrer sous',
+                    about:'A propos',
+                },
+            });
+        </script>
+    {% else %}
+        Aucune réponse
+    {% endif %}
+{% endblock contenu_reponses %}

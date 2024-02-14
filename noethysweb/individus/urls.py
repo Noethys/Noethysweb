@@ -13,7 +13,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             liste_regimes_alimentaires, liste_maladies, liste_informations, individus_doublons_liste, liste_familles_sans_inscriptions, \
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
-                            abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits
+                            abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses
 
 urlpatterns = [
 
@@ -134,6 +134,15 @@ urlpatterns = [
     path('individus/questionnaires/familles/liste/<str:categorie>', liste_questionnaires_familles.Liste.as_view(), name='questionnaires_familles_liste'),
     path('individus/questionnaires/individus/liste', liste_questionnaires_individus.Liste.as_view(), name='questionnaires_individus_liste'),
     path('individus/questionnaires/individus/liste/<str:categorie>', liste_questionnaires_individus.Liste.as_view(), name='questionnaires_individus_liste'),
+
+    # Sondages
+    path('individus/sondages/tableau', sondages_reponses.Tableau.as_view(), name='sondages_reponses_tableau'),
+    path('individus/sondages/tableau/<int:idsondage>', sondages_reponses.Tableau.as_view(), name='sondages_reponses_tableau'),
+    path('individus/sondages/resume', sondages_reponses.Resume.as_view(), name='sondages_reponses_resume'),
+    path('individus/sondages/resume/<int:idsondage>', sondages_reponses.Resume.as_view(), name='sondages_reponses_resume'),
+    path('individus/sondages/detail', sondages_reponses.Detail.as_view(), name='sondages_reponses_detail'),
+    path('individus/sondages/detail/<int:idsondage>', sondages_reponses.Detail.as_view(), name='sondages_reponses_detail'),
+    path('individus/sondages/detail/<int:idsondage>/<int:index>', sondages_reponses.Detail.as_view(), name='sondages_reponses_detail'),
 
     # Impression
     path('individus/etiquettes_individus', etiquettes_individus.Liste.as_view(), name='etiquettes_individus'),

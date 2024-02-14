@@ -1,0 +1,64 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+    
+    <div class="card {% block box_theme %}card-outline card-lightblue{% endblock %}">
+        <div class="card-header">
+            <h3 class="card-title">{{ box_titre }}</h3>
+        </div>
+        <div class="card-body {% block card_body_classe %}{% endblock %}" style="min-height: 0">
+            <p style="margin-bottom: 16px;">{{ box_introduction|safe }}</p>
+
+            {# Sélection du sondage #}
+            <p>
+                <div class="input-group">
+
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Formulaire</span>
+                    </div>
+                    <select id="choix_sondage" class="form-control">
+                        {% for pk, titre in liste_sondages %}
+                            {% with url_temp="sondages_reponses_"|add:type_affichage %}
+                                <option {% if pk == idsondage %}selected{% endif %} value="{% if not pk %}{% url url_temp %}{% else %}{% url url_temp idsondage=pk %}{% endif %}">{{ titre }}</option>
+                            {% endwith %}
+                        {% endfor %}
+                    </select>
+
+                    <div class="btn-group btn-group-toggle ml-3">
+                        <label class="btn {% if type_affichage == "resume" %}btn-primary{% else %}btn-default{% endif %}">
+                            <input type="radio" name="choix_type_affichage" data-url="{% if idsondage %}{% url 'sondages_reponses_resume' idsondage=idsondage %}{% else %}{% endif %}"><i class="fa fa-pie-chart margin-r-5"></i>Résumé
+                        </label>
+                        <label class="btn {% if type_affichage == "tableau" %}btn-primary{% else %}btn-default{% endif %}">
+                            <input type="radio" name="choix_type_affichage" data-url="{% if idsondage %}{% url 'sondages_reponses_tableau' idsondage=idsondage %}{% else %}{% endif %}"><i class="fa fa-table margin-r-5"></i>Tableau
+                        </label>
+                        <label class="btn {% if type_affichage == "detail" %}btn-primary{% else %}btn-default{% endif %}">
+                            <input type="radio" name="choix_type_affichage" data-url="{% if idsondage %}{% url 'sondages_reponses_detail' idsondage=idsondage %}{% else %}{% endif %}"><i class="fa fa-list-alt margin-r-5"></i>Détail
+                        </label>
+                    </div>
+                </div>
+            </p>
+
+            {# Réponses #}
+            {% block contenu_reponses %}
+            {% endblock %}
+
+            <script>
+                function On_change_sondage() {
+                    window.location.href = $(this).val();
+                }
+
+                $("input[name=choix_type_affichage]").on("click", function(event){
+                    window.location.href = $(this).data("url");
+                })
+
+                $(document).ready(function() {
+                    $("#choix_sondage").change(On_change_sondage);
+                });
+            </script>
+        </div>
+    </div>
+
+{% endblock contenu_page %}

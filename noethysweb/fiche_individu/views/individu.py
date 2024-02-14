@@ -54,6 +54,7 @@ class Liste(Page, crud.Liste):
         profil = columns.TextColumn("Profil", sources=['Get_profil'])
         tel_domicile = columns.TextColumn("Tél domicile", processor="Get_tel_domicile")
         tel_mobile = columns.TextColumn("Tél portable", processor="Get_tel_mobile")
+        secteur = columns.TextColumn("Secteur", processor="Get_secteur")
         mail = columns.TextColumn("Email", processor="Get_mail")
         date_naiss = columns.TextColumn("Date naiss.", processor="Get_date_naiss")
         age = columns.TextColumn("Age", sources=['Get_age'], processor="Get_age")
@@ -64,8 +65,8 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idrattachement', 'idindividu', "nom", "prenom", "profil", "famille", "age", "date_naiss", "genre", "rue_resid", "cp_resid", "ville_resid", "tel_domicile", "tel_mobile", "mail"]
-            hidden_columns = ["idrattachement", "tel_domicile", "tel_mobile", "mail", "genre"]
+            columns = ['idrattachement', 'idindividu', "nom", "prenom", "profil", "famille", "age", "date_naiss", "genre", "rue_resid", "cp_resid", "ville_resid", "tel_domicile", "tel_mobile", "mail", "secteur"]
+            hidden_columns = ["idrattachement", "tel_domicile", "tel_mobile", "mail", "genre", "secteur"]
             ordering = ["nom", "prenom"]
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
@@ -99,6 +100,9 @@ class Liste(Page, crud.Liste):
 
         def Get_ville_resid(self, instance, *args, **kwargs):
             return instance.individu.ville_resid
+
+        def Get_secteur(self, instance, *args, **kwargs):
+            return instance.individu.secteur
 
         def Get_genre(self, instance, *args, **kwargs):
             return instance.individu.Get_sexe()

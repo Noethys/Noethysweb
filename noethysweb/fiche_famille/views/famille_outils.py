@@ -42,6 +42,9 @@ class View(Onglet, DetailView):
                     {"titre": "Edition des fiches de renseignements", "url": reverse_lazy("famille_edition_renseignements", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                     {"titre": "Export XML", "url": reverse_lazy("famille_export_xml", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                 ]},
+                {"titre": "Formulaires", "items": [
+                    {"titre": "Liste des formulaires remplis", "url": reverse_lazy("famille_formulaires_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+                ]},
                 {"titre": "Communication", "items": [
                     {"titre": "Envoyer un Email", "url": reverse_lazy("famille_emails_ajouter", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                     {"titre": "Envoyer un SMS", "url": reverse_lazy("famille_sms_ajouter", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},

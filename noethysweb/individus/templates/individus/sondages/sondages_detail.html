@@ -1,0 +1,67 @@
+{% extends "individus/sondages/sondages_base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_reponses %}
+    {% if pages and nbre_repondants %}
+
+        <div class="alert alert-secondary mb-0">
+            <div class="d-flex flex-row">
+                <span class="align-self-center mr-auto">
+                    {{ repondant.famille.nom }}{% if repondant.individu %} : {{ repondant.individu.Get_nom }}{% endif %}
+                </span>
+                <span>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <button id="bouton_moins" class="btn btn-default" type="button"><i class="fa fa-chevron-left"></i></button>
+                        </div>
+                        <input type="number" class="form-control text-center" min="1" max="{{ nbre_repondants }}" id="selection_index" value="{{ index_repondant }}"/>
+                        <div class="input-group-append">
+                            <button id="bouton_plus" class="btn btn-default" type="button"><i class="fa fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </span>
+                <span class="align-self-center ml-2">/ {{ nbre_repondants }}</span>
+            </div>
+        </div>
+
+        <div class="text-right mb-3 text-muted text-xs">
+            Saisi le {{ repondant.date_creation }}{% if repondant.date_modification %} | Modifié le {{ repondant.date_modification }}{% endif %}
+        </div>
+
+        {% for page, form in pages %}
+            <fieldset><legend>{{ page.titre }}</legend></fieldset>
+            <div id="page-{{ page.ordre }}" class="content">
+                {% crispy form %}
+            </div>
+        {% endfor %}
+
+        <script>
+            $(document).ready(function() {
+                $("#selection_index").on('change', function() {
+                    if (($(this).val() >= 1) && ($(this).val() <= {{ nbre_repondants }})) {
+                        window.location.href = "{% url 'sondages_reponses_detail' idsondage=idsondage %}" + "/" + $(this).val();
+                    }
+                })
+                function change_index(valeur) {
+                    $("#selection_index").val(parseInt($("#selection_index").val()) + valeur);
+                    $("#selection_index").trigger("change")
+                }
+                $("#bouton_moins").click(function() {
+                    if ($("#selection_index").val() > 1) {
+                        change_index(-1);
+                    }
+                });
+                $("#bouton_plus").click(function() {
+                    if ($("#selection_index").val() < {{ nbre_repondants }}) {
+                        change_index(+1);
+                    }
+                });
+            });
+        </script>
+
+    {% else %}
+        Aucune réponse
+    {% endif %}
+{% endblock contenu_reponses %}

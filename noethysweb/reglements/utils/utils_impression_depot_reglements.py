@@ -44,7 +44,7 @@ class Impression(utils_impression.Impression):
             Paragraph("<br/>".join((
                 "Date : %s" % depot.date.strftime("%d/%m/%Y") if depot.date else "---",
                 "Compte : %s" % depot.compte.nom,
-                "N° Compte : %s" % depot.compte.numero,
+                "N° Compte : %s" % depot.compte.numero or "",
             )), style_defaut),
         )]
         tableau = Table(dataTableau, [320, 200])
@@ -72,7 +72,7 @@ class Impression(utils_impression.Impression):
         self.story.append(Spacer(0, 15))
 
         # Remplissage du tableau
-        dataTableau = [("ID", "Date", "Mode", "Emetteur", "N° pièce", "Montant", "Famille", "Payeur", "Différé")]
+        dataTableau = [("ID", "Date", "Mode", "Emetteur", "N° pièce", "Montant", "Famille", "Payeur", "N° quittancier", "Différé")]
 
         for reglement in reglements:
             ligne = []
@@ -101,6 +101,9 @@ class Impression(utils_impression.Impression):
             # Payeur
             ligne.append(Paragraph(reglement.payeur.nom if reglement.payeur else "", style_centre))
 
+            # Numéro quittancier
+            ligne.append(Paragraph(reglement.numero_quittancier or "", style_centre))
+
             # Différé
             ligne.append(Paragraph(reglement.date_differe.strftime("%d/%m/%Y") if reglement.date_differe else "", style_defaut))
 
@@ -115,6 +118,6 @@ class Impression(utils_impression.Impression):
             ("ALIGN", (0, 0), (-1, -1), "CENTRE"),
         ])
         # Création du tableau
-        tableau = Table(dataTableau, [30, 50, 50, 55, 45, 45, 115, 80, 50], repeatRows=1)
+        tableau = Table(dataTableau, [30, 50, 50, 55, 45, 45, 85, 60, 50, 50], repeatRows=1)
         tableau.setStyle(style)
         self.story.append(tableau)

@@ -60,6 +60,7 @@
                         <a class="btn btn-danger" href="{% url 'sondages_liste' %}"><i class='fa fa-times margin-r-5'></i>Fermer</a>
                         <a class="btn btn-default" onclick="ajouter_ou_modifier_page()"><i class="fa fa-plus margin-r-5"></i>Ajouter une page</a>
                         <a class="btn btn-default" href="{% url 'sondages_modifier' pk=sondage.pk %}"><i class="fa fa-pencil margin-r-5"></i>Modifier les paramètres</a>
+                        <a class="btn btn-default" href="{% url 'sondages_reponses_resume' idsondage=sondage.pk %}"><i class="fa fa-pie-chart margin-r-5"></i>Consulter les réponses</a>
                         <a class="btn btn-default" href="#" target="_blank" title="Consulter l'aide"><i class="fa fa-life-saver margin-r-5"></i>Aide</a>
                     </div>
 

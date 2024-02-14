@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, json, operator, datetime
+import logging, json, operator, datetime, os, uuid
 logger = logging.getLogger(__name__)
 logging.getLogger('PIL').setLevel(logging.WARNING)
 from django.db.models import Q
@@ -34,9 +34,7 @@ class Impression(utils_impression.Impression):
                 kwds["taille_page"] = portrait(A4)
         utils_impression.Impression.__init__(self, *args, **kwds)
 
-    def Draw(self):
-        modeExport = False
-
+    def Draw(self, mode_export_excel=False):
         # Calcule la largeur du contenu
         largeur_contenu = self.taille_page[0] - 75
 
@@ -799,31 +797,28 @@ class Impression(utils_impression.Impression):
                                         else:
                                             try:
                                                 if dictColonnePerso["code"] == "aucun": donnee = ""
-                                                if dictColonnePerso["code"] == "ville_residence": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_VILLE"]
-                                                if dictColonnePerso["code"] == "secteur": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_SECTEUR"]
-                                                if dictColonnePerso["code"] == "genre": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_SEXE"]
-                                                if dictColonnePerso["code"] == "ville_naissance": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_VILLE_NAISS"]
-                                                if dictColonnePerso["code"] == "nom_ecole": donnee = dictInfosIndividus[inscription.individu_id]["SCOLARITE_NOM_ECOLE"]
-                                                if dictColonnePerso["code"] == "nom_classe": donnee = dictInfosIndividus[inscription.individu_id]["SCOLARITE_NOM_CLASSE"]
-                                                if dictColonnePerso["code"] == "nom_niveau_scolaire": donnee = dictInfosIndividus[inscription.individu_id]["SCOLARITE_NOM_NIVEAU"]
-                                                if dictColonnePerso["code"] == "famille": donnee = dictInfosFamilles[inscription.famille_id]["FAMILLE_NOM"]
-                                                if dictColonnePerso["code"] == "regime": donnee = dictInfosFamilles[inscription.famille_id]["FAMILLE_NOM_REGIME"]
-                                                if dictColonnePerso["code"] == "caisse": donnee = dictInfosFamilles[inscription.famille_id]["FAMILLE_NOM_CAISSE"]
-                                                if dictColonnePerso["code"] == "date_naiss": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_DATE_NAISS"]
-                                                if dictColonnePerso["code"] == "medecin_nom": donnee = dictInfosIndividus[inscription.individu_id]["MEDECIN_NOM"]
-                                                if dictColonnePerso["code"] == "tel_mobile": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_TEL_MOBILE"]
-                                                if dictColonnePerso["code"] == "tel_domicile": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_TEL_DOMICILE"]
-                                                if dictColonnePerso["code"] == "mail": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_MAIL"]
+                                                if dictColonnePerso["code"] == "ville_residence": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_VILLE"] or ""
+                                                if dictColonnePerso["code"] == "secteur": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_SECTEUR"] or ""
+                                                if dictColonnePerso["code"] == "genre": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_SEXE"] or ""
+                                                if dictColonnePerso["code"] == "ville_naissance": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_VILLE_NAISS"] or ""
+                                                if dictColonnePerso["code"] == "nom_ecole": donnee = dictInfosIndividus[inscription.individu_id]["SCOLARITE_NOM_ECOLE"] or ""
+                                                if dictColonnePerso["code"] == "nom_classe": donnee = dictInfosIndividus[inscription.individu_id]["SCOLARITE_NOM_CLASSE"] or ""
+                                                if dictColonnePerso["code"] == "nom_niveau_scolaire": donnee = dictInfosIndividus[inscription.individu_id]["SCOLARITE_NOM_NIVEAU"] or ""
+                                                if dictColonnePerso["code"] == "famille": donnee = dictInfosFamilles[inscription.famille_id]["FAMILLE_NOM"] or ""
+                                                if dictColonnePerso["code"] == "regime": donnee = dictInfosFamilles[inscription.famille_id]["FAMILLE_NOM_REGIME"] or ""
+                                                if dictColonnePerso["code"] == "caisse": donnee = dictInfosFamilles[inscription.famille_id]["FAMILLE_NOM_CAISSE"] or ""
+                                                if dictColonnePerso["code"] == "date_naiss": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_DATE_NAISS"] or ""
+                                                if dictColonnePerso["code"] == "medecin_nom": donnee = dictInfosIndividus[inscription.individu_id]["MEDECIN_NOM"] or ""
+                                                if dictColonnePerso["code"] == "tel_mobile": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_TEL_MOBILE"] or ""
+                                                if dictColonnePerso["code"] == "tel_domicile": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_TEL_DOMICILE"] or ""
+                                                if dictColonnePerso["code"] == "mail": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_MAIL"] or ""
                                                 if dictColonnePerso["code"] == "regimes_alimentaires": donnee = ", ".join([regime.nom for regime in inscription.individu.regimes_alimentaires.all()])
 
                                                 if dictColonnePerso["code"] == "adresse_residence":
                                                     rue = dictInfosIndividus[inscription.individu_id]["INDIVIDU_RUE"]
-                                                    if rue == None : rue = ""
                                                     cp = dictInfosIndividus[inscription.individu_id]["INDIVIDU_CP"]
-                                                    if cp == None : cp = ""
                                                     ville = dictInfosIndividus[inscription.individu_id]["INDIVIDU_VILLE"]
-                                                    if ville == None : ville = ""
-                                                    donnee = u"%s %s %s" % (rue, cp, ville)
+                                                    donnee = u"%s %s %s" % (rue or "", cp or "", ville or "")
 
                                                 # Questionnaires
                                                 if dictColonnePerso["code"].startswith("question_") and "famille" in dictColonnePerso["code"]:
@@ -999,7 +994,7 @@ class Impression(utils_impression.Impression):
                                     style.append(('BACKGROUND', (0, 0), (-1, 0), self.dict_donnees["couleur_fond_entetes"]))
 
                                 # Vérifie si la largeur du tableau est inférieure à la largeur de la page
-                                if not modeExport:
+                                if not mode_export_excel:
                                     for largeur in largeursColonnes:
                                         if largeur < 0:
                                             self.erreurs.append("Il y a trop de colonnes dans le tableau ! Veuillez sélectionner moins de jours dans le calendrier.")
@@ -1149,9 +1144,8 @@ class Impression(utils_impression.Impression):
             pass
 
         # Si mode export Excel
-        # todo: provisoire
-        # if modeExport == True:
-        #     return listeExport, largeursColonnes
+        if mode_export_excel:
+            return listeExport, largeursColonnes
 
 
     def TriClasses(self, listeScolarite=[]):
@@ -1209,3 +1203,84 @@ class Impression(utils_impression.Impression):
         if etat == "absenti": return "<FONT face='Helvetica' color='#a371ff'>(AbsI)</FONT>"
         if etat == "absentj": return "<FONT face='Helvetica' color='#e83e8c'>(AbsJ)</FONT>"
         return ""
+
+    def Exporter_excel(self, dict_donnees=None):
+        self.dict_donnees = dict_donnees
+        self.erreurs = []
+        self.story = []
+
+        donnees = self.Draw(mode_export_excel=True)
+        if not donnees:
+            return
+        listeExport, largeursColonnes = donnees
+
+        # Création du répertoire et du nom du fichier
+        rep_temp = os.path.join("temp", str(uuid.uuid4()))
+        rep_destination = os.path.join(settings.MEDIA_ROOT, rep_temp)
+        if not os.path.isdir(rep_destination):
+            os.makedirs(rep_destination)
+        nom_fichier = "%s.xlsx" % self.titre
+        chemin_fichier = os.path.join(rep_destination, nom_fichier)
+        self.nom_fichier = os.path.join(rep_temp, nom_fichier)
+
+        # Création du classeur
+        import xlsxwriter
+        classeur = xlsxwriter.Workbook(chemin_fichier)
+
+        numFeuille = 1
+        for dictFeuille in listeExport:
+            # Nom de la feuille
+            titre = "Page %d" % numFeuille
+            feuille = classeur.add_worksheet(titre)
+
+            # Titre de la page
+            listeLabels = []
+            if dictFeuille["activite"]: listeLabels.append(dictFeuille["activite"])
+            if dictFeuille["groupe"]: listeLabels.append(dictFeuille["groupe"])
+            if dictFeuille["ecole"]: listeLabels.append(dictFeuille["ecole"])
+            if dictFeuille["classe"]: listeLabels.append(dictFeuille["classe"])
+            if dictFeuille["evenement"]: listeLabels.append(dictFeuille["evenement"])
+            if dictFeuille["etiquette"]: listeLabels.append(dictFeuille["etiquette"])
+            titre = " - ".join(listeLabels)
+            feuille.write(0, 0, titre)
+
+            numLigne = 2
+            for ligne in dictFeuille["lignes"]:
+
+                numColonne = 0
+                for valeur in ligne:
+                    # Si c'est un Paragraph
+                    if isinstance(valeur, Paragraph):
+                        valeur = valeur.text
+                    # Largeur colonne
+                    if type(valeur) == str and ("Nom - " in valeur or valeur == "Informations"):
+                        feuille.set_column(numColonne, numColonne, 50)
+                    # Valeur case
+                    if type(valeur) in (str, int):
+                        # Formatage des heures
+                        if type(valeur) == str and len(valeur) == 11 and valeur[2] == "h" and valeur[8] == "h":
+                            valeur = valeur.replace("\n", "-")
+                        feuille.write(numLigne, numColonne, valeur or "")
+                    # Si c'est une liste
+                    if type(valeur) == list:
+                        listeInfos = []
+                        for element in valeur:
+                            try:
+                                valeur = element.text
+                            except:
+                                valeur = element.P.text
+                            if valeur == "X":
+                                valeur = "1"
+                            listeInfos.append(valeur)
+                        if len(listeInfos) == 1 and listeInfos[0] == "1":
+                            texte = int(valeur)
+                        else:
+                            texte = " - ".join(listeInfos)
+                        feuille.write(numLigne, numColonne, texte)
+
+                    numColonne += 1
+                numLigne += 1
+            numFeuille += 1
+
+        # Finalisation du fichier xlsx
+        classeur.close()

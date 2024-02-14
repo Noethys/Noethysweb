@@ -8,6 +8,7 @@ from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.template.context_processors import csrf
 from django.views.generic import TemplateView
+from django.db.models import Count
 from crispy_forms.utils import render_crispy_form
 from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
@@ -110,12 +111,13 @@ class Page(crud.Page):
     url_modifier = "sondages_modifier"
     url_supprimer = "sondages_supprimer"
     url_consulter = "sondages_consulter"
-    description_liste = "Voici ci-dessous la liste des formulaires. <b>Attention, cette fonctionnalité est en cours de développement : La page des résultats n'est pas encore disponible.</b>"
+    description_liste = "Voici ci-dessous la liste des formulaires. Vous pouvez créer ici des sondages, enquêtes ou questionnaires qui apparaîtront sur le portail. Une fois le formulaire créé, vous devrez paramétrer un article (Menu Paramétrage > Portail > Articles) auquel vous associerez le formulaire afin de le faire apparaître sur le portail."
     description_saisie = "Saisissez toutes les informations concernant le formulaire à créer et cliquez sur le bouton Enregistrer."
     objet_singulier = "un formulaire"
     objet_pluriel = "des formulaires"
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
+        {"label": "Consulter les réponses", "classe": "btn btn-default", "href": reverse_lazy("sondages_reponses_resume"), "icone": "fa fa-pie-chart"},
     ]
 
 
@@ -123,7 +125,7 @@ class Liste(Page, crud.Liste):
     model = Sondage
 
     def get_queryset(self):
-        return Sondage.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure())
+        return Sondage.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure()).annotate(nbre_repondants=Count("sondagerepondant"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -135,11 +137,12 @@ class Liste(Page, crud.Liste):
     class datatable_class(MyDatatable):
         filtres = ["idsondage", "titre", "public"]
         public = columns.TextColumn("Public", sources="public", processor="Get_public")
+        nbre_repondants = columns.TextColumn("Réponses", sources=["nbre_repondants"])
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idsondage", "titre", "public"]
+            columns = ["idsondage", "titre", "public", "nbre_repondants", "actions"]
 
         def Get_public(self, instance, **kwargs):
             return instance.get_public_display()

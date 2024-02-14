@@ -1,0 +1,21 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}bg-warning disabled{% endblock %}
+        {% block box_titre %}<i class="fa fa-lightbulb-o margin-r-5"></i> Astuce du jour{% endblock %}
+        {% block box_outils %}
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Diminuer"><i class="fa fa-minus"></i></button>
+        {% endblock %}
+        {% block box_contenu %}
+            <dl class="mb-0">
+                <dt class="mb-2">{{ astuce.titre }}</dt>
+                <dd>{{ astuce.texte }}</dd>
+            </dl>
+        {% endblock %}
+    {% endembed %}
+
+{% endblock %}
