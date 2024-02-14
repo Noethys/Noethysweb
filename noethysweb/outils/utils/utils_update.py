@@ -30,7 +30,7 @@ def Get_update_for_accueil(request=None):
 
 def Recherche_update():
     # Lecture de la version disponible en ligne
-    url = "https://raw.githubusercontent.com/Noethys/Noethysweb/master/noethysweb/versions.txt"
+    url = "https://raw.githubusercontent.com/Arthur67190/Noethysweb/master/noethysweb/versions.txt"
 
     # Ancienne version avec urlopen
     # fichier = urlopen(url, timeout=5)
@@ -81,7 +81,7 @@ def Update():
     chemin_fichier = os.path.join(rep_temp, nom_fichier)
     try:
         logger.debug("Telechargement de la version %s..." % version_online_txt)
-        url_telechargement = "https://github.com/Noethys/Noethysweb/archive/%s.zip" % version_online_txt
+        url_telechargement = "https://github.com/Arthur67190/Noethysweb/archive/%s.zip" % version_online_txt
         urlretrieve(url_telechargement, chemin_fichier)
     except Exception as err:
         logger.debug("La nouvelle version '%s' n'a pas pu etre telechargee." % version_online_txt)
