@@ -27,13 +27,14 @@ class IndividuForm(forms.ModelForm):
         fields = ['prenom', 'nom']
 
     def save_individu(self, famille):
-
+        # Sauvegarde de l'objet Individu en base de données
         individu = super().save(commit=False)
+        individu.save()
+
         categorie = "2"
         titulaire = True
         # Création des questionnaires de type individu
         utils_questionnaires.Creation_reponses(categorie="individu", liste_instances=[individu])
-
 
         # Recherche d'une adresse à rattacher
         rattachements = Rattachement.objects.prefetch_related('individu').filter(famille=famille)
@@ -42,8 +43,7 @@ class IndividuForm(forms.ModelForm):
                     individu.adresse_auto = rattachement.individu.pk
                     individu.save()
                     # Sauvegarde du rattachement
-                    rattachement = Rattachement(famille=famille, individu=individu, categorie=categorie,
-                                                titulaire=titulaire)
+                    rattachement = Rattachement(famille=famille, individu=individu, categorie=categorie, titulaire=titulaire)
                     rattachement.save()
                     individu.Maj_infos()
                     break

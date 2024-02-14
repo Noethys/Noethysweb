@@ -120,7 +120,7 @@ LISTE_PARAMETRES = [
     Parametre(code="facturation_modele_impression_facture", label="Modèle d'impression des factures", type="modeles_impressions_factures", valeur=None, help_text="Vous devez au préalable créer un modèle d'impression pour la catégorie facture depuis le menu Paramétrage > Modèles d'impressions."),
 
     # Paiement en ligne
-    Parametre(code="paiement_ligne_systeme", label="Paiement en ligne", type="choix", valeur=None, choix=[(None, "Aucun"), ("payfip", "PayFIP"), ("payzen", "Payzen"), ("demo", "Mode démo")], help_text="Sélectionnez un système de paiement en ligne."),
+    Parametre(code="paiement_ligne_systeme", label="Paiement en ligne", type="choix", valeur=None, choix=[(None, "Aucun"), ("payfip", "PayFIP"), ("payzen", "Payzen"), ("payasso","PayAsso"), ("demo", "Mode démo")], help_text="Sélectionnez un système de paiement en ligne."),
     Parametre(code="paiement_ligne_mode_reglement", label="Mode de règlement", type="modes_reglements", valeur=None, help_text="Sélectionnez le mode de règlement qui est associé aux paiements en ligne."),
     Parametre(code="paiement_ligne_compte_bancaire", label="Compte bancaire", type="comptes_bancaires", valeur=None, help_text="Sélectionnez le compte bancaire qui est associé aux paiements en ligne."),
     Parametre(code="paiement_ligne_montant_minimal", label="Montant minimal autorisé", type="decimal", valeur=decimal.Decimal("1.00")),

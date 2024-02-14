@@ -19,7 +19,7 @@ def Get_update_for_accueil(request=None):
     if last_check_update:
         nouvelle_version = last_check_update["nouvelle_version"]
         # Si la dernière recherche date de plus d'un jour, on cherche une nouvelle version
-        if datetime.date.today() > last_check_update["date"].date():
+        if datetime.now().time() > last_check_update["date"].time():
             last_check_update = None
     if not last_check_update:
         logger.debug("Recherche d'une nouvelle version...")
