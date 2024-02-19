@@ -1,3 +1,7 @@
+Version 1.2.2.9. (19/02/2024) :
+
+Import du champ catégorie_tarif rentré lors de l'inscription lors de la création de l'inscription par le directeur
+
 Version 1.2.2.9.2 (15/02/2024) :
 
 - Correction bugs utils_update suite à la première bascule vers SACADOC.
