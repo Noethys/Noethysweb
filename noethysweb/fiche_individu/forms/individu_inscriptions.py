@@ -40,6 +40,7 @@ class Formulaire(FormulaireBase, ModelForm):
         idfamille = kwargs.pop("idfamille", None)
         idactivite = kwargs.pop("idactivite", None)
         idgroupe = kwargs.pop("idgroupe", None)
+        idcategorie_tarif = kwargs.pop("idcategorie_tarif", None)
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'individu_inscriptions_form'
@@ -64,6 +65,8 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields["activite"].initial = idactivite
         if idgroupe:
             self.fields["groupe"].initial = idgroupe
+        if idcategorie_tarif:
+            self.fields["categorie_tarif"].initial = idcategorie_tarif
 
         # Si modification
         nbre_conso = 0

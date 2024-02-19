@@ -36,7 +36,7 @@ urlpatterns = [
 
     path('individus/individus/inscriptions/liste/<int:idfamille>/<int:idindividu>', individu_inscriptions.Liste.as_view(), name='individu_inscriptions_liste'),
     path('individus/individus/inscriptions/ajouter/<int:idfamille>/<int:idindividu>', individu_inscriptions.Ajouter.as_view(), name='individu_inscriptions_ajouter'),
-    path('individus/individus/inscriptions/ajouter/<int:idfamille>/<int:idindividu>/<int:idactivite>/<int:idgroupe>', individu_inscriptions.Ajouter.as_view(), name='individu_inscriptions_ajouter'),
+    path('individus/individus/inscriptions/ajouter/<int:idfamille>/<int:idindividu>/<int:idactivite>/<int:idgroupe>/<int:idcategorie_tarif>', individu_inscriptions.Ajouter.as_view(), name='individu_inscriptions_ajouter'),
     path('individus/individus/inscriptions/modifier/<int:idfamille>/<int:idindividu>/<int:pk>', individu_inscriptions.Modifier.as_view(), name='individu_inscriptions_modifier'),
     path('individus/individus/inscriptions/supprimer/<int:idfamille>/<int:idindividu>/<int:pk>', individu_inscriptions.Supprimer.as_view(), name='individu_inscriptions_supprimer'),
     path('individus/individus/inscriptions/appliquer_forfait_date/<int:idfamille>/<int:idindividu>', individu_appliquer_forfait_date.View.as_view(), name='individu_appliquer_forfait_date'),

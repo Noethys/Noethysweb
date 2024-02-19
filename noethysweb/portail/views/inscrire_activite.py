@@ -53,6 +53,7 @@ def Valid_form(request):
     individu = form.cleaned_data["individu"]
     activite = form.cleaned_data["activite"]
     groupe = form_extra.cleaned_data["groupe"]
+    categorie_tarif = form_extra.cleaned_data["categorie_tarif"]
 
     if not activite.inscriptions_multiples:
 
@@ -78,7 +79,7 @@ def Valid_form(request):
 
     # Enregistrement de la demande
     demande = form.save()
-    demande.nouvelle_valeur = json.dumps("%d;%d" % (activite.pk, groupe.pk), cls=DjangoJSONEncoder)
+    demande.nouvelle_valeur = json.dumps("%d;%d;%d" % (activite.pk, groupe.pk, categorie_tarif.pk ), cls=DjangoJSONEncoder)
     demande.save()
 
     # Enregistrement des pièces

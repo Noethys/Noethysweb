@@ -11,7 +11,7 @@ from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import PortailRenseignement, TypeSieste, Caisse, Individu, Secteur, CategorieTravail, RegimeAlimentaire, TypeMaladie, \
-                        Medecin, ContactUrgence, Assurance, Information, QuestionnaireQuestion, Vaccin, Activite, Groupe
+                        Medecin, ContactUrgence, Assurance, Information, QuestionnaireQuestion, Vaccin, Activite, Groupe,CategorieTarif
 from core.data import data_civilites
 from core.utils import utils_dates, utils_parametres
 from portail.utils import utils_champs
@@ -61,8 +61,8 @@ def Traiter_demande(request=None, demande=None, etat=None):
 
         # Inscription à une activité
         if demande.code == "inscrire_activite":
-            idactivite, idgroupe = nouvelle_valeur.split(";")
-            redirection = reverse_lazy("individu_inscriptions_ajouter", kwargs={"idfamille": demande.famille_id, "idindividu": demande.individu_id, "idactivite": int(idactivite), "idgroupe": int(idgroupe)})
+            idactivite, idgroupe, idcategorie_tarif = nouvelle_valeur.split(";")
+            redirection = reverse_lazy("individu_inscriptions_ajouter", kwargs={"idfamille": demande.famille_id, "idindividu": demande.individu_id, "idactivite": int(idactivite), "idgroupe": int(idgroupe),"idcategorie_tarif": int(idcategorie_tarif) })
             messages.add_message(request, messages.WARNING, "Vous avez été redirigé vers la fiche famille afin de vérifier et confirmer l'inscription")
 
     # Modifie l'état de la demande
@@ -331,7 +331,8 @@ class Liste(Page, crud.Liste):
                 if not hasattr(self, "dict_activites"):
                     self.dict_activites = {activite.pk: activite.nom for activite in Activite.objects.all()}
                     self.dict_groupes = {groupe.pk: groupe.nom for groupe in Groupe.objects.all()}
-                idactivite, idgroupe = valeur.split(";")
-                return "%s (%s)" % (self.dict_activites.get(int(idactivite), "?"), self.dict_groupes.get(int(idgroupe), "?"))
+                    self.dict_categorie_tarif = {categorie_tarif.pk: categorie_tarif.nom for categorie_tarif in CategorieTarif.objects.all()}
+                idactivite, idgroupe, idcategorie_tarif = valeur.split(";")
+                return "%s (%s) - %s" % (self.dict_activites.get(int(idactivite), "?"), self.dict_groupes.get(int(idgroupe), "?"), self.dict_categorie_tarif.get(int(idcategorie_tarif), "?") )
 
             return valeur

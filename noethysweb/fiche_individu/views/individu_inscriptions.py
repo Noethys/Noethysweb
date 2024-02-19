@@ -77,12 +77,13 @@ class Page(Onglet):
         return context
 
     def get_form_kwargs(self, **kwargs):
-        """ Envoie l'idindividu au formulaire """
+        """ Envoie l'idindividu au formulaire et les infos rentrées dans le form par la famille """
         form_kwargs = super(Page, self).get_form_kwargs(**kwargs)
         form_kwargs["idindividu"] = self.Get_idindividu()
         form_kwargs["idfamille"] = self.Get_idfamille()
         form_kwargs["idactivite"] = self.kwargs.get("idactivite", None)
         form_kwargs["idgroupe"] = self.kwargs.get("idgroupe", None)
+        form_kwargs["idcategorie_tarif"] = self.kwargs.get("idcategorie_tarif", None)
         return form_kwargs
 
     def get_success_url(self):

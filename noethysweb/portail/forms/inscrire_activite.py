@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML, Div
 from crispy_forms.bootstrap import Field
-from core.models import Activite, Rattachement, Groupe, PortailRenseignement
+from core.models import Activite, Rattachement, Groupe, PortailRenseignement, CategorieTarif
 from core.utils.utils_commandes import Commandes
 from portail.forms.fiche import FormulaireBase
 from individus.utils import utils_pieces_manquantes
@@ -20,6 +20,7 @@ from individus.utils import utils_pieces_manquantes
 
 class Formulaire_extra(FormulaireBase, forms.Form):
     groupe = forms.ModelChoiceField(label=_("Groupe"), queryset=Groupe.objects.all(), required=True, help_text=_("Sélectionnez le groupe correspondant à l'individu dans la liste."))
+    categorie_tarif = forms.ModelChoiceField(label=_("Catégorie de Tarif"), queryset=CategorieTarif.objects.none(), required=True, help_text=_("Sélectionnez le nombre d'enfants inscrits à un camp à pédagogie Flambeaux."))
 
     def __init__(self, *args, **kwargs):
         activite = kwargs.pop("activite", None)
@@ -46,10 +47,13 @@ class Formulaire_extra(FormulaireBase, forms.Form):
         if len(liste_groupes) == 1:
             self.fields["groupe"].initial = liste_groupes.first()
 
-        # Affichage
-        self.helper.layout = Layout(
-            Field("groupe"),
-        )
+        # Recherche des catégories de tarif de l'activité
+        liste_categorie_tarif = CategorieTarif.objects.filter(activite=activite).order_by("nom")
+        self.fields["categorie_tarif"].queryset = liste_categorie_tarif
+
+        # S'il n'y a qu'une catégorie de tarif, on le sélectionne par défaut
+        if len(liste_categorie_tarif) == 1:
+            self.fields["categorie_tarif"].initial = liste_categorie_tarif.first()
 
         # Ajout des pièces à fournir
         if activite.portail_inscriptions_imposer_pieces:
@@ -73,6 +77,7 @@ class Formulaire(FormulaireBase, ModelForm):
         fields = "__all__"
         labels = {
             "individu": _("Individu"),
+            "categorie_tarif": _("Catégorie de Tarif"),
         }
         help_texts = {
             "individu": _("Sélectionnez le membre de la famille à inscrire."),
@@ -91,12 +96,17 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.attrs = {'enctype': 'multipart/form-data'}
 
         # Individu
-        rattachements = Rattachement.objects.select_related("individu").filter(famille=self.request.user.famille).exclude(individu__in=self.request.user.famille.individus_masques.all()).order_by("categorie")
-        self.fields["individu"].choices = [(rattachement.individu_id, rattachement.individu.Get_nom()) for rattachement in rattachements]
+        rattachements = Rattachement.objects.select_related("individu").filter(
+            famille=self.request.user.famille).exclude(
+            individu__in=self.request.user.famille.individus_masques.all()).order_by("categorie")
+        self.fields["individu"].choices = [(rattachement.individu_id, rattachement.individu.Get_nom()) for rattachement
+                                           in rattachements]
         self.fields["individu"].required = True
 
         # Activité
-        conditions = (Q(portail_inscriptions_affichage="TOUJOURS") | (Q(portail_inscriptions_affichage="PERIODE") & Q(portail_inscriptions_date_debut__lte=datetime.datetime.now()) & Q(portail_inscriptions_date_fin__gte=datetime.datetime.now())))
+        conditions = (Q(portail_inscriptions_affichage="TOUJOURS") | (Q(portail_inscriptions_affichage="PERIODE") & Q(
+            portail_inscriptions_date_debut__lte=datetime.datetime.now()) & Q(
+            portail_inscriptions_date_fin__gte=datetime.datetime.now())))
         self.fields["activite"].queryset = Activite.objects.filter(conditions).order_by("nom")
 
         # Affichage
@@ -109,7 +119,9 @@ class Formulaire(FormulaireBase, ModelForm):
             Field("activite"),
             Div(id="form_extra"),
             HTML(EXTRA_SCRIPT),
-            Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>%s" % _("Envoyer la demande d'inscription"), annuler_url="{% url 'portail_activites' %}", ajouter=False, aide=False, css_class="pull-right"),
+            Commandes(
+                enregistrer_label="<i class='fa fa-send margin-r-5'></i>%s" % _("Envoyer la demande d'inscription"),
+                annuler_url="{% url 'portail_activites' %}", ajouter=False, aide=False, css_class="pull-right"),
         )
 
 
@@ -154,6 +166,5 @@ $(document).ready(function() {
         });
     });
 })
-    
 </script>
 """
