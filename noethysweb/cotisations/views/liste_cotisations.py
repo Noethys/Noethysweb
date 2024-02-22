@@ -3,12 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import decimal
 from django.urls import reverse
-from django.db.models import Q
+from django.db.models import Q, Sum
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Cotisation
-from core.utils import utils_dates
+from core.models import Cotisation, Ventilation
+from core.utils import utils_dates, utils_texte
 
 
 class Page(crud.Page):
@@ -47,12 +48,13 @@ class Liste(Page, crud.Liste):
         rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
         cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')
         ville_resid = columns.TextColumn("Ville", processor='Get_ville_resid')
+        solde = columns.TextColumn("Solde", sources=[], processor="Get_solde")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idcotisation', 'date_debut', 'date_fin', 'famille', 'individu', 'nom_cotisation', 'numero', 'depot', "rue_resid", "cp_resid", "ville_resid"]
-            hidden_columns = ["rue_resid", "cp_resid", "ville_resid"]
+            columns = ['check', 'idcotisation', 'date_debut', 'date_fin', 'famille', 'individu', 'nom_cotisation', 'numero', 'depot', "rue_resid", "cp_resid", "ville_resid", "solde"]
+            hidden_columns = ["rue_resid", "cp_resid", "ville_resid", "solde"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
@@ -68,6 +70,26 @@ class Liste(Page, crud.Liste):
                 return instance.prestation.label
             else:
                 return "%s - %s" % (instance.type_cotisation.nom, instance.unite_cotisation.nom)
+
+        def Get_solde(self, instance, *args, **kwargs):
+            # Calcul du solde de la prestation de la cotisation
+            if not hasattr(self, "dict_soldes"):
+                dict_ventilations = {temp["prestation_id"]: temp["total"] for temp in Ventilation.objects.values("prestation_id").filter(prestation__cotisation__isnull=False).annotate(total=Sum("montant"))}
+                self.dict_soldes = {}
+                for prestation in Cotisation.objects.select_related("prestation").values("prestation__pk", "prestation__montant").filter():
+                    self.dict_soldes.setdefault(prestation["prestation__pk"], decimal.Decimal(0))
+                    self.dict_soldes[prestation["prestation__pk"]] += dict_ventilations.get(prestation["prestation__pk"], decimal.Decimal(0)) - prestation["prestation__montant"]
+                del dict_ventilations
+            if instance.prestation_id not in self.dict_soldes:
+                return ""
+            solde = self.dict_soldes.get(instance.prestation_id, decimal.Decimal(0))
+            if solde == decimal.Decimal(0):
+                couleur = "success"
+            elif solde > decimal.Decimal(0):
+                couleur = "info"
+            else:
+                couleur = "danger"
+            return """<span class='badge badge-%s'>%s</span>""" % (couleur, utils_texte.Formate_montant(solde))
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
