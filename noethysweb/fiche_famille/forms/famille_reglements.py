@@ -99,6 +99,10 @@ class Formulaire(FormulaireBase, ModelForm):
                 PrependedText('montant', utils_preferences.Get_symbole_monnaie()),
                 Field('payeur'),
             ),
+            Fieldset('Ventilation',
+                Field('ventilation'),
+                HTML(EXTRA_HTML),
+            ),
             Fieldset('Options',
                 Field('observations'),
                 Field('numero_quittancier'),
@@ -106,10 +110,6 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset('Encaissement',
                 Field('compte'),
                 Field('date_differe'),
-            ),
-            Fieldset('Ventilation',
-                Field('ventilation'),
-                HTML(EXTRA_HTML),
             ),
         )
         if self.instance.depot:
