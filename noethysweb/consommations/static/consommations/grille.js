@@ -719,8 +719,10 @@ class Case_evenement extends Case_base {
             // Création des cases html
             var html = "<table class='table table_evenements'><tbody><tr>";
             liste_evenements.forEach(function(evenement) {
-                var classe_event = $("#" + self.key).hasClass("fermeture") ? "fermeture" : "ouvert";
-                html += "<td class='case " + classe_event + "' id='event_" + self.key + "_" + evenement.pk + "'</td>";
+                if (self.groupe === evenement.groupe) {
+                    var classe_event = $("#" + self.key).hasClass("fermeture") ? "fermeture" : "ouvert";
+                    html += "<td class='case " + classe_event + "' id='event_" + self.key + "_" + evenement.pk + "'</td>";
+                }
             });
             html += "</tr></tbody></table>";
             $("#" + this.key).html(html);
