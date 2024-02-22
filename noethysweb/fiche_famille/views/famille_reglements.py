@@ -155,7 +155,7 @@ class Liste(Page, crud.Liste):
         # emetteur = columns.TextColumn("Emetteur", sources=['emetteur__nom'])
         payeur = columns.TextColumn("Payeur", sources=['payeur__nom'])
         depot = columns.TextColumn("Dépôt", sources=['depot__date'], processor='Get_date_depot')
-        ventile = columns.TextColumn("Ventilé", sources=['ventile'], processor='Formate_ventile')
+        ventile = columns.TextColumn("Ventilé", sources=None, processor='Formate_ventile')
 
         class Meta:
             structure_template = MyDatatable.structure_template
