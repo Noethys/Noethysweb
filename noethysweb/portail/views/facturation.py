@@ -74,6 +74,10 @@ def effectuer_paiement_en_ligne(request):
     if montant_reglement < decimal.Decimal(parametres_portail.get("paiement_ligne_montant_minimal", 0.0)):
         return JsonResponse({"erreur": _("Le paiement en ligne nécessite un montant minimal de %.2f € !") % parametres_portail.paiement_ligne_montant_minimal}, status=401)
 
+    # Vérifie que la famille a une adresse mail
+    if not request.user.famille.mail:
+        return JsonResponse({"erreur": _("Aucune adresse mail n'a été renseignée sur votre dossier. Le paiement en ligne est impossible sans cette information.")}, status=401)
+
     # Mémorise les numéros de factures et la ventilation
     dict_ventilation = {"facture": {}, "periode": {}, "cotisation": {}}
     for texte in liste_impayes:
