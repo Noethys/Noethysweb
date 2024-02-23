@@ -19,7 +19,8 @@ class Liste(crud.Page, crud.Liste):
     objet_pluriel = "des règlements"
 
     def get_queryset(self):
-        return Reglement.objects.select_related('mode', 'emetteur', 'famille', 'payeur').filter(self.Get_filtres("Q"), depot__isnull=True)
+        depot = Depot.objects.get(pk=self.kwargs["iddepot"])
+        return Reglement.objects.select_related('mode', 'emetteur', 'famille', 'payeur').filter(self.Get_filtres("Q"), depot__isnull=True, compte=depot.compte)
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
