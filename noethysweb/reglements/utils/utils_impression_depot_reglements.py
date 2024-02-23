@@ -3,9 +3,10 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, decimal
 logger = logging.getLogger(__name__)
 logging.getLogger("PIL").setLevel(logging.WARNING)
+from django.db.models import Sum, Count
 from reportlab.platypus import Spacer, Paragraph, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
@@ -44,7 +45,7 @@ class Impression(utils_impression.Impression):
             Paragraph("<br/>".join((
                 "Date : %s" % depot.date.strftime("%d/%m/%Y") if depot.date else "---",
                 "Compte : %s" % depot.compte.nom,
-                "N° Compte : %s" % depot.compte.numero or "",
+                ("N° Compte : %s" % depot.compte.numero) if depot.compte.numero else "",
             )), style_defaut),
         )]
         tableau = Table(dataTableau, [320, 200])
@@ -120,4 +121,26 @@ class Impression(utils_impression.Impression):
         # Création du tableau
         tableau = Table(dataTableau, [30, 50, 50, 55, 45, 45, 85, 60, 50, 50], repeatRows=1)
         tableau.setStyle(style)
+        self.story.append(tableau)
+
+        # Tableau du détail par mode de règlement
+        quantite = Reglement.objects.filter(depot=depot).count()
+        stats = Reglement.objects.select_related("mode").values("mode__label").filter(depot=depot).annotate(total=Sum("montant"), nbre=Count("pk"))
+        if not stats:
+            texte = "<b>Aucun règlement</b>"
+        else:
+            total = decimal.Decimal(0)
+            liste_details = []
+            for stat in stats:
+                liste_details.append("%d %s (%s)" % (stat["nbre"], stat["mode__label"], utils_texte.Formate_montant(stat["total"])))
+                total += stat["total"]
+            texte = "<b>%d règlements (%s)</b> : %s." % (quantite, utils_texte.Formate_montant(total), utils_texte.Convert_liste_to_texte_virgules(liste_details))
+
+        dataTableau = [(Paragraph(texte, style_centre),)]
+        tableau = Table(dataTableau, [520,])
+        tableau.setStyle(TableStyle([
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("BOX", (0, 0), (-1, -1), 0.25, colors.black),
+            ("BACKGROUND", (0, 0), (-1, 0), (0.8, 0.8, 0.8)),
+        ]))
         self.story.append(tableau)
