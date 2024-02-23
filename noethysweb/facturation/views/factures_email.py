@@ -8,10 +8,11 @@ logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.contrib import messages
+from django.db.models import Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.utils import utils_preferences
-from core.models import MessageFacture, Mail, DocumentJoint, Facture, Destinataire, ModeleEmail, ModeleImpression
+from core.models import MessageFacture, Mail, DocumentJoint, Facture, Destinataire, ModeleEmail, ModeleImpression, Individu
 from facturation.forms.factures_options_impression import Formulaire as Form_parametres
 from facturation.forms.factures_choix_modele import Formulaire as Form_modele
 from facturation.forms.choix_modele_impression import Formulaire as Form_modele_impression
@@ -68,16 +69,35 @@ def Impression_pdf(request):
         utilisateur=request.user,
     )
 
+    # Importation des factures et des mails des individus
+    dict_factures = {facture.pk: facture for facture in Facture.objects.select_related("famille").filter(pk__in=list(resultat["noms_fichiers"].keys()))}
+    dict_mails = {individu.pk: {"perso": individu.mail, "travail": individu.travail_mail} for individu in Individu.objects.filter((Q(mail__isnull=False) or Q(travail_mail__isnull=False)))}
+
+    # Recherche des mails des destinataires
+    for IDfacture, facture in dict_factures.items():
+        facture.liste_mails = []
+        if facture.famille.email_factures:
+            for valeur in facture.famille.email_factures_adresses.split("##"):
+                IDindividu, categorie, adresse = valeur.split(";")
+                if IDindividu and int(IDindividu) in dict_mails:
+                    adresse = dict_mails[int(IDindividu)][categorie]
+                if adresse:
+                    facture.liste_mails.append(adresse)
+        else:
+            if facture.famille.mail:
+                facture.liste_mails.append(facture.famille.mail)
+
     # Création des destinataires et des documents joints
     logger.debug("Enregistrement des destinataires et documents joints...")
     liste_anomalies = []
     for IDfacture, donnees in resultat["noms_fichiers"].items():
-        facture = Facture.objects.select_related('famille').get(pk=IDfacture)
-        if facture.famille.mail:
-            destinataire = Destinataire.objects.create(categorie="famille", famille=facture.famille, adresse=facture.famille.mail, valeurs=json.dumps(donnees["valeurs"]))
-            document_joint = DocumentJoint.objects.create(nom="Facture n°%s" % facture.numero, fichier=donnees["nom_fichier"])
-            destinataire.documents.add(document_joint)
-            mail.destinataires.add(destinataire)
+        facture = dict_factures[IDfacture]
+        if facture.liste_mails:
+            for adresse in facture.liste_mails:
+                destinataire = Destinataire.objects.create(categorie="famille", famille=facture.famille, adresse=adresse, valeurs=json.dumps(donnees["valeurs"]))
+                document_joint = DocumentJoint.objects.create(nom="Facture n°%s" % facture.numero, fichier=donnees["nom_fichier"])
+                destinataire.documents.add(document_joint)
+                mail.destinataires.add(destinataire)
         else:
             liste_anomalies.append(facture.famille.nom)
 
