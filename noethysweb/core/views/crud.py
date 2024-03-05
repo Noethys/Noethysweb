@@ -74,6 +74,13 @@ class Liste_commun():
                     conditions &= Q(**{champ + "__in": resultats})
                     filtre["condition"] = ""
 
+                # Filtre spécial : Age
+                if filtre["champ"].startswith("age:"):
+                    type_champ, champ = champ.split(":")
+                    resultats = [individu for individu in Individu.objects.all() if self.appliquer_condition(valeur=individu.Get_age() or 0, criteres=list(map(int, criteres)), filtre=filtre)]
+                    conditions &= Q(**{champ + "__in": resultats})
+                    filtre["condition"] = ""
+
                 # Filtre spécial : Etat d'une consommation
                 if filtre["champ"] == "etat":
                     for code, label in LISTE_ETATS_CONSO:
@@ -181,7 +188,7 @@ class Liste_commun():
             return self.filtres_liste
 
     def appliquer_condition(self, valeur=None, criteres=[], filtre=None):
-        """ Sert au filtre spécial date de naissance """
+        """ Sert au filtre spécial date de naissance et âge """
         if filtre["condition"] == "EGAL": return valeur == criteres[0]
         if filtre["condition"] == "DIFFERENT": return valeur != criteres[0]
         if filtre["condition"] == "CONTIENT": return criteres[0] in valeur
