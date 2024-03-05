@@ -199,7 +199,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:pk", "fscolarise:pk", "idfamille", 'nom', "internet_actif", "internet_identifiant", "internet_mdp", "derniere_action"]
+        filtres = ["fgenerique:pk", "idfamille", "internet_actif", "internet_identifiant", "internet_mdp", "derniere_action"]
         check = columns.CheckBoxSelectColumn(label="")
         internet_actif = columns.TextColumn("Activation", sources=["internet_actif"], processor='Get_internet_actif')
         internet_identifiant = columns.TextColumn("Identifiant", sources=[], processor='Get_internet_identifiant')

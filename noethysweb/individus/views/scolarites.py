@@ -39,7 +39,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['idscolarite', 'date_debut', 'date_fin', 'ecole__nom', 'classe__nom', 'niveau__abrege', 'individu__nom', 'individu__prenom', 'datenaiss:individu']
+        filtres = ["igenerique:individu", 'idscolarite', 'date_debut', 'date_fin', 'ecole__nom', 'classe__nom', 'niveau__abrege']
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         nom = columns.TextColumn("Nom", sources=["individu__nom"])
         prenom = columns.TextColumn("Prénom", sources=["individu__prenom"])

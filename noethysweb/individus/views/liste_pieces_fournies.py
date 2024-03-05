@@ -32,8 +32,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "ipresent:individu", "fscolarise:famille", "iscolarise:individu", "idpiece", "date_debut", "date_fin", "famille__nom", "individu__nom", "type_piece__nom"]
-
+        filtres = ["fgenerique:famille", "igenerique:individu", "idpiece", "date_debut", "date_fin", "type_piece__nom"]
         check = columns.CheckBoxSelectColumn(label="")
 
         class Meta:

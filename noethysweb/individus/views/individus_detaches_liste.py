@@ -32,7 +32,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['idindividu', "nom", "prenom", "date_naiss", "rue_resid", "cp_resid", "ville_resid"]
+        filtres = ["igenerique:pk",]
         idindividu = columns.IntegerColumn("ID", sources=['pk'])
         # nom = columns.TextColumn("Nom", sources=['nom'])
         # prenom = columns.TextColumn("Prénom", sources=['prenom'])

@@ -52,6 +52,22 @@ def Get_form_filtres(request):
         colonnes = liste_view.colonnes
         filtres = liste_view.filtres
 
+    # Génération de filtres génériques
+    for filtre in filtres:
+
+        if filtre.startswith("igenerique:"):
+            nom_champ = filtre.split(":")[1]
+            filtres.extend(["%s:%s" % (txt, nom_champ) for txt in ("ipresent", "iscolarise", "datenaiss", "age")])
+            filtres.extend(["%s%s" % ("" if nom_champ == "pk" else nom_champ + "__", txt) for txt in ("nom", "prenom", "rue_resid", "cp_resid", "ville_resid", "tel_domicile", "tel_mobile", "mail", "date_creation")])
+
+        if filtre.startswith("fgenerique:"):
+            nom_champ = filtre.split(":")[1]
+            filtres.extend(["%s:%s" % (txt, nom_champ) for txt in ("fpresent", "fscolarise")])
+            filtres.extend(["%s%s" % ("" if nom_champ == "pk" else nom_champ + "__", txt) for txt in ("nom", "rue_resid", "cp_resid", "ville_resid", "date_creation")])
+
+    # Suppression des filtres en doublon
+    filtres = list({filtre: True for filtre in filtres}.keys())
+
     # Création du formulaire
     if filtres or colonnes:
         form = Formulaire(model=model, filtres=filtres, colonnes=colonnes, nom_liste=nom_liste, idfiltre=idfiltre, request=request)
@@ -109,6 +125,7 @@ def Ajouter_filtre(request):
     if valeurs["champ"].startswith("ipresent") or valeurs["champ"].startswith("iscolarise"): valeurs["label_champ"] = "L'individu"
     if valeurs["champ"].startswith("fpresent") or valeurs["champ"].startswith("fscolarise"): valeurs["label_champ"] = "L'un des membres de la famille"
     if valeurs["champ"].startswith("datenaiss"): valeurs["label_champ"] = "La date de naissance de l'individu"
+    if valeurs["champ"].startswith("age"): valeurs["label_champ"] = "L'âge de l'individu"
     if valeurs["champ"].startswith("fprelevement_actif"): valeurs["label_champ"] = "Le prélèvement activé pour la famille"
     if dict_resultat["condition"] == "INSCRIT" and len(dict_resultat["criteres"]) == 0:
         return JsonResponse({"erreur": "Vous devez cocher au moins une ligne dans la liste"}, status=401)
@@ -192,6 +209,7 @@ class Formulaire(FormulaireBase, forms.Form):
         'fscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_date", "critere_ecoles"], "CLASSES": ["critere_classes"], "NIVEAUX": ["critere_date", "critere_niveaux"], "NON_SCOLARISE": ["critere_date"]}},
         'fprelevement_actif': {'condition': 'condition3', 'criteres': {"VRAI": [], "FAUX": []}},
         'datenaiss': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_date"], "DIFFERENT": ["critere_date"], "SUPERIEUR": ["critere_date"], "SUPERIEUR_EGAL": ["critere_date"], "INFERIEUR": ["critere_date"], "INFERIEUR_EGAL": ["critere_date"], "COMPRIS": ["critere_date_min", "critere_date_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
+        'age': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
     }
 
     critere = forms.CharField(label="Critère", required=False)
@@ -224,15 +242,18 @@ class Formulaire(FormulaireBase, forms.Form):
             if ":" in filtre:
                 # Filtre spécial
                 nom_filtre, champ = filtre.split(":")
+                nom_champ = None
                 if nom_filtre == "ipresent": nom_champ = "Individu : Inscrit/présent"
                 if nom_filtre == "fpresent": nom_champ = "Famille : Inscrit/présent"
                 if nom_filtre == "iscolarise": nom_champ = "Individu : Scolarisé"
                 if nom_filtre == "fscolarise": nom_champ = "Famille : Scolarisé"
                 if nom_filtre == "fprelevement_actif": nom_champ = "Famille : Prélèvement actif"
                 if nom_filtre == "datenaiss": nom_champ = "Individu : Date de naissance"
+                if nom_filtre == "age": nom_champ = "Individu : Age"
                 # Mémorisation du champ
-                dict_champs[filtre] = {'type': nom_filtre, 'label': nom_champ}
-                choix_champs.append((filtre, nom_champ))
+                if nom_champ:
+                    dict_champs[filtre] = {'type': nom_filtre, 'label': nom_champ}
+                    choix_champs.append((filtre, nom_champ))
 
             else:
                 if not colonnes:

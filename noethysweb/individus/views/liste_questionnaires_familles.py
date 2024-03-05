@@ -17,7 +17,7 @@ class Page(crud.Page):
 
 class Liste(Page, liste_questionnaires_base.Liste):
     categorie_question = "famille"
-    filtres = ["fpresent:famille", "fscolarise:famille", "famille__nom", "reponse"]
+    filtres = ["fgenerique:famille", "reponse"]
     colonnes = [
         Colonne(code="famille__nom", label="Famille", classe="CharField", label_filtre="Nom"),
         Colonne(code="reponse", label="Réponse", classe="BooleanField", label_filtre="Valeur"),

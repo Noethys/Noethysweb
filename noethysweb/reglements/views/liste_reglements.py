@@ -35,7 +35,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "fscolarise:famille", "idreglement", "date", "mode__label", "emetteur__nom", "numero_piece", "famille__nom", "payeur__nom", "montant",
+        filtres = ["fgenerique:famille", "idreglement", "date", "mode__label", "emetteur__nom", "numero_piece", "payeur__nom", "montant",
                    "observations", "numero_quittancier", "depot__nom", "compte__nom", "date_differe"]
         check = columns.CheckBoxSelectColumn(label="")
         mode = columns.TextColumn("Mode", sources=['mode__label'])

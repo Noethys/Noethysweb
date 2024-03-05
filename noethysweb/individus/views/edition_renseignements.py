@@ -66,8 +66,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "fscolarise:famille", "ipresent:individu", "iscolarise:individu", "famille__nom", "individu__nom", "individu__prenom",
-                   "individu__rue_resid", "individu__cp_resid", "individu__ville_resid"]
+        filtres = ["fgenerique:famille", "igenerique:individu"]
         check = columns.CheckBoxSelectColumn(label="")
         individu = columns.CompoundColumn("Individu", sources=["individu__nom", "individu__prenom"])
         famille = columns.TextColumn("Famille", sources=["famille__nom"])

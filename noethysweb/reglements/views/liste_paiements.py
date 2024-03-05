@@ -33,7 +33,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "fscolarise:famille", "idpaiement", "horodatage", "famille__nom", "montant"]
+        filtres = ["fgenerique:famille", "idpaiement", "horodatage", "montant"]
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         reglements = columns.TextColumn("Règlements", sources=["reglements__pk"], processor='Get_reglements')
 

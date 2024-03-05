@@ -47,7 +47,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:pk", "fscolarise:pk", "idfamille", "nom", "titulaire_helios__nom", "tiers_solidaire__nom"]
+        filtres = ["fgenerique:pk", "idfamille", "titulaire_helios__nom", "tiers_solidaire__nom"]
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         titulaire_helios = columns.TextColumn("Titulaire Hélios", sources=['titulaire_helios__nom', 'titulaire_helios__prenom'])
         tiers_solidaire = columns.TextColumn("Tiers solidaire", sources=['tiers_solidaire__nom', 'tiers_solidaire__prenom'])

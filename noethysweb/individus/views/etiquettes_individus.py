@@ -24,7 +24,7 @@ class Liste(etiquettes.Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:pk", "iscolarise:pk", "idindividu", "nom", "prenom", "rue_resid", "cp_resid", "ville_resid"]
+        filtres = ["igenerique:pk",]
         check = columns.CheckBoxSelectColumn(label="")
         rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
         cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')

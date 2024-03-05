@@ -31,8 +31,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "fscolarise:famille", "idreglement", "date", "mode__label", "emetteur__nom", "numero_piece", "famille__nom", "payeur__nom", "montant"]
-
+        filtres = ["fgenerique:famille", "idreglement", "date", "mode__label", "emetteur__nom", "numero_piece", "payeur__nom", "montant"]
         mode = columns.TextColumn("Mode", sources=['mode__label'])
         emetteur = columns.CompoundColumn("Emetteur", sources=['emetteur__nom'])
         famille = columns.TextColumn("Famille", sources=['famille__nom'])

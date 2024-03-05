@@ -50,9 +50,8 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:individu", "fpresent:inscription__famille", "iscolarise:individu", "fscolarise:famille", "idconso", "date_saisie", "date", "unite__nom", "groupe__nom", "etat", "activite__nom", "inscription__famille__nom",
-                   "individu__nom", "individu__prenom", "heure_debut", "heure_fin", "quantite", "prestation__idprestation", "categorie_tarif__nom", "prestation__label", "prestation__montant",
-                   "individu__ville_resid"]
+        filtres = ["igenerique:individu", "fgenerique:inscription__famille", "idconso", "date_saisie", "date", "unite__nom", "groupe__nom", "etat", "activite__nom",
+                   "heure_debut", "heure_fin", "quantite", "prestation__idprestation", "categorie_tarif__nom", "prestation__label", "prestation__montant"]
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         activite = columns.TextColumn("Activité", sources=['activite__nom'])

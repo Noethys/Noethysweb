@@ -30,8 +30,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "fscolarise:famille", "idrecu", 'numero', 'date_edition']
-
+        filtres = ["fgenerique:famille", "idrecu", 'numero', 'date_edition']
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
 
         class Meta:

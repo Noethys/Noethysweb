@@ -19,9 +19,7 @@ class Liste(Page, crud.Liste):
         return Rattachement.objects.select_related("individu", "famille").filter(self.Get_filtres("Q"))
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille",
-                   'individu__pk', "individu__nom", "individu__prenom", "famille__nom", "individu__date_naiss", "individu__rue_resid",
-                   "individu__cp_resid", "individu__ville_resid"]
+        filtres = ["igenerique:individu", "fgenerique:famille"]
         check = columns.CheckBoxSelectColumn(label="")
         nom = columns.TextColumn("Nom", sources=['individu__nom'])
         prenom = columns.TextColumn("Prénom", sources=['individu__prenom'])

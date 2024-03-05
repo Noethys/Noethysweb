@@ -30,8 +30,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:prestation__individu", "fpresent:famille", "iscolarise:prestation__individu", "fscolarise:famille", "iddeduction", "date", "label",
-                   "famille__nom", "individu__nom", "montant", "prestation__code_compta"]
+        filtres = ["igenerique:prestation__individu", "fgenerique:famille", "iddeduction", "date", "label", "montant", "prestation__code_compta"]
         activite = columns.TextColumn("Activité", sources=['prestation__activite__nom'])
         individu = columns.CompoundColumn("Individu", sources=['prestation__individu__nom', 'prestation__individu__prenom'])
         date_naiss = columns.TextColumn("Date naiss.", processor="Get_date_naiss")

@@ -36,7 +36,7 @@ class Liste(crud.Page, crud.Liste):
         return HttpResponseRedirect(reverse_lazy("abonnes_listes_diffusion_liste", kwargs={"categorie": self.kwargs.get("idliste_diffusion")}))
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:pk", "iscolarise:pk", "idindividu", "nom", "prenom", "mail", "rue_resid", "cp_resid", "ville_resid"]
+        filtres = ["igenerique:pk",]
         check = columns.CheckBoxSelectColumn(label="")
         mail = columns.TextColumn("Email", processor='Get_mail')
         rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')

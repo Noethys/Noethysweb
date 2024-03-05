@@ -68,7 +68,7 @@ class Page(crud.Page):
 class Liste(Page, crud.CustomListe):
     template_name = "individus/liste_pieces_manquantes.html"
 
-    filtres = ["fpresent:idfamille", "fscolarise:idfamille", "famille"]
+    filtres = ["fgenerique:idfamille", "famille"]
     colonnes = [
         Colonne(code="check", label="check"),
         Colonne(code="idfamille", label="ID", classe="IntegerField"),

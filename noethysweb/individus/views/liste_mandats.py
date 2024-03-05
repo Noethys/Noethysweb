@@ -41,7 +41,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "fscolarise:famille", "idmandat", "date", "rum", "actif", "famille__nom", "sequence"]
+        filtres = ["fgenerique:famille", "idmandat", "date", "rum", "actif", "sequence"]
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         iban = columns.TextColumn("IBAN", sources=[], processor='Get_iban')

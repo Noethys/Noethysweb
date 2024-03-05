@@ -28,7 +28,7 @@ class Liste(Page_destinataires, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:pk", "iscolarise:pk", "idindividu", "nom", "prenom", "tel_mobile", "rue_resid", "cp_resid", "ville_resid"]
+        filtres = ["igenerique:pk", "idindividu"]
         check = columns.CheckBoxSelectColumn(label="")
         tel_mobile = columns.TextColumn("Tél portable", processor="Get_tel_mobile")
         mail = columns.TextColumn("Email", processor='Get_mail')

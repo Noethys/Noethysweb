@@ -86,7 +86,7 @@ class Liste(Page, crud.Liste):
         return "A" in self.kwargs.get("activite", "")
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille", "idinscription", "famille__nom", "individu__nom", "individu__prenom", "individu__ville_resid", "famille__ville_resid", "date_debut", "date_fin", "activite__nom", "groupe__nom", "statut", "categorie_tarif__nom"]
+        filtres = ["igenerique:individu", "fgenerique:famille", "idinscription", "date_debut", "date_fin", "activite__nom", "groupe__nom", "statut", "categorie_tarif__nom"]
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor="Get_actions_speciales")
         groupe = columns.TextColumn("Groupe", sources=["groupe__nom"])

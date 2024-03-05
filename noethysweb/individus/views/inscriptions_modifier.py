@@ -144,7 +144,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "fscolarise:famille", "ipresent:individu", "iscolarise:individu", "idinscription", "famille__nom", "individu__nom", "individu__prenom", "date_debut", "date_fin", "groupe__nom", "statut", "categorie_tarif__nom"]
+        filtres = ["fgenerique:famille", "igenerique:individu", "idinscription", "date_debut", "date_fin", "groupe__nom", "statut", "categorie_tarif__nom"]
         check = columns.CheckBoxSelectColumn(label="")
         groupe = columns.TextColumn("Groupe", sources=["groupe__nom"])
         categorie_tarif = columns.TextColumn("Catégorie de tarif", sources=["categorie_tarif__nom"])

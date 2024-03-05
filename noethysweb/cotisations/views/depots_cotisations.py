@@ -122,8 +122,7 @@ class Consulter(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille", "idcotisation",
-                   "date_saisie", "date_creation_carte", 'famille__nom', 'individu__nom', 'individu__prenom', "numero",
+        filtres = ["igenerique:individu", "fgenerique:famille", "idcotisation", "date_saisie", "date_creation_carte", "numero",
                    "date_debut", "date_fin", "observations", "type_cotisation__nom", "unite_cotisation__nom"]
         check = columns.CheckBoxSelectColumn(label="")
         individu = columns.CompoundColumn("Individu", sources=['individu__nom', 'individu__prenom'])

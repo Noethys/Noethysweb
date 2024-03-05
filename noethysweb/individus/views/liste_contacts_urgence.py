@@ -36,7 +36,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["idcontact", "fpresent:famille", "ipresent:individu", "fscolarise:famille", "iscolarise:individu", "famille__nom", "individu__nom", "individu__prenom", "nom", "prenom", "rue_resid", "tel_domicile", "tel_mobile", "tel_travail", "autorisation_sortie", "autorisation_appel"]
+        filtres = ["idcontact", "fgenerique:famille", "igenerique:individu", "nom", "prenom", "rue_resid", "tel_domicile", "tel_mobile", "tel_travail", "autorisation_sortie", "autorisation_appel"]
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
         individu = columns.CompoundColumn("Individu", sources=['individu__nom', 'individu__prenom'])

@@ -29,8 +29,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "fscolarise:famille", "idfamille", "nom", "code_compta"]
-
+        filtres = ["fgenerique:famille", "idfamille", "code_compta"]
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:

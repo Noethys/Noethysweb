@@ -29,7 +29,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:pk", "iscolarise:pk", "idindividu", "nom", "prenom"]
+        filtres = ["igenerique:pk", "idindividu"]
 
         class Meta:
             structure_template = MyDatatable.structure_template

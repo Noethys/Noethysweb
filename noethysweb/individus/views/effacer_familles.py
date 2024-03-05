@@ -132,7 +132,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:pk", "fscolarise:pk", "idfamille", "nom", "derniere_action"]
+        filtres = ["fgenerique:pk", "idfamille", "derniere_action"]
         check = columns.CheckBoxSelectColumn(label="")
         solde = columns.TextColumn("Solde", sources=None, processor="Get_solde")
         rattachements = columns.TextColumn("Individus rattachés", sources=None, processor="Get_rattachements")

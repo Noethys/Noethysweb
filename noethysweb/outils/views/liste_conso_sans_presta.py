@@ -35,8 +35,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:individu", "fpresent:inscription__famille", "iscolarise:individu", "fscolarise:inscription__famille", "idconso", "date_saisie", "date", "unite__nom", "groupe__nom", "etat", "activite__nom", "inscription__famille__nom",
-                   "individu__nom", "individu__prenom", "heure_debut", "heure_fin", "quantite", "categorie_tarif__nom"]
+        filtres = ["igenerique:individu", "fgenerique:inscription__famille", "idconso", "date_saisie", "date", "unite__nom", "groupe__nom", "etat", "activite__nom", "heure_debut", "heure_fin", "quantite", "categorie_tarif__nom"]
         check = columns.CheckBoxSelectColumn(label="")
         activite = columns.TextColumn("Activité", sources=['activite__nom'])
         unite = columns.TextColumn("Unité", sources=['unite__nom'])
