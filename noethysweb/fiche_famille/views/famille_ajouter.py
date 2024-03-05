@@ -11,7 +11,7 @@ from django.db.models import ProtectedError
 from django.db import transaction
 from django.contrib.admin.utils import NestedObjects
 from core.views import crud
-from core.models import Individu, Famille, Rattachement, Utilisateur
+from core.models import Individu, Famille, Rattachement, Utilisateur, Inscription
 from core.utils import utils_historique, utils_questionnaires
 from fiche_individu.forms.individu import Formulaire
 from fiche_individu.views import individu as INDIVIDU
@@ -317,10 +317,20 @@ class Detacher_individu(Supprimer_individu):
         collector = NestedObjects(using='default')
         collector.collect([self.get_object()])
 
+        # Importation des inscriptions de la famille
+        inscriptions = [inscription.pk for inscription in Inscription.objects.filter(famille=self.get_famille())]
+
         # Exclusion des objets associés à d'autres fiches famille
         liste_objets_proteges = []
         for objet in collector.protected:
             idfamille_objet = getattr(objet, "famille_id", None)
+
+            # Exclusions particulières
+            if objet._meta.model_name == "consommation" and objet.inscription_id not in inscriptions:
+                idfamille_objet = "EXCLURE"
+            if objet._meta.model_name == "transport":
+                idfamille_objet = "EXCLURE"
+
             if idfamille_objet == self.get_famille().pk or not idfamille_objet:
                 liste_objets_proteges.append(objet)
 
