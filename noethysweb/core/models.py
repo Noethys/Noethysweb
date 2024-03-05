@@ -1476,7 +1476,7 @@ class Tarif(models.Model):
         verbose_name_plural = "tarifs"
 
     def __str__(self):
-        return "Tarif ID%d - %s - à partir du %s" % (self.idtarif, self.nom_tarif.nom, self.date_debut.strftime("%d/%m/%Y")) if self.idtarif else "Nouveau tarif"
+        return "Tarif ID%d - %s - à partir du %s" % (self.idtarif, self.nom_tarif.nom if self.nom_tarif else "", self.date_debut.strftime("%d/%m/%Y")) if self.idtarif else "Nouveau tarif"
 
 
 class ModelePrestation(models.Model):
