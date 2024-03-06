@@ -1,3 +1,17 @@
+Version 1.2.3.0 (06/03/2024) :
+
+- Ajout des filtres de liste génériques
+- Ajout du détail par mode de règlement dans le PDF des dépôts
+- Ajout d'une colonne Solde à la liste des adhésions
+- Ajout du filtre par compte bancaire dans la sélection des règlements d'un dépôt
+- Ajout des coordonnées des responsables dans la liste des individus rattachés
+- Ajout blocage paiement en ligne si mail famille manquant
+- Déplacement de la ventilation dans le form de saisie d'un règlement
+- Correction du détachement d'un individu si consommations existantes
+- Correction de l'envoi des factures par email aux abonnés de ce service
+- Correction de l'affichage des évènements avec groupes distincts
+- Divers petits correctifs
+
 Version 1.2.2.9 (13/02/2024) :
 
 - Ajout d'une colonne Solde dans la liste des adhésions non déposées
