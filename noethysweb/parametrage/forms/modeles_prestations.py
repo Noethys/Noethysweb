@@ -144,7 +144,8 @@ function On_change_categorie_tarif() {
         url: "{% url 'ajax_get_tarifs_prestation' %}",
         data: {
             'idactivite': idactivite, 
-            'idcategorie_tarif': idcategorie_tarif, 
+            'idcategorie_tarif': idcategorie_tarif,
+            'masquer_evenements': "oui", 
             'csrfmiddlewaretoken': "{{ csrf_token }}"
         },
         success: function (data) { 

@@ -58,10 +58,14 @@ def Get_tarifs(request):
     """ Renvoie la liste des tarifs pour une activité donnée """
     idactivite = request.POST.get('idactivite')
     idcategorie_tarif = request.POST.get('idcategorie_tarif')
+    masquer_evenements = request.POST.get('masquer_evenements') == "oui"
     if not idactivite or not idcategorie_tarif:
         resultat = ""
     else:
-        tarifs = Tarif.objects.select_related('nom_tarif').filter(activite_id=idactivite, categories_tarifs=idcategorie_tarif).order_by("date_debut")
+        conditions = Q(activite_id=idactivite, categories_tarifs=idcategorie_tarif)
+        if masquer_evenements:
+            conditions &= Q(evenement__isnull=True)
+        tarifs = Tarif.objects.select_related('nom_tarif').filter(conditions).order_by("date_debut")
         html = """
         <option value="">---------</option>
         {% for tarif in tarifs %}
