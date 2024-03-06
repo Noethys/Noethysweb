@@ -6,6 +6,7 @@
 from decimal import Decimal
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Sum, Count
+from django.db.models.functions import Coalesce
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
@@ -35,7 +36,7 @@ class Liste(Page, crud.Liste):
     model = Depot
 
     def get_queryset(self):
-        return Depot.objects.select_related("compte").filter(self.Get_filtres("Q")).annotate(nbre_reglements=Count("reglement"), montant_reglements=Sum("reglement__montant"))
+        return Depot.objects.select_related("compte").filter(self.Get_filtres("Q")).annotate(nbre_reglements=Count("reglement"), montant_reglements=Coalesce(Sum("reglement__montant"), Decimal(0)))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
