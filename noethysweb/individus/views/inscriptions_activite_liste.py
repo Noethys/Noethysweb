@@ -148,22 +148,10 @@ class Liste(Page, crud.Liste):
             return instance.famille.ville_resid
 
         def Get_tel_parents(self, instance, *args, **kwargs):
-            self.Init_dict_parents()
-            liste_tel = []
-            if (instance.famille_id, instance.individu_id) in self.liste_enfants:
-                for individu in self.dict_parents.get(instance.famille_id, []):
-                    if individu.tel_mobile and individu != instance.individu:
-                        liste_tel.append("%s : %s" % (individu.prenom, individu.tel_mobile))
-            return " | ".join(liste_tel)
+            return self.Calc_tel_parents(idindividu=instance.individu_id, idfamille=instance.famille_id)
 
         def Get_mail_parents(self, instance, *args, **kwargs):
-            self.Init_dict_parents()
-            liste_mail = []
-            if (instance.famille_id, instance.individu_id) in self.liste_enfants:
-                for individu in self.dict_parents.get(instance.famille_id, []):
-                    if individu.mail and individu != instance.individu:
-                        liste_mail.append("%s : %s" % (individu.prenom, individu.mail))
-            return " | ".join(liste_mail)
+            return self.Calc_mail_parents(idindividu=instance.individu_id, idfamille=instance.famille_id)
 
         def Get_mail_famille(self, instance, *args, **kwargs):
             return instance.famille.mail
@@ -202,17 +190,6 @@ class Liste(Page, crud.Liste):
                 couleur = "danger"
             return """<span class='badge badge-%s'>%s</span>""" % (couleur, utils_texte.Formate_montant(solde))
 
-        def Init_dict_parents(self):
-            # Importation initiale des parents
-            if not hasattr(self, "dict_parents"):
-                self.dict_parents = {}
-                self.liste_enfants = []
-                for rattachement in Rattachement.objects.select_related("individu").all():
-                    if rattachement.categorie == 1:
-                        self.dict_parents.setdefault(rattachement.famille_id, [])
-                        self.dict_parents[rattachement.famille_id].append(rattachement.individu)
-                    if rattachement.categorie == 2:
-                        self.liste_enfants.append((rattachement.famille_id, rattachement.individu_id))
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire

@@ -59,12 +59,14 @@ class Liste(Page, crud.Liste):
         rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
         cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')
         ville_resid = columns.TextColumn("Ville",  sources=None, processor='Get_ville_resid')
+        tel_parents = columns.TextColumn("Tél responsables", sources=None, processor="Get_tel_parents")
+        mail_parents = columns.TextColumn("Mail responsables", sources=None, processor="Get_mail_parents")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idrattachement', 'idindividu', "nom", "prenom", "profil", "famille", "age", "date_naiss", "genre", "rue_resid", "cp_resid", "ville_resid", "tel_domicile", "tel_mobile", "mail", "secteur"]
-            hidden_columns = ["idrattachement", "tel_domicile", "tel_mobile", "mail", "genre", "secteur"]
+            columns = ['idrattachement', 'idindividu', "nom", "prenom", "profil", "famille", "age", "date_naiss", "genre", "rue_resid", "cp_resid", "ville_resid", "tel_domicile", "tel_mobile", "mail", "secteur", "tel_parents", "mail_parents"]
+            hidden_columns = ["idrattachement", "tel_domicile", "tel_mobile", "mail", "genre", "secteur", "tel_parents", "mail_parents"]
             ordering = ["nom", "prenom"]
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
@@ -104,6 +106,12 @@ class Liste(Page, crud.Liste):
 
         def Get_genre(self, instance, *args, **kwargs):
             return instance.individu.Get_sexe()
+
+        def Get_tel_parents(self, instance, *args, **kwargs):
+            return self.Calc_tel_parents(idindividu=instance.individu_id, idfamille=instance.famille_id)
+
+        def Get_mail_parents(self, instance, *args, **kwargs):
+            return self.Calc_mail_parents(idindividu=instance.individu_id, idfamille=instance.famille_id)
 
 
 class Onglet(CustomView):

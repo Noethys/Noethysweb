@@ -12,7 +12,7 @@ from django.utils.decorators import method_decorator
 from datatableview import Datatable, columns, helpers
 from datatableview.views import DatatableView, MultipleDatatableView, XEditableDatatableView
 from core.utils import utils_texte, utils_parametres
-from core.models import Parametre
+from core.models import Parametre, Rattachement
 
 
 class MyDatatableView(DatatableView):
@@ -105,3 +105,33 @@ class MyDatatable(Datatable):
 
     def Formate_montant_standard(self, instance, **kwargs):
         return "%0.2f" % kwargs.get("default_value", 0.0)
+
+    def Init_dict_parents(self):
+        # Importation initiale des parents
+        if not hasattr(self, "dict_parents"):
+            self.dict_parents = {}
+            self.liste_enfants = []
+            for rattachement in Rattachement.objects.select_related("individu").all():
+                if rattachement.categorie == 1:
+                    self.dict_parents.setdefault(rattachement.famille_id, [])
+                    self.dict_parents[rattachement.famille_id].append(rattachement.individu)
+                if rattachement.categorie == 2:
+                    self.liste_enfants.append((rattachement.famille_id, rattachement.individu_id))
+
+    def Calc_tel_parents(self, idfamille=None, idindividu=None):
+        self.Init_dict_parents()
+        liste_tel = []
+        if (idfamille, idindividu) in self.liste_enfants:
+            for individu in self.dict_parents.get(idfamille, []):
+                if individu.tel_mobile and individu.pk != idindividu:
+                    liste_tel.append("%s : %s" % (individu.prenom, individu.tel_mobile))
+        return " | ".join(liste_tel)
+
+    def Calc_mail_parents(self, idfamille=None, idindividu=None):
+        self.Init_dict_parents()
+        liste_mail = []
+        if (idfamille, idindividu) in self.liste_enfants:
+            for individu in self.dict_parents.get(idfamille, []):
+                if individu.mail and individu.pk != idindividu:
+                    liste_mail.append("%s : %s" % (individu.prenom, individu.mail))
+        return " | ".join(liste_mail)
