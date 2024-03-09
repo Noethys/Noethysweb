@@ -2094,7 +2094,7 @@ class Piece(models.Model):
         if not self.type_piece:
             return self.titre
         if self.type_piece.public == "individu":
-            prenom = self.individu.prenom or self.individu.nom
+            prenom = (self.individu.prenom or self.individu.nom) if self.individu else "?"
             return self.type_piece.nom + " de " + prenom
         else:
             return self.type_piece.nom
