@@ -107,6 +107,7 @@ class Liste(Page, crud.CustomListe):
             # Récupération des paramètres
             date_reference = parametres["date"]
             masquer_complets = parametres["masquer_complets"]
+            masquer_activites_anciennes = parametres["masquer_activites_anciennes"]
 
             param_activites = json.loads(parametres["activites"])
             if param_activites["type"] == "groupes_activites":
@@ -122,7 +123,7 @@ class Liste(Page, crud.CustomListe):
                 presents = None
 
             # Importation des pièces manquantes
-            dictPieces = utils_pieces_manquantes.Get_liste_pieces_manquantes(date_reference=date_reference, activites=liste_activites, presents=presents, only_concernes=masquer_complets)
+            dictPieces = utils_pieces_manquantes.Get_liste_pieces_manquantes(date_reference=date_reference, activites=liste_activites, presents=presents, only_concernes=masquer_complets, masquer_activites_anciennes=masquer_activites_anciennes)
 
             # Mise en forme des données
             lignes = []

@@ -17,6 +17,7 @@ class Formulaire(FormulaireBase, forms.Form):
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
     presents = forms.CharField(label="Uniquement les présents", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
     masquer_complets = forms.BooleanField(label="Masquer les dossiers complets", initial=True, required=False)
+    masquer_activites_anciennes = forms.BooleanField(label="Masquer les activités terminées", initial=True, required=False)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -31,4 +32,5 @@ class Formulaire(FormulaireBase, forms.Form):
             Field('activites'),
             Field('presents'),
             Field('masquer_complets'),
+            Field('masquer_activites_anciennes'),
         )

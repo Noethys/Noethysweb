@@ -68,7 +68,7 @@ def Get_pieces_manquantes(famille=None, date_reference=None, only_invalides=Fals
     return liste_resultats
 
 
-def Get_liste_pieces_manquantes(date_reference=None, activites=None, presents=None, only_concernes=True, liste_familles=[]):
+def Get_liste_pieces_manquantes(date_reference=None, activites=None, presents=None, only_concernes=True, liste_familles=[], masquer_activites_anciennes=False):
     """ Retourne les pièces manquantes d'un ensemble de familles inscrites ou présentes """
     if not date_reference:
         date_reference = datetime.date.today()
@@ -79,6 +79,8 @@ def Get_liste_pieces_manquantes(date_reference=None, activites=None, presents=No
         conditions &= Q(activite__in=activites) & (Q(date_fin__isnull=True) | Q(date_fin__gte=date_reference))
     if presents:
         conditions &= Q(consommation__date__gte=presents[0], consommation__date__lte=presents[1])
+    if masquer_activites_anciennes:
+        conditions &= (Q(activite__date_fin__isnull=True) | Q(activite__date_fin__gte=date_reference))
     if liste_familles:
         conditions &= Q(famille__in=liste_familles)
     inscriptions = Inscription.objects.select_related('activite', 'individu', 'famille').prefetch_related('activite__pieces').filter(conditions).distinct()
