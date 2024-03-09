@@ -77,12 +77,16 @@ def Impression_pdf(request):
     for IDfacture, facture in dict_factures.items():
         facture.liste_mails = []
         if facture.famille.email_factures:
-            for valeur in facture.famille.email_factures_adresses.split("##"):
-                IDindividu, categorie, adresse = valeur.split(";")
-                if IDindividu and int(IDindividu) in dict_mails:
-                    adresse = dict_mails[int(IDindividu)][categorie]
-                if adresse:
-                    facture.liste_mails.append(adresse)
+            if ";" in (facture.famille.email_factures_adresses or ""):
+                for valeur in facture.famille.email_factures_adresses.split("##"):
+                    IDindividu, categorie, adresse = valeur.split(";")
+                    if IDindividu and int(IDindividu) in dict_mails:
+                        adresse = dict_mails[int(IDindividu)][categorie]
+                    if adresse:
+                        facture.liste_mails.append(adresse)
+            else:
+                if facture.famille.mail:
+                    facture.liste_mails.append(facture.famille.mail)
         else:
             if facture.famille.mail:
                 facture.liste_mails.append(facture.famille.mail)
