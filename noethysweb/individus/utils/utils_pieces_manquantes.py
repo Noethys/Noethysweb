@@ -74,9 +74,9 @@ def Get_liste_pieces_manquantes(date_reference=None, activites=None, presents=No
         date_reference = datetime.date.today()
 
     # Importation des inscriptions
-    conditions = Q()
+    conditions = Q(individu__deces=False)
     if activites:
-        conditions &= Q(activite__in=activites)
+        conditions &= Q(activite__in=activites) & (Q(date_fin__isnull=True) | Q(date_fin__gte=date_reference))
     if presents:
         conditions &= Q(consommation__date__gte=presents[0], consommation__date__lte=presents[1])
     if liste_familles:
