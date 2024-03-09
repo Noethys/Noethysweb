@@ -76,8 +76,9 @@ class Liste(Page, crud.Liste):
                 dict_ventilations = {temp["prestation_id"]: temp["total"] for temp in Ventilation.objects.values("prestation_id").filter(prestation__cotisation__isnull=False).annotate(total=Sum("montant"))}
                 self.dict_soldes = {}
                 for prestation in Cotisation.objects.select_related("prestation").values("prestation__pk", "prestation__montant").filter():
-                    self.dict_soldes.setdefault(prestation["prestation__pk"], decimal.Decimal(0))
-                    self.dict_soldes[prestation["prestation__pk"]] += dict_ventilations.get(prestation["prestation__pk"], decimal.Decimal(0)) - prestation["prestation__montant"]
+                    if prestation["prestation__pk"]:
+                        self.dict_soldes.setdefault(prestation["prestation__pk"], decimal.Decimal(0))
+                        self.dict_soldes[prestation["prestation__pk"]] += dict_ventilations.get(prestation["prestation__pk"], decimal.Decimal(0)) - prestation["prestation__montant"]
                 del dict_ventilations
             if instance.prestation_id not in self.dict_soldes:
                 return ""
