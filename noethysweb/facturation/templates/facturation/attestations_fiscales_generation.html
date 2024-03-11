@@ -73,7 +73,6 @@
 
 {% block scripts %}
     {{ block.super }}
-    <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
 
     <script>
@@ -111,9 +110,6 @@
         };
 
         function init_page_selection() {
-            $("#div_table_attestations_fiscales").freezeTable({
-                'scrollable': true,
-            });
 
             $('.check_attestation_fiscale').on('change', function () {
                 if (maj_lot_checkboxes == false) {
@@ -183,9 +179,9 @@
 
         function get_prestations_cochees() {
             var liste_prestations = [];
-            $(".check_prestation").each(function (index) {
+            $(".check_prestation:checked").each(function (index) {
                 var index_prestation = parseInt(this.dataset.index);
-                if (($(this).prop("checked")) && (!(liste_prestations.includes($(this).val())))) {
+                if (!(liste_prestations.includes($(this).val()))) {
                     var ajustement = $("#ajustement_" + index_prestation).val();
                     liste_prestations.push([$(this).val(), ajustement]);
                 }
