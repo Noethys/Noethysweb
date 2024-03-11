@@ -73,7 +73,7 @@ class Liste(Page, crud.Liste):
         activite = self.kwargs.get("activite", None)
         if activite:
             activite = activite.replace("A", "")
-            return activite
+            return int(activite)
         return None
 
     def Get_groupe(self):
