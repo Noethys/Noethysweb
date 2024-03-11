@@ -1,3 +1,10 @@
+Version 1.2.3.1 (11/03/2024) :
+
+- Ajout du masquage des activités obsolètes dans la liste des pièces manquantes
+- Correction de l'affichage du solde dans la liste des adhésions
+- Correction du tri sur total dans la liste des dépôts de règlements
+- Correction de l'envoi des factures par email
+
 Version 1.2.3.0 (06/03/2024) :
 
 - Ajout des filtres de liste génériques
