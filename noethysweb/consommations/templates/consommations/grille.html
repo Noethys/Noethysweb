@@ -23,9 +23,7 @@
         </div>
 
         {# Importation des modals #}
-        {% if data.mode == 'pointeuse' %}
-            {% include 'consommations/grille_saisie_detail.html' %}
-        {% endif %}
+        {% include 'consommations/grille_saisie_detail.html' %}
         {% include 'consommations/grille_saisie_horaires.html' %}
         {% include 'consommations/grille_saisie_quantite.html' %}
         {% include 'consommations/grille_saisie_memo.html' %}
@@ -44,6 +42,7 @@
                     <li class="dropdown-item"><a tabindex="-1" href="#" id="contextmenu_forfait">Appliquer un forfait crédit</a></li>
                     <li class="dropdown-divider"></li>
                 {% endif %}
+                <li class="dropdown-item"><a tabindex="-1" href="#" id="contextmenu_modifier">Modifier</a></li>
                 <li class="dropdown-item"><a tabindex="-1" href="#" id="contextmenu_supprimer">Supprimer</a></li>
                 <li class="dropdown-divider"></li>
                 <li class="dropdown-item"><a tabindex="-1" href="#" data-etat="reservation" id="contextmenu_reservation">Réservation</a></li>

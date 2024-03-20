@@ -21,20 +21,20 @@
                     {# Sélection des horaires #}
                     <div class="row">
                         <div class="col-sm-6">
-                            <label for="saisie_heure_debut" class="col-form-label">Début</label>
+                            <label for="saisie_detail_heure_debut" class="col-form-label">Début</label>
                             <div class="input-group date choix_horaires">
-                                <input id="saisie_heure_debut" type="time" class="form-control"/>
+                                <input id="saisie_detail_heure_debut" type="time" class="form-control"/>
                                 <div class="input-group-append">
-                                    <button id="bouton_heure_debut" class="btn btn-primary" type="button" title="Insérer l'heure actuelle"><i class="fa fa-bell"></i></button>
+                                    <button id="bouton_detail_heure_debut" class="btn btn-primary" type="button" title="Insérer l'heure actuelle"><i class="fa fa-bell"></i></button>
                                 </div>
                             </div>
                         </div>
                         <div class="col-sm-6">
-                            <label for="saisie_heure_fin" class="col-form-label">Fin</label>
+                            <label for="saisie_detail_heure_fin" class="col-form-label">Fin</label>
                             <div class="input-group date choix_horaires">
-                                <input id="saisie_heure_fin" type="time" class="form-control"/>
+                                <input id="saisie_detail_heure_fin" type="time" class="form-control"/>
                                 <div class="input-group-append">
-                                    <button id="bouton_heure_fin" class="btn btn-primary" type="button" title="Insérer l'heure actuelle"><i class="fa fa-bell"></i></button>
+                                    <button id="bouton_detail_heure_fin" class="btn btn-primary" type="button" title="Insérer l'heure actuelle"><i class="fa fa-bell"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -44,14 +44,14 @@
                         {# Sélection de la quantité #}
                         <div class="col-sm-6">
                             <div class="controls">
-                                <label for="saisie_quantite" class="col-form-label">Quantité</label>
-                                <input id="saisie_quantite" type="number" class="numberinput form-control" min="1">
+                                <label for="saisie_detail_quantite" class="col-form-label">Quantité</label>
+                                <input id="saisie_detail_quantite" type="number" class="numberinput form-control" min="1">
                             </div>
                         </div>
                         {# Sélection du groupe #}
                         <div class="col-sm-6">
-                            <label for="saisie_groupe" class="col-form-label">Groupe</label>
-                            <select class="select form-control" id="saisie_groupe">
+                            <label for="saisie_detail_groupe" class="col-form-label">Groupe</label>
+                            <select class="select form-control" id="saisie_detail_groupe">
                                 {% for groupe in data.liste_groupes %}
                                     <option value="{{ groupe.pk }}" selected>{{ groupe.nom }}</option>
                                 {% endfor %}
@@ -113,24 +113,24 @@
 
             // Vérifie si des heures sont fixes
             var case_tableau = dict_cases[$('#saisie_detail_key').val()];
-            $("#saisie_heure_debut").prop('disabled', dict_unites[case_tableau.unite].heure_debut_fixe);
-            $("#bouton_heure_debut").prop('disabled', dict_unites[case_tableau.unite].heure_debut_fixe);
-            $("#saisie_heure_fin").prop('disabled', dict_unites[case_tableau.unite].heure_fin_fixe);
-            $("#bouton_heure_fin").prop('disabled', dict_unites[case_tableau.unite].heure_fin_fixe);
+            $("#saisie_detail_heure_debut").prop('disabled', dict_unites[case_tableau.unite].heure_debut_fixe);
+            $("#bouton_detail_heure_debut").prop('disabled', dict_unites[case_tableau.unite].heure_debut_fixe);
+            $("#saisie_detail_heure_fin").prop('disabled', dict_unites[case_tableau.unite].heure_fin_fixe);
+            $("#bouton_detail_heure_fin").prop('disabled', dict_unites[case_tableau.unite].heure_fin_fixe);
 
-            $("#saisie_heure_debut").focus();
+            $("#saisie_detail_heure_debut").focus();
             if (dict_unites[case_tableau.unite].heure_debut_fixe) {
-                $("#saisie_heure_fin").focus();
+                $("#saisie_detail_heure_fin").focus();
             };
 
         });
 
         // Bouton heure actuelle
-        $("#bouton_heure_debut").on('click', function(e) {
-            $('#saisie_heure_debut').val(moment().format('HH:mm'));
+        $("#bouton_detail_heure_debut").on('click', function(e) {
+            $('#saisie_detail_heure_debut').val(moment().format('HH:mm'));
         });
-        $("#bouton_heure_fin").on('click', function(e) {
-            $('#saisie_heure_fin').val(moment().format('HH:mm'));
+        $("#bouton_detail_heure_fin").on('click', function(e) {
+            $('#saisie_detail_heure_fin').val(moment().format('HH:mm'));
         });
 
         // Validation de la modal sur touche Entrée
@@ -157,13 +157,13 @@
 
         // Vérification des heures saisies
         var case_tableau = dict_cases[$('#saisie_detail_key').val()];
-        if ((case_tableau.type_case === 'horaire') || ($('#saisie_heure_debut').val() != '') || ($('#saisie_heure_fin').val() != '')) {
-            var heure_debut = moment($('#saisie_heure_debut').val().slice(0, 5), "HH:mm", true);
+        if ((case_tableau.type_case === 'horaire') || ($('#saisie_detail_heure_debut').val() != '') || ($('#saisie_detail_heure_fin').val() != '')) {
+            var heure_debut = moment($('#saisie_detail_heure_debut').val().slice(0, 5), "HH:mm", true);
             if (!heure_debut.isValid()) {
                 toastr.error(("L'heure de début n'est pas valide"));
                 return false;
             }
-            var heure_fin = moment($('#saisie_heure_fin').val().slice(0, 5), "HH:mm", true);
+            var heure_fin = moment($('#saisie_detail_heure_fin').val().slice(0, 5), "HH:mm", true);
             if (!heure_fin.isValid()) {
                 toastr.error(("L'heure de fin n'est pas valide"));
                 return false;
@@ -212,7 +212,7 @@
             var heure_fin = null;
         };
 
-        var quantite = $('#saisie_quantite').val();
+        var quantite = $('#saisie_detail_quantite').val();
         if ((quantite == null) || (quantite === '') || (parseInt(quantite) < 1)) {
             toastr.error(("La quantité saisie n'est pas valide"));
             return false;
@@ -221,7 +221,7 @@
         // Get autres variables
         var key = $('#saisie_detail_key').val();
         var action = $('#saisie_detail_action').val();
-        var groupe = $('#saisie_groupe').val();
+        var groupe = $('#saisie_detail_groupe').val();
         var etat = $("input[name='saisie_etat']:checked").val();
 
         // Renvoie les données à la page

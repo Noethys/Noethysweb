@@ -273,18 +273,21 @@ class Case_base {
 
     detail(action="modifier") {
         // Envoie les infos de la conso vers le modal
+        $('#saisie_detail_heure_debut').val(null);
+        $('#saisie_detail_heure_fin').val(null);
+        
         if (this.consommations.length > 0) {
-            if (this.consommations[0].heure_debut) {$('#saisie_heure_debut').val(this.consommations[0].heure_debut)};
-            if (this.consommations[0].heure_fin) {$('#saisie_heure_fin').val(this.consommations[0].heure_fin)};
-            if (this.consommations[0].quantite) {$('#saisie_quantite').val(this.consommations[0].quantite)};
-            $('#saisie_groupe').val(this.consommations[0].groupe);
+            if (this.consommations[0].heure_debut) {$('#saisie_detail_heure_debut').val(this.consommations[0].heure_debut)};
+            if (this.consommations[0].heure_fin) {$('#saisie_detail_heure_fin').val(this.consommations[0].heure_fin)};
+            if (this.consommations[0].quantite) {$('#saisie_detail_quantite').val(this.consommations[0].quantite)};
+            $('#saisie_detail_groupe').val(this.consommations[0].groupe);
             $("input[name='saisie_etat'][value='" + this.consommations[0].etat + "']").prop("checked",true);
         } else {
             // Envoie les infos par défaut si ajout
-            if (dict_unites[this.unite].heure_debut) {$('#saisie_heure_debut').val(dict_unites[this.unite].heure_debut)};
-            if (dict_unites[this.unite].heure_fin) {$('#saisie_heure_fin').val(dict_unites[this.unite].heure_fin)};
-            $('#saisie_quantite').val(1);
-            $('#saisie_groupe').val(this.groupe);
+            if (dict_unites[this.unite].heure_debut) {$('#saisie_detail_heure_debut').val(dict_unites[this.unite].heure_debut)};
+            if (dict_unites[this.unite].heure_fin) {$('#saisie_detail_heure_fin').val(dict_unites[this.unite].heure_fin)};
+            $('#saisie_detail_quantite').val(1);
+            $('#saisie_detail_groupe').val(this.groupe);
             $("input[name='saisie_etat'][value='" + $("#mode_saisie").val() + "']").prop("checked",true);
         };
 
@@ -1073,6 +1076,7 @@ $(function () {
     $(document).on('click', "#contextMenu li a", function(e) {
         var id = $(this).attr('id');
         if (id === "contextmenu_forfait") {case_contextmenu.appliquer_forfait()};
+        if (id === "contextmenu_modifier") {case_contextmenu.detail("modifier")};
         if (id === "contextmenu_supprimer") {case_contextmenu.supprimer()};
         if (id === "contextmenu_reservation") {case_contextmenu.set_etat("reservation")};
         if (id === "contextmenu_attente") {case_contextmenu.set_etat("attente")};
@@ -1558,7 +1562,7 @@ function ajax_facturer(cases_touchees_temp) {
             // Si mode pointeuse, on désactive le dirty de toutes les consommations
             if (mode === 'pointeuse') {
                 $.each(dict_cases, function (key, case_tableau) {
-                    dict_cases[key].set_dirty(false);
+                    try {dict_cases[key].set_dirty(false)} catch {};
                 })
                 dict_suppressions = {"consommations": [], "prestations": [], "memos": []};
             }
