@@ -86,7 +86,6 @@ class Liste(Page, crud.Liste):
             """ Inclut l'idindividu dans les boutons d'actions """
             html = [
                 self.Create_bouton_imprimer(url=reverse("famille_voir_cotisation", kwargs={"idfamille": instance.famille_id, "idcotisation": instance.pk}), title="Imprimer ou envoyer par email l'adhésion"),
+                self.Create_bouton(url=reverse("famille_resume", args=[instance.famille_id]), title="Ouvrir la fiche famille", icone="fa-users"),
             ]
             return self.Create_boutons_actions(html)
-
-
