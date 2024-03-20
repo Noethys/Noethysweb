@@ -40,6 +40,7 @@
                         <a href="#" id="afficher_totaux" class="dropdown-item option_affichage {% if suivi_consommations_parametres.afficher_totaux %}menu-checked{% endif %}" title="Afficher les colonnes des totaux">Afficher les totaux</a>
                         <a href="#" id="afficher_abreges_groupes" class="dropdown-item option_affichage {% if suivi_consommations_parametres.afficher_abreges_groupes %}menu-checked{% endif %}" title="Afficher les abrégés des groupes">Utiliser les noms de groupes abrégés</a>
                         <a href="#" id="afficher_abreges_unites" class="dropdown-item option_affichage {% if suivi_consommations_parametres.afficher_abreges_unites %}menu-checked{% endif %}" title="Afficher les abrégés des unités">Utiliser les noms d'unités abrégés</a>
+                        <a href="#" id="masquer_groupes_fermes" class="dropdown-item option_affichage {% if suivi_consommations_parametres.masquer_groupes_fermes %}menu-checked{% endif %}" title="Masquer les groupes et unités fermés">Masquer les groupes et unités fermés</a>
                     </div>
                 </div>
 
@@ -127,6 +128,7 @@
                 periode: Get_periode(),
                 activites: activites_json,
                 afficher_totaux: $("#afficher_totaux").hasClass("menu-checked"),
+                masquer_groupes_fermes: $("#masquer_groupes_fermes").hasClass("menu-checked"),
                 afficher_abreges_groupes: $("#afficher_abreges_groupes").hasClass("menu-checked"),
                 afficher_abreges_unites: $("#afficher_abreges_unites").hasClass("menu-checked"),
             };

@@ -26,6 +26,7 @@ def Get_parametres(request=None):
         "periode": {},
         "activites": [],
         "afficher_totaux": True,
+        "masquer_groupes_fermes": False,
         "afficher_abreges_groupes": False,
         "afficher_abreges_unites": True,
     })
@@ -62,6 +63,7 @@ def Get_data(parametres={}, request=None):
     afficher_totaux = parametres.get("afficher_totaux", True)
     periode = parametres.get("periode", {})
     activites = parametres.get("activites", [])
+    masquer_groupes_fermes = parametres.get("masquer_groupes_fermes", False)
 
     # Apporté par la view liste d'attente
     liste_activites_temp = parametres.get("liste_activites", [])
@@ -112,11 +114,14 @@ def Get_data(parametres={}, request=None):
     # Importation des ouvertures
     liste_ouvertures = []
     liste_dates = []
+    unites_ouvertes = []
+    groupes_ouverts = []
     for ouverture in Ouverture.objects.filter(conditions_periodes & Q(activite__in=liste_activites)):
         for id_unite_remplissage in dict_unites_remplissage_unites.get(ouverture.unite_id, []):
             liste_ouvertures.append("%s_%s_%s" % (ouverture.date, id_unite_remplissage, ouverture.groupe_id))
-            if ouverture.date not in liste_dates:
-                liste_dates.append(ouverture.date)
+            if ouverture.date not in liste_dates: liste_dates.append(ouverture.date)
+            if id_unite_remplissage not in unites_ouvertes: unites_ouvertes.append(id_unite_remplissage)
+            if ouverture.groupe_id not in groupes_ouverts: groupes_ouverts.append(ouverture.groupe_id)
 
     # Récupération des dates
     liste_dates.sort()
@@ -164,9 +169,11 @@ def Get_data(parametres={}, request=None):
         dict_colonnes["activites"].append({"activite": activite, "nbre_colonnes": nbre_colonnes})
         for groupe in dict_groupes.get(activite, []):
             nbre_colonnes = len(dict_unites_remplissage.get(activite, []))
-            dict_colonnes["groupes"].append({"groupe": groupe, "nbre_colonnes": nbre_colonnes})
+            if groupe.pk in groupes_ouverts or groupe.pk == 999999 or not masquer_groupes_fermes:
+                dict_colonnes["groupes"].append({"groupe": groupe, "nbre_colonnes": nbre_colonnes})
             for unite in dict_unites_remplissage.get(activite, []):
-                dict_colonnes["unites"].append({"unite": unite, "groupe": groupe, "activite": activite})
+                if unite.pk in unites_ouvertes or not masquer_groupes_fermes:
+                    dict_colonnes["unites"].append({"unite": unite, "groupe": groupe, "activite": activite})
 
     # Récupération des seuils d'alerte
     dict_seuils = {}
