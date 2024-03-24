@@ -130,7 +130,7 @@ class View(CustomView, TemplateView):
                     key_label = prestation.label
 
                 if key_code == "activite":
-                    key = prestation.activite_id
+                    key = str(prestation.activite_id)
                     if not prestation.activite_id:
                         key_label = "Activité inconnue"
                     else:
