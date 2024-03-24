@@ -1,3 +1,12 @@
+Version 1.2.3.2 (24/03/2024) :
+
+- Ajout de l'option Masquer les groupes et unités fermés dans le suivi des consommations
+- Ajout d'un bouton Ouvrir la fiche famille dans la liste des adhésions
+- Correction sur la list des inscriptions à une activité
+- Correction de la sélection des prestations dans la génération des attestations fiscales
+- Correction sur les noms des contrôles de la modal détail dans la grille des consommations
+- Correction du regroupement par activité dans la synthèse des prestations
+
 Version 1.2.3.1 (11/03/2024) :
 
 - Ajout du masquage des activités obsolètes dans la liste des pièces manquantes
