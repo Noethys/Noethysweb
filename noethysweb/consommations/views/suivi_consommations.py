@@ -165,15 +165,20 @@ def Get_data(parametres={}, request=None):
     # Colonnes
     dict_colonnes = {"activites": [], "groupes": [], "unites": []}
     for activite in liste_activites:
-        nbre_colonnes = len(dict_groupes.get(activite, [])) * len(dict_unites_remplissage.get(activite, []))
-        dict_colonnes["activites"].append({"activite": activite, "nbre_colonnes": nbre_colonnes})
+        nbre_unites_activite = 0
+        liste_groupes_activite = []
         for groupe in dict_groupes.get(activite, []):
-            nbre_colonnes = len(dict_unites_remplissage.get(activite, []))
-            if groupe.pk in groupes_ouverts or groupe.pk == 999999 or not masquer_groupes_fermes:
-                dict_colonnes["groupes"].append({"groupe": groupe, "nbre_colonnes": nbre_colonnes})
+            nbre_unites_groupe = 0
             for unite in dict_unites_remplissage.get(activite, []):
                 if unite.pk in unites_ouvertes or not masquer_groupes_fermes:
                     dict_colonnes["unites"].append({"unite": unite, "groupe": groupe, "activite": activite})
+                    nbre_unites_activite += 1
+                    nbre_unites_groupe += 1
+            if groupe.pk in groupes_ouverts or groupe.pk == 999999 or not masquer_groupes_fermes:
+                liste_groupes_activite.append({"groupe": groupe, "nbre_colonnes": nbre_unites_groupe})
+        if nbre_unites_activite and liste_groupes_activite:
+            dict_colonnes["activites"].append({"activite": activite, "nbre_colonnes": nbre_unites_activite})
+            dict_colonnes["groupes"] += liste_groupes_activite
 
     # Récupération des seuils d'alerte
     dict_seuils = {}
