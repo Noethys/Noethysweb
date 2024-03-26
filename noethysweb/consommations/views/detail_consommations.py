@@ -50,8 +50,8 @@ class View(CustomView, TemplateView):
             unites = " + ".join(["%s (%s)" % (conso.unite.nom, conso.get_etat_display()) for conso in liste_conso])
             date_saisie = str(liste_conso[0].date_saisie.date().strftime("%d/%m/%Y"))
             action = " ".join([
-                "<a type='button' title='Accéder à la fiche famille' class='btn btn-default btn-xs' href='%s'><i class='fa fa-folder-open-o'></i></a>" % reverse("famille_resume", args=[conso.inscription.famille_id]),
-                "<a type='button' title='Accéder aux consommations' class='btn btn-default btn-xs' href='%s'><i class='fa fa-fw fa-calendar'></i></a>" % reverse("famille_consommations", args=[conso.inscription.famille_id, conso.inscription.individu_id]),
+                "<a type='button' title='Accéder à la fiche famille' class='btn btn-default btn-xs' href='%s'><i class='fa fa-folder-open-o'></i></a>" % reverse("famille_resume", args=[liste_conso[0].inscription.famille_id]),
+                "<a type='button' title='Accéder aux consommations' class='btn btn-default btn-xs' href='%s'><i class='fa fa-fw fa-calendar'></i></a>" % reverse("famille_consommations", args=[liste_conso[0].inscription.famille_id, liste_conso[0].inscription.individu_id]),
             ])
             liste_lignes.append({"label": label, "unites": unites, "date_saisie": date_saisie, "action": action})
 
