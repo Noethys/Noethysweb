@@ -141,8 +141,8 @@ def Get_attestations_fiscales(cleaned_data={}, selection_prestations={}):
                 dict_attestations[prestation["famille_id"]]["activites"].append(prestation["activite_id"])
 
             ajustement = selection_prestations[prestation["label"]]
-            total = max(prestation["montant"] + ajustement, decimal.Decimal(0))
-            regle = max(dict_ventilations.get(prestation["pk"], decimal.Decimal(0)) + ajustement, decimal.Decimal(0))
+            total = prestation["montant"] + ajustement # max(prestation["montant"] + ajustement, decimal.Decimal(0))
+            regle = dict_ventilations.get(prestation["pk"], decimal.Decimal(0)) + ajustement # max(dict_ventilations.get(prestation["pk"], decimal.Decimal(0)) + ajustement, decimal.Decimal(0))
 
             dict_attestations[prestation["famille_id"]]["individus"][prestation["individu_id"]]["total"] += total
             dict_attestations[prestation["famille_id"]]["individus"][prestation["individu_id"]]["regle"] += regle
