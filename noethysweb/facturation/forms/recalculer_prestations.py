@@ -24,7 +24,7 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.form_method = 'post'
 
         # Liste les activités liées à la structure actuelle
-        self.fields['activite'].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin")
+        self.fields['activite'].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom")
 
         self.helper.layout = Layout(
             Field('periode'),

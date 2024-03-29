@@ -14,7 +14,7 @@ from core.utils import utils_dates, utils_parametres
 
 def Get_activites(request=None):
     """ Renvoie une liste d'activités """
-    activites = Activite.objects.filter(structure__in=request.user.structures.all()).order_by("-date_fin")
+    activites = Activite.objects.filter(structure__in=request.user.structures.all()).order_by("-date_fin", "nom")
     context = {"activites": activites}
     return render(request, "consommations/suivi_consommations_activites.html", context)
 

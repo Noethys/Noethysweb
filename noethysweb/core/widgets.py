@@ -466,7 +466,7 @@ class SelectionActivitesWidget(Widget):
                     context['selection'] = {"type": type_selection, "ids": [int(x) for x in valeurs.split(";")]}
 
         context['groupes_activites'] = TypeGroupeActivite.objects.filter(structure__in=self.request.user.structures.all()).order_by("nom")
-        context['activites'] = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin")
+        context['activites'] = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom")
         if context.get("afficher_groupes", False):
             context['groupes'] = {}
             for groupe in Groupe.objects.select_related('activite').all().order_by("ordre"):

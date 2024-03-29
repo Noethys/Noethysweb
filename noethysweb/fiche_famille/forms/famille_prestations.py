@@ -69,7 +69,7 @@ class Formulaire(FormulaireBase, ModelForm):
     montant_unitaire = forms.DecimalField(label="Montant unitaire", max_digits=6, decimal_places=2, initial=0.0, required=True)
     consommations = forms.CharField(label="Consommations", widget=Consommations_prestation(), required=False)
     activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr", "data-width": "100%"}),
-                                      queryset=Activite.objects.all().order_by("-date_fin"), required=False)
+                                      queryset=Activite.objects.all().order_by("-date_fin", "nom"), required=False)
     categorie_tarif = forms.ModelChoiceField(label="Catégorie de tarif", widget=ModelSelect2Widget(
         {"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom__icontains'],
         dependent_fields={"activite": "activite"}), queryset=CategorieTarif.objects.all(), required=False,

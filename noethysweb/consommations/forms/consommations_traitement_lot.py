@@ -24,7 +24,7 @@ class Formulaire_activite(FormulaireBase, forms.Form):
         self.helper.form_method = 'post'
 
         # Sélectionne uniquement les activités autorisées
-        self.fields["activite"].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin")
+        self.fields["activite"].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom")
 
         self.helper.layout = Layout(
             Commandes(enregistrer_label="<i class='fa fa-check margin-r-5'></i>Valider", ajouter=False, annuler_url="{{ view.get_success_url }}"),

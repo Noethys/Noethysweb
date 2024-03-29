@@ -97,7 +97,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Activité
         conditions = (Q(portail_inscriptions_affichage="TOUJOURS") | (Q(portail_inscriptions_affichage="PERIODE") & Q(portail_inscriptions_date_debut__lte=datetime.datetime.now()) & Q(portail_inscriptions_date_fin__gte=datetime.datetime.now())))
-        self.fields["activite"].queryset = Activite.objects.filter(conditions).order_by("nom")
+        self.fields["activite"].queryset = Activite.objects.filter(conditions).order_by("-date_fin", "nom")
 
         # Affichage
         self.helper.layout = Layout(

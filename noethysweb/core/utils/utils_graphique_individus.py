@@ -11,7 +11,7 @@ from core.utils import utils_parametres
 
 def Get_parametres(request):
     """ Récupère les paramètres du graphique """
-    activites = Activite.objects.filter(structure__in=request.user.structures.all()).order_by("-date_fin")
+    activites = Activite.objects.filter(structure__in=request.user.structures.all()).order_by("-date_fin", "nom")
     context = {"activites": activites}
     return render(request, "core/accueil/widgets/graphe_individus_parametres.html", context)
 

@@ -70,7 +70,7 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields["type_image"].initial = "banque_images"
 
         # Activité
-        self.fields["activites"].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("date_fin")
+        self.fields["activites"].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom")
 
         # Groupe
         groupes = Groupe.objects.select_related("activite").filter(activite__structure__in=self.request.user.structures.all()).order_by("activite", "ordre")

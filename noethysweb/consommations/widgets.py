@@ -31,7 +31,7 @@ class SelectionGroupesWidget(Widget):
         liste_dates = context.get("dates", [])
 
         # Branches 1
-        liste_activites = Activite.objects.filter(ouverture__date__in=liste_dates, structure__in=self.request.user.structures.all()).order_by("-date_fin").distinct()
+        liste_activites = Activite.objects.filter(ouverture__date__in=liste_dates, structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom").distinct()
         context['liste_branches1'] = [{"pk": activite.pk, "label": activite.nom} for activite in liste_activites]
 
         # Branches 2
@@ -76,7 +76,7 @@ class SelectionUnitesWidget(Widget):
         liste_dates = context.get("dates", [])
 
         # Importation des activités
-        liste_activites = Activite.objects.filter(ouverture__date__in=liste_dates, structure__in=self.request.user.structures.all()).order_by("-date_fin").distinct()
+        liste_activites = Activite.objects.filter(ouverture__date__in=liste_dates, structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom").distinct()
 
         # Importation des unités
         dict_unites = {}
@@ -154,7 +154,7 @@ class SelectionEvenementsWidget(Widget):
         liste_dates = context.get("dates", [])
 
         # Branches 1
-        liste_activites = Activite.objects.filter(ouverture__date__in=liste_dates).order_by("-date_fin").distinct()
+        liste_activites = Activite.objects.filter(ouverture__date__in=liste_dates).order_by("-date_fin", "nom").distinct()
         context['liste_branches1'] = [{"pk": activite.pk, "label": activite.nom} for activite in liste_activites]
 
         # Branches 2

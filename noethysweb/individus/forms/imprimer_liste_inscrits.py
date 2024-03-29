@@ -44,7 +44,7 @@ class Formulaire(FormulaireBase, forms.Form):
         self.fields["profil"].widget.request = self.request
 
         # Activité
-        self.fields["activite"].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin")
+        self.fields["activite"].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom")
         self.fields["date_situation"].initial = datetime.date.today()
 
         # Colonnes

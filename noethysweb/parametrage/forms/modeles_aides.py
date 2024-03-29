@@ -28,7 +28,7 @@ class Formulaire_creation(FormulaireBase, forms.Form):
 
         # Liste les activités
         condition_structure = Q(structure__in=self.request.user.structures.all())
-        self.fields['activite'].queryset = Activite.objects.filter(condition_structure).order_by("-date_fin")
+        self.fields['activite'].queryset = Activite.objects.filter(condition_structure).order_by("-date_fin", "nom")
 
         self.helper.layout = Layout(
             Commandes(enregistrer_label="<i class='fa fa-check margin-r-5'></i>Valider", ajouter=False, annuler_url="{{ view.get_success_url }}"),

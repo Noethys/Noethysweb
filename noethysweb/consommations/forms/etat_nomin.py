@@ -52,7 +52,7 @@ class Formulaire(FormulaireBase, forms.Form):
         self.fields['profil'].label = False
 
         # Sélectionne uniquement les activités autorisées
-        self.fields["activites"].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("date_fin")
+        self.fields["activites"].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("date_fin", "nom")
 
         # Titre
         self.fields["titre"].initial = "Etat nominatif"
