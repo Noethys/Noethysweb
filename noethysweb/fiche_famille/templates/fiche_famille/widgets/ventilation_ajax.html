@@ -39,6 +39,7 @@
                 ventilation_initiale: parseFloat({{ prestation.reste_ventilation|stringformat:".2f" }}),
                 reste_ventilation: parseFloat({{ prestation.reste_ventilation|stringformat:".2f" }}),
                 ventilation_reglement: parseFloat({{ prestation.ventilation_reglement|stringformat:".2f" }}),
+                idfacture: {{ prestation.facture_id|default:0 }},
                 ligne_regroupement: regroupement,
             });
             dict_lignes["prestation_{{ prestation.pk }}"] = ligne;

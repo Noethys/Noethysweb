@@ -3,18 +3,18 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
-from crispy_forms.bootstrap import Field, StrictButton, PrependedText, InlineField
+from crispy_forms.layout import Layout, Hidden, HTML, Fieldset
+from crispy_forms.bootstrap import Field, PrependedText
+from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import Famille, Reglement, ModeReglement, Emetteur, Payeur, CompteBancaire
+from core.models import Reglement, ModeReglement, Emetteur, Payeur, CompteBancaire, Facture
 from core.widgets import DatePickerWidget, Select_avec_commandes
-from fiche_famille.widgets import Selection_emetteur, Selection_mode_reglement, Saisie_ventilation
 from core.utils import utils_preferences, utils_dates
-import datetime
+from fiche_famille.widgets import Selection_emetteur, Selection_mode_reglement, Saisie_ventilation
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -32,6 +32,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")
+        idfacture = kwargs.pop("idfacture")
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'famille_reglements_form'
@@ -74,6 +75,11 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Ventilation
         self.fields['ventilation'].label = False
+
+        # Si paiement d'une facture
+        if idfacture:
+            self.fields["montant"].initial = Facture.objects.get(pk=idfacture).solde_actuel
+            self.fields["ventilation"].widget.attrs["idfacture"] = idfacture
 
         # Si le règlement est déjà inclus dans un dépôt
         if self.instance.depot:

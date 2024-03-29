@@ -104,9 +104,11 @@
                         {% if perms.core.factures_generation %}<li class="dropdown-item"><a href="{% url 'factures_generation' %}">Générer des factures</a></li>{% endif %}
                         {% if perms.core.rappels_generation %}<li class="dropdown-item"><a href="{% url 'rappels_generation' %}">Générer des lettres de rappel</a></li>{% endif %}
                     {% endif %}
+                    
+                    <li class="dropdown-divider"></li>
+                    <h6 class="dropdown-header"><strong>Règlements</strong></h6>
+                    {% if perms.core.famille_reglements_ajouter %}<li class="dropdown-item"><a href="#" onclick="$('#modal_regler_facture').modal('show');">Régler une facture</a></li>{% endif %}
                     {% if perms.core.depots_reglements_liste %}
-                        <li class="dropdown-divider"></li>
-                        <h6 class="dropdown-header"><strong>Règlements</strong></h6>
                         {% if perms.core.depots_reglements_liste %}<li class="dropdown-item"><a href="{% url 'depots_reglements_liste' %}">Déposer des règlements</a></li>{% endif %}
                     {% endif %}
                     {% if perms.core.collaborateur_ajouter or perms.core.planning_collaborateurs %}
@@ -242,3 +244,5 @@
         </ul>
     </nav>
 </header>
+
+{% include 'reglements/regler_facture.html' %}

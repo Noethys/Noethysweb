@@ -1,0 +1,69 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Modal Régler une facture #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_regler_facture{% endblock %}
+    {% block modal_titre %}Régler une facture{% endblock %}
+    {% block modal_body %}
+        <p>Saisissez le numéro de la facture à régler :</p>
+        <div id="regler_facture_modal_erreurs" class="text-red"></div>
+        <input type="hidden" id="regler_facture_idfamille" value="0">
+        <form id="form_regler_facture" method="post">
+            {% csrf_token %}
+            <div>
+                <div class="controls">
+                    <input id="regler_facture_numero_facture" class="form-control" maxlength="20" autocomplete="off" autocapitalize="off">
+                </div>
+            </div>
+            <div class="buttonHolder">
+                <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                    <button type="submit" class="btn btn-primary" title="Valider" id="regler_facture_bouton_valider" value="Valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                </div>
+            </div>
+        </form>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+$(document).ready(function() {
+
+    // Initialisation de la modal
+    $('#modal_regler_facture').on("show.bs.modal", function (event) {
+        $("#regler_facture_numero_facture").val("");
+    });
+
+    $('#modal_regler_facture').on("shown.bs.modal", function (event) {
+        $("#regler_facture_numero_facture").focus();
+    });
+        
+    $('#modal_regler_facture').on("hide.bs.modal", function (event) {
+        $("#regler_facture_idfamille").val(0);
+    });
+
+    $("#form_regler_facture").on("submit", function (event) {
+        event.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_regler_facture' %}",
+            data: {
+                "numero_facture": $("#regler_facture_numero_facture").val(),
+                "idfamille": $("#regler_facture_idfamille").val(),
+            },
+            datatype: "json",
+            success: function(data){
+                window.location.href = data.url;
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        });
+    });
+
+});
+
+</script>

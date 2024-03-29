@@ -92,6 +92,7 @@ urlpatterns = [
 
     path('individus/familles/reglements/liste/<int:idfamille>', famille_reglements.Liste.as_view(), name='famille_reglements_liste'),
     path('individus/familles/reglements/ajouter/<int:idfamille>', famille_reglements.Ajouter.as_view(), name='famille_reglements_ajouter'),
+    path('individus/familles/reglements/ajouter/<int:idfamille>/<int:idfacture>', famille_reglements.Ajouter.as_view(), name='famille_reglements_ajouter'),
     path('individus/familles/reglements/modifier/<int:idfamille>/<int:pk>', famille_reglements.Modifier.as_view(), name='famille_reglements_modifier'),
     path('individus/familles/reglements/supprimer/<int:idfamille>/<int:pk>', famille_reglements.Supprimer.as_view(), name='famille_reglements_supprimer'),
     path('individus/familles/reglements/supprimer_plusieurs/<int:idfamille>/<str:listepk>', famille_reglements.Supprimer_plusieurs.as_view(), name='famille_reglements_supprimer_plusieurs'),
@@ -185,5 +186,6 @@ urlpatterns = [
     path('individus/location_get_tarif_location', secure_ajax(famille_locations.Get_tarif_location), name='ajax_get_tarif_location'),
     path('individus/famille_edition_renseignements/generer_pdf', secure_ajax(famille_edition_renseignements.Generer_pdf), name='ajax_famille_edition_renseignements_generer_pdf'),
     path('individus/envoi_recu_auto', secure_ajax(reglement_recu_auto.Envoyer_recu_automatiquement), name='ajax_envoi_recu_auto'),
+    path('individus/regler_facture', secure_ajax(famille_reglements.Regler_facture), name='ajax_regler_facture'),
 
 ]

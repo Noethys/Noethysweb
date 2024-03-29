@@ -6,16 +6,37 @@
 import json
 from decimal import Decimal
 from django.urls import reverse_lazy, reverse
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.db.models import Sum, Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Reglement, Payeur, Emetteur, ModeReglement, Prestation, Ventilation, Mandat
+from core.models import Famille, Reglement, Payeur, Emetteur, ModeReglement, Prestation, Ventilation, Mandat, Facture
 from core.utils import utils_dates, utils_texte
 from facturation.utils import utils_factures
 from fiche_famille.forms.famille_reglements import Formulaire
 from fiche_famille.views.famille import Onglet
+
+
+def Regler_facture(request):
+    """ Régler une facture selon son numéro """
+    numero_facture = request.POST.get("numero_facture")
+    idfamille = int(request.POST.get("idfamille"))
+
+    # Recherche la facture à régler
+    try:
+        conditions = Q(numero=numero_facture, etat__isnull=True)
+        if idfamille:
+            conditions &= Q(famille=idfamille)
+        facture = Facture.objects.get(conditions)
+    except:
+        return JsonResponse({"erreur": "Aucune facture valide ne correspond à ce numéro"}, status=401)
+
+    # Si facture déjà réglée
+    if not facture.solde_actuel:
+        return JsonResponse({"erreur": "Cette facture a déjà été intégralement réglée"}, status=401)
+
+    return JsonResponse({"url": reverse_lazy("famille_reglements_ajouter", kwargs={"idfamille": facture.famille_id, "idfacture": facture.pk})})
 
 
 def Get_ventilation(request):
@@ -110,6 +131,7 @@ class Page(Onglet):
         context['onglet_actif'] = "reglements"
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
+            {"label": "Régler une facture", "classe": "btn btn-default", "href": "#", "onclick": "$('#regler_facture_idfamille').val(%d);$('#modal_regler_facture').modal('show');" % self.kwargs.get('idfamille', 0), "icone": "fa fa-plus"},
         ]
         # Ajout l'idfamille à l'URL de suppression groupée
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={'idfamille': self.kwargs.get('idfamille', None), "listepk": "xxx"})
@@ -121,6 +143,7 @@ class Page(Onglet):
         """ Envoie l'idindividu au formulaire """
         form_kwargs = super(Page, self).get_form_kwargs(**kwargs)
         form_kwargs["idfamille"] = self.Get_idfamille()
+        form_kwargs["idfacture"] = self.kwargs.get("idfacture", None)
         return form_kwargs
 
     def get_success_url(self):

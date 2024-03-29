@@ -62,6 +62,7 @@
     var dict_lignes = {};
     var dict_regroupements = {};
     var montant_prestation = 0.0;
+    var idfacture_defaut = parseInt("{{ idfacture|default:0 }}");
 
     class Regroupement {
         constructor(data) {
@@ -133,6 +134,7 @@
             this.reste_ventilation = 0.0;
             this.ventilation_reglement = 0.0;
             this.ligne_regroupement = null;
+            this.num_facture = "";
 
             if (data) {
                 Object.assign(this, data);
@@ -204,6 +206,14 @@
 
     function format_montant(montant) {
         return montant.toFixed(2);
+    };
+    
+    function ventile_facture(idfacture) {
+        $.each(dict_lignes, function (key, ligne) {
+            if (ligne.idfacture === idfacture) {
+                ligne.ventile();
+            }
+        });
     };
 
     function maj_statut_ventilation() {
@@ -289,6 +299,12 @@
         $('#id_montant').on("input",function(event){
             maj_statut_ventilation();
         });
+
+        // Paiement d'une facture
+        if (idfacture_defaut) {
+            // $("#id_mode_regroupement").val("facture");
+            ventile_facture(idfacture_defaut);
+        }
 
     };
 
