@@ -1,3 +1,12 @@
+Version 1.2.3.3 (07/04/2024) :
+
+- Ajout de la commande Régler une facture dans le menu des actions rapides
+- Ajout de la compatibilité du système de sauvegardes avec pcloud
+- Correction du tri de plusieurs listes déroulantes de choix d'activités
+- Correction prestations négatives dans les attestations fiscales
+- Correction des groupes et unités masqués dans le suivi des consommations
+- Correction url du bouton d'ouverture de la fiche famille dans le détail des consommations
+
 Version 1.2.3.2 (24/03/2024) :
 
 - Ajout de l'option Masquer les groupes et unités fermés dans le suivi des consommations
