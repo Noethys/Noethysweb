@@ -123,7 +123,7 @@ def Generation_rappels(request):
                 numero=numero,
                 famille_id=IDfamille,
                 date_edition=form.cleaned_data["date_emission"],
-                activites=";".join([str(x) for x in dict_rappel["liste_activites"]]),
+                activites=";".join([str(x) for x in dict_rappel["liste_activites"]])[:200],
                 modele_id=dict_rappels_coches[IDfamille],
                 date_reference=form.cleaned_data["date_reference"],
                 solde=dict_rappel["solde_num"],

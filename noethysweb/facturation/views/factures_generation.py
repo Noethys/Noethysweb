@@ -161,7 +161,7 @@ def Generation_factures(request):
                 famille_id=dict_facture["IDfamille"],
                 date_edition=form.cleaned_data["date_emission"],
                 date_echeance=form.cleaned_data["date_echeance"],
-                activites=";".join([str(x) for x in dict_facture["liste_activites"]]),
+                activites=";".join([str(x) for x in dict_facture["liste_activites"]])[:200],
                 individus=";".join([str(x) for x in dict_facture["individus"].keys()]),
                 date_debut=form.cleaned_data["periode"].split(";")[0],
                 date_fin=form.cleaned_data["periode"].split(";")[1],
