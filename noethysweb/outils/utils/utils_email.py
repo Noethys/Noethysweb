@@ -184,10 +184,11 @@ def Envoyer_model_mail(idmail=None, request=None):
             resultat = message.send()
         except Exception as err:
             resultat = err
+            logger.error(str(err))
 
         # Mémorise le résultat de l'envoi dans la DB
         destinataire.date_envoi = datetime.datetime.now()
-        destinataire.resultat_envoi = "ok" if resultat == 1 else resultat
+        destinataire.resultat_envoi = "ok" if resultat == 1 else str(resultat)[:300]
         destinataire.save()
 
         if resultat == 1:
