@@ -64,7 +64,7 @@ class Liste(Page, crud.Liste):
         prestation = columns.TextColumn("ID Prestation", sources=['prestation__idprestation'])
         label_prestation = columns.TextColumn("Label prestation", sources=["prestation__label"])
         montant_prestation = columns.TextColumn("Montant prestation", sources=["prestation__montant"])
-        ville_resid = columns.TextColumn("Ville", sources=["individu__ville_resid"])
+        ville_resid = columns.TextColumn("Ville", sources=None)
 
         class Meta:
             structure_template = MyDatatable.structure_template
