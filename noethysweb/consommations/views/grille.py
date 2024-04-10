@@ -72,7 +72,7 @@ def Maj_tarifs_fratries(activite=None, prestations=[], liste_IDprestation_exista
                         num_enfant = index + 1
                     else:
                         num_enfant = len(liste_prestations_fratrie)
-                    montant_deductions = prestation.montant - prestation.montant_initial
+                    montant_deductions = prestation.montant_initial - prestation.montant
                     nouveau_montant = getattr(prestation.tarif_ligne, "montant_enfant_%d" % min(num_enfant, 6), decimal.Decimal(0))
                     if prestation.montant_initial != nouveau_montant:
                         prestation.montant_initial = nouveau_montant
