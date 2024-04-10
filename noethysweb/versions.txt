@@ -1,3 +1,8 @@
+Version 1.2.3.4 (10/04/2024) :
+
+- Correction de l'affichage des erreurs Mailjet
+- Correction du champ activités dans la génération des factures et des rappels
+
 Version 1.2.3.3 (07/04/2024) :
 
 - Ajout de la commande Régler une facture dans le menu des actions rapides
