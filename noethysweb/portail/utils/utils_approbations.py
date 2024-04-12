@@ -4,8 +4,9 @@
 #  Distribué sous licence GNU GPL.
 
 import datetime
+from dateutil import relativedelta
 from django.db.models import Q
-from core.models import TypeConsentement, UniteConsentement, Consentement, Inscription, Rattachement
+from core.models import TypeConsentement, UniteConsentement, Consentement, Inscription, Rattachement, PortailParametre
 
 
 def Get_approbations_requises(famille=None, activites=None, idindividu=None, avec_consentements_existants=True):
@@ -42,18 +43,38 @@ def Get_approbations_requises(famille=None, activites=None, idindividu=None, ave
         if unite_consentement not in unites_consentements_famille:
             approbations_requises["consentements"].append(unite_consentement)
 
+    # Importation de la durée de validité d'une certification
+    duree_certification_defaut = PortailParametre.objects.filter(code="renseignements_duree_certification")
+    duree_certification = duree_certification_defaut.first().valeur if duree_certification_defaut else None
+
     # Recherche des approbations des rattachements
     rattachements = Rattachement.objects.prefetch_related('individu').filter(famille=famille).exclude(individu__in=famille.individus_masques.all()).order_by("individu__nom", "individu__prenom")
     for rattachement in rattachements:
         if not idindividu or rattachement.individu_id == idindividu or rattachement.categorie == 1:
-            if not rattachement.certification_date:
+            if Get_etat_certification(rattachement.certification_date, duree_certification) != "VALIDE":
                 approbations_requises["rattachements"].append(rattachement)
 
     # Recherche des approbations de la fiche famille
-    if not famille.certification_date:
+    if Get_etat_certification(famille.certification_date, duree_certification) != "VALIDE":
         approbations_requises["familles"].append(famille)
 
     # Calcul le nombre d'approbations total
     approbations_requises["nbre_total"] = len(approbations_requises["consentements"]) + len(approbations_requises["rattachements"]) + len(approbations_requises["familles"])
 
     return approbations_requises
+
+def Get_etat_certification(date_certification=None, duree_certification=None):
+    if not date_certification:
+        return "NON_VALIDE"
+    if duree_certification:
+        type_validite, parametre = duree_certification.split("_")
+        if type_validite == "DUREE":
+            if datetime.date.today() > date_certification.date() + relativedelta.relativedelta(months=+int(parametre)):
+                return "EXPIRE"
+        if type_validite == "DATE":
+            date_fin_validite = date_certification.date() + relativedelta.relativedelta(day=1, month=int(parametre))
+            if date_fin_validite < date_certification.date():
+                date_fin_validite += relativedelta.relativedelta(years=+1)
+            if datetime.date.today() > date_fin_validite:
+                return "EXPIRE"
+    return "VALIDE"

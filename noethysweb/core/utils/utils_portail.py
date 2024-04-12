@@ -5,7 +5,7 @@
 
 import decimal
 from django import forms
-from core.models import PortailParametre, AdresseMail, ImageFond, ModeReglement, CompteBancaire, ModeleImpression
+from core.models import PortailParametre, AdresseMail, ImageFond, ModeReglement, CompteBancaire, ModeleImpression, LISTE_MOIS
 from django_summernote.widgets import SummernoteInplaceWidget
 from django.template.loader import render_to_string
 
@@ -43,6 +43,8 @@ class Parametre():
             return forms.ChoiceField(label=self.label, choices=self.choix, required=self.required, help_text=self.help_text)
         if self.type == "decimal":
             return forms.DecimalField(label=self.label, max_digits=6, decimal_places=2, initial=0.0, required=self.required, help_text=self.help_text)
+        if self.type == "duree_certification":
+            return forms.ChoiceField(label=self.label, choices=[(None, "Illimitée"), ("DUREE_3", "3 mois"), ("DUREE_6", "6 mois"), ("DUREE_12", "12 mois"), ("DUREE_24", "24 mois"), ("DUREE_36", "36 mois")] + [("DATE_%d" % num_mois, "Jusqu'au 1er %s suivant" % label_mois.lower()) for num_mois, label_mois in LISTE_MOIS], required=self.required, help_text=self.help_text)
         if self.type == "html":
             return forms.CharField(label=self.label, required=self.required, help_text=self.help_text, widget=SummernoteInplaceWidget(
                 attrs={'summernote': {'width': '100%', 'height': '200px', 'toolbar': [
@@ -89,6 +91,7 @@ LISTE_PARAMETRES = [
     Parametre(code="validation_auto:individu_regimes_alimentaires", label="Validation automatique de la page 'Régimes alimentaires'", type="boolean", valeur=True),
     Parametre(code="validation_auto:individu_maladies", label="Validation automatique de la page 'Maladies'", type="boolean", valeur=True),
     Parametre(code="validation_auto:individu_medecin", label="Validation automatique de la page 'Médecin'", type="boolean", valeur=True),
+    Parametre(code="renseignements_duree_certification", label="Durée de validité d'une certification", type="duree_certification", valeur=None, help_text="Par défaut, une certification est illimitée mais elle peut également être valable pour une durée donnée ou jusqu'à une date donnée. Une fois la certification expirée, la famille doit certifier de nouveau ses fiches de renseignements sur le portail."),
 
     # Documents
     Parametre(code="cotisations_afficher_page", label="Afficher la page", type="boolean", valeur=False),

@@ -3,6 +3,7 @@
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
+{% load portail %}
 
 
 {% block styles %}
@@ -137,11 +138,15 @@
                         <td class="project-state">
                             <small>
                                 <ul class="list-unstyled">
-                                    {% if request.user.famille.certification_date %}
-                                        <li class="text-success"><i class="fa fa-check margin-r-5"></i>{% blocktrans %}Fiche certifiée exacte le{% endblocktrans %} {{ request.user.famille.certification_date|date:'d/m/Y' }}</li>
-                                    {% else %}
-                                        <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Fiche en attente de certification{% endblocktrans %}</li>
-                                    {% endif %}
+                                    {% with request.user.famille.certification_date|get_etat_certification:parametres_portail.renseignements_duree_certification as etat_certification %}
+                                        {% if etat_certification == "VALIDE" %}
+                                            <li class="text-success"><i class="fa fa-check margin-r-5"></i>{% blocktrans %}Fiche certifiée exacte le{% endblocktrans %} {{ request.user.famille.certification_date|date:'d/m/Y' }}</li>
+                                        {% elif etat_certification == "EXPIRE" %}
+                                            <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Fiche en attente de certification (Certification expirée){% endblocktrans %}</li>
+                                        {% else %}
+                                            <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Fiche en attente de certification{% endblocktrans %}</li>
+                                        {% endif %}
+                                    {% endwith %}
                                 </ul>
                             </small>
                         </td>
@@ -167,11 +172,15 @@
                             <td class="project-state">
                                 <small>
                                     <ul class="list-unstyled">
-                                        {% if rattachement.certification_date %}
-                                            <li class="text-success"><i class="fa fa-check margin-r-5"></i>{% blocktrans %}Fiche certifiée exacte le{% endblocktrans %} {{ rattachement.certification_date|date:'d/m/Y' }}</li>
-                                        {% else %}
-                                            <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Fiche en attente de certification{% endblocktrans %}</li>
-                                        {% endif %}
+                                        {% with rattachement.certification_date|get_etat_certification:parametres_portail.renseignements_duree_certification as etat_certification %}
+                                            {% if etat_certification == "VALIDE" %}
+                                                <li class="text-success"><i class="fa fa-check margin-r-5"></i>{% blocktrans %}Fiche certifiée exacte le{% endblocktrans %} {{ rattachement.certification_date|date:'d/m/Y' }}</li>
+                                            {% elif etat_certification == "EXPIRE" %}
+                                                <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Fiche en attente de certification (Certification expirée){% endblocktrans %}</li>
+                                            {% else %}
+                                                <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Fiche en attente de certification{% endblocktrans %}</li>
+                                            {% endif %}
+                                        {% endwith %}
                                         {% for renseignement in renseignements_manquants|get_item:rattachement.individu %}
                                             <li class="text-red"><i class="fa fa-remove margin-r-5"></i>{{ renseignement }}</li>
                                         {% endfor %}
