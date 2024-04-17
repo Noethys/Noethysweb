@@ -168,7 +168,7 @@
                                                 {% endif %}
                                             </li>
 
-                                            {% if rattachement.individu.tel_domicile or rattachement.individu.tel_mobile %}
+                                            {% if rattachement.individu.tel_domicile or rattachement.individu.tel_mobile or rattachement.individu.mail %}
                                                 <li>
                                                     {% if rattachement.individu.tel_domicile %}<span style="white-space: nowrap;"><i class="fa fa-phone"></i> {{ rattachement.individu.tel_domicile }}</span>{% endif %}
                                                     {% if rattachement.individu.tel_mobile %}<span style="white-space: nowrap;"><i class="fa fa-mobile"></i> {{ rattachement.individu.tel_mobile }}</span>{% endif %}
