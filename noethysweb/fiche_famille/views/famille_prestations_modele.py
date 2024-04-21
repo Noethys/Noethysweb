@@ -3,6 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+from dateutil import rrule
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
@@ -39,6 +40,37 @@ class Page(Onglet):
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
     template_name = "fiche_famille/famille_edit.html"
+
+    def form_valid(self, form):
+        # Enregistrement de la prestation unique
+        if not form.cleaned_data["multiprestations"]:
+            prestation = form.save(commit=True)
+
+        # Si REPARTITION_MENSUELLE
+        if form.cleaned_data["multiprestations"] == "REPARTITION_MENSUELLE":
+            nbre_mois = form.cleaned_data["nbre_mois"]
+            liste_dates = list(rrule.rrule(rrule.MONTHLY, dtstart=form.cleaned_data["date"], count=nbre_mois))
+            mensualite = form.cleaned_data["montant"] // nbre_mois
+            for index, date in enumerate(liste_dates, start=1):
+                # Préparation des valeurs de la prestation
+                valeurs = {key: valeur for key, valeur in form.cleaned_data.items() if key not in ("multiprestations", "nbre_mois")}
+                valeurs["date"] = date
+                valeurs["montant"] = mensualite
+                # Ajout du modulo à la dernière mensualité
+                if index == nbre_mois:
+                    valeurs["montant"] += form.cleaned_data["montant"] % nbre_mois
+                # Enregistrement de la prestation
+                Prestation.objects.create(**valeurs)
+
+        # Si MULTIPLICATION_MENSUELLE
+        if form.cleaned_data["multiprestations"] == "MULTIPLICATION_MENSUELLE":
+            liste_dates = list(rrule.rrule(rrule.MONTHLY, dtstart=form.cleaned_data["date"], count=form.cleaned_data["nbre_mois"]))
+            for index, date in enumerate(liste_dates, start=1):
+                valeurs = {key: valeur for key, valeur in form.cleaned_data.items() if key not in ("multiprestations", "nbre_mois")}
+                valeurs["date"] = date
+                Prestation.objects.create(**valeurs)
+
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class Selection_modele(Onglet, TemplateView):

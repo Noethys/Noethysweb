@@ -26,6 +26,8 @@ class Widget_modele(ModelSelect2Widget):
 
 
 class Formulaire(FormulaireBase, ModelForm):
+    multiprestations = forms.ChoiceField(label="Multi-prestations", choices=[(None, "Non"), ("REPARTITION_MENSUELLE", "Répartir le montant en plusieurs prestations sur x mois"), ("MULTIPLICATION_MENSUELLE", "Générer plusieurs prestations identiques sur x mois")], initial=None, required=False, help_text="Cette option permet de générer plusieurs prestations selon le même modèle.")
+    nbre_mois = forms.IntegerField(label="Nbre mois", initial=1, min_value=1, required=False, help_text="Une prestation sera générée pour chaque mois à partir de la date saisie ci-dessus.")
 
     class Meta:
         model = Prestation
@@ -43,8 +45,8 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_method = 'post'
 
         self.helper.form_class = 'form-horizontal'
-        self.helper.label_class = 'col-md-2 col-form-label'
-        self.helper.field_class = 'col-md-10'
+        self.helper.label_class = 'col-md-3 col-form-label'
+        self.helper.field_class = 'col-md-9'
 
         # Importe le modèle de prestation
         modele = ModelePrestation.objects.get(pk=idmodele)
@@ -88,7 +90,37 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("individu", type=None if modele.public == "individu" else "hidden"),
                 PrependedText("montant", utils_preferences.Get_symbole_monnaie()),
             ),
+            Fieldset("Options",
+                Field("multiprestations"),
+                Field("nbre_mois"),
+            ),
+            HTML(EXTRA_HTML),
         )
+
+    def clean(self):
+        if self.cleaned_data["multiprestations"] in ("REPARTITION_MENSUELLE", "MULTIPLICATION_MENSUELLE") and not self.cleaned_data["nbre_mois"]:
+            self.add_error("nbre_mois", "Vous devez saisir un nombre de mois")
+            return
+        return self.cleaned_data
+
+
+EXTRA_HTML = """
+<script>
+    function On_change_multiprestations() {
+        $('#div_id_nbre_mois').hide();
+        if ($("#id_multiprestations").val() == 'REPARTITION_MENSUELLE') {
+            $('#div_id_nbre_mois').show();
+        };
+        if ($("#id_multiprestations").val() == 'MULTIPLICATION_MENSUELLE') {
+            $('#div_id_nbre_mois').show();
+        };
+    }
+    $(document).ready(function() {
+        $('#id_multiprestations').on('change', On_change_multiprestations);
+        On_change_multiprestations.call($('#id_multiprestations').get(0));
+    });
+</script>
+"""
 
 
 class Formulaire_selection_modele(FormulaireBase, forms.Form):
