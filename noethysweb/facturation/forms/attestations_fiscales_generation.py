@@ -31,7 +31,7 @@ class Formulaire(FormulaireBase, forms.Form):
     selection_familles = forms.TypedChoiceField(label="Sélection des familles", choices=choix_selection_familles, initial="TOUTES", required=False)
     famille = forms.ModelChoiceField(label="Famille", widget=Select2Widget({"lang": "fr", "data-width": "100%"}), queryset=Famille.objects.all().order_by("nom"), required=False)
     date_naiss_min = forms.DateField(label="Date de naissance minimale", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': False}), help_text="Saisissez la date de naissance minimale des individus. Laissez vide pour sélectionner tous les individus quelque soit leur âge.")
-    type_donnee = forms.ChoiceField(label="Type de donnée", choices=[("FACTURE", "Facturé"), ("REGLE", "Réglé")], initial="FACTURE", required=False)
+    type_donnee = forms.ChoiceField(label="Type de donnée", choices=[("FACTURE", "Les prestations de la période"), ("REGLE", "Les prestations de la période réglées"), ("REGLE_PERIODE", "Les prestations réglées durant la période")], initial="FACTURE", required=False)
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -72,6 +72,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Hidden('liste_attestations_fiscales_json', value=""),
             Fieldset('Généralités',
                 Field('periode'),
+                Field('type_donnee'),
                 Field('lot_attestations_fiscales'),
                 Field('prochain_numero'),
                 Field('date_emission'),
@@ -81,7 +82,6 @@ class Formulaire(FormulaireBase, forms.Form):
                 Field('activites'),
             ),
             Fieldset('Options',
-                Field('type_donnee'),
                 Field('selection_familles'),
                 Field('famille'),
             ),

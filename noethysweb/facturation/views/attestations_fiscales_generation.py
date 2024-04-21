@@ -45,7 +45,7 @@ def Modifier_lot_attestations_fiscales(request):
     return JsonResponse({"erreur": "Erreur !"}, status=401)
 
 
-def Get_prestations(cleaned_data):
+def Get_data(cleaned_data=None, selection_prestations=None):
     # Recherche des prestations de la période
     date_debut = utils_dates.ConvertDateENGtoDate(cleaned_data["periode"].split(";")[0])
     date_fin = utils_dates.ConvertDateENGtoDate(cleaned_data["periode"].split(";")[1])
@@ -61,27 +61,41 @@ def Get_prestations(cleaned_data):
     # Importation des noms d'activités et des dates de naissance
     dict_activites = {activite["pk"]: activite["nom"] for activite in Activite.objects.values("pk", "nom").all()}
     dict_individus = {individu["pk"]: individu["date_naiss"] for individu in Individu.objects.values("pk", "date_naiss").all()}
-
-    # Importation des prestations
-    conditions = Q(date__gte=date_debut) & Q(date__lte=date_fin) & Q(activite__in=liste_activites) & Q(individu__isnull=False)
-    if idfamille: conditions &= Q(famille=cleaned_data["famille"])
-    liste_prestations = Prestation.objects.values("pk", "label", "montant", "individu_id", "activite_id").filter(conditions).order_by("label")
+    dict_familles = {famille["pk"]: famille["nom"] for famille in Famille.objects.values("pk", "nom").all()}
 
     # Importation des ventilations
     conditions = Q(prestation__date__gte=date_debut) & Q(prestation__date__lte=date_fin) & Q(prestation__activite__in=liste_activites)
     if idfamille: conditions &= Q(famille=cleaned_data["famille"])
+    if cleaned_data["type_donnee"] == "REGLE_PERIODE": conditions &= Q(reglement__date__gte=date_debut) & Q(reglement__date__lte=date_fin)
     ventilations = Ventilation.objects.values("prestation").filter(conditions).annotate(total=Sum("montant"))
     dict_ventilations = {ventilation["prestation"]: ventilation["total"] for ventilation in ventilations}
 
+    # Importation des prestations
+    if cleaned_data["type_donnee"] == "REGLE_PERIODE":
+        conditions = Q(pk__in=list(dict_ventilations.keys()))
+    else:
+        conditions = Q(date__gte=date_debut) & Q(date__lte=date_fin)
+    conditions &= Q(activite__in=liste_activites) & Q(individu__isnull=False)
+    if selection_prestations != None: conditions &= Q(label__in=selection_prestations.keys())
+    if idfamille: conditions &= Q(famille=cleaned_data["famille"])
+    liste_prestations = Prestation.objects.values("pk", "label", "montant", "famille_id", "individu_id", "activite_id").filter(conditions).order_by("label")
+
+    return {"activites" : dict_activites, "individus": dict_individus, "familles": dict_familles, "prestations": liste_prestations, "ventilations": dict_ventilations}
+
+
+def Get_prestations(cleaned_data):
+    # Recherche des prestations de la période
+    data = Get_data(cleaned_data=cleaned_data)
+
     # Regroupement des prestations par label
     dict_prestations = {}
-    for prestation in liste_prestations:
-        if not cleaned_data["date_naiss_min"] or (dict_individus.get(prestation["individu_id"], None) and dict_individus[prestation["individu_id"]] >= cleaned_data["date_naiss_min"]):
+    for prestation in data["prestations"]:
+        if not cleaned_data["date_naiss_min"] or (data["individus"].get(prestation["individu_id"], None) and data["individus"][prestation["individu_id"]] >= cleaned_data["date_naiss_min"]):
             if prestation["label"] not in dict_prestations:
-                dict_prestations[prestation["label"]] = {"activite__nom": dict_activites.get(prestation["activite_id"], ""), "idactivite": prestation["activite_id"], "nbre": 0,
+                dict_prestations[prestation["label"]] = {"activite__nom": data["activites"].get(prestation["activite_id"], ""), "idactivite": prestation["activite_id"], "nbre": 0,
                                                      "total": decimal.Decimal(0), "regle": decimal.Decimal(0), "solde": decimal.Decimal(0)}
             dict_prestations[prestation["label"]]["total"] += prestation["montant"]
-            dict_prestations[prestation["label"]]["regle"] += dict_ventilations.get(prestation["pk"], decimal.Decimal(0))
+            dict_prestations[prestation["label"]]["regle"] += data["ventilations"].get(prestation["pk"], decimal.Decimal(0))
             dict_prestations[prestation["label"]]["solde"] = dict_prestations[prestation["label"]]["total"] - dict_prestations[prestation["label"]]["regle"]
             dict_prestations[prestation["label"]]["nbre"] += 1
 
@@ -103,38 +117,14 @@ def Ajuster_attestations_fiscales(request):
 
 def Get_attestations_fiscales(cleaned_data={}, selection_prestations={}):
     # Recherche des prestations de la période
-    date_debut = utils_dates.ConvertDateENGtoDate(cleaned_data["periode"].split(";")[0])
-    date_fin = utils_dates.ConvertDateENGtoDate(cleaned_data["periode"].split(";")[1])
-
-    cleaned_data["activites"] = json.loads(cleaned_data["activites"])
-    if cleaned_data["activites"]["type"] == "groupes_activites":
-        liste_activites = [activite.pk for activite in Activite.objects.filter(groupes_activites__in=cleaned_data["activites"]["ids"])]
-    else:
-        liste_activites = cleaned_data["activites"]["ids"]
-
-    idfamille = cleaned_data["famille"] if cleaned_data["selection_familles"] == "FAMILLE" else None
-
-    # Importation des noms de famille et des dates de naissance
-    dict_familles = {famille["pk"]: famille["nom"] for famille in Famille.objects.values("pk", "nom").all()}
-    dict_individus = {individu["pk"]: individu["date_naiss"] for individu in Individu.objects.values("pk", "date_naiss").all()}
-
-    # Importation des prestations
-    conditions = Q(date__gte=date_debut) & Q(date__lte=date_fin) & Q(activite__in=liste_activites) & Q(individu__isnull=False) & Q(label__in=selection_prestations.keys())
-    if idfamille: conditions &= Q(famille=cleaned_data["famille"])
-    liste_prestations = Prestation.objects.values("pk", "label", "montant", "famille_id", "individu_id", "activite_id").filter(conditions).order_by("label")
-
-    # Importation des ventilations
-    conditions = Q(prestation__date__gte=date_debut) & Q(prestation__date__lte=date_fin) & Q(prestation__activite__in=liste_activites)
-    if idfamille: conditions &= Q(famille=cleaned_data["famille"])
-    ventilations = Ventilation.objects.values("prestation").filter(conditions).annotate(total=Sum("montant"))
-    dict_ventilations = {ventilation["prestation"]: ventilation["total"] for ventilation in ventilations}
+    data = Get_data(cleaned_data=cleaned_data, selection_prestations=selection_prestations)
 
     # Regroupement des prestations par label
     dict_attestations = {}
-    for prestation in liste_prestations:
-        if not cleaned_data["date_naiss_min"] or (dict_individus.get(prestation["individu_id"], None) and dict_individus[prestation["individu_id"]] >= cleaned_data["date_naiss_min"]):
+    for prestation in data["prestations"]:
+        if not cleaned_data["date_naiss_min"] or (data["individus"].get(prestation["individu_id"], None) and data["individus"][prestation["individu_id"]] >= cleaned_data["date_naiss_min"]):
             if prestation["famille_id"] not in dict_attestations:
-                dict_attestations[prestation["famille_id"]] = {"nom": dict_familles.get(prestation["famille_id"], ""), "individus": {}, "activites": [], "total": decimal.Decimal(0), "regle": decimal.Decimal(0), "solde": decimal.Decimal(0)}
+                dict_attestations[prestation["famille_id"]] = {"nom": data["familles"].get(prestation["famille_id"], ""), "individus": {}, "activites": [], "total": decimal.Decimal(0), "regle": decimal.Decimal(0), "solde": decimal.Decimal(0)}
             if prestation["individu_id"] not in dict_attestations[prestation["famille_id"]]["individus"]:
                 dict_attestations[prestation["famille_id"]]["individus"][prestation["individu_id"]] = {"total": decimal.Decimal(0), "regle": decimal.Decimal(0), "solde": decimal.Decimal(0)}
             if prestation["activite_id"] not in dict_attestations[prestation["famille_id"]]["activites"]:
@@ -142,7 +132,7 @@ def Get_attestations_fiscales(cleaned_data={}, selection_prestations={}):
 
             ajustement = selection_prestations[prestation["label"]]
             total = prestation["montant"] + ajustement # max(prestation["montant"] + ajustement, decimal.Decimal(0))
-            regle = dict_ventilations.get(prestation["pk"], decimal.Decimal(0)) + ajustement # max(dict_ventilations.get(prestation["pk"], decimal.Decimal(0)) + ajustement, decimal.Decimal(0))
+            regle = data["ventilations"].get(prestation["pk"], decimal.Decimal(0)) + ajustement # max(dict_ventilations.get(prestation["pk"], decimal.Decimal(0)) + ajustement, decimal.Decimal(0))
 
             dict_attestations[prestation["famille_id"]]["individus"][prestation["individu_id"]]["total"] += total
             dict_attestations[prestation["famille_id"]]["individus"][prestation["individu_id"]]["regle"] += regle
