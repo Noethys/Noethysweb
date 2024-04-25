@@ -51,7 +51,7 @@ def Get_anomalies():
     date_retroaction = datetime.date.today() - datetime.timedelta(days=settings.CORRECTEUR_JOURS_RETROACTION)
 
     # Recherche les doublons dans les consommations (pour un individu sur une même date avec la même unité)
-    qs = Consommation.objects.select_related("individu", "inscription").annotate(doublon_id=Concat(F("individu_id"), Value("_"), F("inscription_id"), Value("_"), F("unite_id"), Value("_"), F("date"), Value("_"), F("evenement_id"), output_field=CharField()))
+    qs = Consommation.objects.select_related("individu", "inscription").filter(~Q(unite__type="Multihoraires")).annotate(doublon_id=Concat(F("individu_id"), Value("_"), F("inscription_id"), Value("_"), F("unite_id"), Value("_"), F("date"), Value("_"), F("evenement_id"), output_field=CharField()))
     doublons = qs.values("individu__nom", "individu__prenom", "individu__pk", "inscription__famille_id", "activite__pk", "date", "doublon_id")\
         .annotate(nbre_doublons=Count("doublon_id"))\
         .filter(nbre_doublons__gt=1, date__gte=date_retroaction)
