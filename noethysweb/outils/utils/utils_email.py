@@ -146,11 +146,14 @@ def Envoyer_model_mail(idmail=None, request=None):
             index += 1
 
         # Ajout du lien de désinscription
+        headers = {}
         if mail.adresse_exp.lien_desinscription and destinataire.famille_id and len(destinataires) > 1 and request:
-            html += "<br><hr><p style='font-size: 12px;'>Si vous ne souhaitez plus recevoir nos mails groupés, cliquez sur le lien suivant : <a href='%s'>Désinscription</a></p>" % Generation_lien_desinscription(request=request, idfamille=destinataire.famille_id, adresse=destinataire.adresse)
+            url_desinscription = Generation_lien_desinscription(request=request, idfamille=destinataire.famille_id, adresse=destinataire.adresse)
+            html += "<br><hr><p style='font-size: 12px;'>Si vous ne souhaitez plus recevoir nos mails groupés, cliquez sur le lien suivant : <a href='%s'>Désinscription</a></p>" % url_desinscription
+            headers = {"List-Unsubscribe-Post": "List-Unsubscribe=One-Click", "List-Unsubscribe": url_desinscription}
 
         # Création du message
-        message = EmailMultiAlternatives(subject=objet, body=utils_texte.Textify(html), from_email=mail.adresse_exp.adresse, to=[destinataire.adresse], connection=connection)
+        message = EmailMultiAlternatives(subject=objet, body=utils_texte.Textify(html), from_email=mail.adresse_exp.adresse, to=[destinataire.adresse], connection=connection, headers=headers)
         message.mixed_subtype = 'related'
         message.attach_alternative(html, "text/html")
 
