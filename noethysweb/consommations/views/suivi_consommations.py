@@ -170,7 +170,7 @@ def Get_data(parametres={}, request=None):
         for groupe in dict_groupes.get(activite, []):
             nbre_unites_groupe = 0
             for unite in dict_unites_remplissage.get(activite, []):
-                if unite.pk in unites_ouvertes or not masquer_groupes_fermes:
+                if (unite.pk in unites_ouvertes and (groupe.pk in groupes_ouverts or groupe.pk == 999999)) or not masquer_groupes_fermes:
                     dict_colonnes["unites"].append({"unite": unite, "groupe": groupe, "activite": activite})
                     nbre_unites_activite += 1
                     nbre_unites_groupe += 1
