@@ -126,6 +126,8 @@ class View(CustomView, TemplateView):
 
     def Get_data(self, parametres={}):
         data = []
+        presents = None
+        inscrits_periode = None
 
         if parametres:
             # Rubrique
@@ -149,10 +151,10 @@ class View(CustomView, TemplateView):
                 vacance = Vacance.objects.get(nom=parametres["vacances"], annee=parametres["annee"])
                 presents = (vacance.date_debut, vacance.date_fin)
             elif parametres["donnees"] == "PERIODE":
-                presents = (utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[0]),
-                            utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[1]))
-            else:
-                presents = None
+                presents = utils_dates.ConvertDateRangePicker(parametres["periode"])
+
+            if parametres["donnees"] == "INSCRITS_PERIODE":
+                inscrits_periode = utils_dates.ConvertDateRangePicker(parametres["periode"])
 
 
             # ================================ INDIVIDUS ====================================
@@ -162,6 +164,8 @@ class View(CustomView, TemplateView):
                     condition = Q(consommation__activite__in=liste_activites, consommation__date__gte=presents[0], consommation__date__lte=presents[1], consommation__etat__in=parametres["etats"])
                 else:
                     condition = Q(inscription__activite__in=liste_activites)
+                    if inscrits_periode:
+                        condition &= Q(inscription__date_debut__gte=inscrits_periode[0], inscription__date_debut__lte=inscrits_periode[1])
 
 
             # ---------------------------- INDIVIDUS : Nombre -------------------------------
@@ -197,7 +201,6 @@ class View(CustomView, TemplateView):
                         labels=[utils_dates.ConvertDateToFR(date) for date, nbre in individus],
                         valeurs=[nbre for date, nbre in individus],
                     ))
-
 
 
             # ---------------------------- INDIVIDUS : Genre -------------------------------
@@ -388,6 +391,8 @@ class View(CustomView, TemplateView):
                     condition = Q(rattachement__individu__consommation__activite__in=liste_activites, rattachement__individu__consommation__date__gte=presents[0], rattachement__individu__consommation__date__lte=presents[1], rattachement__individu__consommation__etat__in=parametres["etats"])
                 else:
                     condition = Q(rattachement__individu__inscription__activite__in=liste_activites)
+                    if inscrits_periode:
+                        condition &= Q(rattachement__individu__inscription__date_debut__gte=inscrits_periode[0], rattachement__individu__inscription__date_debut__lte=inscrits_periode[1])
 
             # ---------------------------- FAMILLES : Nombre -------------------------------
             if rubrique == "familles_nombre":

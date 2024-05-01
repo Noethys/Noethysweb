@@ -36,7 +36,7 @@ class Formulaire(FormulaireBase, forms.Form):
     ]
     rubrique = forms.ChoiceField(label="Rubrique", widget=Select2Widget(), choices=choix_rubrique, required=True)
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
-    choix_donnees = [("INSCRITS", "Inscrits"), ("ANNEE", "Présents sur une année"), ("MOIS", "Présents sur un mois"),
+    choix_donnees = [("INSCRITS", "Inscrits"), ("INSCRITS_PERIODE", "Inscrits sur une période de dates"), ("ANNEE", "Présents sur une année"), ("MOIS", "Présents sur un mois"),
                      ("VACANCES", "Présents sur une période de vacances"), ("PERIODE", "Présents sur une période de dates")]
     donnees = forms.TypedChoiceField(label="Données", choices=choix_donnees, initial="INSCRITS", required=True)
     vacances = forms.ChoiceField(label="Vacances", choices=LISTE_VACANCES, required=False)
@@ -97,6 +97,9 @@ function On_change_donnees() {
     $('#div_id_annee').hide();
     $('#div_id_periode').hide();
     $('#div_id_etats').hide();
+    if($(this).val() == 'INSCRITS_PERIODE') {
+        $('#div_id_periode').show();
+    };
     if($(this).val() == 'VACANCES') {
         $('#div_id_vacances').show();
         $('#div_id_annee').show();
