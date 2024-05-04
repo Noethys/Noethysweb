@@ -6,6 +6,7 @@
 import logging, decimal
 logger = logging.getLogger(__name__)
 logging.getLogger("PIL").setLevel(logging.WARNING)
+from django.db.models import Q
 from reportlab.platypus import Spacer, Paragraph, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
@@ -16,17 +17,22 @@ from core.utils import utils_impression, utils_texte
 class Impression(utils_impression.Impression):
     def Draw(self):
         # Importation des prestations
+        conditions = Q(date__range=self.dict_donnees["periode"])
+
         if self.dict_donnees["activites"]["type"] == "groupes_activites":
             liste_activites = [activite.pk for activite in Activite.objects.filter(groupes_activites__in=self.dict_donnees["activites"]["ids"])]
         else:
             liste_activites = self.dict_donnees["activites"]["ids"]
-        prestations = Prestation.objects.select_related("famille", "activite", "individu", "facture").filter(activite_id__in=liste_activites, date__range=self.dict_donnees["periode"]).order_by("individu__prenom")
+        conditions &= Q(activite_id__in=liste_activites)
 
-        # Importation des prestations
+        prestations = Prestation.objects.select_related("famille", "activite", "individu", "facture").filter(conditions).order_by("individu__prenom")
+
+        # Regroupement des prestations par famille et application filtre ville
         dict_prestations = {}
         for prestation in prestations:
-            dict_prestations.setdefault(prestation.famille, [])
-            dict_prestations[prestation.famille].append(prestation)
+            if not self.dict_donnees["filtre_villes"] or (self.dict_donnees["filtre_villes"] == "SELECTION" and prestation.famille.ville_resid and prestation.famille.ville_resid.upper() in self.dict_donnees["villes"]):
+                dict_prestations.setdefault(prestation.famille, [])
+                dict_prestations[prestation.famille].append(prestation)
 
         # Préparation du détail
         dict_prestations_famille = {}
