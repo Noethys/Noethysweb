@@ -1,3 +1,11 @@
+Version 1.2.3.6 (04/05/2024) :
+
+- Ajout de la sélection des villes dans l'édition des prestations
+- Ajout de l'option Inscrits sur une période dans les statistiques
+- Ajout du header unsubscribe dans les emails groupés
+- Correction de la détection des doublons de consommations si multihoraires
+- Correction de l'option Masquer groupes fermés dans le suivi des consommations
+
 Version 1.2.3.5 (21/04/2024) :
 
 - Ajout de la durée de validité d'une certification dans les paramètres du portail
