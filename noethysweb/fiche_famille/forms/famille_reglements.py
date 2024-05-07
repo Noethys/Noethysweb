@@ -144,6 +144,8 @@ class Formulaire(FormulaireBase, ModelForm):
     def clean_emetteur(self):
         if self.cleaned_data["emetteur"] in ("None", ""):
             self.cleaned_data["emetteur"] = None
+        if self.cleaned_data["emetteur"] and self.cleaned_data["emetteur"].mode_id != self.cleaned_data["mode"].pk:
+            self.cleaned_data["emetteur"] = None
         if self.instance and self.instance.depot:
             return getattr(self.instance, "emetteur")
         return self.cleaned_data["emetteur"]
