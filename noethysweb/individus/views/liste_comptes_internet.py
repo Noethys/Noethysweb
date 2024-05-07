@@ -205,7 +205,7 @@ class Liste(Page, crud.Liste):
         internet_identifiant = columns.TextColumn("Identifiant", sources=[], processor='Get_internet_identifiant')
         internet_mdp = columns.TextColumn("Mot de passe", sources=[], processor='Get_internet_mdp')
         date_expiration_mdp = columns.TextColumn("Expiration mdp", sources=["utilisateur__date_expiration_mdp"], processor=helpers.format_date("%d/%m/%Y %H:%M"))
-        derniere_action = columns.TextColumn("Dernière action", sources=["derniere_action"], processor=helpers.format_date('%d/%m/%Y'))
+        derniere_action = columns.TextColumn("Dernière action", sources=None, processor=helpers.format_date('%d/%m/%Y'))
 
         class Meta:
             structure_template = MyDatatable.structure_template
