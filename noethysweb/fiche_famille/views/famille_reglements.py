@@ -175,14 +175,15 @@ class Liste(Page, crud.Liste):
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         mode = columns.TextColumn("Mode", sources=['mode__label'])
-        # emetteur = columns.TextColumn("Emetteur", sources=['emetteur__nom'])
+        emetteur = columns.TextColumn("Emetteur", sources=['emetteur__nom'])
         payeur = columns.TextColumn("Payeur", sources=['payeur__nom'])
         depot = columns.TextColumn("Dépôt", sources=['depot__date'], processor='Get_date_depot')
         ventile = columns.TextColumn("Ventilé", sources=None, processor='Formate_ventile')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idreglement', 'date', 'mode', 'numero_piece', 'payeur', 'montant', 'ventile', 'depot']
+            columns = ['check', 'idreglement', 'date', 'mode', 'emetteur', 'numero_piece', 'payeur', 'montant', 'ventile', 'depot']
+            hidden_columns = ["emetteur",]
             processors = {
                 'date': helpers.format_date('%d/%m/%Y'),
                 'depot': helpers.format_date('%d/%m/%Y'),
