@@ -239,14 +239,24 @@ def Get_data(parametres={}, request=None):
             elif key_case in liste_ouvertures:
                 # Case normale
                 liste_initiales = []
-                for idgroupe in [colonne["groupe"].pk, 0]:
-                    key = "%s_%s_%s" % (date, colonne["unite"].pk, idgroupe)
-                    if key in dict_capacite:
-                        liste_initiales.append(dict_capacite.get(key, 0))
+                key = "%s_%s_%s" % (date, colonne["unite"].pk, colonne["groupe"].pk)
+                if key in dict_capacite:
+                    liste_initiales.append(dict_capacite.get(key, 0))
 
                 initiales = min(liste_initiales) if liste_initiales else 0
                 prises = dict_places.get(key_case, 0)
                 restantes = initiales - prises
+                if restantes < 0:
+                    restantes = 0
+
+                # Total max
+                key = "%s_%s_0" % (date, colonne["unite"].pk)
+                if key in dict_capacite:
+                    if not initiales:
+                        initiales = dict_capacite.get(key, 0)
+                    restantes_total = dict_capacite.get(key, 0) - dict_places.get(key, 0)
+                    if restantes_total < restantes:
+                        restantes = restantes_total
 
                 seuil_alerte = dict_seuils[colonne["unite"].pk]
                 if restantes <= 0: classe = "complet"
