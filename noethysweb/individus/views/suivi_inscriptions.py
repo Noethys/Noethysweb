@@ -107,6 +107,11 @@ def Get_data(parametres={}, filtre=None, request=None):
             nbre_refus = dict_inscriptions.get((activite.pk, "refus", groupe.pk), 0)
             nbre_dispo = nbre_max - nbre_inscrits if nbre_max else 0
 
+            classe = ""
+            if nbre_max and nbre_dispo > 5: classe = "disponible"
+            if nbre_max and 0 < nbre_dispo <= 5: classe = "dernieresplaces"
+            if nbre_max and nbre_dispo <= 0: classe = "complet"
+
             dict_activite["nbre_inscrits"] += nbre_inscrits
             dict_activite["nbre_attente"] += nbre_attente
             dict_activite["nbre_refus"] += nbre_refus
@@ -114,7 +119,14 @@ def Get_data(parametres={}, filtre=None, request=None):
                 dict_activite["nbre_dispo"] = activite.nbre_inscrits_max - dict_activite["nbre_inscrits"]
 
             dict_activite["groupes"].append({"groupe": groupe, "nbre_max": groupe.nbre_inscrits_max, "nbre_inscrits": nbre_inscrits,
-                                             "nbre_attente": nbre_attente, "nbre_refus": nbre_refus, "nbre_dispo": nbre_dispo})
+                                             "nbre_attente": nbre_attente, "nbre_refus": nbre_refus, "nbre_dispo": nbre_dispo, "classe": classe})
+
+        if activite.nbre_inscrits_max:
+            for dict_groupe in dict_activite["groupes"]:
+                if dict_activite["nbre_dispo"] > 5 and not dict_groupe["classe"]: dict_groupe["classe"] = "disponible"
+                if 0 < dict_activite["nbre_dispo"] <= 5 and dict_groupe["classe"] != "complet": dict_groupe["classe"] = "dernieresplaces"
+                if dict_activite["nbre_dispo"] <= 0: dict_groupe["classe"] = "complet"
+
         liste_resultats.append(dict_activite)
 
     return liste_resultats

@@ -24,7 +24,7 @@
             <td>{{ activite.nbre_refus|default:'' }}</td>
         </tr>
         {% for groupe in activite.groupes %}
-            <tr>
+            <tr class="{{ groupe.classe }}">
                 <td>{{ groupe.groupe.nom }}</td>
                 <td>{{ groupe.nbre_inscrits|default:'' }}</td>
                 <td>{{ groupe.nbre_max|default:'' }}</td>
@@ -54,5 +54,13 @@
     .dark-mode #table_suivi_inscriptions .activite {
         background-color: #5f5f5f;
     }
-
+    .disponible {
+        background-color: rgba(227, 254, 219, 0.73);
+    }
+    .dernieresplaces {
+        background-color: #FEFCDB;
+    }
+    .complet {
+        background-color: rgba(247, 172, 178, 0.36);
+    }
 </style>
