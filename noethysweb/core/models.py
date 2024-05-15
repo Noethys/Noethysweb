@@ -1387,6 +1387,7 @@ class Evenement(models.Model):
     heure_fin = models.TimeField(verbose_name="Heure de fin", blank=True, null=True)
     montant = models.DecimalField(verbose_name="Montant", blank=True, null=True, max_digits=10, decimal_places=2, default=0.0)
     equiv_heures = models.TimeField(verbose_name="Equivalence en heures", blank=True, null=True)
+    visible_portail = models.BooleanField(verbose_name="Visible sur le portail", default=True)
 
     class Meta:
         db_table = 'evenements'

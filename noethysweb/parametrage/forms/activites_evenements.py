@@ -134,6 +134,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("heure_debut"),
                 Field("heure_fin"),
                 Field("equiv_heures"),
+                Field("visible_portail"),
             ),
             Fieldset("Limitation du nombre de places",
                 Field("type_nbre_places"),

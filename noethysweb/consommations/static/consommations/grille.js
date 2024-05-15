@@ -722,7 +722,7 @@ class Case_evenement extends Case_base {
             // Création des cases html
             var html = "<table class='table table_evenements'><tbody><tr>";
             liste_evenements.forEach(function(evenement) {
-                if (self.groupe === evenement.groupe) {
+                if ((self.groupe === evenement.groupe) && (!(mode === "portail") || ((mode === "portail") && (evenement.visible_portail === true)))) {
                     var classe_event = $("#" + self.key).hasClass("fermeture") ? "fermeture" : "ouvert";
                     html += "<td class='case " + classe_event + "' id='event_" + self.key + "_" + evenement.pk + "'</td>";
                 }
