@@ -1,3 +1,15 @@
+Version 1.2.3.7 (16/05/2024) :
+
+- Ajout des couleurs au suivi des inscriptions
+- Ajout de l'option Visible sur le portail pour les évènements
+- Ajout d'une colonne Emetteur dans la liste des règlements de la fiche famille
+- Correction sur l'enregistrement de l'émetteur d'un règlement
+- Correction sur le filtre rapide de la colonne dernière action de la liste des comptes internet
+- Correction du total max dans le suivi des consommations
+- Correction des adhésions individuelles sans individu
+- Correction de la suppression des sauvegardes obsolètes avec pcloud
+- Correction du champ forfait dans le formulaire d'une prestation
+
 Version 1.2.3.6 (04/05/2024) :
 
 - Ajout de la sélection des villes dans l'édition des prestations
