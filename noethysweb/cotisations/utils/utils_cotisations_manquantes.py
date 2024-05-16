@@ -26,13 +26,16 @@ def Get_cotisations_manquantes(famille=None, date_reference=None, utilisateur=No
 
     dict_cotisations = {}
     for cotisation in cotisations_existantes:
-        if cotisation.type_cotisation.type == "famille":
-            key = "famille_%d_%d" % (cotisation.famille_id, cotisation.type_cotisation_id)
-        else:
-            key = "individu_%d_%d" % (cotisation.individu_id, cotisation.type_cotisation_id)
-        dict_cotisations.setdefault(key, [])
-        dict_cotisations[key].append(cotisation)
-
+        try:
+            if cotisation.type_cotisation.type == "famille":
+                key = "famille_%d_%d" % (cotisation.famille_id, cotisation.type_cotisation_id)
+            else:
+                key = "individu_%d_%d" % (cotisation.individu_id, cotisation.type_cotisation_id)
+            dict_cotisations.setdefault(key, [])
+            dict_cotisations[key].append(cotisation)
+        except:
+            pass
+        
     liste_traitees = []
     liste_resultats = []
     for inscription in inscriptions:
