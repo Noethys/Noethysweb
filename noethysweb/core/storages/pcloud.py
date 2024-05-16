@@ -3,6 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import os.path
 from django.core.files.storage import Storage
 from django.utils.deconstruct import deconstructible
 from storages.utils import get_available_overwrite_name
@@ -40,11 +41,12 @@ class PcloudStorage(Storage):
         return full_path
 
     def delete(self, name):
-        self.client.deletefile(self._full_path(name))
+        repertoire, nom_fichier = os.path.split(self._full_path(name))
+        self.client.deletefile(path=repertoire, fileid=self.Get_fileid(name))
 
     def exists(self, name):
         try:
-            return bool(self.Get_metadata_fichier(name))
+            return bool(self.Get_meta(name))
         except:
             return False
 
@@ -54,16 +56,25 @@ class PcloudStorage(Storage):
         for dict_fichier in data["metadata"]["contents"]:
             if not dict_fichier["isfolder"]:
                 fichiers.append(dict_fichier["name"])
+        fichiers.sort()
         return repertoires, fichiers
 
-    def Get_metadata_fichier(self, name):
-        return self.client.stat(self._full_path(name))
+    def Get_fileid(self, path):
+        return self.Get_meta(path)["fileid"]
+
+    def Get_meta(self, path):
+        repertoire, nom_fichier = os.path.split(path)
+        data = self.client.listfolder(path=self._full_path(repertoire))
+        for dict_fichier in data["metadata"]["contents"]:
+            if dict_fichier["name"] == nom_fichier:
+                return dict_fichier
+        return None
 
     def size(self, name):
-        return self.Get_metadata_fichier(name)["size"]
+        return self.Get_meta(name)["size"]
 
     def modified_time(self, name):
-        return self.Get_metadata_fichier(name)["modified"]
+        return self.Get_meta(name)["modified"]
 
     def url(self, name):
         pass
