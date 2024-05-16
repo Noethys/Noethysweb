@@ -85,7 +85,9 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Prestation
-        fields = "__all__"
+        fields = ["date", "categorie", "label", "montant_initial", "montant", "activite", "tarif", "facture",
+                  "famille", "individu", "categorie_tarif", "quantite", "tva", "code_compta", "code_analytique",
+                  "code_produit_local", "tarif_ligne"]
         widgets = {
             "date": DatePickerWidget(),
             "facture": Facture_prestation(),
