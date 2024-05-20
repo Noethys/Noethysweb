@@ -67,8 +67,17 @@ class Liste(Page, crud.Liste):
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
 
+    def form_valid(self, form):
+        # Enregistre d'abord la structure
+        redirect = super(Ajouter, self).form_valid(form)
+        # Associe la structure à l'utilisateur qui vient de la créer
+        self.request.user.structures.add(form.instance)
+        return redirect
+
+
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire
+
 
 class Supprimer(Page, crud.Supprimer):
     pass
