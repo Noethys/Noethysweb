@@ -10,7 +10,7 @@ from fiche_famille.views import famille, famille_questionnaire, famille_notes, f
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, famille_sms, \
                             famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats, famille_voir_mandat, famille_prestations_modele, \
                             famille_attestations_fiscales, famille_voir_attestation_fiscale, famille_locations, famille_voir_location, famille_remboursement, famille_factures_consulter, famille_factures_selection, \
-                            famille_edition_renseignements, reglement_recu_auto, famille_formulaires
+                            famille_edition_renseignements, reglement_recu_auto, famille_formulaires, famille_releve_prestations
 
 urlpatterns = [
 
@@ -150,6 +150,7 @@ urlpatterns = [
     path('individus/familles/historique/<int:idfamille>', famille_historique.Liste.as_view(), name='famille_historique'),
     path('individus/familles/export_xml/<int:idfamille>', famille_export_xml.View.as_view(), name='famille_export_xml'),
     path('individus/familles/edition_renseignements/<int:idfamille>', famille_edition_renseignements.View.as_view(), name='famille_edition_renseignements'),
+    path('individus/familles/releve_prestations/<int:idfamille>', famille_releve_prestations.View.as_view(), name='famille_releve_prestations'),
 
     # Communication
     path('individus/familles/emails/ajouter/<int:idfamille>', famille_emails.Ajouter.as_view(), name='famille_emails_ajouter'),
@@ -187,5 +188,7 @@ urlpatterns = [
     path('individus/famille_edition_renseignements/generer_pdf', secure_ajax(famille_edition_renseignements.Generer_pdf), name='ajax_famille_edition_renseignements_generer_pdf'),
     path('individus/envoi_recu_auto', secure_ajax(reglement_recu_auto.Envoyer_recu_automatiquement), name='ajax_envoi_recu_auto'),
     path('individus/regler_facture', secure_ajax(famille_reglements.Regler_facture), name='ajax_regler_facture'),
+    path('individus/famille_releve_prestations/generer_pdf', secure_ajax(famille_releve_prestations.Generer_pdf), name='ajax_famille_releve_prestations_generer_pdf'),
+    path('individus/famille_releve_prestations/get_form_periode', secure_ajax(famille_releve_prestations.Get_form_periode), name='ajax_releve_prestations_form_periode'),
 
 ]

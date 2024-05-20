@@ -1,0 +1,131 @@
+{% load static %}
+{% load embed %}
+
+<table class="table table-bordered">
+    <thead>
+        <tr class="text-center">
+            <th>Intitulé</th>
+            <th style="width: 90px;">Actions</th>
+        </tr>
+    </thead>
+    <tbody id="contenu_tableau">
+    </tbody>
+</table>
+
+<input type="text" id="periodes" name="periodes" hidden>
+
+<button type="button" class="btn btn-success btn-sm" onclick="Ajouter_periode()"><i class="fa fa-plus"></i> Ajouter une période</button>
+
+{# Modal période #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_periode{% endblock %}
+    {% block modal_titre %}{% endblock %}
+    {% block modal_classe %}modal-lg{% endblock %}
+    {% block modal_body %}
+        <div id="id_div_form_periode">
+        </div>
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" onclick="valider_form_periode()"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+    {% endblock %}
+{% endembed %}
+
+<script>
+
+    {% include 'core/csrftoken.html' %}
+
+    var valeurs = JSON.parse("{{ value|escapejs }}");
+
+    $(document).ready(function() {
+        maj_tableau();
+    })
+
+    function maj_tableau() {
+        var html = "";
+        $.each(valeurs, function (index, dict_periode) {
+            var colonnes = [];
+            colonnes.push("<input name='periode' value='" + JSON.stringify(dict_periode) + "' hidden>");
+            colonnes.push("<td>" + dict_periode["label"] + "</td>");
+            html += "<tr class='text-center'>" + colonnes.join() + "<td>";
+            html += "<a type='button' class='btn btn-default btn-xs' onclick='Modifier_periode(" + index + ")' title='Modifier'><i class='fa fa-fw fa-pencil'></i></a> ";
+            html += "<a type='button' class='btn btn-default btn-xs' onclick='Supprimer_periode(" + index + ")' title='Supprimer'><i class='fa fa-fw fa-trash'></i></a>";
+            html += "</td>";
+        })
+        $("#contenu_tableau").html(html)
+        $("#periodes").val(JSON.stringify(valeurs))
+    }
+
+    function Ajouter_periode() {
+        $('#modal_periode .modal-title').html("Ajouter une période");
+        get_form_periode("ajouter", null)
+    }
+
+    function Modifier_periode(index) {
+        $('#modal_periode .modal-title').html("Modifier une période");
+        get_form_periode("modifier", index)
+    }
+
+    function Supprimer_periode(index) {
+        bootbox.dialog({
+            title: "Confirmation",
+            message: "Confirmez-vous la suppression de cette période ?",
+            buttons: {
+                ok: {
+                    label: "<i class='fa fa-trash'></i> Supprimer",
+                    className: 'btn-warning',
+                    callback: function(){
+                        valeurs.splice(index, 1);
+                        maj_tableau();
+                    }
+                },
+                cancel: {
+                    label: "<i class='fa fa-ban'></i> Annuler",
+                    className: 'btn-danger',
+                }
+            }
+        });
+    }
+
+    function get_form_periode(action, index) {
+        $.ajax({
+            url: "{% url 'ajax_releve_prestations_form_periode' %}",
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+                action: action,
+                valeur: JSON.stringify(valeurs[index]),
+                index: index,
+            },
+            success: function (data) {
+                $("#periode_form").remove();
+                $("#id_div_form_periode").append(data['form_html']);
+                $("#modal_periode").modal("show");
+            }
+        });
+    }
+
+    function valider_form_periode() {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_releve_prestations_form_periode' %}",
+            data: $("#periode_form").serialize(),
+            datatype: "json",
+            success: function(data){
+                $("#modal_periode").modal("hide");
+                if (data.index) {
+                    valeurs[data.index] = data.valeur;
+                } else {
+                    valeurs.push(data.valeur);
+                }
+                maj_tableau();
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        });
+    }
+
+</script>

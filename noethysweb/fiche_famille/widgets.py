@@ -215,3 +215,19 @@ class Prestation_cotisation(Widget):
     def render(self, name, value, attrs=None, renderer=None):
         context = self.get_context(name, value, attrs)
         return mark_safe(loader.render_to_string(self.template_name, context))
+
+
+class Periodes_releve_prestations(Widget):
+    template_name = "fiche_famille/widgets/periodes_releve_prestations.html"
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        context["name"] = name
+        context["value"] = value
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
