@@ -1,3 +1,11 @@
+Version 1.2.3.8 (21/05/2024) :
+
+- Ajout du relevé des prestations dans la rubrique Outils de la fiche famille
+- Ajout de l'attribution automatique de l'utilisateur à une nouvelle structure
+- Ajout de la création de médecins depuis la fiche individuelle
+- Ajout du masquage des activités obsolètes dans les widgets de sélection d'activités
+- Correction de la TVA lors de l'application d'un forfait daté
+
 Version 1.2.3.7 (16/05/2024) :
 
 - Ajout des couleurs au suivi des inscriptions
