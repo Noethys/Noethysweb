@@ -22,7 +22,7 @@ class Form_choix_medecin(forms.ModelChoiceField):
 class Formulaire(FormulaireBase, ModelForm):
     medecin = Form_choix_medecin(label=_("Médecin"), queryset=Medecin.objects.all().order_by("nom", "prenom"), required=False,
                                      widget=Select_avec_commandes_form(attrs={"url_ajax": "portail_ajax_ajouter_medecin", "id_form": "medecins_form", "afficher_bouton_ajouter": False,
-                                                                              "textes": {"champ": "Nom du régime alimentaire", "ajouter": "Ajouter un médecin", "modifier": "Modifier un médecin"}}))
+                                                                              "textes": {"champ": "Nom du médecin", "ajouter": "Ajouter un médecin", "modifier": "Modifier un médecin"}}))
 
     class Meta:
         model = Individu

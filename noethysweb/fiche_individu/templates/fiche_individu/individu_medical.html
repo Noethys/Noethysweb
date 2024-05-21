@@ -93,6 +93,18 @@
 
     </div>
 
+    {# Modal Ajout d'un médecin #}
+    {% if form_ajout_medecin %}
+        {% embed 'core/modal.html' %}
+            {% block modal_id %}id_medecin_modal_ajout{% endblock %}
+            {% block modal_titre %}{% endblock %}
+            {% block modal_body %}
+                <div id="modal_erreurs" class="text-red"></div>
+                {% crispy form_ajout_medecin %}
+            {% endblock %}
+        {% endembed %}
+    {% endif %}
+
     {# Modal Sélection du médecin #}
     {% embed 'core/modal.html' %}
         {% block modal_id %}modal_selection_medecin{% endblock %}
@@ -108,7 +120,16 @@
     {% endembed %}
 
     <script>
+    
+        $('#id_medecin_modal_ajout').on("show.bs.modal", function (event) {
+            $("#modal_selection_medecin").modal("hide");
+            $("input[name=idindividu]").val("{{ idindividu }}");
+        });
 
+        $('#id_medecin_modal_ajout').on("hidden.bs.modal", function (event) {
+            window.location.href = "{% url 'individu_medical_liste' idfamille=idfamille idindividu=idindividu %}";
+        });
+                
         // Modal : Sélection médecin
         $(document).on('submit', 'div.modal-body form', function(e) {
             e.preventDefault();

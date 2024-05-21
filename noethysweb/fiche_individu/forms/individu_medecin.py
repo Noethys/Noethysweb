@@ -5,27 +5,25 @@
 
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, ButtonHolder, Div, Fieldset
-from crispy_forms.bootstrap import Field, InlineCheckboxes, FormActions, StrictButton
-from core.utils.utils_commandes import Commandes
+from crispy_forms.layout import Layout, Submit, HTML, ButtonHolder, Div
+from crispy_forms.bootstrap import Field
+from core.forms.base import FormulaireBase
 from core.models import Individu, Medecin
-from django_select2.forms import ModelSelect2Widget
+from core.widgets import Select_avec_commandes_form
 
 
-class Widget_medecin(ModelSelect2Widget):
+class Form_choix_medecin(forms.ModelChoiceField):
     search_fields = ['nom__icontains', 'prenom__icontains', 'ville_resid__icontains']
 
-    def label_from_instance(widget, instance):
-        label = instance.Get_nom()
-        if instance.ville_resid:
-            label += " (%s)" % instance.ville_resid
-        return label
+    def label_from_instance(self, instance):
+        return instance.Get_nom(afficher_ville=True)
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    medecin = forms.ModelChoiceField(label="Sélectionnez un médecin", widget=Widget_medecin({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=Medecin.objects.all().order_by("nom", "prenom"), required=False)
+    medecin = Form_choix_medecin(label="Médecin", queryset=Medecin.objects.all().order_by("nom", "prenom"), required=False, help_text="Cliquez sur le '+' si vous souhaitez ajouter un nouveau médecin qui n'existe pas dans la liste.",
+                                     widget=Select_avec_commandes_form(attrs={"url_ajax": "ajax_ajouter_medecin", "id_form": "medecins_form", "afficher_bouton_ajouter": True,
+                                                                              "textes": {"champ": "Nom du médecin", "ajouter": "Ajouter un médecin", "modifier": "Modifier un médecin"}}))
 
     class Meta:
         model = Individu
@@ -51,4 +49,3 @@ class Formulaire(FormulaireBase, ModelForm):
                 ),
             ),
         )
-

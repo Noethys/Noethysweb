@@ -90,6 +90,7 @@ urlpatterns = [
     path('individus/get_categories_tarifs', secure_ajax(individu_inscriptions.Get_categories_tarifs), name='ajax_get_categories_tarifs'),
     path('individus/select_medecin', secure_ajax(individu_medical.Select_medecin), name='ajax_select_medecin'),
     path('individus/deselect_medecin', secure_ajax(individu_medical.Deselect_medecin), name='ajax_deselect_medecin'),
+    path('individus/ajouter_medecin', secure_ajax(individu_medical.Ajouter_medecin), name='ajax_ajouter_medecin'),
     path('individus/get_coords_gps', secure_ajax(individu_coords.Get_coords_gps), name='ajax_get_coords_gps'),
     path('individus/ajouter_regime_alimentaire', secure_ajax(individu_regimes_alimentaires.Ajouter_regime_alimentaire), name='ajax_ajouter_regime_alimentaire'),
     path('individus/ajouter_maladie', secure_ajax(individu_maladies.Ajouter_maladie), name='ajax_ajouter_maladie'),
