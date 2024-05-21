@@ -304,7 +304,7 @@ class Forfaits():
                             prestation = Prestation.objects.create(
                                 famille=inscription.famille, date=date_facturation, categorie="consommation", label=label_forfait,
                                 montant_initial=montant_initial, montant=montant_final, activite=activite, tarif=tarif, individu=inscription.individu,
-                                forfait=type_forfait, categorie_tarif=categorie_tarif,
+                                forfait=type_forfait, categorie_tarif=categorie_tarif, tva=tarif.tva,
                             )
 
                             # Sauvegarde des déductions
