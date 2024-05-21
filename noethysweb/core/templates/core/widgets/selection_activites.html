@@ -12,7 +12,7 @@
     }
     .table_activites th, td{
         /*font-size: 12px;*/
-        padding: 5px;
+        padding: 5px !important;
     }
     .table_activites th {
         background-color: #e0e0e0;
@@ -25,8 +25,11 @@
     .masquer {
         display: none;
     }
-    #table_groupes td {
+    #table_groupes th, td {
         padding: 5px;
+    }
+    .obsolete {
+        display: none;
     }
 </style>
 
@@ -47,7 +50,12 @@
         <label class="form-check-label" for="radio_choix_groupes_{{ id }}">Groupes</label>
     </div>
     {% endif %}
-
+    <div id="div_activites_obsoletes" class="pull-right masquer">
+        <span class="custom-switch custom-switch-on-primary" title="Afficher les activités obsolètes">
+            <input type="checkbox" class="custom-control-input case_switch" id="switch_activites_obsoletes">
+            <label class="custom-control-label" for="switch_activites_obsoletes"></label>
+        </span>
+    </div>
 </div>
 
 <div id="div_table_groupes_activites_{{ id }}" class="div_table_activites {% if selection.type != "groupes_activites" %}masquer{% endif %}">
@@ -68,7 +76,7 @@
 <div id="div_table_activites_{{ id }}" class="div_table_activites {% if selection.type != "activites" %}masquer{% endif %}">
     <table id="table_activites_{{ id }}" class="table table-bordered table_activites">
         {% for activite in activites %}
-            <tr>
+            <tr class="{% if not activite.Is_active %}obsolete{% endif %}">
                 <td style="padding: 5px !important;">
                     <div class="form-inline">
                         <input name="liste_activites" type="checkbox" value="{{ activite.pk }}" {% if selection.type == "activites" and activite.pk in selection.ids %}checked{% endif %}>
@@ -91,7 +99,7 @@
         <table id="table_groupes_{{ id }}" class="table table-bordered table_activites">
             {% for activite in activites %}
                 {% for groupe in groupes|get_item:activite %}
-                    <tr>
+                    <tr class="{% if not groupe.activite.Is_active %}obsolete{% endif %}">
                         <td>
                             <div class="form-inline">
                                 <input name="liste_groupes" type="checkbox" value="{{ groupe.pk }}" {% if selection.type == "groupes" and groupe.pk in selection.ids %}checked{% endif %}>
@@ -119,6 +127,7 @@ $(document).ready(function() {
     $('input[name=choix_activites]').on('change', function(){
         $("#div_table_groupes_activites_{{ id }}").addClass("masquer");
         $("#div_table_activites_{{ id }}").addClass("masquer");
+        $("#div_activites_obsoletes").hide();
         {% if afficher_groupes %}
             $("#div_table_groupes_{{ id }}").addClass("masquer");
         {% endif %}
@@ -127,13 +136,19 @@ $(document).ready(function() {
         };
         if ($("#radio_choix_activites_{{ id }}").prop("checked")) {
             $("#div_table_activites_{{ id }}").removeClass("masquer");
+            $("#div_activites_obsoletes").show();
         };
             {% if afficher_groupes %}
             if ($("#radio_choix_groupes_{{ id }}").prop("checked")) {
                 $("#div_table_groupes_{{ id }}").removeClass("masquer");
+                $("#div_activites_obsoletes").show();
             };
         {% endif %}
     });
+
+    $("#switch_activites_obsoletes").on("change", function(e) {
+        $(".obsolete").toggle();
+    })
 
 });
 

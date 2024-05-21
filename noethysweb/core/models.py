@@ -1204,6 +1204,12 @@ class Activite(models.Model):
                 return agrement.agrement
         return None
 
+    def Is_active(self):
+        if self.date_fin and self.date_fin < datetime.date.today():
+            return False
+        return True
+
+
 class ResponsableActivite(models.Model):
     idresponsable = models.AutoField(verbose_name="ID", db_column='IDresponsable', primary_key=True)
     activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.CASCADE)
