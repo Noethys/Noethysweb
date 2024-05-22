@@ -10,7 +10,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset
 from crispy_forms.bootstrap import Field
 from django_select2.forms import Select2Widget
-from core.widgets import Profil_configuration, DatePickerWidget
+from core.widgets import Profil_configuration, DatePickerWidget, Select_activite
 from core.models import Parametre, Activite
 from core.utils.utils_commandes import Commandes
 from core.forms.base import FormulaireBase
@@ -19,7 +19,7 @@ from individus.widgets import ColonnesInscritsWidget
 
 class Formulaire(FormulaireBase, forms.Form):
     profil = forms.ModelChoiceField(label="Profil", queryset=Parametre.objects.none(), widget=Profil_configuration({"categorie": "imprimer_liste_inscrits", "module": "individus.views.imprimer_liste_inscrits"}), required=False)
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget(), queryset=Activite.objects.none().order_by("-date_fin"), required=True)
+    activite = forms.ModelChoiceField(label="Activité", widget=Select_activite(), queryset=Activite.objects.all(), required=True)
     date_situation = forms.DateField(label="Date de situation", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=True)
     colonnes_perso = forms.CharField(label="Colonnes", required=False, widget=ColonnesInscritsWidget())
     orientation = forms.ChoiceField(label="Orientation de la page", choices=[("portrait", "Portrait"), ("paysage", "Paysage")], initial="portrait", required=False)
@@ -43,8 +43,8 @@ class Formulaire(FormulaireBase, forms.Form):
         self.fields['profil'].queryset = Parametre.objects.filter(conditions).order_by("nom")
         self.fields["profil"].widget.request = self.request
 
-        # Activité
-        self.fields["activite"].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom")
+        # Sélectionne uniquement les activités autorisées pour l'utilisateur
+        self.fields["activite"].widget.attrs["request"] = self.request
         self.fields["date_situation"].initial = datetime.date.today()
 
         # Colonnes

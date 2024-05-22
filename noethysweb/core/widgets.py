@@ -659,3 +659,31 @@ class Selection_fichier(FileInput):
     def render(self, name, value, attrs=None, renderer=None):
         context = self.get_context(name, value, attrs)
         return mark_safe(loader.render_to_string(self.template_name, context))
+
+
+class Select_activite(Widget):
+    template_name = 'core/widgets/select_activite.html'
+
+    class Media:
+        css = {"all": ("lib/select2/css/select2.min.css",)}
+        js = ("django_select2/django_select2.js", "lib/select2/js/select2.min.js", "lib/select2/js/i18n/fr.js")
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if "request" in self.attrs:
+            context["activites"] = Activite.objects.filter(structure__in=self.attrs["request"].user.structures.all()).order_by("-date_fin", "nom")
+        else:
+            context["activites"] = []
+        if attrs is not None:
+            context.update(attrs)
+        context['name'] = name
+        if value:
+            context['value'] = int(value)
+        if "donnees_extra" not in context:
+            context['donnees_extra'] = {}
+        context['donnees_extra'] = json.dumps(context['donnees_extra'])
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))

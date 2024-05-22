@@ -5,15 +5,15 @@
 
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
+from crispy_forms.layout import Layout
 from crispy_forms.bootstrap import Field
 from core.models import Activite
-from core.forms.select2 import Select2Widget
 from core.forms.base import FormulaireBase
+from core.widgets import Select_activite
 
 
 class Formulaire(FormulaireBase, forms.Form):
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget(), queryset=Activite.objects.none().order_by("-date_fin"), required=True)
+    activite = forms.ModelChoiceField(label="Activité", widget=Select_activite(), queryset=Activite.objects.all(), required=True)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -21,8 +21,8 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.form_id = 'form_parametres'
         self.helper.form_method = 'post'
 
-        # Sélectionne uniquement les activités autorisées
-        self.fields["activite"].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom")
+        # Sélectionne uniquement les activités autorisées pour l'utilisateur
+        self.fields["activite"].widget.attrs["request"] = self.request
 
         self.helper.layout = Layout(
             Field('activite'),

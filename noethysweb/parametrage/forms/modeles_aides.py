@@ -10,7 +10,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset, Div
 from crispy_forms.bootstrap import Field, PrependedText, InlineCheckboxes
 from core.forms.select2 import Select2Widget, Select2MultipleWidget
-from core.widgets import DatePickerWidget, Formset
+from core.widgets import DatePickerWidget, Formset, Select_activite
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.utils import utils_preferences
@@ -18,7 +18,7 @@ from core.models import Activite, Aide, JOURS_SEMAINE
 
 
 class Formulaire_creation(FormulaireBase, forms.Form):
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget(), queryset=Activite.objects.none(), required=True)
+    activite = forms.ModelChoiceField(label="Activité", widget=Select_activite(), queryset=Activite.objects.all(), required=True)
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.pop("instance", None)
@@ -26,9 +26,8 @@ class Formulaire_creation(FormulaireBase, forms.Form):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
 
-        # Liste les activités
-        condition_structure = Q(structure__in=self.request.user.structures.all())
-        self.fields['activite'].queryset = Activite.objects.filter(condition_structure).order_by("-date_fin", "nom")
+        # Sélectionne uniquement les activités autorisées pour l'utilisateur
+        self.fields["activite"].widget.attrs["request"] = self.request
 
         self.helper.layout = Layout(
             Commandes(enregistrer_label="<i class='fa fa-check margin-r-5'></i>Valider", ajouter=False, annuler_url="{{ view.get_success_url }}"),

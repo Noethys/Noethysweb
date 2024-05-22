@@ -13,13 +13,12 @@ from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import Inscription, Individu, Activite, Consommation, QuestionnaireQuestion, QuestionnaireReponse
-from core.widgets import DatePickerWidget
-from core.forms.select2 import Select2Widget
+from core.widgets import DatePickerWidget, Select_activite
 from parametrage.forms import questionnaires
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget(), queryset=Activite.objects.none(), required=True)
+    activite = forms.ModelChoiceField(label="Activité", widget=Select_activite(), queryset=Activite.objects.all(), required=True)
     date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
     date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(), help_text="Laissez vide la date de fin si vous ne connaissez pas la durée de l'inscription.")
     action_conso = forms.ChoiceField(label="Action", required=False, choices=[
@@ -55,8 +54,8 @@ class Formulaire(FormulaireBase, ModelForm):
         else:
             individu = self.instance.individu
 
-        # Liste les activités liées à la structure actuelle
-        self.fields['activite'].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom")
+        # Sélectionne uniquement les activités autorisées pour l'utilisateur
+        self.fields["activite"].widget.attrs["request"] = self.request
 
         # Si c'est un ajout avec présélection de l'activité et du groupe
         # (utilisé surtout pour les demandes d'inscription depuis le portail)

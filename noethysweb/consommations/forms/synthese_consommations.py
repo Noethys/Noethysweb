@@ -5,10 +5,10 @@
 
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
+from crispy_forms.layout import Layout
 from crispy_forms.bootstrap import Field
-from core.widgets import DateRangePickerWidget, SelectionActivitesWidget, Profil_configuration
-from core.utils import utils_parametres, utils_questionnaires
+from core.widgets import DateRangePickerWidget, Select_activite
+from core.utils import utils_questionnaires
 from core.models import Activite
 from core.forms.select2 import Select2Widget, Select2MultipleWidget
 from core.forms.base import FormulaireBase
@@ -16,7 +16,7 @@ from core.forms.base import FormulaireBase
 
 class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget(), queryset=Activite.objects.none().order_by("-date_fin"), required=True)
+    activite = forms.ModelChoiceField(label="Activité", queryset=Activite.objects.all(), required=True, widget=Select_activite())
     afficher_detail_groupe = forms.BooleanField(label="Afficher détail par groupe", initial=False, required=False)
 
     donnees = forms.ChoiceField(label="Données", choices=[("quantite", "Quantité"), ("temps_presence", "Temps de présence"), ("temps_facture", "Temps facturé")], initial="quantite", required=False)
@@ -46,8 +46,8 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.form_id = 'form_parametres'
         self.helper.form_method = 'post'
 
-        # Sélectionne uniquement les activités autorisées
-        self.fields["activite"].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom")
+        # Sélectionne uniquement les activités autorisées pour l'utilisateur
+        self.fields["activite"].widget.attrs["request"] = self.request
 
         self.helper.layout = Layout(
             Field('periode'),
@@ -57,3 +57,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Field('regroupement'),
             Field('etats'),
         )
+
+    def clean(self):
+        print(self.cleaned_data)
+        return self.cleaned_data

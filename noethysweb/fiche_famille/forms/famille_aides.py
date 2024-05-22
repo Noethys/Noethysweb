@@ -12,7 +12,7 @@ from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHo
 from crispy_forms.bootstrap import Field, PrependedText, InlineCheckboxes
 from core.utils.utils_commandes import Commandes
 from core.models import Famille, Aide, JOURS_SEMAINE, Rattachement, Individu, CombiAide, Unite, Activite
-from core.widgets import DatePickerWidget, Formset
+from core.widgets import DatePickerWidget, Formset, Select_activite
 from django_select2.forms import Select2MultipleWidget, Select2Widget, ModelSelect2Widget
 from django.forms.models import inlineformset_factory, BaseInlineFormSet
 from core.utils import utils_preferences
@@ -175,7 +175,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
 
 class Formulaire_selection_activite(FormulaireBase, forms.Form):
-    activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=Activite.objects.none(), required=True)
+    activite = forms.ModelChoiceField(label="Activité", widget=Select_activite(), queryset=Activite.objects.all(), required=True)
     modele_aide = forms.ModelChoiceField(label="Modèle d'aide", widget=ModelSelect2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom__icontains'], dependent_fields={"activite": "activite"}), queryset=Aide.objects.filter(famille__isnull=True), required=False)
 
     def __init__(self, *args, **kwargs):
@@ -183,9 +183,8 @@ class Formulaire_selection_activite(FormulaireBase, forms.Form):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
 
-        # Liste les activités
-        condition_structure = Q(structure__in=self.request.user.structures.all())
-        self.fields['activite'].queryset = Activite.objects.filter(condition_structure).order_by("-date_fin", "nom")
+        # Sélectionne uniquement les activités autorisées pour l'utilisateur
+        self.fields["activite"].widget.attrs["request"] = self.request
 
         self.helper.layout = Layout(
             Field('activite'),

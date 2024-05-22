@@ -1,0 +1,47 @@
+{% load static %}
+{% load embed %}
+
+<style>
+    .input-group-nowrap {
+        -webkit-flex-wrap: nowrap;
+        -ms-flex-wrap: nowrap;
+        flex-wrap: nowrap;
+    }
+    .select2-container--default .select2-results__option[aria-disabled=true] {
+        display: none;
+    }   
+    
+</style>
+
+<div class="input-group input-group-nowrap">
+    {% if icon %}
+        <div class="input-group-prepend">
+            <i class="fa {{ icon }} input-group-text"></i>
+        </div>
+    {% endif %}
+    <select id="{{ id }}" name="{{ name }}" data-minimum-input-length="0" data-width="100%" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2">
+        <option value="">----------</option>
+        {% for activite in activites %}
+            <option class="{% if not activite.Is_active %}option_activite_obsolete{% endif %}" value="{{ activite.pk }}" {% if value == activite.pk %}selected{% endif %} {% if not activite.Is_active %}disabled{% endif %}>{{ activite.nom }}</option>
+        {% endfor %}
+    </select>
+    <div class="input-group-append">
+        <span class="input-group-text p-0 pl-2">
+            <span class="custom-switch custom-switch-on-primary" title="Afficher les activités obsolètes">
+                <input type="checkbox" class="custom-control-input case_switch" id="switch_activites_obsoletes">
+                <label class="custom-control-label" for="switch_activites_obsoletes"></label>
+            </span>
+        </span>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function() {
+        $("#switch_activites_obsoletes").on("change", function(e) {
+            $(".option_activite_obsolete").prop("disabled", !($("#switch_activites_obsoletes").is(":checked")));
+            $("#{{ id }}").select2();
+        })
+    });
+
+</script>
