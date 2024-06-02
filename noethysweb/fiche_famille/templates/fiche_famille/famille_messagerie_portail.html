@@ -16,7 +16,7 @@
                 {% endif %}
 
                 {# Liste des structures disponibles #}
-                {% if liste_structures|length > 1 %}
+                {% if liste_structures %}
                     {% embed 'core/box.html' with box_titre=True %}
                         {% block box_theme %}card-outline card-lightblue{% endblock %}
                         {% block box_titre %}Sélection de la structure{% endblock %}
