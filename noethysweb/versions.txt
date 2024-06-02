@@ -1,3 +1,8 @@
+Version 1.2.3.9 (02/06/2024) :
+
+- Ajout du masquage des activités obsolètes dans le widget de sélection d'une activité
+- Correction de l'affichage des structures dans la messagerie de la fiche famille
+
 Version 1.2.3.8 (21/05/2024) :
 
 - Ajout du relevé des prestations dans la rubrique Outils de la fiche famille
