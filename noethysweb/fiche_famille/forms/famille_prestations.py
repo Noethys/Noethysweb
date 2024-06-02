@@ -13,7 +13,7 @@ from crispy_forms.bootstrap import Field, PrependedText
 from django_select2.forms import ModelSelect2Widget, Select2Widget
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import Prestation, Deduction, Rattachement, Inscription, Activite, CategorieTarif, Tarif , TarifLigne
+from core.models import Prestation, Deduction, Rattachement, Inscription, Activite, CategorieTarif, Tarif , TarifLigne, Consommation
 from core.widgets import DatePickerWidget, Formset
 from core.utils import utils_preferences
 from fiche_famille.widgets import Facture_prestation, Consommations_prestation
@@ -116,6 +116,11 @@ class Formulaire(FormulaireBase, ModelForm):
         if not self.instance.pk:
             self.fields["date"].initial = datetime.date.today()
 
+        # Catégorie (Retire 'consommation' si mode ajouter)
+        if not self.instance.pk:
+            self.fields["categorie"].choices.pop(1)
+            self.fields["categorie"].choices = self.fields["categorie"].choices
+
         # Individu
         rattachements = Rattachement.objects.select_related("individu").filter(famille_id=idfamille).order_by("individu__nom", "individu__prenom")
         self.fields["individu"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
@@ -190,6 +195,11 @@ class Formulaire(FormulaireBase, ModelForm):
             self.cleaned_data["tarif"] = None
         if not self.cleaned_data["tarif"]:
             self.cleaned_data["tarif_ligne"] = None
+
+        # Vérifie qu'il y a des consommations si categorie = consommations
+        if self.cleaned_data["categorie"] == "consommation" and self.instance.pk:
+            if not Consommation.objects.filter(prestation_id=self.instance.pk).exists():
+                self.add_error("categorie", "Vous ne pouvez pas sélectionner la catégorie 'Consommation' s'il n'y a aucune consommation associée à cette prestation.")
         return self.cleaned_data
 
 EXTRA_HTML = """
