@@ -90,6 +90,7 @@ class Modifier(Consulter):
         internet_categorie = form.cleaned_data.get("internet_categorie")
         date_expiration_mdp = form.cleaned_data.get("date_expiration_mdp")
         individus_masques = form.cleaned_data.get("individus_masques")
+        blocage_impayes_off = form.cleaned_data.get("blocage_impayes_off")
 
         # Si changement de l'état actif
         if internet_actif != famille.internet_actif:
@@ -117,6 +118,8 @@ class Modifier(Consulter):
 
         # Enregistrement
         utilisateur.save()
+
+        famille.blocage_impayes_off = blocage_impayes_off
         famille.save()
 
         # Enregistrement des individus masqués

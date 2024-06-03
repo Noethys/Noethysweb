@@ -23,7 +23,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Famille
-        fields = ["internet_actif", "internet_identifiant", "internet_mdp", "internet_categorie", "internet_reservations", "individus_masques"]
+        fields = ["internet_actif", "internet_identifiant", "internet_mdp", "internet_categorie", "internet_reservations", "individus_masques", "blocage_impayes_off"]
         help_texts = {
             "internet_categorie": "Les catégories permettent par exemple d'attribuer des périodes de réservations à certains comptes internet uniquement.",
             "internet_reservations": "Décochez cette case pour interdire à cette famille d'accéder aux réservations sur le portail.",
@@ -78,6 +78,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Options",
                 Field("internet_categorie"),
                 Field("internet_reservations"),
+                Field("blocage_impayes_off"),
                 Field("individus_masques"),
             ),
             HTML(EXTRA_HTML),

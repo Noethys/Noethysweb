@@ -66,7 +66,8 @@ class View(CustomView, TemplateView):
         # Blocage si impayés
         blocage_impayes = context["parametres_portail"].get("reservations_blocage_impayes", None)
         context["blocage_impayes"] = False
-        if blocage_impayes:
+
+        if blocage_impayes and not self.request.user.famille.blocage_impayes_off:
             blocage_impayes = decimal.Decimal(blocage_impayes)
             factures = False
             if blocage_impayes > decimal.Decimal(10000):
