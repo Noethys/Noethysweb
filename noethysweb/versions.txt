@@ -1,3 +1,9 @@
+Version 1.2.4.0 (03/06/2024) :
+
+- Ajout de l'option Ne jamais appliquer blocage si impayés dans la fiche famille
+- Amélioration de l'affichage des erreurs de formulaires
+- Correction sur la catégorie Consommations dans la modification des prestations
+
 Version 1.2.3.9 (02/06/2024) :
 
 - Ajout du masquage des activités obsolètes dans le widget de sélection d'une activité
