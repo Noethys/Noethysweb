@@ -197,7 +197,7 @@ class Formulaire(FormulaireBase, ModelForm):
             self.cleaned_data["tarif_ligne"] = None
 
         # Vérifie qu'il y a des consommations si categorie = consommations
-        if self.cleaned_data["categorie"] == "consommation" and self.instance.pk and not self.instance.forfait:
+        if self.cleaned_data["categorie"] == "consommation" and self.instance.pk and not self.instance.forfait and not self.instance.forfait_date_debut:
             if not Consommation.objects.filter(prestation_id=self.instance.pk).exists():
                 self.add_error("categorie", "Vous ne pouvez pas sélectionner la catégorie 'Consommation' s'il n'y a aucune consommation associée à cette prestation.")
         return self.cleaned_data
