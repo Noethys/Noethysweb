@@ -1,3 +1,9 @@
+Version 1.2.4.1 (12/06/2024) :
+
+- Ajout de la gestion des achats dans le menu Comptabilité
+- Correction de la catégorie consommation dans la modification d'une prestation
+- Correction du filtre dans la sélection d'individus destinataires d'emails
+
 Version 1.2.4.0 (03/06/2024) :
 
 - Ajout de l'option Ne jamais appliquer blocage si impayés dans la fiche famille
