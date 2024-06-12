@@ -63,6 +63,11 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_comptabilite.Add(code="budgets_liste", titre="Budgets", icone="file-text-o")
     menu_comptabilite.Add(code="releves_bancaires_liste", titre="Relevés bancaires", icone="file-text-o")
 
+    # Achats
+    menu_achats = menu_parametrage.Add(titre="Achats")
+    menu_achats.Add(code="achats_categories_liste", titre="Catégories d'articles", icone="file-text-o")
+    menu_achats.Add(code="achats_fournisseurs_liste", titre="Fournisseurs", icone="file-text-o")
+
     # Renseignements
     menu_renseignements = menu_parametrage.Add(titre="Renseignements")
     menu_renseignements.Add(code="types_pieces_liste", titre="Types de pièces", icone="file-text-o")
@@ -459,6 +464,12 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Outils
     menu_comptabilite_outils = menu_comptabilite.Add(titre="Outils")
     menu_comptabilite_outils.Add(code="rapprochements_liste", titre="Rapprochement bancaire", icone="file-text-o")
+
+    # Achats
+    menu_comptabilite_achats = menu_comptabilite.Add(titre="Gestion des achats")
+    menu_comptabilite_achats.Add(code="achats_demandes_liste", titre="Liste des demandes", icone="file-text-o")
+    menu_comptabilite_achats.Add(code="achats_articles_liste", titre="Liste des articles", icone="file-text-o")
+    menu_comptabilite_achats.Add(code="edition_liste_achats", titre="Edition d'une liste d'achats", icone="file-text-o")
 
 
     # ------------------------------------ Collaborateurs ------------------------------------

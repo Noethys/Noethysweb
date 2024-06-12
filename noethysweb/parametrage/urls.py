@@ -26,7 +26,7 @@ from parametrage.views import organisateur, structures, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
     modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
-    modeles_word, releves_bancaires, sondages
+    modeles_word, releves_bancaires, sondages, achats_categories, achats_fournisseurs
 
 
 urlpatterns = [
@@ -636,6 +636,17 @@ urlpatterns = [
     path('parametrage/transports/lieux/modifier/<str:categorie>/<int:pk>', lieux.Modifier.as_view(), name='lieux_modifier'),
     path('parametrage/transports/lieux/supprimer/<str:categorie>/<int:pk>', lieux.Supprimer.as_view(), name='lieux_supprimer'),
 
+    # Catégories d'achats
+    path('parametrage/achats_categories/liste', achats_categories.Liste.as_view(), name='achats_categories_liste'),
+    path('parametrage/achats_categories/ajouter', achats_categories.Ajouter.as_view(), name='achats_categories_ajouter'),
+    path('parametrage/achats_categories/modifier/<int:pk>', achats_categories.Modifier.as_view(), name='achats_categories_modifier'),
+    path('parametrage/achats_categories/supprimer/<int:pk>', achats_categories.Supprimer.as_view(), name='achats_categories_supprimer'),
+
+    # Fournisseurs d'achats
+    path('parametrage/achats_fournisseurs/liste', achats_fournisseurs.Liste.as_view(), name='achats_fournisseurs_liste'),
+    path('parametrage/achats_fournisseurs/ajouter', achats_fournisseurs.Ajouter.as_view(), name='achats_fournisseurs_ajouter'),
+    path('parametrage/achats_fournisseurs/modifier/<int:pk>', achats_fournisseurs.Modifier.as_view(), name='achats_fournisseurs_modifier'),
+    path('parametrage/achats_fournisseurs/supprimer/<int:pk>', achats_fournisseurs.Supprimer.as_view(), name='achats_fournisseurs_supprimer'),
 
     # AJAX
     path('parametrage/get_calendrier', calendrier.Get_calendrier, name='ajax_get_calendrier'),
@@ -667,4 +678,5 @@ urlpatterns = [
     path('parametrage/sondages/valid_form_question', secure_ajax(sondages.Valid_form_question), name='ajax_sondages_valid_form_question'),
     path('parametrage/sondages/supprimer_question', secure_ajax(sondages.Supprimer_question), name='ajax_sondages_supprimer_question'),
     path('parametrage/sondages/reorganiser', secure_ajax(sondages.Reorganiser), name='ajax_sondages_reorganiser'),
+    path('parametrage/achats_categories/deplacer_lignes', secure_ajax(achats_categories.Deplacer.as_view()), name='ajax_deplacer_lignes_achats_categories'),
 ]

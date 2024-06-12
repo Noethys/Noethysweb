@@ -4,7 +4,7 @@
 
 import datetime, decimal, uuid, os
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Count, Q
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.files.storage import get_storage_class
 from django.templatetags.static import static
@@ -4453,3 +4453,93 @@ class SondageReponse(models.Model):
         if self.question.controle in ("decimal", "montant"):
             return float(decimal.Decimal(self.reponse or 0.0))
         return self.reponse or ""
+
+
+class AchatDemande(models.Model):
+    iddemande = models.AutoField(verbose_name="ID", db_column="IDdemande", primary_key=True)
+    collaborateur = models.ForeignKey(Collaborateur, verbose_name="Collaborateur", on_delete=models.CASCADE, blank=True, null=True)
+    date = models.DateField(verbose_name="Date", auto_now_add=True)
+    date_echeance = models.DateField(verbose_name="Date d'échéance", blank=True, null=True)
+    libelle = models.CharField(verbose_name="Libellé", max_length=300, blank=True, null=True)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+    etat = models.IntegerField(verbose_name="Etat", blank=True, null=True, default=0)
+
+    class Meta:
+        db_table = "achat_demandes"
+        verbose_name = "demande d'achats"
+        verbose_name_plural = "demandes d'achats"
+
+    def __str__(self):
+        return self.libelle or ("IDdemande %d" % self.iddemande if self.iddemande else "Nouvelle demande d'achat")
+
+    def Maj_etat(self):
+        stats = AchatArticle.objects.filter(demande=self).aggregate(nbre=Count("idarticle"), nbre_achetes=Count("idarticle", filter=Q(achete=True)))
+        if stats["nbre"] == stats["nbre_achetes"]:
+            pourcentage = 100
+        else:
+            pourcentage = stats["nbre_achetes"] * 100 / stats["nbre"]
+        if self.etat != pourcentage:
+            self.etat = pourcentage
+            self.save()
+
+
+class AchatCategorie(models.Model):
+    idcategorie = models.AutoField(verbose_name="ID", db_column="IDcategorie", primary_key=True)
+    ordre = models.IntegerField(verbose_name="Ordre")
+    nom = models.CharField(verbose_name="Nom", max_length=300)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = "achat_categories"
+        verbose_name = "catégorie d'articles"
+        verbose_name_plural = "catégories d'articles"
+
+    def __str__(self):
+        return self.nom
+
+    def delete(self, *args, **kwargs):
+        # Supprime l'objet
+        super().delete(*args, **kwargs)
+        # Après la suppression, on rectifie l'ordre
+        liste_objects = AchatCategorie.objects.all().order_by("ordre")
+        ordre = 1
+        for objet in liste_objects:
+            if objet.ordre != ordre:
+                objet.ordre = ordre
+                objet.save()
+            ordre += 1
+
+
+class AchatFournisseur(models.Model):
+    idfournisseur = models.AutoField(verbose_name="ID", db_column="IDfournisseur", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = "achat_fournisseurs"
+        verbose_name = "fournisseur"
+        verbose_name_plural = "fournisseurs"
+
+    def __str__(self):
+        return self.nom if self.nom else "Nouveau fournisseur"
+
+
+class AchatArticle(models.Model):
+    idarticle = models.AutoField(verbose_name="ID", db_column="IDarticle", primary_key=True)
+    demande = models.ForeignKey(AchatDemande, verbose_name="Demande", on_delete=models.CASCADE, blank=True, null=True)
+    fournisseur = models.ForeignKey(AchatFournisseur, verbose_name="Fournisseur", on_delete=models.PROTECT, blank=True, null=True)
+    categorie = models.ForeignKey(AchatCategorie, verbose_name="Catégorie", on_delete=models.PROTECT, blank=True, null=True)
+    libelle = models.CharField(verbose_name="Libellé", max_length=300, blank=True, null=True)
+    quantite = models.CharField(verbose_name="Quantité", max_length=200, blank=True, null=True)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    achete = models.BooleanField(verbose_name="Acheté", default=False)
+
+    class Meta:
+        db_table = "achat_articles"
+        verbose_name = "article"
+        verbose_name_plural = "articles"
+
+    def __str__(self):
+        return self.libelle or ("IDarticle %d" % self.idarticle if self.idarticle else "Nouvel article")

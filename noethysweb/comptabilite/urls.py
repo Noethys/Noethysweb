@@ -7,7 +7,7 @@ from django.urls import include, path
 from core.views import toc
 from core.decorators import secure_ajax
 from comptabilite.views import operations_tresorerie, operations_budgetaires, liste_comptes, liste_virements, suivi_budget, suivi_tresorerie, \
-                                rapprochements, rapprochements_selection
+                                rapprochements, rapprochements_selection, achats_demandes, achats_articles, edition_liste_achats
 
 
 urlpatterns = [
@@ -55,8 +55,23 @@ urlpatterns = [
     path('comptabilite/rapprochement/operations/supprimer/<int:idreleve>/<int:pk>', rapprochements.Supprimer_operation.as_view(), name='rapprochements_supprimer_operation'),
     path('comptabilite/rapprochement/operations/supprimer_plusieurs/<int:idreleve>/<str:listepk>', rapprochements.Supprimer_plusieurs_operations.as_view(), name='rapprochements_supprimer_plusieurs_operations'),
 
+    # Achats : Demandes
+    path('comptabilite/achats_demandes/liste', achats_demandes.Liste.as_view(), name='achats_demandes_liste'),
+    path('comptabilite/achats_demandes/ajouter', achats_demandes.Ajouter.as_view(), name='achats_demandes_ajouter'),
+    path('comptabilite/achats_demandes/modifier/<int:pk>', achats_demandes.Modifier.as_view(), name='achats_demandes_modifier'),
+    path('comptabilite/achats_demandes/supprimer/<int:pk>', achats_demandes.Supprimer.as_view(), name='achats_demandes_supprimer'),
+
+    # Achats : Articles
+    path('comptabilite/achats_articles/liste', achats_articles.Liste.as_view(), name='achats_articles_liste'),
+    path('comptabilite/achats_articles/modifier/<int:pk>', achats_articles.Modifier.as_view(), name='achats_articles_modifier'),
+    path('comptabilite/achats_articles/supprimer/<int:pk>', achats_articles.Supprimer.as_view(), name='achats_articles_supprimer'),
+
+    # Edition de la liste des achats
+    path('comptabilite/edition_liste_achats', edition_liste_achats.View.as_view(), name='edition_liste_achats'),
 
     # AJAX
     path('comptabilite/operations_tresorerie/get_form_ventilation', secure_ajax(operations_tresorerie.Get_form_ventilation), name='ajax_operations_tresorerie_form_ventilation'),
-
+    path('comptabilite/achats_demandes/get_form_article', secure_ajax(achats_demandes.Get_form_article), name='ajax_achats_demandes_form_article'),
+    path('comptabilite/achats_articles/modifier_achete', secure_ajax(achats_articles.Modifier_achete), name='ajax_modifier_article_achete'),
+    path('comptabilite/edition_liste_achats/generer_pdf', secure_ajax(edition_liste_achats.Generer_pdf), name='ajax_edition_liste_achats_generer_pdf'),
 ]
