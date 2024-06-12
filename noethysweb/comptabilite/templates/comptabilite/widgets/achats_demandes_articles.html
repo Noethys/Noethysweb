@@ -54,7 +54,7 @@
     $(document).ready(function() {
         maj_tableau();
     })
-    
+
     function set_event_checkbox() {
         $(".check_article").on("change", function() {
             var index = $(this).data("index")
@@ -62,7 +62,7 @@
             $("#articles").val(JSON.stringify(valeurs))
         })
     }
-    
+
     function maj_tableau() {
         var html = "";
         $.each(valeurs, function (index, dict_article) {
@@ -141,7 +141,6 @@
             data: $("#article_form").serialize(),
             datatype: "json",
             success: function(data){
-                $("#modal_article").modal("hide");
                 if (data.index) {
                     valeurs[data.index] = data.valeur;
                 } else {
@@ -149,7 +148,9 @@
                 }
                 maj_tableau();
                 if (ajouter === true) {
-                    Ajouter_article()
+                    Ajouter_article();
+                } else {
+                    $("#modal_article").modal("hide");
                 }
             },
             error: function(data) {
