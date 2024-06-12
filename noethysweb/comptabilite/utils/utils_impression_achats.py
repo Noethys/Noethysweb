@@ -89,7 +89,7 @@ class Impression(utils_impression.Impression):
                     ligne = [
                         Paragraph("X" if article.achete else "", style_centre),
                         Paragraph(article.libelle, style_centre),
-                        Paragraph(article.quantite, style_centre),
+                        Paragraph(article.quantite or "", style_centre),
                         Paragraph(article.observations, style_centre),
                         Paragraph(utils_dates.ConvertDateToFR(article.demande.date_echeance), style_centre),
                         Paragraph(article.demande.libelle, style_centre),
