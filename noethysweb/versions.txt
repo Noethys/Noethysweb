@@ -1,3 +1,7 @@
+Version 1.2.4.2 (13/06/2024) :
+
+- Corrections sur la gestion des achats
+
 Version 1.2.4.1 (12/06/2024) :
 
 - Ajout de la gestion des achats dans le menu Comptabilité
