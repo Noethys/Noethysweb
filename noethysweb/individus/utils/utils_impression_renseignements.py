@@ -336,6 +336,11 @@ class Impression(utils_impression.Impression):
                 texte_certification = "Fiche non certifiée sur le portail"
             self.story.append(Tableau(titre="Certification en ligne".upper(), aide="", contenu=[Paragraph(texte_certification, style_defaut)], bord_bas=not self.dict_donnees["afficher_signature"]))
 
+            # Texte bonus
+            if self.dict_donnees["bonus_texte"]:
+                texte_bonus = [Paragraph("<para>%s</para>" % ligne, style_defaut) for ligne in self.dict_donnees["bonus_texte"].splitlines()]
+                self.story.append(Tableau(titre=(self.dict_donnees["bonus_titre"] or "").upper(), aide="", contenu=texte_bonus, bord_bas=True))
+
             # Signature
             if self.dict_donnees["afficher_signature"]:
                 texte_signature = [

@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
 from core.models import Rattachement
+from core.utils import utils_parametres
 from individus.forms.edition_renseignements import Formulaire
 
 
@@ -27,6 +28,10 @@ def Generer_pdf(request):
     if not rattachements:
         return JsonResponse({"erreur": "Veuillez cocher au moins une ligne dans la liste"}, status=401)
     options["rattachements"] = rattachements
+
+    # Mémorisation des paramètres
+    utils_parametres.Set_categorie(categorie="edition_renseignements", utilisateur=request.user, parametres={
+        "bonus_titre": form.cleaned_data["bonus_titre"], "bonus_texte": form.cleaned_data["bonus_texte"]})
 
     # Création du PDF
     from individus.utils import utils_impression_renseignements
