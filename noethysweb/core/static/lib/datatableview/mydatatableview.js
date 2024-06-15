@@ -101,6 +101,7 @@ $(document).ready(function() {
                         exportOptions: {
                             columns: ':visible'
                         },
+                        footer: true,
                     },
                     {
                         text: 'PDF (paysage)',
@@ -109,6 +110,7 @@ $(document).ready(function() {
                         exportOptions: {
                             columns: ':visible'
                         },
+                        footer: true,
                     }
                 ]
             },
