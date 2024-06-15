@@ -63,6 +63,8 @@ def Envoyer_email(request):
         destinataire_defaut.delete()
 
     liste_envois_succes = utils_email.Envoyer_model_mail(idmail=mail.pk, request=request)
+    if liste_envois_succes == False:
+        return JsonResponse({"message": "L'email n'a pas pu être envoyé"}, status=401)
     liste_reussis = [destinataire.adresse for destinataire in liste_envois_succes]
     liste_echecs = [adresse for adresse in liste_adresses if adresse not in liste_reussis]
     if len(liste_reussis) == len(liste_adresses):

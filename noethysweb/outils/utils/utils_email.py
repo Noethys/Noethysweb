@@ -31,7 +31,7 @@ def Envoyer_model_mail(idmail=None, request=None):
     # Stoppe l'envoi si mode démo activé
     if settings.MODE_DEMO:
         messages.add_message(request, messages.ERROR, "Vous ne pouvez pas envoyer d'emails en mode démo.")
-        return
+        return False
 
     # Importation de l'email
     mail = Mail.objects.prefetch_related('destinataires', 'pieces_jointes').select_related("adresse_exp").get(pk=idmail)
@@ -67,7 +67,7 @@ def Envoyer_model_mail(idmail=None, request=None):
         connection.open()
     except Exception as err:
         messages.add_message(request, messages.ERROR, "Connexion impossible au serveur de messagerie : %s" % err)
-        return
+        return False
 
     # Chargement de la signature de l'utilisateur
     signature = ""
@@ -76,7 +76,7 @@ def Envoyer_model_mail(idmail=None, request=None):
             signature = request.user.signature.html
         else:
             messages.add_message(request, messages.ERROR, "Vous avez demandé à intéger une signature d'emails alors que votre profil utilisateur n'est associé à aucune signature.")
-            return
+            return False
 
     # Récupération de l'organisateur
     organisateur = cache.get('organisateur', None)
