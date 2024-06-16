@@ -158,7 +158,6 @@ class Formulaire(FormulaireBase, ModelForm):
                     style="margin-bottom:20px;"
                 ),
             ),
-            HTML(EXTRA_SCRIPT),
         )
 
         # Intégration des commandes pour le mode planning
@@ -220,50 +219,3 @@ class Formulaire(FormulaireBase, ModelForm):
                 QuestionnaireReponse.objects.update_or_create(donnee=instance.pk, question_id=idquestion, defaults={'reponse': valeur})
 
         return instance
-
-
-EXTRA_SCRIPT = """
-{% load static %}
-
-<script>
-
-// Sélection période
-function On_change_selection_periode() {
-    $('#div_periode_unique').hide();
-    $('#div_periode_recurrente').hide();
-    if ($("#id_selection_periode").val() == 'UNIQUE') {
-        $('#div_periode_unique').show();
-    };
-    if ($("#id_selection_periode").val() == 'RECURRENCE') {
-        $('#div_periode_recurrente').show();
-    };
-}
-$(document).ready(function() {
-    $('#id_selection_periode').on('change', On_change_selection_periode);
-    On_change_selection_periode.call($('#id_selection_periode').get(0));
-});
-
-function appliquer_tarif() {
-    $.ajax({ 
-        type: "POST",
-        url: "{% url 'ajax_get_tarif_location' %}",
-        data: {
-            'idproduit': $("#id_produit").val(),
-            'quantite': $("#id_quantite").val(),
-            'date_debut': $("#id_date_debut").val(),
-        },
-        success: function (data) { 
-            var idligne = $("#id_prestation_set-TOTAL_FORMS").val() - 1;
-            $("#id_prestation_set-" + idligne + "-date").datepicker("setDate", data.date);
-            $("#id_prestation_set-" + idligne + "-label").val(data.label);
-            $("#id_prestation_set-" + idligne + "-montant").val(data.montant);
-            $("#id_prestation_set-" + idligne + "-tva").val(data.tva);
-        },
-        error: function(data) {
-            toastr.error(data.responseJSON.erreur);
-        }
-    });
-}
-
-</script>
-"""

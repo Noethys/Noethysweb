@@ -28,9 +28,11 @@ def Get_tarif_location(request):
 
     # Importation du produit
     produit = Produit.objects.get(pk=int(idproduit))
+    tarifs_trouves = []
+    tarifs_selections = []
     if produit.montant:
         # Si tarif simple
-        return JsonResponse({
+        tarifs_trouves.append({
             "date": utils_dates.ConvertDateToFR(date_debut),
             "label": produit.nom,
             "montant": produit.montant,
@@ -39,18 +41,19 @@ def Get_tarif_location(request):
     else:
         # Si tarifs avancés
         tarifs = TarifProduit.objects.filter(produit=produit).order_by("date_debut")
-        tarif_trouve = None
+        index = 0
         for tarif in tarifs:
             if tarif.date_debut <= date_debut and (not tarif.date_fin or tarif.date_fin >= date_debut):
                 montant = tarif.montant if tarif.methode == "produit_montant_unique" else tarif.montant * quantite
-                tarif_trouve = {
+                tarifs_trouves.append({
                     "date": utils_dates.ConvertDateToFR(date_debut),
                     "label": produit.nom,
                     "montant": montant,
                     "tva": tarif.tva or 0.0,
-                }
-        if tarif_trouve:
-            return JsonResponse(tarif_trouve)
+                })
+                tarifs_selections.append({"text" : "%s : %s €" % (produit.nom, montant), "value": index})
+                index += 1
+    return JsonResponse({"tarifs": tarifs_trouves, "selections": tarifs_selections})
 
 
 class Page(Onglet):
@@ -137,7 +140,7 @@ class Liste(Page, crud.Liste):
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
-    template_name = "fiche_famille/famille_edit.html"
+    template_name = "fiche_famille/famille_locations.html"
 
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """
@@ -158,7 +161,7 @@ class Ajouter(Page, crud.Ajouter):
 
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire
-    template_name = "fiche_famille/famille_edit.html"
+    template_name = "fiche_famille/famille_locations.html"
 
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """
