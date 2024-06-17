@@ -1,3 +1,9 @@
+Version 1.2.4.3 (17/06/2024) :
+
+- Ajout de la rubrique personnalisée dans l'édition des renseignements
+- Ajout du footer dans l'export pdf des datatables
+- Correction de la sélection du tarif d'une location
+
 Version 1.2.4.2 (13/06/2024) :
 
 - Corrections sur la gestion des achats
