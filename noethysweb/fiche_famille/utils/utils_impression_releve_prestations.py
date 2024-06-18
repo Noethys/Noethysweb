@@ -154,6 +154,7 @@ class Impression(utils_impression.Impression):
 
                         # Label de la prestation
                         labelPrestation = prestation.label
+
                         if periode["detail_conso"]:
                             liste_consommations = consommations.get(prestation.pk, [])
                             if liste_consommations:
@@ -166,6 +167,9 @@ class Impression(utils_impression.Impression):
                                     listeConsoTemp.append(nomUnite)
                                 if listeConsoTemp and not doublons:
                                     labelPrestation = "%s (%s)" % (labelPrestation, "+".join(listeConsoTemp))
+
+                        if prestation.quantite and prestation.quantite != 1:
+                            labelPrestation += " - %d" % prestation.quantite
 
                         listeLabels.append(Paragraph(labelPrestation, paraStyle))
 
