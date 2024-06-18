@@ -162,7 +162,7 @@ class Forfaits():
                                     if not combinaison.groupe or combinaison.groupe_id == inscription.groupe_id:
                                         for unite in combinaison.unites.all():
                                             liste_consommations.append((combinaison.date, unite))
-                            liste_consommations.sort()
+                            liste_consommations.sort(key=lambda x: x[0])
 
                             # Périodes de gestion
                             # if self.gestion.Verification("consommations", listeConsommations) == False: return False
