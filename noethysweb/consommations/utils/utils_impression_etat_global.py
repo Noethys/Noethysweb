@@ -9,8 +9,9 @@ from reportlab.platypus import Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
-from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires
 from core.models import Evenement, Regime, Vacance, Activite, Quotient, TarifLigne, Consommation, Famille, Individu
+from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires
+from core.utils.utils_dates import HeureStrEnDelta as HEURE
 
 
 # Regex pour formule
@@ -415,7 +416,7 @@ class Impression(utils_impression.Impression):
                     try:
                         valeur = self.Calcule_formule(formule=dictCalcul["formule"], date=conso.date, debut=heure_debut, fin=heure_fin)
                     except Exception as err:
-                        self.erreurs.append("La formule saisie pour l'unité %s ne semble pas valide" % conso.unite.nom)
+                        self.erreurs.append("La formule saisie pour l'unité %s ne semble pas valide : %s" % (conso.unite.nom, err))
                         return False
 
                 elif dictCalcul["type"] == "4":
