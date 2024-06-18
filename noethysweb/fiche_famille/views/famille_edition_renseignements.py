@@ -14,7 +14,7 @@ def Generer_pdf(request):
     time.sleep(1)
 
     # Récupération des options
-    form = Formulaire(request.POST, idfamille=int(request.POST.get("idfamille")))
+    form = Formulaire(request.POST, idfamille=int(request.POST.get("idfamille")), request=request)
     if not form.is_valid():
         return JsonResponse({"erreur": "Veuillez compléter les paramètres"}, status=401)
     options = form.cleaned_data
@@ -38,6 +38,6 @@ class View(Onglet, TemplateView):
         context['box_titre'] = "Edition des fiches de renseignements"
         context['box_introduction'] = "Sélectionnez les individus à inclure dans le document et cliquez sur le bouton Générer le PDF."
         context['onglet_actif'] = "outils"
-        context['form'] = Formulaire(idfamille=kwargs["idfamille"])
+        context['form'] = Formulaire(idfamille=kwargs["idfamille"], request=self.request)
         context['idfamille'] = kwargs["idfamille"]
         return context
