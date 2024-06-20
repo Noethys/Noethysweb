@@ -235,8 +235,19 @@ def Get_generic_data(data={}):
     data['dict_unites_remplissage_json'] = mark_safe(json.dumps(dict_unites_remplissage_json))
 
     # Importation des places prises
-    liste_places = Consommation.objects.values('date', 'unite', 'groupe', 'quantite', 'evenement').annotate(nbre=Count('pk')).filter(data["conditions_periodes"] & Q(activite=data['selection_activite']) & Q(etat__in=("reservation", "present", "attente"))).exclude(inscription__in=data["liste_inscriptions"])
+    liste_places = list(Consommation.objects.values('pk', 'date', 'unite', 'groupe', 'quantite', 'evenement').annotate(nbre=Count('pk')).filter(data["conditions_periodes"] & Q(activite=data['selection_activite']) & Q(etat__in=("reservation", "present", "attente"))).exclude(inscription__in=data["liste_inscriptions"]))
     dict_places = {}
+
+    if data.get("consommations", []):
+        # Ajout des places prises masquées (notamment si fraterie masquée)
+        inscriptions_affichees = [inscription.pk for inscription in data["liste_inscriptions"]]
+        consommations_temp = [conso["pk"] for conso in liste_places]
+        for key, liste_conso_temp in data.get("consommations", {}).items():
+            for conso_temp in liste_conso_temp:
+                if conso_temp["inscription"] not in inscriptions_affichees and conso_temp["pk"] not in consommations_temp:
+                    conso_temp["nbre"] = 1
+                    liste_places.append(conso_temp)
+
     for p in liste_places:
         for idgroupe in [p["groupe"], 0]:
             key = "%s_%d_%d" % (p["date"], p["unite"], idgroupe)
