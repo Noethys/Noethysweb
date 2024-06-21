@@ -11,6 +11,7 @@ from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Location, Vacance, Ferie, Produit, TarifProduit, Prestation
 from core.utils import utils_dates
+from locations.utils import utils_locations
 from fiche_famille.forms.famille_locations import Formulaire, FORMSET_PRESTATIONS
 from fiche_famille.views.famille import Onglet
 
@@ -218,11 +219,26 @@ def Form_valid_ajouter(form=None, request=None, object=None):
     # Sauvegarde de la location
     liste_locations = []
     if form.cleaned_data["selection_periode"] == "UNIQUE":
+        anomalies = utils_locations.Verifie_dispo_produit(produit=form.cleaned_data["produit"], date_debut=form.cleaned_data["date_debut"], date_fin=form.cleaned_data["date_fin"])
+        if anomalies:
+            for anomalie in anomalies:
+                form.add_error("date_debut", anomalie)
+            return form
         object = form.save()
         liste_locations.append(object)
 
     if form.cleaned_data["selection_periode"] == "RECURRENCE":
         occurences = Calcule_occurences(form.cleaned_data)
+        liste_anomalies = []
+        for occurence in occurences:
+            anomalies = utils_locations.Verifie_dispo_produit(produit=form.cleaned_data["produit"], date_debut=occurence["date_debut"], date_fin=occurence["date_fin"])
+            if anomalies:
+                for anomalie in anomalies:
+                    liste_anomalies.append(anomalie)
+                    form.add_error("date_debut", anomalie)
+        if liste_anomalies:
+            return form
+
         serie = str(uuid.uuid4())
         for occurence in occurences:
             location = Location.objects.create(
@@ -263,6 +279,13 @@ def Form_valid_modifier(form=None, request=None, object=None):
     # Vérification du formset des prestations
     formset_prestations = FORMSET_PRESTATIONS(request.POST, instance=object)
     if not formset_prestations.is_valid():
+        return form
+
+    # Recherche dispo produit
+    anomalies = utils_locations.Verifie_dispo_produit(produit=form.cleaned_data["produit"], date_debut=form.cleaned_data["date_debut"], date_fin=form.cleaned_data["date_fin"], location_exclue=object)
+    if anomalies:
+        for anomalie in anomalies:
+            form.add_error("date_debut", anomalie)
         return form
 
     # Sauvegarde de la location

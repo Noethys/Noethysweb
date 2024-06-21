@@ -1,0 +1,73 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+<script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+
+<script>
+
+    let locale = {
+        OK: "OK",
+        CONFIRM: "<i class='fa fa-check'></i> Valider",
+        CANCEL: "<i class='fa fa-ban'></i> Annuler"
+    };
+    bootbox.addLocale('custom', locale);
+
+    // Sélection période
+    function On_change_selection_periode() {
+        $('#div_periode_unique').hide();
+        $('#div_periode_recurrente').hide();
+        if ($("#id_selection_periode").val() == 'UNIQUE') {
+            $('#div_periode_unique').show();
+        };
+        if ($("#id_selection_periode").val() == 'RECURRENCE') {
+            $('#div_periode_recurrente').show();
+        };
+    }
+    $(document).ready(function() {
+        $('#id_selection_periode').on('change', On_change_selection_periode);
+        On_change_selection_periode.call($('#id_selection_periode').get(0));
+    });
+
+    function appliquer_tarif() {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_get_tarif_location' %}",
+            data: {
+                'idproduit': $("#id_produit").val(),
+                'quantite': $("#id_quantite").val(),
+                'date_debut': $("#id_date_debut").val(),
+            },
+            success: function (data) {
+                if (data.tarifs.length === 0) {toastr.error("Aucun tarif disponible")}
+                if (data.tarifs.length === 1) {set_tarif(data.tarifs[0])}
+                if (data.tarifs.length > 1) {selectionner_tarif(data.selections, data.tarifs)}
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        });
+    }
+
+    function selectionner_tarif(selections, tarifs) {
+        bootbox.prompt({
+            title: "Appliquer un tarif",
+            message: "Plusieurs tarifs sont disponibles. Sélectionnez celui de votre choix :",
+            inputType: "radio",
+            inputOptions: selections,
+            locale: 'custom',
+            callback: function (resultat) {
+                if (resultat) {set_tarif(tarifs[resultat])};
+            }
+        });
+    }
+
+    function set_tarif(data) {
+        var idligne = $("#id_prestation_set-TOTAL_FORMS").val() - 1;
+        $("#id_prestation_set-" + idligne + "-date").datepicker("setDate", data.date);
+        $("#id_prestation_set-" + idligne + "-label").val(data.label);
+        $("#id_prestation_set-" + idligne + "-montant").val(data.montant);
+        $("#id_prestation_set-" + idligne + "-tva").val(data.tva);
+    }
+
+</script>

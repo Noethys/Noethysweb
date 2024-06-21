@@ -5,6 +5,7 @@
 
 import logging, datetime
 logger = logging.getLogger(__name__)
+from django.db.models import Q
 from core.utils import utils_infos_individus, utils_questionnaires
 from core.models import Location
 from locations.utils import utils_impression_location
@@ -105,3 +106,55 @@ class Locations():
 
         logger.debug("Création des PDF terminée.")
         return {"champs": dictChampsFusion, "nom_fichier": nom_fichier, "noms_fichiers": noms_fichiers}
+
+
+def Get_stock_disponible(produit=None, date_debut=None, date_fin=None, location_exclue=None):
+    """ Recherche si un produit est disponible sur une période donnée """
+    if not date_debut:
+        date_debut = datetime.datetime(1900, 1, 1)
+    if not date_fin:
+        date_fin = datetime.datetime(2999, 1, 1)
+
+    # Recherche les locations du produit sur la période
+    liste_dates = [date_debut, date_fin]
+    conditions = Q(produit=produit) & Q(date_debut__lte=date_fin) & (Q(date_fin__isnull=True) | Q(date_fin__gte=date_debut))
+    if location_exclue:
+        conditions &= ~Q(pk=location_exclue.pk)
+    liste_locations = Location.objects.filter(conditions)
+    for location in liste_locations:
+        if location.date_debut not in liste_dates and location.date_debut > date_debut:
+            liste_dates.append(location.date_debut)
+        if location.date_fin not in liste_dates and location.date_fin and location.date_fin < date_fin :
+            liste_dates.append(location.date_fin)
+
+    # Analyse des périodes de disponibilités
+    liste_dates.sort()
+    dict_periodes = {}
+    for index in range(0, len(liste_dates)-1) :
+        debut, fin = (liste_dates[index], liste_dates[index+1])
+        disponible = produit.quantite
+        loue = 0
+        for location in liste_locations :
+            if location.date_debut < fin and (not location.date_fin or location.date_fin > debut) :
+                disponible -= location.quantite
+                loue += location.quantite
+
+        dict_periodes[(debut, fin)] = {"loue": loue, "disponible" : disponible}
+
+    return dict_periodes
+
+def Verifie_dispo_produit(produit=None, date_debut=None, date_fin=None, location_exclue=None):
+    """ Vérifie que la quantité demandée d'un produit est disponible """
+    liste_anomalies = []
+    dictPeriodes = Get_stock_disponible(produit=produit, date_debut=date_debut, date_fin=date_fin, location_exclue=location_exclue)
+    liste_periode_non_dispo = []
+    for periode, valeurs in dictPeriodes.items():
+        if valeurs["disponible"] < produit.quantite:
+            debut = datetime.datetime.strftime(periode[0], "%d/%m/%Y-%Hh%M")
+            fin = "Illimité" if periode[1].year == 2999 else datetime.datetime.strftime(periode[1], "%d/%m/%Y-%Hh%M")
+            liste_periode_non_dispo.append("Stock disponible du %s au %s : %d produits" % (debut, fin, valeurs["disponible"]))
+    if liste_periode_non_dispo:
+        periode_str = "%s - %s" % (date_debut.strftime("%d/%m/%Y %H:%M:%S"), date_fin.strftime("%d/%m/%Y %H:%M:%S") if (date_fin and date_fin.year != 2999) else "Illimitée")
+        liste_anomalies.append("Location du %s : Produit indisponible. %s." % (periode_str, ", ".join(liste_periode_non_dispo)))
+
+    return liste_anomalies

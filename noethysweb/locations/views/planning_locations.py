@@ -44,6 +44,7 @@ def Get_locations(request):
             "end": str(location.date_fin),
             "eventColor": location.produit.couleur,
             "allDay": False,
+            "overlap": False if location.quantite in (1, None) else True,
         })
 
     return JsonResponse({"locations": resultats})

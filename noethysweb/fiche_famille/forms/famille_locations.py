@@ -197,6 +197,11 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Période de location
         if self.cleaned_data["selection_periode"] == "UNIQUE":
+            if self.cleaned_data["date_fin"] and self.cleaned_data["date_fin"] < self.cleaned_data["date_debut"]:
+                self.add_error("date_fin", "La date de fin doit être supérieure à la date de début")
+                return
+
+        if self.cleaned_data["selection_periode"] == "UNIQUE":
             if not self.cleaned_data["date_debut"]:
                 self.add_error("date_debut", "Vous devez sélectionner une date de début")
                 return

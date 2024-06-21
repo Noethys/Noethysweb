@@ -122,6 +122,10 @@
         });
 
         function modifier_event(data_event) {
+            //if (isOverlapping(data_event.idlocation, data_event.date_debut, data_event.date_fin)) {
+            //    alert("La location que vous essayez de modifier chevauche une autre location !");
+            //    return false
+            //};
             $.ajax({
                 type: "POST",
                 url: "{% url 'ajax_planning_locations_modifier_location' %}",
@@ -152,6 +156,8 @@
                 success: function (data) {
                     $("#id_div_form_detail_location").html(data['form_html']);
                     $("#modal_detail_location").modal("show");
+                    $('#id_selection_periode').on('change', On_change_selection_periode);
+                    On_change_selection_periode.call($('#id_selection_periode').get(0));
                     $("#modal_detail_location").on('submit', submit_form);
                 }
             });
@@ -190,6 +196,19 @@
             });
         }
 
+        //function isOverlapping(id, start, end, resourceId){
+        //    var array = calendar.getEvents();
+        //    for (i in array) {
+        //        console.log("i=", array[i], array[i].start, array[i].end, array[i].id, array[i].getResources()[0].id)
+        //        if (array[i].id != id && array[i].resourceId == resourceId) {
+        //            if ((array[i].end > start) && (array[i].start < end)) {
+        //                return true;
+        //            }
+        //        }
+        //    }
+        //    return false;
+        //};
+
     </script>
 
     {# Modal Détail d'une location #}
@@ -202,5 +221,8 @@
             </div>
         {% endblock %}
     {% endembed %}
+
+    {# Fonctions liées au form de saisie d'une location #}
+    {% include 'locations/extra_form_location.html' %}
 
 {% endblock contenu_page %}
