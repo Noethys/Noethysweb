@@ -35,7 +35,7 @@ def Get_cotisations_manquantes(famille=None, date_reference=None, utilisateur=No
             dict_cotisations[key].append(cotisation)
         except:
             pass
-        
+
     liste_traitees = []
     liste_resultats = []
     for inscription in inscriptions:

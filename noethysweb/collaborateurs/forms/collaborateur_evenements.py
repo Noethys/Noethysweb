@@ -116,7 +116,7 @@ class Formulaire(FormulaireBase, ModelForm):
             self.helper.layout[0] = commandes
 
     def clean(self):
-        # Période de location
+        # Période
         if self.cleaned_data["selection_periode"] == "UNIQUE":
             if not self.cleaned_data["date_debut"]:
                 self.add_error("date_debut", "Vous devez sélectionner une date de début")
