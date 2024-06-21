@@ -1,3 +1,12 @@
+Version 1.2.4.4 (21/06/2024) :
+
+- Ajour de l'affichage des quantités dans le relevé des prestations
+- Correction du calcul de la formule dans l'état global
+- Correction du tri des forfaits datés dans la sélection de forfaits
+- Correction de l'accès à l'édition d'une fiche de renseignements depuis la fiche famille
+- Correction du calcul du remplissage si fraterie masquée dans grille des consommations
+- Correction protection contre les chevauchements de locations
+
 Version 1.2.4.3 (17/06/2024) :
 
 - Ajout de la rubrique personnalisée dans l'édition des renseignements
