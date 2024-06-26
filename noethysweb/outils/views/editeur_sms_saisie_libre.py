@@ -57,7 +57,8 @@ class Liste(Page_destinataires, TemplateView):
         # Suppression des destinataires
         for numero in liste_numeros_existants:
             if numero not in liste_numeros:
-                destinataires = DestinataireSMS.objects.filter(categorie="saisie_libre", mobile=numero, sms=sms)
-                destinataires.delete()
+                for destinataire in DestinataireSMS.objects.filter(categorie="saisie_libre", sms=sms):
+                    if destinataire.mobile == numero:
+                        destinataire.delete()
 
         return HttpResponseRedirect(reverse_lazy("editeur_sms", kwargs={'pk': sms.pk}))

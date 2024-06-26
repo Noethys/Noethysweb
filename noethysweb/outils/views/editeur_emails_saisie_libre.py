@@ -70,7 +70,8 @@ class Liste(Page_destinataires, TemplateView):
         # Suppression des destinataires
         for adresse in liste_adresses_existantes:
             if adresse not in liste_adresses:
-                destinataires = Destinataire.objects.filter(categorie="saisie_libre", adresse=adresse, mail=mail)
-                destinataires.delete()
+                for destinataire in Destinataire.objects.filter(categorie="saisie_libre", mail=mail):
+                    if destinataire.adresse == adresse:
+                        destinataire.delete()
 
         return HttpResponseRedirect(reverse_lazy("editeur_emails", kwargs={'pk': mail.pk}))
