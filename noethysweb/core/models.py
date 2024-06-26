@@ -62,8 +62,8 @@ LISTE_METHODES_TARIFS = [
     { "code": "montant_unique_date", "label":u"Montant unique en fonction de la date", "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("date", "montant_unique", "label"), "champs_obligatoires": ("date", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
     { "code": "qf_date", "label":u"En fonction de la date et du quotient familial", "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("date", "qf_min", "qf_max", "montant_unique", "label"), "champs_obligatoires": ("date", "qf_min", "qf_max", "montant_unique"), "tarifs_compatibles": ("JOURN",) },
 
-    # { "code": "variable", "label":u"Tarif libre (Saisi par l'utilisateur)"), "type": "unitaire", "nbre_lignes_max": 0, "entete": None, "champs": (), "champs_obligatoires": (), "tarifs_compatibles": ("JOURN",) },
-    # { "code": "choix", "label":u"Tarif au choix (Sélectionné par l'utilisateur)"), "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("montant_unique", "label"), "champs_obligatoires": ("montant_unique",), "tarifs_compatibles": ("JOURN", "FORFAIT",) },
+    # { "code": "variable", "label":u"Tarif libre (Saisi par l'utilisateur)", "type": "unitaire", "nbre_lignes_max": 0, "entete": None, "champs": (), "champs_obligatoires": (), "tarifs_compatibles": ("JOURN",) },
+    { "code": "choix", "label":u"Tarif au choix (Sélectionné par l'utilisateur)", "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("montant_unique", "label"), "champs_obligatoires": ("montant_unique",), "tarifs_compatibles": ("JOURN", "FORFAIT",) },
 
     { "code": "montant_evenement", "label":u"Montant de l'évènement", "type": "unitaire", "nbre_lignes_max": 0, "entete": None, "champs": (), "champs_obligatoires": (), "tarifs_compatibles": ("JOURN",) },
 
@@ -2278,6 +2278,7 @@ class Consommation(models.Model):
     evenement = models.ForeignKey(Evenement, verbose_name="Evénement", blank=True, null=True, on_delete=models.PROTECT)
     badgeage_debut = models.DateTimeField(verbose_name="Badgeage début", blank=True, null=True)
     badgeage_fin = models.DateTimeField(verbose_name="Badgeage fin", blank=True, null=True)
+    options = models.CharField(verbose_name="Options", max_length=100, blank=True, null=True)
 
     class Meta:
         db_table = 'consommations'

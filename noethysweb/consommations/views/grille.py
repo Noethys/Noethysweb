@@ -280,6 +280,25 @@ def Get_generic_data(data={}):
         data["tarifs_credits_exists"] = Tarif.objects.filter(type="CREDIT", activite=data['selection_activite']).exists()
         data["liste_idinscription"] = [inscription.pk for inscription in data["liste_inscriptions"]]
 
+    # Recherche les tarifs spéciaux (choix)
+    data["tarifs_choix_json"] = {}
+    conditions = Q(methode="choix", activite=data["selection_activite"], date_debut__lte=data["date_max"]) & (Q(date_fin__gte=data["date_min"]) | Q(date_fin__isnull=True))
+    tarifs_choix = Tarif.objects.prefetch_related("categories_tarifs").filter(conditions)
+    if tarifs_choix:
+        tarifs_temp = {}
+        for ligne in TarifLigne.objects.select_related("tarif").filter(tarif__in=tarifs_choix):
+            tarifs_temp.setdefault(ligne.tarif_id, {"unites": [], "categories_tarifs": [], "lignes": []})
+            tarifs_temp[ligne.tarif_id]["lignes"].append({"idligne": ligne.pk, "label": ligne.label, "montant": float(ligne.montant_unique)})
+
+        for combi in CombiTarif.objects.prefetch_related("unites").filter(tarif__in=tarifs_choix):
+            for unite in combi.unites.all():
+                tarifs_temp[combi.tarif_id]["unites"].append(unite.pk)
+
+        for tarif in tarifs_choix:
+            for categorie in tarif.categories_tarifs.all():
+                tarifs_temp[tarif.pk]["categories_tarifs"].append(categorie.pk)
+        data["tarifs_speciaux_json"] = json.dumps(tarifs_temp)
+
     # Conversion des unités de conso en JSON
     liste_unites_json = []
     for unite in data["liste_unites"]:
@@ -383,7 +402,7 @@ def Save_grille(request=None, donnees={}):
                     individu_id=dict_conso["individu"], inscription_id=dict_conso["inscription"], activite_id=dict_conso["activite"], date=dict_conso["date"],
                     unite_id=dict_conso["unite"], groupe_id=dict_conso["groupe"], heure_debut=dict_conso["heure_debut"], heure_fin=dict_conso["heure_fin"],
                     etat=dict_conso["etat"], categorie_tarif_id=dict_conso["categorie_tarif"], prestation_id=dict_conso["prestation"], quantite=dict_conso["quantite"],
-                    evenement_id=dict_conso["evenement"], badgeage_debut=dict_conso["badgeage_debut"], badgeage_fin=dict_conso["badgeage_fin"],
+                    evenement_id=dict_conso["evenement"], badgeage_debut=dict_conso["badgeage_debut"], badgeage_fin=dict_conso["badgeage_fin"], options=dict_conso["options"],
                 ))
                 logger.debug("Consommation à ajouter : " + str(dict_conso))
                 label_conso = dict_conso["nom_evenement"] if "nom_evenement" in dict_conso else dict_unites[dict_conso["unite"]].nom
@@ -413,6 +432,7 @@ def Save_grille(request=None, donnees={}):
         conso.categorie_tarif_id = dict_modifications[conso.pk]["categorie_tarif"]
         conso.prestation_id = dict_modifications[conso.pk]["prestation"]
         conso.quantite = dict_modifications[conso.pk]["quantite"]
+        conso.options = dict_modifications[conso.pk]["options"]
 
         if conso.prestation_id in dict_idprestation:
             conso.prestation_id = dict_idprestation[conso.prestation_id]
@@ -425,7 +445,7 @@ def Save_grille(request=None, donnees={}):
         Consommation.objects.bulk_create(liste_ajouts)
         texte_notification.append("%s ajout%s" % (len(liste_ajouts), "s" if len(liste_ajouts) > 1 else ""))
     if liste_modifications:
-        Consommation.objects.bulk_update(liste_modifications, ["groupe", "heure_debut", "heure_fin", "etat", "categorie_tarif", "prestation", "quantite"], batch_size=50)
+        Consommation.objects.bulk_update(liste_modifications, ["groupe", "heure_debut", "heure_fin", "etat", "categorie_tarif", "prestation", "quantite", "options"], batch_size=50)
         texte_notification.append("%s modification%s" % (len(liste_modifications), "s" if len(liste_modifications) > 1 else ""))
     if donnees["suppressions"]["consommations"]:
         logger.debug("Consommations à supprimer : " + str(donnees["suppressions"]["consommations"]))
@@ -593,7 +613,7 @@ class Facturation():
 
                 action = "saisie" # todo : PROVISOIRE
                 modeSilencieux = False # todo : PROVISOIRE
-
+                dict_options_conso = {}
 
                 # Recherche les unités utilisées de la ligne
                 dictUnitesUtilisees = {}
@@ -602,6 +622,9 @@ class Facturation():
                     if not conso["forfait"] and (conso["unite"] not in dictUnitesUtilisees or dictUnitesUtilisees[conso["unite"]] in (None, "attente", "refus")):
                         dictUnitesUtilisees[conso["unite"]] = conso["etat"]
                     dictQuantites[conso["unite"]] = conso["quantite"]
+                    options = conso.get("options", None)
+                    if options:
+                        dict_options_conso[conso["unite"]] = options
                 #logger.debug("Unités utilisées sur la ligne : " + str(dictUnitesUtilisees))
 
                 # Mémorise les tarifs
@@ -785,6 +808,14 @@ class Facturation():
                             break
                         else:
                             montant_tarif, nom_tarif, temps_facture, quantite, tarif_ligne = resultat
+
+                        # Si tarif spécial
+                        if dict_options_conso:
+                            if len(tarif_base.combi_retenue) == 1 and tarif_base.combi_retenue[0] in dict_options_conso:
+                                methode, id = dict_options_conso[tarif_base.combi_retenue[0]].split("=")
+                                if methode == "choix_tarif":
+                                    ligne = TarifLigne.objects.get(pk=int(id))
+                                    montant_tarif, nom_tarif, tarif_ligne = ligne.montant_unique, ligne.label, ligne
 
                         logger.debug("Montant trouvé : Montant=%s (tarif=%s temps_facturé=%s Quantité=%d)" % (montant_tarif, nom_tarif, temps_facture, quantite))
 

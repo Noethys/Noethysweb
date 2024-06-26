@@ -194,7 +194,7 @@ class Case_base {
         return resultat;
     };
 
-    creer_conso(data={}, maj_facturation=true) {
+    creer_conso(data={}, maj_facturation=true, options=null) {
         // Message si jour complet
         var is_complet = $("#" + this.key).hasClass("complet");
 
@@ -212,6 +212,11 @@ class Case_base {
             };
         }
 
+        // Tarif spécial
+        if ((options == null) && dict_tarifs_speciaux) {
+            if (appliquer_tarif_special(this, data, maj_facturation) === true) {return false}
+        }
+
         // Création de la nouvelle conso
         var conso = new Conso({fields:{
             pk: uuid(),
@@ -224,6 +229,7 @@ class Case_base {
             activite: this.activite,
             famille: this.famille,
             categorie_tarif: this.categorie_tarif,
+            options: options
         }});
         // Assigne des valeurs si un dict data est donné
         if (data) {
@@ -961,6 +967,7 @@ class Conso {
         this.evenement = null;
         this.badgeage_debut = null;
         this.badgeage_fin = null;
+        this.options = null;
         this.dirty = false;
 
         // Importation depuis un array
@@ -1459,7 +1466,6 @@ function facturer(case_tableau) {
 };
 
 
-
 function get_donnees_for_facturation(keys_cases_touchees) {
     // Mémorise toutes les conso
     var dict_conso_facturation = {};
@@ -1698,3 +1704,33 @@ function impression_pdf(email=false) {
     })
 };
 
+
+function appliquer_tarif_special(case_tableau, data, maj_facturation) {
+    var liste_choix_tarifs = [];
+    $.each(dict_tarifs_speciaux, function (idtarif, dict_tarif) {
+        if ((dict_tarif.unites.indexOf(case_tableau.unite) !== -1) && (dict_tarif.categories_tarifs.indexOf(case_tableau.categorie_tarif) !== -1)) {
+            for (var ligne of dict_tarif.lignes) {
+                liste_choix_tarifs.push({
+                    "text": ligne.montant.toFixed(2) + " € : " + ligne.label,
+                    "value": "choix_tarif=" + ligne.idligne
+                })
+            }
+        }
+    })
+    if (liste_choix_tarifs.length) {
+        var dlg = bootbox.prompt({
+            title: "Tarif au choix",
+            message: "<b>Quel tarif souhaitez-vous appliquer ?<br><br>",
+            inputType: "radio",
+            locale: "custom",
+            inputOptions: liste_choix_tarifs,
+            callback: function (choix_tarif) {
+                if (choix_tarif) {
+                    case_tableau.creer_conso(data, maj_facturation, choix_tarif)
+                }
+            }
+        })
+        return true
+    }
+    return false
+}
