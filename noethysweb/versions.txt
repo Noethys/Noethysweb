@@ -1,3 +1,7 @@
+Version 1.2.4.6 (27/06/2024) :
+
+- Correction des tarifs spéciaux dans le gestionnaire des consommations
+
 Version 1.2.4.5 (27/06/2024) :
 
 - Ajout du tarif au choix
