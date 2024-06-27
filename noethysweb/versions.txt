@@ -1,6 +1,12 @@
+Version 1.2.4.5 (27/06/2024) :
+
+- Ajout du tarif au choix
+- Ajout de l'option date de naissance dans le filtre inscrits/présents
+- Correction sur la sélection des destinataires email et SMS
+
 Version 1.2.4.4 (21/06/2024) :
 
-- Ajour de l'affichage des quantités dans le relevé des prestations
+- Ajout de l'affichage des quantités dans le relevé des prestations
 - Correction du calcul de la formule dans l'état global
 - Correction du tri des forfaits datés dans la sélection de forfaits
 - Correction de l'accès à l'édition d'une fiche de renseignements depuis la fiche famille
