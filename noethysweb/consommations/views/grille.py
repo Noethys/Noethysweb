@@ -281,7 +281,6 @@ def Get_generic_data(data={}):
         data["liste_idinscription"] = [inscription.pk for inscription in data["liste_inscriptions"]]
 
     # Recherche les tarifs spéciaux (choix)
-    data["tarifs_choix_json"] = {}
     conditions = Q(methode="choix", activite=data["selection_activite"], date_debut__lte=data["date_max"]) & (Q(date_fin__gte=data["date_min"]) | Q(date_fin__isnull=True))
     tarifs_choix = Tarif.objects.prefetch_related("categories_tarifs").filter(conditions)
     if tarifs_choix:
@@ -298,6 +297,8 @@ def Get_generic_data(data={}):
             for categorie in tarif.categories_tarifs.all():
                 tarifs_temp[tarif.pk]["categories_tarifs"].append(categorie.pk)
         data["tarifs_speciaux_json"] = json.dumps(tarifs_temp)
+    else:
+        data["tarifs_speciaux_json"] = json.dumps({})
 
     # Conversion des unités de conso en JSON
     liste_unites_json = []
