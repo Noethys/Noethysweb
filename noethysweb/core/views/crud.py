@@ -16,7 +16,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatableView, MyMultipleDatatableView
-from core.utils import utils_texte, utils_historique
+from core.utils import utils_texte, utils_historique, utils_dates
 from core.models import FiltreListe, Consommation, Inscription, Scolarite, Individu, LISTE_ETATS_CONSO
 
 
@@ -139,6 +139,10 @@ class Liste_commun():
                             condition &= Q(statut__in=criteres[2])
                         else:
                             condition &= Q(statut__in=["ok",])
+                        if len(criteres) > 3:
+                            date_debut, date_fin = utils_dates.ConvertPeriodeFrToDate(criteres[3])
+                            liste_individus = [individu.pk for individu in Individu.objects.all() if (individu.date_naiss and (date_debut <= individu.date_naiss <= date_fin))]
+                            condition &= Q(individu_id__in=liste_individus)
                         resultats = [resultat[donnee] for resultat in Inscription.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
                     if filtre["condition"] == "PRESENT":
                         donnee = "inscription__famille" if type_champ == "fpresent" else "individu"
@@ -147,6 +151,10 @@ class Liste_commun():
                             condition &= Q(etat__in=criteres[3])
                         else:
                             condition &= Q(etat__in=["reservation", "present"])
+                        if len(criteres) > 4:
+                            date_debut, date_fin = utils_dates.ConvertPeriodeFrToDate(criteres[4])
+                            liste_individus = [individu.pk for individu in Individu.objects.all() if (individu.date_naiss and (date_debut <= individu.date_naiss <= date_fin))]
+                            condition &= Q(individu_id__in=liste_individus)
                         resultats = [resultat[donnee] for resultat in Consommation.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
                     if filtre["condition"] == "SANS_RESA":
                         donnee = "famille" if type_champ == "fpresent" else "individu"

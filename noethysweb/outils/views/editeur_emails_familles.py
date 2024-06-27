@@ -17,7 +17,10 @@ class Liste(Page_destinataires, crud.Liste):
     categorie = "famille"
 
     def get_queryset(self):
-        return Famille.objects.filter(self.Get_filtres("Q"))
+        try:
+            return Famille.objects.filter(self.Get_filtres("Q"))
+        except:
+            return Famille.objects.filter()
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

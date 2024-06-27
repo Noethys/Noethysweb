@@ -97,13 +97,20 @@ def Ajouter_filtre(request):
             type_critere = key.replace("critere_", "")
             if "datetime" in type_critere:
                 dict_resultat["criteres"].append(str(dateutil.parser.parse(valeur, dayfirst=False)))
+            elif "date_naiss" in type_critere:
+                if valeur:
+                    periode_str = utils_dates.ConvertPeriodeFrToDate(valeur)
+                    if not periode_str:
+                        return JsonResponse({"erreur": "Le critère date de naissance semble être erronée"}, status=401)
+                    dict_resultat["criteres"].append(valeur)
+                    liste_labels_criteres.append("né(e) entre '%s'" % valeur)
             elif "date" in type_critere:
                 dict_resultat["criteres"].append(str(utils_dates.ConvertDateFRtoDate(valeur)))
             else:
                 dict_resultat["criteres"].append(valeur)
-            if not valeur and key != "critere_date_optionnelle":
+            if not valeur and key not in ("critere_date_optionnelle", "critere_periode_naiss"):
                 return JsonResponse({"erreur": "Vous n'avez pas renseigné correctement le critère"}, status=401)
-            if key not in ("critere_etats", "critere_etats_inscriptions"):
+            if key not in ("critere_etats", "critere_etats_inscriptions", "critere_periode_naiss"):
                 liste_labels_criteres.append("'%s'" % valeur)
 
         if key.startswith("liste_"):
@@ -127,13 +134,9 @@ def Ajouter_filtre(request):
     if valeurs["champ"].startswith("datenaiss"): valeurs["label_champ"] = "La date de naissance de l'individu"
     if valeurs["champ"].startswith("age"): valeurs["label_champ"] = "L'âge de l'individu"
     if valeurs["champ"].startswith("fprelevement_actif"): valeurs["label_champ"] = "Le prélèvement activé pour la famille"
-    if dict_resultat["condition"] == "INSCRIT" and len(dict_resultat["criteres"]) == 0:
-        return JsonResponse({"erreur": "Vous devez cocher au moins une ligne dans la liste"}, status=401)
-    if dict_resultat["condition"] == "PRESENT" and len(dict_resultat["criteres"]) == 2:
-        return JsonResponse({"erreur": "Vous devez cocher au moins une ligne dans la liste"}, status=401)
-    if dict_resultat["condition"] == "SANS_RESA" and len(dict_resultat["criteres"]) == 2:
-        return JsonResponse({"erreur": "Vous devez cocher au moins une ligne dans la liste"}, status=401)
-
+    if dict_resultat["condition"] in ("INSCRIT", "PRESENT", "SANS_RESA"):
+        if "liste_groupes_activites" not in valeurs and "liste_activites" not in valeurs and "liste_groupes" not in valeurs:
+            return JsonResponse({"erreur": "Vous devez cocher au moins une ligne dans la liste"}, status=401)
     dict_resultat["label_filtre"] = "%s %s" % (valeurs["label_champ"], traductions_criteres[dict_resultat["condition"].replace("*", "")])
     if liste_labels_criteres:
         dict_resultat["label_filtre"] += " " + " et ".join(liste_labels_criteres)
@@ -191,6 +194,7 @@ class Formulaire(FormulaireBase, forms.Form):
         initial=["reservation", "present"])
     critere_etats_inscriptions = forms.MultipleChoiceField(label="Statuts", required=False, widget=Select2MultipleWidget(),
         choices=[("ok", "Validé"), ("attente", "En attente"), ("refus", "Refusé")], initial=["ok",])
+    critere_periode_naiss = forms.CharField(label="Né(e) entre", required=False, widget=forms.TextInput(attrs={"placeholder": "jj/mm/aaaa - jj/mm/aaaa"}))
 
     dict_types = {
         'BinaryField': {'condition': 'condition5', 'criteres': {"*EGAL": ["critere_texte"], "*DIFFERENT": ["critere_texte"], "*CONTIENT": ["critere_texte"], "*NE_CONTIENT_PAS": ["critere_texte"], "*EST_VIDE": [], "*EST_PAS_VIDE": []}},
@@ -203,8 +207,8 @@ class Formulaire(FormulaireBase, forms.Form):
         'AutoField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
         'IntegerField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
         'DecimalField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_decimal"], "DIFFERENT": ["critere_decimal"], "SUPERIEUR": ["critere_decimal"], "SUPERIEUR_EGAL": ["critere_decimal"], "INFERIEUR": ["critere_decimal"], "INFERIEUR_EGAL": ["critere_decimal"], "COMPRIS": ["critere_decimal_min", "critere_decimal_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
-        'ipresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date", "critere_etats_inscriptions"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
-        'fpresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date", "critere_etats_inscriptions"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
+        'ipresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date_optionnelle", "critere_etats_inscriptions", "critere_periode_naiss"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats", "critere_periode_naiss"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
+        'fpresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date_optionnelle", "critere_etats_inscriptions", "critere_periode_naiss"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats", "critere_periode_naiss"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
         'iscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_date", "critere_ecoles"], "CLASSES": ["critere_classes"], "NIVEAUX": ["critere_date", "critere_niveaux"], "NON_SCOLARISE": ["critere_date"]}},
         'fscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_date", "critere_ecoles"], "CLASSES": ["critere_classes"], "NIVEAUX": ["critere_date", "critere_niveaux"], "NON_SCOLARISE": ["critere_date"]}},
         'fprelevement_actif': {'condition': 'condition3', 'criteres': {"VRAI": [], "FAUX": []}},
@@ -301,7 +305,7 @@ class Formulaire(FormulaireBase, forms.Form):
             ctrl_criteres = self.dict_types[type_champ]["criteres"][dict_filtre["condition"]]
             for index, nom_ctrl in enumerate(ctrl_criteres):
                 # Si datetime
-                if "-" in dict_filtre["criteres"][index] and ":" in dict_filtre["criteres"][index]:
+                if index <= len(dict_filtre["criteres"])-1 and "-" in dict_filtre["criteres"][index] and ":" in dict_filtre["criteres"][index]:
                     dict_filtre["criteres"][index] = datetime.datetime.strptime(dict_filtre["criteres"][index], "%Y-%m-%d %H:%M:%S")
                 # Importation de la valeur par défaut
                 try:
@@ -344,6 +348,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("critere_niveaux"),
             Field("critere_etats"),
             Field("critere_etats_inscriptions"),
+            Field("critere_periode_naiss"),
             ButtonHolder(
                 Div(
                     HTML("""<button type="button" class="btn btn-primary" onclick="valider_ajout_filtre()"><i class="fa fa-check margin-r-5"></i>Valider</button>"""),

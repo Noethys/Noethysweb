@@ -252,3 +252,12 @@ def ConvertDateRangePicker(periode=""):
     date_debut = ConvertDateENGtoDate(periode.split(";")[0])
     date_fin = ConvertDateENGtoDate(periode.split(";")[1])
     return (date_debut, date_fin)
+
+def ConvertPeriodeFrToDate(periode=""):
+    try:
+        date_debut, date_fin = periode.split("-")
+        date_debut = ConvertDatetimeToDate(dateutil.parser.parse(date_debut.strip(), dayfirst=True))
+        date_fin = ConvertDatetimeToDate(dateutil.parser.parse(date_fin.strip(), dayfirst=True))
+        return (date_debut, date_fin)
+    except:
+        return None
