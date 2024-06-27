@@ -1,3 +1,7 @@
+Version 1.2.4.7 (27/06/2024) :
+
+- Correction des options sur les consommations dans la grille
+
 Version 1.2.4.6 (27/06/2024) :
 
 - Correction des tarifs spéciaux dans le gestionnaire des consommations
