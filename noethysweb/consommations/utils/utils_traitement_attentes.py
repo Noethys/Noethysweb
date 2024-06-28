@@ -54,6 +54,7 @@ def Traiter_attentes(request=None, selections=None, test=False):
                 })
 
         logger.debug("Nombre de familles concernées par la réattribution de places en attente : %d." % len(dict_resultats_familles))
+        logger.debug("Données réattribution : %s" % dict_resultats_familles)
 
         # Si aucune famille concernée, on abandonne la procédure
         if not len(dict_resultats_familles):

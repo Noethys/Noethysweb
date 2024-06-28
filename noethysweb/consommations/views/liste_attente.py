@@ -237,16 +237,15 @@ def Get_resultats(parametres={}, etat="attente", request=None):
                                     placeDispo = False
 
                         # S'il reste finalement une place dispo, on change le nbre de places restantes
-                        if placeDispo:
-                            for dictUnite in dictConso[date][activite][groupe][evenement][inscription]:
-                                IDunite = dictUnite["IDunite"]
-                                listeIDunite.append(IDunite)
-                                listeIDconso.append(dictUnite["IDconso"])
-                                if IDunite in data_remplissage["dict_unites_remplissage_unites"]:
-                                    for IDuniteRemplissage in data_remplissage["dict_unites_remplissage_unites"][IDunite]:
-                                        key = (date, activite, groupe, IDuniteRemplissage, evenement)
-                                        dictPlacesRestantes.setdefault(key, 0)
-                                        dictPlacesRestantes[key] += 1
+                        for dictUnite in dictConso[date][activite][groupe][evenement][inscription]:
+                            IDunite = dictUnite["IDunite"]
+                            listeIDunite.append(IDunite)
+                            listeIDconso.append(dictUnite["IDconso"])
+                            if placeDispo and IDunite in data_remplissage["dict_unites_remplissage_unites"]:
+                                for IDuniteRemplissage in data_remplissage["dict_unites_remplissage_unites"][IDunite]:
+                                    key = (date, activite, groupe, IDuniteRemplissage, evenement)
+                                    dictPlacesRestantes.setdefault(key, 0)
+                                    dictPlacesRestantes[key] += 1
 
                         # Icone
                         if placeDispo:
