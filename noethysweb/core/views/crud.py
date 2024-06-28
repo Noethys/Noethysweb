@@ -139,7 +139,7 @@ class Liste_commun():
                             condition &= Q(statut__in=criteres[2])
                         else:
                             condition &= Q(statut__in=["ok",])
-                        if len(criteres) > 3:
+                        if len(criteres) > 3 and criteres[3]:
                             date_debut, date_fin = utils_dates.ConvertPeriodeFrToDate(criteres[3])
                             liste_individus = [individu.pk for individu in Individu.objects.all() if (individu.date_naiss and (date_debut <= individu.date_naiss <= date_fin))]
                             condition &= Q(individu_id__in=liste_individus)
@@ -151,7 +151,7 @@ class Liste_commun():
                             condition &= Q(etat__in=criteres[3])
                         else:
                             condition &= Q(etat__in=["reservation", "present"])
-                        if len(criteres) > 4:
+                        if len(criteres) > 4 and criteres[4]:
                             date_debut, date_fin = utils_dates.ConvertPeriodeFrToDate(criteres[4])
                             liste_individus = [individu.pk for individu in Individu.objects.all() if (individu.date_naiss and (date_debut <= individu.date_naiss <= date_fin))]
                             condition &= Q(individu_id__in=liste_individus)
