@@ -1,3 +1,8 @@
+Version 1.2.4.8 (28/06/2024) :
+
+- Correction de la réattribution manuelle de places
+- Correction du critère période de naissance dans les filtres
+
 Version 1.2.4.7 (27/06/2024) :
 
 - Correction des options sur les consommations dans la grille
