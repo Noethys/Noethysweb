@@ -399,15 +399,15 @@ class Exporter():
             Adresse.appendChild(TypAdr)
 
             Adr2 = doc.createElement("Adr2")
-            Adr2.setAttribute("V", ConvertToTexte(piece.famille.titulaire_helios.rue_resid[:38], majuscules=True))
+            Adr2.setAttribute("V", ConvertToTexte((piece.famille.titulaire_helios.rue_resid or "")[:38], majuscules=True))
             Adresse.appendChild(Adr2)
 
             CP = doc.createElement("CP")
-            CP.setAttribute("V", piece.famille.titulaire_helios.cp_resid[:5])
+            CP.setAttribute("V", (piece.famille.titulaire_helios.cp_resid or "")[:5])
             Adresse.appendChild(CP)
 
             Ville = doc.createElement("Ville")
-            Ville.setAttribute("V", ConvertToTexte(piece.famille.titulaire_helios.ville_resid[:38], majuscules=True))
+            Ville.setAttribute("V", ConvertToTexte((piece.famille.titulaire_helios.ville_resid or "")[:38], majuscules=True))
             Adresse.appendChild(Ville)
 
             CodRes = doc.createElement("CodRes")
