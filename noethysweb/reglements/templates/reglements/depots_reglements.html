@@ -19,6 +19,7 @@
                         <a class="btn btn-default" href="{% url 'depots_reglements_ajouter_reglement' iddepot=depot.pk %}"><i class='fa fa-plus margin-r-5'></i>Ajouter des règlements</a>
                         <a class="btn btn-default" href="{% url 'depots_reglements_modifier' pk=depot.pk %}"><i class="fa fa-pencil margin-r-5"></i>Modifier les paramètres</a>
                         <button class="btn btn-default" onclick="impression_pdf()" title="Aperçu PDF"><i class='fa fa-file-pdf-o margin-r-5'></i>Aperçu PDF</button>
+                        <a class="btn btn-default" href="{% url 'depots_reglements_envoyer_avis' iddepot=depot.pk %}"><i class="fa fa-send-o margin-r-5"></i>Envoyer les avis de dépôt</a>
                         <a class="btn btn-default" href="#" target="_blank" title="Consulter l'aide"><i class="fa fa-life-saver margin-r-5"></i>Aide</a>
                     </div>
 

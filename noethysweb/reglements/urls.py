@@ -10,7 +10,7 @@ from core.decorators import Verifie_ventilation
 from reglements.views import liste_reglements, liste_recus, liste_detaillee_reglements, synthese_modes_reglements, \
                             depots_reglements, depots_reglements_selection, detail_prestations_depot, \
                             liste_reglements_disponibles, corriger_ventilation, liste_paiements, reglements_lot_factures, \
-                            detail_ventilations_depots, detail_ventilations_reglements
+                            detail_ventilations_depots, detail_ventilations_reglements, depots_reglements_avis
 
 
 urlpatterns = [
@@ -43,6 +43,7 @@ urlpatterns = [
     path('reglements/depots_reglements/reglements/ajouter/<int:iddepot>', depots_reglements_selection.Liste.as_view(), name='depots_reglements_ajouter_reglement'),
     path('reglements/depots_reglements/reglements/supprimer/<int:iddepot>/<int:pk>', depots_reglements.Supprimer_reglement.as_view(), name='depots_reglements_supprimer_reglement'),
     path('reglements/depots_reglements/reglements/supprimer_plusieurs/<int:iddepot>/<str:listepk>', depots_reglements.Supprimer_plusieurs_reglements.as_view(), name='depots_reglements_supprimer_plusieurs_reglements'),
+    path('reglements/depots_reglements/reglements/avis/<int:iddepot>', depots_reglements_avis.Liste.as_view(), name='depots_reglements_envoyer_avis'),
 
     # Ventilation
     path('reglements/corriger_ventilation', corriger_ventilation.View.as_view(), name='corriger_ventilation'),
