@@ -37,6 +37,12 @@ class Impression(utils_impression.Impression):
             dict_representants.setdefault(rattachement.famille_id, [])
             dict_representants[rattachement.famille_id].append(rattachement)
 
+        # Importation de tous les contacts famille
+        dict_contacts_famille = {}
+        for rattachement in Rattachement.objects.select_related("individu").filter(categorie=3):
+            dict_contacts_famille.setdefault(rattachement.famille_id, [])
+            dict_contacts_famille[rattachement.famille_id].append(rattachement)
+
         # Importation de tous les liens
         dict_liens = {}
         for lien in Lien.objects.all():
@@ -217,7 +223,31 @@ class Impression(utils_impression.Impression):
                 contenu_tableau.append(Paragraph(texte, style_defaut))
             self.story.append(Tableau(titre="Représentants".upper(), contenu=contenu_tableau))
 
-            # Contacts
+            # Contacts de la famille
+            contenu_tableau = []
+            for contact in dict_contacts_famille.get(rattachement.famille_id, []):
+
+                # Lien du représentant avec l'individu
+                texte_lien = []
+                lien = dict_liens.get((contact.individu_id, rattachement.individu_id), None)
+                dict_civilite = data_civilites.GetCiviliteForIndividu(individu=contact.individu)
+                if lien and lien.idtype_lien and dict_civilite["sexe"]:
+                    texte_lien.append(DICT_TYPES_LIENS[lien.idtype_lien][dict_civilite["sexe"]])
+
+                # Nom représentant
+                texte = "<b>%s</b> (%s)<br/>" % (contact.individu.Get_nom(), " ".join(texte_lien))
+
+                # Coordonnées du contact
+                texte += contact.individu.Get_adresse_complete()
+                for label, code in [("Domi.", "tel_domicile"), ("Port.", "tel_mobile"), ("Pro.", "travail_tel"), ("Email", "mail")]:
+                    if getattr(contact.individu, code):
+                        texte += "&nbsp;&nbsp; %s : %s" % (label, getattr(contact.individu, code))
+
+                contenu_tableau.append(Paragraph(texte, style_defaut))
+            if contenu_tableau:
+                self.story.append(Tableau(titre="Contacts de la famille".upper(), contenu=contenu_tableau))
+
+            # Contacts de l'individu
             contenu_tableau = []
             for contact in dict_contacts.get((rattachement.individu_id, rattachement.famille_id), []):
 
@@ -239,7 +269,7 @@ class Impression(utils_impression.Impression):
 
             if not self.dict_donnees["mode_condense"]:
                 contenu_tableau.append(Paragraph("<br/><br/><br/>", style_defaut))
-            self.story.append(Tableau(titre="Contacts".upper(), aide="Lister les noms des contacts d'urgence et leurs coordonnées", contenu=contenu_tableau))
+            self.story.append(Tableau(titre="Contacts de l'individu".upper(), aide="Lister les noms des contacts d'urgence et leurs coordonnées", contenu=contenu_tableau))
 
             # Assurance
             assurance = dict_assurances.get((rattachement.individu_id, rattachement.famille_id), None)
