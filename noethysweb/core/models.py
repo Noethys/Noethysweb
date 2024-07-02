@@ -3608,6 +3608,7 @@ class Prelevements(models.Model):
     sequence = models.CharField(verbose_name="Séquence", choices=[("OOFF", "Prélèvement ponctuel (OOFF)"), ("FRST", "Premier prélèvement d'une série (FRST)"), ("RCUR", "Prélèvement suivant d'une série (RCUR)"), ('FNAL', "Dernier prélèvement d'une série (FNAL)")], max_length=100)
     statut = models.CharField(verbose_name="Statut", choices=[("valide", "Valide"), ("refus", "Refus"), ("attente", "Attente")], default="attente", max_length=100)
     reglement = models.ForeignKey(Reglement, verbose_name="Règlement", on_delete=models.SET_NULL, blank=True, null=True)
+    libelle = models.CharField(verbose_name="Libellé", max_length=400, blank=True, null=True)
 
     class Meta:
         db_table = "prelevements"

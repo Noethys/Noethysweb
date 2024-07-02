@@ -67,6 +67,7 @@ urlpatterns = [
     path('facturation/lots_prelevements/supprimer/<int:pk>', lots_prelevements.Supprimer.as_view(), name='lots_prelevements_supprimer'),
     path('facturation/lots_prelevements/consulter/<int:pk>', lots_prelevements.Consulter.as_view(), name='lots_prelevements_consulter'),
     path('facturation/lots_prelevements/pieces/ajouter/<int:idlot>', lots_prelevements_factures.Liste.as_view(), name='lots_prelevements_ajouter_piece'),
+    path('facturation/lots_prelevements/pieces/ajouter_manuel/<int:idlot>', lots_prelevements.Ajouter_piece_manuelle.as_view(), name='lots_prelevements_ajouter_piece_manuelle'),
     path('facturation/lots_prelevements/pieces/modifier/<int:idlot>/<int:pk>', lots_prelevements.Modifier_piece.as_view(), name='lots_prelevements_modifier_piece'),
     path('facturation/lots_prelevements/pieces/supprimer/<int:idlot>/<int:pk>', lots_prelevements.Supprimer_piece.as_view(), name='lots_prelevements_supprimer_piece'),
     path('facturation/lots_prelevements/pieces/supprimer_plusieurs/<int:idlot>/<str:listepk>', lots_prelevements.Supprimer_plusieurs_pieces.as_view(), name='lots_prelevements_supprimer_plusieurs_pieces'),

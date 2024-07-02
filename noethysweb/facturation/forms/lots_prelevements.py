@@ -8,9 +8,11 @@ from django import forms
 from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset
-from crispy_forms.bootstrap import Field
+from crispy_forms.bootstrap import Field, PrependedText
+from django_select2.forms import Select2Widget
 from core.utils.utils_commandes import Commandes
-from core.models import PrelevementsLot, PrelevementsModele, Prelevements, Mandat, LotFactures, FiltreListe, Facture
+from core.utils import utils_preferences
+from core.models import PrelevementsLot, PrelevementsModele, Prelevements, Mandat, LotFactures, FiltreListe, Facture, Famille
 from core.widgets import DatePickerWidget
 from core.forms.base import FormulaireBase
 
@@ -133,7 +135,7 @@ class Formulaire_piece(FormulaireBase, ModelForm):
 
     class Meta:
         model = Prelevements
-        fields = ["mandat", "sequence", "statut", "type", "montant"]
+        fields = ["mandat", "sequence", "statut", "type", "montant", "libelle"]
 
     def __init__(self, *args, **kwargs):
         super(Formulaire_piece, self).__init__(*args, **kwargs)
@@ -146,8 +148,10 @@ class Formulaire_piece(FormulaireBase, ModelForm):
         self.helper.field_class = 'col-md-10'
 
         # Désactive certains champs
-        for champ in ("type", "montant"):
-            self.fields[champ].disabled = True
+        self.fields["type"].disabled = True
+        self.fields["montant"].disabled = True
+        if self.instance.type != "manuel":
+            self.fields["libelle"].disabled = True
 
         # Mandat
         self.fields["mandat"].choices = [(None, "---------")] + [(mandat.pk, mandat.rum) for mandat in Mandat.objects.filter(famille=self.instance.famille)]
@@ -159,6 +163,7 @@ class Formulaire_piece(FormulaireBase, ModelForm):
             Fieldset("Pièce",
                 Field("type"),
                 Field("montant"),
+                Field("libelle"),
             ),
             Fieldset("Prélèvement",
                 Field("mandat"),
@@ -171,7 +176,36 @@ EXTRA_HTML = """
 <div class="info-box bg-light">
     <div class="info-box-content">
         <span class="info-box-number text-center text-muted mb-0">{{ object.famille.nom }}</span>
-        <span class="info-box-text text-center text-muted mb-0">{{ object.get_type_display }} n°{{ object.facture.numero }} - {{ object.montant|montant }}</span>
+        <span class="info-box-text text-center text-muted mb-0">{% if object.facture %}{{ object.get_type_display }} n°{{ object.facture.numero }}{% else %}Prélèvement manuel{% endif %} - {{ object.montant|montant }}</span>
     </div>
 </div>
 """
+
+
+class Formulaire_piece_manuelle(FormulaireBase, ModelForm):
+    famille = forms.ModelChoiceField(label="Famille", widget=Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}),
+                                     queryset=Famille.objects.all().order_by("nom"), required=True)
+    libelle = forms.CharField(label="Libellé", required=True)
+
+    class Meta:
+        model = Prelevements
+        fields = ["famille", "montant", "libelle"]
+
+    def __init__(self, *args, **kwargs):
+        idlot = kwargs.pop("idlot", None)
+        super(Formulaire_piece_manuelle, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'piece_manuelle_prelevements_form'
+        self.helper.form_method = 'post'
+
+        self.helper.form_class = 'form-horizontal'
+        self.helper.label_class = 'col-md-2'
+        self.helper.field_class = 'col-md-10'
+
+        # Affichage
+        self.helper.layout = Layout(
+            Commandes(annuler_url="{% url 'lots_prelevements_consulter' pk=" + str(idlot) + " %}", ajouter=False),
+            Field("famille"),
+            Field("libelle"),
+            PrependedText("montant", utils_preferences.Get_symbole_monnaie()),
+        )

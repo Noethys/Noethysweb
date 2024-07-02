@@ -105,7 +105,7 @@ class Impression(utils_impression.Impression):
             ligne = []
 
             # N° Facture
-            ligne.append(piece.facture.numero)
+            ligne.append(piece.facture.numero if piece.facture else "")
 
             # Famille
             texte = "%s<br/>%s<br/>%s %s" % (piece.famille, piece.famille.Get_rue_resid() or "", piece.famille.cp_resid or "", piece.famille.ville_resid or "")
@@ -115,7 +115,10 @@ class Impression(utils_impression.Impression):
             ligne.append(Paragraph(utils_texte.Formate_montant(piece.montant), style_centre))
 
             # Libellé prestation
-            ligne.append(Paragraph("<br/>".join([ligne_detail["libelle"] for ligne_detail in dict_prestations_piece[piece]]), style_defaut))
+            if piece.type == "facture":
+                ligne.append(Paragraph("<br/>".join([ligne_detail["libelle"] for ligne_detail in dict_prestations_piece[piece]]), style_defaut))
+            else:
+                ligne.append(Paragraph(piece.libelle, style_defaut))
 
             # Quantité
             ligne.append(Paragraph("<br/>".join([str(ligne_detail["quantite"]) for ligne_detail in dict_prestations_piece[piece]]), style_centre))

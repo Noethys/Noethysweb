@@ -7,11 +7,12 @@ import json, datetime, time
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Sum, Count
 from django.http import HttpResponseRedirect, JsonResponse
+from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import PrelevementsLot, Prelevements, Facture, FiltreListe, Reglement, Payeur, Prestation, Ventilation
+from core.models import PrelevementsLot, Prelevements, Facture, FiltreListe, Reglement, Payeur, Prestation, Ventilation, Mandat
 from core.utils import utils_texte
-from facturation.forms.lots_prelevements import Formulaire, Formulaire_creation, Formulaire_piece
+from facturation.forms.lots_prelevements import Formulaire, Formulaire_creation, Formulaire_piece, Formulaire_piece_manuelle
 
 
 def Actions(request):
@@ -58,18 +59,18 @@ def Actions(request):
                 prelevement.save()
 
                 # Création des ventilations
-                for prestation in Prestation.objects.filter(facture=prelevement.facture):
-                    Ventilation.objects.create(famille=prelevement.famille, reglement=reglement, prestation=prestation, montant=prestation.montant)
-
-                # MAJ solde facture
-                prelevement.facture.Maj_solde_actuel()
+                if prelevement.facture:
+                    for prestation in Prestation.objects.filter(facture=prelevement.facture):
+                        Ventilation.objects.create(famille=prelevement.famille, reglement=reglement, prestation=prestation, montant=prestation.montant)
+                    prelevement.facture.Maj_solde_actuel()
 
     # Ne pas régler
     if num_action == 5:
         for prelevement in liste_prelevements:
             if prelevement.reglement:
                 prelevement.reglement.delete()
-                prelevement.facture.Maj_solde_actuel()
+                if prelevement.facture:
+                    prelevement.facture.Maj_solde_actuel()
 
     return JsonResponse({"resultat": "ok"})
 
@@ -230,8 +231,8 @@ class Consulter(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idprelevement", "famille", "montant", "facture", "statut", "reglement", "mandat", "iban", "bic", "sequence", "actions"]
-            hidden_columns = ["iban", "bic", "sequence"]
+            columns = ["check", "idprelevement", "famille", "montant", "facture", "libelle", "statut", "reglement", "mandat", "iban", "bic", "sequence", "actions"]
+            hidden_columns = ["iban", "bic", "sequence", "libelle"]
             processors = {
                 "montant": "Formate_montant",
                 "reglement": "Formate_reglement",
@@ -262,6 +263,44 @@ class Consulter(Page, crud.Liste):
                 return "<span class='badge bg-success'><i class='fa fa-check margin-r-5'></i>Oui</span>"
             else:
                 return "<span class='badge bg-danger'><i class='fa fa-close margin-r-5'></i>Non</span>"
+
+
+class Ajouter_piece_manuelle(Page, crud.Ajouter):
+    model = Prelevements
+    form_class = Formulaire_piece_manuelle
+    objet_singulier = "un prélèvement manuel"
+    description_saisie = "Renseignez les informations demandées et cliquez sur le bouton Enregistrer."
+
+    def get_form_kwargs(self, **kwargs):
+        form_kwargs = super(Page, self).get_form_kwargs(**kwargs)
+        form_kwargs["idlot"] = self.kwargs.get("idlot", None)
+        return form_kwargs
+
+    def get_success_url(self):
+        return reverse_lazy(self.url_consulter, kwargs={'pk': self.kwargs['idlot']})
+
+    def form_valid(self, form):
+        # Importation du mandat de la famille
+        mandat = Mandat.objects.filter(famille=form.cleaned_data["famille"], actif=True).last()
+        if not mandat:
+            messages.add_message(self.request, messages.ERROR, "La famille n'a pas de mandat valide")
+            return self.render_to_response(self.get_context_data(form=form))
+
+        # Création de la pièce manuelle
+        Prelevements.objects.create(
+            lot_id=self.kwargs["idlot"],
+            famille = form.cleaned_data["famille"],
+            type="manuel",
+            montant=form.cleaned_data["montant"],
+            mandat=mandat,
+            sequence=mandat.sequence,
+            libelle=form.cleaned_data["libelle"],
+        )
+
+        # MAJ du mandat
+        mandat.Actualiser(ajouter=True)
+
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class Modifier_piece(Page, crud.Modifier):

@@ -16,7 +16,11 @@
                     {# Boutons de commandes #}
                     <div class="buttonHolder">
                         <a class="btn btn-danger" href="{% url 'lots_prelevements_liste' %}"><i class='fa fa-times margin-r-5'></i>Fermer</a>
-                        <a class="btn btn-default" href="{% url 'lots_prelevements_ajouter_piece' idlot=lot.pk %}"><i class='fa fa-plus margin-r-5'></i>Ajouter des prélèvements</a>
+                        <button type="button" class="btn btn-default" data-toggle="dropdown"><i class='fa fa-plus margin-r-5'></i>Ajouter des prélèvements</button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="{% url 'lots_prelevements_ajouter_piece' idlot=lot.pk %}">Ajouter des factures</a>
+                            <a class="dropdown-item" href="{% url 'lots_prelevements_ajouter_piece_manuelle' idlot=lot.pk %}">Ajouter un prélèvement manuel</a>
+                        </div>
                         <a class="btn btn-default" href="{% url 'lots_prelevements_modifier' pk=lot.pk %}"><i class="fa fa-pencil margin-r-5"></i>Modifier les paramètres</a>
                         <button class="btn btn-default" id="bouton_exporter"><i class='fa fa-bolt margin-r-5'></i>Générer le fichier d'export</button>
                         <button class="btn btn-default" onclick="impression_pdf()" title="Aperçu PDF"><i class='fa fa-file-pdf-o margin-r-5'></i>Aperçu PDF</button>

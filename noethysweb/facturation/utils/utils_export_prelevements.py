@@ -363,7 +363,10 @@ class Exporter():
             # ----------------------------------------------------------- NIVEAU TRANSACTION ------------------------------------------------------------------------------
 
             for transaction in dict_lot["transactions"]:
-                transaction_id = "FACT%s" % transaction.facture.numero
+                if transaction.facture:
+                    transaction_id = "FACT%s" % transaction.facture.numero
+                else:
+                    transaction_id = transaction.libelle
 
                 # DrctDbtTxInf
                 DrctDbtTxInf = doc.createElement("DrctDbtTxInf")
