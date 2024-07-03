@@ -14,8 +14,8 @@ from core.models import AdresseMail
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    cle_api = forms.CharField(label="Clé API", required=False, help_text="Saisissez la clé API associée à votre compte Mailjet.")
-    cle_secrete = forms.CharField(label="Clé secrète", required=False, help_text="Saisissez la clé secrète associée à votre compte Mailjet.")
+    cle_api = forms.CharField(label="Clé API", required=False, help_text="Saisissez la clé API associée à votre compte.")
+    cle_secrete = forms.CharField(label="Clé secrète", required=False, help_text="Saisissez la clé secrète associée à votre compte.")
     accuse = forms.BooleanField(label="Accusé de réception", required=False, initial=False, help_text="Compatible uniquement avec Microsoft Outlook.")
     motdepasse = forms.CharField(label="Mot de passe", widget=forms.TextInput(attrs={"type": "password"}), required=False, help_text="Saisissez le mot de passe associé à votre messagerie.")
     envoi_lot = forms.ChoiceField(label="Envoi par lot", choices=[("oui", "Activé"), ("non", "Désactivé")], initial="non", required=False, help_text="L'envoi par lot est recommandé si votre fournisseur de messagerie impose des limites d'envoi. Par exemple, Gmail permet d'envoyer uniquement 60 mails par minute.")
@@ -116,6 +116,12 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.add_error('cle_secrete', "Vous devez renseigner la clé secrète")
                 return
 
+        if self.cleaned_data["moteur"] == "brevo":
+
+            if not self.cleaned_data["cle_api"]:
+                self.add_error('cle_api', "Vous devez renseigner la clé API")
+                return
+
         # Paramètres
         parametres = []
 
@@ -129,6 +135,9 @@ class Formulaire(FormulaireBase, ModelForm):
         if self.cleaned_data["moteur"] == "mailjet":
             parametres.append("api_key==%s" % self.cleaned_data["cle_api"])
             parametres.append("api_secret==%s" % self.cleaned_data["cle_secrete"])
+
+        if self.cleaned_data["moteur"] == "brevo":
+            parametres.append("api_key==%s" % self.cleaned_data["cle_api"])
 
         self.cleaned_data["parametres"] = "##".join(parametres)
 
@@ -181,6 +190,12 @@ function On_change_moteur() {
         $('#div_id_nom_adresse').show();
         $('#div_id_cle_api').show();
         $('#div_id_cle_secrete').show();
+    }
+
+    if($(this).val() == 'brevo') {
+        $('#div_id_adresse').show();
+        $('#div_id_nom_adresse').show();
+        $('#div_id_cle_api').show();
     }
 
     if($(this).val() == 'console') {

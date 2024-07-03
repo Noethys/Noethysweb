@@ -267,7 +267,7 @@ class AdresseMail(models.Model):
     use_tls = models.BooleanField(verbose_name="TLS", default=False, help_text="Cochez cette case si la messagerie exige le protocole TLS.")
     utilisateur = encrypt(models.CharField(verbose_name="Utilisateur", max_length=300, blank=True, null=True, help_text="Saisissez le nom d'utilisateur (Souvent identique à l'adresse mail)."))
     nom_adresse = models.CharField(verbose_name="Adresse affichée", max_length=300, blank=True, null=True, help_text="Saisissez le nom ou l'adresse que vous souhaitez voir apparaître dans le client de messagerie du destinataire.")
-    moteur = models.CharField(verbose_name="Moteur", max_length=200, choices=[("smtp", "SMTP"), ("mailjet", "Mailjet"), ("console", "Console")], help_text="Sélectionnez un moteur d'expédition (Smtp ou Mailjet).")
+    moteur = models.CharField(verbose_name="Moteur", max_length=200, choices=[("smtp", "SMTP"), ("mailjet", "Mailjet"), ("brevo", "Brevo"), ("console", "Console")], help_text="Sélectionnez un moteur d'expédition (Smtp ou Mailjet).")
     parametres = models.CharField(verbose_name="Paramètres", max_length=500, blank=True, null=True)
     actif = models.BooleanField(verbose_name="Actif", default=True, help_text="Décochez la case pour désactiver cette adresse.")
     lien_desinscription = models.BooleanField(verbose_name="Insérer un lien de désinscription dans les mails groupés", default=True, help_text="Un lien de désinscription sera inséré à la fin de chaque mail envoyé par lot.")

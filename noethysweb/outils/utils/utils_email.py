@@ -57,6 +57,13 @@ def Envoyer_model_mail(idmail=None, request=None):
             "secret_key": mail.adresse_exp.Get_parametre("api_secret"),
         }
 
+    # Backend BREVO
+    if mail.adresse_exp.moteur == "brevo":
+        backend = 'anymail.backends.sendinblue.EmailBackend'
+        backend_kwargs = {
+            "api_key": mail.adresse_exp.Get_parametre("api_key"),
+        }
+
     # Recherche si envoi par lot activé
     nbre_mails_lot = mail.adresse_exp.Get_parametre("nbre_mails")
     duree_pause = mail.adresse_exp.Get_parametre("duree_pause")
@@ -229,6 +236,11 @@ def Envoyer_mail_test(request=None, dict_options={}):
     if dict_options["moteur"] == "mailjet":
         backend = 'anymail.backends.mailjet.EmailBackend'
         backend_kwargs = {"api_key": dict_options["cle_api"], "secret_key": dict_options["cle_secrete"],}
+
+    # Backend BREVO
+    if dict_options["moteur"] == "brevo":
+        backend = 'anymail.backends.sendinblue.EmailBackend'
+        backend_kwargs = {"api_key": dict_options["cle_api"]}
 
     # Création de la connexion
     connection = djangomail.get_connection(backend=backend, fail_silently=False, **backend_kwargs)

@@ -127,6 +127,11 @@ class MyPasswordResetForm(PasswordResetForm):
             backend = 'anymail.backends.mailjet.EmailBackend'
             backend_kwargs = {"api_key": adresse_exp.Get_parametre("api_key"), "secret_key": adresse_exp.Get_parametre("api_secret"), }
 
+        # Backend BREVO
+        if adresse_exp.moteur == "brevo":
+            backend = 'anymail.backends.sendinblue.EmailBackend'
+            backend_kwargs = {"api_key": adresse_exp.Get_parametre("api_key")}
+
         # Création de la connexion
         connection = djangomail.get_connection(backend=backend, fail_silently=False, **backend_kwargs)
         try:
