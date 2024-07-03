@@ -118,6 +118,9 @@ class Consulter(Page, crud.Liste):
                 liste_details.append("%d %s (%s)" % (stat["nbre"], stat["mode__label"], utils_texte.Formate_montant(stat["total"])))
                 total += stat["total"]
             texte = "<b>%d règlements (%s)</b> : %s." % (quantite, utils_texte.Formate_montant(total), utils_texte.Convert_liste_to_texte_virgules(liste_details))
+            nbre_avis_a_envoyer = Reglement.objects.filter(depot_id=iddepot, avis_depot__isnull=True, famille__email_depots=True).count()
+            if nbre_avis_a_envoyer:
+                texte += " <span class='ml-2'><font color='red'><i class='fa fa-exclamation-circle'></i> %d avis de dépôt à envoyer</font></span>" % nbre_avis_a_envoyer
         return texte
 
     def get_context_data(self, **kwargs):
