@@ -35,6 +35,7 @@ def Get_parametres(request=None):
         "activites": {},
         "masquer_activites_obsoletes": True,
         "masquer_individus_partis": True,
+        "tri": "date_fin+nom",
     })
     parametres["activites_inscriptions_json"] = json.dumps(parametres["activites"])
     return parametres
@@ -79,7 +80,9 @@ def Get_data(parametres={}, filtre=None, request=None):
     if filtre:
         conditions &= Q(nom__icontains=filtre)
 
-    liste_activites = Activite.objects.filter(conditions).order_by("-date_fin", "nom")
+    tri = parametres.get("tri", "date_fin+nom")
+    param_tri = ("-date_fin", "nom") if tri == "date_fin+nom" else ("nom",)
+    liste_activites = Activite.objects.filter(conditions).order_by(*param_tri)
 
     # Importation des groupes
     dict_groupes = {}

@@ -43,6 +43,10 @@
                         <h6 class="dropdown-header"><strong>Options</strong></h6>
                         <a href="#" id="masquer_activites_obsoletes" class="dropdown-item option_affichage_inscriptions {% if suivi_inscriptions_parametres.masquer_activites_obsoletes %}menu-checked{% endif %}" title="Masquer les activités obsolètes"> Masquer les activités obsolètes</a>
                         <a href="#" id="masquer_individus_partis" class="dropdown-item option_affichage_inscriptions {% if suivi_inscriptions_parametres.masquer_individus_partis %}menu-checked{% endif %}" title="Masquer les individus partis"> Masquer les individus partis</a>
+                        <li class="dropdown-divider"></li>
+                        <h6 class="dropdown-header"><strong>Tri</strong></h6>
+                        <a href="#" class="dropdown-item mode_tri {% if suivi_inscriptions_parametres.tri == 'date_fin+nom' %}menu-checked{% endif %}" data-mode="date_fin+nom" title="Tri des activités">Date de fin et nom de l'activité</a>
+                        <a href="#" class="dropdown-item mode_tri {% if suivi_inscriptions_parametres.tri == 'nom' %}menu-checked{% endif %}" data-mode="nom" title="Tri des activités">Nom de l'activité</a>
                     </div>
                 </div>
 
@@ -106,6 +110,14 @@
             };
             maj_affichage_inscriptions(update_parametres=true);
         });
+        
+        // Click sur le choix d'un tri
+        $(".mode_tri").on("click",function(event){
+            event.preventDefault();
+            $(".mode_tri").removeClass("menu-checked");
+            $(this).addClass("menu-checked");
+            maj_affichage_inscriptions(update_parametres=true);
+        });
 
         // MAJ de l'affichage au chargement de la page
         maj_affichage_inscriptions();
@@ -119,6 +131,7 @@
                 activites: activites_inscriptions_json,
                 masquer_activites_obsoletes: $("#masquer_activites_obsoletes").hasClass("menu-checked"),
                 masquer_individus_partis: $("#masquer_individus_partis").hasClass("menu-checked"),
+                tri: $(".mode_tri.menu-checked").get(0).dataset.mode,
             };
         };
         $.ajax({
