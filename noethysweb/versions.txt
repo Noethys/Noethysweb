@@ -1,3 +1,12 @@
+Version 1.2.4.9 (03/07/2024) :
+
+- Ajout du prélèvement manuel
+- Ajout de l'envoi des emails avec BREVO
+- Ajout de l'envoi des avis de dépôt par email
+- Ajout des contacts de la famille dans la fiche de renseignements
+- Ajout de l'option de tri dans le suivi des inscriptions
+- Correction des titulaires sans adresse dans l'export PES
+
 Version 1.2.4.8 (28/06/2024) :
 
 - Correction de la réattribution manuelle de places
