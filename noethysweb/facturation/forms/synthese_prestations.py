@@ -16,7 +16,7 @@ from core.forms.base import FormulaireBase
 
 def Get_regroupements():
     liste_regroupements = [
-        ("jour", "Jour"), ("mois", "Mois"), ("annee", "Année"),
+        ("", "Aucun"), ("jour", "Jour"), ("mois", "Mois"), ("annee", "Année"),
         ("label_prestation", "Label de la prestation"), ("activite", "Activité"),
         ("categorie_tarif", "Catégorie de tarif"), ("famille", "Famille"), ("individu", "Individu"),
         ("ville_residence", "Ville de résidence"), ("secteur", "Secteur géographique"), ("age", "Age"),

@@ -338,26 +338,25 @@ class View(CustomView, TemplateView):
                         listeKeys2.append(key)
             listeKeys2.sort()
 
-            for key2_tri, key2, key2_label in listeKeys2:
-                if key_ligne2 != "":
+            if key_ligne2 != "":
+                for key2_tri, key2, key2_label in listeKeys2:
                     id_detail = "detail_%s" % key2
                     ligne = {"id": id_detail, "pid": id_regroupement, "col0": key2_label, "regroupement": False}
 
-                # Colonnes périodes
-                totalLigne = Decimal(0)
-                for regroupement in listeRegroupements:
-                    if regroupement in dictPrestations[key1]["regroupements"]:
-                        if key2 in dictPrestations[key1]["regroupements"][regroupement]["key2"]:
-                            valeur = dictPrestations[key1]["regroupements"][regroupement]["key2"][key2][mode_affichage]
-                            totalLigne += valeur
-                            if key_ligne2 != "":
-                                ligne[dictColonnes[regroupement]] = float(valeur)
+                    # Colonnes périodes
+                    totalLigne = Decimal(0)
+                    for regroupement in listeRegroupements:
+                        if regroupement in dictPrestations[key1]["regroupements"]:
+                            if key2 in dictPrestations[key1]["regroupements"][regroupement]["key2"]:
+                                valeur = dictPrestations[key1]["regroupements"][regroupement]["key2"][key2][mode_affichage]
+                                totalLigne += valeur
+                                if key_ligne2 != "":
+                                    ligne[dictColonnes[regroupement]] = float(valeur)
 
-                # Colonne Total
-                if key_ligne2 != "":
+                    # Colonne Total
                     ligne[dictColonnes["total"]] = float(totalLigne)
 
-                liste_lignes.append(ligne)
+                    liste_lignes.append(ligne)
 
             id_regroupement += 1
 

@@ -81,7 +81,7 @@
                             if (colonne === "col0") {return "Total"}
                             var total = 0;
                             items.forEach(function(item) {
-                                if ($.isNumeric(item[colonne]) && (item.regroupement === false)) {
+                                if ($.isNumeric(item[colonne]) && (item.regroupement === true)) {
                                     total = total + item[colonne];
                                 };
                             });
