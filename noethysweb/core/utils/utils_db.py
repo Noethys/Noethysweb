@@ -27,4 +27,4 @@ def Maj_infos():
 
     # Met à jour les totaux des factures
     utils_factures.Maj_total_factures(IDfamille=0, IDfacture=0)
-
+    utils_factures.Maj_solde_actuel_factures()
