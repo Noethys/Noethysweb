@@ -39,7 +39,7 @@ class Liste(Page, crud.CustomListe):
         context['box_introduction'] = "Voici ci-dessous la liste des quotients familiaux/revenus."
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
-        context["hauteur_table"] = "500px"
+        # context["hauteur_table"] = "500px"
         if "form_parametres" not in kwargs:
             context['form_parametres'] = Formulaire(request=self.request)
             context["datatable"] = self.Get_customdatatable()
