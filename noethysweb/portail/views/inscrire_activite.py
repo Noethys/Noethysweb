@@ -95,7 +95,7 @@ def Valid_form(request):
                                          date_debut=datetime.date.today(), date_fin=type_piece.Get_date_fin_validite())
 
             # Enregistrement du renseignement de portail
-            PortailRenseignement.objects.create(famille=famille, individu=individu, categorie="famille_pieces", code="Nouvelle pièce", validation_auto=True,
+            PortailRenseignement.objects.create(famille=form.cleaned_data["famille"], individu=individu, categorie="famille_pieces", code="Nouvelle pièce", validation_auto=True,
                                                 nouvelle_valeur=json.dumps(piece.Get_nom(), cls=DjangoJSONEncoder), idobjet=piece.pk)
 
     # Message de confirmation
