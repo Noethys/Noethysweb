@@ -1,3 +1,11 @@
+Version 1.2.5.0 (05/07/2024) :
+
+- Ajout de l'option Aucun dans les paramètres de la synthèse des prestations
+- Ajout de la pagination dans la liste des quotients
+- Correction de la saisie d'une inscription avec pièce obligatoire sur le portail
+- Correction du solde des factures lors de l'importation initiale
+- Correction du filtre rapide dans la liste des inscriptions à une activité
+
 Version 1.2.4.9 (03/07/2024) :
 
 - Ajout du prélèvement manuel
