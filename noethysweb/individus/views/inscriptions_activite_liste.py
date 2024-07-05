@@ -95,10 +95,10 @@ class Liste(Page, crud.Liste):
         famille = columns.TextColumn("Famille", sources=["famille__nom"])
         individu_ville = columns.TextColumn("Ville de l'individu", processor="Get_ville_individu")
         famille_ville = columns.TextColumn("Ville de la famille", processor="Get_ville_famille")
-        date_naiss = columns.TextColumn("Date naiss.", sources=["individu__date_naiss"], processor=helpers.format_date("%d/%m/%Y"))
+        date_naiss = columns.TextColumn("Date naiss.", processor=helpers.format_date("%d/%m/%Y"))
         age = columns.TextColumn("Age", sources=['Get_age'], processor="Get_age")
-        mail = columns.CompoundColumn("Email", sources=["individu__mail"])
-        portable = columns.CompoundColumn("Portable", sources=["individu__tel_mobile"])
+        mail = columns.CompoundColumn("Email", processor='Get_mail')
+        portable = columns.CompoundColumn("Portable", processor='Get_mobile')
         tel_parents = columns.TextColumn("Tél responsables", sources=None, processor="Get_tel_parents")
         mail_parents = columns.TextColumn("Mail responsables", sources=None, processor="Get_mail_parents")
         num_cotisation = columns.TextColumn("N° adhésion", sources=None, processor="Get_num_cotisation")
@@ -107,8 +107,11 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idinscription", "date_debut", "date_fin", "individu", "date_naiss", "age", "mail", "portable", "famille", "tel_parents", "mail_parents", "mail_famille", "groupe", "categorie_tarif", "individu_ville", "famille_ville", "num_cotisation", "statut", "solde"]
-            hidden_columns = ["idinscription", "date_debut", "date_fin", "mail", "famille", "categorie_tarif", "individu_ville", "famille_ville", "num_cotisation", "solde", "mail_famille"]
+            columns = ["check", "idinscription", "date_debut", "date_fin", "individu", "date_naiss", "age", "mail", "portable",
+                       "famille", "tel_parents", "mail_parents", "mail_famille", "groupe", "categorie_tarif", "individu_ville",
+                       "famille_ville", "num_cotisation", "statut", "solde"]
+            hidden_columns = ["idinscription", "date_debut", "date_fin", "mail", "famille", "categorie_tarif", "individu_ville",
+                              "famille_ville", "num_cotisation", "solde", "mail_famille"]
             page_length = 100
             processors = {
                 "date_debut": helpers.format_date("%d/%m/%Y"),
@@ -140,6 +143,12 @@ class Liste(Page, crud.Liste):
                 self.Create_bouton(url=reverse("famille_resume", args=[instance.famille_id]), title="Ouvrir la fiche famille", icone="fa-users"),
             ]
             return self.Create_boutons_actions(html)
+
+        def Get_mail(self, instance, *args, **kwargs):
+            return instance.individu.mail
+
+        def Get_mobile(self, instance, *args, **kwargs):
+            return instance.individu.tel_mobile
 
         def Get_ville_individu(self, instance, *args, **kwargs):
             return instance.individu.ville_resid
