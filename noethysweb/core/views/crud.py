@@ -181,14 +181,19 @@ class Liste_commun():
                         tous_objets = self.model.objects.select_related(champs_temp[0]).all()
                     else:
                         tous_objets = self.model.objects.all()
-                    if filtre["condition"] == "*EGAL": resultats = [objet.pk for objet in tous_objets if attrgetter(".".join(champs_temp))(objet) == criteres[0]]
-                    if filtre["condition"] == "*DIFFERENT": resultats = [objet.pk for objet in tous_objets if attrgetter(".".join(champs_temp))(objet) != criteres[0]]
-                    if filtre["condition"] == "*CONTIENT": resultats = [objet.pk for objet in tous_objets if criteres[0] in (attrgetter(".".join(champs_temp))(objet) or "")]
-                    if filtre["condition"] == "*NE_CONTIENT_PAS": resultats = [objet.pk for objet in tous_objets if criteres[0] not in (attrgetter(".".join(champs_temp))(objet) or "")]
-                    if filtre["condition"] == "*EST_VIDE": resultats = [objet.pk for objet in tous_objets if attrgetter(".".join(champs_temp))(objet) in ("", None)]
-                    if filtre["condition"] == "*EST_PAS_VIDE": resultats = [objet.pk for objet in tous_objets if attrgetter(".".join(champs_temp))(objet) not in ("", None)]
-                    if filtre["condition"] == "*EST_NUL": resultats = [objet.pk for objet in tous_objets if attrgetter(".".join(champs_temp))(objet) == None]
-                    if filtre["condition"] == "*EST_PAS_NUL": resultats = [objet.pk for objet in tous_objets if attrgetter(".".join(champs_temp))(objet) != None]
+                    def Get_objet(objet):
+                        try:
+                            return attrgetter(".".join(champs_temp))(objet)
+                        except:
+                            return None
+                    if filtre["condition"] == "*EGAL": resultats = [objet.pk for objet in tous_objets if Get_objet(objet) == criteres[0]]
+                    if filtre["condition"] == "*DIFFERENT": resultats = [objet.pk for objet in tous_objets if Get_objet(objet) != criteres[0]]
+                    if filtre["condition"] == "*CONTIENT": resultats = [objet.pk for objet in tous_objets if criteres[0] in (Get_objet(objet) or "")]
+                    if filtre["condition"] == "*NE_CONTIENT_PAS": resultats = [objet.pk for objet in tous_objets if criteres[0] not in (Get_objet(objet) or "")]
+                    if filtre["condition"] == "*EST_VIDE": resultats = [objet.pk for objet in tous_objets if Get_objet(objet) in ("", None)]
+                    if filtre["condition"] == "*EST_PAS_VIDE": resultats = [objet.pk for objet in tous_objets if Get_objet(objet) not in ("", None)]
+                    if filtre["condition"] == "*EST_NUL": resultats = [objet.pk for objet in tous_objets if Get_objet(objet) == None]
+                    if filtre["condition"] == "*EST_PAS_NUL": resultats = [objet.pk for objet in tous_objets if Get_objet(objet) != None]
                     conditions &= Q(pk__in=resultats)
 
             return conditions
