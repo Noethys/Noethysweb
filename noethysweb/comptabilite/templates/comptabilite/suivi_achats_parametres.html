@@ -1,0 +1,47 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{# Model Sélection de la période #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_suivi_achats_parametres{% endblock %}
+    {% block modal_titre %}Paramètres{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+
+        {% crispy form_parametres_suivi_achats %}
+
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" id="valider_suivi_achats_parametres"/><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+
+        </form>
+    {% endblock %}
+{% endembed %}
+
+<script>
+
+$(document).ready(function() {
+
+    // Validation de la modal
+    $("#valider_suivi_achats_parametres").on('click', function(e) {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_suivi_achats_valider_form_parametres' %}",
+            data: $("#form_suivi_achats_parametres").serialize(),
+            datatype: "json",
+            success: function(data){
+                location.reload()
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        })
+    });
+
+});
+
+</script>

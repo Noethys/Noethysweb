@@ -1,0 +1,127 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    <style>
+        .tableau_suivi_achats td {
+            padding: 6px !important;
+        }
+
+        {# https://www.sitepoint.com/create-calendar-icon-html5-css3/ #}
+        time.icon {
+            font-size: 0.5em; /* change icon size */
+            display: block;
+            position: relative;
+            width: 7em;
+            height: 7em;
+            background-color: #fff;
+            border-radius: 0.6em;
+            box-shadow: 0 1px 0 #bdbdbd, 0 2px 0 #fff, 0 0 0 1px #bdbdbd;
+            overflow: hidden;
+        }
+        time.icon * {
+            display: block;
+            width: 100%;
+            font-size: 1em;
+            font-weight: bold;
+            font-style: normal;
+            text-align: center;
+        }
+        time.icon strong {
+            position: absolute;
+            top: 0;
+            padding: 0.4em 0;
+            color: #fff;
+            background-color: #fd9f1b;
+            border-bottom: 1px dashed #f37302;
+            box-shadow: 0 2px 0 #fd9f1b;
+        }
+        time.icon em {
+            position: absolute;
+            bottom: 0.3em;
+            color: #fd9f1b;
+        }
+        time.icon span {
+            font-size: 2.8em;
+            letter-spacing: -0.05em;
+            padding-top: 0.8em;
+            color: #2f2f2f;
+        }
+        .icon {
+            width: 50%;
+            height: auto;
+        }
+        .product-description {
+            font-size: 10px;
+        }
+    </style>
+{% endblock %}
+
+{% block contenu_page %}
+
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline{% endblock %}
+        {% block box_titre %}<i class="fa fa-shopping-cart margin-r-5"></i> Suivi des achats{% endblock %}
+        {% block box_outils %}
+            <a type="button" class="btn btn-tool" title="Ajouter une demande d'achat" href="{% url 'achats_demandes_ajouter' %}"><i class="fa fa-plus-circle"></i></a>
+            <button id="id_parametres_suivi_achats" class="btn btn-tool" title="Ajuster les paramètres"><i class="fa fa-gear"></i></button>
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Diminuer"><i class="fa fa-minus"></i></button>
+        {% endblock %}
+        {% block card_body_classe %}p-0{% endblock %}
+        {% block box_contenu %}
+                <tbody>
+
+                    <ul class="products-list product-list-in-card pl-2 pr-2">
+                        {% for demande in demandes_achats %}
+                            <li class="item">
+                                <div class="product-img">
+                                    <time class="icon">
+                                        <em>{{ demande.date_echeance|date:"l" }}</em>
+                                        <strong>{{ demande.date_echeance|date:"F" }}</strong>
+                                        <span>{{ demande.date_echeance|date:"j" }}</span>
+                                    </time>
+                                </div>
+                                <div class="product-info">
+                                    <a href="{% url 'achats_demandes_modifier' pk=demande.pk %}" class="product-title">{{ demande.libelle }}
+                                    <span class="badge {% if demande.etat == 0 %}badge-danger{% elif demande.etat == 100 %}badge-success{% else %}badge-warning{% endif %} float-right">{{ demande.etat }} %</span></a>
+                                    <span class="product-description">Pour {{ demande.collaborateur.Get_nom }}</span>
+                                    <span class="product-description {% if demande.Get_delai_restant <= 3 %}text-danger{% endif %}">
+                                        {% if demande.Get_delai_restant <= 3 %}<i class="fa fa-exclamation-triangle"></i>{% endif %}
+                                        A acheter dans {{ demande.Get_delai_restant }} jours
+                                    </span>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                </tbody>
+            </table>
+        {% endblock %}
+    {% endembed %}
+
+    {# Ajout de la modal des paramètres #}
+    <div id="div_modal_suivi_achats_parametres"></div>
+
+    <script>
+        $(document).ready(function() {
+    
+            $("#id_parametres_suivi_achats").on("click", function(event){
+                event.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_suivi_achats_get_form_parametres' %}",
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    success: function (data) {
+                        $("#div_modal_suivi_achats_parametres").html(data);
+                        $('#modal_suivi_achats_parametres').modal('show');
+                    }
+                });
+            });
+    
+        });
+    </script>
+
+{% endblock %}

@@ -470,6 +470,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_comptabilite_achats.Add(code="achats_demandes_liste", titre="Liste des demandes", icone="file-text-o")
     menu_comptabilite_achats.Add(code="achats_articles_liste", titre="Liste des articles", icone="file-text-o")
     menu_comptabilite_achats.Add(code="edition_liste_achats", titre="Edition d'une liste d'achats", icone="file-text-o")
+    menu_comptabilite_achats.Add(code="suivi_achats", titre="Suivi des achats", icone="file-text-o")
 
 
     # ------------------------------------ Collaborateurs ------------------------------------

@@ -7,7 +7,7 @@ from django.urls import include, path
 from core.views import toc
 from core.decorators import secure_ajax
 from comptabilite.views import operations_tresorerie, operations_budgetaires, liste_comptes, liste_virements, suivi_budget, suivi_tresorerie, \
-                                rapprochements, rapprochements_selection, achats_demandes, achats_articles, edition_liste_achats
+                                rapprochements, rapprochements_selection, achats_demandes, achats_articles, edition_liste_achats, suivi_achats
 
 
 urlpatterns = [
@@ -60,6 +60,7 @@ urlpatterns = [
     path('comptabilite/achats_demandes/ajouter', achats_demandes.Ajouter.as_view(), name='achats_demandes_ajouter'),
     path('comptabilite/achats_demandes/modifier/<int:pk>', achats_demandes.Modifier.as_view(), name='achats_demandes_modifier'),
     path('comptabilite/achats_demandes/supprimer/<int:pk>', achats_demandes.Supprimer.as_view(), name='achats_demandes_supprimer'),
+    path('comptabilite/suivi_achats', suivi_achats.View.as_view(), name='suivi_achats'),
 
     # Achats : Articles
     path('comptabilite/achats_articles/liste', achats_articles.Liste.as_view(), name='achats_articles_liste'),
@@ -74,4 +75,7 @@ urlpatterns = [
     path('comptabilite/achats_demandes/get_form_article', secure_ajax(achats_demandes.Get_form_article), name='ajax_achats_demandes_form_article'),
     path('comptabilite/achats_articles/modifier_achete', secure_ajax(achats_articles.Modifier_achete), name='ajax_modifier_article_achete'),
     path('comptabilite/edition_liste_achats/generer_pdf', secure_ajax(edition_liste_achats.Generer_pdf), name='ajax_edition_liste_achats_generer_pdf'),
+    path('comptabilite/suivi_achats_get_form_parametres', secure_ajax(suivi_achats.Get_form_parametres), name='ajax_suivi_achats_get_form_parametres'),
+    path('comptabilite/suivi_achats_valider_form_parametres', secure_ajax(suivi_achats.Valider_form_parametres), name='ajax_suivi_achats_valider_form_parametres'),
+
 ]

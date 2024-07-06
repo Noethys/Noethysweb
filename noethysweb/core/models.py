@@ -4485,6 +4485,11 @@ class AchatDemande(models.Model):
             self.etat = pourcentage
             self.save()
 
+    def Get_delai_restant(self):
+        if not self.date_echeance:
+            return 0
+        return (self.date_echeance - datetime.date.today()).days
+
 
 class AchatCategorie(models.Model):
     idcategorie = models.AutoField(verbose_name="ID", db_column="IDcategorie", primary_key=True)
