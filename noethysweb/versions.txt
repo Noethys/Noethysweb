@@ -1,3 +1,8 @@
+Version 1.2.5.1 (07/07/2024) :
+
+- Ajout du widget Suivi des achats pour le tableau de bord
+- Ajout du planning des achats dans le menu Comptabilité
+
 Version 1.2.5.0 (05/07/2024) :
 
 - Ajout de l'option Aucun dans les paramètres de la synthèse des prestations
