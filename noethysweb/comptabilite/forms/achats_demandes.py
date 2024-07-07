@@ -7,7 +7,7 @@ import json
 from django import forms
 from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset
+from crispy_forms.layout import Layout, Fieldset, Hidden, HTML
 from crispy_forms.bootstrap import Field
 from core.forms.select2 import Select2Widget
 from core.forms.base import FormulaireBase
@@ -35,6 +35,7 @@ class Formulaire(FormulaireBase, ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        mode_affichage = kwargs.pop("mode_affichage", None)
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = "achats_demandes_form"
@@ -57,6 +58,7 @@ class Formulaire(FormulaireBase, ModelForm):
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'achats_demandes_liste' %}"),
+            Hidden('iddemande', value=self.instance.pk if self.instance else None),
             Fieldset("Généralités",
                 Field("date_echeance"),
                 Field("collaborateur"),
@@ -69,3 +71,13 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("observations"),
             ),
         )
+
+        # Intégration des commandes pour le mode planning
+        if mode_affichage == "planning":
+            commandes = Commandes(enregistrer=False, ajouter=False, annuler=False, aide=False, autres_commandes=[
+                HTML("""<button type="submit" name="enregistrer" title="Enregistrer" class="btn btn-primary"><i class="fa fa-check margin-r-5"></i>Enregistrer</button> """),
+                HTML("""<a class="btn btn-danger" title="Annuler" onclick="$('#modal_detail_achat').modal('hide');"><i class="fa fa-ban margin-r-5"></i>Annuler</a> """),
+            ],)
+            if self.instance.pk:
+                commandes.insert(1, HTML("""<button type="button" class="btn btn-warning" onclick="supprimer_achat(%d)"><i class="fa fa-trash margin-r-5"></i>Supprimer</button> """ % self.instance.pk))
+            self.helper.layout[0] = commandes

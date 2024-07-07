@@ -5,7 +5,7 @@
 
 import json
 from django.urls import reverse_lazy
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.template.context_processors import csrf
 from django.db.models import Count
 from crispy_forms.utils import render_crispy_form
@@ -71,32 +71,43 @@ class Page(crud.Page):
     ]
 
     def form_valid(self, form):
-        # Récupération des articles
-        articles = json.loads(form.cleaned_data.get("articles", "[]"))
+        resultat = Form_valid(form=form, request=self.request, object=self.object)
+        if resultat == True:
+            return HttpResponseRedirect(self.get_success_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=resultat))
 
-        # Sauvegarde
-        self.object = form.save()
 
-        # Récupération des articles existants
-        articles_existants = list(AchatArticle.objects.filter(demande=self.object))
+def Form_valid(form=None, request=None, object=None):
+    # Vérification du formulaire
+    if not form.is_valid():
+        return form
 
-        # Sauvegarde des articles
-        for article in articles:
-            idarticle = article["idarticle"] if article["idarticle"] else None
-            AchatArticle.objects.update_or_create(pk=idarticle, defaults={
-                "demande": self.object, "fournisseur_id": article["fournisseur"], "categorie_id": article["categorie"],
-                "libelle": article["libelle"], "quantite": article["quantite"], "observations": article["observations"], "achete": article["achete"],
-            })
+    # Récupération des articles
+    articles = json.loads(form.cleaned_data.get("articles", "[]"))
 
-        # Suppression des articles supprimés
-        for article in articles_existants:
-            if article.pk not in [int(a["idarticle"]) for a in articles if a["idarticle"]]:
-                article.delete()
+    # Sauvegarde
+    object = form.save()
 
-        # MAJ de l'état de la demande
-        self.object.Maj_etat()
+    # Récupération des articles existants
+    articles_existants = list(AchatArticle.objects.filter(demande=object))
 
-        return super().form_valid(form)
+    # Sauvegarde des articles
+    for article in articles:
+        idarticle = article["idarticle"] if article["idarticle"] else None
+        AchatArticle.objects.update_or_create(pk=idarticle, defaults={"demande": object, "fournisseur_id": article[
+            "fournisseur"], "categorie_id": article["categorie"], "libelle": article["libelle"], "quantite": article[
+            "quantite"], "observations": article["observations"], "achete": article["achete"], })
+
+    # Suppression des articles supprimés
+    for article in articles_existants:
+        if article.pk not in [int(a["idarticle"]) for a in articles if a["idarticle"]]:
+            article.delete()
+
+    # MAJ de l'état de la demande
+    object.Maj_etat()
+
+    return True
 
 
 class Liste(Page, crud.Liste):

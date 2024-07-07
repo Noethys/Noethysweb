@@ -37,7 +37,7 @@
             <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
                 <button type="button" class="btn btn-primary" onclick="valider_form_article(ajouter=false)"><i class="fa fa-check margin-r-5"></i>Valider</button>
                 <button type="button" class="btn btn-primary" onclick="valider_form_article(ajouter=true)"><i class="fa fa-check margin-r-5"></i>Valider & Ajouter</button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                <button type="button" class="btn btn-danger" onclick="$('#modal_article').modal('hide');"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
             </div>
         </div>
     {% endblock %}
@@ -53,6 +53,14 @@
 
     $(document).ready(function() {
         maj_tableau();
+        
+        // Pour le mode planing contre le bug de perte de focus
+        if ($("#modal_detail_achat").length) {
+            $("#modal_article").on("hidden.bs.modal", function (e) {
+                $("body").addClass("modal-open");
+            });
+        }
+            
     })
 
     function set_event_checkbox() {

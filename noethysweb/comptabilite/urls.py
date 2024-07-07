@@ -7,7 +7,8 @@ from django.urls import include, path
 from core.views import toc
 from core.decorators import secure_ajax
 from comptabilite.views import operations_tresorerie, operations_budgetaires, liste_comptes, liste_virements, suivi_budget, suivi_tresorerie, \
-                                rapprochements, rapprochements_selection, achats_demandes, achats_articles, edition_liste_achats, suivi_achats
+                                rapprochements, rapprochements_selection, achats_demandes, achats_articles, edition_liste_achats, suivi_achats, \
+                                planning_achats
 
 
 urlpatterns = [
@@ -61,6 +62,7 @@ urlpatterns = [
     path('comptabilite/achats_demandes/modifier/<int:pk>', achats_demandes.Modifier.as_view(), name='achats_demandes_modifier'),
     path('comptabilite/achats_demandes/supprimer/<int:pk>', achats_demandes.Supprimer.as_view(), name='achats_demandes_supprimer'),
     path('comptabilite/suivi_achats', suivi_achats.View.as_view(), name='suivi_achats'),
+    path('comptabilite/planning_achats', planning_achats.View.as_view(), name='planning_achats'),
 
     # Achats : Articles
     path('comptabilite/achats_articles/liste', achats_articles.Liste.as_view(), name='achats_articles_liste'),
@@ -77,5 +79,10 @@ urlpatterns = [
     path('comptabilite/edition_liste_achats/generer_pdf', secure_ajax(edition_liste_achats.Generer_pdf), name='ajax_edition_liste_achats_generer_pdf'),
     path('comptabilite/suivi_achats_get_form_parametres', secure_ajax(suivi_achats.Get_form_parametres), name='ajax_suivi_achats_get_form_parametres'),
     path('comptabilite/suivi_achats_valider_form_parametres', secure_ajax(suivi_achats.Valider_form_parametres), name='ajax_suivi_achats_valider_form_parametres'),
+    path('comptabilite/planning_achats/get_achats', secure_ajax(planning_achats.Get_achats), name='ajax_planning_achats_get_achats'),
+    path('comptabilite/planning_achats/get_form_detail_achat', secure_ajax(planning_achats.Get_form_detail_achat), name='ajax_planning_achats_get_form_detail_achat'),
+    path('comptabilite/planning_achats/valid_form_detail_achat', secure_ajax(planning_achats.Valid_form_detail_achat), name='ajax_planning_achats_valid_form_detail_achat'),
+    path('comptabilite/planning_achats/modifier_achat', secure_ajax(planning_achats.Modifier_achat), name='ajax_planning_achats_modifier_achat'),
+    path('comptabilite/planning_achats/supprimer_achat', secure_ajax(planning_achats.Supprimer_achat), name='ajax_planning_achats_supprimer_achat'),
 
 ]

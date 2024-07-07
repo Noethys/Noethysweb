@@ -1,0 +1,176 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+{% endblock styles %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static 'lib/fullcalendar/dist/index.global.min.js' %}"></script>
+    <script src="{% static 'lib/moment/moment.min.js' %}" type="text/javascript"></script>
+    <script src="{% static 'lib/select2/js/select2.min.js' %}" type="text/javascript"></script>
+    <script src="{% static 'lib/select2/js/i18n/fr.js' %}" type="text/javascript"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    <div style="height: 75vh;">
+        <div id="calendar"></div>
+    </div>
+
+    <script>
+        var calendar;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+                height: window.innerHeight - 165,
+                windowResize: function(arg) {
+                    calendar.setOption("height", window.innerHeight - 165);
+                },
+                themeSystem: 'bootstrap',
+                editable: true,
+                selectable: true,
+                nowIndicator: true,
+                headerToolbar: {
+                    left: 'today prev,next',
+                    center: 'title',
+                    right: 'dayGridMonth,multiMonthYear,listWeek'
+                },
+                buttonText: {
+                    today: "Aujourd'hui",
+                    month: "Mois",
+                    week: "Agenda",
+                    day: "Jour",
+                    multiMonthYear: "Année",
+                    resourceTimelineWeek: "Semaine",
+                    list: "Liste"
+                },
+                slotDuration: "00:30:00",
+                slotMinWidth: 15,
+                initialView: 'dayGridMonth',
+                firstDay: 1,
+                allDaySlot: true,
+                events: function (fetchInfo, successCallback, failureCallback) {
+                    $.ajax({
+                        url: "{% url 'ajax_planning_achats_get_achats' %}",
+                        type: "POST",
+                        data: {
+                            date_debut: moment(fetchInfo.start).format('YYYY-MM-DD HH:mm'),
+                            date_fin: moment(fetchInfo.end).format('YYYY-MM-DD HH:mm'),
+                            csrfmiddlewaretoken: "{{ csrf_token }}"
+                        }
+                    }).done(function(data) {
+                        successCallback(data.demandes);
+                    });
+                },
+                select: function(selectionInfo) {
+                    data_event = {
+                        "date_echeance": moment(selectionInfo.start).format('YYYY-MM-DD'),
+                    }
+                    ouvre_modal_detail(null, data_event);
+                },
+                eventClick: function(event) {
+                    ouvre_modal_detail(event.event.id);
+                },
+                eventDrop: function(eventDropInfo) {
+                    modifier_event({
+                        "iddemande": eventDropInfo.event.id,
+                        "date_echeance": moment(eventDropInfo.event.start).format('YYYY-MM-DD'),
+                    })
+                },
+
+            });
+            calendar.setOption('locale', 'fr');
+            calendar.render();
+        });
+
+        function modifier_event(data_event) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_planning_achats_modifier_achat' %}",
+                data: {
+                    "data_event": JSON.stringify(data_event),
+                    "csrfmiddlewaretoken": "{{ csrf_token }}"
+                },
+                datatype: "json",
+                success: function(data){
+                    calendar.refetchEvents();
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
+        function ouvre_modal_detail(iddemande, data_event) {
+            $("#modal_detail_achat").off('submit');
+            $.ajax({
+                url: "{% url 'ajax_planning_achats_get_form_detail_achat' %}",
+                type: "POST",
+                data: {
+                    iddemande: iddemande,
+                    data_event: JSON.stringify(data_event),
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function (data) {
+                    $("#id_div_form_detail_achat").html(data['form_html']);
+                    $("#modal_detail_achat").modal("show");
+                    $("#modal_detail_achat").on('submit', submit_form);
+                }
+            });
+        }
+
+        function submit_form(event) {
+            event.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_planning_achats_valid_form_detail_achat' %}",
+                data: $("#achats_demandes_form").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $("#modal_detail_achat").modal("hide");
+                    calendar.refetchEvents();
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
+        function supprimer_achat(iddemande) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_planning_achats_supprimer_achat' %}",
+                data: {"iddemande": iddemande},
+                datatype: "json",
+                success: function(data){
+                    $("#modal_detail_achat").modal("hide");
+                    calendar.refetchEvents();
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
+    </script>
+
+    {# Modal Détail d'une demande d'achat #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_detail_achat{% endblock %}
+        {% block modal_titre %}Détail d'une demande d'achats{% endblock %}
+        {% block modal_classe %}modal-lg{% endblock %}
+        {% block modal_body %}
+            <div id="id_div_form_detail_achat">
+            </div>
+        {% endblock %}
+    {% endembed %}
+
+{% endblock contenu_page %}
