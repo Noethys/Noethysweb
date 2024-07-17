@@ -1313,6 +1313,7 @@ class Unite(models.Model):
     autogen_conditions = models.CharField(verbose_name="Conditions de la génération", max_length=400, blank=True, null=True)
     autogen_parametres = models.CharField(verbose_name="Paramètres de la génération", max_length=400, blank=True, null=True)
     groupes = models.ManyToManyField(Groupe, blank=True)
+    categories_tarifs = models.ManyToManyField("CategorieTarif", blank=True)
     incompatibilites = models.ManyToManyField("self", verbose_name="Incompatibilités", blank=True)
     visible_portail = models.BooleanField(verbose_name="Visible sur le portail", default=True)
     imposer_saisie_valeur = models.BooleanField(verbose_name="Imposer la saisie de la valeur aux usagers sur le portail (uniquement pour les unités de type horaire ou quantité)", default=False)

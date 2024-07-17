@@ -12,7 +12,7 @@ from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Div, Fieldset
 from crispy_forms.bootstrap import Field, FormActions, StrictButton
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import Unite, Groupe, Activite
+from core.models import Unite, Groupe, Activite, CategorieTarif
 from core.widgets import DatePickerWidget
 from core.forms.select2 import Select2MultipleWidget
 
@@ -36,6 +36,11 @@ class Formulaire(FormulaireBase, ModelForm):
     groupes_type = forms.TypedChoiceField(label="Groupes associés", choices=choix_groupes, initial='TOUS', required=True)
     groupes = forms.ModelMultipleChoiceField(label="Sélection des groupes", widget=Select2MultipleWidget(), queryset=Groupe.objects.none(), required=False)
 
+    # Catégories de tarifs
+    choix_categories = [("TOUS", "Toutes les catégories de tarifs"), ("SELECTION", "Uniquement certaines catégories de tarifs")]
+    categories_tarifs_type = forms.TypedChoiceField(label="Catégories de tarifs associées", choices=choix_categories, initial='TOUS', required=True)
+    categories_tarifs = forms.ModelMultipleChoiceField(label="Sélection des catégories", widget=Select2MultipleWidget(), queryset=CategorieTarif.objects.none(), required=False)
+
     # Incompatibilités
     incompatibilites = forms.ModelMultipleChoiceField(label="Incompatibilités", widget=Select2MultipleWidget(), queryset=Unite.objects.none(), required=False,
                                                       help_text="Sélectionnez les unités qui ne peuvent être saisies en même temps que cette unité.")
@@ -47,7 +52,7 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Unite
         fields = ["ordre", "activite", "nom", "abrege", "type", "heure_debut", "heure_fin", "heure_debut_fixe", "heure_fin_fixe",
-                  "repas", "restaurateur", "touche_raccourci", "date_debut", "date_fin", "groupes", "incompatibilites", "visible_portail", "imposer_saisie_valeur",
+                  "repas", "restaurateur", "touche_raccourci", "date_debut", "date_fin", "groupes", "categories_tarifs", "incompatibilites", "visible_portail", "imposer_saisie_valeur",
                   "heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "equiv_journees", "equiv_heures", "dependances"]
         help_texts = {
             "equiv_journees": "Saisissez l'équivalence en journées (utile uniquement pour l'état global et l'état nominatif). Ex : une journée=1, une demi-journée=0.5, etc...",
@@ -104,6 +109,12 @@ class Formulaire(FormulaireBase, ModelForm):
             if len(self.instance.groupes.all()) > 0:
                 self.fields['groupes_type'].initial = "SELECTION"
 
+        # Importe les catégories de tarifs
+        self.fields['categories_tarifs'].queryset = CategorieTarif.objects.filter(activite=activite)
+        if self.instance.ordre != None:
+            if len(self.instance.categories_tarifs.all()) > 0:
+                self.fields['categories_tarifs_type'].initial = "SELECTION"
+
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{{ view.get_success_url }}"),
@@ -151,6 +162,10 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("groupes_type"),
                 Field("groupes"),
             ),
+            Fieldset("Catégories de tarifs associées",
+                Field("categories_tarifs_type"),
+                Field("categories_tarifs"),
+            ),
             HTML(EXTRA_SCRIPT),
         )
 
@@ -180,6 +195,14 @@ class Formulaire(FormulaireBase, ModelForm):
         else:
             self.cleaned_data["groupes"] = []
 
+        # Catégories de tarifs associées
+        if self.cleaned_data["categories_tarifs_type"] == "SELECTION":
+            if len(self.cleaned_data["categories_tarifs"]) == 0:
+                self.add_error('categories_tarifs', "Vous devez cocher au moins une catégorie de tarifs")
+                return
+        else:
+            self.cleaned_data["categories_tarifs"] = []
+
         return self.cleaned_data
 
 
@@ -197,6 +220,19 @@ function On_change_groupes_type() {
 $(document).ready(function() {
     $('#id_groupes_type').change(On_change_groupes_type);
     On_change_groupes_type.call($('#id_groupes_type').get(0));
+});
+
+
+// categories_tarifs_type
+function On_change_categories_tarifs_type() {
+    $('#div_id_categories_tarifs').hide();
+    if($(this).val() == 'SELECTION') {
+        $('#div_id_categories_tarifs').show();
+    }
+}
+$(document).ready(function() {
+    $('#id_categories_tarifs_type').change(On_change_categories_tarifs_type);
+    On_change_categories_tarifs_type.call($('#id_categories_tarifs_type').get(0));
 });
 
 

@@ -268,7 +268,8 @@ def Get_generic_data(data={}):
 
     # Importation des unités de conso
     groupes_utilises = list({inscription.groupe: True for inscription in data['liste_inscriptions']}.keys()) + data.get("selection_groupes", [])
-    conditions = (Q(groupes__in=groupes_utilises) | Q(groupes__isnull=True))
+    categories_tarifs_utilisees = list({inscription.categorie_tarif: True for inscription in data['liste_inscriptions']}.keys())
+    conditions = (Q(groupes__in=groupes_utilises) | Q(groupes__isnull=True)) & (Q(categories_tarifs__in=categories_tarifs_utilisees) | Q(categories_tarifs__isnull=True))
     data["liste_unites"] = Unite.objects.select_related('activite').prefetch_related('groupes', 'incompatibilites', 'dependances').filter(conditions, activite=data['selection_activite']).distinct().order_by("ordre")
 
     # Sélection des unités visibles
