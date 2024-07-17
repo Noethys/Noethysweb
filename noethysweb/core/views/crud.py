@@ -328,8 +328,10 @@ class BaseView():
         # Ecriture dans le log
         if famille:
             detail += " Famille=%s" % famille
-        logger.debug("%s : %s (%s)" % (utilisateur, titre, detail))
-
+        try:
+            logger.debug("%s : %s (%s)" % (utilisateur, titre, detail))
+        except:
+            pass
 
 class Ajouter(BaseView, CreateView):
     template_name = "core/crud/edit.html"

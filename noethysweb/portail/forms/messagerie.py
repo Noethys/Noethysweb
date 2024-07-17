@@ -43,24 +43,24 @@ class Formulaire(FormulaireBase, ModelForm):
             Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>%s" % _("Envoyer"), annuler_url="{% url 'portail_contact' %}", ajouter=False, aide=False, css_class="pull-right"),
         )
 
-    def clean_texte(self):
-        # Retrait des emojis qui causent une erreur de charset MySQL
-        emoji_pattern = compile("["
-                                u"\U0001F600-\U0001F64F"  # emoticons
-                                u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-                                u"\U0001F680-\U0001F6FF"  # transport & map symbols
-                                u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-                                u"\U0001F1F2-\U0001F1F4"  # Macau flag
-                                u"\U0001F1E6-\U0001F1FF"  # flags
-                                u"\U0001F600-\U0001F64F"
-                                u"\U00002702-\U000027B0"
-                                u"\U000024C2-\U0001F251"
-                                u"\U0001f926-\U0001f937"
-                                u"\U0001F1F2"
-                                u"\U0001F1F4"
-                                u"\U0001F620"
-                                u"\u200d"
-                                u"\u2640-\u2642"
-                                "]+", flags=UNICODE)
-        texte = emoji_pattern.sub(r'', self.cleaned_data["texte"])
-        return texte
+    # def clean_texte(self):
+    #     # Retrait des emojis qui causent une erreur de charset MySQL
+    #     emoji_pattern = compile("["
+    #                             u"\U0001F600-\U0001F64F"  # emoticons
+    #                             u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+    #                             u"\U0001F680-\U0001F6FF"  # transport & map symbols
+    #                             u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+    #                             u"\U0001F1F2-\U0001F1F4"  # Macau flag
+    #                             u"\U0001F1E6-\U0001F1FF"  # flags
+    #                             u"\U0001F600-\U0001F64F"
+    #                             u"\U00002702-\U000027B0"
+    #                             u"\U000024C2-\U0001F251"
+    #                             u"\U0001f926-\U0001f937"
+    #                             u"\U0001F1F2"
+    #                             u"\U0001F1F4"
+    #                             u"\U0001F620"
+    #                             u"\u200d"
+    #                             u"\u2640-\u2642"
+    #                             "]+", flags=UNICODE)
+    #     texte = emoji_pattern.sub(r'', self.cleaned_data["texte"])
+    #     return texte
