@@ -1,3 +1,10 @@
+Version 1.2.5.2 (17/07/2024) :
+
+- Ajout des catégories de tarifs associées aux unités de consommation
+- Correction sur la fusion avec un integer dans l'envoi express d'un email
+- Correction de l'ordre des réponses de type texte dans les sondages
+- Correction de la prise en charge des emojis
+
 Version 1.2.5.1 (07/07/2024) :
 
 - Ajout du widget Suivi des achats pour le tableau de bord
