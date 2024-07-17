@@ -172,7 +172,7 @@ class Resume(Base):
                 data.append(Table(
                     titre=question.label,
                     colonnes=["Colonne 1",],
-                    lignes=[[valeur,] for valeur in sorted(dict_reponses.get(question, {}).keys())],
+                    lignes=[[valeur,] for valeur in dict_reponses.get(question, {}).keys()],
                     afficher_entetes_colonnes=False,
                 ))
 
