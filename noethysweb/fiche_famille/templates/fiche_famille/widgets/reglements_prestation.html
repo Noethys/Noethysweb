@@ -1,0 +1,45 @@
+{% load static %}
+
+<style>
+    #table_reglements th, td {
+        text-align: center;
+    }
+</style>
+
+{% if reglements %}
+
+    <table id="table_reglements" class="table table-bordered">
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Mode</th>
+                <th>Montant</th>
+                <th>Ventilé</th>
+                <th>Payeur</th>
+                <th>Dépôt</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for reglement in reglements %}
+                <tr>
+                    <td>{{ reglement.pk }}</td>
+                    <td>{{ reglement.date|date:"d/m/Y" }}</td>
+                    <td>{{ reglement.mode.label }}</td>
+                    <td>{{ reglement.montant|montant }}</td>
+                    <td>{{ reglement.ventile|montant }}</td>
+                    <td>{{ reglement.payeur.nom }}</td>
+                    <td>{{ reglement.depot.date|date:'d/m/Y'|default:'' }}</td>
+                    <td><a type="button" class="btn btn-default btn-xs" href="{% url 'famille_reglements_modifier' idfamille=reglement.famille_id pk=reglement.pk %}" title="Ouvrir le règlement"><i class="fa fa-fw fa-pencil"></i></a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+{% else %}
+    <div style="vertical-align: middle;margin-top: 7px;">Aucun règlement associé.</div>
+{% endif %}

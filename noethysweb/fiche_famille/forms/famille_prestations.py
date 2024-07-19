@@ -16,7 +16,7 @@ from core.utils.utils_commandes import Commandes
 from core.models import Prestation, Deduction, Rattachement, Inscription, Activite, CategorieTarif, Tarif , TarifLigne, Consommation
 from core.widgets import DatePickerWidget, Formset
 from core.utils import utils_preferences
-from fiche_famille.widgets import Facture_prestation, Consommations_prestation
+from fiche_famille.widgets import Facture_prestation, Consommations_prestation, Reglements_prestation
 
 
 class DeductionForm(forms.ModelForm):
@@ -68,6 +68,7 @@ class Formulaire(FormulaireBase, ModelForm):
     quantite = forms.IntegerField(label="Quantité", initial=1, min_value=1, required=True)
     montant_unitaire = forms.DecimalField(label="Montant unitaire", max_digits=6, decimal_places=2, initial=0.0, required=True)
     consommations = forms.CharField(label="Consommations", widget=Consommations_prestation(), required=False)
+    reglements = forms.CharField(label="Règlements", widget=Reglements_prestation(), required=False)
     activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr", "data-width": "100%"}),
                                       queryset=Activite.objects.all().order_by("-date_fin", "nom"), required=False)
     categorie_tarif = forms.ModelChoiceField(label="Catégorie de tarif", widget=ModelSelect2Widget(
@@ -136,6 +137,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.fields[champ].help_text = "Ce champ n'est pas modifiable car la prestation est déjà facturée."
 
         self.fields["consommations"].initial = self.instance.pk
+        self.fields["reglements"].initial = self.instance.pk
 
         # Affichage
         self.helper.layout = Layout(
@@ -172,6 +174,10 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Consommations associées",
                 Field('consommations'),
                 id="fieldset_consommations",
+            ),
+            Fieldset("Règlements associés",
+                Field('reglements'),
+                id="fieldset_reglements",
             ),
             Fieldset("Déductions",
                 Div(

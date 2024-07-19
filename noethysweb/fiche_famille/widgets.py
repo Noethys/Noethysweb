@@ -7,7 +7,8 @@ import datetime
 from django.forms.widgets import Widget
 from django.template import loader
 from django.utils.safestring import mark_safe
-from core.models import Facture, Consommation, TarifLigne
+from django.db.models import Q, Sum
+from core.models import Facture, Consommation, TarifLigne, Reglement
 from core.utils import utils_dates
 
 
@@ -188,6 +189,23 @@ class Consommations_prestation(Widget):
             context.update(attrs)
         consommations = Consommation.objects.select_related("unite").filter(prestation_id=value) if value else None
         context['consommations'] = consommations
+        context['idprestation'] = value
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
+
+
+class Reglements_prestation(Widget):
+    template_name = 'fiche_famille/widgets/reglements_prestation.html'
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        reglements = Reglement.objects.select_related("mode", "payeur", "depot").annotate(ventile=Sum("ventilation__montant", filter=Q(ventilation__prestation_id=value))).filter(ventilation__prestation_id=value) if value else None
+        context['reglements'] = reglements
         context['idprestation'] = value
         return context
 
