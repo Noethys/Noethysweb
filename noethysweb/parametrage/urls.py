@@ -347,6 +347,8 @@ urlpatterns = [
     path('parametrage/classes/ajouter', classes.Ajouter.as_view(), name='classes_ajouter'),
     path('parametrage/classes/modifier/<int:pk>', classes.Modifier.as_view(), name='classes_modifier'),
     path('parametrage/classes/supprimer/<int:pk>', classes.Supprimer.as_view(), name='classes_supprimer'),
+    path('parametrage/classes/supprimer_plusieurs/<str:listepk>', classes.Supprimer_plusieurs.as_view(), name='classes_supprimer_plusieurs'),
+    path('parametrage/classes/dupliquer', secure_ajax(classes.Dupliquer), name='ajax_classes_dupliquer'),
 
     # Restaurateurs
     path('parametrage/restaurateurs/liste', restaurateurs.Liste.as_view(), name='restaurateurs_liste'),
