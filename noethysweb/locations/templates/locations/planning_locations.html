@@ -38,8 +38,16 @@
                 editable: true,
                 selectable: true,
                 nowIndicator: true,
+                customButtons: {
+                    bouton_parametres: {
+                        text: "Paramètres",
+                        click: function() {
+                            ouvre_modal_parametres();
+                        }
+                    }
+                },
                 headerToolbar: {
-                    left: 'today prev,next',
+                    left: 'today prev,next bouton_parametres',
                     center: 'title',
                     right: 'resourceTimelineDay,resourceTimelineWeek,dayGridMonth,multiMonthYear,timeGridWeek,listWeek'
                 },
@@ -52,11 +60,15 @@
                     resourceTimelineWeek: "Semaine",
                     list: "Liste"
                 },
-                slotDuration: "00:30:00",
-                slotMinWidth: 15,
-                initialView: 'resourceTimelineDay',
+                slotDuration: "{{ parametres.graduations_duree }}",
+                slotMinWidth: {{ parametres.graduations_largeur }},
+                slotMinTime: "{{ parametres.heure_min }}",
+                slotMaxTime: "{{ parametres.heure_max }}",
+                initialView: "{{ parametres.vue_favorite }}",
                 firstDay: 1,
                 allDaySlot: false,
+                displayEventTime: {% if parametres.barre_afficher_heure %}true{% else %}false{% endif %},
+                defaultRangeSeparator: "-",
                 resourceAreaHeaderContent: 'Produits',
                 resourceAreaWidth: '25%',
                 resourceGroupField: 'categorie',
@@ -85,6 +97,7 @@
                     });
                 },
                 select: function(selectionInfo) {
+                    $(".popover").popover("dispose");
                     if (selectionInfo.resource.id.indexOf("categorie") >= 0) {
                         return false;
                     }
@@ -96,12 +109,14 @@
                     ouvre_modal_detail(null, data_event);
                 },
                 eventClick: function(event) {
+                    $(".popover").popover("dispose");
                     ouvre_modal_detail(event.event.id);
                 },
                 eventAllow: function(dropInfo, draggedEvent) {
                     return dropInfo.resource.id.indexOf("categorie") < 0;
                 },
                 eventDrop: function(eventDropInfo) {
+                    $(".popover").popover("dispose");
                     modifier_event({
                         "idlocation": eventDropInfo.event.id,
                         "produit": eventDropInfo.newResource ? eventDropInfo.newResource.id: 0,
@@ -110,11 +125,24 @@
                     })
                 },
                 eventResize: function (eventResizeInfo) {
+                    $(".popover").popover("dispose");
                     modifier_event({
                         "idlocation": eventResizeInfo.event.id,
                         "date_debut": moment(eventResizeInfo.event.start).format('YYYY-MM-DD HH:mm'),
                         "date_fin": moment(eventResizeInfo.event.end).format('YYYY-MM-DD HH:mm')
                     })
+                },
+                eventDidMount: function(info) {
+                    if (!info.isMirror) {
+                        $(info.el).popover({
+                            title: info.event.extendedProps.tooltip_titre,
+                            placement: 'top',
+                            trigger: 'hover',
+                            content: info.event.extendedProps.tooltip_description,
+                            container: 'body',
+                            html: true
+                        });
+                    }
                 },
             });
             calendar.setOption('locale', 'fr');
@@ -158,12 +186,12 @@
                     $("#modal_detail_location").modal("show");
                     $('#id_selection_periode').on('change', On_change_selection_periode);
                     On_change_selection_periode.call($('#id_selection_periode').get(0));
-                    $("#modal_detail_location").on('submit', submit_form);
+                    $("#modal_detail_location").on('submit', submit_form_detail);
                 }
             });
         }
 
-        function submit_form(event) {
+        function submit_form_detail(event) {
             event.preventDefault();
             $.ajax({
                 type: "POST",
@@ -209,6 +237,39 @@
         //    return false;
         //};
 
+        function ouvre_modal_parametres() {
+            $("#modal_parametres").off('submit');
+            $.ajax({
+                url: "{% url 'ajax_planning_locations_get_form_parametres' %}",
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function (data) {
+                    $("#id_div_form_parametres").html(data['form_html']);
+                    $("#modal_parametres").modal("show");
+                    $("#modal_parametres").on('submit', submit_form_parametres);
+                }
+            });
+        }
+
+        function submit_form_parametres(event) {
+            event.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_planning_locations_valid_form_parametres' %}",
+                data: $("#form_planning_locations_parametres").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $("#modal_parametres").modal("hide");
+                    location.reload();
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
     </script>
 
     {# Modal Détail d'une location #}
@@ -224,5 +285,16 @@
 
     {# Fonctions liées au form de saisie d'une location #}
     {% include 'locations/extra_form_location.html' %}
+
+    {# Modal Paramètres #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_parametres{% endblock %}
+        {% block modal_titre %}Paramètres{% endblock %}
+        {% block modal_classe %}modal-lg{% endblock %}
+        {% block modal_body %}
+            <div id="id_div_form_parametres">
+            </div>
+        {% endblock %}
+    {% endembed %}
 
 {% endblock contenu_page %}
