@@ -1446,11 +1446,16 @@ class Facturation():
             for ligne_calcul in lignes_calcul:
                 # Vérifie si QF ok pour le calcul basé également sur paliers de QF
                 conditions = True
-                if "qf" in methode_calcul and qf_famille != None:
-                    if qf_famille >= ligne_calcul.qf_min and qf_famille <= ligne_calcul.qf_max:
-                        conditions = True
+                if "qf" in methode_calcul:
+                    if qf_famille != None:
+                        if qf_famille >= ligne_calcul.qf_min and qf_famille <= ligne_calcul.qf_max:
+                            conditions = True
+                        else:
+                            conditions = False
                     else:
-                        conditions = False
+                        # Sélectionne la dernière ligne pour les familles sans QF
+                        if ligne_calcul.num_ligne < len(lignes_calcul)-1:
+                            conditions = False
 
                 if methode_calcul == "taux_date":
                     if ligne_calcul.date != case_tableau["date"]:
