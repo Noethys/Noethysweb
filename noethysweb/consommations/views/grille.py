@@ -306,13 +306,13 @@ def Get_generic_data(data={}):
     for unite in data["liste_unites"]:
         liste_unites_json.append({
             "pk": unite.pk, "fields": {"activite": unite.activite_id, "nom": unite.nom, "abrege": unite.abrege, "type": unite.type,
-            "heure_debut": str(unite.heure_debut), "heure_fin": str(unite.heure_fin), "heure_debut_fixe": unite.heure_debut_fixe,
+            "heure_debut": str(unite.heure_debut or ""), "heure_fin": str(unite.heure_fin or ""), "heure_debut_fixe": unite.heure_debut_fixe,
             "heure_fin_fixe": unite.heure_fin_fixe, "touche_raccourci": unite.touche_raccourci, "largeur": unite.largeur,
             "groupes": [groupe.pk for groupe in unite.groupes.all()], "incompatibilites": [u.pk for u in unite.incompatibilites.all()],
             "visible_portail": unite.visible_portail, "imposer_saisie_valeur": unite.imposer_saisie_valeur,
             "unites_remplissage": dict_unites_remplissage_unites.get(unite.pk, []),
-            "heure_debut_min": str(unite.heure_debut_min), "heure_debut_max": str(unite.heure_debut_max),
-            "heure_fin_min": str(unite.heure_fin_min), "heure_fin_max": str(unite.heure_fin_max),
+            "heure_debut_min": str(unite.heure_debut_min or ""), "heure_debut_max": str(unite.heure_debut_max or ""),
+            "heure_fin_min": str(unite.heure_fin_min or ""), "heure_fin_max": str(unite.heure_fin_max or ""),
             "dependances": [u.pk for u in unite.dependances.all()]}})
     data['liste_unites_json'] = json.dumps(liste_unites_json)
 

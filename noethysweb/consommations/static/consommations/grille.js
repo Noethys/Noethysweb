@@ -561,6 +561,10 @@ class Case_unitaire extends Case_standard {
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
 
+        // Saisie des heures par défaut
+        if (!("heure_debut" in data) && dict_unites[this.unite].heure_debut) {data["heure_debut"] = dict_unites[this.unite].heure_debut};
+        if (!("heure_fin" in data) && dict_unites[this.unite].heure_fin) {data["heure_fin"] = dict_unites[this.unite].heure_fin};
+
         // Mode pointeuse
         if (mode === 'pointeuse') {this.detail("ajouter"); return false};
 
