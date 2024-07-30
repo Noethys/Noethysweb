@@ -5,6 +5,7 @@
 
 import datetime, json
 from colorhash import ColorHash
+from django.db.models import Q
 from django.http import JsonResponse
 from django.template.context_processors import csrf
 from django.views.generic import TemplateView
@@ -80,7 +81,8 @@ def Get_locations(request):
     parametres = Get_parametres(request)
 
     # Importation des locations
-    locations = Location.objects.select_related("famille", "produit").filter(date_debut__lte=date_fin, date_fin__gte=date_debut)
+    conditions = Q(date_debut__lte=date_fin) & (Q(date_fin__isnull=True) | Q(date_fin__gte=date_debut))
+    locations = Location.objects.select_related("famille", "produit").filter(conditions)
     resultats = []
     for location in locations:
         # Label de la barre
@@ -97,7 +99,7 @@ def Get_locations(request):
         # Description pour tooltip
         description = [
             "Début : %s" % datetime.datetime.strftime(location.date_debut, "%d/%m/%Y %H:%M"),
-            "Fin : %s" % datetime.datetime.strftime(location.date_fin, "%d/%m/%Y %H:%M"),
+            "Fin : %s" % (datetime.datetime.strftime(location.date_fin, "%d/%m/%Y %H:%M") if location.date_fin else "Illimité"),
             "Observations : %s" % (location.observations or "-"),
             "Quantité : %d" % (location.quantite or 1),
         ]
@@ -106,7 +108,7 @@ def Get_locations(request):
             "title": label,
             "resourceId": str(location.produit_id),
             "start": str(location.date_debut),
-            "end": str(location.date_fin),
+            "end": str(location.date_fin or datetime.datetime(2999, 1, 1, 0, 0)),
             "color": couleur,
             "allDay": False,
             "overlap": False if location.quantite in (1, None) else True,
