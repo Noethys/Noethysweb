@@ -1,3 +1,11 @@
+Version 1.2.5.4 (31/07/2024) :
+
+- Ajout de la duplication des classes
+- Améliorations diverses sur le planning des locations
+- Correction des heures par défaut sur les consommations de type unitaire
+- Correction de l'affichage des locations illimitées dans le planning des locations
+- Correction du tarif taux d'effort et QF
+
 Version 1.2.5.3 (19/07/2024) :
 
 - Ajout des règlements associés dans le détail des prestations de la fiche famille
