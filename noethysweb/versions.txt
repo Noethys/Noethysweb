@@ -1,3 +1,9 @@
+Version 1.2.5.5 (02/08/2024) :
+
+- Ajout de la commande de réinitialisation des dates de certification des fiches
+- Mise à jour du format de la notification de retour Payfip
+- Correction de la déventilation intempestive après la modification des heures facturées
+
 Version 1.2.5.4 (31/07/2024) :
 
 - Ajout de la duplication des classes
