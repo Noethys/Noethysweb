@@ -995,14 +995,21 @@ class Facturation():
                     return {"IDprestation": IDprestation, "dictPrestation": dict_prestation_2, "nouveau": False}
 
                 # Renvoie prestation existante si la prestation semble identique avec montants identiques
-                keys = ["date", "individu", "tarif", "montant_initial", "montant", "categorie_tarif", "famille", "label", "temps_facture", "quantite", "tarif_ligne"]
+                keys = ["date", "individu", "tarif", "montant_initial", "montant", "categorie_tarif", "famille", "label", "quantite", "tarif_ligne"]
 
                 if dictPrestation["temps_facture"]: dictPrestation["temps_facture"] = dictPrestation["temps_facture"].lstrip("0")
                 if dict_prestation_2["temps_facture"]: dict_prestation_2["temps_facture"] = dict_prestation_2["temps_facture"].lstrip("0")
 
                 if CompareDict(dictPrestation, dict_prestation_2, keys=keys) == True:
                     logger.debug("Récupération d'un IDprestation existant : " + str(IDprestation))
-                    return {"IDprestation": IDprestation, "dictPrestation": dict_prestation_2, "nouveau": False}
+
+                    # Met à jour le temps facturé de la prestation si besoin
+                    is_nouveau = False
+                    if dictPrestation["temps_facture"] != dict_prestation_2["temps_facture"]:
+                        dict_prestation_2.update({"temps_facture": dictPrestation["temps_facture"], "dirty": True})
+                        is_nouveau = True
+
+                    return {"IDprestation": IDprestation, "dictPrestation": dict_prestation_2, "nouveau": is_nouveau}
 
         # Génération d'un nouvel IDprestation
         IDprestation = str(uuid4())
