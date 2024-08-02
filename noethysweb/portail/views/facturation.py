@@ -6,7 +6,7 @@
 import logging, decimal, sys, datetime, re, copy, json
 logger = logging.getLogger(__name__)
 from django.urls import reverse
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, QueryDict
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
@@ -188,17 +188,12 @@ def retour_payfip(request):
     logger.debug("Page RETOUR PAYFIP")
 
     # Extraction des variables post
-    data = request.POST
-
-    # Extraction des champs non traités par eopayment
-    resultrans = data.get("resultrans", 0)
-    numauto = data.get("numauto", 0)
-    dattrans = data.get("dattrans", 0)
-    heurtrans = data.get("heurtrans", 0)
+    data = QueryDict(request.META["QUERY_STRING"])
+    logger.debug(data)
 
     # Récupération des données et calcul de la signature
     p = Payment("tipi", {})
-    reponse = p.response(data.urlencode())
+    reponse = p.response(request.META["QUERY_STRING"])
 
     # Recherche l'état du paiement
     resultat = ETATS_PAIEMENTS[reponse.result]
@@ -217,11 +212,11 @@ def retour_payfip(request):
         logger.debug("Page RETOUR_PAYFIP: Le paiement est déjà PAID.")
         return
 
-    paiement.resultrans = resultrans
     paiement.resultat = resultat
-    paiement.numauto = numauto
-    paiement.dattrans = dattrans
-    paiement.heurtrans = heurtrans
+    paiement.resultrans = data.get("resultrans", 0)
+    paiement.numauto = data.get("numauto", 0)
+    paiement.dattrans = data.get("dattrans", 0)
+    paiement.heurtrans = data.get("heurtrans", 0)
     paiement.message = reponse.bank_status
     paiement.save()
 
