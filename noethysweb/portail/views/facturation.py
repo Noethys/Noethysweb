@@ -6,7 +6,7 @@
 import logging, decimal, sys, datetime, re, copy, json
 logger = logging.getLogger(__name__)
 from django.urls import reverse
-from django.http import JsonResponse, HttpResponse, QueryDict
+from django.http import JsonResponse, HttpResponse
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
@@ -188,12 +188,12 @@ def retour_payfip(request):
     logger.debug("Page RETOUR PAYFIP")
 
     # Extraction des variables post
-    data = QueryDict(request.META["QUERY_STRING"])
+    data = request.POST
     logger.debug(data)
 
     # Récupération des données et calcul de la signature
     p = Payment("tipi", {})
-    reponse = p.response(request.META["QUERY_STRING"])
+    reponse = p.response(data.urlencode())
 
     # Recherche l'état du paiement
     resultat = ETATS_PAIEMENTS[reponse.result]
