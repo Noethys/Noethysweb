@@ -1,3 +1,7 @@
+Version 1.2.5.6 (11/08/2024) :
+
+- Rétablissement de l'ancien format de la notification Payfip
+
 Version 1.2.5.5 (02/08/2024) :
 
 - Ajout de la commande de réinitialisation des dates de certification des fiches
