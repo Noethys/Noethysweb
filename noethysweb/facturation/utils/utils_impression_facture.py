@@ -599,9 +599,19 @@ class Impression(utils_impression.Impression):
                 largeursColonnes = [self.taille_cadre[2] - largeurColonneMontantTTC - largeurColonneLabel, largeurColonneLabel, largeurColonneMontantTTC]
 
                 if not self.dict_options["afficher_deja_paye"] and not self.dict_options["afficher_reste_regler"]:
-                    dataTableau.append((listeMessages, "Total :", "%.02f %s" % (dictValeur["total"], utils_preferences.Get_symbole_monnaie())))
+                    if dictValeur["total_tva"]:
+                        dataTableau.append((listeMessages, "Total HT :", "%.02f %s" % (dictValeur["total"] - dictValeur["total_tva"], utils_preferences.Get_symbole_monnaie())))
+                        dataTableau.append((listeMessages, "Total TVA :", "%.02f %s" % (dictValeur["total_tva"], utils_preferences.Get_symbole_monnaie())))
+                        dataTableau.append((listeMessages, "Total TTC :", "%.02f %s" % (dictValeur["total"], utils_preferences.Get_symbole_monnaie())))
+                    else:
+                        dataTableau.append((listeMessages, "Total :", "%.02f %s" % (dictValeur["total"], utils_preferences.Get_symbole_monnaie())))
                 else:
-                    dataTableau.append((listeMessages, "Total période :", u"%.02f %s" % (dictValeur["total"], utils_preferences.Get_symbole_monnaie())))
+                    if dictValeur["total_tva"]:
+                        dataTableau.append((listeMessages, "Total HT période :", "%.02f %s" % (dictValeur["total"] - dictValeur["total_tva"], utils_preferences.Get_symbole_monnaie())))
+                        dataTableau.append((listeMessages, "Total TVA période :", "%.02f %s" % (dictValeur["total_tva"], utils_preferences.Get_symbole_monnaie())))
+                        dataTableau.append((listeMessages, "Total TTC période :", "%.02f %s" % (dictValeur["total"], utils_preferences.Get_symbole_monnaie())))
+                    else:
+                        dataTableau.append((listeMessages, "Total période :", u"%.02f %s" % (dictValeur["total"], utils_preferences.Get_symbole_monnaie())))
 
                     if self.dict_options["afficher_deja_paye"]:
                         dataTableau.append(("", "Montant déjà réglé :", u"%.02f %s" % (dictValeur["ventilation"], utils_preferences.Get_symbole_monnaie())))

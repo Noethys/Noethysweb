@@ -307,6 +307,7 @@ class Facturation():
                     "listeDeductions": [],
                     "prestations_familiales": [],
                     "total": Decimal(0),
+                    "total_tva": Decimal(0),
                     "ventilation": Decimal(0),
                     "solde": Decimal(0),
                     "qfdates": {},
@@ -363,6 +364,9 @@ class Facturation():
             dictComptes[ID]["total"] += prestation.montant
             dictComptes[ID]["ventilation"] += montant_ventilation
             dictComptes[ID]["solde"] = dictComptes[ID]["total"] - dictComptes[ID]["ventilation"]
+
+            if prestation.tva:
+                dictComptes[ID]["total_tva"] += Decimal(float(prestation.montant) - ((100.0 * float(prestation.montant)) / (100 + float(prestation.tva))))
             
             dictComptes[ID]["{TOTAL_PERIODE}"] = u"%.02f %s" % (dictComptes[ID]["total"], utils_preferences.Get_symbole_monnaie())
             dictComptes[ID]["{TOTAL_REGLE}"] = u"%.02f %s" % (dictComptes[ID]["ventilation"], utils_preferences.Get_symbole_monnaie())
