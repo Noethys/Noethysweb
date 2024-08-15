@@ -41,6 +41,7 @@ def Vider_rep_temp():
     call_command("reset_rep_temp")
     Corriger_anomalies()
     Purge_mdp_expires()
+    Purge_auto_historique()
 
 def Corriger_anomalies():
     logger.debug("%s : Lancement de la correction automatique des anomalies..." % datetime.datetime.now())
@@ -53,6 +54,10 @@ def Generer_taches():
 def Purge_mdp_expires():
     logger.debug("%s : Purge des mots de passe expirés..." % datetime.datetime.now())
     call_command("purge_mdp_expires")
+
+def Purge_auto_historique():
+    logger.debug("%s : Purge historique..." % datetime.datetime.now())
+    call_command("purge_auto_historique")
 
 def Recalculer_prestations_mois_precedent():
     logger.debug("%s : Recalculer les prestations du mois précédent..." % datetime.datetime.now())
