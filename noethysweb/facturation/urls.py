@@ -12,7 +12,7 @@ from facturation.views import factures_generation, liste_prestations, liste_fact
                                 rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations, \
                                 lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
                                 attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes, edition_recap_factures, \
-                                factures_modifier, export_ecritures_cloe
+                                factures_modifier, export_ecritures_cloe, saisie_lot_forfaits_credits
 
 urlpatterns = [
 
@@ -83,6 +83,7 @@ urlpatterns = [
     path('facturation/synthese_prestations', synthese_prestations.View.as_view(), name='synthese_prestations'),
     path('facturation/edition_prestations', edition_prestations.View.as_view(), name='edition_prestations'),
     path('facturation/recalculer_prestations', recalculer_prestations.View.as_view(), name='recalculer_prestations'),
+    path('facturation/saisie_lot_forfaits_credits', saisie_lot_forfaits_credits.View.as_view(), name='saisie_lot_forfaits_credits'),
 
     # Aides
     path('facturation/aides/liste', liste_aides.Liste.as_view(), name='aides_liste'),
@@ -125,5 +126,7 @@ urlpatterns = [
     path('facturation/ajax_solder_impayes', secure_ajax(solder_impayes.Solder), name='ajax_solder_impayes'),
     path('facturation/ajax_factures_modifier', secure_ajax(factures_modifier.Appliquer), name='ajax_factures_modifier'),
     path('facturation/export_ecritures_cloe/exporter', secure_ajax(export_ecritures_cloe.Exporter), name='ajax_export_ecritures_cloe_exporter'),
+    path('facturation/ajax_saisie_lot_forfaits_credits_get_tarifs', secure_ajax(saisie_lot_forfaits_credits.Get_tarifs), name='ajax_saisie_lot_forfaits_credits_get_tarifs'),
+    path('facturation/ajax_saisie_lot_forfaits_credits_appliquer', secure_ajax(saisie_lot_forfaits_credits.Appliquer), name='ajax_saisie_lot_forfaits_credits_appliquer'),
 
 ]

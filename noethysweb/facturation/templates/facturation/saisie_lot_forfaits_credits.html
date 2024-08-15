@@ -1,0 +1,163 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-3" >
+
+            <!-- Paramètres -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Paramètres</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <button type="submit" form="form_parametres" class="btn btn-primary btn-block mb-3" name="type_submit" title="Actualiser les résultats"><i class="fa fa-refresh margin-r-5"></i> Actualiser les résultats</button>
+                    {% crispy form_parametres %}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-9">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-caret-square-o-right margin-r-5"></i> Résultats</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    {% if not data.activite and not data.tarif %}
+                        <p>Sélectionnez la période souhaitée pour le forfait, l'activité concernée, puis le forfait à appliquer. Cliquez sur le bouton Actualiser pour afficher les individus
+                            pour lesquels des consommations existent sur la période souhaitée.</p>
+                    {% endif %}
+
+                    {% if data.activite %}
+
+                        <p>Cochez les lignes souhaitées et cliquez sur le bouton Appliquer. Un forfait-crédit sera créé pour chaque ligne.</p>
+
+                        <div class="buttonHolder">
+                            <button class="btn btn-primary" id="bouton_recalculer"><i class='fa fa-magic margin-r-5'></i>Appliquer le forfait-crédit</button>
+                        </div>
+
+                        <script>
+                            var contenu_table = JSON.parse('{{ data.liste_lignes|escapejs }}');
+                            var affiche_pagination = false;
+                        </script>
+
+                        <table id="table" class="table-sm table-xxs" data-height="500" data-show-footer='true'>
+                            <thead>
+                                {% if data.liste_colonnes %}
+                                    <tr>
+                                        <th data-field="state" data-halign="center" data-align="center"data-checkbox="true"></th>
+                                        {% for colonne in data.liste_colonnes %}
+                                            <th data-field="{{ forloop.counter0 }}" data-halign="center" data-align="center" data-footer-formatter="calcule_total"
+                                            >{{ colonne }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                {% endif %}
+                            </thead>
+                        </table>
+
+                        <script>
+                            function calcule_total(items) {
+                                {# Calcule le total de chaque colonne #}
+                                var colonne = this.field;
+                                if (colonne === "0") {return "Total"}
+                                var total = 0;
+                                items.forEach(function(item) {
+                                    if ($.isNumeric(item[colonne])) {
+                                        total = total + item[colonne];
+                                    } else {
+                                        total = "";
+                                    };
+                                });
+                                return total;
+                            };
+                        </script>
+
+                        {% include 'core/widgets/bootstrap-table.html' %}
+
+                    {% endif %}
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+
+        $("#bouton_recalculer").on("click",function(event){
+            // Vérifie qu'une ligne est cochée
+            if ($("#table").bootstrapTable('getSelections').length === 0) {
+                toastr.error("Vous devez cocher au moins une ligne dans la liste");
+                return;
+            }
+            // Demande la confirmation du lancement de la procédure
+            var dialog_confirm = bootbox.dialog({
+                title: "Confirmation",
+                message: "Confirmez-vous l'application du forfait aux " + $("#table").bootstrapTable('getSelections').length + " lignes cochées ?",
+                buttons: {
+                    ok: {
+                        label: "<i class='fa fa-check'></i> Appliquer",
+                        className: 'btn-primary',
+                        callback: function(){
+                            executer(dialog_confirm);
+                        }
+                    },
+                    cancel: {
+                        label: "<i class='fa fa-ban'></i> Annuler",
+                        className: 'btn-danger',
+                    }
+                }
+            });
+        });
+
+        function executer(dialogbox) {
+            dialogbox.modal('hide');
+
+            // Affiche une modal d'attente
+            var box_progress = bootbox.dialog({
+                message: "<p class='text-center mb-0'><h4><i class='fa fa-spin fa-cog'></i> Application en cours...</h4><br>Ceci peut prendre plusieurs minutes, merci de patienter.</p>",
+                closeButton: false
+            });
+
+            // Procédure Ajax
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_saisie_lot_forfaits_credits_appliquer' %}",
+                data: {
+                    selections: JSON.stringify($("#table").bootstrapTable('getSelections')),
+                    date_debut: "{{ data.date_debut|date:'Y-m-d' }}",
+                    date_fin: "{{ data.date_fin|date:'Y-m-d' }}",
+                    idactivite: {% if data.activite %}{{ data.activite.pk }}{% else %}0{% endif %},
+                    idtarif: {% if data.tarif %}{{ data.tarif.pk }}{% else %}0{% endif %},
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                },
+                success: function (data) {
+                    box_progress.modal("hide");
+                    toastr.success("Application terminée");
+                    location.reload(true);
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+    </script>
+
+{% endblock contenu_page %}

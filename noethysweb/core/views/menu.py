@@ -399,6 +399,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_prestations.Add(code="synthese_prestations", titre="Synthèse des prestations", icone="file-text-o")
     menu_prestations.Add(code="edition_prestations", titre="Edition des prestations", icone="file-text-o")
     menu_prestations.Add(code="recalculer_prestations", titre="Recalculer des prestations", icone="file-text-o")
+    menu_prestations.Add(code="saisie_lot_forfaits_credits", titre="Saisir un lot de forfaits-crédits", icone="file-text-o")
 
     # Aides
     menu_aides = menu_facturation.Add(titre="Aides")
