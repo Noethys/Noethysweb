@@ -1,3 +1,9 @@
+Version 1.2.5.7 (15/08/2024) :
+
+- Ajout de la saisie par lot des forfaits-crédits dans le menu Facturation
+- Ajout du total TVA dans les factures
+- Ajout de la purge auto de l'historique
+
 Version 1.2.5.6 (11/08/2024) :
 
 - Rétablissement de l'ancien format de la notification Payfip
