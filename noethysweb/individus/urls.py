@@ -13,7 +13,8 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             liste_regimes_alimentaires, liste_maladies, liste_informations, individus_doublons_liste, liste_familles_sans_inscriptions, \
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
-                            abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses
+                            abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses, certifications, \
+                            certifications_individus, certifications_familles
 
 urlpatterns = [
 
@@ -116,6 +117,9 @@ urlpatterns = [
 
     path('individus/mails/liste', liste_mails.Liste.as_view(), name='mails_liste'),
 
+    path('individus/certifications_individus', certifications_individus.Liste.as_view(), name='certifications_individus'),
+    path('individus/certifications_familles', certifications_familles.Liste.as_view(), name='certifications_familles'),
+
     # Abonnés aux listes de diffusion
     path('individus/abonnes_listes_diffusion/liste', abonnes_listes_diffusion.Liste.as_view(), name='abonnes_listes_diffusion_liste'),
     path('individus/abonnes_listes_diffusion/liste/<str:categorie>', abonnes_listes_diffusion.Liste.as_view(), name='abonnes_listes_diffusion_liste'),
@@ -188,5 +192,6 @@ urlpatterns = [
     path('individus/inscriptions_changer_groupe', secure_ajax(inscriptions_changer_groupe.Appliquer), name='ajax_inscriptions_changer_groupe'),
     path('individus/liste_pieces_manquantes_email', secure_ajax(liste_pieces_manquantes.Envoi_emails), name='ajax_liste_pieces_manquantes_emails'),
     path('individus/imprimer_liste_inscrits/generer_pdf', secure_ajax(imprimer_liste_inscrits.Generer_pdf), name='ajax_imprimer_liste_inscrits_generer_pdf'),
+    path('individus/certifications_reinitialiser', secure_ajax(certifications.Reinitialiser), name='ajax_certifications_reinitialiser'),
 
 ]

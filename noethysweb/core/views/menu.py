@@ -265,6 +265,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_infos_individus.Add(code="edition_informations", titre="Edition des informations et régimes", icone="file-text-o")
     menu_infos_individus.Add(code="liste_comptes_internet", titre="Liste des comptes internet", icone="file-text-o")
     menu_infos_individus.Add(code="mails_liste", titre="Liste des Emails", icone="file-text-o")
+    menu_infos_individus.Add(code="certifications_individus", titre="Liste des certifications", icone="file-text-o")
 
     # Pièces
     menu_pieces_individus = menu_individus.Add(titre="Pièces")

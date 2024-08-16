@@ -1,0 +1,90 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-3" >
+
+            <form id="form_general" action="{% if categorie == "famille" %}{% url 'certifications_familles' %}{% else %}{% url 'certifications_individus' %}{% endif %}" class="uniForm" method="post">
+
+                <!-- Catégorie -->
+                <div class="card card-default">
+                    <div class="card-header with-border">
+                        <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Catégorie</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% crispy form_categorie %}
+                    </div>
+                </div>
+            
+            </form>
+
+        </div>
+
+        <div class="col-md-9">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-caret-square-o-right margin-r-5"></i> Certifications des {{ categorie }}s</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Cette liste détaille les dates de certification des fiches sur le portail famille. Il est possible de réinitialiser la date
+                        de certification des fiches cochées si vous souhaitez imposer aux familles de les certifier exactes de nouveau.
+                    </p>
+                    <div class="buttonHolder">
+                        <button class="btn btn-primary" onclick="reinitialiser()" title="Réinitialiser"><i class='fa fa-remove margin-r-5'></i>Réinitialiser les certifications cochées</button>
+                        <a class="btn btn-danger" href="{% url 'individus_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                    </div>
+
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {# Insertion des modals #}
+    {% include 'core/modal_pdf.html' %}
+
+    <script>
+
+        // Impression du PDF
+        function reinitialiser() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_certifications_reinitialiser' %}",
+                data: {
+                    form_general: JSON.stringify($("#form_general").serializeObject()),
+                    coches: JSON.stringify(get_coches()),
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                datatype: "json",
+                success: function(data){
+                    location.reload();
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+    </script>
+
+{% endblock contenu_page %}
