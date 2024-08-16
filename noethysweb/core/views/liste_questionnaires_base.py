@@ -65,6 +65,7 @@ class Liste(crud.CustomListe):
         return classe
 
     def Formate_reponse(self, reponse=None):
-        if reponse and reponse.lower() == "oui": return "<small class='badge badge-pill badge-success'><i class='fa fa-check margin-r-5'></i>Oui</small>"
-        if reponse and reponse.lower() == "non": return "<small class='badge badge-pill badge-danger'><i class='fa fa-remove margin-r-5'></i>Non</small>"
+        if reponse and isinstance(reponse, str):
+            if reponse.lower() == "oui": return "<small class='badge badge-pill badge-success'><i class='fa fa-check margin-r-5'></i>Oui</small>"
+            if reponse.lower() == "non": return "<small class='badge badge-pill badge-danger'><i class='fa fa-remove margin-r-5'></i>Non</small>"
         return reponse
