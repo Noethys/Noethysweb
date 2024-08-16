@@ -50,15 +50,13 @@ class Formulaire(FormulaireBase, ModelForm):
         liste_adresses_existantes = []
         liste_adresses_autres = []
         if famille.email_factures:
-            if "##" in famille.email_factures_adresses:
-                liste_adresses = famille.email_factures_adresses.split("##")
-                for adresse in liste_adresses:
-                    print("adresse=", adresse)
-                    id, categorie, adresse_manuelle = adresse.split(";")
-                    if id:
-                        liste_adresses_existantes.append(adresse)
-                    else:
-                        liste_adresses_autres.append(adresse_manuelle)
+            liste_adresses = famille.email_factures_adresses.split("##")
+            for adresse in liste_adresses:
+                id, categorie, adresse_manuelle = adresse.split(";")
+                if id:
+                    liste_adresses_existantes.append(adresse)
+                else:
+                    liste_adresses_autres.append(adresse_manuelle)
 
         self.fields["adresses_individus"].initial = liste_adresses_existantes
         self.fields["adresses_autres"].initial = ";".join(liste_adresses_autres)
@@ -98,5 +96,6 @@ class Formulaire(FormulaireBase, ModelForm):
         else:
             # Si non activé
             self.cleaned_data["email_factures_adresses"] = None
+
         return self.cleaned_data
 
