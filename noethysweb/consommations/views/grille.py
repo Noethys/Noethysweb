@@ -66,7 +66,8 @@ def Maj_tarifs_fratries(activite=None, prestations=[], liste_IDprestation_exista
         # Recherche les fratries
         if liste_modifications:
             for famille_id, tarif_id, date in liste_modifications:
-                liste_prestations_fratrie = Prestation.objects.select_related("tarif", "tarif_ligne").filter(famille_id=famille_id, tarif_id=tarif_id, date=date).order_by("individu_id")
+                liste_prestations_fratrie = Prestation.objects.select_related("tarif", "tarif_ligne", "individu").filter(famille_id=famille_id, tarif_id=tarif_id, date=date).order_by("individu_id")
+                liste_prestations_fratrie = sorted(list(liste_prestations_fratrie), key=lambda prestation: (prestation.individu.date_naiss or datetime.date(1950, 1, 1), prestation.individu.pk))
                 for index, prestation in enumerate(liste_prestations_fratrie):
                     if "degr" in prestation.tarif.methode:
                         num_enfant = index + 1
