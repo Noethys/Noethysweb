@@ -104,7 +104,7 @@ class Consulter(Page, crud.Liste):
     url_supprimer_plusieurs = "depots_reglements_supprimer_plusieurs_reglements"
 
     def get_queryset(self):
-        return Reglement.objects.select_related("famille").filter(self.Get_filtres("Q"), depot_id=self.kwargs["pk"])
+        return Reglement.objects.select_related("famille", "depot").filter(self.Get_filtres("Q"), depot_id=self.kwargs["pk"])
 
     def Get_stats(self, iddepot=None):
         quantite = Reglement.objects.filter(depot_id=iddepot).count()
@@ -125,12 +125,14 @@ class Consulter(Page, crud.Liste):
 
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
+        depot = Depot.objects.get(pk=self.kwargs["pk"])
         context['box_titre'] = "Consulter un dépot"
         context['box_introduction'] = "Vous pouvez ici ajouter des règlements au dépot ou modifier les paramètres du dépôt."
         context['onglet_actif'] = "depots_reglements_liste"
         context['active_checkbox'] = True
+        context['bouton_supprimer'] = False if depot.verrouillage else True
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={"iddepot": self.kwargs["pk"], "listepk": "xxx"})
-        context['depot'] = Depot.objects.get(pk=self.kwargs["pk"])
+        context['depot'] = depot
         context["stats"] = self.Get_stats(iddepot=self.kwargs["pk"])
         return context
 
@@ -162,6 +164,8 @@ class Consulter(Page, crud.Liste):
             ordering = ["-idreglement"]
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
+            if instance.depot.verrouillage:
+                return "<span class='text-green' title='Dépôt verrouillé'><i class='fa fa-lock margin-r-5'></i></span>"
             html = [
                 self.Create_bouton_supprimer(url=reverse("depots_reglements_supprimer_reglement", kwargs={"iddepot": instance.depot_id, "pk": instance.pk})),
             ]
