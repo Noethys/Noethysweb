@@ -1,3 +1,13 @@
+Version 1.2.5.8 (17/08/2024) :
+
+- Ajout de la duplication des articles
+- Ajout des permissions Modifier sur les fiches familles et individus
+- Ajout de la liste des certifications dans le menu Individus
+- Amélioration du verrouillage des dépôts de règlements
+- Correction de l'enregistrement des adresses mails dans les abonnements aux services
+- Correction sur la liste des questionnaires quand réponse non textuelle
+- Correction de l'attribution des montants selon âge avec le tarif selon le nombre d'individus
+
 Version 1.2.5.7 (15/08/2024) :
 
 - Ajout de la saisie par lot des forfaits-crédits dans le menu Facturation
