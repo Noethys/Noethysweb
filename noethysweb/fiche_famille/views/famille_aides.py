@@ -20,7 +20,7 @@ class Page(Onglet):
     url_ajouter = "famille_aides_ajouter"
     url_modifier = "famille_aides_modifier"
     url_supprimer = "famille_aides_supprimer"
-    description_liste = "Saisissez ici les aides de la famille."
+    description_liste = "Consultez et saisissez ici les aides de la famille."
     description_saisie = "Saisissez toutes les informations concernant l'aide et cliquez sur le bouton Enregistrer."
     objet_singulier = "une aide"
     objet_pluriel = "des aides"
@@ -31,10 +31,16 @@ class Page(Onglet):
         if not hasattr(self, "verbe_action"):
             context['box_titre'] = "Aides"
         context['onglet_actif'] = "aides"
-        context['boutons_liste'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-        ]
+        if self.request.user.has_perm("core.famille_aides_modifier"):
+            context['boutons_liste'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
+            ]
         return context
+
+    def test_func_page(self):
+        if getattr(self, "verbe_action", None) in ("Ajouter", "Modifier", "Supprimer") and not self.request.user.has_perm("core.famille_aides_modifier"):
+            return False
+        return True
 
     def get_form_kwargs(self, **kwargs):
         """ Envoie l'idfmille au formulaire """
@@ -88,6 +94,8 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
+            if not view.request.user.has_perm("core.famille_aides_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = view.kwargs
             kwargs["pk"] = instance.pk
             if instance.activite.structure in view.request.user.structures.all():

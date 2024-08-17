@@ -59,7 +59,7 @@ class Page(Onglet):
     url_ajouter = "individu_inscriptions_ajouter"
     url_modifier = "individu_inscriptions_modifier"
     url_supprimer = "individu_inscriptions_supprimer"
-    description_liste = "Saisissez ici les inscriptions de l'individu."
+    description_liste = "Consultez et saisissez ici les inscriptions de l'individu."
     description_saisie = "Saisissez toutes les informations concernant l'inscription et cliquez sur le bouton Enregistrer."
     objet_singulier = "une inscription"
     objet_pluriel = "des inscriptions"
@@ -70,11 +70,17 @@ class Page(Onglet):
         if not hasattr(self, "verbe_action"):
             context['box_titre'] = "Inscriptions"
         context['onglet_actif'] = "inscriptions"
-        context['boutons_liste'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-            {"label": "Appliquer un forfait daté", "classe": "btn btn-default", "href": reverse_lazy("individu_appliquer_forfait_date", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-calendar-plus-o"},
-        ]
+        if self.request.user.has_perm("core.individu_inscriptions_modifier"):
+            context['boutons_liste'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
+                {"label": "Appliquer un forfait daté", "classe": "btn btn-default", "href": reverse_lazy("individu_appliquer_forfait_date", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-calendar-plus-o"},
+            ]
         return context
+
+    def test_func_page(self):
+        if getattr(self, "verbe_action", None) in ("Ajouter", "Modifier", "Supprimer") and not self.request.user.has_perm("core.individu_inscriptions_modifier"):
+            return False
+        return True
 
     def get_form_kwargs(self, **kwargs):
         """ Envoie l'idindividu au formulaire """
@@ -152,6 +158,8 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
+            if not self.view.request.user.has_perm("core.individu_inscriptions_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = view.kwargs
             kwargs["pk"] = instance.pk
             if instance.activite.structure in view.request.user.structures.all():
@@ -164,7 +172,6 @@ class Liste(Page, crud.Liste):
                 # Afficher que l'accès est interdit
                 html = ["<span class='text-red'><i class='fa fa-minus-circle margin-r-5' title='Accès non autorisé'></i>Accès interdit</span>",]
             return self.Create_boutons_actions(html)
-
 
 
 class Ajouter(Page, crud.Ajouter):

@@ -95,13 +95,20 @@ class Page(Onglet):
         if not hasattr(self, "verbe_action"):
             context['box_titre'] = "Prestations"
         context['onglet_actif'] = "prestations"
-        context['boutons_liste'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-            {"label": "Ajouter depuis un modèle", "classe": "btn btn-default", "href": reverse_lazy("famille_prestations_selection_modele", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-        ]
+        if self.request.user.has_perm("core.famille_prestations_modifier"):
+            context['boutons_liste'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
+                {"label": "Ajouter depuis un modèle", "classe": "btn btn-default", "href": reverse_lazy("famille_prestations_selection_modele", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
+            ]
+        context['bouton_supprimer'] = self.request.user.has_perm("core.famille_prestations_modifier")
         # Ajout l'idfamille à l'URL de suppression groupée
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={'idfamille': self.kwargs.get('idfamille', None), "listepk": "xxx"})
         return context
+
+    def test_func_page(self):
+        if getattr(self, "verbe_action", None) in ("Ajouter", "Modifier", "Supprimer") and not self.request.user.has_perm("core.famille_prestations_modifier"):
+            return False
+        return True
 
     def get_form_kwargs(self, **kwargs):
         """ Envoie l'idindividu au formulaire """
@@ -170,6 +177,8 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
+            if not view.request.user.has_perm("core.famille_prestations_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = view.kwargs
             kwargs["pk"] = instance.pk
             if not instance.activite or instance.activite.structure in view.request.user.structures.all():

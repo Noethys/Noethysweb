@@ -20,6 +20,8 @@ class Consulter(Onglet, crud.Modifier):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Paramètres"
         context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
+        if not self.request.user.has_perm("core.famille_divers_modifier"):
+            context['box_introduction'] = "Vous n'avez pas l'autorisation de modifier les informations de cette page."
         context['onglet_actif'] = "divers"
         return context
 
@@ -39,6 +41,9 @@ class Modifier(Consulter):
         context = super(Modifier, self).get_context_data(**kwargs)
         context['box_introduction'] = "Vous pouvez modifier ici divers paramètres concernant la famille."
         return context
+
+    def test_func_page(self):
+        return self.request.user.has_perm("core.famille_divers_modifier")
 
     def get_success_url(self):
         return reverse_lazy("famille_divers", kwargs={'idfamille': self.kwargs.get('idfamille', None)})

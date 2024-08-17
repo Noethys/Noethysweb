@@ -99,7 +99,7 @@ class Page(Onglet):
     url_modifier = "famille_cotisations_modifier"
     url_supprimer = "famille_cotisations_supprimer"
     url_supprimer_plusieurs = "famille_cotisations_supprimer_plusieurs"
-    description_liste = "Saisissez ici les adhésions de la famille."
+    description_liste = "Consultez et saisissez ici les adhésions de la famille."
     description_saisie = "Saisissez toutes les informations concernant l'adhésion et cliquez sur le bouton Enregistrer."
     objet_singulier = "une adhésion"
     objet_pluriel = "des adhésions"
@@ -111,12 +111,19 @@ class Page(Onglet):
             context['box_titre'] = "Adhésions"
         context['onglet_actif'] = "cotisations"
         context['cotisations_manquantes'] = utils_cotisations_manquantes.Get_cotisations_manquantes(famille=context['famille'])
-        context['boutons_liste'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-        ]
+        if self.request.user.has_perm("core.famille_cotisations_modifier"):
+            context['boutons_liste'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
+            ]
+        context['bouton_supprimer'] = self.request.user.has_perm("core.famille_cotisations_modifier")
         # Ajout l'idfamille à l'URL de suppression groupée
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={'idfamille': self.kwargs.get('idfamille', None), "listepk": "xxx"})
         return context
+
+    def test_func_page(self):
+        if getattr(self, "verbe_action", None) in ("Ajouter", "Modifier", "Supprimer") and not self.request.user.has_perm("core.famille_cotisations_modifier"):
+            return False
+        return True
 
     def get_form_kwargs(self, **kwargs):
         """ Envoie l'idfmille au formulaire """
@@ -224,6 +231,8 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
+            if not view.request.user.has_perm("core.famille_cotisations_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = view.kwargs
             kwargs["pk"] = instance.pk
             if not instance.type_cotisation.structure or instance.type_cotisation.structure in view.request.user.structures.all():

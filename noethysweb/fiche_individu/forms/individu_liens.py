@@ -31,7 +31,8 @@ class Formulaire(FormulaireBase, forms.Form):
 
         # Initialisation de l'affichage du formulaire
         if self.mode == "CONSULTATION":
-            commandes = Commandes(modifier_url="individu_liens_modifier", modifier_args="idfamille=idfamille idindividu=idindividu", modifier=True, enregistrer=False, annuler=False, ajouter=False)
+            commandes = Commandes(modifier_url="individu_liens_modifier", modifier_args="idfamille=idfamille idindividu=idindividu",
+                                  modifier=self.request.user.has_perm("core.individu_liens_modifier"), enregistrer=False, annuler=False, ajouter=False)
         else:
             commandes = Commandes(annuler_url="{% url 'individu_liens' idfamille=idfamille idindividu=idindividu %}", ajouter=False)
         self.helper.layout = Layout(commandes)

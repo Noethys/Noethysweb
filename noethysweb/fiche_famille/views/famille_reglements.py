@@ -117,7 +117,7 @@ class Page(Onglet):
     url_modifier = "famille_reglements_modifier"
     url_supprimer = "famille_reglements_supprimer"
     url_supprimer_plusieurs = "famille_reglements_supprimer_plusieurs"
-    description_liste = "Saisissez ici les règlements de la famille."
+    description_liste = "Consultez et saisissez ici les règlements de la famille."
     description_saisie = "Saisissez toutes les informations concernant le règlement et cliquez sur le bouton Enregistrer."
     objet_singulier = "un règlement"
     objet_pluriel = "des règlements"
@@ -129,15 +129,22 @@ class Page(Onglet):
         if not hasattr(self, "verbe_action"):
             context['box_titre'] = "Règlements"
         context['onglet_actif'] = "reglements"
-        context['boutons_liste'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-            {"label": "Régler une facture", "classe": "btn btn-default", "href": "#", "onclick": "$('#regler_facture_idfamille').val(%d);$('#modal_regler_facture').modal('show');" % self.kwargs.get('idfamille', 0), "icone": "fa fa-plus"},
-        ]
+        if self.request.user.has_perm("core.famille_reglements_modifier"):
+            context['boutons_liste'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
+                {"label": "Régler une facture", "classe": "btn btn-default", "href": "#", "onclick": "$('#regler_facture_idfamille').val(%d);$('#modal_regler_facture').modal('show');" % self.kwargs.get('idfamille', 0), "icone": "fa fa-plus"},
+            ]
+        context['bouton_supprimer'] = self.request.user.has_perm("core.famille_reglements_modifier")
         # Ajout l'idfamille à l'URL de suppression groupée
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={'idfamille': self.kwargs.get('idfamille', None), "listepk": "xxx"})
         # Vérifie si le prélèvement est actif
         context['nbre_mandats_actifs'] = Mandat.objects.filter(famille_id=self.kwargs['idfamille'], actif=True).count()
         return context
+
+    def test_func_page(self):
+        if getattr(self, "verbe_action", None) in ("Ajouter", "Modifier", "Supprimer") and not self.request.user.has_perm("core.famille_reglements_modifier"):
+            return False
+        return True
 
     def get_form_kwargs(self, **kwargs):
         """ Envoie l'idindividu au formulaire """
@@ -210,10 +217,9 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
-            # Récupération idfamille
+            if not view.request.user.has_perm("core.famille_reglements_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = view.kwargs
-
-            # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
             html = [
                 self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),

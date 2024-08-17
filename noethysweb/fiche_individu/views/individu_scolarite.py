@@ -74,7 +74,7 @@ class Page(Onglet):
     url_ajouter = "individu_scolarite_ajouter"
     url_modifier = "individu_scolarite_modifier"
     url_supprimer = "individu_scolarite_supprimer"
-    description_liste = "Saisissez ici les étapes de scolarité de l'individu."
+    description_liste = "Consultez et saisissez ici les étapes de scolarité de l'individu."
     description_saisie = "Saisissez toutes les informations concernant l'étape de scolarité et cliquez sur le bouton Enregistrer."
     objet_singulier = "une étape de scolarité"
     objet_pluriel = "des étapes de scolarité"
@@ -84,10 +84,16 @@ class Page(Onglet):
         context = super(Page, self).get_context_data(**kwargs)
         context['box_titre'] = "Scolarité"
         context['onglet_actif'] = "scolarite"
-        context['boutons_liste'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
-        ]
+        if self.request.user.has_perm("core.individu_scolarite_modifier"):
+            context['boutons_liste'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
+            ]
         return context
+
+    def test_func_page(self):
+        if getattr(self, "verbe_action", None) in ("Ajouter", "Modifier", "Supprimer") and not self.request.user.has_perm("core.individu_scolarite_modifier"):
+            return False
+        return True
 
     def get_form_kwargs(self, **kwargs):
         """ Envoie l'idindividu au formulaire """
@@ -137,9 +143,9 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
-            # Récupération idindividu et idfamille
+            if not view.request.user.has_perm("core.individu_scolarite_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = view.kwargs
-            # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
             html = [
                 self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),

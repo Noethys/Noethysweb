@@ -23,7 +23,7 @@ class Page(Onglet):
     url_modifier = "famille_pieces_modifier"
     url_supprimer = "famille_pieces_supprimer"
     url_supprimer_plusieurs = "famille_pieces_supprimer_plusieurs"
-    description_liste = "Saisissez ici les pièces de la famille."
+    description_liste = "Consultez et saisissez ici les pièces de la famille."
     description_saisie = "Saisissez toutes les informations concernant la pièce et cliquez sur le bouton Enregistrer."
     objet_singulier = "une pièce"
     objet_pluriel = "des pièces"
@@ -35,12 +35,19 @@ class Page(Onglet):
             context['box_titre'] = "Pièces"
         context['onglet_actif'] = "pieces"
         context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(famille=context['famille'], utilisateur=self.request.user)
-        context['boutons_liste'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-        ]
+        if self.request.user.has_perm("core.famille_pieces_modifier"):
+            context['boutons_liste'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
+            ]
+        context['bouton_supprimer'] = self.request.user.has_perm("core.famille_pieces_modifier")
         # Ajout l'idfamille à l'URL de suppression groupée
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={'idfamille': self.kwargs.get('idfamille', None), "listepk": "xxx"})
         return context
+
+    def test_func_page(self):
+        if getattr(self, "verbe_action", None) in ("Ajouter", "Modifier", "Supprimer") and not self.request.user.has_perm("core.famille_pieces_modifier"):
+            return False
+        return True
 
     def get_form_kwargs(self, **kwargs):
         """ Envoie l'idindividu au formulaire """
@@ -101,9 +108,9 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
-            # Récupération idindividu et idfamille
+            if not view.request.user.has_perm("core.famille_pieces_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = view.kwargs
-            # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
             html = [
                 self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
@@ -134,6 +141,10 @@ class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
 class Saisie_rapide(Page, RedirectView):
     """ Saisie rapide d'une pièce"""
     def get_redirect_url(self, *args, **kwargs):
+        if not self.request.user.has_perm("core.famille_pieces_modifier"):
+            messages.add_message(self.request, messages.ERROR, "Vous n'avez pas l'autorisation de modifier cette page")
+            return self.request.META['HTTP_REFERER']
+
         type_piece = TypePiece.objects.get(pk=kwargs["idtype_piece"])
         individu = Individu.objects.get(pk=kwargs["idindividu"])
         famille = Famille.objects.get(pk=kwargs["idfamille"])

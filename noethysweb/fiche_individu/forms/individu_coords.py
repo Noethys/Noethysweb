@@ -83,7 +83,8 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Création des boutons de commande
         if self.mode == "CONSULTATION":
-            commandes = Commandes(modifier_url="individu_coords_modifier", modifier_args="idfamille=idfamille idindividu=idindividu", modifier=True, enregistrer=False, annuler=False, ajouter=False)
+            commandes = Commandes(modifier_url="individu_coords_modifier", modifier_args="idfamille=idfamille idindividu=idindividu",
+                                  modifier=self.request.user.has_perm("core.individu_coords_modifier"), enregistrer=False, annuler=False, ajouter=False)
             self.Set_mode_consultation()
         else:
             commandes = Commandes(annuler_url="{% url 'individu_coords' idfamille=idfamille idindividu=idindividu %}", ajouter=False)

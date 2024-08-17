@@ -21,7 +21,7 @@ class Page(Onglet):
     url_ajouter = "individu_contacts_ajouter"
     url_modifier = "individu_contacts_modifier"
     url_supprimer = "individu_contacts_supprimer"
-    description_liste = "Saisissez ici les contacts d'urgence et de sortie de l'individu."
+    description_liste = "Consultez et saisissez ici les contacts d'urgence et de sortie de l'individu."
     description_saisie = "Saisissez toutes les informations concernant le contact et cliquez sur le bouton Enregistrer."
     objet_singulier = "un contact d'urgence et de sortie"
     objet_pluriel = "des contacts d'urgence et de sortie"
@@ -32,11 +32,17 @@ class Page(Onglet):
         if not hasattr(self, "verbe_action"):
             context['box_titre'] = "Contacts d'urgence et de sortie"
         context['onglet_actif'] = "contacts"
-        context['boutons_liste'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-            {"label": "Importer depuis une autre fiche", "classe": "btn btn-default", "href": reverse_lazy("individu_contacts_importer", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-download"},
-        ]
+        if self.request.user.has_perm("core.individu_contacts_modifier"):
+            context['boutons_liste'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
+                {"label": "Importer depuis une autre fiche", "classe": "btn btn-default", "href": reverse_lazy("individu_contacts_importer", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-download"},
+            ]
         return context
+
+    def test_func_page(self):
+        if getattr(self, "verbe_action", None) in ("Ajouter", "Modifier", "Supprimer") and not self.request.user.has_perm("core.individu_contacts_modifier"):
+            return False
+        return True
 
     def get_form_kwargs(self, **kwargs):
         """ Envoie l'idindividu au formulaire """
@@ -102,9 +108,9 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
-            # Récupération idindividu et idfamille
+            if not view.request.user.has_perm("core.individu_scolarite_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = view.kwargs
-            # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
             html = [
                 self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),

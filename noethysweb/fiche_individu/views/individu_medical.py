@@ -86,17 +86,23 @@ class Page(Onglet):
         context = super(Page, self).get_context_data(**kwargs)
         context['box_titre'] = "Médical"
         context['onglet_actif'] = "medical"
-        context['boutons_liste_informations'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_informations_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
-        ]
-        context['boutons_liste_vaccinations'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_vaccinations_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
-        ]
+        if self.request.user.has_perm("core.individu_medical_modifier"):
+            context['boutons_liste_informations'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_informations_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
+            ]
+            context['boutons_liste_vaccinations'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_vaccinations_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
+            ]
         context['form_selection_medecin'] = Formulaire_medecin(idindividu=self.Get_idindividu())
         context['form_ajout_medecin'] = Formulaire_medecin_ajouter(idindividu=self.Get_idindividu())
         context['vaccins_obligatoires'] = utils_vaccinations.Get_vaccins_obligatoires_individu(individu=context["individu"])
         context['pieces_manquantes'] = [{"label": "Fiche sanitaire", "valide": True}, {"label": "Fiche famille", "valide": False}]
         return context
+
+    def test_func_page(self):
+        if getattr(self, "verbe_action", None) in ("Ajouter", "Modifier", "Supprimer") and not self.request.user.has_perm("core.individu_medical_modifier"):
+            return False
+        return True
 
     def get_form_kwargs(self, **kwargs):
         """ Envoie l'idindividu au formulaire """
@@ -118,7 +124,6 @@ class Page(Onglet):
 class Liste(Page, MultipleDatatableView):
     template_name = "fiche_individu/individu_medical.html"
 
-
     class informations_datatable_class(MyDatatable):
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         intitule = columns.TextColumn("Intitulé", processor="Get_intitule")
@@ -136,9 +141,9 @@ class Liste(Page, MultipleDatatableView):
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
-            # Récupération idindividu et idfamille
+            if not kwargs["view"].request.user.has_perm("core.individu_medical_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = kwargs["view"].kwargs
-            # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
             html = [
                 self.Create_bouton_modifier(url=reverse("individu_informations_modifier", kwargs=kwargs)),
@@ -162,9 +167,9 @@ class Liste(Page, MultipleDatatableView):
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
-            # Récupération idindividu et idfamille
+            if not kwargs["view"].request.user.has_perm("core.individu_medical_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = kwargs["view"].kwargs
-            # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
             html = [
                 self.Create_bouton_modifier(url=reverse("individu_vaccinations_modifier", kwargs=kwargs)),
@@ -186,7 +191,6 @@ class Liste(Page, MultipleDatatableView):
     def get_datatables(self, only=None):
         datatables = super(Liste, self).get_datatables(only)
         return datatables
-
 
 
 

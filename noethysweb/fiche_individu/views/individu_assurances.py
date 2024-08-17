@@ -43,7 +43,7 @@ class Page(Onglet):
     url_ajouter = "individu_assurances_ajouter"
     url_modifier = "individu_assurances_modifier"
     url_supprimer = "individu_assurances_supprimer"
-    description_liste = "Saisissez ici les assurances de l'individu."
+    description_liste = "Consultez et saisissez ici les assurances de l'individu."
     description_saisie = "Saisissez toutes les informations concernant l'assurance et cliquez sur le bouton Enregistrer."
     objet_singulier = "une assurance"
     objet_pluriel = "des assurances"
@@ -54,11 +54,17 @@ class Page(Onglet):
         if not hasattr(self, "verbe_action"):
             context['box_titre'] = "Assurances"
         context['onglet_actif'] = "assurances"
-        context['boutons_liste'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-            {"label": "Importer depuis une autre fiche", "classe": "btn btn-default", "href": reverse_lazy("individu_assurances_importer", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-download"}, ]
+        if self.request.user.has_perm("core.individu_assurances_modifier"):
+            context['boutons_liste'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
+                {"label": "Importer depuis une autre fiche", "classe": "btn btn-default", "href": reverse_lazy("individu_assurances_importer", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-download"}, ]
         context['form_ajout'] = Formulaire_assureur()
         return context
+
+    def test_func_page(self):
+        if getattr(self, "verbe_action", None) in ("Ajouter", "Modifier", "Supprimer") and not self.request.user.has_perm("core.individu_assurances_modifier"):
+            return False
+        return True
 
     def get_form_kwargs(self, **kwargs):
         """ Envoie l'idindividu au formulaire """
@@ -109,9 +115,9 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
-            # Récupération idindividu et idfamille
+            if not view.request.user.has_perm("core.individu_assurances_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = view.kwargs
-            # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
             html = [
                 self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),

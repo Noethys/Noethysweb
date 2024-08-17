@@ -64,7 +64,7 @@ class Page(Onglet):
     url_modifier = "famille_locations_modifier"
     url_supprimer = "famille_locations_supprimer"
     url_supprimer_plusieurs = "famille_locations_supprimer_plusieurs"
-    description_liste = "Saisissez ici les locations de la famille."
+    description_liste = "Consultez et saisissez ici les locations de la famille."
     description_saisie = "Saisissez toutes les informations concernant la location et cliquez sur le bouton Enregistrer."
     objet_singulier = "une location"
     objet_pluriel = "des locations"
@@ -75,12 +75,19 @@ class Page(Onglet):
         if not hasattr(self, "verbe_action"):
             context['box_titre'] = "Locations"
         context['onglet_actif'] = "locations"
-        context['boutons_liste'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-        ]
+        if self.request.user.has_perm("core.famille_locations_modifier"):
+            context['boutons_liste'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
+            ]
+        context['bouton_supprimer'] = self.request.user.has_perm("core.famille_locations_modifier")
         # Ajout l'idfamille à l'URL de suppression groupée
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={'idfamille': self.kwargs.get('idfamille', None), "listepk": "xxx"})
         return context
+
+    def test_func_page(self):
+        if getattr(self, "verbe_action", None) in ("Ajouter", "Modifier", "Supprimer") and not self.request.user.has_perm("core.famille_locations_modifier"):
+            return False
+        return True
 
     def get_form_kwargs(self, **kwargs):
         """ Envoie l'idfamille au formulaire """
@@ -129,6 +136,8 @@ class Liste(Page, crud.Liste):
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             view = kwargs["view"]
+            if not view.request.user.has_perm("core.famille_locations_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = view.kwargs
             kwargs["pk"] = instance.pk
             html = [

@@ -57,7 +57,8 @@ class Formulaire(FormulaireBase, ModelForm):
             <a type='button' class='btn btn-default' title="Envoyer les codes par SMS" onclick="envoyer(mode='sms')"><i class="fa fa-send-o margin-r-5"></i>Envoyer les codes par SMS</a> 
         """)]
         if self.mode == "CONSULTATION":
-            commandes = Commandes(modifier_url="famille_portail_modifier", modifier_args="idfamille=idfamille", modifier=True, enregistrer=False, annuler=False, ajouter=False, autres_commandes=autres_commandes)
+            commandes = Commandes(modifier_url="famille_portail_modifier", modifier_args="idfamille=idfamille",
+                                  modifier=self.request.user.has_perm("core.famille_portail_modifier"), enregistrer=False, annuler=False, ajouter=False, autres_commandes=autres_commandes)
             self.Set_mode_consultation()
         else:
             commandes = Commandes(annuler_url="{% url 'famille_portail' idfamille=idfamille %}", ajouter=False, autres_commandes=autres_commandes)

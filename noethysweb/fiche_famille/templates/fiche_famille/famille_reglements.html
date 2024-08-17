@@ -27,17 +27,20 @@
                 <div class="mt-2">
 
                     {# Créer un remboursement #}
-                    <a class="btn btn-app" href="{% url 'famille_remboursement_ajouter' idfamille=idfamille %}" title="Créer un remboursement" style="font-size: 12px !important;">
+                    <a class="btn btn-app {% if not perms.core.famille_reglements_modifier %}disabled{% endif %}" href="{% url 'famille_remboursement_ajouter' idfamille=idfamille %}" 
+                       title="Créer un remboursement" style="font-size: 12px !important;">
                         <i class="fa fa-money"></i>Remboursement
                     </a>
 
                     {# Liste des reçus #}
-                    <a class="btn btn-app" href="{% url 'famille_recus_liste' idfamille=idfamille %}" title="Liste des reçus de règlements" style="font-size: 12px !important;">
+                    <a class="btn btn-app {% if not perms.core.famille_reglements_modifier %}disabled{% endif %}" href="{% url 'famille_recus_liste' idfamille=idfamille %}" 
+                       title="Liste des reçus de règlements" style="font-size: 12px !important;">
                         <i class="fa fa-file-text-o"></i>Liste des reçus
                     </a>
 
                     {# Abonnement à l'envoi des reçus par Email #}
-                    <a class="btn btn-app" href="{% url 'famille_abo_recus_email' idfamille=idfamille %}" title="Cliquez ici pour activer ou désactiver l'abonnement au service d'envoi des reçus par Email" style="font-size: 12px !important;">
+                    <a class="btn btn-app {% if not perms.core.famille_reglements_modifier %}disabled{% endif %}" href="{% url 'famille_abo_recus_email' idfamille=idfamille %}" 
+                       title="Cliquez ici pour activer ou désactiver l'abonnement au service d'envoi des reçus par Email" style="font-size: 12px !important;">
                         {% if famille.email_recus %}
                             <span class="badge bg-success">Activé</span>
                         {% else %}
@@ -47,7 +50,8 @@
                     </a>
 
                     {# Abonnement à l'envoi des avis de dépôt par Email #}
-                    <a class="btn btn-app" href="{% url 'famille_abo_depots_email' idfamille=idfamille %}" title="Cliquez ici pour activer ou désactiver l'abonnement au service d'envoi des avis d'encaissement par Email" style="font-size: 12px !important;">
+                    <a class="btn btn-app {% if not perms.core.famille_reglements_modifier %}disabled{% endif %}" href="{% url 'famille_abo_depots_email' idfamille=idfamille %}" 
+                       title="Cliquez ici pour activer ou désactiver l'abonnement au service d'envoi des avis d'encaissement par Email" style="font-size: 12px !important;">
                         {% if famille.email_depots %}
                             <span class="badge bg-success">Activé</span>
                         {% else %}
@@ -57,7 +61,8 @@
                     </a>
 
                     {# Prélèvements #}
-                    <a class="btn btn-app" href="{% url 'famille_mandats_liste' idfamille=idfamille %}" title="Cliquez ici pour accéder aux paramètres de prélèvement de la famille" style="font-size: 12px !important;">
+                    <a class="btn btn-app {% if not perms.core.famille_reglements_modifier %}disabled{% endif %}" href="{% url 'famille_mandats_liste' idfamille=idfamille %}" 
+                       title="Cliquez ici pour accéder aux paramètres de prélèvement de la famille" style="font-size: 12px !important;">
                         {% if nbre_mandats_actifs %}
                             <span class="badge bg-success">Activé</span>
                         {% else %}

@@ -20,7 +20,7 @@ class Page(Onglet):
     url_ajouter = "famille_quotients_ajouter"
     url_modifier = "famille_quotients_modifier"
     url_supprimer = "famille_quotients_supprimer"
-    description_liste = "Saisissez ici les quotients familiaux de la famille."
+    description_liste = "Consultez et saisissez ici les quotients familiaux de la famille."
     description_saisie = "Saisissez toutes les informations concernant le quotient et cliquez sur le bouton Enregistrer."
     objet_singulier = "un quotient familial"
     objet_pluriel = "des quotients familiaux"
@@ -31,10 +31,16 @@ class Page(Onglet):
         if not hasattr(self, "verbe_action"):
             context['box_titre'] = "Quotients familiaux"
         context['onglet_actif'] = "quotients"
-        context['boutons_liste'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-        ]
+        if self.request.user.has_perm("core.famille_quotients_modifier"):
+            context['boutons_liste'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
+            ]
         return context
+
+    def test_func_page(self):
+        if getattr(self, "verbe_action", None) in ("Ajouter", "Modifier", "Supprimer") and not self.request.user.has_perm("core.famille_quotients_modifier"):
+            return False
+        return True
 
     def get_form_kwargs(self, **kwargs):
         """ Envoie l'idindividu au formulaire """
@@ -133,9 +139,9 @@ class Liste(Page, crud.Liste):
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
-            # Récupération idindividu et idfamille
+            if not view.request.user.has_perm("core.famille_quotients_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = view.kwargs
-            # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
             html = [
                 self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),

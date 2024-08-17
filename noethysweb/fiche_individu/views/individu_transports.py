@@ -49,13 +49,19 @@ class Page(Onglet):
         context = super(Page, self).get_context_data(**kwargs)
         context['box_titre'] = "Transports"
         context['onglet_actif'] = "transports"
-        context['boutons_liste_progtransports'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_progtransports_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
-        ]
-        context['boutons_liste_transports'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_transports_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
-        ]
+        if self.request.user.has_perm("core.individu_transports_modifier"):
+            context['boutons_liste_progtransports'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_progtransports_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
+            ]
+            context['boutons_liste_transports'] = [
+                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy("individu_transports_ajouter", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.Get_idfamille()}), "icone": "fa fa-plus"},
+            ]
         return context
+
+    def test_func_page(self):
+        if getattr(self, "verbe_action", None) in ("Ajouter", "Modifier", "Supprimer") and not self.request.user.has_perm("core.individu_transports_modifier"):
+            return False
+        return True
 
     def get_form_kwargs(self, **kwargs):
         """ Envoie l'idindividu au formulaire """
@@ -109,6 +115,8 @@ class Liste(Page, MultipleDatatableView):
             return ""
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
+            if not kwargs["view"].request.user.has_perm("core.individu_transports_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = kwargs["view"].kwargs
             kwargs["pk"] = instance.pk
             html = [
@@ -159,6 +167,8 @@ class Liste(Page, MultipleDatatableView):
             return ""
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
+            if not kwargs["view"].request.user.has_perm("core.individu_transports_modifier"):
+                return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = kwargs["view"].kwargs
             kwargs["pk"] = instance.pk
             html = [

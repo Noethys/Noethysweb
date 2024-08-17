@@ -22,10 +22,14 @@ def GetPermissionsPossibles(organisateur=None):
     # Fiche famille
     for commande in LISTE_ONGLETS_FAMILLES:
         liste_permissions.append(("famille_%s" % commande["code"], "Fiche famille | %s" % commande["label"]))
+        if commande["code"] not in ("resume", "outils"):
+            liste_permissions.append(("famille_%s_modifier" % commande["code"], "Fiche famille | %s | Modifier" % commande["label"]))
 
     # Fiche individu
     for commande in LISTE_ONGLETS_INDIVIDUS:
         liste_permissions.append(("individu_%s" % commande["code"], "Fiche individuelle | %s" % commande["label"]))
+        if commande["code"] not in ("resume", "consommations"):
+            liste_permissions.append(("individu_%s_modifier" % commande["code"], "Fiche individuelle | %s | Modifier" % commande["label"]))
 
     return liste_permissions
 

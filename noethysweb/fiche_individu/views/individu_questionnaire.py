@@ -19,6 +19,8 @@ class Consulter(Onglet, TemplateView):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Questionnaire"
         context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
+        if not self.request.user.has_perm("core.individu_questionnaire_modifier"):
+            context['box_introduction'] = "Vous n'avez pas l'autorisation de modifier les informations de cette page."
         context['onglet_actif'] = "questionnaire"
         context['form'] = Formulaire(idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], request=self.request, mode=self.mode)
         return context
@@ -31,6 +33,9 @@ class Modifier(Consulter):
         context = super(Modifier, self).get_context_data(**kwargs)
         context['box_introduction'] = "Renseignez le questionnaire de l'individu."
         return context
+
+    def test_func_page(self):
+        return self.request.user.has_perm("core.individu_questionnaire_modifier")
 
     def post(self, request, **kwargs):
         form = Formulaire(request.POST, idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], request=self.request)

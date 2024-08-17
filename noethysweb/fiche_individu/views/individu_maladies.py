@@ -27,6 +27,8 @@ class Consulter(Onglet, crud.Modifier):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Maladies"
         context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
+        if not self.request.user.has_perm("core.individu_maladies_modifier"):
+            context['box_introduction'] = "Vous n'avez pas l'autorisation de modifier les informations de cette page."
         context['onglet_actif'] = "maladies"
         return context
 
@@ -41,6 +43,9 @@ class Modifier(Consulter):
         context = super(Modifier, self).get_context_data(**kwargs)
         context['box_introduction'] = "Sélectionnez dans la liste déroulante les maladies contractées par l'individu."
         return context
+
+    def test_func_page(self):
+        return self.request.user.has_perm("core.individu_maladies_modifier")
 
     def get_success_url(self):
         # MAJ des infos des familles rattachées

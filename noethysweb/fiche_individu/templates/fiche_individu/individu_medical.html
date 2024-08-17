@@ -26,11 +26,13 @@
             {% block box_titre %}Médecin traitant{% endblock %}
             {% block box_contenu %}
                 {% if individu.medecin %}
-
-                    <div class="float-right">
-                        <a type='button' class='btn btn-default btn-sm' data-toggle="modal" data-target="#modal_selection_medecin" title="Sélectionner un médecin"><i class="fa fa-pencil"></i></a>
-                        <a type='button' class='btn btn-default btn-sm' href="#" onclick="SupprimerMedecin();" title="Désélectionner le médecin actuel"><i class="fa fa-trash"></i></a>
-                    </div>
+                    
+                    {% if perms.core.individu_medical_modifier %}
+                        <div class="float-right">
+                            <a type='button' class='btn btn-default btn-sm' data-toggle="modal" data-target="#modal_selection_medecin" title="Sélectionner un médecin"><i class="fa fa-pencil"></i></a>
+                            <a type='button' class='btn btn-default btn-sm' href="#" onclick="SupprimerMedecin();" title="Désélectionner le médecin actuel"><i class="fa fa-trash"></i></a>
+                        </div>
+                    {% endif %}
 
                     <div class="user-block">
                         <img class="rounded-circle" src="{% static "images/medecin.png" %}" alt="User Image">
