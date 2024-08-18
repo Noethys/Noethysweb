@@ -6,7 +6,7 @@
 from django.urls import include, path
 from core.views import toc
 from core.decorators import secure_ajax
-from locations.views import liste_locations, locations_impression, locations_email, planning_locations
+from locations.views import liste_locations, locations_impression, locations_email, planning_locations, synthese_locations
 
 urlpatterns = [
 
@@ -22,6 +22,8 @@ urlpatterns = [
     # Gestion des locations
     path('locations/planning_locations', planning_locations.View.as_view(), name='planning_locations'),
 
+    # Analyse
+    path('locations/synthese_locations', synthese_locations.View.as_view(), name='synthese_locations'),
 
     # AJAX
     path('locations/locations_impression_pdf', secure_ajax(locations_impression.Impression_pdf), name='ajax_locations_impression_pdf'),

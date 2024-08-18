@@ -549,7 +549,7 @@ class Informations():
                 "FAMILLE_RUE": famille.rue_resid,
                 "FAMILLE_CP": famille.cp_resid,
                 "FAMILLE_VILLE": famille.ville_resid,
-                "FAMILLE_SECTEUR": famille.secteur,
+                "FAMILLE_SECTEUR": famille.secteur.nom if famille.secteur else "",
                 "IDFAMILLE": str(famille.pk),
                 "liens": [],
                 "NBRE_REPRESENTANTS_RATTACHES": 0,

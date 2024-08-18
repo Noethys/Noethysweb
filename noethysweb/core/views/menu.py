@@ -313,6 +313,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_gestion_locations = menu_locations.Add(titre="Gestion des locations")
     menu_gestion_locations.Add(code="planning_locations", titre="Planning des locations", icone="file-text-o")
 
+    # Analyse
+    menu_analyse_locations = menu_locations.Add(titre="Analyse")
+    menu_analyse_locations.Add(code="synthese_locations", titre="Synthèse des locations", icone="file-text-o")
+
 
     # ------------------------------------ Cotisations ------------------------------------
     menu_cotisations = menu.Add(code="cotisations_toc", titre="Adhésions", icone="folder-o")

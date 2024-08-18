@@ -1,0 +1,86 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-3" >
+
+            <!-- Paramètres -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Paramètres</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <button type="submit" form="form_parametres" class="btn btn-primary btn-block mb-3" name="type_submit" title="Actualiser les résultats"><i class="fa fa-refresh margin-r-5"></i> Actualiser les résultats</button>
+                    {% crispy form_parametres %}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-9">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-caret-square-o-right margin-r-5"></i> Résultats</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    <script>
+                        var contenu_table = JSON.parse('{{ liste_lignes|escapejs }}');
+                    </script>
+
+                    <table id="table" class="table-sm table-xxs" data-height="700" data-show-footer='true'>
+                        <thead>
+                            <tr>
+                                {% for colonne in liste_colonnes %}
+                                    <th data-field="{{ forloop.counter0 }}" data-halign="center" data-align="center" data-footer-formatter="calcule_total">{{ colonne }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                    </table>
+
+                    <script>
+                        function calcule_total(items) {
+                            {# Calcule le total de chaque colonne #}
+                            var colonne = this.field;
+                            if (colonne === "0") {return "Total"}
+                            var total = 0;
+                            items.forEach(function(item) {
+                                if ($.isNumeric(item[colonne])) {
+                                    total = total + item[colonne];
+                                } else {
+                                    if (item[colonne].includes("h")) {
+                                        var heure = item[colonne].split("h");
+                                        var heures = parseInt(heure[0]);
+                                        var minutes = parseInt(heure[1]);
+                                        total += heures + (minutes / 60)
+                                    }
+                                };
+                            });
+                            return total;
+                        };
+                    </script>
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    {% include 'core/widgets/bootstrap-table.html' %}
+
+{% endblock contenu_page %}
+
