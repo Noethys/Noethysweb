@@ -66,9 +66,10 @@ class Liste(Page, crud.Liste):
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
+            url_supprimer = "famille_locations_supprimer" if not instance.serie else "famille_locations_supprimer_occurence"
             html = [
                 self.Create_bouton_modifier(url=reverse("famille_locations_modifier", kwargs={"idfamille": instance.famille_id, "pk": instance.pk})),
-                self.Create_bouton_supprimer(url=reverse("famille_locations_supprimer", kwargs={"idfamille": instance.famille_id, "pk": instance.pk})),
+                self.Create_bouton_supprimer(url=reverse(url_supprimer, kwargs={"idfamille": instance.famille_id, "pk": instance.pk})),
                 self.Create_bouton_imprimer(url=reverse("famille_voir_location", kwargs={"idfamille": instance.famille_id, "idlocation": instance.pk}), title="Imprimer ou envoyer par email la location"),
             ]
             return self.Create_boutons_actions(html)

@@ -43,6 +43,7 @@ urlpatterns = [
     path('individus/familles/locations/ajouter/<int:idfamille>', famille_locations.Ajouter.as_view(), name='famille_locations_ajouter'),
     path('individus/familles/locations/modifier/<int:idfamille>/<int:pk>', famille_locations.Modifier.as_view(), name='famille_locations_modifier'),
     path('individus/familles/locations/supprimer/<int:idfamille>/<int:pk>', famille_locations.Supprimer.as_view(), name='famille_locations_supprimer'),
+    path('individus/familles/locations/supprimer_occurence/<int:idfamille>/<int:pk>', famille_locations.Supprimer_occurence.as_view(), name='famille_locations_supprimer_occurence'),
     path('individus/familles/locations/supprimer_plusieurs/<int:idfamille>/<str:listepk>', famille_locations.Supprimer_plusieurs.as_view(), name='famille_locations_supprimer_plusieurs'),
     path('individus/familles/locations/voir/<int:idfamille>/<int:idlocation>', famille_voir_location.View.as_view(), name='famille_voir_location'),
 

@@ -1,0 +1,18 @@
+{% extends "fiche_famille/famille.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block detail_famille %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}box-danger{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+                <p>Cette location fait partie d'une série de {{ nbre_occurences }} occurences.</p>
+                <p>{% crispy form_supprimer %}</p>
+            {% endblock %}
+        {% endembed %}
+    </div>
+{% endblock %}

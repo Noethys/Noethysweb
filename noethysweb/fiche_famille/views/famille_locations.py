@@ -6,12 +6,14 @@
 import datetime, uuid
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse, HttpResponseRedirect
-from django.db.models import Q
+from django.db.models import Q, ProtectedError
+from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Location, Vacance, Ferie, Produit, TarifProduit, Prestation
 from core.utils import utils_dates
 from locations.utils import utils_locations
+from locations.forms.supprimer_occurences import Formulaire as Formulaire_supprimer_occurences
 from fiche_famille.forms.famille_locations import Formulaire, FORMSET_PRESTATIONS
 from fiche_famille.views.famille import Onglet
 
@@ -140,9 +142,10 @@ class Liste(Page, crud.Liste):
                 return "<span class='text-red' title='Accès interdit'><i class='fa fa-lock'></i></span>"
             kwargs = view.kwargs
             kwargs["pk"] = instance.pk
+            url_supprimer = view.url_supprimer if not instance.serie else "famille_locations_supprimer_occurence"
             html = [
                 self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
-                self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
+                self.Create_bouton_supprimer(url=reverse(url_supprimer, kwargs=kwargs)),
                 self.Create_bouton_imprimer(url=reverse("famille_voir_location", kwargs={"idfamille": kwargs["idfamille"], "idlocation": instance.pk}), title="Imprimer ou envoyer par email la location"),
             ]
             return self.Create_boutons_actions(html)
@@ -199,6 +202,64 @@ class Supprimer(Page, crud.Supprimer):
         if Prestation.objects.filter(location=objet, facture__isnull=False):
             protections.append("Vous ne pouvez pas supprimer cette location car au moins une prestation facturée y est associée")
         return protections
+
+
+class Supprimer_occurence(Page, crud.Supprimer):
+    template_name = "fiche_famille/famille_locations_delete.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(Page, self).get_context_data(**kwargs)
+        context["nbre_occurences"] = Location.objects.filter(serie=self.object.serie).count()
+        context["form_supprimer"] = Formulaire_supprimer_occurences()
+        return context
+
+    def post(self, request, **kwargs):
+        form = Formulaire_supprimer_occurences(request.POST)
+        form.is_valid()
+
+        # Importation des objets à supprimer
+        objet_selection = Location.objects.get(pk=kwargs["pk"])
+        if form.cleaned_data["donnees"] == "OCCURENCE":
+            objets = [objet_selection,]
+        elif form.cleaned_data["donnees"] == "PERIODE":
+            date_debut, date_fin = utils_dates.ConvertDateRangePicker(form.cleaned_data["periode"])
+            objets = Location.objects.filter(serie=objet_selection.serie, date_debut__date__gte=date_debut, date_fin__date__lte=date_fin)
+        else:
+            objets = Location.objects.filter(serie=objet_selection.serie)
+
+        # Check protections
+        protections = []
+        prestations_facturees = {}
+        for prestation in Prestation.objects.filter(location__in=objets, facture__isnull=False):
+            prestations_facturees[prestation.location_id] = True
+        for location in objets:
+            if location.pk in prestations_facturees:
+                protections.append("La location ID%d est déjà facturée" % location.pk)
+        if protections:
+            messages.add_message(request, messages.ERROR, "Suppression impossible : " + ". ".join(protections))
+            return HttpResponseRedirect(self.get_success_url(), status=303)
+
+        # Suppression des objets
+        for objet in objets:
+            pk = objet.pk
+            try:
+                message_erreur = objet.delete()
+                if isinstance(message_erreur, str):
+                    messages.add_message(request, messages.ERROR, message_erreur)
+                    return HttpResponseRedirect(self.get_success_url(), status=303)
+            except ProtectedError as e:
+                texte_resultats = crud.Formate_liste_objets(objets=e.protected_objects)
+                messages.add_message(request, messages.ERROR, "La suppression de '%s' est impossible car cet élément est rattaché aux données suivantes : %s." % (objet, texte_resultats))
+                return HttpResponseRedirect(self.get_success_url(), status=303)
+
+            # Enregistrement dans l'historique
+            objet.pk = pk
+            self.save_historique(objet)
+
+        # Confirmation de la suppression
+        messages.add_message(self.request, messages.SUCCESS, 'Suppressions effectuées avec succès')
+
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
