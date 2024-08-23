@@ -83,7 +83,7 @@ class Formulaire(FormulaireBase, ModelForm):
             # Recherche si la pièce est présente dans les pièces à fournir
             found = False
             for index, piece in enumerate(self.liste_pieces_fournir):
-                if piece["type_piece"] == self.instance.type_piece and piece["individu"] == self.instance.individu:
+                if piece["type_piece"] == self.instance.type_piece and piece.get("individu", None) == self.instance.individu:
                     self.fields['mode_piece'].initial = "AFOURNIR"
                     self.fields['pieces_fournir'].initial = index
                     found = True
@@ -91,7 +91,7 @@ class Formulaire(FormulaireBase, ModelForm):
             # Recherche si la pièce est présente dans les pièces à fournir
             if not found:
                 for index, piece in enumerate(self.liste_pieces_toutes):
-                    if piece["type_piece"] == self.instance.type_piece and piece["individu"] == self.instance.individu:
+                    if piece["type_piece"] == self.instance.type_piece and piece.get("individu", None) == self.instance.individu:
                         self.fields['mode_piece'].initial = "TOUTES"
                         self.fields['pieces_toutes'].initial = index
 
