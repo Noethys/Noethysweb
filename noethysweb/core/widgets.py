@@ -679,6 +679,8 @@ class Select_activite(Widget):
         context['name'] = name
         if value:
             context['value'] = int(value)
+        if "afficher_tout" not in context:
+            context['afficher_tout'] = False
         if "donnees_extra" not in context:
             context['donnees_extra'] = {}
         context['donnees_extra'] = json.dumps(context['donnees_extra'])

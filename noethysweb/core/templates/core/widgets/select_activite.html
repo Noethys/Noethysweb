@@ -19,20 +19,24 @@
             <i class="fa {{ icon }} input-group-text"></i>
         </div>
     {% endif %}
-    <select id="{{ id }}" name="{{ name }}" data-minimum-input-length="0" data-width="100%" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2">
+
+
+    <select id="{{ id }}" name="{{ name }}" data-minimum-input-length="0" data-width="100%" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2" {% if disabled %}disabled{% endif %}>
         <option value="">----------</option>
         {% for activite in activites %}
-            <option class="{% if not activite.Is_active %}option_activite_obsolete{% endif %}" value="{{ activite.pk }}" {% if value == activite.pk %}selected{% endif %} {% if not activite.Is_active %}disabled{% endif %}>{{ activite.nom }}</option>
+            <option class="{% if not activite.Is_active %}option_activite_obsolete{% endif %}" value="{{ activite.pk }}" {% if value == activite.pk %}selected{% endif %} {% if not activite.Is_active and not afficher_tout and not disabled %}disabled{% endif %}>{{ activite.nom }}</option>
         {% endfor %}
     </select>
-    <div class="input-group-append">
-        <span class="input-group-text p-0 pl-2">
-            <span class="custom-switch custom-switch-on-primary" title="Afficher les activités obsolètes">
-                <input type="checkbox" class="custom-control-input case_switch" id="switch_activites_obsoletes">
-                <label class="custom-control-label" for="switch_activites_obsoletes"></label>
+    {% if not disabled %}
+        <div class="input-group-append">
+            <span class="input-group-text p-0 pl-2">
+                <span class="custom-switch custom-switch-on-primary" title="Afficher les activités obsolètes">
+                    <input type="checkbox" class="custom-control-input case_switch" id="switch_activites_obsoletes" {% if afficher_tout %}checked{% endif %}>
+                    <label class="custom-control-label" for="switch_activites_obsoletes"></label>
+                </span>
             </span>
-        </span>
-    </div>
+        </div>
+    {% endif %}
 </div>
 
 <script>
