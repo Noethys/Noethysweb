@@ -1,3 +1,12 @@
+Version 1.2.6.0 (05/09/2024) :
+
+- Ajout de la synthèse des locations dans le menu Locations
+- Ajout de la suppression des occurences d'une série de locations
+- Correction du formulaire de saisie d'une pièce sans individu associé
+- Correction de la saisie des mails dans l'option d'envoi des factures par email
+- Correction de l'enregistrement d'une pièce associée à une inscription sur le portail
+- Correction du widget de sélection d'une activité obsolète
+
 Version 1.2.5.9 (18/08/2024) :
 
 - Ajout de la procédure update_permissions
