@@ -47,6 +47,13 @@ class Formulaire(FormulaireBase, ModelForm):
         # Ecole
         self.fields["ecole"].queryset = Ecole.objects.all().order_by("nom")
 
+        # Définit l'individu associé
+        if hasattr(self.instance, "individu") == False:
+            if idindividu:
+                individu = Individu.objects.get(pk=idindividu)
+        else:
+            individu = self.instance.individu
+
         # Récupération de l'école et des dates de la dernière classe saisie
         if self.instance.date_debut == None:
             classe = Scolarite.objects.last()
@@ -54,12 +61,11 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.fields["date_debut"].initial = classe.date_debut
                 self.fields["date_fin"].initial = classe.date_fin
 
-        # Définit l'individu associé
-        if hasattr(self.instance, "individu") == False:
-            if idindividu:
-                individu = Individu.objects.get(pk=idindividu)
-        else:
-            individu = self.instance.individu
+            # On récupère la dernière école de l'individu
+            if idindividu and not idclasse:
+                derniere_classe_individu = Scolarite.objects.filter(individu_id=idindividu).last()
+                if derniere_classe_individu:
+                    self.fields["ecole"].initial = derniere_classe_individu.ecole
 
         # Si on vient de la gestion des inscriptions scolaires, on définit la classe par défaut
         if idclasse:
