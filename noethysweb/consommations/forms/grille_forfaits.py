@@ -155,6 +155,7 @@ class Formulaire(FormulaireBase, forms.Form):
 
     def __init__(self, *args, **kwargs):
         inscriptions = kwargs.pop("inscriptions", [])
+        is_portail = kwargs.pop("is_portail", False)
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'grille_forfaits'
@@ -168,6 +169,12 @@ class Formulaire(FormulaireBase, forms.Form):
             liste_familles = [(nom, id) for id, nom in {inscription.famille_id: inscription.famille.nom for inscription in inscriptions}.items()]
             liste_familles.sort()
             self.fields["famille"].choices = [(id, nom) for nom, id in liste_familles]
+
+        if is_portail:
+            self.fields["date_fin"].disabled = True
+            self.fields["label"].disabled = True
+            self.fields["date_prestation"].disabled = True
+            self.fields["montant"].disabled = True
 
         self.helper.layout = Layout(
             Hidden("idprestation", value=""),

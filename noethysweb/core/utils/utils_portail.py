@@ -111,6 +111,8 @@ LISTE_PARAMETRES = [
     Parametre(code="reservations_intro_planning", label="Texte d'introduction du planning", type="char_2lignes", valeur="Cliquez dans les cases pour ajouter ou supprimer des consommations avant de valider l'envoi des données."),
     Parametre(code="reservations_adresse_exp", label="Adresse d'expédition pour confirmation par email", type="adresse_exp", valeur=None, help_text="Cette adresse mail est utilisée pour envoyer des mails de confirmation des modifications effectuées dans les réservations."),
     Parametre(code="reservations_blocage_impayes", label="Blocage si impayés", type="choix", valeur=None, choix=[(None, "Désactivé")] + [(x, "Si impayés >= %d Euros" % x) for x in (50, 100, 200, 300, 400, 500, 1000, 1500, 2000, 3000)] + [(x+10000, "Si impayés facturés >= %d Euros" % x) for x in (50, 100, 200, 300, 400, 500, 1000, 1500, 2000, 3000)], help_text="Vous pouvez empêcher la famille d'accéder aux réservations en cas d'impayés."),
+    Parametre(code="reservations_afficher_facturation", label="Afficher la facturation", type="boolean", valeur=False, help_text="Comme dans la grille des consommations, le cadre Facturation apparaît à côté du planning des réservations et permet aux familles de visualiser les prestations."),
+    Parametre(code="reservations_afficher_forfaits", label="Afficher la liste des forfaits-crédit", type="boolean", valeur=False, help_text="Affiche la liste des forfaits-crédit de la période et permet l'ajout, la modification et la suppression des forfaits par la famille. Ne fonctionne que si l'affichage de la facturation est activé."),
 
     # Facturation
     Parametre(code="facturation_afficher_page", label="Afficher la page", type="boolean", valeur=True),

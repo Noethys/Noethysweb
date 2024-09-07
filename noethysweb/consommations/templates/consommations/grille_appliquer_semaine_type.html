@@ -248,7 +248,11 @@ $(document).ready(function() {
                 }
 
                 // Application réservation
-                var active_facturation = !(mode === "portail");
+                if (!(mode === "portail") || (afficher_facturation === true)) {
+                    var active_facturation = true;
+                } else {
+                    var active_facturation = false;
+                }
                 if (valide === true) {
                     if (case_tableau.has_conso()) {
                         case_tableau.modifier_conso(data=data, maj_facturation=active_facturation);

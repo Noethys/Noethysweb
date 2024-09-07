@@ -1300,12 +1300,16 @@ $(document).ready(function() {
     });
 
     $('[name=bouton_enregistrer]').on('click', function(event) {
-        // Si mode portail, on générer la facturation avant le submit
-        var box = bootbox.dialog({
-            message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> Enregistrement des données<br>Veuillez patienter...</p>",
-            closeButton: false
-        });
-        tout_recalculer();
+        if (afficher_facturation === false) {
+            // Si mode portail, on génére la facturation avant le submit
+            var box = bootbox.dialog({
+                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> Enregistrement des données<br>Veuillez patienter...</p>",
+                closeButton: false
+            });
+            tout_recalculer();
+        } else {
+            $('#form-maj').submit();
+        }
     });
 
     $('[name=bouton_annuler]').on('click', function(event) {
@@ -1335,7 +1339,7 @@ $(document).ready(function() {
     // Envoi des paramètres au format json vers le form de maj
     $("#form-maj").on('submit', function(event) {
 
-        if ((mode !== "portail") && (mode !== "pointeuse")) {
+        if (((mode !== "portail") || (afficher_facturation === true)) && (mode !== "pointeuse")) {
 
             // Vérifie qu'il n'y a pas un calcul de facturation en cours
             if (!($("#loader_facturation").hasClass("masquer"))) {
@@ -1346,7 +1350,7 @@ $(document).ready(function() {
 
             // Affiche un loader durant le submit
             var box = bootbox.dialog({
-                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog margin-r-5'></i> Veuillez patienter...</p>",
+                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog margin-r-5'></i> Enregistrement des données<br>Veuillez patienter...</p>",
                 closeButton: false
             });
 
@@ -1450,7 +1454,9 @@ function facturer(case_tableau) {
     // Si mode portail, on évite le calcul de la facturation
     if (mode === "portail") {
         search_unites_liees(case_tableau);
-        return false;
+        if (afficher_facturation === false) {
+            return false;
+        }
     }
     // Si mode pointeuse, on affiche un loader
     if (mode === "pointeuse") {
@@ -1588,7 +1594,7 @@ function ajax_facturer(cases_touchees_temp) {
             };
 
             // Si mode portail, on déclenche le submit
-            if (mode === "portail") {
+            if ((mode === "portail") && (afficher_facturation === false))  {
                 $('#form-maj').submit();
             };
 
@@ -1639,7 +1645,7 @@ function maj_box_facturation() {
                         month: 'long',
                         day: 'numeric'
                     });
-                    if (mode == "individu") {
+                    if ((mode == "individu") || (mode == "portail")) {
                         html += "<tr><td class='date_prestation'>" + datefr + "</td><td class='montant_prestation'></td></tr>";
                     };
                     for (var idprestation of dict_dates[date].sort()) {

@@ -277,10 +277,8 @@ def Get_generic_data(data={}):
     data["liste_unites_visibles"] = [unite for unite in data["liste_unites"] if unite.pk in liste_unites_ouvertes and (unite.visible_portail or data["mode"] != "portail")]
 
     # Recherche s'il y a des forfaits crédit dans les tarifs de l'activité
-    data["tarifs_credits_exists"] = False
-    if data["mode"] != "portail":
-        data["tarifs_credits_exists"] = Tarif.objects.filter(type="CREDIT", activite=data['selection_activite']).exists()
-        data["liste_idinscription"] = [inscription.pk for inscription in data["liste_inscriptions"]]
+    data["tarifs_credits_exists"] = Tarif.objects.filter(type="CREDIT", activite=data['selection_activite']).exists()
+    data["liste_idinscription"] = [inscription.pk for inscription in data["liste_inscriptions"]]
 
     # Recherche les tarifs spéciaux (choix)
     conditions = Q(methode="choix", activite=data["selection_activite"], date_debut__lte=data["date_max"]) & (Q(date_fin__gte=data["date_min"]) | Q(date_fin__isnull=True))

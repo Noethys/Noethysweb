@@ -16,6 +16,7 @@ from core.utils import utils_portail
 from outils.utils import utils_email
 from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
 from consommations.forms.appliquer_semaine_type import Formulaire as form_appliquer_semaine_type
+from consommations.forms.grille_forfaits import Formulaire as form_forfaits
 from portail.templatetags.planning import is_modif_allowed
 from portail.utils import utils_approbations
 from portail.views.base import CustomView
@@ -71,6 +72,8 @@ class View(CustomView, TemplateView):
         context['form_appliquer_semaine_type'] = form_appliquer_semaine_type
         context['jours_complets_semaine'] = JOURS_COMPLETS_SEMAINE
         context['data'] = self.Get_data_planning()
+        if context['data']["tarifs_credits_exists"]:
+            context['form_forfaits'] = form_forfaits(inscriptions=context['data']["liste_inscriptions"], is_portail=True)
         return context
 
     def Get_data_planning(self):

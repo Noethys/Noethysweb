@@ -41,6 +41,7 @@
         var liste_vacances = JSON.parse('{{ data.liste_vacances_json|escapejs }}');
         var liste_key_individus = JSON.parse('{{ data.liste_key_individus_json|escapejs }}');
         var periode_json = JSON.parse('{{ data.periode_json|escapejs }}');
+        var afficher_facturation = {% if parametres_portail.reservations_afficher_facturation %}true{% else %}false{% endif %};
         if (mode === "individu") {
             Set_periode(periode_json);
         };

@@ -86,9 +86,14 @@
 
     {# Grilles des réservations #}
     <div class="row">
-        <div class="col-md-12" >
-            <div class="card">
 
+        {% if parametres_portail.reservations_afficher_facturation %}
+            <div class="col-md-9">
+        {% else %}
+            <div class="col-md-12" >
+        {% endif %}
+
+            <div class="card">
                 {# Grille des consommations #}
                 <div class="card-body">
 
@@ -116,9 +121,18 @@
                     </small></div>
 
                 </div>
-
             </div>
         </div>
+
+        {% if parametres_portail.reservations_afficher_facturation %}
+            <div class="col-md-3">
+                {% if parametres_portail.reservations_afficher_forfaits and data.tarifs_credits_exists %}
+                    {% include "consommations/grille_forfaits.html" %}
+                {% endif %}
+                {% include "consommations/grille_facturation.html" %}
+            </div>
+        {% endif %}
+
     </div>
 
     {% include 'consommations/grille_saisie_horaires.html' %}
