@@ -115,7 +115,7 @@ class Impression(utils_impression.Impression):
         # Tri des pages
         def tri_classe(rattachement):
             scolarite = dict_scolarites.get(rattachement.individu_id, None)
-            return scolarite.classe.nom if scolarite else ""
+            return scolarite.classe.nom if scolarite and scolarite.classe else ""
 
         if self.dict_donnees["tri"] == "classe":
             rattachements = sorted(rattachements, key=tri_classe)
