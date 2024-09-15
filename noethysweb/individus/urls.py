@@ -14,7 +14,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
                             abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses, certifications, \
-                            certifications_individus, certifications_familles
+                            certifications_individus, certifications_familles, inscriptions_saisir_lot
 
 urlpatterns = [
 
@@ -61,6 +61,9 @@ urlpatterns = [
 
     path('individus/inscriptions_changer_groupe/selection_activite', inscriptions_changer_groupe.Selection_activite.as_view(), name='inscriptions_changer_groupe'),
     path('individus/inscriptions_changer_groupe/liste/<int:idactivite>', inscriptions_changer_groupe.Liste.as_view(), name='inscriptions_changer_groupe_liste'),
+
+    path('individus/inscriptions_saisir_lot/selection_activite', inscriptions_saisir_lot.Selection_activite.as_view(), name='inscriptions_saisir_lot'),
+    path('individus/inscriptions_saisir_lot/liste/<int:idactivite>', inscriptions_saisir_lot.Liste.as_view(), name='inscriptions_saisir_lot_liste'),
 
     # Inscriptions scolaires
     path('individus/inscriptions_scolaires', inscriptions_scolaires.Liste.as_view(), name='inscriptions_scolaires_liste'),
@@ -193,5 +196,5 @@ urlpatterns = [
     path('individus/liste_pieces_manquantes_email', secure_ajax(liste_pieces_manquantes.Envoi_emails), name='ajax_liste_pieces_manquantes_emails'),
     path('individus/imprimer_liste_inscrits/generer_pdf', secure_ajax(imprimer_liste_inscrits.Generer_pdf), name='ajax_imprimer_liste_inscrits_generer_pdf'),
     path('individus/certifications_reinitialiser', secure_ajax(certifications.Reinitialiser), name='ajax_certifications_reinitialiser'),
-
+    path('individus/inscriptions_saisir_lot', secure_ajax(inscriptions_saisir_lot.Appliquer), name='ajax_inscriptions_saisir_lot'),
 ]
