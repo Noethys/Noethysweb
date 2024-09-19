@@ -20,6 +20,8 @@ media/
 settings_production.py
 TODO.txt
 mysql.cfg
+gunicorn.pid
+gunicorn.sock
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

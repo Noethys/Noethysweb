@@ -11,23 +11,61 @@ Installation
 ------------------------
 
 - Téléchargez le code source.
-- Installez python 3 et les dépendances du fichier *requirements.txt* :
-    - `pip3 install -r requirements.txt`
+- Installez python 3.9
+- Allez dans le répertoire d'installation
+    - `python3.9 -m venv venv`
+- Installez les dépendances du fichier *requirements.txt*
+    - `./venv/bin/python install -r requirements.txt`
 - Allez dans le répertoire *noethysweb/noethysweb* et renommez le fichier *settings_production_modele.py* en *settings_production.py*.
 - Personnalisez le fichier *settings_production.py* selon vos besoins.
 - Exécutez les commandes suivantes depuis le répertoire *noethysweb* :
-    - `python3 manage.py makemigrations`
-    - `python3 manage.py migrate`
-    - `python3 manage.py collectstatic`
-    - `python3 manage.py createsuperuser`
-    - `python3 manage.py update_permissions`
+    - `../venv/bin/python manage.py makemigrations`
+    - `../venv/bin/python manage.py migrate`
+    - `../venv/bin/python manage.py collectstatic`
+    - `../venv/bin/python manage.py createsuperuser`
+    - `../venv/bin/python manage.py update_permissions`
 - Si vous souhaitez commencer avec une base de données vide :
-    - `python3 manage.py import_defaut`
+    - `../venv/bin/python manage.py import_defaut`
 - Ou si vous souhaitez importer la base de données d'un fichier Noethys - où xxx est le nom du fichier d'export créé depuis la fonction "Exporter vers Noethysweb" du menu Fichier de Noethys, et motdepasse est le mot de passe saisi lors de la génération de l'export :
-    - `python3 manage.py import_fichier xxx.nweb motdepasse`
+    - `../venv/bin/python manage.py import_fichier xxx.nweb motdepasse`
 - Lancez enfin le serveur intégré (Uniquement pour des tests) :
-    - `python3 manage.py runserver`
-- Consultez le site www.djangoproject.com pour en savoir davantage sur les options et le déploiement.
+    - `../venv/bin/python manage.py runserver`
+- Consultez le site www.djangoproject.com pour en savoir davantage sur les options et le déploiement.  
+  Exemple utilisant [Gunicorn](https://gunicorn.org/):
+  - Service systemd */etc/systemd/system/noethysweb.service*
+    ```ini
+    [Unit]
+    Description=noethysweb
+    After=network.target
+
+    [Service]
+    Type=notify
+    User=apache
+    Group=apache
+    # Chemin du dossier dans lequel est manage.py
+    WorkingDirectory=/chemin/vers/Noethysweb/noethysweb
+    ExecStart=/chemin/vers/Noethysweb/venv/bin/gunicorn
+    ExecReload=/bin/kill -s HUP $MAINPID
+    KillMode=mixed
+    TimeoutStopSec=5
+
+    [Install]
+    WantedBy=multi-user.target
+    ```
+  - Activez dans *settings_production.py* la variable `GUNICORN_PIDFILE` pour que le reload du code se fasse lors des mises à jour
+  - Vous pouvez ensuite utiliser la configuration suivante pour Apache:
+    ```apacheconf
+    # Fichiers statiques
+    ProxyPass "/static/" "!"
+    ProxyPass "/media/" "!"
+    RewriteEngine On
+    RewriteRule ^/(?:static|media)/.+$ /noethysweb$0 [L]
+
+    # Le reste est transmis à Gunicorn
+    ProxyPreserveHost On
+    RequestHeader set X-Forwarded-Proto https
+    ProxyPass "/" unix:/chemin/vers/Noethysweb/gunicorn.sock|http://localhost/
+    ```
 
 Utilisation
 ------------------------

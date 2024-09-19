@@ -147,20 +147,34 @@ def Update():
 
 
 def AutoReloadWSGI():
-    nom_fichier = os.path.join(settings.BASE_DIR, "noethysweb/wsgi.py")
+    """Reload le serveur en envoyant un SIGHUP à gunicorn ou en modifiant le fichier wsgi.py."""
+    if (
+        hasattr(settings, "GUNICORN_PIDFILE")
+        and settings.GUNICORN_PIDFILE
+        and os.path.isfile(settings.GUNICORN_PIDFILE)
+    ):
+        with open(settings.GUNICORN_PIDFILE) as pidfile:
+            gunicorn_pid = int(pidfile.read())
+        import signal
 
-    # Ouverture du fichier
-    fichier_wsgi = open(nom_fichier, "r")
-    liste_lignes_wsgi = fichier_wsgi.readlines()
-    fichier_wsgi.close()
+        try:
+            os.kill(gunicorn_pid, signal.SIGHUP)
+        except ProcessLookupError:
+            pass
+        else:
+            return
+
+    nom_fichier = os.path.join(settings.BASE_DIR, "noethysweb/wsgi.py")
+    # Lecture du fichier
+    with open(nom_fichier, "r") as fichier_wsgi:
+        liste_lignes_wsgi = fichier_wsgi.readlines()
 
     # Modification du fichier
-    fichier_wsgi = codecs.open(nom_fichier, 'w')
-    for ligne in liste_lignes_wsgi:
-        if "lastupdate" in ligne:
-            ligne = "# lastupdate = %s" % datetime.datetime.now()
-        fichier_wsgi.write(ligne)
-    fichier_wsgi.close()
+    with codecs.open(nom_fichier, "w") as fichier_wsgi:
+        for ligne in liste_lignes_wsgi:
+            if ligne.startswith("# lastupdate"):
+                ligne = "# lastupdate = %s" % datetime.datetime.now()
+            fichier_wsgi.write(ligne)
 
 
 if __name__ == '__main__':
