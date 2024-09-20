@@ -20,8 +20,8 @@
         {% for prestation in prestations %}
             <tr>
                 <td>{{ prestation.date|date:"d/m/Y"|capfirst }}</td>
-                <td>{{ prestation.individu }}</td>
-                <td>{{ prestation.activite }}</td>
+                <td>{{ prestation.individu|default:"-" }}</td>
+                <td>{{ prestation.activite|default:"-" }}</td>
                 <td>{{ prestation.label }}</td>
                 <td>{{ prestation.montant|montant }}</td>
             </tr>
