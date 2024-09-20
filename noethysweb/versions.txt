@@ -1,3 +1,11 @@
+Version 1.2.6.1 (20/09/2024) :
+
+- Ajout de l'option Afficher la facturation sur le planning du portail
+- Ajout attribution dernière école lors d'une inscription scolaire
+- Ajout de la saisie d'inscriptions par lot dans le menu Individus
+- Correction sur les classes des fiches de renseignements
+- Correction du total max dans le suivi des consommations
+
 Version 1.2.6.0 (05/09/2024) :
 
 - Ajout de la synthèse des locations dans le menu Locations
