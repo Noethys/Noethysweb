@@ -2,12 +2,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
-from core.models import Utilisateur, Structure
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import Permission, Group
-from django import forms
+from django.contrib.admin.widgets import FilteredSelectMultiple, RelatedFieldWidgetWrapper
+from core.models import Utilisateur, Structure
 
 
 # --------------------------- Groupes d'utilisateurs ----------------------------
@@ -15,7 +16,7 @@ from django import forms
 class GroupAdminForm(forms.ModelForm):
     permissions = forms.ModelMultipleChoiceField(
         queryset=Permission.objects.exclude(name__startswith='Can').order_by("name"), label="Permissions",
-        widget=admin.widgets.FilteredSelectMultiple('permissions', False))
+        widget=FilteredSelectMultiple('permissions', False))
 
     class Meta:
         model = Group
@@ -32,14 +33,30 @@ admin.site.register(Group, MyGroupAdmin)
 
 # --------------------------- Modification du formulaire (permissions)  ----------------------------
 
+class FilteredSelectMultiplePermissions(FilteredSelectMultiple):
+    """ Permet de contourner le bug du label placé à droite du widget au lieu de la gauche """
+    class Media:
+        js = [
+            "admin/js/core.js",
+            "admin/js/SelectBox.js",
+            "admin/js/SelectFilter2.js",
+            "lib/filteredselectmultiple.js",
+        ]
+
+
 class UserEditForm(UserChangeForm):
     user_permissions = forms.ModelMultipleChoiceField(
         queryset=Permission.objects.exclude(name__startswith='Can').order_by("name"), label="Permissions",
-        widget=admin.widgets.FilteredSelectMultiple('permissions', False), required=False)
+        widget=FilteredSelectMultiplePermissions("permissions", is_stacked=False),
+        required=False)
 
     structures = forms.ModelMultipleChoiceField(
         queryset=Structure.objects.all().order_by("nom"), label="Structures",
-        widget=admin.widgets.FilteredSelectMultiple('structures', False), required=False)
+        widget=RelatedFieldWidgetWrapper(
+            FilteredSelectMultiple("structures", is_stacked=False),
+            rel=Utilisateur._meta.get_field("structures").remote_field, admin_site=admin.site, can_add_related=False,
+        ),
+        required=False)
 
     class Meta:
         model = Utilisateur

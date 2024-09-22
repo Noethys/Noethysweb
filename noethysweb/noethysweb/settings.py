@@ -3,6 +3,7 @@
 #  Distribué sous licence GNU GPL.
 
 import os
+import crispy_forms
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -102,9 +103,9 @@ INSTALLED_APPS = [
     'django_cleanup.apps.CleanupConfig',
 ]
 
-# import crispy_forms
-# if int(crispy_forms.__version__.split(".")[0]) >= 2:
-#     INSTALLED_APPS.append("crispy_bootstrap4")
+# Ajout de crispy_bootstrap4 si version de crispy forms > 2
+if int(crispy_forms.__version__.split(".")[0]) >= 2:
+    INSTALLED_APPS.append("crispy_bootstrap4")
 
 # Liste des plugins
 PLUGINS = []

@@ -6,7 +6,7 @@
 import os.path
 from django.core.files.storage import Storage
 from django.utils.deconstruct import deconstructible
-from storages.utils import get_available_overwrite_name
+# from storages.utils import get_available_overwrite_name
 from storages.utils import setting
 from pcloud import PyCloud
 
@@ -91,6 +91,7 @@ class PcloudStorage(Storage):
     def get_available_name(self, name, max_length=None):
         """Overwrite existing file with the same name."""
         name = self._full_path(name)
-        if self.write_mode == 'overwrite':
-            return get_available_overwrite_name(name, max_length)
+        # Incompatible sur django-storages 1.14.4
+        # if self.write_mode == 'overwrite':
+        #     return get_available_overwrite_name(name, max_length)
         return super().get_available_name(name, max_length)

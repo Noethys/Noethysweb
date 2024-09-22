@@ -38,3 +38,5 @@ pystrich==0.8
 docx-mailmerge2
 xlrd
 xlsxwriter
+pcloud
+crispy-bootstrap4

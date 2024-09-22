@@ -267,7 +267,12 @@ class Formset(LayoutObject):
         if template:
             self.template = template
 
-    def render(self, form, form_style, context, template_pack=TEMPLATE_PACK):
+    def render(self, *args, **kwargs):
+        """ Arguments ci-dessus différents selon versions de crispy :
+        avec django-crispy-forms 1.x : form, form_style, context, template_pack=TEMPLATE_PACK
+        avec django-crispy-forms 2.x : form, context, template_pack=TEMPLATE_PACK
+        """
+        context = args[-1]
         formset = context[self.formset_name_in_context]
         return render_to_string(self.template, {'formset': formset})
 
