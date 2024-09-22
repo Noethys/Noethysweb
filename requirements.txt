@@ -38,3 +38,4 @@ pystrich==0.8
 docx-mailmerge2
 xlrd
 xlsxwriter
+gunicorn==23.0.0
