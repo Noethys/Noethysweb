@@ -93,6 +93,7 @@ class Modifier(Consulter):
         internet_identifiant = form.cleaned_data.get("internet_identifiant")
         mdp = form.cleaned_data.get("internet_mdp")
         internet_categorie = form.cleaned_data.get("internet_categorie")
+        internet_reservations = form.cleaned_data.get("internet_reservations")
         date_expiration_mdp = form.cleaned_data.get("date_expiration_mdp")
         individus_masques = form.cleaned_data.get("individus_masques")
         blocage_impayes_off = form.cleaned_data.get("blocage_impayes_off")
@@ -120,6 +121,9 @@ class Modifier(Consulter):
         # Si changement de categorie
         if internet_categorie != famille.internet_categorie:
             famille.internet_categorie = internet_categorie
+
+        if internet_reservations != famille.internet_reservations:
+            famille.internet_reservations = internet_reservations
 
         # Enregistrement
         utilisateur.save()
