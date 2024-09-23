@@ -23,7 +23,7 @@ class Form_choix_assureur(forms.ModelChoiceField):
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    assureur = Form_choix_assureur(label="Assureur", queryset=Assureur.objects.all().order_by("nom"), required=False, help_text="Cliquez sur le champ ci-dessus pour sélectionner un assureur dans la liste déroulante. Vous pouvez faire une recherche par nom ou par ville. Cliquez sur le bouton '+' pour ajouter un assureur manquant dans la liste de choix.",
+    assureur = Form_choix_assureur(label="Assureur", queryset=Assureur.objects.all().order_by("nom"), required=True, help_text="Cliquez sur le champ ci-dessus pour sélectionner un assureur dans la liste déroulante. Vous pouvez faire une recherche par nom ou par ville. Cliquez sur le bouton '+' pour ajouter un assureur manquant dans la liste de choix.",
                                      widget=Select_avec_commandes_form(attrs={"url_ajax": "ajax_ajouter_assureur", "id_form": "assureurs_form",
                                                                               "textes": {"champ": "Nom de l'assureur", "ajouter": "Ajouter un assureur", "modifier": "Modifier un assureur"}}))
 
