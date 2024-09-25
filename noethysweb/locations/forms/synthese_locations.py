@@ -30,7 +30,7 @@ class Formulaire(FormulaireBase, forms.Form):
             label = "Question %s. : %s" % (public[:3], dictTemp["label"])
             code = "question_%s_%d" % (public, dictTemp["IDquestion"])
             choix_regroupement.append((code, label))
-    regroupement = forms.ChoiceField(label="Regroupement", widget=Select2Widget(), choices=choix_regroupement, required=False)
+    regroupement = forms.ChoiceField(label="Regroupement", widget=Select2Widget(), choices=choix_regroupement, initial="jour", required=True)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
