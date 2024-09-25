@@ -400,12 +400,16 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Prestations
     menu_prestations = menu_facturation.Add(titre="Prestations")
     menu_prestations.Add(code="liste_prestations", titre="Liste des prestations", icone="file-text-o")
-    menu_prestations.Add(code="liste_deductions", titre="Liste des déductions", icone="file-text-o")
     menu_prestations.Add(code="liste_soldes", titre="Liste des soldes", icone="file-text-o")
     menu_prestations.Add(code="synthese_prestations", titre="Synthèse des prestations", icone="file-text-o")
     menu_prestations.Add(code="edition_prestations", titre="Edition des prestations", icone="file-text-o")
     menu_prestations.Add(code="recalculer_prestations", titre="Recalculer des prestations", icone="file-text-o")
     menu_prestations.Add(code="saisie_lot_forfaits_credits", titre="Saisir un lot de forfaits-crédits", icone="file-text-o")
+
+    # Déductions
+    menu_deductions = menu_facturation.Add(titre="Déductions")
+    menu_deductions.Add(code="liste_deductions", titre="Liste des déductions", icone="file-text-o")
+    menu_deductions.Add(code="synthese_deductions", titre="Synthèse des déductions", icone="file-text-o")
 
     # Aides
     menu_aides = menu_facturation.Add(titre="Aides")

@@ -12,7 +12,7 @@ from facturation.views import factures_generation, liste_prestations, liste_fact
                                 rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations, \
                                 lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
                                 attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes, edition_recap_factures, \
-                                factures_modifier, export_ecritures_cloe, saisie_lot_forfaits_credits
+                                factures_modifier, export_ecritures_cloe, saisie_lot_forfaits_credits, synthese_deductions
 
 urlpatterns = [
 
@@ -78,12 +78,15 @@ urlpatterns = [
     # Prestations
     path('facturation/liste_prestations', liste_prestations.Liste.as_view(), name='liste_prestations'),
     path('facturation/prestations_supprimer_plusieurs/<str:listepk>', liste_prestations.Supprimer_plusieurs.as_view(), name='prestations_supprimer_plusieurs'),
-    path('facturation/liste_deductions', liste_deductions.Liste.as_view(), name='liste_deductions'),
     path('facturation/liste_soldes', liste_soldes.View.as_view(), name='liste_soldes'),
     path('facturation/synthese_prestations', synthese_prestations.View.as_view(), name='synthese_prestations'),
     path('facturation/edition_prestations', edition_prestations.View.as_view(), name='edition_prestations'),
     path('facturation/recalculer_prestations', recalculer_prestations.View.as_view(), name='recalculer_prestations'),
     path('facturation/saisie_lot_forfaits_credits', saisie_lot_forfaits_credits.View.as_view(), name='saisie_lot_forfaits_credits'),
+
+    # Déductions
+    path('facturation/liste_deductions', liste_deductions.Liste.as_view(), name='liste_deductions'),
+    path('facturation/synthese_deductions', synthese_deductions.View.as_view(), name='synthese_deductions'),
 
     # Aides
     path('facturation/aides/liste', liste_aides.Liste.as_view(), name='aides_liste'),
