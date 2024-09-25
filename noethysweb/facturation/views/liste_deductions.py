@@ -40,14 +40,17 @@ class Liste(Page, crud.Liste):
         caisse = columns.TextColumn("Caisse", sources=["aide__caisse__nom"])
         allocataire = columns.TextColumn("Allocataire titulaire", sources=['allocataire__nom', 'allocataire__prenom'])
         num_allocataire = columns.TextColumn("N° Allocataire", sources=None, processor='Get_num_allocataire')
+        prestation_montant_initial = columns.TextColumn("Montant initial prestation", sources=["prestation__montant_initial"])
+        prestation_final_initial = columns.TextColumn("Montant final prestation", sources=["prestation__montant"])
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["iddeduction", "date", "label", "famille", "individu", "date_naiss", "montant", "activite", "num_facture", "code_compta_prestation", "num_allocataire", "allocataire", "caisse"]
+            columns = ["iddeduction", "date", "label", "famille", "individu", "date_naiss", "montant", "prestation_montant_initial", "prestation_final_initial", "activite", "num_facture", "code_compta_prestation", "num_allocataire", "allocataire", "caisse"]
             processors = {
                 'date': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ["date"]
+            hidden_columns = ["prestation_montant_initial", "prestation_final_initial"]
 
         def Get_date_naiss(self, instance, *args, **kwargs):
             return utils_dates.ConvertDateToFR(instance.prestation.individu.date_naiss) if instance.prestation.individu else ""
