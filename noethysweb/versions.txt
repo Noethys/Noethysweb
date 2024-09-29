@@ -1,3 +1,11 @@
+Version 1.2.6.2 (29/09/2024) :
+
+- Ajout de la synthèse des déductions dans le menu Facturation
+- Ajout des montants de prestations dans la liste des déductions
+- Mise à jour de l'export vers Cloé
+- Adaptations pour Django 5
+- Correction de divers petits bugs
+
 Version 1.2.6.1 (20/09/2024) :
 
 - Ajout de l'option Afficher la facturation sur le planning du portail
