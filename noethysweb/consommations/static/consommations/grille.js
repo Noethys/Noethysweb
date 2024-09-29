@@ -281,7 +281,7 @@ class Case_base {
         // Envoie les infos de la conso vers le modal
         $('#saisie_detail_heure_debut').val(null);
         $('#saisie_detail_heure_fin').val(null);
-        
+
         if (this.consommations.length > 0) {
             if (this.consommations[0].heure_debut) {$('#saisie_detail_heure_debut').val(this.consommations[0].heure_debut)};
             if (this.consommations[0].heure_fin) {$('#saisie_detail_heure_fin').val(this.consommations[0].heure_fin)};
@@ -667,6 +667,10 @@ class Case_quantite extends Case_standard {
 
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
+
+        // Saisie des heures par défaut
+        if (!("heure_debut" in data) && dict_unites[this.unite].heure_debut) {data["heure_debut"] = dict_unites[this.unite].heure_debut};
+        if (!("heure_fin" in data) && dict_unites[this.unite].heure_fin) {data["heure_fin"] = dict_unites[this.unite].heure_fin};
 
         // Si saisie en mode portail
         if (((mode === "portail") && (dict_unites[this.unite].imposer_saisie_valeur === false)) || (touche_clavier === 17)) {
@@ -1303,7 +1307,7 @@ $(document).ready(function() {
         if (afficher_facturation === false) {
             // Si mode portail, on génére la facturation avant le submit
             var box = bootbox.dialog({
-                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> Enregistrement des données<br>Veuillez patienter...</p>",
+                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> Veuillez patienter...</p>",
                 closeButton: false
             });
             tout_recalculer();
@@ -1350,7 +1354,7 @@ $(document).ready(function() {
 
             // Affiche un loader durant le submit
             var box = bootbox.dialog({
-                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog margin-r-5'></i> Enregistrement des données<br>Veuillez patienter...</p>",
+                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog margin-r-5'></i> Veuillez patienter...</p>",
                 closeButton: false
             });
 
@@ -1523,6 +1527,7 @@ function get_donnees_for_facturation(keys_cases_touchees) {
         liste_vacances: liste_vacances,
         dict_suppressions: dict_suppressions,
         mode: mode,
+        // dict_conso: dict_conso,
     };
 };
 
@@ -1585,6 +1590,11 @@ function ajax_facturer(cases_touchees_temp) {
 
             // MAJ du box facturation
             maj_box_facturation();
+
+            if (data.tout_recalculer) {
+                tout_recalculer();
+                maj_box_forfaits();
+            }
 
             // Masque loader du box facturation
             afficher_loader_facturation(false);

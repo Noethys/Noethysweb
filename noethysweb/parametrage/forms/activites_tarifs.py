@@ -3,24 +3,23 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json, decimal
 from django import forms
-from django.forms import ModelForm, HiddenInput
-from core.forms.base import FormulaireBase
-from django.forms.models import inlineformset_factory, BaseInlineFormSet
+from django.forms import ModelForm, HiddenInput, ValidationError
+from django.forms.models import inlineformset_factory, BaseInlineFormSet, model_to_dict
+from django.core.validators import MinValueValidator
 from django.utils.dateparse import parse_time, parse_date
-from core.forms.select2 import Select2MultipleWidget
+from django.utils.safestring import mark_safe
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, PrependedText, TabHolder, Tab, InlineCheckboxes, StrictButton
+from crispy_forms.layout import Layout, Hidden, HTML, Fieldset, Div
+from crispy_forms.bootstrap import Field, PrependedText, TabHolder, Tab, InlineCheckboxes
+from core.forms.base import FormulaireBase
+from core.forms.select2 import Select2MultipleWidget
 from core.utils.utils_commandes import Commandes
-from core.models import Tarif, CategorieTarif, Activite, Groupe, TypeCotisation, Caisse, NomTarif, TarifLigne, \
+from core.models import Tarif, CategorieTarif, Activite, Groupe, TypeCotisation, Caisse, TarifLigne, \
                                 LISTE_METHODES_TARIFS, DICT_COLONNES_TARIFS, CombiTarif, Unite, Evenement, QuestionnaireQuestion
 from core.widgets import DatePickerWidget, Formset
-from django.forms import ValidationError
 from parametrage.widgets import ParametresTarifs
-from django.utils.safestring import mark_safe
-from django.forms.models import model_to_dict
-import json, decimal
 
 
 class CombiTarifForm(forms.ModelForm):
@@ -157,8 +156,40 @@ class Formulaire(FormulaireBase, ModelForm):
 
     # Forfait daté : Date de facturation
     choix_date_facturation_forfait = [("DATE_DEBUT_FORFAIT", "Date de début du forfait"), ("DATE_SAISIE", "Date de la saisie du forfait"), ("DATE_DEBUT_ACTIVITE", "Date de début de l'activité"), ("DATE", "Une date donnée")]
-    date_facturation_forfait_type = forms.TypedChoiceField(label="date de facturation", choices=choix_date_facturation_forfait, initial='DATE_DEBUT_FORFAIT', required=False)
+    date_facturation_forfait_type = forms.TypedChoiceField(label="Date de facturation", choices=choix_date_facturation_forfait, initial='DATE_DEBUT_FORFAIT', required=False)
     date_facturation_forfait = forms.DateField(label="Date de facturation", required=False, widget=DatePickerWidget())
+
+    # Forfait-crédit : Automatique
+    type_application = forms.TypedChoiceField(label="Application", choices=[
+        ("MANUEL", "Manuelle"),
+        #("AUTO", "Automatique")
+    ], initial="MANUEL", required=False)
+    forfait_auto_nbre_conso_min = forms.IntegerField(label="Nbre conso min.", required=False, initial=2, validators=[MinValueValidator(1)], help_text="Ce forfait sera appliqué automatiquement si le nombre de consommations existantes sur la période est supérieur ou égal à X.")
+    forfait_auto_debut = forms.TypedChoiceField(label="Début du forfait", initial="PREC_SEMAINE_PREMIER_JOUR", required=False, choices=[
+        ("PREC_LUNDI", "Lundi précédent"), ("PREC_MARDI", "Mardi précédent"), ("PREC_MERCREDI", "Mercredi précédent"), ("PREC_JEUDI", "Jeudi précédent"),
+        ("PREC_VENDREDI", "Vendredi précédent"), ("PREC_SAMEDI", "Samedi précédent"), ("PREC_DIMANCHE", "Dimanche précédent"),
+        ("PREC_SEMAINE_PREMIER_JOUR", "1er jour de la semaine"), ("PREC_MOIS_PREMIER_JOUR", "1er jour du mois"),
+        # ("PREC_JOUR", "Le jour de la première consommation saisie"),
+        # ("PREC_JOUR_MOINS_1", "Jour J-1"), ("PREC_JOUR_MOINS_2", "Jour J-2"), ("PREC_JOUR_MOINS_3", "Jour J-3"), ("PREC_JOUR_MOINS_4", "Jour J-4"),
+        # ("PREC_JOUR_MOINS_5", "Jour J-5"), ("PREC_JOUR_MOINS_6", "Jour J-6"), ("PREC_JOUR_MOINS_7", "Jour J-7"),
+        ("PREC_MOIS_1", "1er janvier précédent"), ("PREC_MOIS_2", "1er février précédent"), ("PREC_MOIS_3", "1er mars précédent"),
+        ("PREC_MOIS_4", "1er avril précédent"),("PREC_MOIS_5", "1er mai précédent"), ("PREC_MOIS_6", "1er juin précédent"),
+        ("PREC_MOIS_7", "1er juillet précédent"),("PREC_MOIS_8", "1er août précédent"), ("PREC_MOIS_9", "1er septembre précédent"),
+        ("PREC_MOIS_10", "1er octobre précédent"),("PREC_MOIS_11", "1er novembre précédent"), ("PREC_MOIS_12", "1er décembre précédent"),
+    ])
+    forfait_auto_fin = forms.TypedChoiceField(label="Fin du forfait", initial="SUIV_SEMAINE_VENDREDI", required=False, choices=[
+        ("SUIV_LUNDI", "Lundi suivant"), ("SUIV_MARDI", "Mardi suivant"), ("SUIV_MERCREDI", "Mercredi suivant"), ("SUIV_JEUDI", "Jeudi suivant"),
+        ("SUIV_VENDREDI", "Vendredi suivant"), ("SUIV_SAMEDI", "Samedi suivant"), ("SUIV_DIMANCHE", "Dimanche suivant"),
+        ("SUIV_SEMAINE_DERNIER_JOUR", "Dernier jour de la semaine"), ("SUIV_SEMAINE_VENDREDI", "Vendredi de la semaine"), ("SUIV_SEMAINE_SAMEDI", "Samedi de la semaine"),
+        ("SUIV_MOIS_DERNIER_JOUR", "Dernier jour du mois"),
+        # ("SUIV_JOUR", "Le jour de la première consommation saisie"),
+        # ("SUIV_JOUR_PLUS_1", "Jour J+1"), ("SUIV_JOUR_PLUS_2", "Jour J+2"), ("SUIV_JOUR_PLUS_3", "Jour J+3"), ("SUIV_JOUR_PLUS_4", "Jour J+4"),
+        # ("SUIV_JOUR_PLUS_5", "Jour J+5"), ("PREC_JOUR_PLUS_6", "Jour J+6"), ("SUIV_JOUR_PLUS_7", "Jour J+7"),
+        ("SUIV_MOIS_1", "Dernier jour du mois de janvier suivant"), ("SUIV_MOIS_2", "Dernier jour du mois de février suivant"), ("SUIV_MOIS_3", "Dernier jour du mois de mars suivant"),
+        ("SUIV_MOIS_4", "Dernier jour du mois de avril suivant"),("SUIV_MOIS_5", "Dernier jour du mois de mai suivant"), ("SUIV_MOIS_6", "Dernier jour du mois de juin suivant"),
+        ("SUIV_MOIS_7", "Dernier jour du mois de juillet suivant"),("SUIV_MOIS_8", "Dernier jour du mois de août suivant"), ("SUIV_MOIS_9", "Dernier jour du mois de septembre suivant"),
+        ("SUIV_MOIS_10", "Dernier jour du mois de octobre suivant"),("SUIV_MOIS_11", "Dernier jour du mois de novembre suivant"), ("SUIV_MOIS_12", "Dernier jour du mois de décembre suivant"),
+    ])
 
     # Forfait-crédit : Durée de validité
     choix_duree_forfait = [("NON", "Sans durée par défaut"), ("OUI", "Avec une durée par défaut")]
@@ -291,6 +322,13 @@ class Formulaire(FormulaireBase, ModelForm):
             if self.instance.date_facturation.startswith("date:"):
                 self.fields['date_facturation_credit_type'].initial = "DATE"
                 self.fields['date_facturation_credit'].initial = parse_date(self.instance.date_facturation[5:]).strftime('%d/%m/%Y')
+
+        # Forfait-crédit : Automatique
+        self.fields["forfait_auto_nbre_conso_min"].widget.attrs["min"] = 1
+        if self.instance.forfait_auto:
+            self.fields["type_application"].initial = "AUTO"
+            for key, valeur in json.loads(self.instance.forfait_auto).items():
+                self.fields["forfait_auto_%s" % key].initial = valeur
 
         # Etats conditionnels
         if not self.instance.pk:
@@ -430,6 +468,14 @@ class Formulaire(FormulaireBase, ModelForm):
                         Field("forfait_beneficiaire"),
                         Field("date_facturation_credit_type"),
                         Field("date_facturation_credit"),
+                        Field("type_application"),
+                        Fieldset("Paramètres du forfait automatique",
+                            HTML("""<div class='alert alert-warning alert-dismissible'><i class='icon fa fa-warning'></i>L'application automatique est une fonction expérimentale. A utiliser avec vigilance.</div>"""),
+                            Field("forfait_auto_nbre_conso_min"),
+                            Field("forfait_auto_debut"),
+                            Field("forfait_auto_fin"),
+                            id="div_parametres_forfait_auto",
+                        ),
                         Fieldset('Durée par défaut',
                             Field('validite_duree_forfait'),
                             Div(
@@ -438,6 +484,7 @@ class Formulaire(FormulaireBase, ModelForm):
                                 Field('validite_jours'),
                                 id='bloc_duree_forfait'
                             ),
+                             id="div_validite_duree_forfait",
                         ),
                         id="div_type_credit"
                     ),
@@ -519,6 +566,16 @@ class Formulaire(FormulaireBase, ModelForm):
             if self.cleaned_data["methode"] not in ("montant_unique", "qf"):
                 self.add_error('methode', "Le type 'Forfait daté' n'est compatible qu'avec les méthodes 'Montant unique' et 'En fonction du QF'.")
                 return
+
+        # Forfait crédit : Automatique
+        if self.cleaned_data["type"] == "CREDIT" and self.cleaned_data["type_application"] == "AUTO" and self.cleaned_data["forfait_beneficiaire"] == "individu":
+            self.cleaned_data["forfait_auto"] = json.dumps({
+                "nbre_conso_min" : self.cleaned_data["forfait_auto_nbre_conso_min"],
+                "debut": self.cleaned_data["forfait_auto_debut"],
+                "fin": self.cleaned_data["forfait_auto_fin"],
+            })
+        else:
+            self.cleaned_data["forfait_auto"] = None
 
         # Durée par défaut si forfait-crédit
         if self.cleaned_data["validite_duree_forfait"] == "OUI":
@@ -787,6 +844,34 @@ $(document).ready(function() {
     On_change_date_facturation_forfait_type.call($('#id_date_facturation_forfait_type').get(0));
 });
 
+// forfait_beneficiaire
+function On_change_forfait_beneficiaire() {console.log("coucou");
+    $('#div_id_type_application').hide();
+    if ($(this).val() == 'individu') {
+        $('#div_id_type_application').show();
+    }
+    On_change_type_application.call($('#id_type_application').get(0));
+}
+$(document).ready(function() {
+    $('#id_forfait_beneficiaire').change(On_change_forfait_beneficiaire);
+    On_change_forfait_beneficiaire.call($('#id_forfait_beneficiaire').get(0));
+});
+
+// type_application
+function On_change_type_application() {
+    $('#div_parametres_forfait_auto').hide();
+    $('#div_validite_duree_forfait').hide();
+    if (($(this).val() == 'AUTO') & ($('#id_forfait_beneficiaire').val() == 'individu')) {
+        $('#div_parametres_forfait_auto').show();
+    }
+    if (($(this).val() == 'MANUEL') | ($('#id_forfait_beneficiaire').val() == 'famille')) {
+        $('#div_validite_duree_forfait').show();
+    }
+}
+$(document).ready(function() {
+    $('#id_type_application').change(On_change_type_application);
+    On_change_type_application.call($('#id_type_application').get(0));
+});
 
 </script>
 """
