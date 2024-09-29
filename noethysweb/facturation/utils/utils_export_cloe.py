@@ -3,11 +3,31 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import os, calendar, datetime, shutil, uuid
+import os, datetime, shutil, uuid
 from django.conf import settings
-from core.models import Famille, Facture, Prestation, Depot, Reglement
-from core.utils import utils_dates, utils_parametres, utils_texte
-from dateutil.relativedelta import relativedelta
+from core.models import Famille, Facture, Prestation, Depot, Reglement, Ventilation
+from core.utils import utils_dates
+
+
+format_export_cpt = [("num_compte", "Numéro de compte", 10), ("nom", "Raison sociale ou nom", 30),
+                     ("adresse", "Adresse", 30), ("complement_adresse", "Complément d'adresse", 30),
+                     ("cp", "Code postal", 5), ("ville", "Ville", 44),
+                     ("compte_collectif", "Compte collectif pour les comptes clients", 10)]
+
+format_export_fac = [("num_ecriture", "Numéro d'écriture", 6), ("num_ligne_ecriture", "Numéro de ligne d'écriture", 6),
+                     ("date_ecriture", "Date d'écriture", 8), ("compte_general", "Compte général", 11),
+                     ("compte_analytique", "Compte analytique", 10), ("code_journal", "Code journal", 3),
+                     ("type_piece", "Type de pièce", 3), ("num_piece", "Numéro de pièce", 15), ("montant", "Montant", 15),
+                     ("libelle", "Libellé de l'écriture", 50), ("date_echeance", "Date d'échéance", 8),
+                     ("num_reglement", "Numéro de règlement", 12), ("num_facture", "Numéro de facture", 20)]
+
+format_export_rgl = [("num_ecriture", "Numéro d'écriture", 6), ("num_ligne_ecriture", "Numéro de ligne d'écriture", 6),
+                     ("date_ecriture", "Date d'écriture", 8), ("compte_general", "Compte général", 11),
+                     ("code_analytique", "Compte analytique", 10), ("code_journal", "Code journal", 3),
+                     ("type_piece", "Type de pièce", 3), ("num_piece", "Numéro de pièce", 15), ("montant", "Montant", 15),
+                     ("libelle_ecriture", "Libellé de l'écriture", 50), ("date_echeance", "Date d'échéance", 8),
+                     ("num_reglement", "Numéro de règlement", 12), ("num_facture", "Numéro de facture", 20),
+                     ("emetteur", "Emetteur", 40), ("etablissement_bancaire", "Etablissement bancaire", 40)]
 
 
 class Exporter():
@@ -32,7 +52,7 @@ class Exporter():
         return os.path.join(settings.MEDIA_URL, self.rep_base, nom_fichier_zip)
 
     def Get_detail_factures(self, factures=[]):
-        prestations = Prestation.objects.select_related("activite", "individu", "facture").filter(facture__in=factures)
+        prestations = Prestation.objects.select_related("activite", "individu", "facture", "cotisation", "cotisation__type_cotisation").filter(facture__in=factures)
 
         dict_resultats = {}
         for prestation in prestations:
@@ -42,6 +62,9 @@ class Exporter():
             if prestation.activite:
                 if prestation.activite.code_comptable: code_compta = prestation.activite.code_comptable
                 if prestation.activite.code_analytique: code_analytique = prestation.activite.code_analytique
+            if hasattr(prestation, "cotisation"):
+                if prestation.cotisation.type_cotisation.code_comptable: code_compta = prestation.cotisation.type_cotisation.code_comptable
+                if prestation.cotisation.type_cotisation.code_analytique: code_analytique = prestation.cotisation.type_cotisation.code_analytique
             if prestation.code_compta: code_compta = prestation.code_compta
             if prestation.code_analytique: code_analytique = prestation.code_analytique
 
@@ -75,8 +98,8 @@ class Exporter():
         texte = []
         for valeurs_ligne in lignes:
             ligne = []
-            for nom_colonne, taille_colonne in format_export:
-                valeur = str(valeurs_ligne.get(nom_colonne, "") or "")
+            for code_colonne, nom_colonne, taille_colonne in format_export:
+                valeur = str(valeurs_ligne.get(code_colonne, "") or "")
                 ligne.append(valeur[:taille_colonne].ljust(taille_colonne))
             texte.append("".join(ligne))
         return "\n".join(texte)
@@ -99,12 +122,11 @@ class Exporter():
             ligne["complement_adresse"] = lignes_rue[1] if len(lignes_rue) > 1 else ""
             ligne["cp"] = famille.cp_resid
             ligne["ville"] = famille.ville_resid
-            ligne["compte_collectif"] = "411000"
+            ligne["compte_collectif"] = self.options["compte_collectif"] or ""
             lignes.append(ligne)
 
         # Création du fichier
-        format_export = [("num_compte", 10), ("nom", 30), ("adresse", 30), ("complement_adresse", 30), ("cp", 5), ("ville", 44), ("compte_collectif", 10)]
-        texte = self.Generer_fichier_texte(format_export=format_export, lignes=lignes)
+        texte = self.Generer_fichier_texte(format_export=format_export_cpt, lignes=lignes)
         with open(os.path.join(self.rep_destination, "CPT-%s.TXT" % datetime.date.today().strftime("%d%m%Y")), "w") as fichier:
             fichier.write(texte)
 
@@ -149,29 +171,38 @@ class Exporter():
             lignes.append(ligne)
 
         # Création du fichier
-        format_export = [("num_ecriture", 6), ("num_ligne_ecriture", 6), ("date_ecriture", 8), ("compte_general", 11), ("compte_analytique", 10), ("code_journal", 3),
-                         ("type_piece", 3), ("num_piece", 15), ("montant", 15), ("libelle", 50), ("date_echeance", 8), ("num_reglement", 12), ("num_facture", 20)]
-        texte = self.Generer_fichier_texte(format_export=format_export, lignes=lignes)
+        texte = self.Generer_fichier_texte(format_export=format_export_fac, lignes=lignes)
         with open(os.path.join(self.rep_destination, "FAC-%s.TXT" % datetime.date.today().strftime("%d%m%Y")), "w") as fichier:
             fichier.write(texte)
 
         # Génération du fichier des règlements
+        depots = Depot.objects.filter(date__gte=date_debut, date__lte=date_fin).order_by("pk")
+
+        ventilations = Ventilation.objects.select_related("reglement", "prestation", "prestation__facture").filter(reglement__depot__in=depots, prestation__facture__isnull=False)
+        dict_reglements_factures = {ventilation.reglement: ventilation.prestation.facture.numero for ventilation in ventilations}
+
         lignes = []
-        for index_depot, depot in enumerate(Depot.objects.filter(date__gte=date_debut, date__lte=date_fin).order_by("pk"), 1):
+        for index_depot, depot in enumerate(depots, 1):
 
             # Ligne du règlement
-            for index_reglement, reglement in enumerate(Reglement.objects.select_related("famille", "emetteur").filter(depot=depot), 1):
+            index_reglement = 0
+            dernier_reglement = None
+            for index_reglement, reglement in enumerate(Reglement.objects.select_related("famille", "mode", "emetteur", "payeur").filter(depot=depot), 1):
+                dernier_reglement = reglement
                 ligne = {}
                 ligne["num_ecriture"] = index_depot
                 ligne["num_ligne_ecriture"] = index_reglement
-                ligne["date_depot"] = depot.date.strftime("%d%m%Y")
-                ligne["num_compte"] = "FAM%06d" % reglement.famille.pk
-                if reglement.famille.code_compta:
-                    ligne["num_compte"] = reglement.famille.code_compta
-                ligne["montant"] = "%.2f" % -reglement.montant
-                ligne["nom"] = reglement.famille.nom
+                ligne["date_ecriture"] = depot.date.strftime("%d%m%Y")
+                ligne["compte_general"] = reglement.famille.code_compta or "FAM%06d" % reglement.famille.pk
+                ligne["code_journal"] = reglement.mode.code_journal or ""
                 ligne["type_piece"] = "FV"
-                ligne["nom_emetteur"] = reglement.emetteur.nom if reglement.emetteur else ""
+                ligne["num_piece"] = reglement.numero_piece or ""
+                ligne["montant"] = "%.2f" % -reglement.montant
+                ligne["libelle_ecriture"] = reglement.famille.nom
+                ligne["num_reglement"] = depot.pk
+                ligne["num_facture"] = dict_reglements_factures.get(reglement, "")
+                ligne["emetteur"] = reglement.payeur.nom
+                ligne["etablissement_bancaire"] = reglement.emetteur.nom if reglement.emetteur else ""
                 ligne["monnaie"] = "E"
                 lignes.append(ligne)
 
@@ -179,16 +210,17 @@ class Exporter():
             ligne = {}
             ligne["num_ecriture"] = index_depot
             ligne["num_ligne_ecriture"] = index_reglement + 1
-            ligne["date_depot"] = depot.date.strftime("%d%m%Y")
-            ligne["num_compte"] = depot.code_compta
-            ligne["montant"] = "%.2f" % depot.montant
-            ligne["nom"] = depot.nom
+            ligne["date_ecriture"] = depot.date.strftime("%d%m%Y")
+            ligne["compte_general"] = depot.code_compta
+            ligne["code_journal"] = dernier_reglement.mode.code_journal if dernier_reglement and dernier_reglement.mode.code_journal else ""
             ligne["type_piece"] = "FV"
+            ligne["montant"] = "%.2f" % (depot.montant or 0.0)
+            ligne["libelle_ecriture"] = depot.nom
+            ligne["num_reglement"] = depot.pk
             lignes.append(ligne)
 
         # Création du fichier
-        format_export = [("num_compte", 10), ("nom", 30), ("adresse", 30), ("complement_adresse", 30), ("cp", 5), ("ville", 44), ("compte_collectif", 10)]
-        texte = self.Generer_fichier_texte(format_export=format_export, lignes=lignes)
+        texte = self.Generer_fichier_texte(format_export=format_export_rgl, lignes=lignes)
         with open(os.path.join(self.rep_destination, "RGL-%s.TXT" % datetime.date.today().strftime("%d%m%Y")), "w") as fichier:
             fichier.write(texte)
 

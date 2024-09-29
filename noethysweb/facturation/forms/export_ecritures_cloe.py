@@ -14,6 +14,7 @@ from core.forms.base import FormulaireBase
 
 class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget(attrs={"afficher_check": False}))
+    compte_collectif = forms.CharField(label="Compte collectif", max_length=100, initial="411000", help_text="Compte collectif pour les comptes clients.")
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -32,5 +33,6 @@ class Formulaire(FormulaireBase, forms.Form):
                       ]),
             Fieldset("Paramètres",
                 Field("periode"),
+                Field("compte_collectif"),
             ),
         )

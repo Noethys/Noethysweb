@@ -44,6 +44,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field('label'),
                 Field('type_comptable'),
                 Field('code_compta'),
+                Field('code_journal'),
             ),
             Fieldset("Image",
                 Field('image'),
