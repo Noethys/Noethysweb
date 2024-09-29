@@ -6,13 +6,13 @@ import datetime, decimal, uuid, os
 from django.db import models
 from django.db.models import Sum, Count, Q
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.files.storage import get_storage_class
 from django.templatetags.static import static
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, UserManager
 from django_resized import ResizedImageField
 from django_cryptography.fields import encrypt
 from django.utils.translation import gettext_lazy as _
+from django.utils.module_loading import import_string
 from multiselectfield import MultiSelectField
 from core.data import data_civilites
 from core.data.data_modeles_impressions import CATEGORIES as CATEGORIES_MODELES_IMPRESSIONS
@@ -254,7 +254,7 @@ def get_uuid_path(instance, filename):
 def get_storage(nom_champ=None):
     """ Renvoie la classe de stockage souhaitée """
     class_storage = getattr(settings, "STORAGE_%s" % nom_champ.upper(), "django.core.files.storage.FileSystemStorage")
-    return get_storage_class(class_storage)
+    return import_string(class_storage)()
 
 
 class AdresseMail(models.Model):
@@ -508,6 +508,7 @@ class ModeReglement(models.Model):
     type_choix = [("banque", "Banque"), ("caisse", "Caisse")]
     type_comptable = models.CharField(verbose_name="Type comptable", max_length=100, choices=type_choix, default="banque", blank=True, null=True)
     code_compta = models.CharField(verbose_name="Code comptable", max_length=200, blank=True, null=True)
+    code_journal = models.CharField(verbose_name="Code journal", max_length=200, blank=True, null=True)
 
     class Meta:
         db_table = 'modes_reglements'
@@ -1452,8 +1453,8 @@ class Tarif(models.Model):
     choix_methode = [(dict_methode["code"], dict_methode["label"]) for dict_methode in LISTE_METHODES_TARIFS]
     methode = models.CharField(verbose_name="Méthode", max_length=200, choices=choix_methode, default="montant_unique")
     forfait_duree = models.CharField(verbose_name="Durée de validité par défaut", max_length=100, blank=True, null=True)
-    beneficiaire_choix = [("individu", "Forfait individuel"), ("famille", "Forfait familial")]
-    forfait_beneficiaire = models.CharField(verbose_name="Type de forfait", max_length=50, choices=beneficiaire_choix, default="individu", blank=True, null=True)
+    beneficiaire_choix = [("individu", "Individu"), ("famille", "Famille")]
+    forfait_beneficiaire = models.CharField(verbose_name="Bénéficiaire", max_length=50, choices=beneficiaire_choix, default="individu", blank=True, null=True)
     description = models.CharField(verbose_name="Description", max_length=400, blank=True, null=True)
     jours_scolaires = MultiSelectField(verbose_name="Jours sur les périodes scolaires", max_length=100, choices=JOURS_SEMAINE, blank=True, null=True)
     jours_vacances = MultiSelectField(verbose_name="Jours sur les périodes de vacances", max_length=100, choices=JOURS_SEMAINE, blank=True, null=True)
@@ -1477,6 +1478,7 @@ class Tarif(models.Model):
     penalite = models.CharField(verbose_name="Pénalité", max_length=100, choices=choix_penalite, default=None, blank=True, null=True, help_text="Sélectionnez un type de pénalité financière à appliquer en cas d'absence injustifiée.")
     penalite_pourcentage = models.DecimalField(verbose_name="Pourcentage", max_digits=10, decimal_places=2, default=100, blank=True, null=True, help_text="Saisissez le pourcentage à appliquer.")
     penalite_label = models.CharField(verbose_name="Label de la prestation", max_length=300, blank=True, null=True, help_text="Saisissez le label de la prestation de pénalité. Laissez vide pour utiliser le label par défaut. Mots-clés disponibles : {LABEL_PRESTATION}.")
+    forfait_auto = models.CharField(verbose_name="Automatique", max_length=400, blank=True, null=True)
 
     class Meta:
         db_table = 'tarifs'
@@ -2508,7 +2510,8 @@ class QuestionnaireReponse(models.Model):
 
     def Get_reponse_for_ctrl(self):
         if self.question.controle in ("liste_deroulante", "liste_coches"):
-            return self.reponse.split(";")
+            if self.reponse:
+                return self.reponse.split(";")
         if self.question.controle in ("entier", "slider"):
             if self.reponse:
                 return int(self.reponse)
@@ -4432,7 +4435,8 @@ class SondageReponse(models.Model):
 
     def Get_reponse_for_ctrl(self):
         if self.question.controle in ("liste_deroulante", "liste_coches"):
-            return self.reponse.split(";")
+            if self.reponse:
+                return self.reponse.split(";")
         if self.question.controle in ("entier", "slider"):
             if self.reponse:
                 return int(self.reponse)
