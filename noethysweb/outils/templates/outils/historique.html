@@ -13,7 +13,7 @@
                 {% block box_contenu %}
                     <div class="custom-control custom-checkbox custom-control-inline">
                         <input type="checkbox" class="custom-control-input" id="id_check_delai" {% if afficher_dernier_mois %}checked{% endif %}>
-                        <label class="custom-control-label" for="id_check_delai">Afficher uniquement les actions des 10 derniers jours</label>
+                        <label class="custom-control-label" for="id_check_delai">Afficher uniquement les actions des 7 derniers jours</label>
                     </div>
                     {% embed 'core/crud/liste.html' %}
                     {% endembed %}

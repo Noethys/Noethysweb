@@ -3,16 +3,18 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
+from django.db.models import Q
+from django.conf import settings
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Historique
+from core.models import Historique
 from fiche_famille.views.famille import Onglet
-from django.db.models import Q
 
 
 class Page(Onglet):
     description_liste = "Vous pouvez consulter ici la liste des actions effectuées sur cette fiche famille."
+    if settings.PURGE_HISTORIQUE_JOURS:
+        description_liste += " Les actions sont mémorisées uniquement jusqu'à %d jours." % settings.PURGE_HISTORIQUE_JOURS
 
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """

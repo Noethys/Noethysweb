@@ -5,14 +5,17 @@
 
 import datetime
 from django.db.models import Q
+from django.conf import settings
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Historique
+from core.models import Historique
 from core.utils import utils_parametres
 
 
 class Page(crud.Page):
     description_liste = "Vous pouvez consulter ici la liste des actions effectuées dans le logiciel."
+    if settings.PURGE_HISTORIQUE_JOURS:
+        description_liste += " Les actions sont mémorisées uniquement jusqu'à %d jours." % settings.PURGE_HISTORIQUE_JOURS
     menu_code = "historique"
 
     def get_context_data(self, **kwargs):
@@ -32,7 +35,7 @@ class Liste(Page, crud.Liste):
         conditions = (Q(utilisateur__structures__in=self.request.user.structures.all()) | Q(utilisateur__categorie="famille"))
         self.afficher_dernier_mois = utils_parametres.Get(nom="afficher_dernier_mois", categorie="historique", utilisateur=self.request.user, valeur=True)
         if self.afficher_dernier_mois:
-            conditions &= Q(horodatage__date__gte=datetime.date.today() - datetime.timedelta(days=10))
+            conditions &= Q(horodatage__date__gte=datetime.date.today() - datetime.timedelta(days=7))
         return Historique.objects.select_related("famille", "individu", "collaborateur", "utilisateur").filter(conditions, self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):

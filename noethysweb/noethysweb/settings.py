@@ -50,13 +50,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 AUTH_USER_MODEL = 'core.Utilisateur'
 DUREE_VALIDITE_MDP = 60*60*48
 CORRECTEUR_JOURS_RETROACTION = 30
-PURGE_HISTORIQUE_JOURS = None
+PURGE_HISTORIQUE_JOURS = 365
 ATTRIBUTION_TARIF_FRATERIE_AINES = True
 
 # CONFIGURATION ACCUEIL
 CONFIG_ACCUEIL_DEFAUT = [
     [[6, "citation", "anniversaires"], [6, "celebrations", "anniversaires_demain"]],
-    [[8, "notes", "taches", "suivi_consommations", "suivi_inscriptions"], [4, "graphe_individus", "messages", "astuce"]],
+    [[8, "notes", "taches", "suivi_consommations", "suivi_inscriptions", "suivi_reservations"], [4, "graphe_individus", "messages", "astuce"]],
 ]
 
 # Application definition
