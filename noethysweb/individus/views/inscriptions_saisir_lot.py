@@ -81,14 +81,14 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['idrattachement', "igenerique:individu", "fgenerique:famille", "genre", "profil"]
+        filtres = ['idrattachement', "igenerique:individu", "fgenerique:famille", "genre", "categorie"]
         check = columns.CheckBoxSelectColumn(label="")
         idindividu = columns.IntegerColumn("ID", sources=['individu__pk'])
         nom = columns.TextColumn("Nom", sources=['individu__nom'])
         prenom = columns.TextColumn("Prénom", sources=['individu__prenom'])
         genre = columns.TextColumn("Genre", sources=None, processor='Get_genre')
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
-        profil = columns.TextColumn("Profil", sources=['Get_profil'])
+        categorie = columns.TextColumn("Profil", sources=['categorie'], processor="Get_categorie")
         rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
         cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')
         ville_resid = columns.TextColumn("Ville",  sources=None, processor='Get_ville_resid')
@@ -98,9 +98,12 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idrattachement", "idindividu", "nom", "prenom", "profil", "famille", "age", "date_naiss", "genre", "rue_resid", "cp_resid", "ville_resid"]
+            columns = ["check", "idrattachement", "idindividu", "nom", "prenom", "categorie", "famille", "age", "date_naiss", "genre", "rue_resid", "cp_resid", "ville_resid"]
             hidden_columns = ["idrattachement", "secteur"]
             ordering = ["nom", "prenom"]
+
+        def Get_categorie(self, instance, *args, **kwargs):
+            return instance.Get_profil()
 
         def Get_age(self, instance, *args, **kwargs):
             return instance.individu.Get_age()
