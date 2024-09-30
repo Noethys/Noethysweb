@@ -187,13 +187,18 @@ class Ajouter(Page, crud.Ajouter):
         self.object = form.save()
         messages.add_message(self.request, messages.SUCCESS, "L'inscription a bien été enregistrée")
 
+        # Mémorisation dans l'historique
+        self.save_historique(instance=self.object, form=form)
+
         # Enregistre un forfait si besoin
         f = utils_forfaits.Forfaits(request=self.request, famille=self.object.famille_id, activites=[self.object.activite_id], individus=[self.object.individu_id])
         f.Applique_forfait(mode_inscription=True, selection_activite=self.object.activite_id)
 
-        # Mémorisation dans l'historique
-        self.save_historique(instance=self.object, form=form)
+        # S'il y a des tarifs au choix, envoie vers la page du choix des montants
+        if f.montants_a_choisir:
+            return HttpResponseRedirect(reverse_lazy("individu_appliquer_forfait_date_choix", kwargs={"idfamille": self.object.famille_id, "idindividu": self.object.individu_id, "tarifs": ";".join([str(x) for x in f.montants_a_choisir])}))
 
+        # Retourne à la liste des inscriptions de l'individu
         return HttpResponseRedirect(self.get_success_url())
 
 

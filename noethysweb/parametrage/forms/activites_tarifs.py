@@ -563,8 +563,8 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.cleaned_data["date_facturation"] = "date:%s" % self.cleaned_data["date_facturation_forfait"]
             else:
                 self.cleaned_data["date_facturation"] = self.cleaned_data["date_facturation_forfait_type"].lower()
-            if self.cleaned_data["methode"] not in ("montant_unique", "qf"):
-                self.add_error('methode', "Le type 'Forfait daté' n'est compatible qu'avec les méthodes 'Montant unique' et 'En fonction du QF'.")
+            if self.cleaned_data["methode"] not in ("montant_unique", "qf", "choix"):
+                self.add_error('methode', "Le type 'Forfait daté' n'est compatible qu'avec les méthodes 'Montant unique', 'En fonction du QF' et 'au choix'.")
                 return
 
         # Forfait crédit : Automatique

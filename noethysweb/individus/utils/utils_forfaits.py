@@ -21,6 +21,7 @@ class Forfaits():
         self.saisie_manuelle = saisie_manuelle
         self.saisie_auto = saisie_auto
         self.vacances = Vacance.objects.all()
+        self.montants_a_choisir = []
 
         # Périodes de gestion
         # self.gestion = UTILS_Gestion.Gestion(None)
@@ -89,8 +90,9 @@ class Forfaits():
 
         return dict_resultats
 
-    def Applique_forfait(self, request=None, categorie_tarif=None, selection_tarif=None, mode_inscription=False, selection_activite=None):
+    def Applique_forfait(self, request=None, categorie_tarif=None, selection_tarif=None, mode_inscription=False, selection_activite=None, choix_montant=None):
         """ Recherche et applique les forfaits auto à l'inscription """
+        self.montants_a_choisir = []
         if request:
             self.request = request
 
@@ -114,13 +116,11 @@ class Forfaits():
         for IDindividu in self.selection_individus:
             for IDactivite, activite in dict_activites.items():
                 for inscription in dict_inscriptions.get((IDindividu, IDactivite), []):
-
                     # Récupère la catégorie de tarif
                     if not categorie_tarif:
                         categorie_tarif = inscription.categorie_tarif
 
                     for tarif in getattr(activite, "tarifs", []):
-
                         # Conditions
                         groupes_tarif = tarif.groupes.all()
                         categories_tarif = tarif.categories_tarifs.all()
@@ -206,21 +206,15 @@ class Forfaits():
                                     if QFfamille and ligne.qf_min <= QFfamille <= ligne.qf_max:
                                         break
 
-                            # -------------- Recherche du montant du tarif : CHOIX (MONTANT ET LABEL SELECTIONNES PAR L'UTILISATEUR)
-                            # if tarif.methode == "choix":
-                            #     # Nouvelle saisie si clic sur la case
-                            #     lignes_calcul = dictTarif["lignes_calcul"]
-                            #     from Dlg import DLG_Selection_montant_prestation
-                            #     dlg = DLG_Selection_montant_prestation.Dialog(None, lignes_calcul=lignes_calcul,
-                            #                                                   label=nom_tarif, montant=0.0,
-                            #                                                   titre=labelTarif)
-                            #     if dlg.ShowModal() == wx.ID_OK:
-                            #         nom_tarif = dlg.GetLabel()
-                            #         montant_tarif = dlg.GetMontant()
-                            #         dlg.Destroy()
-                            #     else:
-                            #         dlg.Destroy()
-                            #         return False
+                            # ------------ Recherche du montant du tarif : CHOIX (MONTANT ET LABEL SELECTIONNES PAR L'UTILISATEUR)
+                            if tarif.methode == "choix":
+                                if selection_tarif and choix_montant:
+                                    montant_tarif = choix_montant[0]
+                                    if choix_montant[1]:
+                                        label_forfait = choix_montant[1]
+                                else:
+                                    self.montants_a_choisir.append(tarif.pk)
+                                    break
 
                             # ------------ Déduction d'une aide journalière --------------
 

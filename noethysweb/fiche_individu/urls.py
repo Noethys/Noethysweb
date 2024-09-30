@@ -7,7 +7,8 @@ from django.urls import include, path
 from core.decorators import secure_ajax
 from fiche_individu.views import individu, individu_identite, individu_coords, individu_questionnaire, individu_scolarite, individu_inscriptions, \
                                 individu_medical, individu_notes, individu_liens, individu_appliquer_forfait_date, individu_contacts, \
-                                individu_regimes_alimentaires, individu_assurances, individu_maladies, individu_transports
+                                individu_regimes_alimentaires, individu_assurances, individu_maladies, individu_transports, \
+                                individu_appliquer_forfait_date_choix
 
 urlpatterns = [
 
@@ -40,6 +41,7 @@ urlpatterns = [
     path('individus/individus/inscriptions/modifier/<int:idfamille>/<int:idindividu>/<int:pk>', individu_inscriptions.Modifier.as_view(), name='individu_inscriptions_modifier'),
     path('individus/individus/inscriptions/supprimer/<int:idfamille>/<int:idindividu>/<int:pk>', individu_inscriptions.Supprimer.as_view(), name='individu_inscriptions_supprimer'),
     path('individus/individus/inscriptions/appliquer_forfait_date/<int:idfamille>/<int:idindividu>', individu_appliquer_forfait_date.View.as_view(), name='individu_appliquer_forfait_date'),
+    path('individus/individus/inscriptions/appliquer_forfait_date_choix/<int:idfamille>/<int:idindividu>/<str:tarifs>', individu_appliquer_forfait_date_choix.View.as_view(), name='individu_appliquer_forfait_date_choix'),
 
     path('individus/individus/regimes_alimentaires/<int:idfamille>/<int:idindividu>', individu_regimes_alimentaires.Consulter.as_view(), name='individu_regimes_alimentaires'),
     path('individus/individus/regimes_alimentaires/modifier/<int:idfamille>/<int:idindividu>', individu_regimes_alimentaires.Modifier.as_view(), name='individu_regimes_alimentaires_modifier'),

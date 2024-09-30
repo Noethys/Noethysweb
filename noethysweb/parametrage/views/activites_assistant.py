@@ -73,9 +73,10 @@ class Page_tarifs(forms.Form):
             else:
                 texte_categorie = ""
             self.fields["data_tarif_%d" % index] = forms.CharField(widget=forms.HiddenInput(), required=False)
-            self.fields["methode_tarif_%d" % index] = forms.ChoiceField(label="Méthode de calcul%s" % texte_categorie, choices=[(dict_methode["code"], dict_methode["label"]) for dict_methode in LISTE_METHODES_TARIFS[:2]], initial="montant_unique", required=True)
+            liste_methodes = [dict_methode for dict_methode in LISTE_METHODES_TARIFS if "FORFAIT" in dict_methode["tarifs_compatibles"]]
+            self.fields["methode_tarif_%d" % index] = forms.ChoiceField(label="Méthode de calcul%s" % texte_categorie, choices=[(dict_methode["code"], dict_methode["label"]) for dict_methode in liste_methodes], initial="montant_unique", required=True)
             attrs = {
-                'liste_methodes_tarifs': LISTE_METHODES_TARIFS[:2],
+                'liste_methodes_tarifs': liste_methodes,
                 'dict_colonnes_tarifs': DICT_COLONNES_TARIFS,
                 'id_ctrl_methode': "id_tarifs-methode_tarif_%d" % index,
                 'id': index,
