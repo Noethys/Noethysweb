@@ -190,13 +190,13 @@ class Ajouter(Page, crud.Ajouter):
         # Mémorisation dans l'historique
         self.save_historique(instance=self.object, form=form)
 
-        # Enregistre un forfait si besoin
-        f = utils_forfaits.Forfaits(request=self.request, famille=self.object.famille_id, activites=[self.object.activite_id], individus=[self.object.individu_id])
-        f.Applique_forfait(mode_inscription=True, selection_activite=self.object.activite_id)
-
-        # S'il y a des tarifs au choix, envoie vers la page du choix des montants
-        if f.montants_a_choisir:
-            return HttpResponseRedirect(reverse_lazy("individu_appliquer_forfait_date_choix", kwargs={"idfamille": self.object.famille_id, "idindividu": self.object.individu_id, "tarifs": ";".join([str(x) for x in f.montants_a_choisir])}))
+        # Application d'un forfait daté si inscription valide
+        if self.object.statut == "ok":
+            # Enregistre un forfait si besoin
+            f = utils_forfaits.Forfaits(request=self.request, famille=self.object.famille_id, activites=[self.object.activite_id], individus=[self.object.individu_id])
+            f.Applique_forfait(mode_inscription=True, selection_activite=self.object.activite_id)
+            if f.montants_a_choisir:
+                return HttpResponseRedirect(reverse_lazy("individu_appliquer_forfait_date_choix", kwargs={"idfamille": self.object.famille_id, "idindividu": self.object.individu_id, "tarifs": ";".join([str(x) for x in f.montants_a_choisir])}))
 
         # Retourne à la liste des inscriptions de l'individu
         return HttpResponseRedirect(self.get_success_url())
@@ -276,6 +276,15 @@ class Modifier(Page, crud.Modifier):
                 for conso in consommations:
                     grille.Modifier(criteres={"idconso": conso.pk}, modifications={"categorie_tarif": form.cleaned_data["categorie_tarif"].pk})
                 grille.Enregistrer()
+
+        # Si le changement de statut entraîne l'application d'un forfait daté
+        if "statut" in form.changed_data and form.cleaned_data["statut"] == "ok":
+            logger.debug("Change de statut pour l'inscription : OK")
+            f = utils_forfaits.Forfaits(request=self.request, famille=self.object.famille_id, activites=[self.object.activite_id], individus=[self.object.individu_id])
+            f.Applique_forfait(mode_inscription=True, selection_activite=self.object.activite_id)
+            if f.montants_a_choisir:
+                self.object.save()
+                return HttpResponseRedirect(reverse_lazy("individu_appliquer_forfait_date_choix", kwargs={"idfamille": self.object.famille_id, "idindividu": self.object.individu_id, "tarifs": ";".join([str(x) for x in f.montants_a_choisir])}))
 
         return super(Modifier, self).form_valid(form)
 
