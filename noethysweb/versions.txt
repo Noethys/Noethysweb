@@ -1,3 +1,8 @@
+Version 1.2.6.3 (01/10/2024) :
+
+- Ajout de la prise en charge du tarif au choix pour les forfaits datés
+- Correction sur la suppression automatique des forfaits crédit
+
 Version 1.2.6.2 (29/09/2024) :
 
 - Ajout de la synthèse des déductions dans le menu Facturation
