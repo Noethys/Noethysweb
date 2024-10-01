@@ -967,7 +967,7 @@ class Facturation():
                                 self.liste_anciennes_prestations.append(idprestation)
                             # Suppression d'une prestation forfait-crédit
                             if dict_prestation["forfait_date_debut"]:
-                                if not dict_prestation["facture"] and not self.Recherche_forfait_applicable(tarif=dict_prestation["tarif"], case_tableau=case_tableau, dict_prestation=dict_prestation):
+                                if not dict_prestation["facture"] and self.Recherche_forfait_applicable(tarif=dict_prestation["tarif"], case_tableau=case_tableau, dict_prestation=dict_prestation) == False:
                                     self.liste_anciennes_prestations.append(idprestation)
                                     tout_recalculer = True
 
@@ -1048,7 +1048,7 @@ class Facturation():
         if quantites_dates >= parametres_tarif["nbre_conso_min"]:
             return (forfait_date_debut, forfait_date_fin)
 
-        return None
+        return False
 
     def Memorise_prestation(self, case_tableau, tarif, nom_tarif, montant_initial, montant_final, liste_aides=[],
                            temps_facture=None, forfait_date_debut=None, forfait_date_fin=None, evenement=None, quantite=1, tarif_ligne=None):
