@@ -522,6 +522,7 @@ urlpatterns = [
     path('parametrage/articles/modifier/<int:pk>', articles.Modifier.as_view(), name='articles_modifier'),
     path('parametrage/articles/supprimer/<int:pk>', articles.Supprimer.as_view(), name='articles_supprimer'),
     path('parametrage/articles/dupliquer/<int:pk>', articles.Dupliquer.as_view(), name='articles_dupliquer'),
+    path('parametrage/articles/apercu/<int:pk>', articles.Apercu.as_view(), name='articles_apercu'),
 
     # Images d'articles
     path('parametrage/images_articles/liste', images_articles.Liste.as_view(), name='images_articles_liste'),

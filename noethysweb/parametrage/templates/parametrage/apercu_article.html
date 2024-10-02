@@ -1,0 +1,40 @@
+{% extends "core/page.html" %}
+{% load static %}
+{% load embed %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .card-img-top {
+            border-top-left-radius: .25rem;
+            border-top-right-radius: .25rem;
+        }
+    </style>
+
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <p>
+                Voici ci-dessous un aperçu de l'article '{{ article.titre }}'. Il apparaîtra de la façon suivante sur le portail famille. Notez que les 
+                éventuels liens qui apparaissent dans cet article ne sont pas fonctionnels dans cet aperçu car ils renvoient vers des pages 
+                accessibles uniquement sur le portail.
+            </p>
+            <p>
+                <a href="{% url 'articles_liste' %}"><i class="fa fa-arrow-circle-o-left mb-2"></i> Revenir à la liste des articles</a>
+            </p>
+            <div class="card-columns">
+                {% include 'portail/article.html' %}
+            </div>
+        </div>
+    </div>
+
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+{% endblock scripts %}

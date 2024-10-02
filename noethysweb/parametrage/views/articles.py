@@ -5,6 +5,7 @@
 
 from copy import deepcopy
 from django.urls import reverse_lazy, reverse
+from django.views.generic import TemplateView
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Article
@@ -42,12 +43,13 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idarticle", "titre", "date_debut", "date_fin"]
+        apercu = columns.TextColumn("Aperçu", sources=None, processor='Get_apercu')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         statut = columns.TextColumn("Statut", sources=["statut"], processor='Get_statut')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idarticle", "titre", "date_debut", "date_fin", "statut", "actions"]
+            columns = ["idarticle", "titre", "date_debut", "date_fin", "statut", "apercu", "actions"]
             ordering = ["date_debut"]
             processors = {
                 "date_debut": helpers.format_date("%d/%m/%Y %H:%M"),
@@ -60,6 +62,10 @@ class Liste(Page, crud.Liste):
                 return "<small class='badge badge-success'>Publié</small>"
             else:
                 return "<small class='badge badge-danger'>Non publié</small>"
+
+        def Get_apercu(self, instance, *args, **kwargs):
+            html = [self.Create_bouton(url=reverse("articles_apercu", args=[instance.pk]), title="Aperçu", icone="fa-search")]
+            return self.Create_boutons_actions(html)
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut la duplication dans les boutons d'actions """
@@ -96,3 +102,12 @@ class Dupliquer(Page, crud.Dupliquer):
         # Redirection
         url = reverse(self.url_modifier, args=[nouvel_article.pk,]) if "dupliquer_ouvrir" in request.POST else None
         return self.Redirection(url=url)
+
+class Apercu(Page, TemplateView):
+    template_name = "parametrage/apercu_article.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(Apercu, self).get_context_data(**kwargs)
+        context["box_titre"] = "Aperçu de l'article"
+        context["article"] = Article.objects.get(pk=self.kwargs.get("pk", None))
+        return context
