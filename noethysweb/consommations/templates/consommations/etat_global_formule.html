@@ -7,6 +7,7 @@
 {% embed 'core/modal.html' %}
     {% block modal_id %}modal_saisir_formule{% endblock %}
     {% block modal_titre %}Saisie d'une formule{% endblock %}
+    {% block modal_classe %}modal-lg{% endblock %}
     {% block modal_body %}
         <div id="modal_erreurs" class="text-red"></div>
 
@@ -16,26 +17,26 @@
             <div class="form-group">
                 <div class="controls">
                     <label for="saisie_formule" class="col-form-label">Formule</label>
-                    <textarea id="saisie_formule" class="form-control" rows="6" maxlength="450"></textarea>
+                    <textarea id="saisie_formule" class="form-control" rows="3" maxlength="450"></textarea>
                 </div>
             </div>
 
             <div>
                 <p>Exemples de variables et de fonctions spéciales :
                     <ul>
-                        <li>debut, fin, duree, HEURE(), SI(condition, alors, sinon), ET, OU</li>
-                        <li>unite1, unite1.debut, unite1.fin, unite1.duree</li>
+                        <li>debut, fin, duree, quantite, HEURE(), SI(condition, alors, sinon), ET, OU</li>
+                        <li>unite1, unite1.debut, unite1.fin, unite1.duree, unite1.quantite</li>
                     </ul>
                 </p>
                 <p>
-                Exemples de formule :
-                    <ul>
-                        <li>SI(debut <= HEURE("9h") ET fin >= HEURE("7h00"), HEURE("2h"))</li>
-                        <li>SI(debut <= HEURE("12h") ET fin >= HEURE("9h00"), HEURE("3h"), HEURE("2h"))</li>
-                        <li>SI(unite1, HEURE("5h30"), HEURE("4h30"))</li>
-                        <li>SI(unite24.duree > HEURE("9h"), HEURE("8h"))</li>
-                        <li>duree + HEURE("1h") + unite32.duree</li>
-                    </ul>
+                    Exemples de formule :
+                    <table class="table table-bordered text-center table-sm">
+                        <tr><th>Formule</th><th>Explication</th></tr>
+                        <tr><td>SI(debut <= HEURE("9h") ET fin >= HEURE("7h00"), HEURE("3h"), HEURE("2h"))</td><td>Si l'heure de début est < à 9h et l'heure de fin est > à 7h, alors on applique 3h, sinon on applique 2h</td></tr>
+                        <tr><td>SI(unite24.duree > HEURE("9h"), HEURE("8h"))</td><td>Si la durée de l'unité 24 est > à 9h, alors on applique 8h</td></tr>
+                        <tr><td>SI(unite24.quantite, duree) OU SI(unite25.quantite, duree)</td><td>S'il y a une quantité pour l'unité 24 ou 25, alors on applique la durée de l'unité étudiée, sinon rien</td></tr>
+                        <tr><td>duree + HEURE("1h") + unite32.duree</td><td>Addition de : durée de l'unité étudiée + 1h + durée de l'unité 32</td></tr>
+                    </table>
                 </p>
             </div>
 

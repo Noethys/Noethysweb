@@ -9,7 +9,7 @@ from reportlab.platypus import Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
-from core.models import Evenement, Regime, Vacance, Activite, Quotient, TarifLigne, Consommation, Famille, Individu
+from core.models import Evenement, Regime, Vacance, Activite, Quotient, TarifLigne, Consommation, Famille, Individu, Unite
 from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires
 from core.utils.utils_dates import HeureStrEnDelta as HEURE
 
@@ -18,12 +18,15 @@ from core.utils.utils_dates import HeureStrEnDelta as HEURE
 REGEX_UNITES = re.compile(r"unite[0-9]+")
 
 
-class Unite():
+class Unite_conso():
     def __init__(self, IDunite=None, heure_debut=None, heure_fin=None, etat=None, quantite=1):
         # Mémorisation des variables de l'unité
+        self.idunite = IDunite
         self.debut = utils_dates.TimeEnDelta(heure_debut)
         self.fin = utils_dates.TimeEnDelta(heure_fin)
+        self.etat = etat
         self.duree = self.fin - self.debut
+        self.quantite = quantite if etat else 0
 
 
 def FormateValeur(valeur, mode="decimal"):
@@ -195,10 +198,9 @@ class Impression(utils_impression.Impression):
 
         # Récupération des consommations
         self.dict_unites = {}
-        liste_conso = Consommation.objects.select_related("unite", "activite", "groupe", "prestation", "categorie_tarif", "inscription", "evenement").filter(date__gte=date_debut, date__lte=date_fin, unite__in=liste_idunite)
+        liste_conso = Consommation.objects.select_related("unite", "activite", "groupe", "prestation", "categorie_tarif", "inscription", "evenement").filter(date__gte=date_debut, date__lte=date_fin, activite__in=activites)
         for conso in liste_conso:
-            self.dict_unites.setdefault(conso.date, {})
-            self.dict_unites[conso.date]["unite%d" % conso.unite_id] = Unite(conso.unite_id, conso.heure_debut, conso.heure_fin, conso.etat, conso.quantite)
+            self.dict_unites[(conso.date, conso.inscription_id, conso.unite_id)] = Unite_conso(conso.unite_id, conso.heure_debut, conso.heure_fin, conso.etat, conso.quantite)
 
         dict_resultats = {}
         listePrestationsTraitees = []
@@ -330,159 +332,160 @@ class Impression(utils_impression.Impression):
             if valide == True:
 
                 # ----- Recherche de la méthode de calcul pour cette unité -----
-                dictCalcul = dict_parametres[str(conso.unite_id)]
+                dictCalcul = dict_parametres.get(str(conso.unite_id), None)
 
-                valeur = datetime.timedelta(hours=0, minutes=0)
-
-                if dictCalcul["type"] == "0":
-                    # Si c'est selon le coeff :
-                    if valeur == None or valeur == "":
-                        valeur = datetime.timedelta(hours=0, minutes=0)
-                    else:
-                        try:
-                            valeur = datetime.timedelta(hours=float(dictCalcul["coeff"]), minutes=0)
-                        except:
-                            pass
-
-                elif dictCalcul["type"] == "1":
-
-                    # Si c'est en fonction du temps réél :
-                    if heure_debut != None and heure_debut != "" and heure_fin != None and heure_fin != "":
-
-                        # Si une heure seuil est demandée
-                        heure_seuil = dictCalcul["heure_seuil"]
-                        if heure_seuil:
-                            try:
-                                heure_seuil = utils_dates.HeureStrEnTime(heure_seuil)
-                            except:
-                                self.erreurs.append("L'heure de seuil de l'unité %s ne semble pas valide. Vérifiez qu'elle est au format 'hh:mm'." % conso.unite.nom)
-                                return False
-                            if heure_debut < heure_seuil:
-                                heure_debut = heure_seuil
-
-                        # Si une heure plafond est demandée
-                        heure_plafond = dictCalcul["heure_plafond"]
-                        if heure_plafond:
-                            try:
-                                heure_plafond = utils_dates.HeureStrEnTime(heure_plafond)
-                            except:
-                                self.erreurs.append("L'heure de plafond de l'unité %s ne semble pas valide. Vérifiez qu'elle est au format 'hh:mm'." % conso.unite.nom)
-                                return False
-
-                            if heure_fin > heure_plafond:
-                                heure_fin = heure_plafond
-
-                        # Calcul de la durée
-                        valeur = datetime.timedelta(hours=heure_fin.hour, minutes=heure_fin.minute) - datetime.timedelta(hours=heure_debut.hour, minutes=heure_debut.minute)
-
-                        # Si un arrondi est demandé
-                        arrondi = dictCalcul["arrondi"]
-                        if arrondi:
-
-                            arrondi_type, arrondi_delta = arrondi.split(";")
-                            valeur = utils_dates.CalculerArrondi(arrondi_type=arrondi_type, arrondi_delta=int(arrondi_delta), heure_debut=heure_debut, heure_fin=heure_fin)
-
-                        # Si une durée seuil est demandée
-                        duree_seuil = dictCalcul["duree_seuil"]
-                        if duree_seuil:
-                            try:
-                                duree_seuil = utils_dates.HeureStrEnDelta(duree_seuil)
-                            except:
-                                self.erreurs.append("La durée seuil de l'unité %s ne semble pas valide. Vérifiez qu'elle est au format 'hh:mm'." % conso.unite.nom)
-                                return False
-                            if valeur < duree_seuil:
-                                valeur = duree_seuil
-
-                        # Si une durée plafond est demandée
-                        duree_plafond = dictCalcul["duree_plafond"]
-                        if duree_plafond:
-                            try:
-                                duree_plafond = utils_dates.HeureStrEnDelta(duree_plafond)
-                            except:
-                                self.erreurs.append("La durée plafond de l'unité %s ne semble pas valide. Vérifiez qu'elle est au format 'hh:mm'." % conso.unite.nom)
-                                return False
-                            if valeur > duree_plafond:
-                                valeur = duree_plafond
-
-                elif dictCalcul["type"] == "2":
-                    # Si c'est en fonction du temps facturé
-                    if conso.prestation.temps_facture != None and conso.prestation.temps_facture != "":
-                        if conso.prestation_id not in listePrestationsTraitees:
-                            valeur = conso.prestation.temps_facture
-                            listePrestationsTraitees.append(conso.prestation_id)
-
-                elif dictCalcul["type"] == "3":
-                    # Calcul selon une formule
-                    try:
-                        valeur = self.Calcule_formule(formule=dictCalcul["formule"], date=conso.date, debut=heure_debut, fin=heure_fin)
-                    except Exception as err:
-                        self.erreurs.append("La formule saisie pour l'unité %s ne semble pas valide : %s" % (conso.unite.nom, err))
-                        return False
-
-                elif dictCalcul["type"] == "4":
-                    # Si c'est selon l'équivalence en heures paramétrée :
+                if dictCalcul:
                     valeur = datetime.timedelta(hours=0, minutes=0)
-                    if conso.unite.equiv_heures:
-                        valeur = utils_dates.TimeEnDelta(conso.unite.equiv_heures)
-                    if conso.evenement and conso.evenement.equiv_heures:
-                        valeur = utils_dates.TimeEnDelta(conso.evenement.equiv_heures)
 
-                # Options plafond journalier par individu (valable pour l'ensemble des activités)
-                plafond_journalier_individu = dict_options["plafond_journalier_individu"]
-                if plafond_journalier_individu > 0:
-                    dict_temps_journalier_individu = utils_dictionnaires.DictionnaireImbrique(dictionnaire=dict_temps_journalier_individu, cles=[conso.individu_id, conso.date], valeur=datetime.timedelta(hours=0, minutes=0))
-                    if dict_temps_journalier_individu[conso.individu_id][conso.date] + valeur > datetime.timedelta(minutes=plafond_journalier_individu):
-                        valeur = datetime.timedelta(minutes=plafond_journalier_individu) - dict_temps_journalier_individu[conso.individu_id][conso.date]
-                    dict_temps_journalier_individu[conso.individu_id][conso.date] += valeur
+                    if dictCalcul["type"] == "0":
+                        # Si c'est selon le coeff :
+                        if valeur == None or valeur == "":
+                            valeur = datetime.timedelta(hours=0, minutes=0)
+                        else:
+                            try:
+                                valeur = datetime.timedelta(hours=float(dictCalcul["coeff"]), minutes=0)
+                            except:
+                                pass
 
-                # Calcule l'âge de l'individu
-                if individu.date_naiss:
-                    age = (conso.date.year - individu.date_naiss.year) - int((conso.date.month, conso.date.day) < (individu.date_naiss.month, individu.date_naiss.day))
-                else:
-                    age = -1
+                    elif dictCalcul["type"] == "1":
 
-                # ----- Recherche du regroupement par âge ou date de naissance  -----
-                if len(dict_tranches_age) == 0:
-                    index_tranche_age = 0
-                else:
-                    for key, dictTemp in dict_tranches_age.items():
-                        if "min" in dictTemp:
-                            if dictTemp["min"] == -1 and age < dictTemp["max"]: index_tranche_age = key
-                            if dictTemp["max"] == -1 and age >= dictTemp["min"]: index_tranche_age = key
-                            if dictTemp["min"] != -1 and dictTemp["max"] != -1 and age >= dictTemp["min"] and age < dictTemp["max"]: index_tranche_age = key
+                        # Si c'est en fonction du temps réél :
+                        if heure_debut != None and heure_debut != "" and heure_fin != None and heure_fin != "":
 
-                if age == -1:
-                    index_tranche_age = None
+                            # Si une heure seuil est demandée
+                            heure_seuil = dictCalcul["heure_seuil"]
+                            if heure_seuil:
+                                try:
+                                    heure_seuil = utils_dates.HeureStrEnTime(heure_seuil)
+                                except:
+                                    self.erreurs.append("L'heure de seuil de l'unité %s ne semble pas valide. Vérifiez qu'elle est au format 'hh:mm'." % conso.unite.nom)
+                                    return False
+                                if heure_debut < heure_seuil:
+                                    heure_debut = heure_seuil
 
-                # Mémorisation du résultat
-                if valeur != datetime.timedelta(hours=0, minutes=0) or valeur != datetime.timedelta(hours=0, minutes=0):
-                    famille = dict_familles[conso.inscription.famille_id]
-                    if famille.caisse:
-                        IDregime = famille.caisse.regime_id
-                    else:
-                        IDregime = 0
-                        if dict_options["afficher_regime_inconnu"] == True:
-                            self.erreurs.append("Attention, le régime d'appartenance n'a pas été renseigné pour la famille de %s. Remarque : Vous pouvez masquer cette erreur dans les options." % individu.Get_nom())
+                            # Si une heure plafond est demandée
+                            heure_plafond = dictCalcul["heure_plafond"]
+                            if heure_plafond:
+                                try:
+                                    heure_plafond = utils_dates.HeureStrEnTime(heure_plafond)
+                                except:
+                                    self.erreurs.append("L'heure de plafond de l'unité %s ne semble pas valide. Vérifiez qu'elle est au format 'hh:mm'." % conso.unite.nom)
+                                    return False
+
+                                if heure_fin > heure_plafond:
+                                    heure_fin = heure_plafond
+
+                            # Calcul de la durée
+                            valeur = datetime.timedelta(hours=heure_fin.hour, minutes=heure_fin.minute) - datetime.timedelta(hours=heure_debut.hour, minutes=heure_debut.minute)
+
+                            # Si un arrondi est demandé
+                            arrondi = dictCalcul["arrondi"]
+                            if arrondi:
+
+                                arrondi_type, arrondi_delta = arrondi.split(";")
+                                valeur = utils_dates.CalculerArrondi(arrondi_type=arrondi_type, arrondi_delta=int(arrondi_delta), heure_debut=heure_debut, heure_fin=heure_fin)
+
+                            # Si une durée seuil est demandée
+                            duree_seuil = dictCalcul["duree_seuil"]
+                            if duree_seuil:
+                                try:
+                                    duree_seuil = utils_dates.HeureStrEnDelta(duree_seuil)
+                                except:
+                                    self.erreurs.append("La durée seuil de l'unité %s ne semble pas valide. Vérifiez qu'elle est au format 'hh:mm'." % conso.unite.nom)
+                                    return False
+                                if valeur < duree_seuil:
+                                    valeur = duree_seuil
+
+                            # Si une durée plafond est demandée
+                            duree_plafond = dictCalcul["duree_plafond"]
+                            if duree_plafond:
+                                try:
+                                    duree_plafond = utils_dates.HeureStrEnDelta(duree_plafond)
+                                except:
+                                    self.erreurs.append("La durée plafond de l'unité %s ne semble pas valide. Vérifiez qu'elle est au format 'hh:mm'." % conso.unite.nom)
+                                    return False
+                                if valeur > duree_plafond:
+                                    valeur = duree_plafond
+
+                    elif dictCalcul["type"] == "2":
+                        # Si c'est en fonction du temps facturé
+                        if conso.prestation.temps_facture != None and conso.prestation.temps_facture != "":
+                            if conso.prestation_id not in listePrestationsTraitees:
+                                valeur = conso.prestation.temps_facture
+                                listePrestationsTraitees.append(conso.prestation_id)
+
+                    elif dictCalcul["type"] == "3":
+                        # Calcul selon une formule
+                        try:
+                            valeur = self.Calcule_formule(formule=dictCalcul["formule"], date=conso.date, idinscription=conso.inscription_id, debut=heure_debut, fin=heure_fin)
+                        except Exception as err:
+                            self.erreurs.append("La formule saisie pour l'unité %s ne semble pas valide : %s" % (conso.unite.nom, err))
                             return False
 
-                    # Si régime inconnu :
-                    if dict_options["associer_regime_inconnu"] not in (None, "non", "") and IDregime == 0:
-                        IDregime = int(dict_options["associer_regime_inconnu"])
+                    elif dictCalcul["type"] == "4":
+                        # Si c'est selon l'équivalence en heures paramétrée :
+                        valeur = datetime.timedelta(hours=0, minutes=0)
+                        if conso.unite.equiv_heures:
+                            valeur = utils_dates.TimeEnDelta(conso.unite.equiv_heures)
+                        if conso.evenement and conso.evenement.equiv_heures:
+                            valeur = utils_dates.TimeEnDelta(conso.evenement.equiv_heures)
 
-                    # Mémoriser les régimes à afficher
-                    if IDregime not in listeRegimesUtilises:
-                        listeRegimesUtilises.append(IDregime)
+                    # Options plafond journalier par individu (valable pour l'ensemble des activités)
+                    plafond_journalier_individu = dict_options["plafond_journalier_individu"]
+                    if plafond_journalier_individu > 0:
+                        dict_temps_journalier_individu = utils_dictionnaires.DictionnaireImbrique(dictionnaire=dict_temps_journalier_individu, cles=[conso.individu_id, conso.date], valeur=datetime.timedelta(hours=0, minutes=0))
+                        if dict_temps_journalier_individu[conso.individu_id][conso.date] + valeur > datetime.timedelta(minutes=plafond_journalier_individu):
+                            valeur = datetime.timedelta(minutes=plafond_journalier_individu) - dict_temps_journalier_individu[conso.individu_id][conso.date]
+                        dict_temps_journalier_individu[conso.individu_id][conso.date] += valeur
 
-                    # Stats globales
-                    if conso.individu_id not in dict_stats["individus"]:
-                        dict_stats["individus"].append(conso.individu_id)
-                    if conso.inscription.famille_id not in dict_stats["familles"]:
-                        dict_stats["familles"].append(conso.inscription.famille_id)
+                    # Calcule l'âge de l'individu
+                    if individu.date_naiss:
+                        age = (conso.date.year - individu.date_naiss.year) - int((conso.date.month, conso.date.day) < (individu.date_naiss.month, individu.date_naiss.day))
+                    else:
+                        age = -1
+
+                    # ----- Recherche du regroupement par âge ou date de naissance  -----
+                    if len(dict_tranches_age) == 0:
+                        index_tranche_age = 0
+                    else:
+                        for key, dictTemp in dict_tranches_age.items():
+                            if "min" in dictTemp:
+                                if dictTemp["min"] == -1 and age < dictTemp["max"]: index_tranche_age = key
+                                if dictTemp["max"] == -1 and age >= dictTemp["min"]: index_tranche_age = key
+                                if dictTemp["min"] != -1 and dictTemp["max"] != -1 and age >= dictTemp["min"] and age < dictTemp["max"]: index_tranche_age = key
+
+                    if age == -1:
+                        index_tranche_age = None
 
                     # Mémorisation du résultat
-                    dict_resultats = utils_dictionnaires.DictionnaireImbrique(dictionnaire=dict_resultats, cles=[regroupement, index_tranche_age, periode, IDregime], valeur=datetime.timedelta(hours=0, minutes=0))
-                    quantite = conso.quantite if conso.quantite else 1
-                    dict_resultats[regroupement][index_tranche_age][periode][IDregime] += valeur * quantite
+                    if valeur != datetime.timedelta(hours=0, minutes=0) or valeur != datetime.timedelta(hours=0, minutes=0):
+                        famille = dict_familles[conso.inscription.famille_id]
+                        if famille.caisse:
+                            IDregime = famille.caisse.regime_id
+                        else:
+                            IDregime = 0
+                            if dict_options["afficher_regime_inconnu"] == True:
+                                self.erreurs.append("Attention, le régime d'appartenance n'a pas été renseigné pour la famille de %s. Remarque : Vous pouvez masquer cette erreur dans les options." % individu.Get_nom())
+                                return False
+
+                        # Si régime inconnu :
+                        if dict_options["associer_regime_inconnu"] not in (None, "non", "") and IDregime == 0:
+                            IDregime = int(dict_options["associer_regime_inconnu"])
+
+                        # Mémoriser les régimes à afficher
+                        if IDregime not in listeRegimesUtilises:
+                            listeRegimesUtilises.append(IDregime)
+
+                        # Stats globales
+                        if conso.individu_id not in dict_stats["individus"]:
+                            dict_stats["individus"].append(conso.individu_id)
+                        if conso.inscription.famille_id not in dict_stats["familles"]:
+                            dict_stats["familles"].append(conso.inscription.famille_id)
+
+                        # Mémorisation du résultat
+                        dict_resultats = utils_dictionnaires.DictionnaireImbrique(dictionnaire=dict_resultats, cles=[regroupement, index_tranche_age, periode, IDregime], valeur=datetime.timedelta(hours=0, minutes=0))
+                        quantite = conso.quantite if conso.quantite else 1
+                        dict_resultats[regroupement][index_tranche_age][periode][IDregime] += valeur * quantite
 
         # Création du titre du document
         self.Insert_header()
@@ -721,16 +724,13 @@ class Impression(utils_impression.Impression):
             # Espace après activité
             self.story.append(Spacer(0, 20))
 
-    def Calcule_formule(self, formule="", date=None, debut=None, fin=None):
+    def Calcule_formule(self, formule="", date=None, idinscription=None, debut=None, fin=None):
         debut = utils_dates.TimeEnDelta(debut)
         fin = utils_dates.TimeEnDelta(fin)
         duree = fin - debut
 
         def SI(condition=None, alors=None, sinon=datetime.timedelta(minutes=0)):
-            if condition:
-                return alors
-            else:
-                return sinon
+            return alors if condition else sinon
 
         # Remplacements
         remplacements = [("\n", ""), ("ET", "and"), ("OU", "or")]
@@ -738,9 +738,8 @@ class Impression(utils_impression.Impression):
             formule = formule.replace(expression, remplacement)
 
         # Unités
-        dict_unites_date = self.dict_unites.get(date)
         for code_unite in REGEX_UNITES.findall(formule):
-            unite = dict_unites_date.get(code_unite, None)
+            unite = self.dict_unites.get((date, idinscription, int(code_unite.replace("unite", ""))), Unite_conso())
             setattr(self, code_unite, unite)
             formule = formule.replace(code_unite, "self.%s" % code_unite)
 
@@ -750,5 +749,4 @@ class Impression(utils_impression.Impression):
             resultat = datetime.timedelta(minutes=0)
         if type(resultat) == int:
             resultat = datetime.timedelta(hours=resultat)
-
         return resultat
