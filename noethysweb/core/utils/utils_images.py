@@ -3,12 +3,17 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from PIL import Image
 import json
+from PIL import Image
+from pkg_resources import parse_version
 
 
 def Recadrer_image_form(cropper_data=None, image=None):
     """ Enregistre l'image d'un form après cropper """
+    # Adaptation pour PIL > 10.0.0
+    if parse_version(Image.__version__) >= parse_version("10.0.0"):
+        Image.ANTIALIAS = Image.LANCZOS
+
     cropper_data = json.loads(cropper_data)
     img = Image.open(image)
     img = img.rotate(-cropper_data["rotate"], expand=True)
