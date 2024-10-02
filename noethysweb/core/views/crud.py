@@ -3,17 +3,18 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, json, datetime
+import logging, json
 from operator import attrgetter
 logger = logging.getLogger(__name__)
 import dateutil.parser
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views.generic import ListView, TemplateView
-from django.urls import reverse_lazy, reverse
+from django.views.generic import TemplateView
+from django.urls import reverse_lazy
 from django.db.models import Q, Count, ProtectedError
 from django.contrib.admin.utils import NestedObjects
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+from django.forms import Form
 from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatableView, MyMultipleDatatableView
 from core.utils import utils_texte, utils_historique, utils_dates
@@ -406,12 +407,23 @@ def Formate_liste_objets(objets=[]):
     return texte_resultats
 
 
+class Formulaire_supprimer(Form):
+    """ Pour la compatibilité avec django 4 """
+    def __init__(self, *args, **kwargs):
+        # On retire les kwargs personnalisés pour éviter un bug sur le form
+        for key in list(kwargs.keys()):
+            if key not in ("initial", "prefix", "data", "next", "files"):
+                kwargs.pop(key, None)
+        super(Formulaire_supprimer, self).__init__(*args, **kwargs)
+
+
 class Supprimer(BaseView, DeleteView):
     template_name = "core/crud/confirm_delete_in_box.html"
     verbe_action = "Supprimer"
     nom_action = "Suppression"
     check_protections = True
     manytomany_associes = []
+    form_class = Formulaire_supprimer
 
     def get_context_data(self, **kwargs):
         context = super(Supprimer, self).get_context_data(**kwargs)
@@ -453,6 +465,11 @@ class Supprimer(BaseView, DeleteView):
         """ Pour compatibilité avec Django 4 """
         form_kwargs = super(BaseView, self).get_form_kwargs(**kwargs)
         return form_kwargs
+
+    def form_valid(self, form):
+        """ Pour compatibilité avec Django 4 """
+        response = self.delete(self.request)
+        return response
 
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
