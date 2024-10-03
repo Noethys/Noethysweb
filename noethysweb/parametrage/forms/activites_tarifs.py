@@ -348,7 +348,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 tarifs_lignes_data = json.loads(tarifs_lignes_data)
             else:
                 tarifs_lignes_data = []
-                liste_lignes = TarifLigne.objects.filter(tarif=self.instance).order_by("num_ligne")
+                liste_lignes = TarifLigne.objects.filter(tarif_id=self.instance.pk).order_by("num_ligne")
                 for ligne in liste_lignes:
                     ligne_data = []
                     dict_ligne = model_to_dict(ligne)
