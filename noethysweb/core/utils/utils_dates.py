@@ -109,7 +109,10 @@ def DateComplete(dateDD, abrege=False):
     return dateComplete
 
 def HeureStrEnTime(heureStr):
-    if heureStr == None or heureStr == "": return datetime.time(0, 0)
+    if heureStr == None or heureStr == "":
+        return datetime.time(0, 0)
+    if isinstance(heureStr, datetime.time):
+        return heureStr
     try:
         if len(heureStr.split(":")) == 2: heures, minutes = heureStr.split(":")
         if len(heureStr.split(":")) == 3: heures, minutes, secondes = heureStr.split(":")
