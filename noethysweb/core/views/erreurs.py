@@ -8,17 +8,22 @@ logger = logging.getLogger(__name__)
 from django.shortcuts import render
 from django.conf import settings
 
+
 def erreur_403(request, exception=None):
-    return render(request, "core/erreurs/erreur_403.html")
+    return render(request, "core/erreurs/erreur_403.html", status=403)
+
 
 def erreur_404(request, exception=None):
-    return render(request, "core/erreurs/erreur_404.html")
+    return render(request, "core/erreurs/erreur_404.html", status=404)
+
 
 def erreur_500(request, exception=None):
-    return render(request, "core/erreurs/erreur_500.html")
+    return render(request, "core/erreurs/erreur_500.html", status=500)
+
 
 def erreur_axes(request, exception=None):
     return render(request, "core/erreurs/erreur_axes.html")
+
 
 def deblocage(request, code=None):
     if code.lower() == settings.URL_GESTION.lower().replace("/", "")[-10:]:
