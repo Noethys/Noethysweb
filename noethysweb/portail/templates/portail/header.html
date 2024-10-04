@@ -57,9 +57,10 @@
 
             {# Bouton de déconnexion #}
             <li class="nav-item">
-                <a href="{% url 'portail_deconnexion' %}" class="nav-link btn btn-danger" title="{% trans "Déconnexion" %}">
-                    <i class="fa fa-power-off"></i>
-                </a>
+                <form action="{% url 'portail_deconnexion' %}" method="post">
+                    {% csrf_token %}
+                    <button class="nav-link btn btn-danger" type="submit" title="{% trans "Déconnexion" %}"><i class="fa fa-power-off"></i></button>
+                </form>
             </li>
 
         </ul>
