@@ -1,3 +1,15 @@
+Version 1.2.6.4 (04/10/2024) :
+
+- Ajout de l'aperçu des articles
+- Correction de l'application automatique d'un forfait daté si inscription en attente
+- Correction de la formule dans l'état global
+- Correction du convertisseur d'heures str en datetime
+- Adaptation deleteview pour Django 5
+- Adaptation des pages d'erreurs pour Django 5
+- Adaptation sur la lecture des lignes de tarifs pour Django 5
+- Adaptation logout pour Django 5
+- Adaptation pour Pillow 10
+
 Version 1.2.6.3 (01/10/2024) :
 
 - Ajout de la prise en charge du tarif au choix pour les forfaits datés
