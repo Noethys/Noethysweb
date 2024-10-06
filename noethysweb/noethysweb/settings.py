@@ -19,7 +19,7 @@ SECRET_KEY = 'cle_secrete_a_modifier_imperativement'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+MODE_DEMO = False
 ALLOWED_HOSTS = []
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
@@ -195,6 +195,14 @@ STATIC_URL = '/static/'
 # Media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+# Stockage
+STORAGE_PROBLEME = "django.core.files.storage.FileSystemStorage"
+STORAGE_PIECE = "django.core.files.storage.FileSystemStorage"
+STORAGE_QUOTIENT = "django.core.files.storage.FileSystemStorage"
+STORAGE_ASSURANCE = "django.core.files.storage.FileSystemStorage"
+STORAGE_PHOTO = "django.core.files.storage.FileSystemStorage"
+STORAGE_PIECE_COLLABORATEUR = "django.core.files.storage.FileSystemStorage"
 
 # Crispy forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"

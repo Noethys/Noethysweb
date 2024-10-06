@@ -1,0 +1,22 @@
+Bienvenue dans Noethysweb Desk !
+
+Cet outil vous permet de continuer à utiliser Noethysweb et votre fichier de données en local sur un ordinateur Windows. Il va installer l'application Noethysweb, ses dépendances, un serveur virtuel et votre fichier de données. Attention, certaines fonctionnalités de l'application seront évidemment inaccessibles telles que les sauvegardes automatisées, l'accès au portail famille en ligne pour vos usagers, etc... Il est également impossible de se connecter depuis d'autres ordinateurs à l'application.
+
+---------- REMARQUES ----------
+
+Les comptes utilisateurs sont toujours les mêmes
+Les URL d'accès utilisateurs, administrateurs et familles sont également les mêmes. Mais vous devez remplacer le nom de domaine par "http://127.0.0.1:8000". Par exemple, "www.monsitenoethysweb.com/admin" deviendra "http://127.0.0.1:8000/admin"
+
+---------- INSTALLATION ----------
+
+Commencez par télécharger et installer Python 3.12 depuis le lien suivant : https://www.python.org/ftp/python/3.12.7/python-3.12.7-amd64.exe
+
+Une fois Python installé, double-cliquez sur le fichier "run.py" qui se trouve dans le répertoire Noethyswebdesk.
+
+Au menu principal, tapez sur 2 puis Entrée pour lancer l'installation de l'application. Attention, l'installation peut prendre du temps, vous devrez parfois patienter entre les étapes de l'installation, veuillez ne pas interrompre le processus.
+
+Après l'installation, vous reviendrez au menu principal. Tapez sur 1 pour Entrée pour lancer le serveur virtuel. 
+
+---------- UTILISATION ----------
+
+A chaque fois que vous souhaiterez utiliser Noethysweb, il vous suffira d'exécuter le fichier "run.py" et de taper le choix 1.
