@@ -8,8 +8,8 @@ from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Sum
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Inscription, Activite, Rattachement, Cotisation, Groupe, Prestation, Ventilation
-from core.utils import utils_texte
+from core.models import Inscription, Activite, Cotisation, Groupe, Prestation, Ventilation
+from core.utils import utils_texte, utils_dates
 from fiche_individu.forms.individu_inscriptions import Formulaire
 
 
@@ -95,7 +95,7 @@ class Liste(Page, crud.Liste):
         famille = columns.TextColumn("Famille", sources=["famille__nom"])
         individu_ville = columns.TextColumn("Ville de l'individu", processor="Get_ville_individu")
         famille_ville = columns.TextColumn("Ville de la famille", processor="Get_ville_famille")
-        date_naiss = columns.TextColumn("Date naiss.", processor=helpers.format_date("%d/%m/%Y"))
+        date_naiss = columns.TextColumn("Date naiss.", processor='Get_date_naiss')
         age = columns.TextColumn("Age", sources=['Get_age'], processor="Get_age")
         mail = columns.CompoundColumn("Email", processor='Get_mail')
         portable = columns.CompoundColumn("Portable", processor='Get_mobile')
@@ -123,6 +123,9 @@ class Liste(Page, crud.Liste):
                 "date_fin": "Fin",
             }
             ordering = ["individu"]
+
+        def Get_date_naiss(self, instance, *args, **kwargs):
+            return utils_dates.ConvertDateToFR(instance.individu.date_naiss)
 
         def Get_age(self, instance, *args, **kwargs):
             return instance.individu.Get_age()
