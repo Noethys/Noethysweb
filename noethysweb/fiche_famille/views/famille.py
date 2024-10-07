@@ -119,10 +119,11 @@ class Liste(Page, crud.Liste):
         cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')
         ville_resid = columns.TextColumn("Ville",  sources=None, processor='Get_ville_resid')
         secteur = columns.TextColumn("Secteur", sources=None, processor='Get_secteur')
+        mail = columns.TextColumn("Email", processor="Get_mail")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idfamille", "nom", "rue_resid", "cp_resid", "ville_resid", "secteur"]
+            columns = ["idfamille", "nom", "rue_resid", "cp_resid", "ville_resid", "mail", "secteur"]
             hidden_columns = ["secteur",]
             processors = {
                 'date_creation': helpers.format_date('%d/%m/%Y'),
@@ -146,6 +147,9 @@ class Liste(Page, crud.Liste):
 
         def Get_secteur(self, instance, *args, **kwargs):
             return instance.secteur
+
+        def Get_mail(self, instance, *args, **kwargs):
+            return instance.mail
 
 
 class Supprimer_famille(Page, crud.Supprimer):
