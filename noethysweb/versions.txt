@@ -1,3 +1,12 @@
+Version 1.2.6.5 (07/10/2024) :
+
+- Ajout de l'export Noethysweb Desk
+- Ajout du mail favori dans liste des familles
+- Ajout de l'export Excel des destinataires dans l'éditeur d'emails
+- Correction de l'affichage de la date de naissance dans la liste des inscriptions à une activité
+- Correction de l'affichage de la ville dans la liste des consommations
+- Correction du bug de la colonne des coches masquée dans les listes
+
 Version 1.2.6.4 (04/10/2024) :
 
 - Ajout de l'aperçu des articles
