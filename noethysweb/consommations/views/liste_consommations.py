@@ -64,7 +64,7 @@ class Liste(Page, crud.Liste):
         prestation = columns.TextColumn("ID Prestation", sources=['prestation__idprestation'])
         label_prestation = columns.TextColumn("Label prestation", sources=["prestation__label"])
         montant_prestation = columns.TextColumn("Montant prestation", sources=["prestation__montant"])
-        ville_resid = columns.TextColumn("Ville", sources=None)
+        ville_resid = columns.TextColumn("Ville", sources=None, processor="Get_ville_resid")
 
         class Meta:
             structure_template = MyDatatable.structure_template
@@ -77,6 +77,9 @@ class Liste(Page, crud.Liste):
             }
             hidden_columns = ["prestation", "label_prestation", "montant_prestation", "ville_resid"]
             ordering = ["date_saisie"]
+
+        def Get_ville_resid(self, instance, *args, **kwargs):
+            return instance.individu.ville_resid
 
         def Get_etat(self, instance, **kwargs):
             return instance.get_etat_display()
