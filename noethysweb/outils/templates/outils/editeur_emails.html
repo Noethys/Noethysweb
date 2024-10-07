@@ -21,7 +21,6 @@
 
 {% block contenu_page %}
 
-
     <div class="row">
         <div class="col-md-3">
 
@@ -30,12 +29,9 @@
                 <div class="card-header">
                     <h3 class="card-title">Destinataires</h3>
                     <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Diminuer">
-                            <i class="fa fa-minus"></i>
-                        </button>
+                        <button type="button" class="btn btn-tool" onclick="exporter_excel()" title="Exporter la liste des destinataires sélectionnés au format Excel"><i class="fa fa-file-excel-o"></i></button>
                     </div>
                 </div>
-
 
                 <div class="card-footer p-0">
                     {% if mail.verrouillage_destinataires %}
@@ -67,11 +63,6 @@
             <div class="card card-default">
                 <div class="card-header">
                     <h3 class="card-title">Envois</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Diminuer">
-                            <i class="fa fa-minus"></i>
-                        </button>
-                    </div>
                 </div>
 
                 <div class="card-footer p-0">
@@ -115,65 +106,77 @@
                 {% block box_titre %}Message{% endblock %}
                 {% block box_contenu %}
                     {% crispy form %}
-
-                    <script>
-                        $(document).ready(function() {
-
-                            $("#bouton_envoyer").on('click', function(event) {
-                                if ($('#id_selection').val() == "TOUS") {
-                                    var nbre_destinataires = {{ destinataires|length }};
-                                } else {
-                                    var nbre_destinataires = {{ nbre_envois_attente|add:nbre_envois_echec }};
-                                }
-                                if (nbre_destinataires === 0) {
-                                    toastr.error("Vous devez sélectionner au moins un destinataire");
-                                    return false;
-                                }
-                                if (nbre_destinataires === 1) {
-                                    var texte_message = "Confirmez-vous l'envoi de ce message à 1 destinataire ?";
-                                } else {
-                                    var texte_message = "Confirmez-vous l'envoi de ce message à " + nbre_destinataires + " destinataires ?";
-                                }
-
-                                bootbox.dialog({
-                                    title: "Confirmation de l'envoi",
-                                    message: texte_message,
-                                    buttons: {
-                                        ok: {
-                                            label: "<i class='fa fa-check'></i> Envoyer",
-                                            className: 'btn-primary',
-                                            callback: function(){
-                                                bootbox.dialog({
-                                                    message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> L'envoi peut durer plusieurs minutes. Veuillez patienter...</p>",
-                                                    closeButton: false
-                                                });
-                                                $('[name=action]').val('envoyer');
-                                                $('#form_editeur_emails').submit();
-                                            }
-                                        },
-                                        cancel: {
-                                            label: "<i class='fa fa-ban'></i> Annuler",
-                                            className: 'btn-danger',
-                                        }
-                                    }
-                                });
-
-                            });
-
-                        });
-                    </script>
-
                 {% endblock %}
-
             {% endembed %}
-
 
         </div>
 
     </div>
+    
+    <script>
+        $(document).ready(function() {
 
+            $("#bouton_envoyer").on('click', function(event) {
+                if ($('#id_selection').val() == "TOUS") {
+                    var nbre_destinataires = {{ destinataires|length }};
+                } else {
+                    var nbre_destinataires = {{ nbre_envois_attente|add:nbre_envois_echec }};
+                }
+                if (nbre_destinataires === 0) {
+                    toastr.error("Vous devez sélectionner au moins un destinataire");
+                    return false;
+                }
+                if (nbre_destinataires === 1) {
+                    var texte_message = "Confirmez-vous l'envoi de ce message à 1 destinataire ?";
+                } else {
+                    var texte_message = "Confirmez-vous l'envoi de ce message à " + nbre_destinataires + " destinataires ?";
+                }
 
+                bootbox.dialog({
+                    title: "Confirmation de l'envoi",
+                    message: texte_message,
+                    buttons: {
+                        ok: {
+                            label: "<i class='fa fa-check'></i> Envoyer",
+                            className: 'btn-primary',
+                            callback: function(){
+                                bootbox.dialog({
+                                    message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> L'envoi peut durer plusieurs minutes. Veuillez patienter...</p>",
+                                    closeButton: false
+                                });
+                                $('[name=action]').val('envoyer');
+                                $('#form_editeur_emails').submit();
+                            }
+                        },
+                        cancel: {
+                            label: "<i class='fa fa-ban'></i> Annuler",
+                            className: 'btn-danger',
+                        }
+                    }
+                });
+            });
+            
+        });
+        
+        // Exporter vers Excel des destinataires
+        function exporter_excel() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_editeur_emails_exporter_excel' %}",
+                data: {
+                    idmail: "{{ mail.pk }}",
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                datatype: "json",
+                success: function(data){
+                    window.location = "{{ MEDIA_URL }}" + data.nom_fichier;
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+    </script>
 
 {% endblock contenu_page %}
-
-

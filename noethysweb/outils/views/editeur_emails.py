@@ -3,11 +3,12 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import json
+import json, os, uuid
 from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponseRedirect
 from django.db.models import Q, Count
 from django.contrib import messages
+from django.conf import settings
 from core.views import crud
 from core.models import ModeleEmail, Mail, PieceJointe, Destinataire, Famille, Individu, Collaborateur, Contact, SignatureEmail
 from core.utils import utils_texte
@@ -27,6 +28,28 @@ def Get_signature_email(request):
     idsignature = int(request.POST.get("idsignature"))
     signature = SignatureEmail.objects.filter(pk=idsignature).first()
     return JsonResponse({"html": signature.html})
+
+
+def Exporter_excel(request):
+    idmail = int(request.POST.get("idmail"))
+    mail = Mail.objects.prefetch_related("destinataires").get(pk=idmail)
+
+    # Création du répertoire et du nom du fichier
+    rep_temp = os.path.join("temp", str(uuid.uuid4()))
+    rep_destination = os.path.join(settings.MEDIA_ROOT, rep_temp)
+    if not os.path.isdir(rep_destination):
+        os.makedirs(rep_destination)
+    nom_fichier = "export_destinataires.xlsx"
+
+    # Création du classeur
+    import xlsxwriter
+    classeur = xlsxwriter.Workbook(os.path.join(rep_destination, nom_fichier))
+    feuille = classeur.add_worksheet("Destinataires")
+    for num_ligne, destinataire in enumerate(mail.destinataires.all()):
+        feuille.write(num_ligne, 0, destinataire.adresse)
+    classeur.close()
+
+    return JsonResponse({"nom_fichier": os.path.join(rep_temp, nom_fichier)})
 
 
 class Page(crud.Page):

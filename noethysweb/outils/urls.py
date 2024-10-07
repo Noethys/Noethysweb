@@ -37,6 +37,7 @@ urlpatterns = [
     path('outils/editeur_emails/contacts/<int:idmail>', editeur_emails_contacts.Liste.as_view(), name='editeur_emails_contacts'),
     path('outils/editeur_emails/listes_diffusion/<int:idmail>', editeur_emails_listes_diffusion.Liste.as_view(), name='editeur_emails_listes_diffusion'),
     path('outils/editeur_emails/saisie_libre/<int:idmail>', editeur_emails_saisie_libre.Liste.as_view(), name='editeur_emails_saisie_libre'),
+    path('outils/editeur_emails/exporter_excel', secure_ajax(editeur_emails.Exporter_excel), name='ajax_editeur_emails_exporter_excel'),
 
     path('outils/emails/liste', emails.Liste.as_view(), name='emails_liste'),
     path('outils/emails/supprimer/<int:pk>', emails.Supprimer.as_view(), name='emails_supprimer'),
