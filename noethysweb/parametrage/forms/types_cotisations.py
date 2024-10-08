@@ -32,7 +32,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.field_class = 'col-md-10'
 
         # Type
-        if self.instance and Cotisation.objects.filter(type_cotisation=self.instance):
+        if self.instance and Cotisation.objects.filter(type_cotisation_id=self.instance.pk):
             self.fields["type"].disabled = True
 
         # Définir comme valeur par défaut

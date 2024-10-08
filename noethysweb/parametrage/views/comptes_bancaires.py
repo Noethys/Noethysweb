@@ -75,7 +75,7 @@ class Modifier(Page, crud.Modifier):
         return super().form_valid(form)
 
 class Supprimer(Page, crud.Supprimer):
-    form_class = Formulaire
+    pass
 
     # def delete(self, request, *args, **kwargs):
     #     reponse = super(Supprimer, self).delete(request, *args, **kwargs)

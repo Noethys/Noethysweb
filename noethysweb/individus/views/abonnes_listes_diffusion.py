@@ -103,7 +103,6 @@ class Liste(Page, crud.Liste):
 
 
 class Supprimer(Page, crud.Supprimer):
-    form_class = Formulaire
     check_protections = False
 
     def get_context_data(self, **kwargs):

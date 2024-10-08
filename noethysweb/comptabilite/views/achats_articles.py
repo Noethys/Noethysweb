@@ -81,7 +81,7 @@ class Modifier(Page, crud.Modifier):
 
 
 class Supprimer(Page, crud.Supprimer):
-    form_class = Formulaire
+    pass
 
     def delete(self, request, *args, **kwargs):
         article = self.get_object()

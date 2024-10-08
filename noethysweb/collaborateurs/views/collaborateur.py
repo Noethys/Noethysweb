@@ -87,7 +87,7 @@ class Ajouter(Page, crud.Ajouter):
 
 
 class Supprimer(Page, crud.Supprimer):
-    form_class = Formulaire
+    pass
 
     def get_object(self):
         return Collaborateur.objects.get(pk=self.kwargs["idcollaborateur"])

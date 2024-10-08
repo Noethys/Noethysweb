@@ -233,4 +233,4 @@ class Modifier(Page, crud.Modifier):
 
 
 class Supprimer(Page, crud.Supprimer):
-    form_class = Formulaire
+    pass
