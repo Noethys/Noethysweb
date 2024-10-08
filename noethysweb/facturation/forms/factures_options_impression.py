@@ -15,7 +15,7 @@ from core.utils import utils_parametres
 
 VALEURS_DEFAUT = {
     "memoriser_parametres": False, "affichage_solde": "actuel", "afficher_impayes": True, "integrer_impayes": True, "afficher_deja_paye": True, "afficher_reste_regler": True,
-    "afficher_coupon_reponse": True, "afficher_messages": True, "impayes_factures": False,
+    "afficher_coupon_reponse": True, "afficher_messages": True, "impayes_factures": False, "afficher_dates_forfaits": True,
     "afficher_codes_barres": True, "afficher_reglements": True, "afficher_avis_prelevements": False, "afficher_qf_dates": True, "afficher_titre": True, "texte_titre": "Facture",
     "taille_texte_titre": 19, "afficher_periode": True, "taille_texte_periode": 8, "affichage_prestations": "0", "intitules": "0", "couleur_fond_1": "#D9D9D9",
     "couleur_fond_2": "#F1F1F1", "largeur_colonne_date": 50, "largeur_colonne_montant_ht": 50, "largeur_colonne_montant_tva": 50, "largeur_colonne_montant_ttc": 70,
@@ -43,6 +43,7 @@ class Formulaire(FormulaireBase, forms.Form):
     afficher_reglements = forms.BooleanField(label="Afficher les règlements", initial=VALEURS_DEFAUT["afficher_reglements"], required=False)
     afficher_avis_prelevements = forms.BooleanField(label="Afficher les avis de prélèvements", initial=VALEURS_DEFAUT["afficher_avis_prelevements"], required=False)
     afficher_qf_dates = forms.BooleanField(label="Afficher les quotients familiaux", initial=VALEURS_DEFAUT["afficher_qf_dates"], required=False)
+    afficher_dates_forfaits = forms.BooleanField(label="Afficher les dates extrêmes des forfaits", initial=VALEURS_DEFAUT["afficher_dates_forfaits"], required=False)
 
     afficher_titre = forms.BooleanField(label="Afficher le titre", initial=VALEURS_DEFAUT["afficher_titre"], required=False)
     texte_titre = forms.CharField(label="Titre du document", initial=VALEURS_DEFAUT["texte_titre"], required=True)
@@ -117,6 +118,7 @@ class Formulaire(FormulaireBase, forms.Form):
                 Field("afficher_reglements"),
                 Field("afficher_avis_prelevements"),
                 Field("afficher_qf_dates"),
+                Field("afficher_dates_forfaits"),
             ),
             Fieldset("Titre",
                 Field("afficher_titre"),

@@ -46,7 +46,7 @@ class Formulaire(FormulaireBase, forms.Form):
     categories = forms.MultipleChoiceField(label="Catégories de prestations", widget=Select2MultipleWidget(), choices=choix_categories, required=True)
     activites = forms.CharField(label="Activités", required=False, widget=SelectionActivitesWidget())
     prestations_anterieures = forms.DateField(label="Prestations antérieures", required=False, widget=DatePickerWidget({"afficher_check": True, "label_checkbox": "Inclure les prestations antérieures non facturées depuis le"}))
-    inclure_cotisations_si_conso = forms.BooleanField(label="Inclure les adhésions uniquement pour les familles qui sur les activités cochées", required=False, initial=False)
+    inclure_cotisations_si_conso = forms.BooleanField(label="Inclure les adhésions uniquement pour les familles qui sont sur les activités cochées", required=False, initial=False)
     choix_selection_familles = [("TOUTES", "Toutes les familles"), ("FAMILLE", "Uniquement la famille sélectionnée")]
     selection_familles = forms.TypedChoiceField(label="Sélection des familles", choices=choix_selection_familles, initial="TOUTES", required=False)
     famille = forms.ModelChoiceField(label="Famille", widget=Select2Widget(), queryset=Famille.objects.all().order_by("nom"), required=False)

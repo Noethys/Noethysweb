@@ -27,6 +27,7 @@ class Formulaire(FormulaireBase, forms.Form):
     afficher_reglements = forms.BooleanField(label="Afficher les règlements", initial=True, required=False)
     afficher_avis_prelevements = forms.BooleanField(label="Afficher les avis de prélèvements", initial=False, required=False)
     afficher_qf_dates = forms.BooleanField(label="Afficher les quotients familiaux", initial=True, required=False)
+    afficher_dates_forfaits = forms.BooleanField(label="Afficher les dates extrêmes des forfaits", initial=True, required=False)
 
     afficher_titre = forms.BooleanField(label="Afficher le titre", initial=True, required=False)
     texte_titre = forms.CharField(label="Titre du document", initial="Attestation de présence", required=True)
@@ -101,6 +102,7 @@ class Formulaire(FormulaireBase, forms.Form):
                 Field("afficher_reglements"),
                 Field("afficher_avis_prelevements"),
                 Field("afficher_qf_dates"),
+                Field("afficher_dates_forfaits"),
             ),
             Fieldset("Titre",
                 Field("afficher_titre"),

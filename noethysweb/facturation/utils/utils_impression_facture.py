@@ -272,7 +272,7 @@ class Impression(utils_impression.Impression):
                                         # if self.dict_options["affichage_prestations"] in ("1", "3"):
                                         #     dictRegroupement[labelkey]["base"] = dictRegroupement[labelkey]["total"] / dictRegroupement[labelkey]["nbre"]
 
-                                        if len(listeDatesUnite) > 1:
+                                        if len(listeDatesUnite) > 1 and self.dict_options.get("afficher_dates_forfaits", True):
                                             listeDatesUnite.sort()
                                             date_debut = listeDatesUnite[0]
                                             date_fin = listeDatesUnite[-1]
@@ -404,7 +404,7 @@ class Impression(utils_impression.Impression):
                                         listeIntitules.append(Paragraph(label, paraStyle)) 
                                         
                                         # Recherche si c'est un forfait
-                                        if len(listeDatesUnite) > 1:
+                                        if len(listeDatesUnite) > 1 and self.dict_options.get("afficher_dates_forfaits", True):
                                             listeDatesUnite.sort()
                                             date_debut = listeDatesUnite[0]
                                             date_fin = listeDatesUnite[-1]
