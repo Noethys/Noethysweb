@@ -29,7 +29,7 @@
                 <div class="card-header">
                     <h3 class="card-title">Destinataires</h3>
                     <div class="card-tools">
-                        <button type="button" class="btn btn-tool" onclick="exporter_excel()" title="Exporter la liste des destinataires sélectionnés au format Excel"><i class="fa fa-file-excel-o"></i></button>
+                        <button type="button" class="btn btn-tool" onclick="exporter_excel(mode='destinataires')" title="Exporter la liste des destinataires sélectionnés au format Excel"><i class="fa fa-file-excel-o"></i></button>
                     </div>
                 </div>
 
@@ -63,6 +63,9 @@
             <div class="card card-default">
                 <div class="card-header">
                     <h3 class="card-title">Envois</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" onclick="exporter_excel(mode='envois')" title="Exporter la liste des envois au format Excel"><i class="fa fa-file-excel-o"></i></button>
+                    </div>
                 </div>
 
                 <div class="card-footer p-0">
@@ -159,12 +162,13 @@
         });
         
         // Exporter vers Excel des destinataires
-        function exporter_excel() {
+        function exporter_excel(mode) {
             $.ajax({
                 type: "POST",
                 url: "{% url 'ajax_editeur_emails_exporter_excel' %}",
                 data: {
                     idmail: "{{ mail.pk }}",
+                    mode: mode,
                     csrfmiddlewaretoken: "{{ csrf_token }}"
                 },
                 datatype: "json",

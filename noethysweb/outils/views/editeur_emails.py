@@ -31,22 +31,41 @@ def Get_signature_email(request):
 
 
 def Exporter_excel(request):
-    idmail = int(request.POST.get("idmail"))
-    mail = Mail.objects.prefetch_related("destinataires").get(pk=idmail)
+    idmail = int(request.POST.get("idmail") or 0)
+    mode = request.POST.get("mode")
+    destinataires = Destinataire.objects.select_related("famille", "individu", "contact", "collaborateur").filter(mail=idmail).order_by("adresse")
+    if not destinataires:
+        return JsonResponse({"erreur": "Aucun destinataire n'a été sélectionné"}, status=401)
 
     # Création du répertoire et du nom du fichier
     rep_temp = os.path.join("temp", str(uuid.uuid4()))
     rep_destination = os.path.join(settings.MEDIA_ROOT, rep_temp)
     if not os.path.isdir(rep_destination):
         os.makedirs(rep_destination)
-    nom_fichier = "export_destinataires.xlsx"
+    nom_fichier = "export_%s.xlsx" % mode
 
     # Création du classeur
     import xlsxwriter
     classeur = xlsxwriter.Workbook(os.path.join(rep_destination, nom_fichier))
-    feuille = classeur.add_worksheet("Destinataires")
-    for num_ligne, destinataire in enumerate(mail.destinataires.all()):
-        feuille.write(num_ligne, 0, destinataire.adresse)
+    feuille = classeur.add_worksheet(mode)
+
+    # Création des colonnes
+    if mode == "envois":
+        colonnes = ("Famille", "Individu", "Collaborateur", "Contact", "Email", "Résultat de l'envoi")
+        for num_colonne, label_colonne in enumerate(colonnes):
+            feuille.set_column(num_colonne, num_colonne, 35)
+            feuille.write(0, num_colonne, label_colonne)
+
+    for num_ligne, destinataire in enumerate(destinataires):
+        if mode == "destinataires":
+            feuille.write(num_ligne, 0, destinataire.adresse)
+        if mode == "envois":
+            feuille.write(num_ligne+1, 0, destinataire.famille.nom if destinataire.famille else "")
+            feuille.write(num_ligne+1, 1, destinataire.individu.Get_nom() if destinataire.individu else "")
+            feuille.write(num_ligne+1, 2, destinataire.collaborateur.Get_nom() if destinataire.collaborateur else "")
+            feuille.write(num_ligne+1, 3, destinataire.contact.Get_nom() if destinataire.contact else "")
+            feuille.write(num_ligne+1, 4, destinataire.adresse)
+            feuille.write(num_ligne+1, 5, destinataire.resultat_envoi)
     classeur.close()
 
     return JsonResponse({"nom_fichier": os.path.join(rep_temp, nom_fichier)})
