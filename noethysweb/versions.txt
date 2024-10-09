@@ -1,3 +1,10 @@
+Version 1.2.6.6 (09/10/2024) :
+
+- Ajout de l'export Excel des envois dans l'éditeur d'emails
+- Ajout d'une colonne Portable favori dans la liste des familles
+- Ajout de l'option Afficher les dates des forfaits dans les impressions de factures et attestations
+- Adaptations pour Django 5
+
 Version 1.2.6.5 (07/10/2024) :
 
 - Ajout de l'export Noethysweb Desk
