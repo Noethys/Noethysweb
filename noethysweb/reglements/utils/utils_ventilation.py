@@ -19,11 +19,14 @@ def xDecimal(valeur=0.0):
     return valeur
 
 
-def GetAnomaliesVentilation():
+def GetAnomaliesVentilation(idfamille=None):
     """ Retourne les anomalies de ventilation """
-    reglements = Reglement.objects.values('famille').filter().annotate(total=Sum("montant"))
-    prestations = {item["famille"]: item["total"] for item in Prestation.objects.values('famille').filter().annotate(total=Sum("montant"))}
-    ventilations = {item["famille"]: item["total"] for item in Ventilation.objects.values('famille').filter().annotate(total=Sum("montant"))}
+    condition = Q()
+    if idfamille:
+        condition = Q(famille_id=idfamille)
+    reglements = Reglement.objects.values('famille').filter(condition).annotate(total=Sum("montant"))
+    prestations = {item["famille"]: item["total"] for item in Prestation.objects.values('famille').filter(condition).annotate(total=Sum("montant"))}
+    ventilations = {item["famille"]: item["total"] for item in Ventilation.objects.values('famille').filter(condition).annotate(total=Sum("montant"))}
 
     dict_anomalies = {}
     for item in reglements:

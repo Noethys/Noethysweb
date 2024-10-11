@@ -20,6 +20,7 @@ from consommations.forms.grille_forfaits import Formulaire as form_forfaits
 from portail.templatetags.planning import is_modif_allowed
 from portail.utils import utils_approbations
 from portail.views.base import CustomView
+from reglements.utils import utils_ventilation
 
 
 class View(CustomView, TemplateView):
@@ -40,6 +41,10 @@ class View(CustomView, TemplateView):
     def post(self, request, *args, **kwargs):
         """ Sauvegarde de la grille """
         resultat = Save_grille(request=request, donnees=json.loads(self.request.POST.get("donnees")))
+
+        # Ventilation auto si besoin
+        if utils_portail.Get_parametre(code="reservations_ventilation_auto") and utils_ventilation.GetAnomaliesVentilation(idfamille=self.request.user.famille.pk):
+            utils_ventilation.Ventilation_auto(IDfamille=self.request.user.famille.pk)
 
         # Envoi d'un mail de confirmation des modifications
         idadresse_exp = utils_portail.Get_parametre(code="reservations_adresse_exp")
