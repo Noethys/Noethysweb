@@ -47,13 +47,14 @@ class Liste(Page, crud.Liste):
         rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
         cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')
         ville_resid = columns.TextColumn("Ville", processor='Get_ville_resid')
+        mail = columns.TextColumn("Email", processor="Get_mail")
         solde = columns.TextColumn("Solde", sources=[], processor="Get_solde")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idcotisation', 'date_debut', 'date_fin', 'famille', 'individu', 'nom_cotisation', 'numero', 'depot', "rue_resid", "cp_resid", "ville_resid", "solde"]
-            hidden_columns = ["rue_resid", "cp_resid", "ville_resid", "solde"]
+            columns = ['check', 'idcotisation', 'date_debut', 'date_fin', 'famille', 'individu', 'nom_cotisation', 'numero', 'depot', "rue_resid", "cp_resid", "ville_resid", "mail", "solde"]
+            hidden_columns = ["rue_resid", "cp_resid", "ville_resid", "mail", "solde"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
@@ -63,6 +64,9 @@ class Liste(Page, crud.Liste):
                 "date_fin": "Fin",
             }
             ordering = ["date_debut"]
+
+        def Get_mail(self, instance, *args, **kwargs):
+            return instance.famille.mail
 
         def Get_nom_cotisation(self, instance, *args, **kwargs):
             if instance.prestation:
