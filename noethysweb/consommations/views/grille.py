@@ -55,7 +55,7 @@ def Maj_tarifs_fratries(activite=None, prestations=[], liste_IDprestation_exista
     if liste_tarifs_speciaux:
         prestations += list(Prestation.objects.filter(pk__in=liste_IDprestation_existants, facture__isnull=True))
 
-        # Recherche les individu à modifier
+        # Recherche les individus à modifier
         liste_modifications = []
         liste_id_tarif = [tarif.pk for tarif in liste_tarifs_speciaux]
         for prestation in prestations:
@@ -486,7 +486,7 @@ def Save_grille(request=None, donnees={}):
 
     # ------------------ TRAITEMENT DES TARIFS SELON NBRE INDIVIDUS PRESENTS -------------------
 
-    Maj_tarifs_fratries(activite=donnees.get("selection_activite", None) or donnees.get("activite", None), prestations=liste_nouvelles_prestations + liste_prestations_suppr, liste_IDprestation_existants=liste_IDprestation_existants)
+    Maj_tarifs_fratries(activite=donnees.get("selection_activite", None) or donnees.get("activite", None) or donnees.get("ancienne_activite", None), prestations=liste_nouvelles_prestations + liste_prestations_suppr, liste_IDprestation_existants=liste_IDprestation_existants)
 
     # ---------------------------------- MEMOS JOURNALIERS -------------------------------------
 
