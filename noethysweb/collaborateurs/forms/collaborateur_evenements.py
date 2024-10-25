@@ -67,7 +67,6 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields["collaborateur"].disabled = True
 
         self.fields["date_debut"].required = True
-        self.fields["date_fin"].required = True
         self.fields["type_evenement"].required = True
 
         self.fields["date_debut"].initial = datetime.datetime.now()
@@ -120,6 +119,9 @@ class Formulaire(FormulaireBase, ModelForm):
         if self.cleaned_data["selection_periode"] == "UNIQUE":
             if not self.cleaned_data["date_debut"]:
                 self.add_error("date_debut", "Vous devez sélectionner une date de début")
+                return
+            if not self.cleaned_data["date_fin"]:
+                self.add_error("date_fin", "Vous devez sélectionner une date de fin")
                 return
 
         if self.cleaned_data["selection_periode"] == "RECURRENCE":
