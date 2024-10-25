@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import datetime
+import datetime, decimal
 from django import forms
 from django.forms import ModelForm
 from django.db.models import Q
@@ -66,7 +66,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 montant = max(liste_montants)
 
         self.fields["montant"].initial = montant
-        montant_initial = montant
+        montant_initial = montant if not modele.tva else round(montant / (1 + modele.tva / decimal.Decimal(100.0)), 2)
 
         # Date de la prestation
         self.fields["date"].initial = datetime.date.today()
@@ -83,6 +83,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Hidden("famille", value=idfamille),
             Hidden("categorie", value=modele.categorie),
             Hidden("montant_initial", value=montant_initial),
+            Hidden("tva", value=modele.tva),
             Hidden("quantite", value=1),
             Fieldset("Généralités",
                 Field("date"),
