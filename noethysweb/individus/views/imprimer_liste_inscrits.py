@@ -60,7 +60,7 @@ class View(CustomView, TemplateView):
             profil = Parametre.objects.filter(idparametre=int(request_post.get("profil"))).first()
             initial_data = json.loads(profil.parametre or "{}")
             initial_data["profil"] = profil.pk
-            initial_data["colonnes_perso"] = json.dumps(initial_data["colonnes_perso"])
+            initial_data["colonnes_perso"] = json.dumps(initial_data.get("colonnes_perso", "[]"))
 
         # Intégration des formulaires
         context["form"] = Formulaire(data=initial_data, request=self.request)

@@ -428,7 +428,7 @@ class Informations():
                     codeCible = dictCibles[IDcategorie]["code"] + "_%d" % index
 
                     # Récupération des infos sur l'individu pour transfert vers dictFamilles
-                    for code, valeur in self.dictIndividus[IDindividu].items():
+                    for code, valeur in self.dictIndividus.get(IDindividu, {}).items():
                         if code.startswith("INDIVIDU"):
                             self.dictFamilles[IDfamille][code.replace("INDIVIDU", codeCible)] = valeur
                     self.dictFamilles[IDfamille][codeCible + "_TITULAIRE"] = titulaireStr

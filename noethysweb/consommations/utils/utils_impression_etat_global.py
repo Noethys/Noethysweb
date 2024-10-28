@@ -409,7 +409,7 @@ class Impression(utils_impression.Impression):
 
                     elif dictCalcul["type"] == "2":
                         # Si c'est en fonction du temps facturé
-                        if conso.prestation.temps_facture != None and conso.prestation.temps_facture != "":
+                        if conso.prestation and conso.prestation.temps_facture != None and conso.prestation.temps_facture != "":
                             if conso.prestation_id not in listePrestationsTraitees:
                                 valeur = conso.prestation.temps_facture
                                 listePrestationsTraitees.append(conso.prestation_id)
