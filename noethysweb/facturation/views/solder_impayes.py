@@ -83,11 +83,13 @@ class View(CustomView, TemplateView):
         liste_colonnes = ["Famille", "Nbre prestations", "Impayés"]
 
         # Création des lignes
-        familles = Prestation.objects.select_related("famille").values("famille", "famille__nom").filter(date__gte=date_debut, date__lte=date_fin).annotate(nbre_prestations=Count("idprestation"), total_prestations=Sum("montant"), total_ventilation=Sum("ventilation__montant"))
+        familles = Prestation.objects.select_related("famille").values("famille", "famille__nom").filter(date__gte=date_debut, date__lte=date_fin).annotate(nbre_prestations=Count("idprestation"), total_prestations=Sum("montant"))
+        ventilations = Ventilation.objects.values("famille").filter(prestation__date__gte=date_debut, prestation__date__lte=date_fin).annotate(total=Sum("montant"))
+        dict_ventilations = {ventilation["famille"]: ventilation["total"] for ventilation in ventilations}
 
         liste_lignes = []
         for famille in familles:
-            impaye = (famille["total_prestations"] or decimal.Decimal(0)) - (famille["total_ventilation"] or decimal.Decimal(0))
+            impaye = (famille["total_prestations"] or decimal.Decimal(0)) - (dict_ventilations.get(famille["famille"], decimal.Decimal(0)))
             if impaye:
                 ligne = {
                     "0": famille["famille__nom"],
