@@ -490,9 +490,12 @@ class Impression(utils_impression.Impression):
         # Création du titre du document
         self.Insert_header()
 
-        # Insertion du label Paramètres
-        # styleA = ParagraphStyle(name="A", fontName="Helvetica", fontSize=6, spaceAfter=0)
-        # self.story.append(Paragraph(u"<b>Critères :</b> %s" % labelParametres, styleA))
+        liste_label_parametres = [
+            "Période du %s au %s" % (utils_dates.ConvertDateToFR(date_debut), utils_dates.ConvertDateToFR(date_fin)),
+            "Activités : %s" % ", ".join([activite.nom for activite in activites]),
+        ]
+        styleA = ParagraphStyle(name="A", fontName="Helvetica", fontSize=6, spaceAfter=0)
+        self.story.append(Paragraph(u"<b>Critères :</b> %s" % " | ".join(liste_label_parametres), styleA))
 
         txt_stats_globales = u"%d individus | %d familles" % (len(dict_stats["individus"]), len(dict_stats["familles"]))
         styleA = ParagraphStyle(name="A", fontName="Helvetica", fontSize=6, spaceAfter=20)
