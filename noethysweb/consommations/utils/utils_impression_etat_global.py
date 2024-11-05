@@ -225,7 +225,7 @@ class Impression(utils_impression.Impression):
                 if dict_options["regroupement_principal"] == "evenement_date": regroupement = conso.evenement_id
                 if dict_options["regroupement_principal"] == "categorie_tarif": regroupement = conso.categorie_tarif.nom
                 if dict_options["regroupement_principal"] == "unite_conso": regroupement = conso.unite.nom
-                if dict_options["regroupement_principal"] == "ville_residence": regroupement = dictInfosIndividus[conso.individu_id]["INDIVIDU_VILLE"]
+                if dict_options["regroupement_principal"] == "ville_residence": regroupement = dictInfosIndividus[conso.individu_id]["INDIVIDU_VILLE"] or ""
                 if dict_options["regroupement_principal"] == "secteur": regroupement = dictInfosIndividus[conso.individu_id]["INDIVIDU_SECTEUR"]
                 if dict_options["regroupement_principal"] == "genre": regroupement = dictInfosIndividus[conso.individu_id]["INDIVIDU_SEXE"]
                 if dict_options["regroupement_principal"] == "age": regroupement = dictInfosIndividus[conso.individu_id]["INDIVIDU_AGE_INT"]
