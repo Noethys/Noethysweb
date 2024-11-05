@@ -96,7 +96,7 @@ def Ajouter_filtre(request):
         if key.startswith("critere"):
             type_critere = key.replace("critere_", "")
             if "datetime" in type_critere:
-                dict_resultat["criteres"].append(str(dateutil.parser.parse(valeur, dayfirst=False)))
+                dict_resultat["criteres"].append(str(dateutil.parser.parse(valeur, dayfirst=True)))
             elif "date_naiss" in type_critere:
                 if valeur:
                     periode_str = utils_dates.ConvertPeriodeFrToDate(valeur)
