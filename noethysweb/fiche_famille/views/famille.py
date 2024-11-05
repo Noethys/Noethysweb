@@ -124,10 +124,10 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idfamille", "nom", "rue_resid", "cp_resid", "ville_resid", "mail", "portable", "secteur"]
-            hidden_columns = ["secteur",]
+            columns = ["idfamille", "nom", "rue_resid", "cp_resid", "ville_resid", "mail", "portable", "secteur", "date_creation"]
+            hidden_columns = ["secteur", "date_creation"]
             processors = {
-                'date_creation': helpers.format_date('%d/%m/%Y'),
+                "date_creation": helpers.format_date("%d/%m/%Y %H:%M"),
             }
             ordering = ["nom"]
 
