@@ -247,6 +247,11 @@ $(document).ready(function() {
                     }
                 }
 
+                // Vérifie que l'évènement est bien lié au groupe de l'individu
+                if (case_tableau.type_case === "event" && case_tableau.groupe !== case_tableau.evenement.groupe) {
+                    valide = false
+                }
+
                 // Application réservation
                 if (!(mode === "portail") || (afficher_facturation === true)) {
                     var active_facturation = true;
