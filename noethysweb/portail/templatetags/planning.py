@@ -75,6 +75,11 @@ def is_modif_allowed(date, data):
             date_limite = date_limite - relativedelta.relativedelta(
                 weekday=relativedelta.SU(-1)) - relativedelta.relativedelta(weekday=jours_semaine[nbre_jours - 2000](-1))
 
+        # Lundi, mardi, mercredi... de la semaine S-2
+        if 3000 <= nbre_jours <= 3006:
+            date_limite = date_limite - relativedelta.relativedelta(
+                weekday=relativedelta.SU(-1)) - relativedelta.relativedelta(weekday=jours_semaine[nbre_jours - 3000](-2))
+
         # Validation de la date limite
         if datetime.datetime.now() > date_limite:
             return False

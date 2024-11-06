@@ -11,7 +11,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset, Div
 from crispy_forms.bootstrap import Field, InlineCheckboxes
 from core.utils.utils_commandes import Commandes
-from core.models import Activite, ModeleEmail, JOURS_SEMAINE
+from core.models import Activite, ModeleEmail, JOURS_SEMAINE, JOURS_COMPLETS_SEMAINE
 from core.widgets import DateTimePickerWidget
 
 
@@ -20,14 +20,11 @@ class Formulaire(FormulaireBase, ModelForm):
     portail_inscriptions_date_fin = forms.DateTimeField(label="Date de fin*", required=False, widget=DateTimePickerWidget())
 
     # Limite de modification
-    liste_choix = [(None, "Aucun"),
-        (1000, "Lundi précédent"), (1001, "Mardi précédent"),
-        (1002, "Mercredi précédent"), (1003, "Jeudi précédent"), (1004, "Vendredi précédent"),
-        (1005, "Samedi précédent"), (1006, "Dimanche précédent"), (2000, "Lundi de la semaine précédente"),
-        (2001, "Mardi de la semaine précédente"), (2002, "Mercredi de la semaine précédente"),
-        (2003, "Jeudi de la semaine précédente"), (2004, "Vendredi de la semaine précédente"),
-        (2005, "Samedi de la semaine précédente"), (2006, "Dimanche de la semaine précédente"),
-        (0, "Jour J"), ]
+    liste_choix = [(None, "Aucun"),]
+    liste_choix.extend([(1000 + num_jour, "%s précédent" % label_jour) for num_jour, label_jour in JOURS_COMPLETS_SEMAINE])
+    liste_choix.extend([(2000 + num_jour, "%s de la semaine précédente" % label_jour) for num_jour, label_jour in JOURS_COMPLETS_SEMAINE])
+    liste_choix.extend([(3000 + num_jour, "%s de la semaine S-2" % label_jour) for num_jour, label_jour in JOURS_COMPLETS_SEMAINE])
+    liste_choix.append((0, "Jour J"))
     for x in range(1, 31):
         liste_choix.append((x, "Jour J-%d" % x))
     liste_choix.append((60, "Jour J-60"))
