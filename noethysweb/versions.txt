@@ -1,3 +1,21 @@
+Version 1.2.6.7 (07/11/2024) :
+
+- Ajout de la commande des repas dans le menu Outils
+- Ajout de la limite de modification S-2 sur le planning du portail
+- Ajout de la colonne Mail dans la liste des adhésions
+- Ajout de la ventilation auto après la modification du planning sur le portail
+- Ajout de la colonne Date création dans la liste des familles
+- Adaptation de l'éditeur de mails express pour la commande des repas
+- Correction de l'affichage des QF dans les factures
+- Correction de l'application d'une semaine-type sur les évènements
+- Correction du regroupement par ville de résidence dans l'état global
+- Correction des filtres de liste de type datetime
+- Correction de l'affichage du label de paramètres dans le PDF de l'état global
+- Correction de la liste Solder les impayés
+- Correction sur la validation de la saisie d'un évènement collaborateur
+- Correction du calcul du tarif selon fraterie sur le planning du portail
+- Correction de l'application de la TVA avec les modèles de prestations
+
 Version 1.2.6.6 (09/10/2024) :
 
 - Ajout de l'export Excel des envois dans l'éditeur d'emails
