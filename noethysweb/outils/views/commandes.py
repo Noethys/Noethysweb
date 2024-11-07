@@ -102,7 +102,7 @@ class Ajouter(Page, crud.Ajouter):
         return context
 
     def get_success_url(self):
-        return reverse_lazy(self.url_consulter, kwargs={'pk': self.object.idcommande})
+        return reverse_lazy(self.url_consulter, kwargs={'pk': self.object.idcommande if self.object else 0})
 
 
 class Modifier(Page, crud.Modifier):
@@ -203,8 +203,8 @@ class Consulter(Page, TemplateView):
         valeurs_version = json.loads(version.valeurs) if version else {}
 
         # Recherche la précédente version et la version suivante
-        context["version_precedente"] = CommandeVersion.objects.values("idversion", "horodatage").filter(commande=commande, idversion__lt=version.pk).order_by("-pk").first()
-        context["version_suivante"] = CommandeVersion.objects.values("idversion", "horodatage").filter(commande=commande, idversion__gt=version.pk).order_by("pk").first()
+        context["version_precedente"] = CommandeVersion.objects.values("idversion", "horodatage").filter(commande=commande, idversion__lt=version.pk if version else 0).order_by("-pk").first()
+        context["version_suivante"] = CommandeVersion.objects.values("idversion", "horodatage").filter(commande=commande, idversion__gt=version.pk if version else 0).order_by("pk").first()
 
         # Création des cases
         valeurs = {}
