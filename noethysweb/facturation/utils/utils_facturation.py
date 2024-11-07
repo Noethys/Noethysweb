@@ -140,6 +140,7 @@ class Facturation():
             dictVentilationPrestations[ventilation.prestation_id] += ventilation.montant
 
         # Recherche des QF aux dates concernées
+        date_min, date_max = None, None
         if not liste_factures:
             date_min = date_debut
             date_max = date_fin
@@ -147,9 +148,13 @@ class Facturation():
             liste_dates = []
             for prestation in prestations:
                 liste_dates.append(prestation.date)
-            date_min = min(liste_dates)
-            date_max = max(liste_dates)
-        listeQfdates = Quotient.objects.filter(Q(date_fin__gte=date_min) & Q(date_debut__lte=date_max))
+            if liste_dates:
+                date_min = min(liste_dates)
+                date_max = max(liste_dates)
+        if date_min and date_max:
+            listeQfdates = Quotient.objects.filter(Q(date_fin__gte=date_min) & Q(date_debut__lte=date_max))
+        else:
+            listeQfdates = []
 
         # Recherche des anciennes prestations impayées (=le report antérieur)
         logger.debug("Recherche des prestations reportées...")
