@@ -66,6 +66,11 @@ class Formulaire(FormulaireBase, ModelForm):
                         if not selection_defaut:
                             selection_defaut = dest
 
+            if destinataire.categorie == "saisie_libre" and destinataire.adresse:
+                dest = "%s <%s>" % (destinataire.adresse, destinataire.adresse)
+                liste_dest.append(dest)
+                selection_defaut = dest
+
             self.fields['dest'].choices = [(dest, dest) for dest in liste_dest]
             if selection_defaut:
                 self.fields['dest'].initial = selection_defaut

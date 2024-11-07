@@ -3,13 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
+from email.utils import parseaddr
 from django.http import JsonResponse
-from core.models import ModeleEmail, Mail, PieceJointe, Destinataire, Famille, Individu, Contact, AdresseMail, DocumentJoint
+from django.shortcuts import render
+from core.models import ModeleEmail, Mail, Destinataire, Famille, DocumentJoint
 from outils.utils import utils_email
 from outils.forms.editeur_emails_express import Formulaire
-from django.shortcuts import render
-import json, re
-from email.utils import parseaddr
 
 
 def Envoyer_email(request):
@@ -81,7 +81,14 @@ def Get_view_editeur_email(request):
     donnees = json.loads(request.POST.get("donnees"))
 
     # Importation de la famille
-    famille = Famille.objects.get(pk=donnees["idfamille"])
+    if "idfamille" in donnees:
+        categorie = "famille"
+        famille = Famille.objects.get(pk=donnees["idfamille"])
+        adresse = famille.mail
+    else:
+        categorie = "saisie_libre"
+        famille = None
+        adresse = donnees.get("adresse", "")
 
     # Création du mail
     modele_email = ModeleEmail.objects.filter(categorie=donnees["categorie"], defaut=True).first()
@@ -96,7 +103,7 @@ def Get_view_editeur_email(request):
     )
 
     # Création du destinataire et du document joint
-    destinataire = Destinataire.objects.create(categorie="famille", famille=famille, adresse=famille.mail, valeurs=json.dumps(donnees["champs"]))
+    destinataire = Destinataire.objects.create(categorie=categorie, famille=famille, adresse=adresse, valeurs=json.dumps(donnees["champs"]))
     if "nom_fichier" in donnees:
         document_joint = DocumentJoint.objects.create(nom=donnees["label_fichier"], fichier=donnees["nom_fichier"])
         destinataire.documents.add(document_joint)
@@ -109,10 +116,3 @@ def Get_view_editeur_email(request):
         "modeles": ModeleEmail.objects.filter(categorie=request.POST.get("categorie", donnees["categorie"])),
     }
     return render(request, 'outils/editeur_emails_express.html', context)
-
-
-# def Get_modele_email(request):
-#     """ Renvoie le contenu HTML d'un modèle d'emails """
-#     idmodele = int(request.POST.get("idmodele"))
-#     modele = ModeleEmail.objects.filter(pk=idmodele).first()
-#     return JsonResponse({"objet": modele.objet, "html": modele.html})
