@@ -26,7 +26,7 @@ from parametrage.views import organisateur, structures, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
     modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
-    modeles_word, releves_bancaires, sondages, achats_categories, achats_fournisseurs
+    modeles_word, releves_bancaires, sondages, achats_categories, achats_fournisseurs, modeles_commandes, modeles_commandes_colonnes
 
 
 urlpatterns = [
@@ -368,6 +368,19 @@ urlpatterns = [
     path('parametrage/menus_legendes/modifier/<int:pk>', menus_legendes.Modifier.as_view(), name='menus_legendes_modifier'),
     path('parametrage/menus_legendes/supprimer/<int:pk>', menus_legendes.Supprimer.as_view(), name='menus_legendes_supprimer'),
 
+    # Modèles de commandes
+    path('parametrage/modeles_commandes/liste', modeles_commandes.Liste.as_view(), name='modeles_commandes_liste'),
+    path('parametrage/modeles_commandes/ajouter', modeles_commandes.Ajouter.as_view(), name='modeles_commandes_ajouter'),
+    path('parametrage/modeles_commandes/modifier/<int:pk>', modeles_commandes.Modifier.as_view(), name='modeles_commandes_modifier'),
+    path('parametrage/modeles_commandes/supprimer/<int:pk>', modeles_commandes.Supprimer.as_view(), name='modeles_commandes_supprimer'),
+
+    # Colonnes des modèles de commandes
+    path('parametrage/modeles_commandes_colonnes/liste', modeles_commandes_colonnes.Liste.as_view(), name='modeles_commandes_colonnes_liste'),
+    path('parametrage/modeles_commandes_colonnes/liste/<int:categorie>', modeles_commandes_colonnes.Liste.as_view(), name='modeles_commandes_colonnes_liste'),
+    path('parametrage/modeles_commandes_colonnes/ajouter/<int:categorie>', modeles_commandes_colonnes.Ajouter.as_view(), name='modeles_commandes_colonnes_ajouter'),
+    path('parametrage/modeles_commandes_colonnes/modifier/<int:categorie>/<int:pk>', modeles_commandes_colonnes.Modifier.as_view(), name='modeles_commandes_colonnes_modifier'),
+    path('parametrage/modeles_commandes_colonnes/supprimer/<int:categorie>/<int:pk>', modeles_commandes_colonnes.Supprimer.as_view(), name='modeles_commandes_colonnes_supprimer'),
+
     # Catégories de notes
     path('parametrage/notes_categories/liste', notes_categories.Liste.as_view(), name='notes_categories_liste'),
     path('parametrage/notes_categories/ajouter', notes_categories.Ajouter.as_view(), name='notes_categories_ajouter'),
@@ -682,5 +695,6 @@ urlpatterns = [
     path('parametrage/sondages/valid_form_question', secure_ajax(sondages.Valid_form_question), name='ajax_sondages_valid_form_question'),
     path('parametrage/sondages/supprimer_question', secure_ajax(sondages.Supprimer_question), name='ajax_sondages_supprimer_question'),
     path('parametrage/sondages/reorganiser', secure_ajax(sondages.Reorganiser), name='ajax_sondages_reorganiser'),
-    path('parametrage/achats_categories/deplacer_lignes', secure_ajax(achats_categories.Deplacer.as_view()), name='ajax_deplacer_lignes_achats_categories'),
+    path('parametrage/achats_categories/liste/deplacer_lignes', secure_ajax(achats_categories.Deplacer.as_view()), name='ajax_deplacer_lignes_achats_categories'),
+    path('parametrage/modeles_commandes_colonnes/liste/deplacer_lignes', secure_ajax(modeles_commandes_colonnes.Deplacer.as_view()), name='ajax_deplacer_modeles_commandes_colonnes'),
 ]

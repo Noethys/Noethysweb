@@ -11,7 +11,7 @@ from outils.views import editeur_emails, editeur_emails_express, historique, upd
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
                         demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur, editeur_sms, editeur_sms_familles, \
                         editeur_sms_individus, editeur_sms_collaborateurs, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures, editeur_sms_express, taches, \
-                        suivi_reservations
+                        suivi_reservations, commandes
 
 urlpatterns = [
 
@@ -82,6 +82,14 @@ urlpatterns = [
     # Sauvegarde
     path('outils/sauvegarde/creer', sauvegarde_creer.View.as_view(), name='sauvegarde_creer'),
 
+    # Commandes
+    path('outils/commandes/liste', commandes.Liste.as_view(), name='commandes_liste'),
+    path('outils/commandes/ajouter', commandes.Ajouter.as_view(), name='commandes_ajouter'),
+    path('outils/commandes/modifier/<int:pk>', commandes.Modifier.as_view(), name='commandes_modifier'),
+    path('outils/commandes/supprimer/<int:pk>', commandes.Supprimer.as_view(), name='commandes_supprimer'),
+    path('outils/commandes/consulter/<int:pk>', commandes.Consulter.as_view(), name='commandes_consulter'),
+    path('outils/commandes/consulter/<int:pk>/<int:idversion>', commandes.Consulter.as_view(), name='commandes_consulter'),
+
     # Portail
     path('outils/portail/messages/liste', messages_portail.Liste.as_view(), name='messages_portail_liste'),
     path('outils/portail/messages/supprimer/<int:pk>', messages_portail.Supprimer.as_view(), name='messages_portail_supprimer'),
@@ -121,5 +129,6 @@ urlpatterns = [
     path('outils/reservations_get_form_periode', secure_ajax(suivi_reservations.Get_form_periode), name='ajax_reservations_get_form_periode'),
     path('outils/reservations_valider_form_activites', secure_ajax(suivi_reservations.Valider_form_activites), name='ajax_reservations_valider_form_activites'),
     path('outils/reservations_valider_form_periode', secure_ajax(suivi_reservations.Valider_form_periode), name='ajax_reservations_valider_form_periode'),
+    path('outils/commandes/generer_pdf', secure_ajax(commandes.Generer_pdf), name='ajax_commandes_generer_pdf'),
 
 ]

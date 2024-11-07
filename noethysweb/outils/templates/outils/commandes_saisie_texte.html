@@ -1,0 +1,59 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Modal Saisir un texte libre #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_saisir_texte{% endblock %}
+    {% block modal_titre %}Saisie d'un texte{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+
+        <form id="form_selection_texte" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="saisie_texte_key" value="">
+            <div class="form-group">
+                <div class="controls">
+                    <label for="saisie_texte" class="col-form-label">Texte</label>
+                    <textarea id="saisie_texte" class="form-control" rows="4" maxlength="450"></textarea>
+                </div>
+            </div>
+
+            <div class="buttonHolder">
+                <div class="modal-footer d-flex" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                    <button type="submit" class="btn btn-warning mr-auto p-2" title="Supprimer" id="saisie_texte_supprimer" value="Supprimer"><i class="fa fa-trash-o margin-r-5"></i>Supprimer</button>
+                    <button type="submit" class="btn btn-primary p-2" title="Valider" id="saisie_texte_valider" value="Valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                    <button type="button" class="btn btn-danger p-2" data-dismiss="modal"><i class="fa fa-ban margin-r-5"></i>Annuler</button>
+                </div>
+            </div>
+
+        </form>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+    $(document).ready(function() {
+        $('#modal_saisir_texte').on('shown.bs.modal', function () {
+            $("#saisie_texte").focus();
+        });
+    });
+
+    $("#form_selection_texte").on('click', '#saisie_texte_supprimer', function(e) {
+        e.preventDefault();
+        var key = $('#saisie_texte_key').val();
+        $('#modal_saisir_texte').modal('hide');
+        dict_cases[key].importe_data({texte: ''});
+    });
+
+    // Modal : Validation du texte saisi
+    $("#form_selection_texte").on('click', '#saisie_texte_valider', function(e) {
+        e.preventDefault();
+        var texte = $('#saisie_texte').val();
+        var key = $('#saisie_texte_key').val();
+        $('#modal_saisir_texte').modal('hide');
+        dict_cases[key].importe_data({texte: texte});
+    });
+
+</script>

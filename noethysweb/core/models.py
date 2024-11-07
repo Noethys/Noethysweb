@@ -4555,3 +4555,85 @@ class AchatArticle(models.Model):
 
     def __str__(self):
         return self.libelle or ("IDarticle %d" % self.idarticle if self.idarticle else "Nouvel article")
+
+
+class CommandeModele(models.Model):
+    idmodele = models.AutoField(verbose_name="ID", db_column="IDmodele", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    restaurateur = models.ForeignKey(Restaurateur, verbose_name="Restaurateur", on_delete=models.PROTECT, blank=True, null=True)
+    defaut = models.BooleanField(verbose_name="Modèle par défaut", default=False)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        db_table = "modeles_commandes"
+        verbose_name = "modèle"
+        verbose_name_plural = "modèles"
+
+    def __str__(self):
+        return self.nom or ("IDmodele %d" % self.idmodele if self.idmodele else "Nouveau modèle")
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        if len(CommandeModele.objects.filter(defaut=True)) == 0:
+            objet = CommandeModele.objects.first()
+            if objet != None:
+                objet.defaut = True
+                objet.save()
+
+
+class CommandeModeleColonne(models.Model):
+    idcolonne = models.AutoField(verbose_name="ID", db_column="IDcolonne", primary_key=True)
+    modele = models.ForeignKey(CommandeModele, verbose_name="Modèle", on_delete=models.CASCADE)
+    ordre = models.IntegerField(verbose_name="Ordre")
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    largeur = models.IntegerField(verbose_name="Largeur de la colonne", default=80)
+    categorie = models.CharField(verbose_name="Catégorie", max_length=200)
+    parametres = models.TextField(verbose_name="Paramètres", blank=True, null=True)
+
+    class Meta:
+        db_table = "modeles_commandes_colonnes"
+        verbose_name = "colonne"
+        verbose_name_plural = "colonnes"
+
+    def __str__(self):
+        return self.nom or ("IDcolonne %d" % self.idcolonne if self.idcolonne else "Nouvelle colonne")
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        liste_objects = CommandeModeleColonne.objects.all().order_by("ordre")
+        for ordre, objet in enumerate(liste_objects, 1):
+            if objet.ordre != ordre:
+                objet.ordre = ordre
+                objet.save()
+
+
+class Commande(models.Model):
+    idcommande = models.AutoField(verbose_name="ID", db_column="IDcommande", primary_key=True)
+    modele = models.ForeignKey(CommandeModele, verbose_name="Modèle", on_delete=models.PROTECT)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    date_debut = models.DateField(verbose_name="Début")
+    date_fin = models.DateField(verbose_name="Fin")
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+
+    class Meta:
+        db_table = "commandes"
+        verbose_name = "commande"
+        verbose_name_plural = "commandes"
+
+    def __str__(self):
+        return self.nom or ("IDcommande %d" % self.idcommande if self.idcommande else "Nouvelle commande")
+
+
+class CommandeVersion(models.Model):
+    idversion = models.AutoField(verbose_name="ID", db_column="IDversion", primary_key=True)
+    commande = models.ForeignKey(Commande, verbose_name="Commande", on_delete=models.CASCADE)
+    horodatage = models.DateTimeField(verbose_name="Horodatage", auto_now_add=True)
+    valeurs = models.TextField(verbose_name="Valeurs", blank=True, null=True)
+
+    class Meta:
+        db_table = "commandes_versions"
+        verbose_name = "version"
+        verbose_name_plural = "versions"
+
+    def __str__(self):
+        return "IDversion %d" % self.idversion if self.idversion else "Nouvelle version"

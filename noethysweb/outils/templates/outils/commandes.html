@@ -1,0 +1,223 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static "outils/commandes.js" %}"></script>
+{% endblock scripts %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+
+    #table-commande th {
+        text-align: center;
+    }
+
+    .case {
+        height: 40px;
+        position: relative;
+    }
+
+    .total {
+        background-color: #f8f8f8;
+        text-align: right;
+    }
+
+    .texte_libre, .texte_infos {
+        white-space: pre-line;
+        padding: 4px !important;
+        font-size: 80%;
+    }
+
+    .texte_libre {
+        cursor: pointer;
+    }
+
+    .texte_infos {
+        background-color: #f8f8f8;
+    }
+
+    .numerique_suggestion, .numerique_libre {
+        text-align: right;
+        cursor: pointer;
+    }
+
+    .numerique_total, .numerique_conso {
+        text-align: right;
+        background-color: #f8f8f8;
+    }
+
+    .suggestion {
+        position: absolute;
+        left: 4px;
+        top: 3px;
+        color: #8d8d8d;
+        background-color: #efeeee;
+        display: inline-block;
+        padding: .25em .4em;
+        font-size: 75%;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 10rem;
+        transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+
+    .noselect {
+      -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+         -khtml-user-select: none; /* Konqueror HTML */
+           -moz-user-select: none; /* Old versions of Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+                user-select: none; /* Non-prefixed version, currently
+    }
+
+    </style>
+{% endblock %}
+
+{% block contenu_page %}
+
+    <script>
+        var dict_valeurs = JSON.parse('{{ valeurs_json|escapejs }}');
+        var dict_colonnes_total = JSON.parse('{{ colonnes_total_json|escapejs }}');
+        var url_impression_pdf = "{% url 'ajax_commandes_generer_pdf' %}";
+        var url_editeur_email = "{% url 'ajax_get_view_editeur_email' %}";
+        var url_modifier = "{% url 'commandes_modifier' pk=commande.pk %}";
+        var url_version_precedente = {% if version_precedente %}"{% url 'commandes_consulter' pk=commande.pk idversion=version_precedente.idversion %}"{% else %}"#"{% endif %}
+        var url_version_suivante = {% if version_suivante %}"{% url 'commandes_consulter' pk=commande.pk idversion=version_suivante.idversion %}"{% else %}"#"{% endif %}
+        var idcommande = "{{ commande.pk }}";
+        var csrf_token = "{{ csrf_token }}";
+    </script>
+
+    <div class="row">
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder">
+                        <button type="submit" title="Enregistrer" form="form-maj" class='btn btn-primary' value="Sauvegarde"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
+                        <a class="btn btn-danger" href="{% url 'commandes_liste' %}"><i class='fa fa-times margin-r-5'></i>Annuler</a>
+                        <button class="btn btn-default" onclick="verification_dirty(url=url_modifier)"><i class="fa fa-pencil margin-r-5"></i>Modifier les paramètres</button>
+                        {% if is_colonne_suggestion_exists %}
+                            <button class="btn btn-default" id="bouton_appliquer_suggestions"><i class="fa fa-magic margin-r-5"></i>Appliquer les suggestions</button>
+                        {% endif %}
+                        <button class="btn btn-default" onclick="impression_pdf()" title="Aperçu PDF"><i class="fa fa-file-pdf-o margin-r-5"></i>Aperçu PDF</button>
+                        <button class="btn btn-default" onclick="impression_pdf(true)" title="Envoyer par email"><i class="fa fa-send-o margin-r-5"></i>Envoyer par email</button>
+                    </div>
+
+                    {# Paramètres de la commande #}
+                    <div class="card bg-light d-flex flex-fill mb-3 mt-3">
+                        <div class="card-body pt-0 p-3">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h2 class="lead"><b>{{ commande.nom }}</b></h2>
+                                    {% if commande.observations %}
+                                        <div class="text-muted border-bottom-0">
+                                            <div class="mt-1"><span><i class="fa fa-xs fa-info-circle"></i></span> Observations : {{ commande.observations }}</div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-5">
+                                    <ul class="ml-4 mb-0 fa-ul text-muted">
+                                        <li class="small"><span><i class="fa fa-xs fa-gear"></i></span> Modèle : {{ commande.modele.nom }}</li>
+                                        <li class="small"><span><i class="fa fa-xs fa-cutlery"></i></span> Restaurateur : {{ commande.modele.restaurateur.nom }}</li>
+                                        <li class="small"><span><i class="fa fa-xs fa-calendar"></i></span> Période : {{ commande.date_debut }} - {{ commande.date_fin }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% if version %}
+                            <div class="card-footer">
+                                <div class="col-12 text-center text-muted">
+                                    {% if version_precedente %}
+                                        <a onclick="verification_dirty(url=url_version_precedente)" title="Consulter la version précédente"><i class="fa fa-chevron-circle-left"></i></a>
+                                    {% endif %}
+                                    <span class="ml-2 mr-2">Version du {{ version.horodatage }}</span>
+                                    {% if version_suivante %}
+                                        <a onclick="verification_dirty(url=url_version_suivante)" title="Consulter la version suivante"><i class="fa fa-chevron-circle-right"></i></a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# Tableau des valeurs #}
+                    <div class="table noselect" id="table_commande" draggable="false">
+                        <table cellspacing="0" id="table-commande" class="table table-bordered table-grille bg-white" style="min-width: 400px;">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    {% for colonne in colonnes %}
+                                        <th>{{ colonne.nom }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for date in dates %}
+                                    <tr>
+                                        <th class="date">{{ date|date:"l j F Y"|title }}</th>
+                                        {% for colonne in colonnes %}
+                                            {% creation_string_key date colonne.pk as key_case %}
+                                            <td class="case {{ colonne.categorie|lower }}" id="{{ key_case }}"></td>
+                                            <script>
+                                                var case_tableau = new Case_{{ colonne.categorie|lower }}({
+                                                    categorie: "{{ colonne.categorie|lower }}",
+                                                    key: "{{ key_case }}",
+                                                    date: "{{ date|date:'Y-m-d' }}",
+                                                    colonne: {{ colonne.pk }},
+                                                });
+                                                dict_cases["{{ key_case }}"] = case_tableau;
+                                            </script>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                                 <tr>
+                                    <th class="date">Total</th>
+                                    {% for colonne in colonnes %}
+                                        {% creation_string_key 'total' colonne.pk as key_case %}
+                                        <td class="case total" id="{{ key_case }}"></td>
+                                        <script>
+                                            var case_tableau = new Case_total({
+                                                categorie: "total",
+                                                key: "{{ key_case }}",
+                                                colonne: {{ colonne.pk }},
+                                            });
+                                            dict_cases["{{ key_case }}"] = case_tableau;
+                                        </script>
+                                    {% endfor %}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="color: #b4b4b4;margin-bottom: 5px;font-size: 12px;">
+                        <i class="fa fa-lightbulb-o"></i> Pour reproduire la dernière valeur ou le dernier texte modifié d'une colonne, conservez la touche C enfoncée en cliquant sur les cases.
+                    </div>
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+
+    </div>
+
+    <form method="post" id="form-maj">
+        {% csrf_token %}
+        <input type="hidden" id="donnees" name="donnees" value="">
+    </form>
+    
+    {# Insertion des modals #}
+    {% include 'outils/commandes_saisie_quantite.html' %}
+    {% include 'outils/commandes_saisie_texte.html' %}
+    {% include 'outils/modal_editeur_emails.html' %}
+    {% include 'core/modal_pdf.html' %}
+    
+{% endblock contenu_page %}

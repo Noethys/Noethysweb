@@ -103,6 +103,8 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_restauration.Add(code="restaurateurs_liste", titre="Restaurateurs", icone="file-text-o")
     menu_restauration.Add(code="menus_categories_liste", titre="Catégories de menus", icone="file-text-o")
     menu_restauration.Add(code="menus_legendes_liste", titre="Légendes de menus", icone="file-text-o")
+    menu_restauration.Add(code="modeles_commandes_liste", titre="Modèles de commandes", icone="file-text-o")
+    menu_restauration.Add(code="modeles_commandes_colonnes_liste", titre="Colonnes des modèles de commandes", icone="file-text-o")
 
     # Notes
     menu_notes = menu_parametrage.Add(titre="Notes")
@@ -199,6 +201,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Sauvegarde
     menu_sauvegarde = menu_outils.Add(titre="Sauvegarde")
     menu_sauvegarde.Add(code="sauvegarde_creer", titre="Créer une sauvegarde", icone="file-text-o", compatible_demo=False)
+
+    # Restauration
+    menu_restauration = menu_outils.Add(titre="Restauration")
+    menu_restauration.Add(code="commandes_liste", titre="Commandes des repas", icone="file-text-o")
 
     # Portail
     menu_portail = menu_outils.Add(titre="Portail")
