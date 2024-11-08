@@ -5,8 +5,9 @@
 
 import os, datetime, shutil, uuid
 from django.conf import settings
-from core.models import Famille, Facture, Prestation, Depot, Reglement, Ventilation
+from core.models import Famille, Facture, Depot, Reglement, Ventilation
 from core.utils import utils_dates
+from facturation.utils.utils_export_ecritures import BaseExporter
 
 
 format_export_cpt = [("num_compte", "Numéro de compte", 10), ("nom", "Raison sociale ou nom", 30),
@@ -30,19 +31,10 @@ format_export_rgl = [("num_ecriture", "Numéro d'écriture", 6), ("num_ligne_ecr
                      ("emetteur", "Emetteur", 40), ("etablissement_bancaire", "Etablissement bancaire", 40)]
 
 
-class Exporter():
-    def __init__(self, request=None, options=None):
-        self.options = options
-        self.request = request
-        self.erreurs = []
-
+class Exporter(BaseExporter):
     def Generer(self):
-        # Création du répertoire de sortie
-        self.rep_base = os.path.join("temp", str(uuid.uuid4()))
-        self.rep_destination = os.path.join(settings.MEDIA_ROOT, self.rep_base, "cloe")
-        os.makedirs(self.rep_destination)
-
-        # Création des fichiers
+        # Création du répertoire de sortie et des fichiers
+        self.Creer_repertoire_sortie(nom_rep="cloe")
         if not self.Creation_fichiers():
             return False
 
@@ -50,59 +42,6 @@ class Exporter():
         nom_fichier_zip = "export_cloe_%s.zip" % datetime.date.today().strftime("%Y-%m-%d")
         shutil.make_archive(os.path.join(settings.MEDIA_ROOT, self.rep_base, nom_fichier_zip.replace(".zip", "")), "zip", self.rep_destination)
         return os.path.join(settings.MEDIA_URL, self.rep_base, nom_fichier_zip)
-
-    def Get_detail_factures(self, factures=[]):
-        prestations = Prestation.objects.select_related("activite", "individu", "facture", "cotisation", "cotisation__type_cotisation").filter(facture__in=factures)
-
-        dict_resultats = {}
-        for prestation in prestations:
-            # Recherche le code compta et le code analytique
-            code_compta = None
-            code_analytique = None
-            if prestation.activite:
-                if prestation.activite.code_comptable: code_compta = prestation.activite.code_comptable
-                if prestation.activite.code_analytique: code_analytique = prestation.activite.code_analytique
-            if hasattr(prestation, "cotisation"):
-                if prestation.cotisation.type_cotisation.code_comptable: code_compta = prestation.cotisation.type_cotisation.code_comptable
-                if prestation.cotisation.type_cotisation.code_analytique: code_analytique = prestation.cotisation.type_cotisation.code_analytique
-            if prestation.code_compta: code_compta = prestation.code_compta
-            if prestation.code_analytique: code_analytique = prestation.code_analytique
-
-            # Mémorisation
-            key = (prestation.label, code_compta, code_analytique)
-            dict_resultats.setdefault(prestation.facture, {})
-            dict_resultats[prestation.facture].setdefault(key, 0)
-            dict_resultats[prestation.facture][key] += prestation.montant
-
-        dict_resultats2 = {}
-        for facture, dict_facture in dict_resultats.items():
-            dict_resultats2.setdefault(facture, [])
-            for (label, code_compta, code_analytique), montant in dict_facture.items():
-                dict_resultats2[facture].append({"label": label, "code_compta": code_compta, "code_analytique": code_analytique, "montant": montant})
-            dict_resultats2[facture].sort(key=lambda x: x["label"])
-
-        return dict_resultats2
-
-    def Get_erreurs_html(self):
-        html = """
-            <div class='text-red'>Les erreurs suivantes ont été rencontrées :<div><ul class='mt-2'>%s</ul>
-            <div class="buttonHolder">
-                <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-times margin-r-5'></i>Fermer</button>
-                </div>
-            </div>
-        """ % "".join(["<li>%s</li>" % erreur for erreur in self.erreurs])
-        return html
-
-    def Generer_fichier_texte(self, format_export=None, lignes=[]):
-        texte = []
-        for valeurs_ligne in lignes:
-            ligne = []
-            for code_colonne, nom_colonne, taille_colonne in format_export:
-                valeur = str(valeurs_ligne.get(code_colonne, "") or "")
-                ligne.append(valeur[:taille_colonne].ljust(taille_colonne))
-            texte.append("".join(ligne))
-        return "\n".join(texte)
 
     def Creation_fichiers(self):
         # Récupération de la période

@@ -12,7 +12,7 @@ from facturation.views import factures_generation, liste_prestations, liste_fact
                                 rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations, \
                                 lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
                                 attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes, edition_recap_factures, \
-                                factures_modifier, export_ecritures_cloe, saisie_lot_forfaits_credits, synthese_deductions
+                                factures_modifier, export_ecritures_cloe, saisie_lot_forfaits_credits, synthese_deductions, export_ecritures_cwe
 
 urlpatterns = [
 
@@ -97,6 +97,7 @@ urlpatterns = [
 
     # Export des écritures
     path('facturation/export_ecritures_cloe', export_ecritures_cloe.View.as_view(), name='export_ecritures_cloe'),
+    path('facturation/export_ecritures_cwe', export_ecritures_cwe.View.as_view(), name='export_ecritures_cwe'),
 
     # AJAX
     path('facturation/modifier_lot_factures', secure_ajax(factures_generation.Modifier_lot_factures), name='ajax_modifier_lot_factures'),
@@ -129,6 +130,7 @@ urlpatterns = [
     path('facturation/ajax_solder_impayes', secure_ajax(solder_impayes.Solder), name='ajax_solder_impayes'),
     path('facturation/ajax_factures_modifier', secure_ajax(factures_modifier.Appliquer), name='ajax_factures_modifier'),
     path('facturation/export_ecritures_cloe/exporter', secure_ajax(export_ecritures_cloe.Exporter), name='ajax_export_ecritures_cloe_exporter'),
+    path('facturation/export_ecritures_cwe/exporter', secure_ajax(export_ecritures_cwe.Exporter), name='ajax_export_ecritures_cwe_exporter'),
     path('facturation/ajax_saisie_lot_forfaits_credits_get_tarifs', secure_ajax(saisie_lot_forfaits_credits.Get_tarifs), name='ajax_saisie_lot_forfaits_credits_get_tarifs'),
     path('facturation/ajax_saisie_lot_forfaits_credits_appliquer', secure_ajax(saisie_lot_forfaits_credits.Appliquer), name='ajax_saisie_lot_forfaits_credits_appliquer'),
 

@@ -433,6 +433,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Export des écritures comptables
     menu_export_ecritures = menu_facturation.Add(titre="Export des écritures comptables")
     menu_export_ecritures.Add(code="export_ecritures_cloe", titre="Exporter vers Cloé", icone="file-text-o")
+    menu_export_ecritures.Add(code="export_ecritures_cwe", titre="Exporter vers Comptabilité Web Entreprise", icone="file-text-o")
 
 
     # ------------------------------------ Règlements ------------------------------------
