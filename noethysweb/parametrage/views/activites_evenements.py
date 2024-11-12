@@ -6,7 +6,6 @@
 import re
 from copy import deepcopy
 from django.urls import reverse_lazy, reverse
-from django.http import HttpResponseRedirect
 from django.db.models import Q
 from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
@@ -35,6 +34,7 @@ class Page(Onglet):
         context['onglet_actif'] = "evenements"
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idactivite': self.Get_idactivite()}), "icone": "fa fa-plus"},
+            {"label": "Catégories d'événements", "classe": "btn btn-default", "href": reverse_lazy("activites_evenements_categories_liste", kwargs={'idactivite': self.Get_idactivite()}), "icone": "fa fa-gear"},
         ]
         return context
 

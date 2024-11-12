@@ -1382,6 +1382,26 @@ class UniteRemplissage(models.Model):
             ordre += 1
 
 
+class CategorieEvenement(models.Model):
+    idcategorie = models.AutoField(verbose_name="ID", db_column="IDcategorie", primary_key=True)
+    activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.CASCADE)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
+    choix_limitations = [(None, "Aucune"),]# ("1EVTSEMAINE", "1 événement par semaine max"), ("2EVTSEMAINE", "2 événements par semaine max"), ("3EVTSEMAINE", "3 événements par semaine max")]
+    limitations = models.CharField(verbose_name="Limitation", max_length=100, choices=choix_limitations, default=None, blank=True, null=True)
+
+    class Meta:
+        db_table = 'evenements_categories'
+        verbose_name = "catégorie d'événement"
+        verbose_name_plural = "catégories d'événements"
+
+    def __str__(self):
+        return self.nom or ("IDcategorie %d" % self.idcategorie if self.idcategorie else "Nouvelle catégorie")
+
+    def get_nom_image(self):
+        return os.path.basename(self.image.url).split(".")[0] if self.image else None
+
+
 class Evenement(models.Model):
     idevenement = models.AutoField(verbose_name="ID", db_column='IDevenement', primary_key=True)
     activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.CASCADE)
@@ -1396,6 +1416,8 @@ class Evenement(models.Model):
     montant = models.DecimalField(verbose_name="Montant", blank=True, null=True, max_digits=10, decimal_places=2, default=0.0)
     equiv_heures = models.TimeField(verbose_name="Equivalence en heures", blank=True, null=True)
     visible_portail = models.BooleanField(verbose_name="Visible sur le portail", default=True)
+    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
+    categorie = models.ForeignKey(CategorieEvenement, verbose_name="Catégorie", blank=True, null=True, on_delete=models.PROTECT)
 
     class Meta:
         db_table = 'evenements'
@@ -1404,6 +1426,9 @@ class Evenement(models.Model):
 
     def __str__(self):
         return "Evenement ID%d" % self.idevenement
+
+    def get_nom_image(self):
+        return os.path.basename(self.image.url).split(".")[0] if self.image else None
 
 
 class CategorieTarif(models.Model):

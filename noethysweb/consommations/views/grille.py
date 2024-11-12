@@ -213,9 +213,12 @@ def Get_generic_data(data={}):
     data['liste_vacances_json'] = mark_safe(json.dumps([(str(vac.date_debut), str(vac.date_fin)) for vac in data['liste_vacances']]))
 
     # Importation des événements
-    liste_evenements = Evenement.objects.filter(data["conditions_periodes"] & Q(activite=data['selection_activite'])).order_by("date", "heure_debut")
+    liste_evenements = Evenement.objects.select_related("categorie").filter(data["conditions_periodes"] & Q(activite=data['selection_activite'])).order_by("date", "heure_debut")
     data["liste_evenements_json"] = serializers.serialize('json', liste_evenements)
     data["liste_evenements"] = liste_evenements
+    data["liste_images_evenements"] = [evt for evt in liste_evenements if evt.image]
+    data["liste_categories_evenements"] = list({evt.categorie: True for evt in liste_evenements if evt.categorie}.keys())
+    data["dict_categories_evenements_json"] = json.dumps({categorie.pk: {"nom": categorie.nom, "image": categorie.get_nom_image(), "limitations": categorie.limitations} for categorie in data["liste_categories_evenements"]})
 
     # Importation des remplissages
     liste_remplissage = Remplissage.objects.filter(data["conditions_periodes"] & Q(activite=data['selection_activite']))

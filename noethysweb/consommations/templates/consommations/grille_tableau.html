@@ -5,11 +5,18 @@
 {% block styles %}
     <link rel="stylesheet" type="text/css" href="{% static 'lib/clusterize/clusterize.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'consommations/grille.css' %}">
+    <style>
+        {% for evt in data.liste_images_evenements %}
+            .event-img-{{ evt.get_nom_image }}:before {background-image: url("{{ evt.image.url }}");}
+        {% endfor %}
+        {% for cat in data.liste_categories_evenements %}
+            {% if cat.image %}.event-img-{{ cat.get_nom_image }}:before {background-image: url("{{ cat.image.url }}");}{% endif %}
+        {% endfor %}
+    </style>
 {% endblock styles %}
 
 {% block scripts %}
     <script type="text/javascript" src="{% static 'lib/clusterize/clusterize.min.js' %}"></script>
-{#    <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>#}
     <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
     <script type="text/javascript" src="{% static "consommations/grille.js" %}"></script>
 {% endblock scripts %}
@@ -31,6 +38,7 @@
         var liste_memos_existants = JSON.parse('{{ data.liste_memos_json|escapejs }}');
         var liste_unites = JSON.parse('{{ data.liste_unites_json|escapejs }}');
         var liste_evenements = JSON.parse('{{ data.liste_evenements_json|escapejs }}');
+        var dict_categories_evenements = JSON.parse('{{ data.dict_categories_evenements_json|escapejs }}');
         var liste_groupes = JSON.parse('{{ data.liste_groupes_json|escapejs }}');
         var dict_places = JSON.parse('{{ data.dict_places_json|escapejs }}');
         var dict_capacite = JSON.parse('{{ data.dict_capacite_json|escapejs }}');

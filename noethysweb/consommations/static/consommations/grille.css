@@ -189,6 +189,21 @@
     border: 1px solid #ffffff !important;
 }
 
+.table_evenements td:before {
+    content: ' ';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.2;
+    background-repeat: no-repeat;
+    background-position: 100% 100%;
+    background-size: cover;
+    filter: grayscale(100%);
+}
+
 /* Elements des cases */
 
 .infos {

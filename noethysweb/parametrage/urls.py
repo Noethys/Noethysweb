@@ -26,7 +26,8 @@ from parametrage.views import organisateur, structures, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
     modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
-    modeles_word, releves_bancaires, sondages, achats_categories, achats_fournisseurs, modeles_commandes, modeles_commandes_colonnes
+    modeles_word, releves_bancaires, sondages, achats_categories, achats_fournisseurs, modeles_commandes, modeles_commandes_colonnes, \
+    activites_evenements_categories
 
 
 urlpatterns = [
@@ -101,6 +102,11 @@ urlpatterns = [
     path('parametrage/activites/tarifs_evenements/modifier/<int:idactivite>/<int:evenement>/<int:pk>', activites_evenements_tarifs.Modifier.as_view(), name='activites_evenements_tarifs_modifier'),
     path('parametrage/activites/tarifs_evenements/supprimer/<int:idactivite>/<int:evenement>/<int:pk>', activites_evenements_tarifs.Supprimer.as_view(), name='activites_evenements_tarifs_supprimer'),
     path('parametrage/activites/tarifs_evenements/dupliquer/<int:idactivite>/<int:evenement>/<int:pk>', activites_evenements_tarifs.Dupliquer.as_view(), name='activites_evenements_tarifs_dupliquer'),
+
+    path('parametrage/activites/categories_evenements/liste/<int:idactivite>', activites_evenements_categories.Liste.as_view(), name='activites_evenements_categories_liste'),
+    path('parametrage/activites/categories_evenements/ajouter/<int:idactivite>', activites_evenements_categories.Ajouter.as_view(), name='activites_evenements_categories_ajouter'),
+    path('parametrage/activites/categories_evenements/modifier/<int:idactivite>/<int:pk>', activites_evenements_categories.Modifier.as_view(), name='activites_evenements_categories_modifier'),
+    path('parametrage/activites/categories_evenements/supprimer/<int:idactivite>/<int:pk>', activites_evenements_categories.Supprimer.as_view(), name='activites_evenements_categories_supprimer'),
 
     path('parametrage/activites/categories_tarifs/liste/<int:idactivite>', activites_categories_tarifs.Liste.as_view(), name='activites_categories_tarifs_liste'),
     path('parametrage/activites/categories_tarifs/ajouter/<int:idactivite>', activites_categories_tarifs.Ajouter.as_view(), name='activites_categories_tarifs_ajouter'),

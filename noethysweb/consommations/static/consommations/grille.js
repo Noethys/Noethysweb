@@ -379,7 +379,7 @@ class Case_standard extends Case_base {
 
         // Si c'est une case event
         if (this.type_case === "event") {
-            var label_evenement = "<span style='text-transform : uppercase;font-weight: bold;'>" + this.evenement.nom + "</span>";
+            var label_evenement = "<span style='text-transform : uppercase;font-weight: bold;' title='" + this.evenement.nom.replace(/'/g, '&#39;') + "'>" + this.evenement.nom + "</span>";
             if (this.evenement.description) {
                 label_evenement += " <span class='ml-2' title='" + this.evenement.description.replace(/'/g, '&#39;') + "'><i class='fa fa-info-circle'></i> " + this.evenement.description + "</span>";
             }
@@ -738,7 +738,15 @@ class Case_evenement extends Case_base {
             liste_evenements.forEach(function(evenement) {
                 if ((self.groupe === evenement.groupe) && (!(mode === "portail") || ((mode === "portail") && (evenement.visible_portail === true)))) {
                     var classe_event = $("#" + self.key).hasClass("fermeture") ? "fermeture" : "ouvert";
-                    html += "<td class='case " + classe_event + "' id='event_" + self.key + "_" + evenement.pk + "'</td>";
+                    var classe_image_event = "";
+                    if ((evenement.categorie) && (dict_categories_evenements[evenement.categorie].image)) {
+                        classe_image_event = "event-img-" + dict_categories_evenements[evenement.categorie].image;
+                    }
+                    if (evenement.image) {
+                        classe_image_event = "event-img-" + evenement.image.split("/").pop().split(".").shift();
+                    }
+                    html += "<td class='case " + classe_event + " " + classe_image_event + "' id='event_" + self.key + "_" + evenement.pk + "'";
+                    html += "</td>";
                 }
             });
             html += "</tr></tbody></table>";
@@ -944,13 +952,6 @@ class Case_multi extends Case_horaire {
 
 
 
-
-
-
-
-
-
-
 class Conso {
     constructor(conso) {
         this.pk = null;
@@ -1001,7 +1002,6 @@ class Conso {
 
     }
 };
-
 
 
 
@@ -1276,12 +1276,6 @@ $(document).ready(function() {
     $("#in_progress").addClass("masquer");
     $("#in_progress").removeClass("overlay");
 
-    // Initialise la librairie FreezeTable
-    // $("#table_grille").freezeTable({
-    //     'scrollBar': true,
-    //     'fixedNavbar': "#panneau_commandes"
-    // });
-
     $('[name=bouton_outils]').on('click', function(event) {
         $('#modal_outils').modal('show');
     });
@@ -1343,6 +1337,11 @@ $(document).ready(function() {
     // Envoi des paramètres au format json vers le form de maj
     $("#form-maj").on('submit', function(event) {
 
+        if ((mode === "portail") && (!(valider_limitations_evenements()))) {
+            event.preventDefault();
+            return false;
+        }
+
         if (((mode !== "portail") || (afficher_facturation === true)) && (mode !== "pointeuse")) {
 
             // Vérifie qu'il n'y a pas un calcul de facturation en cours
@@ -1365,6 +1364,34 @@ $(document).ready(function() {
     });
 
 });
+
+function valider_limitations_evenements() {
+    var resultat = true;
+    $.each(dict_categories_evenements, function (idcategorie, dict_categorie) {
+        if (dict_categorie.limitations) {
+            var nbre_evt_max = parseInt(dict_categorie.limitations.charAt(0));
+            var dict_evt_semaines = {};
+            $.each(dict_cases, function (key, case_tableau) {
+                if ((case_tableau.type_case === "event") && (case_tableau.evenement) && (case_tableau.evenement.categorie === parseInt(idcategorie))) {
+                    for (var conso of case_tableau.consommations) {
+                        var date_moment = moment(conso.date);
+                        var key_date = date_moment.year().toString() + date_moment.week().toString()
+                        if (!(key_date in dict_evt_semaines)) {
+                            dict_evt_semaines[key_date] = 0;
+                        }
+                        dict_evt_semaines[key_date] += 1;
+                        if (dict_evt_semaines[key_date] > nbre_evt_max) {
+                            toastr.error("Vous ne pouvez pas réserver plus de " + nbre_evt_max + " événement" + (nbre_evt_max > 1 ? "s" : "") + " de type '" + dict_categorie.nom + "' par semaine");
+                            resultat = false;
+                            return false;
+                        }
+                    }
+                }
+            })
+        }
+    })
+    return resultat;
+}
 
 function Get_activite() {
     // return selection_activite;

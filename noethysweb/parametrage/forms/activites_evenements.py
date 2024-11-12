@@ -12,9 +12,9 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML, Fieldset
 from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
-from core.utils import utils_dates
+from core.utils import utils_dates, utils_images
 from core.models import Unite, Groupe, Activite, Evenement, Tarif
-from core.widgets import DatePickerWidget
+from core.widgets import DatePickerWidget, Crop_image
 
 
 class Widget_copie_tarif_evenement(ModelSelect2Widget):
@@ -53,14 +53,20 @@ class Formulaire(FormulaireBase, ModelForm):
     type_tarification = forms.TypedChoiceField(label="Tarification", choices=choix_tarification, initial="GRATUIT", required=False, help_text=texte_aide)
     copie_evenement = forms.ModelChoiceField(label="Evénement", widget=Widget_copie_tarif_evenement({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=Evenement.objects.none(), required=False)
 
+    # Image
+    cropper_data = forms.CharField(widget=forms.HiddenInput(), required=False)
+
     class Meta:
         model = Evenement
         fields = "__all__"
         widgets = {
             "equiv_heures": forms.TimeInput(attrs={'type': 'time'}),
+            "image": Crop_image(attrs={"largeur_min": 400, "hauteur_min": 100, "ratio": "400/100"}),
         }
         help_texts = {
             "equiv_heures": "Saisissez l'équivalence en heures (utile uniquement pour l'état global et l'état nominatif). Format : HH:MM.",
+            "image": "Vous pouvez sélectionner une image à appliquer sur l'arrière-plan de la case de l'évènement dans la grille des consommations. L'image sera convertie en niveaux de gris à l'affichage.",
+            "categorie": "Vous pouvez associer ici une catégorie d'événements afin que cet événement hérite de ses caractéristiques."
         }
 
     def __init__(self, *args, **kwargs):
@@ -69,6 +75,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper = FormHelper()
         self.helper.form_id = 'activites_evenements_form'
         self.helper.form_method = 'post'
+        self.helper.use_custom_control = False
 
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
@@ -119,6 +126,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.layout = Layout(
             Commandes(annuler_url="{{ view.get_success_url }}"),
             Hidden('activite', value=activite.idactivite),
+            Field("cropper_data"),
             Fieldset("Généralités",
                 Field("nom"),
                 Field("unite"),
@@ -131,6 +139,7 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Options",
                 Field("description"),
+                Field("categorie"),
                 Field("heure_debut"),
                 Field("heure_fin"),
                 Field("equiv_heures"),
@@ -144,6 +153,9 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("type_tarification"),
                 Field("montant"),
                 Field("copie_evenement"),
+            ),
+            Fieldset("Image d'arrière-plan",
+                Field("image"),
             ),
             HTML(EXTRA_SCRIPT),
         )
@@ -184,6 +196,12 @@ class Formulaire(FormulaireBase, ModelForm):
 
         return self.cleaned_data
 
+    def save(self):
+        form = super(Formulaire, self).save()
+        cropper_data = self.cleaned_data.get("cropper_data")
+        if cropper_data:
+            utils_images.Recadrer_image_form(cropper_data, form.image)
+        return form
 
 
 EXTRA_SCRIPT = """
