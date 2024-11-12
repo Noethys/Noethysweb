@@ -5,7 +5,8 @@
 
 {% block scripts %}
     {{ block.super }}
-    <script type="text/javascript" src="{% static "outils/commandes.js" %}"></script>
+    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'outils/commandes.js' %}"></script>
 {% endblock scripts %}
 
 {% block styles %}
@@ -217,6 +218,7 @@
     {# Insertion des modals #}
     {% include 'outils/commandes_saisie_quantite.html' %}
     {% include 'outils/commandes_saisie_texte.html' %}
+    {% include 'outils/commandes_options_impression.html' %}
     {% include 'outils/modal_editeur_emails.html' %}
     {% include 'core/modal_pdf.html' %}
     

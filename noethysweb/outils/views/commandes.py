@@ -11,12 +11,18 @@ from django.views.generic import TemplateView
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Commande, CommandeVersion, CommandeModeleColonne, Ouverture, Consommation, Information
-from outils.forms.commandes import Formulaire
+from outils.forms.commandes import Formulaire, Formulaire_options_impression
 
 
 def Generer_pdf(request):
     donnees = json.loads(request.POST["donnees"])
     idcommande = int(request.POST["idcommande"])
+
+    # Récupération des options d'impression
+    form_options = Formulaire_options_impression(json.loads(request.POST.get("options_impression")), request=request)
+    if not form_options.is_valid():
+        messages_erreurs = ["<b>%s</b> : %s " % (field.title(), erreur[0].message) for field, erreur in form_options.errors.as_data().items()]
+        return JsonResponse({"erreur": messages_erreurs}, status=401)
 
     # Récupération du mail du restaurateur
     mail_restaurateur = None
@@ -29,8 +35,8 @@ def Generer_pdf(request):
 
     dict_donnees = {
         "cases": donnees,
+        "options_impression": form_options.cleaned_data,
         "idcommande": idcommande,
-        "orientation": "paysage",
     }
 
     # Création du PDF
@@ -127,6 +133,7 @@ class Consulter(Page, TemplateView):
         context["box_titre"] = "Consulter une commande"
         context["box_introduction"] = "Vous pouvez ici modifier une commande."
         context["onglet_actif"] = "commandes_liste"
+        context["form_options_impression"] = Formulaire_options_impression
 
         commande = Commande.objects.select_related("modele", "modele__restaurateur").get(pk=self.kwargs["pk"])
         context["commande"] = commande

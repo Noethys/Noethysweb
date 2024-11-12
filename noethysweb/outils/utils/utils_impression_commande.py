@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, datetime
 logger = logging.getLogger(__name__)
 logging.getLogger('PIL').setLevel(logging.WARNING)
 from reportlab.platypus import Paragraph, Table, TableStyle
@@ -16,7 +16,7 @@ from core.utils import utils_dates, utils_impression
 
 class Impression(utils_impression.Impression):
     def __init__(self, *args, **kwds):
-        kwds["taille_page"] = landscape(A4) if kwds["dict_donnees"]["orientation"] == "paysage" else portrait(A4)
+        kwds["taille_page"] = landscape(A4) if kwds["dict_donnees"]["options_impression"]["orientation"] == "paysage" else portrait(A4)
         utils_impression.Impression.__init__(self, *args, **kwds)
 
     def Draw(self):
@@ -62,23 +62,35 @@ class Impression(utils_impression.Impression):
         liste_dates = list({utils_dates.ConvertDateENGtoDate(case["date"]): True for key, case in self.dict_donnees["cases"].items() if case["date"]}.keys())
         liste_dates.sort()
 
+        # Filtrage des dates selon les options d'impression
+        options_impression = self.dict_donnees["options_impression"]
+        if options_impression["selection_dates"] == "AUJOURDHUI":
+            selection_dates = (datetime.date.today(), datetime.date.today())
+        elif options_impression["selection_dates"] == "DEMAIN":
+            selection_dates = (datetime.date.today() + datetime.timedelta(days=1), datetime.date.today() + datetime.timedelta(days=1))
+        elif options_impression["selection_dates"] == "SELECTION":
+            selection_dates = utils_dates.ConvertDateRangePicker(options_impression["periode"])
+        else:
+            selection_dates = None
+
         # Dessin des lignes
         dict_totaux_colonnes = {}
         for date in liste_dates:
-            ligne = [utils_dates.DateComplete(date)]
-            for colonne in colonnes:
-                key_case = "%s_%d" % (date, colonne.pk)
-                if "NUMERIQUE" in colonne.categorie:
-                    valeur = str(self.dict_donnees["cases"][key_case]["valeur"])
-                    style = style_total if "TOTAL" in colonne.categorie else style_numerique
-                    dict_totaux_colonnes.setdefault(colonne.pk, 0)
-                    dict_totaux_colonnes[colonne.pk] += int(valeur)
-                else:
-                    valeur = self.dict_donnees["cases"][key_case]["texte"]
-                    valeur = valeur.replace("\n", "<br/>")
-                    style = style_texte
-                ligne.append(Paragraph(valeur, style))
-            dataTableau.append(ligne)
+            if not selection_dates or (selection_dates[0] <= date <= selection_dates[1]):
+                ligne = [utils_dates.DateComplete(date)]
+                for colonne in colonnes:
+                    key_case = "%s_%d" % (date, colonne.pk)
+                    if "NUMERIQUE" in colonne.categorie:
+                        valeur = str(self.dict_donnees["cases"][key_case]["valeur"])
+                        style = style_total if "TOTAL" in colonne.categorie else style_numerique
+                        dict_totaux_colonnes.setdefault(colonne.pk, 0)
+                        dict_totaux_colonnes[colonne.pk] += int(valeur)
+                    else:
+                        valeur = self.dict_donnees["cases"][key_case]["texte"]
+                        valeur = valeur.replace("\n", "<br/>")
+                        style = style_texte
+                    ligne.append(Paragraph(valeur, style))
+                dataTableau.append(ligne)
 
         # Ajout de la ligne de total
         dataTableau.append(["Total"] + [Paragraph(str(dict_totaux_colonnes.get(colonne.pk, "")), style_total) for colonne in colonnes ])

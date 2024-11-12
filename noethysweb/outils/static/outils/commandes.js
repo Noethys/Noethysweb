@@ -64,6 +64,7 @@ var dict_valeurs = {};
 var touche_clavier = null;
 var pressepapiers = {};
 var dirty = false;
+var mode_impression_pdf_email = null;
 
 
 class Case_base {
@@ -359,18 +360,24 @@ function calculer_totaux() {
 
 // Impression du PDF
 function impression_pdf(email=false) {
+    mode_impression_pdf_email = email;
+    $("#modal_options_impression").modal("show");
+};
+
+function run_impression_pdf() {
     $.ajax({
         type: "POST",
         url: url_impression_pdf,
         data: {
             donnees: JSON.stringify(get_donnees()),
+            options_impression: JSON.stringify($("#form_commandes_options_impression").serializeObject()),
             idcommande: idcommande,
-            email: email,
+            email: mode_impression_pdf_email,
             csrfmiddlewaretoken: csrf_token,
         },
         datatype: "json",
         success: function(data){
-            if (email) {
+            if (mode_impression_pdf_email) {
                 envoyer_email(data);
             } else {
                 charge_pdf(data);

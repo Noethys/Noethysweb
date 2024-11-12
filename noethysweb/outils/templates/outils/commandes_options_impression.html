@@ -1,0 +1,34 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Modal Options d'impression de la commande des repas #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_options_impression{% endblock %}
+    {% block modal_titre %}Options d'impression{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+
+        {% crispy form_options_impression %}
+
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" id="valider_options_impression"/><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+
+    {% endblock %}
+{% endembed %}
+
+<script>
+$(document).ready(function() {
+
+    $("#valider_options_impression").on("click", function(e) {
+        $("#modal_options_impression").modal("hide");
+        run_impression_pdf();
+    });
+
+});
+</script>
