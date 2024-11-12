@@ -41,8 +41,8 @@ class Exporter(BaseExporter):
                     "code": "VE",
                     "client": facture.famille.code_compta or facture.famille.pk,
                 }
-                lignes.append(ligne | {"debit": decimal.Decimal(0), "credit": ligne_detail["montant"], "compte": ligne_detail["code_compta"]})
-                lignes.append(ligne | {"credit": decimal.Decimal(0), "debit": ligne_detail["montant"], "compte": self.options["compte_clients"]})
+                lignes.append({**ligne, **{"debit": decimal.Decimal(0), "credit": ligne_detail["montant"], "compte": ligne_detail["code_compta"]}})
+                lignes.append({**ligne, **{"credit": decimal.Decimal(0), "debit": ligne_detail["montant"], "compte": self.options["compte_clients"]}})
 
         # Recherche des règlements
         depots = Depot.objects.filter(date__gte=date_debut, date__lte=date_fin).order_by("pk")
@@ -58,8 +58,8 @@ class Exporter(BaseExporter):
                     "code": reglement.mode.code_journal,
                     "client": reglement.famille.code_compta or reglement.famille.pk,
                 }
-                lignes.append(ligne | {"debit": reglement.montant, "credit": decimal.Decimal(0), "compte": depot.code_compta or reglement.mode.code_compta})
-                lignes.append(ligne | {"credit": reglement.montant, "debit": decimal.Decimal(0), "compte": self.options["compte_clients"]})
+                lignes.append({**ligne, **{"debit": reglement.montant, "credit": decimal.Decimal(0), "compte": depot.code_compta or reglement.mode.code_compta}})
+                lignes.append({**ligne, **{"credit": reglement.montant, "debit": decimal.Decimal(0), "compte": self.options["compte_clients"]}})
 
         # Création du fichier xlsx
         feuille = classeur.add_worksheet("Page 1")
