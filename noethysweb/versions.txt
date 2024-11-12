@@ -1,3 +1,10 @@
+Version 1.2.6.8 (12/11/2024) :
+
+- Ajout de l'export des écritures comptables vers CWE
+- Ajout des images associées aux événements
+- Ajout des catégories d'évènements
+- Correction sur la commande des repas
+
 Version 1.2.6.7 (07/11/2024) :
 
 - Ajout de la commande des repas dans le menu Outils
