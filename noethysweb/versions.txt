@@ -1,3 +1,9 @@
+Version 1.2.6.9 (12/11/2024) :
+
+- Ajout des options d'impression dans la commande des repas
+- Ajout du filtrage des informations dans la commande des repas
+- Correction de la fusion des dictionnaires dans l'export CWE
+
 Version 1.2.6.8 (12/11/2024) :
 
 - Ajout de l'export des écritures comptables vers CWE
