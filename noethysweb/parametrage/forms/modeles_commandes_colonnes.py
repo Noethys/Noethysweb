@@ -13,7 +13,7 @@ from crispy_forms.layout import Layout, HTML, Hidden, Fieldset, Div
 from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import CommandeModeleColonne, Unite, Groupe
+from core.models import CommandeModeleColonne, Unite, Groupe, CategorieInformation
 
 
 LISTE_CHOIX_COLONNES = [
@@ -39,6 +39,8 @@ class Formulaire(FormulaireBase, ModelForm):
     # Texte informations
     type_infos = forms.ChoiceField(label="Informations", choices=[("REGIMES", "Régimes alimentaires"), ("INFOS", "Informations personnelles")], initial="REGIMES", required=False)
     groupes = forms.MultipleChoiceField(label="Groupes", required=False, widget=Select2MultipleWidget(), choices=[], help_text="Sélectionnez les groupes concernés.")
+    categories_informations = forms.MultipleChoiceField(label="Catégories d'informations", required=False, widget=Select2MultipleWidget(), choices=[], help_text="Sélectionnez les catégories d'information concernées. Laissez vide pour toutes les catégories.")
+    coche_afficher_commande = forms.BooleanField(label="Sélectionner uniquement les informations dont la case 'Afficher sur la commande' est cochée.", required=False, initial=False)
 
     class Meta:
         model = CommandeModeleColonne
@@ -83,6 +85,8 @@ class Formulaire(FormulaireBase, ModelForm):
         # Texte informations
         liste_groupes = Groupe.objects.select_related("activite").order_by("-activite__date_fin", "activite__nom", "ordre")
         self.fields["groupes"].choices = [(groupe.pk, "%s : %s" % (groupe.activite.nom, groupe.nom)) for groupe in liste_groupes]
+        liste_categories_informations = CategorieInformation.objects.order_by("nom")
+        self.fields["categories_informations"].choices = [(categories.pk, categories.nom) for categories in liste_categories_informations]
 
         # Importation des paramètres
         if self.instance.parametres:
@@ -126,6 +130,8 @@ class Formulaire(FormulaireBase, ModelForm):
                 Div(
                     Field("type_infos"),
                     Field("groupes"),
+                    Field("categories_informations"),
+                    Field("coche_afficher_commande"),
                     id="TEXTE_INFOS"
                 ),
             ),
@@ -151,11 +157,14 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.add_error("colonnes", "Vous devez sélectionner au moins une colonne")
             self.cleaned_data["parametres"] = json.dumps({"colonnes": self.cleaned_data.get("colonnes")})
 
-        # NUMERIQUE_TOTAL
+        # TEXTE_INFOS
         if self.cleaned_data.get("categorie") == "TEXTE_INFOS":
             if not self.cleaned_data["groupes"]:
                 self.add_error("groupes", "Vous devez sélectionner au moins un groupe")
-            self.cleaned_data["parametres"] = json.dumps({"type_infos": self.cleaned_data.get("type_infos"), "groupes": self.cleaned_data.get("groupes")})
+            self.cleaned_data["parametres"] = json.dumps({"type_infos": self.cleaned_data.get("type_infos"),
+                                                          "groupes": self.cleaned_data.get("groupes"),
+                                                          "categories_informations": self.cleaned_data.get("categories_informations"),
+                                                          "coche_afficher_commande": self.cleaned_data.get("coche_afficher_commande")})
 
         return self.cleaned_data
 
@@ -176,6 +185,20 @@ function On_change_categorie() {
 $(document).ready(function() {
     $("#id_categorie").change(On_change_categorie);
     On_change_categorie.call($("#id_categorie").get(0));
+});
+
+// Type infos
+function On_change_type_infos() {
+    $("#div_id_categories_informations").hide();
+    $("#div_id_coche_afficher_commande").hide();
+    if ($(this).val() == "INFOS") {
+        $("#div_id_categories_informations").show();
+        $("#div_id_coche_afficher_commande").show();
+    };
+}
+$(document).ready(function() {
+    $("#id_type_infos").change(On_change_type_infos);
+    On_change_type_infos.call($("#id_type_infos").get(0));
 });
 
 </script>

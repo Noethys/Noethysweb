@@ -165,7 +165,7 @@ class Consulter(Page, TemplateView):
 
         # Recherche les informations personnelles
         dict_infos_temp = {}
-        for info in Information.objects.filter(individu_id__in=list({conso.individu_id: True for conso in consommations}.keys()), diffusion_listing_repas=True):
+        for info in Information.objects.filter(individu_id__in=list({conso.individu_id: True for conso in consommations}.keys())): #, diffusion_listing_repas=True):
             dict_infos_temp.setdefault(info.individu_id, [])
             dict_infos_temp[info.individu_id].append(info)
 
@@ -190,9 +190,9 @@ class Consulter(Page, TemplateView):
             # Recherche les infos perso
             if conso.individu_id in dict_infos_temp:
                 key = "%s_%s" % (conso.date, conso.groupe_id)
-                dict_infos_perso.setdefault(key, [])
-                texte_infos = "%s : %s." % (conso.individu.Get_nom(), ", ".join([info.intitule for info in dict_infos_temp.get(conso.individu_id, [])]))
-                dict_infos_perso[key].append(texte_infos)
+                dict_infos_perso.setdefault(key, {})
+                if conso.individu not in dict_infos_perso[key]:
+                    dict_infos_perso[key][conso.individu] = dict_infos_temp[conso.individu_id]
 
         # Recherche les valeurs de la dernière version ou de la version demandée
         if self.kwargs.get("idversion", None):
@@ -240,7 +240,17 @@ class Consulter(Page, TemplateView):
                     # Infos
                     if colonne.dict_parametres["type_infos"] == "INFOS":
                         for idgroupe in colonne.dict_parametres["groupes"]:
-                            texte.extend(dict_infos_perso.get("%s_%s" % (date, idgroupe), []))
+                            for individu, liste_infos in dict_infos_perso.get("%s_%s" % (date, idgroupe), {}).items():
+                                liste_temp = []
+                                # Filtrage des infos selon les paramètres de la colonne
+                                for info in liste_infos:
+                                    if (not colonne.dict_parametres.get("categories_informations", []) or str(info.categorie.pk) in colonne.dict_parametres.get("categories_informations", [])) and \
+                                            (not colonne.dict_parametres.get("coche_afficher_commande", None) or info.diffusion_listing_repas):
+                                        liste_temp.append(info)
+                                # Ajout de l'individu et de ses infos
+                                if liste_temp:
+                                    texte_infos = "%s : %s." % (individu.Get_nom(), ", ".join([info.intitule for info in liste_temp]))
+                                    texte.append(texte_infos)
 
                     texte = "<br/>".join(texte)
 
