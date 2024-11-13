@@ -307,6 +307,25 @@ class View(CustomView, TemplateView):
                     valeurs=[item[1] for item in liste_villes],
                 ))
 
+                # Tableau : Répartition des individus par secteur
+                secteurs = {}
+                for secteur, nbre in Individu.objects.select_related("secteur").filter(condition).values_list("secteur__nom").annotate(nbre=Count("idindividu", distinct=True)).order_by("secteur__nom"):
+                    secteurs.setdefault(secteur, 0)
+                    secteurs[secteur] += nbre
+                liste_secteurs = [(secteur, nbre) for secteur, nbre in secteurs.items()]
+
+                data.append(Tableau(
+                    titre="Répartition des individus par secteur",
+                    colonnes=["Secteur", "Nombre d'individus"],
+                    lignes=[(item[0] if item[0] else "Secteur non renseigné", item[1]) for item in liste_secteurs]
+                ))
+
+                # Camembert : Répartition des individus par secteur
+                data.append(Camembert(
+                    titre="Répartition des individus par secteur",
+                    labels=[item[0] if item[0] else "Secteur non renseigné" for item in liste_secteurs],
+                    valeurs=[item[1] for item in liste_secteurs],
+                ))
 
             # ---------------------------- INDIVIDUS : Scolarité -------------------------------
             if rubrique == "individus_scolarite":

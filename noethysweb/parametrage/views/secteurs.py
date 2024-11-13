@@ -4,7 +4,8 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy
-from core.views.mydatatableview import MyDatatable, columns, helpers
+from django.db.models import Count
+from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
 from core.models import Secteur
 from parametrage.forms.secteurs import Formulaire
@@ -29,7 +30,7 @@ class Liste(Page, crud.Liste):
     model = Secteur
 
     def get_queryset(self):
-        return Secteur.objects.filter(self.Get_filtres("Q"))
+        return Secteur.objects.filter(self.Get_filtres("Q")).annotate(nbre_individus=Count("individu"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -40,12 +41,12 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idsecteur", "nom"]
-
+        nbre_individus = columns.TextColumn("Individus associés", sources="nbre_individus")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idsecteur", "nom"]
+            columns = ["idsecteur", "nom", "nbre_individus"]
             ordering = ["nom"]
 
 
