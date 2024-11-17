@@ -159,7 +159,7 @@ LISTE_CONTROLES_QUESTIONNAIRES = [
     {"code": "entier", "label":u"Nombre entier", "image": "Ctrl_nombre.png", "options": {"min":0, "max":99999}, "filtre": "entier" },
     {"code": "decimal", "label":u"Nombre décimal", "image": "Ctrl_decimal.png", "options": {"min":0, "max":99999}, "filtre": "decimal" },
     {"code": "montant", "label":u"Montant", "image": "Euro.png", "filtre": "montant" },
-    {"code": "liste_deroulante", "label":u"Liste déroulante", "image": "Ctrl_choice.png", "options":{"choix":None}, "filtre": "choix" },
+    {"code": "liste_deroulante", "label":u"Liste déroulante basique", "image": "Ctrl_choice.png", "options":{"choix":None}, "filtre": "choix" },
     {"code": "liste_deroulante_avancee", "label":u"Liste déroulante avancée", "image": "Ctrl_choice.png", "options":{"choix":None}, "filtre": "choix" },
     {"code": "liste_coches", "label":u"Sélection multiple", "image": "Coches.png", "options": {"hauteur":-1, "choix":None} , "filtre": "choix"},
     {"code": "case_coche", "label":u"Case à cocher", "image": "Ctrl_coche.png" , "filtre": "coche"},
