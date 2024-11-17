@@ -2579,7 +2579,12 @@ class QuestionnaireReponse(models.Model):
             return ", ".join(self.reponse.split(";"))
         if self.question.controle == "liste_deroulante_avancee":
             if self.reponse and dict_choix.get(int(self.reponse), None):
-                return dict_choix[int(self.reponse)]
+                choix = dict_choix[int(self.reponse)]
+                couleur, icone = choix.couleur, choix.icone
+                if couleur and not icone : icone = "circle"
+                if icone and couleur:
+                    return "<i class='fa fa-%s margin-r-5' style='color: %s'></i> %s</span>" % (icone, couleur, choix.label)
+                return choix.label
         if self.question.controle in ("entier", "slider") and self.reponse:
             return str(self.reponse)
         if self.question.controle == "case_coche":
