@@ -779,6 +779,8 @@ class Case_event extends Case_standard {
         if (this.has_conso()) {return false};
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
+        // Vérifie s'il faut ouvrir la modal questions
+        if (this.ouvrir_modal_questionnaire()) {return false}
         // Créer conso
         this.creer_conso({evenement: this.evenement.pk, heure_debut: this.evenement.heure_debut, heure_fin: this.evenement.heure_fin});
         return true;
@@ -790,12 +792,23 @@ class Case_event extends Case_standard {
             if (mode === 'pointeuse') {
                 this.detail("modifier");
             } else {
+                if (this.ouvrir_modal_questionnaire()) {return false}
                 this.supprimer();
             };
         } else {
             this.ajouter();
         };
     };
+
+    // Vérifie s'il faut ouvrir la modal des questions
+    ouvrir_modal_questionnaire() {
+        if ((this.evenement.categorie) && (dict_categories_evenements[this.evenement.categorie].questions)) {
+            ouvre_modal_questionnaire(this.key);
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     // Calcule le remplissage
     calc_remplissage() {
@@ -977,6 +990,7 @@ class Conso {
         this.badgeage_debut = null;
         this.badgeage_fin = null;
         this.options = null;
+        this.extra = null;
         this.dirty = false;
 
         // Importation depuis un array
@@ -1045,7 +1059,7 @@ $(function () {
         else if (touche_clavier === 67) {case_tableau.copier()}
         else if (touche_clavier === 83) {case_tableau.supprimer()}
         else {
-            // Toggle sur la  case cliquée
+            // Toggle sur la case cliquée
             if (case_tableau.has_conso() === statut) {case_tableau.toggle()};
 
             // Toggle sur case bis sur touche raccourci unité
@@ -1223,8 +1237,6 @@ function maj_remplissage(date) {
             case_tableau.calc_remplissage();
         };
     });
-
-
 
 };
 

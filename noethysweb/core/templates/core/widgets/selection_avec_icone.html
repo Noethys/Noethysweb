@@ -1,0 +1,30 @@
+{% load static %}
+{% load embed %}
+
+
+<select id="{{ id }}" name="{{ name }}" data-minimum-input-length="0" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2" {{ disabled }}>
+    {% for valeur, choix in choices %}
+        <option value="{{ valeur }}" data-couleur="{{ choix.couleur }}" data-icone="{% if choix.couleur and not choix.icone %}circle{% else %}{{ choix.icone }}{% endif %}" {% if value|slugify == valeur|slugify %}selected{% endif %}>{{ choix.label }}</option>
+    {% endfor %}
+</select>
+
+<script>
+    function formate_ligne(state) {
+        if (!state.id) {
+            return state.text;
+        }
+        if (state.element.dataset.couleur && state.element.dataset.icone) {
+            var $state = $("<i class='fa fa-" + state.element.dataset.icone + " margin-r-5' style='color: " + state.element.dataset.couleur + "'></i> " + state.text + "</span>");
+        } else {
+            var $state = $("<span>"+ state.text + "</span>");
+        }
+        return $state;
+    };
+
+    $(document).ready(function() {
+        $("#{{ id }}").select2({
+            templateResult: formate_ligne,
+            templateSelection: formate_ligne,
+        });
+    });
+</script>

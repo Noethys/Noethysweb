@@ -3,14 +3,42 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Count
-from core.views.mydatatableview import MyDatatable, columns, helpers, Deplacer_lignes
+from django.http import JsonResponse
+from django.template.context_processors import csrf
+from crispy_forms.utils import render_crispy_form
+from core.views.mydatatableview import MyDatatable, columns, Deplacer_lignes
 from core.views import crud
-from core.models import LISTE_CATEGORIES_QUESTIONNAIRES, QuestionnaireQuestion, Famille, Individu
+from core.models import LISTE_CATEGORIES_QUESTIONNAIRES, QuestionnaireQuestion, Famille, Individu, QuestionnaireChoix
 from core.utils import utils_questionnaires
 from parametrage.forms.questionnaires import Formulaire
+from parametrage.forms.choix_questionnaire import Formulaire as Formulaire_choix_questionnaire
 
+
+def Get_form_choix(request):
+    action = request.POST.get("action", None)
+    index = request.POST.get("index", None)
+
+    initial_data = {}
+    if "valeur" in request.POST:
+        initial_data = json.loads(request.POST["valeur"])
+        initial_data["index"] = index
+
+    # Création et rendu html du formulaire
+    if action in ("ajouter", "modifier"):
+        form = Formulaire_choix_questionnaire(initial=initial_data)
+        return JsonResponse({"form_html": render_crispy_form(form, context=csrf(request))})
+
+    # Validation du formulaire
+    form = Formulaire_choix_questionnaire(request.POST)
+    if not form.is_valid():
+        messages_erreurs = ["<b>%s</b> : %s " % (field.title(), erreur[0].message) for field, erreur in form.errors.as_data().items()]
+        return JsonResponse({"erreur": messages_erreurs}, status=401)
+
+    dict_retour = form.cleaned_data
+    return JsonResponse({"valeur": dict_retour, "index": form.cleaned_data["index"]})
 
 
 class Page(crud.Page):
@@ -50,6 +78,29 @@ class Page(crud.Page):
         if "SaveAndNew" in self.request.POST:
             url = self.url_ajouter
         return reverse_lazy(url, kwargs={'categorie': self.Get_categorie()})
+
+    def form_valid(self, form):
+        # Récupération de la liste de choix
+        liste_choix = json.loads(form.cleaned_data.get("liste_choix", "[]"))
+
+        # Sauvegarde
+        self.object = form.save()
+
+        # Récupération des ventilations existantes
+        choix_existants = list(QuestionnaireChoix.objects.filter(question=self.object))
+
+        # Sauvegarde des ventilations
+        for index, choix in enumerate(liste_choix, 1):
+            idchoix = choix["idchoix"] if choix["idchoix"] else None
+            QuestionnaireChoix.objects.update_or_create(pk=idchoix, defaults={"question": self.object,
+                "ordre": index, "label": choix["label"], "couleur": choix["couleur"], "icone": choix["icone"], "visible": choix["visible"]})
+
+        # Suppression des choix supprimé
+        for choix in choix_existants:
+            if choix.pk not in [int(c["idchoix"]) for c in liste_choix if c["idchoix"]]:
+                choix.delete()
+
+        return super().form_valid(form)
 
 
 class Deplacer(Deplacer_lignes):

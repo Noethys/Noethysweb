@@ -703,4 +703,5 @@ urlpatterns = [
     path('parametrage/sondages/reorganiser', secure_ajax(sondages.Reorganiser), name='ajax_sondages_reorganiser'),
     path('parametrage/achats_categories/liste/deplacer_lignes', secure_ajax(achats_categories.Deplacer.as_view()), name='ajax_deplacer_lignes_achats_categories'),
     path('parametrage/modeles_commandes_colonnes/liste/deplacer_lignes', secure_ajax(modeles_commandes_colonnes.Deplacer.as_view()), name='ajax_deplacer_modeles_commandes_colonnes'),
+    path('parametrage/questions/get_form_choix', secure_ajax(questionnaires.Get_form_choix), name='ajax_questionnaire_form_choix'),
 ]

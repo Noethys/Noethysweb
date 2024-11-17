@@ -9,13 +9,36 @@ from uuid import uuid4
 from colorhash import ColorHash
 from django.http import JsonResponse
 from django.utils.safestring import mark_safe
+from django.template.context_processors import csrf
 from django.db.models import Q, Count
 from django.core import serializers
 from django.conf import settings
+from crispy_forms.utils import render_crispy_form
 from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite, Consommation, MemoJournee, Evenement, Groupe, Ventilation, Famille, \
                         Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Individu, Activite, Scolarite, QuestionnaireReponse
 from core.utils import utils_dates, utils_decimal, utils_historique
 from consommations.utils import utils_consommations
+from consommations.forms.grille_questionnaire import Formulaire as Formulaire_questionnaire
+
+
+def Get_form_questionnaire(request):
+    # Création du contexte
+    context = {}
+    context.update(csrf(request))
+
+    # Formatage du form en html
+    conso = json.loads(request.POST.get("conso", "{}"))
+    idevenement = int(request.POST.get("idevenement", 0))
+    form_detail = Formulaire_questionnaire(request=request, idevenement=idevenement, initial=json.loads((conso.get("extra", "{}")) or "{}") if conso else {})
+    form_html = render_crispy_form(form_detail, context=context)
+    return JsonResponse({"form_html": form_html})
+
+
+def Valid_form_questionnaire(request):
+    form = Formulaire_questionnaire(request.POST, idevenement=int(request.POST["idevenement"]), request=request)
+    if not form.is_valid():
+        return JsonResponse({"erreur": "Vous devez obligatoirement renseigner les questions marquées d'une étoile (*)"}, status=401)
+    return JsonResponse({"succes": True, "reponses": json.dumps(form.cleaned_data)})
 
 
 def Get_individus(request):
@@ -218,7 +241,7 @@ def Get_generic_data(data={}):
     data["liste_evenements"] = liste_evenements
     data["liste_images_evenements"] = [evt for evt in liste_evenements if evt.image]
     data["liste_categories_evenements"] = list({evt.categorie: True for evt in liste_evenements if evt.categorie}.keys())
-    data["dict_categories_evenements_json"] = json.dumps({categorie.pk: {"nom": categorie.nom, "image": categorie.get_nom_image(), "limitations": categorie.limitations} for categorie in data["liste_categories_evenements"]})
+    data["dict_categories_evenements_json"] = json.dumps({categorie.pk: {"nom": categorie.nom, "image": categorie.get_nom_image(), "questions": categorie.questions, "limitations": categorie.limitations} for categorie in data["liste_categories_evenements"]})
 
     # Importation des remplissages
     liste_remplissage = Remplissage.objects.filter(data["conditions_periodes"] & Q(activite=data['selection_activite']))
@@ -407,7 +430,8 @@ def Save_grille(request=None, donnees={}):
                     individu_id=dict_conso["individu"], inscription_id=dict_conso["inscription"], activite_id=dict_conso["activite"], date=dict_conso["date"],
                     unite_id=dict_conso["unite"], groupe_id=dict_conso["groupe"], heure_debut=dict_conso["heure_debut"], heure_fin=dict_conso["heure_fin"],
                     etat=dict_conso["etat"], categorie_tarif_id=dict_conso["categorie_tarif"], prestation_id=dict_conso["prestation"], quantite=dict_conso["quantite"],
-                    evenement_id=dict_conso["evenement"], badgeage_debut=dict_conso["badgeage_debut"], badgeage_fin=dict_conso["badgeage_fin"], options=dict_conso.get("options", None),
+                    evenement_id=dict_conso["evenement"], badgeage_debut=dict_conso["badgeage_debut"], badgeage_fin=dict_conso["badgeage_fin"],
+                    options=dict_conso.get("options", None), extra=dict_conso.get("extra", None),
                 ))
                 logger.debug("Consommation à ajouter : " + str(dict_conso))
                 label_conso = dict_conso["nom_evenement"] if "nom_evenement" in dict_conso else dict_unites[dict_conso["unite"]].nom
@@ -438,6 +462,7 @@ def Save_grille(request=None, donnees={}):
         conso.prestation_id = dict_modifications[conso.pk]["prestation"]
         conso.quantite = dict_modifications[conso.pk]["quantite"]
         conso.options = dict_modifications[conso.pk]["options"]
+        conso.extra = dict_modifications[conso.pk]["extra"]
 
         if conso.prestation_id in dict_idprestation:
             conso.prestation_id = dict_idprestation[conso.prestation_id]
@@ -450,7 +475,7 @@ def Save_grille(request=None, donnees={}):
         Consommation.objects.bulk_create(liste_ajouts)
         texte_notification.append("%s ajout%s" % (len(liste_ajouts), "s" if len(liste_ajouts) > 1 else ""))
     if liste_modifications:
-        Consommation.objects.bulk_update(liste_modifications, ["groupe", "heure_debut", "heure_fin", "etat", "categorie_tarif", "prestation", "quantite", "options"], batch_size=50)
+        Consommation.objects.bulk_update(liste_modifications, ["groupe", "heure_debut", "heure_fin", "etat", "categorie_tarif", "prestation", "quantite", "options", "extra"], batch_size=50)
         texte_notification.append("%s modification%s" % (len(liste_modifications), "s" if len(liste_modifications) > 1 else ""))
     if donnees["suppressions"]["consommations"]:
         logger.debug("Consommations à supprimer : " + str(donnees["suppressions"]["consommations"]))

@@ -694,3 +694,30 @@ class Select_activite(Widget):
     def render(self, name, value, attrs=None, renderer=None):
         context = self.get_context(name, value, attrs)
         return mark_safe(loader.render_to_string(self.template_name, context))
+
+
+class Selection_avec_icone(Widget):
+    template_name = "core/widgets/selection_avec_icone.html"
+
+    class Media:
+        css = {"all": ("lib/select2/css/select2.min.css",)}
+        js = ("django_select2/django_select2.js", "lib/select2/js/select2.min.js", "lib/select2/js/i18n/fr.js")
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        context['choices'] = self.choices
+        if attrs is not None:
+            context.update(attrs)
+        context['name'] = name
+        if value is not None:
+            context['value'] = value
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
+
+    def value_from_datadict(self, data, files, name):
+        valeur = data.get(name)
+        if valeur == "None": return None
+        return valeur

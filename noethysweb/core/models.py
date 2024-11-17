@@ -141,6 +141,7 @@ LISTE_CATEGORIES_QUESTIONNAIRES = [
     ("inscription", "Inscription"),
     ("collaborateur", "Collaborateur"),
     ("contrat_collaborateur", "Contrat collaborateur"),
+    ("consommation", "Consommation"),
     ]
 
 LISTE_ETATS_CONSO = [
@@ -159,6 +160,7 @@ LISTE_CONTROLES_QUESTIONNAIRES = [
     {"code": "decimal", "label":u"Nombre décimal", "image": "Ctrl_decimal.png", "options": {"min":0, "max":99999}, "filtre": "decimal" },
     {"code": "montant", "label":u"Montant", "image": "Euro.png", "filtre": "montant" },
     {"code": "liste_deroulante", "label":u"Liste déroulante", "image": "Ctrl_choice.png", "options":{"choix":None}, "filtre": "choix" },
+    {"code": "liste_deroulante_avancee", "label":u"Liste déroulante avancée", "image": "Ctrl_choice.png", "options":{"choix":None}, "filtre": "choix" },
     {"code": "liste_coches", "label":u"Sélection multiple", "image": "Coches.png", "options": {"hauteur":-1, "choix":None} , "filtre": "choix"},
     {"code": "case_coche", "label":u"Case à cocher", "image": "Ctrl_coche.png" , "filtre": "coche"},
     {"code": "date", "label":u"Date", "image": "Jour.png" , "filtre": "date"},
@@ -1387,8 +1389,9 @@ class CategorieEvenement(models.Model):
     activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.CASCADE)
     nom = models.CharField(verbose_name="Nom", max_length=200)
     image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
-    choix_limitations = [(None, "Aucune"),]# ("1EVTSEMAINE", "1 événement par semaine max"), ("2EVTSEMAINE", "2 événements par semaine max"), ("3EVTSEMAINE", "3 événements par semaine max")]
+    choix_limitations = [(None, "Aucune"), ("1EVTSEMAINE", "1 événement par semaine max"), ("2EVTSEMAINE", "2 événements par semaine max"), ("3EVTSEMAINE", "3 événements par semaine max"), ("4EVTSEMAINE", "4 événements par semaine max")]
     limitations = models.CharField(verbose_name="Limitation", max_length=100, choices=choix_limitations, default=None, blank=True, null=True)
+    questions = models.CharField(verbose_name="Questions", max_length=300, blank=True, null=True)
 
     class Meta:
         db_table = 'evenements_categories'
@@ -2307,6 +2310,7 @@ class Consommation(models.Model):
     badgeage_debut = models.DateTimeField(verbose_name="Badgeage début", blank=True, null=True)
     badgeage_fin = models.DateTimeField(verbose_name="Badgeage fin", blank=True, null=True)
     options = models.CharField(verbose_name="Options", max_length=100, blank=True, null=True)
+    extra = models.TextField(verbose_name="Extra", blank=True, null=True)
 
     class Meta:
         db_table = 'consommations'
@@ -2479,7 +2483,6 @@ class ModeleDocument(models.Model):
         return self.nom
 
 
-
 class QuestionnaireQuestion(models.Model):
     idquestion = models.AutoField(verbose_name="ID", db_column='IDquestion', primary_key=True)
     categorie = models.CharField(verbose_name="Catégorie", max_length=200, choices=LISTE_CATEGORIES_QUESTIONNAIRES)
@@ -2493,6 +2496,7 @@ class QuestionnaireQuestion(models.Model):
     visible_fiche_renseignement = models.BooleanField(verbose_name="Visible sur les fiches de renseignements", default=False)
     texte_aide = models.CharField(verbose_name="Texte d'aide", max_length=500, blank=True, null=True, help_text="Vous pouvez saisir un texte d'aide qui apparaîtra sous le champ de saisie.")
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+    obligatoire = models.BooleanField(verbose_name="Obligatoire", default=False)
 
     class Meta:
         db_table = 'questionnaire_questions'
@@ -2515,6 +2519,24 @@ class QuestionnaireQuestion(models.Model):
             ordre += 1
 
 
+class QuestionnaireChoix(models.Model):
+    idchoix = models.AutoField(verbose_name="ID", db_column="IDchoix", primary_key=True)
+    question = models.ForeignKey(QuestionnaireQuestion, verbose_name="Question", on_delete=models.CASCADE)
+    ordre = models.IntegerField(verbose_name="Ordre")
+    visible = models.BooleanField(verbose_name="Visible", default=True)
+    label = models.CharField(verbose_name="Label", max_length=250)
+    couleur = models.CharField(verbose_name="Couleur", max_length=100, blank=True, null=True)
+    icone = models.CharField(verbose_name="Icône", max_length=100, blank=True, null=True)
+
+    class Meta:
+        db_table = "questionnaire_choix"
+        verbose_name = "choix de questionnaire"
+        verbose_name_plural = "choix de questionnaires"
+
+    def __str__(self):
+        return self.label if self.idchoix else "Nouveau choix"
+
+
 class QuestionnaireReponse(models.Model):
     idreponse = models.AutoField(verbose_name="ID", db_column='IDreponse', primary_key=True)
     question = models.ForeignKey(QuestionnaireQuestion, verbose_name="Question", on_delete=models.CASCADE)
@@ -2524,6 +2546,7 @@ class QuestionnaireReponse(models.Model):
     reponse = models.CharField(verbose_name="Réponse", max_length=450, blank=True, null=True)
     # type = models.CharField(verbose_name="Type", max_length=200, choices=LISTE_CATEGORIES_QUESTIONNAIRES, blank=True, null=True)
     donnee = models.IntegerField(verbose_name="Donnée associée", db_column='IDdonnee', blank=True, null=True)
+    choix = models.ForeignKey(QuestionnaireChoix, verbose_name="Choix", blank=True, null=True, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'questionnaire_reponses'
@@ -2537,6 +2560,9 @@ class QuestionnaireReponse(models.Model):
         if self.question.controle in ("liste_deroulante", "liste_coches"):
             if self.reponse:
                 return self.reponse.split(";")
+        if self.question.controle == "liste_deroulante_avancee":
+            if self.reponse:
+                return self.reponse.choix.label
         if self.question.controle in ("entier", "slider"):
             if self.reponse:
                 return int(self.reponse)
@@ -2551,6 +2577,9 @@ class QuestionnaireReponse(models.Model):
             return ""
         if self.question.controle in ("liste_deroulante", "liste_coches"):
             return ", ".join(self.reponse.split(";"))
+        if self.question.controle == "liste_deroulante_avancee":
+            if self.reponse:
+                return self.reponse.choix.label
         if self.question.controle in ("entier", "slider") and self.reponse:
             return str(self.reponse)
         if self.question.controle == "case_coche":
@@ -4462,6 +4491,9 @@ class SondageReponse(models.Model):
         if self.question.controle in ("liste_deroulante", "liste_coches"):
             if self.reponse:
                 return self.reponse.split(";")
+        if self.question.controle == "liste_deroulante_avancee":
+            if self.reponse:
+                return self.reponse.choix.label
         if self.question.controle in ("entier", "slider"):
             if self.reponse:
                 return int(self.reponse)
@@ -4476,6 +4508,9 @@ class SondageReponse(models.Model):
             return ""
         if self.question.controle in ("liste_deroulante", "liste_coches"):
             return ", ".join(self.reponse.split(";"))
+        if self.question.controle == "liste_deroulante_avancee":
+            if self.reponse:
+                return self.reponse.choix.label
         if self.question.controle in ("entier", "slider") and self.reponse:
             return str(self.reponse)
         if self.question.controle == "case_coche":

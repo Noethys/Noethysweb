@@ -16,7 +16,8 @@ from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
 from reportlab.graphics.barcode import code39
 from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires
-from core.models import Activite, Ouverture, Unite, UniteRemplissage, Consommation, MemoJournee, Note, Information, Individu, Inscription, Scolarite, Classe, Ecole, Evenement
+from core.models import Activite, Ouverture, Unite, UniteRemplissage, Consommation, MemoJournee, Note, Information, Individu, \
+                        Inscription, Scolarite, Classe, Ecole, Evenement, QuestionnaireQuestion, QuestionnaireChoix
 from individus.utils import utils_pieces_manquantes
 from cotisations.utils import utils_cotisations_manquantes
 
@@ -70,6 +71,10 @@ class Impression(utils_impression.Impression):
 
         # Importation des unités de remplissage
         dictUnitesRemplissage = {unite.pk: unite for unite in UniteRemplissage.objects.prefetch_related('unites').filter(activite__in=liste_activites)}
+
+        # Importation des questions de type consommation
+        self.liste_questions = QuestionnaireQuestion.objects.filter(categorie="consommation").order_by("ordre")
+        self.dict_choix_questions = {choix.pk: choix for choix in QuestionnaireChoix.objects.filter(question__in=self.liste_questions)} if self.liste_questions else {}
 
         # Importation de la scolarité
         dict_scolarites = {}
@@ -170,7 +175,7 @@ class Impression(utils_impression.Impression):
                                                              cles=[conso.date, conso.unite_id],
                                                              valeur=[])
 
-                    detail_conso = {"heure_debut": conso.heure_debut, "heure_fin": conso.heure_fin, "etat": conso.etat, "quantite": conso.quantite, "IDfamille": conso.inscription.famille_id, "evenement": conso.evenement}  #, "etiquettes": etiquettes}
+                    detail_conso = {"heure_debut": conso.heure_debut, "heure_fin": conso.heure_fin, "etat": conso.etat, "quantite": conso.quantite, "extra": conso.extra, "IDfamille": conso.inscription.famille_id, "evenement": conso.evenement}  #, "etiquettes": etiquettes}
                     dictConso[conso.activite_id][IDgroupe][scolarite][IDevenement][IDetiquette][conso.inscription]["listeConso"][conso.date][conso.unite_id].append(detail_conso)
                     if conso.inscription.pk not in liste_inscriptions:
                         liste_inscriptions.append(conso.inscription.pk)
@@ -478,7 +483,7 @@ class Impression(utils_impression.Impression):
                                                     largeur = 55
 
                                                 # Agrandit si évènements à afficher
-                                                if self.dict_donnees["afficher_evenements"] and self.dict_donnees["largeur_colonne_unite"] == "automatique":
+                                                if dictUnites[IDunite].type == "Evenement" and (self.dict_donnees["afficher_evenements"] or self.dict_donnees["afficher_questions_evenements"]) and self.dict_donnees["largeur_colonne_unite"] == "automatique":
                                                     largeur += 30
 
                                                 # Agrandit si étiquettes à afficher
@@ -647,7 +652,7 @@ class Impression(utils_impression.Impression):
 
                                                     styleConso = ParagraphStyle(name="label_conso", fontName="Helvetica", alignment=1, fontSize=6, leading=6, spaceBefore=0, spaceAfter=0, textColor=colors.black)
                                                     styleEvenement = ParagraphStyle(name="label_evenement", fontName="Helvetica", alignment=1, fontSize=5, leading=5, spaceBefore=2, spaceAfter=0, textColor=colors.black)
-                                                    styleEtiquette = ParagraphStyle(name="label_etiquette", fontName="Helvetica", alignment=1, fontSize=5, leading=5, spaceBefore=2, spaceAfter=0, textColor=colors.grey)
+                                                    styleEtiquette = ParagraphStyle(name="label_etiquette", fontName="Helvetica", alignment=1, fontSize=5, leading=5, spaceBefore=2, spaceAfter=2, textColor=colors.grey)
 
                                                     if typeTemp == "consommation":
                                                         # Unité de Conso
@@ -692,8 +697,12 @@ class Impression(utils_impression.Impression):
 
                                                                     # Affichage de l'évènement
                                                                     if self.dict_donnees["afficher_evenements"] and dictConsoTemp["evenement"] != None:
-                                                                        texteEvenement = dictConsoTemp["evenement"].nom
-                                                                        listeLabels.append(Paragraph(texteEvenement, styleEvenement))
+                                                                        listeLabels.append(Paragraph("<b>%s</b>" % dictConsoTemp["evenement"].nom, styleEvenement))
+
+                                                                    if self.dict_donnees["afficher_questions_evenements"] and dictConsoTemp["evenement"]:
+                                                                        txt_questions_evt = self.Get_questions_evenement(dictConsoTemp)
+                                                                        if txt_questions_evt:
+                                                                            listeLabels.append(Paragraph(txt_questions_evt, styleEtiquette))
 
                                                                     # Affichage de l'étiquette
                                                                     # if self.dict_donnees["afficher_etiquettes"] and len(etiquettes) > 0 :
@@ -765,8 +774,12 @@ class Impression(utils_impression.Impression):
 
                                                                             # Affichage de l'évènement
                                                                             if self.dict_donnees["afficher_evenements"] and dictConsoTemp["evenement"]:
-                                                                                texteEvenement = dictConsoTemp["evenement"].nom
-                                                                                listeLabels.append(Paragraph(texteEvenement, styleEvenement))
+                                                                                listeLabels.append(Paragraph("<b>%s</b>" % dictConsoTemp["evenement"].nom, styleEvenement))
+
+                                                                            if self.dict_donnees["afficher_questions_evenements"] and dictConsoTemp["evenement"]:
+                                                                                txt_questions_evt = self.Get_questions_evenement(dictConsoTemp)
+                                                                                if txt_questions_evt:
+                                                                                    listeLabels.append(Paragraph(txt_questions_evt, styleEtiquette))
 
                                                                             # Affichage de l'étiquette
                                                                             # if self.dict_donnees["afficher_etiquettes"] == True and len(etiquettes) > 0 :
@@ -1284,3 +1297,20 @@ class Impression(utils_impression.Impression):
 
         # Finalisation du fichier xlsx
         classeur.close()
+
+    def Get_questions_evenement(self, conso=None):
+        liste_questions_str = []
+        if conso["evenement"].categorie.questions and conso["extra"]:
+            reponses = json.loads(conso["extra"])
+            liste_idquestion = [int(idq) for idq in conso["evenement"].categorie.questions.split(";")]
+            for question in self.liste_questions:
+                if question.pk in liste_idquestion:
+                    reponse = reponses.get("question_%d" % question.pk, "-")
+                    if question.controle == "liste_deroulante_avancee":
+                        try:
+                            choix = self.dict_choix_questions.get(int(reponse))
+                            reponse = "<font color='%s'>%s</font>" % (choix.couleur or "#000000", choix.label)
+                        except:
+                            pass
+                    liste_questions_str.append("%s : %s" % (question.label, reponse))
+        return ", ".join(liste_questions_str)

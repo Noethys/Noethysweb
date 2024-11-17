@@ -1,0 +1,82 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{# Modal de saisie d'un questionnaire de consommation #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_saisir_questionnaire{% endblock %}
+    {% block modal_titre %}Questionnaire<br><div id="id_div_soustitre_questionnaire" style="font-size: 12px;opacity: 0.5;"></div>{% endblock %}
+    {% block modal_classe %}modal-lg{% endblock %}
+    {% block modal_body %}
+        <div id="modal_erreurs" class="text-red"></div>
+        <div id="id_div_form_questionnaire"></div>
+        <div class="buttonHolder">
+            <div class="modal-footer d-flex" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-warning mr-auto p-2" onclick="supprimer_form_questionnaire()" title="Supprimer"><i class="fa fa-trash margin-r-5"></i>Supprimer la réservation</button>
+                <button type="button" class="btn btn-primary p-2" onclick="valider_form_questionnaire()" title="Valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger p-2" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+            </div>
+        </div>
+    {% endblock %}
+{% endembed %}
+
+<script>
+    
+    var key_case_form_questionnaire = null;
+
+    function ouvre_modal_questionnaire(key_case) {
+        key_case_form_questionnaire = key_case;
+        var case_tableau = dict_cases[key_case_form_questionnaire];
+        var datecasefr = new Date(case_tableau.date);
+        var soustitre = case_tableau.evenement.nom + " du " + datecasefr.toLocaleDateString('fr-FR', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
+        if (case_tableau.has_conso()) {
+            conso = case_tableau.consommations[0];
+        } else {
+            conso = null;
+        }
+        $.ajax({
+            url: "{% url 'ajax_grille_get_form_questionnaire' %}",
+            type: "POST",
+            data: {
+                conso: JSON.stringify(conso),
+                idevenement: case_tableau.evenement.pk,
+                csrfmiddlewaretoken: csrf_token
+            },
+            success: function (data) {
+                $("#id_div_form_questionnaire").html(data["form_html"]);
+                $("#id_div_soustitre_questionnaire").html(soustitre);
+                $("#modal_saisir_questionnaire").modal("show");
+            }
+        });
+    }
+
+    function valider_form_questionnaire() {
+        var case_tableau = dict_cases[key_case_form_questionnaire];
+        $("[name=idevenement]").val(case_tableau.evenement.pk);
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_grille_valide_form_questionnaire' %}",
+            data: $("#grille_form_questionnaire").serialize(),
+            datatype: "json",
+            success: function(data){
+                $("#modal_saisir_questionnaire").modal("hide");
+                var case_tableau = dict_cases[key_case_form_questionnaire];
+                if (case_tableau.has_conso()) {
+                    case_tableau.modifier_conso({extra: data.reponses}, false);
+                } else {
+                    case_tableau.creer_conso({extra: data.reponses, evenement: case_tableau.evenement.pk, heure_debut: case_tableau.evenement.heure_debut, heure_fin: case_tableau.evenement.heure_fin});
+                }
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        });
+    }
+
+    function supprimer_form_questionnaire() {
+        dict_cases[key_case_form_questionnaire].supprimer();
+        $("#modal_saisir_questionnaire").modal("hide");
+    }
+
+</script>

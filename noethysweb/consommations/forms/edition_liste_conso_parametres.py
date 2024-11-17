@@ -62,7 +62,8 @@ class Formulaire(FormulaireBase, forms.Form):
     afficher_age = forms.BooleanField(label="Afficher la colonne", initial=True, required=False)
     liste_choix_largeur = [("automatique", "Automatique")] + [(str(x), "%d pixels" % x) for x in range(5, 305, 5)]
     largeur_colonne_age = forms.ChoiceField(label="Largeur de la colonne", choices=liste_choix_largeur, initial="automatique", required=False)
-    afficher_evenements = forms.BooleanField(label="Afficher les évènements", initial=False, required=False)
+    afficher_evenements = forms.BooleanField(label="Afficher les noms des évènements", initial=False, required=False)
+    afficher_questions_evenements = forms.BooleanField(label="Afficher les questions liées aux évènements", initial=False, required=False)
     masquer_consommations = forms.BooleanField(label="Masquer les consommations", initial=False, required=False)
     masquer_horaires = forms.BooleanField(label="Masquer les horaires et les quantités", initial=False, required=False)
     afficher_tous_etats = forms.BooleanField(label="Inclure tous les états de consommations", initial=False, required=False)
@@ -194,6 +195,7 @@ class Formulaire(FormulaireBase, forms.Form):
                     ),
                     Fieldset("Colonnes des unités",
                         Field('afficher_evenements'),
+                        Field('afficher_questions_evenements'),
                         Field('masquer_consommations'),
                         Field('masquer_horaires'),
                         Field('afficher_tous_etats'),
