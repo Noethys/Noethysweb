@@ -1,10 +1,9 @@
 {% load static %}
 {% load embed %}
 
-
 <select id="{{ id }}" name="{{ name }}" data-minimum-input-length="0" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2" {{ disabled }}>
     {% for valeur, choix in choices %}
-        <option value="{{ valeur }}" data-couleur="{{ choix.couleur }}" data-icone="{% if choix.couleur and not choix.icone %}circle{% else %}{{ choix.icone }}{% endif %}" {% if value|slugify == valeur|slugify %}selected{% endif %}>{{ choix.label }}</option>
+        <option value="{{ valeur }}" data-couleur="{{ choix.couleur }}" data-icone="{% if choix.couleur and not choix.icone %}circle{% else %}{{ choix.icone }}{% endif %}" {% if value|slugify == valeur|slugify %}selected{% endif %}>{% if valeur %}{{ choix.label }}{% else %}{{ choix }}{% endif %}</option>
     {% endfor %}
 </select>
 
@@ -25,6 +24,7 @@
         $("#{{ id }}").select2({
             templateResult: formate_ligne,
             templateSelection: formate_ligne,
+            disabled: {% if disabled %}true{% else %}false{% endif %},
         });
     });
 </script>

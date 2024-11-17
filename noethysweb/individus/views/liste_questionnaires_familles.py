@@ -4,7 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.db.models import Q
-from core.models import QuestionnaireReponse
+from core.models import QuestionnaireReponse, QuestionnaireChoix
 from core.views.customdatatable import CustomDatatable, Colonne, ColonneAction
 from core.views import crud, liste_questionnaires_base
 
@@ -31,9 +31,10 @@ class Liste(Page, liste_questionnaires_base.Liste):
 
     def Get_customdatatable(self):
         lignes = []
+        dict_choix = {choix.pk: choix for choix in QuestionnaireChoix.objects.filter(question=self.Get_categorie())}
         for reponse in QuestionnaireReponse.objects.select_related("question", "famille").filter(Q(question=self.Get_categorie()) & self.Get_filtres("Q")):
             lignes.append([
                 reponse.famille.nom,
-                self.Formate_reponse(reponse.Get_reponse_fr()),
+                self.Formate_reponse(reponse.Get_reponse_fr(dict_choix=dict_choix)),
             ])
         return CustomDatatable(colonnes=self.colonnes, lignes=lignes, filtres=self.Get_filtres())

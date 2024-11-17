@@ -54,7 +54,7 @@ class Liste(crud.CustomListe):
     def Get_classe_reponse(self, question=None):
         classe = None
         if question:
-            if question.controle in ("ligne_texte", "bloc_texte", "liste_deroulante", "liste_coches"):
+            if question.controle in ("ligne_texte", "bloc_texte", "liste_deroulante", "liste_deroulante_avancee", "liste_coches"):
                 classe = "CharField"
             elif question.controle in ("entier", "slider"):
                 classe = "IntegerField"

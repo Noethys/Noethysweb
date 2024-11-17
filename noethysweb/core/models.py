@@ -2561,8 +2561,8 @@ class QuestionnaireReponse(models.Model):
             if self.reponse:
                 return self.reponse.split(";")
         if self.question.controle == "liste_deroulante_avancee":
-            if self.reponse:
-                return self.reponse.choix.label
+            if self.choix:
+                return self.choix
         if self.question.controle in ("entier", "slider"):
             if self.reponse:
                 return int(self.reponse)
@@ -2572,14 +2572,14 @@ class QuestionnaireReponse(models.Model):
             return decimal.Decimal(self.reponse or "0.0")
         return self.reponse
 
-    def Get_reponse_fr(self):
+    def Get_reponse_fr(self, dict_choix={}):
         if not self.reponse:
             return ""
         if self.question.controle in ("liste_deroulante", "liste_coches"):
             return ", ".join(self.reponse.split(";"))
         if self.question.controle == "liste_deroulante_avancee":
-            if self.reponse:
-                return self.reponse.choix.label
+            if self.reponse and dict_choix.get(int(self.reponse), None):
+                return dict_choix[int(self.reponse)]
         if self.question.controle in ("entier", "slider") and self.reponse:
             return str(self.reponse)
         if self.question.controle == "case_coche":
@@ -4491,9 +4491,6 @@ class SondageReponse(models.Model):
         if self.question.controle in ("liste_deroulante", "liste_coches"):
             if self.reponse:
                 return self.reponse.split(";")
-        if self.question.controle == "liste_deroulante_avancee":
-            if self.reponse:
-                return self.reponse.choix.label
         if self.question.controle in ("entier", "slider"):
             if self.reponse:
                 return int(self.reponse)
