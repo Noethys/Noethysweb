@@ -5,10 +5,11 @@
 
 import logging
 logger = logging.getLogger(__name__)
-from core.utils import utils_dates, utils_impression, utils_preferences
 from reportlab.platypus import Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
+from core.utils import utils_dates, utils_impression, utils_preferences
+from core.models import Evenement
 
 
 class Impression(utils_impression.Impression):
@@ -28,6 +29,9 @@ class Impression(utils_impression.Impression):
             self.story.append(Paragraph("&nbsp;", paraStyle))
             self.story.append(Paragraph("&nbsp;", paraStyle))
             self.story.append(Paragraph("<para align='centre'><b>Aucune réservation</b></para>", paraStyle))
+
+        # Importation des évènements utilisés
+        dict_evenements = {evt.pk: evt for evt in Evenement.objects.filter(idevenement__in=self.dict_donnees["evenements"])}
 
         # Tableau NOM INDIVIDU
         totalFacturationFamille = 0.0
@@ -110,10 +114,11 @@ class Impression(utils_impression.Impression):
                     for IDunite, dictUnite in dictDate.items():
                         nomUnite = dictUnite["nomUnite"]
                         etat = dictUnite["etat"]
+                        idevenement = dictUnite["conso"]["evenement"]
 
                         if etat != None :
                             labelUnite = nomUnite
-                            if dictUnite["type"] == "Horaire" :
+                            if dictUnite["type"] == "Horaire":
                                 heure_debut = dictUnite["heure_debut"]
                                 if heure_debut == None : heure_debut = "?"
                                 heure_debut = heure_debut.replace(":", "h")
@@ -121,6 +126,13 @@ class Impression(utils_impression.Impression):
                                 if heure_fin == None : heure_fin = "?"
                                 heure_fin = heure_fin.replace(":", "h")
                                 labelUnite += " (de %s à %s)" % (heure_debut, heure_fin)
+
+                            if dictUnite["type"] == "Evenement":
+                                evenement = dict_evenements[idevenement]
+                                labelUnite += " : %s" % evenement.nom
+                                if evenement.description:
+                                    labelUnite += " <font color='#7e7e7e' size='7'>(%s)</font>" % evenement.description
+
                             listeConso.append(labelUnite)
 
                             if etat not in listeEtats :

@@ -1749,7 +1749,7 @@ def Impression_pdf(request):
         date_min = min(liste_dates)
 
     # Préparation des données pour le pdf
-    dict_donnees = {"reservations": {}}
+    dict_donnees = {"reservations": {}, "evenements": []}
     for conso in liste_conso:
         individu = dict_individus[conso["individu"]]
         activite = dict_activites[conso["activite"]]
@@ -1764,8 +1764,10 @@ def Impression_pdf(request):
         dict_donnees["reservations"][conso["individu"]]["activites"].setdefault(conso["activite"], {"nom": activite.nom, "agrement": activite.Get_agrement(date=date_min), "dates": {}})
         dict_donnees["reservations"][conso["individu"]]["activites"][conso["activite"]]["dates"].setdefault(conso["date"], {})
         dict_donnees["reservations"][conso["individu"]]["activites"][conso["activite"]]["dates"][conso["date"]].setdefault(conso["unite"],
-            {"nomUnite": unite.nom, "etat": conso["etat"], "type": unite.type, "heure_debut": conso["heure_debut"], "heure_fin": conso["heure_fin"], "IDprestation": str(conso["prestation"]), "prestation": prestation}
+            {"conso": conso, "nomUnite": unite.nom, "etat": conso["etat"], "type": unite.type, "heure_debut": conso["heure_debut"], "heure_fin": conso["heure_fin"], "IDprestation": str(conso["prestation"]), "prestation": prestation}
         )
+        if conso["evenement"] and conso["evenement"] not in dict_donnees["evenements"]:
+            dict_donnees["evenements"].append(conso["evenement"])
 
     # Création du PDF
     from consommations.utils import utils_impression_reservations
