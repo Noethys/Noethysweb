@@ -36,7 +36,7 @@
 
 
     {# En attente #}
-    {% if nbre_approbations_requises or nbre_messages_non_lus or nbre_pieces_manquantes %}
+    {% if nbre_approbations_requises or nbre_messages_non_lus or nbre_pieces_manquantes or nbre_informations_manquantes or nbre_vaccinations_manquantes or nbre_assurances_manquantes or cotisations_manquantes %}
         <h5 class="mb-2 text-secondary">{% blocktrans %}En attente{% endblocktrans %}</h5>
         <div class="row mb-2">
 
@@ -52,6 +52,22 @@
                         </div>
                         <div class="icon"><i class="fa fa-comments"></i></div>
                         <a href="{% url 'portail_contact' %}" class="small-box-footer">{% trans "Consulter" %} <i class="fa fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            {% endif %}
+
+            {# Informations manquantes #}
+            {% if nbre_informations_manquantes %}
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>{{ nbre_informations_manquantes }}</h3>
+                            <p>
+                                {% blocktranslate count counter=nbre_informations_manquantes %}Information manquante{% plural %}Informations manquantes{% endblocktranslate %}
+                            </p>
+                        </div>
+                        <div class="icon"><i class="fa fa-folder-open-o"></i></div>
+                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">{% trans "Corriger" %} <i class="fa fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
             {% endif %}

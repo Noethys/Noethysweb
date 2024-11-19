@@ -46,6 +46,8 @@ class Formulaire(FormulaireBase, forms.Form):
                         if getattr(champ, public_code, None):
                             code_field = "%s:%s:%s" % (champ.page, champ.code, public_code)
                             choix_etat = [("MASQUER", "Masqué"), ("AFFICHER", "Affiché"), ("MODIFIABLE", "Modifiable")]
+                            if champ.choix_obligatoire:
+                                choix_etat.append(("OBLIGATOIRE", "Obligatoire"))
                             self.fields[code_field] = forms.ChoiceField(label=public_label, required=False, choices=choix_etat)
                             self.fields[code_field].initial = getattr(champ, public_code)
                             liste_checks.append(Field(code_field))

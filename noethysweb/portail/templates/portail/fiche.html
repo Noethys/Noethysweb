@@ -13,6 +13,23 @@
         .widget-user-2 .widget-user-username, .widget-user-2 .widget-user-desc {
             margin-left: 0px;
         }
+        .alerte {
+            background: {{ couleur_fond|default:"#e4e4e4" }};
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 0.25rem;
+        }
+        .dark-mode .alerte {
+            background: #6c757d;
+        }
+        .alerte ul {
+            margin-bottom: 0px;
+        }
+        .alerte li {
+            display: inline;
+            white-space: nowrap;
+            margin-right: 8px;
+        }
     </style>
 
 {% endblock styles %}

@@ -15,6 +15,7 @@ from core.models import Consentement, Rattachement, Inscription
 from individus.utils import utils_vaccinations, utils_assurances
 from portail.views.base import CustomView
 from portail.forms.approbations import Formulaire
+from portail.utils import utils_champs
 
 
 class View(CustomView, crud.Modifier):
@@ -39,14 +40,18 @@ class View(CustomView, crud.Modifier):
         # Recherche les informations manquantes
         for individu, liste_vaccinations in utils_vaccinations.Get_vaccins_obligatoires_by_inscriptions(inscriptions=inscriptions).items():
             renseignements_manquants.setdefault(individu, [])
-            renseignements_manquants[individu].append("%d vaccination%s manquante%s" % (len(liste_vaccinations), "s" if len(liste_vaccinations) else "", "s" if len(liste_vaccinations) else ""))
+            renseignements_manquants[individu].append("%d vaccination%s manquante%s" % (len(liste_vaccinations), "s" if len(liste_vaccinations) > 1 else "", "s" if len(liste_vaccinations) > 1 else ""))
 
         for individu in utils_assurances.Get_assurances_manquantes_by_inscriptions(famille=self.request.user.famille, inscriptions=inscriptions):
             renseignements_manquants.setdefault(individu, [])
             renseignements_manquants[individu].append("Assurance manquante")
 
-        context["renseignements_manquants"] = renseignements_manquants
+        for individu, liste_infos_manquantes in utils_champs.Get_renseignements_manquants(famille=self.request.user.famille)["FICHES"].items():
+            renseignements_manquants.setdefault(individu, [])
+            nbre = len(liste_infos_manquantes)
+            renseignements_manquants[individu].append("%d information%s manquante%s : %s" % (nbre, "s" if nbre > 1 else "", "s" if nbre > 1 else "", ", ".join(liste_infos_manquantes)))
 
+        context["renseignements_manquants"] = renseignements_manquants
         return context
 
     def get_object(self):

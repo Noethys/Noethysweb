@@ -7,11 +7,12 @@ import datetime
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 from django.db.models import Q
-from portail.views.base import CustomView
-from portail.utils import utils_approbations
+from core.models import PortailMessage, Article, Inscription, Consommation, Lecture
 from individus.utils import utils_pieces_manquantes, utils_vaccinations, utils_assurances
 from cotisations.utils import utils_cotisations_manquantes
-from core.models import PortailMessage, Article, Inscription, Consommation, Lecture
+from portail.views.base import CustomView
+from portail.utils import utils_approbations
+from portail.utils import utils_champs
 
 
 class Accueil(CustomView, TemplateView):
@@ -21,6 +22,9 @@ class Accueil(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(Accueil, self).get_context_data(**kwargs)
         context['page_titre'] = _("Accueil")
+
+        # Informations manquantes
+        context['nbre_informations_manquantes'] = utils_champs.Get_renseignements_manquants(famille=self.request.user.famille)["NBRE"]
 
         # Pièces manquantes
         context['nbre_pieces_manquantes'] = len(utils_pieces_manquantes.Get_pieces_manquantes(famille=self.request.user.famille, only_invalides=True, exclure_individus=self.request.user.famille.individus_masques.all()))
@@ -47,7 +51,7 @@ class Accueil(CustomView, TemplateView):
         if context["parametres_portail"].get("cotisations_afficher_page", False):
             context["cotisations_manquantes"] = utils_cotisations_manquantes.Get_cotisations_manquantes(famille=self.request.user.famille, exclure_individus=self.request.user.famille.individus_masques.all())
 
-            # Articles
+        # Articles
         conditions = Q(statut="publie") & Q(date_debut__lte=datetime.datetime.now()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.datetime.now()))
         conditions &= (Q(public__in=("toutes", "presents", "presents_groupes")) | (Q(public="inscrits") & Q(activites__in=activites)))
         articles = Article.objects.select_related("image_article", "album", "sondage", "auteur").filter(conditions).distinct().order_by("-date_debut")

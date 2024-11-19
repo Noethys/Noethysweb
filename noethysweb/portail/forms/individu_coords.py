@@ -96,6 +96,10 @@ class Formulaire(FormulaireBase, ModelForm):
         # Adresse auto
         if self.cleaned_data["type_adresse"] == "PROPRE":
             self.cleaned_data["adresse_auto"] = None
+            # Champs obligatoires
+            for nom_champ in ("rue_resid", "cp_resid", "ville_resid", "secteur"):
+                if self.dict_champs[nom_champ] == "OBLIGATOIRE" and not self.cleaned_data[nom_champ]:
+                    self.add_error(nom_champ, _("Vous devez obligatoirement renseigner ce champ"))
 
         if self.cleaned_data["type_adresse"] == "RATTACHEE":
             if self.cleaned_data["adresse_auto"]:

@@ -15,7 +15,7 @@ from portail.forms.fiche import FormulaireBase
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    date_naiss = forms.DateField(label="Date", required=False, widget=DatePickerWidget())
+    date_naiss = forms.DateField(label="Date naiss.", required=False, widget=DatePickerWidget())
 
     class Meta:
         model = Individu

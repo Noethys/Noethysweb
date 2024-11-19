@@ -91,31 +91,7 @@
             {% endblock %}
         {% endembed %}
     {% endif %}
-
-{% comment %}
-    {#  Renseignements manquants #}
-    {% if renseignements_manquants %}
-        {% embed 'core/box.html' with box_introduction=True %}
-            {% block box_theme %}card-outline card-danger{% endblock %}
-            {% block box_titre %}<i class="fa fa-exclamation-triangle text-danger"></i> Renseignements manquants{% endblock %}
-            {% block box_introduction %}Merci de renseigner les informations manquantes dans les fiches ci-dessous :{% endblock %}
-            {% block box_contenu %}
-                <ul>
-                {% for individu, liste_renseignements in renseignements_manquants.items %}
-                    <li><strong>{{ individu.prenom }}</strong> :
-                        <ul>
-                            {% for renseignement in liste_renseignements %}
-                                <li>{{ renseignement }}</li>
-                            {% endfor %}
-                        </ul>
-                    </li>
-                {% endfor %}
-                </ul>
-            {% endblock %}
-        {% endembed %}
-    {% endif %}
-{% endcomment %}
-
+    
     {# Liste des fiches de renseignements #}
     {% embed 'core/box.html' with box_titre=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
@@ -147,6 +123,9 @@
                                             <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Fiche en attente de certification{% endblocktrans %}</li>
                                         {% endif %}
                                     {% endwith %}
+                                    {% for renseignement in renseignements_manquants|get_item:None %}
+                                        <li class="text-red"><i class="fa fa-remove margin-r-5"></i>{{ renseignement }}</li>
+                                    {% endfor %}
                                 </ul>
                             </small>
                         </td>

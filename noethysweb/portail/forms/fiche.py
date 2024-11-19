@@ -36,18 +36,19 @@ class FormulaireBase():
         dict_renseignements = {renseignement.code: json.loads(renseignement.nouvelle_valeur) for renseignement in renseignements}
 
         # Liste des champs à afficher
-        dict_champs = utils_champs.Get_champs_page(page=self.nom_page, categorie=categorie)
+        self.dict_champs = utils_champs.Get_champs_page(page=self.nom_page, categorie=categorie)
 
         # Préparation du layout
         self.helper.layout = Layout()
 
         # Création des fields
+        liste_renseignements_manquants = []
         for dict_rubrique in self.liste_champs_possibles:
             champs = []
             for code in dict_rubrique["champs"]:
-                statut_champ = dict_champs.get(code, "MASQUER")
+                statut_champ = self.dict_champs.get(code, "MASQUER")
 
-                if statut_champ in ("AFFICHER", "MODIFIABLE"):
+                if statut_champ in ("AFFICHER", "MODIFIABLE", "OBLIGATOIRE"):
 
                     # Affiche les help_text si mode édition
                     if self.mode == "EDITION":
@@ -59,16 +60,27 @@ class FormulaireBase():
                         self.fields[code].help_text = "<span class='text-orange'><i class='fa fa-exclamation-circle margin-r-5'></i>%s</span>" % _("Modification en attente de validation par l'administrateur.")
 
                     # Si champ en lecture seule
-                    if dict_champs[code] == "AFFICHER":
+                    if self.dict_champs[code] == "AFFICHER":
                         self.fields[code].disabled = True
                         if self.mode == "EDITION":
                             self.fields[code].help_text = _("Ce champ n'est pas modifiable.")
+
+                    # Obligatoire
+                    if self.dict_champs[code] == "OBLIGATOIRE" and code not in ("rue_resid", "cp_resid", "ville_resid"):
+                        self.fields[code].required = True
+
+                    if self.dict_champs[code] == "OBLIGATOIRE" and not self.initial[code]:
+                        liste_renseignements_manquants.append(str(self.fields[code].label))
 
                     # Génération du field
                     champs.append(Field(code, css_class="text-orange" if code in dict_renseignements else None))
 
             if champs:
                 self.helper.layout.append(Fieldset(dict_rubrique["titre"], *champs))
+
+        # Affichage des renseignements manquants en haut du formulaire
+        if liste_renseignements_manquants:
+            self.helper.layout.insert(0, HTML("""<div class='alerte'><i class='icon fa fa-warning text-danger'></i> <b>Renseignements manquants : %s</b></div>""" % ", ".join(liste_renseignements_manquants)))
 
         # Désactive les champs en mode consultation
         if self.mode == "CONSULTATION":
