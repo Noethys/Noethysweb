@@ -75,6 +75,7 @@ class Liste(Page, crud.Liste):
     class datatable_class(MyDatatable):
         filtres = ["igenerique:pk",]
         check = columns.CheckBoxSelectColumn(label="")
+        mail = columns.TextColumn("Email", processor='Get_mail')
         rue_resid = columns.TextColumn("Rue", processor='Get_rue_resid')
         cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')
         ville_resid = columns.TextColumn("Ville",  sources=None, processor='Get_ville_resid')
@@ -82,8 +83,11 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', "idindividu", "nom", "prenom", "rue_resid", "cp_resid", "ville_resid", "actions"]
+            columns = ['check', "idindividu", "nom", "prenom", "mail", "rue_resid", "cp_resid", "ville_resid", "actions"]
             ordering = ["nom", "prenom"]
+
+        def Get_mail(self, instance, *args, **kwargs):
+            return instance.mail
 
         def Get_rue_resid(self, instance, *args, **kwargs):
             return instance.rue_resid
