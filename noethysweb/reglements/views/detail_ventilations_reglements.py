@@ -57,7 +57,7 @@ class View(CustomView, TemplateView):
             reglements = Reglement.objects.select_related("emetteur", "mode", "famille").filter(conditions).order_by("date")
 
         # Récupération des ventilations
-        ventilations = Ventilation.objects.select_related("reglement", "reglement__depot", "prestation", "prestation__activite").filter(reglement__in=reglements).order_by("prestation__date")
+        ventilations = Ventilation.objects.select_related("reglement", "reglement__depot", "prestation", "prestation__activite", "prestation__cotisation").filter(reglement__in=reglements).order_by("prestation__date")
         dict_ventilations_reglement = {}
         for ventilation in ventilations:
             dict_ventilations_reglement.setdefault(ventilation.reglement, [])

@@ -87,7 +87,7 @@ class View(CustomView, TemplateView):
             conditions_prestations &= Q(facture__isnull=False)
         if "nonfacturee" in mode_affichage:
             conditions_prestations &= Q(facture__isnull=True)
-        prestations = Prestation.objects.select_related('activite', 'categorie_tarif', 'famille', 'individu').filter(conditions_prestations).distinct()
+        prestations = Prestation.objects.select_related('activite', 'cotisation', 'categorie_tarif', 'famille', 'individu').filter(conditions_prestations).distinct()
 
         # Récupération des tranches de QF
         liste_tranches = []
