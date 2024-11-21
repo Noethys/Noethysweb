@@ -740,8 +740,8 @@ class Impression(utils_impression.Impression):
         for expression, remplacement in remplacements:
             formule = formule.replace(expression, remplacement)
 
-        # Unités
-        for code_unite in REGEX_UNITES.findall(formule):
+        # Unités (après avoir enlevé les doublons d'unités)
+        for code_unite in list({item: True for item in REGEX_UNITES.findall(formule)}.keys()):
             unite = self.dict_unites.get((date, idinscription, int(code_unite.replace("unite", ""))), Unite_conso())
             setattr(self, code_unite, unite)
             formule = formule.replace(code_unite, "self.%s" % code_unite)
