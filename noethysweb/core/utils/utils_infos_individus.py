@@ -336,6 +336,7 @@ class Informations():
                 "INDIVIDU_CP": individu.cp_resid,
                 "INDIVIDU_VILLE": individu.ville_resid,
                 "INDIVIDU_SECTEUR": individu.secteur,
+                "INDIVIDU_SECTEUR_COLORE": ("<font color='%s'>%s</font>" % (individu.secteur.couleur or "#000000", individu.secteur)) if individu.secteur else "",
                 "INDIVIDU_CATEGORIE_TRAVAIL": individu.categorie_travail,
                 "INDIVIDU_PROFESSION": individu.profession,
                 "INDIVIDU_EMPLOYEUR": individu.employeur,
