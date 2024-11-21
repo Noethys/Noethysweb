@@ -137,7 +137,7 @@ class Consulter(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fgenerique:famille", "idreglement", "date", "mode__label", "emetteur__nom", "numero_piece", "payeur__nom", "montant", "date_differe", "avis_depot"]
+        filtres = ["fgenerique:famille", "idreglement", "date", "mode__label", "emetteur__nom", "numero_piece", "payeur__nom", "montant", "date_differe", "avis_depot", "observations"]
         check = columns.CheckBoxSelectColumn(label="")
         mode = columns.TextColumn("Mode", sources=['mode__label'])
         emetteur = columns.CompoundColumn("Emetteur", sources=['emetteur__nom'])
@@ -149,7 +149,7 @@ class Consulter(Page, crud.Liste):
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ["check", "idreglement", "date", "mode", "emetteur", "numero_piece", "montant", "famille", "payeur", "date_differe",
-                       "numero_quittancier", "avis_depot", "actions"]
+                       "numero_quittancier", "avis_depot", "observations", "actions"]
             processors = {
                 "date": helpers.format_date("%d/%m/%Y"),
                 "date_differe": helpers.format_date('%d/%m/%Y'),
@@ -160,7 +160,7 @@ class Consulter(Page, crud.Liste):
                 "date_differe": "Différé",
                 "avis_depot": "Avis dépôt",
             }
-            hidden_columns = ["numero_quittancier", "avis_depot"]
+            hidden_columns = ["numero_quittancier", "avis_depot", "observations"]
             ordering = ["-idreglement"]
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
