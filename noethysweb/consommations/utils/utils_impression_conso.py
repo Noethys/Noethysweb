@@ -812,6 +812,7 @@ class Impression(utils_impression.Impression):
                                                 if dictColonnePerso["code"] == "aucun": donnee = ""
                                                 if dictColonnePerso["code"] == "ville_residence": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_VILLE"] or ""
                                                 if dictColonnePerso["code"] == "secteur": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_SECTEUR"] or ""
+                                                if dictColonnePerso["code"] == "secteur_colore": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_SECTEUR_COLORE"] or ""
                                                 if dictColonnePerso["code"] == "genre": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_SEXE"] or ""
                                                 if dictColonnePerso["code"] == "ville_naissance": donnee = dictInfosIndividus[inscription.individu_id]["INDIVIDU_VILLE_NAISS"] or ""
                                                 if dictColonnePerso["code"] == "nom_ecole": donnee = dictInfosIndividus[inscription.individu_id]["SCOLARITE_NOM_ECOLE"] or ""

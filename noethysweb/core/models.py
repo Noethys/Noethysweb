@@ -736,6 +736,7 @@ class Ferie(models.Model):
 class Secteur(models.Model):
     idsecteur = models.AutoField(verbose_name="ID", db_column='IDsecteur', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=200)
+    couleur = models.CharField(verbose_name="Couleur", max_length=100, default="#000000")
 
     class Meta:
         db_table = 'secteurs'
@@ -1389,7 +1390,7 @@ class CategorieEvenement(models.Model):
     activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.CASCADE)
     nom = models.CharField(verbose_name="Nom", max_length=200)
     image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
-    choix_limitations = [(None, "Aucune"), ("1EVTSEMAINE", "1 événement par semaine max"), ("2EVTSEMAINE", "2 événements par semaine max"), ("3EVTSEMAINE", "3 événements par semaine max"), ("4EVTSEMAINE", "4 événements par semaine max")]
+    choix_limitations = [(None, "Aucune"), ("1EVTJOUR", "1 événement par jour max"), ("2EVTJOUR", "2 événements par jour max"), ("3EVTJOUR", "3 événements par jour max"), ("1EVTSEMAINE", "1 événement par semaine max"), ("2EVTSEMAINE", "2 événements par semaine max"), ("3EVTSEMAINE", "3 événements par semaine max"), ("4EVTSEMAINE", "4 événements par semaine max")]
     limitations = models.CharField(verbose_name="Limitation", max_length=100, choices=choix_limitations, default=None, blank=True, null=True)
     questions = models.CharField(verbose_name="Questions", max_length=300, blank=True, null=True)
 
@@ -2283,7 +2284,23 @@ class Prestation(models.Model):
     def __str__(self):
         return "Prestation ID%d : %s" % (self.idprestation, self.label)
 
+    def Get_code_comptable(self):
+        code_compta = None
+        if self.activite:
+            if self.activite.code_comptable: code_compta = self.activite.code_comptable
+        if hasattr(self, "cotisation"):
+            if self.cotisation.type_cotisation.code_comptable: code_compta = self.cotisation.type_cotisation.code_comptable
+        if self.code_compta: code_compta = self.code_compta
+        return code_compta
 
+    def Get_code_analytique(self):
+        code_analytique = None
+        if self.activite:
+            if self.activite.code_analytique: code_analytique = self.activite.code_analytique
+        if hasattr(self, "cotisation"):
+            if self.cotisation.type_cotisation.code_analytique: code_analytique = self.cotisation.type_cotisation.code_analytique
+        if self.code_analytique: code_analytique = self.code_analytique
+        return code_analytique
 
 
 class Consommation(models.Model):

@@ -3,20 +3,26 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, ButtonHolder
-from crispy_forms.bootstrap import Field, FormActions, PrependedText, StrictButton
+from crispy_forms.layout import Layout
+from crispy_forms.bootstrap import Field
+from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import Secteur
+from core.widgets import ColorPickerWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Secteur
         fields = "__all__"
+        widgets = {
+            "couleur": ColorPickerWidget(),
+        }
+        help_texts = {
+            "couleur": "Cliquez sur le champ pour afficher le sélecteur de couleur. Cette couleur peut être appliquée dans certaines fonctionnalités de l'application."
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -32,4 +38,5 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'secteurs_liste' %}"),
             Field('nom'),
+            Field("couleur"),
         )
