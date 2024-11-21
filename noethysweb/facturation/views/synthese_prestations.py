@@ -137,6 +137,24 @@ class View(CustomView, TemplateView):
                         key_label = prestation.activite.nom
                     key_tri = key_label
 
+                if key_code == "code_comptable":
+                    code_comptable = prestation.Get_code_comptable()
+                    key = code_comptable
+                    if not code_comptable:
+                        key_label = "Code inconnu"
+                    else:
+                        key_label = code_comptable
+                    key_tri = key_label
+
+                if key_code == "code_analytique":
+                    code_analytique = prestation.Get_code_analytique()
+                    key = code_analytique
+                    if not code_analytique:
+                        key_label = "Code inconnu"
+                    else:
+                        key_label = code_analytique
+                    key_tri = key_label
+
                 if key_code == "categorie_tarif":
                     key = prestation.categorie_tarif_id
                     if not prestation.categorie_tarif_id:

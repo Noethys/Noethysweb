@@ -63,8 +63,16 @@ class View(CustomView, TemplateView):
             dict_ventilations_reglement.setdefault(ventilation.reglement, [])
             dict_ventilations_reglement[ventilation.reglement].append(ventilation)
 
-        def Get_nom_colonne(date):
-            return date.strftime("%m/%Y" if parametres["regroupement_colonne"] == "mois" else "%Y")
+        def Get_nom_colonne(prestation):
+            if parametres["regroupement_colonne"] == "mois":
+                return prestation.date.strftime("%m/%Y")
+            if parametres["regroupement_colonne"] == "annee":
+                return prestation.date.strftime("%Y")
+            if parametres["regroupement_colonne"] == "code_comptable":
+                return prestation.Get_code_comptable() or "Inconnu"
+            if parametres["regroupement_colonne"] == "code_analytique":
+                return prestation.Get_code_analytique() or "Inconnu"
+            return None
 
         def Get_nom_prestation(ventilation):
             if ventilation.prestation.activite and ventilation.prestation.activite.nom != ventilation.prestation.label:
@@ -76,7 +84,7 @@ class View(CustomView, TemplateView):
         liste_colonnes = ["Règlement"]
         for ventilation in ventilations:
             if ventilation.prestation.date:
-                nom_colonne = Get_nom_colonne(ventilation.prestation.date)
+                nom_colonne = Get_nom_colonne(ventilation.prestation)
                 if nom_colonne not in liste_colonnes:
                     liste_colonnes.append(nom_colonne)
                     dict_colonnes[nom_colonne] = "col%d" % (len(liste_colonnes)-1)
@@ -103,7 +111,7 @@ class View(CustomView, TemplateView):
             for nom_colonne, code_colonne in dict_colonnes.items():
                 montant = decimal.Decimal(0)
                 for ventilation in dict_ventilations_reglement.get(reglement, []):
-                    if nom_colonne == Get_nom_colonne(ventilation.prestation.date):
+                    if nom_colonne == Get_nom_colonne(ventilation.prestation):
                         montant += ventilation.montant
                 ligne_regroupement[code_colonne] = float(montant)
                 total_ligne += montant
@@ -132,7 +140,7 @@ class View(CustomView, TemplateView):
                     for nom_colonne, code_colonne in dict_colonnes.items():
                         montant = decimal.Decimal(0)
                         for ventilation in dict_ventilations_reglement.get(reglement, []):
-                            if nom_colonne == Get_nom_colonne(ventilation.prestation.date) and nom_prestation == Get_nom_prestation(ventilation):
+                            if nom_colonne == Get_nom_colonne(ventilation.prestation) and nom_prestation == Get_nom_prestation(ventilation):
                                 montant += ventilation.montant
                         if montant:
                             ligne[code_colonne] = float(montant)

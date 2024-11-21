@@ -20,7 +20,8 @@ class Formulaire(FormulaireBase, forms.Form):
                                        initial="DATE_SAISIE", required=False)
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     famille = forms.ModelChoiceField(label="Famille", widget=Select2Widget(), queryset=Famille.objects.all().order_by("nom"), required=False)
-    regroupement_colonne = forms.ChoiceField(label="Colonne", choices=[("mois", "Mois"), ("annee", "Année")], initial="mois", required=False)
+    regroupement_colonne = forms.ChoiceField(label="Colonne", choices=[("mois", "Mois"), ("annee", "Année"),
+                                                                       ("code_comptable", "Code comptable"), ("code_analytique", "Code analytique")], initial="mois", required=False)
     afficher_detail = forms.BooleanField(label="Afficher le détail des prestations", initial=True, required=False)
     afficher_id = forms.BooleanField(label="Afficher le ID du règlement", initial=True, required=False)
     afficher_date = forms.BooleanField(label="Afficher la date du règlement", initial=True, required=False)
