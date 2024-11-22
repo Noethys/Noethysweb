@@ -9,7 +9,7 @@ from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Min, Max
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Quotient, Prestation
+from core.models import Quotient, Prestation
 from fiche_famille.forms.famille_quotients import Formulaire
 from fiche_famille.views.famille import Onglet
 

@@ -25,6 +25,7 @@ LISTE_ONGLETS = [
     Onglet(code="famille_caisse", label=_("Caisse"), icone="fa-institution", url="portail_famille_caisse", validation_auto=False),
     Onglet(code="famille_questionnaire", label=_("Questionnaire"), icone="fa-question", url="portail_famille_questionnaire", validation_auto=True),
     Onglet(code="famille_parametres", label=_("Paramètres"), icone="fa-gear", url="portail_famille_parametres", validation_auto=True),
+    # Onglet(code="famille_quotients", label=_("Quotients"), icone="fa-euro", url="portail_famille_quotients", validation_auto=True),
     Onglet(code="individu_identite", label=_("Identité"), icone="fa-user", url="portail_individu_identite", validation_auto=False),
     Onglet(code="individu_questionnaire", label=_("Questionnaire"), icone="fa-question", url="portail_individu_questionnaire", validation_auto=True),
     Onglet(code="individu_coords", label=_("Coordonnées"), icone="fa-map-marker", url="portail_individu_coords", validation_auto=False),

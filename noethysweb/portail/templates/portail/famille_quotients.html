@@ -1,0 +1,51 @@
+{% extends "portail/fiche.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_fiche %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+
+                <div class="">
+                    {% if liste_quotients %}
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="text-center">
+                                    <th>{% trans "Début" %}</th>
+                                    <th>{% trans "Fin" %}</th>
+                                    <th>{% trans "Quotient" %}</th>
+                                    <th style="width: 90px;">{% trans "Actions" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for quotient in liste_quotients %}
+                                    <tr class="text-center">
+                                        <td>{{ quotient.date_debut|date:'d/m/Y' }}</td>
+                                        <td>{{ quotient.date_fin|date:'d/m/Y' }}</td>
+                                        <td>{{ quotient.quotient }}</td>
+                                        <td>
+                                            <a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_famille_quotients_modifier' idquotient=quotient.pk %}" title="{% trans "Modifier" %}"><i class="fa fa-fw fa-pencil"></i></a>
+                                            <a type="button" class="btn btn-danger btn-xs" href="{% url 'portail_famille_quotients_supprimer' idquotient=quotient.pk %}" title="{% trans "Supprimer" %}"><i class="fa fa-fw fa-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <b>{% blocktrans %}Aucun quotient enregistré.{% endblocktrans %}</b>
+                    {% endif %}
+                </div>
+                <a class="btn btn-primary pull-right" href="{% url 'portail_famille_quotients_ajouter' %}" title="{% trans "Ajouter un quotient" %}"><i class="fa fa-plus margin-r-5"></i>{% blocktrans %}Ajouter un quotient{% endblocktrans %}</a>
+
+            {% endblock box_contenu %}
+            {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+        {% endembed %}
+    </div>
+{% endblock %}

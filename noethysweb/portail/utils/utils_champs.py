@@ -35,6 +35,8 @@ LISTE_CHAMPS = [
     Champ(page="famille_parametres", code="email_blocage", label="Blocage envois Emails", famille="MODIFIABLE"),
     Champ(page="famille_parametres", code="mobile_blocage", label="Blocage envois SMS", famille="MODIFIABLE"),
 
+    # Champ(page="famille_quotients", code="quotients", label="Quotients", famille="MASQUER"),
+
     Champ(page="famille_consentements", code="consentements", label="Consentements", famille="MODIFIABLE"),
 
     Champ(page="individu_identite", code="nom", label="Nom de famille", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE", choix_obligatoire=True),
@@ -90,6 +92,7 @@ def Get_liste_champs():
             champ.representant = dict_champs_db[key].representant
             champ.enfant = dict_champs_db[key].enfant
             champ.contact = dict_champs_db[key].contact
+            champ.famille = dict_champs_db[key].famille
         liste_champs_temp.append(champ)
     return liste_champs_temp
 

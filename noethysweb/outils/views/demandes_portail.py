@@ -11,7 +11,7 @@ from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import PortailRenseignement, TypeSieste, Caisse, Individu, Secteur, CategorieTravail, RegimeAlimentaire, TypeMaladie, \
-                        Medecin, ContactUrgence, Assurance, Information, QuestionnaireQuestion, Vaccin, Activite, Groupe
+                        Medecin, ContactUrgence, Assurance, Information, QuestionnaireQuestion, Vaccin, Activite, Groupe, Quotient
 from core.data import data_civilites
 from core.utils import utils_dates, utils_parametres
 from portail.utils import utils_champs
@@ -99,7 +99,7 @@ def Get_labels():
     dict_labels = utils_champs.Get_labels_champs()
 
     # Ajout des tables spéciales
-    for categorie, table in [("individu_contacts", ContactUrgence), ("individu_assurances", Assurance), ("individu_informations", Information), ("individu_vaccinations", Vaccin)]:
+    for categorie, table in [("individu_contacts", ContactUrgence), ("individu_assurances", Assurance), ("individu_informations", Information), ("individu_vaccinations", Vaccin), ("famille_quotients", Quotient)]:
         for field in table._meta.get_fields():
             dict_labels[(categorie, field.name)] = "%s : %s" % (table._meta.verbose_name.capitalize(), field.verbose_name)
 
@@ -178,7 +178,7 @@ class Liste(Page, crud.Liste):
                 label = self.dict_labels.get((instance.categorie, instance.code))
             # Insère une icône si donnée importante
             warning = False
-            if instance.categorie in ("individu_questionnaire", "famille_questionnaire", "individu_informations", "famille_pieces", "individu_regimes_alimentaires"):
+            if instance.categorie in ("individu_questionnaire", "famille_questionnaire", "individu_informations", "famille_quotients", "famille_pieces", "individu_regimes_alimentaires"):
                 warning = True
             if instance.categorie == "individu_coords" and instance.code in ("type_adresse", "ville_resid"):
                 warning = True

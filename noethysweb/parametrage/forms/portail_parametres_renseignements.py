@@ -33,8 +33,9 @@ class Formulaire(FormulaireBase, forms.Form):
         dict_champs = {(champ.page, champ.code): champ for champ in copy.copy(utils_champs.LISTE_CHAMPS)}
         for champ in PortailChamp.objects.all():
             for public in ("famille", "representant", "enfant", "contact"):
-                if getattr(dict_champs[(champ.page, champ.code)], public):
-                    setattr(dict_champs[(champ.page, champ.code)], public, getattr(champ, public))
+                if (champ.page, champ.code) in dict_champs:
+                    if getattr(dict_champs[(champ.page, champ.code)], public):
+                        setattr(dict_champs[(champ.page, champ.code)], public, getattr(champ, public))
 
         # Création des fields
         for onglet in utils_onglets.LISTE_ONGLETS:
