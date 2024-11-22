@@ -1351,6 +1351,7 @@ $(document).ready(function() {
 
         if ((mode === "portail") && (!(valider_limitations_evenements()))) {
             event.preventDefault();
+            bootbox.hideAll();
             return false;
         }
 
@@ -1381,19 +1382,26 @@ function valider_limitations_evenements() {
     var resultat = true;
     $.each(dict_categories_evenements, function (idcategorie, dict_categorie) {
         if (dict_categorie.limitations) {
+            var type_limitation = dict_categorie.limitations.indexOf("SEMAINE") >= 0 ? "SEMAINE": "JOUR";
             var nbre_evt_max = parseInt(dict_categorie.limitations.charAt(0));
             var dict_evt_semaines = {};
+            var dict_evt_jours = {};
             $.each(dict_cases, function (key, case_tableau) {
                 if ((case_tableau.type_case === "event") && (case_tableau.evenement) && (case_tableau.evenement.categorie === parseInt(idcategorie))) {
                     for (var conso of case_tableau.consommations) {
                         var date_moment = moment(conso.date);
                         var key_date = date_moment.year().toString() + date_moment.week().toString()
-                        if (!(key_date in dict_evt_semaines)) {
-                            dict_evt_semaines[key_date] = 0;
-                        }
+                        if (!(key_date in dict_evt_semaines)) {dict_evt_semaines[key_date] = 0;}
+                        if (!(key_date in dict_evt_jours)) {dict_evt_jours[key_date] = 0;}
                         dict_evt_semaines[key_date] += 1;
-                        if (dict_evt_semaines[key_date] > nbre_evt_max) {
+                        dict_evt_jours[key_date] += 1;
+                        if ((type_limitation === "SEMAINE") && (dict_evt_semaines[key_date] > nbre_evt_max)) {
                             toastr.error("Vous ne pouvez pas réserver plus de " + nbre_evt_max + " événement" + (nbre_evt_max > 1 ? "s" : "") + " de type '" + dict_categorie.nom + "' par semaine");
+                            resultat = false;
+                            return false;
+                        }
+                        if ((type_limitation === "JOUR") && (dict_evt_jours[key_date] > nbre_evt_max)) {
+                            toastr.error("Vous ne pouvez pas réserver plus de " + nbre_evt_max + " événement" + (nbre_evt_max > 1 ? "s" : "") + " de type '" + dict_categorie.nom + "' par jour");
                             resultat = false;
                             return false;
                         }
