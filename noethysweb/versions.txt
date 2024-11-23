@@ -1,3 +1,18 @@
+Version 1.2.7.0 (23/11/2024) :
+
+- Ajout des renseignements obligatoires sur le portail
+- Ajout des questions associées aux événements
+- Ajout de la limitation des événements par jour et par semaine
+- Ajout de la liste déroulante avancée dans les questionnaires
+- Ajout des secteurs géographiques colorés
+- Ajout de la colonne Observations dans la liste des règlements d'un dépôt
+- Ajout regroupement par codes comptable et analytique dans synthèse prestations et détail ventilation
+- Ajout d'une colonne Email dans la liste des abonnés
+- Ajout de la description des événements dans la liste des réservations
+- Ajout des icônes à la liste des réponses aux questionnaires
+- Ajout des secteurs dans la page coordonnées des statistiques
+- Correction du doublon des unités dans la formule de l'état global
+
 Version 1.2.6.9 (12/11/2024) :
 
 - Ajout des options d'impression dans la commande des repas
