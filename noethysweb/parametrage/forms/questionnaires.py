@@ -35,7 +35,7 @@ def Get_controle(question=None):
     elif question.controle == "liste_deroulante":
         liste_choix = [(None, "---------")]
         liste_choix.extend([(choix, choix) for choix in question.choix.split(";")])
-        ctrl = forms.TypedChoiceField(label=question.label, choices=liste_choix, widget=Selection_avec_icone(), initial=None, required=question.obligatoire, help_text=question.texte_aide)
+        ctrl = forms.TypedChoiceField(label=question.label, choices=liste_choix, initial=None, required=question.obligatoire, help_text=question.texte_aide)
     elif question.controle == "liste_deroulante_avancee":
         liste_choix = [(None, "---------")]
         liste_choix.extend([(choix.pk, choix) for choix in QuestionnaireChoix.objects.filter(question=question).order_by("ordre")])
