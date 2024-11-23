@@ -1,3 +1,7 @@
+Version 1.2.7.1 (23/11/2024) :
+
+- Correction sur les listes déroulantes basiques dans les questionnaires
+
 Version 1.2.7.0 (23/11/2024) :
 
 - Ajout des renseignements obligatoires sur le portail
