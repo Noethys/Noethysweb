@@ -1,3 +1,7 @@
+Version 1.2.7.2 (24/11/2024) :
+
+- Ajout de l'autocomplete sur les champs Rue
+
 Version 1.2.7.1 (23/11/2024) :
 
 - Correction sur les listes déroulantes basiques dans les questionnaires
