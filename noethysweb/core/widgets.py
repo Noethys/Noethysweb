@@ -3,16 +3,16 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime, json
 from django.forms.utils import flatatt
 from django.forms.widgets import Widget, Textarea, ClearableFileInput, FileInput, SelectMultiple
 from django.template import loader
+from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.conf import settings
 from crispy_forms.layout import LayoutObject, TEMPLATE_PACK
-from django.template.loader import render_to_string
-import datetime, json
 from core.utils import utils_dates
-from core.models import Activite, TypeGroupeActivite, Groupe
+from core.models import Activite, TypeGroupeActivite, Groupe, Organisateur
 
 
 class DatePickerWidget(Widget):
@@ -211,6 +211,26 @@ class DateMask(Widget):
         context['name'] = name
         if value is not None:
             context['value'] = value
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
+
+
+class Rue(Widget):
+    template_name = 'core/widgets/rue.html'
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        context["name"] = name
+        if value is not None:
+            context["value"] = value
+        # Récupération des coordonnées GPS de l'organisateur pour une meilleure précision des réponses de l'API adresse
+        from core.utils import utils_adresse
+        context["gps_organisateur"] = utils_adresse.Get_gps_organisateur()
         return context
 
     def render(self, name, value, attrs=None, renderer=None):

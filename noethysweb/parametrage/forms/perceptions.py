@@ -10,7 +10,7 @@ from crispy_forms.layout import Layout, Fieldset
 from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.models import Perception
-from core.widgets import CodePostal, Ville
+from core.widgets import CodePostal, Ville, Rue
 from core.forms.base import FormulaireBase
 
 
@@ -19,7 +19,7 @@ class Formulaire(FormulaireBase, ModelForm):
         model = Perception
         fields = "__all__"
         widgets = {
-            'rue_resid': forms.Textarea(attrs={'rows': 2}),
+            'rue_resid': Rue(attrs={"id_codepostal": "id_cp_resid", "id_ville": "id_ville_resid"}),
             'cp_resid': CodePostal(attrs={"id_ville": "id_ville_resid"}),
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
         }

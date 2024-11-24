@@ -27,6 +27,20 @@ class Page(crud.Page):
         cache.delete('organisateur')
         return reverse_lazy("parametrage_toc")
 
+    def form_valid(self, form):
+        self.object = form.save()
+
+        # Recherche et enregistre les coordonnées GPS de la ville de l'organisateur
+        self.object.gps = None
+        if self.object.cp and self.object.ville:
+            from core.utils import utils_adresse
+            gps = utils_adresse.Get_gps_ville(cp=self.object.cp, ville=self.object.ville)
+            if gps:
+                self.object.gps = "%s;%s" % (gps["lon"], gps["lat"])
+        self.object.save()
+
+        return super().form_valid(form)
+
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire

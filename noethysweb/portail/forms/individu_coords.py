@@ -10,7 +10,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML
 from core.models import Individu, Rattachement
 from core.forms.select2 import Select2Widget
-from core.widgets import Telephone, CodePostal, Ville
+from core.widgets import Telephone, CodePostal, Ville, Rue
 from portail.forms.fiche import FormulaireBase
 
 
@@ -32,7 +32,7 @@ class Formulaire(FormulaireBase, ModelForm):
             'tel_fax': Telephone(),
             'travail_tel': Telephone(),
             'travail_fax': Telephone(),
-            'rue_resid': forms.Textarea(attrs={'rows': 2}),
+            'rue_resid': Rue(attrs={"id_codepostal": "id_cp_resid", "id_ville": "id_ville_resid"}),
             'cp_resid': CodePostal(attrs={"id_ville": "id_ville_resid"}),
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
         }

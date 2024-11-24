@@ -5,13 +5,13 @@
 
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Row, Column, Fieldset
-from crispy_forms.bootstrap import Field, FormActions, PrependedText, StrictButton
+from crispy_forms.layout import Layout, Fieldset
+from crispy_forms.bootstrap import Field
+from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import Medecin
-from core.widgets import Telephone, CodePostal, Ville
+from core.widgets import Telephone, CodePostal, Ville, Rue
 from fiche_individu.widgets import CarteOSM
 
 
@@ -24,7 +24,7 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             'tel_cabinet': Telephone(),
             'tel_mobile': Telephone(),
-            'rue_resid': forms.Textarea(attrs={'rows': 2}),
+            'rue_resid': Rue(attrs={"id_codepostal": "id_cp_resid", "id_ville": "id_ville_resid"}),
             'cp_resid': CodePostal(attrs={"id_ville": "id_ville_resid"}),
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
             "memo": forms.Textarea(attrs={'rows': 3}),

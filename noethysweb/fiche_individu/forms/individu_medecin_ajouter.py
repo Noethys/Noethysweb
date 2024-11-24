@@ -10,7 +10,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Div, ButtonHolder, Hidden
 from crispy_forms.bootstrap import Field
 from core.models import Medecin
-from core.widgets import Telephone, CodePostal, Ville
+from core.widgets import Telephone, CodePostal, Ville, Rue
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -21,7 +21,7 @@ class Formulaire(FormulaireBase, ModelForm):
         fields = ["nom", "prenom", "rue_resid", "cp_resid", "ville_resid", "tel_cabinet", "idindividu"]
         widgets = {
             'tel_cabinet': Telephone(),
-            'rue_resid': forms.Textarea(attrs={'rows': 2}),
+            'rue_resid': Rue(attrs={"id_codepostal": "id_cp_resid", "id_ville": "id_ville_resid"}),
             'cp_resid': CodePostal(attrs={"id_ville": "id_ville_resid"}),
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
         }

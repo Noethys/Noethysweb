@@ -12,7 +12,7 @@ from crispy_forms.bootstrap import Field, InlineRadios
 from core.utils.utils_commandes import Commandes
 from core.models import Individu, ListeDiffusion, Rattachement
 from core.forms.select2 import Select2MultipleWidget, Select2Widget
-from core.widgets import Telephone, CodePostal, Ville
+from core.widgets import Telephone, CodePostal, Ville, Rue
 from fiche_individu.widgets import CarteOSM
 
 
@@ -36,14 +36,14 @@ class Formulaire(FormulaireBase, ModelForm):
             'tel_fax': Telephone(),
             'travail_tel': Telephone(),
             'travail_fax': Telephone(),
-            'rue_resid': forms.Textarea(attrs={'rows': 2}),
+            'rue_resid': Rue(attrs={"id_codepostal": "id_cp_resid", "id_ville": "id_ville_resid"}),
             'cp_resid': CodePostal(attrs={"id_ville": "id_ville_resid"}),
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
         }
         help_texts = {
             "type_adresse": "Sélectionnez 'rattachée' pour faire le lien avec l'adresse d'un autre membre de la famille ou sélectionnez 'propre' pour saisir une adresse pour cet individu.",
             "adresse_auto": "Sélectionnez l'individu dont vous souhaitez récupérer l'adresse.",
-            "rue_resid": "Saisissez le numéro et le nom de la voie. Exemple : 12 Rue des acacias.",
+            "rue_resid": "Saisissez le numéro et le nom de la voie. Exemple : 12 Rue des acacias. Astuce : Vous pouvez également saisir le nom de la ville puis cliquez dans la liste déroulante sur le choix souhaité.",
             "cp_resid": "Saisissez le code postal de la ville de résidence, attendez une seconde et sélectionnez la ville dans la liste déroulante.",
             "ville_resid": "Saisissez le nom de la ville en majuscules.",
             "secteur": "Sélectionnez un secteur dans la liste déroulante.",

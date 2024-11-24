@@ -1,0 +1,32 @@
+{% load static %}
+
+<textarea type="text" autocomplete="off" class="{{ class }}" rows="2" data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}" {% if disabled %}disabled{% endif %}>{{ value }}</textarea>
+
+<script>
+
+    $(function () {
+        $("#{{ id }}").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "https://api-adresse.data.gouv.fr/search/?q="+$("input[id={{ id }}]").val()+"&type=housenumber&autocomplete=1&limit=10{% if gps_organisateur %}&lat={{ gps_organisateur.lat }}&lon={{ gps_organisateur.lon }}{% endif %}",
+                    data: {q: request.term},
+                    dataType: "json",
+                    success: function (data) {
+                        response($.map(data.features, function (item) {
+                            return { label: item.properties.label,
+                                     code_postal: item.properties.postcode,
+                                     ville: replaceSpec(item.properties.city).toUpperCase(),
+                                     value: item.properties.name,
+                            };
+                        }));
+                    }
+                });
+            },
+            // Si sélection, on remplit aussi le CP et la ville
+            select: function(event, ui) {
+                $("#{{ id_codepostal }}").val(ui.item.code_postal);
+                $("#{{ id_ville }}").val(ui.item.ville);
+            }
+        });
+});
+</script>

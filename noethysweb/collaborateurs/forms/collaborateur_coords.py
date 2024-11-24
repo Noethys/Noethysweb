@@ -11,7 +11,7 @@ from crispy_forms.layout import Layout, Fieldset
 from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.models import Collaborateur
-from core.widgets import Telephone, CodePostal, Ville
+from core.widgets import Telephone, CodePostal, Ville, Rue
 from fiche_individu.widgets import CarteOSM
 
 
@@ -25,7 +25,7 @@ class Formulaire(FormulaireBase, ModelForm):
             'tel_domicile': Telephone(),
             'tel_mobile': Telephone(),
             'travail_tel': Telephone(),
-            'rue_resid': forms.Textarea(attrs={'rows': 2}),
+            'rue_resid': Rue(attrs={"id_codepostal": "id_cp_resid", "id_ville": "id_ville_resid"}),
             'cp_resid': CodePostal(attrs={"id_ville": "id_ville_resid"}),
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
         }

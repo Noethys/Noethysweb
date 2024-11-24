@@ -12,7 +12,7 @@ from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.utils import utils_texte
 from core.models import Mandat, Famille, Rattachement
-from core.widgets import DatePickerWidget, Telephone, CodePostal, Ville
+from core.widgets import DatePickerWidget, Telephone, CodePostal, Ville, Rue
 from core.forms.select2 import Select2Widget, Select2MultipleWidget
 from facturation.widgets import ChampAutomatiqueWidget
 from facturation.utils import utils_prelevements
@@ -27,7 +27,7 @@ class Formulaire(FormulaireBase, ModelForm):
         fields = "__all__"
         widgets = {
             'date': DatePickerWidget(),
-            'individu_rue': forms.Textarea(attrs={'rows': 2}),
+            'individu_rue': Rue(attrs={"id_codepostal": "id_individu_cp", "id_ville": "id_individu_ville"}),
             'individu_cp': CodePostal(attrs={"id_ville": "id_individu_ville"}),
             'individu_ville': Ville(attrs={"id_codepostal": "id_individu_cp"}),
             'memo': forms.Textarea(attrs={'rows': 3}),
