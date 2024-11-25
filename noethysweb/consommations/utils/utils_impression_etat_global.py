@@ -243,20 +243,22 @@ class Impression(utils_impression.Impression):
 
                 # QF par tranche de 100
                 if dict_options["regroupement_principal"] == "qf_100":
-                    regroupement = None
+                    regroupement = (0, 0)
                     qf = GetQF(dictQuotientsFamiliaux, conso.inscription.famille_id, conso.date)
-                    for x in range(0, 10000, 100):
-                        min, max = x, x + 99
-                        if qf >= min and qf <= max:
-                            regroupement = (min, max)
+                    if qf:
+                        for x in range(0, 10000, 100):
+                            min, max = x, x + 99
+                            if qf >= min and qf <= max:
+                                regroupement = (min, max)
 
                 # QF par tranches
                 if dict_options["regroupement_principal"] in ("qf_tarifs", "qf_perso"):
-                    regroupement = None
+                    regroupement = (0, 0)
                     qf = GetQF(dictQuotientsFamiliaux, conso.inscription.famille_id, conso.date)
-                    for min, max in liste_tranches_qf:
-                        if qf >= min and qf <= max:
-                            regroupement = (min, max)
+                    if qf:
+                        for min, max in liste_tranches_qf:
+                            if qf >= min and qf <= max:
+                                regroupement = (min, max)
 
                 # # Etiquettes
                 # if regroupement_principal == "etiquette":
@@ -541,7 +543,10 @@ class Impression(utils_impression.Impression):
             elif dict_options["regroupement_principal"] == "annee": label_regroupement = str(regroupement)
             elif dict_options["regroupement_principal"] == "evenement" and regroupement in dictEvenements: label_regroupement = dictEvenements[regroupement]["nom"]
             elif dict_options["regroupement_principal"] == "evenement_date" and regroupement in dictEvenements: label_regroupement = u"%s (%s)" % (dictEvenements[regroupement]["nom"], utils_dates.ConvertDateToFR(dictEvenements[regroupement]["date"]))
-            elif dict_options["regroupement_principal"].startswith("qf") and type(regroupement) == tuple: label_regroupement = u"%d-%d" % regroupement
+            elif dict_options["regroupement_principal"].startswith("qf") and type(regroupement) == tuple:
+                label_regroupement = u"%d-%d" % regroupement
+                if regroupement == (0, 0):
+                    label_regroupement = "Non renseigné"
             elif dict_options["regroupement_principal"] == "age": label_regroupement = "%d ans" % regroupement
             else: label_regroupement = str(regroupement)
 
