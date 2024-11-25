@@ -19,4 +19,10 @@ class SummernoteTextFormField(fields.CharField):
         value = super().to_python(value)
         ATTRIBUTES['img'] = ['src', 'style']
         STYLES.extend(["width"])
-        return bleach.clean(html.unescape(value), tags=ALLOWED_TAGS, attributes=ATTRIBUTES, styles=STYLES, strip=True, strip_comments=True)
+
+        # Pour compatibilité avec bleach >= 5.0.0
+        version_bleach = [int(x) for x in bleach.__version__.split(".")]
+        if version_bleach[0] >= 5:
+            return bleach.clean(html.unescape(value), tags=ALLOWED_TAGS, attributes=ATTRIBUTES, css_sanitizer=STYLES, strip=True, strip_comments=True)
+        else:
+            return bleach.clean(html.unescape(value), tags=ALLOWED_TAGS, attributes=ATTRIBUTES, styles=STYLES, strip=True, strip_comments=True)
