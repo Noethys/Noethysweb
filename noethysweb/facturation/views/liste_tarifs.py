@@ -35,7 +35,7 @@ class View(CustomView, TemplateView):
 
     def Get_resultats(self, parametres={}):
         activite = parametres["activite"]
-        tarifs = Tarif.objects.select_related('nom_tarif').prefetch_related('categories_tarifs').filter(activite=activite).order_by("-date_debut")
+        tarifs = Tarif.objects.select_related('nom_tarif').prefetch_related('categories_tarifs').filter(activite=activite, nom_tarif__isnull=False).order_by("-date_debut")
         tarifs_lignes = TarifLigne.objects.filter(activite=activite).order_by("num_ligne")
 
         source = []
