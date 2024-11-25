@@ -1,3 +1,9 @@
+Version 1.2.7.3 (25/11/2024) :
+
+- Ajout du multiprestations dans les modèles de prestations
+- Correction du regroupement par QF dans l'état global
+- Adaptations pour bleach 5
+
 Version 1.2.7.2 (24/11/2024) :
 
 - Ajout de l'autocomplete sur les champs Rue
