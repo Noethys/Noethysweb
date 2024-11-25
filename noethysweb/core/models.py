@@ -1534,7 +1534,8 @@ class ModelePrestation(models.Model):
     tarifs = models.TextField(verbose_name="Tarifs", blank=True, null=True)
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
     # type_quotient = models.ForeignKey(TypeQuotient, verbose_name="Type de QF", blank=True, null=True, on_delete=models.SET_NULL, help_text="Sélectionnez un type de quotient familial ou laissez le champ vide pour tenir compte de tous les types de quotients.")
-
+    multiprestations = models.TextField(verbose_name="Multi-prestations", blank=True, null=True)
+    
     class Meta:
         db_table = 'modeles_prestations'
         verbose_name = "modèle de prestation"

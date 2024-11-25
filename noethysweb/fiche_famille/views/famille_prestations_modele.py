@@ -3,6 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from dateutil import rrule
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
@@ -47,30 +48,45 @@ class Ajouter(Page, crud.Ajouter):
             prestation = form.save(commit=True)
 
         # Si REPARTITION_MENSUELLE
-        if form.cleaned_data["multiprestations"] == "REPARTITION_MENSUELLE":
-            nbre_mois = form.cleaned_data["nbre_mois"]
-            liste_dates = list(rrule.rrule(rrule.MONTHLY, dtstart=form.cleaned_data["date"], count=nbre_mois))
-            mensualite = form.cleaned_data["montant"] // nbre_mois
+        if form.cleaned_data["multiprestations"] in ("REPARTITION_MENSUELLE_X_MOIS", "REPARTITION_MENSUELLE_DATES"):
+            nbre_mensualites = form.cleaned_data["nbre_mois"]
+            if form.cleaned_data["multiprestations"] == "REPARTITION_MENSUELLE_X_MOIS":
+                liste_dates = list(rrule.rrule(rrule.MONTHLY, dtstart=form.cleaned_data["date"], count=nbre_mensualites))
+            else:
+                liste_dates = self.Get_selection_dates(form.cleaned_data["selection_dates"])
+            mensualite = form.cleaned_data["montant"] // nbre_mensualites
             for index, date in enumerate(liste_dates, start=1):
                 # Préparation des valeurs de la prestation
-                valeurs = {key: valeur for key, valeur in form.cleaned_data.items() if key not in ("multiprestations", "nbre_mois")}
+                valeurs = self.Get_valeurs_prestation(form)
                 valeurs["date"] = date
                 valeurs["montant"] = mensualite
                 # Ajout du modulo à la dernière mensualité
-                if index == nbre_mois:
-                    valeurs["montant"] += form.cleaned_data["montant"] % nbre_mois
+                if index == nbre_mensualites:
+                    valeurs["montant"] += form.cleaned_data["montant"] % nbre_mensualites
                 # Enregistrement de la prestation
                 Prestation.objects.create(**valeurs)
 
         # Si MULTIPLICATION_MENSUELLE
-        if form.cleaned_data["multiprestations"] == "MULTIPLICATION_MENSUELLE":
-            liste_dates = list(rrule.rrule(rrule.MONTHLY, dtstart=form.cleaned_data["date"], count=form.cleaned_data["nbre_mois"]))
+        if form.cleaned_data["multiprestations"] in ("MULTIPLICATION_MENSUELLE_X_MOIS", "MULTIPLICATION_MENSUELLE_DATES"):
+            if form.cleaned_data["multiprestations"] == "MULTIPLICATION_MENSUELLE_X_MOIS":
+                liste_dates = list(rrule.rrule(rrule.MONTHLY, dtstart=form.cleaned_data["date"], count=form.cleaned_data["nbre_mois"]))
+            else:
+                liste_dates = self.Get_selection_dates(form.cleaned_data["selection_dates"])
             for index, date in enumerate(liste_dates, start=1):
-                valeurs = {key: valeur for key, valeur in form.cleaned_data.items() if key not in ("multiprestations", "nbre_mois")}
+                valeurs = self.Get_valeurs_prestation(form)
                 valeurs["date"] = date
                 Prestation.objects.create(**valeurs)
 
         return HttpResponseRedirect(self.get_success_url())
+
+    def Get_valeurs_prestation(self, form=None):
+        return {key: valeur for key, valeur in form.cleaned_data.items() if key not in ("multiprestations", "nbre_mois", "selection_dates")}
+
+    def Get_selection_dates(self, selection_dates=""):
+        liste_dates = []
+        for date in selection_dates.split(";"):
+            liste_dates.append(datetime.datetime.strptime(date.strip(), "%d/%m/%Y").date())
+        return liste_dates
 
 
 class Selection_modele(Onglet, TemplateView):

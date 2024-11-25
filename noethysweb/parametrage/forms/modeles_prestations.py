@@ -3,19 +3,26 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime, json
 from django import forms
 from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit, HTML, Row, Column, Fieldset, ButtonHolder
-from crispy_forms.bootstrap import Field, FormActions, PrependedText, StrictButton
+from crispy_forms.layout import Layout, HTML, Fieldset
+from crispy_forms.bootstrap import Field, PrependedText
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.utils import utils_preferences
 from core.models import ModelePrestation
+from fiche_famille.forms.famille_prestations_modele import LISTE_CHOIX_MULTI_PRESTATIONS, EXTRA_HTML as EXTRA_HTML_MULTIPRESTATIONS
 
 
 class Formulaire(FormulaireBase, ModelForm):
+    # Tarifs
     type_tarif = forms.ChoiceField(label="Type de tarif", choices=[("MONTANT", "Montant unique"), ("QF", "Montant selon le quotient familial")], initial="MONTANT", required=False, help_text="Sélectionnez un type de tarif à appliquer : montant unique ou selon le quotient familial.")
+    # Multi-prestations
+    multiprestations = forms.ChoiceField(label="Multi-prestations", initial=None, required=False, choices=LISTE_CHOIX_MULTI_PRESTATIONS, help_text="Cette option permet de générer plusieurs prestations selon le même modèle.")
+    nbre_mois = forms.IntegerField(label="Nbre mois", initial=1, min_value=1, required=False, help_text="Une prestation sera générée pour chaque mois à partir de la date saisie ci-dessus.")
+    selection_dates = forms.CharField(label="Dates", widget=forms.Textarea(attrs={"rows": 2}), required=False, help_text="Saisissez les dates souhaitées pour chaque prestation (séparées par des points-virgules). Exemple : 01/01/2024;01/02/2024;15/03/2024...")
 
     class Meta:
         model = ModelePrestation
@@ -45,6 +52,13 @@ class Formulaire(FormulaireBase, ModelForm):
             elif self.instance.montant:
                 self.fields["type_tarif"].initial = "MONTANT"
 
+        # Multi-prestations
+        if self.instance.pk and self.instance.multiprestations:
+            dict_parametres = json.loads(self.instance.multiprestations)
+            for key, valeur in dict_parametres.items():
+                self.fields[key].initial = valeur
+                self.initial[key] = valeur
+
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'modeles_prestations_liste' %}"),
@@ -63,6 +77,11 @@ class Formulaire(FormulaireBase, ModelForm):
                 PrependedText('montant', utils_preferences.Get_symbole_monnaie()),
                 Field('tarifs'),
             ),
+            Fieldset("Multi-prestations",
+                Field("multiprestations"),
+                Field("nbre_mois"),
+                Field("selection_dates"),
+            ),
             Fieldset("Options",
                 PrependedText("tva", "%"),
                 Field("code_compta"),
@@ -71,6 +90,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("structure"),
             ),
             HTML(EXTRA_SCRIPT),
+            HTML(EXTRA_HTML_MULTIPRESTATIONS),
         )
 
     def clean(self):
@@ -88,6 +108,21 @@ class Formulaire(FormulaireBase, ModelForm):
                 resultat = self.Verifie_coherence_tarifs(tarifs=self.cleaned_data["tarifs"])
                 if resultat != True:
                     self.add_error("tarifs", resultat)
+
+        # Multi-prestations
+        if self.cleaned_data["multiprestations"] in ("REPARTITION_MENSUELLE_X_MOIS", "MULTIPLICATION_MENSUELLE_X_MOIS"):
+            if not self.cleaned_data["nbre_mois"]:
+                self.add_error("nbre_mois", "Vous devez saisir un nombre de mois")
+                return
+            self.cleaned_data["multiprestations"] = json.dumps({"multiprestations": self.cleaned_data["multiprestations"], "nbre_mois": self.cleaned_data["nbre_mois"]})
+        if self.cleaned_data["multiprestations"] in ("REPARTITION_MENSUELLE_DATES", "MULTIPLICATION_MENSUELLE_DATES"):
+            try:
+                for date in self.cleaned_data["selection_dates"].split(";"):
+                    date_temp = datetime.datetime.strptime(date.strip(), "%d/%m/%Y").date()
+            except:
+                self.add_error("selection_dates", "Vous devez saisir au moins une date valide")
+                return
+            self.cleaned_data["multiprestations"] = json.dumps({"multiprestations": self.cleaned_data["multiprestations"], "selection_dates": self.cleaned_data["selection_dates"]})
 
         return self.cleaned_data
 

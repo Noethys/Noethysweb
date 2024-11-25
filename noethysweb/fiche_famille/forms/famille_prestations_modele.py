@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import datetime, decimal
+import datetime, decimal, json
 from django import forms
 from django.forms import ModelForm
 from django.db.models import Q
@@ -18,6 +18,15 @@ from core.models import Rattachement, Prestation, ModelePrestation, Quotient
 from core.widgets import DatePickerWidget
 
 
+LISTE_CHOIX_MULTI_PRESTATIONS = [
+    (None, "Non"),
+    ("REPARTITION_MENSUELLE_X_MOIS", "Répartir le montant en plusieurs prestations sur x mois"),
+    ("REPARTITION_MENSUELLE_DATES", "Répartir le montant sur une sélection de dates"),
+    ("MULTIPLICATION_MENSUELLE_X_MOIS", "Générer plusieurs prestations identiques sur x mois"),
+    ("MULTIPLICATION_MENSUELLE_DATES", "Générer plusieurs prestations identiques sur une sélection de dates"),
+]
+
+
 class Widget_modele(ModelSelect2Widget):
     search_fields = ["label__icontains"]
 
@@ -26,8 +35,9 @@ class Widget_modele(ModelSelect2Widget):
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    multiprestations = forms.ChoiceField(label="Multi-prestations", choices=[(None, "Non"), ("REPARTITION_MENSUELLE", "Répartir le montant en plusieurs prestations sur x mois"), ("MULTIPLICATION_MENSUELLE", "Générer plusieurs prestations identiques sur x mois")], initial=None, required=False, help_text="Cette option permet de générer plusieurs prestations selon le même modèle.")
+    multiprestations = forms.ChoiceField(label="Multi-prestations", initial=None, required=False, choices=LISTE_CHOIX_MULTI_PRESTATIONS, help_text="Cette option permet de générer plusieurs prestations selon le même modèle.")
     nbre_mois = forms.IntegerField(label="Nbre mois", initial=1, min_value=1, required=False, help_text="Une prestation sera générée pour chaque mois à partir de la date saisie ci-dessus.")
+    selection_dates = forms.CharField(label="Dates", widget=forms.Textarea(attrs={"rows": 2}), required=False, help_text="Saisissez les dates souhaitées pour chaque prestation (séparées par des points-virgules). Exemple : 01/01/2024;01/02/2024;15/03/2024...")
 
     class Meta:
         model = Prestation
@@ -56,13 +66,15 @@ class Formulaire(FormulaireBase, ModelForm):
         if modele.tarifs:
             qf_famille = Quotient.objects.filter(famille_id=idfamille, date_debut__lte=datetime.date.today(), date_fin__gte=datetime.date.today()).first()
             liste_montants = []
+            montant_found = False
             for ligne in modele.tarifs.splitlines():
                 tranches, montant_tarif = ligne.split("=")
                 qf_min, qf_max = tranches.split("-")
                 liste_montants.append(float(montant_tarif))
                 if qf_famille and float(qf_min) <= qf_famille.quotient <= float(qf_max):
                     montant = float(montant_tarif)
-            if not qf_famille:
+                    montant_found = True
+            if not qf_famille or not montant_found:
                 montant = max(liste_montants)
 
         self.fields["montant"].initial = montant
@@ -76,6 +88,12 @@ class Formulaire(FormulaireBase, ModelForm):
         self.fields["individu"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
         if modele.public == "individu":
             self.fields["individu"].required = True
+
+        # Multiprestations
+        if modele.multiprestations:
+            dict_parametres = json.loads(modele.multiprestations)
+            for key, valeur in dict_parametres.items():
+                self.fields[key].initial = valeur
 
         # Affichage
         self.helper.layout = Layout(
@@ -94,14 +112,22 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Options",
                 Field("multiprestations"),
                 Field("nbre_mois"),
+                Field("selection_dates"),
             ),
             HTML(EXTRA_HTML),
         )
 
     def clean(self):
-        if self.cleaned_data["multiprestations"] in ("REPARTITION_MENSUELLE", "MULTIPLICATION_MENSUELLE") and not self.cleaned_data["nbre_mois"]:
+        if self.cleaned_data["multiprestations"] in ("REPARTITION_MENSUELLE_X_MOIS", "MULTIPLICATION_MENSUELLE_X_MOIS") and not self.cleaned_data["nbre_mois"]:
             self.add_error("nbre_mois", "Vous devez saisir un nombre de mois")
             return
+        if self.cleaned_data["multiprestations"] in ("REPARTITION_MENSUELLE_DATES", "MULTIPLICATION_MENSUELLE_DATES"):
+            try:
+                for date in self.cleaned_data["selection_dates"].split(";"):
+                    date_temp = datetime.datetime.strptime(date.strip(), "%d/%m/%Y").date()
+            except:
+                self.add_error("selection_dates", "Vous devez saisir au moins une date valide")
+                return
         return self.cleaned_data
 
 
@@ -109,11 +135,18 @@ EXTRA_HTML = """
 <script>
     function On_change_multiprestations() {
         $('#div_id_nbre_mois').hide();
-        if ($("#id_multiprestations").val() == 'REPARTITION_MENSUELLE') {
+        $('#div_id_selection_dates').hide();
+        if ($("#id_multiprestations").val() == 'REPARTITION_MENSUELLE_X_MOIS') {
             $('#div_id_nbre_mois').show();
         };
-        if ($("#id_multiprestations").val() == 'MULTIPLICATION_MENSUELLE') {
+        if ($("#id_multiprestations").val() == 'REPARTITION_MENSUELLE_DATES') {
+            $('#div_id_selection_dates').show();
+        };
+        if ($("#id_multiprestations").val() == 'MULTIPLICATION_MENSUELLE_X_MOIS') {
             $('#div_id_nbre_mois').show();
+        };
+        if ($("#id_multiprestations").val() == 'MULTIPLICATION_MENSUELLE_DATES') {
+            $('#div_id_selection_dates').show();
         };
     }
     $(document).ready(function() {
