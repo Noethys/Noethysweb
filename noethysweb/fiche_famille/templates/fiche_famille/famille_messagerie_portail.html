@@ -75,7 +75,12 @@
                                             <div class="direct-chat-msg">
                                                 <div class="direct-chat-infos clearfix">
                                                     <span class="direct-chat-name float-left">{{ message.famille }}</span>
-                                                    <span class="direct-chat-timestamp float-right">{{ message.date_creation|date:"l j F Y H:i" }}</span>
+                                                    <span class="direct-chat-timestamp float-right">{{ message.date_creation|date:"l j F Y H:i" }}
+                                                        <span class="custom-switch custom-switch-off-danger custom-switch-on-success" title="Marquer comme lu">
+                                                            <input type="checkbox" class="custom-control-input case_switch" id="switch_{{ message.pk }}" data-idmessage="{{ message.pk }}" checked>
+                                                            <label class="custom-control-label" for="switch_{{ message.pk }}"></label>
+                                                        </span>
+                                                    </span>
                                                     {% if not message.date_lecture %}<span class="badge bg-danger ml-md-2">Nouveau</span>{% endif %}
                                                 </div>
                                                 <img class="direct-chat-img" src="{% static "images/user.png" %}">
@@ -99,6 +104,27 @@
                     <script>
                         {# Scroll jusqu'en bas de la liste des messages #}
                         $("#div_messages").scrollTop($("#div_messages").get(0).scrollHeight);
+                        
+                        $(document).ready(function() {
+                            $(".case_switch").on("change", function(e) {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "{% url 'ajax_message_marquer_lu' %}",
+                                    data: {
+                                        idmessage: $(this).data("idmessage"),
+                                        etat: this.checked,
+                                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                                    },
+                                    datatype: "json",
+                                    success: function(data){
+                                        toastr.success("Modification du message effectuée");
+                                    },
+                                    error: function(data) {
+                                        toastr.error(data.responseJSON.erreur);
+                                    }
+                                })
+                            })
+                        })
                     </script>
 
                 {% endif %}
