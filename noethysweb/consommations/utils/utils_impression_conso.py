@@ -483,7 +483,7 @@ class Impression(utils_impression.Impression):
                                                     largeur = 55
 
                                                 # Agrandit si évènements à afficher
-                                                if dictUnites[IDunite].type == "Evenement" and (self.dict_donnees["afficher_evenements"] or self.dict_donnees["afficher_questions_evenements"]) and self.dict_donnees["largeur_colonne_unite"] == "automatique":
+                                                if IDunite in dictUnites and dictUnites[IDunite].type == "Evenement" and (self.dict_donnees["afficher_evenements"] or self.dict_donnees["afficher_questions_evenements"]) and self.dict_donnees["largeur_colonne_unite"] == "automatique":
                                                     largeur += 30
 
                                                 # Agrandit si étiquettes à afficher
