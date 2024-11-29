@@ -1,0 +1,79 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    {% embed 'core/box.html' %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}{{ box_titre }}{% endblock %}
+        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+        {% block box_contenu %}
+            {% crispy form %}
+        {% endblock %}
+    {% endembed %}
+    
+    {% include 'core/modal_pdf.html' %}
+
+    {# Lien de téléchargement du fichier d'export #}
+    <a id="download" download></a>
+
+    <script>
+
+        // Générer l'export ou l'import
+        function executer() {
+            var box = bootbox.dialog({
+                    message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Opération en cours</b><br><br>Veuillez patienter...</p>",
+                    closeButton: false
+                });
+            var formData = new FormData($("#form_parametres")[0]);
+            formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_activites_import_export_executer' %}",
+                data: formData,
+                contentType: false,
+                processData: false,
+                datatype: "json",
+                success: function(data){
+                    bootbox.hideAll();
+                    if (data.action === "EXPORTER") {
+                        $("#download").attr("href", data.url_fichier);
+                        document.getElementById("download").click();
+                    }
+                    if (data.action === "SELECTION_ACTIVITES") {
+                        selectionner_activites(JSON.parse(data.liste_activites));
+                    }
+                    if (data.action === "IMPORTER") {
+                        toastr.success("Les activités ont été importées avec succès")
+                    }
+                },
+                error: function(data) {
+                    bootbox.hideAll();
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+        // Sélectionner les activités à importer
+        function selectionner_activites(liste_activites) {
+            bootbox.prompt({
+                title: "Sélectionnez la ou les activités à importer",
+                inputType: "select",
+                multiple: true,
+                inputOptions: liste_activites,
+                callback: function (resultats) {
+                    $("#id_selection_activites_importables").val(JSON.stringify(resultats));
+                    executer();
+                }
+            });
+        };
+    </script>
+
+{% endblock contenu_page %}

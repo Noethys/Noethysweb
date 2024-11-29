@@ -30,6 +30,7 @@ class Page(crud.Page):
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
         {"label": "Ajouter avec assistant", "classe": "btn btn-default", "href": reverse_lazy("activites_assistant_liste"), "icone": "fa fa-magic"},
+        {"label": "Importer/Exporter", "classe": "btn btn-default", "href": reverse_lazy("activites_import_export"), "icone": "fa fa-download"},
     ]
 
 

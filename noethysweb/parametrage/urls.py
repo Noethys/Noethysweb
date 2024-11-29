@@ -27,7 +27,7 @@ from parametrage.views import organisateur, structures, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
     modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
     modeles_word, releves_bancaires, sondages, achats_categories, achats_fournisseurs, modeles_commandes, modeles_commandes_colonnes, \
-    activites_evenements_categories
+    activites_evenements_categories, activites_import_export
 
 
 urlpatterns = [
@@ -57,6 +57,7 @@ urlpatterns = [
     path('parametrage/activites/supprimer/<int:idactivite>', activites.Supprimer.as_view(), name='activites_supprimer'),
     path('parametrage/activites/resume/<int:idactivite>', activites.Resume.as_view(), name='activites_resume'),
     path('parametrage/activites/dupliquer/<int:pk>', activites.Dupliquer.as_view(), name='activites_dupliquer'),
+    path('parametrage/activites/import_export', activites_import_export.View.as_view(), name='activites_import_export'),
 
     path('parametrage/activites/generalites/<int:idactivite>', activites_generalites.Consulter.as_view(), name='activites_generalites'),
     path('parametrage/activites/generalites/modifier/<int:idactivite>', activites_generalites.Modifier.as_view(), name='activites_generalites_modifier'),
@@ -704,4 +705,5 @@ urlpatterns = [
     path('parametrage/achats_categories/liste/deplacer_lignes', secure_ajax(achats_categories.Deplacer.as_view()), name='ajax_deplacer_lignes_achats_categories'),
     path('parametrage/modeles_commandes_colonnes/liste/deplacer_lignes', secure_ajax(modeles_commandes_colonnes.Deplacer.as_view()), name='ajax_deplacer_modeles_commandes_colonnes'),
     path('parametrage/questions/get_form_choix', secure_ajax(questionnaires.Get_form_choix), name='ajax_questionnaire_form_choix'),
+    path('parametrage/activites/import_export/exporter', secure_ajax(activites_import_export.Executer), name='ajax_activites_import_export_executer'),
 ]
