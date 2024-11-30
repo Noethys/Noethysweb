@@ -43,17 +43,27 @@
         <div class="row">
 
             <div class="col-md-3">
-                <div class="info-box">
-                    <span class="info-box-icon bg-{% if solde > 0 %}red{% else %}gray-light{% endif %}"><i class="fa fa-euro"></i></span>
+                <div class="info-box" title="Ce solde prend en compte toutes les prestations et règlements passés ou futurs">
+                    <span class="info-box-icon bg-{% if solde_global < 0 %}red{% else %}gray-light{% endif %}"><i class="fa fa-euro"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">Solde</span>
-                        <span class="info-box-number {% if solde > 0 %}text-red{% endif %}">{{ solde|montant }}</span>
+                        <span class="info-box-text">Solde global</span>
+                        <span class="info-box-number {% if solde_global < 0 %}text-red{% endif %}">{{ solde_global|montant }}</span>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-3">
-                <div class="info-box">
+                <div class="info-box" title="Ce solde prend en compte uniquement les prestations facturées et les règlements associés">
+                    <span class="info-box-icon bg-{% if solde_facture < 0 %}red{% else %}gray-light{% endif %}"><i class="fa fa-euro"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Solde facturé</span>
+                        <span class="info-box-number {% if solde_facture < 0 %}text-red{% endif %}">{{ solde_facture|montant }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="info-box" title="Le détail des alertes se trouve dans le cadre ci-dessous">
                     <span class="info-box-icon bg-{% if nbre_alertes %}orange{% else %}gray-light{% endif %}"><i class="fa fa-warning"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Alertes</span>
@@ -62,6 +72,7 @@
                 </div>
             </div>
 
+{% comment %}
             <div class="col-md-3">
                 <div class="info-box">
                     <span class="info-box-icon bg-{% if notes|length %}orange{% else %}gray-light{% endif %}"><i class="fa fa-sticky-note-o"></i></span>
@@ -71,9 +82,10 @@
                     </div>
                 </div>
             </div>
+{% endcomment %}
 
             <div class="col-md-3">
-                <div class="info-box">
+                <div class="info-box" title="Messages envoyés par la famille via le portail">
                     <span class="info-box-icon bg-{% if nbre_messages_non_lus %}orange{% else %}gray-light{% endif %}"><i class="fa fa-comments-o"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Messages</span>

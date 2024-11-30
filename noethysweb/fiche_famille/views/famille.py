@@ -13,8 +13,7 @@ from django.views.generic.detail import DetailView
 from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Note, Rattachement, CATEGORIES_RATTACHEMENT, Prestation, Reglement, PortailMessage, Inscription
-from core.utils import utils_texte
+from core.models import Famille, Note, Rattachement, CATEGORIES_RATTACHEMENT, Prestation, Reglement, PortailMessage, Inscription, Facture
 from individus.utils import utils_pieces_manquantes
 from fiche_individu.forms.individu import Formulaire
 from fiche_famille.utils.utils_famille import LISTE_ONGLETS
@@ -216,12 +215,16 @@ class Resume(Onglet, DetailView):
         conditions = (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
         context['notes'] = Note.objects.filter(conditions, famille_id=idfamille).order_by("date_saisie")
 
-        # Calcul du solde
+        # Calcul du solde global
         total_prestations = Prestation.objects.values('famille_id').filter(famille_id=idfamille).aggregate(total=Sum("montant"))
         total_reglements = Reglement.objects.values('famille_id').filter(famille_id=idfamille).aggregate(total=Sum("montant"))
         total_du = total_prestations["total"] if total_prestations["total"] else Decimal(0)
         total_regle = total_reglements["total"] if total_reglements["total"] else Decimal(0)
-        context['solde'] = total_du - total_regle
+        context["solde_global"] = total_regle - total_du
+
+        # Calcul du solde facturé
+        solde_facture = Facture.objects.filter(famille_id=idfamille, etat__isnull=True).aggregate(solde=-Sum("solde_actuel"))
+        context["solde_facture"] = solde_facture["solde"] if solde_facture["solde"] else Decimal(0)
 
         # Inscriptions actuelles
         conditions = Q(famille_id=idfamille) & Q(date_debut__lte=datetime.date.today()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
