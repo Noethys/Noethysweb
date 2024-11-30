@@ -177,6 +177,7 @@ MOTSCLES = {
         ("{NOM_FAMILLE}", "Nom de la famille"),
         ("{IDENTIFIANT_INTERNET}", "Identifiant du compte internet"),
         ("{MOTDEPASSE_INTERNET}", "Mot de passe du compte internet"),
+        ("{DATE_EXPIRATION_MOTDEPASSE}", "Date d'expiration du mot de passe du compte internet"),
     ],
 
     "portail_demande_inscription": [

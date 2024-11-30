@@ -6,6 +6,7 @@
 from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponseRedirect
 from django.contrib import messages
+from django.utils.dateparse import parse_date
 from core.views import crud
 from core.models import Famille, Utilisateur
 from fiche_famille.forms.famille_portail import Formulaire
@@ -17,6 +18,7 @@ def Envoyer_codes(request):
     # Récupération des données du formulaire
     internet_identifiant = request.POST.get("internet_identifiant")
     internet_mdp = request.POST.get("internet_mdp")
+    date_expiration_mdp = request.POST.get("date_expiration_mdp")
     idfamille = int(request.POST.get("idfamille"))
 
     # Récupération des valeurs de fusion
@@ -25,6 +27,7 @@ def Envoyer_codes(request):
         "{NOM_FAMILLE}": famille.nom,
         "{IDENTIFIANT_INTERNET}": internet_identifiant,
         "{MOTDEPASSE_INTERNET}": internet_mdp,
+        "{DATE_EXPIRATION_MOTDEPASSE}": parse_date(date_expiration_mdp[:10]).strftime("%d/%m/%Y") if date_expiration_mdp and date_expiration_mdp != "None" else "",
     }
     return JsonResponse({"categorie": "portail", "champs": champs, "idfamille": idfamille})
 

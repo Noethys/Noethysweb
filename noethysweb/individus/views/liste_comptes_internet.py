@@ -37,7 +37,7 @@ def Envoyer_email(request):
     )
 
     # Importation des comptes internet
-    familles = Famille.objects.filter(pk__in=coches)
+    familles = Famille.objects.select_related("utilisateur").filter(pk__in=coches)
 
     # Recherche le dernier ID de la table Destinataires
     dernier_destinataire = Destinataire.objects.last()
@@ -49,7 +49,12 @@ def Envoyer_email(request):
     liste_ajouts = []
     for famille in familles:
         if famille.mail:
-            valeurs = {"{NOM_FAMILLE}": famille.nom, "{IDENTIFIANT_INTERNET}": famille.internet_identifiant, "{MOTDEPASSE_INTERNET}": famille.internet_mdp}
+            valeurs = {
+                "{NOM_FAMILLE}": famille.nom,
+                "{IDENTIFIANT_INTERNET}": famille.internet_identifiant,
+                "{MOTDEPASSE_INTERNET}": famille.internet_mdp,
+                "{DATE_EXPIRATION_MOTDEPASSE}": famille.utilisateur.date_expiration_mdp.strftime("%d/%m/%Y") if famille.utilisateur.date_expiration_mdp else "",
+                }
             liste_ajouts.append(Destinataire(categorie="famille", famille=famille, adresse=famille.mail, valeurs=json.dumps(valeurs)))
         else:
             liste_anomalies.append(famille.nom)
