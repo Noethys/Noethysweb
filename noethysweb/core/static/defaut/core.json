@@ -1154,7 +1154,7 @@
             "categorie": "portail", 
             "description": "", 
             "objet": "Vos codes d'acc\u00e8s au portail famille", 
-            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Veuillez trouver ci-dessous vos codes d'acc\u00e8s personnels au portail famille :</p><p align=\"left\"></p><p align=\"left\">Identifiant : <b>{IDENTIFIANT_INTERNET}<br></b>Mot de passe : <b>{MOTDEPASSE_INTERNET}</b></p><p align=\"left\"></p><p align=\"left\">Bonne r\u00e9ception,</p><p align=\"left\"></p><p align=\"left\">{UTILISATEUR_NOM_COMPLET}</p>", 
+            "html": "<p align=\"left\">Bonjour,</p><p align=\"left\"></p><p align=\"left\">Veuillez trouver ci-dessous vos codes d'acc\u00e8s personnels au portail famille {URL_PORTAIL} :</p><p align=\"left\"></p><p align=\"left\">Identifiant : <b>{IDENTIFIANT_INTERNET}<br></b>Mot de passe : <b>{MOTDEPASSE_INTERNET}</b> (valide jusqu'au {DATE_EXPIRATION_MOTDEPASSE})</p><p align=\"left\"></p><p align=\"left\">Bonne r\u00e9ception,</p><p align=\"left\"></p><p align=\"left\">{ORGANISATEUR_NOM}</p>",
             "defaut": true, 
             "idmodele": 11
         }
