@@ -21,7 +21,11 @@ class Formulaire(FormulaireBase, forms.Form):
     selection_activites_importables = forms.CharField(widget=forms.HiddenInput(), required=False)
     selection_structure = forms.ModelChoiceField(label="Structure associée", queryset=Structure.objects.none(), required=False, help_text="Sélectionnez la structure qui sera associée aux activités importées.")
     donnees = forms.MultipleChoiceField(label="Données annexes à importer", required=False, widget=Select2MultipleWidget(), initial=[],
-                                        choices=[("groupes_activites", "Groupes d'activités"), ("pieces", "Types de pièces"),("cotisations", "Types d'adhésion"), ("types_consentements", "Types de consentements")],
+                                        choices=[("groupes_activites", "Groupes d'activités"),
+                                                 ("pieces", "Types de pièces"),
+                                                 # ("cotisations", "Types d'adhésion"),
+                                                 ("types_consentements", "Types de consentements"),
+                                                 ],
                                         help_text="Sélectionnez les données annexes à importer. Si vous utilisez cette option, veuillez à ne pas importer des données déjà existantes.")
 
     def __init__(self, *args, **kwargs):

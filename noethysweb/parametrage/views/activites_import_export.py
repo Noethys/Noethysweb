@@ -144,6 +144,8 @@ def Importer(parametres):
             if "types_consentements" in parametres["donnees"]: Ajouter_manytomany(nom_champ="types_consentements", nom_classe="TypeConsentement")
 
             # Duplications simples
+            correspondances = {}
+
             def Get_correspondances(correspondances={}, objet=None):
                 return {
                     "activite_id": activite.pk,
@@ -154,12 +156,11 @@ def Importer(parametres):
                     "nom_tarif_id": correspondances["NomTarif"][objet.nom_tarif_id] if getattr(objet, "nom_tarif_id", None) and "NomTarif" in correspondances else None,
                     "evenement_id": correspondances["Evenement"][objet.evenement_id] if getattr(objet, "evenement_id", None) and "Evenement" in correspondances else None,
                     "structure_id": parametres["selection_structure"].pk,
+                    "restaurateur_id": None,
                 }
 
-            tables = [ResponsableActivite, Agrement, Groupe, Unite, Evenement, CategorieTarif, NomTarif,
-                      UniteRemplissage, Tarif, TarifLigne, Ouverture, Remplissage, PortailPeriode]
-            correspondances = {}
-            for classe in tables:
+            def Copie_classe(classe=None, bulk=False):
+                liste_ajouts = []
                 for instance in dict_objets.get(classe._meta.object_name, []):
                     objet_instance = instance.object
                     if objet_instance.activite_id == objet_activite.object.pk:
@@ -169,16 +170,33 @@ def Importer(parametres):
                         # Traitement des ForeignKey
                         for key, valeur in Get_correspondances(correspondances, objet_instance).items():
                             setattr(nouvel_objet, key, valeur)
-                        nouvel_objet.save()
 
-                        # Mémorisation des correspondances
-                        correspondances.setdefault(objet_instance._meta.object_name, {})
-                        correspondances[objet_instance._meta.object_name][objet_instance.pk] = nouvel_objet.pk
+                        if bulk:
+                            # Enregistrement groupé
+                            liste_ajouts.append(nouvel_objet)
+                        else:
+                            # Enregistrement à l'unité et mémorisation des correspondances
+                            nouvel_objet.save()
 
-                        # Duplication des champs manytomany
-                        for field in classe._meta.get_fields():
-                            if field.__class__.__name__ == "ManyToManyField":
-                                getattr(nouvel_objet, field.name).set(getattr(objet_instance, field.name).all(), through_defaults=Get_correspondances(correspondances, objet_instance))
+                            # Mémorisation des correspondances
+                            correspondances.setdefault(objet_instance._meta.object_name, {})
+                            correspondances[objet_instance._meta.object_name][objet_instance.pk] = nouvel_objet.pk
+
+                            # Duplication des champs manytomany
+                            for field in classe._meta.get_fields():
+                                if field.__class__.__name__ == "ManyToManyField":
+                                    getattr(nouvel_objet, field.name).set(getattr(objet_instance, field.name).all(), through_defaults=Get_correspondances(correspondances, objet_instance))
+                if liste_ajouts:
+                    classe.objects.bulk_create(liste_ajouts)
+
+            # Duplications avec enregistrement à l'unité
+            tables = [ResponsableActivite, Agrement, Groupe, Unite, Evenement, CategorieTarif, NomTarif, UniteRemplissage, Tarif, TarifLigne, PortailPeriode]
+            for classe in tables:
+                Copie_classe(classe=classe)
+
+            # Duplications avec enregistrement groupé
+            for classe in (Ouverture, Remplissage):
+                Copie_classe(classe=classe, bulk=True)
 
             # Unite de remplissage
             for instance in UniteRemplissage.objects.filter(activite=activite):
