@@ -117,6 +117,12 @@ class Formulaire(FormulaireBase, ModelForm):
             HTML(EXTRA_HTML),
         )
 
+        # Ajout d'autres champs du modèle
+        for champ in ("activite_id", "categorie_tarif_id", "tarif_id", "code_compta"):
+            valeur = getattr(modele, champ)
+            if valeur:
+                self.helper.layout.append(Hidden(champ.replace("_id", ""), value=valeur))
+
     def clean(self):
         if self.cleaned_data["multiprestations"] in ("REPARTITION_MENSUELLE_X_MOIS", "MULTIPLICATION_MENSUELLE_X_MOIS") and not self.cleaned_data["nbre_mois"]:
             self.add_error("nbre_mois", "Vous devez saisir un nombre de mois")
