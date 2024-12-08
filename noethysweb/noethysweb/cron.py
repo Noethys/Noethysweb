@@ -63,3 +63,7 @@ def Recalculer_prestations_mois_precedent():
     logger.debug("%s : Recalculer les prestations du mois précédent..." % datetime.datetime.now())
     from dateutil.relativedelta import relativedelta
     call_command("recalculer_prestations", mois=format(datetime.date.today() - relativedelta(months=1), "%Y-%m"))
+
+def Maj_soldes_factures():
+    logger.debug("%s : MAJ totaux et soldes des factures..." % datetime.datetime.now())
+    call_command("maj_soldes_factures")

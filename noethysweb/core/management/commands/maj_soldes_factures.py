@@ -10,7 +10,8 @@ class Command(BaseCommand):
     help = 'MAJ des soldes des factures'
 
     def handle(self, *args, **kwargs):
-        # MAJ des soldes des factures
+        # MAJ des totaux et des soldes des factures
         from facturation.utils import utils_factures
+        utils_factures.Maj_total_factures(IDfamille=0, IDfacture=0)
         utils_factures.Maj_solde_actuel_factures()
-        self.stdout.write(self.style.SUCCESS("MAJ des soldes des factures OK"))
+        self.stdout.write(self.style.SUCCESS("MAJ des totaux et des soldes des factures OK"))
