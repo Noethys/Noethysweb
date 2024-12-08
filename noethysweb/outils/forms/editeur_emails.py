@@ -18,7 +18,7 @@ from outils.widgets import Pieces_jointes
 class Formulaire(FormulaireBase, ModelForm):
     action = forms.CharField(label="Action", required=False)
     objet = forms.CharField(label="Objet", required=False)
-    html = forms.CharField(label="Texte", widget=SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '300px'}}), required=False)
+    html = forms.CharField(label="Texte", widget=SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '400px'}}), required=False)
     pieces_jointes = forms.CharField(label="Pièces jointes", required=False, widget=Pieces_jointes())
     # selection = forms.ChoiceField(label="Sélection", widget=forms.RadioSelect, choices=[("TOUS", "Tous les destinataires"), ("SELECTION", "Les destinataires qui n'ont pas déjà reçu le message")], initial="SELECTION", required=False)
 
@@ -40,6 +40,10 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Sélectionne l'adresse d'expédition
         self.fields["adresse_exp"].queryset = AdresseMail.objects.filter(pk__in=self.request.user.Get_adresses_exp_possibles(), actif=True).order_by("adresse")
+        if not self.fields["adresse_exp"].queryset.count():
+            self.fields['adresse_exp'].help_text = """<span class='text-danger'><i class='fa fa-warning text-danger'></i> Vous devez vérifier qu'une adresse d'expédition a été créée dans le menu 
+                                                    Paramétrage > Adresses d'expédition et que vous l'avez rattachée à la structure (Menu Paramétrage > Structures). Vous pouvez
+                                                    également associer une adresse d'expédition à votre compte utilisateur dans la partie Administrateur.</span>"""
         if not idmail:
             self.fields['adresse_exp'].initial = self.request.user.Get_adresse_exp_defaut()
 

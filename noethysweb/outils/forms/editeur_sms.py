@@ -40,6 +40,10 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Sélectionne l'adresse d'expédition
         self.fields["configuration_sms"].queryset = ConfigurationSMS.objects.filter(pk__in=self.request.user.Get_configurations_sms_possibles())
+        if not self.fields["configuration_sms"].queryset.count():
+            self.fields['configuration_sms'].help_text = """<span class='text-danger'><i class='fa fa-warning text-danger'></i> Vous devez vérifier qu'une configuration SMS a été créée dans le menu 
+                                                    Paramétrage > Configurations SMS et que vous l'avez rattachée à la structure (Menu Paramétrage > Structures). Vous pouvez
+                                                    également associer une configuration SMS à votre compte utilisateur dans la partie Administrateur.</span>"""
         if not idsms:
             self.fields['configuration_sms'].initial = self.request.user.Get_configuration_sms_defaut()
 
