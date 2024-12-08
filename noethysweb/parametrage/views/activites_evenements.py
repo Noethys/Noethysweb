@@ -22,7 +22,7 @@ class Page(Onglet):
     url_ajouter = "activites_evenements_ajouter"
     url_modifier = "activites_evenements_modifier"
     url_supprimer = "activites_evenements_supprimer"
-    description_liste = "Vous pouvez saisir ici des événements pour l'activité."
+    description_liste = "Vous pouvez saisir ici des événements pour l'activité. Vous devez avoir au préalable créé au moins une unité de consommation de type 'Evénementiel'."
     description_saisie = "Saisissez toutes les informations concernant l'événement à saisir et cliquez sur le bouton Enregistrer."
     objet_singulier = "un événement"
     objet_pluriel = "des événements"

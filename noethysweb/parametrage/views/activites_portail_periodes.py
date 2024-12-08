@@ -18,7 +18,7 @@ class Page(Onglet):
     url_ajouter = "activites_portail_periodes_ajouter"
     url_modifier = "activites_portail_periodes_modifier"
     url_supprimer = "activites_portail_periodes_supprimer"
-    description_liste = "Vous pouvez saisir ici des périodes de réservation pour l'activité."
+    description_liste = "Vous pouvez saisir ici des périodes de réservation pour l'activité. Elles sont nécessaires si vous souhaitez permettre aux usagers d'enregistrer des réservations depuis le portail famille."
     description_saisie = "Saisissez toutes les informations concernant la période de réservation à saisir et cliquez sur le bouton Enregistrer."
     objet_singulier = "une période de réservation"
     objet_pluriel = "des périodes de réservation"

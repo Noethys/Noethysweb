@@ -17,11 +17,19 @@ from django.db.models import Max
 class Formulaire(FormulaireBase, ModelForm):
     # Nombre max d'inscrits
     choix_nbre_inscrits = [("NON", "Sans limitation du nombre d'inscrits"), ("OUI", "Avec limitation du nombre d'inscrits")]
-    type_nbre_inscrits = forms.TypedChoiceField(label="Limitation du nombre d'inscrits", choices=choix_nbre_inscrits, initial="NON", required=True)
+    type_nbre_inscrits = forms.TypedChoiceField(label="Limitation du nombre d'inscrits", choices=choix_nbre_inscrits, initial="NON", required=True, help_text="""
+                                                Vous pouvez ici définir le nombre d'inscrits maximal autorisé sur ce groupe. Attention, il ne s'agit pas ici du nombre de places
+                                                maximales par jour (qui se paramètre dans le calendrier), mais bien du nombre d'inscriptions initiales. Cette option n'est 
+                                                généralement utilisée que pour des activités limitées dans le temps. Exemples : Club de gym - Saison 2024-25, 
+                                                Séjour à la neige - février 2026...""")
 
     class Meta:
         model = Groupe
         fields = "__all__"
+        help_texts = {
+            "nom": "Exemples : 3-6 ans, 6-12 ans, Les séniors, Les bébés, Le groupe du jeudi soir...",
+            "abrege": "Il doit s'agir de quelques caractères en majuscules ou de chiffres. Exemples : 3-6, 6-12, SENIORS, JEUDI..."
+        }
 
     def __init__(self, *args, **kwargs):
         idactivite = kwargs.pop("idactivite")

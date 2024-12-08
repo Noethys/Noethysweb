@@ -16,11 +16,11 @@ from core.forms.select2 import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    introduction = forms.CharField(label="Introduction", widget=forms.Textarea(attrs={'rows': 3}), required=False)
-    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
-    date_fin = forms.DateField(label="Date de fin", required=True, widget=DatePickerWidget())
-    affichage_date_debut = forms.DateTimeField(label="Date de début*", required=False, widget=DateTimePickerWidget())
-    affichage_date_fin = forms.DateTimeField(label="Date de fin*", required=False, widget=DateTimePickerWidget())
+    introduction = forms.CharField(label="Introduction", widget=forms.Textarea(attrs={'rows': 3}), required=False, help_text="Il est possible de saisir ici un texte qui sera placé en évidence juste au-dessus du planning des réservations de l'individu. Il peut s'agir par exemple d'une information importante au sujet de la période ou d'un rappel sur les règles de la structure. Exemples : Annulation possible jusqu'à 48h avant, Ne ratez pas notre grande fête de l'été, etc...")
+    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget(), help_text="Saisissez la date de début de la période que l'usager pourra réserver.")
+    date_fin = forms.DateField(label="Date de fin", required=True, widget=DatePickerWidget(), help_text="Saisissez la date de fin de la période que l'usager pourra réserver.")
+    affichage_date_debut = forms.DateTimeField(label="Date de début*", required=False, widget=DateTimePickerWidget(), help_text="Saisissez la date à partir de laquelle cette période apparaîtra sur le portail.")
+    affichage_date_fin = forms.DateTimeField(label="Date de fin*", required=False, widget=DateTimePickerWidget(), help_text="Saisissez la date jusqu'à laquelle cette période apparaîtra sur le portail.")
     modele = forms.ModelChoiceField(label="Modèle d'Email", queryset=ModeleEmail.objects.filter(categorie="portail_demande_reservation"), required=False, help_text="Laissez vide si vous souhaitez que le modèle par défaut soit automatiquement sélectionné.")
     categories = forms.ModelMultipleChoiceField(label="Sélection de catégories", widget=Select2MultipleWidget(),
                                                 queryset=CategorieCompteInternet.objects.all().order_by("nom"), required=False,
@@ -29,6 +29,9 @@ class Formulaire(FormulaireBase, ModelForm):
         model = PortailPeriode
         fields = "__all__"
         help_texts = {
+            "nom": "Saisissez un nom significatif et clair qui permettra à l'usager de comprendre de quelle période il s'agit. Exemples : Décembre 2023, Vacances d'été 2024, 1er trimestre 2025, etc...",
+            "affichage": "Indiquez si cette période doit être affichée sur le portail en permanence, jamais ou uniquement sur une période donnée. Généralement, on sélectionnera la dernière option.",
+            "type_date": "Par défaut, toutes les dates ouvertes de la période sont affichées, mais vous pouvez ici choisir d'afficher uniquement les dates scolaires ou de vacances.",
             "types_categories": "Vous pouvez attribuer cette période uniquement à une sélection de comptes internet.",
             "types_villes": "Vous pouvez attribuer cette période uniquement aux familles résidant ou ne résidant pas sur une ou plusieurs villes données.",
             "villes": "Saisissez en majuscules un ou plusieurs noms de villes séparés par des virgules."
@@ -70,9 +73,9 @@ class Formulaire(FormulaireBase, ModelForm):
                     id="bloc_affichage",
                 ),
             ),
-            Fieldset("Email de réponse",
-                Field("modele"),
-            ),
+            # Fieldset("Email de réponse",
+            #     Field("modele"),
+            # ),
             Fieldset("Préfacturation",
                 Field("prefacturation"),
             ),

@@ -24,7 +24,7 @@ class Page(Onglet):
     url_modifier = "activites_tarifs_modifier"
     url_supprimer = "activites_tarifs_supprimer"
     url_dupliquer = "activites_tarifs_dupliquer"
-    description_liste = "Vous pouvez saisir ici des tarifs pour chaque nom de tarif."
+    description_liste = "Vous pouvez saisir ici des tarifs pour chaque nom de tarif. Sélectionnez un nom de tarif dans la liste et cliquez sur Ajouter. Important : Lors d'une évolution de tarif, vous devez créer de nouveaux tarifs (Ne modifiez pas le tarif existant)."
     description_saisie = "Saisissez toutes les informations concernant le tarif et cliquez sur le bouton Enregistrer."
     objet_singulier = "un tarif"
     objet_pluriel = "des tarifs"
@@ -48,7 +48,7 @@ class Page(Onglet):
             ]
         else:
             # Si aucun nom de tarif existe
-            context['box_introduction'] = "Vous pouvez saisir ici des tarifs pour chaque nom de tarif.<br><b>Vous devez avoir enregistré au moins un nom de tarif avant de pouvoir ajouter des tarifs !</b>"
+            context['box_introduction'] = self.description_liste + "<br><b>Vous devez avoir enregistré au moins un nom de tarif avant de pouvoir ajouter des tarifs !</b>"
         return context
 
     def Get_categorie(self):

@@ -27,19 +27,22 @@ class Widget_copie_tarif_evenement(ModelSelect2Widget):
 
 class Formulaire(FormulaireBase, ModelForm):
     mode_saisie = forms.TypedChoiceField(label="Mode de saisie", choices=[("UNIQUE", "Date unique"), ("MULTIPLE", "Dates multiples")], initial="UNIQUE", required=False, help_text="Sélectionnez le mode Dates multiples si vous souhaitez reproduire cet évènement sur plusieurs dates.")
-    date = forms.DateField(label="Date", required=False, widget=DatePickerWidget(), help_text="Sélectionnez la date de l'évènement.")
+    date = forms.DateField(label="Date", required=False, widget=DatePickerWidget(), help_text="Sélectionnez la date de l'évènement. Notez que l'application créera automatiquement une ouverture dans le calendrier des ouvertures lors de la création de cet événement.")
     dates_multiples = forms.CharField(label="Dates", required=False, help_text="Saisissez les dates souhaitées séparées par des virgules ou des points-virgules. Exemple : 15/12/2023;16/12/2023;17/12/2023")
-    unite = forms.ModelChoiceField(label="Unité", queryset=Unite.objects.none(), required=True)
-    groupe = forms.ModelChoiceField(label="Groupe", queryset=Groupe.objects.none(), required=True)
-    description = forms.CharField(label="Description", widget=forms.Textarea(attrs={'rows': 2}), required=False, help_text="<i class='fa fa-exclamation-triangle'></i> Cette description est visible pour les familles sur le portail.")
+    unite = forms.ModelChoiceField(label="Unité", queryset=Unite.objects.none(), required=True, help_text="Sélectionnez obligatoirement l'unité de consommation de type 'Evénementiel' associée à cet événement.")
+    groupe = forms.ModelChoiceField(label="Groupe", queryset=Groupe.objects.none(), required=True, help_text="Sélectionnez obligatoirement le groupe associé à cet événement. Exemples : 10-14 ans, Les séniors, Groupe unique...")
+    description = forms.CharField(label="Description", widget=forms.Textarea(attrs={'rows': 2}), required=False, help_text="""<i class='fa fa-exclamation-triangle'></i> 
+                                    Cette description sera visible pour les familles sur le portail. C'est ici que vous pouvez par exemple indiquer les horaires de l'évènement
+                                    ou le matériel à apporter. Exemples : RDV à 10h au port, n'oubliez pas vos casquettes...""")
 
     # Heures
-    heure_debut = forms.TimeField(label="Heure de début", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-    heure_fin = forms.TimeField(label="Heure de fin", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
+    heure_debut = forms.TimeField(label="Heure de début", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Il est possible de renseigner ici une heure de début par défaut. Utile pour des statistiques par exemple.")
+    heure_fin = forms.TimeField(label="Heure de fin", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Il est possible de renseigner ici une heure de fin par défaut. Utile pour des statistiques par exemple.")
 
     # Nombre max d'inscrits
     choix_nbre_places = [("NON", "Sans limitation du nombre de places"), ("OUI", "Avec limitation du nombre de places")]
-    type_nbre_places = forms.TypedChoiceField(label="Places", choices=choix_nbre_places, initial="NON", required=False)
+    type_nbre_places = forms.TypedChoiceField(label="Places", choices=choix_nbre_places, initial="NON", required=False, help_text="""Il est possible de définir ici une
+                                                capacité d'accueil maximale uniquement pour cet événement.""")
     capacite_max = forms.IntegerField(label="Nombre de places*", initial=0, min_value=0, required=False)
 
     # Tarification
@@ -64,9 +67,11 @@ class Formulaire(FormulaireBase, ModelForm):
             "image": Crop_image(attrs={"largeur_min": 400, "hauteur_min": 100, "ratio": "400/100"}),
         }
         help_texts = {
+            "nom": "Saisissez un nom pour cet événement. Exemple : Patinoire, sortie familiale au zoo, Soirée karaoké, Atelier découverte de l'informatique...",
             "equiv_heures": "Saisissez l'équivalence en heures (utile uniquement pour l'état global et l'état nominatif). Format : HH:MM.",
             "image": "Vous pouvez sélectionner une image à appliquer sur l'arrière-plan de la case de l'évènement dans la grille des consommations. L'image sera convertie en niveaux de gris à l'affichage.",
-            "categorie": "Vous pouvez associer ici une catégorie d'événements afin que cet événement hérite de ses caractéristiques."
+            "categorie": "Vous pouvez associer ici une catégorie d'événements afin que cet événement hérite de ses caractéristiques.",
+            "visible_portail": "Décochez cette case si vous souhaitez que les usagers ne puissent pas voir cet événement sur le planning des réservations du portail.",
         }
 
     def __init__(self, *args, **kwargs):

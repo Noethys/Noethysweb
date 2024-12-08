@@ -46,6 +46,8 @@ class CombiTarifForm(forms.ModelForm):
 
         if self.prefixe == "JOURN":
             self.fields['unites'].label = "Combinaisons d'unités conditionnelles"
+            self.fields['unites'].help_text = """Sélectionnez la ou les unités de consommation qui vont déclencher ce tarif. Chaque ligne représente une combinaison possible.
+                                                Cliquez sur Ajouter ci-dessous pour ajouter une nouvelle combinaison de déclenchement."""
         if self.prefixe == "FORFAIT":
             self.fields['unites'].label = "Combinaisons d'unités"
         if self.prefixe == "CREDIT":
@@ -123,41 +125,58 @@ FORMSET_UNITES_CREDIT = inlineformset_factory(Tarif, CombiTarif, form=CombiTarif
 
 class Formulaire(FormulaireBase, ModelForm):
     # Dates de validité
-    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
-    date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget())
+    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget(), help_text="Saisissez obligatoirement la date de début d'application de ce tarif.")
+    date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(), help_text="Il est possible de définir une date de fin de validité, mais cela sera souvent inutile car en cas d'évolution tarifaire, vous créerez simplement un nouveau tarif qui viendra remplacer l'ancien à partir d'une date donnée.")
 
     # Catégories de tarifs
-    categories_tarifs = forms.ModelMultipleChoiceField(label="Catégories de tarifs", widget=Select2MultipleWidget(), queryset=CategorieTarif.objects.none(), required=True)
+    categories_tarifs = forms.ModelMultipleChoiceField(label="Catégories de tarifs", widget=Select2MultipleWidget(), queryset=CategorieTarif.objects.none(), required=True, help_text="""
+                                                        Vous devez obligatoirement sélectionner la ou les catégories de tarifs associés à ce tarif. Par exemple, sélectionnez une
+                                                        catégorie 'Hors commune' si vous souhaitez que ce tarif s'applique uniquement aux individus inscrits avec la catégorie
+                                                        de tarif correspondante.""")
 
     # Label prestation
     choix_label = [("NOM_TARIF", "Nom du tarif"), ("DESCRIPTION", "Description du tarif"), ("PERSO", "Un label personnalisé")]
-    label_type = forms.TypedChoiceField(label="Label de la prestation", choices=choix_label, initial='NOM_TARIF', required=False)
+    label_type = forms.TypedChoiceField(label="Label de la prestation", choices=choix_label, initial='NOM_TARIF', required=False, help_text="""La prestation générée automatiquement
+                                        portera par défaut le label du 'nom de tarif' associé à ce tarif. Mais vous pouvez aussi choisir de donner à la prestation le nom correspondant au champ 
+                                        'Description' du tarif (Voir plus sur cette page) ou un nom personnalisé à renseigner ci-dessous.""")
     # label_prestation = forms.CharField(label="Label personnalisé", required=False)
 
     # Conditions
     choix_groupes = [("TOUS", "Tous les groupes"), ("SELECTION", "Uniquement certains groupes")]
-    groupes_type = forms.TypedChoiceField(label="Groupes associés", choices=choix_groupes, initial='TOUS', required=False)
+    groupes_type = forms.TypedChoiceField(label="Groupes associés", choices=choix_groupes, initial='TOUS', required=False, help_text="""A renseigner uniquement 
+                                            si vous souhaitez que ce tarif ne s'applique qu'aux individus inscrits sur un ou plusieurs groupes donnés.""")
     groupes = forms.ModelMultipleChoiceField(label="Sélection des groupes", widget=Select2MultipleWidget(), queryset=Groupe.objects.none(), required=False)
 
     choix_cotisations = [("TOUS", "Toutes les adhésions"), ("SELECTION", "Uniquement certaines adhésions")]
-    cotisations_type = forms.TypedChoiceField(label="Adhésions associées", choices=choix_cotisations, initial='TOUS', required=False)
+    cotisations_type = forms.TypedChoiceField(label="Adhésions associées", choices=choix_cotisations, initial='TOUS', required=False, help_text="""A renseigner uniquement 
+                                            si vous souhaitez que ce tarif ne s'applique qu'aux individus qui sont à jour d'un ou plusieurs types d'adhésions donnés.""")
     cotisations = forms.ModelMultipleChoiceField(label="Sélection des adhésions", widget=Select2MultipleWidget(), queryset=TypeCotisation.objects.all(), required=False)
 
     choix_caisses = [("TOUS", "Toutes les caisses"), ("SELECTION", "Uniquement certaines caisses")]
-    caisses_type = forms.TypedChoiceField(label="Caisses associées", choices=choix_caisses, initial='TOUS', required=False)
+    caisses_type = forms.TypedChoiceField(label="Caisses associées", choices=choix_caisses, initial='TOUS', required=False, help_text="""A renseigner uniquement 
+                                            si vous souhaitez que ce tarif ne s'applique qu'aux familles associées à une ou plusieurs caisses données.""")
     caisses = forms.ModelMultipleChoiceField(label="Sélection des caisses", widget=Select2MultipleWidget(), queryset=Caisse.objects.all(), required=False)
 
     choix_periodes = [("TOUS", "Toutes les périodes"), ("SELECTION", "Uniquement certaines périodes")]
-    periodes_type = forms.TypedChoiceField(label="Périodes", choices=choix_periodes, initial='TOUS', required=False)
+    periodes_type = forms.TypedChoiceField(label="Périodes", choices=choix_periodes, initial='TOUS', required=False, help_text="""A renseigner uniquement 
+                                            si vous souhaitez que ce tarif ne s'applique que sur une période donnée. Utile si vous avez par exemple des tarifs 
+                                            différents les lundis et les mardis, ou les jours de vacances et les jours scolaires...""")
 
     # Forfait daté : Création de consommations
     choix_conso_forfait = [("SANS_CONSO", "Sans consommations"), ("CALENDRIER", "Créer les consommations selon le calendrier des ouvertures"), ("CHOIX_CONSO", "Créer les consommations suivantes")]
-    conso_forfait_type = forms.TypedChoiceField(label="Consommations", choices=choix_conso_forfait, initial='SANS_CONSO', required=False)
+    conso_forfait_type = forms.TypedChoiceField(label="Consommations", choices=choix_conso_forfait, initial='SANS_CONSO', required=False, help_text="""
+                                                Par défaut, aucune consommation ne sera générée automatiquement lors de l'application du tarif. Mais vous pouvez choisir
+                                                de laisser l'application créer automatiquement des consommations dans la grille des consommations de l'individu lorsque
+                                                ce tarif sera appliqué. Cela est par exemple utile pour appliquer une prestation forfaitaire pour un séjour et créer en
+                                                même temps les consommations pour chaque date du séjour.""")
 
     # Forfait daté : Date de facturation
     choix_date_facturation_forfait = [("DATE_DEBUT_FORFAIT", "Date de début du forfait"), ("DATE_SAISIE", "Date de la saisie du forfait"), ("DATE_DEBUT_ACTIVITE", "Date de début de l'activité"), ("DATE", "Une date donnée")]
-    date_facturation_forfait_type = forms.TypedChoiceField(label="Date de facturation", choices=choix_date_facturation_forfait, initial='DATE_DEBUT_FORFAIT', required=False)
-    date_facturation_forfait = forms.DateField(label="Date de facturation", required=False, widget=DatePickerWidget())
+    date_facturation_forfait_type = forms.TypedChoiceField(label="Date de facturation", choices=choix_date_facturation_forfait, initial='DATE_DEBUT_FORFAIT', required=False, help_text="""
+                                                            La date de la prestation générée sera par défaut celle du début du forfait, mais vous pouvez choisir un autre
+                                                            type de date dans la liste proposée.""")
+    date_facturation_forfait = forms.DateField(label="Date de facturation", required=False, widget=DatePickerWidget(), help_text="""Par défaut, la date de la prestation sera
+                                                    celle du début du forfait, mais vous pouvez choisir un autre type de date dans la liste proposée.""")
 
     # Forfait-crédit : Automatique
     type_application = forms.TypedChoiceField(label="Application", choices=[
@@ -193,17 +212,23 @@ class Formulaire(FormulaireBase, ModelForm):
 
     # Forfait-crédit : Durée de validité
     choix_duree_forfait = [("NON", "Sans durée par défaut"), ("OUI", "Avec une durée par défaut")]
-    validite_duree_forfait = forms.TypedChoiceField(label="Durée par défaut", choices=choix_duree_forfait, initial='NON', required=False)
+    validite_duree_forfait = forms.TypedChoiceField(label="Durée par défaut", choices=choix_duree_forfait, initial='NON', required=False, help_text="""
+                                                    Vous pouvez définir ici la durée par défaut du forfait à partir de la date du début. Exemple : 5 jours...""")
     validite_jours = forms.IntegerField(label="Jours", required=False)
     validite_mois = forms.IntegerField(label="Mois", required=False)
     validite_annees = forms.IntegerField(label="Années", required=False)
 
     # Forfait-crédit : Blocage plafond
-    blocage_plafond = forms.BooleanField(label="Bloquer si la quantité maximale de consommations est atteinte", required=False)
+    blocage_plafond = forms.BooleanField(label="Bloquer si la quantité maximale de consommations est atteinte", required=False, help_text="""
+                                            Cochez cette case uniquement si la quantité maximale que vous avez renseigné ci-dessus doit bloquer la saisie
+                                            des consommations. Par exemple, si la quantité maximale de 'matin' est de 5, il sera impossible d'associer plus de 5 matins
+                                            avec ce forfait.""")
 
     # Forfait-crédit : Date de facturation
     choix_date_facturation_credit = [("DATE_DEBUT_FORFAIT", "Date de début du forfait"), ("DATE_SAISIE", "Date de la saisie du forfait"), ("DATE", "Une date donnée")]
-    date_facturation_credit_type = forms.TypedChoiceField(label="date de facturation", choices=choix_date_facturation_credit, initial='DATE_DEBUT_FORFAIT', required=False)
+    date_facturation_credit_type = forms.TypedChoiceField(label="Date de facturation", choices=choix_date_facturation_credit, initial='DATE_DEBUT_FORFAIT', required=False, help_text="""
+                                                        Par défaut, la date de la prestation sera celle du début du forfait, mais vous pouvez sélectionner un autre type
+                                                        de date dans la liste proposée.""")
     date_facturation_credit = forms.DateField(label="Date de facturation", required=False, widget=DatePickerWidget())
 
     # Lignes de tarifs
@@ -221,6 +246,27 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Tarif
         fields = "__all__"
+        help_texts = {
+            "description": "Il est possible de définir une description rapide pour vous aider à vous souvenir des caractéristiques de ce tarif. Exemple : Tarif pour les individus hors-commune uniquement...",
+            "observations": "Si vous souhaitez ajouter un commentaire au sujet de ce tarif.",
+            "code_compta": "Renseignez ici le code comptable de l'activité uniquement si vous souhaitez faire un export des écritures comptables vers des logiciels de comptabilité tiers.",
+            "tva": "Saisissez si besoin un taux de TVA si votre activité est soumise à la collecte de la TVA. Attention, notez que cette application n'est pas un logiciel de caisse certifié pour la collecte de la TVA.",
+            "type": """Sélectionnez obligatoirement un type de tarif. Le type 'Prestation journalière' est le plus utilisé, il permet de déclencher ce tarif lorsqu'une ou plusieurs
+                        unités de consommation sont sélectionnées dans la grille des consommations. Le 'forfait daté' permet notamment d'appliquer un tarif forfaitaire à
+                        l'inscription (Pour une activité yoga annuelle par exemple). Le 'forfait crédit' permet d'appliquer un forfait pour une période donnée et d'y associer
+                        automatiquement certaines consommations.""",
+            "etats": "Cochez le ou les états de consommation qui vont déclencher ce tarif.",
+            "forfait_saisie_manuelle": """En cochant cette case, vous autorisez l'utilisateur à saisir ce tarif forfaitaire manuellement depuis la grille 
+                                        des consommations. Si vous souhaitez que ce tarif forfaitaire s'applique uniquement à l'inscription, ne cochez pas cette case.""",
+            "forfait_saisie_auto": """Cochez cette case si vous souhaitez que ce tarif forfaitaire s'applique automatiquement lors de l'inscription initiale de 
+                                        l'individu à l'activité. Utile notamment pour des activités limitées dans le temps. Exemples : 'Yoga - Saison 2024-25' ou 'Séjour à la
+                                        neige - Février 2026'...""",
+            "forfait_suppression_auto": """Si vous avez coché la case ci-dessus, cochez également cette case pour permettre à l'application de supprimer automatiquement la 
+                                            prestation forfaitaire si on désinscrit l'individu de l'activité.""",
+            "date_facturation_forfait": "Par défaut, la date de la prestation sera celle du début du forfait, mais vous pouvez choisir un autre type de date dans la liste.",
+            "forfait_beneficiaire": "Sélectionnez 'famille' si le forfait est commun à tous les membres de la famille, sinon sélectionnez 'individu'.",
+            "methode": "Sélectionnez une méthode de calcul dans la liste proposée puis renseignez les paramètres ci-dessous.",
+        }
 
     def __init__(self, *args, **kwargs):
         idactivite = kwargs.pop("idactivite")

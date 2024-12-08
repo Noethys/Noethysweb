@@ -3,12 +3,11 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, ButtonHolder
-from crispy_forms.bootstrap import Field, FormActions, StrictButton
+from crispy_forms.layout import Layout, Hidden
+from crispy_forms.bootstrap import Field
+from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import NomTarif, Activite
 
@@ -17,6 +16,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = NomTarif
         fields = "__all__"
+        help_texts = {
+            "nom": "Vous devez saisir un nom de tarif. Exemples : Journée avec repas, Atelier, Séjour à la neige - Février 2026, Yoga - Saison 2024-25...",
+        }
 
     def __init__(self, *args, **kwargs):
         idactivite = kwargs.pop("idactivite")

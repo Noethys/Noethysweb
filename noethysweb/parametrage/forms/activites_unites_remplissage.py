@@ -3,38 +3,50 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
+from django.db.models import Max
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Div, Fieldset, ButtonHolder
-from crispy_forms.bootstrap import Field, FormActions, StrictButton
+from crispy_forms.layout import Layout, Hidden, HTML, Div, Fieldset
+from crispy_forms.bootstrap import Field
+from core.forms.base import FormulaireBase
+from core.widgets import DatePickerWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.utils.utils_commandes import Commandes
 from core.models import UniteRemplissage, Unite, Activite
-from django.db.models import Max
-from core.widgets import DatePickerWidget
-import datetime
-from core.forms.select2 import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
     # Durée de validité
     choix_validite = [("ILLIMITEE", "Durée illimitée"), ("LIMITEE", "Durée limitée")]
-    validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='ILLIMITEE', required=True)
+    validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='ILLIMITEE', required=True, help_text="""Généralement, cette optin sera toujours
+                                            définie sur 'Illimitée', sauf si vous souhaitez masquer cette unité de remplissage à partir d'une date donnée dans la grille des consommations
+                                            (Si elle est devenue obsolète par exemple).""")
     validite_date_debut = forms.DateField(label="Date de début*", required=False, widget=DatePickerWidget())
     validite_date_fin = forms.DateField(label="Date de fin*", required=False, widget=DatePickerWidget())
 
     # Unités
-    unites = forms.ModelMultipleChoiceField(label="Unités de consommation associées", widget=Select2MultipleWidget(), queryset=Unite.objects.none(), required=True)
+    unites = forms.ModelMultipleChoiceField(label="Unités de consommation associées", widget=Select2MultipleWidget(), queryset=Unite.objects.none(), required=True, help_text="""
+                                            Sélectionnez obligatoirement une ou plusieurs unités de consommation à additionner. Exemples : Sélectionnez une unité 'Journée' et une
+                                            unité 'Matinée' pour obtenir le nombre d'individus total prévus sur une matinée. Pour une activité simple, vous pouvez également par exemple
+                                            sélectionner une unité de consommation 'Atelier' pour afficher uniquement le nombre d'individus prévus sur cette unité.""")
 
     # Plage horaire
-    heure_min = forms.TimeField(label="Heure min", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="La plage horaire permet de comptabiliser uniquement les consommations appartenant à la plage horaire renseignée.")
+    heure_min = forms.TimeField(label="Heure min", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="""
+                                La plage horaire permet de comptabiliser uniquement les consommations appartenant à la plage horaire renseignée. A utiliser uniquement
+                                si vous utilisez des unités de consommation de type Horaire ou Multihoraires. Vous pouvez ainsi créer par exemple des unités de remplissage
+                                telles que '7h30-8h', '8h-8h30', '8h30-9h' afin d'obtenir le total des individus prévus sur chacun de ces créneaux horaires.""")
     heure_max = forms.TimeField(label="Heure max", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
 
     class Meta:
         model = UniteRemplissage
         fields = ["ordre", "activite", "nom", "abrege", "seuil_alerte", "date_debut", "date_fin", "unites", "heure_min", "heure_max",
                   "afficher_page_accueil", "afficher_grille_conso"]
+        help_texts = {
+            "afficher_page_accueil": "A décocher uniquement si vous souhaitez que cette unité de remplissage n'apparaisse plus dans le widget 'Suivi des consommations' de la page d'accueil.",
+            "afficher_grille_conso": "A décocher uniquement si vous souhaitez que cette unité de remplissage n'apparaisse plus dans la grille des consommations de chaque individu.",
+        }
 
     def __init__(self, *args, **kwargs):
         idactivite = kwargs.pop("idactivite")

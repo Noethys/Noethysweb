@@ -19,7 +19,9 @@ class Page(Onglet):
     url_ajouter = "activites_categories_tarifs_ajouter"
     url_modifier = "activites_categories_tarifs_modifier"
     url_supprimer = "activites_categories_tarifs_supprimer"
-    description_liste = "Vous pouvez saisir ici une catégorie de tarif pour l'activité."
+    description_liste = """Vous pouvez saisir ici une catégorie de tarif pour l'activité. Exemples : Commune, Hors commune, Tarif réduit, Famille nombreuse... 
+                        Il est obligatoirement de créer au moins une catégorie de tarif. Si vous n'avez qu'une seule catégorie de tarif, créez simplement une
+                        catégorie nommée par exemple 'Catégorie par défaut'."""
     description_saisie = "Saisissez toutes les informations concernant la catégorie de tarif à saisir et cliquez sur le bouton Enregistrer."
     objet_singulier = "une catégorie de tarif"
     objet_pluriel = "des catégories de tarifs"

@@ -56,7 +56,7 @@ class View(Onglet, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         idactivite = kwargs.get("idactivite", None)
         context['box_titre'] = "Calendrier"
-        context['box_introduction'] = "Cliquez sur le bouton Modifier pour définir les dates d'ouverture de l'activité."
+        context['box_introduction'] = "Cliquez sur le bouton Modifier pour définir les dates d'ouverture de l'activité. C'est également ici que vous pouvez définir la capacité d'accueil maximale par jour, par groupe et par unité de remplissage."
         context['onglet_actif'] = "calendrier"
         context['boutons_liste'] = [
             {"label": "Modifier", "classe": "btn btn-success", "href": reverse_lazy("activites_ouvertures", args=[idactivite]), "icone": "fa fa-pencil"},

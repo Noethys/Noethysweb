@@ -20,24 +20,36 @@ from core.widgets import Telephone, CodePostal, Ville, Selection_image, Rue
 class Formulaire(FormulaireBase, ModelForm):
     # Durée de validité
     choix_validite = [("ILLIMITEE", "Durée illimitée"), ("LIMITEE", "Durée limitée")]
-    validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='ILLIMITEE', required=True)
+    validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='ILLIMITEE', required=True,
+                                           help_text="""En règle générale, on choisira 'Illimitée' pour les activités qui utilisent les consommations et pour lesquelles 
+                                           on fait une inscription initiale qu'une seule fois (Exemples : Accueil de loisirs, cantine, secteur jeunes, périscolaire...) et on choisira 'Limitée' pour
+                                           les activités qui commencent à une date donnée et se terminent à une date donnée et pour lesquelles on doit se réinscrire régulièrement
+                                           (Exemples : Club de gym - Saison 2024-25, séjour à la neige - Février 2026, Stage de magie - Noël 2023...).""")
     validite_date_debut = forms.DateField(label="Date de début*", required=False, widget=DatePickerWidget())
     validite_date_fin = forms.DateField(label="Date de fin*", required=False, widget=DatePickerWidget())
 
     # Groupes d'activités
-    groupes_activites = forms.ModelMultipleChoiceField(label="Groupes d'activités", widget=Select2MultipleWidget(), queryset=TypeGroupeActivite.objects.all(), required=False)
+    groupes_activites = forms.ModelMultipleChoiceField(label="Groupes d'activités", widget=Select2MultipleWidget(), queryset=TypeGroupeActivite.objects.all(), required=False,
+                                                       help_text="""Sélectionnez un ou plusieurs groupes d'activités à associer à cette activité. Les groupes d'activités 
+                                                       permettent d'effectuer des sélections rapides par 'famille d'activités' dans plusieurs fonctionnalités de l'application. 
+                                                       Exemples de groupes : Activités enfants, Activités sportives, Activités de la saison 2024-25... Si aucun groupe d'activités 
+                                                       n'est disponible, vous pouvez les créer depuis le menu Paramétrage > Groupes d'activités.""")
 
     # Nombre max d'inscrits
     choix_nbre_inscrits = [("NON", "Sans limitation du nombre d'inscrits"), ("OUI", "Avec limitation du nombre d'inscrits")]
-    type_nbre_inscrits = forms.TypedChoiceField(label="Limitation du nombre d'inscrits", choices=choix_nbre_inscrits, initial="NON", required=False)
+    type_nbre_inscrits = forms.TypedChoiceField(label="Limitation du nombre d'inscrits", choices=choix_nbre_inscrits, initial="NON", required=False, help_text="""
+                                                Vous pouvez ici définir le nombre d'inscrits maximal autorisé à cette activité. Attention, il ne s'agit pas ici du nombre de places
+                                                maximales par jour (qui se paramètre dans le calendrier), mais bien du nombre d'inscriptions initiales. Cette option n'est 
+                                                généralement utilisée que pour des activités limitées dans le temps. Exemples : Club de gym - Saison 2024-25, 
+                                                Séjour à la neige - février 2026...""")
 
     # Logo
     choix_logo = [("ORGANISATEUR", "Identique à celui de l'organisateur"), ("SPECIFIQUE", "Logo spécifique à l'activité")]
-    type_logo = forms.TypedChoiceField(label="Logo de l'activité", choices=choix_logo, initial="ORGANISATEUR", required=False)
+    type_logo = forms.TypedChoiceField(label="Logo de l'activité", choices=choix_logo, initial="ORGANISATEUR", required=False, help_text="Généralement, on conserve l'option 'Identique à l'organisateur'.")
 
     # Coordonnées
     choix_coords = [("ORGANISATEUR", "Identiques à celles de l'organisateur"), ("SPECIFIQUE", "Coordonnées spécifiques à l'activité")]
-    type_coords = forms.TypedChoiceField(label="Coordonnées de l'activité", choices=choix_coords, initial="ORGANISATEUR", required=False)
+    type_coords = forms.TypedChoiceField(label="Coordonnées de l'activité", choices=choix_coords, initial="ORGANISATEUR", required=False, help_text="Généralement, on conserve l'option 'Identique à l'organisateur'.")
 
     class Meta:
         model = Activite
@@ -52,9 +64,13 @@ class Formulaire(FormulaireBase, ModelForm):
             'logo': Selection_image(),
         }
         help_texts = {
-            "nom": "Saisissez le nom complet de l'activité.",
-            "abrege": "Saisissez le nom abrégé de l'activité (quelques caractères en majuscules).",
+            "nom": "Saisissez le nom complet de l'activité. Exemples : Accueil de loisirs, Cantine, Club de yoga - Saison 2024-25, Séjour à la neige - Février 2024...",
+            "abrege": "Saisissez le nom abrégé de l'activité (quelques caractères en majuscules). Exemples : ALSH, PERI, YOGA24, COLO, STAGE...",
             "structure": "Sélectionnez la structure associée à cette activité.",
+            "regie": "Cette option n'est utilisée que par les structures publiques.",
+            "code_comptable" : "A renseigner si vous utilisez certains exports d'écritures comptables vers des logiciels de comptabilité ou des exports vers Hélios.",
+            "code_analytique": "A renseigner si vous utilisez certains exports d'écritures comptables vers des logiciels de comptabilité ou des exports vers Hélios.",
+            "code_produit_local": "Cette option n'est utilisée que par les structures publiques pour des exports vers des logiciels de comptabilité publique.",
         }
 
     def __init__(self, *args, **kwargs):

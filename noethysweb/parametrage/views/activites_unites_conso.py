@@ -18,7 +18,7 @@ class Page(Onglet):
     url_ajouter = "activites_unites_conso_ajouter"
     url_modifier = "activites_unites_conso_modifier"
     url_supprimer = "activites_unites_conso_supprimer"
-    description_liste = "Vous pouvez saisir ici une unité de consommation pour l'activité."
+    description_liste = "Vous pouvez saisir ici des unités de consommation de l'activité. Exemples : Journée, Matin, Repas, Séance, Atelier... Elles sont utilisées principalement si vous souhaitez enregistrer des réservations ou des présences."
     description_saisie = "Saisissez toutes les informations concernant l'unité de consommation à saisir et cliquez sur le bouton Enregistrer."
     objet_singulier = "une unité de consommation"
     objet_pluriel = "des unités de consommation"

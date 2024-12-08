@@ -18,32 +18,32 @@ from core.forms.select2 import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    heure_debut = forms.TimeField(label="Heure de début par défaut", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-    heure_fin = forms.TimeField(label="Heure de fin par défaut", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-    heure_debut_min = forms.TimeField(label="Heure de début min.", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-    heure_debut_max = forms.TimeField(label="Heure de début max.", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-    heure_fin_min = forms.TimeField(label="Heure de fin min.", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-    heure_fin_max = forms.TimeField(label="Heure de fin max.", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
+    heure_debut = forms.TimeField(label="Heure de début par défaut", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Vous pouvez saisir ici l'heure de début par défaut qui sera enregistrée lors de la saisie d'une consommation.")
+    heure_fin = forms.TimeField(label="Heure de fin par défaut", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Vous pouvez saisir ici l'heure de fin par défaut qui sera enregistrée lors de la saisie d'une consommation.")
+    heure_debut_min = forms.TimeField(label="Heure de début min.", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Heure de début minimale autorisée lors de la saisie.")
+    heure_debut_max = forms.TimeField(label="Heure de début max.", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Heure de début maximale autorisée lors de la saisie.")
+    heure_fin_min = forms.TimeField(label="Heure de fin min.", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Heure de fin minimale autorisée lors de la saisie.")
+    heure_fin_max = forms.TimeField(label="Heure de fin max.", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Heure de fin maximale autorisée lors de la saisie.")
 
     # Durée de validité
     choix_validite = [("ILLIMITEE", "Durée illimitée"), ("LIMITEE", "Durée limitée")]
-    validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='ILLIMITEE', required=True)
+    validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='ILLIMITEE', required=True, help_text="Généralement, la durée sera illimitée. A modifier uniquement si vous souhaitez masquer cette unité de la grille des consommations à partir d'une date donnée (Dans le cas d'une unité obsolète par exemple).")
     validite_date_debut = forms.DateField(label="Date de début*", required=False, widget=DatePickerWidget())
     validite_date_fin = forms.DateField(label="Date de fin*", required=False, widget=DatePickerWidget())
 
     # Groupes
     choix_groupes = [("TOUS", "Tous les groupes"), ("SELECTION", "Uniquement certains groupes")]
-    groupes_type = forms.TypedChoiceField(label="Groupes associés", choices=choix_groupes, initial='TOUS', required=True)
+    groupes_type = forms.TypedChoiceField(label="Groupes associés", choices=choix_groupes, initial='TOUS', required=True, help_text="A renseigner si vous souhaitez que cette unité apparaisse uniquement dans la grille des consommations des individus inscrits sur un groupe donné. Exemple : Pour afficher une unité 'Sieste' uniquement pour les enfants du groupe 'Maternel'.")
     groupes = forms.ModelMultipleChoiceField(label="Sélection des groupes", widget=Select2MultipleWidget(), queryset=Groupe.objects.none(), required=False)
 
     # Catégories de tarifs
     choix_categories = [("TOUS", "Toutes les catégories de tarifs"), ("SELECTION", "Uniquement certaines catégories de tarifs")]
-    categories_tarifs_type = forms.TypedChoiceField(label="Catégories de tarifs associées", choices=choix_categories, initial='TOUS', required=True)
+    categories_tarifs_type = forms.TypedChoiceField(label="Catégories de tarifs associées", choices=choix_categories, initial='TOUS', required=True, help_text="A renseigner uniquement pour que cette unité apparaisse dans la grille des consommations des individus inscrits sur une catégorie de tarif donnée. Exemple : Pour afficher une unité 'Transport' pour les enfants inscrits avec la catégorie de tarif 'Hors commune'.")
     categories_tarifs = forms.ModelMultipleChoiceField(label="Sélection des catégories", widget=Select2MultipleWidget(), queryset=CategorieTarif.objects.none(), required=False)
 
     # Incompatibilités
     incompatibilites = forms.ModelMultipleChoiceField(label="Incompatibilités", widget=Select2MultipleWidget(), queryset=Unite.objects.none(), required=False,
-                                                      help_text="Sélectionnez les unités qui ne peuvent être saisies en même temps que cette unité.")
+                                                      help_text="Sélectionnez les unités qui ne peuvent pas être saisies en même temps que cette unité. Exemple : Une unité 'Matin' qui ne pourrait pas être saisie en même temps qu'une 'Journée'.")
 
     # Dépendances
     dependances = forms.ModelMultipleChoiceField(label="Unités liées", widget=Select2MultipleWidget(), queryset=Unite.objects.none(), required=False,
@@ -55,9 +55,19 @@ class Formulaire(FormulaireBase, ModelForm):
                   "repas", "restaurateur", "touche_raccourci", "date_debut", "date_fin", "groupes", "categories_tarifs", "incompatibilites", "visible_portail", "imposer_saisie_valeur",
                   "heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "equiv_journees", "equiv_heures", "dependances"]
         help_texts = {
+            "nom": "Saisissez le nom de l'unité. Exemple : Journée, Matin, repas, Séance, Atelier...",
+            "abrege": "Saisissez quelques caractères en majuscules ou des chiffres. Exemples : J, M, R, SEANCE, ATELIER...",
+            "type": """Sélectionnez le type de l'unité. 
+                        Unitaire : Le plus utilisé, pour enregistrer simplement des consommations (Journée, Matin, Atelier...). 
+                        Horaire : Pour imposer la saisie d'horaires de début et de fin pour chaque consommation (Pour une activité facturée au temps par exemple).
+                        Quantité : Pour imposer la saisie d'une quantité (pour facturer par exemple 10 repas à une association pour une date donnée).
+                        Multihoraires : Pour permettre de saisir plusieurs horaires dans une seule consommation (Pour enregistrer des allers et venues par exemple). 
+                        Evenementiel : Pour autoriser la saisie de plusieurs évènements dans une seule unité de consommation. Très utilisé par les secteurs jeunes ou pour des sorties familiales par exemple.""",
             "equiv_journees": "Saisissez l'équivalence en journées (utile uniquement pour l'état global et l'état nominatif). Ex : une journée=1, une demi-journée=0.5, etc...",
             "equiv_heures": "Saisissez l'équivalence en heures (utile uniquement pour l'état global et l'état nominatif). Format : HH:MM.",
             "touche_raccourci": "Il suffira de conserver cette touche enfoncée pour saisir une consommation de cette unité en même temps qu'une autre dans la grille des consommations.",
+            "visible_portail": "Décochez cette case uniquement si vous souhaitez que cette unité ne soit pas visible par un usager sur le planning de réservations du portail. Seuls les utilisateurs pourront la voir dans la grille des consommations.",
+            "imposer_saisie_valeur": "Par défaut, un usager ne peut pas saisir d'horaire ou de quantité sur le portail. En cochant cette case, vous imposez à l'usager de renseigner cette information lors de la saisie de la réservation. Cette option n'est utile que si vous avez sélectionné un type Horaire ou Quantité.",
         }
         widgets = {
             "equiv_heures": forms.TimeInput(attrs={'type': 'time'}),

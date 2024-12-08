@@ -17,6 +17,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = CategorieTarif
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez un nom. Exemples : Commune, Hors commune, Tarif réduit, Gratuit, Famille nombreuse... Si vous n'avez qu'une seule catégorie de tarif pour tous les usagers, créez simplement une catégorie nommée par exemple 'Catégorie unique'.",
+        }
 
     def __init__(self, *args, **kwargs):
         idactivite = kwargs.pop("idactivite")
