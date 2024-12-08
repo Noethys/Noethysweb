@@ -182,7 +182,7 @@ class Case_base {
         $.each(dict_cases, function(key, valeurs) {
             if (valeurs.date === self.date && valeurs.inscription === self.inscription) {
                 for (var conso of valeurs.consommations) {
-                    if (jQuery.inArray(conso.etat, ["reservation", "present", "attente"]) !== -1 && jQuery.inArray(valeurs.unite, unites_incompatibles) !== -1) {
+                    if (jQuery.inArray(conso.etat, ["reservation", "present", "attente", "demande"]) !== -1 && jQuery.inArray(valeurs.unite, unites_incompatibles) !== -1) {
                         toastr.error("L'unité " + dict_unites[self.unite].nom + " est incompatible avec l'unité " + dict_unites[valeurs.unite].nom);
                         resultat = false;
                         return false;
@@ -200,11 +200,15 @@ class Case_base {
 
         // Sélection du mode de saisie
         if (mode === "portail") {
-            var mode_saisie = "reservation";
-            if (is_complet) {
-                toastr.warning("Attention, il n'y a plus de place sur cette date ! Une place a été réservée sur la liste d'attente.");
-                var mode_saisie = "attente";
-            };
+            if (activite_validation_type === "MANUELLE") {
+                var mode_saisie = "demande";
+            } else {
+                var mode_saisie = "reservation";
+                if (is_complet) {
+                    toastr.warning("Attention, il n'y a plus de place sur cette date ! Une place a été réservée sur la liste d'attente.");
+                    var mode_saisie = "attente";
+                }
+            }
         } else {
             var mode_saisie = $("#mode_saisie").val();
             if (is_complet) {
@@ -372,7 +376,7 @@ class Case_standard extends Case_base {
 
     // MAJ de l'affichage du contenu de la case
     maj_affichage() {
-        $("#" + this.key).removeClass("reservation attente refus present absentj absenti");
+        $("#" + this.key).removeClass("reservation attente refus present absentj absenti demande");
         $("#" + this.key + " .infos").html("");
         $("#" + this.key + " .groupe").html("");
         $("#" + this.key + " .icones").html("");
@@ -417,6 +421,7 @@ class Case_standard extends Case_base {
                 if (conso.etat === "attente") {texte= "Attente"}
                 if (conso.etat === "present") {texte= "Présent"}
                 if (conso.etat === "refus") {texte= "Refus"}
+                if (conso.etat === "demande") {texte= "Demande"}
                 if ((conso.etat === "absenti") || (conso.etat === "absentj")) {texte= "Absent"}
                 if (dict_unites[this.unite].imposer_saisie_valeur && this.type_case === "horaire") {
                     texte += " (" + conso.heure_debut.substring(0,5).replace(":", "h") + "-" + conso.heure_fin.substring(0,5).replace(":", "h") + ")";
@@ -481,8 +486,8 @@ class Case_standard extends Case_base {
     // Attribue un état à la conso
     set_etat(etat) {
         if (this.has_conso()) {
-            if ((jQuery.inArray(etat, ["present", "absenti", "absentj"]) !== -1) && (jQuery.inArray(this.consommations[0].etat, ["attente", "refus"]) !== -1)) {
-                toastr.error("Vous ne pouvez pas pointer une réservation en attente ou en refus");
+            if ((jQuery.inArray(etat, ["present", "absenti", "absentj"]) !== -1) && (jQuery.inArray(this.consommations[0].etat, ["attente", "refus", "demande"]) !== -1)) {
+                toastr.error("Vous ne pouvez pas pointer une réservation en attente, en refus ou en demande");
                 return false;
             };
 
@@ -492,7 +497,7 @@ class Case_standard extends Case_base {
             };
 
             // Vérifie la compatibilité avec les autres unités
-            if ((etat === "reservation" || etat === "present") && this.check_compatilites_unites() === false) {return false};
+            if ((etat === "reservation" || etat === "present" || etat === "demande") && this.check_compatilites_unites() === false) {return false};
 
             // Modifie l'état de la conso
             this.modifier_conso({etat: etat}, true);
@@ -542,6 +547,10 @@ class Case_standard extends Case_base {
         }
         if (this.consommations[0].facture) {
             toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation dont la prestation associée apparaît sur une facture");
+            return true;
+        }
+        if ((mode === "portail") && (this.consommations.length > 0) && (this.consommations[0].etat === "refus")) {
+            toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation refusée");
             return true;
         }
         return false;
@@ -1056,6 +1065,7 @@ $(function () {
         else if (touche_clavier === 80 && mode !== "portail") {case_tableau.set_etat("present")}
         else if (touche_clavier === 74 && mode !== "portail") {case_tableau.set_etat("absentj")}
         else if (touche_clavier === 73 && mode !== "portail") {case_tableau.set_etat("absenti")}
+        else if (touche_clavier === 68 && mode !== "portail") {case_tableau.set_etat("demande")}
         else if (touche_clavier === 67) {case_tableau.copier()}
         else if (touche_clavier === 83) {case_tableau.supprimer()}
         else {
@@ -1113,6 +1123,7 @@ $(function () {
         if (id === "contextmenu_present") {case_contextmenu.set_etat("present")};
         if (id === "contextmenu_absentj") {case_contextmenu.set_etat("absentj")};
         if (id === "contextmenu_absenti") {case_contextmenu.set_etat("absenti")};
+        if (id === "contextmenu_demande") {case_contextmenu.set_etat("demande")};
         if ($(this).hasClass("ctx_groupe")) {case_contextmenu.set_groupe(this.dataset.groupe)};
         $("#contextMenu").hide();
         return false;

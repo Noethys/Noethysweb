@@ -206,16 +206,19 @@ MOTSCLES = {
 
     "portail_demande_reservation": [
         ("{DEMANDE_HORODATAGE}", "Date et heure de la demande"),
-        ("{DEMANDE_DESCRIPTION}", "Description de la demande"),
-        ("{DEMANDE_COMMENTAIRE}", "Commentaire de la demande"),
-        ("{DEMANDE_TRAITEMENT_DATE}", "Date de traitement"),
+        # ("{DEMANDE_DESCRIPTION}", "Description de la demande"),
+        # ("{DEMANDE_COMMENTAIRE}", "Commentaire de la demande"),
+        # ("{DEMANDE_TRAITEMENT_DATE}", "Date de traitement"),
         ("{DEMANDE_REPONSE}", "Réponse à la demande"),
-        ("{PERIODE_NOM}", "Nom de la période"),
-        ("{PERIODE_DATE_DEBUT}", "Date de début de la période"),
-        ("{PERIODE_DATE_FIN}", "Date de fin de la période"),
-        ("{TOTAL}", "Total des prestations de la période"),
-        ("{REGLE}", "Total déjà réglé pour la période"),
-        ("{SOLDE}", "Solde de la période"),
+        # ("{PERIODE_NOM}", "Nom de la période"),
+        # ("{PERIODE_DATE_DEBUT}", "Date de début de la période"),
+        # ("{PERIODE_DATE_FIN}", "Date de fin de la période"),
+        ("{INDIVIDU_NOM}", "Nom de famille de l'individu concerné"),
+        ("{INDIVIDU_PRENOM}", "Prénom de l'individu concerné"),
+        ("{INDIVIDU_NOM_COMPLET}", "Nom et prénom de l'individu concerné"),
+        # ("{TOTAL}", "Total des prestations de la période"),
+        # ("{REGLE}", "Total déjà réglé pour la période"),
+        # ("{SOLDE}", "Solde de la période"),
     ],
 
     "portail_places_disponibles": [

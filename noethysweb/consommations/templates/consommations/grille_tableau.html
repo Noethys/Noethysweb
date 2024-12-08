@@ -28,6 +28,7 @@
         {# Récupération des données json #}
         var mode = '{{ data.mode }}';
         var selection_activite = {% if data.selection_activite %}{{ data.selection_activite.pk }}{% else %}null{% endif %};
+        var activite_validation_type = "{% if data.selection_activite %}{{ data.selection_activite.validation_type }}{% else %}AUTOMATIQUE{% endif %}";
         var selection_groupes = {% if data.selection_groupes %}{{ data.selection_groupes }}{% else %}null{% endif %};
         var selection_classes = {% if data.selection_classes %}{{ data.selection_classes }}{% else %}null{% endif %};
         var idfamille = {% if idfamille %}{{ idfamille }}{% else %}null{% endif %};

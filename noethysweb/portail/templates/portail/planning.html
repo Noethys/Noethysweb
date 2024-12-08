@@ -103,7 +103,14 @@
                             <i class="fa fa-info-circle margin-r-5"></i>{{ data.periode_reservation.introduction }}
                         </div>
                     {% endif %}
-
+                
+                    {# Texte si validation manuelle des réservations #}
+                    {% if data.periode_reservation.activite.validation_type == "MANUELLE" %}
+                        <div class="d-print-none" style="margin-bottom: 10px;">
+                            <i class="fa fa-info-circle margin-r-5"></i>Vos demandes de réservations devront être validées par l'administrateur du portail.
+                        </div>
+                    {% endif %}
+                
                     {# Tableau de la grille #}
                     {% include "consommations/grille_tableau.html" %}
 

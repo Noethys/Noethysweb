@@ -315,7 +315,7 @@ class Forfaits():
                                     individu=inscription.individu, inscription=inscription, activite=inscription.activite, date=date,
                                     unite=unite, groupe=inscription.groupe, heure_debut=dict_unites[unite.pk].heure_debut,
                                     heure_fin=dict_unites[unite.pk].heure_fin, etat="reservation", categorie_tarif=categorie_tarif,
-                                    forfait=type_forfait, prestation=prestation,
+                                    forfait=type_forfait, prestation=prestation, date_saisie=datetime.datetime.now(),
                                 )
                                 liste_ajouts.append(conso)
                             Consommation.objects.bulk_create(liste_ajouts)

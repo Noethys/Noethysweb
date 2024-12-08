@@ -420,6 +420,7 @@ def Save_grille(request=None, donnees={}):
     liste_ajouts = []
     dict_modifications = {}
     dict_idconso = {}
+    date_saisie = datetime.datetime.now()
     for key_case, consommations in donnees["consommations"].items():
         for dict_conso in consommations:
             # Recherche du nouvel IDprestation
@@ -431,7 +432,7 @@ def Save_grille(request=None, donnees={}):
                     unite_id=dict_conso["unite"], groupe_id=dict_conso["groupe"], heure_debut=dict_conso["heure_debut"], heure_fin=dict_conso["heure_fin"],
                     etat=dict_conso["etat"], categorie_tarif_id=dict_conso["categorie_tarif"], prestation_id=dict_conso["prestation"], quantite=dict_conso["quantite"],
                     evenement_id=dict_conso["evenement"], badgeage_debut=dict_conso["badgeage_debut"], badgeage_fin=dict_conso["badgeage_fin"],
-                    options=dict_conso.get("options", None), extra=dict_conso.get("extra", None),
+                    options=dict_conso.get("options", None), extra=dict_conso.get("extra", None), date_saisie=date_saisie,
                 ))
                 logger.debug("Consommation à ajouter : " + str(dict_conso))
                 label_conso = dict_conso["nom_evenement"] if "nom_evenement" in dict_conso else dict_unites[dict_conso["unite"]].nom
@@ -650,7 +651,7 @@ class Facturation():
                 dictUnitesUtilisees = {}
                 dictQuantites = {}
                 for conso in self.donnees["consommations"].get("%s_%s" % (case_tableau["date"], case_tableau["inscription"]), []):
-                    if not conso["forfait"] and (conso["unite"] not in dictUnitesUtilisees or dictUnitesUtilisees[conso["unite"]] in (None, "attente", "refus")):
+                    if not conso["forfait"] and (conso["unite"] not in dictUnitesUtilisees or dictUnitesUtilisees[conso["unite"]] in (None, "attente", "refus", "demande")):
                         dictUnitesUtilisees[conso["unite"]] = conso["etat"]
                     dictQuantites[conso["unite"]] = conso["quantite"]
                     options = conso.get("options", None)
@@ -785,7 +786,7 @@ class Facturation():
                         # Recherche les évènements pour lesquels une conso est saisie
                         liste_evenements = []
                         for conso in self.donnees["consommations"].get("%s_%s" % (case_tableau["date"], case_tableau["inscription"]), []):
-                            if conso["evenement"] and conso["etat"] not in ("attente", "refus"):
+                            if conso["evenement"] and conso["etat"] not in ("attente", "refus", "demande"):
                                 idevenement = conso["evenement"]
                                 evenement = Evenement.objects.filter(pk=idevenement).first()
                                 liste_evenements.append(evenement)

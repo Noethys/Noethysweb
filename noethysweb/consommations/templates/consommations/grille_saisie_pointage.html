@@ -10,7 +10,7 @@
     {% block modal_body %}
         <div id="modal_erreurs" class="text-red"></div>
         <p>Vous pouvez effectuer ici un pointage par lot. Sélectionnez l'état des consommations à convertir et l'état souhaité.
-        Notez que vous pouvez également utiliser les touches raccourcis (a, p, i, j) pour convertir l'état d'une seule consommation.</p>
+        Notez que vous pouvez également utiliser les touches raccourcis (a, p, i, j, d) pour convertir l'état d'une seule consommation.</p>
 
         <form id="form_saisie_pointage" method="post">
             {% csrf_token %}
@@ -26,6 +26,7 @@
                                 <option value="present">Présence</option>
                                 <option value="absentj">Absence justifiée</option>
                                 <option value="absenti">Absence injustifiée</option>
+                                <option value="demande">Demande</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -37,6 +38,7 @@
                                 <option value="present" selected>Présence</option>
                                 <option value="absentj">Absence justifiée</option>
                                 <option value="absenti">Absence injustifiée</option>
+                                <option value="demande">Demande</option>
                             </select>
                         </div>
                     </div>

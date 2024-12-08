@@ -157,6 +157,16 @@
                 </li>
             {% endif %}
 
+            {# Demandes de réservations à traiter #}
+            {% if nbre_demandes_attente_traitement and perms.core.liste_demandes %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link" href="{% url 'liste_demandes' %}" title="Vous avez {{ nbre_demandes_attente_traitement }} demande{{ nbre_demandes_attente_traitement|pluralize }} de réservations à traiter">
+                        <i class="fa fa-calendar-check-o"></i>
+                        <span class="badge badge-danger navbar-badge">{{ nbre_demandes_attente_traitement }}</span>
+                    </a>
+                </li>
+            {% endif %}
+        
             {% if perms.core.demandes_portail_liste %}
 
                 {# Renseignements à valider #}
@@ -178,7 +188,7 @@
                         </a>
                     </li>
                 {% endif %}
-
+                
             {% endif %}
 
         </ul>

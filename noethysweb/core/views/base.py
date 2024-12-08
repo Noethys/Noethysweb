@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.core.cache import cache
 from core.views.menu import GetMenuPrincipal
-from core.models import Organisateur, Parametre, Utilisateur, PortailMessage, PortailRenseignement
+from core.models import Organisateur, Consommation, PortailMessage, PortailRenseignement
 from core.utils import utils_parametres
 from noethysweb.version import GetVersion
 
@@ -166,6 +166,9 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
         renseignements_attente = {validation_auto: nbre for validation_auto, nbre in PortailRenseignement.objects.filter(etat="ATTENTE").values_list("validation_auto").annotate(nbre=Count("pk"))}
         context["nbre_renseignements_attente_validation"] = renseignements_attente.get(False, 0)
         context["nbre_renseignements_attente_lecture"] = renseignements_attente.get(True, 0)
+
+        # Demandes de réservations à traiter
+        context["nbre_demandes_attente_traitement"] = Consommation.objects.values("date_saisie").filter(etat="demande").distinct().count()
 
         return context
 

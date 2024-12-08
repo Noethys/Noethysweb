@@ -9,7 +9,7 @@ from parametrage.views import calendrier
 from consommations.forms import grille_forfaits
 from consommations.views import grille, gestionnaire, suivi_consommations, etat_global, synthese_consommations, liste_attente, liste_absences, edition_liste_conso, \
                                 pointeuse, liste_consommations, liste_repas, etat_nomin, liste_durees, consommations_traitement_lot, evolution_reservations, \
-                                detail_consommations #, pointeuse_barcodes
+                                detail_consommations, liste_demandes #, pointeuse_barcodes
 from core.decorators import secure_ajax
 
 
@@ -41,6 +41,7 @@ urlpatterns = [
     path('consommations/traitement_automatique', liste_attente.Traitement_automatique, name='liste_attente_traitement_automatique'),
     path('consommations/liste_repas', liste_repas.View.as_view(), name='liste_repas'),
     path('consommations/liste_durees', liste_durees.View.as_view(), name='liste_durees'),
+    path('consommations/liste_demandes', liste_demandes.View.as_view(), name='liste_demandes'),
 
     # Analyse
     path('consommations/etat_global', etat_global.View.as_view(), name='etat_global'),
@@ -69,4 +70,6 @@ urlpatterns = [
     path('consommations/consommations_traitement_lot', secure_ajax(consommations_traitement_lot.Appliquer), name='ajax_consommations_traitement_lot'),
     path('consommations/liste_consommations/dissocier_prestation', secure_ajax(liste_consommations.Dissocier_prestation), name='ajax_consommations_dissocier_prestation'),
     path('consommations/attribution_manuelle', secure_ajax(liste_attente.Attribution_manuelle), name='liste_attente_attribution_manuelle'),
+    path('consommations/liste_demandes/get_detail_demande', secure_ajax(liste_demandes.Get_detail_demande), name='ajax_liste_demandes_get_detail_demande'),
+    path('consommations/liste_demandes/valider_demande', secure_ajax(liste_demandes.Valider_demande), name='ajax_liste_demandes_valider_demande'),
 ]

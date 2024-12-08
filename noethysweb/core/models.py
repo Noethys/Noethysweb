@@ -151,6 +151,7 @@ LISTE_ETATS_CONSO = [
     ("absentj", "Absence justifiée"),
     ("attente", "Attente"),
     ("refus", "Refus"),
+    ("demande", "Demande"),
 ]
 
 LISTE_CONTROLES_QUESTIONNAIRES = [
@@ -1178,9 +1179,11 @@ class Activite(models.Model):
     service1 = models.CharField(verbose_name="Service axe 1", max_length=15, blank=True, null=True, help_text="Premier axe analytique.")
     service2 = models.CharField(verbose_name="Service axe 2", max_length=10, blank=True, null=True, help_text="Second axe analytique.")
     reattribution_auto = models.BooleanField(verbose_name="Réattribution automatique des places disponibles", default=False, help_text="Cochez cette case pour laisser Noethysweb réattribuer les places en attente automatiquement chaque nuit.")
-    reattribution_adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Adresse d'expédition", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez l'adresse d'expédition d'emails qui sera utilisée pour envoyer une notification de réattribution de places à la famille.")
+    reattribution_adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Adresse d'expédition", blank=True, null=True, on_delete=models.PROTECT)
     reattribution_delai = models.IntegerField(verbose_name="Délai de réattribution", blank=True, null=True, choices=[(1, "1 jour"), (2, "2 jours"), (3, "3 jours"), (4, "4 jours"), (5, "5 jours"), (7, "1 semaine"), (14, "2 semaines")], default=2, help_text="Sélectionnez le nombre de jours jusqu'auquel il est possible de réattribuer des places.")
-    reattribution_modele_email = models.ForeignKey("ModeleEmail", verbose_name="Modèle d'Email", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez le modèle d'email qui sera utilisé pour notifier les familles par email de la réattribution.")
+    reattribution_modele_email = models.ForeignKey("ModeleEmail", verbose_name="Modèle d'Email", blank=True, null=True, on_delete=models.PROTECT)
+    validation_type = models.CharField(verbose_name="Type de validation", max_length=100, choices=[("AUTOMATIQUE", "Automatique"), ("MANUELLE", "Manuelle")], default="AUTOMATIQUE")
+    validation_modele_email = models.ForeignKey("ModeleEmail", verbose_name="Modèle d'Email", blank=True, null=True, related_name="validation_modele_email", on_delete=models.PROTECT)
 
     class Meta:
         db_table = 'activites'
@@ -2316,7 +2319,7 @@ class Consommation(models.Model):
     heure_fin = models.TimeField(verbose_name="Heure de fin", blank=True, null=True)
     etat = models.CharField(verbose_name="Etat", max_length=100, choices=LISTE_ETATS_CONSO, blank=True, null=True)
     # verrouillage = models.IntegerField(blank=True, null=True)
-    date_saisie = models.DateTimeField(verbose_name="Date de saisie", auto_now_add=True)
+    date_saisie = models.DateTimeField(verbose_name="Date de saisie")
     # idutilisateur = models.IntegerField(db_column='IDutilisateur', blank=True, null=True)  # Field name made lowercase.
     categorie_tarif = models.ForeignKey(CategorieTarif, verbose_name="Catégorie de tarif", on_delete=models.PROTECT, blank=True, null=True)
     # idcompte_payeur = models.IntegerField(db_column='IDcompte_payeur', blank=True, null=True)  # Field name made lowercase.

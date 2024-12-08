@@ -1,0 +1,133 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+
+    <div class="col-md-12">
+
+        <div class="card card-default">
+            <div class="card-header with-border">
+                <h3 class="card-title">Liste des demandes de réservations</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Cliquez sur le bouton <i class='fa fa-fw fa-search'></i> à droite de chaque ligne pour traiter la demande de réservations.</p>
+                
+                <script>
+                    var contenu_table = JSON.parse('{{ resultats.liste_lignes|escapejs }}');
+                    var affiche_pagination = false;
+                </script>
+
+                <table id="table">
+                    <thead>
+                        <tr>
+                            <th data-field="horodatage" data-halign="center" data-align="center">Horodatage</th>
+                            <th data-field="famille" data-halign="center" data-align="center">Famille</th>
+                            <th data-field="individu" data-halign="center" data-align="center">Individu</th>
+                            <th data-field="activite" data-halign="center" data-align="center">Activité</th>
+                            <th data-field="groupe" data-halign="center" data-align="center">Groupe</th>
+                            <th data-field="categorie_tarif" data-halign="center" data-align="center">Catégorie de tarif</th>
+                            <th data-field="nbre_conso" data-halign="center" data-align="center">Nb conso</th>
+                            <th data-field="periode" data-halign="center" data-align="center">Période</th>
+                            <th data-field="action" data-halign="center" data-align="center">Action</th>
+                        </tr>
+                    </thead>
+                </table>
+
+            </div>
+        </div>
+
+    </div>
+
+    {% include 'core/widgets/bootstrap-table.html' %}
+
+    {# Modal Détail d'une demande #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_detail_demande{% endblock %}
+        {% block modal_titre %}Détail d'une demande{% endblock %}
+        {% block modal_classe %}modal-lg{% endblock %}
+        {% block modal_body %}
+            <div id="id_div_detail_demande"></div>
+            <div class="buttonHolder">
+                <div class="modal-footer d-flex" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default" onclick="tout_cocher('reservation')" title="Tout accepter"><i class="fa fa-check"></i></button>
+                        <button type="button" class="btn btn-default" onclick="tout_cocher('attente')" title="Tout mettre en attente"><i class="fa fa-hourglass-2"></i></button>
+                        <button type="button" class="btn btn-default" onclick="tout_cocher('refus')" title="Tout refuser"><i class="fa fa-remove"></i></button>
+                    </div>
+                    <div class="form-group ml-3 mr-auto">
+                        <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success" title="Envoi d'une notification par email à la famille. Ce contrôle est verrouillé si les paramètres ne permettent pas d'envoyer un email.">
+                            <input type="checkbox" class="custom-control-input" id="id_switch_notification">
+                            <label class="custom-control-label" for="id_switch_notification"> Notification</label>
+                        </div>
+                    </div>
+                    <div class="">
+                        <button type="button" class="btn btn-primary" id="valider_demande"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                    </div>
+                </div>
+            </div>
+        {% endblock %}
+    {% endembed %}
+
+    <script>
+
+        // Récupération du tableau des consommations
+        function ouvre_modal_demande(index) {
+            $.ajax({
+                url: "{% url 'ajax_liste_demandes_get_detail_demande' %}",
+                type: "POST",
+                data: {
+                    demande: JSON.stringify(contenu_table[index]),
+                    index: index,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function (data) {
+                    $("#id_switch_notification").prop("checked", data["envoi_notification_possible"]).prop("disabled", !data["envoi_notification_possible"]);
+                    $("#id_div_detail_demande").html(data['html']);
+                    $("#modal_detail_demande").modal("show");
+                }
+            });
+        }
+
+        // Validation de la modal
+        $("#valider_demande").on("click", function(e) {
+            var dict_decisions = {};
+            $("#id_div_detail_demande input:checked").each(function () {
+                dict_decisions[$(this).attr("name")] = $(this).data("decision");
+            });
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_liste_demandes_valider_demande' %}",
+                data: {
+                    idinscription: $("input[name='idinscription']").val(),
+                    date_saisie: $("input[name='date_saisie']").val(),
+                    index: $("input[name='index']").val(),
+                    notification_active: $("#id_switch_notification").prop("checked"),
+                    dict_decisions: JSON.stringify(dict_decisions),
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                datatype: "json",
+                success: function(data){
+                    $('#modal_detail_demande').modal("hide");
+                    $("#table").bootstrapTable("hideRow", {index: data.index})
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        });
+
+        // Tout cocher
+        function tout_cocher(etat) {
+            $("#id_div_detail_demande input[data-decision='" + etat + "']").each(function () {
+                $(this).prop("checked", true).trigger("click");
+            });
+        };
+
+    </script>
+{% endblock contenu_page %}

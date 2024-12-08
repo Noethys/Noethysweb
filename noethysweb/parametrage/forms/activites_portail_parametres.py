@@ -43,13 +43,19 @@ class Formulaire(FormulaireBase, ModelForm):
         model = Activite
         fields = ["portail_inscriptions_affichage", "portail_inscriptions_date_debut", "portail_inscriptions_date_fin", "portail_reservations_affichage",
                   "portail_reservations_limite", "portail_afficher_dates_passees", "portail_inscriptions_bloquer_si_complet", "portail_inscriptions_imposer_pieces",
-                  "reattribution_auto", "reattribution_adresse_exp", "reattribution_delai", "reattribution_modele_email"
+                  "reattribution_auto", "reattribution_adresse_exp", "reattribution_delai", "reattribution_modele_email",
+                  "validation_type", "validation_modele_email",
                   ]
         help_texts = {
             "portail_inscriptions_affichage": "Sélectionnez Autoriser pour permettre aux usagers de demander une inscription à cette activité depuis le portail. Cette demande devra être validée par un utilisateur.",
             "portail_reservations_affichage": "Sélectionnez Autoriser pour permettre aux usagers de gérer leurs réservations pour cette activité sur le portail.",
             "portail_inscriptions_bloquer_si_complet": "L'usager ne peut pas envoyer sa demande d'inscription si l'activité est complète.",
             "portail_inscriptions_imposer_pieces": "Cochez cette case si vous souhaitez que l'usager fournisse obligatoirement les pièces manquantes depuis le portail pour valider sa demande d'inscription.",
+            "portail_afficher_dates_passees": "Vous pouvez sélectionner la période passée que l'usager pourra visualiser dans le planning des réservations sur le portail. Ces dates passées seront bien-sûr uniquement en mode lecture.",
+            "reattribution_adresse_exp": "Sélectionnez l'adresse d'expédition d'emails qui sera utilisée pour envoyer des notifications par email aux familles (Réattributions de places ou validations manuelles de réservations).",
+            "reattribution_modele_email": "Sélectionnez le modèle d'email qui sera utilisé pour notifier les familles par email de la réattribution. Si aucun modèle n'est disponible, vous devez le créer dans le menu Paramétrage > Modèles d'emails > Catégorie = Attribution de places disponibles. N'oubliez pas de sélectionner également au bas de cette page l'adresse d'expédition souhaitée.",
+            "validation_type": "Sélectionnez Automatique pour que la réservation soit instantanée ou Manuelle pour effectuer vous-même la validation manuelle de chaque réservation.",
+            "validation_modele_email": "Sélectionnez le modèle d'email qui sera utilisé pour notifier les familles par email du traitement de la demande. Uniquement utile si la validation des réservations est manuelle. Si aucun modèle n'est disponible, vous devez le créer dans le menu Paramétrage > Modèles d'emails > Catégorie = Demande d'une réservation. N'oubliez pas de sélectionner également au bas de cette page l'adresse d'expédition souhaitée.",
         }
 
     def __init__(self, *args, **kwargs):
@@ -74,6 +80,9 @@ class Formulaire(FormulaireBase, ModelForm):
                 for chaine in self.instance.portail_reservations_limite.split("#"):
                     if "exclure_jours" in chaine:
                         self.fields["exclure_jours"].initial = [int(num_jour) for num_jour in chaine.replace("exclure_jours", "")]
+
+        # Modèle d'email de validation
+        self.fields["validation_modele_email"].queryset = ModeleEmail.objects.filter(categorie="portail_demande_reservation")
 
         # Modèle d'email de réattribution
         self.fields["reattribution_modele_email"].queryset = ModeleEmail.objects.filter(categorie="portail_places_disponibles")
@@ -110,11 +119,17 @@ class Formulaire(FormulaireBase, ModelForm):
                 ),
                 Field("portail_afficher_dates_passees"),
                 ),
-            Fieldset("Réattribution automatique des places disponibles",
+            Fieldset("Validation des réservations",
+                Field("validation_type"),
+                Field("validation_modele_email"),
+            ),
+            Fieldset("Réattribution automatique des places en attente",
                 Field("reattribution_auto"),
-                Field("reattribution_adresse_exp"),
                 Field("reattribution_delai"),
                 Field("reattribution_modele_email"),
+            ),
+            Fieldset("Expédition d'emails",
+                Field("reattribution_adresse_exp"),
             ),
             HTML(EXTRA_SCRIPT),
         )
