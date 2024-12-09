@@ -360,7 +360,7 @@ class Exporter():
                         ligne[66] = ConvertToTexte(piece.prelevement_mandat.bic)
 
                     # Tribunal - Texte (100)
-                    ligne[68] = ConvertToTexte("")#ConvertToTexte(self.lot.modele.nom_tribunal[:100])
+                    ligne[68] = ConvertToTexte(self.lot.modele.nom_tribunal or "")
 
                     # TIPI - O/N
                     ligne[70] = ConvertToTexte("O" if self.lot.modele.payable_internet else "N")
