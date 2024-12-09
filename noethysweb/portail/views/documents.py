@@ -30,7 +30,8 @@ class View(CustomView, TemplateView):
         for document in PortailDocument.objects.all().order_by("titre"):
             liste_documents.append({"titre": document.titre, "texte": document.texte, "fichier": document.document, "couleur_fond": document.couleur_fond, "extension": document.Get_extension()})
         for unite_consentement in utils_approbations.Get_approbations_requises(famille=self.request.user.famille, avec_consentements_existants=False).get("consentements", []):
-            liste_documents.append({"titre": unite_consentement.type_consentement.nom, "texte": "Version du %s" % utils_dates.ConvertDateToFR(unite_consentement.date_debut), "fichier": unite_consentement.document, "couleur_fond": "primary", "extension": unite_consentement.Get_extension()})
+            if unite_consentement.document.name:
+                liste_documents.append({"titre": unite_consentement.type_consentement.nom, "texte": "Version du %s" % utils_dates.ConvertDateToFR(unite_consentement.date_debut), "fichier": unite_consentement.document, "couleur_fond": "primary", "extension": unite_consentement.Get_extension()})
         context['liste_documents'] = liste_documents
 
         return context
