@@ -168,7 +168,7 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
         context["nbre_renseignements_attente_lecture"] = renseignements_attente.get(True, 0)
 
         # Demandes de réservations à traiter
-        context["nbre_demandes_attente_traitement"] = Consommation.objects.values("date_saisie").filter(etat="demande").distinct().count()
+        context["nbre_demandes_attente_traitement"] = Consommation.objects.values("date_saisie").filter(etat="demande", activite__structure__in=self.request.user.structures.all()).distinct().count()
 
         return context
 
