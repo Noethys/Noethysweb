@@ -1,6 +1,6 @@
 Version 1.2.7.5 (09/12/2024) :
 
-- Ajout de la validation manuelle des réservations
+- Ajout de la validation manuelle des réservations du portail
 - Ajout de textes d'aides complémentaires dans le paramétrage des activités
 - Ajout de l'alerte pour adresse d'expédition manquante dans l'éditeur d'emails
 - Optimisation de la vitesse d'import d'une activité
