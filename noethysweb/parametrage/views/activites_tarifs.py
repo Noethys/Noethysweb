@@ -90,8 +90,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['idtarif', 'date_debut', 'nom_tarif', 'description', 'type', 'methode']
-
+        filtres = ['idtarif', 'date_debut', 'date_fin', 'nom_tarif', 'description', 'type', 'methode']
         categories = columns.TextColumn("Catégories", sources=None, processor='Get_categories')
         type = columns.TextColumn("Type", sources=["type"], processor='Get_type')
         methode = columns.TextColumn("Méthode", sources=["methode"], processor='Get_methode')
@@ -99,9 +98,10 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idtarif', 'date_debut', 'description', 'categories', 'type', 'methode']
+            columns = ['idtarif', 'date_debut', 'date_fin', 'description', 'categories', 'type', 'methode']
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
+                'date_fin': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ['-date_debut']
 
