@@ -82,6 +82,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("releve"),
                 Field("ref_piece"),
                 Field("observations"),
+                Field("document"),
             ),
         )
 
