@@ -17,7 +17,7 @@ from reportlab.lib import colors
 from reportlab.graphics.barcode import code39
 from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires
 from core.models import Activite, Ouverture, Unite, UniteRemplissage, Consommation, MemoJournee, Note, Information, Individu, \
-                        Inscription, Scolarite, Classe, Ecole, Evenement, QuestionnaireQuestion, QuestionnaireChoix
+                        Inscription, Scolarite, Classe, Ecole, Evenement, QuestionnaireQuestion, QuestionnaireChoix, Rattachement
 from individus.utils import utils_pieces_manquantes
 from cotisations.utils import utils_cotisations_manquantes
 
@@ -38,15 +38,6 @@ class Impression(utils_impression.Impression):
     def Draw(self, mode_export_excel=False):
         # Calcule la largeur du contenu
         largeur_contenu = self.taille_page[0] - 75
-
-        # Colonnes personnalisées
-        colonnes_perso = json.loads(self.dict_donnees["colonnes_perso"])
-        if colonnes_perso:
-            # Chargement des informations individuelles
-            infosIndividus = utils_infos_individus.Informations(date_reference=self.dict_donnees["dates"][0], qf=True, inscriptions=True, messages=False, infosMedicales=False,
-                                                                cotisationsManquantes=False, piecesManquantes=False, questionnaires=True, scolarite=True)
-            dictInfosIndividus = infosIndividus.GetDictValeurs(mode="individu", ID=None, formatChamp=False)
-            dictInfosFamilles = infosIndividus.GetDictValeurs(mode="famille", ID=None, formatChamp=False)
 
         # Préparation des unités
         dictChoixUnites = {}
@@ -177,8 +168,8 @@ class Impression(utils_impression.Impression):
 
                     detail_conso = {"heure_debut": conso.heure_debut, "heure_fin": conso.heure_fin, "etat": conso.etat, "quantite": conso.quantite, "extra": conso.extra, "IDfamille": conso.inscription.famille_id, "evenement": conso.evenement}  #, "etiquettes": etiquettes}
                     dictConso[conso.activite_id][IDgroupe][scolarite][IDevenement][IDetiquette][conso.inscription]["listeConso"][conso.date][conso.unite_id].append(detail_conso)
-                    if conso.inscription.pk not in liste_inscriptions:
-                        liste_inscriptions.append(conso.inscription.pk)
+                    if conso.inscription not in liste_inscriptions:
+                        liste_inscriptions.append(conso.inscription)
 
         # Masquer les présents
         if self.dict_donnees["masquer_presents"]:
@@ -189,7 +180,7 @@ class Impression(utils_impression.Impression):
 
             conditions = Q(activite__in=liste_activites) & Q(statut="ok") & (Q(date_fin__isnull=True) | Q(date_fin__gte=max(self.dict_donnees["dates"])))
             if self.dict_donnees["masquer_presents"]:
-                conditions &= ~Q(idinscription__in=liste_inscriptions)
+                conditions &= ~Q(inscription__in=liste_inscriptions)
 
             inscriptions = Inscription.objects.select_related('individu', 'activite', 'famille', 'individu__type_sieste').prefetch_related("individu__regimes_alimentaires").filter(conditions)
 
@@ -215,6 +206,9 @@ class Impression(utils_impression.Impression):
                 if self.dict_donnees["afficher_scolarite_inconnue"]:
                     valide = True
 
+                if inscription not in liste_inscriptions:
+                    liste_inscriptions.append(inscription)
+
                 # Provisoire :
                 IDetiquette = None
                 IDevenement = None
@@ -223,6 +217,10 @@ class Impression(utils_impression.Impression):
                     utils_dictionnaires.DictionnaireImbrique(dictionnaire=dictConso,
                                                              cles=[inscription.activite_id, IDgroupe, scolarite, IDevenement, IDetiquette, inscription],
                                                              valeur={"IDcivilite": inscription.individu.civilite, "nom": inscription.individu.nom, "prenom": inscription.individu.prenom, "date_naiss": inscription.individu.date_naiss, "age": inscription.individu.Get_age(), "listeConso": {}})
+
+        # Synthèse des familles et individus à afficher
+        liste_idfamille = [inscription.famille_id for inscription in liste_inscriptions]
+        liste_idindividu = [inscription.individu_id for inscription in liste_inscriptions]
 
         # Récupération des mémo-journées
         dictMemos = {}
@@ -236,7 +234,8 @@ class Impression(utils_impression.Impression):
         if self.dict_donnees["afficher_photos"] == "grande": tailleImageFinal = 64
 
         # Récupération des notes
-        notes = Note.objects.filter(afficher_liste=True)
+        conditions = (Q(individu_id__in=liste_idindividu) | Q(famille_id__in=liste_idfamille)) & Q(afficher_liste=True)
+        notes = Note.objects.filter(conditions)
 
         dictMessagesFamilles = {}
         dictMessagesIndividus = {}
@@ -262,12 +261,31 @@ class Impression(utils_impression.Impression):
 
         # Récupération des informations personnelles
         dictInfosPerso = {}
-        conditions = Q(diffusion_listing_conso=True) & (Q(date_debut__lte=min(self.dict_donnees["dates"])) | Q(date_debut__isnull=True)) & (Q(date_fin__gte=max(self.dict_donnees["dates"])) | Q(date_fin__isnull=True))
+        conditions = Q(individu_id__in=liste_idindividu) & Q(diffusion_listing_conso=True) & (Q(date_debut__lte=min(self.dict_donnees["dates"])) | Q(date_debut__isnull=True)) & (Q(date_fin__gte=max(self.dict_donnees["dates"])) | Q(date_fin__isnull=True))
         infos = Information.objects.select_related("individu", "categorie").filter(conditions)
         for info in infos:
             dictInfosPerso.setdefault(info.individu_id, [])
             dictInfosPerso[info.individu_id].append(info)
 
+        # Colonnes personnalisées
+        colonnes_perso = json.loads(self.dict_donnees["colonnes_perso"])
+        if colonnes_perso:
+            # Chargement des informations individuelles
+            infosIndividus = utils_infos_individus.Informations(date_reference=self.dict_donnees["dates"][0], qf=False, inscriptions=False, messages=False, infosMedicales=False,
+                                                                cotisationsManquantes=False, piecesManquantes=False, questionnaires=True, scolarite=True, liste_familles=liste_idfamille)
+            dictInfosIndividus = infosIndividus.GetDictValeurs(mode="individu", ID=None, formatChamp=False)
+            dictInfosFamilles = infosIndividus.GetDictValeurs(mode="famille", ID=None, formatChamp=False)
+
+        # Récupération des coordonnées des parents
+        self.dict_parents = {}
+        self.liste_enfants = []
+        for rattachement in Rattachement.objects.select_related("individu").filter(famille_id__in=[inscription.famille_id for inscription in liste_inscriptions]):
+            if rattachement.categorie == 1:
+                rattachement.individu.titulaire = rattachement.titulaire
+                self.dict_parents.setdefault(rattachement.famille_id, [])
+                self.dict_parents[rattachement.famille_id].append(rattachement.individu)
+            if rattachement.categorie == 2:
+                self.liste_enfants.append((rattachement.famille_id, rattachement.individu_id))
 
         # --------------------------------------- Création du PDF ----------------------------------------------
 
@@ -844,6 +862,42 @@ class Impression(utils_impression.Impression):
                                                 if dictColonnePerso["code"] == "codebarres_individu":
                                                     type_donnee = "code-barres"
                                                     donnee = code39.Extended39("I%06d" % inscription.individu_id, humanReadable=False)
+
+                                                # Noms responsables
+                                                if dictColonnePerso["code"] == "noms_responsables":
+                                                    liste_noms = []
+                                                    if (inscription.famille_id, inscription.individu_id) in self.liste_enfants:
+                                                        for individu in self.dict_parents.get(inscription.famille_id, []):
+                                                            if individu.pk != inscription.individu_id:
+                                                                liste_noms.append(individu.Get_nom())
+                                                    donnee = " | ".join(liste_noms)
+
+                                                # Noms responsables titulaires
+                                                if dictColonnePerso["code"] == "noms_responsables_titulaires":
+                                                    liste_noms = []
+                                                    if (inscription.famille_id, inscription.individu_id) in self.liste_enfants:
+                                                        for individu in self.dict_parents.get(inscription.famille_id, []):
+                                                            if individu.titulaire and individu.pk != inscription.individu_id:
+                                                                liste_noms.append(individu.Get_nom())
+                                                    donnee = " | ".join(liste_noms)
+
+                                                # Tél responsables
+                                                if dictColonnePerso["code"] == "tel_responsables":
+                                                    liste_tel = []
+                                                    if (inscription.famille_id, inscription.individu_id) in self.liste_enfants:
+                                                        for individu in self.dict_parents.get(inscription.famille_id, []):
+                                                            if individu.tel_mobile and individu.pk != inscription.individu_id:
+                                                                liste_tel.append("%s : %s" % (individu.prenom, individu.tel_mobile))
+                                                    donnee = " | ".join(liste_tel)
+
+                                                # Mail responsables
+                                                if dictColonnePerso["code"] == "mail_responsables":
+                                                    liste_mail = []
+                                                    if (inscription.famille_id, inscription.individu_id) in self.liste_enfants:
+                                                        for individu in self.dict_parents.get(inscription.famille_id, []):
+                                                            if individu.mail and individu.pk != inscription.individu_id:
+                                                                liste_mail.append("%s : %s" % (individu.prenom, individu.mail))
+                                                    donnee = " | ".join(liste_mail)
 
                                             except :
                                                 donnee = ""

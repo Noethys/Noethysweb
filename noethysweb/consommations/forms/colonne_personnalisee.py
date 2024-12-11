@@ -17,6 +17,7 @@ class Formulaire(FormulaireBase, forms.Form):
     liste_choix = [("aucun", "Aucune"), ("genre", "Genre (M/F)"), ("date_naiss", "Date de naissance"),
         ("ville_naissance", "Ville de naissance"), ("medecin_nom", "Nom du médecin"),
         ("tel_mobile", "Tél. mobile"), ("tel_domicile", "Tél. domicile"), ("mail", "Email"),
+        ("noms_responsables", "Noms responsables"), ("noms_responsables_titulaires", "Noms responsables titulaires"), ("tel_responsables", "Tél. responsables"), ("mail_responsables", "Email responsables"),
         ("ville_residence", "Ville de résidence"), ("adresse_residence", "Adresse complète de résidence"),
         ("secteur", "Secteur géographique"), ("secteur_colore", "Secteur géographique coloré"), ("nom_ecole", "Ecole"), ("nom_classe", "Classe"),
         ("nom_niveau_scolaire", "Niveau scolaire"), ("famille", "Famille"), ("regime", "Régime social"),
