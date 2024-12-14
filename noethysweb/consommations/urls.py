@@ -72,4 +72,6 @@ urlpatterns = [
     path('consommations/attribution_manuelle', secure_ajax(liste_attente.Attribution_manuelle), name='liste_attente_attribution_manuelle'),
     path('consommations/liste_demandes/get_detail_demande', secure_ajax(liste_demandes.Get_detail_demande), name='ajax_liste_demandes_get_detail_demande'),
     path('consommations/liste_demandes/valider_demande', secure_ajax(liste_demandes.Valider_demande), name='ajax_liste_demandes_valider_demande'),
+    path('consommations/liste_attente/get_form_modifier_reservation', secure_ajax(liste_attente.Get_form_modifier_reservation), name='ajax_liste_attente_modifier_reservation'),
+    path('consommations/liste_attente/valider_form_modifier_reservation', secure_ajax(liste_attente.Valider_form_modifier_reservation), name='ajax_liste_attente_valider_modifier_reservation'),
 ]

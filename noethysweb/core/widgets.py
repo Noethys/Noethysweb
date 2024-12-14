@@ -127,6 +127,8 @@ class DateTimePickerWidget(Widget):
             context['value'] = value
         if 'format' not in context:
             context['format'] = 'dd/mm/yyyy hh:ii'
+        if context.get("afficher_secondes", False):
+            context['format'] = 'dd/mm/yyyy hh:ii:ss'
         context['djformat'] = settings.DATETIME_FORMAT
         return context
 
@@ -138,7 +140,8 @@ class DateTimePickerWidget(Widget):
         date = data.get(name, None)
         if not date:
             return None
-        date = datetime.datetime.strptime(date, "%d/%m/%Y %H:%M")
+        format = "%d/%m/%Y %H:%M:%S" if len(date) == 19 else "%d/%m/%Y %H:%M"
+        date = datetime.datetime.strptime(date, format)
         return date
 
 

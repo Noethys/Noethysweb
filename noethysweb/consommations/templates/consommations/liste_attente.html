@@ -143,4 +143,48 @@
 
     {% include 'core/widgets/bootstrap-table.html' %}
 
+    {# Modal Modifier la réservation #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_modifier_reservation{% endblock %}
+        {% block modal_titre %}Modifier une réservation{% endblock %}
+        {% block modal_body %}
+            <div id="id_div_form_modifier_reservation">
+            </div>
+        {% endblock %}
+    {% endembed %}
+    
+    <script>
+        function ouvre_modal_modifier_reservation(listeidconso) {
+            $.ajax({
+                url: "{% url 'ajax_liste_attente_modifier_reservation' %}",
+                type: "POST",
+                data: {
+                    listeidconso: listeidconso,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function (data) {
+                    $("#id_div_form_modifier_reservation").html(data['form_html']);
+                    $("#modal_modifier_reservation").modal("show");
+                }
+            });
+        }
+        
+        function valider_modifier_reservation() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_liste_attente_valider_modifier_reservation' %}",
+                data: $("#form_modifier_reservation").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $("#modal_modifier_reservation").modal("hide");
+                    location.reload();
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
+    </script>
+    
 {% endblock contenu_page %}

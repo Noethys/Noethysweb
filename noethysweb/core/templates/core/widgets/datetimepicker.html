@@ -9,5 +9,5 @@ $(function () {
     <div class="input-group-prepend">
         <i class="fa {% if icon %}{{ icon }}{% else %}fa-calendar{% endif %} input-group-text"></i>
     </div>
-    <input type="text" class="{{ class }}" data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}" value="{{ value|date:'d/m/Y H:i' }}" autocomplete="off" autocorrect="off" autocapitalize="off"/>
+    <input type="text" class="{{ class }}" data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}" value="{% if afficher_secondes %}{{ value|date:'d/m/Y H:i:s' }}{% else %}{{ value|date:'d/m/Y H:i' }}{% endif %}" autocomplete="off" autocorrect="off" autocapitalize="off"/>
 </div>

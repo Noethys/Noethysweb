@@ -9,11 +9,13 @@ from django.views.generic import TemplateView
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.core.exceptions import PermissionDenied
+from django.template.context_processors import csrf
+from crispy_forms.utils import render_crispy_form
 from core.views.base import CustomView
-from core.utils import utils_dates, utils_infos_individus, utils_dictionnaires
-from core.models import Unite, Activite, Evenement, Consommation, Groupe
+from core.utils import utils_dates, utils_dictionnaires
+from core.models import Activite, Consommation
 from consommations.views import suivi_consommations
-from consommations.forms.liste_attente import Formulaire
+from consommations.forms.liste_attente import Formulaire, Formulaire_modifier_reservation
 
 
 def Traitement_automatique(request):
@@ -32,6 +34,34 @@ def Attribution_manuelle(request):
     from consommations.utils import utils_traitement_attentes
     utils_traitement_attentes.Traiter_attentes(request=request, selections=selections)
     return JsonResponse({"resultat": True})
+
+
+def Get_form_modifier_reservation(request):
+    listeidconso = request.POST.get("listeidconso")
+
+    # Création du contexte
+    context = {}
+    context.update(csrf(request))
+
+    # Intégration du formset dans le contexte
+    form = Formulaire_modifier_reservation(request=request, initial={"listeidconso": listeidconso})
+    form_html = render_crispy_form(form, context=context)
+    return JsonResponse({"form_html": form_html})
+
+
+def Valider_form_modifier_reservation(request):
+    # Validation du formulaire de modification
+    form = Formulaire_modifier_reservation(request.POST, request=request)
+    if not form.is_valid():
+        liste_erreurs = ", ".join([erreur[0].message for field, erreur in form.errors.as_data().items()])
+        return JsonResponse({"erreur": liste_erreurs}, status=401)
+
+    # Modification des consommations de la réservation
+    for conso in Consommation.objects.filter(pk__in=[int(idconso) for idconso in form.cleaned_data["listeidconso"].split(";")]):
+        conso.date_saisie = form.cleaned_data["date_saisie"]
+        conso.save()
+
+    return JsonResponse({"succes": True})
 
 
 class View(CustomView, TemplateView):
@@ -177,7 +207,7 @@ def Get_resultats(parametres={}, etat="attente", request=None):
                         id_evenement = id_groupe
 
                     # Branches inscriptions
-                    listeInscriptions = [(min([dictConsoIndividu["IDconso"] for dictConsoIndividu in listeConso]), inscription) for inscription, listeConso in dictTemp.items()]
+                    listeInscriptions = [(min([dictConsoIndividu["date_saisie"] for dictConsoIndividu in listeConso]), inscription) for inscription, listeConso in dictTemp.items()]
                     listeInscriptions.sort()
 
                     num = 1
@@ -255,13 +285,14 @@ def Get_resultats(parametres={}, etat="attente", request=None):
 
                         # URL fiche famille
                         action = " ".join([
-                            "<a type='button' title='Accéder à la fiche famille' class='btn btn-default btn-xs' href='%s'><i class='fa fa-folder-open-o'></i></a>" % reverse("famille_resume", args=[inscription.famille_id]),
-                            "<a type='button' title='Accéder aux consommations' class='btn btn-default btn-xs' href='%s'><i class='fa fa-fw fa-calendar'></i></a>" % reverse("famille_consommations", args=[inscription.famille_id, inscription.individu_id]),
+                            """<a type='button' title="Accéder à la fiche famille" class='btn btn-default btn-xs' href='%s'><i class='fa fa-fw fa-folder-open-o'></i></a>""" % reverse("famille_resume", args=[inscription.famille_id]),
+                            """<a type='button' title="Accéder aux consommations de l'individu" class='btn btn-default btn-xs' href='%s'><i class='fa fa-fw fa-calendar'></i></a>""" % reverse("famille_consommations", args=[inscription.famille_id, inscription.individu_id]),
+                            """<button title="Modifier la date et l'heure de la réservation&#13(Permet de modifier la position dans la liste d'attente)" class="btn btn-default btn-xs" onclick="ouvre_modal_modifier_reservation('%s')"><i class="fa fa-fw fa-clock-o"></i></button>""" % ";".join([str(idconso) for idconso in listeIDconso]),
                         ])
 
                         liste_resultats.append({
                             "id": "individu_%s" % inscription.individu_id, "pid": id_evenement, "type": "individu", "label": label, "idfamille": inscription.famille_id, "idindividu": inscription.individu_id,
-                            "unites": texteUnites[:-3], "date_saisie": utils_dates.DateComplete(dateSaisie), "action": action, "idactivite": activite.pk,
+                            "unites": texteUnites[:-3], "date_saisie": dateSaisie.strftime("%d/%m/%Y %H:%M:%S"), "action": action, "idactivite": activite.pk,
                             "liste_IDunite": listeIDunite, "date": str(date), "place_dispo": placeDispo, "nom_activite": activite.nom, "liste_IDconso": listeIDconso,
                         })
 
