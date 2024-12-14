@@ -1,3 +1,10 @@
+Version 1.2.7.6 (14/12/2024) :
+
+- Ajout de la modification de la date de saisie d'une consommation dans la liste d'attente
+- Ajout d'une colonne Date de fin dans les tarifs de l'activité
+- Ajout du champ Document dans les opérations de trésorerie
+- Ajout des infos responsables dans les colonnes personnalisées de la liste PDF des consommations
+
 Version 1.2.7.5 (09/12/2024) :
 
 - Ajout de la validation manuelle des réservations du portail
