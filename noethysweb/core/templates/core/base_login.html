@@ -73,11 +73,13 @@
             .login-card .form-control {
                 border: 1px solid #d5dae2;
                 padding: 15px 25px;
-                margin-bottom: 20px;
                 min-height: 45px;
                 font-size: 13px;
                 line-height: 15;
                 font-weight: normal;
+            }
+            .login-card .ligne {
+                margin-bottom: 20px;
             }
             .login-card .form-control::-webkit-input-placeholder {
                 color: #919aa3;
@@ -100,6 +102,7 @@
                 font-weight: bold;
                 line-height: 20px;
                 margin-bottom: 24px;
+                margin-top: 35px;
             }
             .login-card .forgot-password-link {
                 font-size: 14px;
@@ -145,12 +148,30 @@
                 top: 0px;
                 right: 0px;
             }
+            #id_afficher_mdp {
+                color: #495057;
+            }
         </style>
     {% endblock %}
 
     {% block scripts %}
         <script src="{% static 'lib/jquery/jquery.min.js' %}"></script>
         <script src="{% static 'lib/bootstrap4/js/bootstrap.min.js' %}"></script>
+        
+        <script>
+            $(document).ready(function () {
+                $('#id_eye').click(function (event) {
+                    event.preventDefault();
+                    $('#id_password').attr('type', $('#id_password').is(':password') ? 'text' : 'password');
+                    if ($('#id_password').attr('type') === 'password') {
+                        $('#id_eye').removeClass('fa-eye').addClass('fa-eye-slash');
+                    } else {
+                        $('#id_eye').removeClass('fa-eye-slash').addClass('fa-eye');
+                    }
+                });
+            });
+        </script>
+
     {% endblock %}
 
     {% block extra_head %}

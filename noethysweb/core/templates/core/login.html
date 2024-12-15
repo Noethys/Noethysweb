@@ -18,12 +18,27 @@
             {% endfor %}
         {% endif %}
 
-        <div class="form-group has-feedback">
+        <div class="form-group has-feedback input-group ligne">
+            <div class="input-group-prepend">
+                <span class="input-group-text">
+                    <i class="fa fa-fw fa-user"></i>
+                </span>
+            </div>
             {{ form.username }}
         </div>
 
-        <div class="form-group has-feedback">
+        <div class="form-group has-feedback input-group ligne">
+            <div class="input-group-prepend">
+                <span class="input-group-text">
+                    <i class="fa fa-fw fa-lock"></i>
+                </span>
+            </div>
             {{ form.password }}
+            <div class="input-group-append">
+                <span class="input-group-text">
+                    <a id="id_afficher_mdp" href="" title="Afficher ou masquer le mot de passe"><i id="id_eye" class="fa fa-fw fa-eye-slash" aria-hidden="true"></i></a>
+                </span>
+            </div>
         </div>
 
         {% if form.captcha.errors %}
@@ -32,7 +47,7 @@
             </div>
         {% endif %}
 
-        <div>
+        <div class="ligne">
             {{ form.captcha }}
         </div>
 
