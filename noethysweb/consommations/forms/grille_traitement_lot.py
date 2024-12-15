@@ -10,6 +10,7 @@ from crispy_forms.bootstrap import Field, InlineCheckboxes, Div
 from core.widgets import DatePickerWidget
 from core.models import JOURS_SEMAINE
 from core.forms.base import FormulaireBase
+from core.utils.utils_texte import Creation_tout_cocher
 
 
 class Formulaire(FormulaireBase, forms.Form):
@@ -23,8 +24,8 @@ class Formulaire(FormulaireBase, forms.Form):
     inclure_feries = forms.BooleanField(label="Inclure les fériés", required=False)
 
     # Jours
-    jours_scolaires = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
-    jours_vacances = forms.MultipleChoiceField(label="Jours de vacances", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
+    jours_scolaires = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("jours_scolaires"))
+    jours_vacances = forms.MultipleChoiceField(label="Jours de vacances", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("jours_vacances"))
     choix_frequence = [(1, "Toutes les semaines"), (2, "Une semaine sur deux"),
                         (3, "Une semaine sur trois"), (4, "Une semaine sur quatre"),
                         (5, "Les semaines paires"), (6, "Les semaines impaires")]

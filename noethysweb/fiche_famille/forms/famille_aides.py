@@ -5,17 +5,17 @@
 
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
-from django.db.models import Q
+from django.forms.models import inlineformset_factory, BaseInlineFormSet
+from django_select2.forms import Select2MultipleWidget, ModelSelect2Widget
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
 from crispy_forms.bootstrap import Field, PrependedText, InlineCheckboxes
-from core.utils.utils_commandes import Commandes
-from core.models import Famille, Aide, JOURS_SEMAINE, Rattachement, Individu, CombiAide, Unite, Activite
+from core.forms.base import FormulaireBase
+from core.models import Aide, JOURS_SEMAINE, Rattachement, Individu, CombiAide, Unite, Activite
 from core.widgets import DatePickerWidget, Formset, Select_activite
-from django_select2.forms import Select2MultipleWidget, Select2Widget, ModelSelect2Widget
-from django.forms.models import inlineformset_factory, BaseInlineFormSet
+from core.utils.utils_commandes import Commandes
 from core.utils import utils_preferences
+from core.utils.utils_texte import Creation_tout_cocher
 
 
 class CombiAideForm(forms.ModelForm):
@@ -80,8 +80,8 @@ FORMSET_COMBI = inlineformset_factory(Aide, CombiAide, form=CombiAideForm, fk_na
 
 class Formulaire(FormulaireBase, ModelForm):
     montant_max = forms.DecimalField(label="Montant plafond", max_digits=6, decimal_places=2, initial=0.0, required=False)
-    jours_scolaires = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
-    jours_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
+    jours_scolaires = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("jours_scolaires"))
+    jours_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("jours_vacances"))
     individus = forms.ModelMultipleChoiceField(label="Bénéficiaires", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Individu.objects.none(), required=True)
 
     class Meta:

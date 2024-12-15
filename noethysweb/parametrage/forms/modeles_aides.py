@@ -5,15 +5,15 @@
 
 from django import forms
 from django.forms import ModelForm
-from django.db.models import Q
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset, Div
 from crispy_forms.bootstrap import Field, PrependedText, InlineCheckboxes
-from core.forms.select2 import Select2Widget, Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.widgets import DatePickerWidget, Formset, Select_activite
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.utils import utils_preferences
+from core.utils.utils_texte import Creation_tout_cocher
 from core.models import Activite, Aide, JOURS_SEMAINE
 
 
@@ -39,8 +39,8 @@ class Formulaire_creation(FormulaireBase, forms.Form):
 
 class Formulaire(FormulaireBase, ModelForm):
     montant_max = forms.DecimalField(label="Montant plafond", max_digits=6, decimal_places=2, initial=0.0, required=False)
-    jours_scolaires = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
-    jours_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
+    jours_scolaires = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("jours_scolaires"))
+    jours_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("jours_vacances"))
 
     # Champ fictif nécessire pour charger Select2MultipleWidget pour le formset
     champ_fictif = forms.ModelMultipleChoiceField(label="Champ fictif", widget=Select2MultipleWidget(), queryset=Aide.objects.none(), required=False)

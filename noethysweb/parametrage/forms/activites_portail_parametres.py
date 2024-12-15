@@ -11,6 +11,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset, Div
 from crispy_forms.bootstrap import Field, InlineCheckboxes
 from core.utils.utils_commandes import Commandes
+from core.utils.utils_texte import Creation_tout_cocher
 from core.models import Activite, ModeleEmail, JOURS_SEMAINE, JOURS_COMPLETS_SEMAINE
 from core.widgets import DateTimePickerWidget
 
@@ -37,7 +38,7 @@ class Formulaire(FormulaireBase, ModelForm):
     limite_heure = forms.TimeField(label="Heure limite", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
     exclure_weekends = forms.BooleanField(label="Exclure les weeks-ends", required=False, initial=False)
     exclure_feries = forms.BooleanField(label="Exclure les jours fériés", required=False, initial=False)
-    exclure_jours = forms.MultipleChoiceField(label="Exclure les jours", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
+    exclure_jours = forms.MultipleChoiceField(label="Exclure les jours", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("exclure_jours"))
 
     class Meta:
         model = Activite

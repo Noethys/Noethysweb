@@ -64,3 +64,9 @@ def Textify(html):
     """ Convertit un html en str """
     text_only = re.sub('[ \t]+', ' ', strip_tags(html))
     return text_only.replace('\n ', '\n').strip()
+
+def Creation_tout_cocher(nom_champ=""):
+    """ Utilisé pour générer un lien tout cocher et un lien tout décocher à insérer dans un help_text pour un CheckboxSelectMultiple """
+    texte = """<a href="javascript:void(0)" onclick="$('input[name=%s]').prop('checked', true);">Tout cocher</a>""" % nom_champ
+    texte += """ | <a href="javascript:void(0)" onclick="$('input[name=%s]').prop('checked', false);">Tout décocher</a>""" % nom_champ
+    return texte

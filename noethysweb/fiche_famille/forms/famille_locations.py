@@ -14,6 +14,7 @@ from crispy_forms.layout import Layout, Hidden, HTML, Fieldset, Div
 from crispy_forms.bootstrap import Field, InlineCheckboxes
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
+from core.utils.utils_texte import Creation_tout_cocher
 from core.models import Location, QuestionnaireQuestion, QuestionnaireReponse, Produit, Prestation, JOURS_SEMAINE, Famille
 from core.widgets import DatePickerWidget, DateTimePickerWidget, Formset
 from parametrage.forms import questionnaires
@@ -79,8 +80,8 @@ class Formulaire(FormulaireBase, ModelForm):
     recurrence_heure_debut = forms.TimeField(label="Heure de début", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
     recurrence_heure_fin = forms.TimeField(label="Heure de fin", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
     recurrence_feries = forms.BooleanField(label="Inclure les fériés", required=False)
-    recurrence_jours_scolaires = forms.MultipleChoiceField(label="Jours scolaires", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
-    recurrence_jours_vacances = forms.MultipleChoiceField(label="Jours de vacances", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE)
+    recurrence_jours_scolaires = forms.MultipleChoiceField(label="Jours scolaires", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("recurrence_jours_scolaires"))
+    recurrence_jours_vacances = forms.MultipleChoiceField(label="Jours de vacances", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("recurrence_jours_vacances"))
     choix_frequence = [(1, "Toutes les semaines"), (2, "Une semaine sur deux"),
                         (3, "Une semaine sur trois"), (4, "Une semaine sur quatre"),
                         (5, "Les semaines paires"), (6, "Les semaines impaires")]

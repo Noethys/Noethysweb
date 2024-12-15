@@ -5,11 +5,11 @@
 
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
+from crispy_forms.layout import Layout, Hidden, Fieldset
 from crispy_forms.bootstrap import Field, InlineCheckboxes
-from core.widgets import DateRangePickerWidget, SelectionActivitesWidget, Profil_configuration
+from core.widgets import DateRangePickerWidget, SelectionActivitesWidget, Profil_configuration, ColorPickerWidget
 from core.utils import utils_parametres, utils_questionnaires
-from core.widgets import ColorPickerWidget
+from core.utils.utils_texte import Creation_tout_cocher
 from core.models import Regime, JOURS_SEMAINE, Parametre
 from core.forms.base import FormulaireBase
 
@@ -99,9 +99,9 @@ class Form_selection_options(FormulaireBase, forms.Form):
     plafond_journalier_individu = forms.IntegerField(label="Plafond journalier par individu", initial=0, required=False, help_text="Saisissez un plafond journalier (en minutes) par individu, toutes activités confondues (0 = désactivé). Exemple : une valeur de 120 (minutes) plafonnera le temps retenu pour chaque individu à hauteur de 2 heures.")
 
     # Filtres
-    jours_hors_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, initial=[0, 1, 2, 3, 4, 5, 6], help_text="Sélectionnez les jours hors vacances à inclure dans les calculs.")
-    jours_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, initial=[0, 1, 2, 3, 4, 5, 6], help_text="Sélectionnez les jours de vacances à inclure dans les calculs.")
-    etat_consommations = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=[("reservation", "Réservation"), ("present", "Présent"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present", "absentj", "absenti"], help_text="Sélectionnez les états de consommations à inclure dans les calculs.")
+    jours_hors_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, initial=[0, 1, 2, 3, 4, 5, 6], help_text="Sélectionnez les jours hors vacances à inclure dans les calculs. %s." % Creation_tout_cocher("jours_hors_vacances"))
+    jours_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, initial=[0, 1, 2, 3, 4, 5, 6], help_text="Sélectionnez les jours de vacances à inclure dans les calculs. %s." % Creation_tout_cocher("jours_vacances"))
+    etat_consommations = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=[("reservation", "Réservation"), ("present", "Présent"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")], initial=["reservation", "present", "absentj", "absenti"], help_text="Sélectionnez les états de consommations à inclure dans les calculs. %s." % Creation_tout_cocher("etat_consommations"))
 
     # Affichage
     orientation = forms.ChoiceField(label="Orientation de la page", choices=[("portrait", "Portrait"), ("paysage", "Paysage")], initial="portrait", required=False, help_text="Sélectionnez l'orientation de la page.")
