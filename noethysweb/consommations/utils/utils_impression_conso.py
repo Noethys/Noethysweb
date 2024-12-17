@@ -180,7 +180,7 @@ class Impression(utils_impression.Impression):
 
             conditions = Q(activite__in=liste_activites) & Q(statut="ok") & (Q(date_fin__isnull=True) | Q(date_fin__gte=max(self.dict_donnees["dates"])))
             if self.dict_donnees["masquer_presents"]:
-                conditions &= ~Q(inscription__in=liste_inscriptions)
+                conditions &= ~Q(idinscription__in=[inscription.pk for inscription in liste_inscriptions])
 
             inscriptions = Inscription.objects.select_related('individu', 'activite', 'famille', 'individu__type_sieste').prefetch_related("individu__regimes_alimentaires").filter(conditions)
 
