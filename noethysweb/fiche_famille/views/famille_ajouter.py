@@ -226,6 +226,11 @@ class Supprimer_individu(Page, crud.Supprimer):
 
         return erreurs_protection
 
+    def form_invalid(self, form):
+        """ Pour compatibilité avec Django 4 """
+        response = self.delete(self.request)
+        return response
+
     def delete(self, request, *args, **kwargs):
         """ Empêche la suppression du dernier individu si la famille ne peut être supprimée """
         famille = self.get_famille()
