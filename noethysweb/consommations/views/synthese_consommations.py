@@ -90,11 +90,12 @@ class View(CustomView, TemplateView):
             # QF
             if parametres["regroupement"] == "qf":
                 regroupement = None
-                qf = dictInfosFamilles[conso["inscription__famille_id"]]["FAMILLE_QF_ACTUEL_INT"]
-                for x in range(0, 10000, 100):
-                    min, max = x, x + 99
-                    if qf >= min and qf <= max:
-                        regroupement = (min, max)
+                if "FAMILLE_QF_ACTUEL_INT" in dictInfosFamilles[conso["inscription__famille_id"]]:
+                    qf = dictInfosFamilles[conso["inscription__famille_id"]]["FAMILLE_QF_ACTUEL_INT"]
+                    for x in range(0, 10000, 100):
+                        min, max = x, x + 99
+                        if qf >= min and qf <= max:
+                            regroupement = (min, max)
 
             # Questionnaires
             if parametres["regroupement"].startswith("question_") and "famille" in parametres["regroupement"]:
