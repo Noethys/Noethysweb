@@ -1,3 +1,11 @@
+Version 1.2.7.7 (18/12/2024) :
+
+- Ajout de l'affichage du mot de passe sur les pages de connexion
+- Ajout de Tout et Rien cocher dans les checkbox multiples
+- Correction de l'option Masquer les présents dans l'édition pdf des consommations
+- Correction du regroupement par QF dans la synthèse des consommations
+- Correction de la suppression d'un individu avec Django 4
+
 Version 1.2.7.6 (14/12/2024) :
 
 - Ajout de la modification de la date de saisie d'une consommation dans la liste d'attente
