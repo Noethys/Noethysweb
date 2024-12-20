@@ -497,7 +497,7 @@ class SelectionActivitesWidget(Widget):
         context['activites'] = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom")
         if context.get("afficher_groupes", False):
             context['groupes'] = {}
-            for groupe in Groupe.objects.select_related('activite').all().order_by("ordre"):
+            for groupe in Groupe.objects.select_related('activite').filter(activite__structure__in=self.request.user.structures.all()).order_by("ordre"):
                 context['groupes'].setdefault(groupe.activite, [])
                 context['groupes'][groupe.activite].append(groupe)
         return context
