@@ -51,7 +51,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "fournisseurs": json.dumps({fournisseur.pk: fournisseur.nom for fournisseur in AchatFournisseur.objects.all()}),
             "categories": json.dumps({categorie.pk: categorie.nom for categorie in AchatCategorie.objects.all()}),
         })
-        articles = AchatArticle.objects.select_related("fournisseur", "categorie").filter(demande=self.instance if self.instance else 0)
+        articles = AchatArticle.objects.select_related("fournisseur", "categorie").filter(demande_id=self.instance.pk if self.instance else 0)
         self.fields["articles"].initial = json.dumps([{"idarticle": a.pk, "fournisseur": a.fournisseur_id, "categorie": a.categorie_id, "libelle": a.libelle,
                                                        "quantite": a.quantite, "observations": a.observations, "achete": a.achete} for a in articles])
 

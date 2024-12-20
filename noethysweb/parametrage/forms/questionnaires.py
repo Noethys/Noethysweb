@@ -86,7 +86,7 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields['ordre'].initial = self.instance.ordre
 
         # Liste de choix avancés
-        liste_choix = QuestionnaireChoix.objects.filter(question=self.instance if self.instance else 0).order_by("ordre")
+        liste_choix = QuestionnaireChoix.objects.filter(question_id=self.instance.pk if self.instance else 0).order_by("ordre")
         self.fields["liste_choix"].initial = json.dumps([model_to_dict(choix) for choix in liste_choix])
 
         # Empêche la modification de contrôle

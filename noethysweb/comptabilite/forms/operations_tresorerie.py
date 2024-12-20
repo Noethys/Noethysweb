@@ -59,7 +59,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "analytiques": json.dumps({analytique.pk: analytique.nom for analytique in ComptaAnalytique.objects.all()}),
             "categories": json.dumps({categorie.pk: categorie.nom for categorie in ComptaCategorie.objects.all()}),
         })
-        ventilations = ComptaVentilation.objects.select_related("analytique", "categorie").filter(operation=self.instance if self.instance else 0)
+        ventilations = ComptaVentilation.objects.select_related("analytique", "categorie").filter(operation_id=self.instance.pk if self.instance else 0)
         self.fields["ventilation"].initial = json.dumps([{"idventilation": v.pk, "date_budget": str(v.date_budget), "analytique": v.analytique_id, "categorie": v.categorie_id, "montant": str(v.montant)} for v in ventilations])
 
         # Affichage

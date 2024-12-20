@@ -41,7 +41,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "types_evenements": json.dumps({type_evenement.pk: type_evenement.nom for type_evenement in TypeEvenementCollaborateur.objects.all()}),
             "jours_semaine": json.dumps({num_jour: nom_jour for num_jour, nom_jour in JOURS_COMPLETS_SEMAINE}),
         })
-        lignes = LigneModelePlanningCollaborateur.objects.select_related("type_evenement").filter(modele=self.instance if self.instance else 0)
+        lignes = LigneModelePlanningCollaborateur.objects.select_related("type_evenement").filter(modele_id=self.instance.pk if self.instance else 0)
         self.fields["lignes"].initial = json.dumps([{
             "idligne": ligne.pk, "jour": ligne.jour, "periode": ligne.periode, "heure_debut": str(ligne.heure_debut),
             "heure_fin": str(ligne.heure_fin), "type_evenement": ligne.type_evenement_id, "titre": ligne.titre}
