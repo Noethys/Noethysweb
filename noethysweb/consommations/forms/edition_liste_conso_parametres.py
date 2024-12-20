@@ -113,6 +113,7 @@ class Formulaire(FormulaireBase, forms.Form):
         # Evénements
         self.fields['evenements'].label = False
         self.fields['evenements'].widget.attrs.update({'dates': dates})
+        self.fields["evenements"].widget.request = self.request
 
         # Unités
         self.fields['unites'].label = False

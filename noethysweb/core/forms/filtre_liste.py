@@ -19,7 +19,7 @@ from core.forms.base import FormulaireBase
 from core.utils import utils_dates
 from core.models import FiltreListe
 from core.widgets import DatePickerWidget, SelectionActivitesWidget, DateTimePickerWidget
-from consommations.widgets import SelectionEcolesWidget, SelectionClassesWidget, SelectionNiveauxWidget
+from consommations.widgets import SelectionEcolesWidget, SelectionClassesWidget, SelectionNiveauxWidget, SelectionEvenementsWidget
 
 
 def Get_form_filtres(request):
@@ -89,7 +89,6 @@ def Ajouter_filtre(request):
         dict_resultat["options"] = valeurs["options"]
     liste_labels_criteres = []
     for key, valeur in valeurs.items():
-
         if key.startswith("condition"):
             dict_resultat["condition"] = valeur
 
@@ -122,8 +121,9 @@ def Ajouter_filtre(request):
     traductions_criteres = {
         "EGAL": "est égal à", "DIFFERENT": "est différent de", "CONTIENT": "contient", "NE_CONTIENT_PAS": "ne contient pas",
         "SUPERIEUR": "est supérieur à", "SUPERIEUR_EGAL": "est supérieur ou égal à", "INFERIEUR": "est inférieur à", "INFERIEUR_EGAL": "est inférieur ou égal à",
-        "VRAI": "est vrai", "FAUX": "est faux", "COMPRIS": "est compris entre", "INSCRIT": "est inscrit sur une sélection d'activités au ", "PRESENT": "est présent sur une sélection d'activités entre",
-        "SANS_RESA": "est sans réservations sur une sélection d'activités entre", "EST_VIDE": "est vide", "EST_PAS_VIDE": "n'est pas vide",
+        "VRAI": "est vrai", "FAUX": "est faux", "COMPRIS": "est compris entre", "INSCRIT": "est inscrit sur une sélection d'activités au ",
+        "PRESENT": "a des consommations sur une sélection d'activités entre", "EVENEMENTS": "a des consommations sur une sélection d'évènements",
+        "SANS_RESA": "est sans consommation sur une sélection d'activités entre", "EST_VIDE": "est vide", "EST_PAS_VIDE": "n'est pas vide",
         "ECOLES": "est scolarisé sur une sélection d'écoles au", "CLASSES": "est scolarisé sur une sélection de classes",
         "NIVEAUX": "est scolarisé sur une sélection de niveaux scolaires au", "NON_SCOLARISE": "n'est pas scolarisé au",
         "EST_NUL": "est vide", "EST_PAS_NUL": "n'est pas vide",
@@ -165,7 +165,7 @@ class Formulaire(FormulaireBase, forms.Form):
     condition1 = forms.ChoiceField(label="Condition", choices=[("EGAL", "Est égal à"), ("DIFFERENT", "Est différent de"), ("CONTIENT", "Contient"), ("NE_CONTIENT_PAS", "Ne contient pas"), ("EST_VIDE", "Est vide"), ("EST_PAS_VIDE", "N'est pas vide")], required=False)
     condition2 = forms.ChoiceField(label="Condition", choices=[("EGAL", "Est égal à"), ("DIFFERENT", "Est différent de"), ("SUPERIEUR", "Est supérieur à"), ("SUPERIEUR_EGAL", "Est supérieur ou égal à"), ("INFERIEUR", "Est inférieur à"), ("INFERIEUR_EGAL", "Est inférieur ou égal à"), ("COMPRIS", "Est compris entre"), ("EST_NUL", "Est vide"), ("EST_PAS_NUL", "N'est pas vide")], required=False)
     condition3 = forms.ChoiceField(label="Condition", choices=[("VRAI", "Est vrai"), ("FAUX", "Est faux")], required=False)
-    condition4 = forms.ChoiceField(label="Condition", choices=[("INSCRIT", "Est inscrit sur l'une des activités suivantes"), ("PRESENT", "Est présent sur l'une des activités suivantes"), ("SANS_RESA", "Est sans réservations sur l'une des activités suivantes")], required=False)
+    condition4 = forms.ChoiceField(label="Condition", choices=[("INSCRIT", "Est inscrit sur l'une des activités suivantes"), ("PRESENT", "A des consommations sur l'une des activités suivantes"), ("EVENEMENTS", "A des consommations sur l'un des événements suivants"), ("SANS_RESA", "Est sans consommations sur l'une des activités suivantes")], required=False)
     condition5 = forms.ChoiceField(label="Condition", choices=[("*EGAL", "Est égal à"), ("*DIFFERENT", "Est différent de"), ("*CONTIENT", "Contient"), ("*NE_CONTIENT_PAS", "Ne contient pas"), ("*EST_VIDE", "Est vide"), ("*EST_PAS_VIDE", "N'est pas vide")], required=False)
     condition6 = forms.ChoiceField(label="Condition", choices=[("ECOLES", "Est scolarisé dans l'une des écoles suivantes"), ("CLASSES", "Est scolarisé dans l'une des classes suivantes"), ("NIVEAUX", "Est scolarisé dans l'un des niveaux suivants"), ("NON_SCOLARISE", "N'est pas scolarisé")], required=False)
     critere_texte = forms.CharField(label="Texte", required=False)
@@ -189,6 +189,7 @@ class Formulaire(FormulaireBase, forms.Form):
     critere_ecoles = forms.CharField(label="Ecoles", required=False, widget=SelectionEcolesWidget(attrs={"name": "liste_ecoles"}))
     critere_classes = forms.CharField(label="Classes", required=False, widget=SelectionClassesWidget(attrs={"name": "liste_classes"}))
     critere_niveaux = forms.CharField(label="Niveaux", required=False, widget=SelectionNiveauxWidget(attrs={"name": "liste_niveaux"}))
+    critere_evenements = forms.CharField(label="Evénements", required=False, widget=SelectionEvenementsWidget(attrs={"name": "liste_evenements"}), help_text="Vous pouvez uniquement cocher les événements de moins de 1 an.")
     critere_etats = forms.MultipleChoiceField(label="Etats", required=False, widget=Select2MultipleWidget(),
         choices=[("reservation", "Réservation"), ("present", "Présent"), ("attente", "Attente"), ("absentj", "Absence justifiée"), ("absenti", "Absence injustifiée")],
         initial=["reservation", "present"])
@@ -207,8 +208,8 @@ class Formulaire(FormulaireBase, forms.Form):
         'AutoField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
         'IntegerField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
         'DecimalField': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_decimal"], "DIFFERENT": ["critere_decimal"], "SUPERIEUR": ["critere_decimal"], "SUPERIEUR_EGAL": ["critere_decimal"], "INFERIEUR": ["critere_decimal"], "INFERIEUR_EGAL": ["critere_decimal"], "COMPRIS": ["critere_decimal_min", "critere_decimal_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
-        'ipresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date_optionnelle", "critere_etats_inscriptions", "critere_periode_naiss"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats", "critere_periode_naiss"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
-        'fpresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date_optionnelle", "critere_etats_inscriptions", "critere_periode_naiss"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats", "critere_periode_naiss"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
+        'ipresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date_optionnelle", "critere_etats_inscriptions", "critere_periode_naiss"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats", "critere_periode_naiss"], "EVENEMENTS": ["critere_evenements", "critere_etats", "critere_periode_naiss"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
+        'fpresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date_optionnelle", "critere_etats_inscriptions", "critere_periode_naiss"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats", "critere_periode_naiss"], "EVENEMENTS": ["critere_evenements", "critere_etats", "critere_periode_naiss"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
         'iscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_date", "critere_ecoles"], "CLASSES": ["critere_classes"], "NIVEAUX": ["critere_date", "critere_niveaux"], "NON_SCOLARISE": ["critere_date"]}},
         'fscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_date", "critere_ecoles"], "CLASSES": ["critere_classes"], "NIVEAUX": ["critere_date", "critere_niveaux"], "NON_SCOLARISE": ["critere_date"]}},
         'fprelevement_actif': {'condition': 'condition3', 'criteres': {"VRAI": [], "FAUX": []}},
@@ -235,6 +236,10 @@ class Formulaire(FormulaireBase, forms.Form):
 
         # Liste uniquement les activités accessibles pour l'utilisateur
         self.fields["critere_activites"].widget.request = self.request
+        self.fields["critere_evenements"].widget.request = self.request
+
+        # Affiche uniquement les événéments récents
+        self.fields["critere_evenements"].widget.attrs["date_min"] = datetime.date.today() - datetime.timedelta(days=365)
 
         # Date du jour
         # self.fields["critere_classes"].widget.attrs.update({"dates": [datetime.date.today()]})
@@ -326,6 +331,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("condition5"),
             Field("condition6"),
             Field("critere_activites"),
+            Field("critere_evenements"),
             Field("critere_texte"),
             Field("critere_date"),
             Field("critere_date_optionnelle"),

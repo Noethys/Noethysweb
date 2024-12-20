@@ -143,25 +143,32 @@ class SelectionEvenementsWidget(Widget):
         context = dict(self.attrs.items())
         if attrs is not None:
             context.update(attrs)
-        context['name'] = name
+        context['name'] = self.attrs.get("name", name)
 
         # Récupère les sélections initiales
         context['selections'] = []
         if value:
+            value = value.replace("evenements:", "")
             context['selections'] = [int(id) for id in value.split(";")]
 
         # Récupération des dates
         liste_dates = context.get("dates", [])
 
         # Branches 1
-        liste_activites = Activite.objects.filter(ouverture__date__in=liste_dates).order_by("-date_fin", "nom").distinct()
-        context['liste_branches1'] = [{"pk": activite.pk, "label": activite.nom} for activite in liste_activites]
+        conditions = Q(ouverture__date__in=liste_dates) if liste_dates else Q()
+        liste_activites = Activite.objects.filter(conditions, structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom").distinct()
 
         # Branches 2
         context['dict_branches2'] = {}
-        for evenement in Evenement.objects.select_related('activite').filter(activite_id__in=liste_activites, date__in=liste_dates).order_by("date", "heure_debut"):
+        conditions = Q(date__in=liste_dates) if liste_dates else Q()
+        if context.get("date_min", None):
+            conditions &= Q(date__gte=context["date_min"])
+        for evenement in Evenement.objects.select_related('activite', 'groupe').filter(conditions, activite_id__in=liste_activites).order_by("-date", "-heure_debut"):
             context['dict_branches2'].setdefault(evenement.activite_id, [])
-            context['dict_branches2'][evenement.activite_id].append({"pk": evenement.pk, "label": "%s : %s" % (utils_dates.ConvertDateToFR(evenement.date), evenement.nom)})
+            context['dict_branches2'][evenement.activite_id].append({"pk": evenement.pk, "label": "%s : %s (%s)" % (utils_dates.ConvertDateToFR(evenement.date), evenement.nom, evenement.groupe)})
+
+        # Ne conserve que les activités qui possèdent des événements
+        context['liste_branches1'] = [{"pk": activite.pk, "label": activite.nom} for activite in liste_activites if activite.pk in context['dict_branches2']]
 
         return context
 

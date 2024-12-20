@@ -111,7 +111,7 @@ class Liste_commun():
                 if filtre["condition"] == "FAUX": conditions &= Q(**{champ: False})
 
                 # Filtres spéciaux : Inscrit/Présent et Scolarisé
-                if filtre["condition"] in ("INSCRIT", "PRESENT", "SANS_RESA", "ECOLES", "CLASSES", "NIVEAUX", "NON_SCOLARISE"):
+                if filtre["condition"] in ("INSCRIT", "PRESENT", "EVENEMENTS", "SANS_RESA", "ECOLES", "CLASSES", "NIVEAUX", "NON_SCOLARISE"):
                     type_champ, champ = champ.split(":")
                     try:
                         if filtre["condition"] in ("ECOLES", "NIVEAUX"):
@@ -129,6 +129,7 @@ class Liste_commun():
                     if type_criteres == "ecoles": condition = Q(date_debut__lte=date_reference, date_fin__gte=date_reference, ecole__in=liste_criteres)
                     if type_criteres == "classes": condition = Q(classe__in=liste_criteres)
                     if type_criteres == "niveaux": condition = Q(date_debut__lte=date_reference, date_fin__gte=date_reference, niveau__in=liste_criteres)
+                    if type_criteres == "evenements": condition = Q(evenement_id__in=liste_criteres)
 
                     # Recherche les inscrits ou les présents
                     if filtre["condition"] == "INSCRIT":
@@ -154,6 +155,14 @@ class Liste_commun():
                             condition &= Q(etat__in=["reservation", "present"])
                         if len(criteres) > 4 and criteres[4]:
                             date_debut, date_fin = utils_dates.ConvertPeriodeFrToDate(criteres[4])
+                            liste_individus = [individu.pk for individu in Individu.objects.all() if (individu.date_naiss and (date_debut <= individu.date_naiss <= date_fin))]
+                            condition &= Q(individu_id__in=liste_individus)
+                        resultats = [resultat[donnee] for resultat in Consommation.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
+                    if filtre["condition"] == "EVENEMENTS":
+                        donnee = "inscription__famille" if type_champ == "fpresent" else "individu"
+                        condition &= Q(etat__in=criteres[1])
+                        if len(criteres) > 2 and criteres[2]:
+                            date_debut, date_fin = utils_dates.ConvertPeriodeFrToDate(criteres[2])
                             liste_individus = [individu.pk for individu in Individu.objects.all() if (individu.date_naiss and (date_debut <= individu.date_naiss <= date_fin))]
                             condition &= Q(individu_id__in=liste_individus)
                         resultats = [resultat[donnee] for resultat in Consommation.objects.values(donnee).filter(condition).annotate(nbre=Count('pk'))]
