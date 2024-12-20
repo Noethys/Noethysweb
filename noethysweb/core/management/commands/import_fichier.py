@@ -11,7 +11,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('fichier', type=str, help='Nom du fichier')
-        parser.add_argument('mdp', type=str, help='Mot de passe', nargs="?", default="")
+        parser.add_argument('--mdp', type=str, help='Mot de passe', nargs="?", default="")
         parser.add_argument('--conserve_mdp_internet', action='store_true', help='Conserve les mots de passe internet')
 
     def handle(self, *args, **kwargs):
