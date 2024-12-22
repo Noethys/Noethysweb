@@ -151,12 +151,13 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idprestation', 'date', 'individu', 'activite', 'label', 'montant', 'facture']
+            columns = ['check', 'idprestation', 'date', 'individu', 'activite', 'label', 'quantite', 'montant', 'facture']
             processors = {
                 'date': helpers.format_date('%d/%m/%Y'),
                 'montant': "Formate_montant_standard",
             }
             ordering = ['date']
+            hidden_columns = ['quantite']
 
         def Formate_montant(self, instance, **kwargs):
             ventile = Decimal(instance.ventile or 0.0)

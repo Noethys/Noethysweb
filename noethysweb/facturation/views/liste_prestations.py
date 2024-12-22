@@ -46,12 +46,13 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', "idprestation", "date", "label", "montant", "activite", "famille", "individu", "tarif", "tarif_date_debut", "facture"]
+            columns = ['check', "idprestation", "date", "label", "quantite", "montant", "activite", "famille", "individu", "tarif", "tarif_date_debut", "facture"]
             processors = {
                 "date": helpers.format_date("%d/%m/%Y"),
                 "montant": "Formate_montant_standard",
             }
             ordering = ["date"]
+            hidden_columns = ["quantite"]
 
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
