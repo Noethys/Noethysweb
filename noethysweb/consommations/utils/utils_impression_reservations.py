@@ -37,7 +37,7 @@ class Impression(utils_impression.Impression):
         totalFacturationFamille = 0.0
         for IDindividu, dictIndividu in self.dict_donnees["reservations"].items():
             nom = dictIndividu["nom"]
-            prenom = dictIndividu["prenom"]
+            prenom = dictIndividu["prenom"] or ""
             date_naiss = dictIndividu["date_naiss"]
             sexe = dictIndividu["sexe"]
             if date_naiss != None :
