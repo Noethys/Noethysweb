@@ -60,6 +60,7 @@ urlpatterns = [
     path('consommations/impression_pdf', secure_ajax(grille.Impression_pdf), name='ajax_grille_impression_pdf'),
     path('consommations/grille/get_form_questionnaire', grille.Get_form_questionnaire, name='ajax_grille_get_form_questionnaire'),
     path('consommations/grille/valid_form_questionnaire', grille.Valid_form_questionnaire, name='ajax_grille_valide_form_questionnaire'),
+    path('consommations/grille/memoriser_options', grille.Memoriser_options, name='ajax_grille_memoriser_options'),
     path('consommations/get_suivi_consommations', secure_ajax(suivi_consommations.Get_suivi_consommations), name='ajax_get_suivi_consommations'),
     path('consommations/get_activites', secure_ajax(suivi_consommations.Get_activites), name='ajax_get_activites'),
     path('consommations/etat_global/appliquer_parametres', secure_ajax(etat_global.Appliquer_parametres), name='ajax_etat_global_appliquer_parametres'),

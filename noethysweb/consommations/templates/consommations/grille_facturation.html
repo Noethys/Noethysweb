@@ -6,9 +6,19 @@
     <!-- Box Facturation -->
     <div class="card card-default">
         <div class="card-header with-border">
-            <h3 class="card-title"><i class="fa fa-euro margin-r-5"></i>Facturation</h3>
+            <h3 class="card-title"><i class="fa fa-euro margin-r-5"></i>Prestations</h3>
                 <div class="card-tools">
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    
+                    {% if data.mode != "portail" %}
+                        <div class="btn-group">
+                            <button href="#" class="btn btn-tool" title="Ajuster les options" data-toggle="dropdown"><i class="fa fa-gear"></i></button>
+                            <div class="dropdown-menu dropdown-menu-right" role="menu">
+                                <h6 class="dropdown-header"><strong>Options</strong></h6>
+                                <a href="#" id="afficher_quantites" class="dropdown-item option_affichage_facturation {% if data.options.afficher_quantites %}menu-checked{% endif %}" title="Afficher les quantités">Afficher les quantités</a>
+                            </div>
+                        </div>
+                    {% endif %}
+
                 </div>
         </div>
         <div class="card-body p-0">
@@ -42,5 +52,35 @@
         </div>
 
     </div>
+
+    <script>
+        $(document).ready(function() {
+    
+            // Click sur l'option Afficher les quantités
+            $(".option_affichage_facturation").on("click",function(event){
+                event.preventDefault();
+                $(this).hasClass("menu-checked") ? $(this).removeClass("menu-checked") : $(this).addClass("menu-checked");
+                dict_options.afficher_quantites = $(this).hasClass("menu-checked");
+                memorise_options_grille();
+                maj_box_facturation();
+            });
+    
+        });
+    
+        function memorise_options_grille() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_grille_memoriser_options' %}",
+                data: {
+                    afficher_quantites: $("#afficher_quantites").hasClass("menu-checked"),
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                },
+                success: function (data) {
+                    toastr.success("Cette option a été mémorisée");
+                }
+            });
+        };
+    
+    </script>
 
 {% endblock contenu_page %}

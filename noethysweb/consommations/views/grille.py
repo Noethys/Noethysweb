@@ -16,9 +16,15 @@ from django.conf import settings
 from crispy_forms.utils import render_crispy_form
 from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite, Consommation, MemoJournee, Evenement, Groupe, Ventilation, Famille, \
                         Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Individu, Activite, Scolarite, QuestionnaireReponse
-from core.utils import utils_dates, utils_decimal, utils_historique
+from core.utils import utils_dates, utils_decimal, utils_historique, utils_parametres
 from consommations.utils import utils_consommations
 from consommations.forms.grille_questionnaire import Formulaire as Formulaire_questionnaire
+
+
+def Memoriser_options(request):
+    parametres = {"afficher_quantites": request.POST.get("afficher_quantites", False) == "true"}
+    utils_parametres.Set_categorie(categorie="grille", utilisateur=request.user, parametres=parametres)
+    return JsonResponse({"succes": True})
 
 
 def Get_form_questionnaire(request):

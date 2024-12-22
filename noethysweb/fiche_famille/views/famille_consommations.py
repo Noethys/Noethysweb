@@ -74,7 +74,7 @@ class Modifier(Onglet, TemplateView):
         else:
             # Si c'est un chargement initial de la page
             data["periode"] = utils_parametres.Get(nom="periode", categorie="suivi_consommations", utilisateur=self.request.user, valeur={})
-            data["options"] = {} # todo : options préparées pour plus tard
+            data["options"] = utils_parametres.Get_categorie(categorie="grille", utilisateur=self.request.user, parametres={"afficher_quantites": False})
             data["selection_individus"] = [self.IDindividu,] if self.IDindividu != None else "__all__"
             data["selection_activite"] = None
             data["dict_suppressions"] = {"consommations": [], "prestations": [], "memos": []}

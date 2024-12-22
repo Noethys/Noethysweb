@@ -82,7 +82,7 @@ class View(CustomView, TemplateView):
         return context
 
     def Get_data_planning(self):
-        data = {"mode": "portail", "idfamille": self.request.user.famille.pk, "consommations": {}, "prestations": {}, "memos": {}, "options": {}}
+        data = {"mode": "portail", "idfamille": self.request.user.famille.pk, "consommations": {}, "prestations": {}, "memos": {}, "options": {"afficher_quantites": False}}
         data["dict_suppressions"] = {"consommations": [], "prestations": [], "memos": []}
 
         # Importation de l'individu

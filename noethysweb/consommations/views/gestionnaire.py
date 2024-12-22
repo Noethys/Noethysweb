@@ -80,6 +80,7 @@ class View(CustomView, TemplateView):
             data["selection_groupes"] = None
             data["selection_classes"] = None
             data["options"] = utils_parametres.Get_categorie(categorie="gestionnaire_%s" % self.mode_grille, utilisateur=self.request.user, parametres=options_defaut)
+            data["options"].update(utils_parametres.Get_categorie(categorie="grille", utilisateur=self.request.user, parametres={"afficher_quantites": False}))
             data["dict_suppressions"] = {"consommations": [], "prestations": [], "memos": []}
 
         # Récupération de la période

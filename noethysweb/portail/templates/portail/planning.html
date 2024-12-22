@@ -26,7 +26,7 @@
     {{ block.super }}
     <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
     <script>
-        var dict_options = null;
+        var dict_options = JSON.parse('{{ data.options_json|escapejs }}');
         function Get_periode() {return null;};
         function Get_individus() {return null;};
         function Get_groupes() {return null;};

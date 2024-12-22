@@ -1688,10 +1688,12 @@ function maj_box_facturation() {
         };
     });
 
+    var afficher_quantites = dict_options.afficher_quantites;
+
     // Dessine la table facturation
-    var montant_total_individus = 0;
+    var total_individus = {'montant': 0, 'quantite': 0};
     for (var key_individu of liste_key_individus) {
-        var total_individu = 0;
+        var total_individu = {'montant': 0, 'quantite': 0};
         var html = "";
         var key = key_individu[0] + '_' + key_individu[1]
         if (key in dict_prestations_temp) {
@@ -1720,17 +1722,25 @@ function maj_box_facturation() {
                         var dict_prestation = dict_prestations[idprestation];
                         var label = dict_prestation.label;
                         if (dict_prestation.aides.length > 0) {label += " <span class='exposant'>(Aide)</span>"};
-                        html += "<tr class='ligne_prestation'><td class='label_prestation'>" + label + "</td><td class='montant_prestation'>" + dict_prestation.montant.toFixed(2) + " €</td></tr>";
-                        total_individu += dict_prestation.montant;
+                        html += "<tr class='ligne_prestation'><td class='label_prestation'>" + label + "</td><td class='montant_prestation'>" + dict_prestation.montant.toFixed(2) + " €";
+                        if (afficher_quantites) {html += " (" + dict_prestation.quantite + ")"}
+                        html += "</td></tr>";
+                        total_individu['montant'] += dict_prestation.montant;
+                        total_individu['quantite'] += dict_prestation.quantite;
                     };
                 };
             };
         };
         $('#detail_facturation_individu_' + key_individu[0] + '_' + key_individu[1]).html(html);
-        $('#total_facturation_individu_' + key_individu[0] + '_' + key_individu[1]).html(total_individu.toFixed(2) + " €");
-        montant_total_individus += total_individu;
+        var texte = total_individu['montant'].toFixed(2) + " €";
+        if (afficher_quantites) {texte += " (" + total_individu['quantite'] + ")"}
+        $('#total_facturation_individu_' + key_individu[0] + '_' + key_individu[1]).html(texte);
+        total_individus['montant'] += total_individu['montant'];
+        total_individus['quantite'] += total_individu['quantite'];
     };
-    $('#total_facturation_individus').html(montant_total_individus.toFixed(2) + " €");
+    var texte = total_individus['montant'].toFixed(2) + " €";
+    if (afficher_quantites) {texte += " (" + total_individus['quantite'] + ")"}
+    $('#total_facturation_individus').html(texte);
 };
 
 function tout_recalculer() {
