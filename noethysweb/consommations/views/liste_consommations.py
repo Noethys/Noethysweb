@@ -4,7 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 import json
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse
 from django.http import JsonResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
