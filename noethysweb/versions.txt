@@ -1,3 +1,12 @@
+Version 1.2.7.8 (22/12/2024) :
+
+- Ajout de la sélection des événements dans le filtre Inscrits/Présents
+- Ajout de l'affichage des quantités dans le cadre Facturation de la grille des consommations
+- Ajout de la liste détaillée des consommations dans le menu Outils de la fiche famille
+- Ajout d'une colonne masquée Quantité dans la liste des prestations
+- Correction de l'affichage d'un individu sans prénom dans l'impression des réservations
+- Adaptations pour Django 5
+
 Version 1.2.7.7 (18/12/2024) :
 
 - Ajout de l'affichage du mot de passe sur les pages de connexion
