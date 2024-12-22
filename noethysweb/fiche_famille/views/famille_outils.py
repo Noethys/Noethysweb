@@ -33,8 +33,11 @@ class View(Onglet, DetailView):
                     {"titre": "Générer une attestation fiscale", "url": reverse_lazy("attestations_fiscales_generation", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                     {"titre": "Liste des attestations fiscales générées", "url": reverse_lazy("famille_attestations_fiscales_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                 ]},
-                {"titre": "Relevés des prestations", "items": [
+                {"titre": "Prestations", "items": [
                     {"titre": "Editer un relevé des prestations", "url": reverse_lazy("famille_releve_prestations", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+                ]},
+                {"titre": "Consommations", "items": [
+                    {"titre": "Liste détaillée des consommations", "url": reverse_lazy("famille_liste_consommations", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                 ]},
             ],
             [

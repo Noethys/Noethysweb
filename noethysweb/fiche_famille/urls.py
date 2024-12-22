@@ -10,7 +10,7 @@ from fiche_famille.views import famille, famille_questionnaire, famille_notes, f
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, famille_sms, \
                             famille_voir_rappel, famille_rappels, famille_portail, famille_emails, reglement_recu, famille_messagerie_portail, famille_mandats, famille_voir_mandat, famille_prestations_modele, \
                             famille_attestations_fiscales, famille_voir_attestation_fiscale, famille_locations, famille_voir_location, famille_remboursement, famille_factures_consulter, famille_factures_selection, \
-                            famille_edition_renseignements, reglement_recu_auto, famille_formulaires, famille_releve_prestations
+                            famille_edition_renseignements, reglement_recu_auto, famille_formulaires, famille_releve_prestations, famille_liste_consommations
 
 urlpatterns = [
 
@@ -152,6 +152,11 @@ urlpatterns = [
     path('individus/familles/export_xml/<int:idfamille>', famille_export_xml.View.as_view(), name='famille_export_xml'),
     path('individus/familles/edition_renseignements/<int:idfamille>', famille_edition_renseignements.View.as_view(), name='famille_edition_renseignements'),
     path('individus/familles/releve_prestations/<int:idfamille>', famille_releve_prestations.View.as_view(), name='famille_releve_prestations'),
+
+    path('individus/familles/consommations/liste/<int:idfamille>', famille_liste_consommations.Liste.as_view(), name='famille_liste_consommations'),
+    path('individus/familles/consommations/modifier/<int:idfamille>/<int:pk>', famille_liste_consommations.Modifier.as_view(), name='famille_liste_consommations_modifier'),
+    path('individus/familles/consommations/supprimer/<int:idfamille>/<int:pk>', famille_liste_consommations.Supprimer.as_view(), name='famille_liste_consommations_supprimer'),
+    path('individus/familles/consommations/supprimer_plusieurs/<int:idfamille>/<str:listepk>', famille_liste_consommations.Supprimer_plusieurs.as_view(), name='famille_liste_consommations_supprimer_plusieurs'),
 
     # Communication
     path('individus/familles/emails/ajouter/<int:idfamille>', famille_emails.Ajouter.as_view(), name='famille_emails_ajouter'),
