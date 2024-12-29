@@ -39,3 +39,4 @@ xlrd
 xlsxwriter
 pcloud
 crispy-bootstrap4
+openpyxl
