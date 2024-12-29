@@ -14,7 +14,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
                             abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses, certifications, \
-                            certifications_individus, certifications_familles, inscriptions_saisir_lot
+                            certifications_individus, certifications_familles, inscriptions_saisir_lot, importer_individus
 
 urlpatterns = [
 
@@ -32,6 +32,7 @@ urlpatterns = [
     path('individus/individus_doublons/liste', individus_doublons_liste.Liste.as_view(), name='individus_doublons_liste'),
     path('individus/recherche_avancee', recherche_avancee.View.as_view(), name='individus_recherche_avancee'),
     path('individus/effacer_familles', effacer_familles.Liste.as_view(), name='effacer_familles'),
+    path('individus/importer_individus', importer_individus.View.as_view(), name='importer_individus'),
 
     # Inscriptions
     path('individus/inscriptions', inscriptions_liste.Liste.as_view(), name='inscriptions_liste'),
@@ -197,4 +198,5 @@ urlpatterns = [
     path('individus/imprimer_liste_inscrits/generer_pdf', secure_ajax(imprimer_liste_inscrits.Generer_pdf), name='ajax_imprimer_liste_inscrits_generer_pdf'),
     path('individus/certifications_reinitialiser', secure_ajax(certifications.Reinitialiser), name='ajax_certifications_reinitialiser'),
     path('individus/inscriptions_saisir_lot', secure_ajax(inscriptions_saisir_lot.Appliquer), name='ajax_inscriptions_saisir_lot'),
+    path('individus/importer_individus/importer', secure_ajax(importer_individus.Importer), name='ajax_importer_individus_importer'),
 ]

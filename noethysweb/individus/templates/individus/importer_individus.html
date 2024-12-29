@@ -1,0 +1,301 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/jspreadsheet/jspreadsheet.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/jspreadsheet/jsuites.css' %}">
+    <style>
+        .jss_nested td {
+            font-weight: bold;
+            color: #3c8dbc;
+        }
+        .jss_content {
+            overflow-y: visible !important;
+        }
+    </style>
+{% endblock styles %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/jspreadsheet/jspreadsheet.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/jspreadsheet/jsuites.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-3">
+
+            <!-- Paramètres -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Paramètres</h3>
+                </div>
+                <div class="card-body">
+                    <button type="submit" form="form_parametres" class="btn btn-default btn-block mb-3" name="type_submit">Appliquer les paramètres</button>
+                    {% crispy form_parametres %}
+                </div>
+            </div>
+
+        </div>
+    
+        <div class="col-md-9">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-caret-square-o-right margin-r-5"></i> {% if data_excel %}Données{% else %}Introduction{% endif %}</h3>
+                </div>
+                <div class="card-body">
+
+                    {% if data_excel %}
+
+                        <div class="buttonHolder mb-3">
+                            <button class="btn btn-primary" onclick="importer(false)" title="Génération du PDF"><i class='fa fa-download margin-r-5'></i>Importer les données</button>
+                            <a class="btn btn-danger" href="{% url 'individus_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                            <button class="btn btn-default" onclick="$('#modal_aide').modal('show');" title="Informations sur l'importation"><i class='fa fa-info-circle margin-r-5'></i>Informations</button>
+                            <button class="btn btn-default" onclick="importer(true)" title="Tester la cohérence des données"><i class='fa fa-check-circle margin-r-5'></i>Tester les données</button>
+                        </div>
+
+                        <div style="overflow-x:auto; white-space: nowrap;margin-bottom: 10px;">
+                            <div class="spread" id="spreadsheet"></div>
+                        </div>
+
+                    {% else %}
+                        <p>Vous pouvez ici importer des individus dans la base de données depuis un fichier Excel.</p>
+                        <p>Tous les types de données ne sont pas importables, mais l'importation des informations principales sur les individus vous épargnera déjà une 
+                            fastidieuse saisie manuelle des noms, numéros de téléphone, adresses, etc...</p>
+                        
+                        <u>Etapes de la procédure :</u>
+                        <ol>
+                            <li>Commencez par renseigner les paramètres : Le fichier Excel (xlsx) à importer et le type de fichier (une ligne par individu ou une ligne par famille).</li>
+                            <li>Vous devrez ensuite procéder à l'affectation : il s'agit d'indiquer à quelle donnée correspond chaque colonne du tableau. Exemple : La colonne 1 correspond au nom de famille, la colonne 2 correspond au prénom, etc...</li>
+                            <li>Si aucune anomalie n'est détectée, les fiches familles et individuelles seront créées. Le cas échéant, vous pourrez modifier les anomalies directement dans le tableau des données affiché.</li>
+                        </ol>
+                        
+                        <u>Remarques importantes :</u>
+                        <ul>
+                            <li>Une civilité et un nom de famille doivent être au minimum renseignés pour chaque individu.</li>
+                            <li>Chaque famille doit comporter au moins un adulte représentant.</li>
+                            <li>En mode 'une ligne par individu', vous devez avoir une colonne "ID Famille' qui est une référence unique pour chaque famille. Il s'agit d'une chaîne
+                                alphanumérique de votre choix qui permettra au système d'identifier les individus d'une même famille. A défaut de cette information, le système créera 
+                                des fiches individuelles non rattachées. Il vous faudra alors ensuite les rattacher manuellement à des fiches familles.</li>
+                        </ul>
+                        
+                    {% endif %}
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    {# Modal Aide #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_aide{% endblock %}
+        {% block modal_titre %}Informations sur l'importation{% endblock %}
+        {% block modal_classe %}modal-lg modal-dialog-scrollable{% endblock %}
+        {% block modal_body %}
+            <p>Voici la liste des données importables :</p>
+            <div id="id_texte_aide">
+                <dl class="row">
+                    {% for item in liste_type_donnee %}
+                        <dt class="col-sm-4">{{ item.titre }}</dt>
+                        <dd class="col-sm-8">{{ item.description }}</dd>
+                    {% endfor %}
+                </dl>
+            </div>
+        {% endblock %}
+    {% endembed %}
+
+    {# Modal Rapport #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_rapport{% endblock %}
+        {% block modal_titre %}Résultats{% endblock %}
+        {% block modal_classe %}modal-lg modal-dialog-scrollable{% endblock %}
+        {% block modal_body %}
+            <div id="id_texte_rapport"></div>
+        {% endblock %}
+    {% endembed %}
+
+    {# Modal Type de colonne #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_type_colonne{% endblock %}
+        {% block modal_titre %}Affecter la colonne à une donnée{% endblock %}
+        {% block modal_body %}
+            <p>Sélectionnez la donnée qui se trouve dans cette colonne.</p>
+
+            {% if form_type_colonne %}{% crispy form_type_colonne %}{% endif %}
+
+            <p id="id_description_type_donnee"></p>
+
+            <div class="buttonHolder">
+                <div class="modal-footer d-flex" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                    <div class="btn-group mr-auto"></div>
+                    <button type="button" class="btn btn-primary" id="valider_type_colonne"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                </div>
+            </div>
+
+        {% endblock %}
+    {% endembed %}
+
+    <script>
+
+    var dict_colonnes_affectees = {};
+    var selection_colonne = null;
+    var dict_choix_types = JSON.parse("{{ dict_type_donnee|escapejs }}");
+
+    jspreadsheet.setDictionary({
+        "Copy": "Copier",
+        "Paste": "Coller",
+        "Save as": "Enregistrer sous",
+        "About": "A propos",
+    });
+
+    var tableau_excel = jspreadsheet($("#spreadsheet")[0], {
+        worksheets: [{
+            data: {{ data_excel }},
+            allowInsertColumn: false,
+            allowRenameColumn: false,
+            allowDeleteColumn: false,
+            tableOverflow: true,
+            tableHeight: "500px",
+            allowInsertRow: false,
+            allowDeleteRow: false,
+            columns: [
+                {% for colonne in colonnes %}
+                    {
+                        width: {{ colonne.largeur }},
+                        title: {% if colonne.entete %}"{{ colonne.entete }}"{% else %}null{% endif %}
+                    },
+                {% endfor %}
+            ],
+            nestedHeaders:[[
+                {% for colonne in colonnes %}
+                    {title: 'Cliquez ici pour affecter', colspan: '1'},
+                {% endfor %}
+            ]],
+        }],
+    });
+
+    $(document).ready(function() {
+        
+        {# Clic sur case affecter une colonne #}
+        $(".jss_nested td").mousedown(function(event) {
+            event.preventDefault();
+
+            // Récupère le numéro de la colonne
+            selection_colonne = $(this).data("column");
+            if (typeof selection_colonne === "undefined") {return false};
+            $("#id_type_donnee").val("")
+            if (selection_colonne in dict_colonnes_affectees) {
+                $("#id_type_donnee").val(dict_colonnes_affectees[selection_colonne])
+            }
+            $("#id_type_donnee").trigger("change");
+            $("#modal_type_colonne").modal("show");
+            $(".jss_spreadsheet thead tr td").css("z-index", "1000");
+        });
+
+        {# Sur changement liste déroulante type de donnée #}
+        $("#id_type_donnee").on("change", function() {
+            var description = dict_choix_types[$("#id_type_donnee").val()].description;
+            if (description) {description = "<i class='fa fa-info-circle margin-r-5'></i>" + description}
+            $("#id_description_type_donnee").html(description);
+        });
+
+    })
+
+    // Modal : Validation du type de donnée
+    $("#valider_type_colonne").on("click", function(event) {
+        var type_donnee = $("#id_type_donnee").val();
+
+        {# Vérifie que cette donnée n'a pas déjà été affectée à une autre colonne #}
+        $.each(dict_colonnes_affectees, function (num_colonne, code_donnee) {
+            if ((code_donnee == type_donnee) && (num_colonne != selection_colonne)) {
+                toastr.error("Cette donnée a déjà été affectée à une autre colonne");
+                type_donnee = false;
+                return false;
+            }
+        })
+        if (type_donnee === false) {return}
+        
+        dict_colonnes_affectees[selection_colonne] = type_donnee;
+        $(".jss_nested td[data-column=" + selection_colonne + "]").html(dict_choix_types[type_donnee].titre);
+        $("#modal_type_colonne").modal("hide");
+    });
+
+    // Importer
+    function importer(mode_test=false, masquer_avertissements=false) {
+        var box = bootbox.dialog({
+            message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Traitement des données en cours</b><br><br>Veuillez patienter...</p>",
+            closeButton: false
+        });
+        var donnees_tableau = tableau_excel[0].getData(false);
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_importer_individus_importer' %}",
+            data: {
+                donnees_tableau: JSON.stringify(donnees_tableau),
+                colonnes_affectees: JSON.stringify(dict_colonnes_affectees),
+                type_import: "{{ type_import }}",
+                mode_test: mode_test,
+                masquer_avertissements: masquer_avertissements,
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+            },
+            datatype: "json",
+            success: function(data){
+                bootbox.hideAll();
+                bootbox.alert(data.rapport_succes);
+            },
+            error: function(data) {
+                bootbox.hideAll();
+                
+                if (data.responseJSON.texte_avertissements) {
+                    bootbox.dialog({
+                        title: "Avertissements",
+                        message: data.responseJSON.texte_avertissements,
+                        buttons: {
+                            ok: {
+                                label: "<i class='fa fa-check'></i> Continuer quand même",
+                                className: 'btn-success',
+                                callback: function () {
+                                    importer(mode_test=mode_test, masquer_avertissements=true);
+                                }
+                            },
+                            cancel: {
+                                label: "<i class='fa fa-ban'></i> Annuler",
+                                className: 'btn-danger',
+                            }
+                        }
+                    });
+                    return false;
+                }
+
+                // Affichage résumé dans un toastr
+                toastr.error(data.responseJSON.texte_resume);
+
+                // Affichage des erreurs des données
+                if (data.responseJSON.anomalies_donnees) {
+                    for (var item of data.responseJSON.anomalies_donnees) {
+                        tableau_excel[0].setComments(jspreadsheet.helpers.getCellNameFromCoords(item[1], item[0]), item[2]);
+                        tableau_excel[0].getCell(item[1], item[0]).style.backgroundColor = "orange";
+                    }
+                }
+                
+                // Affichage du rapport dans un modal
+                if (data.responseJSON.texte_rapport) {
+                    $("#id_texte_rapport").html(data.responseJSON.texte_rapport)
+                    $('#modal_rapport').modal('show');
+                }
+            }
+        })
+    }
+
+    </script>
+
+{% endblock contenu_page %}
