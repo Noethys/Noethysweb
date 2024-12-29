@@ -43,6 +43,9 @@ class Page(crud.Page):
         return context_data
 
     def form_valid(self, form):
+        if getattr(self, "verbe_action", None) == "Supprimer":
+            return super().form_valid(form)
+
         if "activite" in self.kwargs:
             activite = self.kwargs["activite"]
         else:

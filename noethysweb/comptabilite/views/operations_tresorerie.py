@@ -121,6 +121,9 @@ class Page(crud.Page):
         return reverse_lazy(url, kwargs={'categorie': self.Get_categorie()})
 
     def form_valid(self, form):
+        if getattr(self, "verbe_action", None) == "Supprimer":
+            return super().form_valid(form)
+        
         # Récupération de la ventilation
         ventilations = json.loads(form.cleaned_data.get("ventilation", "[]"))
 

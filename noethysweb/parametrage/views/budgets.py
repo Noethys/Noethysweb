@@ -32,6 +32,9 @@ class Page(crud.Page):
         return context
 
     def form_valid(self, form):
+        if getattr(self, "verbe_action", None) == "Supprimer":
+            return super().form_valid(form)
+
         formset_categories = FORMSET_CATEGORIES(self.request.POST, instance=self.object, form_kwargs={"request": self.request})
         if not formset_categories.is_valid():
             return self.render_to_response(self.get_context_data(form=form))

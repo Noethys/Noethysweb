@@ -141,6 +141,9 @@ class Page(Onglet):
         return reverse_lazy(url, kwargs={'idfamille': self.kwargs.get('idfamille', None)})
 
     def form_valid(self, form):
+        if getattr(self, "verbe_action", None) == "Supprimer":
+            return super().form_valid(form)
+
         famille = form.cleaned_data["famille"]
         individu = form.cleaned_data["individu"]
         facturer = form.cleaned_data["facturer"]

@@ -64,6 +64,9 @@ class Page(crud.Page):
     ]
 
     def form_valid(self, form):
+        if getattr(self, "verbe_action", None) == "Supprimer":
+            return super().form_valid(form)
+
         # Récupération des lignes
         lignes = json.loads(form.cleaned_data.get("lignes", "[]"))
         if not lignes:

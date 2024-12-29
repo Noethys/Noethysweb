@@ -30,6 +30,9 @@ class Page(crud.Page):
     objet_pluriel = "des articles"
 
     def form_valid(self, form):
+        if getattr(self, "verbe_action", None) == "Supprimer":
+            return super().form_valid(form)
+
         # Sauvegarde
         self.object = form.save()
 

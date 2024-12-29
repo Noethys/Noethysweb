@@ -71,6 +71,9 @@ class Page(crud.Page):
     ]
 
     def form_valid(self, form):
+        if getattr(self, "verbe_action", None) == "Supprimer":
+            return super().form_valid(form)
+
         resultat = Form_valid(form=form, request=self.request, object=self.object)
         if resultat == True:
             return HttpResponseRedirect(self.get_success_url())

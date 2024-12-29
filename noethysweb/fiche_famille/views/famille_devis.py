@@ -113,6 +113,9 @@ class Page(Onglet):
         return reverse_lazy(url, kwargs={'idfamille': self.kwargs.get('idfamille', None)})
 
     def form_valid(self, form):
+        if getattr(self, "verbe_action", None) == "Supprimer":
+            return super().form_valid(form)
+
         # Vérifie que le devis a été généré
         if "infos" not in form.cleaned_data:
             messages.add_message(self.request, messages.ERROR, "Vous devez cliquer sur Aperçu ou Envoyer par Email avant d'enregistrer")
