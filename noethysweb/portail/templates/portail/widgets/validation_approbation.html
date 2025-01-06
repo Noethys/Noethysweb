@@ -24,7 +24,7 @@
                         {% endif %}
                     </div>
                 </td>
-                {% if unite_consentement %}
+                {% if unite_consentement and unite_consentement.document %}
                     <td class="text-right py-0 pt-1">
                         <a href="{{ unite_consentement.document.url }}" style="text-decoration: none;" target="_blank" class="btn btn-light btn-xs" title="{% trans "Cliquez ici pour ouvrir le document dans un nouvel onglet" %}"><i class="fa fa-search"></i></a>
                     </td>
