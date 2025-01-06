@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 import json, datetime
+from operator import itemgetter
 from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView
 from django.db.models import Q
@@ -208,7 +209,7 @@ def Get_resultats(parametres={}, etat="attente", request=None):
 
                     # Branches inscriptions
                     listeInscriptions = [(min([dictConsoIndividu["date_saisie"] for dictConsoIndividu in listeConso]), inscription) for inscription, listeConso in dictTemp.items()]
-                    listeInscriptions.sort()
+                    listeInscriptions = sorted(listeInscriptions, key=itemgetter(0))
 
                     num = 1
                     for ordreIndividu, inscription in listeInscriptions:
