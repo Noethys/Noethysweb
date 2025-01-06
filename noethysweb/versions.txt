@@ -1,3 +1,11 @@
+Version 1.2.7.9 (06/01/2025) :
+
+- Ajout de l'import d'individus depuis Excel
+- Ajout de la librairie Openpyxl
+- Correction sur le nouveau tri de la liste d'attente
+- Correction de l'affichage du consentement sans document associé
+- Adaptations pour Django 5
+
 Version 1.2.7.8 (22/12/2024) :
 
 - Ajout de la sélection des événements dans le filtre Inscrits/Présents
