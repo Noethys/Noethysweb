@@ -11,7 +11,7 @@ from outils.views import editeur_emails, editeur_emails_express, historique, upd
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
                         demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur, editeur_sms, editeur_sms_familles, \
                         editeur_sms_individus, editeur_sms_collaborateurs, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures, editeur_sms_express, taches, \
-                        suivi_reservations, commandes
+                        suivi_reservations, commandes, desk_creer
 
 urlpatterns = [
 
@@ -81,6 +81,7 @@ urlpatterns = [
 
     # Sauvegarde
     path('outils/sauvegarde/creer', sauvegarde_creer.View.as_view(), name='sauvegarde_creer'),
+    path('outils/desk/creer', desk_creer.View.as_view(), name='desk_creer'),
 
     # Commandes
     path('outils/commandes/liste', commandes.Liste.as_view(), name='commandes_liste'),
@@ -130,5 +131,5 @@ urlpatterns = [
     path('outils/reservations_valider_form_activites', secure_ajax(suivi_reservations.Valider_form_activites), name='ajax_reservations_valider_form_activites'),
     path('outils/reservations_valider_form_periode', secure_ajax(suivi_reservations.Valider_form_periode), name='ajax_reservations_valider_form_periode'),
     path('outils/commandes/generer_pdf', secure_ajax(commandes.Generer_pdf), name='ajax_commandes_generer_pdf'),
-
+    path('outils/desk_creer/', secure_ajax(desk_creer.Generer), name='ajax_desk_generer'),
 ]

@@ -199,8 +199,9 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_calendrier.Add(code="calendrier_annuel", titre="Calendrier annuel", icone="file-text-o")
 
     # Sauvegarde
-    menu_sauvegarde = menu_outils.Add(titre="Sauvegarde")
+    menu_sauvegarde = menu_outils.Add(titre="Sauvegardes")
     menu_sauvegarde.Add(code="sauvegarde_creer", titre="Créer une sauvegarde", icone="file-text-o", compatible_demo=False)
+    menu_sauvegarde.Add(code="desk_creer", titre="Récupérer les données", icone="file-text-o", compatible_demo=False, superutilisateur_only=True, masquer=not settings.SECRET_EXPORT_DESK)
 
     # Restauration
     menu_restauration = menu_outils.Add(titre="Restauration")
@@ -552,7 +553,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
 
 class Menu():
-    def __init__(self, parent=None, code="", titre="", icone=None, url=None, user=None, toujours_afficher=False, compatible_demo=True, args=None):
+    def __init__(self, parent=None, code="", titre="", icone=None, url=None, user=None, toujours_afficher=False, compatible_demo=True, masquer=False, args=None):
         self.parent = parent
         self.code = code
         self.titre = titre
@@ -563,6 +564,7 @@ class Menu():
         self.user = user
         self.toujours_afficher = toujours_afficher
         self.compatible_demo = compatible_demo
+        self.masquer = masquer
 
     def __repr__(self):
         return "<Menu '%s'>" % self.titre
@@ -570,9 +572,12 @@ class Menu():
     def GetParent(self):
         return self.parent
 
-    def Add(self, code="", titre="", icone="", url=None, toujours_afficher=False, compatible_demo=True, args=None):
-        menu = Menu(self, code=code, titre=titre, icone=icone, url=url, args=args, user=self.user, compatible_demo=compatible_demo, toujours_afficher=toujours_afficher)
-        if not code or not self.user or toujours_afficher or code.endswith("_toc") or self.user.has_perm("core.%s" % code):
+    def Add(self, code="", titre="", icone="", url=None, toujours_afficher=False, compatible_demo=True, args=None, superutilisateur_only=False, masquer=False):
+        menu = Menu(self, code=code, titre=titre, icone=icone, url=url, args=args, user=self.user, compatible_demo=compatible_demo, toujours_afficher=toujours_afficher, masquer=masquer)
+        afficher = not code or not self.user or toujours_afficher or code.endswith("_toc") or self.user.has_perm("core.%s" % code)
+        if masquer or (self.user and superutilisateur_only and not self.user.is_superuser):
+            afficher = False
+        if afficher:
             self.children.append(menu)
         return menu
 

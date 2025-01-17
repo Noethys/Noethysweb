@@ -42,6 +42,10 @@ def Vider_rep_temp():
     Corriger_anomalies()
     Purge_mdp_expires()
     Purge_auto_historique()
+    # Nettoyer répertoire desk dans storage
+    from outils.utils import utils_export_desk
+    desk = utils_export_desk.Desk()
+    desk.Nettoyer_storage()
 
 def Corriger_anomalies():
     logger.debug("%s : Lancement de la correction automatique des anomalies..." % datetime.datetime.now())

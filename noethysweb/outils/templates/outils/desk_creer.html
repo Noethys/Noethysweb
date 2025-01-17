@@ -1,0 +1,96 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    {% embed 'core/box.html' %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}{{ box_titre }}{% endblock %}
+        {% block box_introduction %}
+            Vous pouvez ici récupérer la base de données ainsi qu'une version autonome de Noethysweb nommée Noethysweb Desk.
+            Cet outil vous permet de continuer d'utiliser Noethysweb sur un ordinateur Windows avec une copie des données.
+        {% endblock %}
+        {% block box_contenu %}
+            <div class="mb-3">
+                <div id="erreurs" class="text-red"></div>
+                <button type='button' onclick="$('#modal_desk_creer').modal('show');" class="btn btn-primary"><i class="fa fa-database margin-r-5"></i> Générer un fichier de données Noethysweb Desk</button>
+            </div>
+            <div>
+                <b>Comment générer votre fichier de données :</b>
+                <ol>
+                    <li>Récupérez le code d'autorisation et le lien de téléchargement qui vous ont été transmis par votre installateur Noethysweb.</li>
+                    <li>Cliquez sur le bouton de génération ci-dessous et saisissez votre code d'autorisation et un mot de passe de votre choix.</li>
+                    <li>Patientez, la génération peut prendre quelques minutes à quelques heures...</li>
+                    <li>Le fichier généré sera détruit automatiquement durant la nuit. Vous devez donc le récupérer aujourd'hui.</li>
+                </ol>
+                <b>Comment récupérer votre fichier de données :</b>
+                <ol>
+                    <li>Allez sur la page de téléchargement grâce au lien de téléchargement et saisissez votre code d'autorisation lorsqu'un mot de passe vous est demandé.</li>
+                    <li>Téléchargez le fichier Noethysweb Desk. S'il n'apparaît pas encore, attendez la fin de la génération.</li>
+                    <li>Si vous ne l'avez pas déjà, téléchargez et installez le logiciel gratuit 7zip (<a href="https://www.7-zip.fr">https://www.7-zip.fr</a>)</li>
+                    <li>Utilisez 7zip pour décompresser le fichier Noethysweb Desk. Il vous sera demandé de saisir le mot de passe que vous avez renseigné lors de la génération.</li>
+                    <li>Dans le répertoire décompressé, vous trouverez un fichier LISEZMOI qui vous permettra d'installer Noethysweb Desk.</li>
+                </ol>
+            </div>
+        {% endblock %}
+
+    {% endembed %}
+
+    {# Modal Sélection de la période #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_desk_creer{% endblock %}
+        {% block modal_titre %}Générer l'export{% endblock %}
+        {% block modal_body %}
+            <div id="modal_erreurs" class="text-red"></div>
+            {% crispy form %}
+            <div class="buttonHolder">
+                <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                    <button type="button" class="btn btn-primary" id="valider_desk_creer"/><i class="fa fa-check margin-r-5"></i>Valider</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                </div>
+            </div>
+        {% endblock %}
+    {% endembed %}
+
+    <script>
+        $(document).ready(function() {
+            $("#valider_desk_creer").on('click', function(event) {
+                $('#modal_desk_creer').modal('hide');
+                
+                event.preventDefault();
+                var box = bootbox.dialog({
+                    message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Création de l'export en cours</b><br><br>Cette opération peut durer plusieurs minutes. Veuillez patienter...</p>",
+                    closeButton: false
+                });
+
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_desk_generer' %}",
+                    data: $("#form_desk_creer").serialize(),
+                    datatype: "json",
+                    success: function(data){
+                        bootbox.hideAll();
+                        var texte = "<div class='alert alert-success'><h6><i class='icon fa fa-check'></i> L'export est terminé</h6></div>"
+                        $("#erreurs").html(texte);
+                        toastr.success(("L'export est terminé"));
+                    },
+                    error: function(data) {
+                        bootbox.hideAll();
+                        var texte = "<div class='alert alert-danger'><h6><i class='icon fa fa-exclamation-triangle'></i> Erreur</h6>" + data.responseJSON.erreur + "</div>"
+                        $("#erreurs").html(texte);
+                        toastr.error(data.responseJSON.erreur);
+                    }
+                });
+            });
+        });
+
+    </script>
+
+{% endblock %}
