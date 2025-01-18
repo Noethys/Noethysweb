@@ -1,0 +1,78 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+    </div>
+
+    {# Modal Modifier des pièces #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_modifier{% endblock %}
+        {% block modal_titre %}Modifier des pièces{% endblock %}
+        {% block modal_body %}
+            {% crispy form_modifier %}
+            <div class="buttonHolder">
+                <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                    <button type="button" class="btn btn-primary" title="Valider" id="bouton_valider" onclick="valider_modifier()"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                </div>
+            </div>
+        {% endblock %}
+    {% endembed %}
+
+    <script>
+
+        function afficher_modal_modifier() {
+            $("#modal_modifier").modal("show");
+        }
+
+        function Actualiser_page() {
+            var table = new $.fn.dataTable.Api('.datatable');
+            var index_page = table.page();
+            table.ajax.reload();
+            table.page(index_page).draw('page');
+        };
+
+        function valider_modifier() {
+            var listepk = get_coches();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_pieces_fournies_modifier_lot' %}",
+                data: {
+                    form_modifier: JSON.stringify($("#piece_modifier_form").serializeObject()),
+                    liste_pieces: JSON.stringify(listepk),
+                },
+                datatype: "json",
+                success: function (data) {
+                    Actualiser_page();
+                    $("#modal_modifier").modal("hide");
+                },
+                error: function(data) {
+                    Actualiser_page();
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
+    </script>
+
+{% endblock contenu_page %}

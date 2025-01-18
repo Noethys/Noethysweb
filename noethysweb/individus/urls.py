@@ -199,4 +199,5 @@ urlpatterns = [
     path('individus/certifications_reinitialiser', secure_ajax(certifications.Reinitialiser), name='ajax_certifications_reinitialiser'),
     path('individus/inscriptions_saisir_lot', secure_ajax(inscriptions_saisir_lot.Appliquer), name='ajax_inscriptions_saisir_lot'),
     path('individus/importer_individus/importer', secure_ajax(importer_individus.Importer), name='ajax_importer_individus_importer'),
+    path('individus/pieces_fournies_modifier_lot', secure_ajax(liste_pieces_fournies.Modifier_lot), name='ajax_pieces_fournies_modifier_lot'),
 ]
