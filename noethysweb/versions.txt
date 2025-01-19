@@ -1,3 +1,7 @@
+Version 1.2.8.1 (19/01/2025) :
+
+- Correction des settings
+
 Version 1.2.8.0 (19/01/2025) :
 
 - Ajout de la liste des factures détaillées dans le menu Facturation
