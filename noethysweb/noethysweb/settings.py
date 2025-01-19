@@ -16,6 +16,7 @@ PORTAIL_ACTIF = True
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'cle_secrete_a_modifier_imperativement'
+SECRET_EXPORT_DESK = None
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
