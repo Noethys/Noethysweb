@@ -1,0 +1,96 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-3" >
+
+            <!-- Paramètres -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Paramètres</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <button type="submit" form="form_parametres" class="btn btn-primary btn-block mb-3" name="type_submit" title="Actualiser les résultats"><i class="fa fa-refresh margin-r-5"></i> Actualiser les résultats</button>
+                    {% crispy form_parametres %}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-9">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-caret-square-o-right margin-r-5"></i> Résultats</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>{{ box_introduction }}</p>
+
+                    <script>
+                        var contenu_table = JSON.parse('{{ liste_lignes|escapejs }}');
+                    </script>
+
+                    <table id="table" class="table table-sm table-xxs" data-show-footer='true'>
+                        <thead>
+                            <tr>
+                                {% for colonne in liste_colonnes %}
+                                    <th data-field="{{ forloop.counter0 }}" data-halign="center" data-align="center" data-footer-formatter="calcule_total">{{ colonne }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                    </table>
+
+                    <script>
+                        function calcule_total(items) {
+                            {# Calcule le total de chaque colonne #}
+                            var colonne = this.field;
+                            if (colonne === "col0") {return "Total"}
+                            var total = 0;
+                            items.forEach(function(item) {
+                                if ($.isNumeric(item[colonne]) && (item.regroupement === true)) {
+                                    total = total + item[colonne];
+                                };
+                            });
+                            if (!($("#id_donnee_case").val().includes("nbre"))) {
+                                total = total.toFixed(2);
+                            }
+                            return total;
+                        };
+                        function formate_case(value, row, index) {
+                            if (row.regroupement === true) {
+                                return {classes: 'case_regroupement'};
+                            };
+                            return {};
+                        };
+                        function formate_montant(value, row, index) {
+                            try {
+                                if (!($("#id_donnee_case").val().includes("nbre"))) {
+                                    return value.toFixed(2);
+                                } else {
+                                    return value;
+                                }
+                            } catch (error) {
+                                return ""
+                            };
+                        };
+                    </script>
+
+                    {% include 'core/widgets/bootstrap-table.html' %}
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock contenu_page %}

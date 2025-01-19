@@ -12,7 +12,8 @@ from facturation.views import factures_generation, liste_prestations, liste_fact
                                 rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations, \
                                 lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
                                 attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes, edition_recap_factures, \
-                                factures_modifier, export_ecritures_cloe, saisie_lot_forfaits_credits, synthese_deductions, export_ecritures_cwe
+                                factures_modifier, export_ecritures_cloe, saisie_lot_forfaits_credits, synthese_deductions, export_ecritures_cwe, \
+                                liste_factures_detaillees
 
 urlpatterns = [
 
@@ -23,6 +24,7 @@ urlpatterns = [
     path('facturation/factures_generation', Verifie_ventilation(factures_generation.View.as_view()), name='factures_generation'),
     path('facturation/factures_generation/<int:idfamille>', factures_generation.View.as_view(), name='factures_generation'),
     path('facturation/liste_factures', liste_factures.Liste.as_view(), name='liste_factures'),
+    path('facturation/liste_factures_detaillees', liste_factures_detaillees.Liste.as_view(), name='liste_factures_detaillees'),
     path('facturation/factures_supprimer_plusieurs/<str:listepk>', liste_factures.Supprimer_plusieurs.as_view(), name='factures_supprimer_plusieurs'),
     path('facturation/factures_impression', factures_impression.Liste.as_view(), name='factures_impression'),
     path('facturation/factures_email', factures_email.Liste.as_view(), name='factures_email'),
