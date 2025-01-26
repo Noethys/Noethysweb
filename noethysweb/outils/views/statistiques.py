@@ -6,7 +6,7 @@
 from django.urls import reverse_lazy, reverse
 from core.views.base import CustomView
 from django.db.models import Q, Count, F
-from core.models import Activite, Consommation, Inscription, Famille, Individu, Vacance, Scolarite, LISTE_MOIS, Historique, TarifLigne, Quotient
+from core.models import Activite, Consommation, Inscription, Famille, Individu, Vacance, Scolarite, LISTE_MOIS, Historique, TarifLigne, Quotient, Rattachement
 from django.views.generic import TemplateView
 from outils.forms.statistiques import Formulaire
 from core.utils import utils_dates
@@ -405,22 +405,27 @@ class View(CustomView, TemplateView):
 
             # ================================ FAMILLES ====================================
 
+            liste_idfamille = []
             if rubrique.startswith("familles"):
                 if presents:
-                    condition = Q(rattachement__individu__consommation__activite__in=liste_activites, rattachement__individu__consommation__date__gte=presents[0], rattachement__individu__consommation__date__lte=presents[1], rattachement__individu__consommation__etat__in=parametres["etats"])
+                    condition = Q(activite__in=liste_activites, date__gte=presents[0], date__lte=presents[1], etat__in=parametres["etats"])
+                    condition = Q(pk__in=list({c.inscription_id: True for c in Consommation.objects.filter(condition)}.keys()))
                 else:
-                    condition = Q(rattachement__individu__inscription__activite__in=liste_activites)
+                    condition = Q(activite__in=liste_activites)
                     if inscrits_periode:
-                        condition &= Q(rattachement__individu__inscription__date_debut__gte=inscrits_periode[0], rattachement__individu__inscription__date_debut__lte=inscrits_periode[1])
+                        condition &= Q(date_debut__gte=inscrits_periode[0], date_debut__lte=inscrits_periode[1])
+
+                inscriptions = Inscription.objects.select_related("activite").filter(condition)
+                liste_idfamille = list({inscription.famille_id: True for inscription in inscriptions}.keys())
 
             # ---------------------------- FAMILLES : Nombre -------------------------------
             if rubrique == "familles_nombre":
 
                 # Texte : Nombre d'individus total
-                data.append(Texte(texte="%d familles dont au moins un membre est %s." % (Famille.objects.filter(condition).distinct().count(), "présent" if presents else "inscrit")))
+                data.append(Texte(texte="%d familles dont au moins un membre est %s." % (len(liste_idfamille), "présent" if presents else "inscrit")))
 
                 # Tableau : Répartition des familles par activité
-                familles = Famille.objects.filter(condition).values_list("rattachement__individu__%s__activite__nom" % ("consommation" if presents else "inscription")).annotate(nbre=Count("idfamille", distinct=True)).order_by("-nbre")
+                familles = inscriptions.values_list("activite__nom").annotate(nbre=Count("famille_id", distinct=True)).order_by("-nbre")
                 data.append(Tableau(
                     titre="Répartition du nombre de familles par activité",
                     colonnes=["Activité", "Nombre de familles"],
@@ -433,14 +438,16 @@ class View(CustomView, TemplateView):
                     if liste_periodes:
                         liste_labels, liste_valeurs = [], []
                         for dict_periode in liste_periodes:
-                            condition_temp = Q(rattachement__individu__consommation__activite__in=liste_activites, rattachement__individu__consommation__date__gte=dict_periode["date_debut"], rattachement__individu__consommation__date__lte=dict_periode["date_fin"], rattachement__individu__consommation__etat__in=parametres["etats"])
                             liste_labels.append(dict_periode["label"])
-                            liste_valeurs.append(Famille.objects.filter(condition_temp).distinct().count())
+                            condition = Q(activite__in=liste_activites, date__gte=dict_periode["date_debut"], date__lte=dict_periode["date_fin"], etat__in=parametres["etats"])
+                            liste_valeurs.append(len({c.inscription.famille_id: True for c in Consommation.objects.select_related("inscription").filter(condition)}))
+
                         data.append(Histogramme(titre="Evolution du nombre des familles", type_chart="bar", labels=liste_labels, valeurs=liste_valeurs))
 
                 # Chart : Nombre de familles par date
                 if presents:
-                    familles = Famille.objects.filter(condition).values_list('rattachement__individu__consommation__date').annotate(nbre=Count('idfamille', distinct=True)).order_by('rattachement__individu__consommation__date')
+                    condition = Q(activite__in=liste_activites, date__gte=presents[0], date__lte=presents[1], etat__in=parametres["etats"])
+                    familles = Consommation.objects.filter(condition).values_list("date").annotate(nbre=Count("inscription__famille_id", distinct=True)).order_by("date")
                     data.append(Histogramme(
                         titre="Nombre familles par date", type_chart="line",
                         labels=[utils_dates.ConvertDateToFR(date) for date, nbre in familles],
@@ -451,7 +458,7 @@ class View(CustomView, TemplateView):
             # ---------------------------- FAMILLES : Caisse -------------------------------
             if rubrique == "familles_caisse":
 
-                familles = Famille.objects.filter(condition).values_list("caisse__nom").annotate(nbre=Count("idfamille", distinct=True)).order_by("-nbre")
+                familles = Famille.objects.filter(pk__in=liste_idfamille).values_list("caisse__nom").annotate(nbre=Count("idfamille", distinct=True)).order_by("-nbre")
 
                 # Tableau : Répartition des familles par caisse
                 data.append(Tableau(
@@ -470,7 +477,7 @@ class View(CustomView, TemplateView):
             # ---------------------------- FAMILLES : Composition -------------------------------
 
             if rubrique == "familles_composition":
-                familles = Individu.objects.filter(condition).values_list("inscription__famille").annotate(nbre=Count("idindividu", distinct=True)).order_by("nbre")
+                familles = Individu.objects.filter(pk__in=[inscription.individu_id for inscription in inscriptions]).values_list("inscription__famille").annotate(nbre=Count("idindividu", distinct=True)).order_by("nbre")
                 dict_familles = {}
                 for item in familles:
                     dict_familles.setdefault(item[1], 0)
@@ -501,7 +508,7 @@ class View(CustomView, TemplateView):
                     data.append(Texte("Erreur : Les tranches de QF saisies semblent erronées."))
 
                 # Recherche des qf des familles
-                familles = Famille.objects.filter(condition).distinct()
+                familles = Famille.objects.filter(pk__in=liste_idfamille).distinct()
                 condition_qf = Q(famille__in=familles, date_debut__lte=presents[1], date_fin__gte=presents[0]) if presents else Q(famille__in=familles)
                 dict_quotients = {quotient.famille_id: quotient.quotient for quotient in Quotient.objects.filter(condition_qf).order_by("date_debut")}
 
