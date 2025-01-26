@@ -38,6 +38,7 @@ def Get_regroupements():
 def Get_modes():
     liste_modes = [
         ("nbre", "Nombre de prestations"), ("facture", "Montant des prestations"),
+        ("facture_ht", "Montant des prestations HT"), ("facture_tva", "Montant de la TVA"),
         ("regle", "Montant des prestations réglées"), ("impaye", "Montant des prestations impayées"),
         ("nbre_facturees", "Nombre de prestations facturées"),
         ("facture_facturees", "Montant des prestations facturées"),

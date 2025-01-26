@@ -257,6 +257,13 @@ class View(CustomView, TemplateView):
 
                 return key, key_label, key_tri
 
+            def Get_montant_prestation():
+                if "ht" in mode_affichage and prestation.tva:
+                    return round(prestation.montant / (1 + prestation.tva / Decimal(100.0)), 2)
+                if "tva" in mode_affichage:
+                    return round(prestation.montant * prestation.tva / Decimal(100.0), 2) if prestation.tva else Decimal(0)
+                return prestation.montant
+
             # Création des keys de regroupements
             regroupement, labelRegroupement, triRegroupement = GetKey(key_colonne)
             key1, key1_label, key1_tri = GetKey(key_ligne1)
@@ -271,20 +278,20 @@ class View(CustomView, TemplateView):
             if key1 not in dictPrestations:
                 dictPrestations[key1] = {"label": key1_label, "tri": key1_tri, "nbre": 0, "facture": Decimal(0), "regle": Decimal(0), "impaye": Decimal(0), "regroupements": {}}
             dictPrestations[key1]["nbre"] += 1
-            dictPrestations[key1]["facture"] += prestation.montant
+            dictPrestations[key1]["facture"] += Get_montant_prestation()
 
             # Détail par période
             if regroupement not in dictPrestations[key1]["regroupements"]:
                 dictPrestations[key1]["regroupements"][
                     regroupement] = {"nbre": 0, "facture": Decimal(0), "regle": Decimal(0), "impaye": Decimal(0), "key2": {}}
             dictPrestations[key1]["regroupements"][regroupement]["nbre"] += 1
-            dictPrestations[key1]["regroupements"][regroupement]["facture"] += prestation.montant
+            dictPrestations[key1]["regroupements"][regroupement]["facture"] += Get_montant_prestation()
 
             # Détail par catégorie de tarifs
             if key2 not in dictPrestations[key1]["regroupements"][regroupement]["key2"]:
                 dictPrestations[key1]["regroupements"][regroupement]["key2"][key2] = {"label": key2_label, "tri": key2_tri, "nbre": 0, "facture": Decimal(0), "regle": Decimal(0), "impaye": Decimal(0)}
             dictPrestations[key1]["regroupements"][regroupement]["key2"][key2]["nbre"] += 1
-            dictPrestations[key1]["regroupements"][regroupement]["key2"][key2]["facture"] += prestation.montant
+            dictPrestations[key1]["regroupements"][regroupement]["key2"][key2]["facture"] += Get_montant_prestation()
 
             # Ajoute la ventilation
             if prestation.pk in dictVentilation:
