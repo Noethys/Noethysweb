@@ -102,6 +102,7 @@ class Liste(Page, crud.Liste):
         tel_parents = columns.TextColumn("Tél responsables", sources=None, processor="Get_tel_parents")
         mail_parents = columns.TextColumn("Mail responsables", sources=None, processor="Get_mail_parents")
         num_cotisation = columns.TextColumn("N° adhésion", sources=None, processor="Get_num_cotisation")
+        total = columns.TextColumn("Total", sources=[], processor="Get_total")
         solde = columns.TextColumn("Solde", sources=[], processor="Get_solde")
         mail_famille = columns.TextColumn("Email famille", processor='Get_mail_famille')
 
@@ -109,9 +110,9 @@ class Liste(Page, crud.Liste):
             structure_template = MyDatatable.structure_template
             columns = ["check", "idinscription", "date_debut", "date_fin", "individu", "date_naiss", "age", "mail", "portable",
                        "famille", "tel_parents", "mail_parents", "mail_famille", "groupe", "categorie_tarif", "individu_ville",
-                       "famille_ville", "num_cotisation", "statut", "solde"]
+                       "famille_ville", "num_cotisation", "statut", "total", "solde"]
             hidden_columns = ["idinscription", "date_debut", "date_fin", "mail", "famille", "categorie_tarif", "individu_ville",
-                              "famille_ville", "num_cotisation", "solde", "mail_famille"]
+                              "famille_ville", "num_cotisation", "total", "solde", "mail_famille"]
             page_length = 100
             processors = {
                 "date_debut": helpers.format_date("%d/%m/%Y"),
@@ -186,13 +187,7 @@ class Liste(Page, crud.Liste):
         def Get_solde(self, instance, *args, **kwargs):
             # Calcul du solde de l'activité pour l'individu
             if not hasattr(self, "dict_soldes"):
-                dict_ventilations = {temp["prestation_id"]: temp["total"] for temp in Ventilation.objects.values("prestation_id").filter(prestation__activite_id=instance.activite_id).annotate(total=Sum("montant"))}
-                self.dict_soldes = {}
-                for prestation in Prestation.objects.values("famille_id", "individu_id", "pk").filter(activite_id=instance.activite_id).annotate(total=Sum("montant")):
-                    key = (prestation["famille_id"], prestation["individu_id"])
-                    self.dict_soldes.setdefault(key, decimal.Decimal(0))
-                    self.dict_soldes[key] += dict_ventilations.get(prestation["pk"], decimal.Decimal(0)) - prestation["total"]
-                del dict_ventilations
+                self.Calc_solde(instance)
             solde = self.dict_soldes.get((instance.famille_id, instance.individu_id), decimal.Decimal(0))
             if solde == decimal.Decimal(0):
                 couleur = "success"
@@ -201,6 +196,25 @@ class Liste(Page, crud.Liste):
             else:
                 couleur = "danger"
             return """<span class='badge badge-%s'>%s</span>""" % (couleur, utils_texte.Formate_montant(solde))
+
+        def Get_total(self, instance, *args, **kwargs):
+            # Calcul du total de l'activité pour l'individu
+            if not hasattr(self, "dict_prestations"):
+                self.Calc_solde(instance)
+            total = self.dict_prestations.get((instance.famille_id, instance.individu_id), decimal.Decimal(0))
+            return utils_texte.Formate_montant(total)
+
+        def Calc_solde(self, instance=None):
+            dict_ventilations = {temp["prestation_id"]: temp["total"] for temp in Ventilation.objects.values("prestation_id").filter(prestation__activite_id=instance.activite_id).annotate(total=Sum("montant"))}
+            self.dict_soldes = {}
+            self.dict_prestations = {}
+            for prestation in Prestation.objects.values("famille_id", "individu_id", "pk").filter(activite_id=instance.activite_id).annotate(total=Sum("montant")):
+                key = (prestation["famille_id"], prestation["individu_id"])
+                self.dict_soldes.setdefault(key, decimal.Decimal(0))
+                self.dict_soldes[key] += dict_ventilations.get(prestation["pk"], decimal.Decimal(0)) - prestation["total"]
+                self.dict_prestations.setdefault(key, decimal.Decimal(0))
+                self.dict_prestations[key] += prestation["total"]
+            del dict_ventilations
 
 
 class Ajouter(Page, crud.Ajouter):
