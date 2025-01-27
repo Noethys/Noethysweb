@@ -1,3 +1,11 @@
+Version 1.2.8.2 (27/01/2025) :
+
+- Ajout de l'affichage du HT et de la TVA dans la synthèse des prestations
+- Ajout de la colonne Total dans la liste des inscriptions à une activité
+- Ajout du calcul par fratrie si activité identique
+- Correction du nombre de familles dans les statistiques générales
+- Correction sur l'export Noethysweb Desk
+
 Version 1.2.8.1 (19/01/2025) :
 
 - Correction des settings
