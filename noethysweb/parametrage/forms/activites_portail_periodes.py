@@ -3,12 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Div, Fieldset, ButtonHolder
-from crispy_forms.bootstrap import Field, FormActions, StrictButton
+from crispy_forms.layout import Layout, Hidden, HTML, Div, Fieldset
+from crispy_forms.bootstrap import Field
+from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import PortailPeriode, ModeleEmail, CategorieCompteInternet
 from core.widgets import DatePickerWidget, DateTimePickerWidget
@@ -22,6 +23,8 @@ class Formulaire(FormulaireBase, ModelForm):
     affichage_date_debut = forms.DateTimeField(label="Date de début*", required=False, widget=DateTimePickerWidget(), help_text="Saisissez la date à partir de laquelle cette période apparaîtra sur le portail.")
     affichage_date_fin = forms.DateTimeField(label="Date de fin*", required=False, widget=DateTimePickerWidget(), help_text="Saisissez la date jusqu'à laquelle cette période apparaîtra sur le portail.")
     modele = forms.ModelChoiceField(label="Modèle d'Email", queryset=ModeleEmail.objects.filter(categorie="portail_demande_reservation"), required=False, help_text="Laissez vide si vous souhaitez que le modèle par défaut soit automatiquement sélectionné.")
+    mode_consultation_choix = forms.ChoiceField(label="Mode consultation", choices=[("NON", "Désactivé"), ("OUI", "Activé"), ("DATE", "Activé à partir d'une date donnée")], initial="NON", required=False, help_text="Activez ce mode pour que les familles puissent uniquement consulter les réservations de la période sans pouvoir les modifier.")
+    mode_consultation_date = forms.DateTimeField(label="Date d'activation", required=False, widget=DateTimePickerWidget(), help_text="Saisissez la date au format JJ/MM/AAAA HH:MM à partir de laquelle cette période doit passer en mode consultation uniquement.")
     categories = forms.ModelMultipleChoiceField(label="Sélection de catégories", widget=Select2MultipleWidget(),
                                                 queryset=CategorieCompteInternet.objects.all().order_by("nom"), required=False,
                                                 help_text="Sélectionnez une ou plusieurs catégories de compte internet.")
@@ -51,6 +54,10 @@ class Formulaire(FormulaireBase, ModelForm):
         # Affichage
         self.fields["affichage_date_debut"].widget.attrs.update({"autocomplete": "off"})
         self.fields["affichage_date_fin"].widget.attrs.update({"autocomplete": "off"})
+
+        # Mode consultation
+        if self.instance.pk and self.instance.mode_consultation:
+            self.fields["mode_consultation_choix"].initial = "DATE" if self.instance.mode_consultation_date else "OUI"
 
         # Affichage
         self.helper.layout = Layout(
@@ -85,8 +92,9 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("types_villes"),
                 Field("villes"),
             ),
-            Fieldset("Options",
-                Field("mode_consultation"),
+            Fieldset("Mode consultation",
+                Field("mode_consultation_choix"),
+                Field("mode_consultation_date"),
             ),
             HTML(EXTRA_SCRIPT),
         )
@@ -123,6 +131,18 @@ class Formulaire(FormulaireBase, ModelForm):
             if not self.cleaned_data["villes"]:
                 self.add_error('villes', "Vous devez saisir au moins une ville")
                 return
+
+        # Mode consultation
+        if self.cleaned_data["mode_consultation_choix"] == "DATE":
+            if not self.cleaned_data["mode_consultation_date"]:
+                self.add_error("mode_consultation_date", "Vous devez saisir une date d'activation valide")
+                return
+            if self.cleaned_data["mode_consultation_date"].date() < datetime.date(2020, 1, 1):
+                self.add_error("mode_consultation_date", "La date d'activation du mode consultation semble erronée")
+                return
+        else:
+            self.cleaned_data["mode_consultation_date"] = None
+        self.cleaned_data["mode_consultation"] = self.cleaned_data["mode_consultation_choix"] in ("OUI", "DATE")
 
         return self.cleaned_data
 
@@ -167,6 +187,18 @@ function On_change_types_villes() {
 $(document).ready(function() {
     $('#id_types_villes').change(On_change_types_villes);
     On_change_types_villes.call($('#id_types_villes').get(0));
+});
+
+// mode_consultation_choix
+function On_change_mode_consultation_choix() {
+    $('#div_id_mode_consultation_date').hide();
+    if ($(this).val() == 'DATE') {
+        $('#div_id_mode_consultation_date').show();
+    }
+}
+$(document).ready(function() {
+    $('#id_mode_consultation_choix').change(On_change_mode_consultation_choix);
+    On_change_mode_consultation_choix.call($('#id_mode_consultation_choix').get(0));
 });
 
 </script>

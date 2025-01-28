@@ -3,10 +3,10 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
 from django.template.defaulttags import register
 from core.utils import utils_dates
 from dateutil import relativedelta
-import datetime
 
 
 @register.filter
@@ -27,8 +27,13 @@ def is_modif_allowed(date, data):
 
     # Mode consultation only pour le portail
     if "periode_reservation" in data:
-        if data["periode_reservation"].mode_consultation:
+        # Mode activé
+        if data["periode_reservation"].mode_consultation and not data["periode_reservation"].mode_consultation_date:
             return False
+        # Mode activé à partir d'une date donnée
+        if data["periode_reservation"].mode_consultation and data["periode_reservation"].mode_consultation_date:
+            if datetime.datetime.now() > data["periode_reservation"].mode_consultation_date:
+                return False
 
     # On vérifie que la modification est autorisée sur cette date
     activite = data["selection_activite"]

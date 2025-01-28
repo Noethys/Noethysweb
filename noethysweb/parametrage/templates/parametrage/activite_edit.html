@@ -12,6 +12,7 @@
             {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
 
             {% block box_contenu %}
+                {% include 'core/erreurs_form.html' %}
                 {% crispy form %}
             {% endblock %}
 

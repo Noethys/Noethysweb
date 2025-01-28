@@ -3112,6 +3112,7 @@ class PortailPeriode(models.Model):
     types_villes = models.CharField(verbose_name="Filtre villes", max_length=100, choices=choix_villes, default="TOUTES")
     villes = models.CharField(verbose_name="Sélection de villes", max_length=400, blank=True, null=True)
     mode_consultation = models.BooleanField(verbose_name="Mode consultation", default=False, help_text="Cochez cette case pour que les familles puissent uniquement consulter les réservations de la période sans pouvoir les modifier.")
+    mode_consultation_date = models.DateTimeField(verbose_name="Date d'activation", blank=True, null=True)
 
     class Meta:
         db_table = 'portail_periodes'
