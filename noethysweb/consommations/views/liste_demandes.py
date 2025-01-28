@@ -204,7 +204,10 @@ class View(CustomView, TemplateView):
 
         conditions = Q(etat="demande", activite__structure__in=self.request.user.structures.all())
         demandes = Consommation.objects.select_related("activite", "individu", "inscription", "inscription__famille", "inscription__groupe", "inscription__categorie_tarif") \
-                         .values("date_saisie", "activite__nom", "individu__nom", "individu__prenom", "inscription", "inscription__famille_id", "inscription__famille__nom", "inscription__groupe__nom", "inscription__categorie_tarif__nom") \
+                         .values("date_saisie", "activite__nom", "individu__nom", "individu__prenom",
+                                 "individu__cp_resid", "individu__ville_resid", "individu__date_naiss",
+                                 "inscription", "inscription__famille_id", "inscription__famille__nom",
+                                 "inscription__groupe__nom", "inscription__categorie_tarif__nom") \
                         .filter(conditions) \
                         .annotate(nbre_conso=Count("idconso"), date_min=Min("date"), date_max=Max("date")) \
                         .order_by("date_saisie")
@@ -219,6 +222,9 @@ class View(CustomView, TemplateView):
                 "activite": demande["activite__nom"],
                 "famille": demande["inscription__famille__nom"],
                 "individu": "%s %s" % (demande["individu__nom"] or "", demande["individu__prenom"]),
+                "individu_cp": demande["individu__cp_resid"],
+                "individu_ville": demande["individu__ville_resid"],
+                "individu_date_naiss": utils_dates.ConvertDateFRtoDate(demande["individu__date_naiss"]),
                 "groupe": demande["inscription__groupe__nom"],
                 "categorie_tarif": demande["inscription__categorie_tarif__nom"],
                 "nbre_conso": demande["nbre_conso"],
