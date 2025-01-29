@@ -33,7 +33,7 @@ def imprimer_recu(request):
 
     # Création du PDF
     donnees = {"idreglement": reglement.pk, "date_edition": datetime.date.today(), "numero": numero,
-               "idmodele": idmodele, "idfamille": reglement.famille_id, "signataire": dict_options["signataire"],
+               "idmodele": modele_impression.modele_document_id, "idfamille": reglement.famille_id, "signataire": dict_options["signataire"],
                "intro": dict_options["intro"], "afficher_prestations": dict_options["afficher_prestations"]}
 
     # Mémorisation du reçu
