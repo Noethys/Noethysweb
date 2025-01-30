@@ -78,6 +78,8 @@ class Liste(Page, crud.Liste):
             ordering = ["date_debut"]
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
+            if not instance.famille_id:
+                return []
             html = [
                 self.Create_bouton_modifier(url=reverse("famille_pieces_modifier", kwargs={"idfamille": instance.famille_id, "pk": instance.pk})),
                 self.Create_bouton_supprimer(url=reverse("famille_pieces_supprimer", kwargs={"idfamille": instance.famille_id, "pk": instance.pk})),
