@@ -1355,7 +1355,7 @@ class Impression(utils_impression.Impression):
 
     def Get_questions_evenement(self, conso=None):
         liste_questions_str = []
-        if conso["evenement"].categorie.questions and conso["extra"]:
+        if conso["evenement"].categorie and conso["evenement"].categorie.questions and conso["extra"]:
             reponses = json.loads(conso["extra"])
             liste_idquestion = [int(idq) for idq in conso["evenement"].categorie.questions.split(";")]
             for question in self.liste_questions:
