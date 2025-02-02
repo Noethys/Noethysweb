@@ -47,7 +47,7 @@
         function maj_widget_prestations() {
             $.ajax({
                 type: "POST",
-                url: "{% url 'ajax_devis_get_donnees' %}",
+                url: "{% url url_get_donnees %}",
                 data: $("#famille_devis_form").serialize(),
                 datatype: "json",
                 success: function(data) {
@@ -63,7 +63,7 @@
         function impression_pdf(email=false, afficher=true) {
             $.ajax({
                 type: "POST",
-                url: "{% url 'ajax_devis_impression_pdf' %}",
+                url: "{% url url_impression_pdf %}",
                 data: $("#famille_devis_form").serialize(),
                 datatype: "json",
                 success: function(data){

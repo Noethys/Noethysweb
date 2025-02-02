@@ -2829,6 +2829,7 @@ class Attestation(models.Model):
     total = models.DecimalField(verbose_name="Total", max_digits=10, decimal_places=2, default=0.0)
     regle = models.DecimalField(verbose_name="Réglé", max_digits=10, decimal_places=2, default=0.0)
     solde = models.DecimalField(verbose_name="Solde", max_digits=10, decimal_places=2, default=0.0)
+    prestations = models.TextField(verbose_name="Prestations", blank=True, null=True)
 
     class Meta:
         db_table = 'attestations'

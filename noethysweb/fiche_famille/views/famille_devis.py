@@ -92,8 +92,6 @@ def Impression_pdf(request):
         "total": float(dict_devis[IDfamille]["total"]),
         "regle": float(dict_devis[IDfamille]["ventilation"]),
         "solde": float(dict_devis[IDfamille]["solde"]),
-        "individus": ";".join([str(idindividu) for idindividu in dict_devis[IDfamille]["individus"].keys()]),
-        "activites": ";".join([str(idactivite) for idactivite in dict_devis[IDfamille]["liste_idactivite"]])
     }
 
     # Création du PDF
@@ -124,6 +122,8 @@ class Page(Onglet):
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
         ]
+        context["url_get_donnees"] = "ajax_devis_get_donnees"
+        context["url_impression_pdf"] = "ajax_devis_impression_pdf"
         return context
 
     def get_form_kwargs(self, **kwargs):
@@ -152,7 +152,6 @@ class Page(Onglet):
         # Enregistre le devis
         if not self.object:
             Devis.objects.create(numero=form.cleaned_data["numero"], date_edition=form.cleaned_data["date_edition"],
-                                     activites=form.cleaned_data["infos"]["activites"], individus=form.cleaned_data["infos"]["individus"],
                                      date_debut=form.cleaned_data["periode"].split(";")[0], date_fin=form.cleaned_data["periode"].split(";")[1],
                                      total=form.cleaned_data["infos"]["total"], regle=form.cleaned_data["infos"]["regle"],
                                      solde=form.cleaned_data["infos"]["solde"], famille=form.cleaned_data["famille"],
@@ -160,8 +159,6 @@ class Page(Onglet):
         else:
             self.object.numero = form.cleaned_data["numero"]
             self.object.date_edition = form.cleaned_data["date_edition"]
-            self.object.activites = form.cleaned_data["infos"]["activites"]
-            self.object.individus = form.cleaned_data["infos"]["individus"]
             self.object.date_debut = form.cleaned_data["periode"].split(";")[0]
             self.object.date_fin = form.cleaned_data["periode"].split(";")[1]
             self.object.total = form.cleaned_data["infos"]["total"]

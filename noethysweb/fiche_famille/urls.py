@@ -178,6 +178,7 @@ urlpatterns = [
     path('individus/recu_impression_pdf', secure_ajax(reglement_recu.Impression_pdf), name='ajax_recu_impression_pdf'),
     path('individus/facture_impression_pdf', secure_ajax(famille_voir_facture.Impression_pdf), name='ajax_facture_impression_pdf'),
     path('individus/attestation_impression_pdf', secure_ajax(famille_attestations.Impression_pdf), name='ajax_attestation_impression_pdf'),
+    path('individus/attestation_get_donnees', secure_ajax(famille_attestations.Get_donnees), name='ajax_attestation_get_donnees'),
     path('individus/facture_mandat_pdf', secure_ajax(famille_voir_mandat.Impression_pdf), name='ajax_mandat_impression_pdf'),
     path('individus/devis_impression_pdf', secure_ajax(famille_devis.Impression_pdf), name='ajax_devis_impression_pdf'),
     path('individus/devis_get_donnees', secure_ajax(famille_devis.Get_donnees), name='ajax_devis_get_donnees'),
