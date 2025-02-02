@@ -1,3 +1,12 @@
+Version 1.2.8.3 (02/02/2025) :
+
+- Ajout de l'activation automatique du mode consultation sur le portail
+- Ajout de la sélection des prestations dans les devis et les attestations
+- Ajout de colonnes supplémentaires dans la liste des demandes de réservations
+- Correction de l'impression d'un reçu de règlement depuis le portail
+- Correction des pièces sans idfamille dans la liste des pièces fournies
+- Correction de divers petits bugs
+
 Version 1.2.8.2 (27/01/2025) :
 
 - Ajout de l'affichage du HT et de la TVA dans la synthèse des prestations
