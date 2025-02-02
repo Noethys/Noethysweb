@@ -1,0 +1,83 @@
+{% extends "fiche_famille/famille.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_famille %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+                {% include 'core/erreurs_form.html' %}
+                {% crispy form %}
+            {% endblock %}
+        {% endembed %}
+    </div>
+    
+    {# Insertion des modals #}
+    {% include 'outils/modal_editeur_emails.html' %}
+    {% include 'core/modal_pdf.html' %}
+    {% load static %}
+    
+    <script>
+    
+        $(document).ready(function() {
+            
+            $("#famille_devis_form").on("submit", function(event) {
+                if ($("input[name=infos]").val() === '') {
+                    impression_pdf(false, false);
+                    return false;
+                };
+            });
+            
+            $("#id_periode").on("change", function(event) {
+                maj_widget_prestations()
+            });
+            
+            $("#id_categories").on("change", function(event) {
+                maj_widget_prestations()
+            });
+
+            maj_widget_prestations();
+        });
+        
+        function maj_widget_prestations() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_devis_get_donnees' %}",
+                data: $("#famille_devis_form").serialize(),
+                datatype: "json",
+                success: function(data) {
+                    $("#div_id_prestations").replaceWith(data.html_widget_prestations);
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        }
+        
+        // Impression du PDF
+        function impression_pdf(email=false, afficher=true) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_devis_impression_pdf' %}",
+                data: $("#famille_devis_form").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $('input[name=infos]').val(JSON.stringify(data.infos));
+                    if (email) {envoyer_email(data)} 
+                    if (afficher) {charge_pdf(data)}
+                    if ((email === false) & (afficher === false)) {$("#famille_devis_form").submit()};
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+    
+    </script>
+
+{% endblock %}

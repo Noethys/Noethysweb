@@ -26,39 +26,38 @@
 {% endblock styles %}
 
 {% if not liste_branches1 and texte_si_vide %}
-    <strong>{{ texte_si_vide }}</strong>
-{% endif %}
-
-<div id="div_table_{{ id }}">
-    <table id="table_{{ id }}" class="table table-bordered">
-        {% for dict_branche1 in liste_branches1 %}
-            <tr>
-                <td class="ligne_regroupement">
-                    <div>
-                        <input type="checkbox" class="check_branche1" data-idbranche1="{{ dict_branche1.pk }}">
-                        <span style="margin-left: 2px;margin-right:20px;font-weight: bold;">{{ dict_branche1.label }}</span>
-                    </div>
-                </td>
-            </tr>
-            {% for dict_branche2 in dict_branches2|get_item:dict_branche1.pk %}
+    <div style="border: solid 1px #ced4da; padding: 5px;">{{ texte_si_vide }}</div>
+{% else %}
+    <div id="div_table_{{ id }}">
+        <table id="table_{{ id }}" class="table table-bordered mb-0">
+            {% for dict_branche1 in liste_branches1 %}
                 <tr>
-                    <td>
-                        <div style="padding-left:20px;">
-                            {% if dict_branche2.checkable != False %}
-                                <input name="{{ name }}" type="checkbox" class="check_branche2" data-idbranche1="{{ dict_branche1.pk }}" value="{{ dict_branche2.pk }}" {% if dict_branche2.pk in selections or coche_tout %}checked{% endif %}>
-                                {% if dict_branche2.pk in selections or coche_tout %}
-                                    <script>$("#div_table_{{ id }} .check_branche1[data-idbranche1='{{ dict_branche1.pk }}']").prop("checked", true);</script>
-                                {% endif %}
-                            {% endif %}
-                            <span style="margin-left: 2px;margin-right:20px;">{{ dict_branche2.label }}</span>
+                    <td class="ligne_regroupement">
+                        <div>
+                            <input type="checkbox" class="check_branche1" data-idbranche1="{{ dict_branche1.pk }}">
+                            <span style="margin-left: 2px;margin-right:20px;font-weight: bold;">{{ dict_branche1.label }}</span>
                         </div>
                     </td>
                 </tr>
+                {% for dict_branche2 in dict_branches2|get_item:dict_branche1.pk %}
+                    <tr>
+                        <td>
+                            <div style="padding-left:20px;">
+                                {% if dict_branche2.checkable != False %}
+                                    <input name="{{ name }}" type="checkbox" class="check_branche2" data-idbranche1="{{ dict_branche1.pk }}" value="{{ dict_branche2.pk }}" {% if dict_branche2.pk in selections or coche_tout %}checked{% endif %}>
+                                    {% if dict_branche2.pk in selections or coche_tout %}
+                                        <script>$("#div_table_{{ id }} .check_branche1[data-idbranche1='{{ dict_branche1.pk }}']").prop("checked", true);</script>
+                                    {% endif %}
+                                {% endif %}
+                                <span style="margin-left: 2px;margin-right:20px;">{{ dict_branche2.label }}</span>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
             {% endfor %}
-        {% endfor %}
-    </table>
-</div>
-
+        </table>
+    </div>
+{% endif %}
 
 <script>
 

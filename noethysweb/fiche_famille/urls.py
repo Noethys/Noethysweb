@@ -180,6 +180,7 @@ urlpatterns = [
     path('individus/attestation_impression_pdf', secure_ajax(famille_attestations.Impression_pdf), name='ajax_attestation_impression_pdf'),
     path('individus/facture_mandat_pdf', secure_ajax(famille_voir_mandat.Impression_pdf), name='ajax_mandat_impression_pdf'),
     path('individus/devis_impression_pdf', secure_ajax(famille_devis.Impression_pdf), name='ajax_devis_impression_pdf'),
+    path('individus/devis_get_donnees', secure_ajax(famille_devis.Get_donnees), name='ajax_devis_get_donnees'),
     path('individus/cotisation_impression_pdf', secure_ajax(famille_voir_cotisation.Impression_pdf), name='ajax_cotisation_impression_pdf'),
     path('individus/rappel_impression_pdf', secure_ajax(famille_voir_rappel.Impression_pdf), name='ajax_rappel_impression_pdf'),
     path('individus/regenerer_identifiant', secure_ajax(famille_portail.Regenerer_identifiant), name='ajax_regenerer_identifiant'),

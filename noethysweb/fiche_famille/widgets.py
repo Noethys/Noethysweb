@@ -249,3 +249,53 @@ class Periodes_releve_prestations(Widget):
     def render(self, name, value, attrs=None, renderer=None):
         context = self.get_context(name, value, attrs)
         return mark_safe(loader.render_to_string(self.template_name, context))
+
+
+class Prestations_devis(Widget):
+    template_name = 'core/widgets/checktree.html'
+    request = None
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        context['name'] = name
+
+        # Sélections par défaut
+        if context.get("selections", ""):
+            context["selections"] = [int(valeur) for valeur in context["selections"].split(";")]
+
+        # Définit la hauteur du ctrl
+        if "hauteur" not in context:
+            context['hauteur'] = "600px"
+
+        # Récupération des prestations
+        liste_branches1 = []
+        dict_branches2 = {}
+        liste_labels_prestations_temp = []
+        for prestation in context.get("prestations", []):
+            # Branche 1
+            label_individu = prestation.individu.Get_nom() if prestation.individu else "Prestations familiales"
+            idindividu = prestation.individu.pk if prestation.individu else 0
+            item_branche1 = {"pk": idindividu, "label": label_individu}
+            if item_branche1 not in liste_branches1:
+                liste_branches1.append(item_branche1)
+
+            # Branche 2
+            dict_branches2.setdefault(idindividu, [])
+            label_prestation = ("%s : %s" % (prestation.activite.nom, prestation.label)) if prestation.activite else prestation.label
+            if (idindividu, label_prestation) not in liste_labels_prestations_temp:
+                dict_branches2[idindividu].append({"pk": prestation.pk, "label": label_prestation})
+                liste_labels_prestations_temp.append((idindividu, label_prestation))
+
+        context["liste_branches1"] = liste_branches1
+        context["dict_branches2"] = dict_branches2
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
+
+    def value_from_datadict(self, data, files, name):
+        selections = data.getlist(name, [])
+        return ";".join(selections)

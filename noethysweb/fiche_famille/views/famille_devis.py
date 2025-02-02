@@ -4,24 +4,44 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
-from core.views.mydatatableview import MyDatatable, columns, helpers
-from core.views import crud
-from core.models import Famille, Devis
-from fiche_famille.forms.famille_devis import Formulaire as Form_parametres
-from fiche_famille.views.famille import Onglet
-from django.http import JsonResponse, HttpResponseRedirect
-from core.utils import utils_dates, utils_texte, utils_preferences
-from facturation.utils import utils_facturation, utils_impression_facture
 from django.contrib import messages
 from django.db.models import Q
+from django.http import JsonResponse, HttpResponseRedirect
+from django.template import Template, RequestContext
 from core.data import data_modeles_emails
+from core.views.mydatatableview import MyDatatable, columns, helpers
+from core.views import crud
+from core.models import Devis, Prestation
+from core.utils import utils_dates, utils_texte, utils_preferences
+from fiche_famille.forms.famille_devis import Formulaire as Form_parametres
+from fiche_famille.forms.famille_devis import Formulaire_prestations
+from fiche_famille.views.famille import Onglet
+from facturation.utils import utils_facturation, utils_impression_facture
 
+
+def Get_donnees(request):
+    # Récupération des données
+    form_parametres = Form_parametres(request.POST, idfamille=int(request.POST.get("famille")), utilisateur=request.user, request=request)
+    if not form_parametres.is_valid():
+        liste_erreurs = form_parametres.errors.as_data().keys()
+        return JsonResponse({"erreur": "Veuillez renseigner les champs manquants : %s." % ", ".join(liste_erreurs)}, status=401)
+    parametres = form_parametres.cleaned_data
+    prestations_defaut = request.POST.get("prestations_defaut", "")
+
+    # Création et rendu du formulaire contenant uniquement le widget Prestations
+    date_debut, date_fin = utils_dates.ConvertDateRangePicker(parametres["periode"])
+    conditions = Q(date__gte=date_debut, date__lte=date_fin, famille=parametres["famille"], categorie__in=parametres["categories"])
+    prestations = Prestation.objects.select_related("individu", "activite").filter(conditions).order_by("individu__prenom", "activite__nom", "label")
+    html = "{% load crispy_forms_tags %} {{ form.prestations|as_crispy_field }}"
+    html_widget_prestations = Template(html).render(RequestContext(request, {"form": Formulaire_prestations(prestations=prestations, selections=prestations_defaut)}))
+
+    return JsonResponse({"html_widget_prestations": html_widget_prestations})
 
 
 def Impression_pdf(request):
     # Récupération des données
     form_parametres = Form_parametres(request.POST, idfamille=int(request.POST.get("famille")), utilisateur=request.user, request=request)
-    if form_parametres.is_valid() == False:
+    if not form_parametres.is_valid():
         liste_erreurs = form_parametres.errors.as_data().keys()
         return JsonResponse({"erreur": "Veuillez renseigner les champs manquants : %s." % ", ".join(liste_erreurs)}, status=401)
     parametres = form_parametres.cleaned_data
@@ -30,18 +50,28 @@ def Impression_pdf(request):
     if not parametres["date_edition"]: return JsonResponse({"erreur": "Vous devez saisir une date d'édition"}, status=401)
     if not parametres["numero"]: return JsonResponse({"erreur": "Vous devez saisir un numéro de reçu"}, status=401)
     if not parametres["modele"]: return JsonResponse({"erreur": "Vous devez sélectionner un modèle de document"}, status=401)
+    if not parametres["prestations"]: return JsonResponse({"erreur": "Vous devez cocher au moins une prestation à inclure"}, status=401)
 
-    # Récupération de la période
-    date_debut = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[0])
-    date_fin = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[1])
+    IDfamille = parametres["famille"].pk
+    date_debut, date_fin = utils_dates.ConvertDateRangePicker(parametres["periode"])
+
+    # Recherche les individus, activités et noms de prestations à inclure
+    individus, activites = [], []
+    liste_conditions = Q()
+    for prestation in Prestation.objects.filter(pk__in=[int(idprestation) for idprestation in parametres["prestations"].split(";")]):
+        # Individus à inclure
+        idindividu = prestation.individu_id if prestation.individu_id else 0
+        if idindividu not in individus: individus.append(idindividu)
+        # Activités à inclure
+        idactivite = prestation.activite_id if prestation.activite_id else None
+        if idactivite not in activites: activites.append(idactivite)
+        # Labels de prestation à inclure
+        liste_conditions |= Q(individu=prestation.individu, activite=prestation.activite, label=prestation.label)
 
     # Recherche des données de facturation
     facturation = utils_facturation.Facturation()
-    IDfamille = parametres["famille"].pk
-    individus = [int(idindividu) for idindividu in parametres["individus"]]
-    activites = [int(idactivite) for idactivite in parametres["activites"]]
-    categories_prestations = parametres["categories"]
-    dict_devis = facturation.GetDonnees(liste_activites=activites, date_debut=date_debut, date_fin=date_fin, mode="devis", IDfamille=IDfamille, liste_IDindividus=individus, categories_prestations=categories_prestations)
+    dict_devis = facturation.GetDonnees(liste_activites=activites, date_debut=date_debut, date_fin=date_fin, mode="devis", IDfamille=IDfamille,
+                                        liste_IDindividus=individus, categories_prestations=parametres["categories"], liste_conditions=liste_conditions)
 
     # Si aucun devis trouvé
     if not dict_devis:
@@ -50,7 +80,6 @@ def Impression_pdf(request):
     # Rajoute les données du formulaire
     dict_devis[IDfamille].update({
         "{DATE_EDITION}": parametres["date_edition"],
-        "{SIGNATAIRE}": parametres["signataire"],
         "{NUM_DEVIS}": parametres["numero"],
     })
 
@@ -76,7 +105,6 @@ def Impression_pdf(request):
     return JsonResponse({"infos": infos, "nom_fichier": nom_fichier, "categorie": "devis", "label_fichier": "Devis", "champs": champs, "idfamille": IDfamille})
 
 
-
 class Page(Onglet):
     model = Devis
     url_liste = "famille_devis_liste"
@@ -84,7 +112,7 @@ class Page(Onglet):
     url_modifier = "famille_devis_modifier"
     url_supprimer = "famille_devis_supprimer"
     description_liste = "Vous pouvez créer ici des devis."
-    description_saisie = "Saisissez toutes les informations concernant le devis et cliquez sur le bouton Enregistrer."
+    description_saisie = "Saisissez toutes les informations concernant le devis et cliquez sur Aperçu PDF ou Envoyer par email. Vous pourrez ensuite mémoriser le devis en cliquant sur le bouton Enregistrer."
     objet_singulier = "un devis"
     objet_pluriel = "des devis"
 
@@ -127,7 +155,8 @@ class Page(Onglet):
                                      activites=form.cleaned_data["infos"]["activites"], individus=form.cleaned_data["infos"]["individus"],
                                      date_debut=form.cleaned_data["periode"].split(";")[0], date_fin=form.cleaned_data["periode"].split(";")[1],
                                      total=form.cleaned_data["infos"]["total"], regle=form.cleaned_data["infos"]["regle"],
-                                     solde=form.cleaned_data["infos"]["solde"], famille=form.cleaned_data["famille"])
+                                     solde=form.cleaned_data["infos"]["solde"], famille=form.cleaned_data["famille"],
+                                     prestations=form.cleaned_data["prestations"])
         else:
             self.object.numero = form.cleaned_data["numero"]
             self.object.date_edition = form.cleaned_data["date_edition"]
@@ -139,11 +168,10 @@ class Page(Onglet):
             self.object.regle = form.cleaned_data["infos"]["regle"]
             self.object.solde = form.cleaned_data["infos"]["solde"]
             self.object.famille = form.cleaned_data["famille"]
+            self.object.prestations = form.cleaned_data["prestations"]
             self.object.save()
 
         return HttpResponseRedirect(self.get_success_url())
-
-
 
 
 class Liste(Page, crud.Liste):
@@ -195,15 +223,15 @@ class Liste(Page, crud.Liste):
             return "%0.2f %s" % (instance.solde, utils_preferences.Get_symbole_monnaie())
 
 
-
 class Ajouter(Page, crud.Ajouter):
     form_class = Form_parametres
-    template_name = "fiche_famille/famille_edit.html"
+    template_name = "fiche_famille/famille_devis.html"
+
 
 class Modifier(Page, crud.Modifier):
     form_class = Form_parametres
-    template_name = "fiche_famille/famille_edit.html"
+    template_name = "fiche_famille/famille_devis.html"
+
 
 class Supprimer(Page, crud.Supprimer):
     template_name = "fiche_famille/famille_delete.html"
-
