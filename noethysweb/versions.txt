@@ -1,3 +1,7 @@
+Version 1.2.8.4 (05/02/2025) :
+
+- Ajout de la procédure d'export des ventes
+
 Version 1.2.8.3 (02/02/2025) :
 
 - Ajout de l'activation automatique du mode consultation sur le portail
