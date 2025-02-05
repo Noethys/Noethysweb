@@ -24,6 +24,9 @@
         {% endblock %}
     {% endembed %}
 
+    {# Lien de téléchargement d'un fichier #}
+    <a id="download" download></a>
+
     {% embed 'core/box.html' with box_titre=True %}
         {% block box_theme %}card-outline{% endblock %}
         {% block box_titre %}Résultats{% endblock %}
@@ -31,5 +34,15 @@
             {{ resultat|safe }}
         {% endblock %}
     {% endembed %}
+
+    <script>
+        $(document).ready(function() {
+            {# Propose un téléchargement immédiat d'un fichier #}
+            {% if nom_fichier %}
+                $("#download").attr("href", "{{ nom_fichier }}");
+                document.getElementById("download").click();
+            {% endif %}
+        });
+    </script>
 
 {% endblock contenu_page %}

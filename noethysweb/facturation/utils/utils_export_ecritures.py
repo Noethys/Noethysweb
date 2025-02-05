@@ -17,6 +17,21 @@ class BaseExporter():
     def Generer(self):
         pass
 
+    def Generer_xlsx(self, nom_fichier=None):
+        # Création du répertoire de sortie et des fichiers
+        nom_rep = "export_xlsx_ecritures"
+        self.Creer_repertoire_sortie(nom_rep=nom_rep)
+
+        import xlsxwriter
+        classeur = xlsxwriter.Workbook(os.path.join(settings.MEDIA_ROOT, self.rep_base, nom_rep, nom_fichier))
+        if not self.Creation_fichier(classeur=classeur):
+            return False
+
+        return os.path.join(settings.MEDIA_URL, self.rep_base, nom_rep, nom_fichier).replace("\\", "/")
+
+    def Creation_fichier(self, classeur=None):
+        return True
+
     def Creer_repertoire_sortie(self, nom_rep=""):
         # Création du répertoire de sortie
         self.rep_base = os.path.join("temp", str(uuid.uuid4()))

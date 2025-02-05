@@ -10,6 +10,8 @@ from outils.forms.procedures import Formulaire
 
 
 class BaseProcedure:
+    nom_fichier = None
+
     def Arguments(self, parser=None):
         pass
 
@@ -20,6 +22,7 @@ class BaseProcedure:
 class View(CustomView, TemplateView):
     menu_code = "procedures"
     template_name = "outils/procedures.html"
+    nom_fichier = None
 
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
@@ -32,9 +35,11 @@ class View(CustomView, TemplateView):
         form = Formulaire(request.POST, request=self.request)
         if not form.is_valid():
             return self.render_to_response(self.get_context_data(form_parametres=form))
+        resultat = self.Executer(commande=form.cleaned_data["commande"])
         context = {
             "form": form,
-            "resultat": self.Executer(commande=form.cleaned_data["commande"])
+            "resultat": resultat,
+            "nom_fichier": self.nom_fichier,
         }
         return self.render_to_response(self.get_context_data(**context))
 
@@ -68,6 +73,7 @@ class View(CustomView, TemplateView):
         try:
             # Exécution de la procédure
             resultat = procedure.Executer(variables=variables)
+            self.nom_fichier = procedure.nom_fichier
             return resultat
         except Exception as err:
             return err
