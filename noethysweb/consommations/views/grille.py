@@ -888,8 +888,8 @@ class Facturation():
 
                                     # On recherche si des combinaisons sont présentes sur cette ligne
                                     for combi in CombiAide.objects.prefetch_related('unites').filter(aide=aide):
-                                        if tarif.combi_retenue == [unite.pk for unite in combi.unites.all().order_by("pk")]:
-                                            combi.nbre_max_unites = len(tarif.combi_retenue)
+                                        if tarif_base.combi_retenue == [unite.pk for unite in combi.unites.all().order_by("pk")]:
+                                            combi.nbre_max_unites = len(tarif_base.combi_retenue)
                                             liste_combi_valides.append(combi)
 
                                     if liste_combi_valides:
