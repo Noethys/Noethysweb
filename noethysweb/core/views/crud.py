@@ -71,14 +71,14 @@ class Liste_commun():
                 # Filtre spécial : Date de naissance
                 if filtre["champ"].startswith("datenaiss:"):
                     type_champ, champ = champ.split(":")
-                    resultats = [individu for individu in Individu.objects.all() if self.appliquer_condition(valeur=str(individu.date_naiss or ""), criteres=criteres, filtre=filtre)]
+                    resultats = [individu.pk for individu in Individu.objects.all() if self.appliquer_condition(valeur=str(individu.date_naiss or ""), criteres=criteres, filtre=filtre)]
                     conditions &= Q(**{champ + "__in": resultats})
                     filtre["condition"] = ""
 
                 # Filtre spécial : Age
                 if filtre["champ"].startswith("age:"):
                     type_champ, champ = champ.split(":")
-                    resultats = [individu for individu in Individu.objects.all() if self.appliquer_condition(valeur=individu.Get_age() or 0, criteres=list(map(int, criteres)), filtre=filtre)]
+                    resultats = [individu.pk for individu in Individu.objects.all() if self.appliquer_condition(valeur=individu.Get_age() or 0, criteres=list(map(int, criteres)), filtre=filtre)]
                     conditions &= Q(**{champ + "__in": resultats})
                     filtre["condition"] = ""
 
