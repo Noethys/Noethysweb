@@ -597,7 +597,7 @@ class Impression(utils_impression.Impression):
                                             inscription,
                                             dictInscription["nom"],
                                             dictInscription["prenom"],
-                                            dictInscription["age"],
+                                            dictInscription["age"] or 0,
                                             "%s %s" % (dictInscription["nom"], dictInscription["prenom"] or ""),
                                             "%s %s" % (dictInscription["prenom"] or "", dictInscription["nom"]),
                                         ))
