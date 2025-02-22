@@ -23,10 +23,11 @@ class Formulaire(FormulaireBase, ModelForm):
     lot = forms.ModelChoiceField(label="Lot de factures", queryset=LotFactures.objects.all(), required=False, widget=Select_avec_commandes(
                       {"donnees_extra": {}, "url_ajax": "ajax_modifier_lot_factures",
                        "textes": {"champ": "Nom du lot", "ajouter": "Saisir un lot de factures", "modifier": "Modifier un lot de factures"}}))
+    observations = forms.CharField(label="Observations", required=False, widget=forms.Textarea(attrs={"rows": 2}))
 
     class Meta:
         model = Facture
-        fields = ["date_debut", "date_fin", "date_edition", "date_echeance", "lot", "regie", "prefixe", "numero", "date_limite_paiement"]
+        fields = ["date_debut", "date_fin", "date_edition", "date_echeance", "lot", "regie", "prefixe", "numero", "date_limite_paiement", "observations"]
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")
@@ -59,5 +60,21 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Options",
                 Field('lot'),
                 Field('regie'),
+                Field('observations'),
             ),
+        )
+
+
+class Formulaire_annulation(FormulaireBase, forms.Form):
+    observations = forms.CharField(label="Observations", required=False, help_text="Vous pouvez ajouter un commentaire qui sera mémorisé dans la facture annulée. Il peut s'agir par exemple de la raison de l'annulation.", widget=forms.Textarea(attrs={"rows": 2}))
+
+    def __init__(self, *args, **kwargs):
+        super(Formulaire_annulation, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = "form_annulation"
+        self.helper.form_method = "post"
+        self.helper.form_tag = False
+
+        self.helper.layout = Layout(
+            Field("observations"),
         )

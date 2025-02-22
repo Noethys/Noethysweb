@@ -1,4 +1,5 @@
 {% load static %}
+{% load crispy_forms_tags %}
 
 {% block box_contenu %}
 
@@ -19,6 +20,9 @@
 
         <form method="post">{% csrf_token %}
             <p>Voulez-vous vraiment {{ verbe_action|lower }} l'élément '{{ object }}' ?</p><br>
+            {% if form %}
+                {% crispy form %}
+            {% endif %}
             <div class="pull-right">
                 <button type="submit" title="{{ verbe_action }}" class='btn btn-warning'><i class="fa fa-trash margin-r-5"></i>{{ verbe_action }}</button>
                 <input type='hidden' name='next' value='{{ request.GET.next }}'>

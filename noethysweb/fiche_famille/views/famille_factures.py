@@ -12,7 +12,7 @@ from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Facture, Prestation
 from core.utils import utils_preferences
-from fiche_famille.forms.famille_factures import Formulaire
+from fiche_famille.forms.famille_factures import Formulaire, Formulaire_annulation
 from fiche_famille.views.famille import Onglet
 
 
@@ -76,7 +76,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'lot__nom']
+        filtres = ['idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'lot__nom', 'observations']
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         solde_actuel = columns.TextColumn("Solde actuel", sources=['solde_actuel'], processor='Get_solde_actuel')
@@ -84,7 +84,8 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'lot']
+            columns = ['check', 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'lot', 'observations']
+            hidden_columns = ["observations"]
             processors = {
                 'date_edition': helpers.format_date('%d/%m/%Y'),
                 'date_debut': helpers.format_date('%d/%m/%Y'),
@@ -143,9 +144,21 @@ class Annuler(Page, crud.Supprimer):
     verbe_action = "Annuler"
     nom_action = "Annulation"
 
+    def get_context_data(self, **kwargs):
+        """ Ajout d'un formulaire à la page d'annulation """
+        context = super(Annuler, self).get_context_data(**kwargs)
+        context["form"] = Formulaire_annulation()
+        return context
+
     def delete(self, request, *args, **kwargs):
+        # Importation du formulaire du commentaire
+        form = Formulaire_annulation(request.POST, request=request)
+        form.is_valid()
+
         # Annulation de la facture
         facture = Facture.objects.get(pk=kwargs["pk"])
+        if form.cleaned_data.get("observations", None):
+            facture.observations = form.cleaned_data["observations"]
         facture.etat = "annulation"
         facture.save()
         Prestation.objects.filter(facture=facture).update(facture=None)
@@ -160,9 +173,21 @@ class Annuler_plusieurs(Page, crud.Supprimer_plusieurs):
     verbe_action = "Annuler"
     nom_action = "Annulation"
 
+    def get_context_data(self, **kwargs):
+        """ Ajout d'un formulaire à la page d'annulation """
+        context = super(Annuler_plusieurs, self).get_context_data(**kwargs)
+        context["form"] = Formulaire_annulation()
+        return context
+
     def post(self, request, **kwargs):
+        # Importation du formulaire du commentaire
+        form = Formulaire_annulation(request.POST, request=request)
+        form.is_valid()
+
         # Annulation des factures
         for facture in self.get_objets():
+            if form.cleaned_data.get("observations", None):
+                facture.observations = form.cleaned_data["observations"]
             facture.etat = "annulation"
             facture.save()
             Prestation.objects.filter(facture=facture).update(facture=None)

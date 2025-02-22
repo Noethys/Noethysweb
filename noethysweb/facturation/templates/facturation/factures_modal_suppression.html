@@ -1,0 +1,25 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% embed 'core/modal.html' with modal_footer=True %}
+    {% block modal_id %}modal_suppression_facture{% endblock %}
+    {% block modal_titre %}Actions{% endblock %}
+    {% block modal_body %}
+        <p>Cliquez sur l'action souhaitée.</p>
+        <div class="mb-3">
+            <a class="btn btn-app" id="id_factures_supprimer" href="#"><i class="fa fa-times"></i> Supprimer la facture</a>
+            <a class="btn btn-app" id="id_factures_annuler" href="#"><i class="fa fa-times"></i> Annuler la facture</a>
+        </div>
+        <p>
+            <i class="fa fa-info-circle margin-r-5"></i>La suppression détruit totalement la facture et n'en conserve aucune trace. Cela entraîne un trou dans la numérotation.
+        </p>
+        <p>
+            <i class="fa fa-info-circle margin-r-5"></i>L'annulation détache les prestations associées afin de permettre de les associer de nouveau à une nouvelle facture.
+            Une trace de cette facture est conservée et la numérotation n'est pas interrompue.
+        </p>
+    {% endblock %}
+    {% block modal_footer %}
+        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+    {% endblock %}
+{% endembed %}

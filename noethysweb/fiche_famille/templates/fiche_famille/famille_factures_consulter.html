@@ -36,6 +36,11 @@
                                         <div class="mt-1 text-red"><span><i class='fa fa-trash'></i> Facture annulée</div>
                                     </div>
                                 {% endif %}
+                                {% if facture.observations %}
+                                    <div class="text-muted border-bottom-0">
+                                        <div class="mt-1"><span><i class='fa fa-info-circle'></i> {{ facture.observations }}</div>
+                                    </div>
+                                {% endif %}
                             </div>
                             <div class="col-4">
                                 <ul class="ml-4 mb-0 fa-ul text-muted">
