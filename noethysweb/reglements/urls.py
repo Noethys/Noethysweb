@@ -10,7 +10,7 @@ from core.decorators import Verifie_ventilation
 from reglements.views import liste_reglements, liste_recus, liste_detaillee_reglements, synthese_modes_reglements, \
                             depots_reglements, depots_reglements_selection, detail_prestations_depot, \
                             liste_reglements_disponibles, corriger_ventilation, liste_paiements, reglements_lot_factures, \
-                            detail_ventilations_depots, detail_ventilations_reglements, depots_reglements_avis
+                            detail_ventilations_depots, detail_ventilations_reglements, depots_reglements_avis, edition_ventilations_reglements
 
 
 urlpatterns = [
@@ -25,6 +25,7 @@ urlpatterns = [
     path('reglements/liste_detaillee_reglements', liste_detaillee_reglements.Liste.as_view(), name='liste_detaillee_reglements'),
     path('reglements/reglements_lot_factures', reglements_lot_factures.View.as_view(), name='reglements_lot_factures'),
     path('reglements/detail_ventilations_reglements', Verifie_ventilation(detail_ventilations_reglements.View.as_view()), name='detail_ventilations_reglements'),
+    path('reglements/edition_ventilations_reglements', Verifie_ventilation(edition_ventilations_reglements.View.as_view()), name='edition_ventilations_reglements'),
     path('reglements/liste_paiements', liste_paiements.Liste.as_view(), name='liste_paiements'),
 
     # Analyse
@@ -50,5 +51,5 @@ urlpatterns = [
 
     # AJAX
     path('facturation/depots_reglements_impression_pdf', secure_ajax(depots_reglements.Impression_pdf), name='ajax_depots_reglements_impression_pdf'),
-
+    path('facturation/edition_ventilations_reglements/generer_pdf', secure_ajax(edition_ventilations_reglements.Generer_pdf), name='ajax_edition_ventilations_reglements_generer_pdf'),
 ]

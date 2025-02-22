@@ -448,6 +448,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_listes.Add(code="liste_reglements", titre="Liste des règlements", icone="file-text-o")
     menu_listes.Add(code="liste_detaillee_reglements", titre="Liste détaillée des règlements", icone="file-text-o")
     menu_listes.Add(code="detail_ventilations_reglements", titre="Détail des ventilations des règlements", icone="file-text-o")
+    menu_listes.Add(code="edition_ventilations_reglements", titre="Edition des ventilations des règlements", icone="file-text-o")
     menu_listes.Add(code="reglements_lot_factures", titre="Liste des règlements associés à un lot de factures", icone="file-text-o")
     menu_listes.Add(code="synthese_modes_reglements", titre="Synthèse des modes de règlements", icone="file-text-o")
 
