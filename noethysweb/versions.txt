@@ -1,3 +1,11 @@
+Version 1.2.8.5 (22/02/2025) :
+
+- Ajout de l'édition des ventilations des règlements
+- Correction de l'application des aides sur les évènements
+- Correction du tri par âge dans l'édition de la liste des consommations
+- Correction du filtre de liste générique par date de naissance
+- Correction des chemins dans l'export Desk
+
 Version 1.2.8.4 (05/02/2025) :
 
 - Ajout de la procédure d'export des ventes
