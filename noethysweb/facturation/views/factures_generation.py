@@ -173,6 +173,7 @@ def Generation_factures(request):
                 prestations=";".join(form.cleaned_data["categories"]),
                 regie=regie,
                 date_limite_paiement=form.cleaned_data["date_limite_paiement"],
+                observations=form.cleaned_data["observations"],
             )
             liste_factures_generees.append(facture)
             liste_id_factures.append(facture.pk)
