@@ -271,8 +271,20 @@ def Generation_lien_desinscription(request=None, idfamille=None, adresse=None):
     return url
 
 
-def Desinscription(valeur=None):
+def Verifie_signature_desinscription(valeur=None):
     """ Décrypte la valeur de l'URL pour désinscrire la famille des mails groupés"""
+    try:
+        data = signing.loads(valeur)
+        famille = Famille.objects.get(pk=int(data["pk"]))
+        if famille.mail == data["mail"] and not famille.email_blocage:
+            return True
+    except:
+        pass
+    return False
+
+
+def Desinscription(valeur=None):
+    """ Confirmation désinscription de la famille aux mails groupés"""
     try:
         data = signing.loads(valeur)
         famille = Famille.objects.get(pk=int(data["pk"]))

@@ -141,6 +141,7 @@ urlpatterns = [
 
     # Désinscription mails
     path('desinscription/<str:valeur>', pages_speciales.desinscription_emails, name='desinscription'),
+    path('confirmation_desinscription/<str:valeur>', pages_speciales.confirmation_desinscription, name='confirmation_desinscription'),
 
     # AJAX
     path('facturer', secure_ajax_portail(grille.Facturer), name='portail_ajax_facturer'),

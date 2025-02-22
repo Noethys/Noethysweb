@@ -30,11 +30,16 @@
 
     <section class="content">
         <div class="error-page">
-            <div class="error-content ml-0">
+            <div class="text-center">
                 {% if resultat == True %}
-                    <h3><i class="fa fa-check text-success"></i> Désinscription validée</h3><p>Vous ne recevrez plus nos emails groupés.</p>
+                    {% if valeur %}
+                        <p>Vous ne souhaitez plus recevoir nos mails groupés ?</p>
+                        <a class="btn btn-primary" href="{% url 'confirmation_desinscription' valeur %}" title="Cliquez ici pour confirmer votre désinscription"><i class="fa fa-check margin-r-5"></i>Cliquez ici pour confirmer votre désinscription</a>
+                    {% else %}
+                        <h3><i class="fa fa-check text-success"></i> Désinscription validée</h3><p>Vous ne recevrez plus nos emails groupés.</p>
+                    {% endif %}
                 {% else %}
-                    <h3><i class="fa fa-close text-danger"></i> Demande non valide</h3><p>Votre dossier n'a pas pu être identifié. Veuillez contacter l'organisateur.</p>
+                    <h3><i class="fa fa-close text-danger"></i> Demande non valide</h3><p>Votre dossier n'a pas pu être identifié ou vous êtes déjà désinscrit. <br>Veuillez contacter l'organisateur.</p>
                 {% endif %}
             </div>
         </div>
