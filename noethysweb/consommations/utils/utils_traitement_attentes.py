@@ -26,7 +26,7 @@ def Traiter_attentes(request=None, selections=None, test=False):
             liste_resultats = [dict_temp for dict_temp in selections if dict_temp["idactivite"] == activite.pk]
         else:
             # Recherche les places disponibles
-            date_min = datetime.date.today() + datetime.timedelta(activite.reattribution_delai)
+            date_min = datetime.date.today() + datetime.timedelta(activite.reattribution_delai or 1)
             date_max = date_min + datetime.timedelta(365)
             liste_resultats = Get_resultats(parametres={
                 "donnees": "traitement_attente",
