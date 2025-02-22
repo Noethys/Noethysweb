@@ -13,11 +13,9 @@
     {% block box_theme %}card-outline card-lightblue{% endblock %}
     {% block box_titre %}{{ box_titre }}{% endblock %}
     {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
-
     {% block box_contenu %}
         {% crispy form %}
     {% endblock %}
-
 {% endembed %}
 
     {% include 'core/modal_pdf.html' %}
@@ -32,8 +30,8 @@
                 });
             $.ajax({
                 type: "POST",
-                url: "{% url 'ajax_edition_prestations_generer_pdf' %}",
-                data: $("#form_parametres").serialize(),
+                url: "{% url url_ajax_edition_pdf %}",
+                data: $("#{{ id_form|default:'form_parametres' }}").serialize(),
                 datatype: "json",
                 success: function(data){
                     box.modal("hide");

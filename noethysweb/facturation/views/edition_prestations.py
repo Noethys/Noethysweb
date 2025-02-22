@@ -40,12 +40,14 @@ def Generer_pdf(request):
 
 class View(CustomView, TemplateView):
     menu_code = "edition_prestations"
-    template_name = "facturation/edition_prestations.html"
+    template_name = "core/edition_pdf.html"
 
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Edition des prestations"
         context['box_titre'] = "Edition des prestations"
+        context['url_ajax_edition_pdf'] = "ajax_edition_prestations_generer_pdf"
+        context['id_form'] = "form_parametres"
         context['box_introduction'] = "Renseignez les paramètres et cliquez sur le bouton Générer le PDF. La génération du document peut nécessiter quelques instants d'attente."
         if "form" not in kwargs:
             context['form'] = Formulaire(request=self.request)
