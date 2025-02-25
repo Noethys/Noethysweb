@@ -1,3 +1,10 @@
+Version 1.2.8.6 (25/02/2025) :
+
+- Ajout du champ Observations dans les factures
+- Ajout d'un bouton pour la confirmation de désinscription aux mails groupés
+- Correction du délai d'attribution non renseigné
+- Correction de divers petits bugs
+
 Version 1.2.8.5 (22/02/2025) :
 
 - Ajout de l'édition des ventilations des règlements
