@@ -155,7 +155,7 @@ def Get_data(parametres={}, request=None):
     for p in liste_places:
         for idgroupe in [p["groupe"], 0]:
             for id_unite_remplissage in dict_unites_remplissage_unites.get(p["unite"], []):
-                key = "%s_%d_%d" % (p["date"], id_unite_remplissage, idgroupe)
+                key = "%s_%d_%d" % (p["date"], id_unite_remplissage or 0, idgroupe or 0)
                 quantite = p["nbre"] * p["quantite"] if p["quantite"] else p["nbre"]
                 dict_places[key] = dict_places.get(key, 0) + quantite
                 if p["evenement"]:
