@@ -24,7 +24,7 @@ class Page(Onglet):
     url_modifier = "activites_tarifs_modifier"
     url_supprimer = "activites_tarifs_supprimer"
     url_dupliquer = "activites_tarifs_dupliquer"
-    description_liste = "Vous pouvez saisir ici des tarifs pour chaque nom de tarif. Sélectionnez un nom de tarif dans la liste et cliquez sur Ajouter. Important : Lors d'une évolution de tarif, vous devez créer de nouveaux tarifs (Ne modifiez pas le tarif existant)."
+    description_liste = "Vous pouvez saisir ici des tarifs pour chaque nom de tarif. Sélectionnez un nom de tarif dans la liste et cliquez sur Ajouter. Important : Lors d'une évolution de tarif, vous devez créer de nouveaux tarifs (Ne modifiez pas le tarif existant). Et si vous modifiez ou ajoutez un tarif pour une période sur laquelle des prestations existent déjà, il vous faudra effectuer un recalcul depuis le menu Facturation > Recalculer des prestations."
     description_saisie = "Saisissez toutes les informations concernant le tarif et cliquez sur le bouton Enregistrer."
     objet_singulier = "un tarif"
     objet_pluriel = "des tarifs"
