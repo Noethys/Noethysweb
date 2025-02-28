@@ -117,10 +117,10 @@ class Formulaire(FormulaireBase, forms.Form):
             return
 
         # Avertissements
-        if not self.cleaned_data["lot_factures"]:
-            messages.add_message(self.request, messages.INFO, "Remarque : Vous n'avez pas sélectionné de lot de factures")
-        if not self.cleaned_data["date_echeance"]:
-            messages.add_message(self.request, messages.INFO, "Remarque : Vous n'avez pas sélectionné de date d'échéance")
+        # if not self.cleaned_data["lot_factures"]:
+        #     messages.add_message(self.request, messages.INFO, "Remarque : Vous n'avez pas sélectionné de lot de factures")
+        # if not self.cleaned_data["date_echeance"]:
+        #     messages.add_message(self.request, messages.INFO, "Remarque : Vous n'avez pas sélectionné de date d'échéance")
 
         return self.cleaned_data
 
