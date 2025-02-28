@@ -7,6 +7,7 @@ import json
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Reglement
+from core.utils import utils_dates
 
 
 class Page(crud.Page):
@@ -36,7 +37,7 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["fgenerique:famille", "idreglement", "date", "mode__label", "emetteur__nom", "numero_piece", "payeur__nom", "montant",
-                   "observations", "numero_quittancier", "depot__nom", "compte__nom", "date_differe"]
+                   "observations", "numero_quittancier", "depot__nom", "depot__date", "compte__nom", "date_differe"]
         check = columns.CheckBoxSelectColumn(label="")
         mode = columns.TextColumn("Mode", sources=['mode__label'])
         emetteur = columns.CompoundColumn("Emetteur", sources=['emetteur__nom'])
@@ -44,18 +45,24 @@ class Liste(Page, crud.Liste):
         payeur = columns.TextColumn("Payeur", sources=['payeur__nom'])
         depot = columns.TextColumn("Dépôt", sources=['depot__nom'])
         compte = columns.TextColumn("Compte", sources=['compte__nom'])
+        date_depot = columns.TextColumn("Date de dépôt", sources=['depot__date'], processor='Get_date_depot')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', "idreglement", "date", "mode", "emetteur", "numero_piece", "famille", "payeur", "montant", "depot", "observations", "numero_quittancier",
+            columns = ['check', "idreglement", "date", "mode", "emetteur", "numero_piece", "famille", "payeur", "montant", "depot", "date_depot", "observations", "numero_quittancier",
                        "compte", "date_differe"]
-            hidden_columns = ["observations", "numero_quittancier", "compte", "date_differe"]
+            hidden_columns = ["observations", "numero_quittancier", "compte", "date_differe", "date_depot"]
             processors = {
                 "date": helpers.format_date("%d/%m/%Y"),
                 "date_differe": helpers.format_date("%d/%m/%Y"),
             }
             ordering = ["date"]
             footer = True
+
+        def Get_date_depot(self, instance, *args, **kwargs):
+            if instance.depot:
+                return utils_dates.ConvertDateToFR(instance.depot.date)
+            return ""
 
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
