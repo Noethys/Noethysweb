@@ -118,7 +118,11 @@ def Recherche_factures(request):
     # Recherche des factures à générer
     liste_factures = Get_factures(form.cleaned_data)
     montant_minimum = utils_parametres.Get(nom="montant_minimum", categorie="generation_factures", utilisateur=request.user, valeur=0.0)
-    return render(request, "facturation/factures_generation_selection.html", {"factures": liste_factures, "montant_minimum": montant_minimum})
+
+    # Calcule le nombre d'alertes sur les factures
+    nbre_total_alertes = sum([len(facture["alertes"]) for facture in liste_factures if facture["alertes"]])
+
+    return render(request, "facturation/factures_generation_selection.html", {"factures": liste_factures, "montant_minimum": montant_minimum, "nbre_total_alertes": nbre_total_alertes})
 
 
 

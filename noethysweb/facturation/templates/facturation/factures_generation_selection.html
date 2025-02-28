@@ -8,6 +8,10 @@
     <button type="button" class="btn btn-default" onclick="impression_pdf(0)" title="Prévisualisation de toutes les factures"><i class="fa fa-file-pdf-o margin-r-5"></i>Prévisualisation des factures</button>
 </div>
 
+{% if nbre_total_alertes %}
+    <div class="alert alert-warning alert-dismissible"><i class="icon fa fa-warning"></i> Attention, cette liste comporte {{ nbre_total_alertes }} alerte{{ nbre_total_alertes|pluralize }}.</div>
+{% endif %}
+
 <div class="btn-toolbar mb-2">
     <div class="btn-group mr-2 btn-group-sm">
         <button type="button" class="btn btn-default" onclick="tout_cocher()" ><i class="fa fa-check-square-o"></i> Tout cocher</button>
@@ -28,6 +32,7 @@
         <thead>
             <tr>
                 <th>Famille</th>
+                <th>Alertes</th>
                 <th>Total période</th>
                 <th>Déjà réglé</th>
                 <th>Dû période</th>
@@ -46,13 +51,15 @@
                             <span style="margin-left:5px;margin-right:20px;">{{ facture.nomSansCivilite }}</span>
                         </div>
                     </td>
+                    <td>{% if facture.alertes %}<i class="fa text-warning fa-exclamation-triangle"></i> {{ facture.alertes|join:", " }}{% endif %}</td>
                     <td class="montant">{{ facture.total|montant }}</td>
                     <td class="montant">{{ facture.ventilation|montant }}</td>
                     <td class="montant">{{ facture.solde|montant }}</td>
                     <td class="montant">{{ facture.total_reports|montant }}</td>
                     <td class="montant">{{ facture.solde_avec_reports|montant }}</td>
                     <td class="text-center">
-                        <button class="btn btn-default btn-xs" onclick="impression_pdf({{ facture.idfamille }})" title="Aperçu PDF de la facture"><i class="fa fa-file-pdf-o"></i></button>
+                        <button class="btn btn-default btn-xs" onclick="impression_pdf({{ facture.idfamille }})" title="Aperçu PDF de la facture"><i class="fa fa-fw fa-file-pdf-o"></i></button> 
+                        <a type="button" class="btn btn-default btn-xs" href="{% url 'famille_resume' idfamille=facture.idfamille %}" target="_blank" title="Ouvrir la fiche famille dans un nouvel onglet"><i class="fa fa-fw fa-users"></i></a>
                     </td>
                 </tr>
             {% endfor %}

@@ -342,6 +342,7 @@ class Facturation():
                     "{CODEBARRES_NUM_FACTURE}": "F%06d" % num_facture,
                     "{INDIVIDUS_CONCERNES}": [],
                     "liste_idactivite": [],
+                    "alertes": [],
                     }
 
                 # Date échéance
@@ -495,7 +496,12 @@ class Facturation():
                     else :
                         plage = plage + "au %s" % utils_dates.ConvertDateToFR(quotient.date_fin)
                     dictComptes[ID]["qfdates"][plage] = quotient.quotient
-                
+
+            # Vérifie qu'un QF existe si le tarif de la prestation l'exige
+            if not dictComptes[ID]["qfdates"] and prestation.tarif and "qf" in prestation.tarif.methode:
+                texte_alerte = "Pas de QF"
+                if texte_alerte not in dictComptes[ID]["alertes"]:
+                    dictComptes[ID]["alertes"].append(texte_alerte)
         
         # Intégration des total des déductions
         logger.debug("Intégration des total des déductions...")
@@ -587,7 +593,7 @@ class Facturation():
                 
                 # Attribue un numéro de facture
                 if facture.prefixe:
-                    numeroStr = "%s-%06d" % (facture.prefixe.prefixe, facture.numero)
+                    numeroStr = "%s%06d" % (facture.prefixe.prefixe, facture.numero)
                 else:
                     numeroStr = "%06d" % facture.numero
 
