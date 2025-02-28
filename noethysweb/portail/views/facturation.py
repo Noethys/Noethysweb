@@ -131,10 +131,11 @@ def effectuer_paiement_en_ligne(request):
 
         p = Payment("tipi", {'numcli': facture.regie.numclitipi, "automatic_return_url": request.build_absolute_uri(reverse("retour_payfip"))})
         objet = "Paiement %s" % utils_texte.Supprimer_accents(facture.regie.nom)
+        refdet = "%s%06d" % (facture.prefixe.prefixe if facture.prefixe else "", facture.numero)
         requete = p.request(
             amount=str(montant_reglement),
             exer=str(facture.date_debut.year),
-            refdet="%06d" % facture.numero,
+            refdet=refdet,
             objet=objet,
             email=request.user.famille.mail,
             saisie=saisie)
@@ -142,7 +143,7 @@ def effectuer_paiement_en_ligne(request):
 
         # Enregistrement du paiement
         Paiement.objects.create(famille=request.user.famille, systeme_paiement="payfip", idtransaction=requete[0],
-                                refdet=facture.numero, montant=montant_reglement, objet=objet, saisie=saisie, ventilation=ventilation_str)
+                                refdet=refdet, montant=montant_reglement, objet=objet, saisie=saisie, ventilation=ventilation_str)
 
         return JsonResponse({"systeme_paiement": "payfip", "urltoredirect": requete[2]})
 
