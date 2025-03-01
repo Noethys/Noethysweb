@@ -68,6 +68,8 @@ class View(CustomView, TemplateView):
                 return prestation.date.strftime("%m/%Y")
             if parametres["regroupement_colonne"] == "annee":
                 return prestation.date.strftime("%Y")
+            if parametres["regroupement_colonne"] == "nom_activite":
+                return prestation.activite.nom if prestation.activite else "Autre"
             if parametres["regroupement_colonne"] == "code_comptable":
                 return prestation.Get_code_comptable() or "Inconnu"
             if parametres["regroupement_colonne"] == "code_analytique":
