@@ -147,7 +147,7 @@ class Annuler(Page, crud.Supprimer):
     def get_context_data(self, **kwargs):
         """ Ajout d'un formulaire à la page d'annulation """
         context = super(Annuler, self).get_context_data(**kwargs)
-        context["form"] = Formulaire_annulation()
+        context["form_suppression_extra"] = Formulaire_annulation()
         return context
 
     def delete(self, request, *args, **kwargs):
@@ -176,7 +176,7 @@ class Annuler_plusieurs(Page, crud.Supprimer_plusieurs):
     def get_context_data(self, **kwargs):
         """ Ajout d'un formulaire à la page d'annulation """
         context = super(Annuler_plusieurs, self).get_context_data(**kwargs)
-        context["form"] = Formulaire_annulation()
+        context["form_suppression_extra"] = Formulaire_annulation()
         return context
 
     def post(self, request, **kwargs):
