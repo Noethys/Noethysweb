@@ -1,3 +1,12 @@
+Version 1.2.8.7 (01/03/2025) :
+
+- Ajout des alertes dans le générateur de factures
+- Ajout du préfixe de facture dans le paiement Payfip
+- Ajout de l'affichage des dates de dépôt dans la liste des règlements
+- Ajout du regroupement par nom d'activité dans le détail des ventilations des règlements
+- Correction du formulaire extra de suppression
+- Correction des colonnes fixes dans les bootstrap tables
+
 Version 1.2.8.6 (25/02/2025) :
 
 - Ajout du champ Observations dans les factures
