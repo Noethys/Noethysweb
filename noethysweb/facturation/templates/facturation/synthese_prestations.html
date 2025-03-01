@@ -45,6 +45,10 @@
                             background-color: #efefef;
                             font-weight: bold;
                         }
+                        .entete_regroupement {
+                            min-width: 260px;
+                        }
+
                     </style>
 
                     <table
@@ -90,11 +94,11 @@
                             }
                             return total;
                         };
-                        function formate_case(value, row, index) {
-                            if (row.regroupement === true) {
-                                return {classes: 'case_regroupement'};
-                            };
-                            return {};
+                        function formate_case(value, row, index, field) {
+                            var klass = ""
+                            if (field === "col0") {klass += "entete_regroupement "}
+                            if (row.regroupement === true) {klass += "case_regroupement"}
+                            return {classes: klass};
                         };
                         function formate_montant(value, row, index) {
                             try {

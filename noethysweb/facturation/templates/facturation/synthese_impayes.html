@@ -45,6 +45,10 @@
                             background-color: #efefef;
                             font-weight: bold;
                         }
+                        .entete_regroupement {
+                            min-width: 280px;
+                        }
+
                     </style>
 
                     <table
@@ -86,9 +90,11 @@
                             });
                             return total.toFixed(2);
                         };
-                        function formate_case(value, row, index) {
-                            {% if afficher_detail %}if (row.regroupement === true) {return {classes: 'case_regroupement'}}{% endif %}
-                            return {};
+                        function formate_case(value, row, index, field) {
+                            var klass = ""
+                            if (field === "col0") {klass += "entete_regroupement "}
+                            {% if afficher_detail %}if (row.regroupement === true) {klass += "case_regroupement"}{% endif %}
+                            return {classes: klass};
                         };
                         function formate_montant(value, row, index) {
                             try {
