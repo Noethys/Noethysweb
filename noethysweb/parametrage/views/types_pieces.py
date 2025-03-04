@@ -31,7 +31,7 @@ class Liste(Page, crud.Liste):
     model = TypePiece
 
     def get_queryset(self):
-        return TypePiece.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure()).annotate(nbre_pieces=Count("piece"))
+        return TypePiece.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure()).annotate(nbre_pieces=Count("piece", distinct=True)).annotate(nbre_activites=Count("activite_types_pieces", distinct=True))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -45,10 +45,11 @@ class Liste(Page, crud.Liste):
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
         duree_validite = columns.DisplayColumn("Validité", sources="duree_validite", processor='Get_validite')
         nbre_pieces = columns.TextColumn("Pièces associées", sources="nbre_pieces")
+        nbre_activites = columns.TextColumn("Activités associées", sources="nbre_activites")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idtype_piece', 'nom', 'public', 'duree_validite', "nbre_pieces"]
+            columns = ['idtype_piece', 'nom', 'public', 'duree_validite', "nbre_pieces", "nbre_activites"]
             ordering = ['nom']
 
         def Get_validite(self, instance, **kwargs):
