@@ -93,7 +93,11 @@ LISTE_PARAMETRES = [
     Parametre(code="validation_auto:individu_medecin", label="Validation automatique de la page 'Médecin'", type="boolean", valeur=True),
     Parametre(code="renseignements_duree_certification", label="Durée de validité d'une certification", type="duree_certification", valeur=None, help_text="Par défaut, une certification est illimitée mais elle peut également être valable pour une durée donnée ou jusqu'à une date donnée. Une fois la certification expirée, la famille doit certifier de nouveau ses fiches de renseignements sur le portail."),
 
-    # Documents
+    #Compte utilisateurs
+    Parametre(code="compte_famille", label="Compte Famille",type="boolean", valeur=True , help_text="Cochez cette case pour se connecter sur le portail en tant que Famille."),
+    Parametre(code="compte_individu", label="Compte Individu", type="boolean", valeur=True, help_text="Cochez cette case pour se connecter sur le portail en tant que Individu."),
+
+    # Cotisations
     Parametre(code="cotisations_afficher_page", label="Afficher la page", type="boolean", valeur=False),
     Parametre(code="cotisations_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez ici consulter les informations au sujet des adhésions."),
 
