@@ -15,6 +15,7 @@ LISTE_ONGLETS = [
     {"code": "maladies", "label": "Maladies", "icone": "fa-stethoscope", "url": "individu_maladies"},
     {"code": "medical", "label": "Médical", "icone": "fa-heartbeat", "url": "individu_medical_liste"},
     {"code": "assurances", "label": "Assurances", "icone": "fa-shield", "url": "individu_assurances_liste"},
+    {"code": "portail", "label": "Portail", "icone": "fa-globe", "url": "individu_portail"},
     {"code": "contacts", "label": "Contacts", "icone": "fa-users", "url": "individu_contacts_liste"},
     {"code": "transports", "label": "Transports", "icone": "fa-bus", "url": "individu_transports_liste"},
     {"code": "consommations", "label": "Consommations", "icone": "fa-calendar", "url": "famille_consommations"},
