@@ -20,11 +20,25 @@ class Element():
         self.categorie = ""
 
 
+class Titre(Element):
+    def __init__(self, texte=""):
+        Element.__init__(self)
+        self.categorie = "titre"
+        self.texte = texte.upper()
+
+
 class Texte(Element):
     def __init__(self, texte=""):
         Element.__init__(self)
         self.categorie = "texte"
         self.texte = texte
+
+
+class Espace(Element):
+    def __init__(self, hauteur=30):
+        Element.__init__(self)
+        self.categorie = "espace"
+        self.hauteur = hauteur
 
 
 class Tableau(Element):
@@ -101,8 +115,6 @@ def Calcule_periodes_comparatives(parametres={}, presents=None, liste_activites=
     return liste_periodes
 
 
-
-
 class View(CustomView, TemplateView):
     menu_code = "statistiques"
     template_name = "outils/statistiques.html"
@@ -130,455 +142,469 @@ class View(CustomView, TemplateView):
         inscrits_periode = None
 
         if parametres:
-            # Rubrique
-            rubrique = parametres["rubrique"]
+            for rubrique in parametres["rubriques"]:
 
-            # Activités
-            param_activites = json.loads(parametres["activites"])
-            if param_activites["type"] == "groupes_activites":
-                liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
-            if param_activites["type"] == "activites":
-                liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
+                # Activités
+                param_activites = json.loads(parametres["activites"])
+                if param_activites["type"] == "groupes_activites":
+                    liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
+                if param_activites["type"] == "activites":
+                    liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
 
-            # Données
-            if parametres["donnees"] == "ANNEE":
-                presents = (datetime.date(parametres["annee"], 1, 1),
-                            datetime.date(parametres["annee"], 12, 31))
-            elif parametres["donnees"] == "MOIS":
-                presents = (datetime.date(parametres["annee"], int(parametres["mois"]), 1),
-                            datetime.date(parametres["annee"], int(parametres["mois"]), calendar.monthrange(parametres["annee"], int(parametres["mois"]))[1]))
-            elif parametres["donnees"] == "VACANCES":
-                vacance = Vacance.objects.get(nom=parametres["vacances"], annee=parametres["annee"])
-                presents = (vacance.date_debut, vacance.date_fin)
-            elif parametres["donnees"] == "PERIODE":
-                presents = utils_dates.ConvertDateRangePicker(parametres["periode"])
+                # Données
+                if parametres["donnees"] == "ANNEE":
+                    presents = (datetime.date(parametres["annee"], 1, 1),
+                                datetime.date(parametres["annee"], 12, 31))
+                elif parametres["donnees"] == "MOIS":
+                    presents = (datetime.date(parametres["annee"], int(parametres["mois"]), 1),
+                                datetime.date(parametres["annee"], int(parametres["mois"]), calendar.monthrange(parametres["annee"], int(parametres["mois"]))[1]))
+                elif parametres["donnees"] == "VACANCES":
+                    vacance = Vacance.objects.get(nom=parametres["vacances"], annee=parametres["annee"])
+                    presents = (vacance.date_debut, vacance.date_fin)
+                elif parametres["donnees"] == "PERIODE":
+                    presents = utils_dates.ConvertDateRangePicker(parametres["periode"])
 
-            if parametres["donnees"] == "INSCRITS_PERIODE":
-                inscrits_periode = utils_dates.ConvertDateRangePicker(parametres["periode"])
-
-
-            # ================================ INDIVIDUS ====================================
-
-            if rubrique.startswith("individus"):
-                if presents:
-                    condition = Q(consommation__activite__in=liste_activites, consommation__date__gte=presents[0], consommation__date__lte=presents[1], consommation__etat__in=parametres["etats"])
-                else:
-                    condition = Q(inscription__activite__in=liste_activites)
-                    if inscrits_periode:
-                        condition &= Q(inscription__date_debut__gte=inscrits_periode[0], inscription__date_debut__lte=inscrits_periode[1])
+                if parametres["donnees"] == "INSCRITS_PERIODE":
+                    inscrits_periode = utils_dates.ConvertDateRangePicker(parametres["periode"])
 
 
-            # ---------------------------- INDIVIDUS : Nombre -------------------------------
-            if rubrique == "individus_nombre":
+                # ================================ INDIVIDUS ====================================
 
-                # Texte : Nombre d'individus total
-                data.append(Texte(texte="%d individus %s." % (Individu.objects.filter(condition).distinct().count(), "présents" if presents else "inscrits")))
+                if rubrique.startswith("individus"):
+                    if presents:
+                        condition = Q(consommation__activite__in=liste_activites, consommation__date__gte=presents[0], consommation__date__lte=presents[1], consommation__etat__in=parametres["etats"])
+                    else:
+                        condition = Q(inscription__activite__in=liste_activites)
+                        if inscrits_periode:
+                            condition &= Q(inscription__date_debut__gte=inscrits_periode[0], inscription__date_debut__lte=inscrits_periode[1])
 
-                # Tableau : Répartition des individus par activité
-                individus = Individu.objects.filter(condition).values_list("%s__activite__nom" % ("consommation" if presents else "inscription")).annotate(nbre=Count("idindividu", distinct=True)).order_by("-nbre")
-                data.append(Tableau(
-                    titre="Répartition du nombre d'individus par activité",
-                    colonnes=["Activité", "Nombre d'individus"],
-                    lignes=[(item[0], item[1]) for item in individus]
-                ))
 
-                # Chart : Evolution du nombre d'individus - comparatif par période
-                if presents:
-                    liste_periodes= Calcule_periodes_comparatives(parametres, presents, liste_activites)
-                    if liste_periodes:
-                        liste_labels, liste_valeurs = [], []
-                        for dict_periode in liste_periodes:
-                            condition_temp = Q(consommation__activite__in=liste_activites, consommation__date__gte=dict_periode["date_debut"], consommation__date__lte=dict_periode["date_fin"], consommation__etat__in=parametres["etats"])
-                            liste_labels.append(dict_periode["label"])
-                            liste_valeurs.append(Individu.objects.filter(condition_temp).distinct().count())
-                        data.append(Histogramme(titre="Evolution du nombre des individus", type_chart="bar", labels=liste_labels, valeurs=liste_valeurs))
+                # ---------------------------- INDIVIDUS : Nombre -------------------------------
+                if rubrique == "individus_nombre":
+                    data.append(Titre(texte="Nombre d'individus"))
 
-                # Chart : Nombre d'individus par date
-                if presents:
-                    individus = Individu.objects.filter(condition).values_list('consommation__date').annotate(nbre=Count('idindividu', distinct=True)).order_by('consommation__date')
-                    data.append(Histogramme(
-                        titre="Nombre individus par date", type_chart="line",
-                        labels=[utils_dates.ConvertDateToFR(date) for date, nbre in individus],
-                        valeurs=[nbre for date, nbre in individus],
+                    # Texte : Nombre d'individus total
+                    data.append(Texte(texte="%d individus %s." % (Individu.objects.filter(condition).distinct().count(), "présents" if presents else "inscrits")))
+
+                    # Tableau : Répartition des individus par activité
+                    individus = Individu.objects.filter(condition).values_list("%s__activite__nom" % ("consommation" if presents else "inscription")).annotate(nbre=Count("idindividu", distinct=True)).order_by("-nbre")
+                    data.append(Tableau(
+                        titre="Répartition du nombre d'individus par activité",
+                        colonnes=["Activité", "Nombre d'individus"],
+                        lignes=[(item[0], item[1]) for item in individus]
+                    ))
+
+                    # Chart : Evolution du nombre d'individus - comparatif par période
+                    if presents:
+                        liste_periodes= Calcule_periodes_comparatives(parametres, presents, liste_activites)
+                        if liste_periodes:
+                            liste_labels, liste_valeurs = [], []
+                            for dict_periode in liste_periodes:
+                                condition_temp = Q(consommation__activite__in=liste_activites, consommation__date__gte=dict_periode["date_debut"], consommation__date__lte=dict_periode["date_fin"], consommation__etat__in=parametres["etats"])
+                                liste_labels.append(dict_periode["label"])
+                                liste_valeurs.append(Individu.objects.filter(condition_temp).distinct().count())
+                            data.append(Histogramme(titre="Evolution du nombre des individus", type_chart="bar", labels=liste_labels, valeurs=liste_valeurs))
+
+                    # Chart : Nombre d'individus par date
+                    if presents:
+                        individus = Individu.objects.filter(condition).values_list('consommation__date').annotate(nbre=Count('idindividu', distinct=True)).order_by('consommation__date')
+                        data.append(Histogramme(
+                            titre="Nombre individus par date", type_chart="line",
+                            labels=[utils_dates.ConvertDateToFR(date) for date, nbre in individus],
+                            valeurs=[nbre for date, nbre in individus],
+                        ))
+
+
+                # ---------------------------- INDIVIDUS : Genre -------------------------------
+                if rubrique == "individus_genre":
+                    data.append(Titre(texte="Genre des individus"))
+
+                    individus = Individu.objects.filter(condition).values_list("civilite").annotate(nbre=Count("idindividu", distinct=True))
+                    resultats = {"M": 0, "F": 0}
+                    for item in individus:
+                        if item[0] in (1, 4): resultats["M"] += item[1]
+                        if item[0] in (2, 3, 5): resultats["F"] += item[1]
+
+                    # Tableau : Répartition par genre
+                    data.append(Tableau(
+                        titre="Répartition par genre",
+                        colonnes=["Genre", "Nombre d'individus"],
+                        lignes=[("Garçons", resultats["M"]), ("Filles", resultats["F"])]
+                    ))
+
+                    # Camembert : Répartition par genre
+                    data.append(Camembert(
+                        titre="Répartition par genre",
+                        labels=["Garçons", "Filles"],
+                        valeurs=[resultats["M"], resultats["F"]],
+                        couleurs=["rgba(54, 162, 235, 0.5)", "rgba(255, 99, 132, 0.5)"],
                     ))
 
 
-            # ---------------------------- INDIVIDUS : Genre -------------------------------
-            if rubrique == "individus_genre":
+                # ---------------------------- INDIVIDUS : Age -------------------------------
+                if rubrique == "individus_age":
+                    data.append(Titre(texte="Age des individus"))
 
-                individus = Individu.objects.filter(condition).values_list("civilite").annotate(nbre=Count("idindividu", distinct=True))
-                resultats = {"M": 0, "F": 0}
-                for item in individus:
-                    if item[0] in (1, 4): resultats["M"] += item[1]
-                    if item[0] in (2, 3, 5): resultats["F"] += item[1]
+                    if presents:
+                        today = presents[0]
+                    else:
+                        today = None
 
-                # Tableau : Répartition par genre
-                data.append(Tableau(
-                    titre="Répartition par genre",
-                    colonnes=["Genre", "Nombre d'individus"],
-                    lignes=[("Garçons", resultats["M"]), ("Filles", resultats["F"])]
-                ))
+                    # Calcul des âges
+                    dict_ages = {}
+                    for individu in Individu.objects.filter(condition).distinct():
+                        age = individu.Get_age(today)
+                        dict_ages.setdefault(age, 0)
+                        dict_ages[age] += 1
+                    liste_ages = [(age, nbre) for age, nbre in dict_ages.items() if age]
+                    liste_ages = sorted(liste_ages, key=operator.itemgetter(0))
 
-                # Camembert : Répartition par genre
-                data.append(Camembert(
-                    titre="Répartition par genre",
-                    labels=["Garçons", "Filles"],
-                    valeurs=[resultats["M"], resultats["F"]],
-                    couleurs=["rgba(54, 162, 235, 0.5)", "rgba(255, 99, 132, 0.5)"],
-                ))
+                    # Afficher les ages inconnus
+                    if None in dict_ages:
+                        data.append(Texte(texte="Remarque : La date de naissance n'a pas été renseignée pour %d individus." % dict_ages[None]))
 
+                    # Tableau : Répartition par âge
+                    data.append(Tableau(
+                        titre="Répartition par âge",
+                        colonnes=["Age", "Nombre d'individus"],
+                        lignes=liste_ages
+                    ))
 
-            # ---------------------------- INDIVIDUS : Age -------------------------------
-            if rubrique == "individus_age":
+                    # Chart : Répartition par âge
+                    data.append(Histogramme(titre="Répartition par âge", type_chart="bar",
+                        labels=[age for age, nbre in liste_ages],
+                        valeurs=[nbre for age, nbre in liste_ages],
+                    ))
 
-                if presents:
-                    today = presents[0]
-                else:
-                    today = None
+                    # Calcul des années de naissance
+                    annees_naiss = {}
+                    for individu in Individu.objects.filter(condition).distinct():
+                        if individu.date_naiss:
+                            annees_naiss.setdefault(individu.date_naiss.year, 0)
+                            annees_naiss[individu.date_naiss.year] += 1
+                    liste_annees_naiss = [(annee, nbre) for annee, nbre in annees_naiss.items()]
+                    liste_annees_naiss.sort()
 
-                # Calcul des âges
-                dict_ages = {}
-                for individu in Individu.objects.filter(condition).distinct():
-                    age = individu.Get_age(today)
-                    dict_ages.setdefault(age, 0)
-                    dict_ages[age] += 1
-                liste_ages = [(age, nbre) for age, nbre in dict_ages.items() if age]
-                liste_ages = sorted(liste_ages, key=operator.itemgetter(0))
+                    # Tableau : Répartition par année de naissance
+                    data.append(Tableau(
+                        titre="Répartition par année de naissance",
+                        colonnes=["Année", "Nombre d'individus"],
+                        lignes=[(annee, nbre) for annee, nbre in liste_annees_naiss],
+                    ))
 
-                # Afficher les ages inconnus
-                if None in dict_ages:
-                    data.append(Texte(texte="Remarque : La date de naissance n'a pas été renseignée pour %d individus." % dict_ages[None]))
+                    # Chart : Répartition par année de naissance
+                    data.append(Histogramme(titre="Répartition par année de naissance", type_chart="bar",
+                        labels=[annee for annee, nbre in liste_annees_naiss],
+                        valeurs=[nbre for annee, nbre in liste_annees_naiss],
+                    ))
 
-                # Tableau : Répartition par âge
-                data.append(Tableau(
-                    titre="Répartition par âge",
-                    colonnes=["Age", "Nombre d'individus"],
-                    lignes=liste_ages
-                ))
+                # ---------------------------- INDIVIDUS : Coordonnées -------------------------------
+                if rubrique == "individus_coordonnees":
+                    data.append(Titre(texte="Coordonnées des individus"))
 
-                # Chart : Répartition par âge
-                data.append(Histogramme(titre="Répartition par âge", type_chart="bar",
-                    labels=[age for age, nbre in liste_ages],
-                    valeurs=[nbre for age, nbre in liste_ages],
-                ))
+                    # Tableau : Répartition des individus par ville de résidence
+                    villes = {}
+                    for ville, nbre in Individu.objects.filter(condition).values_list("ville_resid").annotate(nbre=Count("idindividu", distinct=True)).order_by("ville_resid"):
+                        villes.setdefault(ville, 0)
+                        villes[ville] += nbre
+                    liste_villes = [(ville, nbre) for ville, nbre in villes.items()]
 
-                # Calcul des années de naissance
-                annees_naiss = {}
-                for individu in Individu.objects.filter(condition).distinct():
-                    if individu.date_naiss:
-                        annees_naiss.setdefault(individu.date_naiss.year, 0)
-                        annees_naiss[individu.date_naiss.year] += 1
-                liste_annees_naiss = [(annee, nbre) for annee, nbre in annees_naiss.items()]
-                liste_annees_naiss.sort()
+                    data.append(Tableau(
+                        titre="Répartition des individus par ville de résidence",
+                        colonnes=["Ville de résidence", "Nombre d'individus"],
+                        lignes=[(item[0] if item[0] else "Ville non renseignée", item[1]) for item in liste_villes]
+                    ))
 
-                # Tableau : Répartition par année de naissance
-                data.append(Tableau(
-                    titre="Répartition par année de naissance",
-                    colonnes=["Année", "Nombre d'individus"],
-                    lignes=[(annee, nbre) for annee, nbre in liste_annees_naiss],
-                ))
+                    # Camembert : Répartition des individus par ville de résidence
+                    data.append(Camembert(
+                        titre="Répartition des individus par ville de résidence",
+                        labels=[item[0] if item[0] else "Ville non renseignée" for item in liste_villes],
+                        valeurs=[item[1] for item in liste_villes],
+                    ))
 
-                # Chart : Répartition par année de naissance
-                data.append(Histogramme(titre="Répartition par année de naissance", type_chart="bar",
-                    labels=[annee for annee, nbre in liste_annees_naiss],
-                    valeurs=[nbre for annee, nbre in liste_annees_naiss],
-                ))
+                    # Tableau : Répartition des individus par secteur
+                    secteurs = {}
+                    for secteur, nbre in Individu.objects.select_related("secteur").filter(condition).values_list("secteur__nom").annotate(nbre=Count("idindividu", distinct=True)).order_by("secteur__nom"):
+                        secteurs.setdefault(secteur, 0)
+                        secteurs[secteur] += nbre
+                    liste_secteurs = [(secteur, nbre) for secteur, nbre in secteurs.items()]
 
-            # ---------------------------- INDIVIDUS : Coordonnées -------------------------------
-            if rubrique == "individus_coordonnees":
+                    data.append(Tableau(
+                        titre="Répartition des individus par secteur",
+                        colonnes=["Secteur", "Nombre d'individus"],
+                        lignes=[(item[0] if item[0] else "Secteur non renseigné", item[1]) for item in liste_secteurs]
+                    ))
 
-                # Tableau : Répartition des individus par ville de résidence
-                villes = {}
-                for ville, nbre in Individu.objects.filter(condition).values_list("ville_resid").annotate(nbre=Count("idindividu", distinct=True)).order_by("ville_resid"):
-                    villes.setdefault(ville, 0)
-                    villes[ville] += nbre
-                liste_villes = [(ville, nbre) for ville, nbre in villes.items()]
+                    # Camembert : Répartition des individus par secteur
+                    data.append(Camembert(
+                        titre="Répartition des individus par secteur",
+                        labels=[item[0] if item[0] else "Secteur non renseigné" for item in liste_secteurs],
+                        valeurs=[item[1] for item in liste_secteurs],
+                    ))
 
-                data.append(Tableau(
-                    titre="Répartition des individus par ville de résidence",
-                    colonnes=["Ville de résidence", "Nombre d'individus"],
-                    lignes=[(item[0] if item[0] else "Ville non renseignée", item[1]) for item in liste_villes]
-                ))
+                # ---------------------------- INDIVIDUS : Scolarité -------------------------------
+                if rubrique == "individus_scolarite":
+                    data.append(Titre(texte="Scolarité des individus"))
 
-                # Camembert : Répartition des individus par ville de résidence
-                data.append(Camembert(
-                    titre="Répartition des individus par ville de résidence",
-                    labels=[item[0] if item[0] else "Ville non renseignée" for item in liste_villes],
-                    valeurs=[item[1] for item in liste_villes],
-                ))
+                    date_reference = presents[0] if presents else datetime.date.today()
+                    nbre_individus_total = Individu.objects.filter(condition).distinct().count()
 
-                # Tableau : Répartition des individus par secteur
-                secteurs = {}
-                for secteur, nbre in Individu.objects.select_related("secteur").filter(condition).values_list("secteur__nom").annotate(nbre=Count("idindividu", distinct=True)).order_by("secteur__nom"):
-                    secteurs.setdefault(secteur, 0)
-                    secteurs[secteur] += nbre
-                liste_secteurs = [(secteur, nbre) for secteur, nbre in secteurs.items()]
+                    # Recherche de l'école des individus
 
-                data.append(Tableau(
-                    titre="Répartition des individus par secteur",
-                    colonnes=["Secteur", "Nombre d'individus"],
-                    lignes=[(item[0] if item[0] else "Secteur non renseigné", item[1]) for item in liste_secteurs]
-                ))
+                    condition_temp = Q(scolarite__date_debut__lte=date_reference, scolarite__date_fin__gte=date_reference)
+                    individus = list(Individu.objects.filter(condition, condition_temp).values_list("scolarite__ecole__nom").annotate(nbre=Count("idindividu", distinct=True)).order_by("nbre"))
+                    nbre_individus_avec_scolarite = 0
+                    for item in individus:
+                        nbre_individus_avec_scolarite += item[1]
+                    nbre_individus_sans_scolarite = nbre_individus_total - nbre_individus_avec_scolarite
+                    if nbre_individus_sans_scolarite:
+                        individus.insert(0, ("Ecole non spécifiée", nbre_individus_sans_scolarite))
 
-                # Camembert : Répartition des individus par secteur
-                data.append(Camembert(
-                    titre="Répartition des individus par secteur",
-                    labels=[item[0] if item[0] else "Secteur non renseigné" for item in liste_secteurs],
-                    valeurs=[item[1] for item in liste_secteurs],
-                ))
+                    # Tableau : Répartition des individus par école
+                    data.append(Tableau(
+                        titre="Répartition des individus par école",
+                        colonnes=["Ecole", "Nombre d'individus"],
+                        lignes=[(item[0], item[1]) for item in individus]
+                    ))
 
-            # ---------------------------- INDIVIDUS : Scolarité -------------------------------
-            if rubrique == "individus_scolarite":
+                    # Camembert : Répartition des individus par école
+                    data.append(Camembert(
+                        titre="Répartition des individus par école",
+                        labels=[item[0] for item in individus],
+                        valeurs=[item[1] for item in individus],
+                    ))
 
-                date_reference = presents[0] if presents else datetime.date.today()
-                nbre_individus_total = Individu.objects.filter(condition).distinct().count()
+                    # Recherche du niveau des individus
+                    condition_temp = Q(scolarite__date_debut__lte=date_reference, scolarite__date_fin__gte=date_reference, scolarite__niveau__nom__isnull=False)
+                    individus = list(Individu.objects.filter(condition, condition_temp).values_list("scolarite__niveau__nom").annotate(nbre=Count("idindividu", distinct=True)).order_by("nbre"))
+                    nbre_individus_avec_scolarite = 0
+                    for item in individus:
+                        nbre_individus_avec_scolarite += item[1]
+                    nbre_individus_sans_scolarite = nbre_individus_total - nbre_individus_avec_scolarite
+                    if nbre_individus_sans_scolarite:
+                        individus.insert(0, ("Niveau non spécifié", nbre_individus_sans_scolarite))
 
-                # Recherche de l'école des individus
+                    # Tableau : Répartition des individus par niveau
+                    data.append(Tableau(
+                        titre="Répartition des individus par niveau",
+                        colonnes=["Niveau scolaire", "Nombre d'individus"],
+                        lignes=[(item[0], item[1]) for item in individus]
+                    ))
 
-                condition_temp = Q(scolarite__date_debut__lte=date_reference, scolarite__date_fin__gte=date_reference)
-                individus = list(Individu.objects.filter(condition, condition_temp).values_list("scolarite__ecole__nom").annotate(nbre=Count("idindividu", distinct=True)).order_by("nbre"))
-                nbre_individus_avec_scolarite = 0
-                for item in individus:
-                    nbre_individus_avec_scolarite += item[1]
-                nbre_individus_sans_scolarite = nbre_individus_total - nbre_individus_avec_scolarite
-                if nbre_individus_sans_scolarite:
-                    individus.insert(0, ("Ecole non spécifiée", nbre_individus_sans_scolarite))
-
-                # Tableau : Répartition des individus par école
-                data.append(Tableau(
-                    titre="Répartition des individus par école",
-                    colonnes=["Ecole", "Nombre d'individus"],
-                    lignes=[(item[0], item[1]) for item in individus]
-                ))
-
-                # Camembert : Répartition des individus par école
-                data.append(Camembert(
-                    titre="Répartition des individus par école",
-                    labels=[item[0] for item in individus],
-                    valeurs=[item[1] for item in individus],
-                ))
-
-                # Recherche du niveau des individus
-                condition_temp = Q(scolarite__date_debut__lte=date_reference, scolarite__date_fin__gte=date_reference, scolarite__niveau__nom__isnull=False)
-                individus = list(Individu.objects.filter(condition, condition_temp).values_list("scolarite__niveau__nom").annotate(nbre=Count("idindividu", distinct=True)).order_by("nbre"))
-                nbre_individus_avec_scolarite = 0
-                for item in individus:
-                    nbre_individus_avec_scolarite += item[1]
-                nbre_individus_sans_scolarite = nbre_individus_total - nbre_individus_avec_scolarite
-                if nbre_individus_sans_scolarite:
-                    individus.insert(0, ("Niveau non spécifié", nbre_individus_sans_scolarite))
-
-                # Tableau : Répartition des individus par niveau
-                data.append(Tableau(
-                    titre="Répartition des individus par niveau",
-                    colonnes=["Niveau scolaire", "Nombre d'individus"],
-                    lignes=[(item[0], item[1]) for item in individus]
-                ))
-
-                # Camembert : Répartition des individus par niveau
-                data.append(Camembert(
-                    titre="Répartition des individus par niveau",
-                    labels=[item[0] for item in individus],
-                    valeurs=[item[1] for item in individus],
-                ))
-
-
-            # ---------------------------- INDIVIDUS : Profession -------------------------------
-            if rubrique == "individus_profession":
-
-                # Tableau : Répartition des individus par catégorie socio-professionnelle
-                individus = Individu.objects.filter(condition).values_list("categorie_travail__nom").annotate(nbre=Count("idindividu", distinct=True)).order_by("-nbre")
-                data.append(Tableau(
-                    titre="Répartition des individus par catégorie socio-professionnelle",
-                    colonnes=["Catégorie", "Nombre d'individus"],
-                    lignes=[(item[0] if item[0] else "Catégorie non renseignée", item[1]) for item in individus]
-                ))
-
-                # Camembert : Répartition des individus par catégorie socio-professionnelle
-                data.append(Camembert(
-                    titre="Répartition des individus par catégorie socio-professionnelle",
-                    labels=[item[0] if item[0] else "Catégorie non renseignée" for item in individus],
-                    valeurs=[item[1] for item in individus],
-                ))
-
-
-
-            # ================================ FAMILLES ====================================
-
-            liste_idfamille = []
-            if rubrique.startswith("familles"):
-                if presents:
-                    condition = Q(activite__in=liste_activites, date__gte=presents[0], date__lte=presents[1], etat__in=parametres["etats"])
-                    condition = Q(pk__in=list({c.inscription_id: True for c in Consommation.objects.filter(condition)}.keys()))
-                else:
-                    condition = Q(activite__in=liste_activites)
-                    if inscrits_periode:
-                        condition &= Q(date_debut__gte=inscrits_periode[0], date_debut__lte=inscrits_periode[1])
-
-                inscriptions = Inscription.objects.select_related("activite").filter(condition)
-                liste_idfamille = list({inscription.famille_id: True for inscription in inscriptions}.keys())
-
-            # ---------------------------- FAMILLES : Nombre -------------------------------
-            if rubrique == "familles_nombre":
-
-                # Texte : Nombre d'individus total
-                data.append(Texte(texte="%d familles dont au moins un membre est %s." % (len(liste_idfamille), "présent" if presents else "inscrit")))
-
-                # Tableau : Répartition des familles par activité
-                familles = inscriptions.values_list("activite__nom").annotate(nbre=Count("famille_id", distinct=True)).order_by("-nbre")
-                data.append(Tableau(
-                    titre="Répartition du nombre de familles par activité",
-                    colonnes=["Activité", "Nombre de familles"],
-                    lignes=[(item[0], item[1]) for item in familles]
-                ))
-
-                # Chart : Evolution du nombre de familles - comparatif par période
-                if presents:
-                    liste_periodes= Calcule_periodes_comparatives(parametres, presents, liste_activites)
-                    if liste_periodes:
-                        liste_labels, liste_valeurs = [], []
-                        for dict_periode in liste_periodes:
-                            liste_labels.append(dict_periode["label"])
-                            condition = Q(activite__in=liste_activites, date__gte=dict_periode["date_debut"], date__lte=dict_periode["date_fin"], etat__in=parametres["etats"])
-                            liste_valeurs.append(len({c.inscription.famille_id: True for c in Consommation.objects.select_related("inscription").filter(condition)}))
-
-                        data.append(Histogramme(titre="Evolution du nombre des familles", type_chart="bar", labels=liste_labels, valeurs=liste_valeurs))
-
-                # Chart : Nombre de familles par date
-                if presents:
-                    condition = Q(activite__in=liste_activites, date__gte=presents[0], date__lte=presents[1], etat__in=parametres["etats"])
-                    familles = Consommation.objects.filter(condition).values_list("date").annotate(nbre=Count("inscription__famille_id", distinct=True)).order_by("date")
-                    data.append(Histogramme(
-                        titre="Nombre familles par date", type_chart="line",
-                        labels=[utils_dates.ConvertDateToFR(date) for date, nbre in familles],
-                        valeurs=[nbre for date, nbre in familles],
+                    # Camembert : Répartition des individus par niveau
+                    data.append(Camembert(
+                        titre="Répartition des individus par niveau",
+                        labels=[item[0] for item in individus],
+                        valeurs=[item[1] for item in individus],
                     ))
 
 
-            # ---------------------------- FAMILLES : Caisse -------------------------------
-            if rubrique == "familles_caisse":
+                # ---------------------------- INDIVIDUS : Profession -------------------------------
+                if rubrique == "individus_profession":
+                    data.append(Titre(texte="Profession des individus"))
 
-                familles = Famille.objects.filter(pk__in=liste_idfamille).values_list("caisse__nom").annotate(nbre=Count("idfamille", distinct=True)).order_by("-nbre")
-
-                # Tableau : Répartition des familles par caisse
-                data.append(Tableau(
-                    titre="Répartition des familles par caisse",
-                    colonnes=["Caisse", "Nombre de familles"],
-                    lignes=[(item[0] if item[0] else "Caisse non renseignée", item[1]) for item in familles]
-                ))
-
-                # Camembert : Répartition des familles par caisse
-                data.append(Camembert(
-                    titre="Répartition des familles par caisse",
-                    labels=[item[0] if item[0] else "Caisse non renseignée" for item in familles],
-                    valeurs=[item[1] for item in familles],
-                ))
-
-            # ---------------------------- FAMILLES : Composition -------------------------------
-
-            if rubrique == "familles_composition":
-                familles = Individu.objects.filter(pk__in=[inscription.individu_id for inscription in inscriptions]).values_list("inscription__famille").annotate(nbre=Count("idindividu", distinct=True)).order_by("nbre")
-                dict_familles = {}
-                for item in familles:
-                    dict_familles.setdefault(item[1], 0)
-                    dict_familles[item[1]] += 1
-                familles = [(key, valeur) for key, valeur in dict_familles.items()]
-
-                # Tableau : Composition des familles
-                data.append(Tableau(titre="Composition des familles",
-                    colonnes=["Nombre de membres", "Nombre de familles"],
-                    lignes=[(item[0], item[1]) for item in familles]))
-
-                # Camembert : Composition des familles
-                data.append(Camembert(titre="Composition des familles",
-                    labels=[item[0] for item in familles],
-                    valeurs=[item[1] for item in familles], ))
-
-            # ---------------------------- FAMILLES : QF -------------------------------
-
-            if rubrique == "familles_qf":
-
-                # Récupération des tranches de qf
-                dict_tranches = {None: 0}
-                try:
-                    for tranche in parametres["tranches_qf"].split(";"):
-                        qf_min, qf_max = tranche.split("-")
-                        dict_tranches[(int(qf_min), int(qf_max))] = 0
-                except:
-                    data.append(Texte("Erreur : Les tranches de QF saisies semblent erronées."))
-
-                # Recherche des qf des familles
-                familles = Famille.objects.filter(pk__in=liste_idfamille).distinct()
-                condition_qf = Q(famille__in=familles, date_debut__lte=presents[1], date_fin__gte=presents[0]) if presents else Q(famille__in=familles)
-                dict_quotients = {quotient.famille_id: quotient.quotient for quotient in Quotient.objects.filter(condition_qf).order_by("date_debut")}
-
-                # Regroupement des qf par tranche
-                for famille in familles:
-                    quotient = dict_quotients.get(famille.pk, None)
-                    found = False
-                    if quotient:
-                        for tranche, nbre in dict_tranches.items():
-                            if tranche and tranche[0] <= quotient <= tranche[1]:
-                                dict_tranches[tranche] += 1
-                                found = True
-                    if not found:
-                        dict_tranches[None] += 1
-
-                def Formate_tranche(tranche):
-                    return "%d - %d" % tranche if tranche else "Autre ou inconnu"
-
-                # Tableau : QF des familles
-                data.append(Tableau(titre="Quotients familiaux des familles",
-                    colonnes=["Tranches de QF", "Nombre de familles"],
-                    lignes=[(Formate_tranche(tranche), nbre) for tranche, nbre in dict_tranches.items()]))
-
-                # Camembert : QF des familles
-                data.append(Camembert(titre="Quotients familiaux des familles",
-                    labels=[Formate_tranche(tranche) for tranche, nbre in dict_tranches.items()],
-                    valeurs=[nbre for tranche, nbre in dict_tranches.items()]))
-
-            # ---------------------------- CONSOMMATIONS : Saisie -------------------------------
-
-            if rubrique == "consommations_saisie":
-                if not presents:
-                    data.append(Texte(texte="Données accessible uniquement avec le mode Présents."))
-                else:
-
-                    # Chart : Dates de saisie des consommations
-                    donnees = Consommation.objects.filter(activite__in=liste_activites, date__range=presents).values_list("date_saisie__date").annotate(nbre=Count("idconso", distinct=True)).order_by("date_saisie__date")
-                    data.append(Histogramme(titre="Dates de saisie des consommations", type_chart="bar", chronologie="date",
-                        labels=[str(date) for date, nbre in donnees],
-                        valeurs=[nbre for date, nbre in donnees],
+                    # Tableau : Répartition des individus par catégorie socio-professionnelle
+                    individus = Individu.objects.filter(condition).values_list("categorie_travail__nom").annotate(nbre=Count("idindividu", distinct=True)).order_by("-nbre")
+                    data.append(Tableau(
+                        titre="Répartition des individus par catégorie socio-professionnelle",
+                        colonnes=["Catégorie", "Nombre d'individus"],
+                        lignes=[(item[0] if item[0] else "Catégorie non renseignée", item[1]) for item in individus]
                     ))
 
-                    # Chart : Anticipation des réservations en nombre de jours
-                    donnees = Consommation.objects.filter(activite__in=liste_activites, date__range=presents).annotate(jours=F("date_saisie__date") - F("date")).values_list("jours")
-                    resultats = {}
-                    for delta, in donnees:
-                        resultats.setdefault(delta, 0)
-                        resultats[delta] += 1
-                    donnees = [(nbre_jours, nbre_conso) for nbre_jours, nbre_conso in resultats.items()]
-                    donnees.sort()
-                    data.append(Histogramme(titre="Anticipation des réservations en nombre de jours", type_chart="bar",
-                        labels=[nbre_jours.days for nbre_jours, nbre_conso in donnees],
-                        valeurs=[nbre_conso for nbre_jours, nbre_conso in donnees],
+                    # Camembert : Répartition des individus par catégorie socio-professionnelle
+                    data.append(Camembert(
+                        titre="Répartition des individus par catégorie socio-professionnelle",
+                        labels=[item[0] if item[0] else "Catégorie non renseignée" for item in individus],
+                        valeurs=[item[1] for item in individus],
                     ))
 
-                    # Chart : Evolution des réservations
-                    condition = (Q(titre="Ajout d'une consommation") | Q(titre="Suppression d'une consommation")) & Q(activite__in=liste_activites, date__range=presents)
-                    dict_temp = {}
-                    for titre, date, nbre in Historique.objects.filter(condition).values_list("titre", "horodatage__date").annotate(nbre=Count("idaction", distinct=True)).order_by("horodatage__date"):
-                        dict_temp[date] = dict_temp.get(date, 0) + (-nbre if "Suppression" in titre else nbre)
-                    donnees = []
-                    x = 0
-                    for date, nbre in dict_temp.items():
-                        x += nbre
-                        donnees.append((date, x))
-                    donnees.sort()
-                    data.append(Histogramme(
-                        titre="Evolution des réservations pour les consommations de la période sélectionnée", type_chart="line", chronologie="date",
-                        labels=[str(date) for date, nbre in donnees],
-                        valeurs=[nbre for date, nbre in donnees],
+
+
+                # ================================ FAMILLES ====================================
+
+                liste_idfamille = []
+                if rubrique.startswith("familles"):
+                    if presents:
+                        condition = Q(activite__in=liste_activites, date__gte=presents[0], date__lte=presents[1], etat__in=parametres["etats"])
+                        condition = Q(pk__in=list({c.inscription_id: True for c in Consommation.objects.filter(condition)}.keys()))
+                    else:
+                        condition = Q(activite__in=liste_activites)
+                        if inscrits_periode:
+                            condition &= Q(date_debut__gte=inscrits_periode[0], date_debut__lte=inscrits_periode[1])
+
+                    inscriptions = Inscription.objects.select_related("activite").filter(condition)
+                    liste_idfamille = list({inscription.famille_id: True for inscription in inscriptions}.keys())
+
+                # ---------------------------- FAMILLES : Nombre -------------------------------
+                if rubrique == "familles_nombre":
+                    data.append(Titre(texte="Nombre de familles"))
+
+                    # Texte : Nombre d'individus total
+                    data.append(Texte(texte="%d familles dont au moins un membre est %s." % (len(liste_idfamille), "présent" if presents else "inscrit")))
+
+                    # Tableau : Répartition des familles par activité
+                    familles = inscriptions.values_list("activite__nom").annotate(nbre=Count("famille_id", distinct=True)).order_by("-nbre")
+                    data.append(Tableau(
+                        titre="Répartition du nombre de familles par activité",
+                        colonnes=["Activité", "Nombre de familles"],
+                        lignes=[(item[0], item[1]) for item in familles]
                     ))
+
+                    # Chart : Evolution du nombre de familles - comparatif par période
+                    if presents:
+                        liste_periodes= Calcule_periodes_comparatives(parametres, presents, liste_activites)
+                        if liste_periodes:
+                            liste_labels, liste_valeurs = [], []
+                            for dict_periode in liste_periodes:
+                                liste_labels.append(dict_periode["label"])
+                                condition = Q(activite__in=liste_activites, date__gte=dict_periode["date_debut"], date__lte=dict_periode["date_fin"], etat__in=parametres["etats"])
+                                liste_valeurs.append(len({c.inscription.famille_id: True for c in Consommation.objects.select_related("inscription").filter(condition)}))
+
+                            data.append(Histogramme(titre="Evolution du nombre des familles", type_chart="bar", labels=liste_labels, valeurs=liste_valeurs))
+
+                    # Chart : Nombre de familles par date
+                    if presents:
+                        condition = Q(activite__in=liste_activites, date__gte=presents[0], date__lte=presents[1], etat__in=parametres["etats"])
+                        familles = Consommation.objects.filter(condition).values_list("date").annotate(nbre=Count("inscription__famille_id", distinct=True)).order_by("date")
+                        data.append(Histogramme(
+                            titre="Nombre familles par date", type_chart="line",
+                            labels=[utils_dates.ConvertDateToFR(date) for date, nbre in familles],
+                            valeurs=[nbre for date, nbre in familles],
+                        ))
+
+
+                # ---------------------------- FAMILLES : Caisse -------------------------------
+                if rubrique == "familles_caisse":
+                    data.append(Titre(texte="Caisse des familles"))
+
+                    familles = Famille.objects.filter(pk__in=liste_idfamille).values_list("caisse__nom").annotate(nbre=Count("idfamille", distinct=True)).order_by("-nbre")
+
+                    # Tableau : Répartition des familles par caisse
+                    data.append(Tableau(
+                        titre="Répartition des familles par caisse",
+                        colonnes=["Caisse", "Nombre de familles"],
+                        lignes=[(item[0] if item[0] else "Caisse non renseignée", item[1]) for item in familles]
+                    ))
+
+                    # Camembert : Répartition des familles par caisse
+                    data.append(Camembert(
+                        titre="Répartition des familles par caisse",
+                        labels=[item[0] if item[0] else "Caisse non renseignée" for item in familles],
+                        valeurs=[item[1] for item in familles],
+                    ))
+
+                # ---------------------------- FAMILLES : Composition -------------------------------
+
+                if rubrique == "familles_composition":
+                    data.append(Titre(texte="Composition des familles"))
+
+                    familles = Individu.objects.filter(pk__in=[inscription.individu_id for inscription in inscriptions]).values_list("inscription__famille").annotate(nbre=Count("idindividu", distinct=True)).order_by("nbre")
+                    dict_familles = {}
+                    for item in familles:
+                        dict_familles.setdefault(item[1], 0)
+                        dict_familles[item[1]] += 1
+                    familles = [(key, valeur) for key, valeur in dict_familles.items()]
+
+                    # Tableau : Composition des familles
+                    data.append(Tableau(titre="Composition des familles",
+                        colonnes=["Nombre de membres", "Nombre de familles"],
+                        lignes=[(item[0], item[1]) for item in familles]))
+
+                    # Camembert : Composition des familles
+                    data.append(Camembert(titre="Composition des familles",
+                        labels=[item[0] for item in familles],
+                        valeurs=[item[1] for item in familles], ))
+
+                # ---------------------------- FAMILLES : QF -------------------------------
+
+                if rubrique == "familles_qf":
+                    data.append(Titre(texte="Quotients familiaux des familles"))
+
+                    # Récupération des tranches de qf
+                    dict_tranches = {None: 0}
+                    try:
+                        for tranche in parametres["tranches_qf"].split(";"):
+                            qf_min, qf_max = tranche.split("-")
+                            dict_tranches[(int(qf_min), int(qf_max))] = 0
+                    except:
+                        data.append(Texte("Erreur : Les tranches de QF saisies semblent erronées."))
+
+                    # Recherche des qf des familles
+                    familles = Famille.objects.filter(pk__in=liste_idfamille).distinct()
+                    condition_qf = Q(famille__in=familles, date_debut__lte=presents[1], date_fin__gte=presents[0]) if presents else Q(famille__in=familles)
+                    dict_quotients = {quotient.famille_id: quotient.quotient for quotient in Quotient.objects.filter(condition_qf).order_by("date_debut")}
+
+                    # Regroupement des qf par tranche
+                    for famille in familles:
+                        quotient = dict_quotients.get(famille.pk, None)
+                        found = False
+                        if quotient:
+                            for tranche, nbre in dict_tranches.items():
+                                if tranche and tranche[0] <= quotient <= tranche[1]:
+                                    dict_tranches[tranche] += 1
+                                    found = True
+                        if not found:
+                            dict_tranches[None] += 1
+
+                    def Formate_tranche(tranche):
+                        return "%d - %d" % tranche if tranche else "Autre ou inconnu"
+
+                    # Tableau : QF des familles
+                    data.append(Tableau(titre="Quotients familiaux des familles",
+                        colonnes=["Tranches de QF", "Nombre de familles"],
+                        lignes=[(Formate_tranche(tranche), nbre) for tranche, nbre in dict_tranches.items()]))
+
+                    # Camembert : QF des familles
+                    data.append(Camembert(titre="Quotients familiaux des familles",
+                        labels=[Formate_tranche(tranche) for tranche, nbre in dict_tranches.items()],
+                        valeurs=[nbre for tranche, nbre in dict_tranches.items()]))
+
+                # ---------------------------- CONSOMMATIONS : Saisie -------------------------------
+
+                if rubrique == "consommations_saisie":
+                    data.append(Titre(texte="Saisie des consommations"))
+
+                    if not presents:
+                        data.append(Texte(texte="Données accessible uniquement avec le mode Présents."))
+                    else:
+
+                        # Chart : Dates de saisie des consommations
+                        donnees = Consommation.objects.filter(activite__in=liste_activites, date__range=presents).values_list("date_saisie__date").annotate(nbre=Count("idconso", distinct=True)).order_by("date_saisie__date")
+                        data.append(Histogramme(titre="Dates de saisie des consommations", type_chart="bar", chronologie="date",
+                            labels=[str(date) for date, nbre in donnees],
+                            valeurs=[nbre for date, nbre in donnees],
+                        ))
+
+                        # Chart : Anticipation des réservations en nombre de jours
+                        donnees = Consommation.objects.filter(activite__in=liste_activites, date__range=presents).annotate(jours=F("date_saisie__date") - F("date")).values_list("jours")
+                        resultats = {}
+                        for delta, in donnees:
+                            resultats.setdefault(delta, 0)
+                            resultats[delta] += 1
+                        donnees = [(nbre_jours, nbre_conso) for nbre_jours, nbre_conso in resultats.items()]
+                        donnees.sort()
+                        data.append(Histogramme(titre="Anticipation des réservations en nombre de jours", type_chart="bar",
+                            labels=[nbre_jours.days for nbre_jours, nbre_conso in donnees],
+                            valeurs=[nbre_conso for nbre_jours, nbre_conso in donnees],
+                        ))
+
+                        # Chart : Evolution des réservations
+                        condition = (Q(titre="Ajout d'une consommation") | Q(titre="Suppression d'une consommation")) & Q(activite__in=liste_activites, date__range=presents)
+                        dict_temp = {}
+                        for titre, date, nbre in Historique.objects.filter(condition).values_list("titre", "horodatage__date").annotate(nbre=Count("idaction", distinct=True)).order_by("horodatage__date"):
+                            dict_temp[date] = dict_temp.get(date, 0) + (-nbre if "Suppression" in titre else nbre)
+                        donnees = []
+                        x = 0
+                        for date, nbre in dict_temp.items():
+                            x += nbre
+                            donnees.append((date, x))
+                        donnees.sort()
+                        data.append(Histogramme(
+                            titre="Evolution des réservations pour les consommations de la période sélectionnée", type_chart="line", chronologie="date",
+                            labels=[str(date) for date, nbre in donnees],
+                            valeurs=[nbre for date, nbre in donnees],
+                        ))
+
+                data.append(Espace(hauteur=50))
 
         return data

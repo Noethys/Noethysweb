@@ -10,7 +10,7 @@ from crispy_forms.layout import Layout, HTML
 from crispy_forms.bootstrap import Field
 from core.widgets import SelectionActivitesWidget, DateRangePickerWidget
 from core.models import Vacance, LISTE_VACANCES, LISTE_MOIS, LISTE_ETATS_CONSO
-from core.forms.select2 import Select2Widget, Select2MultipleWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.forms.base import FormulaireBase
 
 
@@ -34,7 +34,7 @@ class Formulaire(FormulaireBase, forms.Form):
             ("consommations_saisie", "Saisie des consommations"),
         )),
     ]
-    rubrique = forms.ChoiceField(label="Rubrique", widget=Select2Widget(), choices=choix_rubrique, required=True)
+    rubriques = forms.MultipleChoiceField(label="Rubriques", choices=choix_rubrique, required=True, help_text="Sélectionnez une ou plusieurs rubriques.")
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
     choix_donnees = [("INSCRITS", "Inscrits"), ("INSCRITS_PERIODE", "Inscrits sur une période de dates"), ("ANNEE", "Présents sur une année"), ("MOIS", "Présents sur un mois"),
                      ("VACANCES", "Présents sur une période de vacances"), ("PERIODE", "Présents sur une période de dates")]
@@ -53,7 +53,7 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.form_method = 'post'
 
         self.helper.layout = Layout(
-            Field('rubrique'),
+            Field('rubriques'),
             Field('tranches_qf'),
             Field('activites'),
             Field('donnees'),

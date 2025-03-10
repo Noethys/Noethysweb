@@ -3,10 +3,22 @@
 {% load static %}
 {% load embed %}
 
-
 {% block styles %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static 'lib/chartjs/ancienne_version/Chart.min.css' %}">
+    <style>
+        .titre {
+            margin-bottom: 30px;
+            padding: 6px;
+            border-radius: 6px;
+            background-color:#dedede;
+            text-align: center;
+            font-weight: bold;
+        }
+        @media print {
+            #contenu_resultats {-webkit-print-color-adjust:exact;color-adjust: exact !important;}
+        }
+    </style>
 {% endblock styles %}
 
 {% block scripts %}
@@ -15,11 +27,10 @@
     <script type="text/javascript" src="{% static 'lib/moment/moment.min.js' %}"></script>
 {% endblock scripts %}
 
-
 {% block contenu_page %}
 
     <div class="row">
-        <div class="col-md-3" >
+        <div class="col-md-3 d-print-none">
 
             <!-- Paramètres -->
             <div class="card card-default">
@@ -38,23 +49,30 @@
         </div>
 
         <div class="col-md-9">
-
             <div class="card card-default">
                 <div class="card-header with-border">
-                    <h3 class="card-title"><i class="fa fa-caret-square-o-right margin-r-5"></i> Résultats</h3>
+                    <h3 class="card-title"><i class="fa fa-caret-square-o-right margin-r-5"></i> Statistiques</h3>
                     <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
                     </div>
                 </div>
-                <div class="card-body">
-
+                <div class="card-body" id="contenu_resultats">
+                
                     {% for element in data %}
+
+                        {# espace #}
+                        {% if element.categorie == "espace" %}
+                            <div style="margin-bottom: {{ element.hauteur }}px;"></div>
+                        {% endif %}
+
+                        {# titre #}
+                        {% if element.categorie == "titre" %}
+                            <p class="titre">{{ element.texte }}</p>
+                        {% endif %}
 
                         {# texte #}
                         {% if element.categorie == "texte" %}
                             <p style="margin-bottom: 30px;">{{ element.texte }}</p>
                         {% endif %}
-
 
                         {# Tableau #}
                         {% if element.categorie == "tableau" %}
@@ -82,7 +100,6 @@
                                 </tbody>
                             </table>
                         {% endif %}
-
 
                         {# Camembert #}
                         {% if element.categorie == "camembert" %}
@@ -113,7 +130,6 @@
                                 });
                             </script>
                         {% endif %}
-
 
                         {# Histogramme #}
                         {% if element.categorie == "histogramme" %}
@@ -184,4 +200,3 @@
     </div>
 
 {% endblock contenu_page %}
-
