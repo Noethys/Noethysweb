@@ -1799,7 +1799,7 @@ function appliquer_tarif_special(case_tableau, data, maj_facturation) {
         if ((dict_tarif.unites.indexOf(case_tableau.unite) !== -1) && (dict_tarif.categories_tarifs.indexOf(case_tableau.categorie_tarif) !== -1)) {
             for (var ligne of dict_tarif.lignes) {
                 liste_choix_tarifs.push({
-                    "text": ligne.montant.toFixed(2) + " € : " + ligne.label,
+                    "text": ligne.montant.toFixed(2) + (ligne.label ? " € : " + ligne.label: ""),
                     "value": "choix_tarif=" + ligne.idligne
                 })
             }
@@ -1807,11 +1807,20 @@ function appliquer_tarif_special(case_tableau, data, maj_facturation) {
     })
     if (liste_choix_tarifs.length) {
         var dlg = bootbox.prompt({
-            title: "Tarif au choix",
-            message: "<b>Quel tarif souhaitez-vous appliquer ?<br><br>",
+            title: "Montant au choix",
+            message: "<b>Quel montant souhaitez-vous appliquer ?<br><br>",
             inputType: "radio",
             locale: "custom",
             inputOptions: liste_choix_tarifs,
+            buttons: {
+                cancel: {
+                    label: "<i class='fa fa-times'></i> Annuler",
+                    className: "btn-danger"
+                },
+                confirm: {
+                    label: "<i class='fa fa-check'></i> Valider"
+                }
+            },
             callback: function (choix_tarif) {
                 if (choix_tarif) {
                     case_tableau.creer_conso(data, maj_facturation, choix_tarif)

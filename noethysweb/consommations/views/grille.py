@@ -674,7 +674,7 @@ class Facturation():
                 # Mémorise les tarifs
                 key = (case_tableau["activite"], case_tableau["categorie_tarif"])
                 if key not in self.dict_tarifs:
-                    self.dict_tarifs[key] = Tarif.objects.prefetch_related('groupes', 'caisses').filter(activite_id=case_tableau["activite"], categories_tarifs=case_tableau["categorie_tarif"]).order_by("date_debut")
+                    self.dict_tarifs[key] = Tarif.objects.prefetch_related('groupes', 'caisses', 'nom_tarif').filter(activite_id=case_tableau["activite"], categories_tarifs=case_tableau["categorie_tarif"]).order_by("date_debut")
 
                 # Recherche un tarif valable pour cette date
                 tarifs_valides1 = []
@@ -864,7 +864,7 @@ class Facturation():
                                 methode, id = dict_options_conso[tarif_base.combi_retenue[0]].split("=")
                                 if methode == "choix_tarif":
                                     ligne = TarifLigne.objects.get(pk=int(id))
-                                    montant_tarif, nom_tarif, tarif_ligne = ligne.montant_unique, ligne.label, ligne
+                                    montant_tarif, nom_tarif, tarif_ligne = ligne.montant_unique, ligne.label or tarif_base.nom_tarif.nom, ligne
 
                         logger.debug("Montant trouvé : Montant=%s (tarif=%s temps_facturé=%s Quantité=%d)" % (montant_tarif, nom_tarif, temps_facture, quantite))
 
