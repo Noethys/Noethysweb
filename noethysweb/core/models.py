@@ -1859,7 +1859,7 @@ class Famille(models.Model):
     mobile_blocage = models.BooleanField(verbose_name="La famille ne souhaite pas recevoir de SMS groupés", default=False, help_text="L'éditeur de SMS groupés du menu Outils ne proposera pas cette famille dans les destinataires.")
     individus_masques = models.ManyToManyField(Individu, verbose_name="Individus masqués", related_name="individus_masques", blank=True)
     blocage_impayes_off = models.BooleanField(verbose_name="Ne jamais appliquer le blocage des réservations si impayés", default=False, help_text="En cochant cette case, vous permettez à cette famille d'accéder aux réservations du portail même s'il y a des impayés et que le paramètre 'blocage si impayés' a été activé dans les paramètres généraux du portail.")
-
+    utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, null=True)
     class Meta:
         db_table = 'familles'
         verbose_name = "famille"
@@ -1918,18 +1918,25 @@ class Famille(models.Model):
 
         # Titulaire Hélios
         if maj_titulaire_helios:
-            if self.titulaire_helios:
-                # recherche si le titulaire est toujours dans la famille
-                found = False
-                for rattachement in rattachements:
-                    if rattachement.individu == self.titulaire_helios:
-                        found = True
-                if not found:
-                    self.titulaire_helios = None
-            if not self.titulaire_helios:
-                # Recherche un individu valide parmi les titulaires de la famille
-                if rattachements:
-                    self.titulaire_helios = rattachements.first().individu
+            try:
+                if self.titulaire_helios:
+                    # Recherche si le titulaire est toujours dans la famille
+                    found = False
+                    for rattachement in rattachements:
+                        if rattachement.individu == self.titulaire_helios:
+                            found = True
+                            break  # Si trouvé, on sort de la boucle
+                    if not found:
+                        # Si le titulaire n'est pas trouvé dans la famille, on le met à None
+                        self.titulaire_helios = None
+            except Individu.DoesNotExist:
+                # Si le titulaire a été supprimé, on le met à None
+                self.titulaire_helios = None
+
+            # Assurez-vous qu'il y a un titulaire dans la famille si nécessaire
+            if not self.titulaire_helios and rattachements.exists():
+                # Recherche un individu valide parmi les rattachements
+                self.titulaire_helios = rattachements.first().individu
 
         if maj_tiers_solidaire:
             if self.tiers_solidaire:
@@ -3140,18 +3147,35 @@ class PortailPeriode(models.Model):
         """ Vérifie si la période est active ce jour """
         return self.affichage == "TOUJOURS" or (datetime.datetime.now() >= self.affichage_date_debut and datetime.datetime.now() <= self.affichage_date_fin)
 
-    def Is_famille_authorized(self, famille=None):
+    def Is_famille_authorized(self, famille=None, individu=None):
         """ Vérifie si une famille est autorisée à accéder à cette période """
         # Vérification du compte internet
-        if (self.types_categories == "AUCUNE" and famille.internet_categorie) or (self.types_categories == "SELECTION" and famille.internet_categorie not in self.categories.all()):
+        if (self.types_categories == "AUCUNE" and famille.internet_categorie) or (
+                self.types_categories == "SELECTION" and famille.internet_categorie not in self.categories.all()):
             return False
         # Vérification de la ville de résidence
         if self.types_villes != "TOUTES" and self.villes:
             liste_villes = [ville.strip().upper() for ville in self.villes.split(",")]
-            if not famille.ville_resid or (self.types_villes == "SELECTION" and famille.ville_resid.upper() not in liste_villes) or (self.types_villes == "SELECTION_INVERSE" and famille.ville_resid.upper() in liste_villes):
+            if not famille.ville_resid or (
+                    self.types_villes == "SELECTION" and famille.ville_resid.upper() not in liste_villes) or (
+                    self.types_villes == "SELECTION_INVERSE" and famille.ville_resid.upper() in liste_villes):
                 return False
         return True
 
+    def Is_individu_authorized(self, individu=None):
+        """ Vérifie si un individu est autorisée à accéder à cette période """
+        # Vérification du compte internet
+        if (self.types_categories == "AUCUNE" and individu.internet_categorie) or (
+                self.types_categories == "SELECTION" and individu.internet_categorie not in self.categories.all()):
+            return False
+        # Vérification de la ville de résidence
+        if self.types_villes != "TOUTES" and self.villes:
+            liste_villes = [ville.strip().upper() for ville in self.villes.split(",")]
+            if not individu.ville_resid or (
+                    self.types_villes == "SELECTION" and individu.ville_resid.upper() not in liste_villes) or (
+                    self.types_villes == "SELECTION_INVERSE" and individu.ville_resid.upper() in liste_villes):
+                return False
+        return True
 
 class PortailParametre(models.Model):
     idparametre = models.AutoField(verbose_name="ID", db_column='IDparametre', primary_key=True)
@@ -3446,6 +3470,7 @@ class PesPiece(models.Model):
 class Consentement(models.Model):
     idconsentement = models.AutoField(verbose_name="ID", db_column='IDconsentement', primary_key=True)
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT, blank=True, null=True)
+    individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.PROTECT, blank=True, null=True)
     unite_consentement = models.ForeignKey(UniteConsentement, verbose_name="Unité de consentement", on_delete=models.PROTECT)
     horodatage = models.DateTimeField(verbose_name="Date", auto_now_add=True)
 

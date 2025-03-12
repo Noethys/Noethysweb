@@ -30,7 +30,7 @@ def CreationIdentifiantIndividu(IDindividu=None, IDutilisateur=None, nbreCaract=
         numTmp += random.choice("123456789")
     identifiant = numTmp + "0" * 5
     if IDindividu:
-        identifiant = u"I%d" % (int(identifiant) + IDindividu)
+        identifiant = u"R%d" % (int(identifiant) + IDindividu)
     if IDutilisateur:
         identifiant = u"U%d" % (int(identifiant) + IDutilisateur)
     return identifiant
