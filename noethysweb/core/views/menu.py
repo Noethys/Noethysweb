@@ -6,12 +6,13 @@
 import copy, importlib
 from django.urls import reverse_lazy
 from django.conf import settings
+from django.utils.translation import gettext as _
 
 
 def GetMenuPrincipal(parametres_generaux=None, organisateur=None, user=None):
     parametres_generaux = parametres_generaux or {}  # Fallback to an empty dictionary
 
-    menu = Menu(titre="Menu principal",  user=user)
+    menu = Menu(titre=_("Menu principal"),  user=user)
 
     # ------------------------------------ Accueil ------------------------------------
     menu.Add(code="accueil", titre="Accueil", icone="home", toujours_afficher=True)
@@ -122,6 +123,7 @@ def GetMenuPrincipal(parametres_generaux=None, organisateur=None, user=None):
     menu_emails.Add(code="adresses_mail_liste", titre="Adresses d'expédition d'emails", icone="file-text-o", compatible_demo=False)
     menu_emails.Add(code="signatures_emails_liste", titre="Signatures d'emails", icone="file-text-o")
     menu_emails.Add(code="listes_diffusion_liste", titre="Listes de diffusion", icone="file-text-o")
+    menu_emails.Add(code="outils_parametres_generaux", titre="Paramètres généraux", icone="file-text-o")
 
     # SMS
     menu_sms = menu_parametrage.Add(titre="SMS")
@@ -167,7 +169,7 @@ def GetMenuPrincipal(parametres_generaux=None, organisateur=None, user=None):
 
 
     # ------------------------------------ Outils ------------------------------------
-    menu_outils = menu.Add(code="outils_toc", titre="Outils", icone="wrench", toujours_afficher=parametres_generaux.get("outils_afficher_page_portailuser", False))
+    menu_outils = menu.Add(code="outils_toc", titre=_("Outils"), icone="wrench", toujours_afficher=parametres_generaux.get("outils_afficher_page_portailuser", False))
 
     # Statistiques
     menu_stats = menu_outils.Add(titre="Statistiques")
@@ -177,7 +179,7 @@ def GetMenuPrincipal(parametres_generaux=None, organisateur=None, user=None):
     # Emails
     menu_emails = menu_outils.Add(titre="Emails")
     menu_emails.Add(code="contacts_liste", titre="Carnets d'adresses", icone="file-text-o")
-    menu_emails.Add(code="editeur_emails", titre="Editeur d'Emails", icone="file-text-o")
+    menu_emails.Add(code="editeur_emails", titre="Envoi des emails par lot", icone="file-text-o")
     menu_emails.Add(code="emails_liste", titre="Liste des Emails", icone="file-text-o")
 
     # SMS
@@ -204,7 +206,6 @@ def GetMenuPrincipal(parametres_generaux=None, organisateur=None, user=None):
     # Sauvegarde
     menu_sauvegarde = menu_outils.Add(titre="Sauvegardes")
     menu_sauvegarde.Add(code="sauvegarde_creer", titre="Créer une sauvegarde", icone="file-text-o", compatible_demo=False)
-    menu_sauvegarde.Add(code="desk_creer", titre="Récupérer les données", icone="file-text-o", compatible_demo=False, superutilisateur_only=True, masquer=not settings.SECRET_EXPORT_DESK)
 
     # Restauration
     menu_restauration = menu_outils.Add(titre="Restauration")
@@ -451,7 +452,6 @@ def GetMenuPrincipal(parametres_generaux=None, organisateur=None, user=None):
     menu_listes.Add(code="liste_reglements", titre="Liste des règlements", icone="file-text-o")
     menu_listes.Add(code="liste_detaillee_reglements", titre="Liste détaillée des règlements", icone="file-text-o")
     menu_listes.Add(code="detail_ventilations_reglements", titre="Détail des ventilations des règlements", icone="file-text-o")
-    menu_listes.Add(code="edition_ventilations_reglements", titre="Edition des ventilations des règlements", icone="file-text-o")
     menu_listes.Add(code="reglements_lot_factures", titre="Liste des règlements associés à un lot de factures", icone="file-text-o")
     menu_listes.Add(code="synthese_modes_reglements", titre="Synthèse des modes de règlements", icone="file-text-o")
 
@@ -577,7 +577,7 @@ class Menu():
     def GetParent(self):
         return self.parent
 
-    def Add(self, code="", titre="", icone="", url=None, toujours_afficher=False, compatible_demo=True, args=None, superutilisateur_only=False, masquer=False):
+    def Add(self, code="", titre="", icone="", url=None, toujours_afficher=False, compatible_demo=True, args=None):
         # Créer l'objet menu
         menu = Menu(self, code=code, titre=titre, icone=icone, url=url, args=args, user=self.user,
                     compatible_demo=compatible_demo, toujours_afficher=toujours_afficher)
@@ -591,6 +591,7 @@ class Menu():
         # Ajouter le menu uniquement s'il doit être affiché
         if should_display:
             self.children.append(menu)
+
         return menu  # Retourne toujours le menu, même s'il n'est pas affiché
 
     def GetUrl(self):

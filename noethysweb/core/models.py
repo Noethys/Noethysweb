@@ -1538,7 +1538,7 @@ class ModelePrestation(models.Model):
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
     # type_quotient = models.ForeignKey(TypeQuotient, verbose_name="Type de QF", blank=True, null=True, on_delete=models.SET_NULL, help_text="Sélectionnez un type de quotient familial ou laissez le champ vide pour tenir compte de tous les types de quotients.")
     multiprestations = models.TextField(verbose_name="Multi-prestations", blank=True, null=True)
-    
+
     class Meta:
         db_table = 'modeles_prestations'
         verbose_name = "modèle de prestation"
@@ -3053,6 +3053,8 @@ class Destinataire(models.Model):
     categorie = models.CharField(verbose_name="Catégorie", max_length=300, blank=True, null=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.CASCADE)
     famille = models.ForeignKey(Famille, verbose_name="Famille", blank=True, null=True, on_delete=models.CASCADE)
+    inscription = models.ForeignKey(Inscription, verbose_name="Inscription", blank=True, null=True,on_delete=models.CASCADE)
+    activites = models.ForeignKey(Activite, verbose_name="Activites", blank=True, null=True, on_delete=models.CASCADE)
     collaborateur = models.ForeignKey("Collaborateur", verbose_name="Collaborateur", blank=True, null=True, on_delete=models.CASCADE)
     contact = models.ForeignKey(Contact, verbose_name="Contact", blank=True, null=True, on_delete=models.CASCADE)
     liste_diffusion = models.ForeignKey(ListeDiffusion, verbose_name="Liste de diffusion", blank=True, null=True, on_delete=models.CASCADE)

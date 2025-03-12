@@ -26,7 +26,7 @@
                     {# Boutons de commandes #}
                     <div class="buttonHolder">
                         <button class="btn btn-primary" onclick="on_bouton_valider()" title="Transférer les inscriptions vers l'éditeur d'Emails"><i class='fa fa-file-pdf-o margin-r-5'></i> Transférer les inscriptions vers l'éditeur d'Emails</button>
-                        <a class="btn btn-danger" href="{% url 'editeur_emails' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                        <a class="btn btn-danger" href="{% url 'outils_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
                     </div>
 
                     {# Liste des inscriptions générées #}
@@ -35,16 +35,10 @@
 
                     <br>
 
-                    {# Options d'impression #}
-                    {% crispy form_modele %}
-
                 {% endblock box_contenu %}
                 {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
             {% endembed %}
         </div>
-
-        {# Insertion des modals #}
-        {% include 'core/modal_pdf.html' %}
 
         <script>
 
@@ -59,7 +53,7 @@
                             callback: function(){
                                 bootbox.dialog({
                                     message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> L'opération peut durer plusieurs minutes. Veuillez patienter...</p>",
-                                    closeButton: false
+                                    closeButton: true
                                 });
                                 impression_pdf(box);
                             }
@@ -76,9 +70,8 @@
             function impression_pdf(dialogbox) {
                 $.ajax({
                     type: "POST",
-                    url: "{% url 'ajax_inscriptions_email_pdf' %}",
+                    url: "{% url 'ajax_inscriptions_emails_pdf' %}",
                     data: {
-                        form_modele: JSON.stringify($("#choix_modele_form").serializeObject()),
                         inscriptions_cochees: JSON.stringify(get_coches()),
                         csrfmiddlewaretoken: '{{ csrf_token }}',
                     },
