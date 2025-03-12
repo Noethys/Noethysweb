@@ -1538,7 +1538,7 @@ class ModelePrestation(models.Model):
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
     # type_quotient = models.ForeignKey(TypeQuotient, verbose_name="Type de QF", blank=True, null=True, on_delete=models.SET_NULL, help_text="Sélectionnez un type de quotient familial ou laissez le champ vide pour tenir compte de tous les types de quotients.")
     multiprestations = models.TextField(verbose_name="Multi-prestations", blank=True, null=True)
-
+    
     class Meta:
         db_table = 'modeles_prestations'
         verbose_name = "modèle de prestation"
@@ -1860,7 +1860,7 @@ class Famille(models.Model):
     individus_masques = models.ManyToManyField(Individu, verbose_name="Individus masqués", related_name="individus_masques", blank=True)
     blocage_impayes_off = models.BooleanField(verbose_name="Ne jamais appliquer le blocage des réservations si impayés", default=False, help_text="En cochant cette case, vous permettez à cette famille d'accéder aux réservations du portail même s'il y a des impayés et que le paramètre 'blocage si impayés' a été activé dans les paramètres généraux du portail.")
     contact_facturation = models.ForeignKey(Individu, verbose_name="Contact facturation", related_name="contact_facturation", on_delete=models.SET_NULL, blank=True, null=True)
-
+    utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, null=True)
     class Meta:
         db_table = 'familles'
         verbose_name = "famille"
@@ -1919,18 +1919,25 @@ class Famille(models.Model):
 
         # Titulaire Hélios
         if maj_titulaire_helios:
-            if self.titulaire_helios:
-                # recherche si le titulaire est toujours dans la famille
-                found = False
-                for rattachement in rattachements:
-                    if rattachement.individu == self.titulaire_helios:
-                        found = True
-                if not found:
-                    self.titulaire_helios = None
-            if not self.titulaire_helios:
-                # Recherche un individu valide parmi les titulaires de la famille
-                if rattachements:
-                    self.titulaire_helios = rattachements.first().individu
+            try:
+                if self.titulaire_helios:
+                    # Recherche si le titulaire est toujours dans la famille
+                    found = False
+                    for rattachement in rattachements:
+                        if rattachement.individu == self.titulaire_helios:
+                            found = True
+                            break  # Si trouvé, on sort de la boucle
+                    if not found:
+                        # Si le titulaire n'est pas trouvé dans la famille, on le met à None
+                        self.titulaire_helios = None
+            except Individu.DoesNotExist:
+                # Si le titulaire a été supprimé, on le met à None
+                self.titulaire_helios = None
+
+            # Assurez-vous qu'il y a un titulaire dans la famille si nécessaire
+            if not self.titulaire_helios and rattachements.exists():
+                # Recherche un individu valide parmi les rattachements
+                self.titulaire_helios = rattachements.first().individu
 
         if maj_tiers_solidaire:
             if self.tiers_solidaire:
@@ -3221,8 +3228,8 @@ class PortailMessage(models.Model):
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.CASCADE, db_index=True)
     utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True,on_delete=models.PROTECT)
     texte = models.TextField(verbose_name="Texte")
-    date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True, db_index=True)
-    date_lecture = models.DateTimeField(verbose_name="Date de lecture", max_length=200, blank=True, null=True,db_index=True)
+    date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
+    date_lecture = models.DateTimeField(verbose_name="Date de lecture", max_length=200, blank=True, null=True)
 
     class Meta:
         db_table = 'portail_messages'
