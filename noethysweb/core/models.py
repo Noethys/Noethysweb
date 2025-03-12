@@ -1859,6 +1859,7 @@ class Famille(models.Model):
     mobile_blocage = models.BooleanField(verbose_name="La famille ne souhaite pas recevoir de SMS groupés", default=False, help_text="L'éditeur de SMS groupés du menu Outils ne proposera pas cette famille dans les destinataires.")
     individus_masques = models.ManyToManyField(Individu, verbose_name="Individus masqués", related_name="individus_masques", blank=True)
     blocage_impayes_off = models.BooleanField(verbose_name="Ne jamais appliquer le blocage des réservations si impayés", default=False, help_text="En cochant cette case, vous permettez à cette famille d'accéder aux réservations du portail même s'il y a des impayés et que le paramètre 'blocage si impayés' a été activé dans les paramètres généraux du portail.")
+    contact_facturation = models.ForeignKey(Individu, verbose_name="Contact facturation", related_name="contact_facturation", on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         db_table = 'familles'
