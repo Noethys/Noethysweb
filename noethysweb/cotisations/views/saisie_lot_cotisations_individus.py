@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
-from core.models import Rattachement
+from core.models import Rattachement, Cotisation
 from core.utils import utils_dates
 from cotisations.views.saisie_lot_cotisations import Page
 
@@ -16,7 +16,12 @@ class Liste(Page, crud.Liste):
     model = Rattachement
 
     def get_queryset(self):
-        return Rattachement.objects.select_related("individu", "famille").filter(self.Get_filtres("Q"))
+        idunite_cotisation = self.kwargs.get("idunite_cotisation", 0)
+        affichage_beneficiaires = self.kwargs.get("affichage_beneficiaires", 0)
+        exclusions = []
+        if affichage_beneficiaires == 1:
+            exclusions = list({cotisation.individu_id: True for cotisation in Cotisation.objects.filter(unite_cotisation=idunite_cotisation)}.keys())
+        return Rattachement.objects.select_related("individu", "famille").filter(self.Get_filtres("Q")).exclude(individu_id__in=exclusions)
 
     class datatable_class(MyDatatable):
         filtres = ["igenerique:individu", "fgenerique:famille"]

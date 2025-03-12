@@ -24,8 +24,8 @@ urlpatterns = [
 
     # Gestion des cotisations
     path('cotisations/saisie_lot_cotisations', saisie_lot_cotisations.Selection_type_cotisation.as_view(), name='saisie_lot_cotisations'),
-    path('cotisations/saisie_lot_cotisations/individus/<int:idtype_cotisation>', saisie_lot_cotisations_individus.Liste.as_view(), name='saisie_lot_cotisations_individus'),
-    path('cotisations/saisie_lot_cotisations/familles/<int:idtype_cotisation>', saisie_lot_cotisations_familles.Liste.as_view(), name='saisie_lot_cotisations_familles'),
+    path('cotisations/saisie_lot_cotisations/individus/<int:idtype_cotisation>/<int:idunite_cotisation>/<int:affichage_beneficiaires>', saisie_lot_cotisations_individus.Liste.as_view(), name='saisie_lot_cotisations_individus'),
+    path('cotisations/saisie_lot_cotisations/familles/<int:idtype_cotisation>/<int:idunite_cotisation>/<int:affichage_beneficiaires>', saisie_lot_cotisations_familles.Liste.as_view(), name='saisie_lot_cotisations_familles'),
 
     # Dépôts de cotisations
     path('cotisations/liste_cotisations_disponibles', liste_cotisations_disponibles.Liste.as_view(), name='liste_cotisations_disponibles'),

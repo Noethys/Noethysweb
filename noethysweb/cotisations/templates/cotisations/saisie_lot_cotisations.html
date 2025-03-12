@@ -59,6 +59,7 @@
                                         form_options: JSON.stringify($("#famille_cotisations_form").serializeObject()),
                                         lignes_cochees: JSON.stringify(get_coches()),
                                         idtype_cotisation: {{ idtype_cotisation }},
+                                        idunite_cotisation: {{ idunite_cotisation }},
                                         csrfmiddlewaretoken: '{{ csrf_token }}',
                                     },
                                     datatype: "json",

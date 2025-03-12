@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
-from core.models import Famille
+from core.models import Famille, Cotisation
 from cotisations.views.saisie_lot_cotisations import Page
 
 
@@ -15,7 +15,12 @@ class Liste(Page, crud.Liste):
     model = Famille
 
     def get_queryset(self):
-        return Famille.objects.filter(self.Get_filtres("Q"))
+        idunite_cotisation = self.kwargs.get("idunite_cotisation", 0)
+        affichage_beneficiaires = self.kwargs.get("affichage_beneficiaires", 0)
+        exclusions = []
+        if affichage_beneficiaires == 1:
+            exclusions = list({cotisation.famille_id: True for cotisation in Cotisation.objects.filter(unite_cotisation=idunite_cotisation)}.keys())
+        return Famille.objects.filter(self.Get_filtres("Q")).exclude(pk__in=exclusions)
 
     class datatable_class(MyDatatable):
         filtres = ["fgenerique:pk", "idfamille", "caisse__nom"]

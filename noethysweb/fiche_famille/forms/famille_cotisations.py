@@ -7,15 +7,15 @@
 import datetime
 from django import forms
 from django.forms import ModelForm
-from core.forms.select2 import Select2MultipleWidget, Select2Widget
-from django.db.models import Q, Max
+from django.db.models import Q
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
-from crispy_forms.bootstrap import Field, StrictButton, PrependedText
+from crispy_forms.layout import Layout, Hidden, HTML, Fieldset, Div
+from crispy_forms.bootstrap import Field, PrependedText
+from core.forms.select2 import Select2MultipleWidget, Select2Widget
 from core.forms.base import FormulaireBase
-from core.utils.utils_commandes import Commandes
-from core.models import Famille, Cotisation, Activite, Rattachement, TypeCotisation, UniteCotisation, Prestation, ModeleDocument
+from core.models import Famille, Cotisation, Activite, Rattachement, TypeCotisation, UniteCotisation
 from core.widgets import DatePickerWidget
+from core.utils.utils_commandes import Commandes
 from core.utils import utils_preferences, utils_texte
 from cotisations.widgets import Selection_beneficiaires_cotisation
 from fiche_famille.widgets import Prestation_cotisation
@@ -57,6 +57,7 @@ class Formulaire(FormulaireBase, ModelForm):
         idfamille = kwargs.pop("idfamille", None)
         idindividu = kwargs.pop("idindividu", None)
         idtype_cotisation = kwargs.pop("idtype_cotisation", None)
+        idunite_cotisation = kwargs.pop("idunite_cotisation", None)
         super(Formulaire, self).__init__(*args, **kwargs)
 
         self.helper = FormHelper()
@@ -86,6 +87,8 @@ class Formulaire(FormulaireBase, ModelForm):
 
         if idtype_cotisation:
             self.fields["type_cotisation"].initial = idtype_cotisation
+        if idunite_cotisation:
+            self.fields["unite_cotisation"].initial = idunite_cotisation
 
         # Individu
         if idfamille:
@@ -170,6 +173,7 @@ class Formulaire(FormulaireBase, ModelForm):
         # Si c'est pour une saisie par lot
         if not idfamille:
             self.fields["type_cotisation"].disabled = True
+            self.fields["unite_cotisation"].disabled = True
             self.helper.layout.pop(0)
             self.helper.layout.append(Fieldset("Bénéficiaires"))
 
@@ -391,6 +395,11 @@ $(document).ready(function() {
 
 class Formulaire_type_cotisation(FormulaireBase, forms.Form):
     type_cotisation = forms.ModelChoiceField(label="Type d'adhésion", widget=Select2Widget(), queryset=TypeCotisation.objects.none().order_by("nom"), required=True)
+    unite_cotisation = forms.ModelChoiceField(label="Unité d'adhésion", widget=Select2Widget(), queryset=UniteCotisation.objects.none().order_by("nom"), required=True)
+    affichage_beneficiaires = forms.ChoiceField(label="Liste de bénéficiaires", initial=0, required=True, choices=[
+        (0, "Afficher tous les bénéficiaires potentiels"),
+        (1, "Afficher uniquement les bénéficiaires potentiels qui n'ont jamais adhéré à cette unité d'adhésion"),
+    ])
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.pop("instance", None)
@@ -404,7 +413,45 @@ class Formulaire_type_cotisation(FormulaireBase, forms.Form):
 
         self.helper.layout = Layout(
             Commandes(enregistrer_label="<i class='fa fa-check margin-r-5'></i>Valider", ajouter=False, annuler_url="{{ view.get_success_url }}"),
-            Fieldset("Sélection du type d'adhésion",
+            Fieldset("Sélection de l'adhésion à créer",
                 Field("type_cotisation"),
+                Field("unite_cotisation"),
             ),
+            Fieldset("Options",
+                Field("affichage_beneficiaires"),
+            ),
+            HTML(EXTRA_SCRIPT_2),
         )
+
+
+EXTRA_SCRIPT_2 = """
+<script>
+
+// Actualise la liste des unités en fonction du type sélectionné
+function On_change_type() {
+    var idtype_cotisation = $("#id_type_cotisation").val();
+    var idunite_cotisation = $("#id_unite_cotisation").val();
+    $('#div_id_unite_cotisation').hide();
+    if ($("#id_type_cotisation").val()) {
+        $('#div_id_unite_cotisation').show();
+    };
+    $.ajax({ 
+        type: "POST",
+        url: "{% url 'ajax_on_change_type_cotisation' %}",
+        data: {
+            idtype_cotisation: idtype_cotisation, 
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function (data) { 
+            $("#id_unite_cotisation").html(data); 
+            On_change_unite();
+        }
+    });
+};
+$(document).ready(function() {
+    $('#id_type_cotisation').change(On_change_type);
+    On_change_type.call($('#id_type_cotisation').get(0));
+});
+
+</script>
+"""

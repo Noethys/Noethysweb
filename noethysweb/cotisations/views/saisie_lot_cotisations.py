@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponseRedirect
 from core.views import crud
-from core.models import TypeCotisation, Famille, Rattachement, Prestation, Cotisation
+from core.models import TypeCotisation, UniteCotisation, Famille, Rattachement, Prestation, Cotisation
 from core.utils import utils_texte
 from fiche_famille.forms.famille_cotisations import Formulaire_type_cotisation, Formulaire
 
@@ -18,10 +18,11 @@ def Appliquer(request):
 
     # Récupération du type de cotisation
     type_cotisation = TypeCotisation.objects.get(pk=request.POST.get("idtype_cotisation"))
+    unite_cotisation = UniteCotisation.objects.get(pk=request.POST.get("idunite_cotisation"))
 
     # Récupération des options
     valeurs_form_options = json.loads(request.POST.get("form_options"))
-    form = Formulaire(valeurs_form_options, request=request, idtype_cotisation=type_cotisation.pk)
+    form = Formulaire(valeurs_form_options, request=request, idtype_cotisation=type_cotisation.pk, idunite_cotisation=unite_cotisation.pk)
     if not form.is_valid():
         max_errors = 1 if type_cotisation.type == "famille" else 2
         if len(form.errors.as_data().keys()) > max_errors:
@@ -60,8 +61,7 @@ def Appliquer(request):
         cotisation = Cotisation.objects.create(date_creation_carte=form.cleaned_data["date_creation_carte"],
             numero=numero, date_debut=form.cleaned_data["date_debut"], date_fin=form.cleaned_data["date_fin"],
             observations=form.cleaned_data["observations"], famille=famille, individu=individu, prestation=prestation,
-            type_cotisation=form.cleaned_data["type_cotisation"],
-            unite_cotisation=form.cleaned_data["unite_cotisation"], )
+            type_cotisation=type_cotisation, unite_cotisation=unite_cotisation)
         if form.cleaned_data["activites"]:
             cotisation.activites.set(form.cleaned_data["activites"])
         if numero:
@@ -87,8 +87,9 @@ class Page(crud.Page):
         context["active_checkbox"] = True
         context["bouton_supprimer"] = False
         context["hauteur_table"] = "400px"
-        context["form_options"] = Formulaire(request=self.request, idtype_cotisation=self.kwargs.get("idtype_cotisation", None))
+        context["form_options"] = Formulaire(request=self.request, idtype_cotisation=self.kwargs.get("idtype_cotisation", None), idunite_cotisation=self.kwargs.get("idunite_cotisation", None))
         context["idtype_cotisation"] = self.kwargs.get("idtype_cotisation", None)
+        context["idunite_cotisation"] = self.kwargs.get("idunite_cotisation", None)
         context["afficher_menu_brothers"] = True
         return context
 
@@ -99,12 +100,15 @@ class Selection_type_cotisation(Page, crud.Ajouter):
 
     def get_context_data(self, **kwargs):
         context = super(Selection_type_cotisation, self).get_context_data(**kwargs)
-        context["box_introduction"] = "Vous devez sélectionner un type d'adhésion."
+        context["box_introduction"] = "Vous devez sélectionner le type et l'unité d'adhésion à créer."
         context["page_titre"] = "Saisir un lot d'adhésions"
         context["box_titre"] = "Saisir un lot d'adhésions"
         return context
 
     def post(self, request, **kwargs):
         idtype_cotisation = request.POST.get("type_cotisation")
+        idunite_cotisation = request.POST.get("unite_cotisation")
+        affichage_beneficiaires = request.POST.get("affichage_beneficiaires")
         type_cotisation = TypeCotisation.objects.get(pk=idtype_cotisation)
-        return HttpResponseRedirect(reverse_lazy("saisie_lot_cotisations_%ss" % type_cotisation.type, kwargs={"idtype_cotisation": idtype_cotisation}))
+        kwargs = {"idtype_cotisation": idtype_cotisation, "idunite_cotisation": idunite_cotisation, "affichage_beneficiaires": affichage_beneficiaires}
+        return HttpResponseRedirect(reverse_lazy("saisie_lot_cotisations_%ss" % type_cotisation.type, kwargs=kwargs))
