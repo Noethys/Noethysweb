@@ -3216,17 +3216,26 @@ class PortailChamp(models.Model):
 
 class PortailMessage(models.Model):
     idmessage = models.AutoField(verbose_name="ID", db_column='IDmessage', primary_key=True)
-    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE)
-    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.CASCADE)
-    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.PROTECT)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE, db_index=True)
+    individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE, null=True, db_index=True)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.CASCADE, db_index=True)
+    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True,on_delete=models.PROTECT)
     texte = models.TextField(verbose_name="Texte")
-    date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
-    date_lecture = models.DateTimeField(verbose_name="Date de lecture", max_length=200, blank=True, null=True)
+    date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True, db_index=True)
+    date_lecture = models.DateTimeField(verbose_name="Date de lecture", max_length=200, blank=True, null=True,db_index=True)
 
     class Meta:
         db_table = 'portail_messages'
         verbose_name = "message"
         verbose_name_plural = "messages"
+        indexes = [
+            models.Index(fields=["famille"]),
+            models.Index(fields=["individu"]),
+            models.Index(fields=["structure"]),
+            models.Index(fields=["utilisateur"]),
+            models.Index(fields=["date_creation"]),
+            models.Index(fields=["date_lecture"]),
+        ]
 
     def __str__(self):
         return "Message ID%d" % self.idmessage if self.idmessage else "Nouveau message"
