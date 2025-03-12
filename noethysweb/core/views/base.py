@@ -166,9 +166,16 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
         if context['menu_actif'] != None:
             context['breadcrumb'] = context['menu_actif'].GetBreadcrumb()
 
-        # Messages du portail non lus
-        context["liste_messages_non_lus"] = PortailMessage.objects.select_related("famille", "structure").filter(structure__in=self.request.user.structures.all(), utilisateur__isnull=True, date_lecture__isnull=True).order_by("date_creation")
+        # Récupérer les messages non lus
+        messages_non_lus = (PortailMessage.objects.filter(
+            Q(date_lecture__isnull=True),
+            Q(famille_id__isnull=False) | Q(individu_id__isnull=False)
+        ).exclude( Q(utilisateur=self.request.user))
+        .order_by("date_creation"))
+        print('messages_non_lus',messages_non_lus)
 
+        # Ajouter au contexte
+        context["liste_messages_non_lus"] = messages_non_lus
         # Renseignements à traiter
         renseignements_attente = {validation_auto: nbre for validation_auto, nbre in PortailRenseignement.objects.filter(etat="ATTENTE").values_list("validation_auto").annotate(nbre=Count("pk"))}
         context["nbre_renseignements_attente_validation"] = renseignements_attente.get(False, 0)

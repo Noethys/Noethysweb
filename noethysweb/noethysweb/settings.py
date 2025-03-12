@@ -161,9 +161,9 @@ AUTHENTICATION_BACKENDS = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'noethysweb',
-        'USER': 'noethysweb',
-        'PASSWORD': 'noethysweb',
+        'NAME': 'noethys',
+        'USER': 'noethys',
+        'PASSWORD': 'noethys',
         'HOST': 'localhost',  # ou l'adresse IP de votre serveur MariaDB
         'PORT': '3306',       # le port par défaut de MariaDB
     }

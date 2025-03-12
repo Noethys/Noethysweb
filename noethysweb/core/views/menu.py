@@ -26,7 +26,7 @@ def GetMenuPrincipal(parametres_generaux=None, organisateur=None, user=None):
     else:
         menu_structure.Add(code="organisateur_ajouter", titre="Organisateur", icone="file-text-o", compatible_demo=False)
     menu_structure.Add(code="structures_liste", titre="Structures", icone="file-text-o", compatible_demo=False)
-    menu_structure.Add(code="parametres_generaux", titre="Paramètres généraux", icone="file-text-o")
+    menu_structure.Add(code="parametres_generaux", titre="Paramètres généraux ", icone="file-text-o")
 
     # Activités
     menu_activites = menu_parametrage.Add(titre="Activités")
@@ -123,7 +123,7 @@ def GetMenuPrincipal(parametres_generaux=None, organisateur=None, user=None):
     menu_emails.Add(code="adresses_mail_liste", titre="Adresses d'expédition d'emails", icone="file-text-o", compatible_demo=False)
     menu_emails.Add(code="signatures_emails_liste", titre="Signatures d'emails", icone="file-text-o")
     menu_emails.Add(code="listes_diffusion_liste", titre="Listes de diffusion", icone="file-text-o")
-    menu_emails.Add(code="outils_parametres_generaux", titre="Paramètres généraux", icone="file-text-o")
+    menu_emails.Add(code="outils_parametres_generaux", titre="Paramètres généraux Emails", icone="file-text-o")
 
     # SMS
     menu_sms = menu_parametrage.Add(titre="SMS")
@@ -137,7 +137,7 @@ def GetMenuPrincipal(parametres_generaux=None, organisateur=None, user=None):
 
     # Portail
     menu_portail = menu_parametrage.Add(titre="Portail")
-    menu_portail.Add(code="portail_parametres_modifier", titre="Paramètres généraux", icone="file-text-o", compatible_demo=False)
+    menu_portail.Add(code="portail_parametres_modifier", titre="Paramètres généraux Portail", icone="file-text-o", compatible_demo=False)
     menu_portail.Add(code="portail_parametres_renseignements_modifier", titre="Paramètres des renseignements", icone="file-text-o", compatible_demo=False)
     menu_portail.Add(code="categories_compte_internet_liste", titre="Catégories de compte internet", icone="file-text-o")
     menu_portail.Add(code="types_consentements_liste", titre="Types de consentements", icone="file-text-o")
@@ -213,7 +213,6 @@ def GetMenuPrincipal(parametres_generaux=None, organisateur=None, user=None):
 
     # Portail
     menu_portail = menu_outils.Add(titre="Portail")
-    menu_portail.Add(code="messagerie_portail", titre="Messages non lus à traiter", icone="file-text-o")
     menu_portail.Add(code="messages_portail_liste", titre="Messages du portail", icone="file-text-o")
     menu_portail.Add(code="demandes_portail_liste", titre="Historique du portail", icone="file-text-o")
     menu_portail.Add(code="suivi_reservations", titre="Suivi des réservations", icone="file-text-o")
