@@ -1,0 +1,94 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+{% endblock styles %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+    <div class="row">
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder">
+                        <button class="btn btn-primary" onclick="on_bouton_valider()" title="Transférer les inscriptions vers l'éditeur d'Emails"><i class='fa fa-file-pdf-o margin-r-5'></i> Transférer les inscriptions vers l'éditeur d'Emails</button>
+                        <a class="btn btn-danger" href="{% url 'outils_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                    </div>
+
+                    {# Liste des inscriptions générées #}
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+
+                    <br>
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+
+        <script>
+
+            function on_bouton_valider() {
+                var box = bootbox.dialog({
+                    title: "Confirmation du transfert",
+                    message: "Confirmez-vous le transfert des inscriptions vers l'éditeur d'emails ?",
+                    buttons: {
+                        ok: {
+                            label: "<i class='fa fa-check'></i> Transférer",
+                            className: 'btn-primary',
+                            callback: function(){
+                                bootbox.dialog({
+                                    message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> L'opération peut durer plusieurs minutes. Veuillez patienter...</p>",
+                                    closeButton: true
+                                });
+                                impression_pdf(box);
+                            }
+                        },
+                        cancel: {
+                            label: "<i class='fa fa-ban'></i> Annuler",
+                            className: 'btn-danger',
+                        }
+                    }
+                });
+            };
+
+            // Impression du PDF
+            function impression_pdf(dialogbox) {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_inscriptions_emails_pdf' %}",
+                    data: {
+                        inscriptions_cochees: JSON.stringify(get_coches()),
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    },
+                    datatype: "json",
+                    success: function(data){
+                        window.location.href = data.url;
+                    },
+                    error: function(data) {
+                        toastr.error(data.responseJSON.erreur);
+                        bootbox.hideAll();
+                    }
+                })
+            };
+
+        </script>
+
+    </div>
+
+{% endblock contenu_page %}
+
