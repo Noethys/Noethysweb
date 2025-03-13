@@ -1,0 +1,60 @@
+{% extends "fiche_individu/individu.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block detail_individu %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+            {% block box_contenu %}
+                {% crispy form %}
+            {% endblock %}
+
+        {% endembed %}
+    </div>
+
+    {# Insertion des modals #}
+    {% include 'outils/modal_editeur_emails.html' %}
+    {% include 'outils/modal_editeur_sms.html' %}
+    {% include 'core/modal_pdf.html' %}
+
+    <script>
+
+        // Envoyer les codes
+        function envoyer(mode="") {
+            var date_expiration_mdp = $("input[name='date_expiration_mdp']").val();
+            if ((date_expiration_mdp) && (Date.parse(date_expiration_mdp) < Date.now())) {
+                toastr.error("Le mot de passe a expiré. Vous devez en générer un nouveau.");
+                return false;
+            }
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_codes_internet_envoyer_Individu' %}",
+                data: {
+                    internet_identifiant: $("#id_internet_identifiant").val(),
+                    internet_mdp: $("#id_internet_mdp").val(),
+                    idindividu: {{ idindividu }},
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                datatype: "json",
+                success: function(data){
+                    if (mode === 'sms') {
+                        envoyer_sms(data);
+                    } else {
+                        envoyer_email(data)
+                    }
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+    </script>
+
+{% endblock %}

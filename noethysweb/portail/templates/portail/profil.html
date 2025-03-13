@@ -12,7 +12,12 @@
         {% block box_contenu %}
 
             <dt>{% blocktrans %}Nom d'utilisateur{% endblocktrans %}</dt>
-            <dd>{% firstof request.user.famille %}</dd>
+
+            {% if request.user.famille %}
+                <dd>{% firstof request.user.famille %}</dd>
+            {% else %}
+                <dd>{% firstof request.user.individu %}</dd>
+            {% endif %}
 
             <dt>{% blocktrans %}Dernière connexion{% endblocktrans %}</dt>
             <dd>{{ request.user.last_login }}</dd>
@@ -32,5 +37,4 @@
     {% endembed %}
 
 {% endblock %}
-
 

@@ -15,358 +15,386 @@
 
 {% block contenu_page %}
 
-    {# Texte d'introduction #}
-    {% if parametres_portail.facturation_intro %}
-        <div style="margin-bottom: 20px;">
-            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.facturation_intro }}
-        </div>
-    {% endif %}
 
-    {# Solde famille #}
-    {% if parametres_portail.facturation_afficher_solde_famille %}
-        <div class="alert alert-{% if solde_famille > 0 %}danger{% else %}success{% endif %}">
-            <i class='fa fa-{% if solde_famille > 0 %}exclamation-triangle{% else %}check-circle{% endif %} margin-r-5'></i>
-            {% blocktrans %}Solde du compte{% endblocktrans %} :
-            {% if solde_famille < 0 %}
-                {% blocktrans %}Il reste un crédit de{% endblocktrans %} <b>{{ solde_famille|inverse_signe|montant }}</b>
-            {% else %}
-                {% blocktrans %}Il reste à régler un total de{% endblocktrans %} <b>{{ solde_famille|montant }}</b>
-            {% endif %}
-        </div>
-    {% endif %}
 
-    {# Texte impayés #}
-    {% if texte_impayes and parametres_portail.facturation_afficher_solde_facture %}
-        <div class="alert alert-danger">
-            <i class='fa fa-exclamation-triangle margin-r-5'></i>{{ texte_impayes|safe }}
-        </div>
-    {% endif %}
+{% for family in all_familles %}
+{# Block for each family #}
+{% embed 'core/box.html' with box_titre=True %}
+{% block box_theme %}card-outline card-lightblue custom-card{% endblock %}
+{% block box_titre %}{% blocktrans %} Famille: {{ family }} {% endblocktrans %}{% endblock %}
+{% block card_body_classe %}p-0{% endblock %}
+ {% block box_contenu %}
+    <div class="card-body" style="min-height: 0; margin-block: 5px; padding-block: 5px; margin-left: 10px; margin-right: 10px;">
+ {% if user == family.contact_facturation %}
+     {# Texte d'introduction #}
+        {% if parametres_portail.facturation_intro %}
+            <div style="margin-bottom: 20px;color: #127d08;">
+                <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.facturation_intro }}
+            </div>
+        {% endif %}
+    {% for famille in familles %}
 
-    {# Prélèvement activé #}
-    {% if prelevement_actif %}
-        <div class="alert alert-info">
-            <i class='fa fa-info-circle margin-r-5'></i>{% blocktrans %}Vous êtes abonné au prélèvement automatique.{% endblocktrans %}
-        </div>
-    {% endif %}
+        {% if famille.famille == family %}
+             {# Solde famille #}
 
-    {# Paiements en cours #}
-    {% if liste_paiements %}
-        <div class="alert alert-warning">
-            <i class='fa fa-exclamation-triangle margin-r-5'></i>
-            {% if liste_paiements|length == 1 %}
-                {% blocktrans %}Un paiement est en attente.{% endblocktrans %}
-            {% else %}
-                {{ liste_paiements|length }} {% blocktrans %}paiements sont en attente.{% endblocktrans %}
-            {% endif %}
-            {% blocktrans %}Si vous avez interrompu la procédure de paiement, vous devez attendre quelques minutes avant de réactualiser cette page pour voir de nouveau la facture impayée apparaître ci-dessous.{% endblocktrans %}
-        </div>
-    {% endif %}
-
-    {# Récapitulatif des factures impayées #}
-    {% if texte_impayes and parametres_portail.facturation_afficher_solde_facture %}
-        {% embed 'core/box.html' with box_titre=True %}
-            {% block box_theme %}card-outline card-danger{% endblock %}
-            {% block box_titre %}{% blocktrans %}Récapitulatif des impayés{% endblocktrans %}{% endblock %}
-            {% block card_body_classe %}p-0{% endblock %}
-            {% block box_contenu %}
-                <div>
-                    <table class="table-facturation table mb-0">
-                        <tbody>
-                            <tr>
-                                <th>{% trans "Intitulé" %}</th>
-                                <th>{% trans "Montant" %}</th>
-                                <th>{% blocktrans %}Déjà réglé{% endblocktrans %}</th>
-                                <th>{% blocktrans %}Reste à régler{% endblocktrans %}</th>
-                            </tr>
-
-                            {% for facture in liste_factures_impayees %}
-                                <tr>
-                                    <td>{% trans "Facture" %} n°{{ facture.numero }}</td>
-                                    <td>{{ facture.total|montant }}</td>
-                                    <td>{{ facture.Get_regle_actuel|montant }}</td>
-                                    <td><span class="badge-pill bg-{% if facture.en_cours_paiement %}yellow{% elif facture.solde_actuel > 0.0 %}red{% else %}green{% endif %}">{{ facture.solde_actuel|montant }}</span></td>
-                                </tr>
-                            {% endfor %}
-
-                            {% for periode in liste_periodes_prefacturation %}
-                                <tr>
-                                    <td>{{ periode.nom }}</td>
-                                    <td>{{ periode.total|montant }}</td>
-                                    <td>{{ periode.regle|montant }}</td>
-                                    <td><span class="badge-pill bg-{% if periode.solde > 0.0 %}red{% else %}green{% endif %}">{{ periode.solde|montant }}</span></td>
-                                </tr>
-                            {% endfor %}
-
-                            {% for prestation_cotisation in liste_cotisations_prefacturation %}
-                                <tr>
-                                    <td>{{ prestation_cotisation.label }}</td>
-                                    <td>{{ prestation_cotisation.total|montant }}</td>
-                                    <td>{{ prestation_cotisation.regle|montant }}</td>
-                                    <td><span class="badge-pill bg-{% if prestation_cotisation.solde > 0.0 %}red{% else %}green{% endif %}">{{ prestation_cotisation.solde|montant }}</span></td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% endblock box_contenu %}
-        {% endembed %}
-    {% endif %}
-
-    {# Paiement en ligne #}
-    {% if texte_impayes and parametres_portail.paiement_ligne_systeme and paiement_actif %}
-        {% embed 'core/box.html' with box_titre=True %}
-            {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}{% blocktrans %}Payer en ligne{% endblocktrans %}{% endblock %}
-            {% block box_contenu %}
-                {% if parametres_portail.paiement_ligne_systeme|is_in_list:"payzen;demo" %}
-                    <img src="{% static "images/payzen.png" %}" class="pull-right" alt="Logo Payzen">
-                    <p>{% blocktrans %}Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PayZen. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.{% endblocktrans %}</p>
-                {% else %}
-                    <img src="{% static "images/payfip.jpg" %}" class="pull-right" alt="Logo Payfip">
-                    <p>{% blocktrans %}Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PAYFIP. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.{% endblocktrans %}</p>
-                {% endif %}
-                <div>
-                    <a href="#" class="btn btn-success" data-toggle="modal" data-target="#modal_selection_factures" title="Payer en ligne avec une carte bancaire"><i class="fa fa-credit-card margin-r-5"></i>{% blocktrans %}Payer en ligne{% endblocktrans %}</a>
-                </div>
-            {% endblock box_contenu %}
-            {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
-        {% endembed %}
-
-        {# Modal Sélection des impayés à régler #}
-        {% embed 'core/modal.html' with modal_footer=True %}
-            {% block modal_id %}modal_selection_factures{% endblock %}
-            {% block modal_titre %}{% blocktrans %}Payer en ligne{% endblocktrans %}{% endblock %}
-            {% block modal_classe %}modal-lg{% endblock %}
-            {% block modal_body %}
-                <p>{% blocktrans %}Cochez les sommes à payer et cliquez sur le bouton Valider pour accéder à la page de paiement sécurisée de notre partenaire.{% endblocktrans %}</p>
-			    <div id="message_erreur" class="text-red"></div>
-                <div class="box-body table-responsive">
-
-                    <table class="table-facturation table table-bordered table-striped">
-                        <tbody>
-                            <tr>
-                                <th>{% trans "Sélection" %}</th>
-                                <th>{% trans "Intitulé" %}</th>
-                                <th>{% trans "Montant" %}</th>
-                                <th>{% blocktrans %}Déjà réglé{% endblocktrans %}</th>
-                                <th>{% blocktrans %}Reste à régler{% endblocktrans %}</th>
-                            </tr>
-
-                            {% for facture in liste_factures_impayees %}
-                                <tr>
-                                    <td><input type="checkbox" class="check_impaye" name="check_impaye" value="{{ facture.solde_actuel|stringformat:".2f" }}" data-type='facture' data-id={{ facture.pk }} data-num={{ facture.numero }} data-solde={{ facture.solde_actuel|stringformat:".2f" }}></td>
-                                    <td>Facture n°{{ facture.numero }}</td>
-                                    <td>{{ facture.total|montant }}</td>
-                                    <td>{{ facture.Get_regle_actuel|montant }}</td>
-                                    <td><span class="badge-pill bg-{% if facture.en_cours_paiement %}yellow{% elif facture.solde_actuel > 0.0 %}red{% else %}green{% endif %}">{{ facture.solde_actuel|montant }}</span></td>
-                                </tr>
-                            {% endfor %}
-
-                            {% for periode in liste_periodes_prefacturation %}
-                                <tr>
-                                    <td><input type="checkbox" class="check_impaye" name="check_impaye" value={{ periode.solde|stringformat:".2f" }} unchecked data-type='periode' data-id={{ periode.pk }} data-num="" data-solde={{ periode.solde|stringformat:".2f" }}></td>
-                                    <td>{{ periode.nom }}</td>
-                                    <td>{{ periode.total|montant }}</td>
-                                    <td>{{ periode.regle|montant }}</td>
-                                    <td><span class="badge-pill bg-{% if periode.solde > 0.0 %}red{% else %}green{% endif %}">{{ periode.solde|montant }}</span></td>
-                                </tr>
-                            {% endfor %}
-
-                            {% for prestation_cotisation in liste_cotisations_prefacturation %}
-                                <tr>
-                                    <td><input type="checkbox" class="check_impaye" name="check_impaye" value={{ prestation_cotisation.solde|stringformat:".2f" }} unchecked data-type='cotisation' data-id={{ prestation_cotisation.pk }} data-num="" data-solde={{ prestation_cotisation.solde|stringformat:".2f" }}></td>
-                                    <td>{{ prestation_cotisation.label }}</td>
-                                    <td>{{ prestation_cotisation.total|montant }}</td>
-                                    <td>{{ prestation_cotisation.regle|montant }}</td>
-                                    <td><span class="badge-pill bg-{% if prestation_cotisation.solde > 0.0 %}red{% else %}green{% endif %}">{{ prestation_cotisation.solde|montant }}</span></td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-
-                    <div>
-                        {% blocktrans %}Montant du règlement{% endblocktrans %} : <strong><span class="total">0.00 €</span></strong>
-                    </div>
-
-                    {% if parametres_portail.payzen_echelonnement %}
-                        </br>
-                        <div>
-                            <input type="checkbox" id="check_echelonnement" name="check_echelonnement"> {% blocktrans %}Payer en 3 fois sans frais (Echelonnement sur 3 mois){% endblocktrans %}
-                        </div>
+            {% if parametres_portail.facturation_afficher_solde_famille %}
+                <div class="alert alert-{% if famille.solde > 0 %}danger{% else %}success{% endif %}">
+                    <i class='fa fa-{% if famille.solde > 0 %}exclamation-triangle{% else %}check-circle{% endif %} margin-r-5'></i>
+                    {% blocktrans %}Solde du compte{% endblocktrans %} :
+                    {% if famille.solde < 0 %}
+                        {% blocktrans %}Il reste un crédit de{% endblocktrans %} <b>{{ famille.solde|inverse_signe|montant }}</b>
+                    {% else %}
+                        {% blocktrans %}Il reste à régler un total de{% endblocktrans %} <b>{{ famille.solde|montant }}</b>
                     {% endif %}
                 </div>
-            {% endblock %}
+            {% endif %}
 
-            {% block modal_footer %}
-                <div id="div_form_paiement" style="visibility:hidden"></div>
-                <button type="button" class="btn btn-primary" id="bouton_valider_montant"><i class="fa fa-check margin-r-5"></i>{% trans "Valider" %}</button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>{% trans "Annuler" %}</button>
-            {% endblock %}
+            {# Texte impayés #}
+            {% if famille.texte_impayes and parametres_portail.facturation_afficher_solde_facture %}
+                <div class="alert alert-danger">
+                    <i class='fa fa-exclamation-triangle margin-r-5'></i>{{ famille.texte_impayes|safe }}
+                </div>
+            {% endif %}
 
-        {% endembed %}
+            {# Prélèvement activé #}
+            {% if famille.prelevement_actif %}
+                <div class="alert alert-info">
+                    <i class='fa fa-info-circle margin-r-5'></i>{% blocktrans %}Vous êtes abonné au prélèvement automatique.{% endblocktrans %}
+                </div>
+            {% endif %}
 
-        <a id="lien_externe"></a>
+            {# Paiements en cours #}
+            {% if famille.liste_paiements %}
+                <div class="alert alert-warning">
+                    <i class='fa fa-exclamation-triangle margin-r-5'></i>
+                    {% if famille.liste_paiements|length == 1 %}
+                        {% blocktrans %}Un paiement est en attente.{% endblocktrans %}
+                    {% else %}
+                        {{ famille.liste_paiements|length }} {% blocktrans %}paiements sont en attente.{% endblocktrans %}
+                    {% endif %}
+                    {% blocktrans %}Si vous avez interrompu la procédure de paiement, vous devez attendre quelques minutes avant de réactualiser cette page pour voir de nouveau la facture impayée apparaître ci-dessous.{% endblocktrans %}
+                </div>
+            {% endif %}
 
-        <script>
-            // Reset des champs de saisie de la fenêtre modale
-            $('#modal_selection_factures').on('show.bs.modal', function (event) {
-                $('#message_erreur').text('')
-                $('#div_form_paiement').hide();
-                $('#div_form_paiement').html('');
-            })
+            {# Récapitulatif des factures impayées #}
+            {% if famille.texte_impayes and parametres_portail.facturation_afficher_solde_facture %}
+                {% embed 'core/box.html' with box_titre=True %}
+                    {% block box_theme %}card-outline card-danger{% endblock %}
+                    {% block box_titre %}{% blocktrans %}Récapitulatif des impayés{% endblocktrans %}{% endblock %}
+                    {% block card_body_classe %}p-0{% endblock %}
+                    {% block box_contenu %}
+                        <div>
+                            <table class="table-facturation table mb-0">
+                                <tbody>
+                                    <tr>
+                                        <th>{% trans "Intitulé" %}</th>
+                                        <th>{% trans "Montant" %}</th>
+                                        <th>{% blocktrans %}Déjà réglé{% endblocktrans %}</th>
+                                        <th>{% blocktrans %}Reste à régler{% endblocktrans %}</th>
+                                    </tr>
 
-            $(document).ready(function() {
-                {# Fonction de calcul du total du paiement #}
-                function maj_montant_paiement() {
-                    var montant_reglement = 0.0;
-                    $("input[name='check_impaye']:checked").each(function() {
-                        montant_reglement += parseFloat($(this).val());
-                    });
-                    $('.total').html(parseFloat(montant_reglement).toFixed(2) + " €");
-                }
+                                    {% for facture in famille.liste_factures_impayees %}
+                                        <tr>
+                                            <td>{% trans "Facture" %} n°{{ facture.numero }}</td>
+                                            <td>{{ facture.total|montant }}</td>
+                                            <td>{{ facture.Get_regle_actuel|montant }}</td>
+                                            <td><span class="badge-pill bg-{% if facture.en_cours_paiement %}yellow{% elif facture.solde_actuel > 0.0 %}red{% else %}green{% endif %}">{{ facture.solde_actuel|montant }}</span></td>
+                                        </tr>
+                                    {% endfor %}
 
-                {# Mise à jour du montant total du règlement #}
-                $(".check_impaye").change(function() {
-                    maj_montant_paiement();
-                });
+                                    {% for periode in famille.liste_finale_periodes %}
+                                        <tr>
+                                            <td>{{ periode.nom }}</td>
+                                            <td>{{ periode.total|montant }}</td>
+                                            <td>{{ periode.regle|montant }}</td>
+                                            <td><span class="badge-pill bg-{% if periode.solde > 0.0 %}red{% else %}green{% endif %}">{{ periode.solde|montant }}</span></td>
+                                        </tr>
+                                    {% endfor %}
 
-                {# Sélection d'une seule facture si multi factures non actif #}
-                {% if not parametres_portail.paiement_ligne_multi_factures %}
-                    $(".check_impaye").change(function() {
-                        if ($(this).prop("checked") === true) {
-                            $("#modal_selection_factures .check_impaye:checked").prop("checked", false);
-                            $(this).prop("checked", true);
-                            maj_montant_paiement();
+                                    {% for prestation_cotisation in famille.liste_finale_cotisations %}
+                                        <tr>
+                                            <td>{{ prestation_cotisation.label }}</td>
+                                            <td>{{ prestation_cotisation.total|montant }}</td>
+                                            <td>{{ prestation_cotisation.regle|montant }}</td>
+                                            <td><span class="badge-pill bg-{% if prestation_cotisation.solde > 0.0 %}red{% else %}green{% endif %}">{{ prestation_cotisation.solde|montant }}</span></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endblock box_contenu %}
+                {% endembed %}
+            {% endif %}
+
+            {# Paiement en ligne #}
+
+            {% if famille.texte_impayes and parametres_portail.paiement_ligne_systeme and famille.paiement_actif %}
+                {% embed 'core/box.html' with box_titre=True %}
+                    {% block box_theme %}card-outline card-lightblue{% endblock %}
+                    {% block box_titre %}{% blocktrans %}Payer en ligne{% endblocktrans %}{% endblock %}
+                    {% block box_contenu %}
+
+                        {% if parametres_portail.paiement_ligne_systeme|is_in_list:"payzen;demo" %}
+                            <img src="{% static "images/payzen.png" %}" class="pull-right" alt="Logo Payzen">
+                            <p>{% blocktrans %}Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PayZen. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.{% endblocktrans %}</p>
+                        {% else %}
+                            <img src="{% static "images/payfip.jpg" %}" class="pull-right" alt="Logo Payfip">
+                            <p>{% blocktrans %}Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PAYFIP. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.{% endblocktrans %}</p>
+                        {% endif %}
+                        <div>
+                            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#modal_selection_factures" title="Payer en ligne avec une carte bancaire"><i class="fa fa-credit-card margin-r-5"></i>{% blocktrans %}Payer en ligne{% endblocktrans %}</a>
+                        </div>
+                    {% endblock box_contenu %}
+                    {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+                {% endembed %}
+
+                {# Modal Sélection des impayés à régler #}
+                {% embed 'core/modal.html' with modal_footer=True %}
+                    {% block modal_id %}modal_selection_factures{% endblock %}
+                    {% block modal_titre %}{% blocktrans %}Payer en ligne{% endblocktrans %}{% endblock %}
+                    {% block modal_classe %}modal-lg{% endblock %}
+                    {% block modal_body %}
+                        <p>{% blocktrans %}Cochez les sommes à payer et cliquez sur le bouton Valider pour accéder à la page de paiement sécurisée de notre partenaire.{% endblocktrans %}</p>
+                        <div id="message_erreur" class="text-red"></div>
+                        <div class="box-body table-responsive">
+
+                            <table class="table-facturation table table-bordered table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th>{% trans "Sélection" %}</th>
+                                        <th>{% trans "Intitulé" %}</th>
+                                        <th>{% trans "Montant" %}</th>
+                                        <th>{% blocktrans %}Déjà réglé{% endblocktrans %}</th>
+                                        <th>{% blocktrans %}Reste à régler{% endblocktrans %}</th>
+                                    </tr>
+
+                                    {% for facture in liste_factures_impayees %}
+                                        <tr>
+                                            <td><input type="checkbox" class="check_impaye" name="check_impaye" value="{{ facture.solde_actuel|stringformat:".2f" }}" data-type='facture' data-id={{ facture.pk }} data-num={{ facture.numero }} data-solde={{ facture.solde_actuel|stringformat:".2f" }}></td>
+                                            <td>Facture n°{{ facture.numero }}</td>
+                                            <td>{{ facture.total|montant }}</td>
+                                            <td>{{ facture.Get_regle_actuel|montant }}</td>
+                                            <td><span class="badge-pill bg-{% if facture.en_cours_paiement %}yellow{% elif facture.solde_actuel > 0.0 %}red{% else %}green{% endif %}">{{ facture.solde_actuel|montant }}</span></td>
+                                        </tr>
+                                    {% endfor %}
+
+                                    {% for periode in liste_periodes_prefacturation %}
+                                        <tr>
+                                            <td><input type="checkbox" class="check_impaye" name="check_impaye" value={{ periode.solde|stringformat:".2f" }} unchecked data-type='periode' data-id={{ periode.pk }} data-num="" data-solde={{ periode.solde|stringformat:".2f" }}></td>
+                                            <td>{{ periode.nom }}</td>
+                                            <td>{{ periode.total|montant }}</td>
+                                            <td>{{ periode.regle|montant }}</td>
+                                            <td><span class="badge-pill bg-{% if periode.solde > 0.0 %}red{% else %}green{% endif %}">{{ periode.solde|montant }}</span></td>
+                                        </tr>
+                                    {% endfor %}
+
+                                    {% for prestation_cotisation in liste_cotisations_prefacturation %}
+                                        <tr>
+                                            <td><input type="checkbox" class="check_impaye" name="check_impaye" value={{ prestation_cotisation.solde|stringformat:".2f" }} unchecked data-type='cotisation' data-id={{ prestation_cotisation.pk }} data-num="" data-solde={{ prestation_cotisation.solde|stringformat:".2f" }}></td>
+                                            <td>{{ prestation_cotisation.label }}</td>
+                                            <td>{{ prestation_cotisation.total|montant }}</td>
+                                            <td>{{ prestation_cotisation.regle|montant }}</td>
+                                            <td><span class="badge-pill bg-{% if prestation_cotisation.solde > 0.0 %}red{% else %}green{% endif %}">{{ prestation_cotisation.solde|montant }}</span></td>
+                                        </tr>fa-exclamation-triangle
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+
+                            <div>
+                                {% blocktrans %}Montant du règlement{% endblocktrans %} : <strong><span class="total">0.00 €</span></strong>
+                            </div>
+
+                            {% if parametres_portail.payzen_echelonnement %}
+                                </br>
+                                <div>
+                                    <input type="checkbox" id="check_echelonnement" name="check_echelonnement"> {% blocktrans %}Payer en 3 fois sans frais (Echelonnement sur 3 mois){% endblocktrans %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endblock %}
+
+                    {% block modal_footer %}
+                        <div id="div_form_paiement" style="visibility:hidden"></div>
+                        <button type="button" class="btn btn-primary" id="bouton_valider_montant"><i class="fa fa-check margin-r-5"></i>{% trans "Valider" %}</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>{% trans "Annuler" %}</button>
+                    {% endblock %}
+
+                {% endembed %}
+
+                <a id="lien_externe"></a>
+
+                <script>
+                    // Reset des champs de saisie de la fenêtre modale
+                    $('#modal_selection_factures').on('show.bs.modal', function (event) {
+                        $('#message_erreur').text('')
+                        $('#div_form_paiement').hide();
+                        $('#div_form_paiement').html('');
+                    })
+
+                    $(document).ready(function() {
+                        {# Fonction de calcul du total du paiement #}
+                        function maj_montant_paiement() {
+                            var montant_reglement = 0.0;
+                            $("input[name='check_impaye']:checked").each(function() {
+                                montant_reglement += parseFloat($(this).val());
+                            });
+                            $('.total').html(parseFloat(montant_reglement).toFixed(2) + " €");
                         }
+
+                        {# Mise à jour du montant total du règlement #}
+                        $(".check_impaye").change(function() {
+                            maj_montant_paiement();
+                        });
+
+                        {# Sélection d'une seule facture si multi factures non actif #}
+                        {% if not parametres_portail.paiement_ligne_multi_factures %}
+                            $(".check_impaye").change(function() {
+                                if ($(this).prop("checked") === true) {
+                                    $("#modal_selection_factures .check_impaye:checked").prop("checked", false);
+                                    $(this).prop("checked", true);
+                                    maj_montant_paiement();
+                                }
+                            });
+                        {% endif %}
+
+                        {# Validation du montant du paiement #}
+                        $('#bouton_valider_montant').on('click', function(event) {
+                            var nbr_selected_impayes = 0;
+                            var selected_impayes = [];
+                            var montant_reglement = 0;
+                            var paiement_echelonne = 0;
+                            $(".check_impaye:checked").each(function() {
+                                nbr_selected_impayes += 1;
+                                selected_impayes.push($(this).attr("data-type") + "##" + $(this).attr("data-id") + "##" + $(this).attr("data-solde"));
+                                montant_reglement += parseFloat($(this).attr("data-solde"));
+                            });
+                            if (($("#check_echelonnement").length) && ($("#check_echelonnement").prop("checked") === true)) {
+                                paiement_echelonne = 1;
+                            };
+                            $.ajax({
+                                type: "POST",
+                                url: "{% url 'portail_ajax_effectuer_paiement_en_ligne' %}",
+                                datatype: "json",
+                                data: {
+                                    liste_impayes: selected_impayes.toString(),
+                                    montant_reglement: montant_reglement,
+                                    paiement_echelonne: paiement_echelonne,
+                                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                                },
+                                success: function(data) {
+                                    if (data.systeme_paiement === "demo") {
+                                        toastr.info(data.texte);
+                                    }
+                                    if (data.systeme_paiement === "payzen") {
+                                        $('#div_form_paiement').html(data.form_paiement);
+                                        $('#div_form_paiement').hide();
+                                        $("#form_paiement").submit()
+                                    }
+                                    if (data.systeme_paiement === "payfip") {
+                                        $('#modal_selection_factures').modal('hide');
+                                        window.open(data.urltoredirect, '_blank', 'height=700, width=900, toolbar=no, menubar=no, scrollbars=no, resizable=yes, location=no, directories=no, status=no');
+                                        window.location.href = "{% url 'portail_attente_paiement' %}"
+                                    }
+                                },
+                                error: function(data) {
+                                    toastr.error(data.responseJSON.erreur);
+                                },
+                            });
+                        });
+
                     });
-                {% endif %}
 
-                {# Validation du montant du paiement #}
-                $('#bouton_valider_montant').on('click', function(event) {
-                    var nbr_selected_impayes = 0;
-                    var selected_impayes = [];
-                    var montant_reglement = 0;
-                    var paiement_echelonne = 0;
-                    $(".check_impaye:checked").each(function() {
-                        nbr_selected_impayes += 1;
-                        selected_impayes.push($(this).attr("data-type") + "##" + $(this).attr("data-id") + "##" + $(this).attr("data-solde"));
-                        montant_reglement += parseFloat($(this).attr("data-solde"));
-                    });
-                    if (($("#check_echelonnement").length) && ($("#check_echelonnement").prop("checked") === true)) {
-                        paiement_echelonne = 1;
-                    };
-                    $.ajax({
-                        type: "POST",
-                        url: "{% url 'portail_ajax_effectuer_paiement_en_ligne' %}",
-                        datatype: "json",
-                        data: {
-                            liste_impayes: selected_impayes.toString(),
-                            montant_reglement: montant_reglement,
-                            paiement_echelonne: paiement_echelonne,
-                            csrfmiddlewaretoken: "{{ csrf_token }}",
-                        },
-                        success: function(data) {
-                            if (data.systeme_paiement === "demo") {
-                                toastr.info(data.texte);
-                            }
-                            if (data.systeme_paiement === "payzen") {
-                                $('#div_form_paiement').html(data.form_paiement);
-                                $('#div_form_paiement').hide();
-                                $("#form_paiement").submit()
-                            }
-                            if (data.systeme_paiement === "payfip") {
-                                $('#modal_selection_factures').modal('hide');
-                                window.open(data.urltoredirect, '_blank', 'height=700, width=900, toolbar=no, menubar=no, scrollbars=no, resizable=yes, location=no, directories=no, status=no');
-                                window.location.href = "{% url 'portail_attente_paiement' %}"
-                            }
-                        },
-                        error: function(data) {
-                            toastr.error(data.responseJSON.erreur);
-                        },
-                    });
-                });
+                </script>
 
-            });
-
-        </script>
-
-	{% endif %}
-
-    {# Liste des factures #}
-    {% embed 'core/box.html' with box_titre=True %}
-        {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}{% blocktrans %}Liste des dernières factures{% endblocktrans %}{% endblock %}
-        {% block card_body_classe %}p-0{% endblock %}
-        {% block box_contenu %}
+            {% endif %}
 
             {# Liste des factures #}
-            <div style="display: block;overflow-x: auto;white-space: nowrap;">
-                {% if liste_factures %}
-                    <table class="table projects mb-0">
-                        <thead>
-                            <tr class="text-center">
-                                <th>{% trans "Du" %}</th>
-                                <th>{% trans "Au" %}</th>
-                                {% if parametres_portail.facturation_afficher_numero_facture %}
-                                    <th>N°</th>
-                                {% endif %}
-                                <th>{% trans "Montant" %}</th>
-                                {% if parametres_portail.facturation_afficher_solde_facture %}
-                                    <th>{% blocktrans %}Reste à régler{% endblocktrans %}</th>
-                                {% endif %}
-                                {% if parametres_portail.facturation_autoriser_telechargement_facture or parametres_portail.facturation_autoriser_detail_facture %}
-                                    <th style="width: 90px;">{% trans "Actions" %}</th>
-                                {% endif %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for facture in liste_factures %}
-                                <tr class="text-center">
-                                    <td>{{ facture.date_debut|date:'d/m/Y' }}</td>
-                                    <td>{{ facture.date_fin|date:'d/m/Y' }}</td>
-                                    {% if parametres_portail.facturation_afficher_numero_facture %}
-                                        <td>{{ facture.numero }}</td>
-                                    {% endif %}
-                                    <td>{{ facture.total|montant }}</td>
-                                    {% if parametres_portail.facturation_afficher_solde_facture %}
-                                        <td><span class="badge-pill bg-{% if facture.solde_actuel %}danger{% else %}success{% endif %}">{{ facture.solde_actuel|montant }}</span></td>
-                                    {% endif %}
-                                    {% if parametres_portail.facturation_autoriser_telechargement_facture or parametres_portail.facturation_autoriser_detail_facture %}
-                                        <td>
-                                            {% if parametres_portail.facturation_autoriser_detail_facture %}
-                                                <button data-idfacture="{{ facture.pk }}" class="btn btn-primary btn-xs bouton_detail_facture" title="{% trans "Afficher le détail de la facture" %}"><i class="fa fa-fw fa-search"></i></button>
+            {% embed 'core/box.html' with box_titre=True %}
+                {% block box_theme %}card-outline card-lightblue{% endblock %}
+                {% block box_titre %}{% blocktrans %}Liste des dernières factures{% endblocktrans %}{% endblock %}
+                {% block card_body_classe %}p-0{% endblock %}
+                {% block box_contenu %}
+                    {# Liste des factures #}
+                    <div style="display: block;overflow-x: auto;white-space: nowrap;">
+                        {% if famille.liste_factures %}
+
+                            <table class="table projects mb-0">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th>{% trans "Du" %}</th>
+                                        <th>{% trans "Au" %}</th>
+                                        {% if parametres_portail.facturation_afficher_numero_facture %}
+                                            <th>N°</th>
+                                        {% endif %}
+                                        <th>{% trans "Montant" %}</th>
+                                        {% if parametres_portail.facturation_afficher_solde_facture %}
+                                            <th>{% blocktrans %}Reste à régler{% endblocktrans %}</th>
+                                        {% endif %}
+                                        {% if parametres_portail.facturation_autoriser_telechargement_facture or parametres_portail.facturation_autoriser_detail_facture %}
+                                            <th style="width: 90px;">{% trans "Actions" %}</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for facture in famille.liste_factures %}
+                                        <tr class="text-center">
+                                            <td>{{ facture.date_debut|date:'d/m/Y' }}</td>
+                                            <td>{{ facture.date_fin|date:'d/m/Y' }}</td>
+                                            {% if parametres_portail.facturation_afficher_numero_facture %}
+                                                <td>{{ facture.numero }}</td>
                                             {% endif %}
-                                            {% if parametres_portail.facturation_autoriser_telechargement_facture and parametres_portail.facturation_modele_impression_facture %}
-                                                <button data-idfacture="{{ facture.pk }}" class="btn btn-primary btn-xs bouton_imprimer_facture" title="{% trans "Télécharger la facture" %}"><i class="fa fa-fw fa-download"></i></button>
+                                            <td>{{ facture.total|montant }}</td>
+                                            {% if parametres_portail.facturation_afficher_solde_facture %}
+                                                <td><span class="badge-pill bg-{% if facture.solde_actuel %}danger{% else %}success{% endif %}">{{ facture.solde_actuel|montant }}</span></td>
                                             {% endif %}
-                                        </td>
-                                    {% endif %}
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <div style="padding: 12px;">{% blocktrans %}Aucune facture{% endblocktrans %}</div>
-                {% endif %}
+                                            {% if parametres_portail.facturation_autoriser_telechargement_facture or parametres_portail.facturation_autoriser_detail_facture %}
+                                                <td>
+                                                    {% if parametres_portail.facturation_autoriser_detail_facture %}
+                                                        <button data-idfacture="{{ facture.pk }}" class="btn btn-primary btn-xs bouton_detail_facture" title="{% trans "Afficher le détail de la facture" %}"><i class="fa fa-fw fa-search"></i></button>
+                                                    {% endif %}
+                                                    {% if parametres_portail.facturation_autoriser_telechargement_facture and parametres_portail.facturation_modele_impression_facture %}
+                                                        <button data-idfacture="{{ facture.pk }}" class="btn btn-primary btn-xs bouton_imprimer_facture" title="{% trans "Télécharger la facture" %}"><i class="fa fa-fw fa-download"></i></button>
+                                                    {% endif %}
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div style="padding: 12px;">{% blocktrans %}Aucune facture{% endblocktrans %}</div>
+                        {% endif %}
+                    </div>
+
+                    {# Lien de téléchargement de la facture #}
+                 <a id="download" download></a>
+
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+            {% endembed %}
+
+
+            {# Modal Détail d'une facture #}
+            {% embed 'core/modal.html' %}
+                {% block modal_id %}modal_detail_facture{% endblock %}
+                {% block modal_classe %}modal-xl modal-dialog-scrollable{% endblock %}
+                {% block modal_titre %}{% blocktrans %}Détail d'une facture{% endblocktrans %}{% endblock %}
+                {% block modal_body %}
+                    <div id="texte_detail_facture"></div>
+                {% endblock %}
+            {% endembed %}
+
+            {% endif %}
+{% endfor %}
+        {% else %}
+                <div style="margin-bottom: 20px;color: #ff0000bd;">
+                <i class="fa fa-info-circle margin-r-5"> Vous ne pouvez pas consulter ici les données de facturation comme vous n'êtes pas contact de facturation.</i>
             </div>
-
-            {# Lien de téléchargement de la facture #}
-            <a id="download" download></a>
-
-        {% endblock box_contenu %}
-        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
-    {% endembed %}
-
-
-    {# Modal Détail d'une facture #}
-    {% embed 'core/modal.html' %}
-        {% block modal_id %}modal_detail_facture{% endblock %}
-        {% block modal_classe %}modal-xl modal-dialog-scrollable{% endblock %}
-        {% block modal_titre %}{% blocktrans %}Détail d'une facture{% endblocktrans %}{% endblock %}
-        {% block modal_body %}
-            <div id="texte_detail_facture"></div>
-        {% endblock %}
-    {% endembed %}
+{% endif %}
+{% endblock box_contenu %}
+{% endembed %}
+    </div>
+{% endfor %}
 
     <script>
         $(document).ready(function() {

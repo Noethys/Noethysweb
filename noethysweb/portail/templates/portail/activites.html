@@ -17,6 +17,9 @@
         .card-individu {
             border-radius: 5px;
         }
+        .card {
+            margin-top: 2rem;
+        }
     </style>
 {% endblock %}
 
@@ -35,44 +38,77 @@
         </p>
     {% endif %}
 
-    {% for individu in liste_individus %}
-        <div class="card card-individu mb-4">
+    {% for famille, individus in famille_individus %}
+    {# Block for each family #}
+        {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline card-lightblue custom-card{% endblock %}
+        {% block box_titre %}{% blocktrans %} Famille: {{ famille }} {% endblocktrans %}{% endblock %}
+        {% block card_body_classe %}p-0{% endblock %}
+        {% block card_custom_styles %}
+            <style>
+                .custom-card {
+                    border-top: 3px solid #3c8dbc;
+                    margin-bottom: 3rem;
+                }
+            </style>
+         {% endblock %}
 
-            <!-- Nom de l'individu -->
-            <div class="user-block card-footer m-0" style="padding: .6rem 1rem;">
-                <img class="img-circle" src="{{ individu.Get_photo }}" alt="Individu Image">
-                <span class="username">{{ individu.prenom }}</span>
-                {% if individu.Get_age %}<span class="description">{{ individu.Get_age }} ans</span>{% endif %}
-            </div>
+        {% block box_contenu %}
+         {% if individus %}
+            {% for individu in individus %}
 
-            <!-- Liste des activités -->
-            <div class="p-2" style="background-color: #00000008;">
-                <div>
-                    <table class="table table-bordered table-sm mb-0"  style="background-color: #FFFFFF;">
-                        <thead>
-                            <tr class="text-center">
-                                <th>{% trans "Activité" %}</th>
-                                <th>{% trans "Groupe" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for inscription in individu.inscriptions %}
-                                <tr class="text-center">
-                                    <td>{{ inscription.activite.nom }}</td>
-                                    <td>{{ inscription.groupe.nom }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% for demande in demandes_inscriptions_attente|get_item:individu.pk %}
-                        demande={{ demande }}
-                    {% endfor %}
+            <div class="card card-individu mb-4"  style="margin-inline: 0.5rem; margin-block: 0.8rem;">
+
+                <!-- Nom de l'individu -->
+                <div class="user-block card-footer m-0" style="padding: .6rem 1rem; background-color: #d9d9d98f;">
+                    <img class="img-circle" src="{{ individu.Get_photo }}" alt="Individu Image">
+                    <span class="username">{{ individu.nom }} {{ individu.prenom }}</span>
+                    {% if individu.Get_age %}
+                        <span class="description">{{ individu.Get_age }} ans</span>
+                    {% endif %}
                 </div>
+
+                <!-- Liste des activités -->
+                <div class="p-2" style="background-color: #d9d9d98f;">
+                    <div>
+                        <table class="table table-bordered table-sm mb-0"  style="background-color: #FFFFFF;">
+                            <thead>
+                                <tr class="text-center">
+                                    <th>{% trans "Activité" %}</th>
+                                    <th>{% trans "Groupe" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for inscription in individu.inscriptions %}
+                                    <tr class="text-center">
+                                        <td>{{ inscription.activite.nom }}</td>
+                                        <td>{{ inscription.groupe.nom }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <!-- Demandes d'inscription en attente -->
+                        {% for demande in demandes_inscriptions_attente|get_item:individu.pk %}
+                            <div class="alert alert-warning mt-2">
+                                {% trans "Demande en attente" %}: {{ demande.nom_activite }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
             </div>
-
-        </div>
-
-    {% endfor %}
+            {% endfor %}
+            {% else %}
+                <div class="card-body " style="min-height: 0">
+                    <div style="display: block;overflow-x: auto;white-space: nowrap;">
+                        {% blocktrans %}Aucune activité.{% endblocktrans %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endblock box_contenu %}
+        {% endembed %}
+{% endfor %}
 
     {% if demandes_inscriptions_attente %}
         <div class="card card-individu bg-warning">
@@ -87,6 +123,7 @@
                     <table class="table table-bordered table-sm mb-0"  style="background-color: #FFFFFF;">
                         <thead>
                             <tr class="text-center">
+                                <th>Famille d'individu </th>
                                 <th>Individu à inscrire</th>
                                 <th>Activité souhaitée</th>
                             </tr>
@@ -94,7 +131,8 @@
                         <tbody>
                             {% for demande in demandes_inscriptions_attente %}
                                 <tr class="text-center">
-                                    <td>{{ demande.individu.prenom }}</td>
+                                    <td>{{ demande.famille }}</td>
+                                    <td>{{ demande.individu.nom }} {{ demande.individu.prenom }}</td>
                                     <td>{{ demande.nom_activite }}</td>
                                 </tr>
                             {% endfor %}

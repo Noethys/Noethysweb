@@ -165,6 +165,8 @@ urlpatterns = [
     # Messagerie du portail
     path('individus/familles/messagerie/<int:idfamille>', famille_messagerie_portail.Ajouter.as_view(), name='famille_messagerie_portail'),
     path('individus/familles/messagerie/ajouter/<int:idfamille>/<int:idstructure>', famille_messagerie_portail.Ajouter.as_view(), name='famille_messagerie_portail'),
+    path('individus/familles/messagerie/ajouter/<int:idfamille>/<int:idstructure>/<int:idindividu>',famille_messagerie_portail.Ajouter.as_view(), name='famille_messagerie_portail'),
+    path('individus/familles/messagerie/ajouter/<int:idfamille>/<int:idstructure>', famille_messagerie_portail.Ajouter.as_view(), name='portail_contact'),
 
     # AJAX
     path('individus/get_individus_existants', secure_ajax(famille_ajouter.Get_individus_existants), name='ajax_get_individus_existants'),

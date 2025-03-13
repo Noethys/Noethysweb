@@ -104,7 +104,7 @@
                         {% if perms.core.factures_generation %}<li class="dropdown-item"><a href="{% url 'factures_generation' %}">Générer des factures</a></li>{% endif %}
                         {% if perms.core.rappels_generation %}<li class="dropdown-item"><a href="{% url 'rappels_generation' %}">Générer des lettres de rappel</a></li>{% endif %}
                     {% endif %}
-                    
+
                     <li class="dropdown-divider"></li>
                     <h6 class="dropdown-header"><strong>Règlements</strong></h6>
                     {% if perms.core.famille_reglements_ajouter %}<li class="dropdown-item"><a href="#" onclick="$('#modal_regler_facture').modal('show');">Régler une facture</a></li>{% endif %}
@@ -120,7 +120,6 @@
                 </ul>
             </li>
 
-
             {# Messagerie #}
             {% if liste_messages_non_lus %}
                 <li class="nav-item dropdown">
@@ -130,29 +129,39 @@
                         <span class="badge badge-danger navbar-badge">{{ liste_messages_non_lus|length }}</span>
                     </a>
 
-                    <div class="dropdown-menu dropdown-menu-xl dropdown-menu-left">
-                        <span class="dropdown-item dropdown-header text-center">{{ liste_messages_non_lus|length }} nouveau{{ liste_messages_non_lus|length|pluralize:"x" }} message{{ liste_messages_non_lus|length|pluralize }}</span>
+                     <div class="dropdown-menu dropdown-menu-xl dropdown-menu-left" style="max-height: 375px; overflow-y: auto;">
+                        <span class="dropdown-item dropdown-header text-center">
+                            {{ liste_messages_non_lus|length }} nouveau{{ liste_messages_non_lus|length|pluralize:"x" }} message{{ liste_messages_non_lus|length|pluralize }}
+                        </span>
                         <div class="dropdown-divider"></div>
 
                         {% for message in liste_messages_non_lus %}
-                            <a href="{% url 'messagerie_portail' idfamille=message.famille_id idstructure=message.structure_id %}" class="dropdown-item" title="{{ message.texte|striptags }}">
+                            <a href="{% if message.individu %}
+                                    {% url 'famille_messagerie_portail' idfamille=message.famille_id idindividu=message.individu_id idstructure=message.structure_id %}
+                                 {% else %}
+                                    {% url 'famille_messagerie_portail' idfamille=message.famille_id idstructure=message.structure_id %}
+                                 {% endif %}"
+                               class="dropdown-item" title="{{ message.texte|striptags }}">
                                 <div class="media">
                                     <div class="media-body">
                                         <h3 class="dropdown-item-title">
-                                            <i class="fa fa-envelope text-danger mr-1"></i> {{ message.famille.nom }}
+                                            <i class="fa fa-envelope text-danger mr-1"></i>
+                                            {% if message.individu %}
+                                                {{ message.individu.nom }}
+                                                {{ message.individu.prenom }}
+                                            {% else %}
+                                                {{ message.famille.nom }}
+                                            {% endif %}
                                         </h3>
-                                        <p class="text-xs">{{ message.texte|striptags|truncatechars:55 }}</p>
-                                        <p class="mt-1 text-muted" style="font-size: 10px;"><i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }} | <i class="fa fa-home mr-1"></i>{{ message.structure }}</p>
+                                        <p class="mt-1 text-muted" style="font-size: 10px;">
+                                            <i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }}
+                                            | <i class="fa fa-home mr-1"></i>{{ message.structure }}
+                                        </p>
                                     </div>
                                 </div>
                             </a>
                             <div class="dropdown-divider"></div>
                         {% endfor %}
-
-                        <a href="{% url 'messagerie_portail' %}" class="dropdown-item dropdown-footer">
-                            Voir tous les nouveaux messages
-                        </a>
-
                     </div>
                 </li>
             {% endif %}
@@ -166,7 +175,7 @@
                     </a>
                 </li>
             {% endif %}
-        
+
             {% if perms.core.demandes_portail_liste %}
 
                 {# Renseignements à valider #}
@@ -188,7 +197,7 @@
                         </a>
                     </li>
                 {% endif %}
-                
+
             {% endif %}
 
         </ul>

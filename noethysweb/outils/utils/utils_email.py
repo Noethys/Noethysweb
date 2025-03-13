@@ -37,7 +37,7 @@ def Envoyer_model_mail(idmail=None, request=None):
     mail = Mail.objects.prefetch_related('destinataires', 'pieces_jointes').select_related("adresse_exp").get(pk=idmail)
 
     # Backend CONSOLE (Par défaut)
-    backend = 'django.core.mail.backends.console.EmailBackend'
+    backend = 'django.core.mail.backends.dummy.EmailBackend'
     backend_kwargs = {}
 
     # Backend SMTP

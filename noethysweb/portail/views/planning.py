@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 import logging, json, datetime
+from core.models import Rattachement
 logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
@@ -27,24 +28,53 @@ class View(CustomView, TemplateView):
     menu_code = "portail_reservations"
     template_name = "portail/planning.html"
 
+    def get_object(self):
+        """Récupérer l'objet famille ou individu selon l'utilisateur"""
+        if hasattr(self.request.user, 'famille'):
+            return self.request.user.famille
+        elif hasattr(self.request.user, 'individu'):
+            return self.request.user.individu
+        else:
+            raise Http404("Utilisateur non reconnu.")
+
+    def get_famille_object(self):
+        if hasattr(self.request.user, 'famille'):
+            return self.request.user.famille
+        elif hasattr(self.request.user, 'individu'):
+            rattachement = Rattachement.objects.filter(individu=self.request.user.individu).first()
+            if rattachement.famille and rattachement.titulaire == 1:
+                return rattachement.famille
+
+        return None
+
     def dispatch(self, request, *args, **kwargs):
-        """ Vérifie si des approbations sont requises """
+        """ Vérifie si des approbations sont requises et utilise la famille ou l'individu selon l'utilisateur """
         if not request.user.is_authenticated:
             return redirect("portail_connexion")
+        # Récupération de l'objet famille ou individu
+        utilisateur_obj = self.get_object()
+
+        # Récupération de l'activité
         activite = Activite.objects.prefetch_related("types_consentements").get(pk=kwargs["idactivite"])
-        approbations_requises = utils_approbations.Get_approbations_requises(famille=request.user.famille, activites=[activite,], idindividu=kwargs["idindividu"])
+
+        # Approbations requises
+        famille = self.get_famille_object()  # Toujours utiliser la famille, que l'utilisateur soit une famille ou un individu
+
+        approbations_requises = utils_approbations.Get_approbations_requises(famille=famille,activites=[activite,],idindividu=kwargs["idindividu"])
         if approbations_requises["nbre_total"] > 0:
             messages.add_message(request, messages.ERROR, "L'accès à ces réservations nécessite au moins une approbation. Veuillez valider les approbations en attente.")
             return redirect("portail_renseignements")
         return super(View, self).dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        famille = self.get_famille_object()  # Toujours utiliser la famille, que l'utilisateur soit une famille ou un individu
+
         """ Sauvegarde de la grille """
         resultat = Save_grille(request=request, donnees=json.loads(self.request.POST.get("donnees")))
 
         # Ventilation auto si besoin
-        if utils_portail.Get_parametre(code="reservations_ventilation_auto") and utils_ventilation.GetAnomaliesVentilation(idfamille=self.request.user.famille.pk):
-            utils_ventilation.Ventilation_auto(IDfamille=self.request.user.famille.pk)
+        if utils_portail.Get_parametre(code="reservations_ventilation_auto") and utils_ventilation.GetAnomaliesVentilation(idfamille=famille.pk):
+            utils_ventilation.Ventilation_auto(IDfamille=famille.pk)
 
         # Envoi d'un mail de confirmation des modifications
         idadresse_exp = utils_portail.Get_parametre(code="reservations_adresse_exp")
@@ -54,20 +84,26 @@ class View(CustomView, TemplateView):
         return HttpResponseRedirect(reverse_lazy("portail_reservations"))
 
     def test_func(self):
-        """ Vérifie que l'utilisateur peut se connecter à cette page """
+        """ Vérifie que l'utilisateur peut accéder à cette page """
         if not super(View, self).test_func():
             return False
-        inscription = Inscription.objects.filter(famille=self.request.user.famille, individu_id=self.kwargs.get('idindividu'), activite_id=self.kwargs["idactivite"])
-        if not inscription:
+
+        famille = self.get_famille_object()  # Récupérer la famille peu importe le type d'utilisateur
+
+        if not famille:
             return False
-        if not inscription.first().internet_reservations:
+
+        inscription = Inscription.objects.filter(famille=famille,individu_id=self.kwargs.get('idindividu'),activite_id=self.kwargs["idactivite"])
+        if not inscription.exists() or not inscription.first().internet_reservations:
             return False
-        if not self.request.user.famille.internet_reservations:
-            return False
+
         periode = PortailPeriode.objects.select_related("activite").prefetch_related("categories").get(pk=self.kwargs.get('idperiode'))
         if not periode or not periode.Is_active_today():
             return False
-        if not periode.Is_famille_authorized(famille=self.request.user.famille):
+        if hasattr(self.request.user, 'famille') and not periode.Is_famille_authorized(famille=self.request.user.famille):
+            return False
+
+        if hasattr(self.request.user, 'individu') and not periode.Is_individu_authorized(individu=self.request.user.individu):
             return False
         return True
 
@@ -82,7 +118,9 @@ class View(CustomView, TemplateView):
         return context
 
     def Get_data_planning(self):
-        data = {"mode": "portail", "idfamille": self.request.user.famille.pk, "consommations": {}, "prestations": {}, "memos": {}, "options": {"afficher_quantites": False}}
+        # Initialisation des données avec la famille de l'utilisateur
+        famille = self.get_famille_object()  # Utilisation de la méthode pour récupérer la famille
+        data = {"mode": "portail", "idfamille": famille.pk, "consommations": {}, "prestations": {}, "memos": {},"options": {"afficher_quantites": False}}
         data["dict_suppressions"] = {"consommations": [], "prestations": [], "memos": []}
 
         # Importation de l'individu
@@ -93,7 +131,7 @@ class View(CustomView, TemplateView):
         periode_reservation = PortailPeriode.objects.select_related("activite").get(pk=self.kwargs.get('idperiode'))
         data['periode_reservation'] = periode_reservation
 
-        # Dates de la période
+        # Gestion des dates de la période
         afficher_dates_passees = int(periode_reservation.activite.portail_afficher_dates_passees)
         if afficher_dates_passees == 9999:
             data["date_min"] = periode_reservation.date_debut
@@ -105,7 +143,7 @@ class View(CustomView, TemplateView):
         data["liste_feries"] = Ferie.objects.all()
 
         # Création des périodes à afficher
-        data["periode"] = {'mode': 'dates', 'selections': {}, 'periodes': ['%s;%s' % (data["date_min"], data["date_max"])]}
+        data["periode"] = {'mode': 'dates', 'selections': {},'periodes': ['%s;%s' % (data["date_min"], data["date_max"])]}
 
         if periode_reservation.type_date == "VACANCES":
             data["periode"]["periodes"] = []
@@ -136,7 +174,7 @@ class View(CustomView, TemplateView):
 
         # Importation de toutes les inscriptions de l'individu
         data['liste_inscriptions'] = []
-        for inscription in Inscription.objects.select_related('individu', 'activite', 'groupe', 'famille', 'categorie_tarif').filter(famille=self.request.user.famille, individu=individu, activite=periode_reservation.activite):
+        for inscription in Inscription.objects.select_related('individu', 'activite', 'groupe', 'famille', 'categorie_tarif').filter(famille=famille, individu=individu, activite=periode_reservation.activite):
             if inscription.Is_inscription_in_periode(data["date_min"], data["date_max"]):
                 data['liste_inscriptions'].append(inscription)
 
@@ -199,7 +237,7 @@ class View(CustomView, TemplateView):
         logger.debug("Création du mail de confirmation des modifications...")
         modele_email = ModeleEmail.objects.filter(categorie="portail_confirmation_reservations", defaut=True).first()
         if not modele_email:
-            logger.error("Erreur : Aucune modèle d'email de catégorie 'portail_confirmation_reservations' n'a été paramétré !")
+            logger.error("Erreur : Aucun modèle d'email de catégorie 'portail_confirmation_reservations' n'a été paramétré !")
             return
 
         mail = Mail.objects.create(
@@ -216,7 +254,7 @@ class View(CustomView, TemplateView):
                           "{INDIVIDU_NOM}": individu.nom, "{INDIVIDU_PRENOM}": individu.prenom, "{INDIVIDU_NOM_COMPLET}": individu.Get_nom()}
 
         # Création du destinataire
-        destinataire = Destinataire.objects.create(categorie="famille", famille=self.request.user.famille, adresse=self.request.user.famille.mail, valeurs=json.dumps(valeurs_fusion))
+        destinataire = Destinataire.objects.create(categorie="famille", famille=self.get_famille(), adresse=self.get_famille().mail, valeurs=json.dumps(valeurs_fusion))
         mail.destinataires.add(destinataire)
 
         # Envoi du mail

@@ -1,9 +1,27 @@
+<!DOCTYPE html>
+<head>
+    <style>
+        html body a.btn.btn-app.button-class.selected {
+            border: 2.4px solid #3c8dbc !important;
+            color : #3c8dbc !important;
+        }
+        html body .bg-info {
+            background-color: #3c8dbc !important;
+        }
+        .texte-bleu {
+            color: #3c8dbc;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+
 {% extends "portail/page.html" %}
 {% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
-
+{% load famille %}
 {% block styles %}
     {{ block.super }}
 {% endblock %}
@@ -13,78 +31,304 @@
     {# Texte d'introduction #}
     {% if parametres_portail.messagerie_intro %}
         <div style="margin-bottom: 20px;">
-            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.messagerie_intro }}
+            <i class="fa fa-info-circle margin-r-5"></i>
+            {{ parametres_portail.messagerie_intro }}
         </div>
     {% endif %}
 
     {# Lien de retour vers la page contact #}
-	<div class="d-print-none" style="margin-bottom: 10px;">
-        <a href="{% url 'portail_contact' %}"><i class="fa fa-arrow-circle-o-left"></i> {% blocktrans %}Revenir à la page contact{% endblocktrans %}</a>
-	</div>
+    <div class="d-print-none" style="margin-bottom: 10px;">
+        <a href="{% url 'portail_contact' %}">
+            <i class="fa fa-arrow-circle-o-left"></i>
+            {% blocktrans %}Revenir à la page contact{% endblocktrans %}
+        </a>
+    </div>
 
-    {# Messagerie #}
+    {# ------------------------------------------------------------- #}
+    {# 1) Boutons pour sélectionner la famille                    #}
+    {# ------------------------------------------------------------- #}
+{% if familles %}
+<!--    {% if familles_count > 1 %}-->
+        {% embed 'core/box.html' with box_titre=True %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}
+                {% trans "Sélection de la famille" %}
+            {% endblock box_titre %}
+
+            {% block box_contenu %}
+                <p class="mb-3">
+                    {% blocktrans %}Cliquez ci-dessous sur  <B>la famille</B> à laquelle vous souhaitez participer{% endblocktrans %}.
+                </p>
+                {# Boutons pour les familles #}
+               {% for fam in familles %}
+                    {% dict_get_item unread_messages_by_family fam.pk as unread_count %}
+                    <a class="btn btn-app button-class"
+                       data-idfamilles="{{ fam.pk }}"
+                       href="{% url 'portail_messagerie_famille' idstructure=structure.pk idfamille=fam.pk %}">
+                        <i class="fa fa-users"></i>
+                        {{ fam }}
+                        {% if unread_count > 0 %}
+                            <span class="badge bg-danger">
+                                {{ unread_count }} message{{ messages_non_lus_individu|pluralize }} non lu{{ messages_non_lus_individu|pluralize }}
+                            </span>
+                        {% endif %}
+                    </a>
+                {% endfor %}
+            {% endblock box_contenu %}
+            {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+        {% endembed %}
+<!--    {% endif %}-->
+    {# ------------------------------------------------------------- #}
+    {# 2) Boutons pour sélectionner la discussion                    #}
+    {# ------------------------------------------------------------- #}
+            <div id="discussion-section">
+            {% embed 'core/box.html' with box_titre=True %}
+                    {% block box_theme %}card-outline card-lightblue{% endblock %}
+                    {% block box_titre %}
+                        {% trans "Sélection de la discussion" %}
+                    {% endblock box_titre %}
+
+                    {% block box_contenu %}
+                        <p class="mb-3">
+                            {% blocktrans %}Cliquez ci-dessous sur  <B>la discussion </B> à laquelle vous souhaitez participer{% endblocktrans %}.
+                        </p>
+                        {% for fam in familles %}
+                             {% if fam == discussion_famille %}
+                                {# Boutons pour la discussion en groupe de la famille #}
+                                {% dict_get_item unread_messages_by_family fam.pk as unread_count %}
+                                <a class="btn btn-app button-class"
+                                   data-idfamille="{{ fam.pk }}"
+                                   href="{% url 'portail_messagerie_famille' idstructure=structure.pk idfamille=fam.pk %}">
+                                    <i class="fa fa-users"></i>
+                                    Discussion En famille
+                                    {% with unread_messages_family|get_item:fam.pk as unread_count %}
+                                        {% if unread_count > 0 %}
+                                            <span class="badge bg-danger">
+                                                {{ unread_count }} message{{ unread_count|pluralize:"s" }} non lu{{ unread_count|pluralize }}
+                                            </span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </a>
+
+                                {# Bouton "Moi uniquement" pour les messages privés #}
+                                {% if request.user.individu %}
+                                    <a class="btn btn-app button-class"
+                                       data-idindividu="{{ request.user.individu.pk }}"
+                                       href="{% url 'portail_messagerie_individu' idstructure=structure.pk idfamille=fam.pk idindividu=request.user.individu.pk %}">
+                                        <i class="fa fa-user"></i>
+                                        Discussion Privée
+                                        {% with unread_messages_private|get_item:fam.pk as unread_count %}
+                                            {% if unread_count > 0 %}
+                                                <span class="badge bg-danger">
+                                                    {{ unread_count }} message{{ unread_count|pluralize }} non lu{{ unread_count|pluralize }}
+                                                </span>
+                                            {% endif %}
+                                         {% endwith %}
+                                    </a>
+                                {% endif %}
+                        {% endif %}
+                 {% endfor %}
+
+                    {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+            {% endembed %}
+            </div>
+{% endif %}
+<script>
+<!--document.addEventListener("DOMContentLoaded", function () {-->
+<!--    const discussionSection = document.getElementById("discussion-section");-->
+<!--    discussionSection.style.display = "block";-->
+<!--    discussionSection.classList.add("show");-->
+
+<!--});-->
+
+
+</script>
+    {# ------------------------------------------------------------- #}
+    {# 3) Boîte de discussion : on n'affiche qu'UNE discussion,      #}
+    {#    celle choisie par l'URL (discussion familiale ou privée).  #}
+    {# ------------------------------------------------------------- #}
+
     {% embed 'core/box.html' with box_titre=True box_conclusion=True %}
         {% block box_theme %}card-outline card-lightblue direct-chat direct-chat-primary{% endblock %}
         {% block box_titre %}
-            {% blocktrans %}Discussion avec{% endblocktrans %} '{{ structure }}'
+            {% if discussion_type == "famille" %}
+                {# Discussion familiale #}
+                {% trans "Discussion entre" %}
+                <span class="texte-bleu">
+                   {{ structure.nom }}
+                </span>
+                et la {% trans "Famille" %} <span class="texte-bleu">{{ discussion_famille }}</span>
+            {% elif discussion_type == "individu" %}
+                {# Discussion privée #}
+                {% trans "Discussion entre" %}
+                <span class="texte-bleu">
+                   {{ structure.nom }}
+                </span>
+                et <span class="texte-bleu">{% trans "Moi uniquement" %}</span>
+            {% else %}
+                {# Pas de discussion sélectionnée #}
+                {% trans "Aucune discussion sélectionnée" %}
+            {% endif %}
+
+            {# Badge si messages non lus #}
             {% if liste_messages_non_lus %}
-                <span class="badge bg-danger"><i class="fa fa-envelope margin-r-5"></i>{{ liste_messages_non_lus|length }} nouveau{{ liste_messages_non_lus|length|pluralize:"x" }} message{{ liste_messages_non_lus|length|pluralize }}</span>
+                <span class="badge bg-danger">
+                    <i class="fa fa-envelope margin-r-5"></i>
+                    {{ liste_messages_non_lus|length }}
+                    {% trans "nouveau" %}{{ liste_messages_non_lus|length|pluralize:"x" }}
+                    {% trans "message" %}{{ liste_messages_non_lus|length|pluralize }}
+                </span>
             {% endif %}
         {% endblock %}
-        {% block box_contenu %}
 
-            {% if not liste_messages %}
+        {% block box_contenu %}
+            {% if not discussion_type %}
                 <div style="padding:20px;">
-                    {% blocktrans %}Aucun message récent.{% endblocktrans %}
+                    {% trans "Veuillez sélectionner une discussion (d'une famille ou moi uniquement) ci-dessus." %}
+                </div>
+            {% elif not liste_messages %}
+                <div style="padding:20px;">
+                    {% trans "Aucun message récent." %}
                 </div>
             {% else %}
+                {# Affichage des messages #}
                 <div id="div_messages" class="direct-chat-messages" style="height: 300px; padding: 20px;">
                     {% for message in liste_messages %}
-
-                        {% if message.utilisateur %}
-
-                            {# Si c'est un message de l'administrateur #}
+                        {% if message.utilisateur and message.utilisateur.pk == request.user.pk %}
+                            {# -- MESSAGE DE L’UTILISATEUR CONNECTÉ => gauche / gris -- #}
                             <div class="direct-chat-msg right">
                                 <div class="direct-chat-infos clearfix">
-                                    <span class="direct-chat-name float-right">{% firstof message.utilisateur.get_full_name message.utilisateur message.utilisateur.get_short_name %}</span>
-                                    <span class="direct-chat-timestamp float-left">{{ message.date_creation|date:"l j F Y H:i" }}</span>
+                                    <span class="direct-chat-name float-right">
+                                        {{ request.user.individu }}
+                                    </span>
+                                    <span class="direct-chat-timestamp float-left">
+                                        {{ message.date_creation|date:"l j F Y H:i" }}
+                                    </span>
+                                </div>
+                                <img class="direct-chat-img" src="{% static "images/user.png" %}" alt="User">
+                                <div class="direct-chat-text" style="background: #3c8dbc; color: #fff;">
+                                    {{ message.texte|safe }}
+                                </div>
+                            </div>
+                        {% else %}
+                            {# -- MESSAGE D’UN AUTRE UTILISATEUR => droite / bleu -- #}
+                            <div class="direct-chat-msg left">
+                                <div class="direct-chat-infos clearfix">
+                                    <span class="direct-chat-name float-left">
+                                        {% if message.utilisateur %}
+                                            {% firstof message.utilisateur.get_full_name message.utilisateur.individu message.utilisateur message.utilisateur.get_short_name %}
+                                        {% endif %}
+                                    </span>
+                                    <span class="direct-chat-timestamp float-right">
+                                        {{ message.date_creation|date:"l j F Y H:i" }}
+                                    </span>
                                     {% if message in liste_messages_non_lus %}<span class="badge bg-danger ml-md-2">{% trans "Nouveau" %}</span>{% endif %}
                                 </div>
-                                <img class="direct-chat-img" src="{% static "images/user.png" %}">
-                                <div class="direct-chat-text">
+                                <img class="direct-chat-img" src="{% static "images/user.png" %}" alt="Admin">
+                                <div class="direct-chat-text" style="background: #f4f4f4; color: #444;">
                                     {{ message.texte|safe }}
                                 </div>
                             </div>
-
-                        {% else %}
-
-                            {# Si c'est un message de la famille #}
-                            <div class="direct-chat-msg">
-                                <div class="direct-chat-infos clearfix">
-                                    <span class="direct-chat-name float-left">{{ message.famille }}</span>
-                                    <span class="direct-chat-timestamp float-right">{{ message.date_creation|date:"l j F Y H:i" }}</span>
-                                </div>
-                                <img class="direct-chat-img" src="{% static "images/user.png" %}">
-                                <div class="direct-chat-text">
-                                    {{ message.texte|safe }}
-                                </div>
-                            </div>
-
                         {% endif %}
-
                     {% endfor %}
                 </div>
             {% endif %}
-
         {% endblock box_contenu %}
+
         {% block box_conclusion %}
-            {% crispy form %}
+            {# Le formulaire ne s'affiche que s'il y a une discussion en cours #}
+            {% if discussion_type %}
+                {% crispy form %}
+            {% endif %}
         {% endblock %}
     {% endembed %}
 
     <script>
-        {# Scroll jusqu'en bas de la liste des messages #}
-        $("#div_messages").scrollTop($("#div_messages").get(0).scrollHeight);
-    </script>
+        // Scroll tout en bas de la discussion
+        const divMessages = document.getElementById("div_messages");
+        if (divMessages) {
+            divMessages.scrollTop = divMessages.scrollHeight;
+        }
+document.addEventListener('DOMContentLoaded', function () {
+    const familleButtons = document.querySelectorAll('.button-class[data-idfamilles]');
+    const discussionFamilleButtons = document.querySelectorAll('.button-class[data-idfamille]');
+    const discussionIndividuButtons = document.querySelectorAll('.button-class[data-idindividu]');
 
+    // Récupération des sélections à partir de localStorage
+    const selectedFamillesId = localStorage.getItem('selectedFamillesId');
+    const selectedFamilleDiscussionId = localStorage.getItem('selectedFamilleDiscussionId');
+    const selectedDiscussionType = localStorage.getItem('selectedDiscussionType');
+
+    // Ajouter la classe "selected" au bouton correspondant à la famille
+    if (selectedFamillesId) {
+        const familleButton = document.querySelector(`.button-class[data-idfamilles="${selectedFamillesId}"]`);
+        if (familleButton) {
+            familleButton.classList.add('selected');
+        }
+    }
+
+    // Ajouter la classe "selected" au bouton correspondant à la discussion en famille
+    if (selectedFamilleDiscussionId) {
+        const discussionFamilleButton = document.querySelector(`.button-class[data-idfamille="${selectedFamilleDiscussionId}"]`);
+        if (discussionFamilleButton) {
+            discussionFamilleButton.classList.add('selected');
+        }
+    }
+
+    // Ajouter la classe "selected" au bouton correspondant à la discussion privée
+    if (selectedDiscussionType) {
+        const discussionIndividuButton = document.querySelector(`.button-class[data-idindividu="${selectedDiscussionType}"]`);
+        if (discussionIndividuButton) {
+            discussionIndividuButton.classList.add('selected');
+        }
+    }
+
+    // Gestion des clics sur les boutons de famille
+    familleButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            // Supprimer la classe "selected" des autres boutons famille
+            familleButtons.forEach(btn => btn.classList.remove('selected'));
+
+            // Ajouter la classe "selected" au bouton cliqué
+            this.classList.add('selected');
+
+            // Sauvegarder la sélection dans localStorage
+            localStorage.setItem('selectedFamillesId', this.getAttribute('data-idfamilles'));
+        });
+    });
+
+    // Gestion des clics sur les boutons de discussion en famille
+    discussionFamilleButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            // Supprimer la classe "selected" des autres boutons de discussion
+            discussionFamilleButtons.forEach(btn => btn.classList.remove('selected'));
+            discussionIndividuButtons.forEach(btn => btn.classList.remove('selected')); // Désactiver discussion privée
+
+            // Ajouter la classe "selected" au bouton cliqué
+            this.classList.add('selected');
+
+            // Sauvegarder la sélection dans localStorage
+            localStorage.setItem('selectedFamilleDiscussionId', this.getAttribute('data-idfamille'));
+            localStorage.removeItem('selectedDiscussionType'); // Retirer la sélection de discussion privée
+        });
+    });
+
+    // Gestion des clics sur les boutons de discussion privée
+    discussionIndividuButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            // Supprimer la classe "selected" des autres boutons de discussion
+            discussionFamilleButtons.forEach(btn => btn.classList.remove('selected')); // Désactiver discussion en famille
+            discussionIndividuButtons.forEach(btn => btn.classList.remove('selected'));
+
+            // Ajouter la classe "selected" au bouton cliqué
+            this.classList.add('selected');
+
+            // Sauvegarder la sélection dans localStorage
+            localStorage.setItem('selectedDiscussionType', this.getAttribute('data-idindividu'));
+            localStorage.removeItem('selectedFamilleDiscussionId'); // Retirer la sélection de discussion en famille
+        });
+    });
+});
+    </script>
 {% endblock contenu_page %}

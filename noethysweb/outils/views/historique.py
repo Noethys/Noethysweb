@@ -32,10 +32,13 @@ class Liste(Page, crud.Liste):
     template_name = "outils/historique.html"
 
     def get_queryset(self):
-        conditions = (Q(utilisateur__structures__in=self.request.user.structures.all()) | Q(utilisateur__categorie="famille"))
+        conditions = (
+                Q(utilisateur__structures__in=self.request.user.structures.all()) |
+                Q(utilisateur__categorie__in=["famille", "individu"])
+        )
         self.afficher_dernier_mois = utils_parametres.Get(nom="afficher_dernier_mois", categorie="historique", utilisateur=self.request.user, valeur=True)
         if self.afficher_dernier_mois:
-            conditions &= Q(horodatage__date__gte=datetime.date.today() - datetime.timedelta(days=7))
+            conditions &= Q(horodatage__date__gte=datetime.date.today() - datetime.timedelta(days=14))
         return Historique.objects.select_related("famille", "individu", "collaborateur", "utilisateur").filter(conditions, self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
@@ -71,7 +74,15 @@ class Liste(Page, crud.Liste):
             return instance.collaborateur.Get_nom() if instance.collaborateur else ""
 
         def Formate_utilisateur(self, instance, **kwargs):
-            if instance.utilisateur.categorie == "utilisateur":
-                return instance.utilisateur.username if instance.utilisateur else ""
-            else:
-                return instance.utilisateur.famille
+            if instance.utilisateur:
+                # Vérifie si la catégorie est "utilisateur"
+                if instance.utilisateur.categorie == "utilisateur":
+                    return instance.utilisateur.username
+                # Vérifie si la catégorie est "famille"
+                elif instance.utilisateur.categorie == "famille":
+                    return instance.utilisateur.famille.nom if instance.utilisateur.famille else ""
+                # Vérifie si la catégorie est "individu"
+                elif instance.utilisateur.categorie == "individu":
+                    return instance.utilisateur.individu.Get_nom() if instance.utilisateur.individu else ""
+            # Si aucune catégorie n'est définie, retourne une chaîne vide
+            return ""

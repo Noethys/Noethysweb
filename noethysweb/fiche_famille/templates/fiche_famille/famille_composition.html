@@ -107,7 +107,7 @@
     <div class="row categories_horizontales">
         {% for num_categorie, nom_categorie in categories_utilisees %}
             <div class="col-sm-{% if categories_utilisees|length == 3 %}4{% elif categories_utilisees|length == 2 %}6{% else %}12{% endif %}" style="{% if num_categorie == 1 %}padding-left: 0px{% elif num_categorie == 3 %}padding-right: 0px{% endif %}">
-                <p class="nom_categorie">{{ nom_categorie }}s</p>
+                <p class="nom_categorie" style="color: #000;"><strong>{{ nom_categorie }}s</strong></p>
             </div>
         {% endfor %}
     </div>
