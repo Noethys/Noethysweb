@@ -18,6 +18,7 @@ from individus.utils import utils_pieces_manquantes
 from fiche_individu.forms.individu import Formulaire
 from fiche_famille.utils.utils_famille import LISTE_ONGLETS
 from cotisations.utils import utils_cotisations_manquantes
+from core.utils.utils_parametres_generaux import Get_dict_parametres
 
 
 def Definir_titulaire(request):
@@ -172,12 +173,29 @@ class Onglet(CustomView):
     def get_context_data(self, **kwargs):
         context = super(Onglet, self).get_context_data(**kwargs)
         context['page_titre'] = "Fiche famille"
-        context['liste_onglets'] = [dict_onglet for dict_onglet in self.liste_onglets if self.request.user.has_perm("core.famille_%s" % dict_onglet["code"])]
+
+        # Récupérer les paramètres généraux pour filtrer les onglets
+        parametres = Get_dict_parametres()
+
+        # Vérifier si le compte famille est actif depuis la session
+        compte_famille_active = self.request.session.get('compte_famille_active', False)
+
+        # Appliquer les permissions et les paramètres pour afficher les onglets
+        context['liste_onglets'] = [
+            dict_onglet for dict_onglet in self.liste_onglets
+            if self.request.user.has_perm("core.famille_%s" % dict_onglet["code"])
+            and (dict_onglet["code"] != "portail" or compte_famille_active)
+            and parametres.get(f"{dict_onglet['code']}_afficher_page_famille", True)  # Filtrage dynamique
+        ]
+
         context['famille'] = Famille.objects.get(pk=self.kwargs['idfamille'])
         context['idfamille'] = self.kwargs['idfamille']
         context['categories'] = CATEGORIES_RATTACHEMENT
-        context['rattachements'] = Rattachement.objects.prefetch_related('individu').filter(famille_id=self.kwargs['idfamille']).order_by("individu__civilite")
+        context['rattachements'] = Rattachement.objects.prefetch_related('individu').filter(
+            famille_id=self.kwargs['idfamille']
+        ).order_by("individu__civilite")
         context['categories_utilisees'] = self.Get_categories_utilisees(context['rattachements'])
+
         return context
 
     def Get_categories_utilisees(self, rattachements=[]):
