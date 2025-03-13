@@ -37,6 +37,9 @@ class Impression(utils_impression.Impression):
             self.story.append(utils_impression.Bookmark(nomSansCivilite, str(IDinscription)))
 
             # ----------- Insertion du cadre principal --------------
+            if self.modele_doc is None:
+                raise ValueError("Aucun modèle de document n'a été défini pour l'impression.")
+
             cadre_principal = self.modele_doc.FindObjet("cadre_principal")
             if cadre_principal != None:
 
