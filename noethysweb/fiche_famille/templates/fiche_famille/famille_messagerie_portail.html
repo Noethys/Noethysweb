@@ -1,18 +1,46 @@
+<!DOCTYPE html>
+<head>
+    <style>
+        html body a.btn.btn-app.button-class.selected {
+            border: 2.4px solid #3c8dbc !important;
+            color : #3c8dbc !important;
+        }
+        html body .bg-info {
+            background-color: #3c8dbc !important;
+        }
+
+<!--        html body .bg-danger {-->
+<!--            font-size: 10px;-->
+<!--            font-weight: 400;-->
+<!--        }-->
+
+        .texte-bleu {
+            color: #3c8dbc;
+            font-weight: bold;
+        }
+        .texte-red {
+            color: red;
+<!--            font-weight: bold;-->
+        }
+
+    </style>
+</head>
+
 {% extends "fiche_famille/famille.html" %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
-
+{% load famille %}
 
 {% block detail_famille %}
     <div class="col-md-9">
-
         <div class="row">
-
             <div class="col-md-12">
 
                 {% if not liste_structures %}
-                    Aucune structure disponible
+                    <span class="texte-red">
+                        Aucune structure disponible. ( car vous n'êtes pas inscrit à une activité associée à une structure ) <!--  à celle-ci.-->
+                    </span>
                 {% endif %}
 
                 {# Liste des structures disponibles #}
@@ -22,89 +50,230 @@
                         {% block box_titre %}Sélection de la structure{% endblock %}
                         {% block box_contenu %}
                             {% for structure in liste_structures %}
-
-                                {% with dict_messages_par_structure|get_item:structure.pk as nbre_messages %}
-                                <a class="btn btn-app" href="{% url 'famille_messagerie_portail' idfamille=idfamille idstructure=structure.pk %}">
-                                    {% if nbre_messages %}
-                                        <span class="badge bg-info">{{ nbre_messages }} message{{ nbre_messages|pluralize }}</span>
+                                {% dict_get_item_2d dict_messages_par_structure famille.pk structure.pk as nbre_total %}
+                                {% with dict_messages_non_lus_structure|get_item:structure.pk as nbre_messages_non_lus %}
+                                <a class="btn btn-app button-class"
+                                   data-idstructure="{{ structure.pk }}"
+                                   href="{% url 'famille_messagerie_portail' idfamille=idfamille idstructure=structure.pk %}">
+                                    {% if nbre_messages_non_lus and nbre_messages_non_lus > 0 %}
+                                        <!-- Badge rouge pour les messages non lus avec le total -->
+                                        <span class="badge bg-danger">
+                                            {{ nbre_messages_non_lus }} non lus / {{ nbre_total }} messages
+                                        </span>
+                                    {% elif nbre_total > 0 %}
+                                        <!-- Badge bleu pour le nombre total de messages -->
+                                        <span class="badge bg-info">
+                                            {{ nbre_total }} message{{ nbre_total|pluralize }}
+                                        </span>
                                     {% endif %}
                                     <i class="fa fa-comments"></i>{{ structure.nom }}
                                 </a>
                                 {% endwith %}
-
                             {% endfor %}
                         {% endblock box_contenu %}
                         {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
                     {% endembed %}
                 {% endif %}
 
-                {# Discussion #}
+
                 {% if structure %}
-                    {% embed 'core/box.html' with box_titre=True box_conclusion=True %}
-                        {% block box_theme %}card-outline card-lightblue direct-chat direct-chat-primary{% endblock %}
-                        {% block box_titre %}
-                            Discussion avec la structure {{ structure.nom }}
-                        {% endblock %}
-                        {% block box_contenu %}
+                    {# Liste des parents titulaires associés à la famille #}
+                    {% if liste_representants %}
+                        {% embed 'core/box.html' with box_titre=True %}
+                            {% block box_theme %}card-outline card-lightblue{% endblock %}
+                            {% block box_titre %}Sélection des destinataires{% endblock %}
+                            {% block box_contenu %}
 
-                            {% if not liste_messages_discussion %}
-                                <div style="padding:20px;">
-                                    Aucun message.
-                                </div>
-                            {% else %}
-                                <div id="div_messages" class="direct-chat-messages" style="height: 300px; padding: 20px;">
-                                    {% for message in liste_messages_discussion %}
-
-                                        {% if message.utilisateur %}
-
-                                            {# Si c'est un message de l'administrateur #}
-                                            <div class="direct-chat-msg right">
-                                                <div class="direct-chat-infos clearfix">
-                                                    <span class="direct-chat-name float-right">{% firstof message.utilisateur.get_full_name message.utilisateur message.utilisateur.get_short_name %}</span>
-                                                    <span class="direct-chat-timestamp float-left">{{ message.date_creation|date:"l j F Y H:i" }}</span>
-                                                </div>
-                                                <img class="direct-chat-img" src="{% static "images/user.png" %}">
-                                                <div class="direct-chat-text">
-                                                    {{ message.texte|safe }}
-                                                </div>
-                                            </div>
-
-                                        {% else %}
-
-                                            {# Si c'est un message de la famille #}
-                                            <div class="direct-chat-msg">
-                                                <div class="direct-chat-infos clearfix">
-                                                    <span class="direct-chat-name float-left">{{ message.famille }}</span>
-                                                    <span class="direct-chat-timestamp float-right">{{ message.date_creation|date:"l j F Y H:i" }}
-                                                        <span class="custom-switch custom-switch-off-danger custom-switch-on-success" title="Marquer comme lu">
-                                                            <input type="checkbox" class="custom-control-input case_switch" id="switch_{{ message.pk }}" data-idmessage="{{ message.pk }}" checked>
-                                                            <label class="custom-control-label" for="switch_{{ message.pk }}"></label>
-                                                        </span>
-                                                    </span>
-                                                    {% if not message.date_lecture %}<span class="badge bg-danger ml-md-2">Nouveau</span>{% endif %}
-                                                </div>
-                                                <img class="direct-chat-img" src="{% static "images/user.png" %}">
-                                                <div class="direct-chat-text">
-                                                    {{ message.texte|safe }}
-                                                </div>
-                                            </div>
-
+                                    {# Bouton Famille #}
+                                    {% dict_get_item_2d dict_messages_par_famille famille.pk structure.pk as nbre_famille %}
+                                    <a class="btn btn-app button-class"
+                                       data-idfamille="{{ famille.idfamille }}"
+                                       data-idrepresentant="famille"
+                                       href="{% url 'famille_messagerie_portail' idfamille=famille.idfamille idstructure=structure.pk %}">
+                                        {% with dict_messages_non_lus_family|get_item:famille.pk as nbre_messages_non_lus %}
+                                        {% if nbre_messages_non_lus and nbre_messages_non_lus > 0 %}
+                                            <!-- Badge rouge pour les messages non lus avec le total -->
+                                            <span class="badge bg-danger">
+                                                {{ nbre_messages_non_lus }} non lus / {{ nbre_famille }} messages
+                                            </span>
+                                        {% elif nbre_famille > 0 %}
+                                            <!-- Badge bleu pour le nombre total de messages -->
+                                            <span class="badge bg-info">
+                                                {{ nbre_famille }} message{{ nbre_famille|pluralize }}
+                                            </span>
                                         {% endif %}
+                                    {% endwith %}
+                                        <i class="fa fa-users"></i>{{ famille }}
+                                    </a>
 
+                                    {# Boutons Individu #}
+                                    {% for individu in liste_representants %}
+                                        {% dict_get_item_3d dict_messages_par_individu famille.pk structure.pk individu.idindividu as nbre_individu %}
+                                        <a class="btn btn-app button-class"
+                                           data-idfamille="{{ famille.idfamille }}"
+                                           data-idrepresentant="{{ individu.idindividu }}"
+                                           href="{% url 'famille_messagerie_portail' idfamille=famille.idfamille idindividu=individu.idindividu idstructure=structure.pk %}">
+                                            {% with dict_messages_non_lus_individu|get_item:individu.pk as nbre_messages_non_lus %}
+                                            {% if nbre_messages_non_lus and nbre_messages_non_lus > 0 %}
+                                                <!-- Badge rouge pour les messages non lus avec le total -->
+                                                <span class="badge bg-danger">
+                                                    {{ nbre_messages_non_lus }} non lus / {{ nbre_individu }} messages
+                                                </span>
+                                            {% elif nbre_individu > 0 %}
+                                                <!-- Badge bleu pour le nombre total de messages -->
+                                                <span class="badge bg-info">
+                                                    {{ nbre_individu }} message{{ nbre_individu|pluralize }}
+                                                </span>
+                                            {% endif %}
+                                        {% endwith %}
+                                            <i class="fa fa-user"></i>{{ individu.nom }} {{ individu.prenom }}
+                                        </a>
                                     {% endfor %}
-                                </div>
-                            {% endif %}
 
-                        {% endblock box_contenu %}
-                        {% block box_conclusion %}
-                            {% crispy form %}
-                        {% endblock %}
-                    {% endembed %}
+                            {% endblock box_contenu %}
+                            {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+                        {% endembed %}
+                    {% endif %}
 
                     <script>
-                        {# Scroll jusqu'en bas de la liste des messages #}
+                        document.addEventListener('DOMContentLoaded', function () {
+                            // Gestion des boutons de structure
+                            const structureButtons = document.querySelectorAll('.button-class[data-idstructure]');
+                            structureButtons.forEach(button => {
+                                button.addEventListener('click', function () {
+                                    structureButtons.forEach(btn => btn.classList.remove('selected'));
+                                    this.classList.add('selected');
+                                    const id = this.getAttribute('data-idstructure');
+                                    localStorage.setItem('selectedStructureId', id);
+                                });
+                            });
+
+                            // Gestion des boutons de représentants
+                            const representantButtons = document.querySelectorAll('.button-class[data-idrepresentant]');
+                            representantButtons.forEach(button => {
+                                button.addEventListener('click', function () {
+                                    representantButtons.forEach(btn => btn.classList.remove('selected'));
+                                    this.classList.add('selected');
+                                    const id = this.getAttribute('data-idrepresentant');
+                                    localStorage.setItem('selectedRepresentantId', id);
+                                });
+                            });
+
+                            // Récupération de la sélection de la structure depuis localStorage
+                            const selectedStructureId = localStorage.getItem('selectedStructureId');
+                            if (selectedStructureId) {
+                                const selectedStructureButton = document.querySelector(`.button-class[data-idstructure="${selectedStructureId}"]`);
+                                if (selectedStructureButton) {
+                                    selectedStructureButton.classList.add('selected');
+                                }
+                            }
+
+                            // Récupération de la sélection du représentant depuis localStorage
+                            const selectedRepresentantId = localStorage.getItem('selectedRepresentantId');
+                            if (selectedRepresentantId) {
+                                const selectedRepresentantButton = document.querySelector(`.button-class[data-idrepresentant="${selectedRepresentantId}"]`);
+                                if (selectedRepresentantButton) {
+                                    selectedRepresentantButton.classList.add('selected');
+                                }
+                            }
+                        });
+                    </script>
+
+                    {# Discussion #}
+                    {% if structure %}
+                        {% embed 'core/box.html' with box_titre=True box_conclusion=True %}
+                            {% block box_theme %}card-outline card-lightblue direct-chat direct-chat-primary{% endblock %}
+                            {% block box_titre %}
+                                {% if individu_selectionne %}
+                                    Discussion entre la structure
+                                    <span class="texte-bleu">
+                                        {{ structure.nom }}
+                                    </span>
+                                    et le représentant
+                                    <span class="texte-bleu">
+                                        {{ individu_selectionne.nom }} {{ individu_selectionne.prenom }}
+                                    </span>
+                                {% else %}
+                                    Discussion entre la structure
+                                    <span class="texte-bleu">
+                                        {{ structure.nom }}
+                                    </span>
+                                    et la Famille
+                                    <span class="texte-bleu">
+                                        {{ famille }}
+                                    </span>
+                                {% endif %}
+                            {% endblock %}
+
+                            {% block box_contenu %}
+                                {% if not liste_messages_discussion %}
+                                    <div style="padding:20px;">
+                                        Aucun message.
+                                    </div>
+                                {% else %}
+
+                                    <div id="div_messages" class="direct-chat-messages" style="height: 300px; padding: 20px;">
+                                        {% for message in liste_messages_discussion %}
+                                            {% if message.utilisateur and message.utilisateur.pk == request.user.pk or message.utilisateur.categorie == "utilisateur" %}
+                                                {# Messages de l'utilisateur connecté : affichés à gauche avec  un style bleu foncé #}
+                                                <div class="direct-chat-msg right">
+                                                    <div class="direct-chat-infos clearfix">
+                                                        <span class="direct-chat-name float-right">
+                                                            {% firstof message.utilisateur.get_full_name message.utilisateur message.utilisateur.get_short_name %}
+                                                        </span>
+                                                        <span class="direct-chat-timestamp float-left">
+                                                            {{ message.date_creation|date:"l j F Y H:i" }}
+
+
+                                                        </span>
+                                                    </div>
+                                                    <img class="direct-chat-img" src="{% static 'images/user.png' %}" alt="Admin">
+                                                    <div class="direct-chat-text" style="background: #3c8dbc; color: #fff;">
+                                                        {{ message.texte|safe }}
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                {# Messages des autres utilisateurs : affichés à droite avec un style gris clair  #}
+                                                <div class="direct-chat-msg left">
+                                                    <div class="direct-chat-infos clearfix">
+                                                        <span class="direct-chat-name float-left">
+                                                                {{ message.utilisateur.individu }}
+                                                        </span>
+                                                        <span class="direct-chat-timestamp float-right">
+
+                                                            {{ message.date_creation|date:"l j F Y H:i" }}
+                                                            <span class="custom-switch custom-switch-off-danger custom-switch-on-success" title="Marquer comme lu">
+                                                                <input type="checkbox" class="custom-control-input case_switch" id="switch_{{ message.pk }}" data-idmessage="{{ message.pk }}" checked>
+                                                                <label class="custom-control-label" for="switch_{{ message.pk }}"></label>
+                                                            </span>
+                                                        </span>
+                                                         {% if message in liste_messages_non_lus %}
+                                                            <span class="badge bg-danger ml-md-2">Nouveau</span>
+                                                        {% endif %}
+                                                    </div>
+                                                    <img class="direct-chat-img" src="{% static 'images/user.png' %}" alt="User">
+                                                    <div class="direct-chat-text" style="background: #f4f4f4; color: #444;" >
+                                                        {{ message.texte|safe }}
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+
+
+                                {% endif %}
+                            {% endblock box_contenu %}
+
+                            {% block box_conclusion %}
+                                {% crispy form %}
+                            {% endblock %}
+                        {% endembed %}
+                    {% endif %}
+
+                    <script>
+                        // Scroll jusqu'en bas de la liste des messages
                         $("#div_messages").scrollTop($("#div_messages").get(0).scrollHeight);
-                        
+
                         $(document).ready(function() {
                             $(".case_switch").on("change", function(e) {
                                 $.ajax({
@@ -124,13 +293,11 @@
                                     }
                                 })
                             })
-                        })
+                        });
+
                     </script>
-
                 {% endif %}
-
             </div>
         </div>
-
     </div>
 {% endblock %}
