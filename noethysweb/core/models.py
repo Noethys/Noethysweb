@@ -1970,7 +1970,6 @@ class Famille(models.Model):
         return self.rue_resid.replace("\n", "<br/>") if self.rue_resid else None
     
     def Get_nom(self):
-        texte = ""
         texte = self.nom
         return texte
 
@@ -2037,7 +2036,6 @@ class Inscription(models.Model):
             return self.date_debut <= date_max
 
     def Get_activite(self):
-        texte = ""
         texte = self.activite
         return texte
 
