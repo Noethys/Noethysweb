@@ -53,15 +53,18 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for cotisation in liste_cotisations %}
-                                <tr class="text-center">
-                                    <td>{{ cotisation.date_debut|date:'d/m/Y' }}</td>
-                                    <td>{{ cotisation.date_fin|date:'d/m/Y' }}</td>
-                                    <td>{{ cotisation.prestation.label }}</td>
-                                    <td>{{ cotisation.numero|default:"" }}</td>
-                                    <td>{% if cotisation.individu %}{{ cotisation.individu.prenom }}{% else %}{% trans "Famille" %}{% endif %}</td>
-                                </tr>
-                            {% endfor %}
+
+                                {% for cotisation in liste_cotisations %}
+                                    <tr class="text-center">
+                                        <td>{{ cotisation.date_debut|date:'d/m/Y' }}</td>
+                                        <td>{{ cotisation.date_fin|date:'d/m/Y' }}</td>
+                                        <td>{{ cotisation.prestation.label }}</td>
+                                        <td>{{ cotisation.numero|default:"" }}</td>
+                                        <td>{% if cotisation.individu %}{{ cotisation.individu.nom }}{{ cotisation.individu.prenom }}{% else %}{{ cotisation.famille.nom }}{% endif %}</td>
+                                    </tr>
+                                {% endfor %}
+
+
                         </tbody>
                     </table>
                 {% else %}
