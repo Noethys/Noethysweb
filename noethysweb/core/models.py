@@ -262,7 +262,7 @@ def get_storage(nom_champ=None):
 
 class AdresseMail(models.Model):
     idadresse = models.AutoField(verbose_name="ID", db_column='IDadresse', primary_key=True)
-    adresse = encrypt(models.EmailField(verbose_name="Adresse d'envoi", max_length=300, help_text="Saisissez l'adresse mail utilisée."))
+    adresse = models.EmailField(verbose_name="Adresse d'envoi", max_length=300, help_text="Saisissez l'adresse mail utilisée.")
     motdepasse = encrypt(models.CharField(verbose_name="Mot de passe", max_length=300, blank=True, null=True, help_text="Saisissez le mot de passe de la messagerie."))
     hote = encrypt(models.CharField(verbose_name="Hôte", max_length=300, blank=True, null=True, help_text="Saisissez le nom de l'hôte de la messagerie (Ex: smtp.orange.fr, smtp.gmail.com...)."))
     port = models.IntegerField(verbose_name="Port", blank=True, null=True, help_text="Saisissez le numéro de port (Ex: 995, 465...)")
@@ -2036,6 +2036,10 @@ class Inscription(models.Model):
         else:
             return self.date_debut <= date_max
 
+    def Get_activite(self):
+        texte = ""
+        texte = self.activite
+        return texte
 
 class Information(models.Model):
     idinformation = models.AutoField(verbose_name="ID", db_column='IDinformation', primary_key=True)

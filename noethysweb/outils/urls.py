@@ -8,7 +8,7 @@ from core.views import toc
 from core.decorators import secure_ajax
 from outils.views import editeur_emails, editeur_emails_express, historique, update, sauvegarde_creer, statistiques, contacts, \
                         editeur_emails_familles, editeur_emails_individus, editeur_emails_collaborateurs, editeur_emails_contacts, editeur_emails_listes_diffusion, \
-                        editeur_emails_saisie_libre, emails, notes_versions, messages_portail, notes, calendrier_annuel, \
+                        editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
                         demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur, editeur_sms, editeur_sms_familles, \
                         editeur_sms_individus, editeur_sms_collaborateurs, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures, editeur_sms_express, taches, \
                         suivi_reservations, commandes, desk_creer, editeur_emails_inscriptions, editeur_emails_activites
@@ -38,7 +38,6 @@ urlpatterns = [
     path('outils/editeur_emails/listes_diffusion/<int:idmail>', editeur_emails_listes_diffusion.Liste.as_view(), name='editeur_emails_listes_diffusion'),
     path('outils/editeur_emails/saisie_libre/<int:idmail>', editeur_emails_saisie_libre.Liste.as_view(), name='editeur_emails_saisie_libre'),
     path('outils/editeur_emails/exporter_excel', secure_ajax(editeur_emails.Exporter_excel), name='ajax_editeur_emails_exporter_excel'),
-
     path('outils/editeur_emails/inscriptions', editeur_emails_inscriptions.Liste.as_view(), name='editeur_emails_inscriptions'),
     path('outils/editeur_emails/inscriptions_emails_pdf', secure_ajax(editeur_emails_inscriptions.Impression_pdf),name='ajax_inscriptions_emails_pdf'),
     path('outils/editeur_emails/activites', editeur_emails_activites.Liste.as_view(),name='editeur_emails_activites'),
@@ -101,6 +100,10 @@ urlpatterns = [
     path('outils/portail/messages/liste', messages_portail.Liste.as_view(), name='messages_portail_liste'),
     path('outils/portail/messages/supprimer/<int:pk>', messages_portail.Supprimer.as_view(), name='messages_portail_supprimer'),
 
+    path('outils/portail/messagerie', messagerie_portail.Ajouter.as_view(), name='messagerie_portail'),
+    path('outils/portail/messagerie/<int:idstructure>/<int:idfamille>', messagerie_portail.Ajouter.as_view(), name='messagerie_portail'),
+    path('outils/portail/messagerie/<int:idstructure>/<int:idfamille>/<int:idindividu>', messagerie_portail.Ajouter.as_view(),name='messagerie_portail'),
+
     path('outils/portail/renseignements/liste', demandes_portail.Liste.as_view(), name='demandes_portail_liste'),
 
     path('individus/suivi_reservations', suivi_reservations.View.as_view(), name='suivi_reservations'),
@@ -127,6 +130,7 @@ urlpatterns = [
     path('outils/sauvegarder_db/', secure_ajax(sauvegarde_creer.Sauvegarder_db), name='ajax_sauvegarder_db'),
     path('outils/sauvegarder_media/', secure_ajax(sauvegarde_creer.Sauvegarder_media), name='ajax_sauvegarder_media'),
     path('outils/sauvegarder_liste/', secure_ajax(sauvegarde_creer.Get_liste_sauvegardes), name='ajax_get_liste_sauvegardes'),
+    path('outils/messages/marquer_lu/', secure_ajax(messagerie_portail.Marquer_lu), name='ajax_message_marquer_lu'),
     path('outils/get_suivi_reservations', secure_ajax(suivi_reservations.Get_suivi_reservations), name='ajax_get_suivi_reservations'),
     path('outils/reservations_get_form_activites', secure_ajax(suivi_reservations.Get_form_activites), name='ajax_reservations_get_form_activites'),
     path('outils/reservations_get_form_periode', secure_ajax(suivi_reservations.Get_form_periode), name='ajax_reservations_get_form_periode'),

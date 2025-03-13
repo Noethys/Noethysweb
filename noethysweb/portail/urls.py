@@ -135,7 +135,11 @@ urlpatterns = [
 
     # Contact
     path('contact', contact.View.as_view(), name='portail_contact'),
-    path('contact/messagerie/<int:idstructure>', messagerie.Ajouter.as_view(), name='portail_messagerie'),
+    path('messagerie/<int:idstructure>/',messagerie.Ajouter.as_view(),name='portail_messagerie'),
+    # Discussion familiale
+    path('messagerie/famille/<int:idstructure>/<int:idfamille>/', messagerie.Ajouter.as_view(), name='portail_messagerie_famille'),
+    # Discussion individuelle
+    path('messagerie/individu/<int:idstructure>/<int:idfamille>/<int:idindividu>/',messagerie.Ajouter.as_view(), name='portail_messagerie_individu'),
 
     # Mentions
     path('mentions', mentions.View.as_view(), name='portail_mentions'),

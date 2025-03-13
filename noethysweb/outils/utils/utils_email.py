@@ -122,28 +122,16 @@ def Envoyer_model_mail(idmail=None, request=None):
     if mail.selection.startswith("NON_ENVOYE_"):
         destinataires = destinataires[:int(mail.selection.replace("NON_ENVOYE_", ""))]
 
-    # --- Éviter l'envoi en double à la même adresse : on dé-duplique ---
-    unique_destinataires = []
-    deja_vues = set()  # stockera les adresses normalisées
-    for d in destinataires:
-        if not d.adresse:
-            continue
-        addr_norm = d.adresse.strip().lower()
-        if addr_norm not in deja_vues:
-            deja_vues.add(addr_norm)
-            unique_destinataires.append(d)
-
     # Envoi de chaque mail
     index_lot = 1
     liste_envois_succes = []
-    # --- Boucle d'envoi ---
-    for destinataire in unique_destinataires:
+    for destinataire in destinataires:
         html = mail.html
         objet = mail.objet
         if objet == None:
             objet = ""
 
-        # Fusion des mots-clés spécifiques (destinataire.valeurs) + valeurs_defaut
+        # Remplacement des mots-clés
         try:
             valeurs = json.loads(destinataire.valeurs)
         except:
@@ -171,15 +159,8 @@ def Envoyer_model_mail(idmail=None, request=None):
             html += "<br><hr><p style='font-size: 12px;'>Si vous ne souhaitez plus recevoir nos mails groupés, cliquez sur le lien suivant : <a href='%s'>Désinscription</a></p>" % url_desinscription
             headers = {"List-Unsubscribe-Post": "List-Unsubscribe=One-Click", "List-Unsubscribe": url_desinscription}
 
-        # Construction du message
-        message = EmailMultiAlternatives(
-            subject=objet,
-            body=utils_texte.Textify(html),
-            from_email=mail.adresse_exp.adresse,
-            to=[destinataire.adresse],
-            connection=connection,
-            headers=headers
-        )
+        # Création du message
+        message = EmailMultiAlternatives(subject=objet, body=utils_texte.Textify(html), from_email=mail.adresse_exp.adresse, to=[destinataire.adresse], connection=connection, headers=headers)
         message.mixed_subtype = 'related'
         message.attach_alternative(html, "text/html")
 
@@ -222,26 +203,19 @@ def Envoyer_model_mail(idmail=None, request=None):
 
         if resultat == 1:
             liste_envois_succes.append(destinataire)
-            # Historique
-            utils_historique.Ajouter(
-                titre="Envoi d'un email",
-                detail=objet,
-                utilisateur=request.user if request else None,
-                famille=destinataire.famille_id,
-                individu=destinataire.individu_id,
-                collaborateur=destinataire.collaborateur_id,
-                objet="Email",
-                idobjet=mail.pk,
-                classe="Mail"
-            )
 
-        # Pause si envoi par lot
-        if nbre_mails_lot and len(unique_destinataires) > 1:
+            # Mémorise l'envoi dans l'historique
+            utils_historique.Ajouter(titre="Envoi d'un email", detail=objet, utilisateur=request.user if request else None, famille=destinataire.famille_id,
+                                     individu=destinataire.individu_id, collaborateur=destinataire.collaborateur_id, objet="Email", idobjet=mail.pk, classe="Mail")
+
+        # Pause si envoi par lot activé
+        if nbre_mails_lot and len(destinataires) > 1:
             if index_lot >= int(nbre_mails_lot):
                 time.sleep(int(duree_pause))
                 index_lot = 0
             index_lot += 1
 
+    connection.close()
     return liste_envois_succes
 
 
