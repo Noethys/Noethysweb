@@ -25,33 +25,33 @@
 
                     {# Boutons de commandes #}
                     <div class="buttonHolder">
-                        <button class="btn btn-primary" onclick="on_bouton_valider()" title="Transférer les inscriptions vers l'éditeur d'Emails"><i class='fa fa-file-pdf-o margin-r-5'></i> Transférer les inscriptions vers l'éditeur d'Emails</button>
-                        <a class="btn btn-danger" href="{% url 'editeur_emails' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                        <button class="btn btn-primary" onclick="on_bouton_valider()" title="Transférer les activites vers l'éditeur d'Emails" id="bouton_transferer"><i class='fa fa-file-pdf-o margin-r-5'></i> Transférer les activites vers l'éditeur d'Emails</button>
+                        <a class="btn btn-danger" href="{% url 'outils_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
                     </div>
 
-                    {# Liste des inscriptions générées #}
+                    {# Liste des activites générées #}
                     {% embed 'core/crud/liste.html' %}
                     {% endembed %}
 
                     <br>
-
-                    {# Options d'impression #}
-                    {% crispy form_modele %}
 
                 {% endblock box_contenu %}
                 {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
             {% endembed %}
         </div>
 
-        {# Insertion des modals #}
-        {% include 'core/modal_pdf.html' %}
+<script>
 
-        <script>
-
+<!--            function get_coches() {-->
+<!--    var checkboxes = document.querySelectorAll('input[name="checkbox_activite"]:checked');-->
+<!--    var activites = Array.from(checkboxes).map(cb => cb.value);-->
+<!--    console.log("Activités cochées récupérées :", activites);-->
+<!--    return activites;-->
+<!--}-->
             function on_bouton_valider() {
                 var box = bootbox.dialog({
                     title: "Confirmation du transfert",
-                    message: "Confirmez-vous le transfert des inscriptions vers l'éditeur d'emails ?",
+                    message: "Confirmez-vous le transfert des activites vers l'éditeur d'emails ?",
                     buttons: {
                         ok: {
                             label: "<i class='fa fa-check'></i> Transférer",
@@ -59,7 +59,7 @@
                             callback: function(){
                                 bootbox.dialog({
                                     message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> L'opération peut durer plusieurs minutes. Veuillez patienter...</p>",
-                                    closeButton: false
+                                    closeButton: true
                                 });
                                 impression_pdf(box);
                             }
@@ -72,14 +72,13 @@
                 });
             };
 
-            // Impression du PDF
+            // Impression du PDF (ici, on l’utilise pour transférer les activités)
             function impression_pdf(dialogbox) {
                 $.ajax({
                     type: "POST",
-                    url: "{% url 'ajax_inscriptions_email_pdf' %}",
+                    url: "{% url 'ajax_activites_emails_pdf' %}",
                     data: {
-                        form_modele: JSON.stringify($("#choix_modele_form").serializeObject()),
-                        inscriptions_cochees: JSON.stringify(get_coches()),
+                        activites_cochees: JSON.stringify(get_coches()),
                         csrfmiddlewaretoken: '{{ csrf_token }}',
                     },
                     datatype: "json",

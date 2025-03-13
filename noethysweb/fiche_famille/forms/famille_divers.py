@@ -21,7 +21,7 @@ class Formulaire(FormulaireBase, ModelForm):
         model = Famille
         fields = ["mail", "mobile", "memo", "code_compta", "titulaire_helios", "tiers_solidaire", "idtiers_helios", "natidtiers_helios", "reftiers_helios",
                   "cattiers_helios", "natjur_helios", "facturation_nom", "facturation_rue_resid", "facturation_cp_resid", "facturation_ville_resid",
-                  "email_blocage", "mobile_blocage"]
+                  "email_blocage", "mobile_blocage","contact_facturation"]
         widgets = {
             "memo": forms.Textarea(attrs={'rows': 3}),
             "facturation_rue_resid": forms.Textarea(attrs={'rows': 2}),
@@ -43,6 +43,9 @@ class Formulaire(FormulaireBase, ModelForm):
         # Coordonnées favorites
         self.fields["mail"].choices = [(None, "---------")] + [(rattachement.individu.mail, rattachement.individu.mail) for rattachement in rattachements if rattachement.individu.mail]
         self.fields["mobile"].choices = [(None, "---------")] + [(rattachement.individu.tel_mobile, "%s (%s)" % (rattachement.individu.tel_mobile, rattachement.individu.Get_nom())) for rattachement in rattachements if rattachement.individu.tel_mobile]
+
+        # Facturation
+        self.fields["contact_facturation"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
 
         # Titulaire hélios
         self.fields["titulaire_helios"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
@@ -70,6 +73,9 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Comptabilité",
                 Field("code_compta"),
+            ),
+            Fieldset("Facturation",
+                     Field("contact_facturation"),
             ),
             Fieldset("Données tiers pour Hélios",
                 Field("titulaire_helios"),

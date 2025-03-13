@@ -15,7 +15,7 @@ URL_PORTAIL = ""
 PORTAIL_ACTIF = True
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'cle_secrete_a_modifier_imperativement'
+SECRET_KEY = 'gip_recia'
 SECRET_EXPORT_DESK = None
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -29,7 +29,7 @@ LOGIN_REDIRECT_URL = "accueil"
 # LOGOUT_REDIRECT_URL = "connexion"
 
 # AXES
-AXES_FAILURE_LIMIT = 5
+AXES_FAILURE_LIMIT = 24
 AXES_COOLOFF_TIME = 24
 AXES_LOCKOUT_URL = '/locked'
 
@@ -51,14 +51,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 AUTH_USER_MODEL = 'core.Utilisateur'
 DUREE_VALIDITE_MDP = 60*60*168
 CORRECTEUR_JOURS_RETROACTION = 30
-PURGE_HISTORIQUE_JOURS = 365
-ATTRIBUTION_TARIF_FRATERIE_AINES = True
-ATTRIBUTION_TARIF_FRATERIE_TARIF_IDENTIQUE = True
+PURGE_HISTORIQUE_JOURS = None
 
 # CONFIGURATION ACCUEIL
 CONFIG_ACCUEIL_DEFAUT = [
     [[6, "citation", "anniversaires"], [6, "celebrations", "anniversaires_demain"]],
-    [[8, "notes", "taches", "suivi_consommations", "suivi_inscriptions", "suivi_reservations"], [4, "graphe_individus", "messages", "astuce"]],
+    [[8, "notes", "taches", "suivi_consommations", "suivi_inscriptions"], [4, "graphe_individus", "messages", "astuce"]],
 ]
 
 # Application definition
@@ -131,7 +129,8 @@ MIDDLEWARE = [
     'axes.middleware.AxesMiddleware',
     'noethysweb.middleware.CustomMiddleware',
 ]
-
+# settings.py
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 ROOT_URLCONF = 'noethysweb.urls'
 
 TEMPLATES = [
@@ -161,8 +160,12 @@ AUTHENTICATION_BACKENDS = [
 # Database
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'noethysweb',
+        'USER': 'noethysweb',
+        'PASSWORD': 'noethysweb',
+        'HOST': 'localhost',  # ou l'adresse IP de votre serveur MariaDB
+        'PORT': '3306',       # le port par défaut de MariaDB
     }
 }
 
@@ -205,6 +208,10 @@ STORAGE_QUOTIENT = "django.core.files.storage.FileSystemStorage"
 STORAGE_ASSURANCE = "django.core.files.storage.FileSystemStorage"
 STORAGE_PHOTO = "django.core.files.storage.FileSystemStorage"
 STORAGE_PIECE_COLLABORATEUR = "django.core.files.storage.FileSystemStorage"
+
+# Media files
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 # Crispy forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"

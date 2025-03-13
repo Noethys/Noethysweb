@@ -113,7 +113,15 @@ def calc_delai(date=None, nbre_jours=2):
 
 @register.simple_tag
 def get_item_defaut(dictionnaire, key, defaut=None):
-    return dictionnaire.get(key, defaut)
+    try:
+        if isinstance(dictionnaire, dict):
+            return dictionnaire.get(key, defaut)
+        elif hasattr(dictionnaire, '__getitem__'):  # Gère d'autres types indexables (ex: QueryDict, objets JSON, etc.)
+            return dictionnaire[key]
+    except (KeyError, TypeError):
+        return defaut  # Retourne la valeur par défaut si une erreur survient
+
+    return defaut
 
 @register.filter
 def Convert_liste_to_texte_virgules(liste):
