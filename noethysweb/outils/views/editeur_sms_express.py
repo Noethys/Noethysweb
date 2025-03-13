@@ -6,7 +6,7 @@
 import json
 from django.http import JsonResponse
 from django.shortcuts import render
-from core.models import ModeleSMS, SMS, DestinataireSMS, Famille
+from core.models import ModeleSMS, SMS, DestinataireSMS, Famille , Individu
 from outils.forms.editeur_sms_express import Formulaire
 from outils.utils import utils_sms
 
@@ -49,9 +49,6 @@ def Get_view_editeur_sms(request):
     # Récupère d'éventuelles données
     donnees = json.loads(request.POST.get("donnees"))
 
-    # Importation de la famille
-    famille = Famille.objects.get(pk=donnees["idfamille"])
-
     # Création du SMS
     modele_sms = ModeleSMS.objects.filter(categorie=donnees["categorie"], defaut=True).first()
     sms = SMS.objects.create(
@@ -62,9 +59,20 @@ def Get_view_editeur_sms(request):
         utilisateur=request.user,
     )
 
-    # Création du destinataire
-    destinataire = DestinataireSMS.objects.create(categorie="famille", famille=famille, mobile=famille.mobile, valeurs=json.dumps(donnees["champs"]))
-    sms.destinataires.add(destinataire)
+    if 'idfamille' in donnees:
+
+        # Importation de la famille
+        famille = Famille.objects.get(pk=donnees["idfamille"])
+        # Création du destinataire
+        destinataire = DestinataireSMS.objects.create(categorie="famille", famille=famille, mobile=famille.mobile, valeurs=json.dumps(donnees["champs"]))
+        sms.destinataires.add(destinataire)
+
+    else : #individu
+        # Importation de l'individu
+        individu = Individu.objects.get(pk=donnees["idindividu"])
+        # Création du destinataire
+        destinataire = DestinataireSMS.objects.create(categorie="individu", individu=individu, mobile=individu.mobile, valeurs=json.dumps(donnees["champs"]))
+        sms.destinataires.add(destinataire)
 
     # Prépare le context
     context = {
