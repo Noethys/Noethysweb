@@ -155,4 +155,6 @@ urlpatterns = [
     path('individus/ajouter_assureur', secure_ajax_portail(individu_assurances.Ajouter_assureur), name='portail_ajax_ajouter_assureur'),
     path('activites/get_form_extra', secure_ajax_portail(inscrire_activite.Get_form_extra), name='portail_ajax_inscrire_get_form_extra'),
     path('activites/validation_form', secure_ajax_portail(inscrire_activite.Valid_form), name='portail_ajax_inscrire_valid_form'),
+    path('activites/get-individus', secure_ajax_portail(inscrire_activite.Get_individus), name='portail_ajax_inscrire_get_individus'),
+
 ]

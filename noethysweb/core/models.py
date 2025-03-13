@@ -1968,6 +1968,11 @@ class Famille(models.Model):
 
     def Get_rue_resid(self):
         return self.rue_resid.replace("\n", "<br/>") if self.rue_resid else None
+    
+    def Get_nom(self):
+        texte = ""
+        texte = self.nom
+        return texte
 
     def Get_infos(self, avec_civilite=False):
         """ Renvoie le nom des titulaires """
