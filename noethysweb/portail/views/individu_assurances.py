@@ -86,9 +86,9 @@ class Liste(Page, TemplateView):
         context['liste_assurances'] = Assurance.objects.filter(famille=self.get_rattachement().famille, individu=self.get_rattachement().individu).order_by("-date_debut")
 
         # Recherche si l'assurance de l'individu est manquante
-        conditions = Q(famille=self.request.user.famille) & Q(individu=self.get_rattachement().individu) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
+        conditions = Q(famille=self.get_famille()) & Q(individu=self.get_rattachement().individu) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
         inscriptions = Inscription.objects.select_related("activite").filter(conditions)
-        context["assurance_manquante"] = len(utils_assurances.Get_assurances_manquantes_by_inscriptions(famille=self.request.user.famille, inscriptions=inscriptions)) > 0
+        context["assurance_manquante"] = len(utils_assurances.Get_assurances_manquantes_by_inscriptions(famille=self.get_famille(), inscriptions=inscriptions)) > 0
 
         return context
 
@@ -142,12 +142,12 @@ class Importer(Page, TemplateView):
         context = super(Importer, self).get_context_data(**kwargs)
         context['box_titre'] = _("Importer les assurances d'une autre fiche")
         context['box_introduction'] = _("Cochez la ou les assurances à importer et cliquez sur le bouton Importer.")
-        context['form'] = Formulaire_importer(idfamille=self.request.user.famille.pk, idindividu=self.get_individu().pk, idrattachement=self.get_rattachement().pk, request=self.request)
+        context['form'] = Formulaire_importer(idfamille=self.get_famille().pk, idindividu=self.get_individu().pk, idrattachement=self.get_rattachement().pk, request=self.request)
         return context
 
     def post(self, request, **kwargs):
         # Validation du form
-        form = Formulaire_importer(request.POST, idfamille=self.request.user.famille.pk, idindividu=self.get_individu().pk, idrattachement=self.get_rattachement().pk, request=self.request)
+        form = Formulaire_importer(request.POST, idfamille=self.get_famille().pk, idindividu=self.get_individu().pk, idrattachement=self.get_rattachement().pk, request=self.request)
         if form.is_valid() == False:
             return self.render_to_response(self.get_context_data(form=form))
 
