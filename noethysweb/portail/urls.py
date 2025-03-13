@@ -21,7 +21,7 @@ urlpatterns = [
     path('', accueil.Accueil.as_view(), name='portail_accueil'),
 
     # Connexion
-    path('connexion', login.LoginViewFamille.as_view(), name='portail_connexion'),
+    path('connexion', login.LoginViewGeneric.as_view(), name='portail_connexion'),
     path('deconnexion', auth_views.LogoutView.as_view(next_page='portail_connexion'), name='portail_deconnexion'),
 
     # Change mot de passe

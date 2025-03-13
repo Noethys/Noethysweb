@@ -1649,7 +1649,17 @@ class Remplissage(models.Model):
     def __str__(self):
         return "Remplissage ID%d" % self.idremplissage if self.idremplissage else "Nouveau"
 
+class CategorieCompteInternet(models.Model):
+    idcategorie = models.AutoField(verbose_name="ID", db_column='IDcategorie', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
 
+    class Meta:
+        db_table = 'categories_compte_internet'
+        verbose_name = "catégorie de compte internet"
+        verbose_name_plural = "catégories de compte internet"
+
+    def __str__(self):
+        return self.nom
 
 class Individu(models.Model):
     idindividu = models.AutoField(verbose_name="ID", db_column='IDindividu', primary_key=True)
@@ -1696,6 +1706,17 @@ class Individu(models.Model):
     type_garde_choix = [(1, "Mère"), (2, "Père"), (3, "Garde alternée"), (4, "Autre personne")]
     type_garde = models.IntegerField(verbose_name=_("Type de garde"), choices=type_garde_choix, blank=True, null=True)
     info_garde = models.TextField(verbose_name=_("Information sur la garde"), blank=True, null=True)
+    # new attributs
+    internet_categorie = models.ForeignKey(CategorieCompteInternet, verbose_name="Catégorie",related_name="internet_categori", on_delete=models.PROTECT, blank=True,null=True)
+    internet_actif = models.BooleanField(verbose_name="Compte internet activé", default=True)
+    internet_identifiant = encrypt(models.CharField(verbose_name="Identifiant", max_length=200, blank=True, null=True))
+    internet_mdp = encrypt(models.CharField(verbose_name="Mot de passe", max_length=200, blank=True, null=True))
+    internet_secquest = models.CharField(verbose_name="Question", max_length=200, blank=True, null=True)
+    internet_reservations = models.BooleanField(verbose_name="Autoriser les réservations sur le portail", default=True)
+    mobile = encrypt(models.CharField(verbose_name="Portable favori", max_length=100, blank=True, null=True))
+    utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, null=True)
+    certification_date = models.DateTimeField(verbose_name="Date de certification", blank=True, null=True)
+    blocage_impayes_off = models.BooleanField(verbose_name="Ne jamais appliquer le blocage des réservations si impayés",default=False,help_text="En cochant cette case, vous permettez à cette famille d'accéder aux réservations du portail même s'il y a des impayés et que le paramètre 'blocage si impayés' a été activé dans les paramètres généraux du portail.")
 
     class Meta:
         db_table = 'individus'
@@ -1767,6 +1788,9 @@ class Individu(models.Model):
             self.ville_resid = dict_adresse["ville"]
             self.secteur = dict_adresse["secteur"]
             self.save()
+    def save_individu(sender, instance, **kwargs):
+        if hasattr(instance, 'individu'):
+            instance.individu.save()
 
 
 class Scolarite(models.Model):
@@ -1785,19 +1809,6 @@ class Scolarite(models.Model):
 
     def __str__(self):
         return "Etape de scolarité du %s au %s" % (self.date_debut.strftime('%d/%m/%Y'), self.date_fin.strftime('%d/%m/%Y'))
-
-
-class CategorieCompteInternet(models.Model):
-    idcategorie = models.AutoField(verbose_name="ID", db_column='IDcategorie', primary_key=True)
-    nom = models.CharField(verbose_name="Nom", max_length=200)
-
-    class Meta:
-        db_table = 'categories_compte_internet'
-        verbose_name = "catégorie de compte internet"
-        verbose_name_plural = "catégories de compte internet"
-
-    def __str__(self):
-        return self.nom
 
 
 class Famille(models.Model):
@@ -1848,7 +1859,8 @@ class Famille(models.Model):
     mobile_blocage = models.BooleanField(verbose_name="La famille ne souhaite pas recevoir de SMS groupés", default=False, help_text="L'éditeur de SMS groupés du menu Outils ne proposera pas cette famille dans les destinataires.")
     individus_masques = models.ManyToManyField(Individu, verbose_name="Individus masqués", related_name="individus_masques", blank=True)
     blocage_impayes_off = models.BooleanField(verbose_name="Ne jamais appliquer le blocage des réservations si impayés", default=False, help_text="En cochant cette case, vous permettez à cette famille d'accéder aux réservations du portail même s'il y a des impayés et que le paramètre 'blocage si impayés' a été activé dans les paramètres généraux du portail.")
-
+    contact_facturation = models.ForeignKey(Individu, verbose_name="Contact facturation", related_name="contact_facturation", on_delete=models.SET_NULL, blank=True, null=True)
+    utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, null=True)
     class Meta:
         db_table = 'familles'
         verbose_name = "famille"
@@ -1907,18 +1919,25 @@ class Famille(models.Model):
 
         # Titulaire Hélios
         if maj_titulaire_helios:
-            if self.titulaire_helios:
-                # recherche si le titulaire est toujours dans la famille
-                found = False
-                for rattachement in rattachements:
-                    if rattachement.individu == self.titulaire_helios:
-                        found = True
-                if not found:
-                    self.titulaire_helios = None
-            if not self.titulaire_helios:
-                # Recherche un individu valide parmi les titulaires de la famille
-                if rattachements:
-                    self.titulaire_helios = rattachements.first().individu
+            try:
+                if self.titulaire_helios:
+                    # Recherche si le titulaire est toujours dans la famille
+                    found = False
+                    for rattachement in rattachements:
+                        if rattachement.individu == self.titulaire_helios:
+                            found = True
+                            break  # Si trouvé, on sort de la boucle
+                    if not found:
+                        # Si le titulaire n'est pas trouvé dans la famille, on le met à None
+                        self.titulaire_helios = None
+            except Individu.DoesNotExist:
+                # Si le titulaire a été supprimé, on le met à None
+                self.titulaire_helios = None
+
+            # Assurez-vous qu'il y a un titulaire dans la famille si nécessaire
+            if not self.titulaire_helios and rattachements.exists():
+                # Recherche un individu valide parmi les rattachements
+                self.titulaire_helios = rattachements.first().individu
 
         if maj_tiers_solidaire:
             if self.tiers_solidaire:
@@ -3042,6 +3061,8 @@ class Destinataire(models.Model):
     categorie = models.CharField(verbose_name="Catégorie", max_length=300, blank=True, null=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.CASCADE)
     famille = models.ForeignKey(Famille, verbose_name="Famille", blank=True, null=True, on_delete=models.CASCADE)
+    inscription = models.ForeignKey(Inscription, verbose_name="Inscription", blank=True, null=True,on_delete=models.CASCADE)
+    activites = models.ForeignKey(Activite, verbose_name="Activites", blank=True, null=True, on_delete=models.CASCADE)
     collaborateur = models.ForeignKey("Collaborateur", verbose_name="Collaborateur", blank=True, null=True, on_delete=models.CASCADE)
     contact = models.ForeignKey(Contact, verbose_name="Contact", blank=True, null=True, on_delete=models.CASCADE)
     liste_diffusion = models.ForeignKey(ListeDiffusion, verbose_name="Liste de diffusion", blank=True, null=True, on_delete=models.CASCADE)
@@ -3144,7 +3165,7 @@ class PortailPeriode(models.Model):
 
 class PortailParametre(models.Model):
     idparametre = models.AutoField(verbose_name="ID", db_column='IDparametre', primary_key=True)
-    code = models.CharField(verbose_name="Code", max_length=200, blank=True, null=True)
+    code = models.CharField(verbose_name="Code", max_length=200, blank=True, null=True, unique=True)
     valeur = models.TextField(verbose_name="Valeur", blank=True, null=True)
 
     class Meta:
@@ -3202,9 +3223,10 @@ class PortailChamp(models.Model):
 
 class PortailMessage(models.Model):
     idmessage = models.AutoField(verbose_name="ID", db_column='IDmessage', primary_key=True)
-    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE)
-    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.CASCADE)
-    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.PROTECT)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE, db_index=True)
+    individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE, null=True, db_index=True)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.CASCADE, db_index=True)
+    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True,on_delete=models.PROTECT)
     texte = models.TextField(verbose_name="Texte")
     date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
     date_lecture = models.DateTimeField(verbose_name="Date de lecture", max_length=200, blank=True, null=True)
@@ -3213,6 +3235,14 @@ class PortailMessage(models.Model):
         db_table = 'portail_messages'
         verbose_name = "message"
         verbose_name_plural = "messages"
+        indexes = [
+            models.Index(fields=["famille"]),
+            models.Index(fields=["individu"]),
+            models.Index(fields=["structure"]),
+            models.Index(fields=["utilisateur"]),
+            models.Index(fields=["date_creation"]),
+            models.Index(fields=["date_lecture"]),
+        ]
 
     def __str__(self):
         return "Message ID%d" % self.idmessage if self.idmessage else "Nouveau message"

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-#  Copyright (c) 2019-2021 Ivan LUCAS.
+#  Copyright (c) 2025 GIP RECIA.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 import logging
+
 logger = logging.getLogger(__name__)
 from core.utils import utils_dates, utils_impression, utils_preferences
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -25,28 +26,27 @@ class Impression(utils_impression.Impression):
         styleTexte.leading = 12
 
         listeLabels = []
-        for IDinscription, dictValeur in self.dict_donnees.items():
-            if isinstance(IDinscription, int):
-                listeLabels.append((dictValeur["{FAMILLE_NOM}"], IDinscription))
+        for IDactivite, dictValeur in self.dict_donnees.items():
+            if isinstance(IDactivite, int):
+                listeLabels.append((dictValeur["{ACTIVITE_NOM_LONG}"], IDactivite))
         listeLabels.sort()
 
-        for labelDoc, IDinscription in listeLabels:
-            dictValeur = self.dict_donnees[IDinscription]
-            self.story.append(DocAssign("ID", IDinscription))
-            nomSansCivilite = dictValeur["{FAMILLE_NOM}"]
-            self.story.append(utils_impression.Bookmark(nomSansCivilite, str(IDinscription)))
+        for labelDoc, IDactivite in listeLabels:
+            dictValeur = self.dict_donnees[IDactivite]
+            self.story.append(DocAssign("ID", IDactivite))
+            nomSansCivilite = dictValeur["{ACTIVITE_NOM_LONG}"]
+            self.story.append(utils_impression.Bookmark(nomSansCivilite, str(IDactivite)))
 
             # ----------- Insertion du cadre principal --------------
             if self.modele_doc is None:
                 raise ValueError("Aucun modèle de document n'a été défini pour l'impression.")
 
             cadre_principal = self.modele_doc.FindObjet("cadre_principal")
-            if cadre_principal != None:
-
+            if cadre_principal is not None:
                 # ------------------- TITRE -----------------
                 dataTableau = []
                 largeursColonnes = [self.taille_cadre[2], ]
-                dataTableau.append(("Confirmation d'inscription",))
+                dataTableau.append(("Détails de l'Activité",))
                 dataTableau.append((u"",))
                 style = TableStyle([
                     ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
@@ -60,34 +60,16 @@ class Impression(utils_impression.Impression):
                 self.story.append(tableau)
                 self.story.append(Spacer(0, 10))
 
-                # TEXTE D'INTRODUCTION
-                # paraStyleIntro = ParagraphStyle(name="intro",
-                #                                 fontName="Helvetica",
-                #                                 fontSize=11,
-                #                                 leading=14,
-                #                                 spaceBefore=0,
-                #                                 spaceafter=0,
-                #                                 leftIndent=0,
-                #                                 rightIndent=0,
-                #                                 alignment=0,
-                #                                 )
-                #
-                # if True:
-                #     texteIntro = dictValeur["intro"]
-                #     self.story.append(Paragraph(u"<i>%s</i>" % texteIntro, paraStyleIntro))
-                #     self.story.append(Spacer(0, 20))
-
                 # ------------------- TABLEAU CONTENU -----------------
                 dataTableau = []
-                largeursColonnes = [100, self.taille_cadre[2] - 100]
+                largeursColonnes = [120, self.taille_cadre[2] - 120]
                 paraStyle = ParagraphStyle(name="detail", fontName="Helvetica-Bold", fontSize=9)
-                dataTableau.append(("Nom", Paragraph(dictValeur["{INDIVIDU_NOM}"], paraStyle)))
-                dataTableau.append(("Prénom", Paragraph(dictValeur["{INDIVIDU_PRENOM}"] or "", paraStyle)))
-                dataTableau.append(("Activité", Paragraph(dictValeur["{ACTIVITE_NOM_LONG}"], paraStyle)))
-                dataTableau.append(("Groupe", Paragraph(dictValeur["{GROUPE_NOM_LONG}"], paraStyle)))
-                dataTableau.append(("Catégorie", Paragraph(dictValeur["{NOM_CATEGORIE_TARIF}"], paraStyle)))
-                dataTableau.append(("Date de début", Paragraph(dictValeur["{DATE_DEBUT}"], paraStyle)))
-                dataTableau.append(("Date de fin", Paragraph(dictValeur["{DATE_FIN}"], paraStyle)))
+
+                dataTableau.append(("Nom de l'Activité", Paragraph(dictValeur["{ACTIVITE_NOM_LONG}"], paraStyle)))
+                dataTableau.append(("Nom abrégé", Paragraph(dictValeur["{ACTIVITE_NOM_COURT}"], paraStyle)))
+                dataTableau.append(
+                    ("Nombre d'inscriptions", Paragraph(str(dictValeur["{NOMBRE_INSCRIPTIONS}"]), paraStyle)))
+                dataTableau.append(("Familles inscrites", Paragraph(dictValeur["{FAMILLES}"], paraStyle)))
 
                 style = TableStyle([
                     ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
@@ -101,7 +83,6 @@ class Impression(utils_impression.Impression):
 
             # Saut de page
             self.story.append(PageBreak())
-
 
 
 if __name__ == u"__main__":
