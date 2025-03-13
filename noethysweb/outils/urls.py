@@ -11,7 +11,7 @@ from outils.views import editeur_emails, editeur_emails_express, historique, upd
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
                         demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur, editeur_sms, editeur_sms_familles, \
                         editeur_sms_individus, editeur_sms_collaborateurs, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures, editeur_sms_express, taches, \
-                        suivi_reservations, commandes, desk_creer
+                        suivi_reservations, commandes, desk_creer, editeur_emails_inscriptions, editeur_emails_activites
 
 urlpatterns = [
 
@@ -38,6 +38,12 @@ urlpatterns = [
     path('outils/editeur_emails/listes_diffusion/<int:idmail>', editeur_emails_listes_diffusion.Liste.as_view(), name='editeur_emails_listes_diffusion'),
     path('outils/editeur_emails/saisie_libre/<int:idmail>', editeur_emails_saisie_libre.Liste.as_view(), name='editeur_emails_saisie_libre'),
     path('outils/editeur_emails/exporter_excel', secure_ajax(editeur_emails.Exporter_excel), name='ajax_editeur_emails_exporter_excel'),
+
+    path('outils/editeur_emails/inscriptions', editeur_emails_inscriptions.Liste.as_view(), name='editeur_emails_inscriptions'),
+    path('outils/editeur_emails/inscriptions_emails_pdf', secure_ajax(editeur_emails_inscriptions.Impression_pdf),name='ajax_inscriptions_emails_pdf'),
+    path('outils/editeur_emails/activites', editeur_emails_activites.Liste.as_view(),name='editeur_emails_activites'),
+    path('outils/editeur_emails/activites_emails_pdf', secure_ajax(editeur_emails_activites.Impression_pdf),name='ajax_activites_emails_pdf'),
+    path('outils/editeur_emails/activites/transferer_activites/', editeur_emails_activites.Transferer_activites, name='transferer_activites'),
 
     path('outils/emails/liste', emails.Liste.as_view(), name='emails_liste'),
     path('outils/emails/supprimer/<int:pk>', emails.Supprimer.as_view(), name='emails_supprimer'),

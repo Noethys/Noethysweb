@@ -18,6 +18,11 @@ from fiche_individu.views import individu as INDIVIDU
 from fiche_famille.views.famille import Onglet
 from fiche_famille.utils import utils_internet
 
+import logging
+
+logger = logging.getLogger(__name__)
+from core.models import Consentement
+
 
 def Get_individus_existants(request):
     nom = request.POST.get("nom", "")
@@ -132,6 +137,26 @@ class Ajouter(crud.Ajouter):
                         self.object.Maj_infos()
                         break
 
+            #  Fournir un identifiant et un mot de passe à l'individu créé lors de la création d'une famille.
+            individu = Individu.objects.get(pk=self.object.idindividu)
+            internet_identifiant_individu = utils_internet.CreationIdentifiantIndividu(IDindividu=individu.pk)
+            internet_mdp_individu, date_expiration_mdp_individu = utils_internet.CreationMDP()
+            individu.internet_identifiant = internet_identifiant_individu
+            individu.internet_mdp = internet_mdp_individu
+
+            # Vous pouvez aussi créer un utilisateur pour l'individu si nécessaire
+            utilisateur_individu = Utilisateur(
+                username=internet_identifiant_individu,
+                categorie="individu",  # Ou une autre catégorie, selon votre besoin
+                force_reset_password=True,
+                date_expiration_mdp=date_expiration_mdp_individu
+            )
+            utilisateur_individu.set_password(internet_mdp_individu)
+            utilisateur_individu.save()
+
+            # Association de l'utilisateur à l'individu
+            individu.utilisateur = utilisateur_individu
+            individu.save()
             # Renvoie vers la fiche individuelle
             url_success = reverse_lazy("individu_resume", kwargs={'idindividu': self.object.idindividu, 'idfamille': famille.pk})
 
@@ -145,7 +170,6 @@ class Ajouter(crud.Ajouter):
         # Sauvegarde du rattachement
         rattachement = Rattachement(famille=famille, individu=self.object, categorie=categorie, titulaire=titulaire)
         rattachement.save()
-
         # MAJ des infos de la famille
         famille.Maj_infos()
 
@@ -169,16 +193,12 @@ class Ajouter(crud.Ajouter):
 
         # Création de l'utilisateur
         utilisateur = Utilisateur(username=internet_identifiant, categorie="famille", force_reset_password=True, date_expiration_mdp=date_expiration_mdp)
-        utilisateur.save()
         utilisateur.set_password(internet_mdp)
         utilisateur.save()
-
         # Association de l'utilisateur à la famille
         famille.utilisateur = utilisateur
         famille.save()
-
         return famille
-
 
 class Ajouter_individu(Page, Ajouter):
     """ Ajouter un individu depuis la fiche famille """
@@ -254,37 +274,79 @@ class Supprimer_individu(Page, crud.Supprimer):
 
     def Supprime_famille(self, request=None, individu=None, famille=None):
         """ Supprime la famille si besoin"""
-        # Recherche si l'individu à supprimer est le dernier titulaire de la famille
+
+        # Vérifier si l'individu à supprimer est le dernier titulaire de la famille
         rattachements = Rattachement.objects.filter(famille=famille, titulaire=True).exclude(individu=individu)
+
         if not rattachements:
-            # S'il reste un autre membre, on empêche la suppression du dernier titulaire
+            # Vérifier s'il reste d'autres membres dans la famille
             if Rattachement.objects.filter(famille=famille).exclude(individu=individu).exists():
-                messages.add_message(request, messages.ERROR, "Vous ne pouvez pas %s le dernier titulaire car il reste au moins un autre membre dans la famille" % self.mode)
+                messages.add_message(request, messages.ERROR,
+                                     "Vous ne pouvez pas %s le dernier titulaire car il reste au moins un autre membre dans la famille" % self.mode)
                 return HttpResponseRedirect(self.get_success_url(), status=303)
 
-            # Si c'est le dernier membre, on essaye de supprimer la fiche famille
+            # Supprimer la famille en supprimant toutes ses dépendances
             try:
-                message_erreur = famille.delete()
-                if isinstance(message_erreur, str):
-                    messages.add_message(request, messages.ERROR, message_erreur)
-                    return HttpResponseRedirect(self.get_success_url(), status=303)
+                with transaction.atomic():
+                    logger.info(f"Tentative de suppression de la famille ID: {famille.pk}")
+
+                    # Supprimer toutes les dépendances connues
+                    Rattachement.objects.filter(famille=famille).delete()
+                    Inscription.objects.filter(famille=famille).delete()
+                    Consentement.objects.filter(famille=famille).delete()
+                    Utilisateur.objects.filter(famille=famille).delete()
+
+                    # # Vérification avant suppression
+                    # liens_restants = self.verifier_liens_famille(famille.pk)
+                    # if liens_restants:
+                    #     logger.error(
+                    #         f"Échec de suppression de la famille {famille.pk}. Liens restants : {liens_restants}")
+                    #     messages.add_message(request, messages.ERROR,
+                    #                          f"La suppression de la famille est impossible car elle est toujours liée à : {liens_restants}")
+                    #     return HttpResponseRedirect(self.get_success_url(), status=303)
+
+                    # Suppression de la famille
+                    famille.delete()
+
+                    logger.info(f"Famille ID {famille.pk} supprimée avec succès")
+                    messages.add_message(self.request, messages.SUCCESS,
+                                         "La fiche famille a été supprimée car il s'agissait du dernier membre de la famille")
+
+                    # Supprimer la famille de l'historique des recherches
+                    if "historique_recherche" in request.session:
+                        request.session["historique_recherche"] = [
+                            dict_historique for dict_historique in request.session["historique_recherche"]
+                            if dict_historique["idfamille"] != famille.pk
+                        ]
+                        request.session.modified = True
+
             except ProtectedError as e:
                 texte_resultats = crud.Formate_liste_objets(objets=e.protected_objects)
-                messages.add_message(request, messages.ERROR, "La suppression de la famille est impossible car cette famille est rattachée aux données suivantes : %s." % texte_resultats)
+                logger.error(f"Échec de suppression de la famille {famille.pk} : {texte_resultats}")
+                messages.add_message(request, messages.ERROR,
+                                     "La suppression de la famille est impossible car cette famille est rattachée aux données suivantes : %s." % texte_resultats)
                 return HttpResponseRedirect(self.get_success_url(), status=303)
-
-            # Confirmation de la suppression
-            messages.add_message(self.request, messages.SUCCESS, "La fiche famille a été supprimée car il s'agissait du dernier membre de la famille")
-
-            # On supprime la famille de l'historique des recherches
-            if "historique_recherche" in request.session:
-                for index, dict_historique in enumerate(request.session["historique_recherche"]):
-                    if dict_historique["idfamille"] == famille.pk:
-                        request.session["historique_recherche"].pop(index)
-                        request.session.modified = True
 
         return None
 
+    def verifier_liens_famille(self, idfamille):
+        """ Vérifie s'il reste des liens bloquant la suppression de la famille """
+        from django.db import connection
+
+        tables = ["rattachements", "familles_individus_masques", "factures", "paiements", "quotients", "consentements", "contacts_urgence", "inscriptions"
+                  , "devis", "portail_messages", "sondages_repondants", "liens", "pieces", "notes", "cotisations", "rappels", "assurances", "reglements", "destinataires"
+                  , "lectures", "historique", "deductions", "pes_pieces", "destinataires_sms", "portail_renseignements", "prestations", "mandats", "prelevements"
+                  , "payeurs", "ventilation", "attestations_fiscales", "attestations", "locations"]
+        liens_bloquants = []
+
+        for table in tables:
+            with connection.cursor() as cursor:
+                cursor.execute(f"SELECT COUNT(*) FROM {table} WHERE famille_id = %s", [idfamille])
+                count = cursor.fetchone()[0]
+                if count > 0:
+                    liens_bloquants.append(f"{table} ({count} enregistrements)")
+
+        return ", ".join(liens_bloquants) if liens_bloquants else None
     def get_object(self):
         if not hasattr(self, "objet"):
             self.objet = Individu.objects.get(pk=self.kwargs['idindividu'])
