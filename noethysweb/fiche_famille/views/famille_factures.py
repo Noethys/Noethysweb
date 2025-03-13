@@ -156,7 +156,7 @@ class Annuler(Page, crud.Supprimer):
         form.is_valid()
 
         # Annulation de la facture
-        facture = Facture.objects.get(pk=kwargs["pk"])
+        facture = Facture.objects.get(pk=self.kwargs["pk"])
         if form.cleaned_data.get("observations", None):
             facture.observations = form.cleaned_data["observations"]
         facture.etat = "annulation"
@@ -165,7 +165,7 @@ class Annuler(Page, crud.Supprimer):
 
         # Confirmation de la suppression
         messages.add_message(self.request, messages.SUCCESS, "La facture a été annulée avec succès")
-        return HttpResponseRedirect(reverse_lazy(self.url_liste, kwargs={"idfamille": kwargs["idfamille"]}))
+        return HttpResponseRedirect(reverse_lazy(self.url_liste, kwargs={"idfamille": self.kwargs["idfamille"]}))
 
 
 class Annuler_plusieurs(Page, crud.Supprimer_plusieurs):
