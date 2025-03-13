@@ -9,8 +9,8 @@ from django.utils.translation import gettext as _
 
 
 def GetMenuPrincipal(parametres_portail=None, user=None):
-    menu = Menu(titre=_("Menu principal"), user=user)
 
+    menu = Menu(titre=_("Menu principal"), user=user)
     menu.Add(code="portail_accueil", titre=_("Accueil"), icone="home", toujours_afficher=True)
     menu.Add(code="portail_renseignements", titre=_("Renseignements"), icone="folder-open-o", toujours_afficher=parametres_portail.get("renseignements_afficher_page", False))
     menu.Add(code="portail_cotisations", titre=_("Adhésions"), icone="folder-o", toujours_afficher=parametres_portail.get("cotisations_afficher_page", False))
@@ -47,9 +47,18 @@ class Menu():
         return self.parent
 
     def Add(self, code="", titre="", icone="", url=None, toujours_afficher=False, compatible_demo=True, args=None):
-        menu = Menu(self, code=code, titre=titre, icone=icone, url=url, args=args, user=self.user, compatible_demo=compatible_demo, toujours_afficher=toujours_afficher)
-        if not code or not self.user or toujours_afficher or code.endswith("_toc") or self.user.has_perm("core.%s" % code):
+        menu = Menu(self, code=code, titre=titre, icone=icone, url=url, args=args, user=self.user,
+                    compatible_demo=compatible_demo, toujours_afficher=toujours_afficher)
+
+        # Determine if the menu should be added
+        if toujours_afficher or (code and self.user and self.user.has_perm(f"core.{code}")):
             self.children.append(menu)
+        else:
+            # If the parent is not set to always display, log and skip adding
+            if self.parent and not self.parent.toujours_afficher:
+                print(f"Skipping menu {code}: parent 'toujours_afficher'={self.parent.toujours_afficher}")
+            return None
+
         return menu
 
     def GetUrl(self):
