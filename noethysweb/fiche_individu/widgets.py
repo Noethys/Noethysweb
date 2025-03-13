@@ -2,7 +2,7 @@
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
-
+import datetime
 from django.forms.widgets import Widget
 from django.template import loader
 from django.utils.safestring import mark_safe
@@ -122,6 +122,46 @@ class SelectionContactsAutresFiches(Widget):
     def value_from_datadict(self, data, files, name):
         selections = data.getlist(name, [])
         return ";".join(selections)
+
+class Internet_identifiant(Widget):
+    template_name = 'fiche_individu/widgets/internet_identifiant.html'
+
+    class Media:
+        js = ("lib/bootbox/bootbox.min.js",)
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        context['name'] = name
+        if value is not None:
+            context['value'] = value
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
+
+
+class Internet_mdp(Widget):
+    template_name = 'fiche_individu/widgets/internet_mdp.html'
+
+    class Media:
+        js = ("lib/bootbox/bootbox.min.js",)
+
+    def get_context(self, name, value, attrs=None):
+        context = dict(self.attrs.items())
+        if attrs is not None:
+            context.update(attrs)
+        context['name'] = name
+        context['maintenant'] = datetime.datetime.now()
+        if value is not None:
+            context['value'] = value
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(loader.render_to_string(self.template_name, context))
 
 
 class SelectionAssurancesAutresFiches(Widget):

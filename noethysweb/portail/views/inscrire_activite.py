@@ -4,6 +4,11 @@
 #  Distribué sous licence GNU GPL.
 
 import logging, json, datetime
+
+from core.models import Rattachement
+
+from core.models import Individu
+
 logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
@@ -98,11 +103,26 @@ def Valid_form(request):
             PortailRenseignement.objects.create(famille=request.user.famille, individu=individu, categorie="famille_pieces", code="Nouvelle pièce", validation_auto=True,
                                                 nouvelle_valeur=json.dumps(piece.Get_nom(), cls=DjangoJSONEncoder), idobjet=piece.pk)
 
+        # Enregistre les détails de l'action lorsque la demande d'inscription est effectuée
+    logger.info(
+        f"Utilisateur {request.user.username} a demandé une inscription pour "
+        f"l'activité {activite.nom} pour l'individu {individu.nom} {individu.prenom} dans la famille {famille.nom}"
+    )
+
     # Message de confirmation
     messages.add_message(request, messages.SUCCESS, "Votre demande d'inscription a été transmise")
-
-    # Retour de la réponse
     return JsonResponse({"succes": True, "url": reverse_lazy("portail_activites")})
+
+
+def Get_individus(request):
+    """ Returns a list of individuals for the selected family """
+    famille_id = request.POST.get('famille')
+    individus = Individu.objects.filter(rattachement__famille_id=famille_id)
+
+    individu_options = [
+        '<option value="{}">{}</option>'.format(individu.pk, individu.Get_nom()) for individu in individus
+    ]
+    return JsonResponse(''.join(individu_options), safe=False)
 
 
 class Page(CustomView):
@@ -118,7 +138,6 @@ class Page(CustomView):
 
     def get_success_url(self):
         return reverse_lazy("portail_activites")
-
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
