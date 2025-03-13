@@ -110,6 +110,7 @@ urlpatterns = [
     # Documents
     path('documents', documents.View.as_view(), name='portail_documents'),
     path('documents/transmettre', transmettre_piece.Ajouter.as_view(), name='portail_transmettre_piece'),
+    path('documents/transmettre/get-individus', secure_ajax_portail(transmettre_piece.Get_individus), name='portail_ajax_inscrire_get_individus_by_famille'),
 
     # Activités
     path('activites', activites.View.as_view(), name='portail_activites'),
