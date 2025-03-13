@@ -11,9 +11,9 @@ from django.core.cache import cache
 from django.templatetags.static import static
 from django.contrib.auth.models import update_last_login
 from noethysweb.version import GetVersion
-from portail.forms.login import FormLoginFamille
 from core.models import Organisateur, ImageFond
 from core.utils import utils_portail, utils_historique
+from portail.forms.login import FormLogin
 
 
 class ClassCommuneLogin:
@@ -21,7 +21,8 @@ class ClassCommuneLogin:
     def get_context_data(self, **kwargs):
         context = super(ClassCommuneLogin, self).get_context_data(**kwargs)
         # Type de public
-        context['public'] = "famille"
+        context['public'] = ["famille", "individu"]
+
 
         # Version application
         context['version_application'] = cache.get_or_set('version_application', GetVersion())
@@ -49,20 +50,39 @@ class ClassCommuneLogin:
 
         return context
 
-
-class LoginViewFamille(ClassCommuneLogin, LoginView):
-    form_class = FormLoginFamille
-    template_name = 'portail/login.html'
-    redirect_field_name = 'portail_accueil'
+class LoginViewGeneric(ClassCommuneLogin, LoginView):
+    form_class = FormLogin
+    template_name = 'portail/login.html'  # Vous pouvez utiliser le même template si c'est approprié
+    redirect_field_name = 'portail_accueil'  # Redirigez vers l'accueil de l'utilisateur individuel
 
     def form_valid(self, form):
         # Enregistre la date de la dernière connexion
         update_last_login(None, form.get_user())
         # Enregistre la connexion dans le log
-        logger.debug("Connexion portail de la famille %s" % form.get_user())
-        # Enregistre la connexion dans l'historique
-        utils_historique.Ajouter(titre="Connexion au portail", utilisateur=form.get_user(), famille=form.get_user().famille.pk, portail=True)
-        return super(LoginViewFamille, self).form_valid(form)
+        logger.debug("Connexion portail %s" % form.get_user())
+        user=form.get_user()
+        logger.debug("User: %s" % user)
+
+        if user is not None:
+        # Déterminer s'il s'agit d'un utilisateur famille ou individu
+            if user.username.startswith("F"):  # Supposons que les utilisateurs famille ont l'attribut `famille`
+                print('FFFFF')
+
+                utils_historique.Ajouter(
+                        titre="Connexion au portail individuel",
+                        utilisateur=user,
+                        famille=user.famille.pk,
+                        portail=True
+                )
+            elif  user.username.startswith("I"):
+                utils_historique.Ajouter(
+                    titre="Connexion au portail individuel",
+                    utilisateur=user,
+                    individu=user.individu.pk,
+                    portail=True
+                )
+
+        return super(LoginViewGeneric, self).form_valid(form)
 
     def get_success_url(self):
         next = self.get_redirect_url()
