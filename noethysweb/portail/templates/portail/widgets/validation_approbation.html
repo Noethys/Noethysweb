@@ -16,7 +16,7 @@
                                 {% blocktrans %}Je certifie exact les renseignements de la fiche de{% endblocktrans %} {{ rattachement.individu.Get_nom }}.
                             {% endif %}
                             {% if famille %}
-                                {% blocktrans %}Je certifie exact les renseignements de la fiche famille.{% endblocktrans %}
+                                {% blocktrans %}Je certifie exact les renseignements de la fiche famille. {{famille}}{% endblocktrans %}
                             {% endif %}
                         </label>
                         {% if unite_consentement %}

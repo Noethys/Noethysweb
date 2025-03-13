@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 import logging
+
 logger = logging.getLogger(__name__)
 import datetime
 from core.utils import utils_infos_individus, utils_texte, utils_conversion, utils_dates, utils_questionnaires
@@ -25,7 +26,8 @@ class Inscriptions():
         logger.debug("Recherche des données d'impression...")
 
         # Recherche les inscriptions
-        inscriptions = Inscription.objects.select_related("famille", "individu", "groupe", "categorie_tarif", "activite").filter(pk__in=liste_inscriptions)
+        inscriptions = Inscription.objects.select_related("famille", "individu", "groupe", "categorie_tarif",
+                                                          "activite").filter(pk__in=liste_inscriptions)
 
         # Recherche les familles concernées
         liste_idfamille = [inscription.famille_id for inscription in inscriptions]
@@ -45,7 +47,7 @@ class Inscriptions():
                 "{DATE_FIN}": utils_dates.ConvertDateToFR(inscription.date_fin) or "",
 
                 "{IDINDIVIDU}": inscription.individu_id,
-                "{INDIVIDU_NOM}":  inscription.individu.nom,
+                "{INDIVIDU_NOM}": inscription.individu.nom,
                 "{INDIVIDU_PRENOM}": inscription.individu.prenom,
                 "{INDIVIDU_RUE}": inscription.individu.rue_resid,
                 "{INDIVIDU_CP}": inscription.individu.cp_resid,
@@ -70,12 +72,13 @@ class Inscriptions():
             }
 
             # Ajoute les informations de base individus et familles
-            dictDonnee.update(infosIndividus.GetDictValeurs(mode="famille", ID=inscription.famille_id, formatChamp=True))
-            
+            dictDonnee.update(
+                infosIndividus.GetDictValeurs(mode="famille", ID=inscription.famille_id, formatChamp=True))
+
             # Ajoute les réponses des questionnaires
             for dictReponse in self.questionnaires.GetDonnees(inscription.famille_id):
                 dictDonnee[dictReponse["champ"]] = dictReponse["reponse"]
-                if dictReponse["controle"] == "codebarres" :
+                if dictReponse["controle"] == "codebarres":
                     dictDonnee["{CODEBARRES_QUESTION_%d}" % dictReponse["IDquestion"]] = dictReponse["reponse"]
 
             dictDonnees[inscription.pk] = dictDonnee
@@ -88,13 +91,12 @@ class Inscriptions():
 
         return dictDonnees, dictChampsFusion
 
-
     def Impression(self, liste_inscriptions=[], dict_options=None, mode_email=False):
         """ Impression des inscriptions """
         # Récupération des données à partir des IDinscription
         logger.debug("Recherche des données d'impression...")
         resultat = self.GetDonneesImpression(liste_inscriptions)
-        if resultat == False :
+        if resultat == False:
             return False
         dict_inscriptions, dictChampsFusion = resultat
 
@@ -102,16 +104,44 @@ class Inscriptions():
         noms_fichiers = {}
         if mode_email:
             logger.debug("Création des PDF des inscriptions à l'unité...")
-            impression = utils_impression_inscription.Impression(dict_options=dict_options, IDmodele=dict_options["modele"].pk, generation_auto=False)
+            if dict_options and "modele" in dict_options and dict_options["modele"]:
+                IDmodele = dict_options["modele"].pk
+
+            else:
+                from core.models import ModeleDocument  # Importer si nécessaire
+                modele_defaut = ModeleDocument.objects.filter(categorie="inscription", defaut=True).first()
+                IDmodele = modele_defaut.pk if modele_defaut else None
+                # Si aucun modèle n'existe, on en crée un et on l'affecte
+                if IDmodele is None:
+                    logger.warning(
+                        "Aucun modèle de document par défaut pour 'inscription' trouvé. Création en cours...")
+
+                    modele_defaut = ModeleDocument.objects.create(
+                        categorie="inscription",
+                        defaut=True,
+                        nom="Modèle Inscriptions",
+                        largeur="210",
+                        hauteur="290",
+                        objets=[]
+                    )
+
+                    IDmodele = modele_defaut.pk
+
+            impression = utils_impression_inscription.Impression(dict_options=dict_options, IDmodele=IDmodele,
+                                                                 generation_auto=False)
             for IDinscription, dictInscription in dict_inscriptions.items():
                 logger.debug("Création du PDF de l'inscription ID%d..." % IDinscription)
                 impression.Generation_document(dict_donnees={IDinscription: dictInscription})
-                noms_fichiers[IDinscription] = {"nom_fichier": impression.Get_nom_fichier(), "valeurs": impression.Get_champs_fusion_pour_email("inscription", IDinscription)}
+                noms_fichiers[IDinscription] = {"nom_fichier": impression.Get_nom_fichier(),
+                                                "valeurs": impression.Get_champs_fusion_pour_email("inscription",
+                                                                                                   IDinscription)}
 
         # Fabrication du PDF global
         nom_fichier = None
         if not mode_email:
-            impression = utils_impression_inscription.Impression(dict_donnees=dict_inscriptions, dict_options=dict_options, IDmodele=dict_options["modele"].pk)
+            impression = utils_impression_inscription.Impression(dict_donnees=dict_inscriptions,
+                                                                 dict_options=dict_options,
+                                                                 IDmodele=dict_options["modele"].pk)
             nom_fichier = impression.Get_nom_fichier()
 
         logger.debug("Création des PDF terminée.")
