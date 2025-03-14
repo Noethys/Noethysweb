@@ -577,21 +577,17 @@ class Menu():
         return self.parent
 
     def Add(self, code="", titre="", icone="", url=None, toujours_afficher=False, compatible_demo=True, args=None):
-        # Créer l'objet menu
         menu = Menu(self, code=code, titre=titre, icone=icone, url=url, args=args, user=self.user,
                     compatible_demo=compatible_demo, toujours_afficher=toujours_afficher)
-        # Déterminer si ce menu doit être affiché
         should_display = (
-                toujours_afficher or  # Toujours afficher si marqué comme tel
-                (code and self.user and self.user.has_perm(
-                    f"core.{code}")) or  # Afficher si l'utilisateur a la permission
-                self.toujours_afficher  # Si le parent est marqué comme toujours visible
+                toujours_afficher or
+                (code and self.user and self.user.has_perm(f"core.{code}")) or
+                self.toujours_afficher or
+                (self.user is None)  # Afficher par défaut s'il n'y a pas de user
         )
-        # Ajouter le menu uniquement s'il doit être affiché
         if should_display:
             self.children.append(menu)
-
-        return menu  # Retourne toujours le menu, même s'il n'est pas affiché
+        return menu
 
     def GetUrl(self):
         if self.args:
