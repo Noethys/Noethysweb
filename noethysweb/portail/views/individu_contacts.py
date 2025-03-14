@@ -112,7 +112,7 @@ class Importer(Page, TemplateView):
         context = super(Importer, self).get_context_data(**kwargs)
         context['box_titre'] = _("Importer les contacts d'une autre fiche")
         context['box_introduction'] = _("Cochez le ou les contacts à importer et cliquez sur le bouton Importer.")
-        context['form'] = Formulaire_importer(idfamille=self.request.user.famille.pk, idindividu=self.get_individu().pk, idrattachement=self.get_rattachement().pk, request=self.request)
+        context['form'] = Formulaire_importer(idfamille=self.get_famille().pk, idindividu=self.get_individu().pk, idrattachement=self.get_rattachement().pk, request=self.request)
         return context
 
     def post(self, request, **kwargs):

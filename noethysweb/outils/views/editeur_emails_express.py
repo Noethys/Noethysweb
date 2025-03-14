@@ -3,13 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import json
-from email.utils import parseaddr
 from django.http import JsonResponse
-from django.shortcuts import render
-from core.models import ModeleEmail, Mail, Destinataire, Famille, DocumentJoint
+from core.models import ModeleEmail, Mail, PieceJointe, Destinataire, Famille, Individu, Contact, AdresseMail, DocumentJoint
 from outils.utils import utils_email
 from outils.forms.editeur_emails_express import Formulaire
+from django.shortcuts import render
+import json, re
+from email.utils import parseaddr
 
 
 def Envoyer_email(request):
@@ -79,17 +79,6 @@ def Get_view_editeur_email(request):
     """ Renvoie l'éditeur d'emails dans un modal """
     # Récupère d'éventuelles données
     donnees = json.loads(request.POST.get("donnees"))
-
-    # Importation de la famille
-    if "idfamille" in donnees:
-        categorie = "famille"
-        famille = Famille.objects.get(pk=donnees["idfamille"])
-        adresse = famille.mail
-    else:
-        categorie = "saisie_libre"
-        famille = None
-        adresse = donnees.get("adresse", "")
-
     # Création du mail
     modele_email = ModeleEmail.objects.filter(categorie=donnees["categorie"], defaut=True).first()
     mail = Mail.objects.create(
@@ -102,12 +91,25 @@ def Get_view_editeur_email(request):
         utilisateur=request.user,
     )
 
-    # Création du destinataire et du document joint
-    destinataire = Destinataire.objects.create(categorie=categorie, famille=famille, adresse=adresse, valeurs=json.dumps(donnees["champs"]))
-    if "nom_fichier" in donnees:
-        document_joint = DocumentJoint.objects.create(nom=donnees["label_fichier"], fichier=donnees["nom_fichier"])
-        destinataire.documents.add(document_joint)
-    mail.destinataires.add(destinataire)
+    if 'idfamille' in donnees:
+
+        # Importation de la famille
+        famille = Famille.objects.get(pk=donnees["idfamille"])
+        # Création du destinataire et du document joint
+        destinataire = Destinataire.objects.create(categorie="famille", famille=famille, adresse=famille.mail, valeurs=json.dumps(donnees["champs"]))
+        if "nom_fichier" in donnees:
+            document_joint = DocumentJoint.objects.create(nom=donnees["label_fichier"], fichier=donnees["nom_fichier"])
+            destinataire.documents.add(document_joint)
+        mail.destinataires.add(destinataire)
+
+    else : #individu
+        # Importation de l'individu
+        individu = Individu.objects.get(pk=donnees["idindividu"])
+        destinataire = Destinataire.objects.create(categorie="individu", individu=individu, adresse=individu.mail, valeurs=json.dumps(donnees["champs"]))
+        if "nom_fichier" in donnees:
+            document_joint = DocumentJoint.objects.create(nom=donnees["label_fichier"], fichier=donnees["nom_fichier"])
+            destinataire.documents.add(document_joint)
+        mail.destinataires.add(destinataire)
 
     # Prépare le context
     context = {

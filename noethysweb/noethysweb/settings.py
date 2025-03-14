@@ -29,7 +29,7 @@ LOGIN_REDIRECT_URL = "accueil"
 # LOGOUT_REDIRECT_URL = "connexion"
 
 # AXES
-AXES_FAILURE_LIMIT = 5
+AXES_FAILURE_LIMIT = 24
 AXES_COOLOFF_TIME = 24
 AXES_LOCKOUT_URL = '/locked'
 
@@ -52,8 +52,6 @@ AUTH_USER_MODEL = 'core.Utilisateur'
 DUREE_VALIDITE_MDP = 60*60*168
 CORRECTEUR_JOURS_RETROACTION = 30
 PURGE_HISTORIQUE_JOURS = 365
-ATTRIBUTION_TARIF_FRATERIE_AINES = True
-ATTRIBUTION_TARIF_FRATERIE_TARIF_IDENTIQUE = True
 
 # CONFIGURATION ACCUEIL
 CONFIG_ACCUEIL_DEFAUT = [
@@ -131,7 +129,8 @@ MIDDLEWARE = [
     'axes.middleware.AxesMiddleware',
     'noethysweb.middleware.CustomMiddleware',
 ]
-
+# settings.py
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 ROOT_URLCONF = 'noethysweb.urls'
 
 TEMPLATES = [
@@ -161,8 +160,12 @@ AUTHENTICATION_BACKENDS = [
 # Database
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'noethys',
+        'USER': 'noethys',
+        'PASSWORD': 'noethys',
+        'HOST': 'localhost',  # ou l'adresse IP de votre serveur MariaDB
+        'PORT': '3306',       # le port par défaut de MariaDB
     }
 }
 
@@ -194,10 +197,6 @@ LOCALE_PATHS = (
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
-# Media files
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
-
 # Stockage
 STORAGE_PROBLEME = "django.core.files.storage.FileSystemStorage"
 STORAGE_PIECE = "django.core.files.storage.FileSystemStorage"
@@ -205,6 +204,10 @@ STORAGE_QUOTIENT = "django.core.files.storage.FileSystemStorage"
 STORAGE_ASSURANCE = "django.core.files.storage.FileSystemStorage"
 STORAGE_PHOTO = "django.core.files.storage.FileSystemStorage"
 STORAGE_PIECE_COLLABORATEUR = "django.core.files.storage.FileSystemStorage"
+
+# Media files
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 # Crispy forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"

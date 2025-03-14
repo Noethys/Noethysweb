@@ -10,6 +10,15 @@
     #div_id_html {
         margin-bottom: 0px;
     }
+    html body div.badge-container {
+            position: relative;
+            display: inline-block;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            width: 100%;
+    }
+
     </style>
 {% endblock styles %}
 
@@ -20,10 +29,10 @@
 
 
 {% block contenu_page %}
+{% load get_item %}
 
     <div class="row">
         <div class="col-md-3">
-
             <!-- Box Destinataires -->
             <div class="card card-default">
                 <div class="card-header">
@@ -32,33 +41,94 @@
                         <button type="button" class="btn btn-tool" onclick="exporter_excel(mode='destinataires')" title="Exporter la liste des destinataires sélectionnés au format Excel"><i class="fa fa-file-excel-o"></i></button>
                     </div>
                 </div>
-
                 <div class="card-footer p-0">
-                    {% if mail.verrouillage_destinataires %}
+                       {% if mail.verrouillage_destinataires %}
                         <div style="padding-left: 8px;padding-top: 2px;padding-bottom: 2px;font-size: 12px;color: #acacac;background-color: #fafafa;">Sélection verrouillée</div>
                     {% endif %}
                     <ul class="list-group list-group-flush" {% if mail.verrouillage_destinataires %}style="background-color: #fafafa;"{% endif %}>
                         {% if mail.verrouillage_destinataires %}
-                            {% if categories.individu %}<a class="list-group-item list-group-item-action"><i class="fa fa-user fa-fw margin-r-5"></i>Individus <span class="float-right badge bg-blue">{{ categories.individu }}</span></a>{% endif %}
-                            {% if categories.famille %}<a class="list-group-item list-group-item-action"><i class="fa fa-users fa-fw margin-r-5"></i>Familles <span class="float-right badge bg-blue">{{ categories.famille }}</span></a>{% endif %}
-                            {% if categories.collaborateur %}<a class="list-group-item list-group-item-action"><i class="fa fa-users fa-fw margin-r-5"></i>Collaborateurs <span class="float-right badge bg-blue">{{ categories.collaborateur }}</span></a>{% endif %}
+                            {% if parametres.emails_individus_afficher_page and categories.individu%}
+                                <a class="list-group-item list-group-item-action">
+                                    <i class="fa fa-user fa-fw margin-r-5"></i>Individus
+                                    <span class="float-right badge bg-blue">{{ categories.individu }}</span>
+                                </a>
+                            {% endif %}
+                            {% if parametres.emails_familles_afficher_page and categories.famille %}
+                                <a class="list-group-item list-group-item-action"><i class="fa fa-users fa-fw margin-r-5"></i>Familles
+                                    <span class="float-right badge bg-blue">{{ categories.famille }}</span>
+                                </a>
+                            {% endif %}
+                            {% if parametres.emails_activites_afficher_page and categories.activites %}
+                               <a class="list-group-item list-group-item-action"><i class="fa fa-theater-masks fa-fw margin-r-5"></i>Activites
+                                  <span class="float-right badge bg-blue">{{ categories.activites }}</span>
+                               </a>
+                            {% endif %}
+                            {% if parametres.emails_inscriptions_afficher_page and categories.inscription %}
+                               <a class="list-group-item list-group-item-action"><i class="fa fa-file-text-o fa-fw margin-r-5"></i>Inscriptions
+                                  <span class="float-right badge bg-blue">{{ categories.inscription }}</span>
+                               </a>
+                            {% endif %}
+
+                            {% if parametres.emails_collaborateurs_afficher_page and categories.collaborateur %}
+                              <a class="list-group-item list-group-item-action"><i class="fa fa-users fa-fw margin-r-5"></i>Collaborateurs
+                                 <span class="float-right badge bg-blue">{{ categories.collaborateur }}</span>
+                              </a>
+                            {% endif %}
                             {% if categories.contact %}<a class="list-group-item list-group-item-action"><i class="fa fa-phone-square fa-fw margin-r-5"></i>Contacts <span class="float-right badge bg-blue">{{ categories.contact }}</span></a>{% endif %}
+
                             {% if categories.liste_diffusion %}<a class="list-group-item list-group-item-action"><i class="fa fa-list-ul fa-fw margin-r-5"></i>Listes de diffusion <span class="float-right badge bg-blue">{{ categories.liste_diffusion }}</span></a>{% endif %}
-                            {% if categories.saisie_libre %}<a class="list-group-item list-group-item-action"><i class="fa fa-edit fa-fw margin-r-5"></i>Saisie libre <span class="float-right badge bg-blue">{{ categories.saisie_libre }}</span></a>{% endif %}
+
+                            {% if parametres.emails_liste_diffusion_afficher_page and categories.liste_diffusion %}
+                              <a class="list-group-item list-group-item-action"><i class="fa fa-list-ul fa-fw margin-r-5"></i>Listes de diffusion
+                                 <span class="float-right badge bg-blue">{{ categories.liste_diffusion }}</span>
+                              </a>
+                            {% endif %}
                         {% else %}
-                            <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_individus');$('#form_editeur_emails').submit();" title="Sélectionner des individus"><i class="fa fa-user fa-fw margin-r-5"></i>Individus <span class="float-right badge bg-blue">{{ categories.individu }}</span></a>
-                            <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_familles');$('#form_editeur_emails').submit();" title="Sélectionner des familles"><i class="fa fa-users fa-fw margin-r-5"></i>Familles <span class="float-right badge bg-blue">{{ categories.famille }}</span></a>
-                            <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_collaborateurs');$('#form_editeur_emails').submit();" title="Sélectionner des collaborateurs"><i class="fa fa-users fa-fw margin-r-5"></i>Collaborateurs <span class="float-right badge bg-blue">{{ categories.collaborateur }}</span></a>
+                            {% if parametres.emails_individus_afficher_page %}
+                                <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_individus');$('#form_editeur_emails').submit();" title="Sélectionner des individus">
+                                    <i class="fa fa-user fa-fw margin-r-5"></i> Individus
+                                    <span class="float-right badge bg-blue">{{ categories.individu }}</span>
+                                </a>
+                            {% endif %}
+
+                            {% if parametres.emails_familles_afficher_page %}
+                                <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_familles');$('#form_editeur_emails').submit();" title="Sélectionner des familles">
+                                    <i class="fa fa-users fa-fw margin-r-5"></i>Familles
+                                    <span class="float-right badge bg-blue">{{ categories.famille }}</span>
+                                </a>
+                            {% endif %}
+                            {% if parametres.emails_activites_afficher_page %}
+                                <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_activites');$('#form_editeur_emails').submit();" title="Sélectionner des activites">
+                                    <i class="fa fa-book fa-fw margin-r-5"></i>Inscrits aux Activites
+                                    <span class="float-right badge bg-blue">{{ categories.activites }}</span>
+                                </a>
+                            {% endif %}
+                            {% if parametres.emails_inscriptions_afficher_page %}
+                                <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_inscription');$('#form_editeur_emails').submit();" title="Sélectionner des inscriptions">
+                                    <i class="fa fa-file-text-o fa-fw margin-r-5"></i>Inscriptions
+                                    <span class="float-right badge bg-blue">{{ categories.inscription }}</span>
+                                </a>
+                            {% endif %}
+                            {% if parametres.emails_collaborateurs_afficher_page %}
+                                <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_collaborateurs');$('#form_editeur_emails').submit();" title="Sélectionner des collaborateurs">
+                                    <i class="fa fa-users fa-fw margin-r-5"></i>Collaborateurs
+                                    <span class="float-right badge bg-blue">{{ categories.collaborateur }}</span>
+                                </a>
+                            {% endif %}
                             <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_contacts');$('#form_editeur_emails').submit();" title="Sélectionner des contacts"><i class="fa fa-phone-square fa-fw margin-r-5"></i>Contacts <span class="float-right badge bg-blue">{{ categories.contact }}</span></a>
-                            <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_diffusion');$('#form_editeur_emails').submit();" title="Sélectionner des listes de diffusion"><i class="fa fa-list-ul fa-fw margin-r-5"></i>Listes de diffusion <span class="float-right badge bg-blue">{{ categories.liste_diffusion }}</span></a>
+
+                            {% if parametres.emails_liste_diffusion_afficher_page %}
+                                <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_diffusion');$('#form_editeur_emails').submit();" title="Sélectionner des listes de diffusion">
+                                    <i class="fa fa-list-ul fa-fw margin-r-5"></i>Listes de diffusion
+                                    <span class="float-right badge bg-blue">{{ categories.liste_diffusion }}</span>
+                                </a>
+                            {% endif %}
                             <a class="list-group-item list-group-item-action" href="#" onclick="$('[name=action]').val('ajouter_saisie_libre');$('#form_editeur_emails').submit();" title="Saisir des adresses mail"><i class="fa fa-edit fa-fw margin-r-5"></i>Saisie libre <span class="float-right badge bg-blue">{{ categories.saisie_libre }}</span></a>
                         {% endif %}
                     </ul>
                 </div>
 
             </div>
-
-
             <!-- Box Envois -->
             <div class="card card-default">
                 <div class="card-header">
@@ -81,14 +151,14 @@
                                             {{ destinataire.adresse }}
                                         </div>
                                         <div><span style="color: #d2d2d2;font-size: 12px;">
-                                            {% if destinataire.famille %}{{ destinataire.famille.nom }}{% endif %}
-                                            {% if destinataire.collaborateur %}{{ destinataire.collaborateur.Get_nom }}{% endif %}
-                                            {% if destinataire.individu %}{{ destinataire.individu.Get_nom }}{% endif %}
-                                            {% if destinataire.contact %}{{ destinataire.contact.Get_nom }}{% endif %}
+                                            {% if destinataire.categorie == "expediteur" %} Expéditeur en copie : {{ destinataire.adresse }}{% endif %}
+                                            {% if destinataire.famille %} Famille: {{ destinataire.famille.nom }}{% endif %}
+                                            {% if destinataire.collaborateur %} Collaborateur: {{ destinataire.collaborateur.Get_nom }}{% endif %}
+                                            {% if destinataire.individu %} Individu: {{ destinataire.individu.Get_nom }}{% endif %}
+                                            {% if destinataire.inscription %} Inscriptions: {{ destinataire.inscription.Get_activite }}{% endif %}
+                                            {% if destinataire.activites %} Activites: {{ destinataire.activites.nom }}{% endif %}
+                                            {% if destinataire.contact %} Contact: {{ destinataire.contact.Get_nom }}{% endif %}
                                         </span></div>
-                                        {% for document in destinataire.documents.all %}
-                                            <div><a href="{{ document.fichier.url }}" target="_blank" title="Visualiser le document joint"><i class="fa fa-paperclip"></i> {{ document.nom }}</a></div>
-                                        {% endfor %}
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -115,7 +185,7 @@
         </div>
 
     </div>
-    
+
     <script>
         $(document).ready(function() {
 
@@ -158,9 +228,9 @@
                     }
                 });
             });
-            
+
         });
-        
+
         // Exporter vers Excel des destinataires
         function exporter_excel(mode) {
             $.ajax({

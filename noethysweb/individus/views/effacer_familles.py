@@ -19,7 +19,15 @@ from core.utils import utils_texte
 
 def Effacer_attributs(objet=None, attributs=[]):
     for attribut in attributs:
-        setattr(objet, attribut, None)
+        try:
+            setattr(objet, attribut, None)
+        except Exception as e:
+            # Loggez l'erreur ici si nécessaire
+            print(f"Erreur lors de l'effacement de l'attribut {attribut} : {e}")
+    try:
+        objet.save()  # Assurez-vous que l'objet est sauvegardé après l'effacement
+    except Exception as e:
+        print(f"Erreur lors de l'enregistrement de l'objet {objet}: {e}")
 
 
 def Effacer(request):
@@ -30,28 +38,36 @@ def Effacer(request):
     if not coches:
         return JsonResponse({"erreur": "Veuillez cocher au moins une famille dans la liste"}, status=401)
 
-    # Vérifications
+    # Vérifications des anomalies (prestations ou factures récentes)
     liste_anomalies = []
-    for famille in Famille.objects.filter(pk__in=coches).annotate(derniere_prestation=Max("prestation__date"), derniere_facture=Max("facture__date_edition")):
-        if famille not in liste_anomalies and famille.derniere_prestation and (datetime.date.today() - famille.derniere_prestation).days < 60:
+    today = datetime.date.today()
+    for famille in Famille.objects.filter(pk__in=coches).annotate(
+            derniere_prestation=Max("prestation__date"),
+            derniere_facture=Max("facture__date_edition")
+    ):
+        if famille.derniere_prestation and (today - famille.derniere_prestation).days < 60:
             liste_anomalies.append(famille)
-        if famille not in liste_anomalies and famille.derniere_facture and (datetime.date.today() - famille.derniere_facture).days < 60:
+        if famille.derniere_facture and (today - famille.derniere_facture).days < 60:
             liste_anomalies.append(famille)
+
     if liste_anomalies:
-        return JsonResponse({"erreur": "Procédure annulée : Les familles suivantes ont une activité trop récente : %s." % ", ".join([famille.nom for famille in liste_anomalies])}, status=401)
+        familles_str = ", ".join([famille.nom for famille in liste_anomalies])
+        return JsonResponse({"erreur": f"Procédure annulée : Les familles suivantes ont une activité trop récente : {familles_str}."}, status=401)
 
     # Effacer les fiches familles
     for famille in Famille.objects.filter(pk__in=coches):
 
-        # Fiche famille
+        # Mise à jour des champs de la famille
         famille.nom = "Famille effacée"
         famille.internet_actif = False
         Effacer_attributs(famille, [
             "caisse", "num_allocataire", "allocataire", "memo", "email_factures_adresses",
             "email_recus_adresses", "email_depots_adresses", "rue_resid", "cp_resid", "ville_resid",
-            "secteur", "mail", "mobile", "code_compta"])
+            "secteur", "mail", "mobile", "code_compta"
+        ])
         famille.save()
 
+        # Suppression des objets liés
         Note.objects.filter(famille=famille).delete()
         Piece.objects.filter(famille=famille).delete()
         QuestionnaireReponse.objects.filter(famille=famille).delete()
@@ -102,7 +118,6 @@ def Effacer(request):
     # Réactualisation de la page
     messages.add_message(request, messages.SUCCESS, "%d fiches familles ont été effacées avec succès" % len(coches))
     return JsonResponse({"url": reverse_lazy("effacer_familles")})
-
 
 class Page(crud.Page):
     model = Famille

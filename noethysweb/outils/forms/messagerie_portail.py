@@ -4,6 +4,8 @@
 #  Distribué sous licence GNU GPL.
 
 import json
+from django.urls import reverse
+
 from django.urls import reverse_lazy
 from django.forms import ModelForm
 from django.contrib import messages
@@ -68,16 +70,26 @@ class Formulaire(FormulaireBase, ModelForm):
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille", None)
         idstructure = kwargs.pop("idstructure", None)
+        idindividu = kwargs.pop("idindividu", None)
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'portail_messages_form'
         self.helper.form_method = 'post'
+        # Dynamically construct the `annuler_url`
+        if idfamille and idstructure:
+            annuler_url = reverse("famille_messagerie_portail", kwargs={
+                "idfamille": idfamille,
+                "idstructure": idstructure
+            })
+        else:
+            annuler_url = "#"  # Fallback if arguments are missing
 
         # Affichage
         self.helper.layout = Layout(
             Hidden('famille', value=idfamille),
+            Hidden('individu', value=idindividu),
             Hidden('structure', value=idstructure),
             Hidden('utilisateur', value=self.request.user.pk),
             Field('texte'),
-            Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>Envoyer", annuler_url="{% url 'portail_contact' %}", ajouter=False, aide=False, css_class="pull-right"),
+            Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>Envoyer", annuler_url=annuler_url, ajouter=False, aide=False, css_class="pull-right"),
         )

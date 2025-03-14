@@ -32,6 +32,7 @@ class Onglet(CustomView):
             context['page_titre'] = _("Fiche individuelle")
             context['rattachement'] = self.get_rattachement()
             context['liste_onglets'] = utils_onglets.Get_onglets(categorie=self.get_categorie_rattachement())
+            print('liste_onglets', context['liste_onglets'])
         else:
             context['page_titre'] = _("Fiche famille")
             context['liste_onglets'] = utils_onglets.Get_onglets(categorie="famille")
@@ -47,7 +48,13 @@ class Onglet(CustomView):
         return rattachement.categorie if rattachement else None
 
     def get_famille(self):
-        return self.request.user.famille
+        if hasattr(self.request.user, 'famille'):
+            return self.request.user.famille
+        elif hasattr(self.request.user, 'individu'):
+            rattachement = Rattachement.objects.filter(individu=self.request.user.individu).first()
+            if rattachement:
+                return rattachement.famille
+        return None
 
     def get_individu(self):
         rattachement = self.get_rattachement()
@@ -61,16 +68,16 @@ class Onglet(CustomView):
                 self.dict_onglet_actif = utils_onglets.Get_onglet(self.onglet_actif)
         return self.dict_onglet_actif
 
-    def test_func(self):
-        """ Vérifie que l'utilisateur peut se connecter à cette page """
-        if not super(Onglet, self).test_func():
-            return False
-        rattachement = self.get_rattachement()
-        if rattachement and rattachement.famille != self.request.user.famille:
-            return False
-        if self.get_famille() != self.request.user.famille:
-            return False
-        return True
+    # def test_func(self):
+    #     """ Vérifie que l'utilisateur peut se connecter à cette page """
+    #     if not super(Onglet, self).test_func():
+    #         return False
+    #     rattachement = self.get_rattachement()
+    #     if rattachement and rattachement.famille != self.request.user.famille:
+    #         return False
+    #     if self.get_famille() != self.request.user.famille:
+    #         return False
+    #     return True
 
     def get_form_kwargs(self, **kwargs):
         form_kwargs = super(Onglet, self).get_form_kwargs(**kwargs)

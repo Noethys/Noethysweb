@@ -54,7 +54,7 @@
     {# Entête de l'individu #}
     <div class="card card-widget widget-user">
         <div class="widget-user-header bg-lightblue" style="height: 110px;">
-            <h3 class="widget-user-username">{{ data.individu.prenom }}</h3>
+            <h3 class="widget-user-username">{{ data.individu.nom }} {{ data.individu.prenom }}</h3>
         </div>
         <div class="widget-user-image" style="top: 60px;">
             <img class="img-circle elevation-1" src="{{ data.individu.Get_photo }}" alt="Photo">
@@ -86,31 +86,28 @@
 
     {# Grilles des réservations #}
     <div class="row">
-
-        {% if parametres_portail.reservations_afficher_facturation %}
-            <div class="col-md-9">
-        {% else %}
-            <div class="col-md-12" >
-        {% endif %}
-
+        <div class="col-md-12" >
             <div class="card">
+
                 {# Grille des consommations #}
                 <div class="card-body">
 
                     {# Texte d'introduction de la période #}
+                    {{ data.periode_reservation }}
+
                     {% if data.periode_reservation.introduction %}
                         <div class="d-print-none" style="margin-bottom: 10px;">
                             <i class="fa fa-info-circle margin-r-5"></i>{{ data.periode_reservation.introduction }}
                         </div>
                     {% endif %}
-                
+
                     {# Texte si validation manuelle des réservations #}
                     {% if data.periode_reservation.activite.validation_type == "MANUELLE" %}
                         <div class="d-print-none" style="margin-bottom: 10px;">
                             <i class="fa fa-info-circle margin-r-5"></i>Vos demandes de réservations devront être validées par l'administrateur du portail.
                         </div>
                     {% endif %}
-                
+
                     {# Tableau de la grille #}
                     {% include "consommations/grille_tableau.html" %}
 
@@ -128,23 +125,13 @@
                     </small></div>
 
                 </div>
+
             </div>
         </div>
-
-        {% if parametres_portail.reservations_afficher_facturation %}
-            <div class="col-md-3">
-                {% if parametres_portail.reservations_afficher_forfaits and data.tarifs_credits_exists %}
-                    {% include "consommations/grille_forfaits.html" %}
-                {% endif %}
-                {% include "consommations/grille_facturation.html" %}
-            </div>
-        {% endif %}
-
     </div>
 
     {% include 'consommations/grille_saisie_horaires.html' %}
     {% include 'consommations/grille_saisie_quantite.html' %}
     {% include 'consommations/grille_appliquer_semaine_type.html' %}
-    {% include 'consommations/grille_saisie_questionnaire.html' %}
 
 {% endblock contenu_page %}

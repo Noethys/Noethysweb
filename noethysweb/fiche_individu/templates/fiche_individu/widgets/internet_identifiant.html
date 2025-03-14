@@ -1,0 +1,37 @@
+{% load static %}
+
+<div class="input-group">
+    <input id="{{ id }}" name="{{ name }}" value="{{ value }}" class="form-control" readonly>
+    {% if not disabled %}
+        <div class="input-group-append">
+            <button id="{{ id }}_generer_identifiant" title="Générer un nouvel identifiant" class="btn btn-default" type="button"><i class="fa fa-refresh"></i></button>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    $(document).ready(function() {
+
+        $("#{{ id }}_generer_identifiant").on('click', function(event) {
+            bootbox.dialog({
+                title: "Confirmation",
+                message: "Souhaitez-vous vraiment générer un nouvel identifiant ?",
+                buttons: {
+                    ok: {
+                        label: "<i class='fa fa-check'></i> Valider",
+                        className: 'btn-primary',
+                        callback: function(){
+                            regenerer_identifiant();
+                        }
+                    },
+                    cancel: {
+                        label: "<i class='fa fa-ban'></i> Annuler",
+                        className: 'btn-danger',
+                    }
+                }
+            });
+        });
+
+    });
+</script>
+

@@ -16,10 +16,11 @@ from core.models import Activite, Rattachement, Groupe, PortailRenseignement
 from core.utils.utils_commandes import Commandes
 from portail.forms.fiche import FormulaireBase
 from individus.utils import utils_pieces_manquantes
-
+from core.models import Individu
 
 class Formulaire_extra(FormulaireBase, forms.Form):
-    groupe = forms.ModelChoiceField(label=_("Groupe"), queryset=Groupe.objects.all(), required=True, help_text=_("Sélectionnez le groupe correspondant à l'individu dans la liste."))
+    groupe = forms.ModelChoiceField(label=_("Groupe"), queryset=Groupe.objects.all(), required=True,
+                                    help_text=_("Sélectionnez le groupe correspondant à l'individu dans la liste."))
 
     def __init__(self, *args, **kwargs):
         activite = kwargs.pop("activite", None)
@@ -53,7 +54,9 @@ class Formulaire_extra(FormulaireBase, forms.Form):
 
         # Ajout des pièces à fournir
         if activite.portail_inscriptions_imposer_pieces:
-            pieces_necessaires = utils_pieces_manquantes.Get_liste_pieces_necessaires(activite=activite, famille=famille, individu=individu)
+            pieces_necessaires = utils_pieces_manquantes.Get_liste_pieces_necessaires(activite=activite,
+                                                                                      famille=famille,
+                                                                                      individu=individu)
             for piece_necessaire in pieces_necessaires:
                 if not piece_necessaire["valide"]:
                     nom_field = "document_%d" % piece_necessaire["type_piece"].pk
@@ -61,22 +64,46 @@ class Formulaire_extra(FormulaireBase, forms.Form):
                     if piece_necessaire["document"]:
                         url_document_a_telecharger = piece_necessaire["document"].document.url
                         help_text += """Vous pouvez télécharger le document à compléter en cliquant sur le lien suivant : <a href='%s' target="_blank" title="Télécharger le document"><i class="fa fa-download margin-r-5"></i>Télécharger le document</a>.""" % url_document_a_telecharger
-                    self.fields[nom_field] = forms.FileField(label=piece_necessaire["type_piece"].nom, help_text=help_text, required=True, validators=[FileExtensionValidator(allowed_extensions=['pdf', 'png', 'jpg'])])
+                    self.fields[nom_field] = forms.FileField(label=piece_necessaire["type_piece"].nom,
+                                                             help_text=help_text, required=True, validators=[
+                            FileExtensionValidator(allowed_extensions=['pdf', 'png', 'jpg'])])
                     self.helper.layout.append(nom_field)
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    activite = forms.ModelChoiceField(label=_("Activité"), queryset=Activite.objects.none(), required=True, help_text=_("Sélectionnez l'activité souhaitée dans la liste."))
+    activite = forms.ModelChoiceField(label=_("Activité"), queryset=Activite.objects.none(), required=True,
+                                      help_text=_("Sélectionnez l'activité souhaitée dans la liste."))
+    titre_historique = "Inscrire à une activité"
+    template_name = "portail/edit.html"
 
+    def Get_detail_historique(self, instance):
+        return "Famille=%s, Individu=%s" % (instance.famille, instance.individu)
     class Meta:
         model = PortailRenseignement
         fields = "__all__"
         labels = {
+            "famille": _("Famille"),
             "individu": _("Individu"),
         }
         help_texts = {
+            "famille": _("Sélectionnez la famille."),
             "individu": _("Sélectionnez le membre de la famille à inscrire."),
         }
+
+    def get_rattachements_for_user(self):
+        rattachements = set()  # Use a set to avoid duplicates
+        # Check if the user is part of a family or an individual
+        if hasattr(self.request.user, 'individu'):
+            # If the user is an individual, get all families they are attached to
+            rattachements_query = Rattachement.objects.filter(individu=self.request.user.individu)
+            rattachements.update(rattachements_query)
+
+        elif hasattr(self.request.user, 'famille'):
+            # If the user is part of a family, get rattachements for that family
+            rattachements_query = Rattachement.objects.filter(famille=self.request.user.famille)
+            rattachements.update(rattachements_query)
+
+        return list(rattachements)  # Convert back to a list
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -90,70 +117,115 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.use_custom_control = False
         self.helper.attrs = {'enctype': 'multipart/form-data'}
 
-        # Individu
-        rattachements = Rattachement.objects.select_related("individu").filter(famille=self.request.user.famille).exclude(individu__in=self.request.user.famille.individus_masques.all()).order_by("categorie")
-        self.fields["individu"].choices = [(rattachement.individu_id, rattachement.individu.Get_nom()) for rattachement in rattachements]
+        # Récupérer les rattachements pour l'utilisateur
+        rattachements = self.get_rattachements_for_user()
+
+        # Initialiser le champ famille avec '---------'
+        familles = {(rattachement.famille_id, rattachement.famille.Get_nom()) for rattachement in rattachements}
+        self.fields["famille"].choices = [('', '---------')] + list(familles)  # Ajouter '----' en premier choix
+
+        # Initialiser le champ individu avec '----'
+        famille_ids = {rattachement.famille_id for rattachement in rattachements}
+        individus = Individu.objects.filter(rattachement__famille_id__in=famille_ids)
+        self.fields["individu"].choices = [('', '---------')] + [
+            (individu.idindividu, individu.Get_nom()) for individu in individus
+        ]
+        self.fields["famille"].required = True
+
         self.fields["individu"].required = True
 
         # Activité
-        conditions = (Q(portail_inscriptions_affichage="TOUJOURS") | (Q(portail_inscriptions_affichage="PERIODE") & Q(portail_inscriptions_date_debut__lte=datetime.datetime.now()) & Q(portail_inscriptions_date_fin__gte=datetime.datetime.now())))
+        conditions = (
+                Q(portail_inscriptions_affichage="TOUJOURS") |
+                (
+                        Q(portail_inscriptions_affichage="PERIODE") &
+                        Q(portail_inscriptions_date_debut__lte=datetime.datetime.now()) &
+                        Q(portail_inscriptions_date_fin__gte=datetime.datetime.now())
+                )
+        )
         self.fields["activite"].queryset = Activite.objects.filter(conditions).order_by("-date_fin", "nom")
 
         # Affichage
         self.helper.layout = Layout(
-            Hidden("famille", value=self.request.user.famille.pk),
+            Hidden("famille", value=self.request.user.famille.pk if hasattr(self.request.user, 'famille') else None),
             Hidden("etat", value="ATTENTE"),
             Hidden("categorie", value="activites"),
             Hidden("code", value="inscrire_activite"),
+            Field("famille"),
             Field("individu"),
             Field("activite"),
             Div(id="form_extra"),
             HTML(EXTRA_SCRIPT),
-            Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>%s" % _("Envoyer la demande d'inscription"), annuler_url="{% url 'portail_activites' %}", ajouter=False, aide=False, css_class="pull-right"),
+            Commandes(
+                enregistrer_label="<i class='fa fa-send margin-r-5'></i>%s" % _("Envoyer la demande d'inscription"),
+                annuler_url="{% url 'portail_activites' %}",
+                ajouter=False,
+                aide=False,
+                css_class="pull-right"
+            ),
         )
-
 
 EXTRA_SCRIPT = """
 <script>
-
-// Actualise le form extra en fonction de l'activité sélectionnée
+// Fonction pour actualiser le formulaire "extra" en fonction de l'activité sélectionnée
 function On_change_activite() {
-    var idactivite = $("#id_activite").val();
+    var id_activite = $("#id_activite").val();
     $.ajax({ 
         type: "POST",
         url: "{% url 'portail_ajax_inscrire_get_form_extra' %}",
         data: $("#portail_inscrire_activite_form").serialize(),
-        success: function (data) { 
+        success: function (data) {
             $("#form_extra").html(data['form_html']);
         }
     });
 };
 $(document).ready(function() {
     $('#id_activite').change(On_change_activite);
+    On_change_activite();
     On_change_activite.call($('#id_activite').get(0));
 });
 
 $(document).ready(function() {
-    $("#portail_inscrire_activite_form").on('submit', function (event) {
+    // Soumission du formulaire d'inscription à une activité
+    $("#portail_inscrire_activite_form").on('submit', function(event) {
         event.preventDefault();
-        var formData = new FormData($("#portail_inscrire_activite_form")[0]);
+        var formData = new FormData(this);  // Utiliser `this` pour pointer directement vers le formulaire
         formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+
         $.ajax({
             type: "POST",
             url: "{% url 'portail_ajax_inscrire_valid_form' %}",
             data: formData,
             contentType: false,
             processData: false,
-            datatype: "json",
-            success: function(data){
+            dataType: "json",
+            success: function(data) {
                 window.location.href = data.url;
             },
-            error: function(data) {
-                toastr.error(data.responseJSON.erreur);
+            error: function(xhr) {
+                toastr.error(xhr.responseJSON.erreur);
             }
         });
     });
+
+    // Changement de la famille pour actualiser les individus
+    $('#id_famille').change(function() {
+        var selectedFamille = $(this).val();
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'portail_ajax_inscrire_get_individus' %}",  // Récupérer les individus dynamiquement
+            data: {
+                'famille': selectedFamille,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(data) {
+                $('#id_individu').html(data);  // Update individual choices
+            }
+        });
+    });
+
 })
-    
+
 </script>
 """

@@ -6,16 +6,19 @@
 import copy, importlib
 from django.urls import reverse_lazy
 from django.conf import settings
+from django.utils.translation import gettext as _
 
 
-def GetMenuPrincipal(organisateur=None, user=None):
-    menu = Menu(titre="Menu principal", user=user)
+def GetMenuPrincipal(parametres_generaux=None, organisateur=None, user=None):
+    parametres_generaux = parametres_generaux or {}  # Fallback to an empty dictionary
+
+    menu = Menu(titre=_("Menu principal"),  user=user)
 
     # ------------------------------------ Accueil ------------------------------------
     menu.Add(code="accueil", titre="Accueil", icone="home", toujours_afficher=True)
 
     # ------------------------------------ Paramétrage ------------------------------------
-    menu_parametrage = menu.Add(code="parametrage_toc", titre="Paramétrage", icone="gear")
+    menu_parametrage = menu.Add(code="parametrage_toc", titre="Paramétrage", icone="gear", toujours_afficher=True)
 
     menu_structure = menu_parametrage.Add(titre="Généralités")
     if organisateur:
@@ -23,6 +26,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     else:
         menu_structure.Add(code="organisateur_ajouter", titre="Organisateur", icone="file-text-o", compatible_demo=False)
     menu_structure.Add(code="structures_liste", titre="Structures", icone="file-text-o", compatible_demo=False)
+    menu_structure.Add(code="parametres_generaux", titre="Paramètres généraux ", icone="file-text-o")
 
     # Activités
     menu_activites = menu_parametrage.Add(titre="Activités")
@@ -119,6 +123,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_emails.Add(code="adresses_mail_liste", titre="Adresses d'expédition d'emails", icone="file-text-o", compatible_demo=False)
     menu_emails.Add(code="signatures_emails_liste", titre="Signatures d'emails", icone="file-text-o")
     menu_emails.Add(code="listes_diffusion_liste", titre="Listes de diffusion", icone="file-text-o")
+    menu_emails.Add(code="outils_parametres_generaux", titre="Paramètres généraux Emails", icone="file-text-o")
 
     # SMS
     menu_sms = menu_parametrage.Add(titre="SMS")
@@ -132,7 +137,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
     # Portail
     menu_portail = menu_parametrage.Add(titre="Portail")
-    menu_portail.Add(code="portail_parametres_modifier", titre="Paramètres généraux", icone="file-text-o", compatible_demo=False)
+    menu_portail.Add(code="portail_parametres_modifier", titre="Paramètres généraux Portail", icone="file-text-o", compatible_demo=False)
     menu_portail.Add(code="portail_parametres_renseignements_modifier", titre="Paramètres des renseignements", icone="file-text-o", compatible_demo=False)
     menu_portail.Add(code="categories_compte_internet_liste", titre="Catégories de compte internet", icone="file-text-o")
     menu_portail.Add(code="types_consentements_liste", titre="Types de consentements", icone="file-text-o")
@@ -164,7 +169,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
 
     # ------------------------------------ Outils ------------------------------------
-    menu_outils = menu.Add(code="outils_toc", titre="Outils", icone="wrench")
+    menu_outils = menu.Add(code="outils_toc", titre=_("Outils"), icone="wrench", toujours_afficher=parametres_generaux.get("outils_afficher_page_portailuser", False))
 
     # Statistiques
     menu_stats = menu_outils.Add(titre="Statistiques")
@@ -174,7 +179,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Emails
     menu_emails = menu_outils.Add(titre="Emails")
     menu_emails.Add(code="contacts_liste", titre="Carnets d'adresses", icone="file-text-o")
-    menu_emails.Add(code="editeur_emails", titre="Editeur d'Emails", icone="file-text-o")
+    menu_emails.Add(code="editeur_emails", titre="Envoi des emails par lot", icone="file-text-o")
     menu_emails.Add(code="emails_liste", titre="Liste des Emails", icone="file-text-o")
 
     # SMS
@@ -201,7 +206,6 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Sauvegarde
     menu_sauvegarde = menu_outils.Add(titre="Sauvegardes")
     menu_sauvegarde.Add(code="sauvegarde_creer", titre="Créer une sauvegarde", icone="file-text-o", compatible_demo=False)
-    menu_sauvegarde.Add(code="desk_creer", titre="Récupérer les données", icone="file-text-o", compatible_demo=False, superutilisateur_only=True, masquer=not settings.SECRET_EXPORT_DESK)
 
     # Restauration
     menu_restauration = menu_outils.Add(titre="Restauration")
@@ -209,7 +213,6 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
     # Portail
     menu_portail = menu_outils.Add(titre="Portail")
-    menu_portail.Add(code="messagerie_portail", titre="Messages non lus à traiter", icone="file-text-o")
     menu_portail.Add(code="messages_portail_liste", titre="Messages du portail", icone="file-text-o")
     menu_portail.Add(code="demandes_portail_liste", titre="Historique du portail", icone="file-text-o")
     menu_portail.Add(code="suivi_reservations", titre="Suivi des réservations", icone="file-text-o")
@@ -225,7 +228,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
 
     # ------------------------------------ Individus ------------------------------------
-    menu_individus = menu.Add(code="individus_toc", titre="Individus", icone="user")
+    menu_individus = menu.Add(code="individus_toc", titre="Individus", icone="user", toujours_afficher=True )
 
     # Liste des individus
     menu_gestion_individus = menu_individus.Add(titre="Gestion des individus")
@@ -310,7 +313,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
 
     # ------------------------------------ Locations ------------------------------------
-    menu_locations = menu.Add(code="locations_toc", titre="Locations", icone="shopping-cart")
+    menu_locations = menu.Add(code="locations_toc", titre="Locations", icone="shopping-cart", toujours_afficher=parametres_generaux.get("locations_afficher_page_portailuser", False))
 
     # Etat
     menu_etat_locations = menu_locations.Add(titre="Etat des locations")
@@ -328,7 +331,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
 
     # ------------------------------------ Cotisations ------------------------------------
-    menu_cotisations = menu.Add(code="cotisations_toc", titre="Adhésions", icone="folder-o")
+    menu_cotisations = menu.Add(code="cotisations_toc", titre="Adhésions", icone="folder-o", toujours_afficher=parametres_generaux.get("adhesions_afficher_page_portailuser", False))
 
     # Etat
     menu_etat_cotisations = menu_cotisations.Add(titre="Etat des adhésions")
@@ -349,7 +352,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
 
     # ------------------------------------ Consommations ------------------------------------
-    menu_consommations = menu.Add(code="consommations_toc", titre="Consommations", icone="calendar")
+    menu_consommations = menu.Add(code="consommations_toc", titre="Consommations", icone="calendar", toujours_afficher=parametres_generaux.get("consommations_afficher_page", False))
 
     # Gestion des consommations
     menu_gestion_conso = menu_consommations.Add(titre="Gestion des consommations")
@@ -379,7 +382,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
 
     # ------------------------------------ Facturation ------------------------------------
-    menu_facturation = menu.Add(code="facturation_toc", titre="Facturation", icone="euro")
+    menu_facturation = menu.Add(code="facturation_toc", titre="Facturation", icone="euro", toujours_afficher=parametres_generaux.get("factures_afficher_page_portailuser", False))
 
     # Factures
     menu_factures = menu_facturation.Add(titre="Factures")
@@ -441,14 +444,13 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
 
     # ------------------------------------ Règlements ------------------------------------
-    menu_reglements = menu.Add(code="reglements_toc", titre="Règlements", icone="money")
+    menu_reglements = menu.Add(code="reglements_toc", titre="Règlements", icone="money", toujours_afficher=parametres_generaux.get("reglements_afficher_page_portailuser", False))
 
     # Règlements
     menu_listes = menu_reglements.Add(titre="Règlements")
     menu_listes.Add(code="liste_reglements", titre="Liste des règlements", icone="file-text-o")
     menu_listes.Add(code="liste_detaillee_reglements", titre="Liste détaillée des règlements", icone="file-text-o")
     menu_listes.Add(code="detail_ventilations_reglements", titre="Détail des ventilations des règlements", icone="file-text-o")
-    menu_listes.Add(code="edition_ventilations_reglements", titre="Edition des ventilations des règlements", icone="file-text-o")
     menu_listes.Add(code="reglements_lot_factures", titre="Liste des règlements associés à un lot de factures", icone="file-text-o")
     menu_listes.Add(code="synthese_modes_reglements", titre="Synthèse des modes de règlements", icone="file-text-o")
 
@@ -470,7 +472,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
 
     # ------------------------------------ Comptabilité ------------------------------------
-    menu_comptabilite = menu.Add(code="comptabilite_toc", titre="Comptabilité", icone="line-chart")
+    menu_comptabilite = menu.Add(code="comptabilite_toc", titre="Comptabilité", icone="line-chart", toujours_afficher=parametres_generaux.get("comptabilite_afficher_page_portailuser", False))
 
     # Opérations
     menu_comptabilite_operations = menu_comptabilite.Add(titre="Opérations")
@@ -498,7 +500,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
 
     # ------------------------------------ Collaborateurs ------------------------------------
-    menu_collaborateurs = menu.Add(code="collaborateurs_toc", titre="Collaborateurs", icone="users")
+    menu_collaborateurs = menu.Add(code="collaborateurs_toc", titre="Collaborateurs", icone="users", toujours_afficher=parametres_generaux.get("collabotrateurs_afficher_page_portailuser", False))
 
     # Liste des collaborateurs
     menu_gestion_collaborateurs = menu_collaborateurs.Add(titre="Gestion des collaborateurs")
@@ -517,7 +519,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
 
     # ------------------------------------ Aide ------------------------------------
-    menu_aide = menu.Add(code="aide_toc", titre="Aide", icone="support", toujours_afficher=True)
+    menu_aide = menu.Add(code="aide_toc", titre="Aide", icone="support", toujours_afficher=parametres_generaux.get("aides_afficher_page_portailuser", False))
 
 
     # ---------------------------------- Plugins ----------------------------------
@@ -574,12 +576,16 @@ class Menu():
     def GetParent(self):
         return self.parent
 
-    def Add(self, code="", titre="", icone="", url=None, toujours_afficher=False, compatible_demo=True, args=None, superutilisateur_only=False, masquer=False):
-        menu = Menu(self, code=code, titre=titre, icone=icone, url=url, args=args, user=self.user, compatible_demo=compatible_demo, toujours_afficher=toujours_afficher, masquer=masquer)
-        afficher = not code or not self.user or toujours_afficher or code.endswith("_toc") or self.user.has_perm("core.%s" % code)
-        if masquer or (self.user and superutilisateur_only and not self.user.is_superuser):
-            afficher = False
-        if afficher:
+    def Add(self, code="", titre="", icone="", url=None, toujours_afficher=False, compatible_demo=True, args=None):
+        menu = Menu(self, code=code, titre=titre, icone=icone, url=url, args=args, user=self.user,
+                    compatible_demo=compatible_demo, toujours_afficher=toujours_afficher)
+        should_display = (
+                toujours_afficher or
+                (code and self.user and self.user.has_perm(f"core.{code}")) or
+                self.toujours_afficher or
+                (self.user is None)  # Afficher par défaut s'il n'y a pas de user
+        )
+        if should_display:
             self.children.append(menu)
         return menu
 

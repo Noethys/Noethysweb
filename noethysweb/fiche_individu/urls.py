@@ -5,7 +5,7 @@
 
 from django.urls import include, path
 from core.decorators import secure_ajax
-from fiche_individu.views import individu, individu_identite, individu_coords, individu_questionnaire, individu_scolarite, individu_inscriptions, \
+from fiche_individu.views import individu_portail, individu, individu_identite, individu_coords, individu_questionnaire, individu_scolarite, individu_inscriptions, \
                                 individu_medical, individu_notes, individu_liens, individu_appliquer_forfait_date, individu_contacts, \
                                 individu_regimes_alimentaires, individu_assurances, individu_maladies, individu_transports, \
                                 individu_appliquer_forfait_date_choix
@@ -98,5 +98,11 @@ urlpatterns = [
     path('individus/ajouter_maladie', secure_ajax(individu_maladies.Ajouter_maladie), name='ajax_ajouter_maladie'),
     path('individus/ajouter_assureur', secure_ajax(individu_assurances.Ajouter_assureur), name='ajax_ajouter_assureur'),
     path('individus/get_info_transport', secure_ajax(individu_transports.Get_info_transport), name='ajax_get_info_transport'),
+    # portail
+    path('individus/individus/portail/<int:idfamille>/<int:idindividu>', individu_portail.Consulter.as_view(), name='individu_portail'),
+    path('individus/individus/portail/modifier/<int:idfamille>/<int:idindividu>', individu_portail.Modifier.as_view(),name='individu_portail_modifier'),
+    path('individus/individu/regenerer_mdp', secure_ajax(individu_portail.Regenerer_mdp), name='ajax_regenerer_mdp'),
+    path('individus/individu/regenerer_identifiant_Individu', secure_ajax(individu_portail.Regenerer_identifiant),name='ajax_regenerer_identifiant_individu'),
+    path('individus/codes_internet_impression_Individu_pdf', secure_ajax(individu_portail.Envoyer_codes), name='ajax_codes_internet_envoyer_Individu'),
 
 ]

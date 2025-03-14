@@ -1,0 +1,58 @@
+{% load static %}
+
+<div class="input-group">
+    <input id="{{ id }}" name="{{ name }}" value="{{ value }}" class="form-control" readonly>
+    {% if date_expiration_mdp and disabled %}
+        <div class="input-group-append">
+            {% if date_expiration_mdp < maintenant %}
+                <span class="input-group-text text-danger"><i class="fa fa-warning margin-r-5"></i> Expiré depuis le {{ date_expiration_mdp|date:'d/m/Y H:i' }}</span>
+            {% else %}
+                <span class="input-group-text text-success"><i class="fa fa-check margin-r-5"></i> Valide jusqu'au {{ date_expiration_mdp|date:'d/m/Y H:i' }}</span>
+            {% endif %}
+        </div>
+    {% endif %}
+    {% if not disabled %}
+        <div class="input-group-append">
+            <button id="{{ id }}_generer_mdp" title="Générer un nouveau mot de passe" class="btn btn-default" type="button"><i class="fa fa-refresh"></i></button>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+
+    function verrouillage_ctrl() {
+        var mdp = $("#{{ id }}").val();
+        if (mdp.indexOf('custom') === 0) {
+            $("#{{ id }}").prop('type', 'password');
+            $("#{{ id }}").prop('readonly', true);
+        } else {
+            $("#{{ id }}").prop('type', 'text');
+            $("#{{ id }}").prop('readonly', false);
+        }
+    };
+
+    $(document).ready(function() {
+
+        $("#{{ id }}_generer_mdp").on('click', function(event) {
+            bootbox.dialog({
+                title: "Confirmation",
+                message: "Souhaitez-vous vraiment générer un nouveau mot de passe ?",
+                buttons: {
+                    ok: {
+                        label: "<i class='fa fa-check'></i> Valider",
+                        className: 'btn-primary',
+                        callback: function(){
+                            regenerer_mdp();
+                        }
+                    },
+                    cancel: {
+                        label: "<i class='fa fa-ban'></i> Annuler",
+                        className: 'btn-danger',
+                    }
+                }
+            });
+
+        });
+
+    });
+</script>

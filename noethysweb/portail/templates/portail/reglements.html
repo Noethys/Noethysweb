@@ -18,15 +18,22 @@
         </div>
     {% endif %}
 
-    {# Liste des factures #}
-    {% embed 'core/box.html' with box_titre=True %}
-        {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}{% blocktrans %}Liste des règlements{% endblocktrans %}{% endblock %}
-        {% block box_contenu %}
+  {% embed 'core/box.html' with box_titre=True %}
+    {% block box_theme %}card-outline card-lightblue{% endblock %}
+    {% block box_titre %}{% blocktrans %}Liste des règlements{% endblocktrans %}{% endblock %}
+    {% block box_contenu %}
 
-            {# Liste des règlements #}
-            <div style="display: block;overflow-x: auto;white-space: nowrap;">
-                {% if liste_reglements %}
+        <div style="display: block;overflow-x: auto;white-space: nowrap;">
+
+            {% if reglements_grouped %}
+                {% for famille_nom, reglements in reglements_grouped.items %}
+             <div class="card card-famille mb-4" style="background-color: #e6e6e6;border-radius: 0.5rem;">
+
+                        <div class="card-header">
+                            <h5 class="mb-0"> Famille: {{ famille_nom }}</h5> <!-- Afficher le nom de la famille -->
+                        </div>
+                    <div class="card card-individu mb-4"  style="margin-inline: 0.5rem; ">
+
                     <table class="table table-bordered">
                         <thead>
                             <tr class="text-center">
@@ -43,7 +50,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for reglement in liste_reglements %}
+                            {% for reglement in reglements %}
                                 <tr class="text-center">
                                     <td>{{ reglement.date|date:'d/m/Y' }}</td>
                                     <td>{{ reglement.mode }}</td>
@@ -67,36 +74,18 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                {% else %}
-                    <b>{% blocktrans %}Aucun règlement.{% endblocktrans %}</b>
-                {% endif %}
-            </div>
+                    </div>
+                                               </div>
 
-        {% endblock box_contenu %}
-        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
-    {% endembed %}
+                {% endfor %}
+            {% else %}
+                {% blocktrans %}Aucun règlement.{% endblocktrans %}
+            {% endif %}
 
-    <script>
-        $(document).ready(function() {
+        </div>
 
-            // Impression du PDF
-            $(".bouton_imprimer_recu").on('click', function(e) {
-                $.ajax({
-                    type: "POST",
-                    url: "{% url 'portail_ajax_imprimer_recu' %}",
-                    data: {
-                        idreglement: $(this).data("idreglement"),
-                        idmodele_impression: "{{ parametres_portail.reglements_modele_impression_recu }}",
-                        csrfmiddlewaretoken: '{{ csrf_token }}',
-                    },
-                    datatype: "json",
-                    success: function(data){
-                        window.location = "{{ MEDIA_URL }}" + data.nom_fichier;
-                    },
-                })
-            });
-
-        });
-    </script>
+    {% endblock box_contenu %}
+    {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+{% endembed %}
 
 {% endblock contenu_page %}

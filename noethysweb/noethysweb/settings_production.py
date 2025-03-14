@@ -11,13 +11,17 @@
 #########################################################################################
 
 import os
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+from noethysweb.noethysweb.settings import STATIC_ROOT
+STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
 
 #########################################################################################
 # CLE SECRETE : Saisissez une clé aléatoire complexe de votre choix (50 caract. minimum)
 #########################################################################################
 
-SECRET_KEY = 'cle_secrete_a_modifier_imperativement'
+SECRET_KEY = 'gip_recia'
 
 #########################################################################################
 # MODE DEMO : Pour désactiver des fonctionnalités
@@ -48,7 +52,7 @@ PORTAIL_ACTIF = True
 # Exemple : ALLOWED_HOSTS = ["127.0.0.1", "www.monsite.com"]
 #########################################################################################
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 #########################################################################################
 # BASE DE DONNEES : Modifier si besoin (en cas d'utilisation de MySQL par exemple)
@@ -58,11 +62,14 @@ ALLOWED_HOSTS = []
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'noethysweb',
+        'USER': 'noethysweb',
+        'PASSWORD': 'noethysweb',
+        'HOST': 'localhost',  # ou l'adresse IP de votre serveur MariaDB
+        'PORT': '3306',       # le port par défaut de MariaDB
     }
 }
-
 #########################################################################################
 # SAUVEGARDES : Permet de générer et envoyer des sauvegardes chiffrées des données
 # vers un répertoire du serveur ou vers Dropbox.
@@ -70,14 +77,14 @@ DATABASES = {
 #########################################################################################
 
 # ID de la clé GPG pour le chiffrement de la sauvegarde
-# DBBACKUP_GPG_RECIPIENT = "XXXXXXXXX"
+#DBBACKUP_GPG_RECIPIENT = "XXXXXXXXX"
 
 # Pour un stockage de la sauvegarde sur le disque dur (Renseigner ci-dessous un répertoire existant)
 # DBBACKUP_STORAGE = "django.core.files.storage.FileSystemStorage"
-# DBBACKUP_STORAGE_OPTIONS = {"location": "C:/Users/XXXXXX/Desktop/sauvegardes/"}
-# DBBACKUP_CONNECTORS = {"default": {"dump_suffix": "--hex-blob"}}
-# DBBACKUP_CLEANUP_KEEP = 10
-# DBBACKUP_CLEANUP_KEEP_MEDIA = 10
+# DBBACKUP_STORAGE_OPTIONS = {"location": ""}
+DBBACKUP_CONNECTORS = {"default": {"dump_suffix": "--hex-blob"}}
+DBBACKUP_CLEANUP_KEEP = 10
+DBBACKUP_CLEANUP_KEEP_MEDIA = 10
 
 # Pour un stockage de la sauvegarde sur Dropbox (Renseigner ci-dessous le token de Dropbox)
 # 1. Connectez-vous à Dropbox et accédez à Developper Apps : https://www.dropbox.com/developers/apps
@@ -94,12 +101,15 @@ DATABASES = {
 # Pour un stockage sur Dropbox : storages.backends.dropbox.DropBoxStorage
 #########################################################################################
 
-# STORAGE_PROBLEME = "django.core.files.storage.FileSystemStorage"
-# STORAGE_PIECE = "django.core.files.storage.FileSystemStorage"
-# STORAGE_QUOTIENT = "django.core.files.storage.FileSystemStorage"
-# STORAGE_ASSURANCE = "django.core.files.storage.FileSystemStorage"
-# STORAGE_PHOTO = "django.core.files.storage.FileSystemStorage"
-# STORAGE_PIECE_COLLABORATEUR = "django.core.files.storage.FileSystemStorage"
+STORAGE_PROBLEME = "django.core.files.storage.FileSystemStorage"
+STORAGE_PIECE = "django.core.files.storage.FileSystemStorage"
+STORAGE_QUOTIENT = "django.core.files.storage.FileSystemStorage"
+STORAGE_ASSURANCE = "django.core.files.storage.FileSystemStorage"
+STORAGE_PHOTO = "django.core.files.storage.FileSystemStorage"
+STORAGE_PIECE_COLLABORATEUR = "django.core.files.storage.FileSystemStorage"
+
+# settings.py
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 # Si l'un des champs ci-dessus utilise Dropbox, renseignez le token Dropbox ci-dessous :
 # DROPBOX_OAUTH2_TOKEN = "XXXXXXXXXXXXXXX"
@@ -113,17 +123,17 @@ DATABASES = {
 # et modifiez si besoin les horaires de déclenchement et le path python :
 #########################################################################################
 
-# CRONTAB_PYTHON_EXECUTABLE = "/usr/bin/python3.9"
-# CRONTAB_COMMAND_SUFFIX = '2>&1'
-# CRONJOBS = [
-#     ("* * * * *", "noethysweb.cron.Test_cron", ">> " + os.path.join(BASE_DIR, "debug_cron.log")) # Pour des tests
-#     ("00 23 * * *", "noethysweb.cron.Sauvegarder_db", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour sauvegarder la base de données
-#     ("25 23 * * *", "noethysweb.cron.Vider_rep_temp", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour purger le répertoire temp
-#     ("30 23 * * *", "noethysweb.cron.Sauvegarder_media", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour sauvegarde le répertoire media
-#     ("45 23 * * *", "noethysweb.cron.Traiter_attentes", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour traiter les réservations en attente
-#     ("50 23 * * *", "noethysweb.cron.Corriger_anomalies", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour corriger les anomalies
-#     ("00 03 * * *", "noethysweb.cron.Generer_taches", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour générer les tâches récurrentes
-# ]
+CRONTAB_PYTHON_EXECUTABLE = "/usr/bin/python3.9"
+CRONTAB_COMMAND_SUFFIX = '2>&1'
+CRONJOBS = [
+    ("* * * * *", "noethysweb.cron.Test_cron", ">> " + os.path.join(BASE_DIR, "debug_cron.log")) ,# Pour des tests
+    ("00 23 * * *", "noethysweb.cron.Sauvegarder_db", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour sauvegarder la base de données
+    ("25 23 * * *", "noethysweb.cron.Vider_rep_temp", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour purger le répertoire temp
+    ("30 23 * * *", "noethysweb.cron.Sauvegarder_media", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour sauvegarde le répertoire media
+    ("45 23 * * *", "noethysweb.cron.Traiter_attentes", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour traiter les réservations en attente
+    ("50 23 * * *", "noethysweb.cron.Corriger_anomalies", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour corriger les anomalies
+    ("00 03 * * *", "noethysweb.cron.Generer_taches", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour générer les tâches récurrentes
+]
 
 #########################################################################################
 # SECURITE : Les paramètres par défaut conviendront généralement.
@@ -131,13 +141,13 @@ DATABASES = {
 
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'Strict'
-SESSION_COOKIE_SECURE = True
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = False
+SECURE_BROWSER_XSS_FILTER = False
+SECURE_CONTENT_TYPE_NOSNIFF = False
+SECURE_SSL_REDIRECT = False
 X_FRAME_OPTIONS = 'DENY'
 SECURE_HSTS_SECONDS = 15768000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
 SESSION_COOKIE_AGE = 60*60*12 # 12 heures
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
