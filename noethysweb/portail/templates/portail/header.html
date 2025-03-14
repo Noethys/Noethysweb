@@ -36,14 +36,20 @@
             <li class="dropdown user user-menu">
                 <a href="#" class="nav-link" data-toggle="dropdown" title="{% trans "Paramètres du compte" %}">
                     <img src="{% static "images/user.png" %}" class="user-image" alt="User Image">
-                    <span class="d-none d-sm-inline">{{ request.user.famille }}</span>
+                    {% if request.user.famille %}
+                        <span class="d-none d-sm-inline">{{ request.user.famille }}</span>
+                    {% else %}
+                        <span class="d-none d-sm-inline">{{ request.user.individu }}</span> <!-- Par exemple, pour afficher des informations pour les individus -->
+                    {% endif %}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-right">
                     <li class="user-header">
                         <img src="{% static "images/user.png" %}" class="rounded-circle" alt="User Image">
-                        <p>
-                            {{ request.user.famille }}
-                        </p>
+                        {% if request.user.famille %}
+                             <p>{{ request.user.famille }}</p>
+                        {% else %}
+                                <p>{{ request.user.individu }}</p>
+                        {% endif %}
                     </li>
 
                     <li class="user-footer">

@@ -4,8 +4,9 @@
 #  Distribué sous licence GNU GPL.
 
 import logging, json, datetime
+from core.models import Rattachement
 logger = logging.getLogger(__name__)
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.views.generic import TemplateView
 from django.utils.translation import gettext as _
 from core.models import Reglement, ModeleImpression, Recu
@@ -49,8 +50,41 @@ class View(CustomView, TemplateView):
     menu_code = "portail_reglements"
     template_name = "portail/reglements.html"
 
+    def get_object(self):
+        """Récupérer l'objet famille ou individu selon l'utilisateur"""
+        if hasattr(self.request.user, 'famille'):
+            return self.request.user.famille
+        elif hasattr(self.request.user, 'individu'):
+            return self.request.user.individu
+        else:
+            raise Http404("Utilisateur non reconnu.")
+
+    def get_famille_object(self):
+        """Récupérer les familles de l'individu si applicable"""
+        if hasattr(self.request.user, 'famille'):
+            return [self.request.user.famille]
+        elif hasattr(self.request.user, 'individu'):
+            rattachements = Rattachement.objects.filter(individu=self.request.user.individu)
+            familles = [rattachement.famille for rattachement in rattachements if rattachement.famille and rattachement.titulaire == 1]
+            return familles if familles else None
+        return None
+
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = _("Règlements")
-        context['liste_reglements'] = Reglement.objects.select_related("mode", "depot").filter(famille=self.request.user.famille).order_by("-date")
+        familles = self.get_famille_object()
+
+        if familles:
+                # Fetch all regulations linked to these families
+                liste_reglements = Reglement.objects.select_related("mode", "depot").filter(famille__in=familles).order_by("-date")
+
+                # Grouping by family name
+                reglements_grouped = {}
+                for reglement in liste_reglements:
+                    famille_nom = reglement.famille.nom  # Adjust this based on your actual model structure
+                    if famille_nom not in reglements_grouped:
+                        reglements_grouped[famille_nom] = []
+                    reglements_grouped[famille_nom].append(reglement)
+
+                context['reglements_grouped'] = reglements_grouped
         return context
