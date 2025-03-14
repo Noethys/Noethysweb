@@ -31,10 +31,8 @@ class Page(Onglet):
         # ---- 1) Préparer liste des structures auxquelles au moins un individu de la famille est inscrit via une activité ----
         context['liste_structures'] = (
             Structure.objects
-            # 1) Filtrer sur l'accès utilisateur (si nécessaire)
+            # Filtrer sur l'accès utilisateur (si nécessaire)
             .filter(pk__in=self.request.user.structures.all())
-            # 2) Filtrer sur "structures liées à la famille via inscriptions"
-            .filter(activite__inscription__famille_id=self.Get_idfamille())
             .order_by("nom")
             .distinct()
         )

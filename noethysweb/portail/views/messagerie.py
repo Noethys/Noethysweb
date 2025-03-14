@@ -78,18 +78,24 @@ class Page(CustomView):
             context["discussion_famille"] = single_family
             context["discussion_type"] = "famille"
 
+        # Construction du filtre conditionnel selon la catégorie de l'utilisateur
+        if self.request.user.categorie == "individu" and hasattr(self.request.user, "individu"):
+            extra_filter = Q(individu=self.request.user.individu) | Q(individu__isnull=True)
+        elif self.request.user.categorie == "famille" and hasattr(self.request.user, "famille"):
+            extra_filter = Q(famille=self.request.user.famille) | Q(famille__isnull=True)
+        else:
+            extra_filter = Q()  # Ou lever une exception selon votre logique métier
         # Calculer les messages non lus pour chaque famille
         unread_messages_by_family = (
             PortailMessage.objects
-            .select_related("famille","individu", "utilisateur")  # Charge en une seule requête
+            .select_related("famille", "individu", "utilisateur")  # Charge en une seule requête
             .only("idmessage", "famille_id", "individu_id", "utilisateur_id", "texte", "date_creation",
                   "date_lecture")  # Charge seulement les colonnes nécessaires
             .filter(
                 Q(famille__in=familles),
                 Q(utilisateur__isnull=False),
                 Q(date_lecture__isnull=True),
-                # Ajouter la condition pour l'individu :
-                Q(individu=self.request.user.individu) | Q(individu__isnull=True)
+                extra_filter  # Filtre conditionnel selon la catégorie
             )
             .exclude(utilisateur=self.request.user)  # Exclure les messages envoyés par l'utilisateur connecté
             .values("famille")

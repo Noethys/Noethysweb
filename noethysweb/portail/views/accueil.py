@@ -72,15 +72,22 @@ class Accueil(CustomView, TemplateView):
                                                                                   exclure_individus=famille.individus_masques.all()))
             total_pieces_manquantes += pieces_manquantes
 
-            # Messages non lus
-            messages_non_lus = len(
-                PortailMessage.objects.filter(
-                    Q(famille__in=familles),
-                    Q(utilisateur__isnull=False),
-                    Q(date_lecture__isnull=True),
-                    Q(individu=self.request.user.individu) | Q(individu__isnull=True)
-                )
-                .exclude(utilisateur=self.request.user))
+            # On construit le filtre conditionnel selon la catégorie de l'utilisateur
+            if self.request.user.categorie == "individu" and hasattr(self.request.user, "individu"):
+                extra_filter = Q(individu=self.request.user.individu) | Q(individu__isnull=True)
+            elif self.request.user.categorie == "famille" and hasattr(self.request.user, "famille"):
+                extra_filter = Q(famille=self.request.user.famille) | Q(famille__isnull=True)
+            else:
+                # En cas d'inattendu, on peut choisir d'appliquer aucun filtre ou de lever une exception
+                extra_filter = Q()
+
+            # Application du filtre sur les messages non lus
+            messages_non_lus = PortailMessage.objects.filter(
+                Q(famille__in=familles),
+                Q(utilisateur__isnull=False),
+                Q(date_lecture__isnull=True),
+                extra_filter
+            ).exclude(utilisateur=self.request.user).count()
 
             # Approbations
             approbations_requises = utils_approbations.Get_approbations_requises(famille=famille)

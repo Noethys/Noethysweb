@@ -43,12 +43,11 @@ class View(CustomView, TemplateView):
         familles = self.get_famille_object()  # liste de familles liées à l'utilisateur
 
         if familles:
-            # 1) Structures liées par au moins une inscription d’un individu de l’une des familles
+            # 1) Structures
             liste_structures = (
                 Structure.objects
                 .filter(
                     messagerie_active=True,
-                    activite__inscription__famille__in=familles
                 )
                 .order_by("nom")
                 .distinct()
@@ -64,6 +63,15 @@ class View(CustomView, TemplateView):
                 s for s in liste_structures if s.afficher_coords
             ]
             print("utilisateur=", self.request.user)
+
+            # Construction d'un filtre supplémentaire selon la catégorie de l'utilisateur
+            if self.request.user.categorie == "individu" and hasattr(self.request.user, "individu"):
+                extra_filter = Q(individu=self.request.user.individu) | Q(individu__isnull=True)
+            elif self.request.user.categorie == "famille" and hasattr(self.request.user, "famille"):
+                extra_filter = Q(famille=self.request.user.famille) | Q(famille__isnull=True)
+            else:
+                # Par défaut, ne rien filtrer sur individu/famille si aucun attribut n'existe
+                extra_filter = Q()
             # 4) Importation du nombre de messages non lus par structure
             #    pour toutes les familles (donc un filter(famille__in=familles)).
             qs_non_lus = (
@@ -76,8 +84,7 @@ class View(CustomView, TemplateView):
                     Q(famille__in=familles),
                     Q(utilisateur__isnull=False),
                     Q(date_lecture__isnull=True),
-                    # Ajouter la condition pour l'individu : pour filtrer les messages associés à l'individu de l'utilisateur connecté et les messages où l'individu est NULL (aucun individu associé).
-                    Q(individu=self.request.user.individu) | Q(individu__isnull=True)
+                    extra_filter  # Ajoute le filtre conditionnel
                 )
                 .exclude(utilisateur=self.request.user)
                 .annotate(nbre=Count('pk'))
