@@ -77,11 +77,11 @@ DATABASES = {
 #########################################################################################
 
 # ID de la clé GPG pour le chiffrement de la sauvegarde
-DBBACKUP_GPG_RECIPIENT = "D7FC7207637A035E76C58D26C77F465B04290FAA"
+#DBBACKUP_GPG_RECIPIENT = "XXXXXXXXX"
 
 # Pour un stockage de la sauvegarde sur le disque dur (Renseigner ci-dessous un répertoire existant)
-DBBACKUP_STORAGE = "django.core.files.storage.FileSystemStorage"
-DBBACKUP_STORAGE_OPTIONS = {"location": "/home/faouzia-takaya/Documents/sauvegardes/"}
+# DBBACKUP_STORAGE = "django.core.files.storage.FileSystemStorage"
+# DBBACKUP_STORAGE_OPTIONS = {"location": ""}
 DBBACKUP_CONNECTORS = {"default": {"dump_suffix": "--hex-blob"}}
 DBBACKUP_CLEANUP_KEEP = 10
 DBBACKUP_CLEANUP_KEEP_MEDIA = 10
@@ -139,7 +139,7 @@ CRONJOBS = [
 # SECURITE : Les paramètres par défaut conviendront généralement.
 #########################################################################################
 
-CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'Strict'
 SESSION_COOKIE_SECURE = False
 SECURE_BROWSER_XSS_FILTER = False

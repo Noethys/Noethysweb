@@ -15,7 +15,7 @@ URL_PORTAIL = ""
 PORTAIL_ACTIF = True
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'gip_recia'
+SECRET_KEY = 'cle_secrete_a_modifier_imperativement'
 SECRET_EXPORT_DESK = None
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -51,12 +51,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 AUTH_USER_MODEL = 'core.Utilisateur'
 DUREE_VALIDITE_MDP = 60*60*168
 CORRECTEUR_JOURS_RETROACTION = 30
-PURGE_HISTORIQUE_JOURS = None
+PURGE_HISTORIQUE_JOURS = 365
 
 # CONFIGURATION ACCUEIL
 CONFIG_ACCUEIL_DEFAUT = [
     [[6, "citation", "anniversaires"], [6, "celebrations", "anniversaires_demain"]],
-    [[8, "notes", "taches", "suivi_consommations", "suivi_inscriptions"], [4, "graphe_individus", "messages", "astuce"]],
+    [[8, "notes", "taches", "suivi_consommations", "suivi_inscriptions", "suivi_reservations"], [4, "graphe_individus", "messages", "astuce"]],
 ]
 
 # Application definition
@@ -196,10 +196,6 @@ LOCALE_PATHS = (
 # Static files (CSS, JavaScript, Images)
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
-
-# Media files
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
 
 # Stockage
 STORAGE_PROBLEME = "django.core.files.storage.FileSystemStorage"

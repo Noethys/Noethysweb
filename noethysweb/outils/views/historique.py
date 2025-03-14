@@ -38,7 +38,7 @@ class Liste(Page, crud.Liste):
         )
         self.afficher_dernier_mois = utils_parametres.Get(nom="afficher_dernier_mois", categorie="historique", utilisateur=self.request.user, valeur=True)
         if self.afficher_dernier_mois:
-            conditions &= Q(horodatage__date__gte=datetime.date.today() - datetime.timedelta(days=14))
+            conditions &= Q(horodatage__date__gte=datetime.date.today() - datetime.timedelta(days=7))
         return Historique.objects.select_related("famille", "individu", "collaborateur", "utilisateur").filter(conditions, self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):

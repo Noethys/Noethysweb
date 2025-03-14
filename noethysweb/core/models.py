@@ -1538,7 +1538,7 @@ class ModelePrestation(models.Model):
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
     # type_quotient = models.ForeignKey(TypeQuotient, verbose_name="Type de QF", blank=True, null=True, on_delete=models.SET_NULL, help_text="Sélectionnez un type de quotient familial ou laissez le champ vide pour tenir compte de tous les types de quotients.")
     multiprestations = models.TextField(verbose_name="Multi-prestations", blank=True, null=True)
-    
+
     class Meta:
         db_table = 'modeles_prestations'
         verbose_name = "modèle de prestation"
@@ -1968,7 +1968,7 @@ class Famille(models.Model):
 
     def Get_rue_resid(self):
         return self.rue_resid.replace("\n", "<br/>") if self.rue_resid else None
-    
+
     def Get_nom(self):
         texte = self.nom
         return texte
@@ -3157,15 +3157,33 @@ class PortailPeriode(models.Model):
         """ Vérifie si la période est active ce jour """
         return self.affichage == "TOUJOURS" or (datetime.datetime.now() >= self.affichage_date_debut and datetime.datetime.now() <= self.affichage_date_fin)
 
-    def Is_famille_authorized(self, famille=None):
+    def Is_famille_authorized(self, famille=None, individu=None):
         """ Vérifie si une famille est autorisée à accéder à cette période """
         # Vérification du compte internet
-        if (self.types_categories == "AUCUNE" and famille.internet_categorie) or (self.types_categories == "SELECTION" and famille.internet_categorie not in self.categories.all()):
+        if (self.types_categories == "AUCUNE" and famille.internet_categorie) or (
+                self.types_categories == "SELECTION" and famille.internet_categorie not in self.categories.all()):
             return False
         # Vérification de la ville de résidence
         if self.types_villes != "TOUTES" and self.villes:
             liste_villes = [ville.strip().upper() for ville in self.villes.split(",")]
-            if not famille.ville_resid or (self.types_villes == "SELECTION" and famille.ville_resid.upper() not in liste_villes) or (self.types_villes == "SELECTION_INVERSE" and famille.ville_resid.upper() in liste_villes):
+            if not famille.ville_resid or (
+                    self.types_villes == "SELECTION" and famille.ville_resid.upper() not in liste_villes) or (
+                    self.types_villes == "SELECTION_INVERSE" and famille.ville_resid.upper() in liste_villes):
+                return False
+        return True
+
+    def Is_individu_authorized(self, individu=None):
+        """ Vérifie si un individu est autorisée à accéder à cette période """
+        # Vérification du compte internet
+        if (self.types_categories == "AUCUNE" and individu.internet_categorie) or (
+                self.types_categories == "SELECTION" and individu.internet_categorie not in self.categories.all()):
+            return False
+        # Vérification de la ville de résidence
+        if self.types_villes != "TOUTES" and self.villes:
+            liste_villes = [ville.strip().upper() for ville in self.villes.split(",")]
+            if not individu.ville_resid or (
+                    self.types_villes == "SELECTION" and individu.ville_resid.upper() not in liste_villes) or (
+                    self.types_villes == "SELECTION_INVERSE" and individu.ville_resid.upper() in liste_villes):
                 return False
         return True
 
@@ -3233,10 +3251,10 @@ class PortailMessage(models.Model):
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE, db_index=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE, null=True, db_index=True)
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.CASCADE, db_index=True)
-    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True,on_delete=models.PROTECT)
+    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True,on_delete=models.PROTECT, db_index=True)
     texte = models.TextField(verbose_name="Texte")
-    date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
-    date_lecture = models.DateTimeField(verbose_name="Date de lecture", max_length=200, blank=True, null=True)
+    date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True, db_index=True)
+    date_lecture = models.DateTimeField(verbose_name="Date de lecture", max_length=200, blank=True, null=True, db_index=True)
 
     class Meta:
         db_table = 'portail_messages'
@@ -3472,6 +3490,7 @@ class PesPiece(models.Model):
 class Consentement(models.Model):
     idconsentement = models.AutoField(verbose_name="ID", db_column='IDconsentement', primary_key=True)
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT, blank=True, null=True)
+    individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.PROTECT, blank=True, null=True)
     unite_consentement = models.ForeignKey(UniteConsentement, verbose_name="Unité de consentement", on_delete=models.PROTECT)
     horodatage = models.DateTimeField(verbose_name="Date", auto_now_add=True)
 
