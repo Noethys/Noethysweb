@@ -26,15 +26,19 @@ class Page(CustomView):
     menu_code = "portail_contact"
 
     def get_famille_object(self):
-        """Récupérer les familles ayant des inscriptions pour la structure sélectionnée"""
         idstructure = self.kwargs.get("idstructure", None)
         if not idstructure:
             return None
 
-        # Vérifiez si l'utilisateur est une famille
+        # Vérifier que la structure existe
+        try:
+            structure = Structure.objects.get(pk=idstructure)
+        except Structure.DoesNotExist:
+            return None
+
+        # Récupérer les familles associées à l'utilisateur
         if hasattr(self.request.user, 'famille'):
             familles = [self.request.user.famille]
-        # Sinon, si c'est un individu, récupérez les familles auxquelles il est rattaché
         elif hasattr(self.request.user, 'individu'):
             rattachements = Rattachement.objects.filter(individu=self.request.user.individu)
             familles = [
@@ -44,13 +48,8 @@ class Page(CustomView):
         else:
             familles = []
 
-        # Filtrez les familles avec des inscriptions pour la structure donnée
-        familles_inscrites = Famille.objects.filter(
-            inscription__activite__structure_id=idstructure,
-            pk__in=[fam.pk for fam in familles]  # Restreindre aux familles de l'utilisateur
-        ).distinct()
-
-        return familles_inscrites if familles_inscrites.exists() else None
+        # Retourner toutes les familles associées à l'utilisateur
+        return Famille.objects.filter(pk__in=[fam.pk for fam in familles])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

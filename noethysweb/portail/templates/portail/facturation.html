@@ -25,7 +25,7 @@
 {% block card_body_classe %}p-0{% endblock %}
  {% block box_contenu %}
     <div class="card-body" style="min-height: 0; margin-block: 5px; padding-block: 5px; margin-left: 10px; margin-right: 10px;">
- {% if user == family.contact_facturation %}
+ {% if user == family.contact_facturation or not user%}
      {# Texte d'introduction #}
         {% if parametres_portail.facturation_intro %}
             <div style="margin-bottom: 20px;color: #127d08;">
@@ -386,11 +386,13 @@
 
             {% endif %}
 {% endfor %}
-        {% else %}
+         {% else %}
+
                 <div style="margin-bottom: 20px;color: #ff0000bd;">
                 <i class="fa fa-info-circle margin-r-5"> Vous ne pouvez pas consulter ici les données de facturation comme vous n'êtes pas contact de facturation.</i>
             </div>
 {% endif %}
+
 {% endblock box_contenu %}
 {% endembed %}
     </div>
