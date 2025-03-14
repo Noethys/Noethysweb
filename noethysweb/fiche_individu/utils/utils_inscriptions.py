@@ -71,7 +71,7 @@ class Inscriptions():
 
             # Ajoute les informations de base individus et familles
             dictDonnee.update(infosIndividus.GetDictValeurs(mode="famille", ID=inscription.famille_id, formatChamp=True))
-            
+
             # Ajoute les réponses des questionnaires
             for dictReponse in self.questionnaires.GetDonnees(inscription.famille_id):
                 dictDonnee[dictReponse["champ"]] = dictReponse["reponse"]
@@ -102,7 +102,30 @@ class Inscriptions():
         noms_fichiers = {}
         if mode_email:
             logger.debug("Création des PDF des inscriptions à l'unité...")
-            impression = utils_impression_inscription.Impression(dict_options=dict_options, IDmodele=dict_options["modele"].pk, generation_auto=False)
+            if dict_options and "modele" in dict_options and dict_options["modele"]:
+                IDmodele = dict_options["modele"].pk
+
+            else:
+                from core.models import ModeleDocument  # Importer si nécessaire
+                modele_defaut = ModeleDocument.objects.filter(categorie="inscription", defaut=True).first()
+                IDmodele = modele_defaut.pk if modele_defaut else None
+                # Si aucun modèle n'existe, on en crée un et on l'affecte
+                if IDmodele is None:
+                    logger.warning(
+                        "Aucun modèle de document par défaut pour 'inscription' trouvé. Création en cours...")
+
+                    modele_defaut = ModeleDocument.objects.create(
+                        categorie="inscription",
+                        defaut=True,
+                        nom="Modèle Inscriptions",
+                        largeur="210",
+                        hauteur="290",
+                        objets=[]
+                    )
+
+                    IDmodele = modele_defaut.pk
+
+            impression = utils_impression_inscription.Impression(dict_options=dict_options, IDmodele=IDmodele, generation_auto=False)
             for IDinscription, dictInscription in dict_inscriptions.items():
                 logger.debug("Création du PDF de l'inscription ID%d..." % IDinscription)
                 impression.Generation_document(dict_donnees={IDinscription: dictInscription})

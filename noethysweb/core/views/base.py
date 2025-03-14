@@ -12,9 +12,9 @@ from django.conf import settings
 from django.core.cache import cache
 from core.views.menu import GetMenuPrincipal
 from core.models import Organisateur, Consommation, PortailMessage, PortailRenseignement
-from core.utils import utils_parametres
+from core.utils import utils_parametres , utils_parametres_generaux
 from noethysweb.version import GetVersion
-
+from django.db.models import Q
 
 def Memorise_option(request):
     """ Mémorise dans la DB et le cache une option d'interface pour l'utilisateur """
@@ -121,6 +121,13 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
             cache.set('organisateur', organisateur)
         context['organisateur'] = organisateur
 
+        # Paramètres du portail
+        parametres_generaux = cache.get('parametres_generaux')
+        if not parametres_generaux:
+            parametres_generaux = utils_parametres_generaux.Get_dict_parametres()
+            cache.set('parametres_generaux', parametres_generaux, 1)
+        context['parametres_generaux'] = parametres_generaux
+
         # Options d'interface
         key_cache = "options_interface_user%d" % self.request.user.pk
         if cache.get(key_cache, None) != None:
@@ -138,7 +145,7 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
             cache.set(key_cache, parametres)
 
         # Mémorise le menu principal
-        menu_principal = GetMenuPrincipal(organisateur=organisateur, user=self.request.user)
+        menu_principal = GetMenuPrincipal(parametres_generaux=parametres_generaux, organisateur=organisateur, user=self.request.user)
         context['menu_principal'] = menu_principal
 
         # Si la page est un crud, on récupère l'url de la liste en tant que menu_code
