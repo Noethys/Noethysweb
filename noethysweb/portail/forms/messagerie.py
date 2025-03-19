@@ -14,6 +14,8 @@ from core.utils.utils_commandes import Commandes
 from portail.forms.fiche import FormulaireBase
 from portail.utils.utils_summernote import SummernoteTextFormField
 
+from core.models import Famille
+
 
 class Formulaire(FormulaireBase, ModelForm):
     texte = SummernoteTextFormField(label=_("Poster un message"), attrs={'summernote': {'width': '100%', 'height': '200px', 'toolbar': [
@@ -22,7 +24,7 @@ class Formulaire(FormulaireBase, ModelForm):
         ['para', ['ul', 'ol', 'paragraph']],
         ['insert', ['link', 'picture']],
         ['view', ['codeview', 'help']],
-        ]}})
+    ]}})
 
     class Meta:
         model = PortailMessage
@@ -30,18 +32,30 @@ class Formulaire(FormulaireBase, ModelForm):
 
     def __init__(self, *args, **kwargs):
         idstructure = kwargs.pop("idstructure", None)
+        idindividu = kwargs.pop("idindividu", None)
+
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'portail_messages_form'
         self.helper.form_method = 'post'
 
+        # Récupération de la famille
+        utilisateur = self.request.user
+        if hasattr(utilisateur, 'famille'):
+            famille = utilisateur.famille
+        elif hasattr(utilisateur, 'individu'):
+            famille = Famille.objects.filter(nom__icontains=utilisateur.individu).first()
+        else:
+            famille = None  # Cas où l'utilisateur n'a ni famille ni individu
+
         # Affichage
         self.helper.layout = Layout(
-            Hidden('famille', value=self.request.user.famille.pk),
+            Hidden('famille', value=famille.pk if famille else None),  # Ajout d'une vérification pour éviter une erreur si famille est None
             Hidden('structure', value=idstructure),
             Field('texte'),
             Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>%s" % _("Envoyer"), annuler_url="{% url 'portail_contact' %}", ajouter=False, aide=False, css_class="pull-right"),
         )
+
 
     # def clean_texte(self):
     #     # Retrait des emojis qui causent une erreur de charset MySQL
