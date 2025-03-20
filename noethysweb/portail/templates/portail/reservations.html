@@ -17,9 +17,11 @@
         .card-individu {
             border-radius: 5px;
         }
+        .card {
+            margin-top: 2rem;
+        }
     </style>
 {% endblock %}
-
 {% block contenu_page %}
 
     {# Texte d'introduction #}
@@ -41,65 +43,94 @@
         </div>
     {% endif %}
 
-    {% if not blocage_impayes %}
-        {% for individu in liste_individus %}
-            <div class="card card-individu">
+{% for famille in familles %}
+{# Block for each family #}
+{% embed 'core/box.html' with box_titre=True %}
+{% block box_theme %}card-outline card-lightblue custom-card{% endblock %}
+{% block box_titre %}{% blocktrans %} Famille: {{ famille }} {% endblocktrans %}{% endblock %}
+{% block card_body_classe %}p-0{% endblock %}
+    {% block box_contenu %}
+    {% if famille in  reservations_par_famille%}
+        {% for famille, individus in reservations_par_famille.items %}
+            {% if not blocage_impayes %}
+            {# Parcourir les familles et leurs individus #}
 
-                <!-- Nom de l'individu -->
-                <div class="user-block card-footer m-0" style="padding: .6rem 1rem;">
-                    <img class="img-circle" src="{{ individu.Get_photo }}" alt="Individu Image">
-                    <span class="username">{{ individu.prenom }}</span>
-                    {% if individu.Get_age %}<span class="description">{{ individu.Get_age }} {% trans "ans" %}</span>{% endif %}
-                </div>
+                    {# Vérifier si la famille a des individus #}
+                    {% if individus %}
+                        {# Parcourir les individus de chaque famille #}
+                        {% for individu in individus %}
+                            <div class="card card-individu" style="margin-inline: 0.8rem; margin-block: 0.8rem;margin-bottom: 1.5rem;">
 
-                <!-- Liste des périodes -->
-                <div class="card-footer p-0">
-                    <div>
+                                <!-- Nom de l'individu -->
+                                <div class="user-block card-footer m-0" style="padding: .6rem 1rem; background-color:#d9d9d98f;">
+                                    <img class="img-circle" src="{{ individu.Get_photo }}" alt="Individu Image">
+                                    <span class="username">{{ individu.nom }} {{ individu.prenom }}</span>
+                                    {% if individu.Get_age %}<span class="description">{{ individu.Get_age }} {% trans "ans" %}</span>{% endif %}
+                                </div>
 
-                        <ul class="nav nav-tabs">
-                            {% for activite in individu.activites %}
-                                <li class="nav-item">
-                                    <a class="nav-link {% if forloop.first %}active{% endif %}" href="#tab_{{ individu.pk }}_{{ activite.pk }}" data-toggle="tab" role="tab">{{ activite.nom }}</a>
-                                </li>
-                            {% endfor %}
-                        </ul>
+                                <!-- Liste des périodes -->
+                                <div class="card-footer p-0">
+                                    <div>
 
-                        <div class="tab-content p-0">
-                            {% for activite in individu.activites %}
-                                <div class="tab-pane {% if forloop.first %}show active{% endif %}" id="tab_{{ individu.pk }}_{{ activite.pk }}">
-                                    <div class="list-group list-group-flush">
-                                        {% for periode in dict_periodes|get_item:activite %}
-                                            <a href="{% url 'portail_planning' idindividu=individu.pk idactivite=activite.pk idperiode=periode.pk %}" class="list-group-item list-group-item-action">
-                                                <i class="fa fa-calendar margin-r-5"></i>
-                                                {{ periode.nom }}
-                                                <small class="pull-right d-none d-md-block">{% trans "Du" %} {{ periode.date_debut }} {% trans "au" %} {{ periode.date_fin }}</small>
-                                            </a>
-                                        {% empty %}
-                                            <div class="bg-white" style="padding: 8px 10px";><i class="fa fa-ban text-danger margin-r-5"></i> {% blocktrans %}Aucune période disponible{% endblocktrans %}</div>
-                                        {% endfor %}
+                                        <ul class="nav nav-tabs" style="background-color:#d9d9d98f;">
+                                            {% for activite in individu.activites %}
+                                                <li class="nav-item">
+                                                    <a class="nav-link {% if forloop.first %}active{% endif %}" href="#tab_{{ individu.pk }}_{{ activite.pk }}" data-toggle="tab" role="tab">{{ activite.nom }}</a>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+
+                                        <div class="tab-content p-0">
+                                            {% for activite in individu.activites %}
+                                                <div class="tab-pane {% if forloop.first %}show active{% endif %}" id="tab_{{ individu.pk }}_{{ activite.pk }}">
+                                                    <div class="list-group list-group-flush">
+                                                        {% for periode in dict_periodes|get_item:activite %}
+                                                            <a href="{% url 'portail_planning' idindividu=individu.pk idactivite=activite.pk idperiode=periode.pk %}" class="list-group-item list-group-item-action">
+                                                                <i class="fa fa-calendar margin-r-5"></i>
+                                                                {{ periode.nom }}
+                                                                <small class="pull-right d-none d-md-block">{% trans "Du" %} {{ periode.date_debut }} {% trans "au" %} {{ periode.date_fin }}</small>
+                                                            </a>
+                                                        {% empty %}
+                                                            <div class="bg-white" style="padding: 8px 10px;"><i class="fa fa-ban text-danger margin-r-5"></i> {% blocktrans %}Aucune période disponible{% endblocktrans %}</div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+
                                     </div>
                                 </div>
-                            {% endfor %}
+
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fa fa-warning margin-r-5"></i> {% blocktrans %}Aucun individu associé à cette famille.{% endblocktrans %}
                         </div>
+                    {% endif %}
 
-                    </div>
-                </div>
 
-            </div>
-
-        {% empty %}
-
-            {% embed 'core/box.html' with box_titre=True %}
-                {% block box_theme %}card-outline card-lightblue{% endblock %}
-                {% block box_titre %}{% blocktrans %}Liste des périodes de réservations{% endblocktrans %}{% endblock %}
-                {% block box_contenu %}
-                    <div>
-                        <b>{% blocktrans %}Aucune période de réservation disponible.{% endblocktrans %}</b>
-                    </div>
-                {% endblock box_contenu %}
-            {% endembed %}
-
+            {% else %}
+                {% embed 'core/box.html' with box_titre=True %}
+                    {% block box_theme %}card-outline card-lightblue{% endblock %}
+                    {% block box_titre %}{% blocktrans %}Liste des périodes de réservations{% endblocktrans %}{% endblock %}
+                    {% block box_contenu %}
+                        <div>
+                            <b>{% blocktrans %}Aucune période de réservation disponible.{% endblocktrans %}</b>
+                        </div>
+                    {% endblock box_contenu %}
+                {% endembed %}
+            {% endif %}
         {% endfor %}
+    {% else %}
+                        <div class="card-body " style="min-height: 0">
+                            <div style="display: block;overflow-x: auto;white-space: nowrap;">
+                                {% blocktrans %}Aucune réservation.{% endblocktrans %}
+                            </div>
+                        </div>
     {% endif %}
+{% endblock box_contenu %}
+{% endembed %}
+{% endfor %}
 
 {% endblock contenu_page %}

@@ -12,9 +12,9 @@ from django.conf import settings
 from django.core.cache import cache
 from core.views.menu import GetMenuPrincipal
 from core.models import Organisateur, Consommation, PortailMessage, PortailRenseignement
-from core.utils import utils_parametres
+from core.utils import utils_parametres , utils_parametres_generaux
 from noethysweb.version import GetVersion
-
+from django.db.models import Q
 
 def Memorise_option(request):
     """ Mémorise dans la DB et le cache une option d'interface pour l'utilisateur """
@@ -121,6 +121,13 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
             cache.set('organisateur', organisateur)
         context['organisateur'] = organisateur
 
+        # Paramètres du portail
+        parametres_generaux = cache.get('parametres_generaux')
+        if not parametres_generaux:
+            parametres_generaux = utils_parametres_generaux.Get_dict_parametres()
+            cache.set('parametres_generaux', parametres_generaux, 1)
+        context['parametres_generaux'] = parametres_generaux
+
         # Options d'interface
         key_cache = "options_interface_user%d" % self.request.user.pk
         if cache.get(key_cache, None) != None:
@@ -138,7 +145,7 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
             cache.set(key_cache, parametres)
 
         # Mémorise le menu principal
-        menu_principal = GetMenuPrincipal(organisateur=organisateur, user=self.request.user)
+        menu_principal = GetMenuPrincipal(parametres_generaux=parametres_generaux, organisateur=organisateur, user=self.request.user)
         context['menu_principal'] = menu_principal
 
         # Si la page est un crud, on récupère l'url de la liste en tant que menu_code
@@ -159,9 +166,16 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
         if context['menu_actif'] != None:
             context['breadcrumb'] = context['menu_actif'].GetBreadcrumb()
 
-        # Messages du portail non lus
-        context["liste_messages_non_lus"] = PortailMessage.objects.select_related("famille", "structure").filter(structure__in=self.request.user.structures.all(), utilisateur__isnull=True, date_lecture__isnull=True).order_by("date_creation")
+        # Récupérer les messages non lus
+        messages_non_lus = (PortailMessage.objects.filter(
+            Q(date_lecture__isnull=True),
+            Q(famille_id__isnull=False) | Q(individu_id__isnull=False)
+        ).exclude( Q(utilisateur=self.request.user))
+        .order_by("date_creation"))
+        print('messages_non_lus',messages_non_lus)
 
+        # Ajouter au contexte
+        context["liste_messages_non_lus"] = messages_non_lus
         # Renseignements à traiter
         renseignements_attente = {validation_auto: nbre for validation_auto, nbre in PortailRenseignement.objects.filter(etat="ATTENTE").values_list("validation_auto").annotate(nbre=Count("pk"))}
         context["nbre_renseignements_attente_validation"] = renseignements_attente.get(False, 0)

@@ -40,7 +40,7 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin):
         #         return False
 
         # Vérifie que l'user est de type "utilisateur"
-        if self.request.user.categorie != "famille":
+        if self.request.user.categorie not in  ["famille","individu"]:
             return False
         return True
 
@@ -164,3 +164,7 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin):
         if famille:
             detail += " Famille=%s" % famille
         logger.debug("%s : %s (%s)" % (utilisateur, titre, detail))
+        if individu:
+            detail += " Individu=%s" % individu
+        logger.debug("%s : %s (%s)" % (utilisateur, titre, detail))
+
