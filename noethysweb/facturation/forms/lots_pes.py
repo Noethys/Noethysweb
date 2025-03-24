@@ -39,7 +39,11 @@ class Formulaire_creation(FormulaireBase, forms.Form):
                 import jellyfish
                 scores = []
                 for modele in PesModele.objects.all():
-                    scores.append((jellyfish.jaro_distance(modele.nom.lower(), nom_lot.lower()), modele))
+                    try:
+                        distance = jellyfish.jaro_distance(modele.nom.lower(), nom_lot.lower())
+                    except:
+                        distance = jellyfish.jaro_similarity(modele.nom.lower(), nom_lot.lower())
+                    scores.append((distance, modele))
                 if scores:
                     self.fields["modele"].initial = max(scores)[1]
 

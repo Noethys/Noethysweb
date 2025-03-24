@@ -58,11 +58,19 @@ class View(CustomView, TemplateView):
                         if jellyfish.soundex(valeur_recherche) == jellyfish.soundex(valeur_individu):
                             if valeur_recherche.startswith("H"): valeur_recherche = valeur_recherche[1:]
                             if valeur_individu.startswith("H"): valeur_individu = valeur_individu[1:]
-                            score += 1 + jellyfish.jaro_distance(valeur_recherche.lower(), valeur_individu.lower())
+                            try:
+                                distance = jellyfish.jaro_distance(valeur_recherche.lower(), valeur_individu.lower())
+                            except:
+                                distance = jellyfish.jaro_similarity(valeur_recherche.lower(), valeur_individu.lower())
+                            score += 1 + distance
 
                     # Recherche phonétique
                     if form.cleaned_data["type_recherche"] == "TEXTE":
-                        score += jellyfish.jaro_distance(valeur_recherche.lower(), valeur_individu.lower())
+                        try:
+                            distance = jellyfish.jaro_distance(valeur_recherche.lower(), valeur_individu.lower())
+                        except:
+                            distance = jellyfish.jaro_similarity(valeur_recherche.lower(), valeur_individu.lower())
+                        score += distance
 
                     if score >= 0.75:
                         resultats[rattachement] = score
