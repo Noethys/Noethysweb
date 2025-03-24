@@ -6,6 +6,7 @@
 from django import forms
 from django.forms import ModelForm
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 from crispy_forms.helper import FormHelper
 from core.models import Individu, RegimeAlimentaire
 from core.widgets import Select_many_avec_plus
@@ -35,9 +36,14 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.field_class = 'col-md-10'
         self.helper.use_custom_control = False
 
+        # Help texte du champ de saisie des régimes
+        help_text_regimes = _("Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix et cliquez sur un ou plusieurs éléments dans la liste") + ". "
+        if settings.PORTAIL_AUTORISER_AJOUT_REGIME:
+            help_text_regimes += "<a href='#' class='ajouter_element'>" + _("Cliquez ici pour ajouter un régime manquant dans la liste de choix") + ".</a>"
+
         # Help_texts pour le mode édition
         self.help_texts = {
-            "regimes_alimentaires": _("Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix et cliquez sur un ou plusieurs éléments dans la liste") + ". <a href='#' class='ajouter_element'>" + _("Cliquez ici pour ajouter un régime manquant dans la liste de choix") + ".</a>",
+            "regimes_alimentaires": help_text_regimes,
         }
 
         # Champs affichables
