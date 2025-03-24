@@ -1,3 +1,14 @@
+Version 1.2.8.8 (24/03/2025) :
+
+- Ajout de l'affichage multi rubriques dans les statistiques
+- Ajout du nombre d'activités associées dans la liste des types de pièces
+- Ajout dans les settings du blocage de l'ajout d'un régime depuis le portail
+- Amélioration de la sélection des bénéficiaires dans la saisie d'adhésion par lot
+- Amélioration de l'application du tarif au choix
+- Correction des kwargs dans l'annulation d'une facture
+- Correction du z-index de la barre d'outils de l'éditeur d'emails
+- Correction sur l'algorithme jaro avec les dernières versions de jellyfish
+
 Version 1.2.8.7 (01/03/2025) :
 
 - Ajout des alertes dans le générateur de factures
