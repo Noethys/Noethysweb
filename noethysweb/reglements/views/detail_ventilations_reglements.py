@@ -53,6 +53,9 @@ class View(CustomView, TemplateView):
         if parametres["type_selection"] == "FAMILLE":
             conditions = Q(famille=parametres["famille"])
 
+        if parametres["filtre_modes"] == "SELECTION":
+            conditions &= Q(mode__in=parametres["selection_modes"])
+
         if conditions:
             reglements = Reglement.objects.select_related("emetteur", "mode", "famille").filter(conditions).order_by("date")
 

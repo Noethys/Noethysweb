@@ -8,9 +8,10 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML
 from crispy_forms.bootstrap import Field
 from django_select2.forms import Select2Widget
-from core.widgets import DateRangePickerWidget
+from core.forms.select2 import Select2MultipleWidget
 from core.forms.base import FormulaireBase
-from core.models import Famille
+from core.widgets import DateRangePickerWidget
+from core.models import Famille, ModeReglement
 
 
 class Formulaire(FormulaireBase, forms.Form):
@@ -28,6 +29,8 @@ class Formulaire(FormulaireBase, forms.Form):
     afficher_mode = forms.BooleanField(label="Afficher le mode du règlement", initial=True, required=False)
     afficher_famille = forms.BooleanField(label="Afficher la famille du règlement", initial=True, required=False)
     afficher_montant = forms.BooleanField(label="Afficher le montant du règlement", initial=True, required=False)
+    filtre_modes = forms.TypedChoiceField(label="Filtre sur les modes", choices=[("TOUS", "Tous les modes"), ("SELECTION", "Uniquement les modes sélectionnés")], initial="TOUS", required=False)
+    selection_modes = forms.ModelMultipleChoiceField(label="Sélection de modes", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=ModeReglement.objects.all(), required=False)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -49,6 +52,10 @@ class Formulaire(FormulaireBase, forms.Form):
                 Field("afficher_mode"),
                 Field("afficher_famille"),
                 Field("afficher_montant"),
+            ),
+            Fieldset("Filtres",
+                Field("filtre_modes"),
+                Field("selection_modes"),
             ),
             HTML(EXTRA_HTML),
         )
@@ -72,5 +79,17 @@ EXTRA_HTML = """
         $('#id_type_selection').on('change', On_change_type_selection);
         On_change_type_selection.call($('#id_type_selection').get(0));
     });
+    
+    function On_change_filtre_modes() {
+        $('#div_id_selection_modes').hide();
+        if ($("#id_filtre_modes").val() == 'SELECTION') {
+            $('#div_id_selection_modes').show();
+        };
+    }
+    $(document).ready(function() {
+        $('#id_filtre_modes').on('change', On_change_filtre_modes);
+        On_change_filtre_modes.call($('#id_filtre_modes').get(0));
+    });
+
 </script>
 """
