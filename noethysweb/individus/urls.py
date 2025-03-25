@@ -14,7 +14,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
                             abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses, certifications, \
-                            certifications_individus, certifications_familles, inscriptions_saisir_lot, importer_individus
+                            certifications_individus, certifications_familles, inscriptions_saisir_lot, importer_individus, importer_quotients
 
 urlpatterns = [
 
@@ -92,6 +92,7 @@ urlpatterns = [
     path('individus/liste_anniversaires', liste_anniversaires.View.as_view(), name='liste_anniversaires'),
     path('individus/liste_regimes_caisses', liste_regimes_caisses.Liste.as_view(), name='liste_regimes_caisses'),
     path('individus/liste_quotients', liste_quotients.Liste.as_view(), name='liste_quotients'),
+    path('individus/importer_quotients', importer_quotients.View.as_view(), name='importer_quotients'),
     path('individus/liste_codes_comptables', liste_codes_comptables.Liste.as_view(), name='liste_codes_comptables'),
     path('individus/liste_titulaires_helios', liste_titulaires_helios.Liste.as_view(), name='liste_titulaires_helios'),
 
@@ -200,4 +201,6 @@ urlpatterns = [
     path('individus/inscriptions_saisir_lot', secure_ajax(inscriptions_saisir_lot.Appliquer), name='ajax_inscriptions_saisir_lot'),
     path('individus/importer_individus/importer', secure_ajax(importer_individus.Importer), name='ajax_importer_individus_importer'),
     path('individus/pieces_fournies_modifier_lot', secure_ajax(liste_pieces_fournies.Modifier_lot), name='ajax_pieces_fournies_modifier_lot'),
+    path('individus/importer_quotients_rechercher', secure_ajax(importer_quotients.Rechercher), name='ajax_importer_quotients_rechercher'),
+    path('individus/importer_quotients_enregistrer', secure_ajax(importer_quotients.Enregistrer), name='ajax_importer_quotients_enregistrer'),
 ]

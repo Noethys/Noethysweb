@@ -198,5 +198,8 @@ urlpatterns = [
     path('individus/regler_facture', secure_ajax(famille_reglements.Regler_facture), name='ajax_regler_facture'),
     path('individus/famille_releve_prestations/generer_pdf', secure_ajax(famille_releve_prestations.Generer_pdf), name='ajax_famille_releve_prestations_generer_pdf'),
     path('individus/famille_releve_prestations/get_form_periode', secure_ajax(famille_releve_prestations.Get_form_periode), name='ajax_releve_prestations_form_periode'),
-
+    path('individus/famille_quotients/appel_api_particulier', secure_ajax(famille_quotients.Appel_api_particulier), name='ajax_famille_quotients_appel_api_particulier'),
+    path('individus/famille_quotients/memoriser_mdp_api_particulier', secure_ajax(famille_quotients.Memoriser_mdp_api_particulier), name='ajax_famille_quotients_memoriser_mdp_api_particulier'),
+    path('individus/famille_quotients/check_mdp_api_particulier', secure_ajax(famille_quotients.Check_mdp_api_particulier), name='ajax_famille_quotients_check_mdp_api_particulier'),
+    path('individus/famille_quotients/enregistrer_quotient_api_particulier', secure_ajax(famille_quotients.Enregistrer_quotient_api_particulier), name='ajax_famille_quotients_enregistrer_quotient_api_particulier'),
 ]

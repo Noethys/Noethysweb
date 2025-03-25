@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, time
 logger = logging.getLogger(__name__)
 from core.models import Famille, Individu, Cotisation, Rattachement, TarifLigne, Prestation
 
@@ -15,12 +15,14 @@ def Maj_infos_toutes_familles():
         famille.Maj_infos()
     logger.debug("Fin de la MAJ des infos.")
 
+
 def Maj_infos_tous_individus():
     """ Met à jour les adresses de tous les individus """
     logger.debug("MAJ des infos de tous les individus...")
     for individu in Individu.objects.all():
         individu.Maj_infos()
     logger.debug("Fin de la MAJ des infos.")
+
 
 def Maj_cotisations_individuelles():
     """ Associe l'IDfamille à toutes cotisations individuelles sans IDfamille """
@@ -38,6 +40,7 @@ def Maj_cotisations_individuelles():
             cotisation.famille_id = idfamille
             cotisation.save()
     logger.debug("Fin de la MAJ des cotisations individuelles.")
+
 
 def Maj_lignes_tarifs_prestations():
     """ Met à jour les tarif_ligne dans chaque prestation """
@@ -65,3 +68,36 @@ def Maj_lignes_tarifs_prestations():
     logger.debug("Modification de %d prestations..." % len(liste_modifications))
     Prestation.objects.bulk_update(liste_modifications, ["tarif_ligne"], batch_size=50)
     logger.debug("Fin de la MAJ des lignes de tarifs.")
+
+
+def Maj_insee_ville_naiss_tous_individus():
+    """ Recherche et enregistre les codes INSEE pour les villes de naissance de tous les individus """
+    individus = Individu.objects.filter(cp_naiss__isnull=False, ville_naiss__isnull=False, ville_naiss_insee__isnull=True)
+    villes = []
+    for individu in individus:
+        ville = (individu.cp_naiss, individu.ville_naiss)
+        if ville not in villes:
+            villes.append(ville)
+
+    # Importation des codes INSEE
+    from core.utils.utils_adresse import Get_code_insee_ville
+    idx = 0
+    dict_codes_insee = {}
+    for cp, ville in villes:
+        dict_codes_insee[(cp, ville)] = Get_code_insee_ville(cp=cp, ville=ville)
+        # Pour éviter plafond de 50 requêtes par seconde de l'API Adresse
+        if idx > 45:
+            time.sleep(2)
+            idx = 0
+        idx += 1
+
+    # Attribution des codes à chaque individu
+    nbre_maj = 0
+    for individu in individus:
+        ville = (individu.cp_naiss, individu.ville_naiss)
+        if dict_codes_insee.get(ville, None):
+            individu.ville_naiss_insee = dict_codes_insee[ville]
+            individu.save()
+            nbre_maj += 1
+
+    return nbre_maj

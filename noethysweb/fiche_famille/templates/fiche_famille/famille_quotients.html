@@ -1,0 +1,86 @@
+{% extends "fiche_famille/famille.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block detail_famille %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}{% embed 'core/crud/liste.html' %}{% endembed %}{% endblock box_contenu %}
+            {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+        {% endembed %}
+    </div>
+
+    {# Modal API Particulier #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_api_particulier{% endblock %}
+        {% block modal_titre %}Importer depuis l'API Particulier{% endblock %}
+        {% block modal_classe %}modal-lg{% endblock %}
+        {% block modal_body %}
+            <div id="div_contenu_modal_api_particulier"></div>
+        {% endblock %}
+    {% endembed %}
+
+    <script>
+        function ouvrir_api_particulier() {
+            $.ajax({
+                url: "{% url 'ajax_famille_quotients_check_mdp_api_particulier' %}",
+                type: "POST",
+                data: {csrfmiddlewaretoken: "{{ csrf_token }}"},
+                success: function (data) {
+                    acces_api_particulier();
+                },
+                error: function(data) {
+                    $("#modal_saisir_mdp_api_particulier").modal("show");
+                }
+            });
+        }
+
+        function acces_api_particulier() {
+            $.ajax({
+                url: "{% url 'ajax_famille_quotients_appel_api_particulier' %}",
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    idfamille: {{ idfamille }}
+                },
+                success: function (data) {
+                    $("#div_contenu_modal_api_particulier").html(data["html"]);
+                    $("#modal_api_particulier").modal("show");
+                },
+            });
+        }
+        
+        function enregistrer_quotient() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_famille_quotients_enregistrer_quotient_api_particulier' %}",
+                data: {
+                    form: JSON.stringify($("#famille_quotients_saisie_api_particulier_form").serializeObject()),
+                    idfamille: {{ idfamille }},
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                datatype: "json",
+                success: function(data){
+                    toastr.success("Le nouveau quotient a bien été enregistré");
+                    location.reload();
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        }
+
+    </script>
+
+    {% include "individus/saisir_mdp_api_particulier.html" %}
+
+{% endblock %}

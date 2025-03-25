@@ -1,0 +1,223 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+
+    <style>
+        .div_table_familles {
+            display: inline-block;
+            height: 400px;
+            overflow-y: scroll;
+            width: 100%;
+            border: solid 1px #e5e5e5;
+        }
+        .table_familles th, td{
+            vertical-align: middle !important;
+            padding: 5px;
+        }
+        .table_familles th {
+            background-color: #f1f1f1;
+            font-weight: bold;
+            text-align: center;
+        }
+        .table_resultats th {
+            background-color: #f1f1f1;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+{% endblock styles %}
+
+
+{% block contenu_page %}
+    {% embed 'core/box.html' %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}{{ box_titre }}{% endblock %}
+        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+        {% block box_contenu %}
+
+            <div id="div_form">
+                {% crispy form %}
+            </div>
+
+            <div id="div_loader_recherche" style="display: none;text-align: center;margin: 50px;" class="text-primary">
+                <h4><i class='fa fa-spinner fa-spin'></i> <strong>Recherche des quotients en cours</strong></h4>
+                <p>Veuillez patienter quelques minutes...</p>
+            </div>
+
+            <div id="div_loader_enregistrer" style="display: none;text-align: center;margin: 50px;" class="text-primary">
+                <h4><i class='fa fa-spinner fa-spin margin-r-5'></i> <strong>Enregistrement des quotients en cours</strong></h4>
+                <p>Veuillez patienter quelques minutes...</p>
+            </div>
+
+            <div id="div_selection_familles" style="display: none;">
+            </div>
+
+            <div id="div_resultats" style="display: none;">
+            </div>
+
+        {% endblock %}
+
+    {% endembed %}
+
+    {% include "individus/saisir_mdp_api_particulier.html" %}
+
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+
+    <script>
+    var maj_lot_checkboxes = false;
+
+        function init_page_parametres() {
+
+            $("#form_importer_quotients").on("submit", function (event) {
+                event.preventDefault();
+                $.ajax({
+                    url: "{% url 'ajax_famille_quotients_check_mdp_api_particulier' %}",
+                    type: "POST",
+                    data: {csrfmiddlewaretoken: "{{ csrf_token }}"},
+                    success: function (data) {
+                        acces_api_particulier();
+                    },
+                    error: function (data) {
+                        $("#modal_saisir_mdp_api_particulier").modal("show");
+                    }
+                });
+            })
+
+        };
+
+        function acces_api_particulier() {
+            $("#div_form").hide();
+            $("#div_loader_recherche").show();
+            $("#box_introduction").html("")
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_importer_quotients_rechercher' %}",
+                data: $("#form_importer_quotients").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $("#div_selection_familles").html(data);
+                    $("#div_selection_familles").show();
+                    $("#div_loader_recherche").hide();
+                    maj_bouton_enregistrer(get_familles_cochees().length);
+                    $("#box_introduction").html("Sélectionnez les quotients à enregistrer et cliquez sur le bouton Enregistrer les quotients.");
+                    init_page_selection();
+                },
+                error: function(data) {
+                    $("#div_form").html(data.html);
+                    $("#div_form").show();
+                    $("#div_loader_recherche").hide();
+                    $("#box_introduction").html("<span class='text-red'>" + data.responseJSON.erreur + "</span>");
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        };
+
+        function init_page_selection() {
+            $(".check_famille").on("change", function () {
+                if (maj_lot_checkboxes == false) {
+                    maj_bouton_enregistrer(get_familles_cochees().length);
+                };
+            });
+        };
+
+        function maj_bouton_enregistrer(nbre_familles) {
+            $("#bouton_enregistrer_quotients").text("Enregistrer les " + nbre_familles + " quotients cochés")
+        };
+        function tout_cocher() {
+            maj_lot_checkboxes = true;
+            $(".check_famille").each(function (index) {
+                if ($(this).prop("disabled") === false) {
+                    $(this).prop("checked", true);
+                }
+            });
+            maj_lot_checkboxes = false;
+            maj_bouton_enregistrer(get_familles_cochees().length);
+        };
+        function tout_decocher() {
+            maj_lot_checkboxes = true;
+            $(".check_famille").each(function (index) {
+                $(this).prop("checked", false);
+            });
+            maj_lot_checkboxes = false;
+            maj_bouton_enregistrer(get_familles_cochees().length);
+        };
+        function get_familles_cochees() {
+            var liste_familles = [];
+            $(".check_famille").each(function (index) {
+                var id = parseInt($(this).val());
+                if (($(this).prop("checked")) && (!(liste_familles.includes(id)))) {
+                    liste_familles.push(id);
+                }
+            });
+            return liste_familles;
+        };
+
+        function revenir_page_parametres() {
+            $("#div_selection_familles").hide();
+            $("#div_resultats").hide();
+            $("#div_form").show();
+            $("#box_introduction").html("{{ box_introduction|safe }}");
+        };
+
+        function enregistrer_form() {
+            $("#modal_form_enregistrer").modal("show");
+        }
+
+        function enregistrer() {
+            $("#modal_form_enregistrer").modal("hide");
+            $("#div_selection_familles").hide();
+            $("#div_loader_enregistrer").show();
+            $("#box_introduction").html("")
+
+            var liste_familles = [];
+            $(".check_famille").each(function (index) {
+                if ($(this).prop("checked")) {
+                    liste_familles.push({
+                        idfamille: parseInt($(this).val()),
+                        valeur: $(this).data("valeur"),
+                        fournisseur: $(this).data("fournisseur")
+                    });
+                }
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_importer_quotients_enregistrer' %}",
+                data: {
+                    form_parametres: JSON.stringify($("#famille_quotients_enregistrer_form").serializeObject()),
+                    liste_familles: JSON.stringify(liste_familles),
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                datatype: "json",
+                success: function(data){
+                    $("#div_resultats").html(data);
+                    $("#div_resultats").show();
+                    $("#div_loader_enregistrer").hide();
+                    $("#box_introduction").html("Voici la liste des résultats.");
+                    init_page_selection();
+                },
+                error: function(data) {
+                    $("#box_introduction").html("Erreur.");
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        };
+
+        $(document).ready(function() {
+            init_page_parametres();
+        });
+
+    </script>
+
+{% endblock scripts %}

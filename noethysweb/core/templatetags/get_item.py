@@ -118,3 +118,13 @@ def get_item_defaut(dictionnaire, key, defaut=None):
 @register.filter
 def Convert_liste_to_texte_virgules(liste):
     return utils_texte.Convert_liste_to_texte_virgules(liste)
+
+@register.filter
+def nom_mois(value):
+    from core.models import LISTE_MOIS
+    dict_mois = {num: label for num, label in LISTE_MOIS}
+    return dict_mois[value]
+
+@register.filter
+def date_eng_fr(value):
+    return utils_dates.ConvertDateENGtoFR(value)

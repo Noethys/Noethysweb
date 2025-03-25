@@ -5,10 +5,9 @@
 
 from django.urls import reverse_lazy
 from core.views import crud
-from core.models import Individu, Famille
+from core.models import Individu
 from fiche_individu.forms.individu_identite import Formulaire
 from fiche_individu.views.individu import Onglet
-
 
 
 class Consulter(Onglet, crud.Modifier):
@@ -27,7 +26,6 @@ class Consulter(Onglet, crud.Modifier):
 
     def get_object(self):
         return Individu.objects.get(pk=self.kwargs['idindividu'])
-
 
 
 class Modifier(Consulter):

@@ -274,6 +274,7 @@ LOGGING = {
 CSP_DEFAULT_SRC = (
     "'self'",
     "https://api-adresse.data.gouv.fr/",
+    "https://particulier.api.gouv.fr/",
 )
 
 CSP_IMG_SRC = (
@@ -281,6 +282,7 @@ CSP_IMG_SRC = (
     "data:",
     "https://*.openstreetmap.org",
     "https://api-adresse.data.gouv.fr/",
+    "https://particulier.api.gouv.fr/",
 )
 
 CSP_FONT_SRC = (

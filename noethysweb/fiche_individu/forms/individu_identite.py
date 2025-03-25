@@ -3,29 +3,32 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import csv, os.path, operator
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
+from django.conf import settings
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
+from crispy_forms.layout import Layout, HTML, Fieldset, Hidden
+from crispy_forms.bootstrap import Field
+from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
+from core.utils import utils_images, utils_adresse
 from core.models import Individu
-from core.widgets import DatePickerWidget
-from core.widgets import Telephone, CodePostal, Ville, Selection_image, Crop_image
-from core.utils import utils_images
+from core.widgets import DatePickerWidget, CodePostal, Ville, Crop_image
 
 
 class Formulaire(FormulaireBase, ModelForm):
+    # Photo
     cropper_data = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     # Naissance
-    date_naiss = forms.DateField(label="Date", required=False, widget=DatePickerWidget())
+    date_naiss = forms.DateField(label="Date", required=False, widget=DatePickerWidget(), help_text="Saisissez la date de naissance au format JJ/MM/AAAA.")
+    pays_naiss_insee = forms.ChoiceField(label="Pays", choices=[], required=False, help_text="Sélectionnez le pays de naissance dans la liste déroulante.")
 
     class Meta:
         model = Individu
-        fields = ["civilite", "nom", "nom_jfille", "prenom", "deces", "annee_deces", "date_naiss",
-                  "cp_naiss", "ville_naiss", "type_sieste", "memo", "photo", "situation_familiale", "type_garde", "info_garde"]
+        fields = ["civilite", "nom", "nom_jfille", "prenom", "deces", "annee_deces", "date_naiss", "type_sieste", "memo", "photo",
+                  "cp_naiss", "ville_naiss", "ville_naiss_insee", "pays_naiss_insee", "situation_familiale", "type_garde", "info_garde"]
         widgets = {
             'memo': forms.Textarea(attrs={'rows': 3}),
             'info_garde': forms.Textarea(attrs={'rows': 3}),
@@ -37,11 +40,9 @@ class Formulaire(FormulaireBase, ModelForm):
             "civilite": "Sélectionnez une civilité dans la liste déroulante.",
             "nom": "Saisissez le nom de famille en majuscules.",
             "prenom": "Saisissez le prénom en minuscules avec la première lettre majuscule.",
-            "date_naiss": "Saisissez la date de naissance au format JJ/MM/AAAA.",
             "cp_naiss": "Saisissez le code postal, patientez une seconde et sélectionnez la ville dans la liste déroulante.",
-            "ville_naiss": "Saisissez le nom de la ville, patientez une seconde et sélectionnez la ville dans la liste déroulante."
+            "ville_naiss": "Saisissez le nom de la ville, patientez une seconde et sélectionnez la ville dans la liste déroulante.",
         }
-
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -54,6 +55,12 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.field_class = 'col-md-10'
         self.helper.use_custom_control = False
 
+        # Pays de naissance
+        with open(os.path.join(settings.BASE_DIR, "core/data/pays.csv"), "r") as fichier:
+            choix_pays = sorted([ligne for ligne in csv.reader(fichier, delimiter=";")], key=operator.itemgetter(1))
+        self.fields["pays_naiss_insee"].choices = choix_pays
+        self.initial["pays_naiss_insee"] = self.instance.pays_naiss_insee or "99100"
+
         # Création des boutons de commande
         if self.mode == "CONSULTATION":
             commandes = Commandes(modifier_url="individu_identite_modifier", modifier_args="idfamille=idfamille idindividu=idindividu",
@@ -65,6 +72,7 @@ class Formulaire(FormulaireBase, ModelForm):
         # Affichage
         self.helper.layout = Layout(
             commandes,
+            Hidden("ville_naiss_insee", value=self.instance.ville_naiss_insee),
             Field("cropper_data"),
             Fieldset("Etat-civil",
                 Field("civilite"),
@@ -78,6 +86,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("date_naiss"),
                 Field("cp_naiss"),
                 Field("ville_naiss"),
+                Field("pays_naiss_insee"),
             ),
             Fieldset("Situation familiale",
                 Field("situation_familiale"),
@@ -94,9 +103,12 @@ class Formulaire(FormulaireBase, ModelForm):
             HTML(EXTRA_SCRIPT),
         )
 
-
-
     def clean(self):
+        # Si modification de la ville de naissance, on recherche le code INSEE de la ville de naissance
+        if self.cleaned_data["ville_naiss_insee"] == "None":
+            self.cleaned_data["ville_naiss_insee"] = None
+        if "cp_naiss" in self.changed_data or "ville_naiss" in self.changed_data or not self.cleaned_data["ville_naiss_insee"]:
+            self.cleaned_data["ville_naiss_insee"] = utils_adresse.Get_code_insee_ville(cp=self.cleaned_data["cp_naiss"], ville=self.cleaned_data["ville_naiss"])
         return self.cleaned_data
 
     def save(self):

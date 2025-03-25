@@ -1,0 +1,63 @@
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{# Modal Saisir mdp API particulier #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_saisir_mdp_api_particulier{% endblock %}
+    {% block modal_titre %}Accès à l'API Particulier{% endblock %}
+    {% block modal_body %}
+        <p>Saisissez votre mot de passe API Particulier (5 caractères) :</p>
+        <div id="regler_facture_modal_erreurs" class="text-red"></div>
+        <form id="form_saisir_mdp_api_particulier" method="post">
+            {% csrf_token %}
+            <div>
+                <div class="controls">
+                    <input id="mdp_api_particulier" class="form-control" maxlength="5" autocomplete="off" autocapitalize="off">
+                </div>
+            </div>
+            <div class="buttonHolder">
+                <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                    <button type="submit" class="btn btn-primary" title="Valider" id="sasir_mdp_api_particulier_valider" value="Valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                </div>
+            </div>
+        </form>
+    {% endblock %}
+{% endembed %}
+
+
+<script>
+$(document).ready(function() {
+
+    // Initialisation de la modal
+    $('#modal_saisir_mdp_api_particulier').on("show.bs.modal", function (event) {
+        $("#mdp_api_particulier").val("");
+    });
+
+    $('#modal_saisir_mdp_api_particulier').on("shown.bs.modal", function (event) {
+        $("#mdp_api_particulier").focus();
+    });
+
+    $("#form_saisir_mdp_api_particulier").on("submit", function (event) {
+        event.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_famille_quotients_memoriser_mdp_api_particulier' %}",
+            data: {
+                "mdp_api_particulier": $("#mdp_api_particulier").val(),
+            },
+            datatype: "json",
+            success: function(data){
+                $("#modal_saisir_mdp_api_particulier").modal("hide");
+                acces_api_particulier();
+            },
+            error: function(data) {
+                toastr.error(data.responseJSON.erreur);
+            }
+        });
+    });
+
+});
+
+</script>

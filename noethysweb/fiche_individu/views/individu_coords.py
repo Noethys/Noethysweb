@@ -3,14 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import requests, json, urllib.parse
 from django.urls import reverse_lazy
+from django.http import JsonResponse
 from core.views import crud
 from core.models import Individu
 from fiche_individu.forms.individu_coords import Formulaire
 from fiche_individu.views.individu import Onglet
-from django.http import JsonResponse
-import requests, json
-import urllib.parse
 
 
 def Get_coords_gps(request):
@@ -26,7 +25,6 @@ def Get_coords_gps(request):
     except:
         return JsonResponse({"erreur": "Localisation introuvable"}, status=401)
     return JsonResponse({"coords": json.dumps(coords)})
-
 
 
 class Consulter(Onglet, crud.Modifier):

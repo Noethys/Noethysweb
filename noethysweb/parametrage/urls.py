@@ -27,7 +27,7 @@ from parametrage.views import organisateur, structures, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
     modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
     modeles_word, releves_bancaires, sondages, achats_categories, achats_fournisseurs, modeles_commandes, modeles_commandes_colonnes, \
-    activites_evenements_categories, activites_import_export
+    activites_evenements_categories, activites_import_export, api_particulier
 
 
 urlpatterns = [
@@ -288,6 +288,9 @@ urlpatterns = [
     path('parametrage/types_quotients/ajouter', types_quotients.Ajouter.as_view(), name='types_quotients_ajouter'),
     path('parametrage/types_quotients/modifier/<int:pk>', types_quotients.Modifier.as_view(), name='types_quotients_modifier'),
     path('parametrage/types_quotients/supprimer/<int:pk>', types_quotients.Supprimer.as_view(), name='types_quotients_supprimer'),
+
+    # API Particulier
+    path('parametrage/api_particulier/parametrer', api_particulier.View.as_view(), name='api_particulier_parametrer'),
 
     # Catégorie professionnelles
     path('parametrage/categories_travail/liste', categories_travail.Liste.as_view(), name='categories_travail_liste'),
@@ -706,4 +709,6 @@ urlpatterns = [
     path('parametrage/modeles_commandes_colonnes/liste/deplacer_lignes', secure_ajax(modeles_commandes_colonnes.Deplacer.as_view()), name='ajax_deplacer_modeles_commandes_colonnes'),
     path('parametrage/questions/get_form_choix', secure_ajax(questionnaires.Get_form_choix), name='ajax_questionnaire_form_choix'),
     path('parametrage/activites/import_export/exporter', secure_ajax(activites_import_export.Executer), name='ajax_activites_import_export_executer'),
+    path('parametrage/api_particulier/saisir_token', secure_ajax(api_particulier.Saisir_token), name='ajax_api_particulier_saisir_token'),
+    path('parametrage/api_particulier/supprimer_token', secure_ajax(api_particulier.Supprimer_token), name='ajax_api_particulier_supprimer_token'),
 ]

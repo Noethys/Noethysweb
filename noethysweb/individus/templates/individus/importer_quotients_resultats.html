@@ -1,0 +1,36 @@
+{% load static %}
+
+<div class="buttonHolder commandes">
+    <a class="btn btn-danger" href="{% url 'individus_toc' %}"><i class='fa fa-ban margin-r-5'></i>Fermer</a>
+    <button type="button" class="btn btn-default" onclick="revenir_page_parametres()" title="Revenir aux paramètres"><i class="fa fa-reply margin-r-5"></i>Revenir aux paramètres</button>
+</div>
+
+<div id="div_table_resultats" class="div_table_resultats margin-bottom">
+    <table id="table_resultats" class="table table-bordered table_resultats">
+
+        <thead>
+            <tr>
+                <th>Famille</th>
+                <th>Résultat</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for famille, resultat in dict_resultats.items %}
+                <tr>
+                    <td>
+                        {{ famille.nom }}
+                    </td>
+                    <td>
+                        {% if resultat == True %}
+                            <i class="fa fa-check-circle text-success margin-r-5"></i>Enregistré
+                        {% else %}
+                            <i class='icon fa fa-warning text-danger margin-r-5'></i>{{ resultat }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>

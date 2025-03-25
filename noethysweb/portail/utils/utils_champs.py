@@ -45,6 +45,7 @@ LISTE_CHAMPS = [
     Champ(page="individu_identite", code="date_naiss", label="Date de naissance", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE", choix_obligatoire=True),
     Champ(page="individu_identite", code="cp_naiss", label="CP naissance", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE", choix_obligatoire=True),
     Champ(page="individu_identite", code="ville_naiss", label="Ville de naissance", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE", choix_obligatoire=True),
+    Champ(page="individu_identite", code="pays_naiss_insee", label="Pays de naissance", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE", choix_obligatoire=True),
     Champ(page="individu_identite", code="type_sieste", label="Type de sieste", representant="MASQUER", enfant="MODIFIABLE", contact="MASQUER", choix_obligatoire=True),
 
     Champ(page="individu_coords", code="type_adresse", label="Type d'adresse", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE"),

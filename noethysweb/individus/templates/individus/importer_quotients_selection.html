@@ -1,0 +1,105 @@
+{% load static %}
+{% load embed %}
+{% load crispy_forms_tags %}
+
+<div class="buttonHolder commandes">
+    <button id="bouton_enregistrer_quotients" type="button" class="btn btn-primary" onclick="enregistrer_form()" title="Enregistrer les quotients"><i class="fa fa-check margin-r-5"></i>Enregistrer les quotients sélectionnés</button>
+    <a class="btn btn-danger" href="{% url 'individus_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+    <button type="button" class="btn btn-default" onclick="revenir_page_parametres()" title="Revenir aux paramètres"><i class="fa fa-reply margin-r-5"></i>Revenir aux paramètres</button>
+</div>
+
+<div class="btn-toolbar mb-2">
+    <div class="btn-group mr-2 btn-group-sm">
+        <button type="button" class="btn btn-default" onclick="tout_cocher()" ><i class="fa fa-check-square-o"></i> Tout cocher</button>
+        <button type="button" class="btn btn-default" onclick="tout_decocher()"><i class="fa fa-square-o"></i> Tout décocher</button>
+    </div>
+</div>
+
+<div id="div_table_familles" class="div_table_familles margin-bottom">
+    <table id="table_familles" class="table table-bordered table_familles">
+
+        <thead>
+            <tr>
+                <th>Famille</th>
+                <th>Quotient importé depuis l'API Particulier</th>
+                <th>Quotient à la date de situation</th>
+                <th>Quotient précédent</th>
+                <th style="min-width: 80px;">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for famille in familles %}
+                <tr>
+                    <td>
+                        <div class="form-inline">
+                            <input class="check_famille" type="checkbox" value="{{ famille.idfamille }}"
+                                {% if famille.resultat.succes %}
+                                    data-valeur="{{ famille.resultat.data.quotient_familial.valeur }}"
+                                    data-fournisseur="{{ famille.resultat.data.quotient_familial.fournisseur }}"
+                                    checked
+                                {% else %}
+                                    disabled
+                                {% endif %}>
+                            <span style="margin-left:5px;margin-right:20px;">{{ famille.nom }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        {% if famille.resultat.succes %}
+                            <i class="fa fa-check-circle text-success margin-r-5"></i><b>{{ famille.resultat.data.quotient_familial.valeur }}</b> <span class='text-xs'>({{ famille.resultat.data.quotient_familial.fournisseur }})</span>
+                            {% embed 'core/modal.html' %}
+                                {% block modal_id %}modal_detail_famille_{{ famille.pk }}{% endblock %}
+                                {% block modal_titre %}Détail du résultat{% endblock %}
+                                {% block modal_classe %}modal-lg{% endblock %}
+                                {% block modal_body %}
+                                    {{famille.resultat.Get_html_detail }}
+                                    <div class="buttonHolder">
+                                        <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i> Fermer</button>
+                                        </div>
+                                    </div>
+                                {% endblock %}
+                            {% endembed %}
+                        {% else %}
+                            {{ famille.erreurs|safe }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if famille.quotient_actuel %}
+                            <b>{{ famille.quotient_actuel.quotient }}</b> <span class="text-xs">({{ famille.quotient_actuel.date_debut|date:'d/m/y' }}>{{ famille.quotient_actuel.date_fin|date:'d/m/y' }})</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if famille.quotient_precedent %}
+                            <b>{{ famille.quotient_precedent.quotient }}</b> <span class="text-xs">({{ famille.quotient_precedent.date_debut|date:'d/m/y' }}>{{ famille.quotient_precedent.date_fin|date:'d/m/y' }})</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if famille.resultat.succes %}
+                            <a class="btn btn-default btn-xs" onclick="$('#modal_detail_famille_' + {{ famille.pk }}).modal('show');" title="Visualiser le détail du résultat"><i class="fa fa-fw fa-search"></i></a>
+                        {% endif %}
+                        <a type="button" class="btn btn-default btn-xs" href="{% url 'famille_resume' idfamille=famille.idfamille %}" target="_blank" title="Ouvrir la fiche famille dans un nouvel onglet"><i class="fa fa-fw fa-users"></i></a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+
+{# Modal Form des paramètres des nouveaux quotients à enregistrer #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}modal_form_enregistrer{% endblock %}
+    {% block modal_titre %}Enregistrer les quotients{% endblock %}
+    {% block modal_classe %}modal-lg{% endblock %}
+    {% block modal_body %}
+        <p>Définissez les caractéristiques des quotients à enregistrer.</p>
+        {% crispy form_enregistrer %}
+        <div class="buttonHolder">
+            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                <button type="button" class="btn btn-primary" onclick="enregistrer()"><i class="fa fa-check margin-r-5"></i> Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i> Annuler</button>
+            </div>
+        </div>
+    {% endblock %}
+{% endembed %}
