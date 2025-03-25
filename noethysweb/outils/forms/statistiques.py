@@ -78,16 +78,16 @@ class Formulaire(FormulaireBase, forms.Form):
 EXTRA_SCRIPT = """
 <script>
 
-// Rubrique
-function On_change_rubrique() {
+// Rubriques
+function On_change_rubriques() {
     $('#div_id_tranches_qf').hide();
-    if($(this).val() == 'familles_qf') {
+    if (jQuery.inArray("familles_qf", $(this).val()) != -1) {
         $('#div_id_tranches_qf').show();
     };
 }
 $(document).ready(function() {
-    $('#id_rubrique').change(On_change_rubrique);
-    On_change_rubrique.call($('#id_rubrique').get(0));
+    $('#id_rubriques').change(On_change_rubriques);
+    On_change_rubriques.call($('#id_rubriques').get(0));
 });
 
 // Données
