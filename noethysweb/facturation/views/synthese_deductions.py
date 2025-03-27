@@ -101,6 +101,7 @@ class View(CustomView, TemplateView):
                     "montant_initial": decimal.Decimal(0), "montant_deduction": decimal.Decimal(0),
                     "montant_final": decimal.Decimal(0), "liste_dates": [], "individu": deduction.prestation.individu.Get_nom() if deduction.prestation.individu else "-",
                     "famille": dictInfosFamilles[deduction.famille_id]["FAMILLE_NOM"], "liste_individus": [],
+                    "rue_resid": deduction.famille.rue_resid, "cp_resid": deduction.famille.cp_resid, "ville_resid": deduction.famille.ville_resid,
                 }
             dictResultats[regroupement]["montant_initial"] += deduction.prestation.montant_initial
             dictResultats[regroupement]["montant_deduction"] += deduction.montant
@@ -142,6 +143,10 @@ class View(CustomView, TemplateView):
             liste_colonnes_temp.append(("nbre_individus", "Nbre individus"))
         for label_prestation in liste_prestations:
             liste_colonnes_temp.append(("prestation", label_prestation))
+        if parametres["regroupement"] in ("individu", "famille"):
+            liste_colonnes_temp.insert(2, ("rue_resid", "Adresse"))
+            liste_colonnes_temp.insert(2, ("cp_resid", "CP"))
+            liste_colonnes_temp.insert(2, ("ville_resid", "Ville"))
 
         # Création des colonnes
         dict_colonnes = {}
@@ -187,6 +192,9 @@ class View(CustomView, TemplateView):
                 valeur = ""
                 if code_colonne == "num_allocataire": valeur = valeurs["num_allocataire"]
                 if code_colonne == "famille": valeur = valeurs["famille"]
+                if code_colonne == "rue_resid": valeur = valeurs["rue_resid"]
+                if code_colonne == "cp_resid": valeur = valeurs["cp_resid"]
+                if code_colonne == "ville_resid": valeur = valeurs["ville_resid"]
                 if code_colonne == "montant_initial": valeur = float(valeurs["montant_initial"])
                 if code_colonne == "montant_deduction": valeur = float(valeurs["montant_deduction"])
                 if code_colonne == "montant_final": valeur = float(valeurs["montant_final"])
