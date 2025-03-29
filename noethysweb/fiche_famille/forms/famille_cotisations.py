@@ -137,6 +137,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Commandes(annuler_url="{{ view.get_success_url }}"),
             Hidden('famille', value=idfamille),
             Hidden('individu_type', value=individu_type),
+            Hidden('idunite_cotisation_forcee', value=idunite_cotisation),
             Fieldset("Adhésion",
                 Field('type_cotisation'),
                 Field('unite_cotisation'),
@@ -225,6 +226,7 @@ EXTRA_SCRIPT = """
 
 var individu_type = $("input:hidden[name='individu_type']").val();
 var famille = $("input:hidden[name='famille']").val();
+var idunite_cotisation_forcee = $("input:hidden[name='idunite_cotisation_forcee']").val();
 
 $(document).ready(function() {
     $("#bouton_generer_cotisations").on('click', function(event) {
@@ -256,15 +258,17 @@ $(document).ready(function() {
 function On_change_type() {
     var idtype_cotisation = $("#id_type_cotisation").val();
     var idunite_cotisation = $("#id_unite_cotisation").val();
-    $.ajax({ 
-        type: "POST",
-        url: "{% url 'ajax_on_change_type_cotisation' %}",
-        data: {'idtype_cotisation': idtype_cotisation},
-        success: function (data) { 
-            $("#id_unite_cotisation").html(data); 
-            On_change_unite();
-        }
-    });
+    if (idunite_cotisation_forcee === "None") {
+        $.ajax({ 
+            type: "POST",
+            url: "{% url 'ajax_on_change_type_cotisation' %}",
+            data: {'idtype_cotisation': idtype_cotisation},
+            success: function (data) { 
+                $("#id_unite_cotisation").html(data); 
+                On_change_unite();
+            }
+        });
+    }
 };
 $(document).ready(function() {
     $('#id_type_cotisation').change(On_change_type);
