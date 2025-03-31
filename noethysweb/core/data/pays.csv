@@ -1,8 +1,8 @@
-99100;France
+ï»¿99100;France
 99101;Danemark
 99102;Islande
-99103;Norvège
-99104;Suède
+99103;NorvÃ¨ge
+99104;SuÃ¨de
 99105;Finlande
 99106;Estonie
 99107;Lettonie
@@ -13,23 +13,23 @@
 99112;Hongrie
 99113;Liechtenstein
 99114;Roumanie
-99116;Tchéquie
+99116;TchÃ©quie
 99117;Slovaquie
-99118;Bosnie-Herzégovine
+99118;Bosnie-HerzÃ©govine
 99119;Croatie
-99120;Monténégro
+99120;MontÃ©nÃ©gro
 99121;Serbie
 99122;Pologne
 99123;Russie
 99125;Albanie
-99126;Grèce
+99126;GrÃ¨ce
 99127;Italie
 99128;Saint-Marin
 99129;Vatican
 99130;Andorre
 99131;Belgique
 99132;Royaume-Uni
-99133;Territoires britanniques en Méditerranée
+99133;Territoires britanniques en MÃ©diterranÃ©e
 99134;Espagne
 99135;Pays-Bas
 99136;Irlande
@@ -38,30 +38,30 @@
 99139;Portugal
 99140;Suisse
 99144;Malte
-99145;Slovénie
-99148;Biélorussie
+99145;SlovÃ©nie
+99148;BiÃ©lorussie
 99151;Moldavie
 99155;Ukraine
-99156;Macédoine du Nord
+99156;MacÃ©doine du Nord
 99157;Kosovo
-99158;Féroé
-99159;Territoires norvégiens en Atlantique Nord
-99160;Åland
-99161;Dépendances de la Couronne britannique
+99158;FÃ©roÃ©
+99159;Territoires norvÃ©giens en Atlantique Nord
+99160;Ã…land
+99161;DÃ©pendances de la Couronne britannique
 99201;Arabie saoudite
 99203;Irak
 99204;Iran
 99205;Liban
 99206;Syrie
-99207;Israël
+99207;IsraÃ«l
 99208;Turquie
 99212;Afghanistan
 99213;Pakistan
 99214;Bhoutan
-99215;Népal
+99215;NÃ©pal
 99216;Chine
 99217;Japon
-99219;Thaïlande
+99219;ThaÃ¯lande
 99220;Philippines
 99222;Jordanie
 99223;Inde
@@ -71,61 +71,61 @@
 99227;Malaisie
 99229;Maldives
 99230;Hong Kong
-99231;Indonésie
+99231;IndonÃ©sie
 99232;Macao
 99234;Cambodge
 99235;Sri Lanka
-99236;Taïwan
-99238;Corée du Nord
-99239;Corée du Sud
-99240;Koweït
+99236;TaÃ¯wan
+99238;CorÃ©e du Nord
+99239;CorÃ©e du Sud
+99240;KoweÃ¯t
 99241;Laos
 99242;Mongolie
 99243;Vietnam
 99246;Bangladesh
-99247;Émirats arabes unis
+99247;Ã‰mirats arabes unis
 99248;Qatar
-99249;Bahreïn
+99249;BahreÃ¯n
 99250;Oman
-99251;Yémen
-99252;Arménie
-99253;Azerbaïdjan
+99251;YÃ©men
+99252;ArmÃ©nie
+99253;AzerbaÃ¯djan
 99254;Chypre
-99255;Géorgie
+99255;GÃ©orgie
 99256;Kazakhstan
 99257;Kirghizstan
-99258;Ouzbékistan
+99258;OuzbÃ©kistan
 99259;Tadjikistan
-99260;Turkménistan
+99260;TurkmÃ©nistan
 99261;Palestine
 99262;Timor oriental
-99265;Territoires australiens de l’océan Indien
-99301;Égypte
-99302;Libéria
+99265;Territoires australiens de lâ€™ocÃ©an Indien
+99301;Ã‰gypte
+99302;LibÃ©ria
 99303;Afrique du Sud
 99304;Gambie
-99306;Territoires britanniques de l’océan Atlantique
+99306;Territoires britanniques de lâ€™ocÃ©an Atlantique
 99308;Chagos
 99309;Tanzanie
 99310;Zimbabwe
 99311;Namibie
-99312;République démocratique du Congo
+99312;RÃ©publique dÃ©mocratique du Congo
 99313;Territoires espagnols en Afrique du Nord
-99314;Guinée équatoriale
-99315;Éthiopie
+99314;GuinÃ©e Ã©quatoriale
+99315;Ã‰thiopie
 99316;Libye
-99317;Érythrée
+99317;Ã‰rythrÃ©e
 99318;Somalie
-99319;Territoires portugais de l’océan Atlantique
+99319;Territoires portugais de lâ€™ocÃ©an Atlantique
 99321;Burundi
 99322;Cameroun
 99323;Centrafrique
 99324;Congo
-99326;Côte d’Ivoire
-99327;Bénin
+99326;CÃ´te dâ€™Ivoire
+99327;BÃ©nin
 99328;Gabon
 99329;Ghana
-99330;Guinée
+99330;GuinÃ©e
 99331;Burkina
 99332;Kenya
 99333;Madagascar
@@ -133,10 +133,10 @@
 99335;Mali
 99336;Mauritanie
 99337;Niger
-99338;Nigéria
+99338;NigÃ©ria
 99339;Ouganda
 99340;Rwanda
-99341;Sénégal
+99341;SÃ©nÃ©gal
 99342;Sierra Leone
 99343;Soudan
 99344;Tchad
@@ -147,50 +147,50 @@
 99349;Soudan du Sud
 99350;Maroc
 99351;Tunisie
-99352;Algérie
-99363;Terres australes norvégiennes
+99352;AlgÃ©rie
+99363;Terres australes norvÃ©giennes
 99389;Sahara occidental
 99390;Maurice
 99391;Swaziland
-99392;Guinée-Bissao
+99392;GuinÃ©e-Bissao
 99393;Mozambique
-99394;Sao Tomé-et-Principe
+99394;Sao TomÃ©-et-Principe
 99395;Angola
 99396;Cap-Vert
 99397;Comores
 99398;Seychelles
 99399;Djibouti
 99401;Canada
-99404;États-Unis
+99404;Ã‰tats-Unis
 99405;Mexique
 99406;Costa Rica
 99407;Cuba
-99408;République dominicaine
+99408;RÃ©publique dominicaine
 99409;Guatemala
-99410;Haïti
+99410;HaÃ¯ti
 99411;Honduras
 99412;Nicaragua
 99413;Panama
 99414;Salvador
 99415;Argentine
-99416;Brésil
+99416;BrÃ©sil
 99417;Chili
 99418;Bolivie
 99419;Colombie
-99420;Équateur
+99420;Ã‰quateur
 99421;Paraguay
-99422;Pérou
+99422;PÃ©rou
 99423;Uruguay
-99424;Vénézuéla
+99424;VÃ©nÃ©zuÃ©la
 99425;Territoires britanniques dans les Antilles et Bermudes
-99426;Jamaïque
-99427;Territoires britanniques dans l’océan Atlantique Sud
+99426;JamaÃ¯que
+99427;Territoires britanniques dans lâ€™ocÃ©an Atlantique Sud
 99428;Guyana
-99429;Bélize
+99429;BÃ©lize
 99430;Groenland
 99431;Aruba
-99432;Territoires des États-Unis en Amérique
-99433;Trinité-et-Tobago
+99432;Territoires des Ã‰tats-Unis en AmÃ©rique
+99433;TrinitÃ©-et-Tobago
 99434;Barbade
 99435;Grenade
 99436;Bahamas
@@ -199,30 +199,30 @@
 99439;Sainte-Lucie
 99440;Saint-Vincent-et-les-Grenadines
 99441;Antigua-et-Barbuda
-99442;Saint-Christophe-et-Niévès
+99442;Saint-Christophe-et-NiÃ©vÃ¨s
 99443;Bonaire, Saint-Eustache, Saba
-99444;Curaçao
-99445;Saint-Martin (partie néerlandaise)
+99444;CuraÃ§ao
+99445;Saint-Martin (partie nÃ©erlandaise)
 99446;Antarctique argentin
-99447;Territoire chilien de l’Antarctique
+99447;Territoire chilien de lâ€™Antarctique
 99501;Australie
-99502;Nouvelle-Zélande
+99502;Nouvelle-ZÃ©lande
 99503;Pitcairn
-99505;Territoires des États-Unis en Océanie
+99505;Territoires des Ã‰tats-Unis en OcÃ©anie
 99506;Samoa
 99507;Nauru
 99508;Fidji
 99509;Tonga
-99510;Papouasie-Nouvelle-Guinée
+99510;Papouasie-Nouvelle-GuinÃ©e
 99511;Tuvalu
 99512;Salomon
 99513;Kiribati
 99514;Vanuatu
 99515;Marshall
-99516;Micronésie
+99516;MicronÃ©sie
 99517;Palaos
-99519;Territoires de la Nouvelle-Zélande
+99519;Territoires de la Nouvelle-ZÃ©lande
 99520;Cook
 99521;Niue
-99522;Territoires de l’Australie en Océanie
+99522;Territoires de lâ€™Australie en OcÃ©anie
 99699;Antarctique
