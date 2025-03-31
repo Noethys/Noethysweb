@@ -17,6 +17,9 @@
             border-top-left-radius: .25rem;
             border-top-right-radius: .25rem;
         }
+        #div_articles {
+            column-count: 4;
+        }
     </style>
 
     {# Texte bienvenue #}
@@ -159,7 +162,7 @@
     {# Actualités #}
     {% if articles %}
         <h5 class="mb-2 text-secondary">{% trans "Actualités" %}</h5>
-        <div class="card-columns">
+        <div id="div_articles" class="card-columns">
             {% for article in articles %}
                 {% include 'portail/article.html' %}
             {% endfor %}

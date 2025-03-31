@@ -10,6 +10,9 @@
         .card-img-top {
             border-top-left-radius: .25rem;
             border-top-right-radius: .25rem;
+        }  
+        #div_articles {
+            column-count: 4;
         }
     </style>
 
@@ -27,7 +30,7 @@
             <p>
                 <a href="{% url 'articles_liste' %}"><i class="fa fa-arrow-circle-o-left mb-2"></i> Revenir à la liste des articles</a>
             </p>
-            <div class="card-columns">
+            <div id="div_articles" class="card-columns">
                 {% include 'portail/article.html' %}
             </div>
         </div>
