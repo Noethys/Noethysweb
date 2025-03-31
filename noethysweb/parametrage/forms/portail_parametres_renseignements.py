@@ -44,7 +44,7 @@ class Formulaire(FormulaireBase, forms.Form):
                 if champ.page == onglet.code:
                     liste_checks = []
                     for public_code, public_label in (("famille", "Famille"), ("representant", "Représentant"), ("enfant", "Enfant"), ("contact", "Contact")):
-                        if getattr(champ, public_code, None):
+                        if getattr(champ, public_code, None) and ((public_code == "famille" and "famille" in champ.page) or (public_code != "famille" and "individu" in champ.page)):
                             code_field = "%s:%s:%s" % (champ.page, champ.code, public_code)
                             choix_etat = [("MASQUER", "Masqué"), ("AFFICHER", "Affiché"), ("MODIFIABLE", "Modifiable")]
                             if champ.choix_obligatoire:
