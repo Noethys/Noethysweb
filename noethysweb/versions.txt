@@ -1,3 +1,10 @@
+Version 1.2.9.0 (31/03/2025) :
+
+- Ajout du champ nom de naissance sur les fiches du portail
+- Correction unicode du fichier csv des pays
+- Correction de l'affichage des champs dans les paramètres des renseignements
+- Modification du nombre de colonnes des articles du portail
+
 Version 1.2.8.9 (31/03/2025) :
 
 - Ajout de l'import des quotients familiaux depuis l'API Particulier
