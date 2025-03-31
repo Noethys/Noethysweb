@@ -40,6 +40,7 @@ LISTE_CHAMPS = [
     Champ(page="famille_consentements", code="consentements", label="Consentements", famille="MODIFIABLE"),
 
     Champ(page="individu_identite", code="nom", label="Nom de famille", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE", choix_obligatoire=True),
+    Champ(page="individu_identite", code="nom_jfille", label="Nom de naissance", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE", choix_obligatoire=True),
     Champ(page="individu_identite", code="civilite", label="Civilité", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE", choix_obligatoire=True),
     Champ(page="individu_identite", code="prenom", label="Prénom", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE", choix_obligatoire=True),
     Champ(page="individu_identite", code="date_naiss", label="Date de naissance", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE", choix_obligatoire=True),
