@@ -56,7 +56,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.use_custom_control = False
 
         # Pays de naissance
-        with open(os.path.join(settings.BASE_DIR, "core/data/pays.csv"), "r") as fichier:
+        with open(os.path.join(settings.BASE_DIR, "core/data/pays.csv"), "r", encoding="utf-8-sig") as fichier:
             choix_pays = sorted([ligne for ligne in csv.reader(fichier, delimiter=";")], key=operator.itemgetter(1))
         self.fields["pays_naiss_insee"].choices = choix_pays
         self.initial["pays_naiss_insee"] = self.instance.pays_naiss_insee or "99100"

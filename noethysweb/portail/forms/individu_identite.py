@@ -54,13 +54,13 @@ class Formulaire(FormulaireBase, ModelForm):
         }
 
         # Pays de naissance
-        with open(os.path.join(settings.BASE_DIR, "core/data/pays.csv"), "r") as fichier:
+        with open(os.path.join(settings.BASE_DIR, "core/data/pays.csv"), "r", encoding="utf-8-sig") as fichier:
             choix_pays = sorted([ligne for ligne in csv.reader(fichier, delimiter=";")], key=operator.itemgetter(1))
         self.fields["pays_naiss_insee"].choices = choix_pays
 
         # Champs affichables
         self.liste_champs_possibles = [
-            {"titre": _("Etat-civil"), "champs": ["civilite", "nom", "prenom"]},
+            {"titre": _("Etat-civil"), "champs": ["civilite", "nom", "nom_jfille", "prenom"]},
             {"titre": _("Naissance"), "champs": ["date_naiss", "cp_naiss", "ville_naiss", "pays_naiss_insee"]},
             {"titre": _("Divers"), "champs": ["type_sieste"]},
         ]
