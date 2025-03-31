@@ -1,3 +1,11 @@
+Version 1.2.8.9 (31/03/2025) :
+
+- Ajout de l'import des quotients familiaux depuis l'API Particulier
+- Ajout des colonnes d'adresse dans la synthèse des déductions
+- Ajout du filtre Modes de règlements dans le détail des ventilations des règlements
+- Correction de la saisie des tranches de QF dans les statistiques
+- Correction du choix de l'unité d'adhésion dans la saisie des adhésions par lot
+
 Version 1.2.8.8 (24/03/2025) :
 
 - Ajout de l'affichage multi rubriques dans les statistiques
