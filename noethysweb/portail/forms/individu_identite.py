@@ -18,7 +18,7 @@ from portail.forms.fiche import FormulaireBase
 
 class Formulaire(FormulaireBase, ModelForm):
     date_naiss = forms.DateField(label="Date naiss.", required=False, widget=DatePickerWidget())
-    pays_naiss_insee = forms.ChoiceField(label="Pays", choices=[], required=False)
+    pays_naiss_insee = forms.ChoiceField(label="Pays naiss.", choices=[], required=False)
 
     class Meta:
         model = Individu
@@ -26,6 +26,10 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             'cp_naiss': CodePostal(attrs={"id_ville": "id_ville_naiss"}),
             'ville_naiss': Ville(attrs={"id_codepostal": "id_cp_naiss"}),
+        }
+        labels = {
+            "cp_naiss": "Code postal naiss.",
+            "ville_naiss": "Ville naiss.",
         }
 
     def __init__(self, *args, **kwargs):
@@ -74,11 +78,15 @@ class Formulaire(FormulaireBase, ModelForm):
             self.initial["pays_naiss_insee"] = self.instance.pays_naiss_insee or "99100"
 
     def clean(self):
+        # Nom de naissance
+        if self.dict_champs["nom_jfille"] == "OBLIGATOIRE" and self.cleaned_data.get("civilite", None) == 3 and not self.cleaned_data.get("nom_jfille", None):
+            self.add_error("nom_jfille", _("Vous devez obligatoirement renseigner ce champ"))
+
         # Si modification de la ville de naissance, on recherche le code INSEE de la ville de naissance
         if self.cleaned_data.get("ville_naiss_insee", None) == "None":
             self.cleaned_data["ville_naiss_insee"] = None
         if "cp_naiss" in self.changed_data or "ville_naiss" in self.changed_data or not self.cleaned_data.get("ville_naiss_insee", None):
-            self.cleaned_data["ville_naiss_insee"] = utils_adresse.Get_code_insee_ville(cp=self.cleaned_data["cp_naiss"], ville=self.cleaned_data["ville_naiss"])
+            self.cleaned_data["ville_naiss_insee"] = utils_adresse.Get_code_insee_ville(cp=self.cleaned_data.get("cp_naiss", None), ville=self.cleaned_data.get("ville_naiss", None))
         return self.cleaned_data
 
 

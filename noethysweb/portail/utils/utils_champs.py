@@ -143,6 +143,10 @@ def Get_renseignements_manquants(famille=None):
             if code in dict_renseignements:
                 valeur = dict_renseignements[code]
 
+            # Exige le nom de naissance uniquement si la civilité = 3 (Madame)
+            if code == "nom_jfille" and rattachement and rattachement.individu.civilite != 3:
+                valeur = True
+
             if not valeur:
                 label = dict_labels[code]
                 individu = rattachement.individu if rattachement else None

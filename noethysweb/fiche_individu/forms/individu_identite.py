@@ -108,7 +108,7 @@ class Formulaire(FormulaireBase, ModelForm):
         if self.cleaned_data["ville_naiss_insee"] == "None":
             self.cleaned_data["ville_naiss_insee"] = None
         if "cp_naiss" in self.changed_data or "ville_naiss" in self.changed_data or not self.cleaned_data["ville_naiss_insee"]:
-            self.cleaned_data["ville_naiss_insee"] = utils_adresse.Get_code_insee_ville(cp=self.cleaned_data["cp_naiss"], ville=self.cleaned_data["ville_naiss"])
+            self.cleaned_data["ville_naiss_insee"] = utils_adresse.Get_code_insee_ville(cp=self.cleaned_data.get("cp_naiss", None), ville=self.cleaned_data.get("ville_naiss", None))
         return self.cleaned_data
 
     def save(self):

@@ -66,10 +66,10 @@ class FormulaireBase():
                             self.fields[code].help_text = _("Ce champ n'est pas modifiable.")
 
                     # Obligatoire
-                    if self.dict_champs[code] == "OBLIGATOIRE" and code not in ("rue_resid", "cp_resid", "ville_resid"):
+                    if self.dict_champs[code] == "OBLIGATOIRE" and code not in ("rue_resid", "cp_resid", "ville_resid", "nom_jfille"):
                         self.fields[code].required = True
 
-                    if self.dict_champs[code] == "OBLIGATOIRE" and not self.initial[code]:
+                    if self.dict_champs[code] == "OBLIGATOIRE" and not self.initial[code] and (code != "nom_jfille" or (code == "nom_jfille" and self.initial.get("civilite") == 3)):
                         liste_renseignements_manquants.append(str(self.fields[code].label))
 
                     # Génération du field
