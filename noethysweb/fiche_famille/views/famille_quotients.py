@@ -21,7 +21,9 @@ def Check_mdp_api_particulier(request):
     """ Vérifie si le mot de passe de l'API Particulier de l'utilisateur est mémorisé """
     if cache.get("mdp_api_particulier_user%d" % request.user.pk):
         return JsonResponse({"resultat": "ok"})
-    return JsonResponse({"erreur": "Le mot de passe est manquant"}, status=401)
+    if not request.user.token_api_particulier:
+        return JsonResponse({"erreur": "no_token"}, status=401)
+    return JsonResponse({"erreur": "no_mdp"}, status=401)
 
 
 def Memoriser_mdp_api_particulier(request):

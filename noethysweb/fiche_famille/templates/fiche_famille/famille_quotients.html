@@ -39,7 +39,11 @@
                     acces_api_particulier();
                 },
                 error: function(data) {
-                    $("#modal_saisir_mdp_api_particulier").modal("show");
+                    if (data.responseJSON.erreur === "no_token") {
+                        toastr.error("Vous devez commencer par saisir votre token API Particulier dans le menu Paramétrage > API Particulier.");
+                    } else {
+                        $("#modal_saisir_mdp_api_particulier").modal("show");
+                    }
                 }
             });
         }
