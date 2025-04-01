@@ -3,16 +3,16 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import re
 from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, StrictButton
+from crispy_forms.layout import Layout, Fieldset
+from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.models import Famille, Rattachement
 from core.forms.select2 import Select2MultipleWidget
-import re
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -52,11 +52,12 @@ class Formulaire(FormulaireBase, ModelForm):
         if famille.email_recus:
             liste_adresses = famille.email_recus_adresses.split("##")
             for adresse in liste_adresses:
-                id, categorie, adresse_manuelle = adresse.split(";")
-                if id:
-                    liste_adresses_existantes.append(adresse)
-                else:
-                    liste_adresses_autres.append(adresse_manuelle)
+                if ";" in adresse:
+                    id, categorie, adresse_manuelle = adresse.split(";")
+                    if id:
+                        liste_adresses_existantes.append(adresse)
+                    else:
+                        liste_adresses_autres.append(adresse_manuelle)
 
         self.fields["adresses_individus"].initial = liste_adresses_existantes
         self.fields["adresses_autres"].initial = ";".join(liste_adresses_autres)
