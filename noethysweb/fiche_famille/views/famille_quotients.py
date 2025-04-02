@@ -37,7 +37,7 @@ def Memoriser_mdp_api_particulier(request):
         return JsonResponse({"erreur": "Ce mot de passe n'est pas valide"}, status=401)
 
     # Mémorise le mdp dans le cache
-    cache.set("mdp_api_particulier_user%d" % request.user.pk, mdp)
+    cache.set("mdp_api_particulier_user%d" % request.user.pk, mdp, timeout=43200)
     return JsonResponse({"resultat": "ok"})
 
 

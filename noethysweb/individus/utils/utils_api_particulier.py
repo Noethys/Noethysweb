@@ -24,8 +24,8 @@ class Resultat:
         self.request = request
         self.famille = famille
         self.individu = individu
-        self.code_reponse = reponse.status_code if reponse else None
-        self.json_reponse = reponse.json() if reponse else {}
+        self.code_reponse = reponse.status_code if reponse != None else None
+        self.json_reponse = reponse.json() if reponse != None else {}
         self.succes = self.code_reponse == 200
         self.data = self.json_reponse.get("data", {}) if self.json_reponse else None
         if erreurs:
@@ -50,17 +50,25 @@ class Resultat:
                 <dl>
                     {% if data.allocataires %}
                         <dt>Allocataires</dt>
+                        <dd>
                             {% for allocataire in data.allocataires %}
-                                <dd>{{ allocataire.prenoms|title }} {{ allocataire.nom_naissance }}{% if allocataire.nom_usage %} ({{ allocataire.nom_usage }}){% endif %}, 
-                                né{% if allocataire.sexe == "F" %}e{% endif %} le {{ allocataire.date_naissance|date_eng_fr }}</dd>
+                                <div>
+                                    {{ allocataire.prenoms|title }} {{ allocataire.nom_naissance }}{% if allocataire.nom_usage %} ({{ allocataire.nom_usage }}){% endif %}, 
+                                    né{% if allocataire.sexe == "F" %}e{% endif %} le {{ allocataire.date_naissance|date_eng_fr }}
+                                </div>
                             {% endfor %}
+                        </dd>
                     {% endif %}
                     {% if data.enfants %}
-                    <dt>Enfants</dt>
-                        {% for enfant in data.enfants %}
-                            <dd>{{ enfant.prenoms|title }} {{ enfant.nom_naissance }}{% if enfant.nom_usage %} ({{ enfant.nom_usage }}){% endif %}, 
-                            né{% if enfant.sexe == "F" %}e{% endif %} le {{ enfant.date_naissance|date_eng_fr }}</dd>
-                        {% endfor %}
+                        <dt>Enfants</dt>
+                        <dd>
+                            {% for enfant in data.enfants %}
+                                <div>
+                                    {{ enfant.prenoms|title }} {{ enfant.nom_naissance }}{% if enfant.nom_usage %} ({{ enfant.nom_usage }}){% endif %}, 
+                                    né{% if enfant.sexe == "F" %}e{% endif %} le {{ enfant.date_naissance|date_eng_fr }}
+                                </div>
+                            {% endfor %}
+                        </dd>
                     {% endif %}
                     {% if data.adresse %}
                         <dt>Adresse déclarée</dt>
