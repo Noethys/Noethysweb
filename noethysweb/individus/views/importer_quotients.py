@@ -35,7 +35,7 @@ def Rechercher(request):
             liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
         if param_activites["type"] == "activites":
             liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
-        presents = utils_dates.ConvertDateRangePicker(parametres["periode"]) if parametres["presents"] else None
+        presents = utils_dates.ConvertDateRangePicker(parametres["presents"]) if parametres["presents"] else None
 
         # Importation des familles
         conditions = Q(activite__in=liste_activites)
