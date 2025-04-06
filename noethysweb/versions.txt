@@ -1,3 +1,9 @@
+Version 1.2.9.2 (06/04/2025) :
+
+- Ajout du mode d'emploi API Particulier
+- Corrections sur l'API Particulier
+- Correction du nombre de colonnes actualités sur le portail
+
 Version 1.2.9.1 (01/04/2025) :
 
 - Ajout d'un message si token API Particulier manquant
