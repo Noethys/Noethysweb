@@ -40,7 +40,10 @@ class Liste(crud.CustomListe):
             filtres_liste = context['filtres_liste']
             context['filtres_liste'] = []
             for filtre in filtres_liste:
-                idquestion = int(filtre["options"].split("=")[1])
+                try:
+                    idquestion = int(filtre["options"].split("=")[1])
+                except:
+                    idquestion = None
                 if filtre["champ"] != "reponse" or idquestion == int(self.Get_categorie()):
                     context['filtres_liste'].append(filtre)
                 else:
