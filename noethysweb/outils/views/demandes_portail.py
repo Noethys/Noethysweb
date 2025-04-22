@@ -35,7 +35,7 @@ def Traiter_demande(request=None, demande=None, etat=None):
                 demande.famille.autorisation_cafpro = True if nouvelle_valeur == True else False
             else:
                 setattr(demande.famille, demande.code, nouvelle_valeur)
-            demande.famille.save()
+            demande.famille.save(update_fields=[demande.code])
 
         # Individu
         if demande.categorie in ("individu_identite", "individu_coords", "individu_medecin"):
@@ -49,7 +49,7 @@ def Traiter_demande(request=None, demande=None, etat=None):
                 demande.individu.medecin_id = nouvelle_valeur
             else:
                 setattr(demande.individu, demande.code, nouvelle_valeur)
-            demande.individu.save()
+            demande.individu.save(update_fields=[demande.code])
 
         # Régimes alimentaires
         if demande.categorie == "individu_regimes_alimentaires":
