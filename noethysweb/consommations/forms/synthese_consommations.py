@@ -59,5 +59,4 @@ class Formulaire(FormulaireBase, forms.Form):
         )
 
     def clean(self):
-        print(self.cleaned_data)
         return self.cleaned_data

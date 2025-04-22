@@ -201,6 +201,8 @@ class View(CustomView, TemplateView):
             """ Convertit un int en str mais conserve le tri """
             if isinstance(x, int):
                 x = str(x).zfill(8)
+            if parametres["regroupement"] == "qf" and isinstance(x, str):
+                return (0, 0)
             return x
         listeRegroupement.sort(key=sortby)
 

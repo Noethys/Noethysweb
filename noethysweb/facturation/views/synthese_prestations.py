@@ -365,7 +365,7 @@ class View(CustomView, TemplateView):
 
             if key_ligne2 != "":
                 for key2_tri, key2, key2_label in listeKeys2:
-                    id_detail = "detail_%s" % key2
+                    id_detail = "detail_%s" % str(key2)
                     ligne = {"id": id_detail, "pid": id_regroupement, "col0": key2_label, "regroupement": False}
 
                     # Colonnes périodes
