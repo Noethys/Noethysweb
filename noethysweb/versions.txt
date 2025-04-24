@@ -1,3 +1,11 @@
+Version 1.2.9.3 (24/04/2025) :
+
+- Ajout de l'URL du formulaire d'habilitation API Particulier
+- Correction de la validation des rubriques identité et caisse sur le portail
+- Correction des regroupements par QF dans les synthèses des prestations et des consommations
+- Correction de la liste des résultats des questionnaires
+- Adaptation Django 4 sur la suppression de 4 listes dans la fiche individuelle
+
 Version 1.2.9.2 (06/04/2025) :
 
 - Ajout du mode d'emploi API Particulier
