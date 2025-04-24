@@ -221,7 +221,6 @@ class Modifier_progtransport(Page, crud.Modifier):
 
 
 class Supprimer_progtransport(Page, crud.Supprimer):
-    form_class = Formulaire
     model = Transport
     template_name = "fiche_individu/individu_delete.html"
 
@@ -344,7 +343,6 @@ class Modifier_transport(Page, crud.Modifier):
 
 
 class Supprimer_transport(Page, crud.Supprimer):
-    form_class = Formulaire
     model = Transport
     template_name = "fiche_individu/individu_delete.html"
 

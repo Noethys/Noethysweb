@@ -220,7 +220,6 @@ class Modifier_information(Page, crud.Modifier):
 
 
 class Supprimer_information(Page, crud.Supprimer):
-    form_class = Formulaire_information
     model = Information
     template_name = "fiche_individu/individu_delete.html"
 
@@ -256,7 +255,6 @@ class Modifier_vaccin(Page, crud.Modifier):
 
 
 class Supprimer_vaccin(Page, crud.Supprimer):
-    form_class = Formulaire_vaccin
     model = Vaccin
     template_name = "fiche_individu/individu_delete.html"
 
