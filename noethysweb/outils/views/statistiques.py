@@ -458,7 +458,7 @@ class View(CustomView, TemplateView):
                             for dict_periode in liste_periodes:
                                 liste_labels.append(dict_periode["label"])
                                 condition = Q(activite__in=liste_activites, date__gte=dict_periode["date_debut"], date__lte=dict_periode["date_fin"], etat__in=parametres["etats"])
-                                liste_valeurs.append(len({c.inscription.famille_id: True for c in Consommation.objects.select_related("inscription").filter(condition)}))
+                                liste_valeurs.append(len({c.inscription.famille_id: True for c in Consommation.objects.select_related("inscription").filter(condition) if c.inscription}))
 
                             data.append(Histogramme(titre="Evolution du nombre des familles", type_chart="bar", labels=liste_labels, valeurs=liste_valeurs))
 
