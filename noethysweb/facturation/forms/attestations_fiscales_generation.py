@@ -26,6 +26,8 @@ class Formulaire(FormulaireBase, forms.Form):
             "textes": {"champ": "Nom du lot", "ajouter": "Saisir un lot d'attestations fiscales", "modifier": "Modifier un lot d'attestations fiscales"}}))
     date_emission = forms.DateField(label="Date d'émission", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
     prochain_numero = forms.CharField(label="Prochain numéro", required=True, widget=ChampAutomatiqueWidget({"label_checkbox": "Automatique", "title": "Attribuez ici le prochain numéro de la première attestation générée. Les attestations suivantes seront incrémentées automatiquement.", "type": "number"}))
+    choix_selection_prestations = [("TOUTES", "Toutes les prestations individuelles"), ("ACTIVITES", "Uniquement les prestations individuelles des activités sélectionnées")]
+    selection_prestations = forms.TypedChoiceField(label="Sélection des prestations", choices=choix_selection_prestations, initial="ACTIVITES", required=False)
     activites = forms.CharField(label="Activités", required=False, widget=SelectionActivitesWidget())
     choix_selection_familles = [("TOUTES", "Toutes les familles"), ("FAMILLE", "Uniquement la famille sélectionnée")]
     selection_familles = forms.TypedChoiceField(label="Sélection des familles", choices=choix_selection_familles, initial="TOUTES", required=False)
@@ -78,7 +80,8 @@ class Formulaire(FormulaireBase, forms.Form):
                 Field('date_emission'),
                 Field('date_naiss_min'),
             ),
-            Fieldset('Activités',
+            Fieldset('Prestations',
+                Field('selection_prestations'),
                 Field('activites'),
             ),
             Fieldset('Options',
@@ -103,6 +106,16 @@ class Formulaire(FormulaireBase, forms.Form):
 
 EXTRA_SCRIPT = """
 <script>
+
+// validite_type
+function On_change_selection_prestations() {
+    $('#div_id_activites').hide();
+    if($(this).val() == 'ACTIVITES') {$('#div_id_activites').show()};
+}
+$(document).ready(function() {
+    $('#id_selection_prestations').change(On_change_selection_prestations);
+    On_change_selection_prestations.call($('#id_selection_prestations').get(0));
+});
 
 // validite_type
 function On_change_selection_familles() {

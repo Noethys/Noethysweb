@@ -64,18 +64,20 @@ def Get_data(cleaned_data=None, selection_prestations=None):
     dict_familles = {famille["pk"]: famille["nom"] for famille in Famille.objects.values("pk", "nom").all()}
 
     # Importation des ventilations
-    conditions = Q(prestation__date__gte=date_debut) & Q(prestation__date__lte=date_fin) & Q(prestation__activite__in=liste_activites)
+    conditions = Q(prestation__date__gte=date_debut) & Q(prestation__date__lte=date_fin)
+    if cleaned_data["selection_prestations"] == "ACTIVITES": conditions &= Q(prestation__activite__in=liste_activites)
     if idfamille: conditions &= Q(famille=cleaned_data["famille"])
     if cleaned_data["type_donnee"] == "REGLE_PERIODE": conditions &= Q(reglement__date__gte=date_debut) & Q(reglement__date__lte=date_fin)
     ventilations = Ventilation.objects.values("prestation").filter(conditions).annotate(total=Sum("montant"))
     dict_ventilations = {ventilation["prestation"]: ventilation["total"] for ventilation in ventilations}
 
     # Importation des prestations
+    conditions = Q(individu__isnull=False)
     if cleaned_data["type_donnee"] == "REGLE_PERIODE":
-        conditions = Q(pk__in=list(dict_ventilations.keys()))
+        conditions &= Q(pk__in=list(dict_ventilations.keys()))
     else:
-        conditions = Q(date__gte=date_debut) & Q(date__lte=date_fin)
-    conditions &= Q(activite__in=liste_activites) & Q(individu__isnull=False)
+        conditions &= Q(date__gte=date_debut) & Q(date__lte=date_fin)
+    if cleaned_data["selection_prestations"] == "ACTIVITES": conditions &= Q(activite__in=liste_activites)
     if selection_prestations != None: conditions &= Q(label__in=selection_prestations.keys())
     if idfamille: conditions &= Q(famille=cleaned_data["famille"])
     liste_prestations = Prestation.objects.values("pk", "label", "montant", "famille_id", "individu_id", "activite_id").filter(conditions).order_by("label")
