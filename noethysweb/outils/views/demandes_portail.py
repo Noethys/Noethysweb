@@ -47,6 +47,10 @@ def Traiter_demande(request=None, demande=None, etat=None):
                 demande.individu.categorie_travail_id = nouvelle_valeur
             elif demande.code == "medecin":
                 demande.individu.medecin_id = nouvelle_valeur
+            elif demande.code == "type_adresse":
+                if "PROPRE" in demande.nouvelle_valeur:
+                    demande.individu.adresse_auto = None
+                demande.code = "adresse_auto"
             else:
                 setattr(demande.individu, demande.code, nouvelle_valeur)
             demande.individu.save(update_fields=[demande.code])
