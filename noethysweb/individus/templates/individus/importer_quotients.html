@@ -113,7 +113,7 @@
                     $("#div_selection_familles").html(data);
                     $("#div_selection_familles").show();
                     $("#div_loader_recherche").hide();
-                    maj_bouton_enregistrer(get_familles_cochees().length);
+                    maj_nbre_selections(get_familles_cochees().length);
                     $("#box_introduction").html("Sélectionnez les quotients à enregistrer et cliquez sur le bouton Enregistrer les quotients.");
                     init_page_selection();
                 },
@@ -130,32 +130,36 @@
         function init_page_selection() {
             $(".check_famille").on("change", function () {
                 if (maj_lot_checkboxes == false) {
-                    maj_bouton_enregistrer(get_familles_cochees().length);
+                    maj_nbre_selections(get_familles_cochees().length);
                 };
             });
         };
 
-        function maj_bouton_enregistrer(nbre_familles) {
-            $("#bouton_enregistrer_quotients").text("Enregistrer les " + nbre_familles + " quotients cochés")
+        function maj_nbre_selections(nbre_familles) {
+            $("#nbre_selections").text(nbre_familles)
         };
-        function tout_cocher() {
+        
+        function tout_cocher(etat) {
+            tout_decocher();
             maj_lot_checkboxes = true;
             $(".check_famille").each(function (index) {
-                if ($(this).prop("disabled") === false) {
-                    $(this).prop("checked", true);
-                }
+                if (!(etat)) {$(this).prop("checked", true)}
+                if ((etat === "valides") && ($(this).data("valeur"))) {$(this).prop("checked", true)}
+                if ((etat === "invalides") && (!($(this).data("valeur")))) {$(this).prop("checked", true)}
             });
             maj_lot_checkboxes = false;
-            maj_bouton_enregistrer(get_familles_cochees().length);
-        };
+            maj_nbre_selections(get_familles_cochees().length);
+        }
+        
         function tout_decocher() {
             maj_lot_checkboxes = true;
             $(".check_famille").each(function (index) {
                 $(this).prop("checked", false);
             });
             maj_lot_checkboxes = false;
-            maj_bouton_enregistrer(get_familles_cochees().length);
-        };
+            maj_nbre_selections(get_familles_cochees().length);
+        }
+        
         function get_familles_cochees() {
             var liste_familles = [];
             $(".check_famille").each(function (index) {
@@ -175,6 +179,20 @@
         };
 
         function enregistrer_form() {
+            // Vérifie que les familles sélectionnées ont un QF trouvé
+            var liste_anomalies = [];
+            $(".check_famille").each(function (index) {
+                if ($(this).prop("checked")) {
+                    if (!($(this).data("valeur"))) {
+                        liste_anomalies.push($(this).data("nom"))
+                    }
+                }
+            });
+            if (liste_anomalies.length) {
+                toastr.error("Les familles cochées suivantes n'ont pas de QF : " + liste_anomalies.join(", ") + ".")
+                return
+            }
+
             $("#modal_form_enregistrer").modal("show");
         }
 
@@ -210,6 +228,32 @@
                     $("#div_loader_enregistrer").hide();
                     $("#box_introduction").html("Voici la liste des résultats.");
                     init_page_selection();
+                },
+                error: function(data) {
+                    $("#box_introduction").html("Erreur.");
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        };
+    
+        function envoi_emails() {
+            var liste_familles = [];
+            $(".check_famille").each(function (index) {
+                if ($(this).prop("checked")) {
+                    liste_familles.push(parseInt($(this).val()));
+                }
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_importer_quotients_envoyer_emails' %}",
+                data: {
+                    liste_familles: JSON.stringify(liste_familles),
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                datatype: "json",
+                success: function(data){
+                    window.open(data.url, "_blank");
                 },
                 error: function(data) {
                     $("#box_introduction").html("Erreur.");

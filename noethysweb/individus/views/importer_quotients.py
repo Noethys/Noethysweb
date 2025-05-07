@@ -3,13 +3,16 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import json, time
+import logging, json, time
+logger = logging.getLogger(__name__)
 from django.views.generic import TemplateView
 from django.http import JsonResponse
+from django.urls import reverse_lazy
 from django.shortcuts import render
 from django.template import Template, RequestContext
 from django.db.models import Q
-from core.models import Activite, Quotient, Famille, Inscription, TypeQuotient
+from django.contrib import messages
+from core.models import Activite, Quotient, Famille, Inscription, TypeQuotient, Mail, Destinataire
 from core.views.base import CustomView
 from core.utils import utils_dates
 from individus.forms.importer_quotients import Formulaire, Formulaire_parametres_enregistrer
@@ -126,6 +129,47 @@ def Enregistrer(request):
         dict_resultats[famille] = True
 
     return render(request, "individus/importer_quotients_resultats.html", {"dict_resultats": dict_resultats})
+
+
+def Envoyer_emails(request):
+    time.sleep(1)
+
+    # Récupération des familles cochées
+    liste_familles = json.loads(request.POST.get("liste_familles"))
+    if not liste_familles:
+        return JsonResponse({"erreur": "Veuillez cocher au moins une ligne dans la liste"}, status=401)
+
+    # Création du mail
+    logger.debug("Création d'un nouveau mail...")
+    mail = Mail.objects.create(
+        categorie="saisie_libre",
+        adresse_exp=request.user.Get_adresse_exp_defaut(),
+        selection="NON_ENVOYE",
+        verrouillage_destinataires=True,
+        utilisateur=request.user,
+    )
+
+    # Importation des familles
+    dict_familles = {famille.pk: famille for famille in Famille.objects.filter(pk__in=liste_familles)}
+
+    # Création des destinataires
+    logger.debug("Enregistrement des destinataires...")
+    liste_anomalies = []
+    for idfamille in liste_familles:
+        famille = dict_familles[idfamille]
+        if famille.mail:
+            destinataire = Destinataire.objects.create(categorie="famille", famille=famille, adresse=famille.mail)
+            mail.destinataires.add(destinataire)
+        else:
+            liste_anomalies.append(famille.nom)
+
+    if liste_anomalies:
+        messages.add_message(request, messages.ERROR, "Adresses mail manquantes : %s" % ", ".join(liste_anomalies))
+
+    # Création de l'URL pour ouvrir l'éditeur d'emails
+    logger.debug("Redirection vers l'éditeur d'emails...")
+    url = reverse_lazy("editeur_emails", kwargs={'pk': mail.pk})
+    return JsonResponse({"url": url})
 
 
 class View(CustomView, TemplateView):

@@ -3,14 +3,17 @@
 {% load crispy_forms_tags %}
 
 <div class="buttonHolder commandes">
-    <button id="bouton_enregistrer_quotients" type="button" class="btn btn-primary" onclick="enregistrer_form()" title="Enregistrer les quotients"><i class="fa fa-check margin-r-5"></i>Enregistrer les quotients sélectionnés</button>
+    <button id="bouton_enregistrer_quotients" type="button" class="btn btn-primary" onclick="enregistrer_form()" title="Enregistrer les quotients cochés"><i class="fa fa-check margin-r-5"></i>Enregistrer les quotients</button>
     <a class="btn btn-danger" href="{% url 'individus_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+    <button class="btn btn-default" onclick="envoi_emails()" title="Envoyer des Emails aux familles cochées"><i class="fa fa-send-o margin-r-5"></i>Envoyer des Emails</button>
     <button type="button" class="btn btn-default" onclick="revenir_page_parametres()" title="Revenir aux paramètres"><i class="fa fa-reply margin-r-5"></i>Revenir aux paramètres</button>
 </div>
 
 <div class="btn-toolbar mb-2">
     <div class="btn-group mr-2 btn-group-sm">
         <button type="button" class="btn btn-default" onclick="tout_cocher()" ><i class="fa fa-check-square-o"></i> Tout cocher</button>
+        <button type="button" class="btn btn-default" onclick="tout_cocher('valides')" ><i class="fa fa-check-square-o"></i> Cocher les lignes valides</button>
+        <button type="button" class="btn btn-default" onclick="tout_cocher('invalides')" ><i class="fa fa-check-square-o"></i> Cocher les lignes non valides</button>
         <button type="button" class="btn btn-default" onclick="tout_decocher()"><i class="fa fa-square-o"></i> Tout décocher</button>
     </div>
 </div>
@@ -20,6 +23,7 @@
 
         <thead>
             <tr>
+                <th></th>
                 <th>Famille</th>
                 <th>Quotient importé depuis l'API Particulier</th>
                 <th>Quotient à la date de situation</th>
@@ -33,17 +37,16 @@
                 <tr>
                     <td>
                         <div class="form-inline">
-                            <input class="check_famille" type="checkbox" value="{{ famille.idfamille }}"
+                            <input class="check_famille" type="checkbox" value="{{ famille.idfamille }}" 
+                                data-nom="{{ famille.nom }}"
                                 {% if famille.resultat.succes %}
                                     data-valeur="{{ famille.resultat.data.quotient_familial.valeur }}"
                                     data-fournisseur="{{ famille.resultat.data.quotient_familial.fournisseur }}"
                                     checked
-                                {% else %}
-                                    disabled
                                 {% endif %}>
-                            <span style="margin-left:5px;margin-right:20px;">{{ famille.nom }}</span>
                         </div>
                     </td>
+                    <td>{{ famille.nom }}</td>
                     <td>
                         {% if famille.resultat.succes %}
                             <i class="fa fa-check-circle text-success margin-r-5"></i><b>{{ famille.resultat.data.quotient_familial.valeur }}</b> <span class='text-xs'>({{ famille.resultat.data.quotient_familial.fournisseur }})</span>
@@ -86,6 +89,8 @@
 
     </table>
 </div>
+
+<div class="ml-2 text-muted text-sm"><span id="nbre_selections"></span> sélections / {{ familles|length }} familles affichées</div>
 
 {# Modal Form des paramètres des nouveaux quotients à enregistrer #}
 {% embed 'core/modal.html' %}
