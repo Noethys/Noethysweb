@@ -1,3 +1,9 @@
+Version 1.2.9.4 (07/05/2025) :
+
+- Ajout de l'envoi d'emails depuis l'importation des quotients par lot
+- Ajout de l'option Toutes les prestations dans les attestations fiscales
+- Correction de la demande type adresse du portail
+
 Version 1.2.9.3 (24/04/2025) :
 
 - Ajout de l'URL du formulaire d'habilitation API Particulier
