@@ -3368,6 +3368,15 @@ class PesModele(models.Model):
         ("04", "04-ASAP sans traitement DGFIP"),
     ]
     edition_asap = models.CharField(verbose_name="Edition ASAP", max_length=100, choices=choix_edition_asap, default="01", blank=True, null=True, help_text="Indiquez si l'ASAP doit être édité ou non par le centre éditique (Balise Edition dans bloc pièce du PES Titre).")
+    choix_type_pj = [
+        ("002", "002-Recette"),
+        ("006", "006-PESFacture"),
+        ("007", "007-Facture ORMC"),
+        ("008", "008-Document complémentaire ASAP Chorus"),
+        ("010", "010-Facture ASAP associée à un ORMC (en PDF) hors Chorus"),
+        ("011", "011-Pièce complémentaire à l'ASAP (titre ou ORMC) hors Chorus"),
+    ]
+    type_pj = models.CharField(verbose_name="Type de pièce jointe", max_length=100, choices=choix_type_pj, default="006", blank=True, null=True, help_text="Sélectionnez le type de pièce jointe (Balise TypPJPES).")
     nom_tribunal = models.CharField(verbose_name="Nom du tribunal", max_length=400, blank=True, null=True, default="le tribunal administratif", help_text="Saisissez le nom du tribunal administratif de recours.")
     inclure_detail = models.BooleanField(verbose_name="Inclure le détail des factures", default=True, help_text="Cochez cette case si vous souhaitez que Noethys intègre le détail des prestations de chaque facture.")
     inclure_pieces_jointes = models.BooleanField(verbose_name="Inclure les factures au format PDF", default=True, help_text="Cochez cette case si vous souhaitez que Noethys intègre les factures au format PDF.")

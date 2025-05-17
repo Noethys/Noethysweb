@@ -516,7 +516,7 @@ class Exporter():
                 ligne_pj[3] = ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece, piece=piece)[:255], majuscules=True)
 
                 # TypPJPES - Texte (3)
-                ligne_pj[4] = ConvertToTexte("006")
+                ligne_pj[4] = ConvertToTexte(self.lot.modele.type_pj)
 
                 # TypDoc - Texte (2)
                 ligne_pj[6] = ConvertToTexte("02")
