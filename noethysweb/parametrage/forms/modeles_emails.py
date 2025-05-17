@@ -40,7 +40,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.fields['defaut'].label = "Définir comme modèle par défaut"
         if len(ModeleEmail.objects.filter(categorie=categorie)) == 0 or self.instance.defaut == True:
             self.fields['defaut'].initial = True
-            self.fields['defaut'].disabled = True
+            # self.fields['defaut'].disabled = True
 
         # Récupère la liste des mots-clés
         liste_mots_cles = data_modeles_emails.Get_mots_cles(categorie)
