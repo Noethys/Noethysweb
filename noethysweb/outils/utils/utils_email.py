@@ -11,6 +11,7 @@ from django.core import mail as djangomail
 from django.core import signing
 from django.core.cache import cache
 from django.core.mail import EmailMultiAlternatives
+from django.core.validators import validate_email
 from django.db.models import Q
 from django.contrib import messages
 from email.mime.image import MIMEImage
@@ -20,11 +21,12 @@ from core.utils import utils_dates, utils_historique, utils_texte
 
 class Validation_adresse():
     """ Validation d'une adresse mail """
-    def __init__(self):
-        self.regex = re.compile(r"([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+")
-
     def Check(self, adresse=""):
-        return re.search(self.regex, adresse)
+        try:
+            validate_email(adresse)
+        except:
+            return False
+        return True
 
 
 def Envoyer_model_mail(idmail=None, request=None):
