@@ -1,3 +1,12 @@
+Version 1.2.9.5 (26/05/2025) :
+
+- Ajout de nouvelles valeurs à l'option Blocage si impayés
+- Ajout du nombre total dans le PDF des inscrits à une activité
+- Ajout du paramètre Type de pièce dans l'export vers Gestion Financière
+- Retire le défaut obligatoire des modèles d'emails
+- Correction de la vérification de cohérence des adresses mail
+- Correction du paiement en ligne Payzen en 3 fois standard
+
 Version 1.2.9.4 (07/05/2025) :
 
 - Ajout de l'envoi d'emails depuis l'importation des quotients par lot
