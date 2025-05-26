@@ -159,13 +159,17 @@ def effectuer_paiement_en_ligne(request):
             if montant_reglement < montant_minimal_echelonnement:
                 return JsonResponse({"erreur": "Le paiement en plusieurs fois nécessite un montant minimal de %s € !" % montant_minimal_echelonnement}, status=401)
 
-            # Calcul des dates et montants échelonnés
+            # 3 fois standard
             montant_total = float(montant_reglement) * 100
-            today = datetime.date.today()
-            paiement_1 = "%s=%d" % (today.strftime("%Y%m%d"), (montant_total // 3) + (montant_total % 3))
-            paiement_2 = "%s=%d" % ((today + datetime.timedelta(days=30)).strftime("%Y%m%d"), montant_total // 3)
-            paiement_3 = "%s=%d" % ((today + datetime.timedelta(days=60)).strftime("%Y%m%d"), montant_total // 3)
-            vads_payment_config = "MULTI_EXT:%s;%s;%s" % (paiement_1, paiement_2, paiement_3)
+            vads_payment_config = "MULTI:first=%d;count=3;period=30" % ((montant_total // 3) + (montant_total % 3))
+
+            # N fois avancé : Calcul des dates et montants échelonnés
+            # montant_total = float(montant_reglement) * 100
+            # today = datetime.date.today()
+            # paiement_1 = "%s=%d" % (today.strftime("%Y%m%d"), (montant_total // 3) + (montant_total % 3))
+            # paiement_2 = "%s=%d" % ((today + datetime.timedelta(days=30)).strftime("%Y%m%d"), montant_total // 3)
+            # paiement_3 = "%s=%d" % ((today + datetime.timedelta(days=60)).strftime("%Y%m%d"), montant_total // 3)
+            # vads_payment_config = "MULTI_EXT:%s;%s;%s" % (paiement_1, paiement_2, paiement_3)
         else:
             vads_payment_config = "SINGLE"
         requete = p.request(amount=montant_reglement, email=request.user.famille.mail, vads_payment_config=vads_payment_config)
