@@ -74,7 +74,7 @@ class View(Onglet, TemplateView):
         dict_colonnes = {unite.pk: index for index, unite in enumerate(liste_unites, start=1)}
 
         # Importation des ouvertures
-        liste_ouvertures = Ouverture.objects.values("date", "unite").filter(activite_id=idactivite).distinct()
+        liste_ouvertures = Ouverture.objects.values("date", "unite").filter(activite_id=idactivite, unite__in=liste_unites).distinct()
 
         # Analyse des ouvertures
         dict_ouvertures = {}
