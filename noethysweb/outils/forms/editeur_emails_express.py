@@ -71,7 +71,7 @@ class Formulaire(FormulaireBase, ModelForm):
                             selection_defaut = dest
 
             if destinataire.categorie == "saisie_libre" and destinataire.adresse:
-                dest = "%s <%s>" % (destinataire.adresse, destinataire.adresse)
+                dest = "%s <%s>" % (destinataire.adresse.split("@")[0], destinataire.adresse)
                 liste_dest.append(dest)
                 selection_defaut = dest
 
