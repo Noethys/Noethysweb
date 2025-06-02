@@ -187,37 +187,49 @@ class Dupliquer(Page, crud.Dupliquer):
                 nouvel_objet = deepcopy(objet)
                 nouvel_objet.pk = None
 
-                # Traitement des ForeignKey
-                for key, valeur in Get_correspondances(correspondances, objet).items():
-                    setattr(nouvel_objet, key, valeur)
-                nouvel_objet.save()
+                try:
+                    # Traitement des ForeignKey
+                    for key, valeur in Get_correspondances(correspondances, objet).items():
+                        setattr(nouvel_objet, key, valeur)
+                    nouvel_objet.save()
 
-                # Mémorisation des correspondances
-                correspondances.setdefault(objet._meta.object_name, {})
-                correspondances[objet._meta.object_name][objet.pk] = nouvel_objet.pk
+                    # Mémorisation des correspondances
+                    correspondances.setdefault(objet._meta.object_name, {})
+                    correspondances[objet._meta.object_name][objet.pk] = nouvel_objet.pk
 
-                # Duplication des champs manytomany
-                for field in classe._meta.get_fields():
-                    if field.__class__.__name__ == "ManyToManyField":
-                        getattr(nouvel_objet, field.name).set(getattr(objet, field.name).all(), through_defaults=Get_correspondances(correspondances, objet))
+                    # Duplication des champs manytomany
+                    for field in classe._meta.get_fields():
+                        if field.__class__.__name__ == "ManyToManyField":
+                            getattr(nouvel_objet, field.name).set(getattr(objet, field.name).all(), through_defaults=Get_correspondances(correspondances, objet))
+                except:
+                    pass
 
         # Unite de remplissage
         for objet in UniteRemplissage.objects.filter(activite=nouvelle_activite):
-            objet.unites.set(Unite.objects.filter(pk__in=[correspondances["Unite"][obj.pk] for obj in objet.unites.all()]))
+            try:
+                objet.unites.set(Unite.objects.filter(pk__in=[correspondances["Unite"][obj.pk] for obj in objet.unites.all()]))
+            except:
+                pass
 
         # Tarif
         for objet in Tarif.objects.filter(activite=nouvelle_activite):
-            objet.categories_tarifs.set(CategorieTarif.objects.filter(pk__in=[correspondances["CategorieTarif"][obj.pk] for obj in objet.categories_tarifs.all()]))
-            objet.groupes.set(Groupe.objects.filter(pk__in=[correspondances["Groupe"][obj.pk] for obj in objet.groupes.all()]))
+            try:
+                objet.categories_tarifs.set(CategorieTarif.objects.filter(pk__in=[correspondances["CategorieTarif"][obj.pk] for obj in objet.categories_tarifs.all()]))
+                objet.groupes.set(Groupe.objects.filter(pk__in=[correspondances["Groupe"][obj.pk] for obj in objet.groupes.all()]))
+            except:
+                pass
 
         # CombiTarif
         for objet in CombiTarif.objects.filter(tarif_id__in=correspondances.get("Tarif", [])):
-            nouvel_objet = deepcopy(objet)
-            nouvel_objet.pk = None
-            nouvel_objet.tarif_id = correspondances["Tarif"][objet.tarif_id]
-            nouvel_objet.groupe_id = correspondances["Groupe"][objet.groupe_id] if objet.groupe_id else None
-            nouvel_objet.save()
-            nouvel_objet.unites.set(Unite.objects.filter(pk__in=[correspondances["Unite"][obj.pk] for obj in objet.unites.all()]))
+            try:
+                nouvel_objet = deepcopy(objet)
+                nouvel_objet.pk = None
+                nouvel_objet.tarif_id = correspondances["Tarif"][objet.tarif_id]
+                nouvel_objet.groupe_id = correspondances["Groupe"][objet.groupe_id] if objet.groupe_id else None
+                nouvel_objet.save()
+                nouvel_objet.unites.set(Unite.objects.filter(pk__in=[correspondances["Unite"][obj.pk] for obj in objet.unites.all()]))
+            except:
+                pass
 
         # Redirection
         url = reverse(self.url_modifier, args=[nouvelle_activite.pk,]) if "dupliquer_ouvrir" in request.POST else None
