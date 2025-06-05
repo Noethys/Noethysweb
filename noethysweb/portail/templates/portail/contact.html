@@ -53,6 +53,7 @@
                             <div><strong>{{ structure.nom }}</strong></div>
                             {% if structure.rue or structure.cp or structure.ville %}<div><i class='fa fa-map-marker margin-r-5'></i>{{ structure.rue }} {{ structure.cp }} {{ structure.ville }}</div>{% endif %}
                             {% if structure.tel %}<div><i class='fa fa-phone margin-r-5'></i>{{ structure.tel }}</div>{% endif %}
+                            {% if structure.mail %}<div><i class='fa fa-envelope-o margin-r-5'></i>{{ structure.mail }}</div>{% endif %}
                             {% if structure.site %}<div><i class='fa fa-globe margin-r-5'></i><a href="http://{{ structure.site }}" target="_blank">{{ structure.site }}</a></div>{% endif %}
                         </div>
                     {% endfor %}
