@@ -34,6 +34,7 @@ urlpatterns = [
     path('locations/planning/valid_form_detail_location', secure_ajax(planning_locations.Valid_form_detail_location), name='ajax_planning_locations_valid_form_detail_location'),
     path('locations/planning/modifier_location', secure_ajax(planning_locations.Modifier_location), name='ajax_planning_locations_modifier_location'),
     path('locations/planning/supprimer_location', secure_ajax(planning_locations.Supprimer_location), name='ajax_planning_locations_supprimer_location'),
+    path('locations/planning/supprimer_occurences', secure_ajax(planning_locations.Supprimer_occurences), name='ajax_planning_locations_supprimer_occurences'),
     path('locations/planning/get_form_parametres', secure_ajax(planning_locations.Get_form_parametres), name='ajax_planning_locations_get_form_parametres'),
     path('locations/planning/valid_form_parametres', secure_ajax(planning_locations.Valid_form_parametres), name='ajax_planning_locations_valid_form_parametres'),
 ]

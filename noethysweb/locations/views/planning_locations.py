@@ -15,8 +15,9 @@ from core.models import Produit, Location
 from core.views.base import CustomView
 from core.utils import utils_parametres
 from locations.forms.planning_locations_parametres import Formulaire as Formulaire_parametres
+from locations.forms.supprimer_occurences import Formulaire as Form_supprimer_occurences
 from fiche_famille.forms.famille_locations import Formulaire, FORMSET_PRESTATIONS
-from fiche_famille.views.famille_locations import Form_valid_ajouter, Form_valid_modifier
+from fiche_famille.views.famille_locations import Form_valid_ajouter, Form_valid_modifier, Supprime_occurences
 
 
 def Get_parametres(request):
@@ -178,7 +179,28 @@ def Modifier_location(request):
 
 
 def Supprimer_location(request):
-    Location.objects.get(pk=int(request.POST["idlocation"])).delete()
+    location = Location.objects.get(pk=int(request.POST["idlocation"]))
+    if location.serie:
+        form = Form_supprimer_occurences(request=request, mode="planning_locations", idlocation=location.pk)
+        return JsonResponse({"form_html": render_crispy_form(form, context=csrf(request))})
+    else:
+        location.delete()
+        return JsonResponse({"succes": True})
+
+
+def Supprimer_occurences(request):
+    # Récupération des paramètres du formulaire de suppression
+    idlocation = int(request.POST["idlocation"])
+    form = Form_supprimer_occurences(request.POST, request=request, mode="planning_locations")
+    if not form.is_valid():
+        liste_erreurs = ", ".join([erreur[0].message for field, erreur in form.errors.as_data().items()])
+        return JsonResponse({"erreur": liste_erreurs}, status=401)
+
+    # Supprime les occurences
+    resultat = Supprime_occurences(idlocation=idlocation, donnees=form.cleaned_data["donnees"], periode=form.cleaned_data["periode"])
+    if resultat != True:
+        return JsonResponse({"erreur": resultat}, status=401)
+
     return JsonResponse({"succes": True})
 
 

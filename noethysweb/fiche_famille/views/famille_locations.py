@@ -216,45 +216,12 @@ class Supprimer_occurence(Page, crud.Supprimer):
     def post(self, request, **kwargs):
         form = Formulaire_supprimer_occurences(request.POST)
         form.is_valid()
-
-        # Importation des objets à supprimer
-        objet_selection = Location.objects.get(pk=kwargs["pk"])
-        if form.cleaned_data["donnees"] == "OCCURENCE":
-            objets = [objet_selection,]
-        elif form.cleaned_data["donnees"] == "PERIODE":
-            date_debut, date_fin = utils_dates.ConvertDateRangePicker(form.cleaned_data["periode"])
-            objets = Location.objects.filter(serie=objet_selection.serie, date_debut__date__gte=date_debut, date_fin__date__lte=date_fin)
-        else:
-            objets = Location.objects.filter(serie=objet_selection.serie)
-
-        # Check protections
-        protections = []
-        prestations_facturees = {}
-        for prestation in Prestation.objects.filter(location__in=objets, facture__isnull=False):
-            prestations_facturees[prestation.location_id] = True
-        for location in objets:
-            if location.pk in prestations_facturees:
-                protections.append("La location ID%d est déjà facturée" % location.pk)
-        if protections:
-            messages.add_message(request, messages.ERROR, "Suppression impossible : " + ". ".join(protections))
+        
+        # Suppression des occurences
+        resultat = Supprime_occurences(idlocation=kwargs["pk"], donnees=form.cleaned_data["donnees"], periode=form.cleaned_data["periode"], self=self)
+        if resultat != True:
+            messages.add_message(request, messages.ERROR, resultat)
             return HttpResponseRedirect(self.get_success_url(), status=303)
-
-        # Suppression des objets
-        for objet in objets:
-            pk = objet.pk
-            try:
-                message_erreur = objet.delete()
-                if isinstance(message_erreur, str):
-                    messages.add_message(request, messages.ERROR, message_erreur)
-                    return HttpResponseRedirect(self.get_success_url(), status=303)
-            except ProtectedError as e:
-                texte_resultats = crud.Formate_liste_objets(objets=e.protected_objects)
-                messages.add_message(request, messages.ERROR, "La suppression de '%s' est impossible car cet élément est rattaché aux données suivantes : %s." % (objet, texte_resultats))
-                return HttpResponseRedirect(self.get_success_url(), status=303)
-
-            # Enregistrement dans l'historique
-            objet.pk = pk
-            self.save_historique(objet)
 
         # Confirmation de la suppression
         messages.add_message(self.request, messages.SUCCESS, 'Suppressions effectuées avec succès')
@@ -439,3 +406,44 @@ def Calcule_occurences(cleaned_data={}):
 
         dateTemp = date
     return liste_resultats
+
+
+def Supprime_occurences(idlocation=None, donnees=None, periode=None, self=None):
+    # Importation des objets à supprimer
+    objet_selection = Location.objects.get(pk=idlocation)
+    if donnees == "OCCURENCE":
+        objets = [objet_selection,]
+    elif donnees == "PERIODE":
+        date_debut, date_fin = utils_dates.ConvertDateRangePicker(periode)
+        objets = Location.objects.filter(serie=objet_selection.serie, date_debut__date__gte=date_debut, date_fin__date__lte=date_fin)
+    else:
+        objets = Location.objects.filter(serie=objet_selection.serie)
+
+    # Check protections
+    protections = []
+    prestations_facturees = {}
+    for prestation in Prestation.objects.filter(location__in=objets, facture__isnull=False):
+        prestations_facturees[prestation.location_id] = True
+    for location in objets:
+        if location.pk in prestations_facturees:
+            protections.append("La location ID%d est déjà facturée" % location.pk)
+    if protections:
+        return "Suppression impossible : " + ". ".join(protections)
+
+    # Suppression des objets
+    for objet in objets:
+        pk = objet.pk
+        try:
+            message_erreur = objet.delete()
+            if isinstance(message_erreur, str):
+                return message_erreur
+        except ProtectedError as e:
+            texte_resultats = crud.Formate_liste_objets(objets=e.protected_objects)
+            return "La suppression de '%s' est impossible car cet élément est rattaché aux données suivantes : %s." % (objet, texte_resultats)
+
+        # Enregistrement dans l'historique
+        objet.pk = pk
+        if self:
+            self.save_historique(objet)
+
+    return True

@@ -5,7 +5,7 @@
 
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, HTML, ButtonHolder
+from crispy_forms.layout import Layout, Hidden, HTML, ButtonHolder
 from crispy_forms.bootstrap import Field
 from core.widgets import DateRangePickerWidget
 from core.forms.base import FormulaireBase
@@ -17,17 +17,30 @@ class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
 
     def __init__(self, *args, **kwargs):
+        mode = kwargs.pop("mode", None)
+        idlocation = kwargs.pop("idlocation", 0)
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'form_parametres_supprimer_occurences'
         self.helper.form_method = 'post'
 
+        if mode == "planning_locations":
+            liste_boutons = [
+                HTML("""<a class='btn btn-warning' onclick="supprimer_occurences();"><i class="fa fa-trash margin-r-5"></i>Supprimer</a> """),
+                HTML("""<a class="btn btn-danger" onclick="$('#modal_supprimer_occurences').modal('hide');"><i class='fa fa-ban margin-r-5'></i>Annuler</a>"""),
+            ]
+        else:
+            liste_boutons = [
+                HTML("""<button class='btn btn-warning' onclick="$('#form_parametres_supprimer_occurences').submit()"><i class="fa fa-trash margin-r-5"></i>Supprimer</button> """),
+                HTML("""<a class="btn btn-danger" href="{{ view.get_success_url }}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>"""),
+            ]
+
         self.helper.layout = Layout(
+            Hidden("idlocation", value=idlocation),
             Field("donnees"),
             Field("periode"),
             ButtonHolder(
-                HTML("""<button class='btn btn-warning' onclick="$('#form_parametres_supprimer_occurences').submit()"><i class="fa fa-trash margin-r-5"></i>Supprimer</button> """),
-                HTML("""<a class="btn btn-danger" href="{{ view.get_success_url }}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>"""),
+                *liste_boutons,
                 css_class="pull-right",
             ),
             HTML(EXTRA_HTML),

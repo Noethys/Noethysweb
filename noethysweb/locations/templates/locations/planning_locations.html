@@ -18,7 +18,6 @@
 {% endblock scripts %}
 
 {% block contenu_page %}
-
     <div style="height: 75vh;">
         <div id="calendar"></div>
     </div>
@@ -215,6 +214,28 @@
                 data: {"idlocation": idlocation},
                 datatype: "json",
                 success: function(data){
+                    if (data.succes) {
+                        $("#modal_detail_location").modal("hide");
+                        calendar.refetchEvents();
+                    } else {
+                        $("#id_div_form_supprimer_occurences").html(data["form_html"]);
+                        $("#modal_supprimer_occurences").modal("show");
+                    }
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            });
+        }
+
+        function supprimer_occurences() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_planning_locations_supprimer_occurences' %}",
+                data: $("#form_parametres_supprimer_occurences").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $("#modal_supprimer_occurences").modal("hide");
                     $("#modal_detail_location").modal("hide");
                     calendar.refetchEvents();
                 },
@@ -293,6 +314,17 @@
         {% block modal_classe %}modal-lg{% endblock %}
         {% block modal_body %}
             <div id="id_div_form_parametres">
+            </div>
+        {% endblock %}
+    {% endembed %}
+
+    {# Modal Supprimer occurences #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_supprimer_occurences{% endblock %}
+        {% block modal_titre %}Supprimer{% endblock %}
+        {% block modal_body %}
+            <p>Cette location fait partie d'une série de plusieurs occurences.</p>
+            <div id="id_div_form_supprimer_occurences">
             </div>
         {% endblock %}
     {% endembed %}
