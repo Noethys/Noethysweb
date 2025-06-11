@@ -11,7 +11,7 @@ from reportlab.platypus import Paragraph, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
-from core.models import Inscription, Ventilation, Prestation, Rattachement, Cotisation
+from core.models import Inscription, Ventilation, Prestation, Rattachement, Cotisation, ContactUrgence, Scolarite
 from core.utils import utils_texte, utils_impression, utils_questionnaires
 
 
@@ -60,6 +60,25 @@ class Impression(utils_impression.Impression):
                         liste_mail.append("%s : %s" % (individu.prenom, individu.mail))
             return " | ".join(liste_mail)
 
+        # Recherche des contacts d'urgence
+        contacts = {}
+        for contact in ContactUrgence.objects.filter(individu_id__in=[inscription.individu_id for inscription in inscriptions]):
+            contacts.setdefault((contact.famille_id, contact.individu_id), [])
+            contacts[(contact.famille_id, contact.individu_id)].append(contact)
+
+        def Rechercher_tel_contacts(inscription=None):
+            liste_tel = []
+            for contact in contacts.get((inscription.famille_id, inscription.individu_id), []):
+                autorisations = []
+                if contact.autorisation_sortie: autorisations.append("Sortie")
+                if contact.autorisation_sortie: autorisations.append("Appel")
+                tels = []
+                if contact.tel_mobile: tels.append(contact.tel_mobile)
+                if contact.tel_domicile: tels.append(contact.tel_domicile)
+                if contact.tel_travail: tels.append(contact.tel_travail)
+                liste_tel.append("%s %s (%s - %s) : %s" % (contact.nom or "", contact.prenom or "", contact.lien or "Lien inconnu", "+".join(autorisations), ", ".join(tels)))
+            return " | ".join(liste_tel)
+
         # Recherche des cotisations
         dict_cotisations = {}
         for cotisation in Cotisation.objects.filter(date_debut__lte=self.dict_donnees["activite"].date_fin, date_fin__gte=self.dict_donnees["activite"].date_debut).order_by("-date_debut"):
@@ -71,6 +90,11 @@ class Impression(utils_impression.Impression):
                 if not cotisation.individu_id or cotisation.individu_id == inscription.individu_id:
                     return str(cotisation.numero or "")
             return ""
+
+        # Scolarité
+        scolarites = {}
+        for scolarite in Scolarite.objects.select_related("ecole", "classe", "niveau").filter(individu_id__in=[inscription.individu_id for inscription in inscriptions], date_fin__gte=self.dict_donnees["date_situation"], date_debut__lte=self.dict_donnees["date_situation"]).order_by("date_debut"):
+            scolarites[scolarite.individu_id] = scolarite
 
         # Questionnaires
         questionnaires_individus = utils_questionnaires.ChampsEtReponses(categorie="individu", filtre_reponses=Q(individu__in=[i.individu for i in inscriptions]))
@@ -123,10 +147,13 @@ class Impression(utils_impression.Impression):
                 "portable": inscription.individu.tel_mobile,
                 "tel_parents": Rechercher_tel_parents(inscription),
                 "mail_parents": Rechercher_mail_parents(inscription),
+                "tel_contacts": Rechercher_tel_contacts(inscription),
                 "individu_ville": inscription.individu.ville_resid,
                 "famille": inscription.famille.nom,
                 "famille_ville": inscription.famille.ville_resid,
                 "num_cotisation": Rechercher_cotisation(inscription),
+                "ecole": scolarites[inscription.individu_id].ecole.nom if inscription.individu_id in scolarites else None,
+                "classe": scolarites[inscription.individu_id].classe.nom if inscription.individu_id in scolarites and scolarites[inscription.individu_id].classe else None,
                 "statut": inscription.get_statut_display(),
                 "solde": utils_texte.Formate_montant(dict_soldes.get((inscription.famille_id, inscription.individu_id), decimal.Decimal(0))),
             }

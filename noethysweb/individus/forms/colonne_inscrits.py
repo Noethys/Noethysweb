@@ -26,10 +26,13 @@ LISTE_CHOIX = [
     ("portable", "Tél. mobile", 50),
     ("individu_ville", "Ville de résidence", 70),
     ("tel_parents", "Tél parents", 50),
+    ("tel_contacts", "Tél contacts d'urgence et de sortie", 50),
     ("famille", "Nom de la famille", 70),
     ("mail_parents", "Mail parents", 70),
     ("famille_ville", "Ville de la famille", 70),
     ("num_cotisation", "Numéro d'adhésion", 30),
+    ("ecole", "Ecole", 50),
+    ("classe", "Classe", 50),
     ("statut", "Statut de l'inscription", 50),
     ("solde", "Solde", 50),
 ]
