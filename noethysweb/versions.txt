@@ -1,3 +1,13 @@
+Version 1.2.9.6 (19/06/2025) :
+
+- Ajout de nouvelles colonnes dans Imprimer une liste d'inscrits
+- Ajout de l'adresse mail de la structure sur la page Contact du portail
+- Ajout de la suppression des occurrences dans le planning des locations
+- Ajout de l'import depuis Enfance BL
+- Correction de la vérification de cohérence des adresses mail
+- Correction de la duplication d'activités
+- Correction du calendrier des ouvertures
+
 Version 1.2.9.5 (26/05/2025) :
 
 - Ajout de nouvelles valeurs à l'option Blocage si impayés
