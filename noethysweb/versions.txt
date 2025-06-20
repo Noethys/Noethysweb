@@ -1,3 +1,7 @@
+Version 1.2.9.7 (20/06/2025) :
+
+- Ajout du tarif Montant dégressif en fonction du qf et du nombre d'enfants inscrits
+
 Version 1.2.9.6 (19/06/2025) :
 
 - Ajout de nouvelles colonnes dans Imprimer une liste d'inscrits
