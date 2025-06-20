@@ -15,7 +15,7 @@ from django.core import serializers
 from django.conf import settings
 from crispy_forms.utils import render_crispy_form
 from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite, Consommation, MemoJournee, Evenement, Groupe, Ventilation, Famille, \
-                        Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Individu, Activite, Scolarite, QuestionnaireReponse
+                        Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Individu, Activite, Scolarite, QuestionnaireReponse, Inscription
 from core.utils import utils_dates, utils_decimal, utils_historique, utils_parametres
 from consommations.utils import utils_consommations
 from consommations.forms.grille_questionnaire import Formulaire as Formulaire_questionnaire
@@ -94,6 +94,20 @@ def Maj_tarifs_fratries(activite=None, prestations=[], liste_IDprestation_exista
                     liste_modifications.append(key)
 
         # Recherche les fratries
+        dict_inscrits_famille = {}
+
+        def Get_num_enfant_inscrit(idfamille=None, idindividu=None, date=None):
+            if famille_id not in dict_inscrits_famille:
+                dict_inscrits_famille[famille_id] = Inscription.objects.filter(famille_id=famille_id, activite=activite).order_by("individu__date_naiss")
+            liste_enfants = []
+            for inscription in dict_inscrits_famille.get(idfamille, []):
+                if str(inscription.date_debut) <= date and (not inscription.date_fin or str(inscription.date_fin) >= date):
+                    if inscription.individu_id not in liste_enfants:
+                        liste_enfants.append(inscription.individu_id)
+                    if inscription.individu_id == idindividu:
+                        return liste_enfants.index(inscription.individu_id) + 1
+            return 1
+
         if liste_modifications:
             for famille_id, tarif_id, date in liste_modifications:
                 if settings.ATTRIBUTION_TARIF_FRATERIE_TARIF_IDENTIQUE:
@@ -105,10 +119,10 @@ def Maj_tarifs_fratries(activite=None, prestations=[], liste_IDprestation_exista
                 liste_prestations_fratrie = Prestation.objects.select_related("tarif", "tarif_ligne", "individu").filter(condition).order_by("individu_id")
                 liste_prestations_fratrie = sorted(list(liste_prestations_fratrie), key=lambda prestation: (prestation.individu.date_naiss or datetime.date(1950, 1, 1), prestation.individu.pk), reverse=not settings.ATTRIBUTION_TARIF_FRATERIE_AINES)
                 for index, prestation in enumerate(liste_prestations_fratrie):
-                    if "degr" in prestation.tarif.methode:
-                        num_enfant = index + 1
+                    if "inscrits" in prestation.tarif.methode:
+                        num_enfant = Get_num_enfant_inscrit(idfamille=famille_id, idindividu=prestation.individu_id, date=date)
                     else:
-                        num_enfant = len(liste_prestations_fratrie)
+                        num_enfant = (index + 1) if "degr" in prestation.tarif.methode else len(liste_prestations_fratrie)
                     montant_deductions = prestation.montant_initial - prestation.montant
                     nouveau_montant = getattr(prestation.tarif_ligne, "montant_enfant_%d" % min(num_enfant, 6), decimal.Decimal(0))
                     if prestation.montant_initial != nouveau_montant:
