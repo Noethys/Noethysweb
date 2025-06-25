@@ -108,6 +108,9 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# statics
+noethysweb/static/
+
 # =========================
 # Operating System Files
 # =========================
