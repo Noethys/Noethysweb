@@ -1069,6 +1069,12 @@ $(function () {
         else if (touche_clavier === 67) {case_tableau.copier()}
         else if (touche_clavier === 83) {case_tableau.supprimer()}
         else {
+            // Pointage one click
+            if ($("#switch_pointage_one_click").is(":checked")) {
+                case_tableau.set_etat($("#mode_saisie").val());
+                return;
+            }
+
             // Toggle sur la case cliquée
             if (case_tableau.has_conso() === statut) {case_tableau.toggle()};
 

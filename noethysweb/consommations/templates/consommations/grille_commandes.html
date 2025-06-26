@@ -36,11 +36,11 @@
         </div>
 
         <div>
-            <div class="input-group input-group-sm" style="width: 140px;">
+            <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
                     <button type="submit" class="input-group-text"><i class="fa fa-pencil"></i></button>
                 </div>
-                <select class="select form-control form-control-sm text-sm" id="mode_saisie" title="Sélection du mode de saisie">
+                <select style="width: 130px;" class="select form-control form-control-sm text-sm" id="mode_saisie" title="Sélection du mode de saisie">
                     <option value="reservation">Réservation</option>
                     <option value="attente">Attente</option>
                     <option value="refus">Refus</option>
@@ -49,6 +49,14 @@
                     <option value="absenti">Absence injustifiée</option>
                     <option value="demande">Demande</option>
                 </select>
+                <div class="input-group-append">
+                    <span class="input-group-text p-0 pl-2">
+                        <span class="custom-switch custom-switch-on-primary" title="Activer le pointage en 1 clic">
+                            <input type="checkbox" class="custom-control-input case_switch" id="switch_pointage_one_click">
+                            <label class="custom-control-label" for="switch_pointage_one_click"></label>
+                        </span>
+                    </span>
+                </div>
             </div>
         </div>
 
