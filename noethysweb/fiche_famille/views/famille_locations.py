@@ -363,6 +363,7 @@ def Calcule_occurences(cleaned_data={}):
         listeDates.append(tmp)
 
     date = cleaned_data["recurrence_date_debut"]
+    frequence_type = int(cleaned_data["recurrence_frequence_type"])
     numSemaine = int(cleaned_data["recurrence_frequence_type"])
     dateTemp = date
     for date in listeDates:
@@ -382,16 +383,16 @@ def Calcule_occurences(cleaned_data={}):
                 numSemaine += 1
 
         # Fréquence semaines
-        if cleaned_data["recurrence_frequence_type"] in (2, 3, 4):
-            if numSemaine % cleaned_data["recurrence_frequence_type"] != 0:
+        if frequence_type in (2, 3, 4):
+            if numSemaine % frequence_type != 0:
                 valide = False
 
         # Semaines paires et impaires
-        if valide == True and cleaned_data["recurrence_frequence_type"] in (5, 6):
+        if valide == True and frequence_type in (5, 6):
             numSemaineAnnee = date.isocalendar()[1]
-            if numSemaineAnnee % 2 == 0 and cleaned_data["recurrence_frequence_type"] == 6:
+            if numSemaineAnnee % 2 == 0 and frequence_type == 6:
                 valide = False
-            if numSemaineAnnee % 2 != 0 and cleaned_data["recurrence_frequence_type"] == 5:
+            if numSemaineAnnee % 2 != 0 and frequence_type == 5:
                 valide = False
 
         # Vérifie si férié
