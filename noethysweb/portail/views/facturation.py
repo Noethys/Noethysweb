@@ -308,8 +308,18 @@ def Enregistrement_reglement(paiement=None, vads_payment_config=None):
         compte = CompteBancaire.objects.get(pk=int(parametres_portail.get("paiement_ligne_compte_bancaire")))
         num_piece = IDtransaction
         if vads_payment_config.startswith("MULTI"):
-            # Paiement en plusieurs fois
-            liste_paiements = [(float(montant) / 100, datetime.datetime.strptime(date, "%Y%m%d")) for date, montant in re.findall(r"([0-9]+)>([0-9]+)", vads_payment_config)]
+            if "first" in vads_payment_config:
+                # Paiement simple en 3 fois
+                params = {param.split(">")[0]: param.split(">")[1] for param in vads_payment_config[6:].split(";")}
+                premier_montant = decimal.Decimal(float(params["first"]) / 100)
+                liste_paiements = [
+                    (premier_montant, datetime.date.today()),
+                    ((paiement.montant-premier_montant) / 2, datetime.date.today() + datetime.timedelta(days=int(params["period"]))),
+                    ((paiement.montant-premier_montant) / 2, datetime.date.today() + datetime.timedelta(days=int(params["period"])*2)),
+                ]
+            else:
+                # Paiement avancé en plusieurs fois
+                liste_paiements = [(decimal.Decimal(float(montant) / 100), datetime.datetime.strptime(date, "%Y%m%d")) for date, montant in re.findall(r"([0-9]+)>([0-9]+)", vads_payment_config)]
 
     if "payfip" in paiement.systeme_paiement:
         compte = factures[0].regie.compte_bancaire
@@ -346,7 +356,7 @@ def Enregistrement_reglement(paiement=None, vads_payment_config=None):
 
         reglement = Reglement.objects.create(
             famille=paiement.famille,
-            date=datetime.date.today(),
+            date=date_paiement,
             mode=ModeReglement.objects.get(pk=int(parametres_portail.get("paiement_ligne_mode_reglement"))),
             numero_piece=num_piece,
             montant=decimal.Decimal(montant_paiement),
