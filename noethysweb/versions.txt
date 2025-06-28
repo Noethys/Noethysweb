@@ -1,3 +1,9 @@
+Version 1.2.9.8 (29/06/2025) :
+
+- Ajout du pointage en 1 clic
+- Correction du calcul de la fréquence de récurrence d'une location
+- Correction du paiement Payzen simple en 3 fois
+
 Version 1.2.9.7 (20/06/2025) :
 
 - Ajout du tarif Montant dégressif en fonction du qf et du nombre d'enfants inscrits
