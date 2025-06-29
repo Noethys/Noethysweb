@@ -52,7 +52,7 @@ class View(CustomView, TemplateView):
         context['data'] = self.resultats
         return context
 
-    def dispatch(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         """ Affichage direct de la fiche famille en cas de réponse unique """
         self.resultats = self.Get_resultats()
         if "reponse_unique_famille" in self.resultats:
@@ -63,7 +63,7 @@ class View(CustomView, TemplateView):
         if "reponse_unique_collaborateur" in self.resultats:
             collaborateur = self.resultats["reponse_unique_collaborateur"]
             return redirect(str(reverse_lazy("collaborateur_resume", kwargs={'idcollaborateur': collaborateur.pk})))
-        return super(View, self).dispatch(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def Get_resultats(self):
         texte = self.request.GET.get("champ_recherche")
