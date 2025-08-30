@@ -105,13 +105,18 @@ def Enregistrer(request):
     dict_resultats = {}
     for dict_temp in liste_familles:
         famille = Famille.objects.get(pk=dict_temp["idfamille"])
+        type_quotient = Get_type_quotient(dict_temp["fournisseur"])
         data = {
             "famille": famille.pk,
             "date_debut": str(parametres["date_debut"]),
             "date_fin": str(parametres["date_fin"]),
             "quotient": dict_temp["valeur"],
-            "type_quotient": Get_type_quotient(dict_temp["fournisseur"]).pk
+            "type_quotient": type_quotient.pk if type_quotient else None
         }
+
+        if not type_quotient:
+            dict_resultats[famille] = "Type de quotient inconnu"
+            continue
 
         form = Formulaire_quotient(data=data, idfamille=famille.pk)
         if not form.is_valid():
