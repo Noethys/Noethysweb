@@ -1329,6 +1329,7 @@ class Unite(models.Model):
     equiv_journees = models.FloatField(verbose_name="Equivalence en journées", blank=True, null=True)
     equiv_heures = models.TimeField(verbose_name="Equivalence en heures", blank=True, null=True)
     dependances = models.ManyToManyField("self", verbose_name="Unités liées", blank=True, symmetrical=False)
+    solidaires = models.ManyToManyField("self", verbose_name="Unités solidaires", related_name="unites_solidaires", blank=True, symmetrical=False)
 
     class Meta:
         db_table = 'unites'

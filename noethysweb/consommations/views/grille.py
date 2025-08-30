@@ -324,7 +324,7 @@ def Get_generic_data(data={}):
     groupes_utilises = list({inscription.groupe: True for inscription in data['liste_inscriptions']}.keys()) + data.get("selection_groupes", [])
     categories_tarifs_utilisees = list({inscription.categorie_tarif: True for inscription in data['liste_inscriptions']}.keys())
     conditions = (Q(groupes__in=groupes_utilises) | Q(groupes__isnull=True)) & (Q(categories_tarifs__in=categories_tarifs_utilisees) | Q(categories_tarifs__isnull=True))
-    data["liste_unites"] = Unite.objects.select_related('activite').prefetch_related('groupes', 'incompatibilites', 'dependances').filter(conditions, activite=data['selection_activite']).distinct().order_by("ordre")
+    data["liste_unites"] = Unite.objects.select_related('activite').prefetch_related('groupes', 'incompatibilites', 'dependances', 'solidaires').filter(conditions, activite=data['selection_activite']).distinct().order_by("ordre")
 
     # Sélection des unités visibles
     data["liste_unites_visibles"] = [unite for unite in data["liste_unites"] if unite.pk in liste_unites_ouvertes and (unite.visible_portail or data["mode"] != "portail")]
@@ -365,7 +365,8 @@ def Get_generic_data(data={}):
             "unites_remplissage": dict_unites_remplissage_unites.get(unite.pk, []),
             "heure_debut_min": str(unite.heure_debut_min or ""), "heure_debut_max": str(unite.heure_debut_max or ""),
             "heure_fin_min": str(unite.heure_fin_min or ""), "heure_fin_max": str(unite.heure_fin_max or ""),
-            "dependances": [u.pk for u in unite.dependances.all()]}})
+            "dependances": [u.pk for u in unite.dependances.all()],
+            "solidaires": [u.pk for u in unite.solidaires.all()]}})
     data['liste_unites_json'] = json.dumps(liste_unites_json)
 
     # Conversion au format json
@@ -618,6 +619,7 @@ def Facturer(request=None):
         donnees_aller["prestations"].update(donnees_retour["nouvelles_prestations"])
         donnees_save = {
             "mode": donnees_aller.get("mode", None),
+            "activite": donnees_aller.get("activite", None),
             "consommations": donnees_aller["consommations"],
             "prestations": donnees_aller["prestations"],
             "suppressions": {
@@ -1718,10 +1720,9 @@ class Facturation():
                     appliquer_penalite = True
 
             if appliquer_penalite:
-                if tarif.penalite_pourcentage:
-                    if isinstance(montant_tarif, float):
-                        montant_tarif = decimal.Decimal(montant_tarif)
-                    montant_tarif = montant_tarif * tarif.penalite_pourcentage / 100
+                if isinstance(montant_tarif, float):
+                    montant_tarif = decimal.Decimal(montant_tarif)
+                montant_tarif = montant_tarif * tarif.penalite_pourcentage / 100
                 if tarif.penalite_label:
                     nom_tarif = tarif.penalite_label.replace("{LABEL_PRESTATION}", nom_tarif)
 

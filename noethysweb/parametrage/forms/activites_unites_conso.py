@@ -49,11 +49,15 @@ class Formulaire(FormulaireBase, ModelForm):
     dependances = forms.ModelMultipleChoiceField(label="Unités liées", widget=Select2MultipleWidget(), queryset=Unite.objects.none(), required=False,
                                                  help_text="Cette unité héritera de l'état des unités liées et sera supprimée en cas d'absence de l'une des unités liées. Par exemple, un repas ne peut exister seul s'il n'y pas de journée, de matinée ou d'après-midi saisies.")
 
+    # Solidaires
+    solidaires = forms.ModelMultipleChoiceField(label="Unités solidaires", widget=Select2MultipleWidget(), queryset=Unite.objects.none(), required=False,
+                                                 help_text="Lorsque cette unité sera ajoutée sur le portail par les usagers, les unités solidaires seront automatiquement ajoutées.")
+
     class Meta:
         model = Unite
         fields = ["ordre", "activite", "nom", "abrege", "type", "heure_debut", "heure_fin", "heure_debut_fixe", "heure_fin_fixe",
                   "repas", "restaurateur", "touche_raccourci", "date_debut", "date_fin", "groupes", "categories_tarifs", "incompatibilites", "visible_portail", "imposer_saisie_valeur",
-                  "heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "equiv_journees", "equiv_heures", "dependances"]
+                  "heure_debut_min", "heure_debut_max", "heure_fin_min", "heure_fin_max", "equiv_journees", "equiv_heures", "dependances", "solidaires"]
         help_texts = {
             "nom": "Saisissez le nom de l'unité. Exemple : Journée, Matin, repas, Séance, Atelier...",
             "abrege": "Saisissez quelques caractères en majuscules ou des chiffres. Exemples : J, M, R, SEANCE, ATELIER...",
@@ -95,6 +99,9 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Dépendances
         self.fields['dependances'].queryset = Unite.objects.filter(activite=activite).exclude(pk=self.instance.pk)
+
+        # Solidaires
+        self.fields['solidaires'].queryset = Unite.objects.filter(activite=activite).exclude(pk=self.instance.pk)
 
         # Importe la durée de validité
         if self.instance.date_fin in (None, datetime.date(2999, 1, 1)):
@@ -141,6 +148,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("restaurateur"),
                 Field("touche_raccourci"),
                 Field("dependances"),
+                Field("solidaires"),
                 Field("visible_portail"),
                 Field("imposer_saisie_valeur"),
             ),

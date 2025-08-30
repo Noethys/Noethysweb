@@ -545,7 +545,7 @@ class Case_standard extends Case_base {
             toastr.error("Vous ne pouvez pas supprimer cette consommation car elle est associée à un forfait daté");
             return true;
         }
-        if (this.consommations[0].facture) {
+        if ((this.consommations[0].facture) && (!(dict_prestations[this.consommations[0].prestation].forfait_date_debut))) {
             toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation dont la prestation associée apparaît sur une facture");
             return true;
         }
@@ -1494,6 +1494,7 @@ function search_unites_liees(case_tableau) {
     $.each(dict_cases, function (key, valeurs) {
         if (valeurs.date === case_tableau.date && valeurs.inscription === case_tableau.inscription) {
             for (var conso of valeurs.consommations) {
+                // Unités dépendantes
                 dependances_unite = dict_unites[conso.unite].dependances;
                 if (dependances_unite.length > 0) {
                     // Recherche les états des unités dépendantes
@@ -1511,6 +1512,18 @@ function search_unites_liees(case_tableau) {
                     // Si aucune conso dépendante, on supprime la conso
                     if (conso_trouvees.length === 0) {
                         dict_cases[key].supprimer();
+                    }
+                }
+                // Unités solidaires
+                solidaires_unite = dict_unites[conso.unite].solidaires;
+                if (solidaires_unite.length > 0) {
+                    // Recherche les états des unités solidaires
+                    for (var idunite_solidaire of solidaires_unite) {
+                        let key_unite_solidaire = conso.date + "_" + conso.inscription + "_" + idunite_solidaire;
+                        if (key_unite_solidaire in dict_cases) {
+                            var case_solidaire = dict_cases[key_unite_solidaire]
+                            case_solidaire.creer_conso({etat: conso.etat}, false);
+                        }
                     }
                 }
             }
@@ -1591,6 +1604,7 @@ function get_donnees_for_facturation(keys_cases_touchees) {
         liste_vacances: liste_vacances,
         dict_suppressions: dict_suppressions,
         mode: mode,
+        activite: Get_activite(),
         // dict_conso: dict_conso,
     };
 };
