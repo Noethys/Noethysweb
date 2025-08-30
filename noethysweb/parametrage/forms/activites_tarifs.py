@@ -590,10 +590,10 @@ class Formulaire(FormulaireBase, ModelForm):
             self.cleaned_data["caisses"] = []
 
         # Pénalité
-        if self.cleaned_data["penalite"] == "pourcentage":
-            if not self.cleaned_data["penalite_pourcentage"]:
-                self.add_error("penalite_pourcentage", "Vous devez saisir un pourcentage valide")
-                return
+        # if self.cleaned_data["penalite"] == "pourcentage":
+        #     if not self.cleaned_data["penalite_pourcentage"]:
+        #         self.add_error("penalite_pourcentage", "Vous devez saisir un pourcentage valide")
+        #         return
 
         # Forfait daté : Génération de consommations
         if self.cleaned_data["type"] == "FORFAIT":
