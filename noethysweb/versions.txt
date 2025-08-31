@@ -1,3 +1,9 @@
+Version 1.2.9.9 (31/08/2025) :
+
+- Ajout des unités de consommations solidaires
+- Ajout des pénalités avec montant nul
+- Correction sur le type de quotient inconnu lors de l'importation API Particulier
+
 Version 1.2.9.8 (29/06/2025) :
 
 - Ajout du pointage en 1 clic
