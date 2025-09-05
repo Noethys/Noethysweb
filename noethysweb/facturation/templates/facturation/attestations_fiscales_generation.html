@@ -183,7 +183,8 @@
                 var index_prestation = parseInt(this.dataset.index);
                 if (!(liste_prestations.includes($(this).val()))) {
                     var ajustement = $("#ajustement_" + index_prestation).val();
-                    liste_prestations.push([$(this).val(), ajustement]);
+                    var ajustement_type = $("#ajustement_type_" + index_prestation).val();
+                    liste_prestations.push([$(this).val(), ajustement, ajustement_type]);
                 }
             });
             return liste_prestations;

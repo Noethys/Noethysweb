@@ -132,9 +132,13 @@ def Get_attestations_fiscales(cleaned_data={}, selection_prestations={}):
             if prestation["activite_id"] not in dict_attestations[prestation["famille_id"]]["activites"]:
                 dict_attestations[prestation["famille_id"]]["activites"].append(prestation["activite_id"])
 
-            ajustement = selection_prestations[prestation["label"]]
-            total = prestation["montant"] + ajustement # max(prestation["montant"] + ajustement, decimal.Decimal(0))
-            regle = data["ventilations"].get(prestation["pk"], decimal.Decimal(0)) + ajustement # max(dict_ventilations.get(prestation["pk"], decimal.Decimal(0)) + ajustement, decimal.Decimal(0))
+            ajustement, ajustement_type = selection_prestations[prestation["label"]]
+            if ajustement_type == "pourcentage":
+                ajustement = prestation["montant"] * ajustement / 100
+            total = prestation["montant"] + ajustement
+            regle = data["ventilations"].get(prestation["pk"], decimal.Decimal(0))
+            if ajustement:
+                regle = max(regle + ajustement, decimal.Decimal(0))
 
             dict_attestations[prestation["famille_id"]]["individus"][prestation["individu_id"]]["total"] += total
             dict_attestations[prestation["famille_id"]]["individus"][prestation["individu_id"]]["regle"] += regle
@@ -156,7 +160,7 @@ def Recherche_attestations_fiscales(request):
         return JsonResponse({"html": data, "erreur": "Veuillez corriger les erreurs suivantes : %s." % ", ".join(liste_messages_erreurs)}, status=401)
 
     # Récupération des prestations sélectionnées et des ajustements
-    selection_prestations = {index_prestation: decimal.Decimal(ajustement) for index_prestation, ajustement in json.loads(request.POST["liste_prestations_json"])}
+    selection_prestations = {index_prestation: (decimal.Decimal(ajustement), ajustement_type) for index_prestation, ajustement, ajustement_type in json.loads(request.POST["liste_prestations_json"])}
 
     # Recherche des attestations fiscales à générer
     dict_attestations_fiscales = Get_attestations_fiscales(cleaned_data=form.cleaned_data, selection_prestations=selection_prestations)
@@ -175,7 +179,7 @@ def Generation_attestations_fiscales(request):
     date_fin = utils_dates.ConvertDateENGtoDate(form.cleaned_data["periode"].split(";")[1])
 
     # Récupération des prestations sélectionnées, des ajustements et des attestations sélectionnées
-    selection_prestations = {index_prestation: decimal.Decimal(ajustement) for index_prestation, ajustement in json.loads(request.POST["liste_prestations_json"])}
+    selection_prestations = {index_prestation: (decimal.Decimal(ajustement), ajustement_type) for index_prestation, ajustement, ajustement_type in json.loads(request.POST["liste_prestations_json"])}
     selection_attestations_fiscales = json.loads(request.POST["liste_attestations_fiscales_json"])
 
     if not selection_attestations_fiscales:
