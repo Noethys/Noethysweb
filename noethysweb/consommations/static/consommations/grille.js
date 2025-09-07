@@ -1540,7 +1540,7 @@ function facturer(case_tableau) {
         }
     }
     // Si mode pointeuse, on affiche un loader
-    if (mode === "pointeuse") {
+    if ((mode === "pointeuse") && (!($(".bootbox").is(":visible")))) {
         box = bootbox.dialog({
             message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog margin-r-5'></i> Veuillez patienter...</p>",
             closeButton: false, animate: false, centerVertical: true, size: "small",
