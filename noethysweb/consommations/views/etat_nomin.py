@@ -155,7 +155,7 @@ class View(CustomView, TemplateView):
                             if ajouter_valeur:
                                 resultats[key_individu].setdefault(index, valeur_defaut)
                                 resultats[key_individu][index] += ajouter_valeur
-                            else:
+                            elif valeur:
                                 resultats[key_individu][index] = valeur
 
             if key_individu not in resultats:
