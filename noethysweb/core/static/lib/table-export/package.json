@@ -4,12 +4,12 @@
   "description": "html table export",
   "main": "tableExport.min.js",
   "dependencies": {
-    "jquery": ">=3.2.1",
+    "jquery": ">=3.5.0",
     "file-saver": ">=2.0.4",
     "html2canvas": ">=1.0.0",
-    "jspdf": ">=2.0.0",
+    "jspdf": ">=3.0.2",
     "pdfmake": "^0.1.71",
-    "xlsx": ">=0.16.0"
+    "xlsx": ">=0.20.2"
   },
   "repository": {
     "type": "git",
