@@ -11,7 +11,7 @@ django-multiselectfield==0.1.13
 django-simple-captcha==0.6.0
 django-resized==1.0.2
 django-select2==8.2.1
-django-sn==0.8.11.9
+django-summernote==0.8.20.0
 django-extensions==3.2.3
 django-upload-form==0.5.0
 django-dbbackup==4.2.1

@@ -12,7 +12,7 @@ django-multiselectfield
 django-simple-captcha
 django-resized
 django-select2
-django-sn
+django-summernote
 django-extensions
 django-upload-form
 django-dbbackup
