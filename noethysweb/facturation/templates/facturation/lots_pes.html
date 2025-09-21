@@ -3,6 +3,10 @@
 {% load static %}
 {% load embed %}
 
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
 
 {% block contenu_page %}
     <div class="row">
@@ -139,6 +143,10 @@
         };
 
         function action_piece(num_action) {
+            var box = bootbox.dialog({
+                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Action en cours</b><br><br>Veuillez patienter...</p>",
+                closeButton: false
+            });
             var listepk = get_coches();
             $.ajax({
                 type: "POST",
@@ -149,9 +157,11 @@
                 },
                 datatype: "json",
                 success: function (data) {
+                    box.modal("hide");
                     Actualiser_page();
                 },
                 error: function(data) {
+                    box.modal("hide");
                     Actualiser_page();
                     toastr.error(data.responseJSON.erreur);
                 }
