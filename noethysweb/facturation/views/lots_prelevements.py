@@ -17,6 +17,8 @@ from facturation.forms.lots_prelevements import Formulaire, Formulaire_creation,
 
 def Actions(request):
     """ Appliquer une action """
+    time.sleep(1)
+
     num_action = int(request.POST["action"])
     liste_pk = json.loads(request.POST["liste_prelevements"])
 
