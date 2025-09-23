@@ -131,7 +131,7 @@
                     {% with date|is_modif_allowed:data as modif_allowed %}
 
                     {# Regroupement par date #}
-                    {% if data.liste_inscriptions|length > 1 and data.mode == "individu" %}
+                    {% if data.liste_inscriptions|length > 1 and data.mode|is_in_list:"individu;portail" %}
                         <tr>
                             <th class="date_regroupement">{{ date|date:"l j F Y"|title }} {% if not modif_allowed %}<i class='fa fa-lock text-red' title="Date non modifiable"></i>{% endif %}</th>
                                 {% for unite in data.liste_unites_visibles %}
