@@ -5,7 +5,10 @@
 
 import json
 from PIL import Image
-from pkg_resources import parse_version
+try:
+    from packaging.version import parse as parse_version
+except:
+    from pkg_resources import parse_version
 
 
 def Recadrer_image_form(cropper_data=None, image=None):
