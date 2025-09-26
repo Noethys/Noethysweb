@@ -1,3 +1,12 @@
+Version 1.3.0.1 (26/09/2025) :
+
+- Ajout de l'export EBP Compta
+- Ajout d'une bootbox sur les actions des prélèvements
+- Correction du package obsolète pkg_resources
+- Correction de l'affichage multi inscriptions dans le planning du portail
+- Correction unicode sur les PDF de table-export
+- Mise à jour des packages xlsx et jspdf
+
 Version 1.3.0.0 (13/09/2025) :
 
 - Ajout des ajustements par pourcentage dans les attestations fiscales
