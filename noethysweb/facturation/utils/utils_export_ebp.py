@@ -26,7 +26,7 @@ class Exporter(BaseExporter):
 
         # Préparation du csv
         champs_ebp = [
-            "Date", "Journal", "N° compte général", "N° compte tiers",
+            "Date", "Journal", "Compte général", "Compte tiers",
             "N° facture", "Libellé", "Débit", "Crédit", "Code Analytique",
             "Date de pièce", "Référence", "Mode de règlement", "Date d'échéance"
         ]
@@ -43,12 +43,14 @@ class Exporter(BaseExporter):
                 for index_ligne_detail, ligne_detail in enumerate(details_factures.get(facture, []), 1):
                     ligne = {}
                     ligne["Date"] = facture.date_edition.strftime("%d/%m/%Y")
-                    ligne["Journal"] = "VE"
-                    ligne["N° compte général"] = ligne_detail["code_compta"]
+                    ligne["Journal"] = "VT"
+                    ligne["Compte général"] = ligne_detail["code_compta"]
+                    ligne["Compte tiers"] = facture.famille.code_compta or "FAM%06d" % facture.famille.pk
                     ligne["Code Analytique"] = ligne_detail["code_analytique"]
                     ligne["N° facture"] = facture.numero
                     ligne["Libellé"] = ligne_detail["label"]
                     ligne["Crédit"] = "%.2f" % ligne_detail["montant"]
+                    ligne["Débit"] = "0"
                     ligne["Référence"] = facture.numero
                     ligne["Date de pièce"] = facture.date_edition.strftime("%d/%m/%Y")
                     ligne["Date d'échéance"] = facture.date_echeance.strftime("%d/%m/%Y") if facture.date_echeance else ""
@@ -57,12 +59,13 @@ class Exporter(BaseExporter):
                 # Ligne compte client (411xxx)
                 ligne = {}
                 ligne["Date"] = facture.date_edition.strftime("%d/%m/%Y")
-                ligne["Journal"] = "VE"
-                ligne["N° compte général"] = facture.famille.code_compta or "FAM%06d" % facture.famille.pk
-                ligne["N° compte tiers"] = facture.famille.code_compta or "FAM%06d" % facture.famille.pk
+                ligne["Journal"] = "VT"
+                ligne["Compte général"] = self.options["compte_clients"]
+                ligne["Compte tiers"] = facture.famille.code_compta or "FAM%06d" % facture.famille.pk
                 ligne["N° facture"] = facture.numero
                 ligne["Libellé"] = "Facture %s" % facture.numero
-                ligne["Débit"] = "%.2f" % facture.solde
+                ligne["Débit"] = "%.2f" % facture.total
+                ligne["Crédit"] = "0"
                 ligne["Référence"] = facture.numero
                 ligne["Date de pièce"] = facture.date_edition.strftime("%d/%m/%Y")
                 ligne["Date d'échéance"] = facture.date_echeance.strftime("%d/%m/%Y") if facture.date_echeance else ""
@@ -80,12 +83,13 @@ class Exporter(BaseExporter):
                     dernier_reglement = reglement
                     ligne = {}
                     ligne["Date"] = depot.date.strftime("%d/%m/%Y")
-                    ligne["N° compte général"] = reglement.famille.code_compta or "FAM%06d" % reglement.famille.pk
-                    ligne["N° compte tiers"] = reglement.famille.code_compta or "FAM%06d" % reglement.famille.pk
+                    ligne["Compte général"] = self.options["compte_clients"]
+                    ligne["Compte tiers"] = reglement.famille.code_compta or "FAM%06d" % reglement.famille.pk
                     ligne["Journal"] = reglement.mode.code_journal or "BQ"
                     ligne["Libellé"] = "Règlement %s" % reglement.famille.nom
                     ligne["Référence"] = reglement.numero_piece or ""
                     ligne["Crédit"] = "%.2f" % reglement.montant
+                    ligne["Débit"] = "0"
                     ligne["N° facture"] = dict_reglements_factures.get(reglement, "")
                     ligne["Date de pièce"] = depot.date.strftime("%d/%m/%Y")
                     ligne["Mode de règlement"] = reglement.mode.label
@@ -94,9 +98,10 @@ class Exporter(BaseExporter):
                 # Ligne du dépôt
                 ligne = {}
                 ligne["Date"] = depot.date.strftime("%d/%m/%Y")
-                ligne["N° compte général"] = depot.code_compta
+                ligne["Compte général"] = depot.code_compta
                 ligne["Journal"] = dernier_reglement.mode.code_journal if dernier_reglement and dernier_reglement.mode.code_journal else "BQ"
                 ligne["Débit"] = "%.2f" % (depot.montant or 0.0)
+                ligne["Crédit"] = "0"
                 ligne["Libellé"] = depot.nom
                 ligne["Date de pièce"] = depot.date.strftime("%d/%m/%Y")
                 writer.writerow(ligne)
