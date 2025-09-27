@@ -90,7 +90,7 @@ class View(CustomView, TemplateView):
         data['individu'] = individu
 
         # Importation de la période
-        periode_reservation = PortailPeriode.objects.select_related("activite").get(pk=self.kwargs.get('idperiode'))
+        periode_reservation = PortailPeriode.objects.select_related("activite").prefetch_related("unites").get(pk=self.kwargs.get('idperiode'))
         data['periode_reservation'] = periode_reservation
 
         # Dates de la période
@@ -152,6 +152,11 @@ class View(CustomView, TemplateView):
         # Liste des jours de la semaine modifiables
         jours = {date.weekday(): True for date in data["dates_modifiables"]}
         data["jours_semaine_modifiables"] = list(jours.keys())
+
+        # Filtre des unités à afficher
+        if periode_reservation.unites.all():
+            liste_unites_temp = [unite for unite in data["liste_unites_visibles"] if unite in periode_reservation.unites.all()]
+            data["liste_unites_visibles"] = liste_unites_temp
 
         return data
 

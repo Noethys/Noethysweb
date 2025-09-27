@@ -11,7 +11,7 @@ from crispy_forms.layout import Layout, Hidden, HTML, Div, Fieldset
 from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import PortailPeriode, ModeleEmail, CategorieCompteInternet
+from core.models import PortailPeriode, ModeleEmail, CategorieCompteInternet, Unite
 from core.widgets import DatePickerWidget, DateTimePickerWidget
 from core.forms.select2 import Select2MultipleWidget
 
@@ -28,6 +28,9 @@ class Formulaire(FormulaireBase, ModelForm):
     categories = forms.ModelMultipleChoiceField(label="Sélection de catégories", widget=Select2MultipleWidget(),
                                                 queryset=CategorieCompteInternet.objects.all().order_by("nom"), required=False,
                                                 help_text="Sélectionnez une ou plusieurs catégories de compte internet.")
+    unites = forms.ModelMultipleChoiceField(label="Filtre unités", widget=Select2MultipleWidget(), queryset=Unite.objects.none(), required=False, help_text="""
+                                            A utiliser si vous souhaitez afficher uniquement certaines unités de consommations. Sélectionnez les unités souhaitées dans la liste, sinon laissez le champ vide pour afficher toutes les unités.""")
+
     class Meta:
         model = PortailPeriode
         fields = "__all__"
@@ -54,6 +57,9 @@ class Formulaire(FormulaireBase, ModelForm):
         # Affichage
         self.fields["affichage_date_debut"].widget.attrs.update({"autocomplete": "off"})
         self.fields["affichage_date_fin"].widget.attrs.update({"autocomplete": "off"})
+
+        # Unités
+        self.fields["unites"].queryset = Unite.objects.filter(activite_id=idactivite)
 
         # Mode consultation
         if self.instance.pk and self.instance.mode_consultation:
@@ -91,6 +97,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("categories"),
                 Field("types_villes"),
                 Field("villes"),
+                Field("unites"),
             ),
             Fieldset("Mode consultation",
                 Field("mode_consultation_choix"),
