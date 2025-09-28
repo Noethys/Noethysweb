@@ -42,6 +42,7 @@ def Vider_rep_temp():
     Corriger_anomalies()
     Purge_mdp_expires()
     Purge_auto_historique()
+    Maj_soldes_factures()
     # Nettoyer répertoire desk dans storage
     from outils.utils import utils_export_desk
     desk = utils_export_desk.Desk()
