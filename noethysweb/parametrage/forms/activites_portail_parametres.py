@@ -34,6 +34,7 @@ class Formulaire(FormulaireBase, ModelForm):
     liste_choix.append((150, "Jour J-150"))
     liste_choix.append((180, "Jour J-180"))
     liste_choix.append((365, "Jour J-365"))
+    liste_choix.extend([(4000 + x, "%d du mois précédent" % x) for x in range(1, 31)])
     limite_delai = forms.TypedChoiceField(label="Délai de modification", choices=liste_choix, initial=None, required=False, help_text="Une réservation peut être ajoutée, modifiée ou supprimée jusqu'à...")
     limite_heure = forms.TimeField(label="Heure limite", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
     exclure_weekends = forms.BooleanField(label="Exclure les weeks-ends", required=False, initial=False)
