@@ -43,7 +43,7 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["fgenerique:famille", 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde',
-                   'solde_actuel', 'lot__nom', "regie__nom", "date_limite_paiement", "observations"]
+                   'solde_actuel', 'etat', 'lot__nom', "regie__nom", "date_limite_paiement", "observations"]
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
@@ -54,7 +54,7 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idfacture', 'date_edition', 'numero', 'date_debut', 'date_fin', 'famille', 'total', 'solde', 'solde_actuel', 'lot', 'regie', "date_limite_paiement", "observations"]
+            columns = ['check', 'idfacture', 'date_edition', 'numero', 'date_debut', 'date_fin', 'famille', 'total', 'solde', 'solde_actuel', 'lot', 'etat', 'regie', "date_limite_paiement", "observations"]
             processors = {
                 'date_edition': helpers.format_date('%d/%m/%Y'),
                 'date_debut': helpers.format_date('%d/%m/%Y'),
@@ -63,7 +63,7 @@ class Liste(Page, crud.Liste):
                 'date_limite_paiement': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ["date_edition"]
-            hidden_columns = ["regie", "date_limite_paiement", "observations"]
+            hidden_columns = ["regie", "date_limite_paiement", "observations", "etat"]
 
         def Get_solde_actuel(self, instance, **kwargs):
             if instance.etat == "annulation":

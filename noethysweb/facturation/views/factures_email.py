@@ -147,7 +147,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fgenerique:famille", 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'lot__nom', 'famille__email_factures']
+        filtres = ["fgenerique:famille", 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'etat', 'lot__nom', 'famille__email_factures']
 
         check = columns.CheckBoxSelectColumn(label="")
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
@@ -157,7 +157,7 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idfacture', 'date_edition', 'numero', 'date_debut', 'date_fin', 'famille', 'total', 'solde', 'solde_actuel', 'lot']
+            columns = ['check', 'idfacture', 'date_edition', 'numero', 'date_debut', 'date_fin', 'famille', 'total', 'solde', 'solde_actuel', 'lot', 'etat']
             processors = {
                 'date_edition': helpers.format_date('%d/%m/%Y'),
                 'date_debut': helpers.format_date('%d/%m/%Y'),
@@ -165,6 +165,7 @@ class Liste(Page, crud.Liste):
                 'date_echeance': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ["date_edition"]
+            hidden_columns = ["etat"]
 
         def Get_solde_actuel(self, instance, **kwargs):
             if instance.etat == "annulation":
