@@ -3543,6 +3543,7 @@ class Article(models.Model):
     album = models.ForeignKey(Album, verbose_name="Album photos", blank=True, null=True, on_delete=models.SET_NULL, help_text="Sélectionnez un album photos existant à joindre à cet article.")
     texte_popup = models.TextField(verbose_name="Texte", blank=True, null=True, help_text="Ce texte sera affiché dans une fenêtre popup sur la page d'accueil. A utiliser uniquement pour les informations importantes.")
     sondage = models.ForeignKey("Sondage", verbose_name="Formulaire", blank=True, null=True, on_delete=models.SET_NULL, help_text="Sélectionnez un formulaire existant à joindre à cet article.")
+    video = models.CharField(verbose_name="Vidéo", max_length=300, blank=True, null=True, help_text="Saisissez l'URL d'une vidéo. Pour insérer une vidéo Youtube, saisissez l'url 'https://www.youtube.com/embed/xxxxxx' en remplaçant les x par le code youtube de la vidéo.")
 
     class Meta:
         db_table = 'articles'

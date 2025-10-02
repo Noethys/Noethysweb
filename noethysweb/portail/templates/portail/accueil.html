@@ -55,8 +55,8 @@
                 {{ parametres_portail.accueil_texte_bienvenue|safe }}
                 {% if parametres_portail.accueil_url_video %}
                     {% if parametres_portail.accueil_texte_bienvenue %}<p></p>{% endif %}
-                    <a href="#" class="video-btn btn btn-outline-primary btn-sm" data-src="{{ parametres_portail.accueil_url_video }}" data-toggle="modal" data-target="#modal_video" title="{% trans "Cliquez ici pour lancer la vidéo" %}"><i class='fa fa-film margin-r-5'></i>{{ parametres_portail.accueil_titre_video }}</a>
-                    {% embed 'core/accueil/video.html' %}{% endembed %}
+                    <a href="#" id="bouton_video_accueil" class="video-btn btn btn-outline-primary btn-sm" data-src="{{ parametres_portail.accueil_url_video }}" data-toggle="modal" data-target="#modal_video_accueil" title="{% trans "Cliquez ici pour lancer la vidéo" %}"><i class='fa fa-film margin-r-5'></i>{{ parametres_portail.accueil_titre_video }}</a>
+                    {% embed 'core/accueil/video.html' with id='accueil' %}{% endembed %}
                 {% endif %}
             </div>
         </div>

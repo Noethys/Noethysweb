@@ -1,5 +1,7 @@
 {% load i18n %}
 {% load static %}
+{% load embed %}
+
 
 <div class="card mb-4 {% if article.couleur_fond %}bg-{{ article.couleur_fond }}{% endif %}" style="margin-top: 1px;">
     {% if article.Get_anciennete <= 3 %}
@@ -24,6 +26,10 @@
         {% endif %}
         {% if article.sondage %}
             <p class="mb-1"><small><a href="{% url 'portail_sondage' code=article.sondage.code %}" style="text-decoration: none;" title="{% trans "Cliquez ici pour accéder au formulaire" %}"><i class="fa fa-file-text-o margin-r-5"></i>{% blocktrans %}Accéder au formulaire{% endblocktrans %} '{{ article.sondage.titre }}'</a></small></p>
+        {% endif %}
+        {% if article.video %}
+            <p class="mb-1"><small><a href="#" style="text-decoration: none;" id="bouton_video_{{ article.pk }}" data-src="{{ article.video }}" data-toggle="modal" data-target="#modal_video_{{ article.pk }}" title="{% trans "Cliquez ici pour lancer la vidéo" %}"><i class="fa fa-film margin-r-5"></i>{% blocktrans %}Cliquez ici pour lancer la vidéo{% endblocktrans %}</a></small></p>
+            {% embed 'core/accueil/video.html' with id=article.pk %}{% endembed %}
         {% endif %}
     </div>
     <div class="card-footer pl-3 pr-3 pb-1 pt-0 text-right">

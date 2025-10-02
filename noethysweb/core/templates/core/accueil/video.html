@@ -3,7 +3,7 @@
 
 
 {# Modal lecture vidéo #}
-<div class="modal fade" id="modal_video" tabindex="-1" role="dialog" aria-labelledby="modal_video" aria-hidden="true">
+<div class="modal fade" id="modal_video_{{ id }}" tabindex="-1" role="dialog" aria-labelledby="modal_video_{{ id }}" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-body">
@@ -11,7 +11,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
                 <div class="embed-responsive embed-responsive-16by9">
-                    <iframe class="embed-responsive-item" src="" id="video" allow="autoplay"></iframe>
+                    <iframe class="embed-responsive-item" src="" id="video_{{ id }}" allow="autoplay"></iframe>
                 </div>
             </div>
         </div>
@@ -20,18 +20,18 @@
 
 <script>
     $(document).ready(function() {
-        var $videoSrc;
+        var $videoSrc_{{ id }};
 
-        $(".video-btn").click(function() {
-            $videoSrc = $(this).data("src");
+        $("#bouton_video_{{ id }}").click(function() {
+            $videoSrc_{{ id }} = $(this).data("src");
         });
 
-        $("#modal_video").on("shown.bs.modal", function(e) {
-            $("#video").attr("src", $videoSrc + "?autoplay=1&amp;modestbranding=1&amp;showinfo=0");
+        $("#modal_video_{{ id }}").on("shown.bs.modal", function(e) {
+            $("#video_{{ id }}").attr("src", $videoSrc_{{ id }} + "?autoplay=1&amp;modestbranding=1&amp;showinfo=0");
         });
 
-        $("#modal_video").on("hide.bs.modal", function(e) {
-            $("#video").attr("src", "");
+        $("#modal_video_{{ id }}").on("hide.bs.modal", function(e) {
+            $("#video_{{ id }}").attr("src", "");
         });
     });
 </script>
