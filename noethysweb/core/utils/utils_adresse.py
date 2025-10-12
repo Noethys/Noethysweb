@@ -57,3 +57,16 @@ def Get_code_insee_ville(cp=None, ville=None):
         except:
             pass
     return None
+
+
+def Get_adresse_structuree(gps_organisateur=None, rue=None, cp=None, ville=None):
+    """ Transforme une adresse postale destructurée en adresse structurée """
+    params = {"q": "%s %s %s" % (rue, cp, ville), "limit": 1, "autocomplete": 0, "type": "housenumber"}
+    if gps_organisateur:
+        params.update({"lat": gps_organisateur["lat"], "lon": gps_organisateur["lon"]})
+    try:
+        req = requests.get("http://api-adresse.data.gouv.fr/search/", params=params)
+        resultat = json.loads(req.content)["features"][0]["properties"]
+    except:
+        return None
+    return {"numero": resultat["housenumber"], "rue": resultat["street"].capitalize(), "cp": resultat["postcode"], "ville": resultat["city"].upper()}

@@ -476,6 +476,15 @@ class CompteBancaire(models.Model):
     dft_titulaire = models.CharField(verbose_name="Titulaire DFT", max_length=400, blank=True, null=True)
     dft_iban = encrypt(models.CharField(verbose_name="IBAN DFT", max_length=400, blank=True, null=True))
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+    adresse_service = models.CharField(verbose_name="Identité ou service", max_length=70, blank=True, null=True)
+    adresse_rue = models.CharField(verbose_name="Libellé de la voie", max_length=70, blank=True, null=True)
+    adresse_numero = models.CharField(verbose_name="Numéro de la voie", max_length=16, blank=True, null=True)
+    adresse_batiment = models.CharField(verbose_name="Immeuble, bâtiment ou résidence", max_length=35, blank=True, null=True)
+    adresse_etage = models.CharField(verbose_name="Etage", max_length=70, blank=True, null=True)
+    adresse_boite = models.CharField(verbose_name="Boîte postale", max_length=16, blank=True, null=True)
+    adresse_cp = models.CharField(verbose_name="Code postal", max_length=16, blank=True, null=True)
+    adresse_ville = models.CharField(verbose_name="Ville", max_length=35, blank=True, null=True)
+    adresse_pays = models.CharField(verbose_name="Code pays", max_length=10, default="FR", blank=True, null=True)
 
     class Meta:
         db_table = 'comptes_bancaires'
@@ -3301,9 +3310,15 @@ class Mandat(models.Model):
     date = models.DateField(verbose_name="Date", help_text="Date de signature du mandat.")
     individu = models.ForeignKey(Individu, verbose_name="Titulaire", on_delete=models.PROTECT, blank=True, null=True, help_text="Titulaire du compte bancaire. Sélectionnez 'Autre individu' si le titulaire n'est pas dans la liste proposée.")
     individu_nom = models.CharField(verbose_name="Nom", max_length=200, blank=True, null=True)
-    individu_rue = encrypt(models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True))
+    individu_rue = encrypt(models.CharField(verbose_name="Libellé de la voie", max_length=200, blank=True, null=True))
     individu_cp = encrypt(models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True))
     individu_ville = encrypt(models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True))
+    individu_service = models.CharField(verbose_name="Identité ou service", max_length=70, blank=True, null=True)
+    individu_numero = models.CharField(verbose_name="Numéro de la voie", max_length=16, blank=True, null=True)
+    individu_batiment = models.CharField(verbose_name="Immeuble, bâtiment ou résidence", max_length=35, blank=True, null=True)
+    individu_etage = models.CharField(verbose_name="Etage", max_length=70, blank=True, null=True)
+    individu_boite = models.CharField(verbose_name="Boîte postale", max_length=16, blank=True, null=True)
+    individu_pays = models.CharField(verbose_name="Code pays", max_length=10, default="FR", blank=True, null=True)
     iban = encrypt(models.CharField(verbose_name="IBAN", max_length=27, help_text="La cohérence de l'IBAN est vérifié lors de l'enregistrement du mandat."))
     bic = encrypt(models.CharField(verbose_name="BIC", max_length=11, help_text="La cohérence du BIC est vérifié lors de l'enregistrement du mandat."))
     memo = models.TextField(verbose_name="Observations", blank=True, null=True)
@@ -3647,9 +3662,15 @@ class SMS(models.Model):
 class Perception(models.Model):
     idperception = models.AutoField(verbose_name="ID", db_column='IDperception', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=300)
-    rue_resid = models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True)
+    rue_resid = models.CharField(verbose_name="Libellé de la voie", max_length=200, blank=True, null=True)
     cp_resid = models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True)
     ville_resid = models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True)
+    service = models.CharField(verbose_name="Identité ou service", max_length=70, blank=True, null=True)
+    numero = models.CharField(verbose_name="Numéro de la voie", max_length=16, blank=True, null=True)
+    batiment = models.CharField(verbose_name="Immeuble, bâtiment ou résidence", max_length=35, blank=True, null=True)
+    etage = models.CharField(verbose_name="Etage", max_length=70, blank=True, null=True)
+    boite = models.CharField(verbose_name="Boîte postale", max_length=16, blank=True, null=True)
+    pays = models.CharField(verbose_name="Code pays", max_length=10, default="FR", blank=True, null=True)
 
     class Meta:
         db_table = 'perceptions'
@@ -3668,10 +3689,11 @@ class PrelevementsModele(models.Model):
     compte = models.ForeignKey(CompteBancaire, verbose_name="Compte à créditer", on_delete=models.PROTECT, help_text="Sélectionnez le compte bancaire à créditer.")
     mode = models.ForeignKey(ModeReglement, verbose_name="Mode de règlement", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez le mode de règlement à utiliser.")
     reglement_auto = models.BooleanField(verbose_name="Règlement automatique", default=False, help_text="Cochez cette case si vous souhaitez que Noethysweb créé un règlement automatiquement.")
-    encodage = models.CharField(verbose_name="Encodage", max_length=100, choices=[("utf-8", "UTF-8"), ("iso-8859-15", "ISO-8859-15")], default="utf-8", help_text="Sélectionnez le format souhaité")
+    encodage = models.CharField(verbose_name="Encodage", max_length=100, choices=[("utf-8", "UTF-8"), ("iso-8859-15", "ISO-8859-15")], default="utf-8", help_text="Sélectionnez le format souhaité.")
     perception = models.ForeignKey(Perception, verbose_name="Perception", on_delete=models.PROTECT, blank=True, null=True)
     identifiant_service = models.CharField(verbose_name="Identifiant du service", max_length=200, blank=True, null=True, help_text="Saisissez l'identifiant du service. Exemple : TGDFT027 (numéro de département sur 3 chiffres).")
     poste_comptable = models.CharField(verbose_name="Poste comptable par défaut", max_length=200, blank=True, null=True, help_text="Saisissez le codique de la DDFiP de rattachement sur 6 caractères. Exemple : 027000")
+    version_sepa = models.CharField(verbose_name="Version SEPA", max_length=50, choices=[("2009", "2009"), ("2019", "2019")], default="2019", help_text="Sélectionnez la version SEPA souhaitée.")
 
     class Meta:
         db_table = 'modeles_prelevements'

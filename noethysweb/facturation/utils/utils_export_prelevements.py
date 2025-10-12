@@ -3,13 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import decimal, os, calendar, datetime, uuid, zipfile
+import decimal, os, calendar, datetime, uuid, zipfile, time
 from io import BytesIO
 from urllib.request import urlretrieve
 from xml.dom.minidom import Document
 from django.conf import settings
 from core.models import PrelevementsLot, Prelevements, Organisateur
-from core.utils import utils_texte, utils_fichiers
+from core.utils import utils_texte, utils_fichiers, utils_adresse
 
 
 class Exporter():
@@ -22,7 +22,7 @@ class Exporter():
     def Generer(self):
         # Importation des données
         self.lot = PrelevementsLot.objects.select_related("modele", "modele__compte", "modele__mode", "modele__perception").get(pk=self.idlot)
-        self.pieces = Prelevements.objects.select_related("famille", "mandat", "facture").filter(lot=self.lot)
+        self.pieces = Prelevements.objects.select_related("famille", "mandat", "mandat__individu", "facture").filter(lot=self.lot)
 
         # Création du répertoire de sortie
         self.rep_base = os.path.join("temp", str(uuid.uuid4()))
@@ -82,6 +82,8 @@ class Exporter():
         return texte
 
     def Creation_fichiers(self):
+        gps_organisateur = utils_adresse.Get_gps_organisateur()
+
         # Recherche les erreurs potentielles
         if not self.pieces: self.erreurs.append("Vous devez ajouter au moins une pièce.")
         if not self.organisateur.num_siret: self.erreurs.append("Vous devez renseigner le SIRET de l'organisateur dans le menu Paramétrage > Organisateur.")
@@ -104,7 +106,7 @@ class Exporter():
         # Génération du document XML
         racine = doc.createElement("Document")
         racine.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-        racine.setAttribute("xmlns", "urn:iso:std:iso:20022:tech:xsd:pain.008.001.02")
+        racine.setAttribute("xmlns", "urn:iso:std:iso:20022:tech:xsd:pain.008.001.%s" % "08" if self.lot.modele.version_sepa == "2019" else "02")
         doc.appendChild(racine)
 
         # CstmrDrctDbtInitn
@@ -240,37 +242,132 @@ class Exporter():
             Cdtr = doc.createElement("Cdtr")
             PmtInf.appendChild(Cdtr)
 
-            if self.lot.modele.format == "prive":
-                # Cdtr
+            if self.lot.modele.version_sepa == "2009":
+
+                if self.lot.modele.format == "prive":
+                    # Cdtr
+                    Nm = doc.createElement("Nm")
+                    Cdtr.appendChild(Nm)
+                    Nm.appendChild(doc.createTextNode(self.lot.modele.compte.raison))
+
+                if self.lot.modele.format == "public_dft":
+
+                    # Cdtr
+                    Nm = doc.createElement("Nm")
+                    Cdtr.appendChild(Nm)
+                    Nm.appendChild(doc.createTextNode(self.lot.modele.perception.nom))
+
+                    # PstlAdr
+                    PstlAdr = doc.createElement("PstlAdr")
+                    Cdtr.appendChild(PstlAdr)
+
+                    # Ctry
+                    Ctry = doc.createElement("Ctry")
+                    PstlAdr.appendChild(Ctry)
+                    Ctry.appendChild(doc.createTextNode("FR"))
+
+                    # AdrLine
+                    AdrLine = doc.createElement("AdrLine")
+                    PstlAdr.appendChild(AdrLine)
+                    AdrLine.appendChild(doc.createTextNode(self.lot.modele.perception.rue_resid))
+
+                    # AdrLine
+                    AdrLine = doc.createElement("AdrLine")
+                    PstlAdr.appendChild(AdrLine)
+                    AdrLine.appendChild(doc.createTextNode(u"%s %s" % (self.lot.modele.perception.cp_resid, self.lot.modele.perception.ville_resid)))
+
+            if self.lot.modele.version_sepa == "2019":
+
+                if self.lot.modele.format == "prive":
+                    detail_creancier = {
+                        "Nm": self.lot.modele.compte.raison,
+                        "Dept": self.lot.modele.compte.adresse_service,
+                        "StrtNm": self.lot.modele.compte.adresse_rue,
+                        "BldgNb": self.lot.modele.compte.adresse_numero,
+                        "BldgNm": self.lot.modele.compte.adresse_batiment,
+                        "Flr": self.lot.modele.compte.adresse_etage,
+                        "PstBx": self.lot.modele.compte.adresse_boite,
+                        "PstCd": self.lot.modele.compte.adresse_cp,
+                        "TwnNm": self.lot.modele.compte.adresse_ville,
+                        "Ctry": self.lot.modele.compte.adresse_pays,
+                    }
+
+                if self.lot.modele.format == "public_dft":
+                    detail_creancier = {
+                        "Nm": self.lot.modele.perception.nom,
+                        "Dept": self.lot.modele.perception.service,
+                        "StrtNm": self.lot.modele.perception.rue_resid,
+                        "BldgNb": self.lot.modele.perception.numero,
+                        "BldgNm": self.lot.modele.perception.batiment,
+                        "Flr": self.lot.modele.perception.etage,
+                        "PstBx": self.lot.modele.perception.boite,
+                        "PstCd": self.lot.modele.perception.cp_resid,
+                        "TwnNm": self.lot.modele.perception.ville_resid,
+                        "Ctry": self.lot.modele.perception.pays,
+                    }
+
+                # Nm
                 Nm = doc.createElement("Nm")
                 Cdtr.appendChild(Nm)
                 Nm.appendChild(doc.createTextNode(self.lot.modele.compte.raison))
-
-            if self.lot.modele.format == "public_dft":
-
-                # Cdtr
-                Nm = doc.createElement("Nm")
-                Cdtr.appendChild(Nm)
-                Nm.appendChild(doc.createTextNode(self.lot.modele.perception.nom))
 
                 # PstlAdr
                 PstlAdr = doc.createElement("PstlAdr")
                 Cdtr.appendChild(PstlAdr)
 
+                # Dept
+                if detail_creancier["Dept"]:
+                    Dept = doc.createElement("Dept")
+                    PstlAdr.appendChild(Dept)
+                    Dept.appendChild(doc.createTextNode(detail_creancier["Dept"]))
+
+                # StrtNm
+                if detail_creancier["StrtNm"]:
+                    StrtNm = doc.createElement("StrtNm")
+                    PstlAdr.appendChild(StrtNm)
+                    StrtNm.appendChild(doc.createTextNode(detail_creancier["StrtNm"]))
+
+                # BldgNb
+                if detail_creancier["BldgNb"]:
+                    BldgNb = doc.createElement("BldgNb")
+                    PstlAdr.appendChild(BldgNb)
+                    BldgNb.appendChild(doc.createTextNode(detail_creancier["BldgNb"]))
+
+                # BldgNm
+                if detail_creancier["BldgNm"]:
+                    BldgNm = doc.createElement("BldgNm")
+                    PstlAdr.appendChild(BldgNm)
+                    BldgNm.appendChild(doc.createTextNode(detail_creancier["BldgNm"]))
+
+                # Flr
+                if detail_creancier["Flr"]:
+                    Flr = doc.createElement("Flr")
+                    PstlAdr.appendChild(Flr)
+                    Flr.appendChild(doc.createTextNode(detail_creancier["Flr"]))
+
+                # PstBx
+                if detail_creancier["PstBx"]:
+                    PstBx = doc.createElement("PstBx")
+                    PstlAdr.appendChild(PstBx)
+                    PstBx.appendChild(doc.createTextNode(detail_creancier["PstBx"]))
+
+                # PstCd
+                if detail_creancier["PstCd"]:
+                    PstCd = doc.createElement("PstCd")
+                    PstlAdr.appendChild(PstCd)
+                    PstCd.appendChild(doc.createTextNode(detail_creancier["PstCd"]))
+
+                # TwnNm
+                if detail_creancier["TwnNm"]:
+                    TwnNm = doc.createElement("TwnNm")
+                    PstlAdr.appendChild(TwnNm)
+                    TwnNm.appendChild(doc.createTextNode(detail_creancier["TwnNm"]))
+
                 # Ctry
-                Ctry = doc.createElement("Ctry")
-                PstlAdr.appendChild(Ctry)
-                Ctry.appendChild(doc.createTextNode("FR"))
-
-                # AdrLine
-                AdrLine = doc.createElement("AdrLine")
-                PstlAdr.appendChild(AdrLine)
-                AdrLine.appendChild(doc.createTextNode(self.lot.modele.perception.rue_resid))
-
-                # AdrLine
-                AdrLine = doc.createElement("AdrLine")
-                PstlAdr.appendChild(AdrLine)
-                AdrLine.appendChild(doc.createTextNode(u"%s %s" % (self.lot.modele.perception.cp_resid, self.lot.modele.perception.ville_resid)))
+                if detail_creancier["Ctry"]:
+                    Ctry = doc.createElement("Ctry")
+                    PstlAdr.appendChild(Ctry)
+                    Ctry.appendChild(doc.createTextNode(detail_creancier["Ctry"]))
 
             # CdtrAcct
             CdtrAcct = doc.createElement("CdtrAcct")
@@ -294,7 +391,7 @@ class Exporter():
             CdtrAgt.appendChild(FinInstnId)
 
             # BIC
-            BIC = doc.createElement("BIC")
+            BIC = doc.createElement("BICFI" if self.lot.modele.version_sepa == "2019" else "BIC")
             FinInstnId.appendChild(BIC)
             BIC.appendChild(doc.createTextNode(self.lot.modele.compte.bic))
 
@@ -362,6 +459,7 @@ class Exporter():
 
             # ----------------------------------------------------------- NIVEAU TRANSACTION ------------------------------------------------------------------------------
 
+            compteur_api_adresse = 0
             for transaction in dict_lot["transactions"]:
                 if transaction.facture:
                     transaction_id = "FACT%s" % transaction.facture.numero
@@ -423,7 +521,7 @@ class Exporter():
                 DbtrAgt.appendChild(FinInstnId)
 
                 # Dbtr
-                BIC = doc.createElement("BIC")
+                BIC = doc.createElement("BICFI" if self.lot.modele.version_sepa == "2019" else "BIC")
                 FinInstnId.appendChild(BIC)
                 BIC.appendChild(doc.createTextNode(transaction.mandat.bic))
 
@@ -436,6 +534,78 @@ class Exporter():
                 Dbtr.appendChild(Nm)
                 titulaire = transaction.mandat.individu.Get_nom() if transaction.mandat.individu else transaction.mandat.individu_nom
                 Nm.appendChild(doc.createTextNode(utils_texte.Supprimer_accents(titulaire[:70])))
+
+                if self.lot.modele.version_sepa == "2019":
+
+                    # Recherche d'une adresse structurée
+                    if transaction.mandat.individu:
+                        compteur_api_adresse += 1
+                        adresse = utils_adresse.Get_adresse_structuree(gps_organisateur=gps_organisateur, rue=transaction.mandat.individu.rue_resid,
+                                    cp=transaction.mandat.individu.cp_resid, ville=transaction.mandat.individu.ville_resid)
+                        if adresse:
+                            for champ in ["rue", "numero", "cp", "ville"]:
+                                setattr(transaction.mandat, "individu_%s" % champ, adresse[champ])
+                        if compteur_api_adresse == 45:
+                            time.sleep(1)
+                            compteur_api_adresse = 0
+
+                    # PstlAdr
+                    PstlAdr = doc.createElement("PstlAdr")
+                    Dbtr.appendChild(PstlAdr)
+
+                    # Dept
+                    if transaction.mandat.individu_service:
+                        Dept = doc.createElement("Dept")
+                        PstlAdr.appendChild(Dept)
+                        Dept.appendChild(doc.createTextNode(transaction.mandat.individu_service))
+
+                    # StrtNm
+                    if transaction.mandat.individu_rue:
+                        StrtNm = doc.createElement("StrtNm")
+                        PstlAdr.appendChild(StrtNm)
+                        StrtNm.appendChild(doc.createTextNode(transaction.mandat.individu_rue))
+
+                    # BldgNb
+                    if transaction.mandat.individu_numero:
+                        BldgNb = doc.createElement("BldgNb")
+                        PstlAdr.appendChild(BldgNb)
+                        BldgNb.appendChild(doc.createTextNode(transaction.mandat.individu_numero))
+
+                    # BldgNm
+                    if transaction.mandat.individu_batiment:
+                        BldgNm = doc.createElement("BldgNm")
+                        PstlAdr.appendChild(BldgNm)
+                        BldgNm.appendChild(doc.createTextNode(transaction.mandat.individu_batiment))
+
+                    # Flr
+                    if transaction.mandat.individu_etage:
+                        Flr = doc.createElement("Flr")
+                        PstlAdr.appendChild(Flr)
+                        Flr.appendChild(doc.createTextNode(transaction.mandat.individu_etage))
+
+                    # PstBx
+                    if transaction.mandat.individu_boite:
+                        PstBx = doc.createElement("PstBx")
+                        PstlAdr.appendChild(PstBx)
+                        PstBx.appendChild(doc.createTextNode(transaction.mandat.individu_boite))
+
+                    # PstCd
+                    if transaction.mandat.individu_cp:
+                        PstCd = doc.createElement("PstCd")
+                        PstlAdr.appendChild(PstCd)
+                        PstCd.appendChild(doc.createTextNode(transaction.mandat.individu_cp))
+
+                    # TwnNm
+                    if transaction.mandat.individu_ville:
+                        TwnNm = doc.createElement("TwnNm")
+                        PstlAdr.appendChild(TwnNm)
+                        TwnNm.appendChild(doc.createTextNode(transaction.mandat.individu_ville))
+
+                    # Ctry
+                    if transaction.mandat.individu_pays:
+                        Ctry = doc.createElement("Ctry")
+                        PstlAdr.appendChild(Ctry)
+                        Ctry.appendChild(doc.createTextNode(transaction.mandat.individu_pays))
 
                 # DbtrAcct
                 DbtrAcct = doc.createElement("DbtrAcct")
@@ -492,9 +662,11 @@ class Exporter():
 
             # Lecture du XSD
             from lxml import etree
-            fichier = rep_dest + "/pain.008.001.02.xsd"
-            xmlschema_doc = etree.parse(fichier)
-            xsd = etree.XMLSchema(xmlschema_doc)
+            if self.lot.modele.version_sepa == "2009":
+                nom_xsd = "/pain.008.001.02.xsd"
+            if self.lot.modele.version_sepa == "2019":
+                nom_xsd = "/pain.008.001.08.xsd"
+            xsd = etree.XMLSchema(etree.parse(rep_dest + nom_xsd))
 
             # Lecture du XML
             doc = etree.parse(BytesIO(xml))
@@ -512,3 +684,25 @@ class Exporter():
             print("Erreur dans validation XSD :")
             print(err)
             return True
+
+    def Verifier_adresses(self):
+        transactions = Prelevements.objects.select_related("famille", "mandat", "mandat__individu", "facture").filter(lot__pk=self.idlot)
+        gps_organisateur = utils_adresse.Get_gps_organisateur()
+
+        compteur_api_adresse = 0
+        for transaction in transactions:
+            transaction.nom_titulaire = transaction.mandat.individu.Get_nom() if transaction.mandat.individu else transaction.mandat.individu_nom
+
+            # Recherche d'une adresse structurée
+            if transaction.mandat.individu:
+                compteur_api_adresse += 1
+                adresse = utils_adresse.Get_adresse_structuree(gps_organisateur=gps_organisateur, rue=transaction.mandat.individu.rue_resid,
+                                                               cp=transaction.mandat.individu.cp_resid, ville=transaction.mandat.individu.ville_resid)
+                if adresse:
+                    for champ in ["rue", "numero", "cp", "ville"]:
+                        setattr(transaction.mandat, "individu_%s" % champ, adresse[champ])
+                if compteur_api_adresse == 45:
+                    time.sleep(1)
+                    compteur_api_adresse = 0
+
+        return transactions

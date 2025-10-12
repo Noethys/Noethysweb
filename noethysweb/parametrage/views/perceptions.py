@@ -39,12 +39,12 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["idperception", "nom", "rue_resid", "cp_resid", "ville_resid"]
+        filtres = ["idperception", "nom", "numero", "rue_resid", "cp_resid", "ville_resid"]
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idperception", "nom", "rue_resid", "cp_resid", "ville_resid"]
+            columns = ["idperception", "nom", "numero", "rue_resid", "cp_resid", "ville_resid"]
             ordering = ["nom"]
 
 

@@ -123,6 +123,7 @@ urlpatterns = [
     path('facturation/lots_pes_impression_pdf', secure_ajax(lots_pes.Impression_pdf), name='ajax_lots_pes_impression_pdf'),
     path('facturation/lots_pes_actions', secure_ajax(lots_pes.Actions), name='ajax_lots_pes_actions'),
     path('facturation/lots_prelevements_exporter', secure_ajax(lots_prelevements.Exporter), name='ajax_lots_prelevements_exporter'),
+    path('facturation/lots_prelevements_adresses', secure_ajax(lots_prelevements.Adresses), name='ajax_lots_prelevements_adresses'),
     path('facturation/lots_prelevements_impression_pdf', secure_ajax(lots_prelevements.Impression_pdf), name='ajax_lots_prelevements_impression_pdf'),
     path('facturation/lots_prelevements_actions', secure_ajax(lots_prelevements.Actions), name='ajax_lots_prelevements_actions'),
     path('facturation/ajax_recalculer_prestations', secure_ajax(recalculer_prestations.Recalculer), name='ajax_recalculer_prestations'),

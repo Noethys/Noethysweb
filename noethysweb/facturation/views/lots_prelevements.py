@@ -8,6 +8,7 @@ from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Sum, Count
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib import messages
+from django.template import Template, RequestContext
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import PrelevementsLot, Prelevements, Facture, FiltreListe, Reglement, Payeur, Prestation, Ventilation, Mandat
@@ -359,3 +360,43 @@ def Impression_pdf(request):
         return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
     nom_fichier = impression.Get_nom_fichier()
     return JsonResponse({"nom_fichier": nom_fichier})
+
+def Adresses(request):
+    """ Vérification des adresses des débiteurs """
+    time.sleep(1)
+    from facturation.utils import utils_export_prelevements
+    export = utils_export_prelevements.Exporter(idlot=int(request.POST["idlot"]), request=request)
+    transactions = export.Verifier_adresses()
+    html = """
+    <table class='table table-bordered text-center'>
+    <tr>
+        <th>Famille</th>
+        <th>Débiteur</th>
+        <th>N°</th>
+        <th>Voie</th>
+        <th>Bâtiment</th>
+        <th>Etage</th>
+        <th>CP</th>
+        <th>Ville</th>
+        <th>Actions</th>
+    </tr>
+    {% for transaction in transactions %}
+        <tr>
+            <td>{{ transaction.famille.nom }}</td>
+            <td>{{ transaction.nom_titulaire|default:'' }}</td>
+            <td>{{ transaction.mandat.individu_numero|default:'' }}</td>
+            <td>{{ transaction.mandat.individu_rue|default:'' }}</td>
+            <td>{{ transaction.mandat.individu_batiment|default:'' }}</td>
+            <td>{{ transaction.mandat.individu_etage|default:'' }}</td>
+            <td>{{ transaction.mandat.individu_cp|default:'' }}</td>
+            <td>{{ transaction.mandat.individu_ville|default:'' }}</td>
+            <td>
+                <a type="button" class="btn btn-default btn-xs" href="{% url 'famille_mandats_modifier' pk=transaction.mandat_id idfamille=transaction.famille_id %}" target="_blank" title="Ouvrir le mandat dans un nouvel onglet"><i class="fa fa-fw fa-file-text-o"></i></a>
+                <a type="button" class="btn btn-default btn-xs" href="{% url 'famille_resume' idfamille=transaction.famille_id %}" target="_blank" title="Ouvrir la fiche famille dans un nouvel onglet"><i class="fa fa-fw fa-users"></i></a>
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+    """
+    resultats = Template(html).render(RequestContext(request, {"transactions": transactions}))
+    return JsonResponse({"resultats": resultats})

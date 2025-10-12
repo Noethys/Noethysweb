@@ -68,6 +68,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Généralités",
                 Field("format"),
                 Field("nom"),
+                Field("version_sepa"),
                 Field("observations"),
             ),
             Fieldset("Paramètres",
