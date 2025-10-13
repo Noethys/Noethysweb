@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import requests, json
+import requests, json, re
 from django.core.cache import cache
 from core.models import Organisateur
 
@@ -60,7 +60,7 @@ def Get_code_insee_ville(cp=None, ville=None):
 
 
 def Get_adresse_structuree(gps_organisateur=None, rue=None, cp=None, ville=None):
-    """ Transforme une adresse postale destructurée en adresse structurée """
+    """ Transforme une adresse postale destructurée en adresse structurée avec API Adresse """
     params = {"q": "%s %s %s" % (rue, cp, ville), "limit": 1, "autocomplete": 0, "type": "housenumber"}
     if gps_organisateur:
         params.update({"lat": gps_organisateur["lat"], "lon": gps_organisateur["lon"]})
@@ -70,3 +70,17 @@ def Get_adresse_structuree(gps_organisateur=None, rue=None, cp=None, ville=None)
     except:
         return None
     return {"numero": resultat["housenumber"], "rue": resultat["street"].capitalize(), "cp": resultat["postcode"], "ville": resultat["city"].upper()}
+
+
+def Extraire_numero_rue(rue=""):
+    """ Extrait le numéro et la voie à partir d'une rue """
+    regex = "^(([0-9]+)( ?(B|b|bis|BIS|t|T|ter|TER|quater|QUATER|C|D|E|c|d|e|f|F) )?) ?(.+)?"
+    try:
+        if re.match(regex, rue):
+            blocs = re.match(regex, rue).groups()
+            numero = blocs[0].strip()
+            voie = blocs[4].strip().capitalize()
+            return numero, voie
+    except:
+        pass
+    return None

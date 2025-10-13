@@ -459,7 +459,6 @@ class Exporter():
 
             # ----------------------------------------------------------- NIVEAU TRANSACTION ------------------------------------------------------------------------------
 
-            compteur_api_adresse = 0
             for transaction in dict_lot["transactions"]:
                 if transaction.facture:
                     transaction_id = "FACT%s" % transaction.facture.numero
@@ -539,15 +538,13 @@ class Exporter():
 
                     # Recherche d'une adresse structurée
                     if transaction.mandat.individu:
-                        compteur_api_adresse += 1
-                        adresse = utils_adresse.Get_adresse_structuree(gps_organisateur=gps_organisateur, rue=transaction.mandat.individu.rue_resid,
-                                    cp=transaction.mandat.individu.cp_resid, ville=transaction.mandat.individu.ville_resid)
-                        if adresse:
-                            for champ in ["rue", "numero", "cp", "ville"]:
-                                setattr(transaction.mandat, "individu_%s" % champ, adresse[champ])
-                        if compteur_api_adresse == 45:
-                            time.sleep(1)
-                            compteur_api_adresse = 0
+                        transaction.mandat.individu_rue = transaction.mandat.individu.rue_resid
+                        transaction.mandat.individu_cp = transaction.mandat.individu.cp_resid
+                        transaction.mandat.individu_ville = transaction.mandat.individu.ville_resid
+                        detail = utils_adresse.Extraire_numero_rue(rue=transaction.mandat.individu.rue_resid)
+                        if detail:
+                            transaction.mandat.individu_numero = detail[0]
+                            transaction.mandat.individu_rue = detail[1]
 
                     # PstlAdr
                     PstlAdr = doc.createElement("PstlAdr")
@@ -687,22 +684,17 @@ class Exporter():
 
     def Verifier_adresses(self):
         transactions = Prelevements.objects.select_related("famille", "mandat", "mandat__individu", "facture").filter(lot__pk=self.idlot)
-        gps_organisateur = utils_adresse.Get_gps_organisateur()
-
-        compteur_api_adresse = 0
         for transaction in transactions:
             transaction.nom_titulaire = transaction.mandat.individu.Get_nom() if transaction.mandat.individu else transaction.mandat.individu_nom
 
             # Recherche d'une adresse structurée
             if transaction.mandat.individu:
-                compteur_api_adresse += 1
-                adresse = utils_adresse.Get_adresse_structuree(gps_organisateur=gps_organisateur, rue=transaction.mandat.individu.rue_resid,
-                                                               cp=transaction.mandat.individu.cp_resid, ville=transaction.mandat.individu.ville_resid)
-                if adresse:
-                    for champ in ["rue", "numero", "cp", "ville"]:
-                        setattr(transaction.mandat, "individu_%s" % champ, adresse[champ])
-                if compteur_api_adresse == 45:
-                    time.sleep(1)
-                    compteur_api_adresse = 0
+                transaction.mandat.individu_rue = transaction.mandat.individu.rue_resid
+                transaction.mandat.individu_cp = transaction.mandat.individu.cp_resid
+                transaction.mandat.individu_ville = transaction.mandat.individu.ville_resid
+                detail = utils_adresse.Extraire_numero_rue(rue=transaction.mandat.individu.rue_resid)
+                if detail:
+                    transaction.mandat.individu_numero = detail[0]
+                    transaction.mandat.individu_rue = detail[1]
 
         return transactions
