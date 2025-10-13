@@ -27,7 +27,6 @@ class Formulaire(FormulaireBase, ModelForm):
         fields = "__all__"
         widgets = {
             "date": DatePickerWidget(),
-            "individu_rue": Rue(attrs={"id_codepostal": "id_individu_cp", "id_ville": "id_individu_ville"}),
             "individu_cp": CodePostal(attrs={"id_ville": "id_individu_ville"}),
             "individu_ville": Ville(attrs={"id_codepostal": "id_individu_cp"}),
             "memo": forms.Textarea(attrs={"rows": 3}),

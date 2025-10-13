@@ -74,7 +74,7 @@ def Get_adresse_structuree(gps_organisateur=None, rue=None, cp=None, ville=None)
 
 def Extraire_numero_rue(rue=""):
     """ Extrait le numéro et la voie à partir d'une rue """
-    regex = "^(([0-9]+)( ?(B|b|bis|BIS|t|T|ter|TER|quater|QUATER|C|D|E|c|d|e|f|F) )?) ?(.+)?"
+    regex = "^(([0-9]+)( ?(B|b|bis|Bis|BIS|t|T|ter|Ter|TER|quater|QUATER|C|D|E|c|d|e|f|F) )?) ?(.+)?"
     try:
         if re.match(regex, rue):
             blocs = re.match(regex, rue).groups()
