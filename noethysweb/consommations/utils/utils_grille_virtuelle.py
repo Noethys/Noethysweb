@@ -212,6 +212,7 @@ class Grille_virtuelle():
                 for dict_conso in liste_conso:
                     if dict_conso["key_case"] == key_case:
                         dict_conso["prestation"] = idprestation
+                        dict_conso["dirty"] = True
 
         # Ajoute les nouvelles prestations
         self.data_initial["prestations"].update(donnees_retour["nouvelles_prestations"])
