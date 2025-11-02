@@ -10,7 +10,7 @@ from collaborateurs.views import collaborateur, collaborateur_identite, collabor
                                 collaborateur_pieces, collaborateur_notes, collaborateur_contrats, collaborateur_evenements, planning_collaborateurs, \
                                 collaborateur_appliquer_modele_planning, liste_contrats, collaborateur_outils, collaborateur_historique, \
                                 collaborateur_emails, collaborateur_sms, appliquer_modele_planning, collaborateur_groupes, collaborateur_voir_contrat, \
-                                fusionner_contrats_word
+                                fusionner_contrats_word, importer_collaborateurs
 
 
 urlpatterns = [
@@ -68,6 +68,8 @@ urlpatterns = [
     path('collaborateurs/collaborateurs/notes/modifier/<int:idcollaborateur>/<int:pk>', collaborateur_notes.Modifier.as_view(), name='collaborateur_notes_modifier'),
     path('collaborateurs/collaborateurs/notes/supprimer/<int:idcollaborateur>/<int:pk>', collaborateur_notes.Supprimer.as_view(), name='collaborateur_notes_supprimer'),
 
+    path('collaborateurs/importer_collaborateurs', importer_collaborateurs.View.as_view(), name='importer_collaborateurs'),
+
     path('collaborateurs/liste_contrats', liste_contrats.Liste.as_view(), name='contrats_liste'),
 
     path('collaborateurs/fusionner_contrats_word', fusionner_contrats_word.Liste.as_view(), name='fusionner_contrats_word'),
@@ -88,5 +90,6 @@ urlpatterns = [
     path('collaborateurs/planning/valid_form_appliquer_modele', secure_ajax(planning_collaborateurs.Valid_form_appliquer_modele), name='ajax_planning_collaborateurs_valid_form_appliquer_modele'),
     path('collaborateurs/contrats/collaborateur_fusionner_contrat', secure_ajax(collaborateur_voir_contrat.Fusionner), name='ajax_collaborateur_fusionner_contrat'),
     path('collaborateurs/contrats/collaborateur_fusionner_contrats', secure_ajax(fusionner_contrats_word.Fusionner), name='ajax_collaborateur_fusionner_contrats'),
+    path('collaborateurs/importer_collaborateurs/importer', secure_ajax(importer_collaborateurs.Importer), name='ajax_importer_collaborateurs_importer'),
 
 ]

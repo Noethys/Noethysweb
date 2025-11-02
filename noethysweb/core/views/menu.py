@@ -506,6 +506,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Liste des collaborateurs
     menu_gestion_collaborateurs = menu_collaborateurs.Add(titre="Gestion des collaborateurs")
     menu_gestion_collaborateurs.Add(code="collaborateur_liste", titre="Liste des collaborateurs", icone="file-text-o")
+    menu_gestion_collaborateurs.Add(code="importer_collaborateurs", titre="Importer des collaborateurs", icone="file-text-o")
 
     # Liste des collaborateurs
     menu_gestion_contrats = menu_collaborateurs.Add(titre="Gestion des contrats")
