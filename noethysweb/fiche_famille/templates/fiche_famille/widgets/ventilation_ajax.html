@@ -24,7 +24,7 @@
     {% for prestation in prestations|get_item:regroupement %}
         <tr id="prestation_{{ prestation.pk }}" class="ligne_prestation">
             <td>{{ prestation.date|date:"l j F Y"|title }}</td>
-            <td>{{ prestation.individu.prenom|default:"" }}</td>
+            <td>{{ prestation.individu.Get_nom|default:"" }}</td>
             <td>{{ prestation.label }}</td>
             <td style="text-align: center;">{{ prestation.facture.numero|default:"" }}</td>
             <td id="prestation_{{ prestation.pk }}_montant_prestation" class="montant_prestation montant">{{ prestation.montant|montant }}</td>
