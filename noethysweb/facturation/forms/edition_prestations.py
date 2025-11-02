@@ -19,6 +19,7 @@ class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget(attrs={"afficher_check": False}))
     filtre_villes = forms.TypedChoiceField(label="Filtre sur les villes", choices=[(None, "Toutes les villes"), ("SELECTION", "Uniquement les villes sélectionnées")], initial="TOUTES", required=False)
     villes = forms.MultipleChoiceField(label="Sélection de villes", widget=Select2MultipleWidget(), choices=[], required=False)
+    detail_prix_unitaire = forms.BooleanField(label="Afficher le détail par prix unitaire", required=False, initial=True)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -44,6 +45,7 @@ class Formulaire(FormulaireBase, forms.Form):
                 Field("activites"),
                 Field("filtre_villes"),
                 Field("villes"),
+                Field("detail_prix_unitaire"),
             ),
             HTML(EXTRA_HTML),
         )

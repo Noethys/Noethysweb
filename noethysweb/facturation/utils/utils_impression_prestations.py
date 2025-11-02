@@ -41,7 +41,7 @@ class Impression(utils_impression.Impression):
 
             dict_prestations_temp = {}
             for prestation in dict_prestations.get(famille, []):
-                prix_unitaire = prestation.montant / prestation.quantite
+                prix_unitaire = (prestation.montant / prestation.quantite) if self.dict_donnees["detail_prix_unitaire"] else 0
                 if prestation.individu:
                     libelle = "%s - %s" % (prestation.individu.prenom or prestation.individu.nom, prestation.label)
                 else:
@@ -72,7 +72,9 @@ class Impression(utils_impression.Impression):
         self.story.append(Spacer(0, 15))
 
         # Remplissage du tableau
-        dataTableau = [("Famille", "Montant", "Détail", "Qté", "Prix", "Total")]
+        dataTableau = [["Famille", "Montant", "Détail", "Qté", "Total"]]
+        if self.dict_donnees["detail_prix_unitaire"]:
+            dataTableau[0].insert(4, "Prix")
 
         keys = sorted(list(dict_prestations_famille.keys()), key=lambda x: x.nom)
         for famille in keys:
@@ -93,7 +95,8 @@ class Impression(utils_impression.Impression):
             ligne.append(Paragraph("<br/>".join([str(ligne_detail["quantite"]) for ligne_detail in dict_prestations_famille[famille]]), style_centre))
 
             # Prix unitaire
-            ligne.append(Paragraph("<br/>".join([utils_texte.Formate_montant(ligne_detail["prix"]) for ligne_detail in dict_prestations_famille[famille]]), style_centre))
+            if self.dict_donnees["detail_prix_unitaire"]:
+                ligne.append(Paragraph("<br/>".join([utils_texte.Formate_montant(ligne_detail["prix"]) for ligne_detail in dict_prestations_famille[famille]]), style_centre))
 
             # Montant ligne de détail
             ligne.append(Paragraph("<br/>".join([utils_texte.Formate_montant(ligne_detail["montant"]) for ligne_detail in dict_prestations_famille[famille]]), style_centre))
@@ -109,7 +112,8 @@ class Impression(utils_impression.Impression):
             ("ALIGN", (0, 0), (-1, -1), "CENTRE"),
         ])
         # Création du tableau
-        tableau = Table(dataTableau, [170, 50, 160, 40, 50, 50], repeatRows=1)
+        largeurs_colonnes = [170, 50, 160, 40, 50, 50] if self.dict_donnees["detail_prix_unitaire"] else [220, 50, 160, 40, 50]
+        tableau = Table(dataTableau, largeurs_colonnes, repeatRows=1)
         tableau.setStyle(style)
         self.story.append(tableau)
 
@@ -132,22 +136,33 @@ class Impression(utils_impression.Impression):
         keys = list(lignes_recap.keys())
         keys.sort()
 
-        dataTableau = [("Prestation", "Nbre familles", "Nbre individus", "Tarif unitaire", "Quantité", "Total")]
+        dataTableau = [["Prestation", "Nbre familles", "Nbre individus", "Quantité", "Total"]]
+        if self.dict_donnees["detail_prix_unitaire"]:
+            dataTableau[0].insert(3, "Tarif unitaire")
+
         for key in keys:
             ligne_recap = lignes_recap[key]
-            dataTableau.append((
+            ligne = [
                 Paragraph(key[0], style_centre),
                 Paragraph(str(len(ligne_recap["familles"])), style_centre),
                 Paragraph(str(len(ligne_recap["individus"])), style_centre),
-                Paragraph(utils_texte.Formate_montant(key[1]), style_centre),
                 Paragraph(str(ligne_recap["quantite"]), style_centre),
                 Paragraph(utils_texte.Formate_montant(ligne_recap["montant"]), style_centre),
-            ))
-        dataTableau.append((
-            Paragraph("", style_centre), Paragraph("", style_centre), Paragraph("", style_centre), Paragraph("", style_centre),
+            ]
+            if self.dict_donnees["detail_prix_unitaire"]:
+                ligne.insert(3, Paragraph(utils_texte.Formate_montant(key[1]), style_centre))
+            dataTableau.append(ligne)
+
+        ligne = [
+            Paragraph("", style_centre), Paragraph("", style_centre), Paragraph("", style_centre),
             Paragraph("<b>%s</b>" % totaux["quantite"], style_centre), Paragraph("<b>%s</b>" % utils_texte.Formate_montant(totaux["montant"]), style_centre),
-        ))
-        tableau = Table(dataTableau, [195, 65, 65, 65, 65, 65])
+        ]
+        if self.dict_donnees["detail_prix_unitaire"]:
+            ligne.insert(3, Paragraph("", style_centre))
+        dataTableau.append(ligne)
+
+        largeurs_colonnes = [195, 65, 65, 65, 65, 65] if self.dict_donnees["detail_prix_unitaire"] else [260, 65, 65, 65, 65]
+        tableau = Table(dataTableau, largeurs_colonnes)
         tableau.setStyle(TableStyle([
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
             ("FONT", (0, 0), (-1, -1), "Helvetica", 7),
