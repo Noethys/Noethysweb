@@ -1,3 +1,10 @@
+Version 1.3.0.7 (06/11/2025) :
+
+- Ajout de l'importation de collaborateurs
+- Ajout de l'affichage de la catégorie de tarif dans la composition de la famille
+- Ajout du nom de famille dans la ventilation lors de la saisie d'un règlement
+- Correction de la version xsd dans l'export des prélèvements
+
 Version 1.3.0.6 (16/10/2025) :
 
 - Ajout de la structuration automatique des adresses des mandats
