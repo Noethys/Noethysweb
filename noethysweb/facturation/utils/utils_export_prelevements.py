@@ -106,7 +106,7 @@ class Exporter():
         # Génération du document XML
         racine = doc.createElement("Document")
         racine.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-        racine.setAttribute("xmlns", "urn:iso:std:iso:20022:tech:xsd:pain.008.001.%s" % "08" if self.lot.modele.version_sepa == "2019" else "02")
+        racine.setAttribute("xmlns", "urn:iso:std:iso:20022:tech:xsd:pain.008.001.%s" % ("08" if self.lot.modele.version_sepa == "2019" else "02"))
         doc.appendChild(racine)
 
         # CstmrDrctDbtInitn
