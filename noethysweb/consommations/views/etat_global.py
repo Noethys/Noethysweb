@@ -11,7 +11,7 @@ from django.db.models import Q
 from core.views.base import CustomView
 from core.utils import utils_dates
 from core.models import Unite
-from consommations.forms.etat_global import Form_selection_periode, Form_selection_activites, Form_selection_options, Form_profil_configuration
+from consommations.forms.etat_global import Form_selection_periode, Form_selection_options, Form_selection_activites, Form_profil_configuration
 
 
 def Appliquer_parametres(request):
@@ -20,22 +20,21 @@ def Appliquer_parametres(request):
     if not form.is_valid():
         return JsonResponse({"erreur": "Veuillez renseigner la période"}, status=401)
     periode = form.cleaned_data.get("periode")
-    date_debut = utils_dates.ConvertDateENGtoDate(periode.split(";")[0])
-    date_fin = utils_dates.ConvertDateENGtoDate(periode.split(";")[1])
+    date_debut, date_fin = utils_dates.ConvertDateRangePicker(periode)
 
     # Récupération des activités
     form = Form_selection_activites(json.loads(request.POST.get("form_selection_activites")))
     if not form.is_valid():
         return JsonResponse({"erreur": "Veuillez sélectionner des activités"}, status=401)
     activites = json.loads(form.cleaned_data.get("activites"))
-
     if not activites["ids"]:
         return JsonResponse({"erreur": "Veuillez sélectionner des activités"}, status=401)
 
     # Recherche des unités ouvertes
     if activites["type"] == "groupes_activites": condition_activites = Q(activite__groupes_activites__in=activites["ids"])
     if activites["type"] == "activites": condition_activites = Q(activite__in=activites["ids"])
-    unites = Unite.objects.select_related('activite').filter(condition_activites, date_debut__lte=date_fin, date_fin__gte=date_debut).order_by("ordre")
+    condition_periode = Q(activite__date_debut__lte=date_fin) & (Q(activite__date_fin__gte=date_debut) | Q(activite__date_fin__isnull=True))
+    unites = Unite.objects.select_related('activite').filter(condition_activites, condition_periode).order_by("ordre")
 
     # Regroupement par activité
     dict_unites = {}

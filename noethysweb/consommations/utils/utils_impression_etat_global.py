@@ -9,9 +9,8 @@ from reportlab.platypus import Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
-from core.models import Evenement, Regime, Vacance, Activite, Quotient, TarifLigne, Consommation, Famille, Individu, Unite
+from core.models import Evenement, Regime, Vacance, Activite, Quotient, TarifLigne, Consommation, Famille, Individu, LISTE_ETATS_CONSO, JOURS_COMPLETS_SEMAINE
 from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires
-from core.utils.utils_dates import HeureStrEnDelta as HEURE
 
 
 # Regex pour formule
@@ -45,6 +44,9 @@ def GetQF(dictQuotientsFamiliaux={}, IDfamille=None, date=None):
             if date >= date_debut and date <= date_fin :
                 return quotient
     return None
+
+def ConvertListeInDict(liste=[]):
+    return {item[0]: item[1] for item in liste}
 
 
 class Impression(utils_impression.Impression):
@@ -466,7 +468,7 @@ class Impression(utils_impression.Impression):
                             IDregime = famille.caisse.regime_id
                         else:
                             IDregime = 0
-                            if dict_options["afficher_regime_inconnu"] == True:
+                            if dict_options["afficher_regime_inconnu"] and dict_options["regroupement_regime"]:
                                 self.erreurs.append("Attention, le régime d'appartenance n'a pas été renseigné pour la famille de %s. Remarque : Vous pouvez masquer cette erreur dans les options." % individu.Get_nom())
                                 return False
 
@@ -490,18 +492,20 @@ class Impression(utils_impression.Impression):
                         dict_resultats[regroupement][index_tranche_age][periode][IDregime] += valeur * quantite
 
         # Création du titre du document
-        self.Insert_header()
+        self.Insert_header(espace_apres=10)
 
-        liste_label_parametres = [
-            "Période du %s au %s" % (utils_dates.ConvertDateToFR(date_debut), utils_dates.ConvertDateToFR(date_fin)),
-            "Activités : %s" % ", ".join([activite.nom for activite in activites]),
+        # Création de l'intro
+        style_intro = ParagraphStyle(name="intro", fontName="Helvetica", fontSize=6, leading=6, spaceBefore=0, spaceAfter=2)
+        lignes_intro = [
+            Paragraph(u"<b>Période :</b> Du %s au %s" % (utils_dates.ConvertDateToFR(date_debut), utils_dates.ConvertDateToFR(date_fin)), style_intro),
+            Paragraph(u"<b>Activités :</b> %s" % ", ".join([activite.nom for activite in activites]), style_intro),
+            Paragraph(u"<b>Etat des consommations :</b> %s" % ", ".join([ConvertListeInDict(LISTE_ETATS_CONSO)[etat] for etat in dict_options["etat_consommations"]]), style_intro),
+            Paragraph(u"<b>Résultats :</b> %s" % "%d individus | %d familles" % (len(dict_stats["individus"]), len(dict_stats["familles"])), style_intro),
         ]
-        styleA = ParagraphStyle(name="A", fontName="Helvetica", fontSize=6, spaceAfter=0)
-        self.story.append(Paragraph(u"<b>Critères :</b> %s" % " | ".join(liste_label_parametres), styleA))
-
-        txt_stats_globales = u"%d individus | %d familles" % (len(dict_stats["individus"]), len(dict_stats["familles"]))
-        styleA = ParagraphStyle(name="A", fontName="Helvetica", fontSize=6, spaceAfter=20)
-        self.story.append(Paragraph(u"<b>Résultats :</b> %s" % txt_stats_globales, styleA))
+        if len(dict_options["jours_hors_vacances"]) != 7 or len(dict_options["jours_vacances"]) != 7:
+            lignes_intro.insert(3, Paragraph(u"<b>Jours scolaires :</b> %s" % ", ".join([ConvertListeInDict(JOURS_COMPLETS_SEMAINE)[int(jour)] for jour in dict_options["jours_hors_vacances"]]), style_intro))
+            lignes_intro.insert(4, Paragraph(u"<b>Jours de vacances :</b> %s" % ", ".join([ConvertListeInDict(JOURS_COMPLETS_SEMAINE)[int(jour)] for jour in dict_options["jours_vacances"]]), style_intro))
+        self.Insert_intro(lignes=lignes_intro)
 
         # Tri du niveau de regroupement principal
         regroupements = list(dict_resultats.keys())
@@ -518,10 +522,7 @@ class Impression(utils_impression.Impression):
             listeColonnes = []
             largeurColonne = 80
             for IDregime in listeRegimesUtilises:
-                if IDregime in dictRegimes:
-                    nomRegime = dictRegimes[IDregime]
-                else:
-                    nomRegime = "Sans régime"
+                nomRegime = dictRegimes[IDregime] if IDregime in dictRegimes else "Sans régime"
                 listeColonnes.append((IDregime, nomRegime, largeurColonne))
             listeColonnes.append((2000, "Total", largeurColonne))
 
@@ -558,9 +559,10 @@ class Impression(utils_impression.Impression):
             largeursColonnes = [150, ]
             indexColonne = 1
             for IDregime, label, largeur in listeColonnes:
-                ligne1.append(label)
-                largeursColonnes.append(largeur)
-                indexColonne += 1
+                if dict_options["regroupement_regime"] or IDregime == 2000:
+                    ligne1.append(label)
+                    largeursColonnes.append(largeur)
+                    indexColonne += 1
 
             dataTableau.append(ligne1)
 
@@ -586,7 +588,8 @@ class Impression(utils_impression.Impression):
                 if label_tranche_age != "":
                     ligne = [label_tranche_age, ]
                     for IDregime, label, largeur in listeColonnes[:-1]:
-                        ligne.append("")
+                        if dict_options["regroupement_regime"] or IDregime == 2000:
+                            ligne.append("")
                     dataTableau.append(ligne)
                     index += 1
 
@@ -630,7 +633,8 @@ class Impression(utils_impression.Impression):
                                     valeur = dict_resultats_periode[dictPeriode["code"]][IDregime]
                                 else:
                                     valeur = datetime.timedelta(hours=0, minutes=0)
-                                ligne.append(FormateValeur(valeur, dict_options["format_donnees"]))
+                                if dict_options["regroupement_regime"]:
+                                    ligne.append(FormateValeur(valeur, dict_options["format_donnees"]))
                                 totalLigne += valeur
                                 if (IDregime in dictTotaux) == False:
                                     dictTotaux[IDregime] = datetime.timedelta(hours=0, minutes=0)
@@ -651,8 +655,8 @@ class Impression(utils_impression.Impression):
                             total = dictTotaux[IDregime]
                         else:
                             total = datetime.timedelta(hours=0, minutes=0)
-
-                        ligne.append(FormateValeur(total, dict_options["format_donnees"]))
+                        if dict_options["regroupement_regime"]:
+                            ligne.append(FormateValeur(total, dict_options["format_donnees"]))
                         totalLigne += total
 
                         if (indexColonne in dict_totaux_regroupement) == False:
@@ -678,7 +682,7 @@ class Impression(utils_impression.Impression):
                     ('ALIGN', (0, 0), (-1, -1), 'CENTRE'),
 
                     ('BACKGROUND', (0, -1), (-1, -1), couleurFondClair),
-                    ('BACKGROUND', (-1, 0), (-1, -1), couleurFondClair),
+                    # ('BACKGROUND', (-1, 0), (-1, -1), couleurFondClair),
 
                     ('FONT', (0, -1), (-1, -1), "Helvetica-Bold", 7),  # Gras pour totaux
                 ]
@@ -719,8 +723,9 @@ class Impression(utils_impression.Impression):
                     valeur = total
 
                 label = FormateValeur(valeur, dict_options["format_donnees"])
-                ligne1.append(label)
-                largeursColonnes.append(largeur)
+                if dict_options["regroupement_regime"] or IDregime == 2000:
+                    ligne1.append(label)
+                    largeursColonnes.append(largeur)
                 indexColonne += 1
             dataTableau.append(ligne1)
 

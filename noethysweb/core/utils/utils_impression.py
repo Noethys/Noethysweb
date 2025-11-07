@@ -273,6 +273,19 @@ class Impression():
         self.story.append(tableau)
         self.story.append(Spacer(0, espace_apres))
 
+    def Insert_intro(self, lignes=[], espace_apres=20):
+        """ Création d'un tableau d'intro """
+        # Dessin du tableau
+        dataTableau = [[lignes]]
+        largeursColonnes = ((self.taille_page[0] - 75))
+        style = TableStyle([
+            ('LINEBEFORE', (0, 0), (-1, -1), 0.25, colors.black, None, (0.5, 2)), ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('ALIGN', (0, 0), (0, 0), 'LEFT'), ('FONT', (1, 0), (1, 0), "Helvetica", 6), ])
+        tableau = Table(dataTableau, largeursColonnes)
+        tableau.setStyle(style)
+        self.story.append(tableau)
+        self.story.append(Spacer(0, espace_apres))
+
     def Get_champs_fusion(self):
         return self.dict_donnees
 

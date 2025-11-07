@@ -22,9 +22,8 @@ class Form_selection_periode(FormulaireBase, forms.Form):
         self.helper = FormHelper()
         self.helper.form_id = 'form_selection_periode'
         self.helper.form_method = 'post'
-        self.helper.form_show_labels = False
         self.helper.layout = Layout(
-            Field('periode'),
+            Field("periode"),
         )
 
 
@@ -51,11 +50,9 @@ class Form_selection_activites(FormulaireBase, forms.Form):
         self.helper = FormHelper()
         self.helper.form_id = 'form_selection_activites'
         self.helper.form_method = 'post'
-        self.helper.form_show_labels = False
         self.helper.layout = Layout(
             Field('activites'),
         )
-
 
 
 class Form_selection_options(FormulaireBase, forms.Form):
@@ -86,6 +83,7 @@ class Form_selection_options(FormulaireBase, forms.Form):
     regroupement_age = forms.CharField(label="Regroupement par tranches d'âge", required=False, help_text="Saisissez les tranches d'âge souhaitées séparées par des virgules. Exemple : '3, 6, 12'.")
     tranches_qf_perso = forms.CharField(label="Regroupement par tranches de QF", required=False, help_text="Saisissez les tranches de QF souhaitées séparées par des virgules. Exemple : '650, 800, 1200'. A utiliser avec le regroupement principal 'Quotient familial (tranches personnalisées)'.")
     periodes_detaillees = forms.BooleanField(label="Regroupement par périodes détaillées", initial=True, required=False, help_text="Cochez cette case pour afficher les périodes détaillées.")
+    regroupement_regime = forms.BooleanField(label="Regroupement par régimes", initial=False, required=False, help_text="Cochez cette case pour regrouper les régimes distincts par colonne.")
 
     # Données
     format_donnees = forms.ChoiceField(label="Format des données", choices=[("horaire", "Horaire"), ("decimal", "Décimal")], initial="horaire", required=False, help_text="Choisissez le format d'affichage des données: Horaire (Ex: 8h30) ou décimal (Ex: 8.5).")
@@ -136,6 +134,7 @@ class Form_selection_options(FormulaireBase, forms.Form):
                 Field("regroupement_age"),
                 Field("tranches_qf_perso"),
                 Field("periodes_detaillees"),
+                Field("regroupement_regime"),
             ),
             Fieldset("Données",
                 Field("format_donnees"),
@@ -148,7 +147,7 @@ class Form_selection_options(FormulaireBase, forms.Form):
                 InlineCheckboxes("jours_vacances"),
                 InlineCheckboxes("etat_consommations"),
             ),
-            Fieldset("Affichage",
+            Fieldset("Mise en page",
                 Field("orientation"),
                 Field("couleur_ligne_age"),
                 Field("couleur_ligne_total"),

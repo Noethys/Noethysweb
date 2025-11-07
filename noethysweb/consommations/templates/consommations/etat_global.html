@@ -28,35 +28,33 @@
     <div class="row">
         <div class="col-md-3" >
 
-
-
             <!-- Sélection de la période -->
             <div class="card card-default">
                 <div class="card-header with-border">
-                    <h3 class="card-title"><i class="fa fa-calendar margin-r-5"></i> Période</h3>
+                    <h3 class="card-title"><i class="fa fa-calendar margin-r-5"></i> Période/activités</h3>
                     <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                        <button class="btn btn-default btn-xs" style="margin-right: 10px;" onclick="appliquer_parametres()" title="Appliquer les paramètres sélectionnés">Appliquer</button>
                     </div>
                 </div>
                 <div class="card-body">
                     {% crispy form_selection_periode %}
-                    <button class="btn btn-default btn-block btn-flat btn-sm" style="margin-top: -5px;" onclick="appliquer_parametres()" title="Appliquer">Appliquer</button>
+                    {% crispy form_selection_activites %}
                 </div>
             </div>
 
-            <!-- Sélection des activités -->
-            <div class="card card-default">
-                <div class="card-header with-border">
-                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Activités</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    {% crispy form_selection_activites %}
-                    <button class="btn btn-default btn-block btn-flat btn-sm" style="margin-top: -10px;" onclick="appliquer_parametres()" title="Appliquer">Appliquer</button>
-                </div>
-            </div>
+            <!-- Astuces -->
+            {% embed 'core/box.html' with box_titre=True %}
+                {% block box_theme %}bg-warning disabled{% endblock %}
+                {% block box_titre %}<i class="fa fa-lightbulb-o margin-r-5"></i> Astuces{% endblock %}
+                {% block box_outils %}
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Diminuer"><i class="fa fa-minus"></i></button>
+                {% endblock %}
+                {% block box_contenu %}
+                    <p><b>Obtenir le temps réel de présence :</b> Sélectionnez le type de calcul <i>Temps réel de présence</i> pour les unités souhaitées.</p>
+                    <p><b>Appliquer un coefficient :</b> Une journée équivaut par exemple à 8h ? Sélectionnez le type de calcul <i>Nbre d'unités consommées</i> et saisissez le coefficient 8 sur la ligne de l'unité.</p>
+                    <p><b>Distinguer les temps facturé et réalisé :</b> Pour obtenir le temps facturé, décochez l'état <i>Absence justifiée</i> dans l'onglet Options. Pour obtenir le temps réalisé effectif, décochez <i>Absence justifiée</i> et <i>Absence injustifiée</i>.</p>
+                {% endblock %}
+            {% endembed %}
 
         </div>
 
