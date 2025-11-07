@@ -247,6 +247,11 @@ $(document).ready(function() {
                     }
                 }
 
+                // Vérifie les dates modifiables min et max
+                if ((datejs > moment("{{ data.date_modifiable_max|date:'Y-m-d' }}")) || (datejs < moment("{{ data.date_modifiable_min|date:'Y-m-d' }}"))) {
+                    valide =  false
+                }
+
                 // Vérifie que l'évènement est bien lié au groupe de l'individu
                 if (case_tableau.type_case === "event" && case_tableau.groupe !== case_tableau.evenement.groupe) {
                     valide = false
