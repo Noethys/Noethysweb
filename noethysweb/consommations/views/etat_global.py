@@ -34,7 +34,7 @@ def Appliquer_parametres(request):
     if activites["type"] == "groupes_activites": condition_activites = Q(activite__groupes_activites__in=activites["ids"])
     if activites["type"] == "activites": condition_activites = Q(activite__in=activites["ids"])
     condition_periode = Q(activite__date_debut__lte=date_fin) & (Q(activite__date_fin__gte=date_debut) | Q(activite__date_fin__isnull=True))
-    unites = Unite.objects.select_related('activite').filter(condition_activites, condition_periode).order_by("ordre")
+    unites = Unite.objects.select_related('activite').filter(condition_activites, condition_periode).order_by("activite__date_debut", "activite_id", "ordre")
 
     # Regroupement par activité
     dict_unites = {}
