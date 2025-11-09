@@ -32,7 +32,7 @@ class Importer:
             return datetime.datetime(*xlrd.xldate_as_tuple(date, classeur.datemode)).date()
         return None
 
-    def Get_data_classeur(self, nom_fichier=""):
+    def Get_data_xls(self, nom_fichier=""):
         dict_feuilles = {}
         classeur = xlrd.open_workbook(nom_fichier)
         for num_feuille in range(0, classeur.nsheets):
@@ -50,7 +50,39 @@ class Importer:
                 if valeurs_ligne:
                     liste_lignes.append(valeurs_ligne)
             dict_feuilles[feuille.name] = liste_lignes
-        return dict_feuilles, classeur
+        return dict_feuilles
+
+    def Get_data_xlsx(self, nom_fichier="", num_ligne_entete=0):
+        from openpyxl import load_workbook
+
+        def Convert_valeur(valeur):
+            # Conversion d'une date anglaise en français
+            if valeur and len(valeur) > 7 and valeur[4] == "-" and valeur[7] == "-":
+                return datetime.datetime.strptime(valeur,"%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y")
+            # Si None, renvoie une chaîne vide
+            if valeur == "None":
+                return ""
+            return valeur
+
+        dict_feuilles = {}
+        classeur = load_workbook(filename=nom_fichier, data_only=True, read_only=True)
+        feuille = classeur.active
+        dict_noms_colonnes = {}
+        liste_lignes = []
+        for num_ligne, row in enumerate(feuille.rows):
+            if num_ligne >= num_ligne_entete:
+                valeurs_ligne = {}
+                for num_colonne, cell in enumerate(row):
+                    valeur = Convert_valeur(str(cell.value))
+                    if num_ligne == num_ligne_entete:
+                        dict_noms_colonnes[num_colonne] = valeur
+                    else:
+                        valeurs_ligne[dict_noms_colonnes[num_colonne]] = valeur
+                if valeurs_ligne:
+                    liste_lignes.append(valeurs_ligne)
+        dict_feuilles[feuille.title] = liste_lignes
+        classeur.close()
+        return dict_feuilles
 
     def Get_data_csv(self, nom_fichier=""):
         lignes = []
