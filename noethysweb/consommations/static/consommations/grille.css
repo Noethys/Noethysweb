@@ -153,6 +153,7 @@
     border-collapse: separate;
     border-spacing: 4px 4px;
     background-color: #f5f5f5 !important;
+    height: 100%;
 }
 
 .multi_ajouter {
@@ -183,6 +184,7 @@
     border-collapse: separate;
     border-spacing: 4px 4px;
     background-color: #f5f5f5 !important;
+    height: 100%;
 }
 
 .table_evenements td {
