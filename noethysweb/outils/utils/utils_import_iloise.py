@@ -5,13 +5,13 @@
 
 import logging
 logger = logging.getLogger(__name__)
-from core.models import Individu, Rattachement, Caisse
+from core.models import Individu, Rattachement, Caisse, ContactUrgence
 from core.utils import utils_dates, utils_import_excel
 
 
-def Importer(*args):
+def Importer(nom_fichier_enfants="", nom_fichier_responsables=""):
     importation = Import()
-    importation.Start(*args)
+    importation.Start(nom_fichier_enfants=nom_fichier_enfants, nom_fichier_responsables=nom_fichier_responsables)
 
 
 class Import(utils_import_excel.Importer):
@@ -21,7 +21,8 @@ class Import(utils_import_excel.Importer):
 
         def Formate_telephone_international(tel=""):
             if tel:
-                return self.Formate_telephone(tel.replace("'+33", "0"))
+                tel = tel.replace("'", "")
+                return self.Formate_telephone(tel.replace("+33", "0"))
             return None
 
         # Récupération des caisses paramétrées
@@ -85,6 +86,25 @@ class Import(utils_import_excel.Importer):
                     Rattachement.objects.create(categorie=2, titulaire=False, famille=famille, individu=individu)
                     logger.debug("Création enfant : %s" % individu)
                     liste_noms_enfants.append("%s %s" % (enfant["Nom enfant"], enfant["Prénom enfant"]))
+
+                    # Enregistrement des contacts d'urgence et de sortie
+                    for ligne_contact in enfant["Adultes habilités"].split("\n"):
+                        nom_complet, tel = None, None
+                        if len(ligne_contact) > 8:
+                            pos = ligne_contact.find("+")
+                            if pos > 0:
+                                tel = Formate_telephone_international(ligne_contact[pos:])
+                                nom_complet = ligne_contact[:pos]
+                            else:
+                                pos = ligne_contact.find(" 0")
+                                if pos > 0:
+                                    tel = Formate_telephone_international(ligne_contact[pos:])
+                                    nom_complet = ligne_contact[:pos]
+                        if nom_complet:
+                            parties_nom = nom_complet.strip().split(" ")
+                            contact = ContactUrgence.objects.create(nom=" ".join(parties_nom[:-1]), prenom=parties_nom[-1],
+                                                          tel_mobile=tel, lien="?", individu=individu, famille=famille)
+                            logger.debug("  Création contact : %s %s" % (contact.Get_nom(), contact.tel_mobile))
 
                 # Recherche du conjoint
                 for nom_conjoint, conjoint in dict_responsables.items():
