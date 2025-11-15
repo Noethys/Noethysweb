@@ -60,22 +60,6 @@
 
         <div class="col-md-9">
 
-{% comment %}
-            <!-- Profil de configuration -->
-            <div class="card card-default">
-                <div class="card-header with-border">
-                    <h3 class="card-title"><i class="fa fa-calendar margin-r-5"></i> Profil de configuration</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    {% crispy form_profil_configuration %}
-                </div>
-            </div>
-{% endcomment %}
-
-
             <!-- Cadre principal -->
             <div class="card card-default">
                 <div class="card-header with-border">
@@ -92,6 +76,10 @@
                     <div class="buttonHolder">
                         <button class="btn btn-primary" onclick="generer_pdf()" title="Génération du PDF"><i class='fa fa-file-pdf-o margin-r-5'></i>Générer le PDF</button>
                         <a class="btn btn-danger" href="{% url 'consommations_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+                    </div>
+
+                    <div class="mt-4">
+                        {% crispy form_selection_profil %}
                     </div>
 
                     <div style="margin-top: 30px;">
@@ -127,6 +115,7 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
+                                                {{ html_parametres }}
                                                 </tbody>
                                             </table>
                                         </div>
@@ -152,9 +141,15 @@
 
     </div>
 
+    <form id="form_general" method="POST">
+        {% csrf_token %}
+        <input type="text" name="params_periode" id="id_params_periode" value="" hidden/>
+        <input type="text" name="params_activites" id="id_params_activites" value="" hidden/>
+        <input type="text" name="params_profil" id="id_params_profil" value="" hidden/>
+    </form>
+
     {% include 'core/modal_pdf.html' %}
     {% include 'consommations/etat_global_formule.html' %}
-
 
 {% endblock contenu_page %}
 
@@ -167,12 +162,13 @@
 
     <script>
 
-{#        {% include 'core/csrftoken.html' %}#}
+        {% include 'core/csrftoken.html' %}
 
         $(document).ready(function() {
             $("#div_table_parametres").freezeTable({
                 'scrollBar': true,
             });
+            set_parametres(JSON.parse('{{ dict_parametres|safe|default:"{}" }}'));
         });
 
         // Modal saisir une formule
@@ -246,15 +242,13 @@
         };
 
         // Envoi les paramètres au profil de configuration
-{% comment %}
         function get_parametres_profil() {
             var donnees = {
                 parametres: get_parametres(),
                 options: $("#form_selection_options").serializeArray(),
             }
-            donnees = JSON.stringify(donnees);
+            return JSON.stringify(donnees);
         };
-{% endcomment %}
 
         // Générer le PDF
         function generer_pdf() {
@@ -282,11 +276,13 @@
             })
         };
 
+        function appliquer_profil(idprofil) {
+            $("#id_params_periode").val(JSON.stringify($("#form_selection_periode").serializeObject()));
+            $("#id_params_activites").val(JSON.stringify($('#form_selection_activites').serializeArray()));
+            $("#id_params_profil").val(JSON.stringify({"profil": idprofil}));
+            $("#form_general").submit();
+        };
 
     </script>
 
 {% endblock scripts %}
-
-
-
-

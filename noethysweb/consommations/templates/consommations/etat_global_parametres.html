@@ -18,7 +18,7 @@
                         <option value="0" selected>Nombre d'unités consommées</option>
                         <option value="1">Temps réél de présence</option>
                         <option value="2">Temps facturé paramétré dans le tarif</option>
-                        <option value="4">Equivalence en heures paramétrée</option>
+                        <option value="4" {% if unite.equiv_journee or unite.equiv_heures %}selected{% endif %}>Equivalence en heures paramétrée</option>
                         <option value="3">Formule</option>
                     </select>
                 </td>

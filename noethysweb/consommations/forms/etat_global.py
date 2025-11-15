@@ -8,7 +8,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Fieldset
 from crispy_forms.bootstrap import Field, InlineCheckboxes
 from core.widgets import DateRangePickerWidget, SelectionActivitesWidget, Profil_configuration, ColorPickerWidget
-from core.utils import utils_parametres, utils_questionnaires
+from core.utils import utils_questionnaires
 from core.utils.utils_texte import Creation_tout_cocher
 from core.models import Regime, JOURS_SEMAINE, Parametre
 from core.forms.base import FormulaireBase
@@ -28,14 +28,15 @@ class Form_selection_periode(FormulaireBase, forms.Form):
 
 
 class Form_profil_configuration(FormulaireBase, forms.Form):
-    profil = forms.ModelChoiceField(label="Profil", queryset=Parametre.objects.none(), widget=Profil_configuration({"categorie": "etat_global"}), required=True)
+    profil = forms.ModelChoiceField(label="Profil", queryset=Parametre.objects.none(), widget=Profil_configuration({"categorie": "profil_etat_global", "module": "consommations.views.etat_global"}), required=True)
 
     def __init__(self, *args, **kwargs):
         super(Form_profil_configuration, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_id = 'form_profil_configuration'
+        self.helper.form_id = 'form_selection_profil'
         self.helper.form_method = 'post'
         self.helper.form_show_labels = False
+        self.fields["profil"].widget.request = self.request
         self.fields['profil'].queryset = Parametre.objects.filter(categorie="profil_etat_global").order_by("nom")
         self.helper.layout = Layout(
             Field('profil'),
@@ -118,13 +119,6 @@ class Form_selection_options(FormulaireBase, forms.Form):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-4'
         self.helper.field_class = 'col-md-8'
-
-        # Importation des paramètres
-        # parametres = {nom: field.initial for nom, field in self.fields.items()}
-        # del parametres["memoriser_parametres"]
-        # parametres = utils_parametres.Get_categorie(categorie="impression_facture", parametres=parametres)
-        # for nom, valeur in parametres.items():
-        #     self.fields[nom].initial = valeur
 
         # Affichage
         self.helper.layout = Layout(

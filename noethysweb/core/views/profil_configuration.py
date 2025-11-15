@@ -67,7 +67,7 @@ def Modifier_profil_configuration(request):
 
 def Enregistrer(request=None, module="", idprofil=None):
     """ Mémorise les paramètres du profil """
-    donnees = QueryDict(request.POST.get("donnees"))
+    donnees = request.POST.get("donnees")
 
     # Récupération des paramètres à sauvegarder dans le profil
     module = importlib.import_module(module)
