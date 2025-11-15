@@ -34,7 +34,6 @@ class Formulaire(FormulaireBase, forms.Form):
             Field('date'),
             Field('multidate'),
             HTML(EXTRA_HTML),
-            HTML("""<button type="submit" name="appliquer_date" class="btn btn-default btn-block btn-sm" style="margin-top: -5px;" title="Appliquer">Appliquer</button>"""),
         )
 
 
