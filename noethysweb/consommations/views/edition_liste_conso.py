@@ -109,7 +109,7 @@ class View(CustomView, TemplateView):
             request_post["application_profil"] = True
 
         # Application du profil de configuration
-        if profil and request_post.get("application_profil"):
+        if profil and request_post.get("application_profil") and profil.parametre:
             request_post["profil"] = profil.pk
             initial_data = json.loads(profil.parametre)
             [request_post.pop(key) for key in initial_data.keys() if key in request_post]
