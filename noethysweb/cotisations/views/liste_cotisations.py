@@ -27,7 +27,7 @@ class Liste(Page, crud.Liste):
 
     def get_queryset(self):
         condition = (Q(type_cotisation__structure__in=self.request.user.structures.all()) | Q(type_cotisation__structure__isnull=True))
-        return Cotisation.objects.select_related('famille', 'individu', 'type_cotisation', 'type_cotisation__structure', 'unite_cotisation', 'depot_cotisation').filter(self.Get_filtres("Q"), condition)
+        return Cotisation.objects.select_related('famille', 'individu', 'type_cotisation', 'type_cotisation__structure', 'unite_cotisation', 'depot_cotisation', 'prestation').filter(self.Get_filtres("Q"), condition)
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -48,13 +48,16 @@ class Liste(Page, crud.Liste):
         cp_resid = columns.TextColumn("CP", processor='Get_cp_resid')
         ville_resid = columns.TextColumn("Ville", processor='Get_ville_resid')
         mail = columns.TextColumn("Email", processor="Get_mail")
-        solde = columns.TextColumn("Solde", sources=[], processor="Get_solde")
+        date_prestation = columns.TextColumn("Date prestation", sources=['prestation__date'], processor=helpers.format_date('%d/%m/%Y'))
+        montant_prestation = columns.TextColumn("Montant prestation", sources=['prestation__montant'])
+        solde = columns.TextColumn("Solde prestation", sources=[], processor="Get_solde")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idcotisation', 'date_debut', 'date_fin', 'famille', 'individu', 'nom_cotisation', 'numero', 'depot', "rue_resid", "cp_resid", "ville_resid", "mail", "solde"]
-            hidden_columns = ["rue_resid", "cp_resid", "ville_resid", "mail", "solde"]
+            columns = ['check', 'idcotisation', 'date_debut', 'date_fin', 'famille', 'individu', 'nom_cotisation', 'numero',
+                       'depot', "rue_resid", "cp_resid", "ville_resid", "mail", "date_prestation", "montant_prestation", "solde"]
+            hidden_columns = ["rue_resid", "cp_resid", "ville_resid", "mail", "date_prestation", "montant_prestation", "solde"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
