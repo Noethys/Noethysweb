@@ -49,7 +49,11 @@ def Recherche_update():
     pos_debut_numVersion = changelog.find("n")
     pos_fin_numVersion = changelog.find("(")
     version_online_txt = changelog[pos_debut_numVersion + 1:pos_fin_numVersion].strip()
-    version_online_tuple = version.GetVersionTuple(version_online_txt)
+    try:
+        version_online_tuple = version.GetVersionTuple(version_online_txt)
+    except:
+        logger.debug("Erreur dans la recherche d'une nouvelle version")
+        return False, changelog
     logger.debug("version disponible =" + version_online_txt)
 
     # Lecture version actuelle
