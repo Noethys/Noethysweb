@@ -16,7 +16,7 @@ from consommations.forms.suivi_pointage import Formulaire as Form_parametres_sui
 
 def Get_form_parametres(request):
     """ Renvoie le form des paramètres """
-    parametres = utils_parametres.Get_categorie(categorie="suivi_pointage", utilisateur=request.user, parametres={"periode": "14", "activites": "", "afficher_jour": True})
+    parametres = utils_parametres.Get_categorie(categorie="suivi_pointage", utilisateur=request.user, parametres={"periode": "14", "activites": "{}", "afficher_jour": True})
     context = {"form_parametres_suivi_pointage": Form_parametres_suivi_pointage(request=request, initial=parametres)}
     return render(request, "consommations/suivi_pointage_parametres.html", context)
 
@@ -32,13 +32,16 @@ def Valider_form_parametres(request):
 
 def Get_pointage(request):
     """ Importation des consommations non pointées pour le widget """
-    parametres = utils_parametres.Get_categorie(categorie="suivi_pointage", utilisateur=request.user, parametres={"periode": "14", "activites": "", "afficher_jour": True})
+    parametres = utils_parametres.Get_categorie(categorie="suivi_pointage", utilisateur=request.user, parametres={"periode": "14", "activites": "{}", "afficher_jour": True})
 
     # Activités
-    param_activites = json.loads(parametres["activites"])
-    if param_activites["type"] == "groupes_activites":
+    try:
+        param_activites = json.loads(parametres["activites"])
+    except:
+        param_activites = {}
+    if param_activites.get("type") == "groupes_activites":
         liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
-    elif param_activites["type"] == "activites":
+    elif param_activites.get("type") == "activites":
         liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
     else:
         liste_activites = None
@@ -48,12 +51,13 @@ def Get_pointage(request):
     date_max = datetime.date.today() - datetime.timedelta(days=0 if parametres["afficher_jour"] else 1)
 
     # Récupération des stats
-    liste_pointage = Consommation.objects.select_related("activite").values("date", "activite__nom").filter(date__gte=date_min, date__lte=date_max, etat="reservation", activite__in=liste_activites).annotate(nbre=Count("pk")).order_by("date", "activite__nom")
     dict_pointage = {}
-    for item in liste_pointage:
-        dict_pointage.setdefault(item["date"], {"nbre_total": 0, "activites": []})
-        dict_pointage[item["date"]]["activites"].append({"activite__nom": item["activite__nom"], "nbre": item["nbre"]})
-        dict_pointage[item["date"]]["nbre_total"] += item["nbre"]
+    if liste_activites:
+        liste_pointage = Consommation.objects.select_related("activite").values("date", "activite__nom").filter(date__gte=date_min, date__lte=date_max, etat="reservation", activite__in=liste_activites).annotate(nbre=Count("pk")).order_by("date", "activite__nom")
+        for item in liste_pointage:
+            dict_pointage.setdefault(item["date"], {"nbre_total": 0, "activites": []})
+            dict_pointage[item["date"]]["activites"].append({"activite__nom": item["activite__nom"], "nbre": item["nbre"]})
+            dict_pointage[item["date"]]["nbre_total"] += item["nbre"]
     return dict_pointage
 
 
