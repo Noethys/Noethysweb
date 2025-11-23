@@ -362,6 +362,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_gestion_conso.Add(code="suivi_consommations", titre="Suivi des consommations", icone="file-text-o")
     menu_gestion_conso.Add(code="liste_consommations", titre="Liste des consommations", icone="file-text-o")
     menu_gestion_conso.Add(code="consommations_traitement_lot", titre="Traitement par lot", icone="file-text-o")
+    menu_gestion_conso.Add(code="suivi_pointage", titre="Suivi du pointage", icone="file-text-o")
 
     # Liste par état
     menu_listes_etat = menu_consommations.Add(titre="Listes")

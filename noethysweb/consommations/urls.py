@@ -9,7 +9,7 @@ from parametrage.views import calendrier
 from consommations.forms import grille_forfaits
 from consommations.views import grille, gestionnaire, suivi_consommations, etat_global, synthese_consommations, liste_attente, liste_absences, edition_liste_conso, \
                                 pointeuse, liste_consommations, liste_repas, etat_nomin, liste_durees, consommations_traitement_lot, evolution_reservations, \
-                                detail_consommations, liste_demandes #, pointeuse_barcodes
+                                detail_consommations, liste_demandes, suivi_pointage #, pointeuse_barcodes
 from core.decorators import secure_ajax
 
 
@@ -33,6 +33,8 @@ urlpatterns = [
 
     path('consommations/consommations_traitement_lot/selection_activite', consommations_traitement_lot.Selection_activite.as_view(), name='consommations_traitement_lot'),
     path('consommations/consommations_traitement_lot/liste/<int:idactivite>', consommations_traitement_lot.Liste.as_view(), name='consommations_traitement_lot_liste'),
+
+    path('consommations/suivi_pointage', suivi_pointage.View.as_view(), name='suivi_pointage'),
 
     # Listes par état
     path('consommations/liste_attente', liste_attente.View.as_view(etat="attente"), name='liste_attente'),
@@ -75,4 +77,7 @@ urlpatterns = [
     path('consommations/liste_demandes/valider_demande', secure_ajax(liste_demandes.Valider_demande), name='ajax_liste_demandes_valider_demande'),
     path('consommations/liste_attente/get_form_modifier_reservation', secure_ajax(liste_attente.Get_form_modifier_reservation), name='ajax_liste_attente_modifier_reservation'),
     path('consommations/liste_attente/valider_form_modifier_reservation', secure_ajax(liste_attente.Valider_form_modifier_reservation), name='ajax_liste_attente_valider_modifier_reservation'),
+    path('consommations/suivi_pointage_get_form_parametres', secure_ajax(suivi_pointage.Get_form_parametres), name='ajax_suivi_pointage_get_form_parametres'),
+    path('consommations/suivi_pointage_valider_form_parametres', secure_ajax(suivi_pointage.Valider_form_parametres), name='ajax_suivi_pointage_valider_form_parametres'),
+
 ]
