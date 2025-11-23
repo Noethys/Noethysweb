@@ -1,3 +1,10 @@
+Version 1.3.1.2 (23/11/2025) :
+
+- Ajout du widget Suivi du pointage sur la page d'accueil
+- Ajout du détail de la prestation dans la liste des adhésions
+- Affiche le nom original de la pièce jointe dans les emails
+- Correction css sur le suivi des achats
+
 Version 1.3.1.1 (15/11/2025) :
 
 - Ajout du profil de configuration dans l'état global
