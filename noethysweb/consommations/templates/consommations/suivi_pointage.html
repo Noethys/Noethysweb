@@ -79,7 +79,11 @@
                                 <div class="product-info">
                                     <span class="badge badge-danger"><i class="fa fa-exclamation-triangle margin-r-5"></i>{{ detail.nbre_total }} consommation{{ detail.nbre_total|pluralize }} non pointée{{ detail.nbre_total|pluralize }}</span>
                                     {% for item_activite in detail.activites %}
-                                        <span class="product-description">{{ item_activite.activite__nom }} ({{ item_activite.nbre }})</span>
+                                        <span class="product-description">
+                                            <a href="{% url 'gestionnaire_conso' date=date idactivite=item_activite.activite__pk %}" title="Afficher dans le gestionnaire des consommations">
+                                                {{ item_activite.activite__nom }} ({{ item_activite.nbre }})
+                                            </a>
+                                        </span>
                                     {% endfor %}
                                 </div>
                             </li>

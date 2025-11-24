@@ -21,6 +21,7 @@ urlpatterns = [
     # Gestion des consommations
     path('consommations/edition_liste_conso', edition_liste_conso.View.as_view(), name='edition_liste_conso'),
     path('consommations/gestionnaire_consommations', gestionnaire.View.as_view(), name='gestionnaire_conso'),
+    path('consommations/gestionnaire_consommations/<str:date>/<int:idactivite>', gestionnaire.View.as_view(), name='gestionnaire_conso'),
     path('consommations/pointeuse_consommations', pointeuse.View.as_view(), name='pointeuse_conso'),
     # path('consommations/pointeuse_barcodes', pointeuse_barcodes.View.as_view(), name='pointeuse_barcodes'),
     path('consommations/suivi_consommations', suivi_consommations.View.as_view(), name='suivi_consommations'),

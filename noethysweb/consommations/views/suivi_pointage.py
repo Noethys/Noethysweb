@@ -53,10 +53,10 @@ def Get_pointage(request):
     # Récupération des stats
     dict_pointage = {}
     if liste_activites:
-        liste_pointage = Consommation.objects.select_related("activite").values("date", "activite__nom").filter(date__gte=date_min, date__lte=date_max, etat="reservation", activite__in=liste_activites).annotate(nbre=Count("pk")).order_by("date", "activite__nom")
+        liste_pointage = Consommation.objects.select_related("activite").values("date", "activite__nom", "activite__pk").filter(date__gte=date_min, date__lte=date_max, etat="reservation", activite__in=liste_activites).annotate(nbre=Count("pk")).order_by("date", "activite__nom")
         for item in liste_pointage:
             dict_pointage.setdefault(item["date"], {"nbre_total": 0, "activites": []})
-            dict_pointage[item["date"]]["activites"].append({"activite__nom": item["activite__nom"], "nbre": item["nbre"]})
+            dict_pointage[item["date"]]["activites"].append({"activite__nom": item["activite__nom"], "activite__pk": item["activite__pk"], "nbre": item["nbre"]})
             dict_pointage[item["date"]]["nbre_total"] += item["nbre"]
     return dict_pointage
 

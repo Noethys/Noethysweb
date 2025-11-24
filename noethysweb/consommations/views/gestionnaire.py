@@ -29,7 +29,7 @@ class View(CustomView, TemplateView):
     def post(self, request, *args, **kwargs):
         # Si requête de MAJ
         if request.POST.get("type_submit") == "MAJ" or request.POST.get("donnees_ajouter_individu"):
-            context = self.get_context_data(**kwargs)
+            context = self.get_context_data()
             return render(request, self.template_name, context)
 
         # Si requête de sauvegarde
@@ -41,13 +41,13 @@ class View(CustomView, TemplateView):
         context['page_titre'] = "Gestionnaire des consommations"
         context['form_selection_date'] = form_selection_date
         context['form_ajouter_individu'] = form_ajouter_individu
-        context['data'] = self.Get_data_grille()
+        context['data'] = self.Get_data_grille(kwargs=kwargs)
         if context['data']["tarifs_credits_exists"]:
             context['form_forfaits'] = form_forfaits(inscriptions=context['data']["liste_inscriptions"])
         context['form_options'] = form_options(initial=context["data"]["options"])
         return context
 
-    def Get_data_grille(self):
+    def Get_data_grille(self, kwargs={}):
         data = {"mode": self.mode_grille, "consommations": {}, "prestations": {}, "memos": {}}
         options_defaut = {"tri": "nom", "afficher_date_naiss": "non", "afficher_age": "non", "afficher_groupe": "non", "afficher_classe": "non", "afficher_niveau_scolaire": "non", "afficher_presents_totaux": "non"}
 
@@ -74,9 +74,9 @@ class View(CustomView, TemplateView):
 
         else:
             # Si c'est un chargement initial de la page
-            date_jour = str(datetime.date.today())
-            data["periode"] = {'mode': 'jour', 'selections': {'jour': date_jour}, 'periodes': ['%s;%s' % (date_jour, date_jour)]}
-            data["selection_activite"] = None
+            date_jour = kwargs["date"] if "date" in kwargs else str(datetime.date.today())
+            data["periode"] = {"mode": "jour", "selections": {"jour": date_jour}, "periodes": ["%s;%s" % (date_jour, date_jour)]}
+            data["selection_activite"] = Activite.objects.get(pk=kwargs["idactivite"]) if "idactivite" in kwargs else None
             data["selection_groupes"] = None
             data["selection_classes"] = None
             data["options"] = utils_parametres.Get_categorie(categorie="gestionnaire_%s" % self.mode_grille, utilisateur=self.request.user, parametres=options_defaut)
