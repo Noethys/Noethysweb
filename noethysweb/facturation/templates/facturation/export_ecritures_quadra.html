@@ -1,0 +1,95 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    {% embed 'core/box.html' %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}{{ box_titre }}{% endblock %}
+        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+        {% block box_contenu %}
+            {% crispy form %}
+        {% endblock %}
+    {% endembed %}
+
+    {% embed 'core/box.html' with box_introduction=False %}
+        {% block box_theme %}card-outline card-default{% endblock %}
+        {% block box_titre %}Informations{% endblock %}
+        {% block box_contenu %}
+            <div class="small text-warning mb-3"><i class="fa fa-lg fa-exclamation-triangle"></i> Fonctionnalité expérimentale : vérifier les résultats obtenus pour toute utilisation en production.</div>
+
+            <p>
+                Avant l'export, vous devez avoir au préalable renseigné les informations suivantes :
+                <ul>
+                    <li>Menu Paramétrage > Modes de règlements : Le compte comptable et le code journal de chaque type.</li>
+                    <li>Menu Paramétrage > Activités : Le compte comptable et le code analytique (Optionnel) de chaque activité.</li>
+                    <li>Menu Paramétrage > Type d'adhésion : Le compte comptable et le code analytique (Optionnel) de chaque type.</li>
+                    <li>Fiche famille > Paramètres : Le compte comptable de la famille (Optionnel). A défaut, un code de type "FAM000001" sera généré automatiquement.</li>
+                </ul>
+            </p>
+
+            <p>
+                Les résultats de l'export seront les suivants :
+                <ul>
+                    <li>Les factures dont la date de génération est comprise dans la période sélectionnée.</li>
+                    <li>Les règlements dont la date de dépôt est comprise dans la période sélectionnée.</li>
+                </ul>
+            </p>
+
+            <p>
+            Les résultats seront exportés sous la forme d'un fichier ZIP contenant 2 fichiers Excel : Les ventes et les règlements.
+            </p>
+
+            {% for label, formats in formats_export %}
+                <h6>{{ label }}</h6>
+                <table class='table table-bordered table-sm text-center mb-3'>
+                    <tr><th>Nom</th><th>Largeur</th></tr>
+                    {% for code, nom, largeur in formats %}
+                        <tr><td>{{ nom }}</td><td>{{ largeur }}</td></tr>
+                    {% endfor %}
+                </table>
+            {% endfor %}
+
+        {% endblock %}
+    {% endembed %}
+
+    {% include 'core/modal_pdf.html' %}
+
+    {# Lien de téléchargement du fichier d'export #}
+    <a id="download" download></a>
+
+    <script>
+
+        // Générer le PDF
+        function exporter() {
+            var box = bootbox.dialog({
+                    message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Génération de l'export en cours</b><br><br>Veuillez patienter...</p>",
+                    closeButton: false
+                });
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_export_ecritures_quadra_exporter' %}",
+                data: $("#form_parametres").serialize(),
+                datatype: "json",
+                success: function(data){
+                    bootbox.hideAll();
+                    $("#download").attr("href", data.nom_fichier);
+                    document.getElementById("download").click();
+                },
+                error: function(data) {
+                    bootbox.hideAll();
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+    </script>
+
+{% endblock contenu_page %}
