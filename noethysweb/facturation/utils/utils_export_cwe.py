@@ -30,7 +30,7 @@ class Exporter(BaseExporter):
         lignes = []
 
         # Recherche des factures
-        factures = Facture.objects.select_related("famille").filter(date_edition__gte=date_debut, date_edition__lte=date_fin).order_by("pk")
+        factures = Facture.objects.select_related("famille").filter(date_edition__gte=date_debut, date_edition__lte=date_fin, etat__isnull=True).order_by("pk")
         details_factures = self.Get_detail_factures(factures=factures)
         for facture in factures:
             for ligne_detail in details_factures.get(facture, []):
