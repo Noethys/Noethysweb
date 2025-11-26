@@ -149,7 +149,7 @@
             var credit = get_credit();
             var montant = this.reste_ventilation
             if ((forcer === false) && (credit < this.reste_ventilation) && (credit >= 0)) {
-                montant = credit;
+                montant = ceilToMillionths(credit);
             };
             this.ventilation_reglement += montant;
             this.reste_ventilation -= montant;
@@ -191,6 +191,13 @@
         };
 
     };
+
+    function ceilToMillionths(number) {
+        const factor = 1000000;
+        const scaled = number * factor;
+        const roundedUp = Math.ceil(scaled);
+        return roundedUp / factor;
+    }
 
     function get_total_ventilation() {
         var total = 0.0;
