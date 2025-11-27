@@ -249,6 +249,7 @@ class Consulter(Page, crud.Liste):
             html = [
                 self.Create_bouton_modifier(url=reverse("lots_pes_modifier_piece", kwargs={"idlot": instance.lot_id, "pk": instance.pk})),
                 self.Create_bouton_supprimer(url=reverse("lots_pes_supprimer_piece", kwargs={"idlot": instance.lot_id, "pk": instance.pk})),
+                self.Create_bouton(url=reverse("famille_resume", args=[instance.famille_id]), title="Ouvrir la fiche famille", icone="fa-users"),
             ]
             return self.Create_boutons_actions(html)
 
