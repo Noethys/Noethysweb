@@ -1,3 +1,12 @@
+Version 1.3.1.4 (27/11/2025) :
+
+- Ajout de l'export des écritures vers Quadra Compta
+- Ajout des liens du suivi du pointage vers le gestionnaire des consommations
+- Ajout de la vérification des adresses dans l'export JVS
+- Ajout d'un bouton Ouvrir la fiche famille dans l'export PES
+- Correction sur les factures annulées dans l'export des écritures
+- Correction de la virgule flottante dans la ventilation des règlements
+
 Version 1.3.1.3 (23/11/2025) :
 
 - Correction du suivi du pointage
