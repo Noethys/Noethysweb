@@ -69,9 +69,13 @@ class Exporter():
         return texte
 
     def Creation_fichiers(self):
-        # Vérifie que des pièces existent
+        # Vérifications
         if not self.pieces:
             self.erreurs.append("Vous devez ajouter au moins une pièce.")
+        for piece in self.pieces:
+            if not piece.famille.titulaire_helios.rue_resid or not piece.famille.titulaire_helios.cp_resid or not piece.famille.titulaire_helios.ville_resid:
+                self.erreurs.append("Adresse incomplète pour %s (famille %s)." % (piece.famille.titulaire_helios.Get_nom(), piece.famille.nom))
+        if self.erreurs:
             return False
 
         # Génération du XML
