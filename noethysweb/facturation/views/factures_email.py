@@ -99,7 +99,7 @@ def Impression_pdf(request):
         if facture.liste_mails:
             for adresse in facture.liste_mails:
                 destinataire = Destinataire.objects.create(categorie="famille", famille=facture.famille, adresse=adresse, valeurs=json.dumps(donnees["valeurs"]))
-                document_joint = DocumentJoint.objects.create(nom="Facture n°%s" % facture.numero, fichier=donnees["nom_fichier"])
+                document_joint = DocumentJoint.objects.create(nom="Facture %s" % facture.numero, fichier=donnees["nom_fichier"])
                 destinataire.documents.add(document_joint)
                 mail.destinataires.add(destinataire)
         else:
