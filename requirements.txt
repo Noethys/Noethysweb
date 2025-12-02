@@ -6,7 +6,6 @@ django-cryptography
 django-crispy-forms
 django-csp
 django-datatable-view
-django-debug-toolbar
 django-formtools
 django-multiselectfield
 django-simple-captcha
