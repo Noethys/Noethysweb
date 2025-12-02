@@ -1,0 +1,30 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+
+    <p>Découvrez ici toutes les ressources à votre disposition pour appréhender toutes les fonctionnalités de l'application.</p>
+
+    <div class="callout callout-danger">
+        <h5>A découvrir prochainement !</h5>
+        <p>Cette rubrique est actuellement en cours de dévelopement.</p>
+    </div>
+
+    <div class="d-flex flex-wrap ">
+        {% for ressource in ressources %}
+            <div class="card text-center p-4 mr-3" style="max-width: 400px;">
+                <div>
+                    <i class="fa {{ ressource.icone }} fa-3x text-primary card-img p-2" aria-hidden="true"></i>
+                    <h5>{{ ressource.titre }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text p-2">{{ ressource.description }}</p>
+                    <a href="{{ ressource.url }}" class="btn btn-primary" target="_blank" title="Ouvrir dans un nouvel onglet"><i class="fa fa-external-link margin-r-5"></i> Consulter</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}

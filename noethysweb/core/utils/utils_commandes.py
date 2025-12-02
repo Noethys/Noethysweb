@@ -13,7 +13,7 @@ def Commandes(enregistrer=True, enregistrer_label="<i class='fa fa-check margin-
               ajouter=True,
               annuler=True, annuler_url=None,
               modifier=False, modifier_url=None, modifier_args="",
-              aide=True, aide_url="{% url 'aide_toc' %}",
+              aide=True, aide_url="{% url 'aide_accueil' %}",
               autres_commandes=[], css_class="commandes"):
 
     liste_commandes = []

@@ -4,13 +4,12 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import include, path
-from core.views import toc
+from aide.views import aide_accueil
 
 
 urlpatterns = [
 
-    # Table des matières
-    path('aide/', toc.Toc.as_view(menu_code="aide_toc"), name='aide_toc'),
-
+    # Aide
+    path('aide/accueil', aide_accueil.View.as_view(), name="aide_accueil"),
 
 ]

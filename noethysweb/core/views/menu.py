@@ -523,7 +523,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
 
     # ------------------------------------ Aide ------------------------------------
-    menu_aide = menu.Add(code="aide_toc", titre="Aide", icone="support", toujours_afficher=True)
+    menu_aide = menu.Add(code="aide_accueil", titre="Aide", icone="support", toujours_afficher=True)
 
 
     # ---------------------------------- Plugins ----------------------------------
