@@ -186,13 +186,13 @@ def Envoyer_model_mail(idmail=None, request=None):
         for piece in mail.pieces_jointes.all():
             with open(settings.MEDIA_ROOT + "/" + piece.fichier.name, "rb") as f:
                 contenu_fichier = f.read()
-            message.attach(piece.nom, contenu_fichier, mimetypes.guess_type(piece.fichier.name)[0])
+            message.attach("%s%s" % (piece.nom, os.path.splitext(piece.fichier.name)[1]), contenu_fichier, mimetypes.guess_type(piece.fichier.name)[0])
 
         # Rattachement des documents joints
         for document in destinataire.documents.all():
             with open(settings.MEDIA_ROOT + "/" + document.fichier.name, "rb") as f:
                 contenu_fichier = f.read()
-            message.attach(document.nom, contenu_fichier, mimetypes.guess_type(document.fichier.name)[0])
+            message.attach("%s%s" % (document.nom, os.path.splitext(document.fichier.name)[1]), contenu_fichier, mimetypes.guess_type(document.fichier.name)[0])
 
         # Envoie le mail
         try:
