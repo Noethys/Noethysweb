@@ -29,12 +29,11 @@ class Unite_conso():
 
 
 def FormateValeur(valeur, mode="decimal"):
-    heures = int((valeur.days * 24) + (valeur.seconds / 3600))
-    minutes = valeur.seconds % 3600 / 60
     if mode == "decimal":
-        minDecimal = int(int(minutes) * 100 / 60)
-        return float("%s.%s" % (heures, minDecimal))
+        return round(valeur.total_seconds() / 3600, 2)
     if mode == "horaire":
+        heures = int((valeur.days * 24) + (valeur.seconds / 3600))
+        minutes = valeur.seconds % 3600 / 60
         return "%dh%02d" % (heures, minutes)
 
 
