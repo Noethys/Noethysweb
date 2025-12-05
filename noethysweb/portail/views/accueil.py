@@ -42,7 +42,7 @@ class Accueil(CustomView, TemplateView):
         activites = list({inscription.activite: True for inscription in inscriptions}.keys())
 
         # Vaccins manquants
-        context["nbre_vaccinations_manquantes"] = sum([len(liste_vaccinations) for individu, liste_vaccinations in utils_vaccinations.Get_vaccins_obligatoires_by_inscriptions(inscriptions=inscriptions).items()])
+        context["nbre_vaccinations_manquantes"] = sum([len(liste_vaccinations) for (famille, individu), liste_vaccinations in utils_vaccinations.Get_vaccins_obligatoires_by_inscriptions(inscriptions=inscriptions).items()])
 
         # Assurances manquantes
         context["nbre_assurances_manquantes"] = len(utils_assurances.Get_assurances_manquantes_by_inscriptions(famille=self.request.user.famille, inscriptions=inscriptions))

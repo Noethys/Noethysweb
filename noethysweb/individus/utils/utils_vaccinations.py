@@ -32,19 +32,19 @@ def Get_vaccins_obligatoires_by_inscriptions(inscriptions=None):
     # Recherche les individus pour qui les vaccinations sont obligatoires
     liste_individus = []
     for inscription in inscriptions:
-        if inscription.activite.vaccins_obligatoires and inscription.individu not in liste_individus:
-            liste_individus.append(inscription.individu)
+        if inscription.activite.vaccins_obligatoires and (inscription.famille, inscription.individu) not in liste_individus:
+            liste_individus.append((inscription.famille, inscription.individu))
 
     # Recherche les vaccins existants
     dict_vaccins = {}
-    for vaccin in Vaccin.objects.select_related("type_vaccin", "individu").prefetch_related("type_vaccin__types_maladies").filter(individu_id__in=liste_individus):
+    for vaccin in Vaccin.objects.select_related("type_vaccin", "individu").prefetch_related("type_vaccin__types_maladies").filter(individu_id__in=[individu for famille, individu in liste_individus]):
         dict_vaccins.setdefault(vaccin.individu, [])
         dict_vaccins[vaccin.individu].append(vaccin)
 
     # Recherche les vaccins manquants
     types_maladies = TypeMaladie.objects.filter(vaccin_obligatoire=True).order_by("nom")
     resultats = {}
-    for individu in liste_individus:
+    for famille, individu in liste_individus:
         for maladie in types_maladies:
             if not individu.date_naiss or not maladie.vaccin_date_naiss_min or (maladie.vaccin_date_naiss_min and individu.date_naiss >= maladie.vaccin_date_naiss_min):
                 valide = False
@@ -57,8 +57,8 @@ def Get_vaccins_obligatoires_by_inscriptions(inscriptions=None):
                         else:
                             valide = True
                 if not valide:
-                    resultats.setdefault(individu, [])
-                    resultats[individu].append({"label": maladie.nom, "valide": valide})
+                    resultats.setdefault((famille, individu), [])
+                    resultats[(famille, individu)].append({"label": maladie.nom, "valide": valide})
 
     return resultats
 

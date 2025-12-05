@@ -38,7 +38,7 @@ class View(CustomView, crud.Modifier):
         renseignements_manquants = {}
 
         # Recherche les informations manquantes
-        for individu, liste_vaccinations in utils_vaccinations.Get_vaccins_obligatoires_by_inscriptions(inscriptions=inscriptions).items():
+        for (famille, individu), liste_vaccinations in utils_vaccinations.Get_vaccins_obligatoires_by_inscriptions(inscriptions=inscriptions).items():
             renseignements_manquants.setdefault(individu, [])
             renseignements_manquants[individu].append("%d vaccination%s manquante%s" % (len(liste_vaccinations), "s" if len(liste_vaccinations) > 1 else "", "s" if len(liste_vaccinations) > 1 else ""))
 

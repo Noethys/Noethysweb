@@ -14,7 +14,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
                             abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses, certifications, \
-                            certifications_individus, certifications_familles, inscriptions_saisir_lot, importer_individus, importer_quotients
+                            certifications_individus, certifications_familles, inscriptions_saisir_lot, importer_individus, importer_quotients, liste_vaccinations_manquantes
 
 urlpatterns = [
 
@@ -118,6 +118,8 @@ urlpatterns = [
     path('individus/informations/modifier/<int:pk>', liste_informations.Modifier.as_view(), name='informations_modifier'),
     path('individus/informations/supprimer/<int:pk>', liste_informations.Supprimer.as_view(), name='informations_supprimer'),
 
+    path('individus/liste_vaccinations_manquantes', liste_vaccinations_manquantes.Liste.as_view(), name='liste_vaccinations_manquantes'),
+
     path('individus/edition_informations', edition_informations.View.as_view(), name='edition_informations'),
 
     path('individus/mails/liste', liste_mails.Liste.as_view(), name='mails_liste'),
@@ -204,4 +206,5 @@ urlpatterns = [
     path('individus/importer_quotients_rechercher', secure_ajax(importer_quotients.Rechercher), name='ajax_importer_quotients_rechercher'),
     path('individus/importer_quotients_enregistrer', secure_ajax(importer_quotients.Enregistrer), name='ajax_importer_quotients_enregistrer'),
     path('individus/importer_quotients_envoyer_emails', secure_ajax(importer_quotients.Envoyer_emails), name='ajax_importer_quotients_envoyer_emails'),
+    path('individus/liste_vaccinations_manquantes_email', secure_ajax(liste_vaccinations_manquantes.Envoi_emails), name='ajax_liste_vaccinations_manquantes_emails'),
 ]

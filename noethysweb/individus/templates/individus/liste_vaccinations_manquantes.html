@@ -1,0 +1,81 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-3" >
+
+            <!-- Paramètres -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Paramètres</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <button type="submit" form="form_parametres" class="btn btn-primary btn-block mb-3" name="type_submit" title="Actualiser les résultats"><i class="fa fa-refresh margin-r-5"></i> Actualiser les résultats</button>
+                    {% crispy form_parametres %}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-9">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-caret-square-o-right margin-r-5"></i> Résultats</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder">
+                        <button class="btn btn-primary" onclick="envoi_emails()" title="Envoyer des rappels par Email"><i class='fa fa-send-o margin-r-5'></i>Envoyer des rappels par Email</button>
+                    </div>
+
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+
+        function envoi_emails() {
+            var table = $('.custom-datatable').DataTable()
+            var lignes = table.rows({selected: true});
+            var data = lignes.data().toArray();
+            var listepk = [];
+            $.each(data, function(index, valeurs) {
+                listepk.push(valeurs);
+            });
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_liste_vaccinations_manquantes_emails' %}",
+                data: {
+                    lignes_cochees: JSON.stringify(listepk),
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                datatype: "json",
+                success: function(data){
+                    window.location.href = data.url;
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+    </script>
+
+{% endblock contenu_page %}

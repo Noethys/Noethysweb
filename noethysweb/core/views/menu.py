@@ -273,6 +273,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_infos_individus.Add(code="regimes_alimentaires_liste", titre="Liste des régimes alimentaires", icone="file-text-o")
     menu_infos_individus.Add(code="maladies_liste", titre="Liste des maladies", icone="file-text-o")
     menu_infos_individus.Add(code="informations_liste", titre="Liste des informations personnelles", icone="file-text-o")
+    menu_infos_individus.Add(code="liste_vaccinations_manquantes", titre="Liste des vaccinations manquantes", icone="file-text-o")
     menu_infos_individus.Add(code="edition_informations", titre="Edition des informations et régimes", icone="file-text-o")
     menu_infos_individus.Add(code="liste_comptes_internet", titre="Liste des comptes internet", icone="file-text-o")
     menu_infos_individus.Add(code="mails_liste", titre="Liste des Emails", icone="file-text-o")
