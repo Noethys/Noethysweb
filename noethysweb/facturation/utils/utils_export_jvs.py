@@ -236,7 +236,7 @@ class Exporter():
             BlocPiece.appendChild(DteAsp)
 
             ObjPce = doc.createElement("ObjPce")
-            ObjPce.setAttribute("V", ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece)[:160], majuscules=True))
+            ObjPce.setAttribute("V", ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece, piece=piece)[:160], majuscules=True))
             BlocPiece.appendChild(ObjPce)
 
             # Ligne de pièce
@@ -368,10 +368,10 @@ class Exporter():
                 NatIdTiers.setAttribute("V", "" if piece.famille.natidtiers_helios == 9999 else piece.famille.natidtiers_helios)
                 InfoTiers.appendChild(NatIdTiers)
 
-            if piece.famille.reftiers_helios:
-                RefTiers = doc.createElement("RefTiers")
-                RefTiers.setAttribute("V", "%02d" % piece.famille.reftiers_helios)
-                InfoTiers.appendChild(RefTiers)
+            ref_tiers = piece.famille.reftiers_helios if piece.famille.reftiers_helios else piece.famille.code_compta
+            RefTiers = doc.createElement("RefTiers")
+            RefTiers.setAttribute("V", ref_tiers)
+            InfoTiers.appendChild(RefTiers)
 
             CatTiers = doc.createElement("CatTiers")
             CatTiers.setAttribute("V", "%02d" % piece.famille.cattiers_helios)
