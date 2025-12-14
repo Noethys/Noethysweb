@@ -66,6 +66,12 @@
             $('#checkbox_{{ id }}').trigger('change');
         {% endif %}
 
+        $("#{{ id }}").on("keydown", function(event) {
+            if (event.keyCode === 13) {
+                event.preventDefault(); // Empêche l'action par défaut (soumission du formulaire)
+            }
+        });
+
     });
 
 </script>
