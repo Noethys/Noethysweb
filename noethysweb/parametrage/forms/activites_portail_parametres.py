@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import datetime
+import datetime, copy
 from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
@@ -35,16 +35,26 @@ class Formulaire(FormulaireBase, ModelForm):
     liste_choix.append((180, "Jour J-180"))
     liste_choix.append((365, "Jour J-365"))
     liste_choix.extend([(4000 + x, "%d du mois précédent" % x) for x in range(1, 31)])
-    limite_delai = forms.TypedChoiceField(label="Délai de modification", choices=liste_choix, initial=None, required=False, help_text="Une réservation peut être ajoutée, modifiée ou supprimée jusqu'à...")
-    limite_heure = forms.TimeField(label="Heure limite", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-    exclure_weekends = forms.BooleanField(label="Exclure les weeks-ends", required=False, initial=False)
-    exclure_feries = forms.BooleanField(label="Exclure les jours fériés", required=False, initial=False)
-    exclure_jours = forms.MultipleChoiceField(label="Exclure les jours", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("exclure_jours"))
+
+    limite_delai_ajout = forms.TypedChoiceField(label="Délai d'ajout", choices=liste_choix, initial=None, required=False, help_text="Une réservation peut être ajoutée jusqu'à...")
+    limite_heure_ajout = forms.TimeField(label="Heure limite", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
+    exclure_weekends_ajout = forms.BooleanField(label="Exclure les weeks-ends", required=False, initial=False)
+    exclure_feries_ajout = forms.BooleanField(label="Exclure les jours fériés", required=False, initial=False)
+    exclure_jours_ajout = forms.MultipleChoiceField(label="Exclure les jours", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("exclure_jours"))
+
+    liste_choix_suppr = copy.copy(liste_choix)
+    liste_choix_suppr[0] = (None, "Identique au délai d'ajout")
+    liste_choix_suppr.insert(1, (-1, "Aucun"))
+    limite_delai_suppr = forms.TypedChoiceField(label="Délai de suppression", choices=liste_choix_suppr, initial=None, required=False, help_text="Une réservation peut être supprimée jusqu'à...")
+    limite_heure_suppr = forms.TimeField(label="Heure limite", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
+    exclure_weekends_suppr = forms.BooleanField(label="Exclure les weeks-ends", required=False, initial=False)
+    exclure_feries_suppr = forms.BooleanField(label="Exclure les jours fériés", required=False, initial=False)
+    exclure_jours_suppr = forms.MultipleChoiceField(label="Exclure les jours", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("exclure_jours"))
 
     class Meta:
         model = Activite
         fields = ["portail_inscriptions_affichage", "portail_inscriptions_date_debut", "portail_inscriptions_date_fin", "portail_reservations_affichage",
-                  "portail_reservations_limite", "portail_afficher_dates_passees", "portail_inscriptions_bloquer_si_complet", "portail_inscriptions_imposer_pieces",
+                  "portail_reservations_limite", "portail_reservations_limite_suppr", "portail_afficher_dates_passees", "portail_inscriptions_bloquer_si_complet", "portail_inscriptions_imposer_pieces",
                   "reattribution_auto", "reattribution_adresse_exp", "reattribution_delai", "reattribution_modele_email",
                   "validation_type", "validation_modele_email",
                   ]
@@ -71,17 +81,31 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-3 col-form-label'
         self.helper.field_class = 'col-md-9'
 
-        # Limite
+        # Délai ajout
         if self.instance.portail_reservations_limite:
             parametres_limite = self.instance.portail_reservations_limite.split("#")
-            self.fields["limite_delai"].initial = int(parametres_limite[0])
-            self.fields["limite_heure"].initial = datetime.datetime.strptime(parametres_limite[1], '%H:%M')
-            self.fields["exclure_weekends"].initial = "exclure_weekends" in self.instance.portail_reservations_limite
-            self.fields["exclure_feries"].initial = "exclure_feries" in self.instance.portail_reservations_limite
+            self.fields["limite_delai_ajout"].initial = int(parametres_limite[0])
+            self.fields["limite_heure_ajout"].initial = datetime.datetime.strptime(parametres_limite[1], '%H:%M')
+            self.fields["exclure_weekends_ajout"].initial = "exclure_weekends" in self.instance.portail_reservations_limite
+            self.fields["exclure_feries_ajout"].initial = "exclure_feries" in self.instance.portail_reservations_limite
             if "exclure_jours" in self.instance.portail_reservations_limite:
                 for chaine in self.instance.portail_reservations_limite.split("#"):
                     if "exclure_jours" in chaine:
-                        self.fields["exclure_jours"].initial = [int(num_jour) for num_jour in chaine.replace("exclure_jours", "")]
+                        self.fields["exclure_jours_ajout"].initial = [int(num_jour) for num_jour in chaine.replace("exclure_jours", "")]
+
+        # Délai suppression
+        if self.instance.portail_reservations_limite_suppr == "-1":
+            self.fields["limite_delai_suppr"].initial = -1
+        elif self.instance.portail_reservations_limite_suppr:
+            parametres_limite = self.instance.portail_reservations_limite_suppr.split("#")
+            self.fields["limite_delai_suppr"].initial = int(parametres_limite[0])
+            self.fields["limite_heure_suppr"].initial = datetime.datetime.strptime(parametres_limite[1], '%H:%M')
+            self.fields["exclure_weekends_suppr"].initial = "exclure_weekends" in self.instance.portail_reservations_limite_suppr
+            self.fields["exclure_feries_suppr"].initial = "exclure_feries" in self.instance.portail_reservations_limite_suppr
+            if "exclure_jours" in self.instance.portail_reservations_limite_suppr:
+                for chaine in self.instance.portail_reservations_limite_suppr.split("#"):
+                    if "exclure_jours" in chaine:
+                        self.fields["exclure_jours_suppr"].initial = [int(num_jour) for num_jour in chaine.replace("exclure_jours", "")]
 
         # Modèle d'email de validation
         self.fields["validation_modele_email"].queryset = ModeleEmail.objects.filter(categorie="portail_demande_reservation")
@@ -111,16 +135,29 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Réservations",
                 Field("portail_reservations_affichage"),
-                Field("limite_delai"),
-                Div(
-                    Field("limite_heure"),
-                    Field("exclure_weekends"),
-                    Field("exclure_feries"),
-                    InlineCheckboxes("exclure_jours"),
-                    id="bloc_limite"
-                ),
+
                 Field("portail_afficher_dates_passees"),
                 ),
+            Fieldset("Délai d'ajout d'une réservation",
+                Field("limite_delai_ajout"),
+                Div(
+                Field("limite_heure_ajout"),
+                    Field("exclure_weekends_ajout"),
+                    Field("exclure_feries_ajout"),
+                    InlineCheckboxes("exclure_jours_ajout"),
+                    id="bloc_limite_ajout"
+                ),
+            ),
+            Fieldset("Délai de suppression d'une réservation",
+                Field("limite_delai_suppr"),
+                Div(
+                    Field("limite_heure_suppr"),
+                    Field("exclure_weekends_suppr"),
+                    Field("exclure_feries_suppr"),
+                    InlineCheckboxes("exclure_jours_suppr"),
+                    id="bloc_limite_suppr"
+                ),
+            ),
             Fieldset("Validation des réservations",
                 Field("validation_type"),
                 Field("validation_modele_email"),
@@ -152,18 +189,33 @@ class Formulaire(FormulaireBase, ModelForm):
             self.cleaned_data["portail_inscriptions_date_debut"] = None
             self.cleaned_data["portail_inscriptions_date_fin"] = None
 
-        # Limite
-        if self.cleaned_data["limite_delai"]:
-            if not self.cleaned_data["limite_heure"]:
-                self.add_error('limite_heure', "Vous devez spécifier une heure limite")
+        # Délai ajout réservation
+        if self.cleaned_data["limite_delai_ajout"]:
+            if not self.cleaned_data["limite_heure_ajout"]:
+                self.add_error("limite_heure_ajout", "Vous devez spécifier une heure limite pour le délai d'ajout")
                 return
-            parametres_limite = [self.cleaned_data["limite_delai"], self.cleaned_data["limite_heure"].strftime('%H:%M')]
-            if self.cleaned_data["exclure_weekends"]: parametres_limite.append("exclure_weekends")
-            if self.cleaned_data["exclure_feries"]: parametres_limite.append("exclure_feries")
-            if self.cleaned_data["exclure_jours"]: parametres_limite.append("exclure_jours%s" % "".join(str(num_jour) for num_jour in self.cleaned_data["exclure_jours"]))
+            parametres_limite = [self.cleaned_data["limite_delai_ajout"], self.cleaned_data["limite_heure_ajout"].strftime('%H:%M')]
+            if self.cleaned_data["exclure_weekends_ajout"]: parametres_limite.append("exclure_weekends")
+            if self.cleaned_data["exclure_feries_ajout"]: parametres_limite.append("exclure_feries")
+            if self.cleaned_data["exclure_jours_ajout"]: parametres_limite.append("exclure_jours%s" % "".join(str(num_jour) for num_jour in self.cleaned_data["exclure_jours_ajout"]))
             self.cleaned_data["portail_reservations_limite"] = "#".join(parametres_limite)
         else:
             self.cleaned_data["portail_reservations_limite"] = None
+
+        # Délai suppression réservation
+        if self.cleaned_data["limite_delai_suppr"] == "-1":
+            self.cleaned_data["portail_reservations_limite_suppr"] = "-1"
+        elif self.cleaned_data["limite_delai_suppr"]:
+            if not self.cleaned_data["limite_heure_suppr"]:
+                self.add_error("limite_heure_suppr", "Vous devez spécifier une heure limite pour le délai de suppression")
+                return
+            parametres_limite = [self.cleaned_data["limite_delai_suppr"], self.cleaned_data["limite_heure_suppr"].strftime('%H:%M')]
+            if self.cleaned_data["exclure_weekends_suppr"]: parametres_limite.append("exclure_weekends")
+            if self.cleaned_data["exclure_feries_suppr"]: parametres_limite.append("exclure_feries")
+            if self.cleaned_data["exclure_jours_suppr"]: parametres_limite.append("exclure_jours%s" % "".join(str(num_jour) for num_jour in self.cleaned_data["exclure_jours_suppr"]))
+            self.cleaned_data["portail_reservations_limite_suppr"] = "#".join(parametres_limite)
+        else:
+            self.cleaned_data["portail_reservations_limite_suppr"] = None
 
         # Réattribution de places disponibles
         if self.cleaned_data["reattribution_auto"]:
@@ -192,28 +244,28 @@ $(document).ready(function() {
     On_change_affichage_inscriptions.call($('#id_portail_inscriptions_affichage').get(0));
 });
 
-// Heure limite
-function On_change_limite_reservations() {
-    $('#bloc_limite').hide();
+// Délai ajout
+function On_change_limite_reservations_ajout() {
+    $('#bloc_limite_ajout').hide();
     if($(this).val()) {
-        $('#bloc_limite').show();
+        $('#bloc_limite_ajout').show();
     }
 }
 $(document).ready(function() {
-    $('#id_limite_delai').change(On_change_limite_reservations);
-    On_change_limite_reservations.call($('#id_limite_delai').get(0));
+    $('#id_limite_delai_ajout').change(On_change_limite_reservations_ajout);
+    On_change_limite_reservations_ajout.call($('#id_limite_delai_ajout').get(0));
 });
 
-// Absenti
-function On_change_absenti_reservations() {
-    $('#div_id_absenti_heure').hide();
-    if($(this).val()) {
-        $('#div_id_absenti_heure').show();
+// Délai suppression
+function On_change_limite_reservations_suppr() {
+    $('#bloc_limite_suppr').hide();
+    if (($(this).val()) && ($(this).val() != -1)) {
+        $('#bloc_limite_suppr').show();
     }
 }
 $(document).ready(function() {
-    $('#id_absenti_delai').change(On_change_absenti_reservations);
-    On_change_absenti_reservations.call($('#id_absenti_delai').get(0));
+    $('#id_limite_delai_suppr').change(On_change_limite_reservations_suppr);
+    On_change_limite_reservations_suppr.call($('#id_limite_delai_suppr').get(0));
 });
 
 

@@ -165,6 +165,8 @@ class Case_base {
         this.inscription = null;
         this.evenement = null;
         this.categorie_tarif = null;
+        this.dela = null;
+        this.dels = null;
         this.consommations = [];
 
         // Remplit à partir du dict data fourni
@@ -368,6 +370,7 @@ class Case_standard extends Case_base {
         super(data);
         // Dessine la case
         $("#" + this.key).html("<span class='infos'></span><span class='icones'></span><span class='groupe'></span>");
+        this.maj_affichage();
     };
 
     has_conso() {
@@ -389,6 +392,8 @@ class Case_standard extends Case_base {
             }
             $("#" + this.key + " .infos").html(label_evenement);
         };
+
+        var texte_icones = "";
 
         // Si la case est sélectionnée
         if (this.has_conso()) {
@@ -433,7 +438,6 @@ class Case_standard extends Case_base {
             }
 
             // Dessine les icones
-            var texte_icones = "";
             if (conso.prestation && dict_prestations[conso.prestation] && dict_prestations[conso.prestation].forfait_date_debut) {texte_icones += " <i class='fa fa-tag' style='color: " + dict_prestations[conso.prestation].couleur + ";' title='Forfait crédit'></i>"};
             if ((conso.prestation === null) && (mode !== "portail")) {texte_icones += " <i class='fa fa-exclamation-triangle text-orange' title='Aucune prestation'></i>"};
             if (conso.etat === "present") {texte_icones += " <i class='fa fa-check-circle-o text-green' title='Présent'></i>"};
@@ -441,11 +445,14 @@ class Case_standard extends Case_base {
             if (conso.etat === "absentj") {texte_icones += " <i class='fa fa-times-circle-o text-green' title='Absence justifiée'></i>"};
             if (conso.forfait === 2) {texte_icones += " <i class='fa fa-lock text-red' title='Cette consommation est non supprimable car elle est associée à un forfait daté'></i>"};
             if (conso.facture) {texte_icones += " <i class='fa fa-file-text-o text-black-50' title='La prestation associée apparaît sur une facture'></i>"};
-            $("#" + this.key + " .icones").html(texte_icones);
+            if ((mode === "portail") && (conso.dels === "False") && (!(conso.etat === "demande"))) {texte_icones += " <i class='fa fa-lock text-red' title='Suppression impossible : Hors délai'></i>"};
 
             // Pour les tests, affiche l'id de la prestation
             // $("#" + this.key + " .groupe").html(conso.prestation);
-        };
+        } else {
+            if ((mode === "portail") && (this.dela === "False")) {texte_icones += " <i class='fa fa-lock' style='color: #6c757d33;' title='Ajout impossible : Hors délai'></i>"};
+        }
+        $("#" + this.key + " .icones").html(texte_icones);
     };
 
     // Appliquer un forfait crédit
@@ -553,6 +560,10 @@ class Case_standard extends Case_base {
             toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation refusée");
             return true;
         }
+        if ((mode === "portail") && (this.consommations[0].dels === "False") && (!(this.consommations[0].etat === "demande"))) {
+            toastr.error("Vous êtes hors délai pour supprimer cette réservation");
+            return true;
+        }
         return false;
     };
 
@@ -566,6 +577,7 @@ class Case_unitaire extends Case_standard {
 
     ajouter(data={}, maj_facturation=true) {
         if (this.has_conso()) {return false};
+        if (this.dela == "False") {return false};
 
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
@@ -605,6 +617,7 @@ class Case_horaire extends Case_standard {
 
     ajouter(data={}, maj_facturation=true) {
         if (this.has_conso()) {return false};
+        if (this.dela == "False") {return false};
 
         // Vérifie la compatibilité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
@@ -673,6 +686,7 @@ class Case_quantite extends Case_standard {
 
     ajouter(data={}, maj_facturation=true) {
         if (this.has_conso()) {return false};
+        if (this.dela == "False") {return false};
 
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
@@ -747,6 +761,7 @@ class Case_evenement extends Case_base {
             liste_evenements.forEach(function(evenement) {
                 if ((self.groupe === evenement.groupe) && (!(mode === "portail") || ((mode === "portail") && (evenement.visible_portail === true)))) {
                     var classe_event = $("#" + self.key).hasClass("fermeture") ? "fermeture" : "ouvert";
+                    if ($("#" + self.key).hasClass("blocked")) {classe_event = "blocked"}
                     var classe_image_event = "";
                     if ((evenement.categorie) && (dict_categories_evenements[evenement.categorie].image)) {
                         classe_image_event = "event-img-" + dict_categories_evenements[evenement.categorie].image;
@@ -786,6 +801,7 @@ class Case_event extends Case_standard {
 
     ajouter() {
         if (this.has_conso()) {return false};
+        if (this.dela == "False") {return false};
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
         // Vérifie s'il faut ouvrir la modal questions
@@ -928,6 +944,8 @@ class Case_multihoraires extends Case_base {
     };
 
     ajouter() {
+        if (this.dela == "False") {return false};
+
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
 
@@ -1001,6 +1019,7 @@ class Conso {
         this.options = null;
         this.extra = null;
         this.dirty = false;
+        this.dels = null;
 
         // Importation depuis un array
         if (conso) {
@@ -1275,6 +1294,7 @@ $(document).ready(function() {
         var key = conso.fields.date + "_" + conso.fields.inscription + "_" + conso.fields.unite;
         if (conso.fields.evenement !== null) {key = "event_" + key + "_" + conso.fields.evenement};
         if ((key in dict_cases) && !(key in dict_conso)) {
+            conso.fields.dels = dict_cases[key].dels;
             dict_cases[key].importe_conso(conso);
         };
     };
@@ -1580,7 +1600,7 @@ function get_donnees_for_facturation(keys_cases_touchees) {
     var liste_keys_pour_prestations = [];
     for (var key of keys_cases_touchees) {
         dict_cases_touchees_temp[key] = dict_cases[key];
-        liste_keys_pour_prestations.push(dict_cases[key].date + "_" + dict_cases[key].famille + "_" + dict_cases[key].individu+ "_" + dict_cases[key].activite);
+        if (key in dict_cases) {liste_keys_pour_prestations.push(dict_cases[key].date + "_" + dict_cases[key].famille + "_" + dict_cases[key].individu+ "_" + dict_cases[key].activite)}
     };
     var dict_prestations_temp = {};
     var aides_temp = [];

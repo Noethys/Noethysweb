@@ -303,6 +303,9 @@ td.complet {
 .fermeture {
     background-color: #f5f5f5;
 }
+.blocked {
+    background-color: #f5f5f5;
+}
 
 /* Tableau facturation */
 

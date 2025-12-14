@@ -128,12 +128,13 @@
                 {% for date in data.liste_dates %}
 
                     {# Vérifie si la date est modifiable #}
-                    {% with date|is_modif_allowed:data as modif_allowed %}
+                    {% with date|is_ajout_allowed:data as ajout_allowed %}
+                    {% with date|is_suppression_allowed:data as suppression_allowed %}
 
                     {# Regroupement par date #}
                     {% if data.liste_inscriptions|length > 1 and data.mode|is_in_list:"individu;portail" %}
                         <tr>
-                            <th class="date_regroupement">{{ date|date:"l j F Y"|title }} {% if not modif_allowed %}<i class='fa fa-lock text-red' title="Date non modifiable"></i>{% endif %}</th>
+                            <th class="date_regroupement">{{ date|date:"l j F Y"|title }}</th>
                                 {% for unite in data.liste_unites_visibles %}
                                     <td class="date_regroupement"></td>
                                 {% endfor %}
@@ -170,7 +171,6 @@
                                         <div>{{ inscription.individu.prenom|default:inscription.individu.nom }}</div><div class='infos_inscription'>{% if inscription.infos %}{{ inscription.infos }}{% endif %}</div>
                                     {% else %}
                                         <span class="texte_entete_ligne_large">{{ date|date:"l j F Y"|title }}</span><span class="texte_entete_ligne_court">{{ date|date:"D. d/m/y"|title }}</span>
-                                        {% if not modif_allowed %}<i class='fa fa-lock text-red' title="Date non modifiable"></i>{% endif %}
                                     {% endif %}
                                 {% endif %}
                             </th>
@@ -189,7 +189,7 @@
                                     {# Création de la case #}
                                     {% if unite in data.liste_unites_visibles %}
                                         <td
-                                            class="case {{ unite.type|lower }} {% if not modif_allowed %}fermeture{% else %}{% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}ouvert{% endif %}{% endif %}"
+                                            class="case {{ unite.type|lower }} {% if not ajout_allowed %}blocked{% else %}{% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}ouvert{% endif %}{% endif %}"
                                             id="{{ key_case }}"
                                         ></td>
                                     {% endif %}
@@ -205,7 +205,9 @@
                                             activite: {{ inscription.activite_id }},
                                             inscription: {{ inscription.pk }},
                                             groupe: {{ selection_groupe }},
-                                            categorie_tarif: {{ inscription.categorie_tarif_id }}
+                                            categorie_tarif: {{ inscription.categorie_tarif_id }},
+                                            dela: "{{ ajout_allowed }}",
+                                            dels : "{{ suppression_allowed }}"
                                         });
                                         dict_cases["{{ key_case }}"] = case_tableau;
                                     </script>
@@ -233,6 +235,7 @@
 
                         </tr>
                     {% endfor %}
+                    {% endwith %}
                     {% endwith %}
                 {% endfor %}
             </tbody>

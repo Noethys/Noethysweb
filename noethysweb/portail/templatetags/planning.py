@@ -19,8 +19,7 @@ def rangelistfrom1(number):
     return range(1, number+1)
 
 
-@register.filter
-def is_modif_allowed(date, data):
+def is_modif_allowed(date, data, action="ajout"):
     # Si le mode n'est pas portail on autorise les modifications
     if data["mode"] != "portail":
         return True
@@ -37,8 +36,22 @@ def is_modif_allowed(date, data):
 
     # On vérifie que la modification est autorisée sur cette date
     activite = data["selection_activite"]
-    if activite.portail_reservations_limite:
-        parametres_limite = activite.portail_reservations_limite.split("#")
+
+    # Sélectionne délai limite selon action (ajout ou suppression)
+    if action == "ajout":
+        # Délai d'ajout
+        delai_limite = activite.portail_reservations_limite
+    else:
+        delai_limite = activite.portail_reservations_limite_suppr
+        # Délai identique au délai d'ajout
+        if delai_limite == None:
+            delai_limite = activite.portail_reservations_limite
+        # Pas de délai de suppression
+        if delai_limite == "-1":
+            delai_limite = None
+
+    if delai_limite:
+        parametres_limite = delai_limite.split("#")
         nbre_jours = int(parametres_limite[0])
         heure = datetime.datetime.strptime(parametres_limite[1], "%H:%M")
 
@@ -53,16 +66,16 @@ def is_modif_allowed(date, data):
                 date_valide = True
 
                 # Vérifie que la date est hors week-end
-                if "weekends" in activite.portail_reservations_limite and date_limite.weekday() in (5, 6):
+                if "weekends" in delai_limite and date_limite.weekday() in (5, 6):
                     date_valide = False
 
                 # Vérifie que la date est hors fériés
-                if "feries" in activite.portail_reservations_limite and utils_dates.EstFerie(date_limite, data["liste_feries"]):
+                if "feries" in delai_limite and utils_dates.EstFerie(date_limite, data["liste_feries"]):
                     date_valide = False
 
                 # Vérifie que la date est hors jours exclus
-                if "jours" in activite.portail_reservations_limite:
-                    for chaine in activite.portail_reservations_limite.split("#"):
+                if "jours" in delai_limite:
+                    for chaine in delai_limite.split("#"):
                         if "jours" in chaine:
                             for num_jour in [int(num_jour) for num_jour in chaine.replace("exclure_jours", "")]:
                                 if date_limite.weekday() == num_jour:
@@ -94,3 +107,11 @@ def is_modif_allowed(date, data):
             return False
 
     return True
+
+@register.filter
+def is_ajout_allowed(date, data):
+    return is_modif_allowed(date, data, action="ajout")
+
+@register.filter
+def is_suppression_allowed(date, data):
+    return is_modif_allowed(date, data, action="suppression")

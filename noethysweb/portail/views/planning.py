@@ -17,7 +17,7 @@ from outils.utils import utils_email
 from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
 from consommations.forms.appliquer_semaine_type import Formulaire as form_appliquer_semaine_type
 from consommations.forms.grille_forfaits import Formulaire as form_forfaits
-from portail.templatetags.planning import is_modif_allowed
+from portail.templatetags.planning import is_ajout_allowed
 from portail.utils import utils_approbations
 from portail.views.base import CustomView
 from reglements.utils import utils_ventilation
@@ -144,7 +144,7 @@ class View(CustomView, TemplateView):
         data.update(Get_generic_data(data))
 
         # Liste des dates modifiables
-        data["dates_modifiables"] = [date for date in data["liste_dates"] if is_modif_allowed(date, data)]
+        data["dates_modifiables"] = [date for date in data["liste_dates"] if is_ajout_allowed(date, data)]
         if data["dates_modifiables"]:
             data["date_modifiable_min"] = min(data["dates_modifiables"]) if data["dates_modifiables"] else None
             data["date_modifiable_max"] = max(data["dates_modifiables"]) if data["dates_modifiables"] else None

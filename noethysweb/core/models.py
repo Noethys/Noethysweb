@@ -1174,9 +1174,8 @@ class Activite(models.Model):
     portail_inscriptions_bloquer_si_complet = models.BooleanField(verbose_name="Empêcher l'inscription si activité complète", default=False)
     choix_affichage_reservations = [("JAMAIS", "Ne pas autoriser"), ("TOUJOURS", "Autoriser")]
     portail_reservations_affichage = models.CharField(verbose_name="Réservations autorisées", max_length=100, choices=choix_affichage_reservations, default="JAMAIS")
-    portail_reservations_limite = models.CharField(verbose_name="Date limite de modification d'une réservation", max_length=200, blank=True, null=True)
-    # portail_reservations_absenti = models.CharField(verbose_name="Application d'une absence injustifiée", max_length=200, blank=True, null=True)
-    # portail_unites_multiples = models.BooleanField(verbose_name="Sélection multiple d'unités autorisée", default=False)
+    portail_reservations_limite = models.CharField(verbose_name="Date limite d'ajout d'une réservation", max_length=200, blank=True, null=True)
+    portail_reservations_limite_suppr = models.CharField(verbose_name="Date limite de suppression d'une réservation", max_length=200, blank=True, null=True)
     choix_affichage_dates_passees = [("0", "Jamais"), ("2", "Deux jours"), ("3", "Trois jours"), ("7", "Une semaine"), ("14", "Deux semaines"), ("30", "Un mois"), ("61", "Deux mois"), ("92", "Trois mois"), ("9999", "Toujours")]
     portail_afficher_dates_passees = models.CharField(verbose_name="Afficher les dates passées", max_length=100, choices=choix_affichage_dates_passees, default="0")
     regie = models.ForeignKey(FactureRegie, verbose_name="Régie de facturation", on_delete=models.PROTECT, blank=True, null=True)
