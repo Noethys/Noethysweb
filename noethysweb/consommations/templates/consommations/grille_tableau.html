@@ -189,7 +189,7 @@
                                     {# Création de la case #}
                                     {% if unite in data.liste_unites_visibles %}
                                         <td
-                                            class="case {{ unite.type|lower }} {% if not ajout_allowed %}blocked{% else %}{% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}ouvert{% endif %}{% endif %}"
+                                            class="case {{ unite.type|lower }} {% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}ouvert{% endif %} {% if not ajout_allowed %}blocked{% endif %}"
                                             id="{{ key_case }}"
                                         ></td>
                                     {% endif %}
