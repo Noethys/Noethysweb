@@ -104,7 +104,7 @@ class Annuler(Page, crud.Supprimer):
         form.is_valid()
 
         # Annulation de la facture
-        facture = Facture.objects.get(pk=kwargs["pk"])
+        facture = Facture.objects.get(pk=self.kwargs["pk"])
         if form.cleaned_data.get("observations", None):
             facture.observations = form.cleaned_data["observations"]
         facture.etat = "annulation"
