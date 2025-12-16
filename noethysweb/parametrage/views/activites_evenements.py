@@ -22,6 +22,7 @@ class Page(Onglet):
     url_ajouter = "activites_evenements_ajouter"
     url_modifier = "activites_evenements_modifier"
     url_supprimer = "activites_evenements_supprimer"
+    url_supprimer_plusieurs = "activites_evenements_supprimer_plusieurs"
     description_liste = "Vous pouvez saisir ici des événements pour l'activité. Vous devez avoir au préalable créé au moins une unité de consommation de type 'Evénementiel'."
     description_saisie = "Saisissez toutes les informations concernant l'événement à saisir et cliquez sur le bouton Enregistrer."
     objet_singulier = "un événement"
@@ -36,6 +37,8 @@ class Page(Onglet):
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idactivite': self.Get_idactivite()}), "icone": "fa fa-plus"},
             {"label": "Catégories d'événements", "classe": "btn btn-default", "href": reverse_lazy("activites_evenements_categories_liste", kwargs={'idactivite': self.Get_idactivite()}), "icone": "fa fa-gear"},
         ]
+        # Ajout l'idactivite à l'URL de suppression groupée
+        context["url_supprimer_plusieurs"] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={"idactivite": self.kwargs.get("idactivite", None), "listepk": "xxx"})
         return context
 
     def get_form_kwargs(self, **kwargs):
@@ -84,21 +87,22 @@ class Liste(Page, crud.Liste):
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
+        context["active_checkbox"] = True
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['idevenement', 'date', 'groupe__nom', 'nom', 'unite__nom']
-
+        filtres = ["idevenement", "date", "groupe__nom", "nom", "unite__nom"]
+        check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         tarification = columns.TextColumn("Tarification", sources=None, processor='Get_tarification')
         groupe = columns.TextColumn("Groupe", sources=["groupe__nom"])
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idevenement', 'date', 'nom', 'groupe', 'tarification']
-            ordering = ['date']
+            columns = ["check", "idevenement", "date", "nom", "groupe", "tarification"]
+            ordering = ["date"]
             processors = {
-                'date': helpers.format_date('%d/%m/%Y'),
+                "date": helpers.format_date('%d/%m/%Y'),
             }
 
         def Get_tarification(self, instance, *args, **kwargs):
@@ -196,4 +200,8 @@ class Modifier(Page, crud.Modifier):
 
 
 class Supprimer(Page, crud.Supprimer):
+    template_name = "parametrage/activite_delete.html"
+
+
+class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
     template_name = "parametrage/activite_delete.html"

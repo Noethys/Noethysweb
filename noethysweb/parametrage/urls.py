@@ -97,6 +97,7 @@ urlpatterns = [
     path('parametrage/activites/evenements/ajouter/<int:idactivite>', activites_evenements.Ajouter.as_view(), name='activites_evenements_ajouter'),
     path('parametrage/activites/evenements/modifier/<int:idactivite>/<int:pk>', activites_evenements.Modifier.as_view(), name='activites_evenements_modifier'),
     path('parametrage/activites/evenements/supprimer/<int:idactivite>/<int:pk>', activites_evenements.Supprimer.as_view(), name='activites_evenements_supprimer'),
+    path('parametrage/activites/evenements/supprimer_plusieurs/<int:idactivite>/<str:listepk>', activites_evenements.Supprimer_plusieurs.as_view(), name='activites_evenements_supprimer_plusieurs'),
 
     path('parametrage/activites/tarifs_evenements/liste/<int:idactivite>/<int:evenement>', activites_evenements_tarifs.Liste.as_view(), name='activites_evenements_tarifs_liste'),
     path('parametrage/activites/tarifs_evenements/ajouter/<int:idactivite>/<int:evenement>', activites_evenements_tarifs.Ajouter.as_view(), name='activites_evenements_tarifs_ajouter'),
