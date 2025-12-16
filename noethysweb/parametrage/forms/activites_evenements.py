@@ -9,11 +9,12 @@ from django.forms import ModelForm
 from django_select2.forms import ModelSelect2Widget
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, HTML, Fieldset
-from crispy_forms.bootstrap import Field
+from crispy_forms.layout import Layout, Hidden, HTML, Fieldset, Div
+from crispy_forms.bootstrap import Field, InlineCheckboxes
 from core.utils.utils_commandes import Commandes
+from core.utils.utils_texte import Creation_tout_cocher
 from core.utils import utils_dates, utils_images
-from core.models import Unite, Groupe, Activite, Evenement, Tarif
+from core.models import Unite, Groupe, Activite, Evenement, Tarif, JOURS_SEMAINE
 from core.widgets import DatePickerWidget, Crop_image
 
 
@@ -26,9 +27,24 @@ class Widget_copie_tarif_evenement(ModelSelect2Widget):
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    mode_saisie = forms.TypedChoiceField(label="Mode de saisie", choices=[("UNIQUE", "Date unique"), ("MULTIPLE", "Dates multiples")], initial="UNIQUE", required=False, help_text="Sélectionnez le mode Dates multiples si vous souhaitez reproduire cet évènement sur plusieurs dates.")
+    # Date
+    mode_saisie = forms.TypedChoiceField(label="Mode de saisie", choices=[("UNIQUE", "Date unique"), ("MULTIDATES_SAISIE", "Dates multiples saisies dans le champ suivant"), ("MULTIDATES_CALENDRIER", "Dates multiples sélectionnées dans le calendrier suivant"),
+                                                                          ("MULTIDATES_PLANNING", "Dates multiples selon le planning suivant")], initial="UNIQUE", required=False, help_text="Sélectionnez le mode Dates multiples si vous souhaitez dupliquer cet évènement sur plusieurs dates.")
     date = forms.DateField(label="Date", required=False, widget=DatePickerWidget(), help_text="Sélectionnez la date de l'évènement. Notez que l'application créera automatiquement une ouverture dans le calendrier des ouvertures lors de la création de cet événement.")
-    dates_multiples = forms.CharField(label="Dates", required=False, help_text="Saisissez les dates souhaitées séparées par des virgules ou des points-virgules. Exemple : 15/12/2023;16/12/2023;17/12/2023")
+    multidates_saisie = forms.CharField(label="Dates", required=False, help_text="Saisissez les dates souhaitées séparées par des virgules ou des points-virgules. Exemple : 15/12/2023;16/12/2023;17/12/2023")
+    multidates_calendrier = forms.CharField(label="Dates", required=False, widget=DatePickerWidget(attrs={"multidate": True, "affichage_inline": True}), help_text="Cochez les dates souhaitées dans le calendrier.")
+    multidates_planning = forms.CharField(label="Dates", required=False)
+    multidates_planning_date_debut = forms.DateField(label="Date de début", required=False, widget=DatePickerWidget())
+    multidates_planning_date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget())
+    multidates_planning_inclure_feries = forms.BooleanField(label="Inclure les fériés", required=False)
+    multidates_planning_jours_scolaires = forms.MultipleChoiceField(label="Jours scolaires", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("multidates_planning_jours_scolaires"))
+    multidates_planning_jours_vacances = forms.MultipleChoiceField(label="Jours de vacances", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("multidates_planning_jours_vacances"))
+    choix_frequence = [(1, "Toutes les semaines"), (2, "Une semaine sur deux"),
+                        (3, "Une semaine sur trois"), (4, "Une semaine sur quatre"),
+                        (5, "Les semaines paires"), (6, "Les semaines impaires")]
+    multidates_planning_frequence_type = forms.TypedChoiceField(label="Fréquence", choices=choix_frequence, initial=1, required=False)
+
+    # Généralités
     unite = forms.ModelChoiceField(label="Unité", queryset=Unite.objects.none(), required=True, help_text="Sélectionnez obligatoirement l'unité de consommation de type 'Evénementiel' associée à cet événement.")
     groupe = forms.ModelChoiceField(label="Groupe", queryset=Groupe.objects.none(), required=True, help_text="Sélectionnez obligatoirement le groupe associé à cet événement. Exemples : 10-14 ans, Les séniors, Groupe unique...")
     description = forms.CharField(label="Description", widget=forms.Textarea(attrs={'rows': 2}), required=False, help_text="""<i class='fa fa-exclamation-triangle'></i> 
@@ -110,6 +126,10 @@ class Formulaire(FormulaireBase, ModelForm):
             # S'il n'y a qu'un groupe, on le sélectionne par défaut
             self.fields['groupe'].initial = self.fields['groupe'].queryset.first()
 
+        # Jours
+        self.fields["multidates_planning_jours_scolaires"].initial = [0, 1, 2, 3, 4]
+        self.fields["multidates_planning_jours_vacances"].initial = [0, 1, 2, 3, 4]
+
         # Places max
         if self.instance.pk and self.instance.capacite_max:
             self.fields['type_nbre_places'].initial = "OUI"
@@ -140,7 +160,18 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Date",
                 Field("mode_saisie", type="hidden" if kwargs.get("instance", None) else None),
                 Field("date"),
-                Field("dates_multiples", type="hidden" if kwargs.get("instance", None) else None),
+                Field("multidates_saisie", type="hidden" if kwargs.get("instance", None) else None),
+                Field("multidates_calendrier", type="hidden" if kwargs.get("instance", None) else None),
+                Div(
+                    Field("multidates_planning", type="hidden"),
+                    Field("multidates_planning_date_debut"),
+                    Field("multidates_planning_date_fin"),
+                    Field("multidates_planning_inclure_feries"),
+                    InlineCheckboxes("multidates_planning_jours_scolaires"),
+                    InlineCheckboxes("multidates_planning_jours_vacances"),
+                    Field("multidates_planning_frequence_type"),
+                    id="div_id_multidates_planning",
+                )
             ),
             Fieldset("Options",
                 Field("description"),
@@ -187,17 +218,57 @@ class Formulaire(FormulaireBase, ModelForm):
         if self.cleaned_data["mode_saisie"] == "UNIQUE" and not self.cleaned_data["date"]:
             self.add_error("date", "Vous devez saisir une date pour cet évènement")
             return
-        if self.cleaned_data["mode_saisie"] == "MULTIPLE":
-            if not self.cleaned_data["dates_multiples"]:
-                self.add_error("dates_multiples", "Vous devez saisir au mois une date pour cet évènement")
+
+        if self.cleaned_data["mode_saisie"] == "MULTIDATES_SAISIE":
+            if not self.cleaned_data["multidates_saisie"]:
+                self.add_error("multidates_saisie", "Vous devez saisir au mois une date pour cet évènement")
             liste_dates = []
-            for datefr in re.split(';|,', self.cleaned_data["dates_multiples"]):
+            for datefr in re.split(';|,', self.cleaned_data["multidates_saisie"]):
                 date = utils_dates.ConvertDateFRtoDate(datefr.strip())
                 if date:
                     liste_dates.append(date)
                 else:
-                    self.add_error("dates_multiples", "La date '%s' semble erronée" % datefr)
+                    self.add_error("multidates_saisie", "La date '%s' semble erronée" % datefr)
             self.cleaned_data["date"] = liste_dates[0]
+
+        if self.cleaned_data["mode_saisie"] == "MULTIDATES_CALENDRIER":
+            if not self.cleaned_data["multidates_calendrier"]:
+                self.add_error("multidates_calendrier", "Vous devez saisir au mois une date pour cet évènement")
+            liste_dates = []
+            for dateeng in re.split(';|,', self.cleaned_data["multidates_calendrier"]):
+                date = utils_dates.ConvertDateENGtoDate(dateeng)
+                if date:
+                    liste_dates.append(date)
+                else:
+                    self.add_error("multidates_calendrier", "La date '%s' semble erronée" % dateeng)
+            self.cleaned_data["date"] = liste_dates[0]
+
+        if self.cleaned_data["mode_saisie"] == "MULTIDATES_PLANNING":
+            if not self.cleaned_data["multidates_planning_date_debut"]:
+                self.add_error("multidates_planning_date_debut", "Vous devez sélectionner une date de début")
+                return
+            if not self.cleaned_data["multidates_planning_date_fin"]:
+                self.add_error("multidates_planning_date_fin", "Vous devez sélectionner une date de fin")
+                return
+            if self.cleaned_data["multidates_planning_date_debut"] > self.cleaned_data["multidates_planning_date_fin"]:
+                self.add_error("multidates_planning_date_fin", "La date de fin doit être supérieure à la date de début")
+                return
+            if not self.cleaned_data["multidates_planning_jours_scolaires"] and not self.cleaned_data["multidates_planning_jours_vacances"]:
+                self.add_error("multidates_planning_jours_scolaires", "Vous devez cocher au moins un jour scolaire ou un jour de vacances")
+                return
+
+            liste_dates = utils_dates.Calcule_dates_planning(date_debut=self.cleaned_data["multidates_planning_date_debut"],
+                                               date_fin=self.cleaned_data["multidates_planning_date_fin"],
+                                               inclure_feries=self.cleaned_data["multidates_planning_inclure_feries"],
+                                               jours_scolaires=self.cleaned_data["multidates_planning_jours_scolaires"],
+                                               jours_vacances=self.cleaned_data["multidates_planning_jours_vacances"],
+                                               frequence_type=self.cleaned_data["multidates_planning_frequence_type"])
+            if not liste_dates:
+                self.add_error("multidates_planning_date_debut","Aucune date n'a été trouvée dans ce planning")
+                return
+
+            self.cleaned_data["date"] = liste_dates[0]
+            self.cleaned_data["multidates_planning"] = liste_dates
 
         return self.cleaned_data
 
@@ -210,6 +281,15 @@ class Formulaire(FormulaireBase, ModelForm):
 
 
 EXTRA_SCRIPT = """
+<style>
+    #div_id_multidates_planning_jours_scolaires label {
+        text-align: right;
+    }
+    #div_id_multidates_planning_jours_vacances label {
+        text-align: right;
+    }
+</style>
+
 <script>
 
 // type_nbre_places
@@ -240,15 +320,23 @@ $(document).ready(function() {
     On_change_type_tarification.call($('#id_type_tarification').get(0));
 });
 
-// Mode de saisie
+// Mode de saisie date
 function On_change_mode_saisie() {
     $('#div_id_date').hide();
-    $('#div_id_dates_multiples').hide();
+    $('#div_id_multidates_saisie').hide();
+    $('#div_id_multidates_calendrier').hide();
+    $('#div_id_multidates_planning').hide();
     if ($(this).val() == "UNIQUE") {
         $('#div_id_date').show();
     }
-    if ($(this).val() == "MULTIPLE") {
-        $('#div_id_dates_multiples').show();
+    if ($(this).val() == "MULTIDATES_SAISIE") {
+        $('#div_id_multidates_saisie').show();
+    }
+    if ($(this).val() == "MULTIDATES_CALENDRIER") {
+        $('#div_id_multidates_calendrier').show();
+    }
+    if ($(this).val() == "MULTIDATES_PLANNING") {
+        $('#div_id_multidates_planning').show();
     }
 }
 $(document).ready(function() {

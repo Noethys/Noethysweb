@@ -8,7 +8,6 @@ import dateutil.parser
 from dateutil.relativedelta import relativedelta
 
 
-
 LISTE_JOURS = ("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
 LISTE_MOIS = ("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre")
 LISTE_JOURS_ABREGES = ("Lun.", "Mar.", "Mer.", "Jeu.", "Ven.", "Sam.", "Dim.")
@@ -264,3 +263,64 @@ def ConvertPeriodeFrToDate(periode=""):
         return (date_debut, date_fin)
     except:
         return None
+
+def Calcule_dates_planning(date_debut=None, date_fin=None, inclure_feries=False, jours_scolaires=[], jours_vacances=[], frequence_type=1):
+    liste_resultats = []
+
+    from core.models import Vacance, Ferie
+    liste_vacances = Vacance.objects.all()
+    liste_feries = Ferie.objects.all()
+
+    jours_vacances = [int(x) for x in jours_vacances]
+    jours_scolaires = [int(x) for x in jours_scolaires]
+    frequence_type = int(frequence_type)
+
+    # Liste dates
+    listeDates = [date_debut,]
+    tmp = date_debut
+    while tmp < date_fin:
+        tmp += datetime.timedelta(days=1)
+        listeDates.append(tmp)
+
+    date = date_debut
+    numSemaine = frequence_type
+    dateTemp = date
+    for date in listeDates:
+
+        # Vérifie période et jour
+        valide = False
+        if EstEnVacances(date=date, liste_vacances=liste_vacances):
+            if date.weekday() in jours_vacances:
+                valide = True
+        else:
+            if date.weekday() in jours_scolaires:
+                valide = True
+
+        # Calcul le numéro de semaine
+        if len(listeDates) > 0:
+            if date.weekday() < dateTemp.weekday():
+                numSemaine += 1
+
+        # Fréquence semaines
+        if frequence_type in (2, 3, 4):
+            if numSemaine % frequence_type != 0:
+                valide = False
+
+        # Semaines paires et impaires
+        if valide == True and frequence_type in (5, 6):
+            numSemaineAnnee = date.isocalendar()[1]
+            if numSemaineAnnee % 2 == 0 and frequence_type == 6:
+                valide = False
+            if numSemaineAnnee % 2 != 0 and frequence_type == 5:
+                valide = False
+
+        # Vérifie si férié
+        if inclure_feries and EstFerie(date, liste_feries):
+            valide = False
+
+        # Application
+        if valide:
+            liste_resultats.append(date)
+
+        dateTemp = date
+    return liste_resultats

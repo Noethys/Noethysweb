@@ -141,8 +141,18 @@ class Ajouter(Page, crud.Ajouter):
         liste_evenements = [form.instance]
 
         # Si dates multiples, création de tous les évènements
-        if form.cleaned_data["mode_saisie"] == "MULTIPLE":
-            for date in [utils_dates.ConvertDateFRtoDate(datefr.strip()) for datefr in re.split(';|,', form.cleaned_data["dates_multiples"])][1:]:
+        if form.cleaned_data["mode_saisie"] != "UNIQUE":
+
+            if form.cleaned_data["mode_saisie"] == "MULTIDATES_SAISIE":
+                dates = [utils_dates.ConvertDateFRtoDate(datefr.strip()) for datefr in re.split(';|,', form.cleaned_data["multidates_saisie"])][1:]
+
+            if form.cleaned_data["mode_saisie"] == "MULTIDATES_CALENDRIER":
+                dates = [utils_dates.ConvertDateENGtoDate(dateeng) for dateeng in re.split(';', form.cleaned_data["multidates_calendrier"])][1:]
+
+            if form.cleaned_data["mode_saisie"] == "MULTIDATES_PLANNING":
+                dates = form.cleaned_data["multidates_planning"][1:]
+
+            for date in dates:
                 nouveau_evenement = deepcopy(form.instance)
                 nouveau_evenement.pk = None
                 nouveau_evenement.date = date
