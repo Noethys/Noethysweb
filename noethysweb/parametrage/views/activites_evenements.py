@@ -6,7 +6,7 @@
 import re
 from copy import deepcopy
 from django.urls import reverse_lazy, reverse
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
@@ -83,7 +83,7 @@ class Liste(Page, crud.Liste):
     template_name = "parametrage/activite_liste.html"
 
     def get_queryset(self):
-        return Evenement.objects.filter(Q(activite=self.Get_idactivite()) & self.Get_filtres("Q"))
+        return Evenement.objects.filter(Q(activite=self.Get_idactivite()) & self.Get_filtres("Q")).annotate(nbre_conso=Count("consommation"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -96,13 +96,14 @@ class Liste(Page, crud.Liste):
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         tarification = columns.TextColumn("Tarification", sources=None, processor='Get_tarification')
         groupe = columns.TextColumn("Groupe", sources=["groupe__nom"])
+        nbre_conso = columns.TextColumn("Nb conso", sources="nbre_conso")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idevenement", "date", "nom", "groupe", "tarification"]
+            columns = ["check", "idevenement", "date", "nom", "groupe", "tarification", "nbre_conso"]
             ordering = ["date"]
             processors = {
-                "date": helpers.format_date('%d/%m/%Y'),
+                "date": helpers.format_date("%d/%m/%Y"),
             }
 
         def Get_tarification(self, instance, *args, **kwargs):
