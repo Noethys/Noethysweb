@@ -5,8 +5,8 @@
 
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
-from crispy_forms.bootstrap import Field, TabHolder, Tab
+from crispy_forms.layout import Layout, HTML
+from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.widgets import DatePickerWidget
 
@@ -42,9 +42,9 @@ EXTRA_HTML = """
 
     // Activation du multidates
     function On_change_multidate() {
-        multidate = $(this).prop("checked");
-        $(".datepickerwidget").datepicker('destroy');
-        init_datepicker();
+        multidate_id_date = $(this).prop("checked");
+        $(".datepicker_id_date").datepicker('destroy');
+        init_datepicker_id_date();
     }
     $(document).ready(function() {
         $('#id_multidate').on('change', On_change_multidate);

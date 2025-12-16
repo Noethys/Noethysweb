@@ -1,10 +1,9 @@
 {% load i18n %}
 <script>
 
-var multidate = {% if multidate %}true{% else %}false{% endif %};
+var multidate_{{ id }} = {% if multidate %}true{% else %}false{% endif %};
 
-function init_datepicker() {
-
+function init_datepicker_{{ id }}() {
     {% include 'core/csrftoken.html' %}
 
     $.ajax({
@@ -12,13 +11,13 @@ function init_datepicker() {
         url: "{% url 'ajax_get_calendrier' %}",
         datatype: "json",
         success:function(data){
-            maj_datepicker(data);
+            maj_datepicker_{{ id }}(data);
             {% if dates %}
                 var dates = [];
                 {% for date in dates %}
                     dates.push(new Date("{{ date }}"));
                 {% endfor %}
-                $('.datepickerwidget').datepicker('setDates', dates);
+                $('.datepicker_{{ id }}').datepicker('setDates', dates);
             {% endif %}
         }
     })
@@ -27,7 +26,7 @@ function init_datepicker() {
 $(function () {
 
     // Initialisation du datepicker
-    init_datepicker()
+    init_datepicker_{{ id }}()
 
     // Boutons changement de date
     function change_jour(valeur) {
@@ -58,13 +57,13 @@ $(function () {
 
 });
 
-function maj_datepicker(data){
-    $('.datepickerwidget').datepicker({
+function maj_datepicker_{{ id }}(data){
+    $(".datepicker_{{ id }}").datepicker({
         autoclose: true,
         todayBtn: "linked",
         language: "fr",
         todayHighlight: true,
-        multidate: multidate,
+        multidate: multidate_{{ id }},
         multidateSeparator: ";",
         beforeShowDay: function (date) {
             var date_fixe = moment(date).format('YYYY-MM-DD'); // jQuery.datepicker.formatDate('yy-mm-dd', date);
@@ -105,10 +104,10 @@ function maj_datepicker(data){
     .datepicker-inline {
         width: 100%;
     }
-    .datepickerwidget table {
+    .datepicker_{{ id }} table {
         width: 100%;
     }
-    .datepickerwidget tr td {
+    .datepicker_{{ id }} tr td {
         border-radius: 0px !important;
     }
     .calendrier_vacances {
@@ -130,12 +129,12 @@ function maj_datepicker(data){
 
 {% if affichage_inline %}
 
-    <div class="datepickerwidget"></div>
+    <div class="datepicker_{{ id }}"></div>
     <input type="text" name="{{ name }}" id="{{ id }}" value="" hidden/>
     <script>
     $(function () {
-        $('.datepickerwidget').on('changeDate', function (e) {
-            var dates = $('.datepickerwidget').datepicker("getDates");
+        $('.datepicker_{{ id }}').on('changeDate', function (e) {
+            var dates = $('.datepicker_{{ id }}').datepicker("getDates");
             var liste_dates = [];
             dates.forEach(function(date) {
                 liste_dates.push(moment(date).format('YYYY-MM-DD'))
@@ -160,7 +159,7 @@ function maj_datepicker(data){
             {% endif %}
             <span class="input-group-text"><i class="fa {% if icon %}{{ icon }}{% else %}fa-calendar{% endif %}"></i></span>
         </div>
-        <input type="text" autocomplete="off" placeholder="{% trans "Sélectionner une date" %}" class="{{ class }}" data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}" value="{{ value|date:djformat }}" {% if disabled %}disabled="disabled"{% endif %} {% if required %}required{% endif %}/>
+        <input type="text" autocomplete="off" placeholder="{% trans "Sélectionner une date" %}" class="{{ class }} datepicker_{{ id }}" data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}" value="{{ value|date:djformat }}" {% if disabled %}disabled="disabled"{% endif %} {% if required %}required{% endif %}/>
         {% if afficher_fleches %}
             <div class="input-group-append">
                 <button id="datepicker_moins_{{ id }}" title="Sélectionner la veille" class="btn btn-default" type="button"><i class="fa fa-chevron-left"></i></button>
