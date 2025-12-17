@@ -1,3 +1,12 @@
+Version 1.3.1.7 (17/12/2025) :
+
+- Ajout du délai de suppression des réservations sur le portail
+- Ajout du paramétrage des évènements multi-dates selon un calendrier ou un planning
+- Ajout de la suppression par lot des évènements
+- Ajout d'une colonne nb conso dans la liste des évènements
+- Ajout de la liste des vaccinations manquantes
+- Correction de l'export JVS
+
 Version 1.3.1.6 (03/12/2025) :
 
 - Correction sur les extensions de pièces jointes dans les emails
