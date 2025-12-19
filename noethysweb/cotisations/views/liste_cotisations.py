@@ -5,10 +5,10 @@
 
 import decimal
 from django.urls import reverse
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Cotisation, Ventilation
+from core.models import Cotisation, Ventilation, Rattachement
 from core.utils import utils_dates, utils_texte
 
 
@@ -51,13 +51,15 @@ class Liste(Page, crud.Liste):
         date_prestation = columns.TextColumn("Date prestation", sources=['prestation__date'], processor=helpers.format_date('%d/%m/%Y'))
         montant_prestation = columns.TextColumn("Montant prestation", sources=['prestation__montant'])
         solde = columns.TextColumn("Solde prestation", sources=[], processor="Get_solde")
+        nbre_membres_foyer = columns.IntegerColumn("Nb membres foyer", sources=[], processor="Get_nb_membres_foyer")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
             columns = ['check', 'idcotisation', 'date_debut', 'date_fin', 'famille', 'individu', 'nom_cotisation', 'numero',
-                       'depot', "rue_resid", "cp_resid", "ville_resid", "mail", "date_prestation", "montant_prestation", "solde"]
-            hidden_columns = ["rue_resid", "cp_resid", "ville_resid", "mail", "date_prestation", "montant_prestation", "solde"]
+                       'depot', "rue_resid", "cp_resid", "ville_resid", "mail", "date_prestation", "montant_prestation", "solde",
+                       "nbre_membres_foyer"]
+            hidden_columns = ["rue_resid", "cp_resid", "ville_resid", "mail", "date_prestation", "montant_prestation", "solde", "nbre_membres_foyer"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
@@ -97,6 +99,12 @@ class Liste(Page, crud.Liste):
             else:
                 couleur = "danger"
             return """<span class='badge badge-%s'>%s</span>""" % (couleur, utils_texte.Formate_montant(solde))
+
+        def Get_nb_membres_foyer(self, instance, *args, **kwargs):
+            # Recherche du nombre de membres dans le foyer
+            if not hasattr(self, "dict_nb_membres_foyer"):
+                self.dict_nb_membres_foyer = {item["famille_id"]: item["nbre_membres"] for item in Rattachement.objects.values("famille_id").filter(categorie__in=(1, 2)).annotate(nbre_membres=Count('pk'))}
+            return self.dict_nb_membres_foyer.get(instance.famille_id, 0)
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
