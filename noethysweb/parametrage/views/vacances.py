@@ -23,7 +23,7 @@ class Page(crud.Page):
     objet_pluriel = "des périodes de vacances"
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
-        {"label": "Importer depuis internet", "classe": "btn btn-default", "href": reverse_lazy("vacances_importation", args="a"), "icone": "fa fa-download"}
+        {"label": "Importer depuis internet", "classe": "btn btn-default", "href": reverse_lazy("vacances_importation", args="x"), "icone": "fa fa-download"}
     ]
 
 

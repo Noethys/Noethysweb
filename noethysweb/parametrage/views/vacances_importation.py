@@ -4,12 +4,26 @@
 #  Distribué sous licence GNU GPL.
 
 from django.views.generic import TemplateView
-from core.views.base import CustomView
+from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
+from core.views.base import CustomView
 from core.utils import utils_vacances
 from core.models import Vacance
-from django.contrib import messages
+from core.models import Organisateur
+
+
+DICT_ZONES_SCOLAIRES = {
+    "A": [25, 39, 70, 90, 24, 33, 40, 47, 64, 21, 58, 71, 89, 3, 15, 43, 63, 7, 26, 38, 73, 74, 19, 23, 87, 1, 42, 69, 16, 17, 79, 86],
+    "B": [4, 5, 13, 84, 2, 60, 80, 14, 50, 61, 59, 62, 54, 55, 57, 88, 44, 49, 53, 72, 85, 6, 83, 18, 28, 36, 37, 41, 45, 8, 10, 51, 52, 22, 29, 35, 56, 27, 76, 67, 68],
+    "C": [77, 93, 94, 75, 11, 30, 34, 48, 66, 9, 12, 31, 32, 46, 65, 81, 82, 78, 91, 92, 95],
+}
+
+
+def Rechercher_zone_scolaire(cp=""):
+    for zone, liste_departements in DICT_ZONES_SCOLAIRES.items():
+        if int((cp or None)[:2]) in liste_departements: return zone
+    return None
 
 
 class View(CustomView, TemplateView):
@@ -17,39 +31,37 @@ class View(CustomView, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
-        context['page_titre'] = "Gestion des périodes de vacances"
-        context['box_titre'] = "Importer depuis internet"
-        context['box_introduction'] = "Sélectionnez une zone, cochez les périodes souhaitées puis cliquez sur le bouton Importer."
-        context['menu_actif'] = "vacances_liste"
+        context["page_titre"] = "Gestion des périodes de vacances"
+        context["box_titre"] = "Importer depuis internet"
+        context["box_introduction"] = "Sélectionnez une zone, cochez les périodes souhaitées puis cliquez sur le bouton Importer."
+        context["menu_actif"] = "vacances_liste"
 
-        # Récupération de la zone dans l'url
-        zone = self.kwargs['zone']
-        if zone in "abc":
-            context['zone'] = zone.upper()
-        else:
-            context['zone'] = "A"
+        # Recherche de la zone de l'organisateur
+        context["zone_organisateur"] = None
+        organisateur = Organisateur.objects.filter(pk=1).first()
+        if organisateur and organisateur.cp:
+            context["zone_organisateur"] = Rechercher_zone_scolaire(organisateur.cp)
+
+        # Récupération de la zone de l'URL
+        context["zone"] = context["zone_organisateur"] or "A"
+        if self.kwargs["zone"] in "abc":
+            context["zone"] = self.kwargs["zone"].upper()
 
         # Importation des vacances existantes
-        vacances_existantes = []
-        for vacance in Vacance.objects.all():
-            vacances_existantes.append((vacance.annee, vacance.nom))
+        vacances_existantes = [(vacance.annee, vacance.nom) for vacance in Vacance.objects.all()]
 
         # Lecture du icalendar
-        cal = utils_vacances.Calendrier(zone=context['zone'])
-        self.listePeriodes = []
+        cal = utils_vacances.Calendrier(zone=context["zone"])
 
         # Vérifie que la période n'existe pas déjà
-        for dict_vacance in cal.GetVacances():
-            if ((dict_vacance["annee"], dict_vacance["nom"]) in vacances_existantes) == False :
-                self.listePeriodes.append(dict_vacance)
-        context['items'] = self.listePeriodes
+        self.listePeriodes = [dict_vacance for dict_vacance in cal.GetVacances() if not (dict_vacance["annee"], dict_vacance["nom"]) in vacances_existantes]
+        context["items"] = self.listePeriodes
 
         return context
 
     def post(self, request, zone="a"):
         # Récupération de la liste des périodes
-        context = self.get_context_data()
-        reponses = [int(id) for id in request.POST.getlist('items')]
+        reponses = [int(id) for id in request.POST.getlist("items")]
 
         # Vérifie qu'au moins une réponse a été cochée
         if len(reponses) == 0:

@@ -1,6 +1,12 @@
 {% extends "core/box_in_page.html" %}
 {% load crispy_forms_tags %}
 {% load embed %}
+{% load static %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
 
 {% block contenu_page %}
 {% embed 'core/box.html' %}
@@ -35,6 +41,12 @@
                 </div>
             </div>
 
+            {% if zone_organisateur %}
+                <div class="alert alert-warning">
+                    <i class="icon fa fa-info-circle"></i>La zone scolaire de l'organisateur est <b>{{ zone_organisateur }}</b>
+                </div>
+            {% endif %}
+
             {# Liste des périodes à importer #}
             <table class="table table-sm">
                 <tbody>
@@ -57,6 +69,10 @@
         <script>
             $(document).ready(function() {
                 $('input[name=choix_zone]').on('change', function (event) {
+                    var box = bootbox.dialog({
+                        message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Recherche des périodes</b><br><br>Veuillez patienter...</p>",
+                        closeButton: false
+                    });
                     if ($(this).val() === "A") {window.location.href = "{% url 'vacances_importation' 'a' %}";}
                     if ($(this).val() === "B") {window.location.href = "{% url 'vacances_importation' 'b' %}";}
                     if ($(this).val() === "C") {window.location.href = "{% url 'vacances_importation' 'c' %}";}
