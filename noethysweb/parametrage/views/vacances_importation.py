@@ -47,17 +47,21 @@ class View(CustomView, TemplateView):
         if self.kwargs["zone"] in "abc":
             context["zone"] = self.kwargs["zone"].upper()
 
+        # Récupération des périodes
+        context["items"] = self.Get_liste_periodes(zone=context["zone"])
+
+        return context
+
+    def Get_liste_periodes(self, zone="a"):
         # Importation des vacances existantes
         vacances_existantes = [(vacance.annee, vacance.nom) for vacance in Vacance.objects.all()]
 
         # Lecture du icalendar
-        cal = utils_vacances.Calendrier(zone=context["zone"])
+        cal = utils_vacances.Calendrier(zone=zone)
 
-        # Vérifie que la période n'existe pas déjà
-        self.listePeriodes = [dict_vacance for dict_vacance in cal.GetVacances() if not (dict_vacance["annee"], dict_vacance["nom"]) in vacances_existantes]
-        context["items"] = self.listePeriodes
-
-        return context
+        # Récupération des périodes absentes
+        liste_periodes = [dict_vacance for dict_vacance in cal.GetVacances() if not (dict_vacance["annee"], dict_vacance["nom"]) in vacances_existantes]
+        return liste_periodes
 
     def post(self, request, zone="a"):
         # Récupération de la liste des périodes
@@ -69,7 +73,8 @@ class View(CustomView, TemplateView):
             return HttpResponseRedirect(reverse_lazy("vacances_importation", args=zone))
 
         # Sauvegarde des périodes cochées
+        liste_periodes = self.Get_liste_periodes(zone=zone)
         for index in reponses:
-            dict_vacance = self.listePeriodes[index]
+            dict_vacance = liste_periodes[index]
             Vacance.objects.create(nom=dict_vacance["nom"], annee=dict_vacance["annee"], date_debut=dict_vacance["date_debut"], date_fin=dict_vacance["date_fin"])
         return HttpResponseRedirect(reverse_lazy("vacances_liste"))
