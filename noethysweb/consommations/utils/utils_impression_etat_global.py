@@ -11,6 +11,7 @@ from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
 from core.models import Evenement, Regime, Vacance, Activite, Quotient, TarifLigne, Consommation, Famille, Individu, LISTE_ETATS_CONSO, JOURS_COMPLETS_SEMAINE
 from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires
+from core.utils.utils_dates import HeureStrEnDelta as HEURE # Ne pas supprimer : est utilisé pour la formule
 
 
 # Regex pour formule
