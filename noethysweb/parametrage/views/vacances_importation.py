@@ -37,10 +37,7 @@ class View(CustomView, TemplateView):
         context["menu_actif"] = "vacances_liste"
 
         # Recherche de la zone de l'organisateur
-        context["zone_organisateur"] = None
-        organisateur = Organisateur.objects.filter(pk=1).first()
-        if organisateur and organisateur.cp:
-            context["zone_organisateur"] = Rechercher_zone_scolaire(organisateur.cp)
+        context["zone_organisateur"] = self.Get_zone_organisateur()
 
         # Récupération de la zone de l'URL
         context["zone"] = context["zone_organisateur"] or "A"
@@ -51,6 +48,14 @@ class View(CustomView, TemplateView):
         context["items"] = self.Get_liste_periodes(zone=context["zone"])
 
         return context
+
+    def Get_zone_organisateur(self):
+        """ Recherche de la zone de l'organisateur """
+        zone_organisateur = None
+        organisateur = Organisateur.objects.filter(pk=1).first()
+        if organisateur and organisateur.cp:
+            zone_organisateur = Rechercher_zone_scolaire(organisateur.cp)
+        return zone_organisateur
 
     def Get_liste_periodes(self, zone="a"):
         # Importation des vacances existantes
@@ -73,6 +78,8 @@ class View(CustomView, TemplateView):
             return HttpResponseRedirect(reverse_lazy("vacances_importation", args=zone))
 
         # Sauvegarde des périodes cochées
+        if zone == "x":
+            zone = self.Get_zone_organisateur()
         liste_periodes = self.Get_liste_periodes(zone=zone)
         for index in reponses:
             dict_vacance = liste_periodes[index]
