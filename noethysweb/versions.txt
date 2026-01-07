@@ -1,3 +1,9 @@
+Version 1.3.1.9 (07/01/2026) :
+
+- Correction du mot-clé Heure dans la formule de l'état global
+- Correction de l'option sanitizer dans summernote
+- Correction sur l'importation des périodes de vacances
+
 Version 1.3.1.8 (21/12/2025) :
 
 - Ajout de la recherche de la zone scolaire dans l'importation des périodes de vacances
