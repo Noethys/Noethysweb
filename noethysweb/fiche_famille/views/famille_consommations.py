@@ -111,6 +111,10 @@ class Modifier(Onglet, TemplateView):
         # Sélection de l'activité à afficher
         if data['liste_activites_possibles'] and not data["selection_activite"]:
             data['selection_activite'] = data['liste_activites_possibles'][0]
+            for activite in data['liste_activites_possibles']:
+                if not activite.date_fin:
+                    data['selection_activite'] = activite
+                    break
         data["liste_inscriptions"] = dict_inscriptions.get(data['selection_activite'], [])
 
         # Définit le titre de la grille
