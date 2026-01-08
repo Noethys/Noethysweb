@@ -1,3 +1,9 @@
+Version 1.3.2.0 (08/01/2026) :
+
+- Ajout du détail ASAP à l'export vers JVS
+- Optimisation du code pour les exports vers le Trésor Public
+- Correction de la sélection par défaut de l'activité dans la grille des consommations
+
 Version 1.3.1.9 (07/01/2026) :
 
 - Correction du mot-clé Heure dans la formule de l'état global
