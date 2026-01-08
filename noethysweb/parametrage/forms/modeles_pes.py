@@ -83,7 +83,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("fonction", type=None if format in ("magnus",) else "hidden"),
                 Field("service1", type=None if format in ("magnus",) else "hidden"),
                 Field("service2", type=None if format in ("magnus",) else "hidden"),
-                Field("edition_asap", type=None if format in ("magnus",) else "hidden"),
+                Field("edition_asap", type=None if format in ("magnus", "jvs") else "hidden"),
                 Field("type_pj", type=None if format in ("magnus",) else "hidden"),
                 Field("nom_tribunal", type=None if format in ("magnus",) else "hidden"),
                 Field("payable_internet", type=None if format in ("magnus",) else "hidden"),

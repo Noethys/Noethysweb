@@ -3,73 +3,18 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import os, calendar, datetime, uuid, zipfile
+import os, zipfile
 from urllib.request import urlretrieve
 from xml.dom.minidom import Document
 from lxml import etree
 from io import BytesIO
-from django.conf import settings
-from core.models import PesLot, PesPiece, Organisateur
-from core.utils import utils_texte, utils_fichiers
 from noethysweb.version import GetVersion
+from core.utils import utils_fichiers
+from facturation.utils.utils_export_tresor_public import ExporterBase
 
 
-def ConvertToTexte(valeur, majuscules=False):
-    if majuscules and valeur:
-        valeur = utils_texte.Supprimer_accents(valeur.upper())
-    valeur = valeur.replace("\n", " ")
-    valeur = valeur.replace("\r", " ")
-    valeur = valeur.strip()
-    return valeur
-
-
-class Exporter():
-    def __init__(self, idlot=None, request=None):
-        self.idlot = idlot
-        self.request = request
-        self.organisateur = Organisateur.objects.filter(pk=1).first()
-        self.erreurs = []
-
-    def Generer(self):
-        # Importation des données
-        self.lot = PesLot.objects.select_related("modele", "modele__compte", "modele__mode").get(pk=self.idlot)
-        self.pieces = PesPiece.objects.select_related("famille", "prelevement_mandat", "titulaire_helios", "facture").filter(lot=self.lot)
-
-        # Création du répertoire de sortie
-        self.rep_base = os.path.join("temp", str(uuid.uuid4()))
-        self.rep_destination = os.path.join(settings.MEDIA_ROOT, self.rep_base, "pes")
-        os.makedirs(self.rep_destination)
-
-        # Création du nom du fichier
-        self.nom_fichier = "export.xml"
-
-        # Création des fichiers
-        if not self.Creation_fichiers():
-            return False
-
-        return os.path.join(settings.MEDIA_URL, self.rep_base, "pes", self.nom_fichier)
-
-    def Get_erreurs_html(self):
-        html = """
-            <div class='text-red'>Les erreurs suivantes ont été rencontrées :<div><ul class='mt-2'>%s</ul>
-            <div class="buttonHolder">
-                <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-times margin-r-5'></i>Fermer</button>
-                </div>
-            </div>
-        """ % "".join(["<li>%s</li>" % erreur for erreur in self.erreurs])
-        return html
-
-    def Formate_libelle(self, texte="", piece=None):
-        texte = texte.replace("{NOM_ORGANISATEUR}", self.organisateur.nom)
-        if piece:
-            texte = texte.replace("{NUM_FACTURE}", str(piece.facture.numero))
-        texte = texte.replace("{MOIS}", str(self.lot.mois))
-        texte = texte.replace("{MOIS_LETTRES}", self.lot.get_mois_display())
-        texte = texte.replace("{ANNEE}", str(self.lot.exercice))
-        texte = texte.replace("{DATE_DEBUT_MOIS}", datetime.date(self.lot.exercice, self.lot.mois, 1).strftime('%d/%m/%Y'))
-        texte = texte.replace("{DATE_FIN_MOIS}", datetime.date(self.lot.exercice, self.lot.mois, calendar.monthrange(self.lot.exercice, self.lot.mois)[1]).strftime('%d/%m/%Y'))
-        return texte
+class Exporter(ExporterBase):
+    code_format = "pes"
 
     def Creation_fichiers(self):
         # Vérifie que des pièces existent
@@ -107,7 +52,7 @@ class Exporter():
         Parametres.appendChild(TypFic)
 
         NomFic = doc.createElement("NomFic")
-        NomFic.setAttribute("V", self.nom_fichier[:100])
+        NomFic.setAttribute("V", self.nom_fichier_simple[:100])
         Parametres.appendChild(NomFic)
 
         Emetteur = doc.createElement("Emetteur")
@@ -198,7 +143,7 @@ class Exporter():
         BlocBordereau.appendChild(DteAsp)
 
         Objet = doc.createElement("Objet")
-        Objet.setAttribute("V", ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece)[:160], majuscules=True))
+        Objet.setAttribute("V", self.ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece)[:160], majuscules=True))
         BlocBordereau.appendChild(Objet)
 
         for piece in self.pieces:
@@ -223,7 +168,7 @@ class Exporter():
             BlocPiece.appendChild(NatPce)
 
             ObjPce = doc.createElement("ObjPce")
-            ObjPce.setAttribute("V", ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece, piece=piece)[:160], majuscules=True))
+            ObjPce.setAttribute("V", self.ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece, piece=piece)[:160], majuscules=True))
             BlocPiece.appendChild(ObjPce)
 
             NumDette = doc.createElement("NumDette")
@@ -269,7 +214,7 @@ class Exporter():
             InfoLignePiece.appendChild(IdLigne)
 
             ObjLignePce = doc.createElement("ObjLignePce")
-            ObjLignePce.setAttribute("V", ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece, piece=piece)[:160], majuscules=True))
+            ObjLignePce.setAttribute("V", self.ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece, piece=piece)[:160], majuscules=True))
             InfoLignePiece.appendChild(ObjLignePce)
 
             CodProdLoc = doc.createElement("CodProdLoc")
@@ -331,7 +276,7 @@ class Exporter():
                 InfoPrelevementSEPA.appendChild(RefUniMdt)
 
                 LibPrel = doc.createElement("LibPrel")
-                LibPrel.setAttribute("V", ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.prelevement_libelle, piece=piece)[:140], majuscules=True))
+                LibPrel.setAttribute("V", self.ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.prelevement_libelle, piece=piece)[:140], majuscules=True))
                 InfoPrelevementSEPA.appendChild(LibPrel)
 
             # Tiers
@@ -381,13 +326,13 @@ class Exporter():
                 InfoTiers.appendChild(Civilite)
 
             Nom = doc.createElement("Nom")
-            Nom.setAttribute("V", ConvertToTexte(piece.famille.titulaire_helios.nom[:38], majuscules=True))
+            Nom.setAttribute("V", self.ConvertToTexte(piece.famille.titulaire_helios.nom[:38], majuscules=True))
             InfoTiers.appendChild(Nom)
 
             prenom = piece.famille.titulaire_helios.prenom
             if prenom:
                 Prenom = doc.createElement("Prenom")
-                Prenom.setAttribute("V", ConvertToTexte(prenom[:38], majuscules=True))
+                Prenom.setAttribute("V", self.ConvertToTexte(prenom[:38], majuscules=True))
                 InfoTiers.appendChild(Prenom)
 
             # Adresse
@@ -399,7 +344,7 @@ class Exporter():
             Adresse.appendChild(TypAdr)
 
             Adr2 = doc.createElement("Adr2")
-            Adr2.setAttribute("V", ConvertToTexte((piece.famille.titulaire_helios.rue_resid or "")[:38], majuscules=True))
+            Adr2.setAttribute("V", self.ConvertToTexte((piece.famille.titulaire_helios.rue_resid or "")[:38], majuscules=True))
             Adresse.appendChild(Adr2)
 
             CP = doc.createElement("CP")
@@ -407,7 +352,7 @@ class Exporter():
             Adresse.appendChild(CP)
 
             Ville = doc.createElement("Ville")
-            Ville.setAttribute("V", ConvertToTexte((piece.famille.titulaire_helios.ville_resid or "")[:38], majuscules=True))
+            Ville.setAttribute("V", self.ConvertToTexte((piece.famille.titulaire_helios.ville_resid or "")[:38], majuscules=True))
             Adresse.appendChild(Ville)
 
             CodRes = doc.createElement("CodRes")
@@ -429,7 +374,7 @@ class Exporter():
 
                 TitCpte = doc.createElement("TitCpte")
                 individu_mandat = piece.prelevement_mandat.individu_nom or piece.prelevement_mandat.individu.Get_nom()
-                TitCpte.setAttribute("V", ConvertToTexte(individu_mandat[:32], majuscules=True))
+                TitCpte.setAttribute("V", self.ConvertToTexte(individu_mandat[:32], majuscules=True))
                 CpteBancaire.appendChild(TitCpte)
 
         # Génération du XML
@@ -441,7 +386,7 @@ class Exporter():
             return False
 
         # Enregistrement du fichier XML
-        f = open(os.path.join(self.rep_destination, self.nom_fichier), "wb")
+        f = open(os.path.join(self.rep_destination, self.nom_fichier_simple), "wb")
         f.write(xml)
         f.close()
 
