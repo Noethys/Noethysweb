@@ -1134,7 +1134,7 @@ class Facturation():
                     return {"IDprestation": IDprestation, "dictPrestation": dict_prestation_2, "nouveau": False}
 
                 # Renvoie prestation existante si la prestation semble identique avec montants identiques
-                keys = ["date", "individu", "tarif", "montant_initial", "montant", "categorie_tarif", "famille", "label", "quantite", "tarif_ligne"]
+                keys = ["date", "individu", "tarif", "montant_initial", "montant", "categorie_tarif", "famille", "label", "quantite", "tarif_ligne", "tva"]
 
                 if dictPrestation["temps_facture"]: dictPrestation["temps_facture"] = dictPrestation["temps_facture"].lstrip("0")
                 if dict_prestation_2["temps_facture"]: dict_prestation_2["temps_facture"] = dict_prestation_2["temps_facture"].lstrip("0")
