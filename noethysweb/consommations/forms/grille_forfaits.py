@@ -86,12 +86,12 @@ def Get_forfaits_disponibles(request):
     if date_debut and activite:
 
         # Importation des inscriptions de cette famille
-        inscriptions = Inscription.objects.select_related("individu").filter(famille_id=idfamille, pk__in=liste_idinscription)
+        inscriptions = Inscription.objects.select_related("individu", "categorie_tarif").filter(famille_id=idfamille, pk__in=liste_idinscription)
 
         # Recherche de tarifs CREDIT disponibles
         from consommations.views.grille import Facturation
         facturation = Facturation()
-        tarifs = Tarif.objects.select_related("nom_tarif").prefetch_related("groupes").filter((Q(date_fin__isnull=True) | Q(date_fin__gte=date_debut)), date_debut__lte=date_debut, activite_id=activite, type="CREDIT")
+        tarifs = Tarif.objects.select_related("nom_tarif").prefetch_related("groupes", "categories_tarifs").filter((Q(date_fin__isnull=True) | Q(date_fin__gte=date_debut)), date_debut__lte=date_debut, activite_id=activite, type="CREDIT")
         for tarif in tarifs:
 
             # Recherche de la date de facturation
@@ -122,7 +122,7 @@ def Get_forfaits_disponibles(request):
                     dict_forfaits[key] = detail_forfait
                 else:
                     for inscription in inscriptions:
-                        if not tarif.groupes.all() or inscription.groupe in tarif.groupes.all():
+                        if (not tarif.groupes.all() or inscription.groupe in tarif.groupes.all()) and inscription.categorie_tarif in tarif.categories_tarifs.all():
                             key = "%s_%d" % (inscription.individu_id, tarif.pk)
                             liste_forfaits.append((key, "%s - %s - %s" % (inscription.individu.Get_nom(), tarif.description or tarif.nom_tarif.nom, utils_texte.Formate_montant(montant_tarif))))
                             dict_forfaits[key] = copy.copy(detail_forfait)
