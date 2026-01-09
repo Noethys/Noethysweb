@@ -30,9 +30,7 @@ def get_data_profil(donnees=None, request=None):
 
     # Validation des paramètres
     if not form.is_valid():
-        #todo : pas fonctionnel
-        print("Erreurs =", form.errors.as_data())
-        return JsonResponse({"erreur": "Les paramètres ne sont pas valides"}, status=401)
+        return JsonResponse({"erreur": ["<b>%s</b> : %s " % (form.fields[field_name].label, erreur[0].message) for field_name, erreur in form.errors.as_data().items()]}, status=401)
 
     return {"options": form.cleaned_data, "parametres": dict_donnees["parametres"]}
 

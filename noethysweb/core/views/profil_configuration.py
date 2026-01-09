@@ -37,7 +37,10 @@ def Modifier_profil_configuration(request):
     # Ajouter un profil
     if action == "ajouter":
         parametre = Parametre.objects.create(categorie=categorie, nom=nom, utilisateur=utilisateur, structure_id=idstructure)
-        Enregistrer(request=request, module=module, idprofil=parametre.pk)
+        resultat = Enregistrer(request=request, module=module, idprofil=parametre.pk)
+        if resultat:
+            # On retourne une erreur
+            return resultat
         return JsonResponse({"action": action, "id": parametre.pk, "profil_nom": parametre.nom})
 
     # Modifier un profil
@@ -59,7 +62,10 @@ def Modifier_profil_configuration(request):
             return JsonResponse({"erreur": "Vous ne pouvez pas supprimer ce profil"}, status=401)
 
     if action == "enregistrer":
-        Enregistrer(request=request, module=module, idprofil=idprofil)
+        resultat = Enregistrer(request=request, module=module, idprofil=idprofil)
+        if resultat:
+            # On retourne une erreur
+            return resultat
         return JsonResponse({"action": action})
 
     return JsonResponse({"erreur": "Erreur !"}, status=401)
@@ -73,7 +79,13 @@ def Enregistrer(request=None, module="", idprofil=None):
     module = importlib.import_module(module)
     data = module.get_data_profil(donnees, request=request)
 
+    # S'il y a une erreur, on retourne l'erreur au format JsonResponse
+    if isinstance(data, JsonResponse):
+        return data
+
     # Enregistrement des paramètres
     parametre = Parametre.objects.get(idparametre=int(idprofil))
     parametre.parametre = json.dumps(data)
     parametre.save()
+
+    return None

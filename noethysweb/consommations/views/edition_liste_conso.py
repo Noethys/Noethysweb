@@ -6,7 +6,7 @@
 import datetime, json
 from django.views.generic import TemplateView
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, QueryDict
 from core.models import Parametre
 from core.views.base import CustomView
 from core.utils import utils_dates, utils_infos_individus, utils_dictionnaires
@@ -17,13 +17,9 @@ from consommations.forms.edition_liste_conso_parametres import Formulaire as For
 
 def get_data_profil(donnees=None, request=None):
     """ Récupère les données à sauvegarder dans le profil de configuration """
-    form = Form_parametres(donnees, request=request)
-
-    # Validation des paramètres
+    form = Form_parametres(QueryDict(donnees), request=request)
     if not form.is_valid():
-        #todo : pas fonctionnel
-        print("Erreurs =", form.errors.as_data())
-        return JsonResponse({"erreur": "Les paramètres ne sont pas valides"}, status=401)
+        return JsonResponse({"erreur": ["<b>%s</b> : %s " % (form.fields[field_name].label, erreur[0].message) for field_name, erreur in form.errors.as_data().items()]}, status=401)
 
     # Suppression des données inutiles
     data = form.cleaned_data

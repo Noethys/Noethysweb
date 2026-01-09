@@ -5,7 +5,7 @@
 
 import json
 from django.views.generic import TemplateView
-from django.http import JsonResponse
+from django.http import JsonResponse, QueryDict
 from core.models import Parametre
 from core.views.base import CustomView
 from individus.forms.imprimer_liste_inscrits import Formulaire
@@ -13,9 +13,9 @@ from individus.forms.imprimer_liste_inscrits import Formulaire
 
 def get_data_profil(donnees=None, request=None):
     """ Récupère les données à sauvegarder dans le profil de configuration """
-    form = Formulaire(donnees, request=request)
+    form = Formulaire(QueryDict(donnees), request=request)
     if not form.is_valid():
-        return JsonResponse({"erreur": "Les paramètres ne sont pas valides"}, status=401)
+        return JsonResponse({"erreur": ["<b>%s</b> : %s " % (form.fields[field_name].label, erreur[0].message) for field_name, erreur in form.errors.as_data().items()]}, status=401)
 
     data = form.cleaned_data
     data["activite"] = data["activite"].pk
