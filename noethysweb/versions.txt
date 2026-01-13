@@ -1,3 +1,10 @@
+Version 1.3.2.1 (13/01/2026) :
+
+- Ajout de la condition de fin d'activité dans la recherche des pièces manquantes
+- Correction de la recherche des forfaits crédit disponibles
+- Correction sur l'enregistrement des profils de configuration
+- Correction sur le recalcul des prestations avec tva
+
 Version 1.3.2.0 (08/01/2026) :
 
 - Ajout du détail ASAP à l'export vers JVS
