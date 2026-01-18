@@ -138,8 +138,8 @@ class Formulaire(FormulaireBase, forms.Form):
                             </div>
                         </div>
                     """),
-                    HTML("""<a type='button' class="btn btn-default" onclick="exporter_excel()" title="Exporter vers Excel"><i class='fa fa-file-excel-o margin-r-5'></i> Exporter vers Excel</a> """)
                 ],
+                autres_commandes=[HTML("""<a type='button' class="btn btn-default" onclick="exporter_excel()" title="Exporter vers Excel"><i class='fa fa-file-excel-o margin-r-5'></i> Exporter vers Excel</a> """)],
             ),
             Field('profil'),
             TabHolder(

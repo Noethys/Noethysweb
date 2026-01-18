@@ -45,6 +45,7 @@ def Commandes(enregistrer=True, enregistrer_label="<i class='fa fa-check margin-
 
     # Aide
     if aide:
-        liste_commandes.append(HTML("""<a class="btn btn-default" href='%s' target="_blank" title="%s"><i class="fa fa-life-saver margin-r-5"></i>%s</a> """ % (aide_url, _("Consulter l'aide"), _("Aide"))))
+        pass
+        # liste_commandes.append(HTML("""<a class="btn btn-default" href='%s' target="_blank" title="%s"><i class="fa fa-life-saver margin-r-5"></i>%s</a> """ % (aide_url, _("Consulter l'aide"), _("Aide"))))
 
     return ButtonHolder(*liste_commandes, css_class=css_class)
