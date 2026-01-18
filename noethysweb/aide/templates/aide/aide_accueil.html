@@ -5,16 +5,11 @@
 
 {% block contenu_page %}
 
-    <p>Découvrez ici toutes les ressources à votre disposition pour appréhender toutes les fonctionnalités de l'application.</p>
-
-    <div class="callout callout-danger">
-        <h5>A découvrir prochainement !</h5>
-        <p>Cette rubrique est actuellement en cours de développement.</p>
-    </div>
+    <p>Découvrez ici toutes les ressources à votre disposition pour appréhender toutes les fonctionnalités de Noethysweb.</p>
 
     <div class="d-flex flex-wrap ">
         {% for ressource in ressources %}
-            <div class="card text-center p-4 mr-3" style="max-width: 400px;">
+            <div class="card text-center p-4 mr-2" style="max-width: 400px;">
                 <div>
                     <i class="fa {{ ressource.icone }} fa-3x text-primary card-img p-2" aria-hidden="true"></i>
                     <h5>{{ ressource.titre }}</h5>
