@@ -61,7 +61,7 @@ class Liste(Page, crud.Liste):
             ordering = ["date"]
 
         def Formate_montant(self, instance, **kwargs):
-            return utils_texte.Formate_montant(instance.montant_reglements)
+            return "%0.2f" % instance.montant_reglements
 
         def Get_verrouillage(self, instance, **kwargs):
             if instance.verrouillage:
