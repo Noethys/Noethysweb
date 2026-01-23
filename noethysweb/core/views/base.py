@@ -83,7 +83,7 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
     def test_func(self):
         # Vérifie que l'user a une permission
         menu_code = getattr(self, "menu_code", None)
-        if menu_code and menu_code != "accueil" and not menu_code.endswith("_toc"):
+        if menu_code and menu_code not in ("accueil", "aide_accueil") and not menu_code.endswith("_toc"):
             if not menu_code and hasattr(self, "url_liste"):
                 menu_code = self.url_liste
             if not self.request.user.has_perm("core.%s" % menu_code):
