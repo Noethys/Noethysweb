@@ -27,7 +27,7 @@ class View(CustomView, TemplateView):
 
     def post(self, request, **kwargs):
         form = Formulaire(request.POST, request=self.request)
-        if form.is_valid() == False:
+        if not form.is_valid():
             return self.render_to_response(self.get_context_data(form_parametres=form))
 
         liste_colonnes, liste_lignes = self.Get_resultats(parametres=form.cleaned_data)
@@ -43,15 +43,18 @@ class View(CustomView, TemplateView):
         # Récupération des paramètres
         date_debut = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[0])
         date_fin = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[1])
-        param_activites = json.loads(parametres["activites"])
-        if param_activites["type"] == "groupes_activites":
-            liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
-        if param_activites["type"] == "activites":
-            liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
+
+        if parametres["type_activites"] == "SELECTION":
+            param_activites = json.loads(parametres["activites"])
+            if param_activites["type"] == "groupes_activites":
+                liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
+            if param_activites["type"] == "activites":
+                liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
+        else:
+            liste_activites = Activite.objects.all()
 
         # Analyse
         dictResultats = {}
-        listeAnneesVentilation = []
         listeModes = []
 
         # Conditions Règlements
@@ -62,14 +65,20 @@ class View(CustomView, TemplateView):
             conditions &= Q(reglement__depot__date__gte=date_debut, reglement__depot__date__lte=date_fin)
         if parametres["type_reglements"] == "non_deposes":
             conditions &= Q(reglement__depot__isnull=True)
-        if liste_activites:
-            conditions &= Q(prestation__activite__in=liste_activites)
         if parametres["ventilation"]:
             date_debut_ventilation = utils_dates.ConvertDateENGtoDate(parametres["ventilation"].split(";")[0])
             date_fin_ventilation = utils_dates.ConvertDateENGtoDate(parametres["ventilation"].split(";")[1])
             conditions &= Q(prestation__date__gte=date_debut_ventilation, prestation__date__lte=date_fin_ventilation)
 
-        ventilations = Ventilation.objects.select_related('prestation', 'reglement').filter(conditions, prestation__categorie__in=parametres["types_prestations"])
+        conditions_ou = Q()
+        for categorie in parametres["types_prestations"]:
+            if categorie == "consommation":
+                conditions_ou |= (Q(prestation__categorie="consommation") & Q(prestation__activite__in=liste_activites))
+            else:
+                conditions_ou |= Q(prestation__categorie=categorie)
+        conditions &= conditions_ou
+        ventilations = Ventilation.objects.select_related("prestation", "reglement").filter(conditions)
+
         listeAnneesVentilation = []
         for ventilation in ventilations:
             if ventilation.prestation.date.year not in listeAnneesVentilation:
