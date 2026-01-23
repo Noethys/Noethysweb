@@ -43,12 +43,17 @@ class View(CustomView, TemplateView):
         date_fin = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[1])
         param_activites = json.loads(parametres["activites"])
         conditions_periode = Q(date__gte=date_debut) & Q(date__lte=date_fin)
-        if param_activites["type"] == "groupes_activites":
-            condition_activites = (Q(activite__groupes_activites__in=param_activites["ids"]) | Q(activite__isnull=True))
-            liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
-        if param_activites["type"] == "activites":
-            condition_activites = (Q(activite__in=param_activites["ids"]) | Q(activite__isnull=True))
-            liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
+
+        if parametres["type_activites"] == "SELECTION":
+            if param_activites["type"] == "groupes_activites":
+                condition_activites = (Q(activite__groupes_activites__in=param_activites["ids"]) | Q(activite__isnull=True))
+                liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
+            if param_activites["type"] == "activites":
+                condition_activites = (Q(activite__in=param_activites["ids"]) | Q(activite__isnull=True))
+                liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
+        else:
+            condition_activites = Q()
+            liste_activites = Activite.objects.all()
 
         # Paramètres
         mode_affichage = parametres["donnee_case"]
@@ -83,9 +88,9 @@ class View(CustomView, TemplateView):
 
         # Récupération de toutes les prestations de la période
         conditions_prestations = conditions_periode & condition_activites & Q(categorie__in=parametres["donnees"])
-        if "facturee" in mode_affichage:
+        if "_facturee" in mode_affichage:
             conditions_prestations &= Q(facture__isnull=False)
-        if "nonfacturee" in mode_affichage:
+        if "_nonfacturee" in mode_affichage:
             conditions_prestations &= Q(facture__isnull=True)
         prestations = Prestation.objects.select_related('activite', 'cotisation', 'categorie_tarif', 'famille', 'individu').filter(conditions_prestations).distinct()
 
