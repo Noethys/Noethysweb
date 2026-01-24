@@ -58,7 +58,7 @@ FORMSET_PRESTATIONS = inlineformset_factory(Location, Prestation, form=Prestatio
 
 
 class Widget_modele(ModelSelect2Widget):
-    search_fields = ["label__icontains"]
+    search_fields = ["nom__icontains"]
 
     def label_from_instance(widget, instance):
         return "%s - %s" % (instance.nom, instance.categorie.nom)
