@@ -1,3 +1,12 @@
+Version 1.3.2.3 (24/01/2026) :
+
+- Ajout de l'import Cerig
+- Ajout du choix Toutes les activités dans la synthèse des prestations
+- Correction de la sélection des activités dans la synthèse des modes de règlements
+- Correction de la liste déroulante choix du produit dans la saisie d'une location
+- Correction de la permission d'accès à la page aide
+- Suppression symbole euro dans la liste des dépôts
+
 Version 1.3.2.2 (19/01/2026) :
 
 - Finalisation du menu Aide
