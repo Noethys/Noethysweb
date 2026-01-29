@@ -44,12 +44,17 @@ class View(CustomView, TemplateView):
         date_fin = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[1])
         param_activites = json.loads(parametres["activites"])
         conditions_periode = Q(date__gte=date_debut) & Q(date__lte=date_fin)
-        if param_activites["type"] == "groupes_activites":
-            condition_activites = (Q(activite__groupes_activites__in=param_activites["ids"]) | Q(activite__isnull=True))
-            liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
-        if param_activites["type"] == "activites":
-            condition_activites = (Q(activite__in=param_activites["ids"]) | Q(activite__isnull=True))
-            liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
+
+        if parametres["type_activites"] == "SELECTION":
+            if param_activites["type"] == "groupes_activites":
+                condition_activites = (Q(activite__groupes_activites__in=param_activites["ids"]) | Q(activite__isnull=True))
+                liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
+            if param_activites["type"] == "activites":
+                condition_activites = (Q(activite__in=param_activites["ids"]) | Q(activite__isnull=True))
+                liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
+        else:
+            condition_activites = Q()
+            liste_activites = Activite.objects.all()
 
         # Importation des activités
         dictActivites = {activite.pk: {"nom": activite.nom, "abrege": activite.abrege} for activite in liste_activites}
