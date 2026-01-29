@@ -21,6 +21,7 @@ class Formulaire(FormulaireBase, forms.Form):
     donnees = forms.MultipleChoiceField(label="Type de prestation", required=True, widget=Select2MultipleWidget(), choices=[("cotisation", "Cotisations"), ("consommation", "Consommations"), ("location", "Locations"), ("autre", "Autres")], initial=["cotisation", "consommation", "location", "autre"])
     filtre_reglements_saisis = forms.CharField(label="Règlements saisis sur une période", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
     filtre_reglements_deposes = forms.CharField(label="Règlements déposés sur une période", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
+    uniquement_prestations_facturees = forms.BooleanField(label="Uniquement les prestations facturées", initial=False, required=False)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -40,6 +41,7 @@ class Formulaire(FormulaireBase, forms.Form):
             ),
             Fieldset("Filtres",
                 Field('donnees'),
+                Field('uniquement_prestations_facturees'),
                 Field('filtre_reglements_saisis'),
                 Field('filtre_reglements_deposes'),
             ),

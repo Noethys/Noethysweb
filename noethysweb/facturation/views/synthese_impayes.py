@@ -75,6 +75,8 @@ class View(CustomView, TemplateView):
 
         # Récupération de toutes les prestations de la période
         conditions_prestations = conditions_periode & condition_activites & Q(categorie__in=parametres["donnees"])
+        if parametres["uniquement_prestations_facturees"]:
+            conditions_prestations &= Q(facture__isnull=False) & ~Q(facture__etat="annulation")
         prestations = Prestation.objects.select_related('famille').filter(conditions_prestations).distinct()
 
         dictResultats = {"familles": {}, "activites": {}}
