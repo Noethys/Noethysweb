@@ -10,6 +10,7 @@ from django.db.models import Sum, Q
 from django.http import JsonResponse
 from django.contrib import messages
 from django.views.generic.detail import DetailView
+from django.core.cache import cache
 from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
@@ -214,6 +215,15 @@ class Resume(Onglet, DetailView):
         # Notes
         conditions = (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
         context['notes'] = Note.objects.filter(conditions, famille_id=idfamille).order_by("date_saisie")
+
+        # Recherche les notes qui doivent affichées dans le popup à l'ouverture de la fiche famille
+        key_note_rappel = "notes_rappel_famille_%d" % idfamille
+        context["notes_rappel_famille"] = [note for note in context["notes"] if note.rappel_famille]
+        if context["notes_rappel_famille"]:
+            if cache.get(key_note_rappel, False):
+                context["notes_rappel_famille"] = []
+            else:
+                cache.set(key_note_rappel, True, timeout=10*60*60)
 
         # Calcul du solde global
         total_prestations = Prestation.objects.values('famille_id').filter(famille_id=idfamille).aggregate(total=Sum("montant"))

@@ -3,9 +3,10 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
+from django.core.cache import cache
 from core.views import crud
-from core.models import Note, Famille
+from core.models import Note
 from fiche_famille.forms.famille_note import Formulaire
 from fiche_famille.views.famille import Onglet
 
@@ -34,6 +35,9 @@ class Page(Onglet):
 
     def get_success_url(self):
         """ Renvoie vers la liste après le formulaire """
+        # Pour éviter l'affichage du popup
+        cache.set("notes_rappel_famille_%d" % self.Get_idfamille(), True, timeout=10 * 60 * 60)
+
         url = self.url_liste
         if "SaveAndNew" in self.request.POST:
             url = self.url_ajouter
