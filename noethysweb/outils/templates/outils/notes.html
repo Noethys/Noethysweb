@@ -22,6 +22,9 @@
                 </td>
                 <td style="width: 90px;text-align: right;padding: 6px !important;">
                     {% if mode_notes == 'accueil' %}
+                        {% if note.famille %}
+                            <a type="button" class="btn-xs" href="{% url 'famille_resume' idfamille=note.famille_id %}" title="Accéder à la fiche famille"><i class="fa fa-fw fa-users"></i></a>
+                        {% endif %}
                         <a type="button" class="btn-xs" href="{% url 'notes_modifier' pk=note.pk %}?next={{ request.path|urlencode }}" title="Modifier"><i class="fa fa-fw fa-pencil"></i></a>
                         <a type="button" class="btn-xs" href="{% url 'notes_supprimer' pk=note.pk %}?next={{ request.path|urlencode }}" title="Supprimer"><i class="fa fa-fw fa-trash"></i></a>
                     {% endif %}
