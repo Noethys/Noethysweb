@@ -7,7 +7,8 @@ import json
 from email.utils import parseaddr
 from django.http import JsonResponse
 from django.shortcuts import render
-from core.models import ModeleEmail, Mail, Destinataire, Famille, DocumentJoint
+from django.db.models import Q
+from core.models import ModeleEmail, Mail, Destinataire, Famille, DocumentJoint, SignatureEmail
 from outils.utils import utils_email
 from outils.forms.editeur_emails_express import Formulaire
 
@@ -114,5 +115,6 @@ def Get_view_editeur_email(request):
         "page_titre": "Editeur d'emails",
         "form": Formulaire(instance=mail, request=request),
         "modeles": ModeleEmail.objects.filter(categorie=request.POST.get("categorie", donnees["categorie"])),
+        "signatures": SignatureEmail.objects.filter(Q(structure__in=request.user.structures.all()) | Q(structure__isnull=True)),
     }
-    return render(request, 'outils/editeur_emails_express.html', context)
+    return render(request, "outils/editeur_emails_express.html", context)
