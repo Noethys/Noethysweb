@@ -47,7 +47,7 @@
                     <span class="info-box-icon bg-{% if solde_global < 0 %}red{% else %}gray-light{% endif %}"><i class="fa fa-euro"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Solde global</span>
-                        <span class="info-box-number {% if solde_global < 0 %}text-red{% endif %}">{{ solde_global|montant }}</span>
+                        <span class="info-box-number {% if solde_global < 0 %}text-red{% endif %}{% if solde_global > 0 %}text-blue{% endif %}">{% if solde_global > 0 %}+{% endif %}{{ solde_global|montant }}</span>
                     </div>
                 </div>
             </div>
