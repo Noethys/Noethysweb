@@ -6,6 +6,7 @@
     <script>
 
         $(function () {
+            let valeur_initiale = $("#id_{{ name }}").val();
 
             {# Ouverture de la modal cropper #}
             $("#id_{{ name }}").change(function () {
@@ -13,13 +14,17 @@
                     var reader = new FileReader();
                     reader.onload = function (e) {
                         $("#image").attr("src", e.target.result);
+                        $('#modal_crop_image').modal({
+                            backdrop: "static",
+                            keyboard: false
+                        });
                         $("#modal_crop_image").modal("show");
                     }
                     reader.readAsDataURL(this.files[0]);
                 }
             });
 
-            {# Règlages de la modal cropper #}
+            {# Réglages de la modal cropper #}
             var $image = $("#image");
             var cropBoxData;
             var canvasData;
@@ -74,13 +79,19 @@
                 $('#modal_crop_image').modal('hide');
             });
 
+            $("#bouton_annuler_image").click(function () {
+                $("#id_{{ name }}").val(valeur_initiale)
+                $("#{{ id }}").change()
+                $('#modal_crop_image').modal('hide');
+            });
+
         });
     </script>
 {% endblock %}
 
 
 {# Modal Recadrer l'image #}
-{% embed 'core/modal.html' %}
+{% embed 'core/modal.html' with mode_static=True %}
     {% block modal_id %}modal_crop_image{% endblock %}
     {% block modal_titre %}Recadrer l'image{% endblock %}
     {% block modal_classe %}modal-lg{% endblock %}
@@ -111,7 +122,7 @@
             </button>
         </div>
         <button type="button" id="bouton_valider_image" class="btn btn-primary"><i class="fa fa-check margin-r-5"></i>Valider</button>
-        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban margin-r-5"></i>Annuler</button>
+        <button type="button" id="bouton_annuler_image" class="btn btn-danger"><i class="fa fa-ban margin-r-5"></i>Annuler</button>
     </div>
     {% endblock %}
 
@@ -123,28 +134,34 @@
     <div>
         <img class="img-fluid img-thumbnail" style="max-width: 250px;" src="{{ MEDIA_URL }}{{ value.url }}">
     </div>
-    <input type="checkbox" name="{{name}}-clear" id="{{name}}-clear_id">
-    <label for="{{name}}-clear_id" style="margin-top: 10px;margin-bottom: 20px;">Effacer l'image actuelle</label>
+    {% if not disabled %}
+        <input type="checkbox" name="{{name}}-clear" id="{{name}}-clear_id">
+        <label for="{{name}}-clear_id" style="margin-top: 10px;margin-bottom: 20px;">Effacer l'image actuelle</label>
+    {% endif %}
 {% endif %}
 
-
 {# Sélection de l'image #}
-<div class="input-group">
-    <input id="nom_fichier" type="text" class="form-control" style="height: calc(2.25rem - 1px);" readonly>
-    <label class="input-group-append">
-        <span class="btn btn-default text-sm" title="Sélectionner une image" >
-            <i class="fa fa-folder-open-o margin-r-5"></i> Sélectionner
-            <input name="{{ name }}" id="{{ id }}" type="file" accept="image/*" style="display: none;">
-        </span>
-    </label>
-</div>
-
+{% if not disabled %}
+    <div class="input-group">
+        <input id="nom_fichier" type="text" class="form-control" style="height: calc(2.25rem - 1px);" readonly>
+        <label class="input-group-append">
+            <span class="btn btn-default text-sm" title="Sélectionner une image" >
+                <i class="fa fa-folder-open-o margin-r-5"></i> Sélectionner
+                <input name="{{ name }}" id="{{ id }}" type="file" accept="image/*" style="display: none;">
+            </span>
+        </label>
+    </div>
+{% endif %}
 
 <script>
     $(function() {
         // Affiche la liste des fichiers
         $("#{{ id }}").on('change', function() {
-            $('#nom_fichier').val(this.files[0].name + " (" + formatBytes(this.files[0].size) + ")");
+            if (this.files && this.files[0]) {
+                $('#nom_fichier').val(this.files[0].name + " (" + formatBytes(this.files[0].size) + ")");
+            } else {
+                $('#nom_fichier').val("");
+            }
         });
 
         // Formate la taille des fichiers
