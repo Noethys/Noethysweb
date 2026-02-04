@@ -1,3 +1,15 @@
+Version 1.3.2.4 (04/02/2026) :
+
+- Ajout du popup Notes à l'ouverture de la fiche famille
+- Ajout de l'option Uniquement les prestations facturées dans la synthèse des impayés
+- Ajout du choix Toutes les activités dans la synthèse des impayés
+- Ajout d'un accès à la fiche famille depuis le widget Notes
+- Ajout de la personnalisation de la boîte de dialogue Pas de codes d'accès du portail
+- Ajout de l'autorisation d'accès API Particulier dans l'onglet Caisse de la fiche famille
+- Amélioration de l'affichage des avoirs dans la case solde de la fiche famille
+- Correction sur la fermeture de la modale de recadrage d'une image
+- Correction sur les signatures dans l'éditeur emails popup
+
 Version 1.3.2.3 (24/01/2026) :
 
 - Ajout de l'import Cerig
