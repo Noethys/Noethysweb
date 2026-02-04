@@ -73,7 +73,7 @@
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    {% blocktrans %}Contactez directement l'organisme{% endblocktrans %} '{{ organisateur.nom }}' {% blocktrans %}pour recevoir vos codes d'accès{% endblocktrans %}.
+                    {{ parametres_portail.connexion_texte_pas_codes|safe }}
                 </div>
             </div>
         </div>
