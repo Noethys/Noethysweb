@@ -3,13 +3,12 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, Column, Fieldset, Div, ButtonHolder
+from crispy_forms.layout import Layout
+from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
-from crispy_forms.bootstrap import Field, StrictButton
+from core.forms.base import FormulaireBase
 from core.models import Famille, Rattachement
 
 
@@ -17,7 +16,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Famille
-        fields = ["caisse", "num_allocataire", "allocataire", "autorisation_cafpro"]
+        fields = ["caisse", "num_allocataire", "allocataire", "autorisation_cafpro", "autorisation_apiparticulier"]
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")
@@ -52,8 +51,8 @@ class Formulaire(FormulaireBase, ModelForm):
             Field("num_allocataire"),
             Field("allocataire"),
             Field("autorisation_cafpro"),
+            Field("autorisation_apiparticulier"),
         )
 
     def clean(self):
         return self.cleaned_data
-

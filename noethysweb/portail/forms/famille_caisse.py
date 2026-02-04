@@ -5,7 +5,7 @@
 
 from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
-from core.models import Famille, PortailRenseignement, Rattachement
+from core.models import Famille, Rattachement
 from portail.forms.fiche import FormulaireBase
 
 
@@ -13,10 +13,11 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Famille
-        fields = ["caisse", "num_allocataire", "allocataire", "autorisation_cafpro"]
+        fields = ["caisse", "num_allocataire", "allocataire", "autorisation_cafpro", "autorisation_apiparticulier"]
         labels = {
             "caisse": "Caisse d'allocation",
             "autorisation_cafpro": "Autorise l'administrateur à récupérer le quotient familial auprès de la CAF",
+            "autorisation_apiparticulier": "Autorise l'administrateur à récupérer le quotient familial depuis le système API Particulier"
         }
 
     def __init__(self, *args, **kwargs):
@@ -43,11 +44,12 @@ class Formulaire(FormulaireBase, ModelForm):
             "num_allocataire": "Saisissez le numéro d'allocataire.",
             "allocataire": "Sélectionnez le titulaire du dossier auprès de la caisse d'allocation.",
             "autorisation_cafpro": "Cochez la case pour autoriser la récupération du quotient familial auprès de la CAF par l'administrateur. Uniquement pour les familles allocataires de la CAF.",
+            "autorisation_apiparticulier": "Cochez la case pour autoriser la récupération du quotient familial auprès de la CAF ou de la MSA par l'administrateur.",
         }
 
         # Champs affichables
         self.liste_champs_possibles = [
-            {"titre": "Caisse", "champs": ["caisse", "num_allocataire", "allocataire", "autorisation_cafpro"]},
+            {"titre": "Caisse", "champs": ["caisse", "num_allocataire", "allocataire", "autorisation_cafpro", "autorisation_apiparticulier"]},
         ]
 
         # Préparation du layout

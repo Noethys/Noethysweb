@@ -163,6 +163,11 @@ class Api_particulier:
         if isinstance(famille, int):
             famille = Famille.objects.get(pk=famille)
 
+        # Vérifie autorisation de consultation
+        if not famille.autorisation_apiparticulier:
+            self.erreurs_familles[famille.pk] = ["Autorisation de consultation désactivée pour cette famille (Voir fiche famille > Rubrique Caisse).",]
+            return None
+
         # Recherche QF pour chaque individu dans l'ordre : Allocataire, titulaire hélios, représentants.
         individus_etudies = []
         rattachements = [r.individu for r in Rattachement.objects.select_related("individu").filter(famille=famille, categorie=1, titulaire=True).order_by("pk")]

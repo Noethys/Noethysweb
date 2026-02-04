@@ -1821,6 +1821,7 @@ class Famille(models.Model):
     num_allocataire = encrypt(models.CharField(verbose_name="Numéro d'allocataire", max_length=100, blank=True, null=True))
     allocataire = models.ForeignKey(Individu, verbose_name="Titulaire", on_delete=models.CASCADE, blank=True, null=True)
     autorisation_cafpro = models.BooleanField(verbose_name="Autorisation accès CAF-CDAP", default=False)
+    autorisation_apiparticulier = models.BooleanField(verbose_name="Autorisation accès API Particulier", default=True)
     internet_actif = models.BooleanField(verbose_name="Compte internet activé", default=True)
     internet_identifiant = encrypt(models.CharField(verbose_name="Identifiant", max_length=200, blank=True, null=True))
     internet_mdp = encrypt(models.CharField(verbose_name="Mot de passe", max_length=200, blank=True, null=True))

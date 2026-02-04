@@ -33,6 +33,8 @@ def Traiter_demande(request=None, demande=None, etat=None):
                 demande.famille.allocataire_id = nouvelle_valeur
             elif demande.code == "autorisation_cafpro":
                 demande.famille.autorisation_cafpro = True if nouvelle_valeur == True else False
+            elif demande.code == "autorisation_apiparticulier":
+                demande.famille.autorisation_apiparticulier = True if nouvelle_valeur == True else False
             else:
                 setattr(demande.famille, demande.code, nouvelle_valeur)
             demande.famille.save(update_fields=[demande.code])

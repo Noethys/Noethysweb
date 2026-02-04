@@ -29,6 +29,7 @@ LISTE_CHAMPS = [
     Champ(page="famille_caisse", code="num_allocataire", label="N° allocataire", famille="MODIFIABLE", choix_obligatoire=True),
     Champ(page="famille_caisse", code="allocataire", label="Nom de l'allocataire", famille="MODIFIABLE", choix_obligatoire=True),
     Champ(page="famille_caisse", code="autorisation_cafpro", label="Autorisation CAFPRO", famille="MODIFIABLE"),
+    Champ(page="famille_caisse", code="autorisation_apiparticulier", label="Autorisation API Particulier", famille="MODIFIABLE"),
 
     Champ(page="famille_questionnaire", code="questionnaire", label="Questionnaire", famille="MODIFIABLE"),
 
