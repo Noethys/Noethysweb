@@ -43,6 +43,12 @@ class Exporter(BaseExporter):
         shutil.make_archive(os.path.join(settings.MEDIA_ROOT, self.rep_base, nom_fichier_zip.replace(".zip", "")), "zip", self.rep_destination)
         return os.path.join(settings.MEDIA_URL, self.rep_base, nom_fichier_zip)
 
+    def Get_code_compta_famille(self, famille):
+        code = famille.code_compta or "FAM%06d" % famille.pk
+        if self.options["prefixe_c"]:
+            code = "C%s" % code
+        return code
+
     def Creation_fichiers(self):
         # Récupération de la période
         date_debut = utils_dates.ConvertDateENGtoDate(self.options["periode"].split(";")[0])
@@ -52,9 +58,7 @@ class Exporter(BaseExporter):
         lignes = []
         for famille in Famille.objects.all().order_by("nom"):
             ligne = {}
-            ligne["num_compte"] = "FAM%06d" % famille.pk
-            if famille.code_compta:
-                ligne["num_compte"] = famille.code_compta
+            ligne["num_compte"] = self.Get_code_compta_famille(famille)
             ligne["nom"] = famille.nom
             lignes_rue = famille.rue_resid.split("\n") if famille.rue_resid else []
             ligne["adresse"] = lignes_rue[0] if lignes_rue else ""
@@ -98,12 +102,12 @@ class Exporter(BaseExporter):
             ligne["num_ecriture"] = index_facture
             ligne["num_ligne_ecriture"] = index_ligne_detail + 1
             ligne["date_ecriture"] = facture.date_edition.strftime("%d%m%Y")
-            ligne["compte_general"] = facture.famille.code_compta or "FAM%06d" % facture.famille.pk
+            ligne["compte_general"] = self.Get_code_compta_famille(facture.famille)
             ligne["compte_analytique"] = ""
             ligne["code_journal"] = "VE"
             ligne["type_piece"] = "FV"
             ligne["num_piece"] = ""
-            ligne["montant"] = "%.2f" % facture.solde
+            ligne["montant"] = "%.2f" % facture.total
             ligne["libelle"] = facture.famille.nom
             ligne["num_reglement"] = ""
             ligne["num_facture"] = facture.numero
@@ -132,7 +136,7 @@ class Exporter(BaseExporter):
                 ligne["num_ecriture"] = index_depot
                 ligne["num_ligne_ecriture"] = index_reglement
                 ligne["date_ecriture"] = depot.date.strftime("%d%m%Y")
-                ligne["compte_general"] = reglement.famille.code_compta or "FAM%06d" % reglement.famille.pk
+                ligne["compte_general"] = self.Get_code_compta_famille(reglement.famille)
                 ligne["code_journal"] = reglement.mode.code_journal or ""
                 ligne["type_piece"] = "FV"
                 ligne["num_piece"] = reglement.numero_piece or ""
