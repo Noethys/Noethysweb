@@ -1,4 +1,4 @@
-Django
+Django<4
 Pillow
 django-anymail
 django-axes
@@ -11,7 +11,7 @@ django-formtools
 django-multiselectfield
 django-simple-captcha
 django-resized
-django-select2
+django-select2<7
 django-summernote
 django-extensions
 django-upload-form
