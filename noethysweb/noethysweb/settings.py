@@ -337,6 +337,10 @@ AXES_LOCKOUT_URL = (
     f"{_URL_ROOT_PREFIX}/locked" if _URL_ROOT_PREFIX else '/locked'
 )
 
+# Définir le chemin des cookies pour qu'il corresponde uniquement à URL_ROOT
+SESSION_COOKIE_PATH = f"{_URL_ROOT_PREFIX}/" if _URL_ROOT_PREFIX else '/'
+CSRF_COOKIE_PATH = f"{_URL_ROOT_PREFIX}/" if _URL_ROOT_PREFIX else '/'
+
 # Intégration des plugins
 for nom_plugin in PLUGINS:
     INSTALLED_APPS.append("plugins.%s.apps.%s" % (nom_plugin, nom_plugin))
