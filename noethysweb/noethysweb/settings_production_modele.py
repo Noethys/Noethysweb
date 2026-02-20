@@ -37,6 +37,8 @@ DEBUG = False
 # Et de définir une URL un peu plus complexe pour le URL_BUREAU
 #########################################################################################
 
+# URL racine pour héberger plusieurs instances sur un même domaine
+URL_ROOT = ""
 URL_GESTION = "administrateur/"
 URL_BUREAU = "utilisateur/"
 URL_PORTAIL = ""
