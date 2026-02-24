@@ -81,6 +81,12 @@ def trad(nb):
     unite = monnaie["singulier"]
     decim = monnaie["division"]
 
+    if nb < 0:
+        nb = -nb
+        negatif = True
+    else:
+        negatif = False
+
     global t1,t2
     nb=round(nb,2)
     t1=["","un","deux","trois","quatre","cinq","six","sept","huit","neuf","dix","onze","douze","treize","quatorze","quinze","seize","dix-sept","dix-huit","dix-neuf"]
@@ -104,7 +110,7 @@ def trad(nb):
                 ch=ch+" "+decim+'s'
         else:
             ch=ch+" "+decim
-    if nb<0:
+    if negatif:
         ch="moins "+ch
     ch = ch.strip() 
     return ch
@@ -120,16 +126,16 @@ if __name__=='__main__':
     print(4199.88,trad(4199.88))
     print(613812345651.01,trad(613812345651.01))
     print(1,trad(1))
-    print(2.2,trad(2.2))
-    print(12.30,trad(12.30,'heure','minute'))
-    print(12.30,trad(12.30,'heure',''))
-    print(1.8,trad(1.8,u'mètre',''))
-    print(2.5,trad(2.5,'litre',''))
-    print(3.5,trad(3.5,decim=''))
-    print(300,trad(300))
-    print(301,trad(301))
-    print(1000,trad(1000))
-    print(1001,trad(1001))
-    print(1400,trad(1400))
-    print(1401,trad(1401))
-    print(0,trad(0))
+    print(-2.2,trad(-2.2))
+    # print(12.30,trad(12.30,'heure','minute'))
+    # print(12.30,trad(-12.30,'heure',''))
+    # print(1.8,trad(1.8,u'mètre',''))
+    # print(2.5,trad(2.5,'litre',''))
+    # print(3.5,trad(3.5,decim=''))
+    # print(300,trad(300))
+    # print(301,trad(301))
+    # print(1000,trad(1000))
+    # print(1001,trad(1001))
+    # print(1400,trad(1400))
+    # print(1401,trad(1401))
+    # print(0,trad(0))
