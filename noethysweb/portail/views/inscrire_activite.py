@@ -185,8 +185,19 @@ def Valid_form(request):
     # 8. Enregistrement des pièces jointes
     for nom_champ, valeur in form_extra.cleaned_data.items():
         if nom_champ.startswith("document_") and valeur:
-            # Ton code existant pour enregistrer les pièces...
-            pass
+            type_piece = TypePiece.objects.get(pk=int(nom_champ.split("_")[1]))
+
+            # Paramètres de la pièce à enregistrer
+            individu = None if type_piece.public == "famille" else form.cleaned_data["individu"]
+            famille = None if type_piece.public == "individu" and type_piece.valide_rattachement else form.cleaned_data["famille"]
+
+            # Enregistrement de la pièce
+            piece = Piece.objects.create(type_piece=type_piece, famille=famille, individu=individu, auteur=request.user, document=valeur,
+                                         date_debut=datetime.date.today(), date_fin=type_piece.Get_date_fin_validite())
+
+            # Enregistrement du renseignement de portail
+            PortailRenseignement.objects.create(famille=famille, individu=individu, categorie="famille_pieces", code="Nouvelle pièce", validation_auto=True,
+                                                nouvelle_valeur=json.dumps(piece.Get_nom(), cls=DjangoJSONEncoder), idobjet=piece.pk)
 
     messages.add_message(request, messages.SUCCESS, "Votre demande d'inscription a été transmise")
     return JsonResponse({"succes": True, "url": reverse_lazy("portail_activites")})
