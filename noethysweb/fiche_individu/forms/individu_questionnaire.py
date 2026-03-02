@@ -25,31 +25,31 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.form_id = 'individu_questionnaire_form'
         self.helper.form_method = 'post'
         # Création des champs
-        # Récupération de l'individu depuis le rattachement
+
         idindividu = Individu.objects.get(pk=self.idindividu)
         statut_individu = idindividu.statut
-        inscriptions = Inscription.objects.filter(individu=idindividu)
-        activite_ids = inscriptions.values_list('activite', flat=True).distinct()
-        activites = Activite.objects.filter(idactivite__in=activite_ids, structure__visible=True)
 
-        if statut_individu != 5:
-            # Si toutes les activités ont 'interne=False', exclure les questions avec 'activite=None'
-            condition_activite = Q(activite__in=activites)
-            condition_activite &= Q(activite__isnull=False)
-        else:
-            # Si l'individu a le statut 5, vérifier si toutes les activités ont 'interne=False'
-            if activites.filter(interne=False).count() == len(activites):
-                condition_activite = Q(activite__in=activites)
-                condition_activite &= Q(activite__isnull=False)
-            else:
-                # Si certaines activités ont 'interne=True', autoriser les questions sans activité
-                condition_activite = Q(activite__in=activites)
-                condition_activite &= Q(activite__isnull=True)
+        activites = Activite.objects.filter(
+            inscription__individu=idindividu,
+            structure__visible=True
+        ).distinct()
+
+        condition_activite = Q(activite__in=activites)
+
+        # Cas spécial statut 5
+        if statut_individu == 5 and activites.filter(interne=True).exists():
+            condition_activite |= Q(activite__isnull=True)
 
         condition_structure = (
                 Q(structure__in=self.request.user.structures.all()) &
                 condition_activite
         )
+
+        questions = QuestionnaireQuestion.objects.filter(
+            condition_structure,
+            categorie="individu",
+            visible=True
+        ).order_by("ordre")
 
         for question in QuestionnaireQuestion.objects.filter(condition_structure, categorie="individu", visible=True).order_by("ordre"):
             nom_controle, ctrl = questionnaires.Get_controle(question)

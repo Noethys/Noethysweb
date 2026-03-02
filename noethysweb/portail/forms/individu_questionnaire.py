@@ -42,14 +42,9 @@ class Formulaire(FormulaireBase, forms.Form):
         questions_filter = Q(activite__in=activites)
 
         if cat_individu not in [0, 1, 2, 3, 4]:
-            # Vérification si toutes les activités ont 'interne=False'
-            if activites.filter(interne=False).count() == len(activites):
-                # Si toutes les activités ont interne=False, ne pas afficher les questions avec activite=None
-                questions_filter &= ~Q(activite=None)
-            else:
-                # Si au moins une activité a interne=True, afficher les questions avec activite=None
-                questions_filter &= Q(activite=None)
-
+            has_interne = activites.filter(interne=True).exists()
+            if has_interne:
+                questions_filter |= Q(activite=None)
 
         questions = QuestionnaireQuestion.objects.filter(
             categorie="individu",
