@@ -9,6 +9,8 @@ import crispy_forms
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # URLS
+#  URL racine pour héberger plusieurs instances sur un même domaine
+URL_ROOT = ""
 URL_GESTION = "administrateur/"
 URL_BUREAU = "utilisateur/"
 URL_PORTAIL = ""
@@ -119,6 +121,10 @@ INTERNAL_IPS = [
 ]
 
 MIDDLEWARE = [
+    # Doit être placé avant tout pour préfixer les URLs générées
+    'core.middleware.URLPrefixReverseMiddleware',
+    # Doit être en 2ème pour gérer le préfixe URL_ROOT dans les URLs entrantes
+    'core.middleware.URLPrefixMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -126,10 +132,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'axes.middleware.AxesMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'csp.middleware.CSPMiddleware',
-    'axes.middleware.AxesMiddleware',
     'noethysweb.middleware.CustomMiddleware',
 ]
 
@@ -147,6 +153,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
+                'core.context_processors.url_root',
             ],
         },
     },
@@ -190,14 +197,6 @@ LANGUAGES = (
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, "locale"),
 )
-
-# Static files (CSS, JavaScript, Images)
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATIC_URL = '/static/'
-
-# Media files
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
 
 # Stockage
 STORAGE_PROBLEME = "django.core.files.storage.FileSystemStorage"
@@ -319,6 +318,28 @@ try:
     from .settings_production import *
 except:
     print("Settings en production non trouvés : Utilisation des settings par défaut.")
+
+# Modification pour prendre en compte URL_ROOT
+_URL_ROOT_STRIPPED = URL_ROOT.strip("/")
+_URL_ROOT_PREFIX = f"/{_URL_ROOT_STRIPPED}" if _URL_ROOT_STRIPPED else ""
+
+# Static files (CSS, JavaScript, Images)
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# Modification pour prendre en compte URL_ROOT dans les chemins static
+STATIC_URL = f"{_URL_ROOT_PREFIX}/static/" if _URL_ROOT_PREFIX else '/static/'
+
+# Media files
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Modification pour prendre en compte URL_ROOT dans les chemins media
+MEDIA_URL = f"{_URL_ROOT_PREFIX}/media/" if _URL_ROOT_PREFIX else '/media/'
+
+AXES_LOCKOUT_URL = (
+    f"{_URL_ROOT_PREFIX}/locked" if _URL_ROOT_PREFIX else '/locked'
+)
+
+# Définir le chemin des cookies pour qu'il corresponde uniquement à URL_ROOT
+SESSION_COOKIE_PATH = f"{_URL_ROOT_PREFIX}/" if _URL_ROOT_PREFIX else '/'
+CSRF_COOKIE_PATH = f"{_URL_ROOT_PREFIX}/" if _URL_ROOT_PREFIX else '/'
 
 # Intégration des plugins
 for nom_plugin in PLUGINS:

@@ -1,14 +1,18 @@
+# -*- coding: utf-8 -*-
 #  Copyright (c) 2019-2021 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve
+from django.contrib.staticfiles import views
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from core.views import erreurs
 
-
+# Définir les patterns de base
 urlpatterns = [
     path(settings.URL_GESTION, admin.site.urls),
     path(settings.URL_BUREAU, include('core.urls')),
@@ -46,14 +50,29 @@ if settings.PORTAIL_ACTIF:
     urlpatterns.append(path(settings.URL_PORTAIL, include('portail.urls')))
 
 if settings.DEBUG:
-    # Ajoute le répertoire Media
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Import du debug toolbar et ajout des URLs
+    import debug_toolbar
 
     # Ajoute le debugtoolbar
-    import debug_toolbar
     urlpatterns = [
         path('__debug__/', include(debug_toolbar.urls)),
     ] + urlpatterns
+
+    # Ajoute les répertoires Media et Static pour le développement
+    if settings.URL_ROOT:
+        # Pour les fichiers média avec URL_ROOT
+        urlpatterns += [
+            # Pattern pour les chemins avec le préfixe URL_ROOT
+            re_path(r'^%s(?P<path>.*)$' % settings.MEDIA_URL.lstrip('/'), serve, {'document_root': settings.MEDIA_ROOT}),
+            # Pattern pour les chemins sans le préfixe URL_ROOT (après traitement par le middleware)
+            re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+            # Pattern pour les fichiers statiques avec URL_ROOT
+            re_path(r'^%s(?P<path>.*)$' % settings.STATIC_URL.lstrip('/'), views.serve, {'document_root': settings.STATIC_ROOT}),
+        ]
+    else:
+        # Configuration standard sans URL_ROOT
+        urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+        urlpatterns += staticfiles_urlpatterns()
 
 
 # Modifie les noms dans l'admin
