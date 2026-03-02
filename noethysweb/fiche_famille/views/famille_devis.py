@@ -77,10 +77,11 @@ def Impression_pdf(request):
     if not dict_devis:
         return JsonResponse({"erreur": "Aucune donnée n'a été trouvée pour les paramètres donnés"}, status=401)
 
-    # Rajoute les données du formulaire
+    # Prépare les valeurs de fusion
     dict_devis[IDfamille].update({
         "{DATE_EDITION}": parametres["date_edition"],
         "{NUM_DEVIS}": parametres["numero"],
+        "{SOLDE}": dict_devis[IDfamille]["{SOLDE_DU}"],
     })
 
     # Fusion du texte d'introduction
