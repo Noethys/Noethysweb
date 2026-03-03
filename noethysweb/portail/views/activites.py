@@ -35,7 +35,7 @@ class View(CustomView, TemplateView):
         context['nbre_approbations_requises'] = approbations_requises["nbre_total"]
 
         # Importation des inscriptions
-        conditions = Q(famille=self.request.user.famille) & Q(statut="ok") & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today())) & Q(individu__deces=False)
+        conditions = Q(famille=self.request.user.famille) & Q(statut="ok") & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today())) & Q(individu__deces=False) & Q(activite__actif=True)
         inscriptions = Inscription.objects.select_related("activite", "individu").filter(conditions).exclude(individu__in=self.request.user.famille.individus_masques.all())
 
         # Récupération des individus
@@ -72,6 +72,7 @@ class View(CustomView, TemplateView):
 
         # Vérifie si des activités sont ouvertes à l'inscription
         context["activites_ouvertes_inscription"] = Activite.objects.filter((Q(visible=True) & Q(portail_inscriptions_affichage="TOUJOURS") | (Q(portail_inscriptions_affichage="PERIODE") & Q(portail_inscriptions_date_debut__lte=datetime.datetime.now()) & Q(portail_inscriptions_date_fin__gte=datetime.datetime.now())))).exists()
-
+        inscriptions = Inscription.objects.filter(famille=self.request.user.famille, besoin_certification=True)
+        context["nbre_verifications_manquantes"] = inscriptions.count()
         return context
 
