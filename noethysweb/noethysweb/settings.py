@@ -109,13 +109,16 @@ INSTALLED_APPS = [
 if int(crispy_forms.__version__.split(".")[0]) >= 2:
     INSTALLED_APPS.append("crispy_bootstrap4")
 
+# Debug toolbar (uniquement en développement)
+if DEBUG:
+    try:
+        import debug_toolbar
+        INSTALLED_APPS.append('debug_toolbar')
+    except ImportError:
+        pass
+
 # Liste des plugins
 PLUGINS = []
-
-# Ajouté pour permettre l'affichage de la debugtoolbar
-INTERNAL_IPS = [
-    '127.0.0.1',
-]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -126,6 +129,16 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+if DEBUG:
+    try:
+        import debug_toolbar
+        MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
+    except ImportError:
+        pass
+
+MIDDLEWARE += [
     'csp.middleware.CSPMiddleware',
     'axes.middleware.AxesMiddleware',
     'noethysweb.middleware.CustomMiddleware',
@@ -137,13 +150,6 @@ if DEBUG:
     INTERNAL_IPS = [
         '127.0.0.1',
     ]
-    
-    try:
-        import debug_toolbar
-        INSTALLED_APPS.append('debug_toolbar')
-        MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
-    except ImportError:
-        pass
 
 ROOT_URLCONF = 'noethysweb.urls'
 
