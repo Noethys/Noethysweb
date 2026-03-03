@@ -92,7 +92,6 @@ INSTALLED_APPS = [
     # Autres librairies
     'datatableview',
     'crispy_forms',
-    'debug_toolbar',
     'django_select2',
     'django_summernote',
     'anymail',
@@ -119,7 +118,6 @@ INTERNAL_IPS = [
 ]
 
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -132,6 +130,20 @@ MIDDLEWARE = [
     'axes.middleware.AxesMiddleware',
     'noethysweb.middleware.CustomMiddleware',
 ]
+
+
+if DEBUG:
+    # Ajouté pour permettre l'affichage de la debugtoolbar
+    INTERNAL_IPS = [
+        '127.0.0.1',
+    ]
+    
+    try:
+        import debug_toolbar
+        INSTALLED_APPS.append('debug_toolbar')
+        MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
+    except ImportError:
+        pass
 
 ROOT_URLCONF = 'noethysweb.urls'
 
