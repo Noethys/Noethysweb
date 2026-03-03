@@ -1,12 +1,67 @@
 {% load static %}
 
-<div class="card {% block box_theme %}card-outline card-lightblue{% endblock %}">
+<style>
+    /* Carte principale avec ombre douce */
+    .n-card-custom {
+        border-radius: 12px !important; /* Coins plus arrondis */
+        border: none !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        background: #ffffff;
+        margin-bottom: 2rem !important;
+        border-top: 4px solid #007bff; /* On garde la couleur dynamique de Noethys */
+    }
+
+    /* Animation au survol */
+    .n-card-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    /* Header plus propre */
+    .n-card-header {
+        background: transparent !important;
+        border-bottom: 1px solid #f1f1f1 !important;
+        padding: 1.25rem 1.5rem !important;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    /* TITRE MODERNE */
+    .n-card-title {
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
+        text-transform: uppercase; /* Donne un aspect pro */
+        letter-spacing: 0.5px; /* Plus d'espace pour la lisibilité */
+        color: #FF9933 !important;
+        margin: 0 !important;
+        position: relative;
+    }
+
+
+    .n-card-tools .btn-tool {
+        color: #95a5a6 !important;
+        transition: color 0.2s;
+    }
+
+    .n-card-tools .btn-tool:hover {
+        color: #34495e !important;
+    }
+
+    .n-card-body {
+        padding: 1.5rem !important;
+    }
+</style>
+
+<div class="card {% block box_theme %}card-outline card-lightblue{% endblock %} n-card-custom">
     {% if box_titre %}
-    <div class="card-header">
-        <h3 class="card-title">{% block box_titre %}{% endblock %}</h3>
-        <div class="card-tools">
+    <div class="card-header n-card-header">
+        <h3 class="card-title n-card-title">{% block box_titre %}{% endblock %}</h3>
+        <div class="card-tools n-card-tools">
             {% block box_outils %}
-                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Diminuer">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
                     <i class="fa fa-minus"></i>
                 </button>
             {% endblock %}
@@ -14,13 +69,13 @@
     </div>
     {% endif %}
 
-    <div class="card-body {% block card_body_classe %}{% endblock %}" style="min-height: 0">
+    <div class="card-body n-card-body {% block card_body_classe %}{% endblock %}" style="min-height: 0;">
 
         {% if box_introduction %}
-            <p id="box_introduction" style="margin-bottom: 16px;">
+            <div id="box_introduction" class="text-muted" style="margin-bottom: 20px; font-style: italic; font-size: 0.9rem;">
                 {% block box_introduction %}
                 {% endblock %}
-            </p>
+            </div>
         {% endif %}
 
         {% block box_contenu %}
@@ -29,10 +84,11 @@
     </div>
 
     {% if box_conclusion %}
-        <div class="card-footer">
-            {% block box_conclusion %}
-            {% endblock %}
+        <div class="card-footer bg-transparent border-0 pt-0 pb-3 text-right">
+            <div class="text-muted small">
+                {% block box_conclusion %}
+                {% endblock %}
+            </div>
         </div>
     {% endif %}
 </div>
-

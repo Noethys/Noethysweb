@@ -22,9 +22,6 @@
             <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.facturation_intro }}
         </div>
     {% endif %}
-        <h3 class="mb-4">
-            {% trans "Liste des soldes" %}
-        </h3>
  {# Bloc solde des prestations #}
 
     {% if parametres_portail.facturation_afficher_solde_famille %}
@@ -131,9 +128,7 @@
     {% endif %}
 
         <hr class="mt-0 mb-4">
-        <h3 class="mb-4">
-            {% trans "Factures" %}
-        </h3>
+
     {# Récapitulatif des factures impayées #}
     {% if texte_impayes and parametres_portail.facturation_afficher_solde_facture %}
         {% embed 'core/box.html' with box_titre=True %}
@@ -445,9 +440,7 @@
         {% endembed %}
 
         <hr class="mt-2 mb-4">
-        <h3 class="mb-4">
-            {% trans "Règlements" %}
-        </h3>
+
 
         {# Liste des factures #}
         {% embed 'core/box.html' with box_titre=True %}
