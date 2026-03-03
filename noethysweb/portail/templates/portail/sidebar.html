@@ -79,6 +79,12 @@
     .sidebar-collapse .brand-link {
         padding: 15px 0 !important;
     }
+        /* Ombre subtile sur le bord droit de la sidebar */
+    .main-sidebar {
+        box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3) !important;
+        border-right: none !important; /* On enlève le trait plat pour privilégier l'ombre */
+        z-index: 1038; /* S'assure que l'ombre passe au-dessus du contenu */
+    }
 </style>
 
 {% get_item_defaut options_interface "sidebar-no-expand" True as sidebar_no_expand %}

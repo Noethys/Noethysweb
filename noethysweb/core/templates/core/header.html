@@ -2,254 +2,195 @@
 
 {% block scripts %}
     <style>
-        .bouton-recherche {
-            background: rgba(255, 255, 255, 0.2) !important;
-            border-color: transparent !important;
-            margin-left: 0px !important;
-        }
-        .champ-recherche {
-            border-top-left-radius: 4px;
-            border-bottom-left-radius: 4px;
-        }
-        @media (min-width: 768px) {
-            #recherche_collapse {
-                display: none;
-            }
+        /* 1. Style Global de la Navbar */
+        .main-header.navbar {
+            background-color: #3E2F28 !important; /* Même brun que la sidebar */
+            border-bottom: none !important;
+            padding: 0.5rem 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
+        /* 2. Recherche Moderne */
+        .navbar-search-block {
+            background-color: #3E2F28 !important;
+        }
+        .form-control-navbar {
+            background-color: rgba(255, 255, 255, 0.07) !important;
+            border: none !important;
+            color: white !important;
+            border-radius: 8px 0 0 8px !important;
+        }
+        .btn-navbar {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            border: none !important;
+            color: rgba(255,255,255,0.6) !important;
+        }
 
+        /* 3. Liens et Icônes */
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7) !important;
+            transition: all 0.2s;
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+        .nav-link:hover {
+            color: #fff !important;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* 4. Badges de notification (Rappel Orange) */
+        .navbar-badge {
+            font-size: 0.6rem !important;
+            font-weight: 700;
+            top: 5px !important;
+            right: -4px !important;
+            padding: 2px 4px !important;
+            background-color: #ff851b !important; /* Orange de la sidebar */
+            border: 1.5px solid #3E2F28;
+            color: white !important;
+        }
+
+        /* 5. Dropdowns (Menus déroulants) */
+        .dropdown-menu-xl, .dropdown-menu-right {
+            border-radius: 12px !important;
+            border: none !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+            overflow: hidden;
+            margin-top: 10px !important;
+        }
+        .dropdown-header {
+            background: #f8f9fa;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+        .dropdown-item:hover {
+            background-color: rgba(62, 47, 40, 0.05) !important;
+        }
+
+        /* 6. Bouton Déconnexion */
+        .btn-danger {
+            background-color: #dc3545 !important;
+            border: none !important;
+            border-radius: 6px;
+            padding: 5px 15px;
+            transition: 0.3s;
+        }
+        .btn-danger:hover {
+            background-color: #bd2130 !important;
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+        }
+
+        /* Image utilisateur */
+        .user-image {
+            border: 1px solid rgba(255,255,255,0.2);
+            object-fit: cover;
+        }
     </style>
 {% endblock %}
 
+<nav class="main-header navbar navbar-expand navbar-dark border-bottom-0">
 
-<nav class="main-header navbar navbar-expand navbar-dark navbar-lightblue border-bottom-0">
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fa fa-bars"></i></a>
+        </li>
 
-        <!-- Sidebar toggle button-->
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link sidebar-toggle" data-widget="pushmenu" href="#" role="button">
-                    <i class="fa fa-bars"></i>
-                </a>
-            </li>
-            <!-- Navbar Search -->
-            <li class="nav-item">
-                <a class="nav-link" title="Rechercher" data-widget="navbar-search" href="#" role="button">
-                    <i class="fa fa-search"></i>
-                </a>
-                <div class="navbar-search-block">
-                    <form id="form_recherche1" action="{% url 'rechercher' %}" method="GET" class="form-inline" role="search">
-                        {% csrf_token %}
-                        <div class="input-group input-group-sm">
-                            <input id="champ-recherche1" type="text" title="Rechercher une commande, un individu, une famille, un payeur..." name="champ_recherche" class="form-control form-control-navbar champ-recherche" placeholder="Rechercher...">
-                            <div class="input-group-append">
-                                <button class="btn btn-navbar" type="submit">
-                                    <i class="fa fa-search"></i>
-                                </button>
-                                <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                                    <i class="fa fa-times"></i>
-                                </button>
-                            </div>
+        {# Recherche #}
+        <li class="nav-item">
+            <a class="nav-link" title="Rechercher" data-widget="navbar-search" href="#" role="button">
+                <i class="fa fa-search"></i>
+            </a>
+            <div class="navbar-search-block">
+                <form id="form_recherche1" action="{% url 'rechercher' %}" method="GET" class="form-inline">
+                    {% csrf_token %}
+                    <div class="input-group input-group-sm">
+                        <input name="champ_recherche" class="form-control form-control-navbar" type="search" placeholder="Rechercher...">
+                        <div class="input-group-append">
+                            <button class="btn btn-navbar" type="submit"><i class="fa fa-search"></i></button>
+                            <button class="btn btn-navbar" type="button" data-widget="navbar-search"><i class="fa fa-times"></i></button>
                         </div>
-                    </form>
-                </div>
-            </li>
-
-        {# Champ de recherche #}
-{% comment %}
-        <form id="form_recherche1" action="{% url 'rechercher' %}" method="GET" class="form-inline ml-3" role="search">
-            {% csrf_token %}
-            <div class="input-group input-group-sm">
-                <input id="form-control form-control-navbar" type="text" title="Recherchez une commande, un individu, une famille, un payeur, une adresse..." name="champ_recherche" class="form-control form-control-navbar champ-recherche" placeholder="Rechercher un menu, une famille, ...">
-                <div class="input-group-append">
-                    <button class="btn btn-navbar" type="submit">
-                        <i class="fa fa-search"></i>
-                    </button>
-                </div>
+                    </div>
+                </form>
             </div>
-        </form>
-{% endcomment %}
+        </li>
 
-<!--            {# Historique des recherches #}
-            <li class="nav-item dropdown">
-                <a href="#" class="nav-link" data-toggle="dropdown" title="Historique des recherches"><i class="fa fa-history"></i></a>
-                <ul class="dropdown-menu" role="menu">
-                    {% for item in request.session.historique_recherche %}
-                        <li class="dropdown-item"><a href="{{ item.url }}">{{ item.label }}</a></li>
-                    {% empty %}
-                        <li class="dropdown-item"><a>Historique vide</a></li>
-                    {% endfor %}
-                    <li class="dropdown-divider"></li>
-                    <li class="dropdown-item"><a href="{% url 'demandes_portail_liste' %}">Ouvrir l'historique complet</a></li>
-                </ul>
-            </li>-->
+        {# Actions rapides #}
+        <li class="nav-item dropdown">
+            <a href="#" class="nav-link" data-toggle="dropdown" title="Actions rapides"><i class="fa fa-star-o"></i></a>
+            <div class="dropdown-menu">
+                <h6 class="dropdown-header">Finances</h6>
+                <a href="{% url 'ajouter_reglement_familles' %}" class="dropdown-item">Ajouter un règlement</a>
+                <a href="{% url 'ajouter_deduction_familles' %}" class="dropdown-item">Ajouter une déduction</a>
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Individus</h6>
+                {% if perms.core.liste_prestations %}<a href="{% url 'edition_renseignements' %}" class="dropdown-item">PDF des renseignements</a>{% endif %}
+            </div>
+        </li>
 
-            {# Actions rapides #}
-            <li class="nav-item dropdown">
-                <a href="#" class="nav-link" data-toggle="dropdown" title="Actions rapides"><i class="fa fa-star-o"></i></a>
-                <ul class="dropdown-menu" role="menu">
-                        <h6 class="dropdown-header"><strong>Finances</strong></h6>
-                        <li class="dropdown-item"><a href="{% url 'ajouter_reglement_familles' %}">Ajouter un règlement</a></li>
-                        <li class="dropdown-item"><a href="{% url 'ajouter_deduction_familles' %}">Ajouter une déduction</a></li>
-                        <li class="dropdown-divider"></li>
-                        <h6 class="dropdown-header"><strong>Individus</strong></h6>
-                        {% if perms.core.liste_prestations %}<li class="dropdown-item"><a href="{% url 'edition_renseignements' %}">PDF des renseignements</a></li>{% endif %}
-                </ul>
-            </li>
-
-
-            {# Messagerie #}
-                <li class="nav-item dropdown">
-
-                    <a class="nav-link" data-toggle="dropdown" href="#"
-                       title="Vous avez {{ liste_messages_non_lus|length }} message{{ liste_messages_non_lus|length|pluralize }}">
-                        <i class="fa fa-comments "></i>
-                        {% if liste_messages_non_lus|length > 0 %}
-                            <span class="badge badge-danger navbar-badge" style="position: relative; top: -5px; left: -2px;"> {{ liste_messages_non_lus|length }}</span>
-                        {% endif %}
-                    </a>
-
-                    <div class="dropdown-menu dropdown-menu-xl dropdown-menu-left">
-                        <a href="{% url 'messagerie_portail' %}" class="dropdown-item dropdown-footer">
-                            <strong>Accéder à la messagerie</strong>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <span class="dropdown-item dropdown-header text-center">{{ liste_messages_non_lus|length }} nouveau{{ liste_messages_non_lus|length|pluralize:"x" }} message{{ liste_messages_non_lus|length|pluralize }}</span>
-                        <div class="dropdown-divider"></div>
-
-                        {% for message in liste_messages_non_lus %}
-                            <a href="{% url 'messagerie_portail' idfamille=message.famille_id idstructure=message.structure_id %}" class="dropdown-item" title="{{ message.texte|striptags }}">
-                                <div class="media">
-                                    <div class="media-body">
-                                        <h3 class="dropdown-item-title">
-                                            <i class="fa fa-envelope text-danger mr-1"></i> {{ message.famille.nom }}
-                                        </h3>
-                                        <p class="text-xs">{{ message.texte|striptags|truncatechars:55 }}</p>
-                                        <p class="mt-1 text-muted" style="font-size: 10px;"><i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }} | <i class="fa fa-home mr-1"></i>{{ message.structure }}</p>
-                                    </div>
-                                </div>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                        {% endfor %}
-
-                        <span class="dropdown-item dropdown-header text-center">{{ liste_messages_lus|length }} conversation{{ liste_messages_lus|length|pluralize:"s" }} en cours </span>
-                        <div class="dropdown-divider"></div>
-
-                        {% for message in liste_messages_lus %}
-                            <a href="{% url 'messagerie_portail' idfamille=message.famille_id idstructure=message.structure_id %}" class="dropdown-item" title="{{ message.texte|striptags }}">
-                                <div class="media">
-                                    <div class="media-body">
-                                        <h3 class="dropdown-item-title">
-                                            <i class="fa fa-envelope-open text-success mr-1"></i> {{ message.famille.nom }}
-                                        </h3>
-                                        <p class="text-xs">{{ message.texte|striptags|truncatechars:55 }}</p>
-                                        <p class="mt-1 text-muted" style="font-size: 10px;"><i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }} | <i class="fa fa-home mr-1"></i>{{ message.structure }}</p>
-                                    </div>
-                                </div>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                        {% endfor %}
-
-
-                    </>
-                </li>
-
-                {# Renseignements à valider #}
-                {% if nbre_renseignements_attente_validation %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link" href="{% url 'demandes_portail_liste' %}" title="Vous avez {{ nbre_renseignements_attente_validation }} renseignement{{ nbre_renseignements_attente_validation|pluralize }} à valider">
-                            <i class="fa fa-thumbs-up"></i>
-                            <span class="badge badge-warning navbar-badge" style="position: relative; top: -5px; left: -2px;">
-                                {{ nbre_renseignements_attente_validation }}
-                            </span>
-                        </a>
-                    </li>
+        {# Messagerie #}
+        <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="dropdown" href="#">
+                <i class="fa fa-comments-o"></i>
+                {% if liste_messages_non_lus|length > 0 %}
+                    <span class="badge navbar-badge">{{ liste_messages_non_lus|length }}</span>
                 {% endif %}
+            </a>
+            <div class="dropdown-menu dropdown-menu-xl dropdown-menu-left">
+                <a href="{% url 'messagerie_portail' %}" class="dropdown-item dropdown-footer text-primary text-center"><strong>Accéder à la messagerie</strong></a>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-header text-center">{{ liste_messages_non_lus|length }} Nouveau{{ liste_messages_non_lus|length|pluralize:"x" }}</div>
 
+                {% for message in liste_messages_non_lus|slice:":3" %}
+                    <a href="{% url 'messagerie_portail' idfamille=message.famille_id idstructure=message.structure_id %}" class="dropdown-item">
+                        <div class="media">
+                            <div class="media-body">
+                                <h3 class="dropdown-item-title font-weight-bold" style="font-size: 0.85rem;">{{ message.famille.nom }}</h3>
+                                <p class="text-xs text-muted">{{ message.texte|striptags|truncatechars:40 }}</p>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </li>
 
-        </ul>
+        {# Renseignements à valider (Le pouce) #}
+        {% if nbre_renseignements_attente_validation %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'demandes_portail_liste' %}" title="Vous avez {{ nbre_renseignements_attente_validation }} renseignement{{ nbre_renseignements_attente_validation|pluralize }} à valider">
+                    <i class="fa fa-thumbs-up"></i>
+                    <span class="badge navbar-badge">
+                        {{ nbre_renseignements_attente_validation }}
+                    </span>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
 
-        <ul class="navbar-nav ml-auto">
+    <ul class="navbar-nav ml-auto align-items-center">
 
-{% comment %}
-            <div class="nav-item form-group" style="margin-top: 5px;">
-                <div class="custom-control custom-switch">
-                    <input type="checkbox" class="custom-control-input" id="customSwitch1">
-                    <label class="custom-control-label" style="font-weight: 400;opacity: 0.5;" for="customSwitch1">Dark Mode</label>
+        {# Utilisateur #}
+        <li class="nav-item dropdown user-menu">
+            <a href="#" class="nav-link d-flex align-items-center" data-toggle="dropdown">
+                <img src="{% static 'images/user.png' %}" class="user-image img-circle mr-2" width="30">
+                <span class="d-none d-sm-inline">{% firstof request.user.get_full_name request.user %}</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+                <div class="user-header text-center p-3" style="background: #f8f9fa;">
+                    <img src="{% static 'images/user.png' %}" class="img-circle elevation-1 mb-2" width="60">
+                    <p class="mb-0"><strong>{% firstof request.user.get_full_name request.user %}</strong></p>
+                    <small class="text-muted">Membre depuis {{ request.user.date_joined|date:"Y" }}</small>
+                </div>
+                <div class="p-2">
+                    <a href="{% url 'profil_utilisateur' %}" class="btn btn-default btn-sm btn-block">Profil</a>
+                    <a href="{% url 'deconnexion' %}" class="btn btn-danger btn-sm btn-block mt-2">Déconnexion</a>
                 </div>
             </div>
-{% endcomment %}
+        </li>
 
-
-            {# Utilisateur en cours #}
-            <li class="dropdown user user-menu">
-                <a href="#" class="nav-link" data-toggle="dropdown">
-                    <img src="{% static "images/user.png" %}" class="user-image" alt="User Image">
-                    <span class="d-none d-sm-inline">{% firstof request.user.get_full_name request.user request.user.get_short_name %}</span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-right">
-                    <li class="user-header">
-                        <img src="{% static "images/user.png" %}" class="rounded-circle" alt="User Image">
-                        <p>
-                            {% firstof request.user.get_full_name request.user request.user.get_short_name %}
-                            <small>Dernière connexion le {{ request.user.last_login }}</small>
-                            <small>Utilisateur depuis {{ request.user.date_joined|date:"j F Y" }}</small>
-                        </p>
-                    </li>
-                    <!-- Formulaire structures -->
-                    <li class="user-footer">
-                        <h5 class="dropdown-header text-center">Structures actives</h5>
-                        <form id="form_structures" method="post" action="{% url 'profil_utilisateur' %}">
-                            {% csrf_token %}
-                            <div class="btn-group-toggle d-flex flex-wrap" data-toggle="buttons">
-                                {% for structure in request.user.structures_admin.all %}
-                                    <label class="btn btn-outline-primary m-1 {% if structure in request.user.structures.all %}active{% endif %}">
-                                        <input type="checkbox" name="structures" value="{{ structure.idstructure }}" autocomplete="off"
-                                            {% if structure in request.user.structures.all %}checked{% endif %}>
-                                        {{ structure }}
-                                    </label>
-                                {% endfor %}
-                            </div>
-                        </form>
-                    </li>
-
-                    <script>
-                        // Envoie automatiquement le formulaire dès qu'un checkbox est cliqué
-                        document.querySelectorAll('#form_structures input[type=checkbox]').forEach(function(checkbox){
-                            checkbox.addEventListener('change', function(){
-                                this.closest('form').submit();
-                            });
-                        });
-                    </script>
-                    <!-- Menu Footer-->
-                    <li class="user-footer">
-                        <div class="pull-left">
-                            <a href="{% url 'profil_utilisateur' %}" class="btn btn-default">Profil</a>
-                        </div>
-                        <div class="pull-right">
-                            <a href="{% url 'deconnexion' %}" class="btn btn-danger"><i class="fa fa-power-off margin-r-5"></i>Déconnexion</a>
-                        </div>
-                    </li>
-
-                </ul>
-            </li>
-
-            {# Fullscreen #}
-{% comment %}
-            <li class="nav-item">
-                <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-                    <i class="fa fa-expand"></i>
-                </a>
-            </li>
-{% endcomment %}
-
-            {# Panneau latéral #}
-            <li class="nav-item">
-                <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button" title="Options">
-                    <i class="fa fa-gears"></i>
-                </a>
-            </li>
-
-
-        </ul>
-    </nav>
-</header>
+        <li class="nav-item">
+            <a class="nav-link" data-widget="control-sidebar" href="#" role="button"><i class="fa fa-gears"></i></a>
+        </li>
+    </ul>
+</nav>

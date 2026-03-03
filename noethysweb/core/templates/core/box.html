@@ -1,57 +1,44 @@
 {% load static %}
 
 <style>
-    /* Carte principale avec ombre douce */
-    .n-card-custom {
-        border-radius: 12px !important; /* Coins plus arrondis */
-        border: none !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        background: #ffffff;
-        margin-bottom: 2rem !important;
-        border-top: 4px solid #007bff; /* On garde la couleur dynamique de Noethys */
-    }
-
-    /* Animation au survol */
-    .n-card-custom:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6) !important;
-    }
-
-    /* Header plus propre */
+    /* 1. LE HEADER : On s'assure qu'il prend toute la largeur */
     .n-card-header {
-        background: transparent !important;
-        border-bottom: 1px solid #f1f1f1 !important;
-        padding: 1.25rem 1.5rem !important;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        width: 100% !important;
+        padding: 1rem 1.25rem !important; /* Ajuste pour que ce soit équilibré */
     }
 
-    /* TITRE MODERNE */
+    /* 2. LE TITRE : On lui dit de rester à sa place à gauche */
     .n-card-title {
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        font-weight: 700 !important;
-        font-size: 1rem !important;
-        text-transform: uppercase; /* Donne un aspect pro */
-        letter-spacing: 0.5px; /* Plus d'espace pour la lisibilité */
-        color: #FF9933 !important;
         margin: 0 !important;
-        position: relative;
+        float: none !important; /* On casse le vieux système AdminLTE */
     }
 
+    /* 3. LES OUTILS : LE "MARGIN-LEFT: AUTO" LES POUSSE TOUT À DROITE */
+    .n-card-tools {
+        margin-left: auto !important; /* LA MAGIE EST ICI */
+        margin-right: -10px !important; /* Pour coller au bord droit */
+        float: none !important;
+    }
 
+    /* 4. LE BOUTON "-" ULTRA DISCRET (Gris clair, petite taille) */
     .n-card-tools .btn-tool {
-        color: #95a5a6 !important;
-        transition: color 0.2s;
+        color: #cccccc !important;
+        font-size: 0.8rem !important;
+        opacity: 1;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease;
     }
 
+    /* Il s'éclaire seulement au survol de la souris */
     .n-card-tools .btn-tool:hover {
-        color: #34495e !important;
-    }
-
-    .n-card-body {
-        padding: 1.5rem !important;
+        opacity: 1;
+        color: #FF9933 !important; /* Devient orange discret au survol */
+        transform: scale(1.1);
     }
 </style>
 

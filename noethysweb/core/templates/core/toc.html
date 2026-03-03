@@ -7,49 +7,110 @@
 {% block styles %}
     {{ block.super }}
     <style>
-        @media (max-width: 1200px) {
-            .card-columns {
-                column-count: 2;
-            }
+        /* 1. Grille à 3 colonnes */
+        @media (min-width: 1200px) {
+            .card-columns { column-count: 3; column-gap: 0.8rem; }
         }
-        @media (max-width: 650px) {
-            .card-columns {
-                column-count: 1;
-            }
+        @media (max-width: 1199px) and (min-width: 768px) { .card-columns { column-count: 2; } }
+        @media (max-width: 767px) { .card-columns { column-count: 1; } }
+
+        /* 2. Cartes épurées */
+        .card-solid {
+            border: 1px solid #e0e0e0 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03) !important;
+            margin-bottom: 0.8rem !important;
+            display: inline-block;
+            width: 100%;
+            overflow: hidden;
+            background: #fff;
         }
-        .card-columns .list-group a:last-child {
-            border-radius: 0 0 0.25rem 0.25rem;
+
+        /* 3. Header Contrasté (Liseré Orange + Fond Gris perle) */
+        .card-header {
+            background-color: #f8f9fa !important; /* Gris très clair pour détacher du blanc */
+            padding: 10px 12px !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            border-left: 4px solid #ff851b !important; /* Rappel Orange Sidebar */
+        }
+
+        .card-title {
+            font-size: 1rem !important; /* Légèrement agrandi pour le confort */
+            font-weight: 700 !important;   /* Gras affirmé mais pas "pâté" */
+            color: #3E2F28 !important;     /* Ton brun signature */
+            letter-spacing: -0.02em;       /* Resserre légèrement pour un look "Premium/Typo" */
+            margin: 0;
+            display: flex;
+            align-items: center;
+            opacity: 0.95;                 /* Un soupçon de douceur */
+
+        }
+
+        /* 4. Liens (Police 1.05rem / Padding 7px) */
+        .list-group-item {
+            font-size: 1rem !important;
+            font-weight: 500;
+            color: #333 !important;
+            padding: 6px 12px !important;
+            border-bottom: 1px solid #cbd5e1 !important;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Icônes contrastées */
+        .list-group-item i {
+            width: 30px;
+            color: #3E2F28;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        /* Effet au survol */
+        .list-group-item-action:hover {
+            background-color: #fffaf5 !important;
+            padding-left: 18px !important;
+        }
+
+        .list-group-item-action:hover i {
+            color: #ff851b;
+            opacity: 1;
+        }
+
+        /* Badge Démo */
+        .badge-warning {
+            background-color: #ffc107 !important;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 5px;
         }
     </style>
 {% endblock styles %}
 
 {% block contenu_page %}
-
     <div class="card-columns">
         {% for submenu in menu_actif.GetChildren %}
             {% if submenu.HasChildren %}
-                <div class="card card-solid m-2">
+                <div class="card card-solid">
                     {% if submenu.titre %}
                         <div class="card-header">
                             <h3 class="card-title">{{ submenu.titre }}</h3>
                         </div>
                     {% endif %}
                     <div class="card-body p-0">
-                        <ul class="list-group list-group-flush">
+                        <div class="list-group list-group-flush">
                             {% for item in submenu.GetChildren %}
                                 <a class="list-group-item list-group-item-action {% if mode_demo and not item.compatible_demo %}disabled{% endif %}" href="{{ item.GetUrl }}">
-                                    <i class="fa fa-{{ item.icone }} mr-1"></i> {{ item.titre }} {% if mode_demo and not item.compatible_demo %}<small class="badge badge-warning"><i class="fa fa-lock"></i> Mode démo</small>{% endif %}
+                                    <span>{{ item.titre }}</span>
+                                    {% if mode_demo and not item.compatible_demo %}
+                                        <span class="ml-auto"><small class="badge badge-warning">DEMO</small></span>
+                                    {% endif %}
                                 </a>
                             {% endfor %}
-                        </ul>
+                        </div>
                     </div>
                 </div>
             {% endif %}
         {% endfor %}
     </div>
-
 {% endblock contenu_page %}
-
-{% block scripts %}
-    {{ block.super }}
-{% endblock scripts %}
