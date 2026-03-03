@@ -36,7 +36,17 @@ class Liste(Page, crud.CustomListe):
         activite = self.kwargs.get("activite")
         if activite:
             return activite.replace("A", "")
-        return None
+
+        # 🔹 Aucune activité dans l'URL → on prend la première disponible
+        condition = Q(visible=True)
+        premiere_activite = (
+            Activite.objects
+            .filter(self.Get_condition_structure(), condition)
+            .order_by("-date_fin", "nom")
+            .first()
+        )
+
+        return premiere_activite.pk if premiere_activite else None
 
     def get_queryset(self):
         """Inscriptions visibles pour les structures de l'utilisateur et l'activité sélectionnée."""
