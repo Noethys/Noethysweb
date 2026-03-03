@@ -6,12 +6,13 @@
 import datetime
 from django import forms
 from django.forms import ModelForm
+from django.db.models import Min, Max
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset, Div
 from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import Activite, TypeGroupeActivite
+from core.models import Activite, TypeGroupeActivite, Ouverture
 from core.widgets import DatePickerWidget
 from core.forms.select2 import Select2MultipleWidget
 from core.widgets import Telephone, CodePostal, Ville, Selection_image, Rue
@@ -172,6 +173,7 @@ class Formulaire(FormulaireBase, ModelForm):
     def clean(self):
         # Durée de validité
         if self.cleaned_data["validite_type"] == "LIMITEE":
+            # Vérifie la cohérence des dates
             if self.cleaned_data["validite_date_debut"] == None:
                 self.add_error('validite_date_debut', "Vous devez sélectionner une date de début")
                 return
@@ -181,6 +183,16 @@ class Formulaire(FormulaireBase, ModelForm):
             if self.cleaned_data["validite_date_debut"] > self.cleaned_data["validite_date_fin"] :
                 self.add_error('validite_date_fin', "La date de fin doit être supérieure à la date de début")
                 return
+
+            # Vérifie qu'une ouverture existante n'est pas en dehors de cette période
+            stats = Ouverture.objects.filter(activite=self.instance).aggregate(date_min=Min("date"), date_max=Max("date"))
+            if stats["date_min"] and stats["date_min"] < self.cleaned_data["validite_date_debut"]:
+                self.add_error("validite_date_debut", "Il existe une ouverture AVANT la date de début choisie. Allez dans la rubrique Calendrier pour vérifier les ouvertures ou modifiez la date de début.")
+                return
+            if stats["date_max"] and stats["date_max"] > self.cleaned_data["validite_date_fin"]:
+                self.add_error("validite_date_fin", "Il existe une ouverture APRES la date de fin choisie. Allez dans la rubrique Calendrier pour vérifier les ouvertures ou modifiez la date de fin.")
+                return
+
             self.cleaned_data["date_debut"] = self.cleaned_data["validite_date_debut"]
             self.cleaned_data["date_fin"] = self.cleaned_data["validite_date_fin"]
         else:
