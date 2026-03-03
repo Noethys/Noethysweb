@@ -1,44 +1,75 @@
 {% load static %}
 
 <style>
-    /* 1. LE HEADER : On s'assure qu'il prend toute la largeur */
+    /* 1. LA CARD : Ombre profonde et coins arrondis prononcés */
+    .n-card-custom {
+        border-radius: 12px !important;
+        border: none !important;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4) !important;
+        background: #ffffff;
+        margin-bottom: 1.5rem !important;
+        overflow: hidden; /* Pour que le contenu ne dépasse pas des coins arrondis */
+    }
+
+    /* 2. LE HEADER : On force le Flexbox et on nettoie AdminLTE */
     .n-card-header {
         display: flex !important;
-        flex-direction: row !important;
         align-items: center !important;
+        justify-content: space-between !important;
         width: 100% !important;
-        padding: 1rem 1.25rem !important; /* Ajuste pour que ce soit équilibré */
+        padding: 1rem 1.2rem !important;
+        background-color: rgba(0, 0, 0.1, 0.1) !important; /* Fond très léger pour distinguer le titre */
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* 2. LE TITRE : On lui dit de rester à sa place à gauche */
+    /* On neutralise les parasites d'AdminLTE */
+    .n-card-header::after, .n-card-header::before {
+        display: none !important;
+        content: none !important;
+    }
+
+    /* 3. LE TITRE : Typographie pro */
     .n-card-title {
         margin: 0 !important;
-        float: none !important; /* On casse le vieux système AdminLTE */
+        font-weight: 700 !important;
+        font-size: 1.2rem !important;
+        color: #ff851b !important; /* Ton brun Noethys */
+        letter-spacing: 0.2px;
     }
 
-    /* 3. LES OUTILS : LE "MARGIN-LEFT: AUTO" LES POUSSE TOUT À DROITE */
+    /* 4. LES OUTILS : Poussés à droite par le flex */
     .n-card-tools {
-        margin-left: auto !important; /* LA MAGIE EST ICI */
-        margin-right: -10px !important; /* Pour coller au bord droit */
-        float: none !important;
+        margin-left: auto !important;
+        display: flex !important;
+        align-items: center !important;
     }
 
-    /* 4. LE BOUTON "-" ULTRA DISCRET (Gris clair, petite taille) */
+    /* 5. LE BOUTON "-" : Discret, élégant et minimaliste */
     .n-card-tools .btn-tool {
-        color: #cccccc !important;
-        font-size: 0.8rem !important;
-        opacity: 1;
-        background: transparent !important;
+        background: rgba(0, 0, 0, 0.04) !important; /* Petit cercle de fond */
+        color: #999 !important;
+        width: 28px;
+        height: 28px;
+        border-radius: 50% !important; /* Forme ronde moderne */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         border: none !important;
-        box-shadow: none !important;
-        transition: all 0.2s ease;
+        margin-right: -5px !important;
     }
 
-    /* Il s'éclaire seulement au survol de la souris */
     .n-card-tools .btn-tool:hover {
-        opacity: 1;
-        color: #FF9933 !important; /* Devient orange discret au survol */
-        transform: scale(1.1);
+        background: #ff851b !important; /* Orange Sacadoc au survol */
+        color: #ffffff !important;
+        transform: rotate(180deg); /* Petit effet de rotation pro */
+        box-shadow: 0 2px 5px rgba(255, 133, 27, 0.4);
+    }
+
+    /* 6. LE CORPS : Plus d'air pour respirer */
+    .n-card-body {
+        padding: 1.5rem !important;
     }
 </style>
 
@@ -46,6 +77,7 @@
     {% if box_titre %}
     <div class="card-header n-card-header">
         <h3 class="card-title n-card-title">{% block box_titre %}{% endblock %}</h3>
+
         <div class="card-tools n-card-tools">
             {% block box_outils %}
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -57,24 +89,19 @@
     {% endif %}
 
     <div class="card-body n-card-body {% block card_body_classe %}{% endblock %}" style="min-height: 0;">
-
         {% if box_introduction %}
-            <div id="box_introduction" class="text-muted" style="margin-bottom: 20px; font-style: italic; font-size: 0.9rem;">
-                {% block box_introduction %}
-                {% endblock %}
+            <div id="box_introduction" class="text-muted" style="margin-bottom: 20px; font-style: italic; font-size: 0.95rem;">
+                {% block box_introduction %}{% endblock %}
             </div>
         {% endif %}
 
-        {% block box_contenu %}
-        {% endblock %}
-
+        {% block box_contenu %}{% endblock %}
     </div>
 
     {% if box_conclusion %}
         <div class="card-footer bg-transparent border-0 pt-0 pb-3 text-right">
             <div class="text-muted small">
-                {% block box_conclusion %}
-                {% endblock %}
+                {% block box_conclusion %}{% endblock %}
             </div>
         </div>
     {% endif %}
