@@ -1,3 +1,13 @@
+Version 1.3.2.5 (04/03/2026) :
+
+- Ajout de la vérification de cohérence entre les dates d'une activité et les ouvertures
+- Ajout de la procédure d'export des consommations vers Excel
+- Correction sur la conversion des nombres négatifs en lettres
+- Correction du titre personnalisé dans les devis
+- Correction de la récupération des prestations sosies dans la grille des consommations
+- Correction du champ solde dans les envois de devis par email
+- Correction sur l'export Cloé
+
 Version 1.3.2.4 (04/02/2026) :
 
 - Ajout du popup Notes à l'ouverture de la fiche famille
