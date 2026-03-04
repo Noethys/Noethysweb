@@ -39,9 +39,9 @@ def Get_pieces_manquantes_individu(famille=None, individu=None, activite=None, d
         date_reference = datetime.date.today()
 
     # Récupère toutes les pièces existantes pour la famille et l'individu
+    # Pour les pièces individuelles avec valide_rattachement, famille peut être None
     pieces_existantes = Piece.objects.select_related("type_piece").filter(
-        famille=famille,
-        individu=individu,
+        Q(famille=famille) | Q(individu=individu),
         date_debut__lte=date_reference,
         date_fin__gte=date_reference
     )
@@ -102,13 +102,11 @@ def Get_pieces_manquantes(famille=None, date_reference=None, only_invalides=Fals
             valide = False
             for piece in pieces_existantes:
                 if piece.type_piece_id == type_piece.pk and piece.date_fin >= date_reference:
-                    if type_piece.public == "famille":
+                    if type_piece.public == "famille" and piece.famille_id == inscription.famille_id:
                         valide = True
                     if type_piece.public == "individu" and piece.individu_id == inscription.individu_id:
-                        if type_piece.valide_rattachement == True:
-                            valide = True
-                        elif piece.famille_id == inscription.famille_id:
-                            valide = True
+                        # Si la pièce est attachée à l'individu, elle est valide
+                        valide = True
 
             # Création du lien de création
             if valide:
@@ -228,9 +226,14 @@ def Get_liste_pieces_necessaires(date_reference=None, activite=None, famille=Non
 
     # Importation des pièces existantes de la famille
     dict_pieces = {}
-    for piece in Piece.objects.select_related("type_piece").filter(famille=famille, date_debut__lte=date_reference, date_fin__gte=date_reference):
+    # Récupérer les pièces de la famille OU de l'individu (pour gérer valide_rattachement)
+    for piece in Piece.objects.select_related("type_piece").filter(Q(famille=famille) | Q(individu=individu), date_debut__lte=date_reference, date_fin__gte=date_reference):
         if piece.type_piece:
-            key = "famille_%d_%d" % (piece.famille_id, piece.type_piece_id) if piece.type_piece.public == "famille" else "individu_%d_%d" % (piece.individu_id, piece.type_piece_id)
+            # Pour les pièces individuelles, la clé est basée sur l'individu (même si famille=None avec valide_rattachement)
+            if piece.type_piece.public == "famille":
+                key = "famille_%d_%d" % (piece.famille_id, piece.type_piece_id)
+            else:  # individu
+                key = "individu_%d_%d" % (piece.individu_id, piece.type_piece_id)
             dict_pieces.setdefault(key, [])
             dict_pieces[key].append(piece)
 
@@ -245,10 +248,9 @@ def Get_liste_pieces_necessaires(date_reference=None, activite=None, famille=Non
             if type_piece.public == "famille" and piece.famille_id == famille.pk:
                 valide = True
             if type_piece.public == "individu" and piece.individu_id == individu.pk:
-                if type_piece.valide_rattachement == True:
-                    valide = True
-                elif piece.famille_id == famille.pk:
-                    valide = True
+                # Pour les pièces individuelles, c'est valide si attaché à l'individu
+                # Peu importe si valide_rattachement ou pas, la pièce individuelle est valide
+                valide = True
 
         liste_pieces_necessaires.append({"type_piece": type_piece, "valide": valide, "document": type_piece.type_piece_document.first()})
 
