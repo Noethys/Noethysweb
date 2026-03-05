@@ -173,14 +173,12 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_maintenance.Add(code="update", titre="Mise à jour de l'application", icone="file-text-o")
     menu_maintenance.Add(code="notes_versions", titre="Notes de versions", icone="file-text-o")
     menu_maintenance.Add(code="utilisateurs_bloques_liste", titre="Utilisateurs bloqués", icone="file-text-o")
+    menu_maintenance.Add(code="debug_log", titre="Debug", icone="file-text-o")
+
 
     # # Calendrier
     # menu_calendrier = menu_outils.Add(titre="Calendrier")
     # menu_calendrier.Add(code="calendrier_annuel", titre="Calendrier annuel", icone="file-text-o")
-
-    # Sauvegarde
-    menu_sauvegarde = menu_outils.Add(titre="Sauvegarde")
-    menu_sauvegarde.Add(code="sauvegarde_creer", titre="Créer une sauvegarde", icone="file-text-o", compatible_demo=False)
 
     # Portail
     menu_portail = menu_outils.Add(titre="Portail")
@@ -197,6 +195,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     # Utilitaires
     menu_utilitaires = menu_outils.Add(titre="Utilitaires")
     menu_utilitaires.Add(code="procedures", titre="Procédures", icone="file-text-o", compatible_demo=False)
+    menu_utilitaires.Add(code="sauvegarde_creer", titre="Créer une sauvegarde", icone="file-text-o", compatible_demo=False)
 
 
     # ------------------------------------ Individus ------------------------------------

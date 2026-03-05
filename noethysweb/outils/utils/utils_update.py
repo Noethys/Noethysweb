@@ -26,7 +26,7 @@ def Get_update_for_accueil(request=None):
 
 def Recherche_update():
     # Lecture de la version disponible en ligne
-    url = "https://raw.githubusercontent.com/Arthur67190/Joie-et-Vie/refs/heads/main/noethysweb/versions.txt"
+    url = "https://raw.githubusercontent.com/flambeaux-org/Sacadoc/refs/heads/main/noethysweb/versions.txt"
     logger.debug("Recherche d'une nouvelle version...")
     try:
         data = requests.get(url, timeout=10)
@@ -89,10 +89,10 @@ def backup_database():
         # Utilisation de la commande backup de SQLite via CLI
         # Exécution de: sqlite3 db_path ".backup backup_path"
         result = subprocess.run(
-            ['/usr/bin/sqlite3', db_path, f'.backup {backup_path}'],
+            ['sqlite3', db_path, f'.backup {backup_path}'],
             capture_output=True,
             text=True,
-            timeout=300
+            timeout=300  # 5 minutes timeout
         )
 
         if result.returncode != 0:
@@ -147,7 +147,7 @@ def Update():
     version_online_txt, changelog = Recherche_update()
     if not version_online_txt:
         return False
-    print("OK rech version")
+
     # Téléchargement du zip
     nom_fichier = "Sacadoc-%s.zip" % version_online_txt
     if not os.path.isdir(settings.MEDIA_ROOT):
@@ -158,7 +158,7 @@ def Update():
     chemin_fichier = os.path.join(rep_temp, nom_fichier)
     try:
         logger.debug("Telechargement de la version %s..." % version_online_txt)
-        url_telechargement = "https://github.com/Arthur67190/Joie-et-Vie/archive/%s.zip" % version_online_txt
+        url_telechargement = "https://github.com/flambeaux-org/Sacadoc/archive/%s.zip" % version_online_txt
         urlretrieve(url_telechargement, chemin_fichier)
     except Exception as err:
         logger.debug("La nouvelle version '%s' n'a pas pu etre telechargee." % version_online_txt)
@@ -179,13 +179,13 @@ def Update():
     liste_fichiers = zfile.namelist()
 
     # Remplacement des fichiers
-    prefixe = "Joie-et-Vie-%s/noethysweb/" % version_online_txt
+    prefixe = "Sacadoc-%s/noethysweb/" % version_online_txt
     chemin_dest = os.path.join(settings.BASE_DIR, "")
 
     logger.debug("Installation des nouveaux fichiers...")
     for i in liste_fichiers:
         d = i.replace(prefixe, "")
-        if len(d) > 1 and not d.startswith("Joie-et-Vie-%s" % version_online_txt):
+        if len(d) > 1 and not d.startswith("Sacadoc-%s" % version_online_txt):
             if i.endswith('/'):
                 try:
                     os.makedirs(os.path.join(chemin_dest, d))

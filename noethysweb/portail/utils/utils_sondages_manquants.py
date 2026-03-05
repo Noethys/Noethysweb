@@ -45,34 +45,52 @@ def Get_sondages_manquants(famille=None):
         individu__deces=False
     )
 
-    # Parcourir tous les sondages et vérifier s'ils sont complétés
+    # Pré-chargement des structures par individu pour éviter les requêtes en boucle
+    # On crée un dictionnaire : {id_individu: [id_structure1, id_structure2]}
+    dict_structures_par_individu = {}
+    for inscription in inscriptions:
+        ind_id = inscription.individu_id
+        struct_id = inscription.activite.structure_id
+        if ind_id not in dict_structures_par_individu:
+            dict_structures_par_individu[ind_id] = set()
+        dict_structures_par_individu[ind_id].add(struct_id)
+
+    # Parcourir tous les sondages
     for sondage in sondages:
         if sondage.public == "famille":
-            # Sondage de type famille : vérifier si une réponse existe
+            # (Logique famille inchangée...)
             if sondage.idsondage not in dict_reponses_famille:
                 sondages_manquants.append({
                     'sondage': sondage,
                     'titre': sondage.titre,
                     'code': sondage.code,
                     'type': 'famille',
-                    'article': None,  # Pour compatibilité avec le template
+                    'article': None,
                     'individu': None,
                 })
 
         else:  # public == "individu"
-            # Sondage de type individu : vérifier pour chaque individu concerné
-            # Filtrer les rattachements selon les catégories définies dans le sondage
-            rattachements_concernes = rattachements
-            if sondage.categories_rattachements:
-                # categories_rattachements est un MultiSelectField qui retourne une liste
-                categories = [int(cat) for cat in sondage.categories_rattachements]
-                rattachements_concernes = [r for r in rattachements if r.categorie in categories]
-
-            # Vérifier pour chaque individu concerné
-            for rattachement in rattachements_concernes:
+            # On ne boucle que sur les individus qui ont une inscription
+            # dans la structure du sondage
+            for rattachement in rattachements:
                 individu = rattachement.individu
 
-                # Vérifier si cet individu a déjà répondu à ce sondage
+                # --- NOUVELLE LOGIQUE DE FILTRAGE ---
+                # On vérifie si l'individu est inscrit dans la structure du sondage
+                structures_individu = dict_structures_par_individu.get(individu.pk, set())
+
+                if sondage.structure_id not in structures_individu:
+                    # L'individu n'est pas concerné par cette structure, on passe au suivant
+                    continue
+
+                # Facultatif : On peut garder le filtre par catégorie en plus si besoin
+                if sondage.categories_rattachements:
+                    categories = [int(cat) for cat in sondage.categories_rattachements]
+                    if rattachement.categorie not in categories:
+                        continue
+                # ------------------------------------
+
+                # Vérifier si cet individu a déjà répondu
                 reponses_sondage = dict_reponses_individu.get(sondage.idsondage, set())
                 if individu.pk not in reponses_sondage:
                     sondages_manquants.append({
@@ -80,8 +98,8 @@ def Get_sondages_manquants(famille=None):
                         'titre': sondage.titre,
                         'code': sondage.code,
                         'type': 'individu',
-                        'article': None,  # Pour compatibilité avec le template
                         'individu': individu,
+                        'article': None,
                     })
 
     return sondages_manquants

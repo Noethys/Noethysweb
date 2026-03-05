@@ -35,8 +35,9 @@
 
 
     {# Notifications #}
-    {% if approbations_requises or nbre_messages_non_lus or nbre_pieces_manquantes or nbre_renseignements_manquants %}
-        <h5 class="mb-2 text-secondary">{% blocktrans %}Notifications{% endblocktrans %}</h5>
+    {% if approbations_requises or nbre_messages_non_lus or nbre_pieces_manquantes or nbre_renseignements_manquants or nbre_questionnaires_manquants or nbre_vaccinations_manquantes or nbre_verifications_manquante or nbre_assurances_manquantes or cotisations_manquantes or nbre_sondages_manquants %}
+
+        <h5 class="mb-2 text-secondary">{% blocktrans %}Alertes{% endblocktrans %}</h5>
         <div class="row mb-2">
 
             {# Messages #}

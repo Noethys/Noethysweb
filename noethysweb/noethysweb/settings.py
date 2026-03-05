@@ -264,7 +264,7 @@ LOGGING = {
             'level': 'DEBUG',
             'filters': ['request_uid'],
             "class": "logging.FileHandler",
-            'filename': '/var/log/sacadoc/debug_json.log',
+            'filename': os.environ.get('DEBUG_JSON_LOG_FILE', default=os.path.join(BASE_DIR, '..', 'debug_json.log')),
             'formatter': 'json',
         },
         'mail_admins': {

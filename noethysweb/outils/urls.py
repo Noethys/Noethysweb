@@ -11,7 +11,7 @@ from outils.views import editeur_emails, editeur_emails_express, historique, upd
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
                         demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur, editeur_sms, editeur_sms_familles, \
                         editeur_sms_individus, editeur_sms_collaborateurs, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures, editeur_sms_express, taches, \
-                        suivi_reservations, traitement
+                        suivi_reservations, traitement, debug
 
 urlpatterns = [
 
@@ -61,6 +61,7 @@ urlpatterns = [
     path('outils/sms/supprimer_plusieurs/<str:listepk>', sms.Supprimer_plusieurs.as_view(), name='sms_supprimer_plusieurs'),
 
     path('outils/historique', historique.Liste.as_view(), name='historique'),
+    path('outils/debug-log/', debug.DebugLog.as_view(), name='debug_log'),
 
     # Maintenance
     path('outils/update', update.View.as_view(), name='update'),

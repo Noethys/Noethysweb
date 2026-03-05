@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML, Div, Field
 from core.models import (Activite, Rattachement, Groupe, PortailRenseignement,
-                         NomTarif, Tarif, Structure, TarifLigne,PortailDocument)
+                         NomTarif, Tarif, Structure, TarifLigne, PortailDocument, Piece)
 from core.utils.utils_commandes import Commandes
 from portail.forms.fiche import FormulaireBase
 from individus.utils import utils_pieces_manquantes
@@ -75,67 +75,196 @@ class Formulaire_extra(FormulaireBase, forms.Form):
                     self.fields[f_name].choices = choices
                     layout_elements.append(Field(f_name))
 
-            if activite and famille and individu:  # Sécurité pour éviter le TypeError
-                if activite.portail_inscriptions_imposer_pieces:
-                    pieces_necessaires = utils_pieces_manquantes.Get_liste_pieces_necessaires(
-                        activite=activite,
-                        famille=famille,
-                        individu=individu
+            # 3. Section de gestion des pièces justificatives (visualisation + upload fusionnés)
+            if activite and famille and individu:
+                # Récupération de toutes les pièces nécessaires
+                pieces_necessaires = utils_pieces_manquantes.Get_liste_pieces_necessaires(
+                    activite=activite,
+                    famille=famille,
+                    individu=individu
+                )
+
+                if pieces_necessaires:
+                    # Récupération des pièces existantes pour cet individu et cette famille
+                    date_reference = datetime.date.today()
+                    # Pour les pièces individuelles avec valide_rattachement, famille peut être None
+                    pieces_existantes = Piece.objects.select_related('type_piece').filter(
+                        Q(famille=famille) | Q(individu=individu),
+                        date_debut__lte=date_reference
                     )
 
-                    pieces_pas_valides = [piece for piece in pieces_necessaires if not piece["valide"]]
-                    if pieces_pas_valides:
-                        layout_elements.append(HTML("""
-                            <div class='alert alert-warning mb-4 shadow-sm border-0'>
-                                <div class='d-flex align-items-center'>
-                                    <i class='fa fa-file fa-2x mr-3 text-info'></i>
-                                    <div>
-                                        <h5 class='mb-0 text-bold'>Pièces justificatives manquantes</h5>
-                                        <p class='mb-0 small text-muted'>Veuillez joindre les documents requis pour finaliser votre inscription.</p>
-                                    </div>
+                    # Créer un dictionnaire des pièces existantes par type_piece
+                    dict_pieces_existantes = {}
+                    for piece in pieces_existantes:
+                        if piece.type_piece:
+                            key = piece.type_piece.pk
+                            if key not in dict_pieces_existantes:
+                                dict_pieces_existantes[key] = []
+                            dict_pieces_existantes[key].append(piece)
+
+                    # Calcul du nombre de pièces valides
+                    pieces_valides_count = sum(1 for p in pieces_necessaires if p["valide"])
+                    pieces_totales_count = len(pieces_necessaires)
+
+                    # En-tête de la section
+                    layout_elements.append(HTML(f"""
+                        <div class='alert alert-info mb-3 shadow-sm border-0 py-2'>
+                            <div class='d-flex align-items-center'>
+                                <i class='fa fa-clipboard-check fa-lg mr-2 text-primary'></i>
+                                <div class='flex-grow-1'>
+                                    <strong>📄 Pièces justificatives</strong>
+                                    <span class='badge badge-success ml-2'>✅ {pieces_valides_count}/{pieces_totales_count}</span>
+                                    {f"<span class='badge badge-warning ml-1'>⚠️ {pieces_totales_count - pieces_valides_count}</span>" if pieces_valides_count < pieces_totales_count else ""}
                                 </div>
                             </div>
-                        """))
-                    if not pieces_necessaires:
-                        layout_elements.append(
-                            HTML("<p class='alert alert-info'>Aucune pièce justificative n'est requise.</p>"))
-                    elif not pieces_pas_valides:
-                        layout_elements.append(
-                            HTML("<p class='alert alert-success'>Toutes les pièces sont déjà validées.</p>"))
-                    else:
-                        for piece_necessaire in pieces_necessaires:
-                            if not piece_necessaire["valide"]:
-                                nom_field = f"document_{piece_necessaire['type_piece'].pk}"
+                        </div>
+                        <div class='row piece-grid'>
+                    """))
 
-                                # --- Préparation du texte d'aide avec icône de téléchargement ---
-                                help_text = ""
-                                modele_url = None
+                    # Affichage de chaque pièce avec gestion upload intégrée - VERSION COMPACTE
+                    for piece_info in pieces_necessaires:
+                        type_piece = piece_info["type_piece"]
+                        pieces_ce_type = dict_pieces_existantes.get(type_piece.pk, [])
 
-                                portail_document = PortailDocument.objects.filter(activites=activite,
-                                                                                  type_piece=piece_necessaire[
-                                                                                      "type_piece"]).first()
+                        if pieces_ce_type:
+                            # Il y a des pièces de ce type - afficher chacune
+                            for piece in pieces_ce_type:
+                                is_expired = piece.date_fin < date_reference if piece.date_fin else False
+                                
+                                if is_expired:
+                                    status_icon = "⚠️"
+                                    status_class = "danger"
+                                    status_text = f"Exp. {piece.date_fin.strftime('%d/%m/%y')}"
+                                else:
+                                    status_icon = "✅"
+                                    status_class = "success"
+                                    status_text = f"Valide {piece.date_fin.strftime('%d/%m/%y') if piece.date_fin else '∞'}"
+
+                                document_url = f"/media/{piece.document}" if piece.document else "#"
+                                btn_disabled = "" if piece.document else "disabled"
+
+                                # Card compacte en 1 ligne
+                                layout_elements.append(HTML(f"""
+                                    <div class='col-md-6 col-12 mb-2'>
+                                        <div class='piece-item border border-{status_class} rounded p-2' data-piece-id='{piece.pk}'>
+                                            <div class='d-flex align-items-center'>
+                                                <div class='flex-grow-1 mr-2'>
+                                                    <strong class='d-block' style='font-size: 0.9rem;'>{type_piece.nom}</strong>
+                                                    <small class='text-muted'>{piece.individu.prenom if piece.individu else 'Famille'} • 
+                                                        <span class='text-{status_class}'>{status_icon} {status_text}</span>
+                                                    </small>
+                                                </div>
+                                                <div class='btn-group btn-group-sm'>
+                                                    <a href='{document_url}' target='_blank' class='btn btn-outline-primary btn-sm {btn_disabled}' title='Voir'>
+                                                        <i class='fa fa-eye'></i>
+                                                    </a>
+                                                    <button type='button' class='btn btn-outline-danger btn-sm btn-supprimer-piece' data-piece-id='{piece.pk}' data-type-piece-id='{type_piece.pk}' title='Supprimer'>
+                                                        <i class='fa fa-trash'></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                """))
+                                
+                                # Si la pièce est expirée ET que l'upload est imposé, ajouter inline l'upload
+                                if is_expired and activite.portail_inscriptions_imposer_pieces:
+                                    nom_field = f"document_{type_piece.pk}"
+                                    
+                                    # Préparation du modèle si disponible
+                                    modele_html = ""
+                                    portail_document = PortailDocument.objects.filter(
+                                        activites=activite,
+                                        type_piece=type_piece
+                                    ).first()
+                                    if portail_document:
+                                        modele_url = portail_document.document.url
+                                    elif piece_info.get("document"):
+                                        modele_url = piece_info.get("document").document.url
+                                    else:
+                                        modele_url = None
+                                    
+                                    if modele_url:
+                                        modele_html = f"<a href='{modele_url}' target='_blank' class='btn btn-xs btn-outline-info ml-2' title='Télécharger le modèle'><i class='fa fa-download'></i></a>"
+                                    
+                                    self.fields[nom_field] = forms.FileField(
+                                        label="",
+                                        help_text="",
+                                        required=True,
+                                        widget=forms.FileInput(attrs={'class': 'form-control-file form-control-sm', 'accept': '.pdf,.png,.jpg,.jpeg'}),
+                                        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'png', 'jpg', 'jpeg'])]
+                                    )
+                                    
+                                    layout_elements.append(HTML(f"""
+                                            <div class='mt-2 p-2 bg-warning-light rounded'>
+                                                <small class='text-danger d-block mb-1'><i class='fa fa-exclamation-triangle'></i> Pièce expirée - Remplacer :</small>
+                                                <div class='d-flex align-items-center'>
+                                    """))
+                                    layout_elements.append(Field(nom_field, wrapper_class='mb-0 flex-grow-1'))
+                                    layout_elements.append(HTML(f"""
+                                                    {modele_html}
+                                                </div>
+                                            </div>
+                                    """))
+                                
+                                layout_elements.append(HTML("""</div></div>"""))
+                        else:
+                            # Aucune pièce de ce type - Version compacte
+                            layout_elements.append(HTML(f"""
+                                <div class='col-md-6 col-12 mb-2'>
+                                    <div class='piece-item border border-secondary rounded p-2'>
+                                        <div class='d-flex align-items-center'>
+                                            <div class='flex-grow-1'>
+                                                <strong class='d-block' style='font-size: 0.9rem;'>{type_piece.nom}</strong>
+                                                <small class='text-muted'>❌ Manquante • 
+                                                    {'À fournir ci-dessous' if activite.portail_inscriptions_imposer_pieces else 'À fournir ultérieurement'}
+                                                </small>
+                                            </div>
+                                        </div>
+                            """))
+                            
+                            # Si l'upload est imposé, ajouter inline l'upload
+                            if activite.portail_inscriptions_imposer_pieces:
+                                nom_field = f"document_{type_piece.pk}"
+                                
+                                # Préparation du modèle si disponible
+                                modele_html = ""
+                                portail_document = PortailDocument.objects.filter(
+                                    activites=activite,
+                                    type_piece=type_piece
+                                ).first()
                                 if portail_document:
                                     modele_url = portail_document.document.url
-                                elif piece_necessaire["document"]:
-                                    modele_url = piece_necessaire["document"].document.url
-
+                                elif piece_info.get("document"):
+                                    modele_url = piece_info.get("document").document.url
+                                else:
+                                    modele_url = None
+                                
                                 if modele_url:
-                                    help_text = f"""<div class='mt-2'><a href='{modele_url}' target='_blank' class='btn btn-xs btn-outline-info'>
-                                                        <i class='fa fa-download mr-1'></i> Télécharger le modèle à compléter</a></div>"""
-
+                                    modele_html = f"<a href='{modele_url}' target='_blank' class='btn btn-xs btn-outline-info ml-2' title='Télécharger le modèle'><i class='fa fa-download'></i></a>"
+                                
                                 self.fields[nom_field] = forms.FileField(
-                                    label=piece_necessaire["type_piece"].nom,
-                                    help_text=help_text,
+                                    label="",
+                                    help_text="",
                                     required=True,
-                                    widget=forms.FileInput(attrs={'class': 'form-control-file'}),  # Widget plus propre
-                                    validators=[FileExtensionValidator(allowed_extensions=['pdf', 'png', 'jpg'])]
+                                    widget=forms.FileInput(attrs={'class': 'form-control-file form-control-sm', 'accept': '.pdf,.png,.jpg,.jpeg'}),
+                                    validators=[FileExtensionValidator(allowed_extensions=['pdf', 'png', 'jpg', 'jpeg'])]
                                 )
-
-                                # Encapsulation dans une Div stylisée
-                                layout_elements.append(Div(
-                                    Field(nom_field),
-                                    css_class="document-upload-box p-3 mb-3 border rounded bg-light"
-                                ))
+                                
+                                layout_elements.append(HTML(f"""
+                                        <div class='mt-2 p-2 bg-light rounded'>
+                                            <small class='text-primary d-block mb-1'><i class='fa fa-upload'></i> Fournir la pièce :</small>
+                                            <div class='d-flex align-items-center'>
+                                """))
+                                layout_elements.append(Field(nom_field, wrapper_class='mb-0 flex-grow-1'))
+                                layout_elements.append(HTML(f"""
+                                                {modele_html}
+                                            </div>
+                                        </div>
+                                """))
+                            
+                            layout_elements.append(HTML("""</div></div>"""))
+                    
+                    # Fermeture de la grille
+                    layout_elements.append(HTML("""</div>"""))
 
         self.helper.layout = Layout(*layout_elements)
 

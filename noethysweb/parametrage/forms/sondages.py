@@ -25,6 +25,7 @@ class Formulaire_sondage(FormulaireBase, ModelForm):
             "description": SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '200px'}}),
             "conclusion": SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '200px'}}),
             "categories_rattachements": Select2MultipleWidget(),
+            "public": forms.HiddenInput(),
         }
 
     def __init__(self, *args, **kwargs):
@@ -37,48 +38,30 @@ class Formulaire_sondage(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
-        # Catégories de rattachements
-        self.fields["categories_rattachements"].initial = [1, 2, 3]
+        if not self.instance.pk:
+            self.fields["public"].initial = "individu"
+            self.fields["categories_rattachements"].initial = [2]
 
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'sondages_liste' %}", ajouter=False),
+            Hidden("public", self.fields["public"].initial),
             Fieldset("Généralités",
                 Field("titre"),
                 Field("description"),
                 Field("conclusion"),
-                Field("public"),
+
                 Field("categories_rattachements"),
                 Field("modifiable"),
             ),
             Fieldset("Structure associée",
                 Field("structure"),
             ),
-            HTML(EXTRA_SCRIPT_SONDAGE),
         )
 
     def clean(self):
-        if self.cleaned_data["public"] == "individu" and not self.cleaned_data["categories_rattachements"]:
-            self.add_error("categories_rattachements", "Vous devez sélectionner au moins une catégorie de rattachement")
-            return
         return self.cleaned_data
 
-EXTRA_SCRIPT_SONDAGE = """
-<script>
-
-function On_change_public() {
-    $('#div_id_categories_rattachements').hide();
-    if ($("#id_public").val() == 'individu') {
-        $('#div_id_categories_rattachements').show();
-    };
-}
-$(document).ready(function() {
-    $('#id_public').on('change', On_change_public);
-    On_change_public.call($('#id_public').get(0));
-});
-
-</script>
-"""
 
 
 class Formulaire_page(FormulaireBase, ModelForm):

@@ -10,6 +10,7 @@ from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
 from core.models import Rattachement, Activite
 from individus.forms.edition_renseignements import Formulaire
+from individus.utils import utils_impression_renseignements
 
 
 def Generer_pdf(request):
@@ -29,7 +30,6 @@ def Generer_pdf(request):
     options["rattachements"] = rattachements
 
     # Création du PDF
-    from individus.utils import utils_impression_renseignements
     impression = utils_impression_renseignements.Impression(titre="Renseignements", dict_donnees=options)
     if impression.erreurs:
         return JsonResponse({"erreur": impression.erreurs[0]}, status=401)

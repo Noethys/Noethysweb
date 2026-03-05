@@ -6,6 +6,87 @@
 
 {% block styles %}
     {{ block.super }}
+<style>
+    /* --- STRUCTURE COMMUNE DES BOUTONS (Lisibilité & Confort) --- */
+    .btn {
+        border-radius: 8px !important;    /* Arrondi moderne identique partout */
+        font-size: 1.05rem !important;    /* Taille plus lisible */
+        font-weight: 700 !important;      /* Texte bien affirmé */
+        padding: 8px 20px !important;     /* Zone de clic large pour le confort */
+        letter-spacing: 0.7px;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important; /* Petit relief */
+        border-width: 2px !important;     /* Bordure un peu plus franche */
+    }
+
+    /* --- 2. PETITS BOUTONS D'ACTIONS (Tableaux / Listes) --- */
+    /* On cible .btn-sm ou les boutons dans les outils de card */
+    .btn-sm, .btn-group-sm > .btn, .btn-xs {
+        padding: 2px 8px !important;    /* Plus fin */
+        font-size: 0.85rem !important;   /* Texte plus petit */
+        font-weight: 600 !important;     /* Un peu moins gras */
+        border-radius: 4px !important;   /* Arrondi proportionnel */
+        box-shadow: none !important;     /* On enlève l'ombre pour la discrétion */
+        letter-spacing: 0.3px;
+    }
+
+    /* Effet spécifique pour les petits boutons au survol */
+    .btn-sm:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+    }
+
+
+    .btn:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+    }
+
+    /* 1. BOUTONS PRINCIPAUX (Orange Sacadoc) */
+    .btn-primary {
+        background-color: #ED7915 !important;
+        border-color: #ED7915 !important;
+        color: #FFFFFF !important;
+    }
+    .btn-primary:hover {
+        background-color: #e67600 !important;
+        border-color: #e67600 !important;
+    }
+
+    /* 2. BOUTONS DE VALIDATION (Brun Noethys) */
+    .btn-success {
+        background-color: #3E2F28 !important;
+        border-color: #3E2F28 !important;
+        color: #FFFFFF !important;
+    }
+    .btn-success:hover {
+        background-color: #2b201b !important;
+        border-color: #2b201b !important;
+    }
+
+    /* 3. BOUTONS SECONDAIRES / ANNULER (Gris doux) */
+    .btn-secondary, .btn-default {
+        background-color: #f8f9fa !important;
+        border-color: #ddd !important;
+        color: #555 !important;
+    }
+    .btn-secondary:hover, .btn-default:hover {
+        background-color: #e9ecef !important;
+        color: #333 !important;
+    }
+
+    /* 4. MODERNISATION DES CARDS (BOXES) */
+    .card {
+        border-radius: 12px !important; /* Un peu plus d'arrondi pour la modernité */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
+        border: 1px solid #e0e0e0 !important;
+    }
+
+    /* Liseré orange forcé pour l'unité visuelle */
+    .card-outline.card-lightblue,
+    .card-outline.card-primary {
+        border-top: 4px solid #ff851b !important;
+    }
+</style>
 {% endblock styles %}
 
 {% block page %}
@@ -13,19 +94,18 @@
     <div class="content-wrapper">
 
         {% block content_header %}
-
             <div class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0 text-dark">
+                            <h1 class="m-0" style="color: #3E2F28; font-weight: 300;">
                                 {{ page_titre }}
-                                <small>{% block page_description %}{% endblock %}</small>
+                                <small class="text-muted" style="font-size: 60%;">{% block page_description %}{% endblock %}</small>
                             </h1>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="{% url 'accueil' %}"><i class="fa fa-home"></i> Accueil</a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'accueil' %}" style="color: #ff851b;"><i class="fa fa-home"></i> Accueil</a></li>
                                 {% for item in breadcrumb %}
                                     {% if item.code %}
                                         <li class="breadcrumb-item"><a href="{{ item.GetUrl }}">{{ item.titre }}</a></li>
@@ -36,7 +116,6 @@
                     </div>
                 </div>
             </div>
-
         {% endblock %}
 
         <section class="content">
@@ -50,37 +129,38 @@
                 {% endblock contenu_page %}
 
                 {% if afficher_menu_brothers and menu_brothers %}
-
                     <style>
-                        .menu_brothers {
-                            background: #f4f4f4;
-                            padding: 10px;
+                        .menu_brothers_clean {
+                            background: #ffffff !important;
+                            border-top: 1px solid #eee !important;
+                            padding: 15px !important;
                         }
-                        .dark-mode .menu_brothers {
-                            background: #343a40;
+                        .menu_brothers_clean a {
+                            color: #3E2F28 !important;
+                            font-weight: 500;
+                            margin-right: 25px;
+                            display: inline-block;
                         }
-                        .menu_brothers ul {
-                            margin-bottom: 0px;
+                        .menu_brothers_clean a:hover {
+                            color: #ff851b !important;
+                            text-decoration: none;
                         }
-                        .menu_brothers li {
-                            display: inline;
-                            white-space: nowrap;
-                            margin-right: 20px;
+                        .menu_brothers_clean i {
+                            color: #ff851b;
+                            margin-right: 5px;
                         }
                     </style>
 
-                    <div class="card card-solid">
-                        <div class="card-body menu_brothers">
-                            <div style="color: #b4b4b4;margin-bottom: 5px;">
+                    <div class="card card-solid mt-4">
+                        <div class="card-body menu_brothers_clean">
+                            <div style="color: #b4b4b4; margin-bottom: 8px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
                                 <i class="fa fa-link"></i> Rubriques associées
                             </div>
-                            <div>
-                                <ul class="list-unstyled">
-                                    {% for item in menu_brothers %}
-                                        <li><a href="{{ item.GetUrl }}"><i class="fa fa-{{ item.icone }}"></i> {{ item.titre }}</a></li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
+                            <ul class="list-unstyled mb-0">
+                                {% for item in menu_brothers %}
+                                    <li><a href="{{ item.GetUrl }}"><i class="fa fa-{{ item.icone }}"></i> {{ item.titre }}</a></li>
+                                {% endfor %}
+                            </ul>
                         </div>
                     </div>
                 {% endif %}
@@ -90,7 +170,6 @@
 
     </div>
 {% endblock page %}
-
 
 {% block scripts %}
     {{ block.super }}

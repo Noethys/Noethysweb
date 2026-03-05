@@ -1,99 +1,159 @@
 {% load static %}
 
 <style>
-	.organisateur {
-		position: relative;
-		width: 100%;
-		padding: 15px 0px 10px 0px;
-		overflow: hidden;
-	}
-	.organisateur > .image > img {
-		display: block;
-		width: 100%;
-		max-width: 180px;
-		height: auto;
-		margin-left: auto;
-		margin-right: auto;
-	}
-	.organisateur > .info {
-		padding: 15px 5px 10px 5px;
-		margin-bottom: 0px !important;
-		line-height: 1.2;
-		position: relative;
-		left: 0px;
-		text-align: center;
-		color: #ffffff;
-		font-size: 14px;
-		word-wrap: break-word;
-		white-space: normal;
-		display: block;
-	}
-	.sidebar-collapse .organisateur .info {
-		display: none;
-	}
-	.brand-text {
-		font-weight: 500;
-		display: block;
-		margin-left: 10px;
-		transition: width .3s ease-in-out;
-		white-space: nowrap;
-		letter-spacing: 3px;
-	}
-	.sidebar-no-expand .brand-link .brand-image {
-		margin-left: 2.9rem;
-		transition: width .3s ease-in-out;
-	}
-	.sidebar-collapse .brand-link .brand-image {
-		margin-left: .95rem;
-		transition: width .3s ease-in-out;
-	}
+    /* 1. Sidebar et Header - Couleur Uniforme #3E2F28 */
+    .main-sidebar,
+    .main-sidebar .sidebar {
+        background-color: #3E2F28 !important;
+    }
 
-	/* Style du bouton "+" */
+    /* Header sans texte Sacadoc, centré sur le logo */
+    .brand-link {
+        background-color: #3E2F28 !important;
+        border-bottom: none !important;
+        padding: 15px 0px 5px 0px !important;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        height: auto !important;
+    }
+
+    /* Logo Organisateur Principal */
+    .brand-image-custom {
+        max-height: 120px !important;
+        max-width: 85%;
+        width: auto;
+        display: block;
+        transition: all 0.3s ease-in-out;
+    }
+
+    /* 2. Recherche Minimale */
+    .form-control-sidebar {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: none !important;
+        color: #fff !important;
+    }
+    .btn-sidebar {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: none !important;
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    /* --- EFFET HOVER SUR LA RECHERCHE --- */
+    .input-group:hover .form-control-sidebar,
+    .input-group:hover .btn-sidebar {
+        background-color: rgba(255, 255, 255, 0.12) !important; /* Devient plus clair au survol */
+    }
+
+    /* --- EFFET FOCUS (Quand on clique dedans pour écrire) --- */
+    .form-control-sidebar:focus {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: #fff !important;
+        box-shadow: none !important; /* Enlève le halo bleu par défaut de Bootstrap */
+        border-radius: 4px 0 0 4px !important;
+    }
+
+    /* On fait aussi réagir le bouton loupe quand le champ est focus */
+    .form-control-sidebar:focus + .input-group-append .btn-sidebar {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: #ff851b !important; /* La loupe devient orange quand on cherche */
+    }
+
+    /* Petit effet de transition fluide */
+    .form-control-sidebar, .btn-sidebar {
+        transition: all 0.3s ease !important;
+    }
+
+    /* 3. Menu de navigation */
+    .nav-sidebar .nav-item {
+        margin: 2px 0;
+        position: relative;
+    }
+
+    .nav-sidebar .nav-link {
+        font-weight: 300;
+        font-size: 0.9rem;
+        padding: 10px 15px !important;
+        border-left: 4px solid transparent;
+        transition: all 0.2s;
+        color: rgba(255,255,255,0.7) !important;
+        width: 100%;
+    }
+
+    /* État Actif : Barre Orange */
+    .nav-sidebar .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: #ffffff !important;
+        border-left: 4px solid #ff851b !important;
+    }
+
+    /* État Survol */
+    .nav-sidebar .nav-link:hover:not(.active) {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+        border-left: 4px solid rgba(255, 133, 27, 0.4) !important;
+        color: #ffffff !important;
+    }
+
+    /* Style du bouton "+" utilisateur */
     .add-reglement {
         position: absolute;
-        right: 0.5rem;
-        padding: 4px 6px 15px 0px;
-        font-size: 22px;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 1.1rem;
+        transition: all 0.2s;
+        z-index: 5;
     }
 
     .add-reglement:hover {
-        font-size: 28px;
+        color: #ff851b; /* Devient orange au survol */
+        transform: translateY(-50%) scale(1.2);
     }
+
+    .nav-header {
+        font-size: 0.65rem !important;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.3) !important;
+        padding: 25px 20px 10px 20px !important;
+    }
+
+    /* 4. GESTION FERMETURE */
+    .sidebar-collapse .brand-image-custom {
+        max-height: 35px !important;
+    }
+    .sidebar-collapse .add-reglement {
+        display: none; /* Cache les "+" quand réduit */
+    }
+
+    /* Ombre subtile sur le bord droit de la sidebar */
+    .main-sidebar {
+        box-shadow: 4px 0 10px rgba(0, 0, 0, 0.4) !important;
+        border-right: none !important; /* On enlève le trait plat pour privilégier l'ombre */
+        z-index: 1038; /* S'assure que l'ombre passe au-dessus du contenu */
+    }
+
 </style>
 
 {% get_item_defaut options_interface "sidebar-no-expand" True as sidebar_no_expand %}
 
-<aside class="main-sidebar main-sidebar-custom sidebar-dark-lightblue
-    {% if sidebar_no_expand %}sidebar-no-expand{% endif %}">
+<aside class="main-sidebar sidebar-dark-primary {% if sidebar_no_expand %}sidebar-no-expand{% endif %}">
 
-    <!-- Logo -->
-    <a href="{% url 'accueil' %}" class="brand-link navbar-lightblue">
-        <img src="{% static "images/logo_blanc.png" %}" alt="Logo Noethys" class="brand-image" style="opacity: .4">
-        <span class="brand-text font-weight-light" style="opacity: .6">Sacadoc</span>
+    <a href="{% url 'accueil' %}" class="brand-link">
+        {% if organisateur.logo %}
+            <img src="{{ organisateur.logo.url }}" alt="{{ organisateur.nom }}" class="brand-image-custom">
+        {% endif %}
     </a>
 
-    <!-- sidebar: style can be found in sidebar.less -->
     <div class="sidebar">
 
-        <!-- Logo de l'organisateur -->
-        <div class="organisateur">
-            <div class="image">
-                {% if organisateur.logo %}
-                    <img src="{{ organisateur.logo.url }}" class="rounded" alt="Logo organisateur">
-                {% endif %}
-            </div>
-            <div class="info">
-                <span>{{ organisateur.nom }}</span>
-            </div>
-        </div>
-
-        <!-- Recherche -->
-        <div>
+        <div class="mt-3 px-2">
             <form id="form_recherche2" action="{% url 'rechercher' %}" method="GET" role="search">
                 {% csrf_token %}
                 <div class="input-group">
                     <input class="form-control form-control-sidebar" id="champ-recherche2" name="champ_recherche"
-                        type="search" placeholder="Rechercher une famille..." aria-label="Rechercher une famille...">
+                        type="search" placeholder="Rechercher...">
                     <div class="input-group-append">
                         <button class="btn btn-sidebar">
                             <i class="fa fa-search fa-fw"></i>
@@ -103,35 +163,34 @@
             </form>
         </div>
 
-        <!-- Menu Principal -->
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                 <li class="nav-header">{{ menu_principal.titre|upper }}</li>
 
                 {% for child in menu_principal.GetChildren %}
                     {% if child.toujours_afficher or child.HasChildren %}
-                        <li class="nav-item d-flex justify-content-between align-items-center" title="{{ child.titre }}">
+                        <li class="nav-item d-flex align-items-center">
                             <a class="nav-link {% if child in breadcrumb %} active{% endif %}"
                                {% if child.code %}href="{% url child.code %}"{% endif %}>
                                 <i class="nav-icon fa fa-{{ child.icone }}"></i>
                                 <p>{{ child.titre }}</p>
                             </a>
 
+                            {# Fonctions rapides utilisateur #}
                             {% if child.titre == "Finances" %}
-                                <a href="{% url 'ajouter_reglement_familles' %}" class="add-reglement" title="Ajouter un règlement">
-                                    <i class="nav-icon fa fa-plus-circle"></i>
+                                <a href="{% url 'ajouter_reglement_familles' %}" class="add-reglement">
+                                    <i class="fa fa-plus-circle"></i>
                                 </a>
                             {% endif %}
                             {% if child.titre == "Comptabilité" %}
-                                <a href="{% url 'operations_tresorerie_liste' %}" class="add-reglement" title="Ajouter une opération">
-                                    <i class="nav-icon fa fa-plus-circle"></i>
+                                <a href="{% url 'operations_tresorerie_liste' %}" class="add-reglement">
+                                    <i class="fa fa-plus-circle"></i>
                                 </a>
                             {% endif %}
                         </li>
                     {% endif %}
                 {% endfor %}
 
-                <!-- Signaler un bug -->
                 {% if mode_demo %}
                     <li class="nav-item">
                         <a class="nav-link text-danger" href="https://assisthys.noethysweb.com/" target="_blank">
@@ -142,18 +201,4 @@
             </ul>
         </nav>
     </div>
-    <!-- /.sidebar -->
 </aside>
-
-{% block scripts %}
-    <script>
-        $(document).ready(function() {
-            $("#form_recherche2").on('submit', function(event) {
-                if ($("#champ-recherche2").val().length < 3) {
-                    event.preventDefault();
-                    toastr.error("Une recherche doit être effectuée sur un minimum de 3 caractères");
-                };
-            });
-        });
-    </script>
-{% endblock scripts %}

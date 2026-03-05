@@ -62,7 +62,9 @@ class View(CustomView, TemplateView):
         context['liste_documents'] = liste_documents
 
         famille = self.request.user.famille
-        pieces = Piece.objects.filter(famille=famille)
+        # Récupérer les pièces de la famille ET des individus (pour gérer valide_rattachement)
+        individus_famille = famille.rattachement_set.all().values_list('individu_id', flat=True)
+        pieces = Piece.objects.filter(Q(famille=famille) | Q(individu__in=individus_famille))
         context['liste_pieces'] = pieces
 
         attestation = Attestationdoc.objects.filter(famille=famille)

@@ -56,7 +56,7 @@ class Formulaire(FormulaireBase, ModelForm):
         # Filtrage des activités selon les structures de l'utilisateur
         self.fields["activites"].queryset = Activite.objects.filter(
             structure__in=self.request.user.structures.all(),
-            visible=True
+            actif = True
         )
 
         # Layout simplifié uniquement pour Stripe

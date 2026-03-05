@@ -1,97 +1,110 @@
 {% load static %}
 
 <style>
-	.organisateur {
-		position: relative;
-		width: 100%;
-		padding: 15px 0px 10px 0px;
-		overflow: hidden;
-        border-bottom: 1px solid #5f5f5f;
-	}
-	.organisateur > .image > img {
-		display: block;
-		width: 100%;
-		max-width: 180px;
-		height: auto;
-		margin-left: auto;
-		margin-right: auto;
-	}
-	.organisateur > .info {
-		padding: 15px 5px 10px 5px;
-        margin-bottom: 0px !important;
-		line-height: 1.2;
-		position: relative;
-		left: 0px;
-		text-align: center;
-		color: #ffffff;
-		font-size: 14px;
-		word-wrap : break-word;
-		white-space: normal;
-        display: block;
-	}
-    .sidebar-collapse > .organisateur > .info {
-          animation-name: fadeOut;
-          animation-fill-mode: both;
-          visibility: hidden;
-        }
-    .sidebar-collapse .organisateur .info{
-        display: none;
-    }
-    .brand-text {
-        FONT-WEIGHT: 500;
-        display: block;
-        {#font-size: 1.4rem;#}
-        {#line-height: 0.5;#}
-        margin-left: 10px;
-        transition: width .3s ease-in-out;
-        white-space: nowrap;
-        letter-spacing: 3px;
-    }
-    .sidebar-no-expand .brand-link .brand-image {
-        margin-left: 2.9rem;
-        transition: width .3s ease-in-out;
-    }
-    .sidebar-collapse .brand-link .brand-image {
-        margin-left: .95rem;
-        transition: width .3s ease-in-out;
+    /* Uniformisation de la largeur (Optionnel : ajuste ici si besoin) */
+    :root {
+        --sidebar-bg: #3E2F28;
     }
 
+    /* 1. Sidebar et Header - Couleur Uniforme #3E2F28 */
+    .main-sidebar,
+    .main-sidebar .sidebar {
+        background-color: var(--sidebar-bg) !important;
+    }
 
+    .brand-link {
+        background-color: var(--sidebar-bg) !important;
+        border-bottom: none !important;
+        padding: 10px 0px 5px 0px !important; /* Espace réduit en haut du logo */
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        height: auto !important;
+    }
+
+    /* Logo Organisateur */
+    .brand-image-custom {
+        max-height: 150px !important;
+        max-width: 85%; /* Évite que le logo ne touche les bords */
+        width: auto;
+        display: block;
+        transition: all 0.3s ease-in-out;
+    }
+
+    /* 2. Menu de navigation */
+    .nav-sidebar .nav-item {
+        margin: 2px 0;
+    }
+
+    .nav-sidebar .nav-link {
+        font-weight: 300;
+        font-size: 0.9rem;
+        padding: 10px 15px !important; /* Un peu de padding latéral pour le texte */
+        border-left: 4px solid transparent;
+        transition: all 0.2s;
+        color: rgba(255,255,255,0.7) !important;
+    }
+
+    /* État Actif : Barre Orange et fond subtil */
+    .nav-sidebar .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: #ffffff !important;
+        border-left: 4px solid #ff851b !important; /* Ton orange */
+    }
+
+    /* État Survol */
+    .nav-sidebar .nav-link:hover:not(.active) {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+        border-left: 4px solid rgba(255, 133, 27, 0.4) !important;
+        color: #ffffff !important;
+    }
+
+    .nav-icon {
+        font-size: 0.85rem !important;
+        margin-right: 12px !important;
+    }
+
+    .nav-header {
+        font-size: 0.65rem !important;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.3) !important;
+        padding: 25px 20px 10px 20px !important;
+    }
+
+    /* 3. GESTION FERMETURE (Sidebar-collapse) */
+    .sidebar-collapse .brand-image-custom {
+        max-height: 35px !important;
+    }
+    .sidebar-collapse .brand-link {
+        padding: 15px 0 !important;
+    }
+        /* Ombre subtile sur le bord droit de la sidebar */
+    .main-sidebar {
+        box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3) !important;
+        border-right: none !important; /* On enlève le trait plat pour privilégier l'ombre */
+        z-index: 1038; /* S'assure que l'ombre passe au-dessus du contenu */
+    }
 </style>
 
 {% get_item_defaut options_interface "sidebar-no-expand" True as sidebar_no_expand %}
 
-<aside class="main-sidebar sidebar-dark-lightblue
-    {% if sidebar_no_expand %}sidebar-no-expand{% endif %}
-">
+<aside class="main-sidebar sidebar-dark-primary {% if sidebar_no_expand %}sidebar-no-expand{% endif %}">
 
-    <!-- Logo -->
-    <a href="{% url 'portail_accueil' %}" class="brand-link navbar-lightblue">
-      <img src="{% static "images/logo_blanc.png" %}" alt="Logo Noethysweb" class="brand-image" style="opacity: .4">
-      <span class="brand-text font-weight-light" style="opacity: .6">Sacadoc</span>
+    <a href="{% url 'portail_accueil' %}" class="brand-link">
+        {% if organisateur.logo %}
+            <img src="{{ organisateur.logo.url }}" alt="{{ organisateur.nom }}" class="brand-image-custom">
+        {% endif %}
     </a>
 
-    <!-- sidebar: style can be found in sidebar.less -->
     <div class="sidebar">
-
-        <!-- Logo de l'organisateur -->
-        <div class="organisateur">
-            <div class="image">
-                {% if organisateur.logo %}
-                    <img src="{{ organisateur.logo.url }}" class="rounded" alt="Logo organisateur">
-                {% endif %}
-            </div>
-            <div class="info">
-                <span>{{ organisateur.nom }}</span>
-            </div>
-        </div>
-
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                <li class="nav-header">{{ menu_principal.titre|upper }}</li>
+                <li class="nav-header">{{ menu_principal.titre }}</li>
+
                 {% for child in menu_principal.GetChildren %}
                     {% if child.toujours_afficher or child.HasChildren %}
-                        <li class="nav-item" title="{{ child.titre }}">
+                        <li class="nav-item">
                             <a class="nav-link {% if child in breadcrumb %} active{% endif %}" {% if child.code %}href="{% url child.code %}"{% endif %}>
                                 <i class="nav-icon fa fa-{{ child.icone }}"></i>
                                 <p>{{ child.titre }}</p>
@@ -99,10 +112,7 @@
                         </li>
                     {% endif %}
                 {% endfor %}
-
             </ul>
         </nav>
-
     </div>
-    <!-- /.sidebar -->
 </aside>

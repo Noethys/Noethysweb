@@ -4,41 +4,102 @@
 {% load static %}
 {% load embed %}
 
-
 {% block styles %}
     {{ block.super }}
     <style>
-        .card-individu .nav > li:first-child > a {
-            border-left: 0px solid;
-        }
-        .card-individu .list-group a {
-            border-radius: 0.25rem;
-        }
+        /* Carte individu */
         .card-individu {
-            border-radius: 5px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            transition: 0.2s ease-in-out;
+            margin-bottom: 1.5rem;
+        }
+        .card-individu:hover {
+            transform: translateY(-2px);
+        }
+
+        /* User block */
+        .user-block img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .user-block .username {
+            font-weight: 600;
+            margin-left: 3rem;
+        }
+        .user-block .description {
+            margin-left: 3rem;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        /* Badge activités */
+        .badge-activite {
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin-right: 6px;
+            margin-bottom: 4px;
+            display: inline-block;
+        }
+
+        /* Bouton inscrire moderne */
+        .btn-inscrire {
+            border-radius: 50px;
+            padding: 10px 22px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-inscrire i {
+            transition: transform 0.2s ease-in-out;
+        }
+        .btn-inscrire:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+        .btn-inscrire:hover i {
+            transform: rotate(15deg);
+        }
+        .btn-inscrire:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none;
         }
     </style>
 {% endblock %}
 
 {% block contenu_page %}
 
-    {# Texte d'introduction #}
-    {% if parametres_portail.activites_intro %}
-        <div style="margin-bottom: 20px;">
-            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.activites_intro }}
-        </div>
-    {% endif %}
 
+    {# Bouton inscrire avec condition cliquable #}
     {% if activites_ouvertes_inscription %}
         <p>
-            <a title="{% trans "Cliquez ici pour inscrire un individu à une nouvelle activité" %}" href="{% url 'portail_inscrire_activite' %}" class="btn btn-success mb-2" type="button">
-                <i class="fa fa-plus margin-r-5"></i>{% blocktrans %}Inscrire à une nouvelle activité{% endblocktrans %}
-            </a>
+            {% if not nbre_verifications_manquantes %}
+                <a href="{% url 'portail_inscrire_activite' %}"
+                   class="btn btn-success btn-inscrire mb-3">
+                    <i class="fa fa-plus mr-1"></i>{% blocktrans %}Inscrire à une nouvelle activité{% endblocktrans %}
+                </a>
+            {% else %}
+                <div class="mb-3 d-flex align-items-center">
+                    <button class="btn btn-danger btn-inscrire mr-2" disabled>
+                        <i class="fa fa-plus mr-1"></i>{% blocktrans %}Inscrire à une nouvelle activité{% endblocktrans %}
+                    </button>
+                    <span class="text-muted d-flex align-items-center">
+                        <i class="fa fa-info-circle mr-2"></i>
+                        {% blocktrans %}Merci de corriger les alertes en page d'accueil avant d'inscrire votre enfant.{% endblocktrans %}
+                    </span>
+                </div>
+            {% endif %}
         </p>
     {% endif %}
 
+    {# Liste des individus #}
     {% for individu in liste_individus %}
-        <div class="card card-individu mb-4">
+        <div class="card card-individu">
 
             <!-- Nom de l'individu -->
             <div class="user-block card-footer m-0" style="padding: .6rem 1rem;">
@@ -48,82 +109,70 @@
             </div>
 
             <!-- Liste des activités -->
-            <div class="p-2" style="background-color: #00000008;">
-                <div>
-                    <table class="table table-bordered table-sm mb-0"  style="background-color: #FFFFFF;">
-                        <thead>
-                            <tr class="text-center">
-                                <th>{% trans "Activité" %}</th>
-                                <th>{% trans "Groupe" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for inscription in individu.inscriptions %}
-                                <tr class="text-center">
-                                    <td>{{ inscription.activite.nom }}</td>
-                                    <td>{{ inscription.groupe.nom }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% for demande in demandes_inscriptions_attente|get_item:individu.pk %}
-                        demande={{ demande }}
+            <div class="p-3 bg-light rounded-bottom">
+                {% if individu.inscriptions %}
+                    {% for inscription in individu.inscriptions %}
+                        <span class="badge badge-primary badge-activite">
+                            {{ inscription.activite.nom }}
+                            {% if inscription.groupe %}
+                                - {{ inscription.groupe.nom }}
+                            {% endif %}
+                        </span>
                     {% endfor %}
-                </div>
+                {% else %}
+                    <span class="text-muted">
+                        <i class="fa fa-info-circle"></i> Aucune activité
+                    </span>
+                {% endif %}
             </div>
 
         </div>
-
     {% endfor %}
 
+    {# Demandes en attente #}
     {% if demandes_inscriptions_attente %}
         <div class="card card-individu bg-warning">
 
-            <!-- Nom de l'individu -->
             <div class="user-block card-footer m-0" style="padding: .6rem 1rem;">
-                <span class=""><b><i class="fa fa-hourglass-half margin-r-5"></i> Demandes d'inscription en attente de traitement</b></span>
+                <b><i class="fa fa-hourglass-half mr-1"></i> Demandes d'inscription en attente de traitement</b>
             </div>
 
-            <div class="p-2" style="background-color: #00000008;">
-                <div>
-                    <table class="table table-bordered table-sm mb-0"  style="background-color: #FFFFFF;">
-                        <thead>
-                            <tr class="text-center">
-                                <th>Individu à inscrire</th>
-                                <th>Activité souhaitée</th>
-
+            <div class="p-3 bg-light rounded-bottom">
+                <table class="table table-bordered table-sm mb-0 bg-white">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Individu à inscrire</th>
+                            <th>Activité souhaitée</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        {% for demande in demandes_inscriptions_attente %}
+                            <tr>
+                                <td>{{ demande.individu.prenom }}</td>
+                                <td>{{ demande.nom_activite }}</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm"
+                                            onclick="traiter_demande({{ demande.pk }}, 'REFUS')"
+                                            title="Annuler la demande">
+                                        Annuler
+                                    </button>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {% for demande in demandes_inscriptions_attente %}
-                                <tr class="text-center">
-                                    <td>{{ demande.individu.prenom }}</td>
-                                    <td>{{ demande.nom_activite }}</td>
-                                    <td>
-                                        <button class="btn btn-danger btn-circle btn-sm"
-                                                onclick="traiter_demande({{ demande.pk }}, 'REFUS')"
-                                                title="Annuler la demande"> Annuler la demande
-                                        </button>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-        </div>
 
+        </div>
     {% endif %}
 
 {% endblock contenu_page %}
 
-
 {% block scripts %}
     {{ block.super }}
     <script>
-
         function traiter_demande(iddemande, etat) {
-            // Modifie la donnée
             $.ajax({
                 type: "POST",
                 url: "{% url 'ajax_annulation_portail' %}",
@@ -135,19 +184,15 @@
                 datatype: "json",
                 success: function(data){
                     if (data.redirection) {
-                        // Redirection
                         window.location.href = data.redirection;
                     } else {
-                        // Recharge la liste
-                        var table = $('.datatable').DataTable()
-                        table.ajax.reload(null, false);
+                        location.reload();
                     }
                 },
                 error: function(data) {
-                    toastr.error("Erreur");
+                    toastr.error("Erreur lors du traitement de la demande");
                 }
-            })
+            });
         };
-
     </script>
 {% endblock scripts %}

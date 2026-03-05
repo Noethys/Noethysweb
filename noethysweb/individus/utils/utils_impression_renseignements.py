@@ -29,41 +29,45 @@ class Impression(utils_impression.Impression):
     def Draw(self):
         # Importation des rattachements
         conditions = Q(pk__in=self.dict_donnees["rattachements"])
-        rattachements = Rattachement.objects.select_related("individu", "famille", "individu__medecin").prefetch_related("individu__regimes_alimentaires", "individu__maladies").filter(conditions).distinct().order_by("individu__nom", "individu__prenom")
+        rattachements = Rattachement.objects.select_related("individu", "famille", "individu__medecin").prefetch_related("individu__regimes_alimentaires", "individu__maladies", "individu__allergies", "individu__dispmed").filter(conditions).distinct().order_by("individu__nom", "individu__prenom")
         if not rattachements:
             self.erreurs.append("Aucun individu n'a été trouvé avec les paramètres donnés")
 
+        # Récupération des IDs nécessaires pour filtrer les requêtes
+        individus_ids = [r.individu_id for r in rattachements]
+        familles_ids = [r.famille_id for r in rattachements]
+
         # Importation de tous les représentants
         dict_representants = {}
-        for rattachement in Rattachement.objects.select_related("individu").filter(categorie=1):
+        for rattachement in Rattachement.objects.select_related("individu").filter(categorie=1, famille_id__in=familles_ids):
             dict_representants.setdefault(rattachement.famille_id, [])
             dict_representants[rattachement.famille_id].append(rattachement)
 
         # Importation de tous les liens
         dict_liens = {}
-        for lien in Lien.objects.all():
+        for lien in Lien.objects.filter(Q(individu_sujet_id__in=individus_ids) | Q(individu_objet_id__in=individus_ids)):
             dict_liens[(lien.individu_sujet_id, lien.individu_objet_id)] = lien
 
         # Importation de toutes les assurances
         dict_assurances = {}
-        for assurance in Assurance.objects.select_related("assureur").filter(Q(date_debut__lte=datetime.date.today()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))).order_by("date_debut"):
+        for assurance in Assurance.objects.select_related("assureur").filter(Q(individu_id__in=individus_ids) | Q(famille_id__in=familles_ids), Q(date_debut__lte=datetime.date.today()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))).order_by("date_debut"):
             dict_assurances[(assurance.individu_id, assurance.famille_id)] = assurance
 
         # Importation de toutes les scolarités
         dict_scolarites = {}
-        for scolarite in Scolarite.objects.select_related("ecole", "classe", "niveau").filter(date_fin__gte=datetime.date.today()).order_by("date_debut"):
+        for scolarite in Scolarite.objects.select_related("ecole", "classe", "niveau").filter(individu_id__in=individus_ids, date_fin__gte=datetime.date.today()).order_by("date_debut"):
             dict_scolarites[scolarite.individu_id] = scolarite
 
         # Importation de tous les contacts
         dict_contacts = {}
-        for contact in ContactUrgence.objects.all().order_by("nom", "prenom"):
+        for contact in ContactUrgence.objects.filter(Q(individu_id__in=individus_ids) | Q(famille_id__in=familles_ids)).order_by("nom", "prenom"):
             key = (contact.individu_id, contact.famille_id)
             dict_contacts.setdefault(key, [])
             dict_contacts[key].append(contact)
 
         # Importation de toutes les informations
         dict_informations = {}
-        for information in Information.objects.all().order_by("intitule"):
+        for information in Information.objects.filter(individu_id__in=individus_ids).order_by("intitule"):
             dict_informations.setdefault(information.individu_id, [])
             dict_informations[information.individu_id].append(information)
 
@@ -120,6 +124,11 @@ class Impression(utils_impression.Impression):
         # Préparation du tableau
         largeur_contenu = self.taille_page[0] - 75
 
+        # Importation de l'organisateur (une seule fois avant la boucle)
+        organisateur = cache.get('organisateur', None)
+        if not organisateur:
+            organisateur = cache.get_or_set('organisateur', Organisateur.objects.filter(pk=1).first())
+
         # Tri des pages
         def tri_classe(rattachement):
             scolarite = dict_scolarites.get(rattachement.individu_id, None)
@@ -130,11 +139,6 @@ class Impression(utils_impression.Impression):
 
         # Remplissage du tableau
         for rattachement in rattachements:
-
-            # Importation de l'organisateur
-            organisateur = cache.get('organisateur', None)
-            if not organisateur:
-                organisateur = cache.get_or_set('organisateur', Organisateur.objects.filter(pk=1).first())
 
             # Importation de la photo de l'individu
             nom_fichier = rattachement.individu.Get_photo(forTemplate=False)

@@ -182,14 +182,57 @@ def Valid_form(request):
         print(f"Erreur enregistrement : {e}")
         return JsonResponse({"erreur": "Erreur lors de la sauvegarde de la demande"}, status=500)
 
-    # 8. Enregistrement des pièces jointes
+    # 8. Enregistrement des pièces jointes uploadées
     for nom_champ, valeur in form_extra.cleaned_data.items():
         if nom_champ.startswith("document_") and valeur:
-            # Ton code existant pour enregistrer les pièces...
-            pass
+            try:
+                # Extraction de l'ID du type de pièce depuis le nom du champ (document_XXX)
+                type_piece = TypePiece.objects.get(pk=int(nom_champ.split("_")[1]))
+
+                # Paramètres de la pièce à enregistrer selon le type
+                if type_piece.public == "individu":
+                    piece_individu = form.cleaned_data["individu"]
+                    # Si valide_rattachement, on ne met PAS la famille (la pièce est liée uniquement à l'individu)
+                    piece_famille = None if type_piece.valide_rattachement else form.cleaned_data["famille"]
+                else:  # famille
+                    piece_individu = None
+                    piece_famille = form.cleaned_data["famille"]
+                                
+                # Création de la pièce
+                piece = Piece.objects.create(
+                    titre=type_piece.nom,
+                    document=valeur,
+                    famille=piece_famille,
+                    individu=piece_individu,
+                    type_piece=type_piece,
+                    date_debut=datetime.date.today(),
+                    date_fin=type_piece.Get_date_fin_validite(),
+                    auteur=request.user
+                )
+                
+                # Enregistrement du renseignement de portail (utiliser la famille du form, pas la variable locale)
+                PortailRenseignement.objects.create(
+                    famille=form.cleaned_data["famille"], 
+                    individu=form.cleaned_data["individu"], 
+                    categorie="famille_pieces", 
+                    code="Nouvelle pièce", 
+                    validation_auto=True,
+                    nouvelle_valeur=json.dumps(piece.Get_nom(), cls=DjangoJSONEncoder), 
+                    idobjet=piece.pk
+                )
+                
+                logger.info(f"Pièce '{type_piece.nom}' uploadée pour {piece_individu or 'la famille'} lors de l'inscription à {activite}")
+            
+            except (ValueError, TypePiece.DoesNotExist) as e:
+                logger.error(f"Erreur lors de l'enregistrement de la pièce {nom_champ}: {e}")
+                # On continue malgré l'erreur pour ne pas bloquer l'inscription
+            except Exception as e:
+                logger.error(f"Erreur inattendue lors de l'enregistrement de la pièce {nom_champ}: {e}")
+                # On continue malgré l'erreur pour ne pas bloquer l'inscription
 
     messages.add_message(request, messages.SUCCESS, "Votre demande d'inscription a été transmise")
     return JsonResponse({"succes": True, "url": reverse_lazy("portail_activites")})
+
 
 class Page(CustomView):
     model = PortailRenseignement

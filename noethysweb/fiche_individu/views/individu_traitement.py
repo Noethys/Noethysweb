@@ -27,12 +27,12 @@ class Liste(Onglet, DetailView):
         context['box_titre'] = _("Liste des traitements effectués par l'assistant sanitaire")
         context['box_introduction'] = _("Pour ajouter un traitement merci de passer par l'onglet Outils/Assistant sanitaire.")
         context['onglet_actif'] = self.onglet_actif
-        context['traitements'] = self.get_traitement()
+        context['traitements'] = self.get_traitements()
         context['idfamille'] = self.kwargs.get('idfamille')
         context['idindividu'] = self.kwargs.get('idindividu')
         return context
 
-    def get_traitement(self):
+    def get_traitements(self):
         individu = self.get_object()
         date_actuelle = now()
         date_limite = date_actuelle - timedelta(days=365)

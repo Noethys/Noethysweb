@@ -109,7 +109,69 @@
             }
             .info-box-content { overflow: visible !important; }
 
-            /* Style des box de documents */
+            /* === DESIGN COMPACT ET RESPONSIVE DES PIÈCES === */
+            .piece-grid {
+                margin-left: -0.25rem;
+                margin-right: -0.25rem;
+            }
+            
+            .piece-item {
+                background: #fff;
+                transition: all 0.2s ease;
+                min-height: 60px;
+            }
+            
+            .piece-item:hover {
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transform: translateY(-1px);
+            }
+            
+            .piece-item strong {
+                line-height: 1.3;
+            }
+            
+            .piece-item small {
+                font-size: 0.8rem;
+                line-height: 1.2;
+            }
+            
+            /* Background spécial pour les pièces expirées */
+            .bg-warning-light {
+                background-color: #fff3cd !important;
+            }
+            
+            /* Boutons compacts */
+            .piece-item .btn-group-sm .btn {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+            }
+            
+            /* Input files compacts */
+            .form-control-file.form-control-sm {
+                font-size: 0.8rem;
+                height: calc(1.5em + 0.5rem + 2px);
+                padding: 0.25rem 0.5rem;
+            }
+            
+            /* Responsive : 1 colonne sur mobile */
+            @media (max-width: 767px) {
+                .piece-item {
+                    margin-bottom: 0.5rem;
+                }
+                .piece-item .d-flex {
+                    flex-direction: column;
+                    align-items: flex-start !important;
+                }
+                .piece-item .btn-group {
+                    margin-top: 0.5rem;
+                    width: 100%;
+                }
+                .piece-item .btn-group .btn {
+                    flex: 1;
+                }
+            }
+
+            /* Style des box de documents (ancien style conservé pour compatibilité) */
             .document-upload-box {
                 transition: all 0.3s ease;
                 border-left: 4px solid #17a2b8 !important;
@@ -141,10 +203,71 @@
                 width: 50px;
                 font-size: 1.2rem;
             }
+
+            /* Skeleton loader pour les pièces - VERSION COMPACTE */
+            .skeleton-piece {
+                animation: skeleton-loading 1s linear infinite alternate;
+                background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                background-size: 200% 100%;
+                border-radius: 0.25rem;
+            }
+            @keyframes skeleton-loading {
+                0% { background-position: 200% 0; }
+                100% { background-position: -200% 0; }
+            }
+            .skeleton-line {
+                height: 16px;
+                margin-bottom: 4px;
+                border-radius: 4px;
+            }
+            .skeleton-badge {
+                height: 20px;
+                width: 100px;
+                display: inline-block;
+                border-radius: 10px;
+            }
+            .skeleton-btn {
+                height: 28px;
+                width: 80px;
+                display: inline-block;
+                border-radius: 4px;
+            }
         </style>
 
     {% endblock %}
 {% endembed %}
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="modalConfirmSuppression" tabindex="-1" role="dialog" aria-labelledby="modalConfirmSuppressionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalConfirmSuppressionLabel">
+                    <i class="fa fa-exclamation-triangle mr-2"></i>Confirmer la suppression
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3"><strong>Êtes-vous sûr de vouloir supprimer cette pièce ?</strong></p>
+                <p class="text-muted small mb-0">
+                    <i class="fa fa-info-circle mr-1"></i>
+                    Vous pourrez la fournir ultérieurement si nécessaire.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fa fa-times mr-1"></i>Annuler
+                </button>
+                <button type="button" class="btn btn-danger" id="btnConfirmerSuppression">
+                    <i class="fa fa-trash mr-1"></i>Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock contenu_page %}
 
 {% block scripts %}
@@ -286,6 +409,95 @@ $(function () {
             $('input[name="' + $radio.attr('name') + '"]').data('waschecked', false);
             $radio.data('waschecked', true);
         }
+    });
+
+    // --- 4. Gestion de la suppression de pièces ---
+    let pieceToDelete = null;
+    let typePieceToDelete = null;
+    let $colToDelete = null;
+
+    // Ouvrir la modal de confirmation
+    $(document).on('click', '.btn-supprimer-piece', function(e) {
+        e.preventDefault();
+        pieceToDelete = $(this).data('piece-id');
+        typePieceToDelete = $(this).data('type-piece-id');
+        $colToDelete = $(this).closest('.col-md-6, .col-12');
+        $('#modalConfirmSuppression').modal('show');
+    });
+
+    // Confirmer la suppression
+    $('#btnConfirmerSuppression').on('click', function() {
+        if (!pieceToDelete || !typePieceToDelete || !$colToDelete) return;
+
+        const $btn = $(this);
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i>Suppression...');
+        
+        // Fermer la modal
+        $('#modalConfirmSuppression').modal('hide');
+        
+        // Remplacer le contenu de la colonne par un skeleton pendant le chargement
+        const skeletonHtml = `
+            <div class='piece-item border border-secondary rounded p-2'>
+                <div class='d-flex align-items-center'>
+                    <div class='flex-grow-1 mr-2'>
+                        <div class='skeleton-piece skeleton-line' style='width: 70%; height: 16px; margin-bottom: 4px;'></div>
+                        <div class='skeleton-piece skeleton-line' style='width: 50%; height: 12px;'></div>
+                    </div>
+                    <div class='skeleton-piece skeleton-btn' style='width: 80px; height: 28px;'></div>
+                </div>
+            </div>
+        `;
+        
+        $colToDelete.html(skeletonHtml);
+        
+        // Suppression via AJAX
+        $.ajax({
+            url: "/documents/supprimer_piece/" + pieceToDelete + "/",
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: "{{ csrf_token }}"
+            },
+            success: function() {
+                // Recharger le formulaire pour obtenir le HTML à jour
+                $.post("{% url 'portail_ajax_inscrire_get_form_extra' %}", $form.serialize())
+                    .done(function(data) {
+                        // Créer un élément temporaire pour parser le HTML
+                        const $tempDiv = $('<div>').html(data.form_html);
+                        
+                        // Chercher la colonne contenant le document_<type_piece_id> (la pièce maintenant manquante)
+                        const $newPieceCol = $tempDiv.find(`input[name="document_${typePieceToDelete}"]`).closest('.col-md-6, .col-12');
+                        
+                        if ($newPieceCol.length > 0) {
+                            // Remplacer UNIQUEMENT cette colonne avec le HTML du formulaire Django
+                            $colToDelete.html($newPieceCol.html()).hide().fadeIn(300);
+                        } else {
+                            // Fallback : masquer la colonne si la pièce n'est plus nécessaire
+                            $colToDelete.fadeOut(300, function() { $(this).remove(); });
+                        }
+                        
+                        toastr.success('Pièce supprimée avec succès');
+                    })
+                    .fail(function() {
+                        toastr.error('Erreur lors du rechargement du formulaire');
+                        $colToDelete.fadeOut(200).fadeIn(200);
+                    })
+                    .always(function() {
+                        $btn.prop('disabled', false).html('<i class="fa fa-trash mr-1"></i>Supprimer');
+                        pieceToDelete = null;
+                        typePieceToDelete = null;
+                        $colToDelete = null;
+                    });
+            },
+            error: function() {
+                toastr.error('Erreur lors de la suppression de la pièce');
+                // Restaurer l'apparence originale en cas d'erreur
+                $colToDelete.fadeOut(200).fadeIn(200);
+                $btn.prop('disabled', false).html('<i class="fa fa-trash mr-1"></i>Supprimer');
+                pieceToDelete = null;
+                typePieceToDelete = null;
+                $colToDelete = null;
+            }
+        });
     });
 });
 </script>
