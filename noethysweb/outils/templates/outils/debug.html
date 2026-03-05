@@ -1,0 +1,32 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+<div class="box box-danger">
+    <div class="box-body no-padding">
+        <div style="background-color: #1e1e1e; color: #ffffff; font-family: 'Courier New', monospace; padding: 15px; height: 600px; overflow-y: scroll;">
+            {% for ligne in lignes_log %}
+                <div style="border-bottom: 1px solid #333; padding: 2px 0; font-size: 11px;">
+                    {% if "ERROR" in ligne or "CRITICAL" in ligne %}
+                        <span style="color: #ff5f56;">{{ ligne }}</span>
+                    {% elif "WARNING" in ligne %}
+                        <span style="color: #ffbd2e;">{{ ligne }}</span>
+                    {% else %}
+                        <span>{{ ligne }}</span>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <div style="padding: 20px; color: #888;">
+                    Aucune ligne trouvée dans la variable "lignes_log".
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="box-footer">
+        <code>{{ log_path }}</code>
+    </div>
+</div>
+{% endblock contenu_page %}
