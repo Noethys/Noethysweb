@@ -1286,6 +1286,7 @@ class Activite(models.Model):
     interne = models.BooleanField(verbose_name="Mutualisation questionnaire", default=False, help_text="Cochez cette case si vous souhaitez avoir le questionnaire habituel de Sacadoc destiné aux camps d'été")
     maitrise = models.BooleanField(verbose_name="Activité avec équipe encadrante", default=True, help_text="Cochez cette case si l'équipe encadrante doit s'inscrire à votre activité")
     actif = models.BooleanField(verbose_name="Activité active", default=True, help_text="")
+    date_traitements_visibles = models.DateTimeField(verbose_name="Date à partir de laquelle les traitements sont visibles", blank=True, null=True, help_text="Saisissez une date pour que les traitements soient visibles sur le portail à partir de cette date. Par défaut, les traitements sont visibles dès leur création.")
     objects = ActifManager()
     objects_all = models.Manager()
 

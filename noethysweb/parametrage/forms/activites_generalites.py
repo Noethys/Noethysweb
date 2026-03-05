@@ -44,10 +44,18 @@ class Formulaire(FormulaireBase, ModelForm):
     choix_coords = [("ORGANISATEUR", "Identiques à celles de l'organisateur"), ("SPECIFIQUE", "Coordonnées spécifiques à l'activité")]
     type_coords = forms.TypedChoiceField(label="Coordonnées de l'activité", choices=choix_coords, initial="ORGANISATEUR", required=False)
 
+    # Visibilité des traitements
+    choix_visibilite_traitements = [
+        ("DEBUT", "Ne pas cacher les traitements (visibles dès le début de l'activité)"),
+        ("FIN", "Montrer les traitements à la fin de l'activité"),
+        ("PERSONNALISE", "Choisir une date pour révéler les traitements")
+    ]
+    type_visibilite_traitements = forms.TypedChoiceField(label="Visibilité des traitements", choices=choix_visibilite_traitements, initial="DEBUT", required=False)
+
     class Meta:
         model = Activite
         fields = ["pay", "nom", "abrege", "pay_org", "coords_org", "rue", "cp", "ville", "tel", "fax", "mail", "site", "logo_org", "logo", "code_produit_local", "service1", "service2",
-                  "date_debut", "date_fin","abrege", "groupes_activites", "nbre_inscrits_max", "inscriptions_multiples", "regie", "code_comptable", "code_analytique", "structure", "public", "num_decla", "image"]
+                  "date_debut", "date_fin","abrege", "groupes_activites", "nbre_inscrits_max", "inscriptions_multiples", "regie", "code_comptable", "code_analytique", "structure", "public", "num_decla", "image", "date_traitements_visibles"]
         widgets = {
             'tel': Telephone(),
             'fax': Telephone(),
@@ -55,6 +63,7 @@ class Formulaire(FormulaireBase, ModelForm):
             'cp': CodePostal(attrs={"id_ville": "id_ville"}),
             'ville': Ville(attrs={"id_codepostal"   : "id_cp"}),
             'logo': Selection_image(),
+            'date_traitements_visibles': DatePickerWidget(),
         }
         help_texts = {
             "nom": "Saisissez le nom complet de l'activité.",
@@ -106,6 +115,20 @@ class Formulaire(FormulaireBase, ModelForm):
         else:
             self.fields['type_pay'].initial = "NON"
 
+        # Importe la visibilité des traitements
+        if self.instance.date_traitements_visibles is None:
+            self.fields['type_visibilite_traitements'].initial = "DEBUT"
+        else:
+            # Convertir le datetime en date pour la comparaison
+            date_traitement = self.instance.date_traitements_visibles.date() if hasattr(self.instance.date_traitements_visibles, 'date') else self.instance.date_traitements_visibles
+            
+            if date_traitement == self.instance.date_debut:
+                self.fields['type_visibilite_traitements'].initial = "DEBUT"
+            elif date_traitement == self.instance.date_fin:
+                self.fields['type_visibilite_traitements'].initial = "FIN"
+            else:
+                self.fields['type_visibilite_traitements'].initial = "PERSONNALISE"
+
         # Création des boutons de commande
         if self.mode == "CONSULTATION":
             commandes = Commandes(modifier_url="activites_generalites_modifier", modifier_args="idactivite=activite.idactivite", modifier=True, enregistrer=False, annuler=False, ajouter=False)
@@ -139,6 +162,13 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("type_nbre_inscrits"),
                 Field("nbre_inscrits_max"),
                 Field("inscriptions_multiples"),
+            ),
+            Fieldset("Traitements médicaux",
+                Field("type_visibilite_traitements"),
+                Div(
+                    Field("date_traitements_visibles"),
+                    id="bloc_date_traitements"
+                ),
             ),
           #  Fieldset("Logo",
           #      Field("type_logo"),
@@ -214,6 +244,21 @@ class Formulaire(FormulaireBase, ModelForm):
             self.cleaned_data["pay_org"] = False
             self.cleaned_data["pay"] = ""
 
+        # Visibilité des traitements
+        if self.cleaned_data["type_visibilite_traitements"] == "DEBUT":
+            # Mettre la date de début de l'activité
+            self.cleaned_data["date_traitements_visibles"] = datetime.datetime.combine(
+                self.cleaned_data["date_debut"], 
+                datetime.time(0, 0)
+            )
+        elif self.cleaned_data["type_visibilite_traitements"] == "FIN":
+            # Mettre la date de fin de l'activité
+            self.cleaned_data["date_traitements_visibles"] = datetime.datetime.combine(
+                self.cleaned_data["date_fin"], 
+                datetime.time(0, 0)
+            )
+        # Si PERSONNALISE, on garde la valeur saisie par l'utilisateur dans le champ date_traitements_visibles
+
         print(f"Value of 'type_pay': {self.cleaned_data['type_pay']}")
         print(f"Value of 'pay' after assignment: {self.cleaned_data['pay']}")
         print(f"Value of 'type_pay' after assignment: {self.cleaned_data['type_pay']}")
@@ -282,6 +327,36 @@ function On_change_type_coords() {
 $(document).ready(function() {
     $('#id_type_coords').change(On_change_type_coords);
     On_change_type_coords.call($('#id_type_coords').get(0));
+});
+
+// type_visibilite_traitements
+function On_change_type_visibilite_traitements() {
+    var choix = $(this).val();
+    var date_debut = $('#id_validite_date_debut').val();
+    var date_fin = $('#id_validite_date_fin').val();
+    var $date_field = $('#id_date_traitements_visibles');
+    
+    if(choix == 'DEBUT' && date_debut) {
+        // Mettre la date de début et désactiver
+        $date_field.val(date_debut);
+        $date_field.prop('disabled', true);
+    } else if(choix == 'FIN' && date_fin) {
+        // Mettre la date de fin et désactiver
+        $date_field.val(date_fin);
+        $date_field.prop('disabled', true);
+    } else if(choix == 'PERSONNALISE') {
+        // Activer le champ pour permettre la saisie
+        $date_field.prop('disabled', false);
+    }
+}
+$(document).ready(function() {
+    $('#id_type_visibilite_traitements').change(On_change_type_visibilite_traitements);
+    On_change_type_visibilite_traitements.call($('#id_type_visibilite_traitements').get(0));
+    
+    // Mettre à jour aussi si les dates de validité changent
+    $('#id_validite_date_debut, #id_validite_date_fin').change(function() {
+        On_change_type_visibilite_traitements.call($('#id_type_visibilite_traitements').get(0));
+    });
 });
 
 
