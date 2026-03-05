@@ -4,7 +4,7 @@
     <style>
         /* 1. Style Global de la Navbar */
         .main-header.navbar {
-            background-color: #3E2F28 !important; /* Même brun que la sidebar */
+            background-color: #3E2F28 !important;
             border-bottom: none !important;
             padding: 0.5rem 1rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
@@ -38,19 +38,19 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        /* 4. Badges de notification (Rappel Orange) */
+        /* 4. Badges de notification */
         .navbar-badge {
             font-size: 0.6rem !important;
             font-weight: 700;
             top: 5px !important;
             right: -4px !important;
             padding: 2px 4px !important;
-            background-color: #ff851b !important; /* Orange de la sidebar */
+            background-color: #ff851b !important;
             border: 1.5px solid #3E2F28;
             color: white !important;
         }
 
-        /* 5. Dropdowns (Menus déroulants) */
+        /* 5. Dropdowns */
         .dropdown-menu-xl, .dropdown-menu-right {
             border-radius: 12px !important;
             border: none !important;
@@ -64,12 +64,24 @@
             font-size: 0.65rem;
             letter-spacing: 1px;
             font-weight: 700;
+            padding: 10px;
         }
         .dropdown-item:hover {
             background-color: rgba(62, 47, 40, 0.05) !important;
         }
 
-        /* 6. Bouton Déconnexion */
+        /* 6. Boutons de structures */
+        .btn-outline-primary {
+            border-color: #3E2F28;
+            color: #3E2F28;
+            font-size: 0.75rem;
+        }
+        .btn-outline-primary.active {
+            background-color: #3E2F28 !important;
+            border-color: #3E2F28 !important;
+        }
+
+        /* Bouton Déconnexion */
         .btn-danger {
             background-color: #dc3545 !important;
             border: none !important;
@@ -77,12 +89,7 @@
             padding: 5px 15px;
             transition: 0.3s;
         }
-        .btn-danger:hover {
-            background-color: #bd2130 !important;
-            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
-        }
 
-        /* Image utilisateur */
         .user-image {
             border: 1px solid rgba(255,255,255,0.2);
             object-fit: cover;
@@ -155,7 +162,7 @@
             </div>
         </li>
 
-        {# Renseignements à valider (Le pouce) #}
+        {# Renseignements à valider #}
         {% if nbre_renseignements_attente_validation %}
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'demandes_portail_liste' %}" title="Vous avez {{ nbre_renseignements_attente_validation }} renseignement{{ nbre_renseignements_attente_validation|pluralize }} à valider">
@@ -182,6 +189,31 @@
                     <p class="mb-0"><strong>{% firstof request.user.get_full_name request.user %}</strong></p>
                     <small class="text-muted">Membre depuis {{ request.user.date_joined|date:"Y" }}</small>
                 </div>
+
+                {# --- REINTEGRATION DU FORMULAIRE STRUCTURES --- #}
+                <div class="p-2 border-top border-bottom">
+                    <h5 class="dropdown-header text-center mb-2">Structures actives</h5>
+
+                    <div id="loader_structures" style="display:none;" class="text-center p-2">
+                        <i class="fa fa-refresh fa-spin text-primary"></i>
+                        <small class="ml-1 text-muted">Actualisation en cours...</small>
+                    </div>
+
+                    <form id="form_structures" method="post">
+                        {% csrf_token %}
+                        <div id="container_boutons_structures" class="btn-group-toggle d-flex flex-wrap justify-content-center" data-toggle="buttons">
+                            {% for structure in request.user.structures_admin.all %}
+                                <label class="btn btn-outline-primary btn-xs m-1 {% if structure in request.user.structures.all %}active{% endif %}">
+                                    <input type="checkbox" name="structures" value="{{ structure.idstructure }}" autocomplete="off"
+                                        {% if structure in request.user.structures.all %}checked{% endif %}>
+                                    {{ structure.nom|truncatechars:15 }}
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </form>
+                </div>
+                {# ---------------------------------------------- #}
+
                 <div class="p-2">
                     <a href="{% url 'profil_utilisateur' %}" class="btn btn-default btn-sm btn-block">Profil</a>
                     <a href="{% url 'deconnexion' %}" class="btn btn-danger btn-sm btn-block mt-2">Déconnexion</a>
@@ -194,3 +226,44 @@
         </li>
     </ul>
 </nav>
+
+<script>
+    document.addEventListener('change', function(event) {
+        if (event.target.matches('#form_structures input[type=checkbox]')) {
+            const form = event.target.closest('form');
+            const formData = new FormData(form);
+            const container = document.getElementById('container_boutons_structures');
+            const loader = document.getElementById('loader_structures');
+            const url_destination = "{% url 'profil_utilisateur' %}";
+
+            // 1. Feedback visuel immédiat
+            container.style.opacity = '0.3'; // Grise les boutons
+            container.style.pointerEvents = 'none'; // Empêche d'autres clics
+            loader.style.display = 'block'; // Affiche "Actualisation en cours..."
+
+            // 2. Envoi de la requête
+            fetch(url_destination, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => {
+                // On laisse un tout petit délai de 300ms pour que l'œil voie le message
+                // avant que la page ne disparaisse au profit du reload
+                setTimeout(function() {
+                    window.location.reload();
+                }, 300);
+            })
+            .catch(error => {
+                console.error("Erreur:", error);
+                // En cas d'erreur, on remet l'interface en état
+                container.style.opacity = '1';
+                container.style.pointerEvents = 'auto';
+                loader.style.display = 'none';
+                alert("Erreur lors de l'actualisation");
+            });
+        }
+    });
+</script>
