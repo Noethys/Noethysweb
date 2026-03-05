@@ -6,6 +6,8 @@ from django.db import migrations, models
 def migrationsRunPython(apps, schema_editor):
     Article = apps.get_model("core", "Article")
     Structure = apps.get_model("core", "Structure")
+    if Structure.objects.count() == 0:
+        Structure.objects.create(nom="Sacadoc")
     structure = Structure.objects.get(idstructure=1)
     if structure is None:
         return
