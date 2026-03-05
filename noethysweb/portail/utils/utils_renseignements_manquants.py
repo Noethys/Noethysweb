@@ -96,6 +96,108 @@ def Get_renseignements_manquants_individu(individu=None):
     }
 
 
+def Get_renseignements_manquants_par_inscriptions(inscriptions):
+    """
+    Version optimisée : retourne les renseignements manquants par individu pour une liste d'inscriptions.
+    BATCH : 1 requête SQL au total peu importe le nombre d'inscriptions.
+
+    Args:
+        inscriptions: QuerySet ou liste d'instances Inscription
+
+    Returns:
+        dict[individu.pk] -> dict avec 'nbre', 'page_cible', 'message_manquant'
+    """
+    inscriptions_list = list(inscriptions)
+    
+    if not inscriptions_list:
+        return {}
+
+    # Extraire tous les individus uniques
+    individus = list({ins.individu for ins in inscriptions_list})
+    individu_ids = [ind.pk for ind in individus]
+
+    # UNE seule requête pour tous les rattachements
+    rattachements_qs = Rattachement.objects.filter(individu__in=individu_ids)
+    dict_rattachements = {r.individu_id: r for r in rattachements_qs}
+
+    # Construire les résultats par individu
+    dict_resultats = {}
+    for individu in individus:
+        nbre_manquants = 0
+        page_cible = None
+        message_manquant = ""
+        manquant_identite = False
+        manquant_coords = False
+        tmp_msg = ""
+
+        # Vérification identité
+        if not individu.nom:
+            nbre_manquants += 1
+            manquant_identite = True
+            tmp_msg += "- nom\n"
+        if not individu.prenom:
+            nbre_manquants += 1
+            manquant_identite = True
+            tmp_msg += "- prénom\n"
+        if not individu.civilite:
+            nbre_manquants += 1
+            manquant_identite = True
+            tmp_msg += "- civilité\n"
+        if not individu.date_naiss:
+            nbre_manquants += 1
+            manquant_identite = True
+            tmp_msg += "- date de naissance\n"
+        if not individu.cp_naiss:
+            nbre_manquants += 1
+            manquant_identite = True
+            tmp_msg += "- code postal de naissance\n"
+        if not individu.ville_naiss:
+            nbre_manquants += 1
+            manquant_identite = True
+            tmp_msg += "- ville de naissance\n"
+
+        # Vérification coordonnées (utilise le dict pré-chargé)
+        rattachement = dict_rattachements.get(individu.pk)
+        if rattachement and rattachement.categorie == 1:  # Représentant
+            if not individu.rue_resid:
+                nbre_manquants += 1
+                manquant_coords = True
+                tmp_msg += "- rue de domicile\n"
+            if not individu.cp_resid:
+                nbre_manquants += 1
+                manquant_coords = True
+                tmp_msg += "- code postal de domicile\n"
+            if not individu.ville_resid:
+                nbre_manquants += 1
+                manquant_coords = True
+                tmp_msg += "- ville de domicile\n"
+            if not individu.tel_mobile and not individu.tel_domicile:
+                nbre_manquants += 1
+                manquant_coords = True
+                tmp_msg += "- numéro de téléphone\n"
+            if not individu.mail:
+                nbre_manquants += 1
+                manquant_coords = True
+                tmp_msg += "- adresse mail\n"
+
+        # Détermination de la page à cibler
+        if manquant_identite:
+            page_cible = 'identite'
+        elif manquant_coords:
+            page_cible = 'coords'
+
+        if nbre_manquants > 0:
+            message_manquant = f"Il manque pour {individu.prenom} {individu.nom} :\n{tmp_msg}\n"
+
+        dict_resultats[individu.pk] = {
+            'nbre': nbre_manquants,
+            'page_cible': page_cible,
+            'message_manquant': message_manquant
+        }
+
+    return dict_resultats
+
+
 def Get_renseignements_manquants(famille=None):
     """
     Retourne le nombre de renseignements manquants pour une famille et l'ID du premier rattachement concerné.

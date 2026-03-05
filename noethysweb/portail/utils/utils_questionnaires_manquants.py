@@ -67,6 +67,67 @@ def Get_question_individu(individu):
     return questions_non_complétées
 
 
+def Get_questions_par_inscriptions(inscriptions):
+    """
+    Version optimisée : retourne les questions manquantes par individu pour une liste d'inscriptions.
+    BATCH : 3 requêtes SQL au total peu importe le nombre d'inscriptions.
+
+    Args:
+        inscriptions: QuerySet ou liste d'instances Inscription
+
+    Returns:
+        dict[individu.pk] -> liste de questions non complétées
+    """
+    inscriptions_list = list(inscriptions)
+    
+    if not inscriptions_list:
+        return {}
+
+    # Extraire tous les individus et activités
+    individus = list(set(ins.individu for ins in inscriptions_list))
+    individu_ids = [ind.pk for ind in individus]
+    activite_ids = list(set(ins.activite_id for ins in inscriptions_list))
+
+    # UNE requête pour toutes les activités avec structures visibles
+    activites = Activite.objects.filter(
+        idactivite__in=activite_ids,
+        structure__visible=True
+    )
+
+    # UNE requête pour toutes les questions
+    questions = QuestionnaireQuestion.objects.filter(
+        categorie="individu",
+        visible_portail=True,
+        activite__in=activites
+    ).order_by("ordre")
+
+    # UNE requête pour toutes les réponses de tous les individus
+    reponses_qs = QuestionnaireReponse.objects.filter(
+        individu__in=individu_ids,
+        question__in=questions
+    ).select_related('question')
+
+    # Construire un dict de lookup : (individu_id, question_id) -> reponse
+    dict_reponses = {}
+    for reponse in reponses_qs:
+        key = (reponse.individu_id, reponse.question_id)
+        dict_reponses[key] = reponse
+
+    # Construire les résultats par individu
+    dict_resultats = {}
+    for individu in individus:
+        questions_non_completees = []
+        for question in questions:
+            key = (individu.pk, question.pk)
+            reponse = dict_reponses.get(key, None)
+            if not reponse or not est_question_complétée(reponse):
+                questions_non_completees.append(question)
+        
+        dict_resultats[individu.pk] = questions_non_completees
+
+    return dict_resultats
+
+
 def Get_questions_manquantes_famille(famille):
     """
     Retourne un dict avec, pour chaque individu de la famille,

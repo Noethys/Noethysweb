@@ -105,6 +105,111 @@ def Get_sondages_manquants(famille=None):
     return sondages_manquants
 
 
+def Get_sondages_manquants_par_inscriptions(inscriptions):
+    """
+    Version optimisée : retourne les sondages manquants par individu pour une liste d'inscriptions.
+    BATCH : 2-3 requêtes SQL au total peu importe le nombre d'inscriptions.
+
+    Args:
+        inscriptions: QuerySet ou liste d'instances Inscription
+
+    Returns:
+        dict[individu.pk] -> liste de sondages manquants
+    """
+    inscriptions_list = list(inscriptions)
+    
+    if not inscriptions_list:
+        return {}
+
+    # Extraire les individus, familles et structures
+    individus = list({ins.individu for ins in inscriptions_list})
+    individu_ids = [ind.pk for ind in individus]
+    famille_ids = list({ins.famille_id for ins in inscriptions_list})
+    structure_ids = list({ins.activite.structure_id for ins in inscriptions_list})
+
+    # UNE requête pour tous les sondages actifs
+    sondages = Sondage.objects.filter(
+        structure__in=structure_ids,
+        structure__visible=True
+    )
+
+    # UNE requête pour tous les répondants de ces individus
+    repondants = SondageRepondant.objects.filter(
+        sondage__in=sondages,
+        individu__in=individu_ids
+    ).select_related('sondage')
+
+    # UNE requête pour tous les rattachements
+    rattachements = Rattachement.objects.filter(
+        famille__in=famille_ids,
+        individu__deces=False
+    ).select_related('individu')
+    
+    # Dict de rattachements par individu
+    dict_rattachements = {r.individu_id: r for r in rattachements}
+
+    # Construire les dicts de réponses
+    dict_reponses_par_individu = {}
+    for individu in individus:
+        reponses_famille = set()
+        reponses_individu = set()
+        
+        for r in repondants:
+            if r.individu_id == individu.pk:
+                if r.sondage.public == "famille":
+                    reponses_famille.add(r.sondage_id)
+                elif r.sondage.public == "individu":
+                    reponses_individu.add(r.sondage_id)
+        
+        dict_reponses_par_individu[individu.pk] = {
+            'famille': reponses_famille,
+            'individu': reponses_individu
+        }
+
+    # Construire les résultats par individu
+    dict_resultats = {}
+    for individu in individus:
+        sondages_manquants_individu = []
+        reponses = dict_reponses_par_individu.get(individu.pk, {'famille': set(), 'individu': set()})
+        rattachement = dict_rattachements.get(individu.pk)
+
+        for sondage in sondages:
+            # Sondage famille
+            if sondage.public == "famille":
+                if sondage.idsondage not in reponses['famille']:
+                    sondages_manquants_individu.append({
+                        'sondage': sondage,
+                        'titre': sondage.titre,
+                        'code': sondage.code,
+                        'type': 'famille',
+                        'article': None,
+                        'individu': None,
+                    })
+
+            # Sondage individu
+            else:
+                # Vérifier la catégorie de rattachement si définie
+                if rattachement and sondage.categories_rattachements:
+                    categories = [int(c) for c in sondage.categories_rattachements]
+                    if rattachement.categorie not in categories:
+                        continue
+
+                # Vérifier si l'individu a répondu
+                if sondage.idsondage not in reponses['individu']:
+                    sondages_manquants_individu.append({
+                        'sondage': sondage,
+                        'titre': sondage.titre,
+                        'code': sondage.code,
+                        'type': 'individu',
+                        'article': None,
+                        'individu': individu,
+                    })
+
+        dict_resultats[individu.pk] = sondages_manquants_individu
+
+    return dict_resultats
+
+
 def Get_sondages_manquants_individu(individu=None, famille=None, structure=None):
     """
     Retourne la liste des sondages que l'individu n'a pas encore complétés.

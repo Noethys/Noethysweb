@@ -219,6 +219,123 @@ def Get_liste_pieces_manquantes(date_reference=None, activites=None, presents=No
     return dict_final
 
 
+def Get_pieces_manquantes_par_inscriptions(inscriptions, date_reference=None):
+    """
+    Retourne les pièces manquantes pour une liste d'inscriptions de manière optimisée.
+    Fait seulement 2 requêtes DB au total au lieu d'une par inscription.
+
+    Args:
+        inscriptions: QuerySet ou liste d'instances Inscription (déjà avec select_related/prefetch_related)
+        date_reference: date de référence pour la validité des pièces (optionnel)
+
+    Returns:
+        dict[individu.pk] -> liste de dictionnaires de pièces manquantes:
+        {
+            123: [  # individu.pk
+                {
+                    "type_piece": <TypePiece>,
+                    "label": <nom de la pièce>,
+                    "valide": False,
+                    "document": <document lié ou None>
+                },
+                ...
+            ],
+            ...
+        }
+    """
+    if not date_reference:
+        date_reference = datetime.date.today()
+
+    # Convertir en liste si c'est un QuerySet pour éviter les multiples évaluations
+    inscriptions_list = list(inscriptions)
+    
+    if not inscriptions_list:
+        return {}
+
+    # Extraire tous les IDs nécessaires
+    famille_ids = set(ins.famille_id for ins in inscriptions_list)
+    individu_ids = set(ins.individu_id for ins in inscriptions_list)
+
+    # Récupération optimisée : 1 requête pour les pièces + 1 pour les type_pieces requis par activités
+    conditions = Q(date_debut__lte=date_reference) & Q(date_fin__gte=date_reference)
+    conditions &= Q(famille_id__in=famille_ids) & (Q(individu_id__isnull=True) | Q(individu_id__in=individu_ids))
+    
+    pieces_existantes = Piece.objects.select_related("type_piece").filter(conditions)
+    
+    # Pré-charger tous les documents de type_piece en UNE requête (pour éviter N queries plus tard)
+    from core.models import TypePiece
+    type_piece_ids = set()
+    for inscription in inscriptions_list:
+        for type_piece in inscription.activite.pieces.all():  # Déjà prefetché dans le queryset
+            type_piece_ids.add(type_piece.pk)
+    
+    # Dictionnaire de lookup pour les documents
+    dict_documents = {}
+    if type_piece_ids:
+        for type_piece in TypePiece.objects.filter(pk__in=type_piece_ids).prefetch_related('type_piece_document'):
+            doc = type_piece.type_piece_document.first()
+            if doc:
+                dict_documents[type_piece.pk] = doc
+
+    # Construire le dictionnaire de lookup des pièces
+    dict_pieces = {}
+    for piece in pieces_existantes:
+        if piece.type_piece:
+            if piece.type_piece.public == "famille" and piece.famille_id:
+                key = "famille_%d_%d" % (piece.famille_id, piece.type_piece_id)
+            elif piece.type_piece.public == "individu" and piece.individu_id:
+                key = "individu_%d_%d" % (piece.individu_id, piece.type_piece_id)
+            else:
+                continue
+            dict_pieces.setdefault(key, [])
+            dict_pieces[key].append(piece)
+
+    # Traiter chaque inscription et construire les résultats par individu
+    dict_resultats = {}
+    
+    for inscription in inscriptions_list:
+        individu = inscription.individu
+        famille = inscription.famille
+        activite = inscription.activite
+        
+        # Initialiser la liste pour cet individu si nécessaire
+        if individu.pk not in dict_resultats:
+            dict_resultats[individu.pk] = []
+        
+        # Parcourir les pièces requises par l'activité (déjà prefetch dans le QuerySet)
+        for type_piece in activite.pieces.all():
+            # Vérifier si la pièce existe et est valide
+            valide = False
+            
+            if type_piece.public == "famille":
+                key = "famille_%d_%d" % (famille.pk, type_piece.pk)
+                for piece in dict_pieces.get(key, []):
+                    if piece.famille_id == famille.pk and piece.date_fin >= date_reference:
+                        valide = True
+                        break
+            else:  # individu
+                key = "individu_%d_%d" % (individu.pk, type_piece.pk)
+                for piece in dict_pieces.get(key, []):
+                    if piece.individu_id == individu.pk and piece.date_fin >= date_reference:
+                        if type_piece.valide_rattachement == True:
+                            valide = True
+                            break
+                        elif piece.famille_id == famille.pk:
+                            valide = True
+                            break
+            
+            # Ne garder que les pièces NON valides (manquantes)
+            if not valide:
+                dict_resultats[individu.pk].append({
+                    "type_piece": type_piece,
+                    "label": type_piece.Get_nom(individu),
+                    "valide": False,
+                    "document": dict_documents.get(type_piece.pk, None)  # Lookup pré-chargé, pas de requête !
+                })
+    
+    return dict_resultats
+
+
 def Get_liste_pieces_necessaires(date_reference=None, activite=None, famille=None, individu=None):
     """ Retourne les pièces nécessaires à l'inscription d'un individu sur une activité donnée pour une famille et un individu donné """
     if not date_reference:
