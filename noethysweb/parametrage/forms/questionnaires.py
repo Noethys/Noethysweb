@@ -38,8 +38,7 @@ def Get_controle(question=None):
         liste_choix = [(choix, choix) for choix in choix_bruts if choix.strip()]
         ctrl = forms.TypedMultipleChoiceField(label=question.label, choices=liste_choix, widget=Select2MultipleWidget(), required=False, help_text=question.texte_aide)
     elif question.controle == "liste_coches_ouinon":
-        choix_bruts = question.choix.split(";") if question.choix else []
-        liste_choix = [(choix, choix) for choix in choix_bruts if choix.strip()]
+        liste_choix = [("Oui", "Oui"), ("Non", "Non")]
         ctrl = forms.TypedMultipleChoiceField(label=question.label, choices=liste_choix, widget=Select2MultipleWidget(), required=False, help_text=question.texte_aide)
     elif question.controle == "case_coche":
         ctrl = forms.BooleanField(label=question.label, required=False, help_text=question.texte_aide)
