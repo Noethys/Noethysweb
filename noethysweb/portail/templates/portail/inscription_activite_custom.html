@@ -280,17 +280,46 @@ $(function () {
     const $placeholder = $("#placeholder_extra");
     const $loader = $("#loading_extra");
     const $activiteSelect = $("#id_activite");
+    const $individuSelect = $("#id_individu"); // On cible le select individu
     const $groupeSelect = $("#id_groupe");
 
-    let dataActivites = []; // Pour stocker les groupes
+    let dataActivites = [];
+
     if (!$activiteSelect.val() || $activiteSelect.val() === "") {
-            $activiteSelect.prop('disabled', true);
-            $groupeSelect.prop('disabled', true);
+        $activiteSelect.prop('disabled', true);
+        $groupeSelect.prop('disabled', true);
     }
+
+    // --- FONCTION DE MISE À JOUR DU BLOC EXTRA ---
+    function refreshExtraForm() {
+        const activiteId = $activiteSelect.val();
+
+        // On ne charge que si une activité est sélectionnée
+        if (!activiteId) {
+            $divExtra.empty();
+            $placeholder.show();
+            return;
+        }
+
+        $placeholder.hide();
+        $loader.show();
+        $divExtra.empty();
+
+        // On envoie tout le formulaire (contient individu_id et activite_id)
+        $.post("{% url 'portail_ajax_inscrire_get_form_extra' %}", $form.serialize())
+        .done(function(data) {
+            $loader.hide();
+            $divExtra.html(data.form_html).hide().fadeIn(200);
+        })
+        .fail(function() {
+            $loader.hide();
+            toastr.error("Erreur lors de la récupération des pièces justificatives.");
+        });
+    }
+
     // --- 1. Changement de Structure ---
     $("#id_structure").on("change", function() {
         const structureId = $(this).val();
-
         $activiteSelect.empty().append(new Option("Chargement...", "")).prop('disabled', true);
         $groupeSelect.empty().append(new Option("---", "")).prop('disabled', true);
 
@@ -305,7 +334,6 @@ $(function () {
         }).done(function(data) {
             dataActivites = data.activites;
             $activiteSelect.empty().append(new Option("--- Choisir une activité ---", "")).prop('disabled', false);
-
             $.each(dataActivites, function(_, item) {
                 $activiteSelect.append(new Option(item.nom, item.id));
             });
@@ -318,12 +346,11 @@ $(function () {
 
         if (!activiteId) {
             $groupeSelect.empty().append(new Option("---", "")).prop('disabled', true);
-            $divExtra.empty();
-            $placeholder.show();
+            refreshExtraForm();
             return;
         }
 
-        // --- NOUVEAU : Remplissage du groupe ---
+        // Remplissage du groupe
         const selectedAct = dataActivites.find(a => String(a.id) === String(activiteId));
         $groupeSelect.empty().prop('disabled', false);
 
@@ -335,32 +362,27 @@ $(function () {
             $groupeSelect.append(new Option("Aucun groupe", ""));
         }
 
-        // Chargement du form extra
-        $placeholder.hide();
-        $loader.show();
-        $divExtra.empty();
-
-        $.post("{% url 'portail_ajax_inscrire_get_form_extra' %}", $form.serialize())
-        .done(function(data) {
-            $loader.hide();
-            $divExtra.html(data.form_html);
-        });
+        // Appel de la mise à jour des pièces
+        refreshExtraForm();
     });
 
-    // --- 3. Soumission du Formulaire ---
+    // --- NOUVEAU : Changement d'Individu ---
+    $individuSelect.on("change", function() {
+        // Si une activité est déjà sélectionnée, on met à jour les pièces pour ce nouvel individu
+        if ($activiteSelect.val()) {
+            refreshExtraForm();
+        }
+    });
+
+    // --- 3. Soumission du Formulaire --- (Le reste de ton code demeure identique)
     $form.on('submit', function (e) {
         e.preventDefault();
-        console.log("Tentative d'envoi du formulaire...");
-
-        // Vérification de sécurité : est-ce que les champs obligatoires sont là ?
         if (!$("#id_individu").val() || !$("#id_structure").val() || !$("#id_activite").val() || !$("#id_groupe").val()) {
             toastr.error("Veuillez remplir tous les champs (Individu, Structure, Activité et Groupe).");
             return false;
         }
-
         const formData = new FormData(this);
         const $btn = $("#btn_submit");
-
         $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-2"></i> Envoi en cours...');
 
         $.ajax({
@@ -371,21 +393,12 @@ $(function () {
             contentType: false,
             processData: false,
             success: function(data) {
-                console.log("Succès :", data);
-                if (data.url) {
-                    window.location.href = data.url;
-                } else {
-                    location.reload();
-                }
+                if (data.url) window.location.href = data.url;
+                else location.reload();
             },
             error: function(xhr) {
-                console.error("Erreur lors de l'envoi :", xhr.responseText);
                 $btn.prop('disabled', false).html('<i class="fa fa-paper-plane mr-2"></i> Envoyer la demande');
-
-                let errorMsg = "Une erreur est survenue.";
-                if (xhr.responseJSON && xhr.responseJSON.erreur) {
-                    errorMsg = xhr.responseJSON.erreur;
-                }
+                let errorMsg = xhr.responseJSON && xhr.responseJSON.erreur ? xhr.responseJSON.erreur : "Une erreur est survenue.";
                 toastr.error(errorMsg);
             }
         });

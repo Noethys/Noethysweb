@@ -89,7 +89,7 @@ class Formulaire_extra(FormulaireBase, forms.Form):
                     date_reference = datetime.date.today()
                     # Pour les pièces individuelles avec valide_rattachement, famille peut être None
                     pieces_existantes = Piece.objects.select_related('type_piece').filter(
-                        Q(famille=famille) | Q(individu=individu),
+                        individu=individu,
                         date_debut__lte=date_reference
                     )
 
