@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  Copyright (c) 2019-2024 Ivan LUCAS.
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
@@ -100,9 +101,9 @@ class App:
         print("Lancement du serveur django...")
         self.Manage("runserver")
 
-    def Manage(self, commande=""):
+    def Manage(self, commande="", options=[]):
         chemin = os.path.join(self.repertoire_app, self.Get_chemin_noethysweb(), "noethysweb", "manage.py")
-        subprocess.call([sys.executable, chemin, commande], shell=True)
+        subprocess.call([sys.executable, chemin, commande] + options, shell=True)
 
     def Ouvrir_navigateur(self):
         print("Ouverture du navigateur...")
@@ -152,7 +153,7 @@ class App:
         self.Download_Noethysweb()
         self.pip_install_requirements()
         self.Installer_settings_production()
-        self.Manage("collectstatic")
+        self.Manage("collectstatic", options=["--no-input"])
         if not os.path.isfile(os.path.join(self.repertoire_app, self.Get_chemin_noethysweb(), "noethysweb", "db.sqlite3")):
             self.Manage("migrate")
             self.Installer_data()
@@ -219,7 +220,7 @@ class App:
         if reponse == 3:
             self.Installer_settings_production()
         if reponse == 4:
-            self.Manage("collectstatic")
+            self.Manage("collectstatic", options=["--no-input"])
         if reponse == 5:
             self.Manage("migrate")
         if reponse == 6:
