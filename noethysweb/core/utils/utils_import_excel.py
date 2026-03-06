@@ -4,17 +4,28 @@
 #  Distribué sous licence GNU GPL.
 
 
-import logging, datetime, xlrd, csv
+import logging, datetime, xlrd, csv, re, unicodedata
 logger = logging.getLogger(__name__)
 from core.models import Famille, Utilisateur
 from core.utils import utils_db
 from fiche_famille.utils import utils_internet
 
 
+def clean_attribute_name(name):
+    # 1. Convertir en minuscules et supprimer les espaces de début/fin
+    name = name.strip()
+    # 2. Supprimer les accents (ex: 'é' -> 'e')
+    name = ''.join(c for c in unicodedata.normalize('NFD', name) if unicodedata.category(c) != 'Mn')
+    # 3. Remplacer les espaces et caractères spéciaux par des underscores
+    name = re.sub(r'[^\w]+', '_', name)
+    # 4. Supprimer les underscores doublons ou en fin de chaîne
+    return name.strip('_')
+
+
 class Ligne():
     def __init__(self, dict_donnees={}):
         # Mémorisation des valeurs sous forme d'attributs
-        [setattr(self, key, valeur) for key, valeur in dict_donnees.items()]
+        [setattr(self, clean_attribute_name(key), valeur) for key, valeur in dict_donnees.items()]
 
 
 class Importer:
@@ -24,7 +35,10 @@ class Importer:
     def Formate_telephone(self, tel=""):
         if not tel:
             return None
-        tel_final = "{0}{1}.{2}{3}.{4}{5}.{6}{7}.{8}{9}.".format(*[x for x in tel if x in "0123456789"])
+        try:
+            tel_final = "{0}{1}.{2}{3}.{4}{5}.{6}{7}.{8}{9}.".format(*[x for x in tel if x in "0123456789"])
+        except:
+            tel_final = None
         return tel_final
 
     def Formate_date(self, date, classeur):
