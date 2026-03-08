@@ -1,0 +1,128 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-md-3" >
+
+            <!-- Génération de l'export -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Génération de l'export</h3>
+                </div>
+                <div class="card-body">
+                    <a type="button" class="btn btn-primary btn-block mb-3" onclick="exporter()" title="Actualiser les résultats"><i class="fa fa-bolt margin-r-5"></i> Générer le fichier d'export</a>
+                    {% crispy form_parametres %}
+                </div>
+            </div>
+
+            <!-- Liste des colonnes de l'export -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-list-ul margin-r-5"></i> Données transmises</h3>
+                </div>
+                <div class="card-body">
+                    <dl>
+                    {% for colonne in colonnes_export %}
+                        <dt>{{ colonne.titre }}</dt>
+                        <dd>{{ colonne.description }}</dd>
+                    {% endfor %}
+                    </dl>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-9">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-info-circle margin-r-5"></i> Mode d'emploi</h3>
+                </div>
+                <div class="card-body">
+                    <p>Vous avez l'habitude d'utiliser l'état global ou la synthèse des consommations pour obtenir toutes sortes de statistiques pour vous,
+                        pour la CAF ou d'autres institutions ? Demandez plutôt à une IA d'analyser les données de fréquentation pour vous !
+                        L'utilisation est très simple et les possibilités sont stupéfiantes. </p>
+                    <ol>
+                        <li>Générez le fichier d'export dans le cadre de gauche et enregistrez-le sur votre ordinateur.</li>
+                        <li>Ouvrez votre AI préférée dans votre navigateur (Ex : <a href="https://gemini.google.com">gemini.google.com</a>)</li>
+                        <li>Glissez-déposez le fichier d'export vers le cadre du prompt.</li>
+                        <li>Tapez le contexte dans le prompt. Ex : <b>"Tu es directeur d'un accueil de loisirs. Analyse le fichier ci-joint généré par Noethysweb."</b> et tapez sur Entrée.</li>
+                        <li>Vous pouvez ensuite taper toutes les questions de votre choix.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card card-warning">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-exclamation-circle margin-r-5"></i> Remarques</h3>
+                </div>
+                <div class="card-body bg-warning">
+                    <ul>
+                        <li>Cette fonctionnalité est expérimentale, il est conseillé de vérifier la cohérence des résultats.</li>
+                        <li>Aucune information personnelle n'est transmise à l'IA. Les individus et familles sont représentés par des numéros aléatoires.</li>
+                        <li>En utilisant une IA, vous en acceptez les conditions d'utilisation.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-lightbulb-o margin-r-5"></i> Exemples de questions</h3>
+                </div>
+                <div class="card-body">
+                    <p>Pour créer vos propres questions, vous pouvez utiliser les noms de données listées dans le cadre de gauche, et vous inspirer des exemples ci-dessous.</p>
+                    {% for question in exemples_questions %}
+                        <div class="direct-chat-msg">
+                            <img class="direct-chat-img" src="{% static "images/user.png" %}">
+                            <div class="direct-chat-text">
+                                {{ question }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {# Lien de téléchargement du fichier d'export #}
+    <a id="download" download></a>
+
+    <script>
+        {% include 'core/csrftoken.html' %}
+
+        // Générer le PDF
+        function exporter() {
+            var box = bootbox.dialog({
+                    message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Génération de l'export en cours</b><br><br>Veuillez patienter...</p>",
+                    closeButton: false
+                });
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_analyse_ia_frequentation_exporter' %}",
+                data: $("#form_analyse_ia_frequentation").serialize(),
+                datatype: "json",
+                success: function(data){
+                    bootbox.hideAll();
+                    $("#download").attr("href", data.nom_fichier);
+                    document.getElementById("download").click();
+                },
+                error: function(data) {
+                    bootbox.hideAll();
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+    </script>
+
+{% endblock contenu_page %}

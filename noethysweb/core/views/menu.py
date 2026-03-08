@@ -380,6 +380,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_analyse.Add(code="etat_nomin", titre="Etat nominatif", icone="file-text-o")
     menu_analyse.Add(code="synthese_consommations", titre="Synthèse des consommations", icone="file-text-o")
     menu_analyse.Add(code="evolution_reservations", titre="Evolution des réservations", icone="file-text-o")
+    menu_analyse.Add(code="analyse_ia_frequentation", titre="Analyse IA de la fréquentation", icone="file-text-o")
 
 
     # ------------------------------------ Facturation ------------------------------------
