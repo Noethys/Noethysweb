@@ -102,6 +102,23 @@ class MyDatatable(Datatable):
 
     def Get_actions_standard(self, instance, *args, **kwargs):
         view = kwargs["view"]
+        user = view.request.user
+
+        # 1. Vérification de la structure
+        has_structure_field = hasattr(instance, 'structure')
+        pas_de_structure = has_structure_field and not instance.structure
+
+        # 2. Vérification des activités (Many-to-Many)
+        has_activites_field = hasattr(instance, 'activites')
+        # On considère "pas d'activités" si le compte est égal à 0
+        pas_d_activites = has_activites_field and instance.activites.count() == 0
+
+        # SI (Pas de structure OU Pas d'activités) ET que l'user n'est PAS superuser -> Bloqué
+        if (pas_de_structure or pas_d_activites) and not user.is_superuser:
+            return '<i class="fa fa-lock" title="Élément global : modification réservée au super-administrateur" style="color:#999; cursor:help;"></i>'
+
+        # Sinon, on génère les boutons normalement
+        from django.urls import reverse
         html = [
             self.Create_bouton_modifier(url=reverse(view.url_modifier, args=[instance.pk])),
             self.Create_bouton_supprimer(url=reverse(view.url_supprimer, args=[instance.pk])),

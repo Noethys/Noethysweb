@@ -3702,7 +3702,7 @@ class Article(models.Model):
     statut = models.CharField(verbose_name="Statut", max_length=100, choices=choix_statut, default="publie", help_text="Sélectionnez Non publié pour interrompre la publication quelque soit la date de fin de publication prévue.")
     document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, blank=True, null=True, help_text="Privilégiez un document au format PDF.")
     document_titre = models.CharField(verbose_name="Titre", max_length=300, default="Document", help_text="Saisissez un nom de document.")
-    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=False, null=False)
+    structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=False, null=True)
     choix_public = [("toutes", "Toutes les familles"),
                     ("inscrits", "Les familles dont un membre est inscrit à l'une des activités suivantes"),
                    #("presents", "Les familles dont un membre est présent sur l'une des activités suivantes et sur la période suivante"),
