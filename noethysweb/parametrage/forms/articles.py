@@ -23,7 +23,7 @@ from core.forms.select2 import Select2MultipleWidget, Select2Widget
 
 class Formulaire(FormulaireBase, ModelForm):
     cropper_data = forms.CharField(widget=forms.HiddenInput(), required=False)
-    type_image = forms.ChoiceField(label="Image", choices=[("aucune", "Aucune image"), ("importer", "Importation d'une image"), ("banque_images", "Sélection dans la banque d'images")], initial="aucune", required=False)
+    type_image = forms.ChoiceField(label="Image", choices=[("aucune", "Aucune image"), ("importer", "Importation d'une image")], initial="aucune", required=False)
     periode = forms.CharField(label="Période", required=False, widget=DateRangePickerWidget(), help_text="Renseignez une période de présence.")
 
     class Meta:
@@ -33,7 +33,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "date_debut": DateTimePickerWidget(),
             "date_fin": DateTimePickerWidget(),
             "texte": SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '220px'}}),
-            "image": Crop_image(attrs={"largeur_min": 447, "hauteur_min": 167, "ratio": "447/167"}),
+            "image": forms.FileInput(),
             "image_article": Selection_image_article(),
             "activites": Select2MultipleWidget(),
             "groupes": Select2MultipleWidget({"data-minimum-input-length": 0}),
@@ -104,6 +104,15 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Image d'illustration",
                 Field("type_image"),
+                     # On ajoute ce bloc HTML pour l'aperçu
+                     HTML("""
+                        {% if form.instance.image %}
+                            <div class="control-group offset-md-2 col-md-10 mb-2">
+                                <p>Image actuelle :</p>
+                                <img src="{{ form.instance.image.url }}" style="max-width: 200px; border: 1px solid #ccc;">
+                            </div>
+                        {% endif %}
+                    """),
                 Field("image"),
                 Field("image_article"),
             ),
