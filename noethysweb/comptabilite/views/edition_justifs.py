@@ -22,135 +22,151 @@ from django.utils.html import strip_tags
 from django.core.files.base import ContentFile
 from PIL import Image  # Pour traiter l'image (si nécessaire)
 
+# -*- coding: utf-8 -*-
+#  Copyright (c) 2019-2021 Ivan LUCAS.
+#  Noethysweb, application de gestion multi-activités.
+#  Distribué sous licence GNU GPL.
+
+import io, time
+from django.http import JsonResponse
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.pdfgen import canvas
+from pypdf import PdfReader, PdfWriter
+from PIL import Image, ImageOps  # ImageOps est crucial pour la rotation auto
+from core.models import ComptaOperation
+from core.utils import utils_dates
 
 
 def Generer_pdf(request):
-    # Récupérer les options du formulaire
+    # 1. Initialisation et validation
     form = Formulaire(request.POST, request=request)
     if not form.is_valid():
-        return JsonResponse({"erreur": "Veuillez compléter les paramètres"}, status=401)
+        return JsonResponse({"erreur": "Paramètres invalides"}, status=400)
+
     options = form.cleaned_data
-
-
-    # Récupération des paramètres de la période
     date_debut = utils_dates.ConvertDateENGtoDate(options["periode"].split(";")[0])
     date_fin = utils_dates.ConvertDateENGtoDate(options["periode"].split(";")[1])
-    options["periode"] = (date_debut, date_fin)
 
-    # Récupérer le compte sélectionné
     compte = options["compte"]
-    compte_id = compte.idcompte
-    compte_label = compte.nom
+    operations = ComptaOperation.objects.filter(
+        compte=compte,
+        date__gte=date_debut,
+        date__lte=date_fin,
+        document__isnull=False
+    ).exclude(document='').order_by('num_piece')
 
-    if not compte:
-        return JsonResponse({"erreur": "Compte non trouvé."}, status=404)
-
-    # Récupérer toutes les opérations dans la période donnée pour ce compte
-    operations = ComptaOperation.objects.filter(compte_id=compte_id, date__gte=date_debut, date__lte=date_fin, document__isnull=False).exclude(document='').order_by('num_piece')
-    print(operations)
     if not operations:
-        return JsonResponse({"erreur": "Aucune opération avec document pour cette période."}, status=404)
+        return JsonResponse({"erreur": "Aucun document trouvé pour cette période."}, status=404)
 
-    # Créer un fichier PDF en mémoire
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
-
-    # Définir les dimensions de la page A4
+    writer = PdfWriter()
     largeur, hauteur = A4
 
-    # Page de garde
-    c.setFont("Helvetica-Bold", 20)
-    titre = f"Justificatifs compte {compte_id}"
-    titre_width = c.stringWidth(titre, "Helvetica-Bold", 20)
-    c.drawString((largeur - titre_width) / 2, hauteur - 100, titre)  # Centrer le titre
+    # --- ÉTAPE 1 : GÉNÉRATION DE LA PAGE DE GARDE ---
+    buffer_garde = io.BytesIO()
+    c = canvas.Canvas(buffer_garde, pagesize=A4)
 
-    # Sous-titre : Structure
-    c.setFont("Helvetica", 14)
-    structure_nom = compte.structure.nom if compte.structure else "Structure inconnue"
-    structure_width = c.stringWidth(structure_nom, "Helvetica", 14)
-    structure = f"Structure : {structure_nom}"
-    c.drawString((largeur - c.stringWidth(structure, "Helvetica", 12)) / 2, hauteur - 150, structure)
+    # Header style pro (Bleu Sacadoc/Flambeaux)
+    c.setFillColor(colors.HexColor("#1d3557"))
+    c.rect(0, hauteur - 120, largeur, 120, fill=1, stroke=0)
 
-    # Sous-titre : Période
+    c.setStrokeColor(colors.white)
+    c.setLineWidth(2)
+    c.line(50, hauteur - 85, largeur - 50, hauteur - 85)
+
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica-Bold", 22)
+    c.drawCentredString(largeur / 2, hauteur - 70, "Recueil des Justificatifs")
+
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica-Bold", 14)
+    c.drawCentredString(largeur / 2, hauteur - 160, f"Compte : {compte.nom} (ID: {compte.idcompte})")
+
     c.setFont("Helvetica", 12)
-    periode = f"Période : {date_debut.strftime('%d/%m/%Y')} - {date_fin.strftime('%d/%m/%Y')}"
-    c.drawString((largeur - c.stringWidth(periode, "Helvetica", 12)) / 2, hauteur - 200, periode)
+    structure_nom = compte.structure.nom if compte.structure else ""
+    c.drawCentredString(largeur / 2, hauteur - 185, f"Structure : {structure_nom}")
+    c.drawCentredString(largeur / 2, hauteur - 205,
+                        f"Période : {date_debut.strftime('%d/%m/%Y')} au {date_fin.strftime('%d/%m/%Y')}")
 
-    # Ajouter une page pour la page de garde
     c.showPage()
-
-    # Pages des justificatifs
-    for operation in operations:
-        # Titre des pages suivantes : N° de pièce et Libellé
-        titre = f"N° de pièce : {operation.num_piece} - {operation.libelle}"
-        c.setFont("Helvetica-Bold", 16)
-        titre_width = c.stringWidth(titre, "Helvetica-Bold", 16)
-        c.drawString((largeur - titre_width) / 2, hauteur - 100, titre)  # Centrer le titre
-
-        # Sous-titre : Date de l'opération
-        c.setFont("Helvetica", 12)
-        date_op = f"Date : {operation.date.strftime('%d/%m/%Y')}"
-        c.drawString((largeur - c.stringWidth(date_op, "Helvetica", 12)) / 2, hauteur - 150, date_op)
-
-        if operation.document:
-            # Récupérer le chemin absolu du fichier
-            document_url = operation.document.name  # Récupère le chemin relatif (compta_operations/xxx.jpg)
-            document_path = default_storage.path(
-                document_url)  # Utilise default_storage pour obtenir le chemin absolu du fichier
-
-            print(f"Chemin absolu du fichier : {document_path}")  # Pour vérifier le chemin
-
-            # Si le document est une image, on peut l'intégrer dans le PDF
-            if document_url.lower().endswith(('jpg', 'jpeg', 'png', 'gif')):
-                # Charger l'image
-                image_path = default_storage.path(document_url)  # Récupérer le chemin absolu du fichier
-                print(image_path)
-                try:
-                    img = Image.open(image_path)  # Utiliser PIL pour charger l'image
-                    img_width, img_height = img.size  # Obtenir la taille de l'image
-                except Exception as e:
-                    img_width, img_height = 0, 0  # Si l'image ne peut pas être chargée, ignorer l'image
-
-                # Définir une taille maximale pour l'image
-                max_width = 500  # Largeur maximale de l'image dans le PDF
-                max_height = 800  # Hauteur maximale de l'image dans le PDF
-
-                # Calculer le ratio de redimensionnement pour l'image
-                if img_width > max_width or img_height > max_height:
-                    ratio = min(max_width / img_width, max_height / img_height)
-                    img_width = int(img_width * ratio)
-                    img_height = int(img_height * ratio)
-
-                # Ajouter l'image dans le PDF
-                if img_width > 0 and img_height > 0:
-                    c.drawImage(image_path, 50, hauteur - 200 - img_height, width=img_width, height=img_height)
-
-        # Ajouter la page et passer à la suivante
-        c.showPage()
-
-        # Sauvegarder le PDF dans le buffer
     c.save()
+    writer.add_page(PdfReader(io.BytesIO(buffer_garde.getvalue())).pages[0])
 
-        # Convertir le contenu du buffer en un fichier Django avec ContentFile
-    pdf_content = ContentFile(buffer.getvalue())
+    # --- ÉTAPE 2 : TRAITEMENT DES PIÈCES JOINTES ---
+    for op in operations:
+        doc_name = op.document.name.lower()
+        full_path = default_storage.path(op.document.name)
 
-        # Vérifier si le fichier existe déjà
-    filename = f"justifs_compta/justificatifs_compte_{compte_id}_{date_debut.strftime('%Y%m%d')}_{date_fin.strftime('%Y%m%d')}.pdf"
+        # A. Création du bandeau (utilisé pour tamponner les PDF ou habiller les images)
+        buffer_header = io.BytesIO()
+        can = canvas.Canvas(buffer_header, pagesize=A4)
 
-        # Vérifier si le fichier existe déjà
+        # Dessin du bandeau gris en haut
+        can.setFillColor(colors.HexColor("#f1f1f1"))
+        can.rect(0, hauteur - 50, largeur, 50, fill=1, stroke=0)
+        can.setFillColor(colors.black)
+        can.setFont("Helvetica-Bold", 11)
+        can.drawString(30, hauteur - 30, f"PIÈCE N°{op.num_piece} - {op.date.strftime('%d/%m/%Y')}")
+        can.setFont("Helvetica", 10)
+        can.drawRightString(largeur - 30, hauteur - 30, f"{op.libelle[:60]}")
+
+        # Cas 1 : Le document est une IMAGE
+        if doc_name.endswith(('.jpg', '.jpeg', '.png', '.gif')):
+            try:
+                img = Image.open(full_path)
+                img = ImageOps.exif_transpose(img)  # Gère la rotation auto (smartphone)
+
+                img_w, img_h = img.size
+                max_w, max_h = largeur - 60, hauteur - 110
+                ratio = min(max_w / img_w, max_h / img_h)
+                new_w, new_h = img_w * ratio, img_h * ratio
+
+                x_pos = (largeur - new_w) / 2
+                y_pos = (hauteur - 65 - new_h) / 2  # Centré verticalement sous le bandeau
+
+                # On dessine l'image sur le MÊME canvas que le bandeau
+                can.drawImage(full_path, x_pos, y_pos, width=new_w, height=new_h, preserveAspectRatio=True)
+                can.showPage()
+                can.save()
+                writer.add_page(PdfReader(io.BytesIO(buffer_header.getvalue())).pages[0])
+            except Exception as e:
+                print(f"Erreur traitement image {op.num_piece}: {e}")
+
+        # Cas 2 : Le document est un PDF
+        elif doc_name.endswith('.pdf'):
+            try:
+                # On finalise le bandeau seul sur sa page (transparente)
+                can.showPage()
+                can.save()
+                header_reader = PdfReader(io.BytesIO(buffer_header.getvalue()))
+                header_page = header_reader.pages[0]
+
+                # Lecture du justificatif PDF
+                with open(full_path, 'rb') as f:
+                    justif_pdf = PdfReader(f)
+                    for i, page in enumerate(justif_pdf.pages):
+                        if i == 0:
+                            # On fusionne le bandeau PAR-DESSUS la première page
+                            page.merge_page(header_page)
+                        writer.add_page(page)
+            except Exception as e:
+                print(f"Erreur traitement PDF {op.num_piece}: {e}")
+
+    # --- ÉTAPE 3 : FINALISATION ET ENREGISTREMENT ---
+    final_buffer = io.BytesIO()
+    writer.write(final_buffer)
+
+    repertoire = "justifs_compta"
+    filename = f"{repertoire}/Recueil_Justificatifs_{compte.idcompte}_{date_debut.strftime('%Y%m%d')}.pdf"
+
     if default_storage.exists(filename):
-            # Si le fichier existe déjà, on le remplace par le nouveau
-            default_storage.delete(filename)  # On supprime l'ancien fichier
-            print(f"Le fichier {filename} existe déjà. Il va être remplacé.")
+        default_storage.delete(filename)
 
-        # Sauvegarder le nouveau fichier
-    file_path = default_storage.save(filename, pdf_content)
+    file_path = default_storage.save(filename, ContentFile(final_buffer.getvalue()))
 
-        # Retourner le nom du fichier généré pour permettre à l'utilisateur de le télécharger
-    time.sleep(1)  # Simuler un léger délai pour la génération du fichier
-    return JsonResponse({"nom_fichier": file_path})
-
-
+    return JsonResponse({"nom_fichier": file_path, "status": "success"})
 
 class View(CustomView, TemplateView):
     menu_code = "edition_justifs"
