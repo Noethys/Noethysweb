@@ -98,7 +98,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
             # Filtrage des comptes liés à la structure (ou visibles)
             self.fields["compte"].queryset = CompteBancaire.objects.filter(structure__in=self.request.user.structures.all()).order_by("nom")
-
+            self.fields['date_fin'].help_text = "Cela correspond à la période à prendre en compte dans la recherche des opérations (il faut donc être large)."
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'budgets_liste' %}"),
@@ -107,7 +107,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("observations"),
                 Field("compte"),
             ),
-            Fieldset("Période",
+            Fieldset("Période de prise en compte des opérations",
                 Field("date_debut"),
                 Field("date_fin"),
             ),
