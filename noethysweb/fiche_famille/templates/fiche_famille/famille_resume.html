@@ -113,6 +113,11 @@
                         {% embed "individus/alerte.html" with items=cotisations_manquantes titre="Adhésions manquantes"%}{% endembed %}
                     {% endif %}
 
+                    {# Informations manquantes #}
+                    {% if informations_manquantes %}
+                        {% embed "individus/alerte.html" with items=informations_manquantes titre="Informations manquantes"%}{% endembed %}
+                    {% endif %}
+
                 {% endblock %}
             {% endembed %}
         {% endif %}

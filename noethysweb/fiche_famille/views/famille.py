@@ -15,7 +15,7 @@ from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Famille, Note, Rattachement, CATEGORIES_RATTACHEMENT, Prestation, Reglement, PortailMessage, Inscription, Facture
-from individus.utils import utils_pieces_manquantes
+from individus.utils import utils_pieces_manquantes, utils_informations_manquantes
 from fiche_individu.forms.individu import Formulaire
 from fiche_famille.utils.utils_famille import LISTE_ONGLETS
 from cotisations.utils import utils_cotisations_manquantes
@@ -210,7 +210,8 @@ class Resume(Onglet, DetailView):
         # Alertes
         context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(famille=context['famille'], only_invalides=True, utilisateur=self.request.user)
         context['cotisations_manquantes'] = utils_cotisations_manquantes.Get_cotisations_manquantes(famille=context['famille'])
-        context['nbre_alertes'] = len(context['pieces_fournir']) + len(context['cotisations_manquantes'])
+        context['informations_manquantes'] = utils_informations_manquantes.Get_informations_manquantes(famille=context['famille'])
+        context['nbre_alertes'] = len(context['pieces_fournir']) + len(context['cotisations_manquantes']) + len(context['informations_manquantes'])
 
         # Notes
         conditions = (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
