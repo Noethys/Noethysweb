@@ -1,0 +1,32 @@
+{% load static %}
+{% load embed %}
+
+<select id="{{ id }}" name="{{ name }}" data-minimum-input-length="0" data-width="100%" data-allow-clear="false" lang="fr" class="select2widget form-control django-select2" {{ disabled }}>
+    {% for valeur, choix in choices %}
+        <option value="{{ valeur }}" data-description="{{ choix.1 }}" {% if value|slugify == valeur|slugify %}selected{% endif %}>{% if valeur %}{{ choix.0 }}{% else %}{{ choix }}{% endif %}</option>
+    {% endfor %}
+</select>
+
+<script>
+    function formate_ligne(state) {
+        if (!state.id) { return state.text; }
+
+        if (state.element.dataset.description) {
+            var $state = $(
+                '<span><span class="fw-bold d-block">' + state.text + '</span>' +
+                '<small class="text-muted d-block" style="line-height: 1.2;" >' + state.element.dataset.description + '</small></span>'
+            );
+        } else {
+            var $state = $("<span>"+ state.text + "</span>");
+        }
+        return $state;
+    };
+
+    $(document).ready(function() {
+        $("#{{ id }}").select2({
+            templateResult: formate_ligne,
+            //templateSelection: formate_ligne,
+            disabled: {% if disabled %}true{% else %}false{% endif %},
+        });
+    });
+</script>
