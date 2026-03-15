@@ -21,7 +21,7 @@ SECRET_KEY = 'fdjsqfq543Z4645RFsdfSs564Z5-z(YZdqswFSDf'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["joie-et-vie.sacadoc.org", '37.59.122.1']
+ALLOWED_HOSTS = ["localhost"]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 LOGIN_REDIRECT_URL = "accueil"
@@ -186,16 +186,9 @@ LOCALE_PATHS = (
 )
 
 # URL publique pour accéder aux fichiers statiques
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
-
-# Dossier(s) source des fichiers statiques
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'core', 'static'),
-]
-
-# Dossier de destination pour collectstatic (prod)
-STATIC_ROOT = os.path.join(BASE_DIR, 'core', 'static_collected')
-
+STATICFILES_STORAGE = 'noethysweb.storage.ForgivingManifestStaticFilesStorage'
 
 # Media (uploads)
 MEDIA_URL = '/media/'
