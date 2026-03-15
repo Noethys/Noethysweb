@@ -3,15 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
-from core.views.base import CustomView
-from django.db.models import Q, Count, F
-from core.models import Activite, Consommation, Inscription, Famille, Individu, Vacance, Scolarite, LISTE_MOIS, Historique, TarifLigne, Quotient, Rattachement
-from django.views.generic import TemplateView
-from outils.forms.statistiques import Formulaire
-from core.utils import utils_dates
 import json, random, datetime, calendar, operator
-from django.db.models import Max, Min
+from django.views.generic import TemplateView
+from django.db.models import Q, Count, F, Max, Min
+from core.views.base import CustomView
+from core.models import Activite, Consommation, Inscription, Famille, Individu, Vacance, Cotisation, LISTE_MOIS, Historique, Quotient, Rattachement
+from core.utils import utils_dates
+from outils.forms.statistiques import Formulaire
 
 
 class Element():
@@ -81,22 +79,22 @@ def Calcule_periodes_comparatives(parametres={}, presents=None, liste_activites=
     liste_periodes = []
     if dates_extremes["date__min"] and dates_extremes["date__max"]:
 
-        if parametres["donnees"] == "VACANCES":
+        if parametres["condition"] == "VACANCES":
             for vacance in Vacance.objects.filter(nom=parametres["vacances"], date_debut__gte=dates_extremes["date__min"], date_fin__lte=dates_extremes["date__max"]).order_by("date_debut"):
                 liste_periodes.append({"date_debut": vacance.date_debut, "date_fin": vacance.date_fin, "label": "%s %d" % (parametres["vacances"], vacance.annee)})
 
-        if parametres["donnees"] == "MOIS":
+        if parametres["condition"] == "MOIS":
             for annee in range(dates_extremes["date__min"].year, dates_extremes["date__max"].year + 1):
                 liste_periodes.append(
                     {"date_debut": datetime.date(annee, int(parametres["mois"]), 1),
                      "date_fin": datetime.date(annee, int(parametres["mois"]), calendar.monthrange(annee, int(parametres["mois"]))[1]),
                      "label": "%s %d" % (LISTE_MOIS[int(parametres["mois"]) - 1][1], annee)})
 
-        if parametres["donnees"] == "ANNEE":
+        if parametres["condition"] == "ANNEE":
             for annee in range(dates_extremes["date__min"].year, dates_extremes["date__max"].year + 1):
                 liste_periodes.append({"date_debut": datetime.date(annee, 1, 1), "date_fin": datetime.date(annee, 12, 31), "label": "Année %d" % annee})
 
-        if parametres["donnees"] == "PERIODE":
+        if parametres["condition"] == "PERIODE":
             if presents[0].year == presents[1].year:
                 for annee in range(dates_extremes["date__min"].year, dates_extremes["date__max"].year + 1):
                     nbreJoursMois = calendar.monthrange(annee, presents[0].month)[1]
@@ -151,33 +149,45 @@ class View(CustomView, TemplateView):
                 if param_activites["type"] == "activites":
                     liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
 
-                # Données
-                if parametres["donnees"] == "ANNEE":
+                # Condition
+                if parametres["condition"] == "ANNEE":
                     presents = (datetime.date(parametres["annee"], 1, 1),
                                 datetime.date(parametres["annee"], 12, 31))
-                elif parametres["donnees"] == "MOIS":
+                if parametres["condition"] == "MOIS":
                     presents = (datetime.date(parametres["annee"], int(parametres["mois"]), 1),
                                 datetime.date(parametres["annee"], int(parametres["mois"]), calendar.monthrange(parametres["annee"], int(parametres["mois"]))[1]))
-                elif parametres["donnees"] == "VACANCES":
+                if parametres["condition"] == "VACANCES":
                     vacance = Vacance.objects.get(nom=parametres["vacances"], annee=parametres["annee"])
                     presents = (vacance.date_debut, vacance.date_fin)
-                elif parametres["donnees"] == "PERIODE":
+                if parametres["condition"] == "PERIODE":
                     presents = utils_dates.ConvertDateRangePicker(parametres["periode"])
-
-                if parametres["donnees"] == "INSCRITS_PERIODE":
+                if parametres["condition"] == "INSCRITS_PERIODE":
                     inscrits_periode = utils_dates.ConvertDateRangePicker(parametres["periode"])
-
+                if parametres["condition"] in ("ADHERENTS_PERIODE"):
+                    periode = utils_dates.ConvertDateRangePicker(parametres["periode"])
+                    liste_cotisations = Cotisation.objects.filter(date_debut__lte=periode[1], date_fin__gte=periode[0], type_cotisation__in=parametres["types_cotisations"])
 
                 # ================================ INDIVIDUS ====================================
 
                 if rubrique.startswith("individus"):
-                    if presents:
+                    if parametres["condition"] in ("ANNEE", "MOIS", "VACANCES", "PERIODE"):
                         condition = Q(consommation__activite__in=liste_activites, consommation__date__gte=presents[0], consommation__date__lte=presents[1], consommation__etat__in=parametres["etats"])
-                    else:
+                    if parametres["condition"] in ("INSCRITS", "INSCRITS_PERIODE"):
                         condition = Q(inscription__activite__in=liste_activites)
                         if inscrits_periode:
                             condition &= Q(inscription__date_debut__gte=inscrits_periode[0], inscription__date_debut__lte=inscrits_periode[1])
-
+                    if parametres["condition"] in ("ADHERENTS_PERIODE"):
+                        liste_individus, liste_familles = [], []
+                        for cotisation in liste_cotisations:
+                            if cotisation.individu_id:
+                                # On prend en compte les individus des cotisations individuelles
+                                liste_individus.append(cotisation.individu_id)
+                            else:
+                                liste_familles.append(cotisation.famille_id)
+                        if liste_familles:
+                            # On prend en compte tous les membres de la famille si cotisation famille
+                            liste_individus += [r.individu_id for r in Rattachement.objects.filter(famille_id__in=liste_familles, categorie__in=(1, 2))]
+                        condition = Q(pk__in=liste_individus)
 
                 # ---------------------------- INDIVIDUS : Nombre -------------------------------
                 if rubrique == "individus_nombre":
@@ -423,17 +433,23 @@ class View(CustomView, TemplateView):
                 # ================================ FAMILLES ====================================
 
                 liste_idfamille = []
+                inscriptions = []
                 if rubrique.startswith("familles"):
-                    if presents:
+                    if parametres["condition"] in ("ANNEE", "MOIS", "VACANCES", "PERIODE"):
                         condition = Q(activite__in=liste_activites, date__gte=presents[0], date__lte=presents[1], etat__in=parametres["etats"])
                         condition = Q(pk__in=list({c.inscription_id: True for c in Consommation.objects.filter(condition)}.keys()))
-                    else:
+
+                    if parametres["condition"] in ("INSCRITS", "INSCRITS_PERIODE"):
                         condition = Q(activite__in=liste_activites)
                         if inscrits_periode:
                             condition &= Q(date_debut__gte=inscrits_periode[0], date_debut__lte=inscrits_periode[1])
 
-                    inscriptions = Inscription.objects.select_related("activite").filter(condition)
-                    liste_idfamille = list({inscription.famille_id: True for inscription in inscriptions}.keys())
+                    if parametres["condition"] in ("ANNEE", "MOIS", "VACANCES", "PERIODE", "INSCRITS", "INSCRITS_PERIODE"):
+                        inscriptions = Inscription.objects.select_related("activite").filter(condition)
+                        liste_idfamille = list({inscription.famille_id: True for inscription in inscriptions}.keys())
+
+                    if parametres["condition"] in ("ADHERENTS_PERIODE"):
+                        liste_idfamille = list({cotisation.famille_id: True for cotisation in liste_cotisations}.keys())
 
                 # ---------------------------- FAMILLES : Nombre -------------------------------
                 if rubrique == "familles_nombre":
@@ -443,12 +459,13 @@ class View(CustomView, TemplateView):
                     data.append(Texte(texte="%d familles dont au moins un membre est %s." % (len(liste_idfamille), "présent" if presents else "inscrit")))
 
                     # Tableau : Répartition des familles par activité
-                    familles = inscriptions.values_list("activite__nom").annotate(nbre=Count("famille_id", distinct=True)).order_by("-nbre")
-                    data.append(Tableau(
-                        titre="Répartition du nombre de familles par activité",
-                        colonnes=["Activité", "Nombre de familles"],
-                        lignes=[(item[0], item[1]) for item in familles]
-                    ))
+                    if inscriptions:
+                        familles = inscriptions.values_list("activite__nom").annotate(nbre=Count("famille_id", distinct=True)).order_by("-nbre")
+                        data.append(Tableau(
+                            titre="Répartition du nombre de familles par activité",
+                            colonnes=["Activité", "Nombre de familles"],
+                            lignes=[(item[0], item[1]) for item in familles]
+                        ))
 
                     # Chart : Evolution du nombre de familles - comparatif par période
                     if presents:
@@ -495,7 +512,7 @@ class View(CustomView, TemplateView):
 
                 # ---------------------------- FAMILLES : Composition -------------------------------
 
-                if rubrique == "familles_composition":
+                if rubrique == "familles_composition" and inscriptions:
                     data.append(Titre(texte="Composition des familles"))
 
                     familles = Individu.objects.filter(pk__in=[inscription.individu_id for inscription in inscriptions]).values_list("inscription__famille").annotate(nbre=Count("idindividu", distinct=True)).order_by("nbre")
