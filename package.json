@@ -4,6 +4,6 @@
   "dependencies": {
     "jquery": ">=2.1.1",
     "jqueryui": ">=1.12.1",
-	"fabric": ">=4.6.0"
+	"fabric": ">=5.3.0"
   }
 }
