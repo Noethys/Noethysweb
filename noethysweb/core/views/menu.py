@@ -249,6 +249,8 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_inscriptions.Add(code="suivi_inscriptions", titre="Suivi des inscriptions", icone="file-text-o")
     menu_inscriptions.Add(code="inscriptions_impression", titre="Imprimer des inscriptions", icone="file-text-o")
     menu_inscriptions.Add(code="inscriptions_email", titre="Envoyer des inscriptions par Email", icone="file-text-o")
+    # Ajout du menu pour l'éditeur d'emails groupés des activités — à différencier de inscriptions_email qui est l'éditeur d'emails pour les inscriptions individuelles
+    menu_inscriptions.Add(code="inscriptions_activites_email", titre="Envoyer des emails aux inscrits d'une activité", icone="file-text-o")
     menu_inscriptions.Add(code="inscriptions_saisir_lot", titre="Saisir un lot d'inscriptions", icone="file-text-o")
     menu_inscriptions.Add(code="inscriptions_modifier", titre="Modifier des inscriptions par lot", icone="file-text-o")
     menu_inscriptions.Add(code="inscriptions_changer_groupe", titre="Changer de groupe par lot", icone="file-text-o")

@@ -8,7 +8,7 @@ from core.views import toc
 from core.decorators import secure_ajax
 from individus.views import liste_pieces_manquantes, liste_pieces_fournies, liste_regimes_caisses, liste_codes_comptables, liste_inscriptions_attente, suivi_inscriptions, \
                             importation_photos, liste_anniversaires, liste_quotients, etiquettes, etiquettes_familles, etiquettes_individus, \
-                            inscriptions_scolaires, scolarites, inscriptions_liste, inscriptions_impression, inscriptions_email, liste_comptes_internet, \
+                            inscriptions_scolaires, scolarites, inscriptions_liste, inscriptions_impression, inscriptions_email, inscriptions_activites_email, liste_comptes_internet, \
                             individus_detaches_liste, liste_mandats, liste_questionnaires_familles, liste_questionnaires_individus, liste_contacts_urgence, \
                             liste_regimes_alimentaires, liste_maladies, liste_informations, individus_doublons_liste, liste_familles_sans_inscriptions, \
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
@@ -19,7 +19,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
 urlpatterns = [
 
     # Table des matières
-    path('individus/', toc.Toc.as_view(menu_code="individus_toc"), name='individus_toc'),
+    path('individus/', toc.Toc.as_view(menu_code="individus_toc"), name='individus_toc'), # URL de référence pour le menu, utilisée notamment pour le bouton "Annuler" dans les différentes vues du module individus
 
     # # Individus
     # path('individus/individus/liste', individu.Liste.as_view(), name='individu_liste'),
@@ -43,6 +43,9 @@ urlpatterns = [
 
     path('individus/inscriptions_impression', inscriptions_impression.Liste.as_view(), name='inscriptions_impression'),
     path('individus/inscriptions_email', inscriptions_email.Liste.as_view(), name='inscriptions_email'),
+    # URL pour l'éditeur d'emails groupés des activités — à différencier de inscriptions_email qui est l'éditeur d'emails pour les inscriptions individuelles
+    path('individus/inscriptions_activites_email', inscriptions_activites_email.Liste.as_view(), name='inscriptions_activites_email'),
+    path('individus/inscriptions_activites_email_pdf', secure_ajax(inscriptions_activites_email.Impression_pdf), name='ajax_inscriptions_activites_email_pdf'),
     path('individus/imprimer_liste_inscrits', imprimer_liste_inscrits.View.as_view(), name='imprimer_liste_inscrits'),
     path('individus/liste_inscriptions_attente', liste_inscriptions_attente.View.as_view(etat="attente"), name='liste_inscriptions_attente'),
     path('individus/liste_inscriptions_refus', liste_inscriptions_attente.View.as_view(etat="refus"), name='liste_inscriptions_refus'),

@@ -802,6 +802,35 @@ def ConvertTailleModeleEnPx(taille):
     return (taille[0] * mmPDF, taille[1] * mmPDF)
 
 
+class Activite(Categorie):
+    def __init__(self):
+        self.nom = "Activité"
+        self.code = "activite"
+        self.photosIndividuelles = False
+
+        self.champs = [
+            (u"Nom de l'activité (long)", u"Accueil de Loisirs", "{ACTIVITE_NOM_LONG}"),
+            (u"Nom de l'activité (abrégé)", u"ALSH", "{ACTIVITE_NOM_COURT}"),
+            (u"Numéro ID de l'inscription", u"003", "{IDINSCRIPTION}"),
+            (u"Date de début de l'inscription", u"01/09/2026", "{DATE_DEBUT}"),
+            (u"Date de fin de l'inscription", u"30/06/2027", "{DATE_FIN}"),
+            (u"Nom du groupe (long)", u"Groupe A", "{GROUPE_NOM_LONG}"),
+            (u"Nom du groupe (abrégé)", u"GrA", "{GROUPE_NOM_COURT}"),
+            (u"Nom de la catégorie de tarif", u"Tarif standard", "{NOM_CATEGORIE_TARIF}"),
+            (u"Nom de l'enfant inscrit", u"DUPOND", "{INDIVIDU_NOM}"),
+            (u"Prénom de l'enfant inscrit", u"Lucie", "{INDIVIDU_PRENOM}"),
+            (u"Date de naissance de l'enfant inscrit", u"12/04/2018", "{INDIVIDU_DATE_NAISS}"),
+            (u"Nombre total d'inscrits à l'activité", u"12", "{NOMBRE_INSCRIPTIONS}"),
+        ]
+
+        self.speciaux = [
+            {"nom": u"Cadre principal", "champ": u"cadre_principal", "obligatoire": False, "nbreMax": 1, "x": None, "y": None, "verrouillageX": False, "verrouillageY": False, "Xmodifiable": True, "Ymodifiable": True, "largeur": 100, "hauteur": 150, "largeurModifiable": True, "hauteurModifiable": True, "largeurMin": 80, "largeurMax": 1000, "hauteurMin": 80, "hauteurMax": 1000, "verrouillageLargeur": False, "verrouillageHauteur": False, "verrouillageProportions": False, "interditModifProportions": False}
+        ]
+        
+        #à activer pour exposer les champs famille/individu dans l'éditeur
+        #self.champs.extend(utils_infos_individus.GetNomsChampsPossibles(mode="famille"))
+
+
 class Modele_doc():
     """ Importation d'un modèle pour un PDF """
 
