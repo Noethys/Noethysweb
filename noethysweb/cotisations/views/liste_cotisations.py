@@ -130,4 +130,10 @@ class Liste(Page, crud.Liste):
 
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
-    pass
+
+    def Check_protections(self, objets=[]):
+        protections = []
+        for cotisation in objets:
+            if cotisation.prestation and cotisation.prestation.facture_id:
+                protections.append("L'adhésion ID%d est déjà facturée" % cotisation.pk)
+        return protections

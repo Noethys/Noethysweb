@@ -269,21 +269,19 @@ class Modifier(Page, crud.Modifier):
 class Supprimer(Page, crud.Supprimer):
     template_name = "fiche_famille/famille_delete.html"
 
-    # def delete(self, request, *args, **kwargs):
-    #     """ Empêche la suppression de cotisation déjà incluse dans dépôt """
-    #     if self.get_object().depot_cotisation:
-    #         messages.add_message(request, messages.ERROR, "La suppression est impossible car cette adhésion est déjà incluse dans un dépôt")
-    #         return HttpResponseRedirect(self.get_success_url(), status=303)
-    #     reponse = super(Supprimer, self).delete(request, *args, **kwargs)
-    #     return reponse
+    def Check_protections(self, objet=None):
+        protections = []
+        if objet.prestation and objet.prestation.facture_id:
+            protections.append("Vous ne pouvez pas supprimer cette adhésion car la prestation associée est déjà facturée")
+        return protections
 
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
     template_name = "fiche_famille/famille_delete.html"
 
-    # def delete(self, request, objet):
-    #     """ Empêche la suppression de cotisation déjà incluse dans dépôt """
-    #     if objet.depot_cotisation:
-    #         messages.add_message(request, messages.ERROR, "La suppression de '%s' est impossible car cette adhésion est déjà incluse dans un dépôt" % objet)
-    #         return False
-    #     return True
+    def Check_protections(self, objets=[]):
+        protections = []
+        for cotisation in objets:
+            if cotisation.prestation and cotisation.prestation.facture_id:
+                protections.append("L'adhésion ID%d est déjà facturée" % cotisation.pk)
+        return protections

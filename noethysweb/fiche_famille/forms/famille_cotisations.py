@@ -132,6 +132,13 @@ class Formulaire(FormulaireBase, ModelForm):
             else:
                 self.fields["facturer"].initial = False
 
+        # Si prestation facturée
+        if self.instance.prestation and self.instance.prestation.facture_id:
+            for champ in ("type_cotisation", "unite_cotisation", "individu",
+                          "facturer", "date_facturation", "label_prestation", "montant"):
+                self.fields[champ].disabled = True
+                self.fields[champ].help_text = "Ce champ n'est pas modifiable car la prestation associée est déjà facturée."
+
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{{ view.get_success_url }}"),
