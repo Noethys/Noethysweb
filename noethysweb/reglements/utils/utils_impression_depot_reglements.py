@@ -24,6 +24,7 @@ class Impression(utils_impression.Impression):
         if tri_colonne == "mode": tri = "mode__label"
         elif tri_colonne == "famille": tri = "famille__nom"
         elif tri_colonne == "payeur": tri = "payeur__nom"
+        elif tri_colonne == "actions": tri = "famille__nom"
         else: tri = tri_colonne
         if self.dict_donnees["tri_sens"] == "desc":
             tri = "-" + tri
