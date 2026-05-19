@@ -19,6 +19,9 @@
     
     {% include 'core/modal_pdf.html' %}
 
+    {# Lien de téléchargement du fichier d'export #}
+    <a id="download" download></a>
+
     <script>
         // Générer le PDF
         function generer_pdf(telechargement=false) {
@@ -29,6 +32,23 @@
                 datatype: "json",
                 success: function(data){
                     charge_pdf(data, telechargement);
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+        // Exporter au format xlsx
+        function exporter_excel() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_imprimer_liste_inscrits_exporter_xlsx' %}",
+                data: $("#form_parametres").serialize(),
+                datatype: "json",
+                success: function(data){
+                    $("#download").attr("href", data.nom_fichier);
+                    document.getElementById("download").click();
                 },
                 error: function(data) {
                     toastr.error(data.responseJSON.erreur);

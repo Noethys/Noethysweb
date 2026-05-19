@@ -120,6 +120,7 @@ class Impression(utils_impression.Impression):
             ligne.append(colonne["nom"])
             total_largeurs_fixes += int(colonne["largeur"]) if colonne["largeur"] != "automatique" else 0
             nbre_colonnes_auto += 1 if colonne["largeur"] == "automatique" else 0
+            self.export_xlsx["colonnes"].append({"code": colonne["code"], "titre": colonne["nom"]})
         data_tableau.append(ligne)
 
         # Calcul des largeurs de colonnes
@@ -164,6 +165,9 @@ class Impression(utils_impression.Impression):
 
             # Création de la ligne du tableau
             data_tableau.append([Paragraph(valeurs.get(colonne["code"], None) or "", style_defaut) for colonne in self.dict_donnees["colonnes_perso"]])
+
+            # Ajout ligne pour export xlsx
+            self.export_xlsx["lignes"].append({colonne["code"]: valeurs.get(colonne["code"], None) or "" for colonne in self.dict_donnees["colonnes_perso"]})
 
         # Finalisation du tableau
         style = TableStyle([

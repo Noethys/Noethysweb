@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, datetime, os, uuid
+import logging, datetime
 logger = logging.getLogger(__name__)
 logging.getLogger('PIL').setLevel(logging.WARNING)
 from django.conf import settings
@@ -79,7 +79,7 @@ class Impression(utils_impression.Impression):
             {"code": "vaccinations_obligatoires", "titre": "Vaccinations obligatoires"},
             {"code": "autres_vaccinations", "titre": "Autres vaccinations"},
         ]
-        self.export_xlsx = {"lignes": [], "colonnes": colonnes_export}
+        self.export_xlsx["colonnes"] = colonnes_export
 
         # Importation des rattachements
         conditions = Q(pk__in=self.dict_donnees["rattachements"])
@@ -521,31 +521,3 @@ class Impression(utils_impression.Impression):
 
             # Export xlsx
             self.export_xlsx["lignes"].append(ligne_export)
-
-    def Exporter_xlsx(self):
-        # Création du répertoire
-        rep_base = os.path.join("temp", str(uuid.uuid4()))
-        rep_destination = os.path.join(settings.MEDIA_ROOT, rep_base, "export_renseignements")
-        os.makedirs(rep_destination)
-
-        # Création du fichier
-        import xlsxwriter
-        nom_fichier = "export_renseignements.xlsx"
-        classeur = xlsxwriter.Workbook(os.path.join(settings.MEDIA_ROOT, rep_base, nom_fichier))
-        feuille = classeur.add_worksheet("Page 1")
-        dict_format = {
-            "date": classeur.add_format({"num_format": "dd/mm/yyyy"})
-        }
-
-        # Insertion des entêtes de colonnes
-        for index_colonne, colonne in enumerate(self.export_xlsx["colonnes"]):
-            feuille.write(0, index_colonne, colonne["titre"])
-            feuille.set_column(index_colonne, index_colonne, colonne.get("largeur", 16))
-
-        # Insertion des lignes
-        for index_ligne, ligne in enumerate(self.export_xlsx["lignes"], 1):
-            for index_colonne, colonne in enumerate(self.export_xlsx["colonnes"], 0):
-                feuille.write(index_ligne, index_colonne, ligne.get(colonne["code"], ""), dict_format.get(colonne.get("format")))
-
-        classeur.close()
-        return os.path.join(settings.MEDIA_URL, rep_base, nom_fichier)

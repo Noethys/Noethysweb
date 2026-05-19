@@ -52,7 +52,7 @@ def Exporter_xlsx(request):
     impression = Check_options(request)
     if type(impression) == JsonResponse:
         return impression
-    return JsonResponse({"nom_fichier": impression.Exporter_xlsx()})
+    return JsonResponse({"nom_fichier": impression.Exporter_xlsx(nom_fichier_sans_extension="export_renseignements")})
 
 
 class Page(crud.Page):

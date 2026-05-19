@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, os, uuid
 logger = logging.getLogger(__name__)
 import datetime
 from core.utils import utils_dates, utils_modeles_documents, utils_preferences, utils_fichiers, utils_polices
@@ -11,7 +11,6 @@ from core.models import Organisateur
 from core.data import data_modeles_emails
 from django.core.cache import cache
 from django.conf import settings
-from uuid import uuid4
 
 from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, NextPageTemplate
 from reportlab.platypus import SimpleDocTemplate, Spacer, Table, TableStyle
@@ -190,6 +189,7 @@ class Impression():
         self.taille_page = taille_page
         self.modele_doc = None
         self.request = request
+        self.export_xlsx = {"lignes": [], "colonnes": []}
         if generation_auto:
             self.Generation_document(dict_donnees=dict_donnees)
 
@@ -208,7 +208,7 @@ class Impression():
         rep_temp = utils_fichiers.GetTempRep()
 
         # Initialisation du document
-        self.nom_fichier = "/temp/%s.pdf" % uuid4()
+        self.nom_fichier = "/temp/%s.pdf" % uuid.uuid4()
         self.chemin_fichier = settings.MEDIA_ROOT + self.nom_fichier
 
         if self.IDmodele:
@@ -300,3 +300,30 @@ class Impression():
     def Get_nom_fichier(self):
         return self.nom_fichier
 
+    def Exporter_xlsx(self, nom_fichier_sans_extension=""):
+        # Création du répertoire
+        rep_base = os.path.join("temp", str(uuid.uuid4()))
+        rep_destination = os.path.join(settings.MEDIA_ROOT, rep_base, nom_fichier_sans_extension)
+        os.makedirs(rep_destination)
+
+        # Création du fichier
+        import xlsxwriter
+        nom_fichier = "%s.xlsx" % nom_fichier_sans_extension
+        classeur = xlsxwriter.Workbook(os.path.join(settings.MEDIA_ROOT, rep_base, nom_fichier))
+        feuille = classeur.add_worksheet("Page 1")
+        dict_format = {
+            "date": classeur.add_format({"num_format": "dd/mm/yyyy"})
+        }
+
+        # Insertion des entêtes de colonnes
+        for index_colonne, colonne in enumerate(self.export_xlsx["colonnes"]):
+            feuille.write(0, index_colonne, colonne["titre"])
+            feuille.set_column(index_colonne, index_colonne, colonne.get("largeur", 16))
+
+        # Insertion des lignes
+        for index_ligne, ligne in enumerate(self.export_xlsx["lignes"], 1):
+            for index_colonne, colonne in enumerate(self.export_xlsx["colonnes"], 0):
+                feuille.write(index_ligne, index_colonne, ligne.get(colonne["code"], ""), dict_format.get(colonne.get("format")))
+
+        classeur.close()
+        return os.path.join(settings.MEDIA_URL, rep_base, nom_fichier)

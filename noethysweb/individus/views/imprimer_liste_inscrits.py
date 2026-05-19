@@ -24,7 +24,7 @@ def get_data_profil(donnees=None, request=None):
     return data
 
 
-def Generer_pdf(request):
+def Check_options(request):
     # Récupération des paramètres
     form = Formulaire(request.POST, request=request)
     if not form.is_valid():
@@ -32,13 +32,27 @@ def Generer_pdf(request):
     if not form.cleaned_data["colonnes_perso"]:
         return JsonResponse({"erreur": "Vous devez créer au moins une colonne."}, status=401)
 
-    # Création du PDF
+    # Création des données
     from individus.utils import utils_impression_inscrits
     impression = utils_impression_inscrits.Impression(titre="Liste des inscrits", dict_donnees=form.cleaned_data)
     if impression.erreurs:
         return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
-    nom_fichier = impression.Get_nom_fichier()
-    return JsonResponse({"nom_fichier": nom_fichier})
+    return impression
+
+
+def Generer_pdf(request):
+    impression = Check_options(request)
+    if type(impression) == JsonResponse:
+        return impression
+    return JsonResponse({"nom_fichier": impression.Get_nom_fichier()})
+
+
+def Exporter_xlsx(request):
+    """ Générer le fichier d'export """
+    impression = Check_options(request)
+    if type(impression) == JsonResponse:
+        return impression
+    return JsonResponse({"nom_fichier": impression.Exporter_xlsx(nom_fichier_sans_extension="liste_inscrits")})
 
 
 class View(CustomView, TemplateView):
