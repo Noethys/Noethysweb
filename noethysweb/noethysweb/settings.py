@@ -94,7 +94,6 @@ INSTALLED_APPS = [
     # Autres librairies
     'datatableview',
     'crispy_forms',
-    'debug_toolbar',
     'django_select2',
     'django_summernote',
     'anymail',
@@ -115,17 +114,11 @@ if int(crispy_forms.__version__.split(".")[0]) >= 2:
 # Liste des plugins
 PLUGINS = []
 
-# Ajouté pour permettre l'affichage de la debugtoolbar
-INTERNAL_IPS = [
-    '127.0.0.1',
-]
-
 MIDDLEWARE = [
     # Doit être placé avant tout pour préfixer les URLs générées
     'core.middleware.URLPrefixReverseMiddleware',
     # Doit être en 2ème pour gérer le préfixe URL_ROOT dans les URLs entrantes
     'core.middleware.URLPrefixMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -135,9 +128,8 @@ MIDDLEWARE = [
     'axes.middleware.AxesMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'csp.middleware.CSPMiddleware',
-    'noethysweb.middleware.CustomMiddleware',
 ]
+
 
 ROOT_URLCONF = 'noethysweb.urls'
 
@@ -318,6 +310,23 @@ try:
     from .settings_production import *
 except:
     print("Settings en production non trouvés : Utilisation des settings par défaut.")
+
+# Si on est en debug on charge la debug_toolbar en plus
+if DEBUG:
+    try:
+        import debug_toolbar
+        INSTALLED_APPS.append('debug_toolbar')
+        MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
+        # Ajouté pour permettre l'affichage de la debugtoolbar
+        INTERNAL_IPS = ['127.0.0.1']
+    except ImportError:
+        pass
+
+MIDDLEWARE += [
+    'csp.middleware.CSPMiddleware',
+    'axes.middleware.AxesMiddleware',
+    'noethysweb.middleware.CustomMiddleware',
+]
 
 # Modification pour prendre en compte URL_ROOT
 _URL_ROOT_STRIPPED = URL_ROOT.strip("/")
