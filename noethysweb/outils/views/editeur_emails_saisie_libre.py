@@ -36,6 +36,7 @@ class Liste(Page_destinataires, TemplateView):
             # Vérifie toutes les adresses mails
             validation = utils_email.Validation_adresse()
             liste_anomalies = []
+            texte_adresses = texte_adresses.replace("\r\n", "").replace("\n", "").replace("\r", "").replace(" ", "")
             for adresse in texte_adresses.split(";"):
                 if not validation.Check(adresse=adresse):
                     liste_anomalies.append(adresse)
