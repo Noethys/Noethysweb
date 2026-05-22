@@ -138,7 +138,6 @@ class Liste(Page, crud.Liste):
         context['impression_conclusion'] = ""
         context['active_checkbox'] = True
         context['bouton_supprimer'] = False
-        context["hauteur_table"] = "400px"
         context['form_modele_document'] = Form_modele()
         context['form_modele_impression'] = Form_modele_impression(categorie="facture")
         context['form_parametres'] = Form_parametres(request=self.request)
@@ -166,6 +165,7 @@ class Liste(Page, crud.Liste):
             }
             ordering = ["date_edition"]
             hidden_columns = ["etat"]
+            page_length = 500
 
         def Get_solde_actuel(self, instance, **kwargs):
             if instance.etat == "annulation":

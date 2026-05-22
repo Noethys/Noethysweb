@@ -23,10 +23,6 @@ class Facturation():
         logger.debug("Recherche tous les agréments...")
         self.listeAgrements = Agrement.objects.all()
 
-        # Récupération des questionnaires
-        logger.debug("Recherche tous les questionnaires...")
-        self.questionnaires = utils_questionnaires.ChampsEtReponses(categorie="famille")
-
     def RechercheAgrement(self, IDactivite, date):
         for agrement in self.listeAgrements:
             if agrement.activite_id == IDactivite and date >= agrement.date_debut and date <= agrement.date_fin:
@@ -155,7 +151,7 @@ class Facturation():
                 date_min = min(liste_dates)
                 date_max = max(liste_dates)
         if date_min and date_max:
-            listeQfdates = Quotient.objects.filter(Q(date_fin__gte=date_min) & Q(date_debut__lte=date_max))
+            listeQfdates = Quotient.objects.filter(date_fin__gte=date_min, date_debut__lte=date_max, famille_id__in=liste_familles)
         else:
             listeQfdates = []
 
@@ -205,7 +201,6 @@ class Facturation():
             dictConsommations.setdefault(consommation.prestation_id, [])
             dictConsommations[consommation.prestation_id].append({"date": consommation.date, "etat": consommation.etat})
 
-
         # Recherche du solde du compte
         logger.debug("Recherche du total des prestations pour chaque facture...")
         total_prestations = Prestation.objects.values('famille').filter(famille_id__in=liste_familles).annotate(total=Sum("montant"))
@@ -238,6 +233,10 @@ class Facturation():
                 solde_compte = "%.2f %s" % (solde_compte, utils_preferences.Get_symbole_monnaie())
 
             dict_soldes_comptes[IDfamille_temp] = solde_compte
+
+        # Récupération des questionnaires
+        logger.debug("Recherche tous les questionnaires...")
+        questionnaires = utils_questionnaires.ChampsEtReponses(categorie="famille", filtre_reponses=Q(famille__in=liste_familles))
 
         # Analyse et regroupement des données
         logger.debug("Analyse et groupement des données par facture...")
@@ -359,7 +358,7 @@ class Facturation():
                     dictComptes[ID]["{TEXTE_ECHEANCE}"] = ""
 
                 # Ajoute les réponses des questionnaires
-                for dictReponse in self.questionnaires.GetDonnees(IDfamille) :
+                for dictReponse in questionnaires.GetDonnees(IDfamille) :
                     dictComptes[ID][dictReponse["champ"]] = dictReponse["reponse"]
                     if dictReponse["controle"] == "codebarres":
                         dictComptes[ID]["{CODEBARRES_QUESTION_%d}" % dictReponse["IDquestion"]] = dictReponse["reponse"]

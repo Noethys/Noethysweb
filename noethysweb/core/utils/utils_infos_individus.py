@@ -259,6 +259,11 @@ class Informations():
         else:
             self.condition_familles = Q()
 
+        # Condition individus
+        self.liste_individus = []
+        if self.liste_familles:
+            self.liste_individus = [r.individu_id for r in Rattachement.objects.filter(famille_id__in=self.liste_familles)]
+
         # Lancement du calcul
         self.Run()
 
@@ -317,7 +322,11 @@ class Informations():
 
         dict_civilites = data_civilites.GetDictCivilites()
 
-        individus = Individu.objects.select_related('secteur', 'medecin', 'categorie_travail').all()
+        conditions = Q()
+        if self.liste_individus:
+            conditions = Q(pk__in=self.liste_individus)
+
+        individus = Individu.objects.select_related('secteur', 'medecin', 'categorie_travail').filter(conditions)
         for individu in individus:
             age = individu.Get_age()
             dictTemp[individu.pk] = {
@@ -603,7 +612,11 @@ class Informations():
 
     def RechercheInfosMedicales(self):
         """ Récupération des informations personnelles des individus """
-        problemes = Information.objects.select_related('categorie').all()
+        condition = Q()
+        if self.liste_individus:
+            condition = Q(individu_id__in=self.liste_individus)
+
+        problemes = Information.objects.select_related('categorie').filter(condition)
         for probleme in problemes:
             # Mémorise le nombre d'informations personnelles
             if "medical" not in self.dictIndividus[probleme.individu_id]:
@@ -630,7 +643,11 @@ class Informations():
 
     def RechercheMessages(self):
         """ Recherche les messages des familles et des individus """
-        notes = Note.objects.select_related('categorie').all()
+        condition = Q()
+        if self.liste_familles:
+            condition = Q(famille_id__in=self.liste_familles)
+
+        notes = Note.objects.select_related('categorie').filter(condition)
         for note in notes:
             for ID, dictCible in [(note.individu_id, self.dictIndividus), (note.famille_id, self.dictFamilles)]:
                 if ID:
@@ -674,7 +691,11 @@ class Informations():
     def RechercheQuestionnaires(self):
         """ Récupération des questionnaires familiaux et individuels """
         for public, dictPublic in [("famille", self.dictFamilles), ("individu", self.dictIndividus)]:
-            q = utils_questionnaires.ChampsEtReponses(categorie=public)
+            if public == "famille":
+                condition = Q(famille_id__in=dictPublic.keys())
+            else:
+                condition = Q(individu_id__in=dictPublic.keys())
+            q = utils_questionnaires.ChampsEtReponses(categorie=public, filtre_reponses=condition)
             for ID in list(dictPublic.keys()):
                 if ID in dictPublic:
                     if "questionnaires" not in dictPublic[ID]:
@@ -689,7 +710,11 @@ class Informations():
 
     def RechercheScolarite(self):
         """ Recherche les étapes de scolarité des individus """
-        scolarites = Scolarite.objects.select_related('ecole', 'classe', 'niveau').all()
+        condition = Q()
+        if self.liste_individus:
+            condition = Q(individu_id__in=self.liste_individus)
+
+        scolarites = Scolarite.objects.select_related('ecole', 'classe', 'niveau').filter(condition)
         for scolarite in scolarites:
             if scolarite.date_debut <= self.date_reference and scolarite.date_fin >= self.date_reference:
                 self.dictIndividus[scolarite.individu_id]["SCOLARITE_DATE_DEBUT"] = utils_dates.ConvertDateToFR(scolarite.date_debut)
@@ -716,7 +741,11 @@ class Informations():
 
     def RechercheCotisations(self):
         """ Recherche la cotisation actuelle des individus """
-        cotisations = Cotisation.objects.select_related('type_cotisation', 'unite_cotisation').all()
+        condition = Q()
+        if self.liste_familles:
+            condition = Q(famille_id__in=self.liste_familles)
+
+        cotisations = Cotisation.objects.select_related('type_cotisation', 'unite_cotisation').filter(condition)
         for cotisation in cotisations:
             if cotisation.individu_id:
                 if cotisation.date_debut <= self.date_reference and cotisation.date_fin >= self.date_reference:
@@ -797,148 +826,11 @@ class Informations():
         for code, valeur in dictDonnees.items():
             setattr(parent, code, valeur)
 
-    def StockageTable(self, mode="famille"):
-        """ Stockage des infos dans une table SQLITE """
-        listeNomsChamps = self.GetNomsChampsPresents(mode=mode)
-
-        DB = GestionDB.DB()
-
-        nomTable = "table_test"
-
-        # Suppression de la table si elle existe
-        DB.ExecuterReq("DROP TABLE IF EXISTS %s" % nomTable)
-
-        # Création de la table de données
-        req = "CREATE TABLE IF NOT EXISTS %s (ID INTEGER PRIMARY KEY AUTOINCREMENT, " % nomTable
-        for nom in listeNomsChamps:
-            req += "%s %s, " % (nom, "VARCHAR(500)")
-        req = req[:-2] + ")"
-        DB.ExecuterReq(req)
-
-        # Insertion des données
-        dictValeurs = self.GetDictValeurs(mode=mode, formatChamp=False)
-        listeDonnees = []
-        for ID, dictTemp in dictValeurs.items():
-            listeValeurs = [ID, ]
-            for champ in listeNomsChamps:
-                if champ in dictTemp:
-                    valeur = dictTemp[champ]
-                else:
-                    valeur = ""
-                listeValeurs.append(valeur)
-            listeDonnees.append(listeValeurs)
-
-        listeNomsChamps.insert(0, "ID")
-        req = "INSERT INTO %s (%s) VALUES (%s)" % (
-        nomTable, ", ".join(listeNomsChamps), ",".join("?" * len(listeNomsChamps)))
-        DB.Executermany(req=req, listeDonnees=listeDonnees, commit=True)
-
-        DB.Close()
-
-    def StockagePickleFichier(self, mode="famille"):#, nomFichier=UTILS_Fichiers.GetRepTemp(fichier="infos_individus.pickle")):
-        import pickle
-        dictValeurs = self.GetDictValeurs(mode=mode, formatChamp=False)
-        fichier = open(nomFichier, 'wb')
-        pickle.dump(dictValeurs, fichier)
-
-    def GetPickleChaine(self, mode="famille", cryptage=False):
-        dictValeurs = self.GetDictValeurs(mode=mode, formatChamp=False)
-        chaine = cPickle.dumps(dictValeurs)
-        if cryptage == True:
-            chaine = base64.b64encode(chaine)
-        return chaine
-
-    def EnregistreFichier(self, mode="famille"):#, nomFichier=UTILS_Fichiers.GetRepTemp(fichier="infos_f.dat")):
-        chaine = self.GetPickleChaine(mode=mode, cryptage=True)
-        fichier = open(nomFichier, "w")
-        fichier.write(chaine)
-        fichier.close()
-
-    def LectureFichier(self):#, nomFichier=UTILS_Fichiers.GetRepTemp(fichier="infos_f.dat")):
-        fichier = open(nomFichier, "r")
-        chaine = fichier.read()
-        fichier.close()
-        chaine = base64.b64decode(chaine)
-        dictTemp = cPickle.loads(chaine)
-        return dictTemp
-
-    def EnregistreDansDB(self):#, nomFichier=UTILS_Fichiers.GetRepTemp(fichier="database.dat")):
-        dbdest = GestionDB.DB(suffixe=None, nomFichier=nomFichier, modeCreation=True)
-        dictTables = {
-
-            "individus": [("IDindividu", "INTEGER PRIMARY KEY AUTOINCREMENT", "ID de la personne"),
-                          ("IDcivilite", "INTEGER", "Civilité de la personne"),
-                          ("nom", "VARCHAR(100)", "Nom de famille de la personne"),
-                          ("prenom", "VARCHAR(100)", "Prénom de la personne"),
-                          ("photo", "BLOB", "Photo de la personne"),
-                          ],
-
-            "informations": [("IDinfo", "INTEGER PRIMARY KEY AUTOINCREMENT", "ID de la ligne"),
-                             ("IDindividu", "INTEGER", "ID de la personne"),
-                             ("champ", "VARCHAR(500)", "Nom du champ"),
-                             ("valeur", "VARCHAR(500)", "Valeur du champ"),
-                             ]}
-        try:
-            dbdest.CreationTables(dicoDB=dictTables)
-        except:
-            pass
-
-        def Enregistre(nomTable, listeChamps, listeDonnees):
-            txtChamps = ", ".join(listeChamps)
-            txtQMarks = ", ".join(["?" for x in listeChamps])
-            req = "INSERT INTO %s (%s) VALUES (%s)" % (nomTable, txtChamps, txtQMarks)
-            dbdest.cursor.executemany(req, listeDonnees)
-
-        # Insertion des données du dictIndividus
-        dictValeurs = self.GetDictValeurs(mode="individu", formatChamp=False)
-        listeDonnees = []
-        for ID, dictTemp in dictValeurs.items():
-            for champ, valeur in dictTemp.items():
-                if type(valeur) in (str, six.text_type) and valeur not in ("", None):
-                    listeDonnees.append((ID, champ, valeur))
-
-        Enregistre(nomTable="informations", listeChamps=["IDindividu", "champ", "valeur"], listeDonnees=listeDonnees)
-
-        # Insertion des données individus
-        db = GestionDB.DB(suffixe="PHOTOS")
-        req = """SELECT IDindividu, photo FROM photos;"""
-        db.ExecuterReq(req)
-        listePhotos = db.ResultatReq()
-        db.Close()
-        dictPhotos = {}
-        for IDindividu, photo in listePhotos:
-            dictPhotos[IDindividu] = photo
-
-        db = GestionDB.DB()
-        req = """SELECT IDindividu, IDcivilite, nom, prenom FROM individus;"""
-        db.ExecuterReq(req)
-        listeIndividus = db.ResultatReq()
-        db.Close()
-        listeDonnees = []
-        for IDindividu, IDcivilite, nom, prenom in listeIndividus:
-            if IDindividu in dictPhotos:
-                photo = sqlite3.Binary(dictPhotos[IDindividu])
-            else:
-                photo = None
-            listeDonnees.append((IDindividu, IDcivilite, nom, prenom, photo))
-
-        Enregistre(nomTable="individus", listeChamps=["IDindividu", "IDcivilite", "nom", "prenom", "photo"],
-                   listeDonnees=listeDonnees)
-
-        # Cloture de la base
-        dbdest.connexion.commit()
-        dbdest.Close()
-
     # ---------------------------------------------------------------------------------------------------------------------------------
 
     def Tests(self):
         """ Pour les tests """
-        # Récupération des noms des champs
-        # print len(self.GetNomsChampsPresents(mode="individu", listeID=None))
         print(len(GetNomsChampsPossibles(mode="individu")))  # for x in self.GetNomsChampsPresents(mode="individu", listeID=None) :  # print x
-
-        # self.EnregistreFichier(mode="individu", nomFichier="Temp/infos_individus.dat")   # self.EnregistreDansDB()
-
 
 
 if __name__ == '__main__':

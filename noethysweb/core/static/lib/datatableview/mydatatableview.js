@@ -26,8 +26,8 @@ $(document).ready(function() {
         rowReorder: active_deplacements,
         rowGroup: colonne_regroupement,
         lengthMenu: [
-            [ 10, 25, 50, 100, 200, -1 ],
-            [ '10 lignes', '25 lignes', '50 lignes', '100 lignes', '200 lignes', 'Tout afficher' ]
+            [ 10, 25, 50, 100, 200, 500, 1000, -1 ],
+            [ '10 lignes', '25 lignes', '50 lignes', '100 lignes', '200 lignes', '500 lignes', '1000 lignes', 'Tout afficher' ]
         ],
         // dom: "<'pull-right'B><'pull-right'f><'table-scrollable't><'pull-left'i><'pull-right'p>",
         // dom: '<"dt-buttons-haut"<\'pull-right\'B><\'pull-right\'f><\'table-scrollable\'t>><\'pull-left\'i><\'pull-right\'p>',
