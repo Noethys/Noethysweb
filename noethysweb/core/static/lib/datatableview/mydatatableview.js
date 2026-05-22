@@ -97,14 +97,16 @@ $(document).ready(function() {
                         extend: 'excel',
                         text: 'Excel (La page affichée)',
                         exportOptions: {
-                            search: 'applied'
+                            search: 'applied',
+                            columns: ':visible'
                         }
                     },
                     {
                         extend: 'excel',
                         text: 'Excel (Toutes les pages)',
                         exportOptions: {
-                            search: 'applied'
+                            search: 'applied',
+                            columns: ':visible'
                         },
                         action: function (e, dt, button, config) {
                             var self = this;
