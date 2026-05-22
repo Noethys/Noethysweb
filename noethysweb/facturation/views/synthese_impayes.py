@@ -65,12 +65,12 @@ class View(CustomView, TemplateView):
         if parametres["filtre_reglements_saisis"]:
             date_debut_saisie = utils_dates.ConvertDateENGtoDate(parametres["filtre_reglements_saisis"].split(";")[0])
             date_fin_saisie = utils_dates.ConvertDateENGtoDate(parametres["filtre_reglements_saisis"].split(";")[1])
-            conditions_ventilations &= (Q(reglement__depot__date__gte=date_debut_saisie) & Q(reglement__depot__date__lte=date_fin_saisie))
+            conditions_ventilations &= (Q(reglement__date__gte=date_debut_saisie) & Q(reglement__date__lte=date_fin_saisie))
 
         if parametres["filtre_reglements_deposes"]:
             date_debut_depot = utils_dates.ConvertDateENGtoDate(parametres["filtre_reglements_deposes"].split(";")[0])
             date_fin_depot = utils_dates.ConvertDateENGtoDate(parametres["filtre_reglements_deposes"].split(";")[1])
-            conditions_ventilations &= (Q(reglement__date__gte=date_debut_depot) & Q(reglement__date__lte=date_fin_depot))
+            conditions_ventilations &= (Q(reglement__depot__date__gte=date_debut_depot) & Q(reglement__depot__date__lte=date_fin_depot))
 
         # Récupèration de la ventilation des prestations de la période
         dictVentilation = {}
