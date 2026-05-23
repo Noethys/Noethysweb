@@ -58,6 +58,7 @@
         {# Variables générales #}
         var url_facturer = "{% if data.mode == "portail" %}{% url 'portail_ajax_facturer' %}{% else %}{% url 'ajax_facturer' %}{% endif %}";
         var url_impression_pdf = "{% url 'ajax_grille_impression_pdf' %}";
+        var url_enregistrer_memo = "{% url 'ajax_grille_enregistrer_memo' %}";
         var url_editeur_email = "{% url 'ajax_get_view_editeur_email' %}";
         var csrf_token = "{{ csrf_token }}";
 

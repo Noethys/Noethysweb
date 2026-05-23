@@ -147,6 +147,20 @@ class Case_memo {
             this.pk = null;
         }
         $("#" + this.key).text(texte);
+
+        // Si mode pointeuse, enregistrement direct
+        if (mode === "pointeuse") {
+            $.ajax({
+                type: "POST",
+                url: url_enregistrer_memo,
+                data: {
+                    texte: texte,
+                    inscription: this.inscription,
+                    date: this.date,
+                },
+                datatype: "json",
+            });
+        };
     };
 };
 

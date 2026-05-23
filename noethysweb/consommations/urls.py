@@ -62,6 +62,7 @@ urlpatterns = [
     path('consommations/facturer', secure_ajax(grille.Facturer), name='ajax_facturer'),
     path('consommations/traitement_lot', secure_ajax(grille.Valider_traitement_lot), name='ajax_traitement_lot'),
     path('consommations/impression_pdf', secure_ajax(grille.Impression_pdf), name='ajax_grille_impression_pdf'),
+    path('consommations/grille/enregistrer_memo', grille.Enregistrer_memo, name='ajax_grille_enregistrer_memo'),
     path('consommations/grille/get_form_questionnaire', grille.Get_form_questionnaire, name='ajax_grille_get_form_questionnaire'),
     path('consommations/grille/valid_form_questionnaire', grille.Valid_form_questionnaire, name='ajax_grille_valide_form_questionnaire'),
     path('consommations/grille/memoriser_options', grille.Memoriser_options, name='ajax_grille_memoriser_options'),

@@ -27,6 +27,18 @@ def Memoriser_options(request):
     return JsonResponse({"succes": True})
 
 
+def Enregistrer_memo(request):
+    """ Enregistre ou supprime un mémo. Uniquement pour le mode pointeuse """
+    texte = request.POST.get("texte", None)
+    idinscription = request.POST.get("inscription", None)
+    date = request.POST.get("date", None)
+    if texte:
+        MemoJournee.objects.update_or_create(date=date, inscription_id=idinscription, defaults={"texte": texte})
+    else:
+        MemoJournee.objects.filter(date=date, inscription_id=idinscription).delete()
+    return JsonResponse({"succes": True})
+
+
 def Get_form_questionnaire(request):
     # Création du contexte
     context = {}
