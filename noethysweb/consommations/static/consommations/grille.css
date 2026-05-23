@@ -212,10 +212,10 @@
     float: left;
     left: 4px;
     font-size: 11px;
-    position: absolute;
+    /*position: absolute;*/
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    /*white-space: nowrap;*/
     width: calc(100% - 20px);
 }
 
@@ -229,7 +229,7 @@
 
 .groupe {
     font-size: 11px;
-    text-align: left;
+    text-align: right;
     position: absolute;
     left: 4px;
     bottom: 2px;

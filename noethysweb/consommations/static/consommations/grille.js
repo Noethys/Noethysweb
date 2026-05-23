@@ -386,9 +386,9 @@ class Case_standard extends Case_base {
 
         // Si c'est une case event
         if (this.type_case === "event") {
-            var label_evenement = "<span style='text-transform : uppercase;font-weight: bold;' title='" + this.evenement.nom.replace(/'/g, '&#39;') + "'>" + this.evenement.nom + "</span>";
+            var label_evenement = "<div style='text-transform : uppercase;font-weight: bold;' title='" + this.evenement.nom.replace(/'/g, '&#39;') + "'>" + this.evenement.nom + "</div>";
             if (this.evenement.description) {
-                label_evenement += " <span class='ml-2' title='" + this.evenement.description.replace(/'/g, '&#39;') + "'><i class='fa fa-info-circle'></i> " + this.evenement.description + "</span>";
+                label_evenement += " <div title='" + this.evenement.description.replace(/'/g, '&#39;') + "'><i class='fa fa-info-circle'></i> " + this.evenement.description + "</div>";
             }
             $("#" + this.key + " .infos").html(label_evenement);
         };
