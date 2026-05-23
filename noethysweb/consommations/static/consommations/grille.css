@@ -180,6 +180,10 @@
     background-color: #f5f5f5;
 }
 
+.evenement .groupe {
+    text-align: right !important;
+}
+
 .table_evenements {
     border-collapse: separate;
     border-spacing: 4px 4px;
@@ -229,7 +233,7 @@
 
 .groupe {
     font-size: 11px;
-    text-align: right;
+    text-align: left;
     position: absolute;
     left: 4px;
     bottom: 2px;
