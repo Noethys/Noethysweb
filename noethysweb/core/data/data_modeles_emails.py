@@ -5,6 +5,8 @@
 
 import copy
 
+# ce fichier définit les catégories disponibles dans le dropdown de la page Modeles d'emails.
+
 CATEGORIES = [
     ("saisie_libre", "Saisie libre"),
     ("releve_prestations", "Relevé des prestations"),
@@ -34,6 +36,8 @@ CATEGORIES = [
     ("location_demande", "Demande de location"),
     ("commande_repas", "Commande de repas"),
     ("inscription", "Inscription"),
+    # catégorie pour l'envoi d'emails groupés aux familles inscrites à une activité.
+    ("activites", "Activité"),
     ("devis", "Devis"),
 ]
 
@@ -303,6 +307,25 @@ MOTSCLES = {
         ("{INDIVIDU_NOM}", "Nom de famille de l'individu"),
         ("{INDIVIDU_PRENOM}", "Prénom de l'individu"),
         ("{INDIVIDU_DATE_NAISS}", "Date de naissance de l'individu"),
+    ],
+
+    "activites": [
+        # ces mots-clés sont utilisés dans les modèles emails de catégorie "Activité".
+        # ils sont remplis automatiquement par GetDonneesImpression() dans utils_activites.py
+        # lors de l'envoi d'emails groupés aux familles inscrites à une activité.
+
+        ("{ACTIVITE_NOM_LONG}", "Nom de l'activité"),
+        ("{ACTIVITE_NOM_COURT}", "Nom abrégé de l'activité"),
+        ("{IDINSCRIPTION}", "ID de l'inscription"),
+        ("{DATE_DEBUT}", "Date de début de l'inscription"),
+        ("{DATE_FIN}", "Date de fin de l'inscription"),
+        ("{GROUPE_NOM_LONG}", "Nom du groupe"),
+        ("{GROUPE_NOM_COURT}", "Nom abrégé du groupe"),
+        ("{NOM_CATEGORIE_TARIF}", "Nom de la catégorie de tarif"),
+        ("{INDIVIDU_NOM}", "Nom de famille de l'enfant inscrit"),
+        ("{INDIVIDU_PRENOM}", "Prénom de l'enfant inscrit"),
+        ("{INDIVIDU_DATE_NAISS}", "Date de naissance de l'enfant inscrit"),
+        ("{NOMBRE_INSCRIPTIONS}", "Nombre total d'inscriptions à l'activité"),
     ],
 
     "devis": [
