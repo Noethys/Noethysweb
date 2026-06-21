@@ -1,3 +1,23 @@
+Version 1.3.3.3 (21/06/2026) :
+
+- Ajout de l'export xlsx dans la liste des inscrits
+- Ajout de la protection des adhésions si prestation associée facturée
+- Amélioration de l'affichage des erreurs le form tarifs
+- Optimisation du temps d'exécution dans l'impression des factures
+- Correction du calcul du tarif au choix
+- Correction de la longueur de la chaîne de réponse dans les questionnaires
+- Correction des polices dans les pdf reportlab [GIP-RECIA]
+- Correction de la migration superflue sur le champ incompatibilités des unités [GIP-RECIA]
+- Correction de la migration superflue sur la permission desk_creer [GIP-RECIA]
+- Correction de l'ordre des messages non lus du portail
+- Correction du tri sur la colonne actions de la liste des dépôts des règlements
+- Correction des sauts à la ligne dans les destinataires libres des mails
+- Correction des filtres de règlements dans les synthèses des prestations et des impayés
+- Correction sur les colonnes masquées dans les exports datatables
+- Correction de l'affichage des descriptions longues des évènements dans la grille des consommations
+- Correction de l'enregistrement des mémos journaliers dans la pointeuse en temps réel
+- Correction de l'affichage du groupe dans les évènements dans la grille des consommations
+
 Version 1.3.3.2 (03/05/2026) :
 
 - Ajout de l'import Défi
