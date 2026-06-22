@@ -8,9 +8,10 @@ from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Sum
 from django.template import Template, RequestContext
 from django.http import HttpResponse, JsonResponse
+from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Prestation, Tarif, Inscription, Consommation
+from core.models import Ventilation, Prestation, Tarif, Inscription, Consommation
 from fiche_famille.forms.famille_prestations import Formulaire, FORMSET_DEDUCTIONS
 from fiche_famille.views.famille import Onglet
 from core.utils import utils_texte
@@ -231,6 +232,23 @@ class ClasseCommune(Page):
                     instance.date = self.object.date
                     instance.save()
                     formline.save_m2m()
+
+        # Si modification : On vérifie s'il faut modifier la ventilation de la prestation
+        if self.verbe_action == "Modifier":
+            ventilations = Ventilation.objects.filter(prestation_id=self.object.idprestation).order_by("-montant")
+            total_ventilations = sum([ventilation.montant for ventilation in ventilations])
+            if self.object.montant > Decimal(0) and total_ventilations > self.object.montant:
+                a_retirer = total_ventilations - self.object.montant
+                for ventilation in ventilations:
+                    if a_retirer > Decimal(0):
+                        messages.add_message(self.request, messages.INFO, "La ventilation du règlement ID%d a été modifiée automatiquement" % ventilation.reglement_id)
+                        if ventilation.montant < a_retirer:
+                            a_retirer -= ventilation.montant
+                            ventilation.delete()
+                        else:
+                            ventilation.montant -= a_retirer
+                            ventilation.save()
+                            a_retirer = Decimal(0)
 
         return super().form_valid(form)
 
