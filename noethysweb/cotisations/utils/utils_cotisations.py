@@ -77,9 +77,9 @@ class Cotisations():
             
             if cotisation.individu:
                 beneficiaires = cotisation.individu.Get_nom()
-                rue = self.infosIndividus.dictIndividus[4]["INDIVIDU_RUE"]
-                cp = self.infosIndividus.dictIndividus[4]["INDIVIDU_CP"]
-                ville = self.infosIndividus.dictIndividus[4]["INDIVIDU_VILLE"]
+                rue = self.infosIndividus.dictIndividus[cotisation.individu_id]["INDIVIDU_RUE"]
+                cp = self.infosIndividus.dictIndividus[cotisation.individu_id]["INDIVIDU_CP"]
+                ville = self.infosIndividus.dictIndividus[cotisation.individu_id]["INDIVIDU_VILLE"]
 
             # Famille
             if cotisation.famille:
