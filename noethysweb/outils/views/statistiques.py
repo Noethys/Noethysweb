@@ -163,7 +163,7 @@ class View(CustomView, TemplateView):
                     presents = utils_dates.ConvertDateRangePicker(parametres["periode"])
                 if parametres["condition"] == "INSCRITS_PERIODE":
                     inscrits_periode = utils_dates.ConvertDateRangePicker(parametres["periode"])
-                if parametres["condition"] in ("ADHERENTS_PERIODE"):
+                if parametres["condition"] == "ADHERENTS_PERIODE":
                     periode = utils_dates.ConvertDateRangePicker(parametres["periode"])
                     liste_cotisations = Cotisation.objects.filter(date_debut__lte=periode[1], date_fin__gte=periode[0], type_cotisation__in=parametres["types_cotisations"])
 
@@ -176,7 +176,7 @@ class View(CustomView, TemplateView):
                         condition = Q(inscription__activite__in=liste_activites)
                         if inscrits_periode:
                             condition &= Q(inscription__date_debut__gte=inscrits_periode[0], inscription__date_debut__lte=inscrits_periode[1])
-                    if parametres["condition"] in ("ADHERENTS_PERIODE"):
+                    if parametres["condition"] == "ADHERENTS_PERIODE":
                         liste_individus, liste_familles = [], []
                         for cotisation in liste_cotisations:
                             if cotisation.individu_id:
@@ -448,7 +448,7 @@ class View(CustomView, TemplateView):
                         inscriptions = Inscription.objects.select_related("activite").filter(condition)
                         liste_idfamille = list({inscription.famille_id: True for inscription in inscriptions}.keys())
 
-                    if parametres["condition"] in ("ADHERENTS_PERIODE"):
+                    if parametres["condition"] == "ADHERENTS_PERIODE":
                         liste_idfamille = list({cotisation.famille_id: True for cotisation in liste_cotisations}.keys())
 
                 # ---------------------------- FAMILLES : Nombre -------------------------------
