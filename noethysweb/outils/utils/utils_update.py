@@ -159,7 +159,7 @@ def AutoReloadWSGI():
     fichier_wsgi.close()
 
     # Modification du fichier
-    fichier_wsgi = codecs.open(nom_fichier, 'w')
+    fichier_wsgi = codecs.open(nom_fichier, encoding='utf-8', mode='w')
     for ligne in liste_lignes_wsgi:
         if "lastupdate" in ligne:
             ligne = "# lastupdate = %s" % datetime.datetime.now()
