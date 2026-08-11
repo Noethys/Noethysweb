@@ -1,17 +1,27 @@
 {% load static %}
 {% load embed %}
 
-
 {# Modal lecture vidéo #}
-<div class="modal fade" id="modal_video_{{ id }}" tabindex="-1" role="dialog" aria-labelledby="modal_video_{{ id }}" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+<div class="modal fade"
+     id="modal_video_{{ id }}"
+     tabindex="-1"
+     aria-labelledby="modal_video_label_{{ id }}"
+     aria-modal="true"
+     role="dialog">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-body">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <div class="embed-responsive embed-responsive-16by9">
-                    <iframe class="embed-responsive-item" src="" id="video_{{ id }}" allow="autoplay"></iframe>
+            <div class="modal-header bg-primary text-white">
+                <h2 class="modal-title h5" id="modal_video_label_{{ id }}">
+                    <i class="fa fa-film me-1" aria-hidden="true"></i>
+                    Lecture de la vidéo
+                </h2>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer la vidéo"> </button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="ratio ratio-16x9">
+                    <iframe id="video_{{ id }}" src="" title="Lecteur vidéo" allow="autoplay; encrypted-media"
+                            allowfullscreen referrerpolicy="strict-origin-when-cross-origin">
+                    </iframe>
                 </div>
             </div>
         </div>
@@ -19,19 +29,19 @@
 </div>
 
 <script>
-    $(document).ready(function() {
-        var $videoSrc_{{ id }};
+    (function() {
+        var videoSrc_{{ id }} = null;
 
-        $("#bouton_video_{{ id }}").click(function() {
-            $videoSrc_{{ id }} = $(this).data("src");
+        document.getElementById("bouton_video_{{ id }}").addEventListener("click", function() {
+            videoSrc_{{ id }} = this.dataset.src;
         });
 
-        $("#modal_video_{{ id }}").on("shown.bs.modal", function(e) {
-            $("#video_{{ id }}").attr("src", $videoSrc_{{ id }} + "?autoplay=1&amp;showinfo=0");
+        document.getElementById("modal_video_{{ id }}").addEventListener("shown.bs.modal", function() {
+            document.getElementById("video_{{ id }}").src = videoSrc_{{ id }} + "?autoplay=1&showinfo=0";
         });
 
-        $("#modal_video_{{ id }}").on("hide.bs.modal", function(e) {
-            $("#video_{{ id }}").attr("src", "");
+        document.getElementById("modal_video_{{ id }}").addEventListener("hidden.bs.modal", function() {
+            document.getElementById("video_{{ id }}").src = "";
         });
-    });
+    })();
 </script>

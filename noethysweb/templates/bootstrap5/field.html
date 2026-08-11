@@ -1,0 +1,51 @@
+{% load crispy_forms_field %}
+
+{% if field.is_hidden %}
+    {% crispy_field field %}
+{% else %}
+
+<div id="div_{{ field.html_name }}"
+     class="mb-3 row{% if field.field.required %} required{% endif %}">
+
+    {# Label — RGAA 11.1 #}
+    {% if field.label and form_show_labels %}
+        <label for="{{ field.id_for_label }}"
+               class="col-form-label pt-0 col-md-2{% if field.field.required %} requiredField{% endif %}">
+            {{ field.label|safe }}
+            {% if field.field.required %}
+                <span class="asteriskField" aria-hidden="true">*</span>
+            {% endif %}
+        </label>
+    {% endif %}
+
+    <div class="col-md-10">
+
+        {# Le widget est rendu par crispy avec ses classes natives #}
+        {# Les classes BS5 sont injectées par RGAAFormMixin dans forms.py #}
+        {% crispy_field field %}
+
+        {# Erreurs — RGAA 11.11 #}
+        {% if field.errors %}
+            {% for error in field.errors %}
+                <div class="invalid-feedback d-block"
+                     id="{{ field.html_name }}_error"
+                     role="alert"
+                     aria-live="polite">
+                    <i class="fa fa-exclamation-circle me-1" aria-hidden="true"></i>
+                    {{ error }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {# Aide — RGAA 11.9 #}
+        {% if field.help_text %}
+            <div id="{{ field.html_name }}_helptext"
+                 class="form-text text-muted">
+                {{ field.help_text|safe }}
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endif %}

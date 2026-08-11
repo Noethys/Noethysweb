@@ -19,7 +19,7 @@
             <i class="fa {{ icon }} input-group-text"></i>
         </div>
     {% endif %}
-    <select id="{{ id }}" name="{{ name }}" lang="fr" {% if disabled %}disabled{% endif %} data-minimum-input-length="0" data-allow-clear="true" data-placeholder="" data-width="100%" class="select2multiplewidget form-control django-select2" multiple>
+    <select id="{{ id }}" name="{{ name }}" lang="fr" {% if theme %}data-theme="{{ theme }}"{% endif %} {% if disabled %}disabled{% endif %} data-minimum-input-length="0" data-allow-clear="true" data-placeholder="" data-width="100%" class="select2multiplewidget form-control django-select2" multiple>
         {% for choix in choices %}
             <option value="{{ choix.0 }}" {% if choix.0 in selections %}selected{% endif %}>{{ choix.1 }}</option>
         {% endfor %}

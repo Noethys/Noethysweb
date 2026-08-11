@@ -1,0 +1,21 @@
+{% if errors %}
+    <div role="alert"
+         aria-live="assertive"
+         aria-atomic="true"
+         class="alert alert-danger"
+         id="form-errors-summary">
+        <h2 class="alert-heading h6">
+            <i class="fa fa-exclamation-triangle me-2" aria-hidden="true"></i>
+            Le formulaire contient {{ errors|length }} erreur{{ errors|length|pluralize }}
+        </h2>
+        <ul class="mb-0">
+            {% for field, error in errors %}
+                <li>
+                    <a href="#{{ field }}" class="alert-link">
+                        {{ error }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

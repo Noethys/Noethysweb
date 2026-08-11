@@ -5,11 +5,11 @@
 
 from django.contrib.auth.forms import AuthenticationForm
 from django.forms import ValidationError
-from core.utils.utils_captcha import CaptchaField, CustomCaptchaTextInput
+from core.utils.utils_captcha import CaptchaField, CustomCaptchaTextInput_bs4
 
 
 class FormLoginUtilisateur(AuthenticationForm):
-    captcha = CaptchaField(widget=CustomCaptchaTextInput)
+    captcha = CaptchaField(widget=CustomCaptchaTextInput_bs4)
 
     def __init__(self, *args, **kwargs):
         super(FormLoginUtilisateur, self).__init__(*args, **kwargs)
@@ -18,7 +18,7 @@ class FormLoginUtilisateur(AuthenticationForm):
         self.fields['password'].widget.attrs['class'] = "form-control"
         self.fields['password'].widget.attrs['placeholder'] = "Mot de passe"
         self.fields['captcha'].widget.attrs['class'] = "form-control"
-        self.fields['captcha'].widget.attrs['placeholder'] = "Recopiez le code de sécurité ci-contre"
+        self.fields['captcha'].widget.attrs['placeholder'] = "Recopiez le code de sécurité"
 
     def confirm_login_allowed(self, user):
         if not user.is_active:

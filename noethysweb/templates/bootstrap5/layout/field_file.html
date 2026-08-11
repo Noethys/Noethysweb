@@ -1,0 +1,52 @@
+{% load crispy_forms_field %}
+
+<div class="{{ field_class }} mb-2">
+
+    {% if field.value %}
+        {# Fichier existant #}
+        <div class="input-group mb-2">
+            <span class="input-group-text">Fichier actuel</span>
+            <div class="form-control d-flex h-auto align-items-center">
+                <span class="text-break flex-grow-1">
+                    <a href="{{ field.value.url }}">{{ field.value.name }}</a>
+                </span>
+                {% if not field.field.required %}
+                    <span class="ms-2">
+                        <div class="form-check mb-0">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   name="{{ field.html_name }}-clear"
+                                   id="{{ field.auto_id }}-clear_id"
+                                   {% if field.field.disabled %}disabled{% endif %}>
+                            <label class="form-check-label" for="{{ field.auto_id }}-clear_id">
+                                Supprimer
+                            </label>
+                        </div>
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="mb-1">
+            <small class="text-muted">Changer le fichier :</small>
+        </div>
+    {% endif %}
+
+    {# Champ upload #}
+    <input type="file"
+           name="{{ field.html_name }}"
+           id="{{ field.auto_id }}"
+           class="form-control {% if field.errors %}is-invalid{% endif %}"
+           {% if field.field.required and not field.value %}required{% endif %}
+           {% if field.field.disabled %}disabled{% endif %}>
+
+    {% if field.errors %}
+        {% for error in field.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% if field.help_text %}
+        <div class="form-text text-muted">{{ field.help_text }}</div>
+    {% endif %}
+
+</div>

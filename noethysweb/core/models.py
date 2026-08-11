@@ -3273,6 +3273,9 @@ class ContactUrgence(models.Model):
             autorisations.append("""<span class='badge badge-success' title="Contacter en cas d'urgence"><i class='fa fa-phone margin-r-5'></i>Urgence</span>""")
         return " ".join(autorisations)
 
+    def Get_autorisations_b5(self):
+        return self.Get_autorisations().replace("badge-success", "rounded-pill text-bg-success")
+
 
 class Assurance(models.Model):
     idassurance = models.AutoField(verbose_name="ID", db_column='IDassurance', primary_key=True)
