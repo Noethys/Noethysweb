@@ -27,11 +27,13 @@ class DatePickerWidget(Widget):
         if attrs is not None:
             context.update(attrs)
         context['name'] = name
-
         try:
             value = utils_dates.ConvertDateToFR(value)
         except:
             pass
+
+        if "aria-describedby" in attrs:
+            context["aria_describedby"] = attrs["aria-describedby"]
 
         if value and context.get("multidate", False):
             if ";" in value:
@@ -351,8 +353,7 @@ class Select_avec_commandes_form(Widget):
 
     class Media:
         css = {"all": ("lib/select2/css/select2.min.css",)}
-        js = ("django_select2/django_select2.js", "lib/select2/js/select2.min.js", "lib/select2/js/i18n/fr.js",
-              "lib/bootbox/bootbox.min.js")
+        js = ("django_select2/django_select2.js", "lib/select2/js/select2.min.js", "lib/select2/js/i18n/fr.js")
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())
@@ -379,8 +380,7 @@ class Select_avec_commandes_advanced(Widget):
 
     class Media:
         css = {"all": ("lib/select2/css/select2.min.css",)}
-        js = ("django_select2/django_select2.js", "lib/select2/js/select2.min.js", "lib/select2/js/i18n/fr.js",
-              "lib/bootbox/bootbox.min.js")
+        js = ("django_select2/django_select2.js", "lib/select2/js/select2.min.js", "lib/select2/js/i18n/fr.js")
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())
@@ -408,8 +408,7 @@ class Select_many_avec_plus(SelectMultiple):
 
     class Media:
         css = {"all": ("lib/select2/css/select2.min.css",)}
-        js = ("django_select2/django_select2.js", "lib/select2/js/select2.min.js", "lib/select2/js/i18n/fr.js",
-              "lib/bootbox/bootbox.min.js")
+        js = ("django_select2/django_select2.js", "lib/select2/js/select2.min.js", "lib/select2/js/i18n/fr.js")
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())

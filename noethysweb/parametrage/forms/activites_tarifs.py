@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import json, decimal
+import json, decimal, datetime
 from django import forms
 from django.forms import ModelForm, HiddenInput, ValidationError
 from django.forms.models import inlineformset_factory, BaseInlineFormSet, model_to_dict
@@ -699,8 +699,8 @@ def Clean_tarifs_lignes_data(self=None, tarifs_lignes_data=[], code_methode=""):
 
             if valeur and dict_colonne["editeur"] == "date":
                 try:
-                    # valeur = datetime.datetime.strptime(valeur, "%d/%m/%Y").date() # Cette ne semble pas fonctionner avec le tarif selon date
-                    valeur = parse_date(valeur[:10])
+                    valeur = datetime.datetime.strptime(valeur, "%d/%m/%Y").date()
+                    # valeur = parse_date(valeur[:10])
                 except Exception as err:
                     print("erreur=", err)
                     RaiseError()
@@ -881,7 +881,7 @@ $(document).ready(function() {
 });
 
 // forfait_beneficiaire
-function On_change_forfait_beneficiaire() {console.log("coucou");
+function On_change_forfait_beneficiaire() {
     $('#div_id_type_application').hide();
     if ($(this).val() == 'individu') {
         $('#div_id_type_application').show();

@@ -38,7 +38,7 @@ class Donnee:
         """ Vérifie la cohérence de cette donnée """
         if "IDFAMILLE" in self.code and not self.valeur:
             return Anomalie(donnee=self, texte_erreur="La référence ID Famille n'est pas valide.")
-        if "CIVILITE" in self.code and self.valeur.strip().lower() not in ("m", "monsieur", "mr", "m.", "h", "homme", "père", "mère", "melle", "mademoiselle",
+        if "CIVILITE" in self.code and self.valeur and self.valeur.strip().lower() not in ("m", "monsieur", "mr", "m.", "h", "homme", "père", "mère", "melle", "mademoiselle",
                "mme", "madame", "femme", "garçon", "garcon", "g", "fille", "f", "collectivité", "association", "organisme", "entreprise"):
             return Anomalie(donnee=self, texte_erreur="Cette valeur ne fait pas partie des choix disponibles.")
         if "DATE" in self.code and self.valeur:
@@ -79,7 +79,10 @@ class Donnee:
         if self.code.startswith("PRENOM") and self.valeur:
             return self.valeur.title()
         if "DATE" in self.code:
-            return datetime.datetime.strptime(self.valeur,"%d/%m/%Y")
+            try:
+                return datetime.datetime.strptime(self.valeur,"%d/%m/%Y")
+            except:
+                return None
         if "VILLE" in self.code:
             return self.valeur.upper()
         if "RUE" in self.code:

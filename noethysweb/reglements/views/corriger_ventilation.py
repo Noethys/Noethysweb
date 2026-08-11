@@ -27,7 +27,7 @@ class View(CustomView, TemplateView):
         elif len(dict_anomalies) > 1:
             context['box_introduction'] += "<i class='fa fa-exclamation-triangle text-warning margin-r-5'></i><b>%d anomalies de ventilation ont été détectées. Il est recommandé de les corriger dès à présent.</b>" % len(dict_anomalies)
         else:
-            context['box_introduction'] += "<i class='fa fa-check-circle-o text-green margin-r-5'></i><b>Aucune anomalie n'a été détectée</b>. "
+            context['box_introduction'] += "<i class='fa fa-check-circle-o text-success margin-r-5'></i><b>Aucune anomalie n'a été détectée</b>. "
         context['items'] = [{"famille": famille, "valeurs": dict_anomalies[famille.pk]} for famille in Famille.objects.filter(pk__in=dict_anomalies.keys()).order_by("nom")]
         return context
 
