@@ -79,9 +79,6 @@ class Saisie_ventilation(Widget):
 class Internet_identifiant(Widget):
     template_name = 'fiche_famille/widgets/internet_identifiant.html'
 
-    class Media:
-        js = ("lib/bootbox/bootbox.min.js",)
-
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())
         if attrs is not None:
@@ -98,9 +95,6 @@ class Internet_identifiant(Widget):
 
 class Internet_mdp(Widget):
     template_name = 'fiche_famille/widgets/internet_mdp.html'
-
-    class Media:
-        js = ("lib/bootbox/bootbox.min.js",)
 
     def get_context(self, name, value, attrs=None):
         context = dict(self.attrs.items())

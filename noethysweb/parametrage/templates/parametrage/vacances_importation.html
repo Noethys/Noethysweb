@@ -3,10 +3,6 @@
 {% load embed %}
 {% load static %}
 
-{% block scripts %}
-    {{ block.super }}
-    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
-{% endblock scripts %}
 
 {% block contenu_page %}
 {% embed 'core/box.html' %}

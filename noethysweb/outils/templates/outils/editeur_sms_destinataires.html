@@ -32,7 +32,6 @@
                     {% embed 'core/crud/liste.html' %}
                     {% endembed %}
 
-                    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
                     <script>
                         $("#bouton_valider").on("click",function(event) {
                             $("[name=selections]").val(JSON.stringify(get_coches()));

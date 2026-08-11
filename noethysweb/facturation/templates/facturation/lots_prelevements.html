@@ -3,10 +3,6 @@
 {% load static %}
 {% load embed %}
 
-{% block scripts %}
-    {{ block.super }}
-    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
-{% endblock scripts %}
 
 {% block contenu_page %}
     <div class="row">
@@ -78,7 +74,7 @@
                     {% endembed %}
 
                     {# Lien de téléchargement du fichier d'export #}
-                    <a id="download" download></a>
+                    <a id="download" download aria-hidden="true"></a>
 
                 {% endblock box_contenu %}
                 {% block box_conclusion %}{{ box_conclusion }}{% endblock %}

@@ -227,7 +227,6 @@ class Formulaire(FormulaireBase, ModelForm):
 
 EXTRA_SCRIPT = """
 {% load static %}
-<script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
 
 <script>
 

@@ -2,10 +2,6 @@
 {% load static %}
 {% load embed %}
 
-{% block scripts %}
-    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
-{% endblock scripts %}
-
 {# Modal Envoyer un SMS #}
 {% embed 'core/modal.html' %}
     {% block modal_id %}modal_editeur_sms{% endblock %}
