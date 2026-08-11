@@ -80,7 +80,10 @@ class View(CustomView, TemplateView):
         def Convert_valeur(valeur):
             # Conversion d'une date anglaise en français
             if valeur and len(valeur) > 7 and valeur[4] == "-" and valeur[7] == "-":
-                return datetime.datetime.strptime(valeur,"%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y")
+                try:
+                    return datetime.datetime.strptime(valeur,"%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y")
+                except:
+                    pass
             # Si None, renvoie une chaîne vide
             if valeur == "None":
                 return ""
