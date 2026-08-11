@@ -25,7 +25,7 @@
     {% endembed %}
 
     {# Lien de téléchargement d'un fichier #}
-    <a id="download" download></a>
+    <a id="download" download aria-hidden="true"></a>
 
     {% embed 'core/box.html' with box_titre=True %}
         {% block box_theme %}card-outline{% endblock %}

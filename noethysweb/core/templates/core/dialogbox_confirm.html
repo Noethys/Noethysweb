@@ -7,8 +7,6 @@
 {% embed "core/dialogbox_confirm.html" with id="envoyer_email" titre="Envoyer les codes internet par Email" message="Confirmez-vous le transfert des codes internet vers l'éditeur d'emails ?" label_bouton="Transférer" url_exec="ajax_comptes_internet_email" %}{% endembed %}
 {% endcomment %}
 
-<script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
-
 <script>
 
     function {{ id }}() {

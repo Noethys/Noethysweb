@@ -90,7 +90,7 @@
                 <input id="checkbox_{{ id }}" type="checkbox" {% if value %}checked{% endif %}><span style="vertical-align: middle">{{ label_checkbox }}</span>
             </span>
         {% endif %}
-        <i class="fa {% if icon %}{{ icon }}{% else %}fa-calendar{% endif %} input-group-text"></i>
+        <i class="fa {% if icon %}{{ icon }}{% else %}fa-calendar{% endif %} input-group-text" aria-hidden="true"></i>
     </div>
     <input type="text" autocomplete="off" class="{{ class }}" name="{{ name }}" id="{{ id }}" value="{{ value }}" />
 </div>

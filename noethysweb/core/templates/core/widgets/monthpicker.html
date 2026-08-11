@@ -35,7 +35,7 @@ $(function () {
 
 <div class="input-group date">
     <div class="input-group-prepend">
-        <span class="input-group-text"><i class="fa {% if icon %}{{ icon }}{% else %}fa-calendar{% endif %}"></i></span>
+        <span class="input-group-text"><i class="fa {% if icon %}{{ icon }}{% else %}fa-calendar{% endif %}" aria-hidden="true"></i></span>
     </div>
     <input type="text" class="{{ class }}" data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}" value="{{ value|date:djformat }}" />
     <div class="input-group-append">

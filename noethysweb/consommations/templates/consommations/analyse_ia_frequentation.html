@@ -5,7 +5,6 @@
 
 {% block scripts %}
     {{ block.super }}
-    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
 {% endblock scripts %}
 
 {% block contenu_page %}
@@ -95,7 +94,7 @@
     </div>
 
     {# Lien de téléchargement du fichier d'export #}
-    <a id="download" download></a>
+    <a id="download" download aria-hidden="true"></a>
 
     <script>
         {% include 'core/csrftoken.html' %}
