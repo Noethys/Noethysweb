@@ -69,6 +69,16 @@
     {# Ajout de la modal sélection des activités #}
     <div id="div_modal_selection_activites_inscriptions"></div>
 
+    {# Modal tarifs de l'activité #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_tarifs_activite{% endblock %}
+        {% block modal_titre %}Tarifs{% endblock %}
+        {% block modal_classe %}modal-lg{% endblock %}
+        {% block modal_body %}
+            <div id="div_tarifs_activite"></div>
+        {% endblock %}
+    {% endembed %}
+
 <script>
     $(document).ready(function() {
 

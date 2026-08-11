@@ -16,7 +16,12 @@
 <tbody>
     {% for activite in data_suivi_inscriptions %}
         <tr class="activite">
-            <td>{{ activite.activite.nom }}</td>
+            <td class="col-nom">
+                {{ activite.activite.nom }}
+                <button type="button" class="btn btn-xs btn-primary row-action" title="Afficher les tarifs de cette activité" data-id="{{ activite.activite.pk }}" aria-label="Tarifs">
+                    <i class="fa fa-euro"></i>
+                </button>
+            </td>
             <td>{{ activite.nbre_inscrits|default:'' }}</td>
             <td>{{ activite.nbre_max|default:'' }}</td>
             <td>{{ activite.nbre_dispo|default:'' }}</td>
@@ -41,6 +46,20 @@
 
 <script>
     var activites_inscriptions_json = JSON.parse('{{ activites_inscriptions_json|escapejs }}');
+
+    $(document).on("click", "#table_suivi_inscriptions .row-action", function() {
+        var idactivite = $(this).data("id");
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_get_tarifs_activite' %}",
+            data: {"idactivite": idactivite},
+            dataType: "json",
+            success: function(data) {
+                $("#div_tarifs_activite").html(data.html);
+                $("#modal_tarifs_activite").modal("show");
+            },
+        });
+    });
 </script>
 
 <style>
@@ -62,5 +81,25 @@
     }
     .complet {
         background-color: rgba(247, 172, 178, 0.36);
+    }
+
+    /* Bouton d'action au survol de la ligne activité uniquement */
+    #table_suivi_inscriptions .col-nom {
+        position: relative !important;
+        padding-right: 36px;
+    }
+    #table_suivi_inscriptions .row-action {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0;
+        transition: opacity 0.15s ease;
+        padding: 1px 6px;
+        font-size: 11px;
+        line-height: 1.1;
+    }
+    #table_suivi_inscriptions tbody tr.activite:hover .row-action {
+        opacity: 1;
     }
 </style>

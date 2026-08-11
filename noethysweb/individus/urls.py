@@ -173,6 +173,7 @@ urlpatterns = [
 
     # AJAX
     path('individus/get_suivi_inscriptions', secure_ajax(suivi_inscriptions.Get_suivi_inscriptions), name='ajax_get_suivi_inscriptions'),
+    path('individus/get_tarifs_activites', secure_ajax(suivi_inscriptions.Get_tarifs_activite), name='ajax_get_tarifs_activite'),
     path('individus/get_form_activites', secure_ajax(suivi_inscriptions.Get_form_activites), name='ajax_get_form_activites'),
     path('individus/valider_form_activites', secure_ajax(suivi_inscriptions.Valider_form_activites), name='ajax_valider_form_activites'),
     path('individus/importation_photos/analyse/get_individus', secure_ajax(importation_photos.Get_individus), name='ajax_importation_photos_get_individus'),

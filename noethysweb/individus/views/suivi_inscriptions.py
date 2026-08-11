@@ -3,15 +3,15 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from core.models import Activite, Inscription, Groupe
-from core.views.base import CustomView
-from django.views.generic import TemplateView
-from core.utils import utils_dates, utils_parametres
 import datetime, json
+from django.http import JsonResponse
+from django.views.generic import TemplateView
 from django.db.models import Q, Count
 from django.shortcuts import render
+from core.models import Activite, Inscription, Groupe
+from core.views.base import CustomView
+from core.utils import utils_parametres
 from core.forms.selection_activites import Formulaire as Form_activites
-from django.http import JsonResponse
 
 
 def Get_form_activites(request):
@@ -19,7 +19,6 @@ def Get_form_activites(request):
     activites = json.loads(request.POST.get("activites", None))
     context = {"form_activites": Form_activites(defaut=activites, request=request)}
     return render(request, "individus/suivi_inscriptions_activites.html", context)
-
 
 
 def Valider_form_activites(request):
@@ -56,6 +55,13 @@ def Get_suivi_inscriptions(request):
     context.update(parametres)
     return render(request, "individus/suivi_inscriptions_tableau.html", context)
 
+
+def Get_tarifs_activite(request):
+    """ Renvoie le contenu de la modale affichant les tarifs de l'activité """
+    idactivite = request.POST.get("idactivite")
+    activite = Activite.objects.get(pk=int(idactivite))
+    from facturation.views.liste_tarifs import Get_html_tarifs_activite
+    return JsonResponse({"html": Get_html_tarifs_activite(activite=activite)})
 
 
 def Get_data(parametres={}, filtre=None, request=None):
@@ -135,7 +141,6 @@ def Get_data(parametres={}, filtre=None, request=None):
     return liste_resultats
 
 
-
 class View(CustomView, TemplateView):
     menu_code = "suivi_inscriptions"
     template_name = "individus/suivi_inscriptions_view.html"
@@ -145,4 +150,3 @@ class View(CustomView, TemplateView):
         context['page_titre'] = "Suivi des inscriptions"
         context['suivi_inscriptions_parametres'] = Get_parametres(request=self.request)
         return context
-
