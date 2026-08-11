@@ -32,7 +32,8 @@ LISTE_RUBRIQUES = [
                            "payzen_certificat_production", "payzen_mode", "payzen_algo", "payzen_echelonnement"]),
     ("Page des règlements", ["reglements_afficher_page", "reglements_intro", "reglements_afficher_encaissement", "reglements_autoriser_telechargement_recu", "reglements_modele_impression_recu"]),
     ("Page contact", ["contact_afficher_page", "contact_intro", "messagerie_intro", "messagerie_envoyer_notification_famille", "messagerie_envoyer_notification_admin", "contact_afficher_coords_structures", "contact_afficher_coords_organisateur"]),
-    ("Page des mentions légales", ["mentions_afficher_page", "mentions_intro", "mentions_conditions_generales"]),
+    ("Page des mentions légales", ["mentions_afficher_page", "mentions_intro", "mentions_type", "mentions_html"]),
+    ("Accessibilité", ["accessibilite_declaration_type", "accessibilite_declaration_html"]),
 ]
 
 
@@ -124,5 +125,28 @@ EXTRA_HTML = """
         $('#id_paiement_ligne_systeme').change(On_change_paiement_ligne_systeme);
         On_change_paiement_ligne_systeme.call($('#id_paiement_ligne_systeme').get(0));
     });
+    
+    function On_change_mentions_type() {
+        $('#div_id_mentions_html').hide();
+        if ($("#id_mentions_type").val() == "PERSO") {
+            $('#div_id_mentions_html').show();
+        };
+    }
+    $(document).ready(function() {
+        $('#id_mentions_type').change(On_change_mentions_type);
+        On_change_mentions_type.call($('#id_mentions_type').get(0));
+    });
+    
+    function On_change_accessibilite_declaration_type() {
+        $('#div_id_accessibilite_declaration_html').hide();
+        if ($("#id_accessibilite_declaration_type").val() == "PERSO") {
+            $('#div_id_accessibilite_declaration_html').show();
+        };
+    }
+    $(document).ready(function() {
+        $('#id_accessibilite_declaration_type').change(On_change_accessibilite_declaration_type);
+        On_change_accessibilite_declaration_type.call($('#id_accessibilite_declaration_type').get(0));
+    });
+    
 </script>
 """

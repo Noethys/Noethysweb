@@ -39,10 +39,13 @@
             <table id="table-fiches" class="table table-hover projects" style="cursor: pointer;">
                 <tbody>
                     {% for rattachement in rattachements %}
-                        <tr>
+                        <tr style="vertical-align: middle;">
                             <td>
-                                <img src="{{ rattachement.individu.Get_photo }}" alt="user-avatar" class="img-circle img-fluid table-avatar" style="max-height: 80px">
-                                <span class="ml-2"><strong>{{ rattachement.individu.Get_nom }}</strong></span>
+                                {% embed 'portail/titre_individu.html' %}
+                                    {% block styles %}p-2{% endblock %}
+                                    {% block src_photo %}{{ rattachement.individu.Get_photo }}{% endblock %}
+                                    {% block prenom_individu %}{{ rattachement.individu.prenom }}{% endblock %}
+                                {% endembed %}
                             </td>
                             <td class="project-state">
                                 <small>

@@ -15,8 +15,8 @@ from core.models import Individu, Inscription, PortailPeriode, Vacance, Ferie, A
 from core.utils import utils_portail
 from outils.utils import utils_email
 from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
-from consommations.forms.appliquer_semaine_type import Formulaire as form_appliquer_semaine_type
 from consommations.forms.grille_forfaits import Formulaire as form_forfaits
+from portail.forms.appliquer_semaine_type import Formulaire as form_appliquer_semaine_type
 from portail.templatetags.planning import is_ajout_allowed
 from portail.utils import utils_approbations
 from portail.views.base import CustomView
@@ -30,6 +30,7 @@ class View(CustomView, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         """ Vérifie si des approbations sont requises """
         if not request.user.is_authenticated:
+            logger.debug("dispatch : Utilisateur non authentifié. Retour à la page de connexion.")
             return redirect("portail_connexion")
         activite = Activite.objects.prefetch_related("types_consentements").get(pk=kwargs["idactivite"])
         approbations_requises = utils_approbations.Get_approbations_requises(famille=request.user.famille, activites=[activite,], idindividu=kwargs["idindividu"])
@@ -59,15 +60,20 @@ class View(CustomView, TemplateView):
             return False
         inscription = Inscription.objects.filter(famille=self.request.user.famille, individu_id=self.kwargs.get('idindividu'), activite_id=self.kwargs["idactivite"])
         if not inscription:
+            logger.debug("test_func False : Pas d'inscription valide.")
             return False
         if not inscription.first().internet_reservations:
+            logger.debug("test_func False : la case internet_reservations est décochée sur cette inscription.")
             return False
         if not self.request.user.famille.internet_reservations:
+            logger.debug("test_func False : la case internet_reservations est décochée sur cette fiche famille.")
             return False
         periode = PortailPeriode.objects.select_related("activite").prefetch_related("categories").get(pk=self.kwargs.get('idperiode'))
         if not periode or not periode.Is_active_today():
+            logger.debug("test_func False : Pas de période active disponible pour cette activité.")
             return False
         if not periode.Is_famille_authorized(famille=self.request.user.famille):
+            logger.debug("test_func False : Famille non autorisée.")
             return False
         return True
 

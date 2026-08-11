@@ -1,0 +1,184 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+
+    {% block meta %}
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Noethysweb">
+    {% endblock meta %}
+
+    <link rel="shortcut icon" href="{% static 'images/icone.png' %}"/>
+
+    {# RGAA : titre de page explicite et unique #}
+    <title>{% block page_title %}Connexion{% endblock page_title %} — Noethysweb</title>
+
+    <script>
+        (function () {
+            var stored = localStorage.getItem('noethysweb_theme') || 'auto';
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var resolved = stored === 'auto' ? (prefersDark ? 'dark' : 'light') : stored;
+            document.documentElement.setAttribute('data-bs-theme', resolved);
+        }());
+    </script>
+
+    {% block styles %}
+        <link rel="stylesheet" href="{% static 'css/accessibilite.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'lib/bootstrap5/css/bootstrap.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'lib/font-awesome/css/font-awesome.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'polices/bootstrap-icons/css/bootstrap-icons.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/base_login.css' %}">
+    {% endblock %}
+
+    {% block scripts %}
+        <script src="{% static 'lib/jquery/jquery.min.js' %}"></script>
+        <script src="{% static 'lib/bootstrap5/js/bootstrap.min.js' %}"></script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+
+                /* ---- Afficher / masquer le mot de passe ---- */
+                var toggleBtn = document.getElementById('id_afficher_mdp');
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        var input = document.getElementById('id_password');
+                        var icon  = document.getElementById('id_eye');
+                        var isPassword = input.type === 'password';
+                        input.type = isPassword ? 'text' : 'password';
+                        icon.classList.toggle('fa-eye-slash', !isPassword);
+                        icon.classList.toggle('fa-eye', isPassword);
+                        /* RGAA : mise à jour du libellé accessible */
+                        toggleBtn.setAttribute(
+                            'aria-label',
+                            isPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+                        );
+                        toggleBtn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+                    });
+                }
+
+            });
+        </script>
+
+    {% endblock %}
+
+    {% block extra_head %}
+    {% endblock %}
+
+</head>
+
+<body>
+
+    <script>
+        (function () {
+            var CLE = "noethysweb_a11y";
+            try {
+                var p = JSON.parse(localStorage.getItem(CLE) || "{}");
+                var el = document.documentElement;
+                if (p.contraste === "eleve")          el.classList.add("a11y-contraste-eleve");
+                if (p.contraste === "maximum")        el.classList.add("a11y-contraste-maximum");
+                if (p.taille_texte === "petite")      el.classList.add("a11y-texte-petite");
+                if (p.taille_texte === "grande")      el.classList.add("a11y-texte-grande");
+                if (p.taille_texte === "tres_grande") el.classList.add("a11y-texte-tres-grande");
+                if (p.souligner_liens)               el.classList.add("a11y-souligner-liens");
+                if (p.police_dyslexie)               el.classList.add("a11y-dyslexie");
+                if (p.espacement_lettres)            el.classList.add("a11y-espacement");
+                if (p.interlignage === "augmente")   el.classList.add("a11y-interlignage-augmente");
+                if (p.interlignage === "large")      el.classList.add("a11y-interlignage-large");
+                if (p.grandes_zones_clic)            el.classList.add("a11y-grandes-zones-clic");
+                if (p.reduire_animations)            el.classList.add("a11y-no-animations");
+                if (p.agrandir_curseur === "grand")      el.classList.add("a11y-curseur-grand");
+                if (p.agrandir_curseur === "tres_grand") el.classList.add("a11y-curseur-tres-grand");
+            } catch (e) {}
+        }());
+    </script>
+
+    {# Lien d'évitement vers le contenu principal #}
+    <a class="skip-link" href="#main-content">Aller au contenu principal</a>
+
+    {# Fond décoratif — masqué aux lecteurs d'écran #}
+    <div class="bg-image" style="background-image: url('{{ url_image_fond }}');" aria-hidden="true" role="presentation"></div>
+
+    {# Barre d'outils : Accessibilité / Langue / Thème #}
+    <nav class="toolbar-login" aria-label="Préférences d'affichage">
+
+        {# Bouton Accessibilité #}
+        <button class="btn-pill-toolbar" type="button" data-bs-toggle="modal" data-bs-target="#modal_accessibilite"
+                title="{% trans "Ouvrir les réglages d'accessibilité dans une fenêtre" %}" aria-haspopup="dialog">
+            <i class="bi bi-universal-access-circle" aria-hidden="true"></i>
+            <span class="d-none d-md-inline">{% trans "Accessibilité" %}</span>
+        </button>
+
+        {# Bouton Langue #}
+        <button class="btn-pill-toolbar" type="button" data-bs-toggle="modal" data-bs-target="#modal_langue"
+                title="{% trans "Ouvrir les réglages de la langue dans une fenêtre" %}" aria-haspopup="dialog">
+            <i class="bi bi-translate" aria-hidden="true"></i>
+            <span class="d-none d-md-inline">{% trans "Langue" %}</span>
+        </button>
+
+        {# Bouton Thème clair/sombre #}
+        <button class="btn-pill-toolbar" type="button" data-bs-toggle="modal" data-bs-target="#modal_theme"
+                title="{% trans "Choisir le thème dans une fenêtre" %}" aria-haspopup="dialog">
+            <i class="bi bi-circle-half" aria-hidden="true"></i>
+            <span class="d-none d-md-inline">{% trans "Thème" %}</span>
+        </button>
+
+    </nav>
+
+    {# Contenu principal #}
+    <main id="main-content" class="d-flex align-items-center min-vh-100 py-3 py-md-0">
+        <div class="container">
+            <div class="card login-card">
+                <div class="row g-0">
+                    {% block contenu_cadre %}
+                        <div class="col-md-5 position-relative">
+                            {# RGAA critère 1.2 : image décorative avec alt vide #}
+                            <img src="{{ url_image_fond }}"
+                                 alt=""
+                                 class="login-card-img"
+                                 aria-hidden="true">
+                        </div>
+                        <div class="col-md-7">
+                            <div class="card-body">
+                                <div class="brand-wrapper">
+                                    {% if organisateur and organisateur.logo %}
+                                        {# RGAA critère 1.1 : alt descriptif sur le logo #}
+                                        <img src="{{ organisateur.logo.url }}"
+                                             alt="Logo {{ organisateur.nom }}"
+                                             class="logo">
+                                    {% endif %}
+                                </div>
+                                {% if not parametres_portail or parametres_portail.connexion_afficher_nom_organisateur %}
+                                    <p class="login-card-description">{{ organisateur.nom }}</p>
+                                {% endif %}
+
+                                {# RGAA critère 9.1 : h1 unique et pertinent #}
+                                <h1 class="titre_contenu h6 mb-4">
+                                    {% block titre_contenu %}Connexion{% endblock titre_contenu %}
+                                </h1>
+
+                                {% block contenu_page %}
+                                {% endblock contenu_page %}
+
+                            </div>
+                        </div>
+                    {% endblock contenu_cadre %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+{% include "portail/modal_mentions_accessibilite.html" %}
+{% include "portail/modal_mentions_legales.html" %}
+{% include "portail/modal_theme.html" %}
+{% include "portail/modal_langue.html" %}
+{% include "portail/modal_accessibilite.html" %}
+<script src="{% static 'js/accessibilite.js' %}"></script>
+
+</body>
+
+</html>

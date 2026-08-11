@@ -1,0 +1,43 @@
+{# portail/templates/crispy/field_select_row.html                            #}
+{# Template crispy personnalisé : champ <select> dans une ligne setting-row. #}
+{# Usage : Field("mon_champ", template="crispy/field_select_row.html")       #}
+
+<div class="d-flex align-items-center gap-3 px-3 py-3 border-bottom">
+
+  {# ── Label + help_text à gauche ── #}
+  <div class="flex-grow-1">
+    <label for="{{ field.id_for_label }}"
+           class="form-label fw-medium mb-0"
+           style="font-size:.875rem">
+      {{ field.label }}
+    </label>
+    {% if field.help_text %}
+      <div id="hint_{{ field.html_name }}"
+           class="form-text mt-0">
+        {{ field.help_text|safe }}
+      </div>
+    {% endif %}
+    {% if field.errors %}
+      {% for error in field.errors %}
+        <div class="text-danger small">{{ error }}</div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  {# ── Select à droite ── #}
+  <div style="min-width:190px;flex-shrink:0">
+    <select id="{{ field.id_for_label }}"
+            name="{{ field.html_name }}"
+            class="form-select form-select-sm"
+            {% if field.help_text %}aria-describedby="hint_{{ field.html_name }}"{% endif %}
+            {% if field.field.required %}required{% endif %}>
+      {% for val, txt in field.field.choices %}
+        <option value="{{ val }}"
+                {% if field.value == val|stringformat:"s" %}selected{% endif %}>
+          {{ txt }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+</div>

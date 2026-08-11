@@ -9,14 +9,13 @@ from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML
 from core.models import Individu, Rattachement
-from core.forms.select2 import Select2Widget
 from core.widgets import Telephone, CodePostal, Ville, Rue
 from portail.forms.fiche import FormulaireBase
 
 
 class Formulaire(FormulaireBase, ModelForm):
     type_adresse = forms.ChoiceField(label=_("Type d'adresse"), widget=forms.RadioSelect, choices=[("RATTACHEE", _("Adresse rattachée")), ("PROPRE", _("Adresse propre"))], required=False)
-    adresse_auto = forms.ModelChoiceField(label=_("Adresse rattachée"), widget=Select2Widget(), queryset=Rattachement.objects.none(), required=False)
+    adresse_auto = forms.ModelChoiceField(label=_("Adresse rattachée"), queryset=Rattachement.objects.none(), required=False)
 
     class Meta:
         model = Individu
@@ -49,7 +48,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
-        self.helper.use_custom_control = False
+        # self.helper.use_custom_control = False
 
         # Adresse rattachée
         individus = []

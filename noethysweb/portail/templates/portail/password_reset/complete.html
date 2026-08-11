@@ -1,4 +1,4 @@
-{% extends "core/base_login.html" %}
+{% extends "portail/base_login.html" %}
 {% load i18n %}
 {% load static %}
 
@@ -12,7 +12,10 @@
     <p>{% blocktrans %}Vous pouvez vous connecter dès à présent en cliquant sur le bouton ci-dessous{% endblocktrans %} :</p>
     <br>
     <p class="text-center">
-        <a type="button" class="btn btn-primary" title="Aller à la page de connexion" href="{% url 'portail_connexion' %}">{% blocktrans %}Aller à la page de connexion{% endblocktrans %}</a>
+        <a type="button" class="btn w-100 btn-primary login-btn" title="Aller à la page de connexion" href="{% url 'portail_connexion' %}">
+            <i class="fa fa-fw fa-sign-in me-1" aria-hidden="true"></i>
+            {% blocktrans %}Aller à la page de connexion{% endblocktrans %}
+        </a>
     </p>
 
 {% endblock contenu_page %}

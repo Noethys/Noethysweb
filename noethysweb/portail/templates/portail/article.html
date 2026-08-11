@@ -3,36 +3,116 @@
 {% load embed %}
 
 
-<div class="card mb-4 {% if article.couleur_fond %}bg-{{ article.couleur_fond }}{% endif %}" style="margin-top: 1px;">
+<div class="card mb-3
+    {% if article.couleur_fond %}bg-{{ article.couleur_fond }} text-white{% endif %}"
+{#    style="break-inside:avoid;-webkit-column-break-inside:avoid;display:inline-block;width:100%;"#}
+>
+
     {% if article.Get_anciennete <= 3 %}
-        <div class="ribbon-wrapper ribbon-lg">
-            <div class="ribbon bg-warning">{% trans "Nouveau" %}</div>
+        <div class="ribbon-wrapper" aria-hidden="true">
+            <div class="ribbon bg-warning text-dark">
+                {% trans "Nouveau" %}
+            </div>
         </div>
+        <span class="visually-hidden">{% trans "Nouvel article" %}</span>
     {% endif %}
+
     {% if article.image %}
-        <img class="card-img-top" src="{{ article.image.url }}"/>
+        <img class="card-img-top"
+             src="{{ article.image.url }}"
+             alt="" aria-hidden="true"
+             style="border-top-left-radius:var(--bs-card-inner-border-radius);border-top-right-radius:var(--bs-card-inner-border-radius);">
     {% endif %}
     {% if article.image_article %}
-        <img class="card-img-top" src="{{ article.image_article.image.url }}"/>
+        <img class="card-img-top"
+             src="{{ article.image_article.image.url }}"
+             alt="" aria-hidden="true"
+             style="border-top-left-radius:var(--bs-card-inner-border-radius);border-top-right-radius:var(--bs-card-inner-border-radius);">
     {% endif %}
-    <div class="card-body pl-3 pr-3 pt-3 pb-1">
-        <h5 class="card-title">{{ article.titre }}</h5>
-        <p class="card-text">{{ article.texte|safe }}</p>
-        {% if article.document %}
-            <p class="mb-1"><small><a href="{{ article.document.url }}" style="text-decoration: none;" target="_blank" title="{% trans "Cliquez ici pour ouvrir le document dans un nouvel onglet" %}"><i class="fa fa-link margin-r-5"></i>{{ article.document_titre }}</a></small></p>
-        {% endif %}
-        {% if article.album %}
-            <p class="mb-1"><small><a href="{% url 'portail_album' code=article.album.code %}" style="text-decoration: none;" title="{% trans "Cliquez ici pour accéder à l'album" %}"><i class="fa fa-photo margin-r-5"></i>{% blocktrans %}Accéder à l'album{% endblocktrans %} '{{ article.album.titre }}'</a></small></p>
-        {% endif %}
-        {% if article.sondage %}
-            <p class="mb-1"><small><a href="{% url 'portail_sondage' code=article.sondage.code %}" style="text-decoration: none;" title="{% trans "Cliquez ici pour accéder au formulaire" %}"><i class="fa fa-file-text-o margin-r-5"></i>{% blocktrans %}Accéder au formulaire{% endblocktrans %} '{{ article.sondage.titre }}'</a></small></p>
-        {% endif %}
-        {% if article.video %}
-            <p class="mb-1"><small><a href="#" style="text-decoration: none;" id="bouton_video_{{ article.pk }}" data-src="{{ article.video }}" data-toggle="modal" data-target="#modal_video_{{ article.pk }}" title="{% trans "Cliquez ici pour lancer la vidéo" %}"><i class="fa fa-film margin-r-5"></i>{% blocktrans %}Cliquez ici pour lancer la vidéo{% endblocktrans %}</a></small></p>
-            {% embed 'core/accueil/video.html' with id=article.pk %}{% endembed %}
-        {% endif %}
+
+    <div class="card-body p-3 pb-1">
+
+        <h3 class="" style="font-size:1rem;font-weight:600;margin-bottom:8px;">
+            {{ article.titre }}
+        </h3>
+
+        <div class="card-text" style="font-size:14px;">
+            {{ article.texte|safe }}
+        </div>
+
+        {# Liens associés #}
+        <div class="d-flex flex-column gap-1 mb-2">
+
+            {% if article.document %}
+                <small>
+                    <a href="{{ article.document.url }}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="text-decoration-none"
+                       aria-label="{{ article.document_titre }} — {% trans 'Ouvrir le document dans un nouvel onglet' %}">
+                        <i class="fa fa-file-pdf-o me-1" aria-hidden="true"></i>
+                        {{ article.document_titre }}
+                        <i class="fa fa-external-link ms-1" aria-hidden="true" style="font-size:11px;"></i>
+                    </a>
+                </small>
+            {% endif %}
+
+            {% if article.album %}
+                <small>
+                    <a href="{% url 'portail_album' code=article.album.code %}"
+                       class="text-decoration-none"
+                       title="{% trans 'Cliquez ici pour accéder à l\'album' %}"
+                       aria-label="{% blocktrans with titre=article.album.titre %}Accéder à l'album {{ titre }}{% endblocktrans %}">
+                        <i class="fa fa-photo me-1" aria-hidden="true"></i>
+                        {% blocktrans %}Accéder à l'album{% endblocktrans %} « {{ article.album.titre }} »
+                    </a>
+                </small>
+            {% endif %}
+
+            {% if article.sondage %}
+                <small>
+                    <a href="{% url 'portail_sondage' code=article.sondage.code %}"
+                       class="text-decoration-none"
+                       title="{% trans 'Cliquez ici pour accéder au formulaire' %}"
+                       aria-label="{% blocktrans with titre=article.sondage.titre %}Accéder au formulaire {{ titre }}{% endblocktrans %}">
+                        <i class="fa fa-file-text-o me-1" aria-hidden="true"></i>
+                        {% blocktrans %}Accéder au formulaire{% endblocktrans %} « {{ article.sondage.titre }} »
+                    </a>
+                </small>
+            {% endif %}
+
+            {% if article.video %}
+                <small>
+                    <button id="bouton_video_{{ article.pk }}"
+                            type="button"
+                            class="btn btn-link text-decoration-none p-0 border-0"
+                            style="font-size:inherit; color: #367da6;"
+                            data-src="{{ article.video }}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modal_video_{{ article.pk }}"
+                            aria-haspopup="dialog"
+                            aria-label="Lancer la vidéo de l'article">
+                        <i class="fa fa-film me-1" aria-hidden="true"></i>
+                        {% blocktrans %}Lancer la vidéo{% endblocktrans %}
+                    </button>
+                </small>
+                {% embed 'core/accueil/video.html' with id=article.pk %}{% endembed %}
+            {% endif %}
+
+        </div>
     </div>
-    <div class="card-footer pl-3 pr-3 pb-1 pt-0 text-right">
-        <span style="color: #cecece;font-size: 70%;">{% blocktrans %}Publié le{% endblocktrans %} {{ article.date_debut|date:'d/m/Y' }} {% trans "par" %} {% firstof article.auteur.get_short_name article.auteur %}</span>
+
+    <div class="card-footer px-3 text-end" style="border-top: 0;padding-top: 0;padding-bottom: 3px;">
+        <span class="text-muted" style="font-size:65%;">
+            {% blocktrans %}Publié le{% endblocktrans %}
+            <time datetime="{{ article.date_debut|date:'Y-m-d' }}">
+                {{ article.date_debut|date:'d/m/Y' }}
+            </time>
+            {% trans "par" %}
+            {% firstof article.auteur.get_short_name article.auteur %}
+        </span>
     </div>
+
 </div>
+
+

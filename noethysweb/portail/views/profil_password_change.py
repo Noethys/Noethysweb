@@ -10,7 +10,6 @@ from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
 from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.password_validation import password_validators_help_text_html
 from django.contrib import messages
 from portail.views.base import CustomView
 from portail.forms.profil_password_change import MyPasswordChangeForm
@@ -27,7 +26,6 @@ class View(CustomView, TemplateView, auth_views.PasswordChangeView):
         context['page_titre'] = _("Profil")
         context['box_titre'] = _("Modification du mot de passe")
         context['box_introduction'] = _("Saisissez à deux reprises le mot de passe souhaité en tenant compte des caractéristiques énoncées ci-dessous.")
-        context['texte_validateurs'] = password_validators_help_text_html()
         return context
 
     def form_valid(self, form):

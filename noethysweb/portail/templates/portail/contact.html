@@ -7,35 +7,112 @@
 
 {% block styles %}
     {{ block.super }}
+    <style>
+        .btn-app-v4 {
+            position: relative;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-width: 80px;
+            padding: 10px 14px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            color: #495057;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+            line-height: 1.2;
+        }
+        .btn-app-v4:hover {
+            background: #e9ecef;
+            border-color: #3c8dbc;
+            color: #3c8dbc;
+            text-decoration: none;
+        }
+        .btn-app-v4:hover i {
+            color: #3c8dbc;
+        }
+        .btn-app-v4 i {
+            font-size: 20px;
+            color: #6c757d;
+            transition: color 0.15s;
+        }
+
+        /* Badge positionné en haut à droite */
+        .btn-app-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            font-size: 10px;
+            padding: 3px 6px;
+            border-radius: 999px;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        /* Dark mode */
+        [data-bs-theme="dark"] .btn-app-v4 {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.75);
+        }
+        [data-bs-theme="dark"] .btn-app-v4:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #5ba3cc;
+            color: #5ba3cc;
+        }
+        [data-bs-theme="dark"] .btn-app-v4 i {
+            color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
 {% endblock %}
 
 {% block contenu_page %}
 
     {# Texte d'introduction #}
     {% if parametres_portail.contact_intro %}
-        <div style="margin-bottom: 20px;">
-            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.contact_intro }}
+        <div class="div-intro" role="note" aria-label="{% trans "Information" %}">
+            <i class="fa fa-info-circle margin-r-5" aria-hidden="true"></i>{{ parametres_portail.contact_intro }}
         </div>
     {% endif %}
+
 
     {# Messagerie #}
     {% embed 'core/box.html' with box_titre=True box_introduction=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}Messagerie{% endblock %}
+        {% block box_titre %}
+            <i class="fa fa-comments me-2" aria-hidden="true"></i>
+            Messagerie
+        {% endblock %}
         {% block box_introduction %}{% blocktrans %}Cliquez ci-dessous sur la structure ou le service avec lequel vous souhaitez converser{% endblocktrans %}.{% endblock %}
         {% block box_contenu %}
-            {% for structure in liste_structures_messagerie %}
-
-                {% with dict_messages_non_lus|get_item:structure.pk as nbre_messages_non_lus %}
-                <a class="btn btn-app" href="{% url 'portail_messagerie' idstructure=structure.pk %}">
-                    {% if nbre_messages_non_lus %}
-                        <span class="badge bg-danger">{{ nbre_messages_non_lus }} {% if nbre_messages_non_lus == 1 %}{% blocktrans %}non lu{% endblocktrans %}{% else %}{% blocktrans %}non lus{% endblocktrans %}{% endif %}</span>
-                    {% endif %}
-                    <i class="fa fa-comments"></i>{{ structure.nom }}
-                </a>
-                {% endwith %}
-
-            {% endfor %}
+            <div class="d-flex flex-wrap gap-2" role="list" aria-label="{% trans 'Liste des structures ou services' %}">
+                {% for structure in liste_structures_messagerie %}
+                    {% with dict_messages_non_lus|get_item:structure.pk as nbre_messages_non_lus %}
+                        <div role="listitem">
+                            <a class="btn-app-v4"
+                               href="{% url 'portail_messagerie' idstructure=structure.pk %}"
+                               aria-label="{% if nbre_messages_non_lus %}{% blocktrans with nom=structure.nom count=nbre_messages_non_lus %}Messagerie {{ nom }}, {{ count }} messages non lus{% endblocktrans %}{% else %}{% blocktrans with nom=structure.nom %}Messagerie {{ nom }}{% endblocktrans %}{% endif %}">
+                                {% if nbre_messages_non_lus %}
+                                    <span class="btn-app-badge badge text-bg-danger" aria-hidden="true">
+                                        {{ nbre_messages_non_lus }}
+                                        {% if nbre_messages_non_lus == 1 %}{% blocktrans %}non lu{% endblocktrans %}
+                                        {% else %}{% blocktrans %}non lus{% endblocktrans %}{% endif %}
+                                    </span>
+                                {% endif %}
+                                <i class="fa fa-comments" aria-hidden="true"></i>
+                                <span>{{ structure.nom }}</span>
+                            </a>
+                        </div>
+                    {% endwith %}
+                {% endfor %}
+            </div>
         {% endblock box_contenu %}
         {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
     {% endembed %}
@@ -45,21 +122,91 @@
     {% if parametres_portail.contact_afficher_coords_structures %}
         {% embed 'core/box.html' with box_titre=True box_introduction=False %}
             {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}{% blocktrans %}Annuaire des structures ou services{% endblocktrans %}{% endblock %}
+            {% block box_titre %}
+                <i class="fa fa-building-o me-2" aria-hidden="true"></i>
+                {% blocktrans %}Annuaire des structures ou services{% endblocktrans %}
+            {% endblock %}
             {% block box_contenu %}
-                <div class="row">
+                <ul class="row g-3 list-unstyled" aria-label="{% trans 'Liste des structures et services' %}">
+
                     {% for structure in liste_structures_coords %}
-                        {% if structure.rue or structure.cp or structure.ville or structure.tel or structure.mail or structure.site %}
-                            <div class="col-md-4 pl-3 pr-3 pb-3 pt-1">
-                                <div><strong>{{ structure.nom }}</strong></div>
-                                {% if structure.rue or structure.cp or structure.ville %}<div><i class='fa fa-map-marker margin-r-5'></i>{{ structure.rue }} {{ structure.cp }} {{ structure.ville }}</div>{% endif %}
-                                {% if structure.tel %}<div><i class='fa fa-phone margin-r-5'></i>{{ structure.tel }}</div>{% endif %}
-                                {% if structure.mail %}<div><i class='fa fa-envelope-o margin-r-5'></i>{{ structure.mail }}</div>{% endif %}
-                                {% if structure.site %}<div><i class='fa fa-globe margin-r-5'></i><a href="http://{{ structure.site }}" target="_blank">{{ structure.site }}</a></div>{% endif %}
-                            {% endif %}
-                        </div>
+                        <li class="col-12 col-sm-6 col-lg-4">
+                            <article class="card h-100 border overflow-hidden shadow-none" aria-label="{{ structure.nom }}">
+
+                                {# ── Bandeau nom de la structure ── #}
+                                <div class="card-header bg-primary text-white py-2 px-3 d-flex align-items-center gap-2" aria-hidden="true">
+                                    <i class="fa fa-building-o fa-fw" aria-hidden="true"></i>
+                                    <span class="small fw-semibold text-uppercase text-truncate">
+                                        {{ structure.nom }}
+                                    </span>
+                                </div>
+
+                                {# ── Corps : coordonnées ── #}
+                                <div class="card-body bg-primary-subtle d-flex flex-column gap-2 py-3 px-3">
+
+                                    {% if structure.rue or structure.cp or structure.ville %}
+                                        <div class="d-flex align-items-start gap-2 small">
+                                            <i class="fa fa-map-marker fa-fw text-primary flex-shrink-0 mt-1" aria-hidden="true"></i>
+                                            <address class="mb-0" style="font-style: normal;">
+                                                {% if structure.rue %}{{ structure.rue }}<br>{% endif %}
+                                                {% if structure.cp or structure.ville %}
+                                                    {{ structure.cp }} {{ structure.ville }}
+                                                {% endif %}
+                                            </address>
+                                        </div>
+                                    {% endif %}
+
+                                    {% if structure.tel %}
+                                        <div class="d-flex align-items-center gap-2 small">
+                                            <i class="fa fa-phone fa-fw text-primary flex-shrink-0" aria-hidden="true"></i>
+                                            <a href="tel:{{ structure.tel|cut:' ' }}"
+                                               class="text-body-secondary text-decoration-none"
+                                               aria-label="{% blocktrans with nom=structure.nom tel=structure.tel %}Appeler {{ nom }} au {{ tel }}{% endblocktrans %}">
+                                                {{ structure.tel }}
+                                            </a>
+                                        </div>
+                                    {% endif %}
+
+                                    {% if structure.mail %}
+                                        <div class="d-flex align-items-center gap-2 small">
+                                            <i class="fa fa-envelope-o fa-fw text-primary flex-shrink-0" aria-hidden="true"></i>
+                                            <a href="mailto:{{ structure.mail }}"
+                                               class="text-body-secondary text-decoration-none text-break"
+                                               aria-label="{% blocktrans with nom=structure.nom mail=structure.mail %}Envoyer un e-mail à {{ nom }} : {{ mail }}{% endblocktrans %}">
+                                                {{ structure.mail }}
+                                            </a>
+                                        </div>
+                                    {% endif %}
+
+                                </div>
+
+                                {# ── Pied : bouton site web (si disponible) ── #}
+                                <div class="card-footer bg-primary-subtle border-top-0 d-flex justify-content-end pt-0 pb-3 px-3">
+                                    {% if structure.site %}
+                                        <a href="{% if structure.site|slice:':4' != 'http' %}https://{% endif %}{{ structure.site }}"
+                                           class="btn btn-primary btn-sm"
+                                           target="_blank"
+                                           rel="noopener noreferrer"
+                                           aria-label="{% blocktrans with nom=structure.nom %}Visiter le site web de {{ nom }} (nouvelle fenêtre){% endblocktrans %}"
+                                        >
+                                            <i class="fa fa-external-link me-2" aria-hidden="true"></i>
+                                            {{ structure.site }}
+                                            <span class="visually-hidden">
+                                                ({% trans "nouvelle fenêtre" %})
+                                            </span>
+                                        </a>
+                                    {% else %}
+                                        <span class="small text-body-tertiary fst-italic">
+                                            {% trans "Pas de site web" %}
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                            </article>
+                        </li>
                     {% endfor %}
-                </div>
+
+                </ul>
             {% endblock box_contenu %}
         {% endembed %}
     {% endif %}
@@ -69,14 +216,85 @@
     {% if parametres_portail.contact_afficher_coords_organisateur %}
         {% embed 'core/box.html' with box_titre=True box_introduction=False %}
             {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}{% blocktrans %}Coordonnées de l'organisateur{% endblocktrans %}{% endblock %}
+            {% block box_titre %}
+                <i class="fa fa-building-o me-2" aria-hidden="true"></i>
+                {% blocktrans %}Coordonnées de l'organisateur{% endblocktrans %}
+            {% endblock %}
             {% block box_contenu %}
-                <div class="m-2">
-                    <div><strong>{{ organisateur.nom }}</strong></div>
-                    {% if organisateur.rue or organisateur.cp or organisateur.ville %}<div><i class='fa fa-map-marker margin-r-5'></i>{{ organisateur.rue }} {{ organisateur.cp }} {{ organisateur.ville }}</div>{% endif %}
-                    {% if organisateur.tel %}<div><i class='fa fa-phone margin-r-5'></i>{{ organisateur.tel }}</div>{% endif %}
-                    {% if organisateur.site %}<div><i class='fa fa-globe margin-r-5'></i><a href="http://{{ organisateur.site }}" target="_blank">{{ organisateur.site }}</a></div>{% endif %}
-                </div>
+
+                <article class="card h-100 border overflow-hidden shadow-none mb-0" aria-label="{{ organisateur.nom }}">
+
+                    {# ── Bandeau nom de l'organisateur ── #}
+                    <div class="card-header bg-success text-white py-2 px-3 d-flex align-items-center gap-2" aria-hidden="true">
+                        <i class="fa fa-building-o fa-fw" aria-hidden="true"></i>
+                        <span class="small fw-semibold text-uppercase text-truncate">
+                            {{ organisateur.nom }}
+                        </span>
+                    </div>
+
+                    {# ── Corps : coordonnées ── #}
+                    <div class="card-body bg-success-subtle d-flex flex-column gap-2 py-3 px-3">
+
+                        {% if organisateur.rue or organisateur.cp or organisateur.ville %}
+                            <div class="d-flex align-items-start gap-2 small">
+                                <i class="fa fa-map-marker fa-fw text-success flex-shrink-0 mt-1" aria-hidden="true"></i>
+                                <address class="mb-0" style="font-style: normal;">
+                                    {% if organisateur.rue %}{{ organisateur.rue }}<br>{% endif %}
+                                    {% if organisateur.cp or organisateur.ville %}
+                                        {{ organisateur.cp }} {{ organisateur.ville }}
+                                    {% endif %}
+                                </address>
+                            </div>
+                        {% endif %}
+
+                        {% if organisateur.tel %}
+                            <div class="d-flex align-items-center gap-2 small">
+                                <i class="fa fa-phone fa-fw text-success flex-shrink-0" aria-hidden="true"></i>
+                                <a href="tel:{{ organisateur.tel|cut:' ' }}"
+                                   class="text-body-secondary text-decoration-none"
+                                   aria-label="{% blocktrans with nom=organisateur.nom tel=organisateur.tel %}Appeler {{ nom }} au {{ tel }}{% endblocktrans %}">
+                                    {{ organisateur.tel }}
+                                </a>
+                            </div>
+                        {% endif %}
+
+                        {% if organisateur.mail %}
+                            <div class="d-flex align-items-center gap-2 small">
+                                <i class="fa fa-envelope-o fa-fw text-success flex-shrink-0" aria-hidden="true"></i>
+                                <a href="mailto:{{ organisateur.mail }}"
+                                   class="text-body-secondary text-decoration-none text-break"
+                                   aria-label="{% blocktrans with nom=organisateur.nom mail=organisateur.mail %}Envoyer un e-mail à {{ nom }} : {{ mail }}{% endblocktrans %}">
+                                    {{ organisateur.mail }}
+                                </a>
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                    {# ── Pied : bouton site web (si disponible) ── #}
+                    <div class="card-footer bg-success-subtle border-top-0 d-flex justify-content-end pt-0 pb-3 px-3">
+                        {% if organisateur.site %}
+                            <a href="{% if organisateur.site|slice:':4' != 'http' %}https://{% endif %}{{ organisateur.site }}"
+                               class="btn btn-success btn-sm"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               aria-label="{% blocktrans with nom=organisateur.nom %}Visiter le site web de {{ nom }} (nouvelle fenêtre){% endblocktrans %}"
+                            >
+                                <i class="fa fa-external-link me-2" aria-hidden="true"></i>
+                                {{ organisateur.site }}
+                                <span class="visually-hidden">
+                                    ({% trans "nouvelle fenêtre" %})
+                                </span>
+                            </a>
+                        {% else %}
+                            <span class="small text-body-tertiary fst-italic">
+                                {% trans "Pas de site web" %}
+                            </span>
+                        {% endif %}
+                    </div>
+
+                </article>
+
             {% endblock box_contenu %}
         {% endembed %}
     {% endif %}

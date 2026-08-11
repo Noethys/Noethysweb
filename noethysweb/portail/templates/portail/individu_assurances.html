@@ -7,11 +7,17 @@
 
 {% block detail_fiche %}
     <div class="col-md-9">
-        {% embed 'core/box.html' %}
-            {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}{{ box_titre }}{% endblock %}
-            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
-            {% block box_contenu %}
+        <div class="card card-outline card-lightblue">
+
+            <div class="card-header">
+                <h2 class="card-title">{{ box_titre }}</h2>
+            </div>
+
+            <div class="card-body">
+
+                {% if box_introduction %}
+                    <p>{{ box_introduction|safe }}</p>
+                {% endif %}
 
                 {% if assurance_manquante %}
                     {% embed "individus/alerte.html" with titre_uniquement=True titre="<i class='icon fa fa-warning text-danger'></i> Assurance obligatoire"%}
@@ -20,14 +26,14 @@
 
                 <div class="">
                     {% if liste_assurances %}
-                        <table class="table table-bordered">
+                        <table class="table table-bordered align-middle" aria-label="{% trans "Liste des assurances" %}">
                             <thead>
                                 <tr class="text-center">
-                                    <th>{% blocktrans %}Date de début{% endblocktrans %}</th>
-                                    <th>{% blocktrans %}Date de fin{% endblocktrans %}</th>
-                                    <th>{% trans "Assureur" %}</th>
-                                    <th>N° {% trans "contrat" %}</th>
-                                    <th style="width: 90px;">{% trans "Actions" %}</th>
+                                    <th scope="col">{% blocktrans %}Date de début{% endblocktrans %}</th>
+                                    <th scope="col">{% blocktrans %}Date de fin{% endblocktrans %}</th>
+                                    <th scope="col">{% trans "Assureur" %}</th>
+                                    <th scope="col">N° {% trans "contrat" %}</th>
+                                    <th scope="col" style="width: 90px;">{% trans "Actions" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -38,24 +44,47 @@
                                         <td>{{ assurance.assureur }}</td>
                                         <td>{{ assurance.num_contrat }}</td>
                                         <td>
-                                            <a type="button" class="btn btn-primary btn-xs" href="{% url 'portail_individu_assurances_modifier' idrattachement=rattachement.pk idassurance=assurance.pk %}" title="{% trans "Modifier" %}"><i class="fa fa-fw fa-pencil"></i></a>
-                                            <a type="button" class="btn btn-danger btn-xs" href="{% url 'portail_individu_assurances_supprimer' idrattachement=rattachement.pk idassurance=assurance.pk %}" title="{% trans "Supprimer" %}"><i class="fa fa-fw fa-trash"></i></a>
+                                            <a class="btn btn-primary btn-sm"
+                                               href="{% url 'portail_individu_assurances_modifier' idrattachement=rattachement.pk idassurance=assurance.pk %}"
+                                               title="{% trans "Modifier" %} {{ assurance.assureur }}"
+                                               aria-label="{% trans "Modifier" %} {{ assurance.assureur }}">
+                                                <i class="fa fa-pencil" aria-hidden="true"></i>
+                                                <span style="display: none;">{% trans "Modifier" %}</span>
+                                            </a>
+                                            <a class="btn btn-danger btn-sm"
+                                               href="{% url 'portail_individu_assurances_supprimer' idrattachement=rattachement.pk idassurance=assurance.pk %}"
+                                               title="{% trans "Supprimer" %} {{ assurance.assureur }}"
+                                               aria-label="{% trans "Supprimer" %} {{ assurance.assureur }}">
+                                                <i class="fa fa-trash" aria-hidden="true"></i>
+                                                <span style="display: none;">{% trans "Supprimer" %}</span>
+                                            </a>
                                         </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     {% else %}
-                        <b>{% blocktrans %}Aucune assurance enregistrée.{% endblocktrans %}</b>
+                        <b class="fw-bold">{% blocktrans %}Aucune assurance enregistrée.{% endblocktrans %}</b>
                     {% endif %}
                 </div>
-                <div class="pull-right">
-                    <a class="btn btn-default" href="{% url 'portail_individu_assurances_importer' idrattachement=rattachement.pk %}" title="{% trans "Importer des assurances depuis une autre fiche" %}"><i class="fa fa-download margin-r-5"></i>{% blocktrans %}Importer les assurances d'une autre fiche{% endblocktrans %}</a>
-                    <a class="btn btn-primary" href="{% url 'portail_individu_assurances_ajouter' idrattachement=rattachement.pk %}" title="{% trans "Ajouter une assurance" %}"><i class="fa fa-plus margin-r-5"></i>{% blocktrans %}Ajouter une assurance{% endblocktrans %}</a>
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <a class="btn btn-primary"
+                       href="{% url 'portail_individu_assurances_ajouter' idrattachement=rattachement.pk %}"
+                       aria-label="{% trans "Ajouter une assurance" %}">
+                        <i class="fa fa-plus me-2" aria-hidden="true"></i>{% blocktrans %}Ajouter une assurance{% endblocktrans %}
+                    </a>
+                    <a class="btn btn-secondary"
+                       href="{% url 'portail_individu_assurances_importer' idrattachement=rattachement.pk %}"
+                       aria-label="{% trans "Importer des assurances depuis une autre fiche" %}">
+                        <i class="fa fa-download me-2" aria-hidden="true"></i>{% blocktrans %}Importer des assurances depuis une autre fiche{% endblocktrans %}
+                    </a>
                 </div>
-
-            {% endblock box_contenu %}
-            {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
-        {% endembed %}
+            </div>
+            {% if box_conclusion %}
+                <div class="card-footer">
+                    {{ box_conclusion|safe }}
+                </div>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}

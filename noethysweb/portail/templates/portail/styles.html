@@ -1,0 +1,17 @@
+{% load static %}
+
+{% block styles %}
+
+    <link rel="stylesheet" href="{% static 'css/accessibilite.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'polices/bootstrap-icons/css/bootstrap-icons.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/adminlte4/css/adminlte.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/conflicts/conflicts.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/toastr/toastr.min.css' %}" >
+
+    {{ form.media.css }}
+
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/select2/css/select2-bootstrap5.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/portail.css' %}">
+
+{% endblock %}

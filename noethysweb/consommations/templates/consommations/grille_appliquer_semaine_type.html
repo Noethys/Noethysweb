@@ -18,73 +18,202 @@
 
 
 {# Modal Appliquer une semaine type #}
-{% embed 'core/modal.html' with modal_footer=True %}
-    {% block modal_id %}modal_appliquer_semaine_type{% endblock %}
-    {% block modal_titre %}{% blocktrans %}Appliquer une semaine-type{% endblocktrans %}{% endblock %}
-    {% block modal_classe %}{% if data.liste_unites_visibles|length > 2 %}modal-lg{% endif %}{% endblock %}
-    {% block modal_body %}
-        <div id="modal_erreurs" class="text-red"></div>
-        <form id="form_appliquer_semaine_type" method="post">
-            {% csrf_token %}
-            {% crispy form_appliquer_semaine_type %}
+{% if version_bootstrap == 5 %}
 
-            <!-- Tableau de la semaine-type -->
-            <label>{% trans "Semaine-type" %}</label>
+    {# Modal Appliquer une semaine type - Version BOOTSTRAP 5 #}
+    {% embed 'portail/modal.html' with modal_footer=True mode_static=True %}
+        {% block modal_id %}modal_appliquer_semaine_type{% endblock %}
+        {% block modal_titre %}<i class="fa fa-calendar-check-o me-2" aria-hidden="true"></i>{% blocktrans %}Appliquer une semaine-type{% endblocktrans %}{% endblock %}
+        {% block modal_classe %}{% if data.liste_unites_visibles|length > 2 %}modal-lg{% endif %}{% endblock %}
+        {% block modal_theme %}bg-primary-subtle{% endblock %}
+        {% block modal_body %}
 
-            <!-- Toutes les semaines -->
-            <div id='tableau_semaine_type_0'>
-                {% embed 'consommations/grille_semaine_type.html' with num_semaine=0 %}{% endembed %}
-            </div>
+            <style>
+                /* Correction AdminLTE 4 — largeur et layout des pills */
+                #tableau_semaine_type_1 .nav-pills,
+                #tableau_semaine_type_2 .nav-pills {
+                    width: 100% !important;
+                    display: flex !important;
+                    flex-direction: row !important;
+                }
 
-            <!-- Une semaine sur deux -->
-            <div id='tableau_semaine_type_1'>
-                <div class="nav-tabs-custom no-margin">
-                    <ul class="nav nav-pills pb-1">
-                        {% for num_semaine in 2|rangelistfrom1 %}
-                            <li class="nav-item">
-                                <a id="tab_sem_{{ num_semaine }}" class="nav-link {% if num_semaine == 1 %}active{% endif %}" href="#tab_{{ num_semaine }}" data-toggle="tab" role="tab">Semaine {{ num_semaine }}</a>
+                .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+                    color: var(--bs-nav-pills-link-active-color);
+                    background-color: #367da6;
+                }
+
+                /* Correction AdminLTE 4 — couleur du lien inactif */
+                #tableau_semaine_type_1 .nav-pills .nav-link:not(.active),
+                #tableau_semaine_type_2 .nav-pills .nav-link:not(.active) {
+                    color: #367da6 !important;
+                    background-color: transparent !important;
+                }
+
+                /* Correction AdminLTE 4 — couleur au survol */
+                #tableau_semaine_type_1 .nav-pills .nav-link:not(.active):hover,
+                #tableau_semaine_type_2 .nav-pills .nav-link:not(.active):hover {
+                    color: #367da6 !important;
+                    background-color: var(--bs-tertiary-bg) !important;
+                }
+            </style>
+
+            <div id="modal_erreurs" class="text-danger" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+            <form id="form_appliquer_semaine_type" method="post" aria-describedby="modal_erreurs">
+                {% csrf_token %}
+                {% crispy form_appliquer_semaine_type %}
+
+                <fieldset>
+                    <legend>{% trans "Semaine-type" %}</legend>
+
+                    {# Toutes les semaines #}
+                    <div id="tableau_semaine_type_0">
+                        {% embed 'consommations/grille_semaine_type.html' with num_semaine=0 %}{% endembed %}
+                    </div>
+
+                    {# Une semaine sur deux #}
+                    <div id="tableau_semaine_type_1">
+                        <ul class="nav nav-pills pb-3"
+                            role="tablist"
+                            aria-label="{% trans "Sélection de la semaine" %}">
+                            {% for num_semaine in 2|rangelistfrom1 %}
+                                <li class="nav-item" role="presentation">
+                                    <a id="tab_sem_{{ num_semaine }}" class="nav-link {% if num_semaine == 1 %}active{% endif %}"
+                                       role="tab" href="#semaine_{{ num_semaine }}" data-bs-toggle="tab"
+                                       aria-controls="semaine_{{ num_semaine }}" aria-selected="{% if num_semaine == 1 %}true{% else %}false{% endif %}"
+                                       tabindex="{% if num_semaine == 1 %}0{% else %}-1{% endif %}">
+                                        {% blocktrans with n=num_semaine %}Semaine {{ n }}{% endblocktrans %}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="tab-content">
+                            {% for num_semaine in 2|rangelistfrom1 %}
+                                <div class="tab-pane {% if num_semaine == 1 %}show active{% endif %}" id="semaine_{{ num_semaine }}"
+                                     role="tabpanel" aria-labelledby="tab_sem_{{ num_semaine }}" tabindex="0">
+                                    {% embed 'consommations/grille_semaine_type.html' with num_semaine=num_semaine %}{% endembed %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {# Semaines paires/impaires #}
+                    <div id="tableau_semaine_type_2">
+                        <ul class="nav nav-pills pb-3"
+                            role="tablist"
+                            aria-label="{% trans "Sélection semaine paire ou impaire" %}">
+                            <li class="nav-item" role="presentation">
+                                <button id="tab_sem_paire" class="nav-link active" type="button" role="tab"
+                                        data-bs-toggle="tab" data-bs-target="#semaine_paire" aria-controls="semaine_paire"
+                                        aria-selected="true">
+                                    {% blocktrans %}Semaine paire{% endblocktrans %}
+                                </button>
                             </li>
-                        {% endfor %}
-                    </ul>
-                    <div class="tab-content no-padding">
-                        {% for num_semaine in 2|rangelistfrom1 %}
-                            <div class="tab-pane {% if num_semaine == 1 %}show active{% endif %}" id="tab_{{ num_semaine }}">
-                                {% embed 'consommations/grille_semaine_type.html' with num_semaine=num_semaine %}{% endembed %}
+                            <li class="nav-item" role="presentation">
+                                <button id="tab_sem_impaire" class="nav-link" type="button" role="tab" data-bs-toggle="tab"
+                                        data-bs-target="#semaine_impaire" aria-controls="semaine_impaire" aria-selected="false">
+                                    {% blocktrans %}Semaine impaire{% endblocktrans %}
+                                </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane show active" id="semaine_paire" role="tabpanel" aria-labelledby="tab_sem_paire" tabindex="0">
+                                {% embed 'consommations/grille_semaine_type.html' with num_semaine=4 %}{% endembed %}
                             </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Semaines paires/impaires -->
-            <div id='tableau_semaine_type_2'>
-                <div class="nav-tabs-custom no-margin">
-                    <ul class="nav nav-pills pb-1">
-                        <li class="nav-item">
-                            <a id="tab_sem_4" class="nav-link active" href="#tab_4" data-toggle="tab" role="tab">{% blocktrans %}Semaine paire{% endblocktrans %}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a id="tab_sem_5" class="nav-link" href="#tab_5" data-toggle="tab" role="tab">{% blocktrans %}Semaine impaire{% endblocktrans %}</a>
-                        </li>
-                    </ul>
-                    <div class="tab-content no-padding">
-                        <div class="tab-pane active" id="tab_4">
-                            {% embed 'consommations/grille_semaine_type.html' with num_semaine=4 %}{% endembed %}
-                        </div>
-                        <div class="tab-pane" id="tab_5">
-                            {% embed 'consommations/grille_semaine_type.html' with num_semaine=5 %}{% endembed %}
+                            <div class="tab-pane" id="semaine_impaire" role="tabpanel" aria-labelledby="tab_sem_impaire" tabindex="0">
+                                {% embed 'consommations/grille_semaine_type.html' with num_semaine=5 %}{% endembed %}
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-        </form>
-    {% endblock %}
-    {% block modal_footer %}
-        <button type="button" class="btn btn-primary" id="bouton_valider_semaine_type"><i class="fa fa-check margin-r-5"></i>{% trans "Valider" %}</button>
-        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>{% trans "Annuler" %}</button>
-    {% endblock %}
-{% endembed %}
+                </fieldset>
+            </form>
+        {% endblock %}
+
+        {% block modal_footer %}
+            <button type="button" class="btn btn-primary" id="bouton_valider_semaine_type">
+                <i class="fa fa-check margin-r-5" aria-hidden="true"></i>
+                {% trans "Valider" %}
+            </button>
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                <i class="fa fa-ban margin-r-5" aria-hidden="true"></i>
+                {% trans "Annuler" %}
+            </button>
+        {% endblock %}
+    {% endembed %}
+
+{% else %}
+
+    {# Modal Appliquer une semaine type - Version BOOTSTRAP 4 #}
+    {% embed 'core/modal.html' with modal_footer=True %}
+        {% block modal_id %}modal_appliquer_semaine_type{% endblock %}
+        {% block modal_titre %}{% blocktrans %}Appliquer une semaine-type{% endblocktrans %}{% endblock %}
+        {% block modal_classe %}{% if data.liste_unites_visibles|length > 2 %}modal-lg{% endif %}{% endblock %}
+        {% block modal_body %}
+            <div id="modal_erreurs" class="text-red"></div>
+            <form id="form_appliquer_semaine_type" method="post">
+                {% csrf_token %}
+                {% crispy form_appliquer_semaine_type %}
+
+                <!-- Tableau de la semaine-type -->
+                <label>{% trans "Semaine-type" %}</label>
+
+                <!-- Toutes les semaines -->
+                <div id='tableau_semaine_type_0'>
+                    {% embed 'consommations/grille_semaine_type.html' with num_semaine=0 %}{% endembed %}
+                </div>
+
+                <!-- Une semaine sur deux -->
+                <div id='tableau_semaine_type_1'>
+                    <div class="nav-tabs-custom no-margin">
+                        <ul class="nav nav-pills pb-3">
+                            {% for num_semaine in 2|rangelistfrom1 %}
+                                <li class="nav-item">
+                                    <a id="tab_sem_{{ num_semaine }}" class="nav-link {% if num_semaine == 1 %}active{% endif %}" href="#tab_{{ num_semaine }}" data-toggle="tab" role="tab">Semaine {{ num_semaine }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="tab-content no-padding">
+                            {% for num_semaine in 2|rangelistfrom1 %}
+                                <div class="tab-pane {% if num_semaine == 1 %}show active{% endif %}" id="tab_{{ num_semaine }}">
+                                    {% embed 'consommations/grille_semaine_type.html' with num_semaine=num_semaine %}{% endembed %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Semaines paires/impaires -->
+                <div id='tableau_semaine_type_2'>
+                    <div class="nav-tabs-custom no-margin">
+                        <ul class="nav nav-pills pb-3">
+                            <li class="nav-item">
+                                <a id="tab_sem_4" class="nav-link active" href="#tab_4" data-toggle="tab" role="tab">{% blocktrans %}Semaine paire{% endblocktrans %}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a id="tab_sem_5" class="nav-link" href="#tab_5" data-toggle="tab" role="tab">{% blocktrans %}Semaine impaire{% endblocktrans %}</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content no-padding">
+                            <div class="tab-pane active" id="tab_4">
+                                {% embed 'consommations/grille_semaine_type.html' with num_semaine=4 %}{% endembed %}
+                            </div>
+                            <div class="tab-pane" id="tab_5">
+                                {% embed 'consommations/grille_semaine_type.html' with num_semaine=5 %}{% endembed %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        {% endblock %}
+        {% block modal_footer %}
+            <button type="button" class="btn btn-primary" id="bouton_valider_semaine_type"><i class="fa fa-check margin-r-5"></i>{% trans "Valider" %}</button>
+            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>{% trans "Annuler" %}</button>
+        {% endblock %}
+    {% endembed %}
+
+{% endif %}
 
 
 <script>
@@ -104,21 +233,21 @@ $(document).ready(function() {
     });
 
     $('#id_frequence').on("change", function(e) {
-        if ( $("#id_frequence").val() == 0 ) {
-            $("#tableau_semaine_type_0").show();
-            $("#tableau_semaine_type_1").hide();
-            $("#tableau_semaine_type_2").hide();
+        var val = $(this).val();
+        $("#tableau_semaine_type_0").toggle(val == 0);
+        $("#tableau_semaine_type_1").toggle(val == 1);
+        $("#tableau_semaine_type_2").toggle(val == 2);
+
+        {% if version_bootstrap == 5 %}
+            // Forcer le recalcul du layout après affichage
+            if (val == 1 || val == 2) {
+                var container = $("#tableau_semaine_type_" + val);
+                // Forcer reflow
+                container[0].offsetHeight;
+                // Recalculer la largeur de la ul
+                container.find('ul.nav-pills').css('width', '100%');
             }
-        if ( $("#id_frequence").val() == 1 ) {
-            $("#tableau_semaine_type_0").hide();
-            $("#tableau_semaine_type_1").show();
-            $("#tableau_semaine_type_2").hide();
-            }
-        if ( $("#id_frequence").val() == 2 ) {
-            $("#tableau_semaine_type_0").hide();
-            $("#tableau_semaine_type_1").hide();
-            $("#tableau_semaine_type_2").show();
-            }
+        {% endif %}
     });
     $('#id_frequence').trigger("change");
 

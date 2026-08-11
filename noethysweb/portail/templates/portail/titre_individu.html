@@ -1,0 +1,21 @@
+{% load static %}
+
+<div class="d-flex align-items-center {% block styles %}px-3 py-3 border-bottom{% endblock %}">
+    <img
+        class="rounded-circle flex-shrink-0 css-dependent"
+        src="{% block src_photo %}{% endblock %}"
+        alt=""
+        aria-hidden="true"
+        width="46" height="46"
+        style="object-fit:cover; border: 2px solid var(--bs-body-bg); box-shadow: 0 0 0 2px #B5D4F4;"
+        hidden>
+
+    <div class="vr mx-3 flex-shrink-0" aria-hidden="true"></div>
+
+    <div>
+        <{{ balise_nom|default:"h2" }} class="fw-medium mb-0" style="font-size:18px;">{% block prenom_individu %}{% endblock %}</{{ balise_nom|default:"h2" }}>
+        <div class="detail_infos_individu d-flex flex-wrap align-items-center column-gap-3 row-gap-1 mt-1">
+            {% block infos %}{% endblock %}
+        </div>
+    </div>
+</div>

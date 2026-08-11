@@ -53,3 +53,4 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Commandes(annuler_url="{% url 'portail_individu_informations' idrattachement=rattachement.pk %}", aide=False, ajouter=False, css_class="pull-right"),
         )
+        self.Appliquer_version_bootstrap(5)

@@ -1,0 +1,265 @@
+{% load i18n %}
+{% load static %}
+{% load embed %}
+
+{# Cadre de proposition de paiement en ligne #}
+{% embed 'core/box.html' with box_titre=True %}
+    {% block box_theme %}card-outline card-lightblue{% endblock %}
+    {% block box_titre %}
+        <i class="fa fa-credit-card me-2" aria-hidden="true"></i>
+        {% blocktrans %}Payer en ligne{% endblocktrans %}
+    {% endblock %}
+    {% block box_contenu %}
+        {% if parametres_portail.paiement_ligne_systeme|is_in_list:"payzen;demo" %}
+            <img src="{% static "images/payzen.png" %}" class="pull-right" alt="{% trans 'Logo PayZen — prestataire de paiement sécurisé' %}">
+            <p>{% blocktrans %}Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PayZen. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.{% endblocktrans %}</p>
+        {% else %}
+            <img src="{% static "images/payfip.jpg" %}" class="pull-right" alt="{% trans 'Logo PayFip — prestataire de paiement sécurisé' %}">
+            <p>{% blocktrans %}Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PAYFIP. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.{% endblocktrans %}</p>
+        {% endif %}
+        <div>
+            <button type="button" class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modal_selection_factures"
+                    aria-haspopup="dialog"
+                    title="{% blocktrans %}Payer en ligne avec une carte bancaire{% endblocktrans %}">
+                <i class="fa fa-credit-card me-1" aria-hidden="true"></i>
+                {% blocktrans %}Payer en ligne{% endblocktrans %}
+            </button>
+        </div>
+    {% endblock box_contenu %}
+    {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+{% endembed %}
+
+
+{# Modal Sélection des impayés à régler #}
+{% embed 'portail/modal.html' with modal_footer=True %}
+    {% block modal_id %}modal_selection_factures{% endblock %}
+    {% block modal_titre %}
+        <i class="fa fa-credit-card me-2" aria-hidden="true"></i>
+        {% blocktrans %}Payer en ligne{% endblocktrans %}
+    {% endblock %}
+    {% block modal_classe %}modal-lg{% endblock %}
+    {% block modal_id_label %}modal_selection_factures_titre{% endblock %}
+    {% block modal_titre_id %}modal_selection_factures_titre{% endblock %}
+    {% block modal_body %}
+
+        <p class="mb-3">
+            {% blocktrans %}Cochez les sommes à payer et cliquez sur <strong>Valider</strong> pour accéder à la page de paiement sécurisée.{% endblocktrans %}
+        </p>
+
+        <div id="message_erreur" class="alert alert-danger d-none" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+        <div class="table-responsive">
+
+            <table class="table-facturation table table-bordered align-middle text-center small" aria-label="{% trans 'Liste des impayés' %}">
+
+                <thead class="align-middle">
+                    <tr>
+                        <th scope="col" class="bg-body-secondary text-body" style="width: 52px;">
+                        <input type="checkbox" class="form-check-input" id="check-all" aria-label="{% trans 'Sélectionner toutes les lignes' %}" onchange="toggleAll(this)">
+                    </th>
+                    <th scope="col" class="bg-body-secondary text-body">{% trans "Intitulé" %}</th>
+                    <th scope="col" class="bg-body-secondary text-body">{% trans "Montant total" %}</th>
+                    <th scope="col" class="bg-body-secondary text-body">{% blocktrans %}Déjà réglé{% endblocktrans %}</th>
+                    <th scope="col" class="bg-body-secondary text-body">{% blocktrans %}Reste à régler{% endblocktrans %}</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for facture in liste_factures_impayees %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="form-check-input check_impaye" name="check_impaye" id="facture-{{ facture.pk }}"
+                                    value="{{ facture.solde_actuel|stringformat:'.2f' }}" aria-label="{% blocktrans with num=facture.numero solde=facture.solde_actuel %}Sélectionner la facture n°{{ num }}, reste à régler : {{ solde }} €{% endblocktrans %}"
+                                    data-type="facture" data-id="{{ facture.pk }}" data-num="{{ facture.numero }}" data-solde="{{ facture.solde_actuel|stringformat:'.2f' }}"
+                                >
+                            </td>
+                            <td>
+                                <label for="facture-{{ facture.pk }}" class="mb-0 fw-medium">
+                                    {% blocktrans with num=facture.numero %}Facture n°{{ num }}{% endblocktrans %}
+                                </label>
+                            </td>
+                            <td>{{ facture.total|montant }}</td>
+                            <td>{{ facture.Get_regle_actuel|montant }}</td>
+                            <td>
+                                <span class="badge rounded-pill
+                                    {% if facture.en_cours_paiement %}text-bg-warning
+                                    {% elif facture.solde_actuel > 0.0 %}text-bg-danger
+                                    {% else %}text-bg-success{% endif %}"
+                                >
+                                {{ facture.solde_actuel|montant }}
+                                {% if facture.en_cours_paiement %}
+                                    <span class="visually-hidden">— {% trans 'en cours de paiement' %}</span>
+                                {% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                    {% for periode in liste_periodes_prefacturation %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="form-check-input check_impaye" name="check_impaye" id="periode-{{ periode.pk }}"
+                                    value="{{ periode.solde|stringformat:'.2f' }}" aria-label="{% blocktrans with nom=periode.nom solde=periode.solde %}Sélectionner {{ nom }}, reste à régler : {{ solde }} €{% endblocktrans %}"
+                                    data-type="periode" data-id="{{ periode.pk }}" data-solde="{{ periode.solde|stringformat:'.2f' }}"
+                                >
+                            </td>
+                            <td>
+                                <label for="periode-{{ periode.pk }}" class="mb-0">{{ periode.nom }}</label>
+                            </td>
+                            <td>{{ periode.total|montant }}</td>
+                            <td>{{ periode.regle|montant }}</td>
+                            <td>
+                                <span class="badge rounded-pill {% if periode.solde > 0.0 %}text-bg-danger{% else %}text-bg-success{% endif %}">
+                                    {{ periode.solde|montant }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                    {% for prestation_cotisation in liste_cotisations_prefacturation %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="form-check-input check_impaye" name="check_impaye" id="cotisation-{{ prestation_cotisation.pk }}"
+                                    value="{{ prestation_cotisation.solde|stringformat:'.2f' }}"
+                                    aria-label="{% blocktrans with label=prestation_cotisation.label solde=prestation_cotisation.solde %}Sélectionner {{ label }}, reste à régler : {{ solde }} €{% endblocktrans %}"
+                                    data-type="cotisation" data-id="{{ prestation_cotisation.pk }}" data-solde="{{ prestation_cotisation.solde|stringformat:'.2f' }}"
+                                >
+                            </td>
+                            <td>
+                                <label for="cotisation-{{ prestation_cotisation.pk }}" class="mb-0">{{ prestation_cotisation.label }}</label>
+                            </td>
+                            <td>{{ prestation_cotisation.total|montant }}</td>
+                            <td>{{ prestation_cotisation.regle|montant }}</td>
+                            <td>
+                                <span class="badge rounded-pill {% if prestation_cotisation.solde > 0.0 %}text-bg-danger{% else %}text-bg-success{% endif %}">
+                                    {{ prestation_cotisation.solde|montant }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center p-3 bg-body-secondary rounded mt-2" aria-live="polite" aria-atomic="true">
+            <span class="">{% blocktrans %}Montant du règlement{% endblocktrans %} :</span>
+            <strong class="fs-5 me-4 total" id="total" aria-label="{% trans 'Montant total sélectionné : 0.00 €' %}">0.00 €</strong>
+        </div>
+
+
+        {% if parametres_portail.payzen_echelonnement %}
+            <div class="p-3 border rounded mt-3 ml-3 bg-body-secondary">
+                <input type="checkbox" class="form-check-input" id="check_echelonnement" name="check_echelonnement" aria-describedby="desc-echelonnement">
+                <label class="form-check-label fw-medium" for="check_echelonnement">
+                    {% blocktrans %}Payer en 3 fois sans frais{% endblocktrans %}
+                </label>
+                <div id="desc-echelonnement" class="text-body-secondary small mt-1">
+                    {% blocktrans %}Échelonnement sur 3 mensualités consécutives, sans frais supplémentaires.{% endblocktrans %}
+                </div>
+            </div>
+        {% endif %}
+
+    {% endblock %}
+
+    {% block modal_footer %}
+        <div id="div_form_paiement" style="visibility:hidden"></div>
+        <button type="button" class="btn btn-primary" id="bouton_valider_montant"><i class="fa fa-check me-2" aria-hidden="true"></i>{% trans "Valider" %}</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fa fa-ban me-2" aria-hidden="true"></i>{% trans "Annuler" %}</button>
+    {% endblock %}
+
+{% endembed %}
+
+<a id="lien_externe"></a>
+
+<script>
+    // Reset des champs de saisie de la fenêtre modale
+    $('#modal_selection_factures').on('show.bs.modal', function (event) {
+        $('#message_erreur').text('')
+        $('#div_form_paiement').hide();
+        $('#div_form_paiement').html('');
+        maj_montant_paiement()
+    })
+
+    {# Fonction de calcul du total du paiement #}
+    function maj_montant_paiement() {
+        var montant_reglement = 0.0;
+        $("input[name='check_impaye']:checked").each(function() {
+            montant_reglement += parseFloat($(this).val());
+        });
+        const formatted = parseFloat(montant_reglement).toFixed(2) + " €";
+        $('.total').html(formatted);
+        document.getElementById('total').setAttribute('aria-label', '{% trans "Montant total sélectionné" %} : ' + formatted);
+    }
+
+    function toggleAll(cb) {
+        document.querySelectorAll('.check_impaye').forEach(c => { c.checked = cb.checked; });
+        maj_montant_paiement();
+    }
+
+    $(document).ready(function() {
+        {# Mise à jour du montant total du règlement #}
+        $(".check_impaye").change(function() {
+            maj_montant_paiement();
+        });
+
+        {# Sélection d'une seule facture si multi factures non actif #}
+        {% if not parametres_portail.paiement_ligne_multi_factures %}
+            $(".check_impaye").change(function() {
+                if ($(this).prop("checked") === true) {
+                    $("#modal_selection_factures .check_impaye:checked").prop("checked", false);
+                    $(this).prop("checked", true);
+                    maj_montant_paiement();
+                }
+            });
+        {% endif %}
+
+        {# Validation du montant du paiement #}
+        $('#bouton_valider_montant').on('click', function(event) {
+            var nbr_selected_impayes = 0;
+            var selected_impayes = [];
+            var montant_reglement = 0;
+            var paiement_echelonne = 0;
+            $(".check_impaye:checked").each(function() {
+                nbr_selected_impayes += 1;
+                selected_impayes.push($(this).attr("data-type") + "##" + $(this).attr("data-id") + "##" + $(this).attr("data-solde"));
+                montant_reglement += parseFloat($(this).attr("data-solde"));
+            });
+            if (($("#check_echelonnement").length) && ($("#check_echelonnement").prop("checked") === true)) {
+                paiement_echelonne = 1;
+            };
+            $.ajax({
+                type: "POST",
+                url: "{% url 'portail_ajax_effectuer_paiement_en_ligne' %}",
+                datatype: "json",
+                data: {
+                    liste_impayes: selected_impayes.toString(),
+                    montant_reglement: montant_reglement,
+                    paiement_echelonne: paiement_echelonne,
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                },
+                success: function(data) {
+                    if (data.systeme_paiement === "demo") {
+                        toastr.info(data.texte);
+                    }
+                    if (data.systeme_paiement === "payzen") {
+                        $('#div_form_paiement').html(data.form_paiement);
+                        $('#div_form_paiement').hide();
+                        $("#form_paiement").submit()
+                    }
+                    if (data.systeme_paiement === "payfip") {
+                        $('#modal_selection_factures').modal('hide');
+                        window.open(data.urltoredirect, '_blank', 'height=700, width=900, toolbar=no, menubar=no, scrollbars=no, resizable=yes, location=no, directories=no, status=no');
+                        window.location.href = "{% url 'portail_attente_paiement' %}"
+                    }
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                },
+            });
+        });
+
+    });
+
+</script>

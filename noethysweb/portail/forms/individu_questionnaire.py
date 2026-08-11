@@ -63,8 +63,10 @@ class Formulaire(FormulaireBase, forms.Form):
                 self.helper.layout.append(ButtonHolder(HTML("""<a class="btn btn-primary" href="{{% url 'portail_individu_questionnaire_modifier' idrattachement=rattachement.pk %}}" title="{title}"><i class="fa fa-pencil margin-r-5"></i>{label}</a>""".format(title=_("Modifier"), label=_("Modifier cette page"))), css_class="pull-right"))
             if mode == "EDITION":
                 self.helper.layout.append(ButtonHolder(
-                        StrictButton("<i class='fa fa-check margin-r-5'></i>%s" % _("Enregistrer les modifications"), title=_("Enregistrer"), name="enregistrer", type="submit", css_class="btn-primary"),
-                        HTML("""<a class="btn btn-danger" href='{{% url 'portail_individu_questionnaire' idrattachement=rattachement.pk %}}' title="{title}"><i class="fa fa-ban margin-r-5"></i>{label}</a>""".format(title=_("Annuler"), label=_("Annuler"))), css_class="pull-right"))
+                        StrictButton("<i class='fa fa-check margin-r-5' aria-hidden='true'></i>%s" % _("Enregistrer les modifications"), title=_("Enregistrer"), name="enregistrer", type="submit", css_class="btn-primary"),
+                        HTML("""<a class="btn btn-danger" href='{{% url 'portail_individu_questionnaire' idrattachement=rattachement.pk %}}' title="{title}"><i class="fa fa-ban margin-r-5" aria-hidden="true"></i>{label}</a>""".format(title=_("Annuler"), label=_("Annuler"))), css_class="pull-right"))
+
+        self.Appliquer_version_bootstrap(5)
 
     def clean(self):
         for key, valeur in self.cleaned_data.items():

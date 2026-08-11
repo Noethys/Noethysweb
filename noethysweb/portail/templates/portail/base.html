@@ -1,6 +1,7 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-lte-color-mode="off">
 <head>
 
     {% block meta %}
@@ -9,23 +10,17 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="Noethysweb">
-{% comment %}
-        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-        <meta http-equiv="Pragma" content="no-cache">
-        <meta http-equiv="Expires" content="0">
-{% endcomment %}
     {% endblock meta %}
 
     <link rel="shortcut icon" href="{% static 'images/icone.png' %}"/>
-
     <title>Noethysweb | {% block page_titre %}{% endblock %}</title>
 
     {% block styles %}
-        {% include 'core/styles.html' %}
+        {% include 'portail/styles.html' %}
     {% endblock %}
 
     {% block scripts %}
-        {% include 'core/scripts.html' %}
+        {% include 'portail/scripts.html' %}
     {% endblock %}
 
     {% block extra_head %}
@@ -37,15 +32,42 @@
 {% get_item_defaut options_interface "masquer-sidebar" False as masquer_sidebar %}
 {% get_item_defaut options_interface "text-sm" True as text_sm %}
 
-<body class="sidebar-mini sidebar-mini-xs accent-lightblue border-bottom-0 control-sidebar-push-slide layout-fixed
-    {% if text_sm %}text-sm{% endif %}
+<body class="layout-fixed fixed-header sidebar-expand-sm sidebar-mini sidebar-mini-xs border-bottom-0 bg-body-tertiary
     {% if masquer_sidebar %}sidebar-collapse{% endif %}
-    {% if dark_mode %}dark-mode{% endif %}
     " style="height: auto;"
 >
 
+<script>
+    (function () {
+        var CLE = "noethysweb_a11y";
+        try {
+            var p = JSON.parse(localStorage.getItem(CLE) || "{}");
+            var el = document.documentElement;
+            if (p.contraste === "eleve")          el.classList.add("a11y-contraste-eleve");
+            if (p.contraste === "maximum")        el.classList.add("a11y-contraste-maximum");
+            if (p.taille_texte === "petite")      el.classList.add("a11y-texte-petite");
+            if (p.taille_texte === "grande")      el.classList.add("a11y-texte-grande");
+            if (p.taille_texte === "tres_grande") el.classList.add("a11y-texte-tres-grande");
+            if (p.souligner_liens)               el.classList.add("a11y-souligner-liens");
+            if (p.police_dyslexie)               el.classList.add("a11y-dyslexie");
+            if (p.espacement_lettres)            el.classList.add("a11y-espacement");
+            if (p.interlignage === "augmente")   el.classList.add("a11y-interlignage-augmente");
+            if (p.interlignage === "large")      el.classList.add("a11y-interlignage-large");
+            if (p.grandes_zones_clic)            el.classList.add("a11y-grandes-zones-clic");
+            if (p.reduire_animations)            el.classList.add("a11y-no-animations");
+            if (p.agrandir_curseur === "grand")      el.classList.add("a11y-curseur-grand");
+            if (p.agrandir_curseur === "tres_grand") el.classList.add("a11y-curseur-tres-grand");
+        } catch (e) {}
+    }());
+</script>
+
 {% block body %}
-    <div class="wrapper">
+    <div>
+        <a href="#main" class="custom-skip-link">{% trans "Aller au contenu principal" %}</a>
+        <a href="#navigation" class="custom-skip-link">{% trans "Aller à la navigation" %}</a>
+    </div>
+
+    <div class="app-wrapper">
 
         {% block nav_header %}
             {% include 'portail/header.html' %}
@@ -58,12 +80,10 @@
         {% block page %}
         {% endblock page %}
 
-        {% block nav_footer %}
-            {% include 'core/footer.html' %}
-        {% endblock %}
+        <div style="display: none;"><br/><hr/></div>
 
-        {% block nav_control-sidebar %}
-            {% include 'core/control-sidebar.html' %}
+        {% block nav_footer %}
+            {% include 'portail/footer.html' %}
         {% endblock %}
 
     </div>
@@ -72,27 +92,12 @@
 {% block extra_foot %}
 {% endblock %}
 
-
-<script>
-
-    $(document).ready(function() {
-
-        // Enregistre le masquage du sidebar
-        $(".sidebar-toggle").on('click', function(e) {
-            $.ajax({
-                type: "POST",
-                url: "{% url 'ajax_memorise_option' %}",
-                data: {
-                    nom: "masquer-sidebar",
-                    valeur: !$("body").hasClass("sidebar-collapse"),
-                    csrfmiddlewaretoken: "{{ csrf_token }}",
-                },
-                datatype: "json",
-            });
-        });
-    });
-
-</script>
+{% include "portail/modal_mentions_accessibilite.html" %}
+{% include "portail/modal_mentions_legales.html" %}
+{% include "portail/modal_theme.html" %}
+{% include "portail/modal_langue.html" %}
+{% include "portail/modal_accessibilite.html" %}
+<script src="{% static 'js/accessibilite.js' %}"></script>
 
 </body>
 </html>

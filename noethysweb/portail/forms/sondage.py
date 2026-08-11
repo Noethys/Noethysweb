@@ -38,6 +38,7 @@ class Formulaire(FormulaireBase, forms.Form):
             key = "question_%d" % reponse.question_id
             if key in self.fields:
                 self.fields[key].initial = reponse.Get_reponse_for_ctrl()
+        self.Appliquer_version_bootstrap(5)
 
     def clean(self):
         for key, valeur in self.cleaned_data.items():

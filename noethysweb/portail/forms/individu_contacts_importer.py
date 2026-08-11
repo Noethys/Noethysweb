@@ -35,13 +35,13 @@ class Formulaire(FormulaireBase, forms.Form):
             html = """
                 <div class="pull-right">
                     <button type="submit" class='btn btn-primary' name="enregistrer"><i class="fa fa-check margin-r-5"></i>{label}</button> 
-                    <a class="btn btn-danger" href="{{% url 'portail_individu_contacts' idrattachement=idrattachement %}}" title="{annuler}"><i class="fa fa-ban margin-r-5"></i>{annuler}</a>
+                    <a class="btn btn-danger" href="{{% url 'portail_individu_contacts' idrattachement=idrattachement %}}" title="{annuler}"><i class="fa fa-ban margin-r-5" aria-hidden="true"></i>{annuler}</a>
                 </div>
             """.format(label=_("Importer les contacts cochés"), annuler=_("Annuler"))
         else:
             html = """
                 <div class="pull-right">
-                    <a class="btn btn-danger" href="{{% url 'portail_individu_contacts' idrattachement=idrattachement %}}" title="{label}"><i class="fa fa-ban margin-r-5"></i>{label}</a>
+                    <a class="btn btn-danger" href="{{% url 'portail_individu_contacts' idrattachement=idrattachement %}}" title="{label}"><i class="fa fa-ban margin-r-5" aria-hidden="true"></i>{label}</a>
                 </div>
             """.format(label=_("Annuler"))
 

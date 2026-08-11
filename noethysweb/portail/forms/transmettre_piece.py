@@ -74,6 +74,7 @@ class Formulaire(FormulaireBase, ModelForm):
             HTML(EXTRA_SCRIPT),
             Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>%s" % _("Envoyer"), annuler_url="{% url 'portail_documents' %}", ajouter=False, aide=False, css_class="pull-right"),
         )
+        self.Appliquer_version_bootstrap(5)
 
     def clean(self):
         # Type de pièce

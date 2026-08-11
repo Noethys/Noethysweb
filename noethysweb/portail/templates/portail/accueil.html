@@ -4,221 +4,340 @@
 {% load static %}
 {% load embed %}
 
+{% block styles %}
+    {{ block.super }}
+    <style>
+
+
+        /* Liens dans les articles */
+        .card .card-body a {
+            color: #1a5f8a !important;
+        }
+        .card .card-body a:hover {
+            color: #124869 !important;
+            text-decoration: underline;
+        }
+        /* Dark mode */
+        [data-bs-theme="dark"] .card .card-body a {
+            color: #7ab8d8 !important;
+        }
+
+
+        :root {
+            --stat-color-success: #1e7e34;
+            --stat-color-danger:  #bd2130;
+            --stat-color-warning: #e06c00;
+            --stat-color-info:    #117a8b;
+        }
+
+
+        /* Masonry actualités */
+        @media (min-width: 1400px) { #div_articles { column-count: 4; } }
+        @media (max-width: 1400px) { #div_articles { column-count: 3; } }
+        @media (max-width:  800px) { #div_articles { column-count: 2; } }
+        @media (max-width:  600px) { #div_articles { column-count: 1; } }
+        #div_articles .card {
+            break-inside: avoid;
+            -webkit-column-break-inside: avoid;
+            {#page-break-inside: avoid;#}
+            {#display: inline-block;#}
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        #div_articles .card-body {
+            break-inside: avoid;
+        }
+        #div_articles > div {
+            break-inside: avoid;
+            -webkit-column-break-inside: avoid;
+            {#display: inline-block;#}
+            width: 100%;
+        }
+
+        /* Stat cards — entièrement colorées */
+        .stat-card-portail {
+            border-radius: var(--bs-border-radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.1s, opacity 0.15s;
+            border: none !important;
+        }
+        .stat-card-portail:hover {
+            transform: translateY(-2px);
+            opacity: 0.92;
+        }
+        .stat-card-inner {
+            padding: 16px;
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .stat-card-number {
+            font-size: 32px;
+            font-weight: 500;
+            line-height: 1;
+            margin: 0 0 4px;
+            color: #fff !important;   /* écrase text-success/danger/warning */
+        }
+        .stat-card-label {
+            font-size: 13px;
+            color: #ffffff !important;
+            margin: 0;
+            line-height: 1.3;
+        }
+        .stat-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--bs-border-radius);
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #fff !important;   /* écrase text-success/danger/warning */
+            flex-shrink: 0;
+        }
+        .stat-card-icon .bi, .stat-card-icon .fa {
+            opacity: 0.3;
+        }
+        .stat-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 9px 16px;
+            background: rgba(0, 0, 0, 0.12);
+            font-size: 13px;
+            color: #fff !important;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.15s;
+        }
+        .stat-card-footer:hover {
+            background: rgba(0, 0, 0, 0.22);
+            color: #fff !important;
+        }
+
+        .section-title-portail {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--bs-secondary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin: 0 0 10px;
+        }
+        .section-accueil {
+            margin-bottom: 2.2rem;
+        }
+
+    </style>
+{% endblock %}
 
 {% block contenu_page %}
+<div>
 
-    <style>
-        {# Désactive l'agrandissement de l'icône car ça fait clignoter certains articles #}
-        .small-box:hover .icon > i, .small-box:hover .icon > i.fa {
-            -webkit-transform: none !important;
-            transform: none !important;
-        }
-        .card-img-top {
-            border-top-left-radius: .25rem;
-            border-top-right-radius: .25rem;
-        }
-        @media (min-width: 1400px) {
-            #div_articles {
-                -webkit-column-count: 4;
-                -moz-column-count: 4;
-                column-count: 4;
-            }
-        }
-        @media (max-width: 1400px) {
-            #div_articles {
-                -webkit-column-count: 3;
-                -moz-column-count: 3;
-                column-count: 3;
-            }
-        }
-        @media (max-width: 800px) {
-            #div_articles {
-                -webkit-column-count: 2;
-                -moz-column-count: 2;
-                column-count: 2;
-            }
-        }
-        @media (max-width: 600px) {
-            #div_articles {
-                -webkit-column-count: 1;
-                -moz-column-count: 1;
-                column-count: 1;
-            }
-        }
-    </style>
-
-    {# Texte bienvenue #}
+    {#  Bienvenue #}
     {% if parametres_portail.accueil_texte_bienvenue or parametres_portail.accueil_url_video %}
-        <h5 class="mb-2 text-secondary">{% trans "Bienvenue" %}</h5>
-        <div class="card mb-4">
-            <div class="card-body p-3">
-                {{ parametres_portail.accueil_texte_bienvenue|safe }}
-                {% if parametres_portail.accueil_url_video %}
-                    {% if parametres_portail.accueil_texte_bienvenue %}<p></p>{% endif %}
-                    <a href="#" id="bouton_video_accueil" class="video-btn btn btn-outline-primary btn-sm" data-src="{{ parametres_portail.accueil_url_video }}" data-toggle="modal" data-target="#modal_video_accueil" title="{% trans "Cliquez ici pour lancer la vidéo" %}"><i class='fa fa-film margin-r-5'></i>{{ parametres_portail.accueil_titre_video }}</a>
-                    {% embed 'core/accueil/video.html' with id='accueil' %}{% endembed %}
-                {% endif %}
+        <section aria-labelledby="titre-bienvenue" class="section-accueil">
+            <h2 id="titre-bienvenue" class="section-title-portail">
+                {% trans "Bienvenue" %}
+            </h2>
+            <div class="card border">
+                <div class="card-body p-3">
+                    {{ parametres_portail.accueil_texte_bienvenue|safe }}
+                    {% if parametres_portail.accueil_url_video %}
+                        {% if parametres_portail.accueil_texte_bienvenue %}<p></p>{% endif %}
+                        <button id="bouton_video_accueil"
+                                type="button"
+                                class="btn btn-outline-primary btn-sm"
+                                data-src="..."
+                                data-bs-toggle="modal"
+                                data-bs-target="#modal_video_accueil"
+                                aria-haspopup="dialog"
+                                aria-label="Découvrez le portail en vidéo — Lancer la vidéo">
+                            <i class="fa fa-film me-1" aria-hidden="true"></i>
+                            {{ parametres_portail.accueil_titre_video }}
+                        </button>
+                        {% embed 'core/accueil/video.html' with id='accueil' %}{% endembed %}
+                    {% endif %}
+                </div>
             </div>
-        </div>
+        </section>
     {% endif %}
 
 
     {# En attente #}
     {% if nbre_approbations_requises or nbre_messages_non_lus or nbre_pieces_manquantes or nbre_informations_manquantes or nbre_vaccinations_manquantes or nbre_assurances_manquantes or cotisations_manquantes %}
-        <h5 class="mb-2 text-secondary">{% blocktrans %}En attente{% endblocktrans %}</h5>
-        <div class="row mb-2">
+        <section aria-labelledby="titre-attente" class="section-accueil">
 
-            {# Messages #}
-            {% if nbre_messages_non_lus %}
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-success">
-                        <div class="inner">
-                            <h3>{{ nbre_messages_non_lus }}</h3>
-                            <p>
-                                {% blocktranslate count counter=nbre_messages_non_lus %}Nouveau message{% plural %}Nouveaux messages{% endblocktranslate %}
-                            </p>
-                        </div>
-                        <div class="icon"><i class="fa fa-comments"></i></div>
-                        <a href="{% url 'portail_contact' %}" class="small-box-footer">{% trans "Consulter" %} <i class="fa fa-arrow-circle-right"></i></a>
-                    </div>
-                </div>
-            {% endif %}
+            <h2 id="titre-attente" class="section-title-portail">
+                {% blocktrans %}En attente{% endblocktrans %}
+            </h2>
 
-            {# Informations manquantes #}
-            {% if nbre_informations_manquantes %}
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-danger">
-                        <div class="inner">
-                            <h3>{{ nbre_informations_manquantes }}</h3>
-                            <p>
-                                {% blocktranslate count counter=nbre_informations_manquantes %}Information manquante{% plural %}Informations manquantes{% endblocktranslate %}
-                            </p>
-                        </div>
-                        <div class="icon"><i class="fa fa-folder-open-o"></i></div>
-                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">{% trans "Corriger" %} <i class="fa fa-arrow-circle-right"></i></a>
-                    </div>
-                </div>
-            {% endif %}
+            <div class="row g-3">
 
-            {# Pièces manquantes #}
-            {% if nbre_pieces_manquantes %}
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-danger">
-                        <div class="inner">
-                            <h3>{{ nbre_pieces_manquantes }}</h3>
-                            <p>
-                                {% blocktranslate count counter=nbre_pieces_manquantes %}Pièce manquante{% plural %}Pièces manquantes{% endblocktranslate %}
-                            </p>
-                        </div>
-                        <div class="icon"><i class="fa fa-file-text-o"></i></div>
-                        <a href="{% url 'portail_documents' %}" class="small-box-footer">{% trans "Consulter" %} <i class="fa fa-arrow-circle-right"></i></a>
-                    </div>
-                </div>
-            {% endif %}
+                {% if nbre_messages_non_lus %}
+                    {% embed 'portail/accueil_attente.html' %}
+                        {% block card_style %}background:var(--stat-color-success){% endblock %}
+                        {% block quantite %}{{ nbre_messages_non_lus }}{% endblock %}
+                        {% block label %}{% blocktranslate count counter=nbre_messages_non_lus %}Nouveau message{% plural %}Nouveaux messages{% endblocktranslate %}{% endblock %}
+                        {% block icone %}bi bi-chat-text{% endblock %}
+                        {% block url %}{% url 'portail_contact' %}{% endblock %}
+                        {% block label_action %}{% trans 'Consulter' %}{% endblock %}
+                        {% block label_aria %}{% blocktranslate count counter=nbre_messages_non_lus %}Consulter le nouveau message{% plural %}Consulter les nouveaux messages{% endblocktranslate %}{% endblock %}
+                    {% endembed %}
+                {% endif %}
 
-            {# Vaccinations manquantes #}
-            {% if nbre_vaccinations_manquantes %}
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-danger">
-                        <div class="inner">
-                            <h3>{{ nbre_vaccinations_manquantes }}</h3>
-                            <p>
-                                {% blocktranslate count counter=nbre_vaccinations_manquantes %}Vaccination manquante{% plural %}Vaccinations manquantes{% endblocktranslate %}
-                            </p>
-                        </div>
-                        <div class="icon"><i class="fa fa-medkit"></i></div>
-                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">{% trans "Corriger" %} <i class="fa fa-arrow-circle-right"></i></a>
-                    </div>
-                </div>
-            {% endif %}
+                {% if nbre_informations_manquantes %}
+                    {% embed 'portail/accueil_attente.html' %}
+                        {% block card_style %}background:var(--stat-color-danger){% endblock %}
+                        {% block quantite %}{{ nbre_informations_manquantes }}{% endblock %}
+                        {% block label %}{% blocktranslate count counter=nbre_informations_manquantes %}Information manquante{% plural %}Informations manquantes{% endblocktranslate %}{% endblock %}
+                        {% block icone %}bi bi-person-rolodex{% endblock %}
+                        {% block url %}{% url 'portail_renseignements' %}{% endblock %}
+                        {% block label_action %}{% trans 'Corriger' %}{% endblock %}
+                        {% block label_aria %}{% blocktranslate count counter=nbre_informations_manquantes %}Corriger l'information manquante{% plural %}Corriger les {{ counter }} informations manquantes{% endblocktranslate %}{% endblock %}
+                    {% endembed %}
+                {% endif %}
 
-            {# Assurances manquantes #}
-            {% if nbre_assurances_manquantes %}
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-danger">
-                        <div class="inner">
-                            <h3>{{ nbre_assurances_manquantes }}</h3>
-                            <p>
-                                {% blocktranslate count counter=nbre_assurances_manquantes %}Assurance manquante{% plural %}Assurances manquantes{% endblocktranslate %}
-                            </p>
-                        </div>
-                        <div class="icon"><i class="fa fa-shield"></i></div>
-                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">{% trans "Corriger" %} <i class="fa fa-arrow-circle-right"></i></a>
-                    </div>
-                </div>
-            {% endif %}
+                {% if nbre_pieces_manquantes %}
+                    {% embed 'portail/accueil_attente.html' %}
+                        {% block card_style %}background:var(--stat-color-danger){% endblock %}
+                        {% block quantite %}{{ nbre_pieces_manquantes }}{% endblock %}
+                        {% block label %}{% blocktranslate count counter=nbre_pieces_manquantes %}Pièce manquante{% plural %}Pièces manquantes{% endblocktranslate %}{% endblock %}
+                        {% block icone %}bi bi-file-earmark-text{% endblock %}
+                        {% block url %}{% url 'portail_documents' %}{% endblock %}
+                        {% block label_action %}{% trans 'Consulter' %}{% endblock %}
+                        {% block label_aria %}{% blocktranslate count counter=nbre_pieces_manquantes %}Consulter la pièce manquante{% plural %}Consulter les pièces manquantes{% endblocktranslate %}{% endblock %}
+                    {% endembed %}
+                {% endif %}
 
-            {# Adhésions manquantes #}
-            {% if cotisations_manquantes %}
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-danger">
-                        <div class="inner">
-                            <h3>{{ cotisations_manquantes|length }}</h3>
-                            <p>
-                                {% blocktranslate count counter=cotisations_manquantes|length %}Adhésion manquante{% plural %}Adhésions manquantes{% endblocktranslate %}
-                            </p>
-                        </div>
-                        <div class="icon"><i class="fa fa-file-text-o"></i></div>
-                        <a href="{% url 'portail_cotisations' %}" class="small-box-footer">{% trans "Consulter" %} <i class="fa fa-arrow-circle-right"></i></a>
-                    </div>
-                </div>
-            {% endif %}
+                {% if nbre_vaccinations_manquantes %}
+                    {% embed 'portail/accueil_attente.html' %}
+                        {% block card_style %}background:var(--stat-color-danger){% endblock %}
+                        {% block quantite %}{{ nbre_vaccinations_manquantes }}{% endblock %}
+                        {% block label %}{% blocktranslate count counter=nbre_vaccinations_manquantes %}Vaccination manquante{% plural %}Vaccinations manquantes{% endblocktranslate %}{% endblock %}
+                        {% block icone %}fa fa-medkit{% endblock %}
+                        {% block url %}{% url 'portail_renseignements' %}{% endblock %}
+                        {% block label_action %}{% trans 'Corriger' %}{% endblock %}
+                        {% block label_aria %}{% blocktranslate count counter=nbre_vaccinations_manquantes %}Corriger la vaccination manquante{% plural %}Corriger les vaccinations manquantes{% endblocktranslate %}{% endblock %}
+                    {% endembed %}
+                {% endif %}
 
-            {# Approbations #}
-            {% if nbre_approbations_requises %}
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-info">
-                        <div class="inner">
-                            <h3>{{ nbre_approbations_requises }}</h3>
-                            <p>
-                                {% blocktranslate count counter=nbre_approbations_requises %}Approbation en attente{% plural %}Approbations en attente{% endblocktranslate %}
-                            </p>
-                        </div>
-                        <div class="icon"><i class="fa fa-edit"></i></div>
-                        <a href="{% url 'portail_renseignements' %}" class="small-box-footer">{% trans "Corriger" %} <i class="fa fa-arrow-circle-right"></i></a>
-                    </div>
-                </div>
-            {% endif %}
+                {% if nbre_assurances_manquantes %}
+                    {% embed 'portail/accueil_attente.html' %}
+                        {% block card_style %}background:var(--stat-color-danger){% endblock %}
+                        {% block quantite %}{{ nbre_assurances_manquantes }}{% endblock %}
+                        {% block label %}{% blocktranslate count counter=nbre_assurances_manquantes %}Assurance manquante{% plural %}Assurances manquantes{% endblocktranslate %}{% endblock %}
+                        {% block icone %}bi bi-shield-shaded{% endblock %}
+                        {% block url %}{% url 'portail_renseignements' %}{% endblock %}
+                        {% block label_action %}{% trans 'Corriger' %}{% endblock %}
+                        {% block label_aria %}{% blocktranslate count counter=nbre_assurances_manquantes %}Corriger l'assurance manquante{% plural %}Corriger les assurances manquantes{% endblocktranslate %}{% endblock %}
+                    {% endembed %}
+                {% endif %}
 
-        </div>
+                {% if cotisations_manquantes %}
+                    {% embed 'portail/accueil_attente.html' %}
+                        {% block card_style %}background:var(--stat-color-danger){% endblock %}
+                        {% block quantite %}{{ cotisations_manquantes|length }}{% endblock %}
+                        {% block label %}{% blocktranslate count counter=cotisations_manquantes|length %}Adhésion manquante{% plural %}Adhésions manquantes{% endblocktranslate %}{% endblock %}
+                        {% block icone %}bi bi-person-vcard{% endblock %}
+                        {% block url %}{% url 'portail_cotisations' %}{% endblock %}
+                        {% block label_action %}{% trans 'Corriger' %}{% endblock %}
+                        {% block label_aria %}{% blocktranslate count counter=cotisations_manquantes|length %}Corriger l'adhésion manquante{% plural %}Corriger les adhésions manquantes{% endblocktranslate %}{% endblock %}
+                    {% endembed %}
+                {% endif %}
+
+                {% if nbre_approbations_requises %}
+                    {% embed 'portail/accueil_attente.html' %}
+                        {% block card_style %}background:var(--stat-color-info){% endblock %}
+                        {% block quantite %}{{ nbre_approbations_requises }}{% endblock %}
+                        {% block label %}{% blocktranslate count counter=nbre_approbations_requises %}Approbation en attente{% plural %}Approbations en attente{% endblocktranslate %}{% endblock %}
+                        {% block icone %}bi bi-check2-circle{% endblock %}
+                        {% block url %}{% url 'portail_renseignements' %}{% endblock %}
+                        {% block label_action %}{% trans 'Corriger' %}{% endblock %}
+                        {% block label_aria %}{% blocktranslate count counter=nbre_approbations_requises %}Corriger l'approbation en attente{% plural %}Corriger les approbations en attente{% endblocktranslate %}{% endblock %}
+                    {% endembed %}
+                {% endif %}
+
+            </div>
+        </section>
     {% endif %}
 
 
     {# Actualités #}
     {% if articles %}
-        <h5 class="mb-2 text-secondary">{% trans "Actualités" %}</h5>
-        <div id="div_articles" class="card-columns">
-            {% for article in articles %}
-                {% include 'portail/article.html' %}
-            {% endfor %}
-        </div>
+        <section aria-labelledby="titre-actualites" class="section-accueil">
+            <h2 id="titre-actualites" class="section-title-portail">
+                {% trans "Actualités" %}
+            </h2>
+            <div id="div_articles">
+                {% for article in articles %}
+                    {% include 'portail/article.html' %}
+                {% endfor %}
+            </div>
+        </section>
     {% endif %}
 
-    {# Modal : Articles popups #}
+
+    {#   MODAL POPUPS #}
+    {#   AdminLTE 4 / BS5 : #}
+    {#    - data-backdrop="static" → data-bs-backdrop="static" #}
+    {#    - data-dismiss="modal"   → data-bs-dismiss="modal" #}
+    {#    RGAA 4.1 : role dialog + aria-modal + aria-labelledby #}
+    {#    RGAA 7.3 : fermeture clavier (Échap natif BS5) #}
     {% if articles_popups %}
-        <div class="modal" id="modal_popup" data-backdrop="static">
+        <div class="modal fade"
+             id="modal_popup"
+             data-bs-backdrop="static"
+             data-bs-keyboard="true"
+             tabindex="-1"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="modal_popup_titre">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-                    <div class="modal-header bg-lightblue">
-                        <h5 class="modal-title"><i class="fa fa-info-circle margin-r-5"></i>{% trans "Informations" %}</h5>
+                    <div class="modal-header">
+                        <h2 class="modal-title h5" id="modal_popup_titre">
+                            <i class="fa fa-info-circle me-2" aria-hidden="true"></i>
+                            {% trans "Informations" %}
+                        </h2>
                     </div>
                     <div class="modal-body">
                         {% for article in articles_popups %}
-                            <span>{{ article.texte_popup|safe }}</span>
+                            <div>{{ article.texte_popup|safe }}</div>
                         {% endfor %}
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">{% trans "Fermer" %}</button>
+                        <button type="button"
+                                class="btn btn-primary"
+                                data-bs-dismiss="modal"
+                                aria-label="{% trans 'Fermer cette information' %}">
+                            {% trans "Fermer" %}
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
+
         <script>
-            $(document).ready(function() {
-                $('#modal_popup').modal('show');
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+            {# AdminLTE 4 : $('#modal_popup').modal('show') → bootstrap.Modal natif #}
+            var modalEl = document.getElementById('modal_popup');
+            if (modalEl) {
+                var modal = new bootstrap.Modal(modalEl);
+                modal.show();
+                {# RGAA 7.3 — focus sur le titre au chargement #}
+                modalEl.addEventListener('shown.bs.modal', function() {
+                    document.getElementById('modal_popup_titre').focus();
+                });
+            }
+        });
         </script>
     {% endif %}
 
-
+</div>
 {% endblock contenu_page %}

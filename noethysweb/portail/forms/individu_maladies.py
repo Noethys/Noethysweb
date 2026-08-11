@@ -14,7 +14,7 @@ from portail.forms.fiche import FormulaireBase
 
 class Formulaire(FormulaireBase, ModelForm):
     maladies = forms.ModelMultipleChoiceField(label=_("Maladies"),
-                    widget=Select_many_avec_plus(attrs={"url_ajax": "portail_ajax_ajouter_maladie", "afficher_bouton_ajouter": False, "textes": {"champ": _("Nom de la maladie"), "ajouter": _("Ajouter une maladie")}}),
+                    widget=Select_many_avec_plus(attrs={"theme": "bootstrap-5", "url_ajax": "portail_ajax_ajouter_maladie", "afficher_bouton_ajouter": False, "textes": {"champ": _("Nom de la maladie"), "ajouter": _("Ajouter une maladie")}}),
                     queryset=TypeMaladie.objects.all().order_by("nom"), required=False)
 
     class Meta:

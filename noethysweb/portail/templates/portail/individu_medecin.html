@@ -18,11 +18,11 @@
 
     {# Modal d'ajout d'un médecin #}
     {% if form_ajout %}
-        {% embed 'core/modal.html' %}
+        {% embed 'portail/modal.html' %}
             {% block modal_id %}id_medecin_modal_ajout{% endblock %}
             {% block modal_titre %}{% endblock %}
             {% block modal_body %}
-                <div id="modal_erreurs" class="text-red"></div>
+                <div id="modal_erreurs" class="text-danger"></div>
                 {% crispy form_ajout %}
             {% endblock %}
         {% endembed %}

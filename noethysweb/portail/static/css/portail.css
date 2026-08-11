@@ -1,0 +1,614 @@
+
+/* Si le CSS charge, on force l'affichage de l'élément malgré l'attribut hidden */
+.css-dependent[hidden] {
+  display: block !important;
+}
+.css-dependent-flex[hidden] {
+  display: flex !important;
+}
+
+:root {
+    font-size: 15px;
+}
+
+/* Supprime la flèche sur tous les dropdowns qui ont aussi la classe .no-caret */
+.dropdown-toggle.no-caret::after {
+    display: none !important;
+}
+
+/* Ajoute un margin inférieur sur tous les cards */
+.card {
+    margin-bottom: 1.5rem;
+}
+
+/* Ajuste la taille du H1 pour toutes les pages */
+h1 {
+  font-size: calc(1.375rem + 0.8vw);
+}
+@media (min-width: 1200px) {
+  .h1, h1 {
+    font-size: 2rem;
+  }
+}
+
+/* Rend les textes de la nav-bar du header en blanc */
+.nav-link {
+    color: #ffffff;
+}
+
+/* Pour désactiver les skip-links de adminlte et utiliser uniquement les custom */
+.skip-link,
+[class*="skip-to-content"],
+.visually-hidden-focusable:has(a[href*="content"]) {
+    display: none !important;
+}
+
+.skip-links {
+    display: none !important;
+}
+.custom-skip-link {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    z-index: 9999;
+    padding: .5rem 1rem;
+    background: #000;
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+}
+.custom-skip-link:focus {
+    top: 0;
+}
+
+/* Pour mettre en évidence le focus pour le RGAA */
+.app-header .nav-link:focus-visible,
+.app-header a:focus-visible,
+.app-header button:focus-visible {
+    outline: 3px solid #ffffff !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 5px #000000 !important;
+    border-radius: 3px;
+}
+.stat-card-portail a:focus-visible {
+    outline: none !important;
+    box-shadow: inset 0 0 0 3px #000 !important;
+}
+
+/* div intro */
+.div-intro {
+    background: #E6F1FB;
+    border: 1px solid #85B7EB;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 1.5rem;
+    color: #0C447C;
+}
+[data-bs-theme="dark"] .div-intro {
+    background: #343a40;
+    border: 1px solid #4b6681;
+    color: #7b8fa3;
+}
+
+/* Pièces ou cotisations à fournir */
+.piece-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: var(--bs-border-radius);
+    margin-bottom: 4px;
+}
+.piece-ok { background: rgba(25, 135, 84, 0.08); }
+.piece-ko { background: rgba(189, 33, 48, 0.08); }
+
+/* Supprime un border-bottom parasite */
+.sidebar-brand {
+    border-bottom: 0;
+}
+
+
+
+
+/* ================================== TESTS ============================================ */
+
+
+
+
+/* ===========================
+   RADIOSELECT — help_text aligné sur col-md-10
+   Quand use_fieldset=False, le help_text est rendu
+   en dehors de la grille par crispy.
+   On le pousse de col-md-2 (16.666%) vers la droite.
+=========================== */
+
+/* Cible le help_text qui suit directement un label dans une row */
+.mb-3.row > .form-text,
+.mb-3.row > small.form-text {
+    margin-left: 16.66666667%;
+    padding-left: 0.75rem;
+    width: 83.33333333%;
+}
+
+@media (max-width: 767px) {
+    .mb-3.row > .form-text,
+    .mb-3.row > small.form-text {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+
+.btn-default {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #6c757d;
+    --bs-btn-border-color: #6c757d;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #5c636a;
+    --bs-btn-hover-border-color: #565e64;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #565e64;
+    --bs-btn-active-border-color: #51585e;
+}
+
+
+ /* ===========================
+   COULEUR PRIMARY — #3c8dbc
+=========================== */
+
+:root {
+    --bs-primary:              #367da6;
+    --bs-primary-rgb:          60, 141, 188;
+
+    /* AdminLTE 4 */
+    --lte-sidebar-light-bg:    #367da6;
+    --lte-link-color:          #367da6;
+}
+
+.card-primary.card-outline {
+    border-top: 3px solid #367da6;
+}
+
+/* Boutons */
+.btn-primary {
+    --bs-btn-bg:                 #367da6;
+    --bs-btn-border-color:       #367da6;
+    --bs-btn-color:              #ffffff;
+    --bs-btn-hover-bg:           #367fa9;
+    --bs-btn-hover-border-color: #367fa9;
+    --bs-btn-hover-color:        #ffffff;
+    --bs-btn-active-bg:          #2e6d90;
+    --bs-btn-active-border-color:#2e6d90;
+    --bs-btn-active-color:       #ffffff;
+    --bs-btn-disabled-bg:        #367da6;
+    --bs-btn-disabled-border-color: #367da6;
+    --bs-btn-focus-shadow-rgb:   60, 141, 188;
+}
+
+.btn-outline-primary {
+    --bs-btn-color:              #367da6;
+    --bs-btn-border-color:       #367da6;
+    --bs-btn-hover-bg:           #367da6;
+    --bs-btn-hover-border-color: #367da6;
+    --bs-btn-hover-color:        #ffffff;
+    --bs-btn-active-bg:          #367fa9;
+    --bs-btn-focus-shadow-rgb:   60, 141, 188;
+}
+
+/* Navbar */
+.app-header, .sidebar-brand, .badge.bg-primary,
+.border-primary, .bg-primary, .progress-bar {
+    background-color: #367da6 !important;
+}
+
+/* Sidebar */
+.app-sidebar {
+    --lte-sidebar-bg: #222d32;
+}
+.app-sidebar .nav-link.active {
+    background-color: #367da6 !important;
+    color: #ffffff !important;
+}
+
+/* Focus */
+.form-control:focus,
+.form-select:focus {
+    border-color: #367da6;
+    box-shadow: 0 0 0 0.2rem rgba(60, 141, 188, 0.25);
+}
+
+/* Pagination */
+.page-item.active .page-link {
+    background-color: #367da6;
+    border-color:     #367da6;
+}
+.page-link {
+    color: #367da6;
+}
+.page-link:hover {
+    color: #367fa9;
+}
+
+.form-check-input:checked {
+    background-color: #367da6;
+    border-color: #367da6;
+}
+
+/* Dark mode */
+[data-bs-theme="dark"] {
+    --bs-primary:     #5ba3cc;
+    --bs-primary-rgb: 91, 163, 204;
+}
+[data-bs-theme="dark"] .btn-primary {
+    --bs-btn-bg:                 #5ba3cc;
+    --bs-btn-border-color:       #5ba3cc;
+    --bs-btn-hover-bg:           #367da6;
+    --bs-btn-hover-border-color: #367da6;
+    --bs-btn-focus-shadow-rgb:   91, 163, 204;
+}
+
+
+
+
+ /* ===========================
+   FIELDSET
+=========================== */
+
+    fieldset {
+        padding: 0;
+        margin: 0;
+        border: 0;
+    }
+    fieldset legend {
+        display: block;
+        width: 100%;
+        padding: 5px;
+        margin-bottom: 20px;
+        font-size: 12px;
+        line-height: inherit;
+        color: #333;
+        border: 0;
+        background-color: #f1f0f0;
+        text-transform: uppercase;
+    }
+    [data-bs-theme="dark"] fieldset legend {
+        background-color: #6c6c6c;
+    }
+
+
+
+
+/* ===========================
+   SELECT2
+=========================== */
+/*
+    .largeur_pleine .select2-container {
+        width: 100% !important;
+    }
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #ccc !important;
+        border-radius: 0px !important;
+        padding-left: 10px !important;
+    }
+    .select2-container .select2-selection--single {
+        height: 35px !important;
+    }
+    .select2-container--default .select2-selection--multiple {
+        border: 1px solid #ccc !important;
+        border-radius: 0px !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #3c8dbc !important;
+        border-color: #367fa9!important;
+        padding: 1px 10px!important;
+        color: #fff!important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        margin-right: 5px !important;
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    .dark-mode .select2-container--default .select2-selection--multiple {
+        background: rgba(255, 255, 255, 0) !important;
+    }
+    .dark-mode .select2-container--default.select2-container--disabled .select2-selection--multiple {
+        background: rgba(255, 255, 255, 0) !important;
+    }
+    .dark-mode .select2-selection--single {
+        background: rgba(255, 255, 255, 0) !important;
+    }
+    .dark-mode .select2-selection__rendered {
+        color: #ffffff !important;
+    }
+*/
+
+
+
+    .checkbox label, .radio label {
+        padding-left: 0px;
+    }
+
+    /* Affichage des inline radios */
+    .radio-inline {
+        padding-left: 0px;
+    }
+    .iradio_minimal-blue {
+        margin-right: 5px;
+    }
+
+    /* Affichage des inline checkbox */
+    .checkbox-inline.checkbox-inline, .radio-inline.radio-inline {
+        margin-left: 0px;
+        margin-right: 5px;
+    }
+    .checkbox-inline {
+        padding-left: 0px;
+    }
+    .icheckbox_minimal-blue {
+        margin-right: 5px;
+    }
+
+    /* Affiche correctement le sous-titre d'un menu */
+    .dropdown-header {
+        margin-top: 0px;
+        margin-bottom: 0px;
+        margin-left: 0px;
+        text-align: left;
+    }
+
+    /* Affichage d'une coche dans les menus popup */
+    .menu-checked::before {
+        position: absolute;
+        left: .2rem;
+        content: '✓';
+        font-weight: 600;
+    }
+
+    .datatable th.select-checkbox {
+        width: 8%;
+    }
+    .datatable th {
+        text-align: center;
+        vertical-align: middle !important;
+    }
+    .datatable td {
+        text-align: center;
+    }
+    .form-horizontal .checkbox, .form-horizontal .checkbox-inline, .form-horizontal .radio, .form-horizontal .radio-inline {
+        padding-top: 0px;
+    }
+
+    .commandes {
+        margin-bottom: 25px;
+        margin-top: -2px;
+
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background-color: white;
+        padding: 5px 0px 10px 0px;
+
+    }
+    .commandes > .btn {
+        margin-top: 2px;
+    }
+    .margin-r-5 {
+        margin-right: 5px;
+    }
+
+    .breadcrumb {
+        font-size: .775rem !important;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    .card-header {
+        padding: 12px;
+    }
+    .card-body {
+        padding: 12px;
+    }
+    a {
+        color: #34779e;
+        text-decoration: none;
+    }
+
+    @media (min-width: 768px) {
+        .col-form-label {
+            text-align: right;
+        }
+    }
+    .col-form-label {
+        margin-top: 5px;
+    }
+
+    label {
+        font-weight: 500 !important;
+    }
+    .datepicker {
+        z-index: 99999 !important;
+    }
+
+    /* Listes de commandes */
+    .list-group a {
+        padding: 8px 12px;
+    }
+    .dark-mode .list-group a {
+        color: #b5b5b5 !important;
+    }
+    .list-group a > i {
+        color: #3c8dbc;
+    }
+
+    /* Commandes onglet */
+    .widget-user-2 .list-group a {
+        padding: 6px 12px;
+        border-left: 3px solid transparent;
+    }
+    .widget-user-2 .item_actif  {
+        border-left: 3px solid #3c8dbc !important;
+        font-weight: 600 !important;
+    }
+    .widget-user-2 .list-group a > i {
+        color: #3c8dbc;
+    }
+
+    .list-unstyled {
+        margin-bottom: 0px;
+    }
+
+    .dropdown-menu a {
+        color: #0a0a0a !important;
+    }
+    .dark-mode .dropdown-menu a {
+        color: #ffffff !important;
+    }
+    .navbar-nav>.user-menu .user-image {
+        height: 1.8rem;
+        margin-top: -5px;
+        width: 1.8rem;
+    }
+
+    .error-page {
+        margin: 50px auto 0;
+    }
+
+    .custom-select {
+        font-size: .875rem !important;
+    }
+
+    /* Pour éviter que les dropdown soient cachés par la barre d'outils Summernote */
+    .note-toolbar {
+        z-index: auto !important;
+    }
+
+
+    .organisateur {
+		position: relative;
+		width: 100%;
+		padding: 15px 0px 10px 0px;
+		overflow: hidden;
+        border-bottom: 1px solid #5f5f5f;
+	}
+	.organisateur > .image > img {
+		display: block;
+		width: 100%;
+		max-width: 180px;
+		height: auto;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	.organisateur > .info {
+		padding: 15px 5px 10px 5px;
+        margin-bottom: 0px !important;
+		line-height: 1.2;
+		position: relative;
+		left: 0px;
+		text-align: center;
+		color: #ffffff;
+		font-size: 14px;
+		word-wrap : break-word;
+		white-space: normal;
+        display: block;
+	}
+    .sidebar-collapse .organisateur .info{
+        display: none;
+    }
+
+
+    #form_accessibilite fieldset legend {
+        margin-bottom: 0px;
+    }
+
+    @media (min-width: 376px) {
+        .sidebar-expand-sm.layout-fixed .app-sidebar {
+            position: sticky;
+            top: 0;
+            bottom: 0;
+            max-height: 100vh;
+            margin-left: 0;
+        }
+    }
+
+
+
+    /* Select2 bootstrap-5 — support du mode sombre */
+    [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection {
+        background-color: var(--bs-body-bg);
+        color: var(--bs-body-color);
+        border-color: var(--bs-border-color);
+    }
+    [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection__rendered {
+        color: var(--bs-body-color);
+    }
+    [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection__placeholder {
+        color: var(--bs-secondary-color);
+    }
+    [data-bs-theme="dark"] .select2-dropdown {
+        background-color: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+        color: var(--bs-body-color);
+    }
+    [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-results__option {
+        color: var(--bs-body-color);
+    }
+    /* Option survolée / parcourue au clavier */
+    [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-results__option--highlighted[aria-selected] {
+        background-color: var(--bs-primary);
+        color: #fff;
+    }
+    /* Option déjà sélectionnée */
+    [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-results__option[aria-selected="true"] {
+        background-color: var(--bs-tertiary-bg);
+        color: var(--bs-body-color);
+    }
+    /* Champ de recherche dans le dropdown */
+    [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-search__field {
+        background-color: var(--bs-body-bg);
+        color: var(--bs-body-color);
+        border-color: var(--bs-border-color);
+    }
+    [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
+        background-color: var(--bs-tertiary-bg);
+        color: var(--bs-body-color);
+        border-color: var(--bs-border-color);
+    }
+
+
+    /* Ruban d'angle — compatible AdminLTE 4 / Bootstrap 5 */
+    .ribbon-wrapper {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 100px;
+        height: 100px;
+        overflow: hidden;
+        z-index: 10;
+        pointer-events: none;
+    }
+
+    .ribbon {
+        position: absolute;
+        top: 16px;
+        right: -32px;
+        width: 120px;
+        padding: 3px 0;
+        transform: rotate(45deg);
+        text-align: center;
+        font-size: .75rem;
+        font-weight: 500;
+        line-height: 1.3;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+    }
+
+
+    .detail_infos_individu span {
+        font-size: 12px !important;
+        --bs-text-opacity: 1;
+        color: var(--bs-secondary-color) !important;
+        gap: .25rem !important;
+        align-items: center !important;
+        display: flex !important;
+    }

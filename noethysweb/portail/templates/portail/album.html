@@ -7,15 +7,17 @@
 
 {% block styles %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static 'lib/lightbox/ekko-lightbox.css' %}">
+    <link rel="stylesheet" href="{% static 'lib/glightbox/css/glightbox.min.css' %}">
 {% endblock styles %}
 
 
 {% block contenu_page %}
 
+    {% trans "Photo sans titre" as photo_sans_titre %}
+
     {# Texte d'introduction #}
-    <div style="margin-bottom: 20px;">
-        <i class="fa fa-info-circle margin-r-5"></i>{% blocktrans %}Cliquez sur les photos pour les agrandir.{% endblocktrans %}
+    <div class="div-intro" role="note" aria-label="{% trans "Information" %}">
+        <i class="fa fa-info-circle margin-r-5" aria-hidden="true"></i>{% blocktrans %}Cliquez sur les photos pour les agrandir.{% endblocktrans %}
     </div>
 
     {# Album #}
@@ -25,17 +27,17 @@
         {% block box_contenu %}
             {{ album.description|safe }}
 
-            <div class="d-flex flex-wrap">
+            <ul class="list-unstyled d-flex flex-wrap gap-2 mb-0">
                 {% for photo in photos %}
-                    <div class="p-1">
-                        <a href="{{ photo.fichier.url }}" data-toggle="lightbox" data-title="{{ photo.titre|default:'Sans titre' }}" data-gallery="gallery">
-                            <img class="img-fluid img-thumbnail" style="max-height: 150px;" src="{{ photo.fichier.url }}">
+                    <li>
+                        <a href="{{ photo.fichier.url }}" class="glightbox" data-gallery="gallery" data-title="{{ photo.titre|default:photo_sans_titre }}">
+                            <img class="img-fluid img-thumbnail" style="max-height: 150px;" src="{{ photo.fichier.url }}" alt="{{ photo.titre|default:photo_sans_titre }}">
                         </a>
-                    </div>
+                    </li>
                 {% empty %}
-                    Album vide
+                    <li class="text-muted">{% trans "Album vide" %}</li>
                 {% endfor %}
-            </div>
+            </ul>
 
         {% endblock box_contenu %}
     {% endembed %}
@@ -45,11 +47,10 @@
 
 {% block scripts %}
     {{ block.super }}
-    <script src="{% static 'lib/lightbox/ekko-lightbox.min.js' %}"></script>
+    <script src="{% static 'lib/glightbox/js/glightbox.min.js' %}"></script>
     <script>
-        $(document).on('click', '[data-toggle="lightbox"]', function(event) {
-            event.preventDefault();
-            $(this).ekkoLightbox();
+        document.addEventListener('DOMContentLoaded', function () {
+            GLightbox({ selector: '.glightbox' });
         });
     </script>
 {% endblock scripts %}

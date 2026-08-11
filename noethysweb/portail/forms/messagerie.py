@@ -3,23 +3,40 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from re import UNICODE, compile
+from django import forms
 from django.forms import ModelForm
 from django.utils.translation import gettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden
 from crispy_forms.bootstrap import Field
+from django_summernote.utils import get_theme_files, get_config, has_codemirror_config
+from django_summernote.widgets import SummernoteInplaceWidget
 from core.models import PortailMessage
 from core.utils.utils_commandes import Commandes
 from portail.forms.fiche import FormulaireBase
 from portail.utils.utils_summernote import SummernoteTextFormField
 
 
+class SummernoteInplaceWidgetBS5(SummernoteInplaceWidget):
+    """ Force les assets Summernote en thème Bootstrap 5, indépendamment de SUMMERNOTE_THEME (global = bs4). """
+    def _media(self):
+        config = get_config()
+        return forms.Media(
+            css={'all': (config['codemirror_css'] if has_codemirror_config() else ())
+                        + get_theme_files('bs5', 'default_css')
+                        + config['css_for_inplace']},
+            js=(config['codemirror_js'] if has_codemirror_config() else ())
+                + get_theme_files('bs5', 'default_js')
+                + config['js_for_inplace'],
+        )
+    media = property(_media)
+
+
 class Formulaire(FormulaireBase, ModelForm):
     texte = SummernoteTextFormField(label=_("Poster un message"), attrs={'summernote': {'width': '100%', 'height': '200px', 'toolbar': [
         ['font', ['bold', 'underline', 'clear']],
-        ['color', ['color']],
-        ['para', ['ul', 'ol', 'paragraph']],
+        # ['color', ['color']],
+        # ['para', ['ul', 'ol', 'paragraph']],
         ['insert', ['link', 'picture']],
         ['view', ['codeview', 'help']],
         ]}})
@@ -35,6 +52,8 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_id = 'portail_messages_form'
         self.helper.form_method = 'post'
 
+        self.fields["texte"].widget = SummernoteInplaceWidgetBS5(attrs=self.fields["texte"].widget.attrs)
+
         # Affichage
         self.helper.layout = Layout(
             Hidden('famille', value=self.request.user.famille.pk),
@@ -42,25 +61,3 @@ class Formulaire(FormulaireBase, ModelForm):
             Field('texte'),
             Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>%s" % _("Envoyer"), annuler_url="{% url 'portail_contact' %}", ajouter=False, aide=False, css_class="pull-right"),
         )
-
-    # def clean_texte(self):
-    #     # Retrait des emojis qui causent une erreur de charset MySQL
-    #     emoji_pattern = compile("["
-    #                             u"\U0001F600-\U0001F64F"  # emoticons
-    #                             u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-    #                             u"\U0001F680-\U0001F6FF"  # transport & map symbols
-    #                             u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-    #                             u"\U0001F1F2-\U0001F1F4"  # Macau flag
-    #                             u"\U0001F1E6-\U0001F1FF"  # flags
-    #                             u"\U0001F600-\U0001F64F"
-    #                             u"\U00002702-\U000027B0"
-    #                             u"\U000024C2-\U0001F251"
-    #                             u"\U0001f926-\U0001f937"
-    #                             u"\U0001F1F2"
-    #                             u"\U0001F1F4"
-    #                             u"\U0001F620"
-    #                             u"\u200d"
-    #                             u"\u2640-\u2642"
-    #                             "]+", flags=UNICODE)
-    #     texte = emoji_pattern.sub(r'', self.cleaned_data["texte"])
-    #     return texte

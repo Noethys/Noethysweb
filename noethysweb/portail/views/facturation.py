@@ -551,7 +551,10 @@ class View(CustomView, TemplateView):
         if liste_finale_periodes or liste_finale_cotisations:
             liste_impayes.append(_("des prestations à régler en avance"))
         if liste_impayes:
-            texte_impayes = _("Il reste %s pour un total de") % utils_texte.Convert_liste_to_texte_virgules(liste_impayes) + " <strong>%s</strong>" % utils_texte.Formate_montant(total_factures_impayees + total_periodes_impayees + total_cotisations_impayees)
+            texte_impayes = {
+                "texte": utils_texte.Convert_liste_to_texte_virgules(liste_impayes),
+                "montant": utils_texte.Formate_montant(total_factures_impayees + total_periodes_impayees + total_cotisations_impayees),
+            }
         context["texte_impayes"] = texte_impayes
 
         # Calcul du solde

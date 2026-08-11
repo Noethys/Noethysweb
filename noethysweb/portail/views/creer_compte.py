@@ -34,13 +34,6 @@ class CreerCompteView(ClassCommuneLogin, TemplateView):
         context = super(CreerCompteView, self).get_context_data(**kwargs)
         if "form" not in kwargs:
             context["form"] = FormCreerCompte()
-
-        # Fusion du texte des conditions légales avec les valeurs organisateur
-        texte_conditions = context["parametres_portail"].get("mentions_conditions_generales", "")
-        for nom_champ in ("nom", "rue", "cp", "ville"):
-            texte_conditions = texte_conditions.replace("{ORGANISATEUR_%s}" % nom_champ.upper(), getattr(context["organisateur"], nom_champ) or "")
-        context["texte_conditions"] = texte_conditions
-
         return context
 
     def post(self, request, **kwargs):

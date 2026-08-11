@@ -1,0 +1,87 @@
+{% load crispy_forms_tags %}
+{% load static i18n %}
+
+<div class="modal fade" id="modal_langue" tabindex="-1" aria-labelledby="modal-langue-titre" aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header bg-primary text-white">
+                <h2 class="modal-title h5" id="modal-langue-titre">
+                    <i class="bi bi-translate me-2" aria-hidden="true"></i>
+                    {% trans "Choisir la langue" %}
+                </h2>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="{% trans "Fermer la fenêtre de choix de langue" %}"></button>
+            </div>
+
+            <form action="{% url 'set_language' %}" method="post" id="form-langue">
+                {% csrf_token %}
+                <input name="next" type="hidden" value="{{ redirect_to }}">
+
+                <div class="modal-body p-0">
+                    <div class="px-3 py-2 bg-body-secondary border-bottom">
+                        <small class="text-muted text-uppercase fw-semibold"
+                               style="font-size:.7rem; letter-spacing:.07em;">
+                            {% trans "Langue d'affichage" %}
+                        </small>
+                    </div>
+                    <fieldset style="border: none; padding: 0; margin: 0;">
+                        <legend class="visually-hidden">{% trans "Langue d'affichage" %}</legend>
+                        {% get_current_language as lang_actual %}
+                        {% get_available_languages as languages %}
+                        {% for lang_code, lang_name in languages %}
+                            <div class="d-flex align-items-center gap-3 px-3 py-3 {% if not forloop.last %}border-bottom{% endif %}">
+                                <input class="form-check-input mt-0 flex-shrink-0"
+                                       type="radio"
+                                       name="language"
+                                       id="lang_{{ lang_code }}"
+                                       value="{{ lang_code }}"
+                                       {% if lang_code == lang_actual %}checked{% endif %}>
+                                <label class="form-check-label flex-grow-1"
+                                       for="lang_{{ lang_code }}"
+                                       style="font-size:.875rem; font-weight:{% if lang_code == lang_actual %}500{% else %}400{% endif %};">
+                                    {{ lang_name }}
+                                    {% if lang_code == lang_actual %}
+                                        <span class="visually-hidden">({% trans "langue actuellement sélectionnée" %})</span>
+                                    {% endif %}
+                                </label>
+                                {% if lang_code == lang_actual %}
+                                    <span class="badge"
+                                          aria-hidden="true"
+                                          style="background:#e8f4ec; color:#2d7a4a; font-weight:500; font-size:.7rem;">
+                                        {% trans "Actuelle" %}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </fieldset>
+                </div>
+
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-warning" id="btn-reinitialiser-langue" aria-label="{% trans "Réinitialiser la langue par défaut" %}">
+                        <i class="fa fa-undo me-1" aria-hidden="true"></i>
+                        {% trans "Réinitialiser" %}
+                    </button>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-check me-2" aria-hidden="true"></i>
+                            {% trans "Valider" %}
+                        </button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                            <i class="fa fa-ban me-2" aria-hidden="true"></i>
+                            {% trans "Annuler" %}
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('btn-reinitialiser-langue')?.addEventListener('click', function () {
+    var radios = document.querySelectorAll('#form-langue input[name="language"]');
+    if (radios.length > 0) radios[0].checked = true;
+});
+</script>

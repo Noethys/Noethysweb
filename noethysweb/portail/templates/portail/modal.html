@@ -1,0 +1,40 @@
+{% load static %}
+{% load i18n %}
+
+<div class="modal fade"
+     id="{% block modal_id %}{% endblock %}"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="{% block modal_id_label %}{% endblock %}"
+     aria-modal="true"
+     {% if mode_static %}data-bs-backdrop="static" data-bs-keyboard="false"{% endif %}>
+
+    <div class="modal-dialog {% block modal_classe %}{% endblock %}">
+        <div class="modal-content">
+
+            <div class="modal-header {% block modal_theme %}bg-primary text-white{% endblock %}">
+                <h2 class="modal-title h5" id="{% block modal_titre_id %}{% endblock %}">
+                    {% block modal_titre %}{% endblock %}
+                </h2>
+                {% if not mode_static %}
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"
+                            aria-label="{% trans "Fermer la fenêtre" %}">
+                    </button>
+                {% endif %}
+            </div>
+
+            <div class="modal-body {% block modal_body_classe %}{% endblock %}">
+                {% block modal_body %}{% endblock %}
+            </div>
+
+            {% if modal_footer %}
+                <div class="modal-footer">
+                    {% block modal_footer %}{% endblock %}
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>

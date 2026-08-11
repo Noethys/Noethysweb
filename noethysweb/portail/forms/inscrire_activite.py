@@ -64,6 +64,8 @@ class Formulaire_extra(FormulaireBase, forms.Form):
                     self.fields[nom_field] = forms.FileField(label=piece_necessaire["type_piece"].nom, help_text=help_text, required=True, validators=[FileExtensionValidator(allowed_extensions=['pdf', 'png', 'jpg'])])
                     self.helper.layout.append(nom_field)
 
+        self.Appliquer_version_bootstrap(5)
+
 
 class Formulaire(FormulaireBase, ModelForm):
     activite = forms.ModelChoiceField(label=_("Activité"), queryset=Activite.objects.none(), required=True, help_text=_("Sélectionnez l'activité souhaitée dans la liste."))
@@ -111,6 +113,7 @@ class Formulaire(FormulaireBase, ModelForm):
             HTML(EXTRA_SCRIPT),
             Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>%s" % _("Envoyer la demande d'inscription"), annuler_url="{% url 'portail_activites' %}", ajouter=False, aide=False, css_class="pull-right"),
         )
+        self.Appliquer_version_bootstrap(5)
 
 
 EXTRA_SCRIPT = """

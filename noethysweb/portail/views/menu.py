@@ -11,16 +11,16 @@ from django.utils.translation import gettext as _
 def GetMenuPrincipal(parametres_portail=None, user=None):
     menu = Menu(titre=_("Menu principal"), user=user)
 
-    menu.Add(code="portail_accueil", titre=_("Accueil"), icone="home", toujours_afficher=True)
-    menu.Add(code="portail_renseignements", titre=_("Renseignements"), icone="folder-open-o", toujours_afficher=parametres_portail.get("renseignements_afficher_page", False))
-    menu.Add(code="portail_cotisations", titre=_("Adhésions"), icone="folder-o", toujours_afficher=parametres_portail.get("cotisations_afficher_page", False))
-    menu.Add(code="portail_activites", titre=_("Activités"), icone="star-o", toujours_afficher=parametres_portail.get("activites_afficher_page", False))
-    menu.Add(code="portail_reservations", titre=_("Réservations"), icone="calendar", toujours_afficher=parametres_portail.get("reservations_afficher_page", False))
-    menu.Add(code="portail_documents", titre=_("Documents"), icone="file-text-o", toujours_afficher=parametres_portail.get("documents_afficher_page", False))
-    menu.Add(code="portail_facturation", titre=_("Facturation"), icone="euro", toujours_afficher=parametres_portail.get("facturation_afficher_page", False))
-    menu.Add(code="portail_reglements", titre=_("Règlements"), icone="money", toujours_afficher=parametres_portail.get("reglements_afficher_page", False))
-    menu.Add(code="portail_contact", titre=_("Contact"), icone="comments", toujours_afficher=parametres_portail.get("contact_afficher_page", False))
-    menu.Add(code="portail_mentions", titre=_("Mentions légales"), icone="info-circle", toujours_afficher=parametres_portail.get("mentions_afficher_page", False))
+    menu.Add(code="portail_accueil", titre=_("Accueil"), icone="bi bi-house-door", toujours_afficher=True)
+    menu.Add(code="portail_renseignements", titre=_("Renseignements"), icone="bi bi-person-rolodex", toujours_afficher=parametres_portail.get("renseignements_afficher_page", False))
+    menu.Add(code="portail_cotisations", titre=_("Adhésions"), icone="bi bi-person-vcard", toujours_afficher=parametres_portail.get("cotisations_afficher_page", False))
+    menu.Add(code="portail_activites", titre=_("Activités"), icone="bi bi-star", toujours_afficher=parametres_portail.get("activites_afficher_page", False))
+    menu.Add(code="portail_reservations", titre=_("Réservations"), icone="bi bi-calendar4-week", toujours_afficher=parametres_portail.get("reservations_afficher_page", False))
+    menu.Add(code="portail_documents", titre=_("Documents"), icone="bi bi-file-earmark-text", toujours_afficher=parametres_portail.get("documents_afficher_page", False))
+    menu.Add(code="portail_facturation", titre=_("Facturation"), icone="bi bi-currency-euro", toujours_afficher=parametres_portail.get("facturation_afficher_page", False))
+    menu.Add(code="portail_reglements", titre=_("Règlements"), icone="bi bi-cash", toujours_afficher=parametres_portail.get("reglements_afficher_page", False))
+    menu.Add(code="portail_contact", titre=_("Contact"), icone="bi bi-chat-text", toujours_afficher=parametres_portail.get("contact_afficher_page", False))
+    menu.Add(code="portail_mentions", titre=_("Mentions légales"), icone="bi bi-info-circle", toujours_afficher=parametres_portail.get("mentions_afficher_page", False))
 
     return menu
 

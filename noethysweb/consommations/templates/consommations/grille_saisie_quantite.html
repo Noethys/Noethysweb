@@ -4,36 +4,129 @@
 
 
 {# Model Saisir la quantité d'une conso #}
-{% embed 'core/modal.html' %}
-    {% block modal_id %}modal_saisir_quantite{% endblock %}
-    {% block modal_titre %}Saisie de la quantité{% endblock %}
-    {% block modal_body %}
-        <div id="modal_erreurs" class="text-red"></div>
+{% if version_bootstrap == 5 %}
 
-        <form id="form_selection_quantite" method="post">
-            {% csrf_token %}
-            <input type="hidden" id="saisie_quantite_key" value="">
-            <input type="hidden" id="saisie_quantite_action" value="">
+    {% embed 'portail/modal.html' with mode_static=True %}
 
-            <div class="form-group">
-                <div class="controls">
-                    <label for="saisie_quantite" class="col-form-label">Quantité</label>
-                    <input id="saisie_quantite" type="number" class="numberinput form-control form-control-lg" min="1">
+        {% block modal_id %}modal_saisir_quantite{% endblock %}
+        {% block modal_titre %}<i class="fa fa-clock-o me-2" aria-hidden="true"></i>Saisie de la quantité{% endblock %}
+        {% block modal_theme %}bg-primary-subtle{% endblock %}
+
+        {% block modal_body %}
+
+            {# Zone d'erreurs annoncée automatiquement aux lecteurs d'écran #}
+            <div
+                id="modal_erreurs"
+                class="text-danger"
+                role="alert"
+                aria-live="assertive"
+                aria-atomic="true"
+            ></div>
+
+            <form id="form_selection_quantite" method="post" novalidate>
+                {% csrf_token %}
+
+                {# Champs cachés — non interactifs, pas de label nécessaire #}
+                <input type="hidden" id="saisie_quantite_key" value="">
+                <input type="hidden" id="saisie_quantite_action" value="">
+
+                <div class="mb-3">
+                    <label for="saisie_quantite" class="form-label fw-semibold">
+                        Quantité
+                        <span class="text-danger" aria-hidden="true"> *</span>
+                        <span class="visually-hidden">(obligatoire)</span>
+                    </label>
+                    <input
+                        id="saisie_quantite"
+                        type="number"
+                        class="form-control form-control-lg"
+                        min="1"
+                        aria-required="true"
+                        aria-describedby="aide_quantite"
+                    >
+                    <div id="aide_quantite" class="form-text">
+                        Valeur minimale : 1
+                    </div>
                 </div>
-            </div>
 
-            <div class="buttonHolder">
-                <div class="modal-footer d-flex" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
-                    <button type="submit" class="btn btn-warning mr-auto p-2" title="Supprimer" id="saisie_quantite_supprimer" value="Supprimer"><i class="fa fa-trash-o margin-r-5"></i>Supprimer</button>
-                    <button type="submit" class="btn btn-primary p-2" title="Valider" id="saisie_quantite_valider" value="Valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
-                    <button type="button" class="btn btn-danger p-2" data-dismiss="modal"><i class="fa fa-ban margin-r-5"></i>Annuler</button>
+                {# Supprimer à gauche (me-auto), Valider et Annuler à droite #}
+                <div class="modal-footer px-0 pb-0">
+
+                    <button
+                        type="submit"
+                        class="btn btn-warning me-auto"
+                        name="submit_supprimer"
+                        id="saisie_quantite_supprimer"
+                        value="Supprimer"
+                        aria-label="Supprimer cette quantité"
+                    >
+                        <i class="fa fa-trash-o me-1" aria-hidden="true"></i>
+                        Supprimer
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        name="submit_valider"
+                        id="saisie_quantite_valider"
+                        value="Valider"
+                        aria-label="Valider la saisie de la quantité"
+                    >
+                        <i class="fa fa-check me-1" aria-hidden="true"></i>
+                        Valider
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-danger"
+                        data-bs-dismiss="modal"
+                        aria-label="Annuler et fermer la fenêtre de saisie de la quantité"
+                    >
+                        <i class="fa fa-ban me-1" aria-hidden="true"></i>
+                        Annuler
+                    </button>
+
                 </div>
-            </div>
 
-        </form>
-    {% endblock %}
-{% endembed %}
+            </form>
 
+        {% endblock %}
+
+    {% endembed %}
+
+{% else %}
+
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_saisir_quantite{% endblock %}
+        {% block modal_titre %}Saisie de la quantité{% endblock %}
+        {% block modal_body %}
+            <div id="modal_erreurs" class="text-red"></div>
+
+            <form id="form_selection_quantite" method="post">
+                {% csrf_token %}
+                <input type="hidden" id="saisie_quantite_key" value="">
+                <input type="hidden" id="saisie_quantite_action" value="">
+
+                <div class="form-group">
+                    <div class="controls">
+                        <label for="saisie_quantite" class="col-form-label">Quantité</label>
+                        <input id="saisie_quantite" type="number" class="numberinput form-control form-control-lg" min="1">
+                    </div>
+                </div>
+
+                <div class="buttonHolder">
+                    <div class="modal-footer d-flex" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                        <button type="submit" class="btn btn-warning mr-auto p-2" title="Supprimer" id="saisie_quantite_supprimer" value="Supprimer"><i class="fa fa-trash-o margin-r-5"></i>Supprimer</button>
+                        <button type="submit" class="btn btn-primary p-2" title="Valider" id="saisie_quantite_valider" value="Valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                        <button type="button" class="btn btn-danger p-2" data-dismiss="modal"><i class="fa fa-ban margin-r-5"></i>Annuler</button>
+                    </div>
+                </div>
+
+            </form>
+        {% endblock %}
+    {% endembed %}
+
+{% endif %}
 
 <script>
     $(document).ready(function() {

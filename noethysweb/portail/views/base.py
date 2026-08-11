@@ -11,6 +11,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.cache import cache
 from django.shortcuts import redirect
 from portail.views.menu import GetMenuPrincipal
+from portail.forms.accessibilite import FormulaireAccessibilite
+from portail.utils import utils_accessibilite
 from noethysweb.version import GetVersion
 from core.models import Organisateur, Parametre
 from core.utils import utils_parametres, utils_portail, utils_historique
@@ -27,18 +29,11 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin):
     def dispatch(self, request, *args, **kwargs):
         """ Vérifie que l'utilisateur est connecté """
         if not request.user.is_authenticated:
+            logger.debug("dispatch : Utilisateur non authentifié. Retour à la page de connexion.")
             return redirect("portail_connexion")
         return super(CustomView, self).dispatch(request, *args, **kwargs)
 
     def test_func(self):
-        # # Vérifie que l'user a une permission
-        # menu_code = getattr(self, "menu_code", None)
-        # if menu_code and menu_code != "accueil" and not menu_code.endswith("_toc"):
-        #     if not menu_code and hasattr(self, "url_liste"):
-        #         menu_code = self.url_liste
-        #     if not self.request.user.has_perm("core.%s" % menu_code):
-        #         return False
-
         # Vérifie que l'user est de type "utilisateur"
         if self.request.user.categorie != "famille":
             return False
@@ -94,6 +89,12 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin):
         # Mémorise le fil d'ariane
         if context['menu_actif'] != None:
             context['breadcrumb'] = context['menu_actif'].GetBreadcrumb()
+
+        # Formulaire accessibilité
+        context["form_accessibilite"] = FormulaireAccessibilite()
+
+        # Déclaration d'accessibilité
+        context["texte_declaration_accessibilite"] = utils_accessibilite.Get_declaration_accessibilite(context, self.request)
 
         return context
 

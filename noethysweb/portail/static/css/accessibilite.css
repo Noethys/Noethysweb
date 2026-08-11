@@ -1,0 +1,258 @@
+/* ==========================================================================
+   Classes RGAA appliquées dynamiquement sur <body> par accessibilite.js.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   Chargement de la police OpenDyslexic
+   -------------------------------------------------------------------------- */
+
+@font-face {
+    font-family: "OpenDyslexic";
+    src: url("../polices/opendyslexic/OpenDyslexic-Regular.woff2") format("woff2"),
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "OpenDyslexic";
+    src: url("../polices/opendyslexic/OpenDyslexic-Bold.woff2") format("woff2"),
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+/* --------------------------------------------------------------------------
+   1. Contraste élevé  (ratio cible 7:1 — RGAA AA renforcé)
+   -------------------------------------------------------------------------- */
+body.a11y-contraste-eleve,
+body.a11y-contraste-eleve .content-wrapper,
+body.a11y-contraste-eleve .card,
+body.a11y-contraste-eleve .card-body {
+    color:            #000000 !important;
+    background-color: #ffffff !important;
+}
+body.a11y-contraste-eleve p,
+body.a11y-contraste-eleve span,
+body.a11y-contraste-eleve label,
+body.a11y-contraste-eleve td,
+body.a11y-contraste-eleve th,
+body.a11y-contraste-eleve li,
+body.a11y-contraste-eleve .form-label,
+body.a11y-contraste-eleve .form-text { color: #000000 !important; }
+
+body.a11y-contraste-eleve a,
+body.a11y-contraste-eleve .nav-link  { color: #0000cc !important; }
+body.a11y-contraste-eleve a:hover    { color: #000099 !important; text-decoration: underline !important; }
+
+body.a11y-contraste-eleve .text-muted,
+body.a11y-contraste-eleve small      { color: #3a3a3a !important; }
+
+body.a11y-contraste-eleve .btn       { border: 2px solid currentColor !important; }
+
+body.a11y-contraste-eleve input,
+body.a11y-contraste-eleve select,
+body.a11y-contraste-eleve textarea   {
+    border:           2px solid #000000 !important;
+    color:            #000000 !important;
+    background-color: #ffffff !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   2. Contraste maximum  (ratio cible 10:1 — RGAA AAA)
+   -------------------------------------------------------------------------- */
+body.a11y-contraste-maximum,
+body.a11y-contraste-maximum .content-wrapper,
+body.a11y-contraste-maximum .card,
+body.a11y-contraste-maximum .card-body,
+body.a11y-contraste-maximum p,
+body.a11y-contraste-maximum span,
+body.a11y-contraste-maximum label,
+body.a11y-contraste-maximum td,
+body.a11y-contraste-maximum th,
+body.a11y-contraste-maximum li,
+body.a11y-contraste-maximum .form-label,
+body.a11y-contraste-maximum .text-muted,
+body.a11y-contraste-maximum small    {
+    color:            #000000 !important;
+    background-color: #ffffff !important;
+}
+body.a11y-contraste-maximum a,
+body.a11y-contraste-maximum .nav-link { color: #00008b !important; text-decoration: underline !important; }
+
+body.a11y-contraste-maximum input,
+body.a11y-contraste-maximum select,
+body.a11y-contraste-maximum textarea  { border: 3px solid #000000 !important; color: #000000 !important; }
+
+body.a11y-contraste-maximum .btn      { border: 3px solid currentColor !important; font-weight: bold !important; }
+
+
+/* --------------------------------------------------------------------------
+   3. Daltonisme — filtre SVG appliqué sur <html> via JS
+   (Aucune règle CSS ici : géré par html.style.filter dans accessibilite.js)
+   -------------------------------------------------------------------------- */
+
+
+/* --------------------------------------------------------------------------
+   4. Taille du texte
+   -------------------------------------------------------------------------- */
+body.a11y-texte-petite                { font-size: 0.95rem !important; }
+body.a11y-texte-petite .btn,
+body.a11y-texte-petite .btn-pill-toolbar,
+body.a11y-texte-petite label,
+body.a11y-texte-petite input,
+body.a11y-texte-petite select,
+body.a11y-texte-petite textarea       { font-size: 0.85em !important; }
+
+body.a11y-texte-grande                { font-size: 1.20rem !important; }
+body.a11y-texte-grande .btn,
+body.a11y-texte-grande .btn-pill-toolbar,
+body.a11y-texte-grande label,
+body.a11y-texte-grande input,
+body.a11y-texte-grande select,
+body.a11y-texte-grande textarea       { font-size: 1.10rem !important; }
+
+body.a11y-texte-tres-grande           { font-size: 1.4rem !important; }
+body.a11y-texte-tres-grande .btn,
+body.a11y-texte-tres-grande .btn-pill-toolbar,
+body.a11y-texte-tres-grande label,
+body.a11y-texte-tres-grande input,
+body.a11y-texte-tres-grande select,
+body.a11y-texte-tres-grande textarea  { font-size: 1.3rem !important; }
+
+
+/* --------------------------------------------------------------------------
+   5. Souligner les liens
+   -------------------------------------------------------------------------- */
+body.a11y-souligner-liens a,
+body.a11y-souligner-liens .nav-link,
+body.a11y-souligner-liens [role="link"] { text-decoration: underline !important; }
+
+
+/* --------------------------------------------------------------------------
+   6. Police dyslexie — OpenDyslexic
+   -------------------------------------------------------------------------- */
+body.a11y-dyslexie,
+body.a11y-dyslexie p,
+body.a11y-dyslexie span,
+body.a11y-dyslexie label,
+body.a11y-dyslexie input,
+body.a11y-dyslexie select,
+body.a11y-dyslexie textarea,
+body.a11y-dyslexie td,
+body.a11y-dyslexie th,
+body.a11y-dyslexie li,
+body.a11y-dyslexie .btn               { font-family: "OpenDyslexic", sans-serif !important; line-height: 1.8 !important; }
+
+
+/* --------------------------------------------------------------------------
+   7. Espacement des lettres
+   -------------------------------------------------------------------------- */
+body.a11y-espacement,
+body.a11y-espacement p,
+body.a11y-espacement span,
+body.a11y-espacement label,
+body.a11y-espacement td,
+body.a11y-espacement th,
+body.a11y-espacement li               { letter-spacing: 0.12em !important; word-spacing: 0.20em !important; }
+
+
+/* --------------------------------------------------------------------------
+   8. Interlignage
+   -------------------------------------------------------------------------- */
+body.a11y-interlignage-augmente,
+body.a11y-interlignage-augmente p,
+body.a11y-interlignage-augmente li,
+body.a11y-interlignage-augmente td,
+body.a11y-interlignage-augmente th,
+body.a11y-interlignage-augmente label,
+body.a11y-interlignage-augmente span  { line-height: 1.5 !important; }
+
+body.a11y-interlignage-large,
+body.a11y-interlignage-large p,
+body.a11y-interlignage-large li,
+body.a11y-interlignage-large td,
+body.a11y-interlignage-large th,
+body.a11y-interlignage-large label,
+body.a11y-interlignage-large span     { line-height: 2 !important; }
+
+
+/* --------------------------------------------------------------------------
+   9. Grandes zones de clic (WCAG 2.5.5 : 44×44px minimum)
+   -------------------------------------------------------------------------- */
+body.a11y-grandes-zones-clic .btn,
+body.a11y-grandes-zones-clic button   { padding: .6rem 1.2rem !important; min-height: 44px !important; min-width: 44px !important; font-size: 1rem !important; }
+
+body.a11y-grandes-zones-clic a        { padding: .25rem .1rem !important; min-height: 44px !important; display: inline-flex !important; align-items: center !important; }
+
+body.a11y-grandes-zones-clic input[type="checkbox"],
+body.a11y-grandes-zones-clic input[type="radio"]   { width: 22px !important; height: 22px !important; }
+
+body.a11y-grandes-zones-clic .nav-link { padding: .6rem 1rem !important; }
+
+
+/* --------------------------------------------------------------------------
+   10. Réduire les animations
+   -------------------------------------------------------------------------- */
+body.a11y-no-animations *,
+body.a11y-no-animations *::before,
+body.a11y-no-animations *::after      {
+    animation-duration:        0.001ms !important;
+    animation-iteration-count: 1       !important;
+    transition-duration:       0.001ms !important;
+    scroll-behavior:           auto    !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   11. Agrandir le curseur
+   Les curseurs SVG sont des data-URI inline pour éviter toute dépendance
+   externe. La propriété hotspot (offset du point de clic) est définie
+   après la data-URI : cursor: url(...) X Y, fallback.
+   -------------------------------------------------------------------------- */
+
+body.a11y-curseur-grand * {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M6 2 L6 26 L12 20 L17 30 L20 29 L15 19 L23 19 Z' fill='white' stroke='black' stroke-width='1.5'/%3E%3C/svg%3E") 6 2, auto !important;
+}
+
+body.a11y-curseur-tres-grand * {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M8 2 L8 38 L18 28 L25 44 L30 42 L23 26 L36 26 Z' fill='white' stroke='black' stroke-width='2'/%3E%3C/svg%3E") 8 2, auto !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   12. Masquer les images
+   Le masquage lui-même est géré en JS (img[data-a11y-hidden]).
+   Cette règle gère uniquement le style des placeholders textuels
+   injectés par accessibilite.js pour les images informatives.
+   -------------------------------------------------------------------------- */
+
+.a11y-img-placeholder {
+    display:        inline-flex    !important;
+    align-items:    center         !important;
+    justify-content:center         !important;
+    border:         1px dashed #aaa !important;
+    border-radius:  4px            !important;
+    padding:        4px 8px        !important;
+    font-size:      .78rem         !important;
+    color:          #555           !important;
+    background:     #f8f9fa        !important;
+    max-width:      100%           !important;
+    box-sizing:     border-box     !important;
+    vertical-align: middle         !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   13. Masque de lecture
+   Le masque lui-même est un <div> injecté par JS (#a11y-masque-lecture).
+   Cette règle assure qu'il passe au-dessus des éléments fixed d'AdminLTE
+   (sidebar, navbar) mais reste en dessous des modals Bootstrap (z-index 1050+).
+   -------------------------------------------------------------------------- */
+
+#a11y-masque-lecture {
+    z-index: 1040 !important;
+}

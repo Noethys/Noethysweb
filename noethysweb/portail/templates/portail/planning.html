@@ -24,7 +24,6 @@
 
 {% block scripts %}
     {{ block.super }}
-    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
     <script>
         var dict_options = JSON.parse('{{ data.options_json|escapejs }}');
         function Get_periode() {return null;};
@@ -41,48 +40,40 @@
 
     {# Texte d'introduction #}
     {% if parametres_portail.reservations_intro_planning %}
-        <div class="d-print-none" style="margin-bottom: 20px;">
-            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.reservations_intro_planning }}
+        <div class="div-intro" role="note" aria-label="{% trans "Information" %}">
+            <i class="fa fa-info-circle margin-r-5" aria-hidden="true"></i>{{ parametres_portail.reservations_intro_planning }}
         </div>
     {% endif %}
 
     {# Lien de retour vers liste des périodes #}
 	<div class="d-print-none" style="margin-bottom: 10px;">
-        <a id="retour_reservations" href="{% url 'portail_reservations' %}"><i class="fa fa-arrow-circle-o-left"></i> {% blocktrans %}Revenir à la liste des périodes{% endblocktrans %}</a>
+        <a id="retour_reservations" href="{% url 'portail_reservations' %}" aria-label="{% blocktrans %}Revenir à la liste des périodes{% endblocktrans %}">
+            <i class="fa fa-arrow-circle-o-left me-1" aria-hidden="true"></i>
+            {% blocktrans %}Revenir à la liste des périodes{% endblocktrans %}
+        </a>
 	</div>
 
     {# Entête de l'individu #}
     <div class="card card-widget widget-user">
-        <div class="widget-user-header bg-lightblue" style="height: 110px;">
-            <h3 class="widget-user-username">{{ data.individu.prenom }}</h3>
-        </div>
-        <div class="widget-user-image" style="top: 60px;">
-            <img class="img-circle elevation-1" src="{{ data.individu.Get_photo }}" alt="Photo">
-        </div>
-        <div class="card-footer" style="padding-top: 40px;">
-            <div class="row">
-                <div class="col-sm-4 border-right">
-                    <div class="description-block">
-                        <h5 class="description-header"><small>{% trans "Activité" %}</small></h5>
-                        <span class="description-text text-lightblue">{{ data.periode_reservation.activite.nom }}</span>
-                    </div>
-                </div>
-                <div class="col-sm-4 border-right">
-                    <div class="description-block">
-                        <h5 class="description-header"><small>{% trans "Période" %}</small></h5>
-                        <span class="description-text text-lightblue">{{ data.periode_reservation.nom }}</span>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="description-block">
-                        <h5 class="description-header"><small>{% trans "Dates" %}</small></h5>
-                        <span class="description-text text-lightblue">{% trans "Du" %} {{ data.periode_reservation.date_debut|date:"d/m/Y" }} {% trans "au" %} {{ data.periode_reservation.date_fin|date:"d/m/Y" }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% embed 'portail/titre_individu.html' %}
+            {% block src_photo %}{{ data.individu.Get_photo }}{% endblock %}
+            {% block prenom_individu %}{{ data.individu.prenom }}{% endblock %}
+            {% block infos %}
+                <span>
+                    <i class="fa fa-star-o" aria-hidden="true"></i>
+                    {{ data.periode_reservation.activite.nom }}
+                </span>
+                <span>
+                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                    {{ data.periode_reservation.nom }}
+                </span>
+                <span>
+                    <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+                    {% trans "Du" %} {{ data.periode_reservation.date_debut|date:"d/m/Y" }} {% trans "au" %} {{ data.periode_reservation.date_fin|date:"d/m/Y" }}
+                </span>
+            {% endblock %}
+        {% endembed %}
     </div>
-
 
     {# Grilles des réservations #}
     <div class="row">
@@ -115,17 +106,19 @@
                     {% include "consommations/grille_tableau.html" %}
 
                     {# Légende de la grille #}
-                    <div class="legende_grille"><small>
-                        <ul class="list-unstyled">
-                            <li><i class="fa fa-square margin-r-5" style="color: #FF9E1E;"></i>{% trans "Réservation" %}</li>
-                            <li><i class="fa fa-square margin-r-5" style="color: #abcbff;"></i>{% trans "Attente" %}</li>
-                            <li><i class="fa fa-square margin-r-5" style="color: rgba(227, 254, 219, 0.73);"></i>{% trans "Disponible" %}</li>
-                            <li><i class="fa fa-square margin-r-5" style="color: #FEFCDB;"></i>{% blocktrans %}Dernières places{% endblocktrans %}</li>
-                            <li><i class="fa fa-square margin-r-5" style="color: rgba(247, 172, 178, 0.36);"></i>{% trans "Complet" %}</li>
-                            <li><i class="fa fa-check-circle-o text-green margin-r-5"></i>{% trans "Présent" %}</li>
-                            <li><i class="fa fa-lock text-red margin-r-5"></i>{% blocktrans %}Non modifiable{% endblocktrans %}</li>
-                        </ul>
-                    </small></div>
+                    <div class="legende_grille css-dependent" aria-hidden="true" hidden>
+                        <small>
+                            <ul class="list-unstyled">
+                                <li><i class="fa fa-square margin-r-5" style="color: #FF9E1E;"></i>{% trans "Réservation" %}</li>
+                                <li><i class="fa fa-square margin-r-5" style="color: #abcbff;"></i>{% trans "Attente" %}</li>
+                                <li><i class="fa fa-square margin-r-5" style="color: rgba(227, 254, 219, 0.73);"></i>{% trans "Disponible" %}</li>
+                                <li><i class="fa fa-square margin-r-5" style="color: #FEFCDB;"></i>{% blocktrans %}Dernières places{% endblocktrans %}</li>
+                                <li><i class="fa fa-square margin-r-5" style="color: rgba(247, 172, 178, 0.36);"></i>{% trans "Complet" %}</li>
+                                <li><i class="fa fa-check-circle-o text-success margin-r-5"></i>{% trans "Présent" %}</li>
+                                <li><i class="fa fa-lock text-danger margin-r-5"></i>{% blocktrans %}Non modifiable{% endblocktrans %}</li>
+                            </ul>
+                        </small>
+                    </div>
 
                 </div>
             </div>
@@ -142,9 +135,9 @@
 
     </div>
 
-    {% include 'consommations/grille_saisie_horaires.html' %}
-    {% include 'consommations/grille_saisie_quantite.html' %}
-    {% include 'consommations/grille_appliquer_semaine_type.html' %}
+    {% include 'consommations/grille_saisie_horaires.html' with version_bootstrap=5 %}
+    {% include 'consommations/grille_saisie_quantite.html' with version_bootstrap=5 %}
+    {% include 'consommations/grille_appliquer_semaine_type.html' with version_bootstrap=5 %}
     {% include 'consommations/grille_saisie_questionnaire.html' %}
 
 {% endblock contenu_page %}

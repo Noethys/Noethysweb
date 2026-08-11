@@ -1,4 +1,4 @@
-{% extends "core/base_login.html" %}
+{% extends "portail/base_login.html" %}
 {% load i18n %}
 {% load static %}
 
@@ -39,24 +39,37 @@
                 {% endfor %}
             {% endif %}
 
-            <div class="form-group has-feedback">
-                {{ form.new_password1 }}
-                <span class="glyphicon form-control-feedback"></span>
+            <div class="mb-3">
+                <div class="form-group has-feedback">
+                    {{ form.new_password1 }}
+                    <span class="glyphicon form-control-feedback"></span>
+                </div>
+
+                {% if form.new_password1.help_text %}
+                    <div class="form-text" id="{{ form.new_password1.id_for_label }}-help">
+                        {{ form.new_password1.help_text|safe }}
+                    </div>
+                {% endif %}
             </div>
 
-            <div class="form-group has-feedback">
-                {{ form.new_password2 }}
-                <span class="glyphicon form-control-feedback"></span>
+            <div class="mb-3">
+                <div class="form-group has-feedback">
+                    {{ form.new_password2 }}
+                    <span class="glyphicon form-control-feedback"></span>
+                </div>
             </div>
 
             {% if form.secquest %}
                 <p class="small">{% blocktrans %}Pour des raisons de sécurité, répondez à la question suivante{% endblocktrans %} : {{ form.secquest.label }}</p>
-                <div class="form-group has-feedback">
+                <div class="form-group has-feedback mb-3">
                     {{ form.secquest }}
                 </div>
             {% endif %}
 
-            <button class="btn btn-block btn-primary login-btn mb-4" type="submit">{% trans "Valider" %}</button>
+            <button class="btn w-100 btn-primary login-btn mb-3" type="submit" title="{% trans "Cliquez ici pour valider" %}">
+                <i class="fa fa-fw fa-check me-1" aria-hidden="true"></i>
+                {% trans "Valider" %}
+            </button>
 
         {% else %}
 
@@ -66,6 +79,6 @@
 
     </form>
 
-    <a class="forgot-password-link" href="{% url 'portail_connexion' %}" title="{% trans "Revenir à la page de connexion" %}">{% blocktrans %}Revenir à la page de connexion{% endblocktrans %}</a>
+    <a class="" href="{% url 'portail_connexion' %}" title="{% trans "Revenir à la page de connexion" %}"><i class="fa fa-arrow-circle-o-left me-1" aria-hidden="true"></i>{% blocktrans %}Revenir à la page de connexion{% endblocktrans %}</a>
 
 {% endblock contenu_page %}

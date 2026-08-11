@@ -12,7 +12,7 @@ from portail.views import reset_password, change_password, reservations, plannin
                             individu_regimes_alimentaires, individu_coords, individu_medecin, individu_informations, individu_assurances, individu_vaccinations, \
                             famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents, \
                             transmettre_piece, activites, inscrire_activite, attente_paiement, cotisations, sondage, famille_questionnaire, famille_parametres, pages_speciales, \
-                            creer_compte, creer_individu
+                            creer_compte, creer_individu, accessibilite
 
 
 urlpatterns = [
@@ -147,6 +147,9 @@ urlpatterns = [
 
     # Mentions
     path('mentions', mentions.View.as_view(), name='portail_mentions'),
+
+    # Accessibilité
+    path('accessibilite', accessibilite.View.as_view(), name='portail_accessibilite'),
 
     # Désinscription mails
     path('desinscription/<str:valeur>', pages_speciales.desinscription_emails, name='desinscription'),

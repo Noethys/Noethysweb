@@ -1,0 +1,287 @@
+
+/* Changement couleur primary */
+:root {
+    --bs-primary:              #367da6;
+    --bs-primary-rgb:          60, 141, 188;
+}
+.btn-primary {
+    --bs-btn-bg:                 #367da6;
+    --bs-btn-border-color:       #367da6;
+    --bs-btn-color:              #ffffff;
+    --bs-btn-hover-bg:           #367fa9;
+    --bs-btn-hover-border-color: #367fa9;
+    --bs-btn-hover-color:        #ffffff;
+    --bs-btn-active-bg:          #2e6d90;
+    --bs-btn-active-border-color:#2e6d90;
+    --bs-btn-active-color:       #ffffff;
+    --bs-btn-disabled-bg:        #367da6;
+    --bs-btn-disabled-border-color: #367da6;
+    --bs-btn-focus-shadow-rgb:   60, 141, 188;
+}
+.btn-link {
+    color: #367da6;
+}
+a {
+    color: #34779e;
+    text-decoration: none;
+}
+
+/* Lien d'évitement — Visible uniquement à la prise de focus clavier */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 1rem;
+    z-index: 9999;
+    padding: 0.5rem 1rem;
+    background: #fff;
+    color: #000;
+    font-weight: bold;
+    border: 2px solid #000;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: top 0.1s;
+}
+.skip-link:focus {
+    top: 1rem;
+}
+
+/* ----------------------------------------------------------------
+   Fond et mise en page générale
+---------------------------------------------------------------- */
+body {
+    font-family: "Karla", sans-serif;
+    background-color: #d0d0ce;
+    min-height: 100vh;
+}
+
+.bg-image {
+    filter: blur(10px);
+    -webkit-filter: blur(8px);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: fixed;
+    top: -10px;
+    left: -10px;
+    width: 110%;
+    height: 110%;
+    box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.4);
+    aria-hidden: true;
+}
+
+/* ----------------------------------------------------------------
+   Barre de boutons d'accessibilité / langue / thème
+   Positionnée en haut à droite, au-dessus du fond
+---------------------------------------------------------------- */
+.toolbar-login {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 200;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-pill-toolbar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 99px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+.btn-pill-toolbar:hover,
+.btn-pill-toolbar:focus {
+    background: rgba(255, 255, 255, 0.32);
+    color: #fff;
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+}
+.btn-pill-toolbar:focus:not(:focus-visible) {
+    outline: none;
+}
+.btn-pill-toolbar:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+}
+
+/* ----------------------------------------------------------------
+   Carte de login
+---------------------------------------------------------------- */
+.brand-wrapper {
+    margin-bottom: 0;
+    text-align: center;
+}
+.brand-wrapper .logo {
+    height: 100px;
+}
+.login-card {
+    border: 0;
+    border-radius: 27.5px;
+    box-shadow: 0 20px 30px 0 rgba(0, 0, 0, 0.43);
+    overflow: hidden;
+}
+.login-card-img {
+    border-radius: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.login-card .card-body {
+    padding: 40px 60px 40px;
+}
+@media (max-width: 422px) {
+    .login-card .card-body {
+        padding: 35px 24px;
+    }
+}
+.login-card-description {
+    font-size: 20px;
+    color: #000;
+    font-weight: normal;
+    margin-bottom: 50px;
+    text-align: center;
+}
+.titre_contenu {
+    color: #000;
+    font-weight: bold;
+}
+.login-card .form-control {
+    border: 1px solid #d5dae2;
+    padding: 0.375rem 1rem;
+    min-height: 45px;
+    font-size: 13px;
+    font-weight: normal;
+}
+/* RGAA critère 10.7 : focus visible sur les champs */
+.login-card .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.35);
+    outline: none;
+}
+.login-card .ligne {
+    margin-bottom: 20px;
+}
+.login-card .form-control::placeholder {
+    color: #919aa3;
+}
+.login-card .login-btn {
+    padding: 13px 20px 12px;
+    font-size: 17px;
+    font-weight: bold;
+    line-height: 20px;
+    margin-bottom: 24px;
+    margin-top: 10px;
+}
+.login-card .forgot-password-link {
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+.login-card-footer-text {
+    font-size: 16px;
+    color: #0d2366;
+    margin-bottom: 0;
+}
+@media (max-width: 767px) {
+    .login-card-footer-text {
+        margin-bottom: 24px;
+    }
+}
+.login-card-footer-nav a {
+    font-size: 14px;
+}
+.container,
+.container-lg,
+.container-md,
+.container-sm {
+    max-width: 900px;
+}
+
+/* RGAA : indicateur de focus visible pour les liens et boutons */
+a:focus-visible,
+button:focus-visible {
+    outline: 3px solid #0d6efd;
+    outline-offset: 2px;
+}
+
+/* Thème sombre */
+[data-bs-theme="dark"] a:not(.btn) {
+    color: #4793be;
+}
+[data-bs-theme="dark"] #id_afficher_mdp {
+    color: #4793be;
+}
+[data-bs-theme="dark"] .login-card {
+    color: #f0f0f0;
+}
+[data-bs-theme="dark"] .login-card .form-control {
+    color: #f0f0f0;
+    border-color: #555;
+}
+[data-bs-theme="dark"] .titre_contenu,
+[data-bs-theme="dark"] .login-card-description {
+    color: #f0f0f0;
+}
+
+.captcha-wrapper {
+    overflow: visible;
+    position: relative;
+}
+
+.captcha-img {
+    height: 100%;
+    max-height: 38px;
+    transition: transform 0.2s ease;
+    transform-origin: left center;
+    cursor: zoom-in;
+}
+
+.captcha-img:hover {
+    transform: scale(3);
+    z-index: 11;
+    position: relative;
+    outline: 2px solid #000000;
+    border-radius: 2px;
+}
+
+#id_captcha_1 {
+    border-radius: 0;
+}
+
+#modal_accessibilite .form-check-input {
+    font-size: 1.2rem;
+}
+
+
+    fieldset {
+        padding: 0;
+        margin: 0;
+        border: 0;
+    }
+    fieldset legend {
+        display: block;
+        width: 100%;
+        padding: 5px;
+        margin-bottom: 20px;
+        font-size: 12px;
+        line-height: inherit;
+        color: #333;
+        border: 0;
+        background-color: #f1f0f0;
+        text-transform: uppercase;
+    }
+    [data-bs-theme="dark"] fieldset legend {
+        background-color: #6c6c6c;
+    }
+    #form_accessibilite fieldset legend {
+        margin-bottom: 0px;
+    }

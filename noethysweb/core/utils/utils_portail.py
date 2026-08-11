@@ -162,7 +162,12 @@ LISTE_PARAMETRES = [
     # Mentions
     Parametre(code="mentions_afficher_page", label="Afficher la page", type="boolean", valeur=True),
     Parametre(code="mentions_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez consulter ici les mentions légales du portail."),
-    Parametre(code="mentions_conditions_generales", label="Conditions générales d'utilisation", type="html", valeur=render_to_string("portail/modele_conditions_generales.html"), help_text="Vous pouvez insérer dans le texte les mots-clés suivants : {ORGANISATEUR_NOM},  {ORGANISATEUR_RUE}, {ORGANISATEUR_CP}, {ORGANISATEUR_VILLE}."),
+    Parametre(code="mentions_type", label="Mentions légales", type="choix", valeur="DEFAUT", choix=[("DEFAUT", "Mentions par défaut"), ("PERSO", "Mentions personnalisées")], help_text="Vous pouvez choisir d'utiliser les mentions par défaut fournies avec Noethysweb ou saisir un texte personnalisé."),
+    Parametre(code="mentions_html", label="Mentions personnalisées", type="html", valeur="", help_text="Vous pouvez insérer dans le texte les mots-clés suivants : {ORGANISATEUR_NOM},  {ORGANISATEUR_RUE}, {ORGANISATEUR_CP}, {ORGANISATEUR_VILLE}, {URL_PORTAIL}."),
+
+    # Accessibilité
+    Parametre(code="accessibilite_declaration_type", label="Déclaration d'accessibilité", type="choix", valeur="DEFAUT", choix=[("DEFAUT", "Déclaration par défaut"), ("PERSO", "Déclaration personnalisée")], help_text="Vous pouvez choisir d'utiliser la déclaration d'accessibilité par défaut fournie avec Noethysweb ou saisir une déclaration personnalisée."),
+    Parametre(code="accessibilite_declaration_html", label="Déclaration personnalisée", type="html", valeur="", help_text="Vous pouvez insérer dans le texte les mots-clés suivants : {ORGANISATEUR_NOM},  {ORGANISATEUR_RUE}, {ORGANISATEUR_CP}, {ORGANISATEUR_VILLE}, {URL_PORTAIL}."),
 
 ]
 

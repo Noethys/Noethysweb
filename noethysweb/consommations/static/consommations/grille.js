@@ -109,6 +109,7 @@ var dict_places_temp = {};
 var cases_touchees = [];
 var chrono;
 var touche_clavier = null;
+var aides_visuelles = false;
 
 
 class Case_memo {
@@ -278,6 +279,11 @@ class Case_base {
 
     };
 
+    get_date_fr() {
+        var datefr = new Date(this.date);
+        return datefr.toLocaleDateString('fr-FR', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
+    }
+
     // Modifier une conso existante
     modifier_conso(data={}, maj_facturation=false) {
         var conso = this.consommations[0];
@@ -325,7 +331,10 @@ class Case_base {
     // Calcule le remplissage
     calc_remplissage() {
         // Annule la maj si il y a déjà une conso affichée dans la case
-        if (this.consommations.length > 0) {return false};
+        if (this.consommations.length > 0) {
+            return false
+        }
+        ;
 
         var liste_places_initiales = [];
         var liste_places_restantes = [];
@@ -339,7 +348,12 @@ class Case_base {
             for (var idgroupe of [this.groupe, 0]) {
                 // Recherche la capacité max sur le groupe
                 var key1 = this.date + "_" + idunite_remplissage + "_" + idgroupe;
-                if (key1 in dict_capacite) {var capacite_max = dict_capacite[key1]} else {var capacite_max = null};
+                if (key1 in dict_capacite) {
+                    var capacite_max = dict_capacite[key1]
+                } else {
+                    var capacite_max = null
+                }
+                ;
 
                 if (capacite_max) {
                     // Recherche le nbre de places prises
@@ -348,35 +362,145 @@ class Case_base {
                         var key2 = this.date + "_" + idunite_conso + "_" + idgroupe;
                         if (key2 in dict_places_prises) {
                             nbre_places_prises += dict_places_prises[key2]
-                        };
-                    };
+                        }
+                        ;
+                    }
+                    ;
 
                     // Calcule le nombre de places disponibles
                     liste_places_initiales.push(capacite_max)
                     liste_places_restantes.push(capacite_max - nbre_places_prises);
                     liste_seuils.push(dict_unites_remplissage[idunite_remplissage]["seuil_alerte"]);
-                };
-            };
-        };
+                }
+                ;
+            }
+            ;
+        }
+        ;
 
         // Conserve uniquement les valeurs les plus basses
-        if (liste_places_initiales.length > 0) {nbre_places_initiales = Math.min.apply(null, liste_places_initiales)};
-        if (liste_places_restantes.length > 0) {nbre_places_restantes = Math.min.apply(null, liste_places_restantes)};
-        if (liste_seuils.length > 0) {seuil_alerte = Math.min.apply(null, liste_seuils)};
+        if (liste_places_initiales.length > 0) {
+            nbre_places_initiales = Math.min.apply(null, liste_places_initiales)
+        }
+        ;
+        if (liste_places_restantes.length > 0) {
+            nbre_places_restantes = Math.min.apply(null, liste_places_restantes)
+        }
+        ;
+        if (liste_seuils.length > 0) {
+            seuil_alerte = Math.min.apply(null, liste_seuils)
+        }
+        ;
 
         // Envoie les valeurs à l'affichage de la case
+        var texte_etat = "";
         if (nbre_places_restantes !== null && (!$("#" + this.key).hasClass("fermeture"))) {
             var klass = null;
-            if (nbre_places_restantes > seuil_alerte) {klass = "disponible"};
-            if ((nbre_places_restantes > 0) && (nbre_places_restantes <= seuil_alerte)) {klass = "dernieresplaces"};
-            if (nbre_places_restantes <= 0) {klass = "complet"};
+            if (nbre_places_restantes > seuil_alerte) {
+                klass = "disponible"
+            }
+            ;
+            if ((nbre_places_restantes > 0) && (nbre_places_restantes <= seuil_alerte)) {
+                klass = "dernieresplaces"
+            }
+            ;
+            if (nbre_places_restantes <= 0) {
+                klass = "complet"
+            }
+            ;
 
             if (!$("#" + this.key).hasClass(klass)) {
                 $("#" + this.key).removeClass("disponible dernieresplaces complet");
                 $("#" + this.key).addClass(klass);
+                this.maj_aria_label();
             }
-        };
+
+            // Ajout : mise à jour du texte accessible
+            if (klass === "disponible") {
+                texte_etat = "Disponible";
+            }
+            if (klass === "dernieresplaces") {
+                texte_etat = "Dernières places";
+            }
+            if (klass === "complet") {
+                texte_etat = "Complet";
+            }
+        } else {
+            texte_etat = "Disponible";
+        }
+
+        // Si hors délai ou fermé
+        if ((this.dela === "False") || ($("#" + this.key).hasClass("fermeture"))) {
+            texte_etat = "Non modifiable";
+        }
+
+        // Affichage de l'état dans le span groupe
+        if (mode === "portail") {
+            $("#" + this.key + " .groupe").text(aides_visuelles ? texte_etat : "");
+        }
+
+/*        // Met à jour ou crée le span accessible dans .icones
+        var $span = $("#" + this.key + " .icones .sr-remplissage");
+        if ($span.length) {
+            $span.text(texte_etat);
+        } else {
+            $("#" + this.key + " .icones").append(
+                "<span class='visually-hidden sr-remplissage'>" + texte_etat + "</span>"
+            );
+        }*/
+
     };
+
+    maj_aria_label() {
+        var label = this.get_date_fr() + " — " + dict_unites[this.unite].nom;
+
+        if (this.has_conso()) {
+            var conso = this.consommations[0];
+            // État de la consommation
+            var etats = {
+                "reservation": "Réservé",
+                "present":     "Présent",
+                "attente":     "En attente",
+                "refus":       "Refusé",
+                "demande":     "Demande",
+                "absenti":     "Absent (injustifié)",
+                "absentj":     "Absent (justifié)",
+            };
+            if (conso.etat in etats) { label += " — " + etats[conso.etat]; }
+
+            // Horaires si case horaire ou multi
+            if ((this.type_case === "horaire" || this.type_case === "multi") && mode !== "portail") {
+                var hdebut = conso.heure_debut ? conso.heure_debut.substring(0,5).replace(":", "h") : "?";
+                var hfin   = conso.heure_fin   ? conso.heure_fin.substring(0,5).replace(":", "h")   : "?";
+                label += " — " + hdebut + " à " + hfin;
+            }
+
+            // Quantité si case quantité
+            if (this.type_case === "quantite" && conso.quantite) {label += " — Quantité : " + conso.quantite;}
+
+            // Verrouillages
+            if (conso.forfait === 2) {label += " — Non supprimable (forfait daté)";}
+            if (conso.facture) {label += " — Facturé";}
+            if (mode === "portail" && conso.dels === "False" && conso.etat !== "demande") {
+                label += " — Suppression impossible : hors délai";
+            }
+
+        } else {
+            // Case vide : état de remplissage
+            var el = $("#" + this.key);
+            if (el.hasClass("fermeture")) {label += " — Fermé";
+            } else if (el.hasClass("blocked")) {label += " — Non disponible";
+            } else if (el.hasClass("complet")) {label += " — Complet";
+            } else if (el.hasClass("dernieresplaces")) {label += " — Dernières places";
+            } else if (el.hasClass("disponible")) {label += " — Disponible";}
+
+            // Hors délai de modification (portail)
+            if (mode === "portail" && this.dela === "False") {label += " — Modification impossible : hors délai";}
+        }
+
+        $("#" + this.key).attr("aria-label", label);
+    }
+
 };
 
 class Case_standard extends Case_base {
@@ -397,6 +521,9 @@ class Case_standard extends Case_base {
         $("#" + this.key + " .infos").html("");
         $("#" + this.key + " .groupe").html("");
         $("#" + this.key + " .icones").html("");
+
+        // Sauvegarde le texte accessible du remplissage avant reset
+        var texte_remplissage_accessible = $("#" + this.key + " .sr-remplissage").text();
 
         // Si c'est une case event
         if (this.type_case === "event") {
@@ -464,9 +591,18 @@ class Case_standard extends Case_base {
             // Pour les tests, affiche l'id de la prestation
             // $("#" + this.key + " .groupe").html(conso.prestation);
         } else {
-            if ((mode === "portail") && (this.dela === "False")) {texte_icones += " <i class='fa fa-lock' style='color: #6c757d33;' title='Ajout impossible : Hors délai'></i>"};
+            if ((mode === "portail") && (this.dela === "False")) {
+                texte_icones += " <i class='fa fa-lock' style='color: #6c757d33;' aria-hidden='true' title='Modification impossible : Hors délai'></i><span class='visually-hidden'>Modification impossible : Hors délai</span>"
+            };
         }
+
+        // À la fin, réinjecte le span si la case est vide et qu'un état existait
+        if (!this.has_conso() && texte_remplissage_accessible) {
+            texte_icones += "<span class='visually-hidden sr-remplissage'>" + texte_remplissage_accessible + "</span>";
+        }
+
         $("#" + this.key + " .icones").html(texte_icones);
+        this.maj_aria_label();
     };
 
     // Appliquer un forfait crédit
@@ -783,8 +919,8 @@ class Case_evenement extends Case_base {
                     if (evenement.image) {
                         classe_image_event = "event-img-" + evenement.image.split("/").pop().split(".").shift();
                     }
-                    html += "<td class='case " + classe_event + " " + classe_image_event + "' id='event_" + self.key + "_" + evenement.pk + "'";
-                    html += "</td>";
+                    html += "<td tabindex='0' aria-label='" + self.get_date_fr() + " — " + dict_unites[self.unite].nom + " - " + evenement.nom + "'";
+                    html += " class='case " + classe_event + " " + classe_image_event + "' id='event_" + self.key + "_" + evenement.pk + "'></td>";
                 }
             });
             html += "</tr></tbody></table>";
@@ -901,8 +1037,9 @@ class Case_multihoraires extends Case_base {
 
         // Dessine la case multihoraires
         var html = "<table class='table table_multihoraires'><tbody><tr>";
-        html += "<td class='case multi_ajouter' style='border: 0px;'><a data-key='" + this.key + "' class='bouton_ajouter_multi' title='Ajouter une consommation' href='#'><i class='fa fa-plus-circle'></i></a></td>";
-        html += "</tr></tbody></table>";
+        html += "<td class='case multi_ajouter' style='border: 0px;'><a tabindex='0' data-key='" + this.key + "' class='bouton_ajouter_multi'"
+        html += " aria-label='Ajouter une consommation le " + this.get_date_fr() + " — " + dict_unites[this.unite].nom + "' title='Ajouter une consommation' href='#'>";
+        html += "<i class='fa fa-plus-circle' aria-hidden='true'></i></a></td></tr></tbody></table>";
         $("#" + this.key).html(html);
 
         // Maj de l'affichage
@@ -912,6 +1049,7 @@ class Case_multihoraires extends Case_base {
     maj_affichage() {
         var key_case = this.key;
         var data_case = this.data_case;
+        var self = this;
 
         // Suppression des cases existantes
         $("#" + this.key + " td[class*='ouvert']").remove();
@@ -941,7 +1079,9 @@ class Case_multihoraires extends Case_base {
             id_unique_multi += 1;
 
             // Dessine la case
-            $("#" + key_case + ' tr').prepend("<td class='case ouvert' id='" + key_case_multi + "'</td>");
+            var html = "<td tabindex='0' class='case ouvert' id='" + key_case_multi + "' style='border: 0px;'"
+            html += " aria-label='" + self.get_date_fr() + " — " + dict_unites[self.unite].nom + "'</td>"
+            $("#" + key_case + ' tr').prepend(html);
 
             // Création de la case virtuelle
             var data_temp = data_case;
@@ -1066,6 +1206,29 @@ class Conso {
 $(function () {
     var case_contextmenu = null;
 
+    // Mémorise et applique les aides visuelles
+    const STORAGE_KEY = "noethysweb_planning_aides_visuelles";
+
+    function setAidesVisuelles(active) {
+        $("#btn_aides_visuelles").attr("aria-checked", String(active));
+        $("#badge_aides_visuelles")
+            .text(active ? "ON" : "OFF")
+            .toggleClass("bg-danger", !active)
+            .toggleClass("bg-success", active);
+        $("body").toggleClass("aides-visuelles-actives", active);
+        aides_visuelles = active;
+    }
+
+    // Restauration depuis localStorage
+    setAidesVisuelles(localStorage.getItem(STORAGE_KEY) === "true");
+
+    $('#btn_aides_visuelles').on("click", function () {
+        const active = $(this).attr("aria-checked") === "true";
+        setAidesVisuelles(!active);
+        localStorage.setItem(STORAGE_KEY, String(!active));
+        $.each(dict_cases, function (key, case_tableau) {case_tableau.calc_remplissage()});
+    });
+
     // Mémorise la touche enfoncée
     $(window).keydown(function(evt) {touche_clavier = evt.which})
     .keyup(function(evt) {touche_clavier = null});
@@ -1091,6 +1254,14 @@ $(function () {
     });
     $(document).mouseup(function () {
         isMouseDown = false;
+    });
+    $(document).on('keydown', ".table td[class*='ouvert']", function(e) {
+        // Si touch Entrée ou Espace
+        if (e.key === 'Enter' || e.key === ' ') {
+            var case_tableau = dict_cases[$(this).attr('id')];
+            action_sur_clic(case_tableau, case_tableau.has_conso());
+            return false; // prevent text selection
+        }
     });
 
     function action_sur_clic(case_tableau, statut) {
@@ -1170,9 +1341,16 @@ $(function () {
 
     // Clic sur les cases mémo
     $(".table td[class*='memo']").click(function (e) {
-        var case_memo = dict_cases_memos[$(this).attr('id')];
-        case_memo.change();
+        dict_cases_memos[$(this).attr('id')].change();
         return false; // prevent text selection
+    });
+
+    // Touche Entrée ou espace sur les cases mémo
+    $(".table td[class*='memo']").keydown(function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            dict_cases_memos[$(this).attr('id')].change();
+            return false;
+        }
     });
 
     // Clic sur le bouton Ajouter un multi
@@ -1381,6 +1559,7 @@ $(document).ready(function() {
         var box = bootbox.dialog({
             title: "Fermer le planning",
             message: "Souhaitez-vous vraiment fermer le planning ? <br>Les éventuelles modifications effectuées seront perdues...",
+            closeButton: false,
             buttons: {
                 ok: {
                     label: "<i class='fa fa-check'></i> Oui, je veux fermer",

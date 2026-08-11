@@ -13,6 +13,15 @@
         .active .bs-stepper-circle {
             background-color: #ff851b;
         }
+        .step-trigger {
+            padding: 5px !important;
+            margin: 20px !important;
+        }
+        .step-trigger:focus-visible {
+            outline: 3px solid var(--bs-primary, #0d6efd) !important;
+            outline-offset: 4px;
+            border-radius: .25rem;
+        }
     </style>
 {% endblock styles %}
 
@@ -35,42 +44,64 @@
                         {# Si une seule page dans le sondage #}
                         {% if pages.0.0.description %}<div class="mb-4">{{ pages.0.0.description }}</div>{% endif %}
                         {% crispy pages.0.1 %}
-                        <a type="button" class="btn btn-default" href="{% url 'portail_sondage' code=sondage.code %}"><i class="fa fa-home margin-r-5"></i>Début</a>
-                        <div class="text-right"><button type="submit" class="btn btn-success" title="Valider" value="Valider"><i class="fa fa-send margin-r-5"></i>Envoyer</button></div>
+                        <a type="button" class="btn btn-default" href="{% url 'portail_sondage' code=sondage.code %}">
+                            <i class="fa fa-home margin-r-5" aria-hidden="true"></i>Début
+                        </a>
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-success" title="Valider" value="Valider">
+                                <i class="fa fa-send margin-r-5" aria-hidden="true"></i>Envoyer
+                            </button>
+                        </div>
 
                     {% else %}
 
                         {# Si plusieurs pages dans le sondage #}
                         <div id="stepper-sondage" class="bs-stepper">
-                            <div class="bs-stepper-header">
+                            <div class="bs-stepper-header" role="tablist" aria-label="Étapes du sondage">
                                 {% for page, form in pages %}
                                     <div class="step" data-target="#page-{{ page.ordre }}">
-                                        <button type="button" class="btn step-trigger">
-                                            <span class="bs-stepper-circle">{{ page.ordre }}</span>
+                                        <button type="button" class="step-trigger" role="tab" id="tab-page-{{ page.ordre }}"
+                                                aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="page-{{ page.ordre }}"
+                                                tabindex="{% if forloop.first %}0{% else %}-1{% endif %}">
+                                            <span class="bs-stepper-circle" aria-hidden="true">{{ page.ordre }}</span>
                                             <span class="bs-stepper-label">{{ page.titre }}</span>
                                         </button>
                                     </div>
-                                    {% if not forloop.last %}<div class="line"></div>{% endif %}
+                                    {% if not forloop.last %}<div class="line" aria-hidden="true"></div>{% endif %}
                                 {% endfor %}
                             </div>
                             <div class="bs-stepper-content">
                                 {% for page, form in pages %}
-                                    <div id="page-{{ page.ordre }}" class="content">
+                                    <section id="page-{{ page.ordre }}" class="content" role="tabpanel" aria-labelledby="tab-page-{{ page.ordre }}">
                                         {% if page.description %}<div class="mb-4">{{ page.description }}</div>{% endif %}
                                         {% crispy form %}
                                         <div class="text-right">
-                                            <a type="button" class="btn btn-default" href="{% url 'portail_sondage' code=sondage.code %}"><i class="fa fa-home margin-r-5"></i>Début</a>
-                                            {% if not forloop.first %}<button type="button" class="btn btn-default" onclick="stepper1.previous()"><i class="fa fa-chevron-circle-left margin-r-5"></i>Précédent</button>{% endif %}
-                                            {% if not forloop.last %}<button type="button" class="btn btn-primary" onclick="stepper1.next()"><i class="fa fa-chevron-circle-right margin-r-5"></i>Suivant</button>{% endif %}
-                                            {% if forloop.last %}<button type="submit" class="btn btn-success" title="Valider" value="Valider"><i class="fa fa-send margin-r-5"></i>Envoyer</button>{% endif %}
+                                            <a type="button" class="btn btn-default" href="{% url 'portail_sondage' code=sondage.code %}" aria-label="Retour au début">
+                                                <i class="fa fa-home margin-r-5" aria-hidden="true"></i>Début
+                                            </a>
+                                            {% if not forloop.first %}
+                                                <button type="button" class="btn btn-default" onclick="stepper1.previous()" aria-label="Étape précédente">
+                                                    <i class="fa fa-chevron-circle-left margin-r-5" aria-hidden="true"></i>Précédent
+                                                </button>
+                                            {% endif %}
+                                            {% if not forloop.last %}
+                                                <button type="button" class="btn btn-primary" onclick="stepper1.next()" aria-label="Étape suivante">
+                                                    <i class="fa fa-chevron-circle-right margin-r-5" aria-hidden="true"></i>Suivant
+                                                </button>
+                                            {% endif %}
+                                            {% if forloop.last %}
+                                                <button type="submit" class="btn btn-success" title="Valider" value="Valider" aria-label="Envoyer">
+                                                    <i class="fa fa-send margin-r-5" aria-hidden="true"></i>Envoyer
+                                                </button>
+                                            {% endif %}
                                         </div>
-                                    </div>
+                                    </section>
                                 {% endfor %}
                             </div>
                         </div>
-                        
+
                         <script type="text/javascript" src="{% static 'lib/bs-stepper/bs-stepper.min.js' %}"></script>
-                        
+
                         <script>
                             var stepper1Node = document.querySelector('#stepper-sondage')
                             var stepper1 = new Stepper(document.querySelector('#stepper-sondage'), {
@@ -81,7 +112,7 @@
                                     event.preventDefault();
                                 }
                             })
-                
+
                             $("#form_sondage").on("submit", function(event) {
                                 if (!(validation_questions())) {
                                     event.preventDefault();

@@ -1,38 +1,64 @@
 {% load i18n %}
-<style>
-    #table-prestations td, #table-prestations th {
-        vertical-align: middle;
-        text-align: center;
-    }
-</style>
 
-<table id="table-prestations" class="table table-bordered">
-    <thead>
-        <tr>
-            <th>{% trans "Date" %}</th>
-            <th>{% trans "Individu" %}</th>
-            <th>{% trans "Activité" %}</th>
-            <th>{% trans "Intitulé" %}</th>
-            <th>{% trans "Montant" %}</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for prestation in prestations %}
+<div class="table-responsive" tabindex="0" role="region" aria-label="{% trans 'Détail des prestations de la facture' %}">
+    <table id="table-prestations" class="table table-bordered align-middle text-center">
+        <caption class="visually-hidden">{% trans "Détail des prestations de la facture" %}</caption>
+        <thead>
             <tr>
-                <td>{{ prestation.date|date:"d/m/Y"|capfirst }}</td>
-                <td>{{ prestation.individu|default:"-" }}</td>
-                <td>{{ prestation.activite|default:"-" }}</td>
-                <td>{{ prestation.label }}</td>
-                <td>{{ prestation.montant|montant }}</td>
+                <th scope="col">{% trans "Date" %}</th>
+                <th scope="col">{% trans "Individu" %}</th>
+                <th scope="col">{% trans "Activité" %}</th>
+                <th scope="col">{% trans "Intitulé" %}</th>
+                <th scope="col">{% trans "Montant" %}</th>
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% for prestation in prestations %}
+                <tr>
+                    <td>{{ prestation.date|date:"d/m/Y"|capfirst }}</td>
+                    <td>{{ prestation.individu|default:"-" }}</td>
+                    <td>{{ prestation.activite|default:"-" }}</td>
+                    <td>{{ prestation.label }}</td>
+                    <td>{{ prestation.montant|montant }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">{% trans "Aucune prestation" %}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
-<ul>
-    <li>{% blocktrans %}Total de la facture{% endblocktrans %} : <b>{{ facture.total|montant }}</b></li>
+<dl class="row g-3 mt-0 mb-0">
+
+    <div class="col-12 col-md-4">
+        <div class="card h-100 mb-0">
+            <div class="card-body">
+                <dt class="text-secondary small fw-normal mb-1">{% blocktrans %}Total de la facture{% endblocktrans %}</dt>
+                <dd class="fs-4 fw-semibold mb-0">{{ facture.total|montant }}</dd>
+            </div>
+        </div>
+    </div>
+
     {% if parametres_portail.facturation_afficher_solde_facture %}
-        <li>{% blocktrans %}Total déjà réglé{% endblocktrans %} : <b>{{ facture.Get_regle_actuel|montant }}</b></li>
-        <li>{% blocktrans %}Solde actuel{% endblocktrans %} : <b>{{ facture.solde_actuel|montant }}</b></li>
+        <div class="col-12 col-md-4">
+            <div class="card h-100 mb-0">
+                <div class="card-body">
+                    <dt class="text-secondary small fw-normal mb-1">{% blocktrans %}Total déjà réglé{% endblocktrans %}</dt>
+                    <dd class="fs-4 fw-semibold text-success mb-0">{{ facture.Get_regle_actuel|montant }}</dd>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card h-100 mb-0 border border-2 border-info bg-info-subtle">
+                <div class="card-body">
+                    <dt class="small fw-normal mb-1 text-info-emphasis">{% blocktrans %}Solde actuel{% endblocktrans %}</dt>
+                    <dd class="fs-4 fw-semibold mb-0 text-info-emphasis">{{ facture.solde_actuel|montant }}</dd>
+                </div>
+            </div>
+        </div>
     {% endif %}
-</ul>
+
+</dl>

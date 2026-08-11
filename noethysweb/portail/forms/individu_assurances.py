@@ -23,9 +23,10 @@ class Form_choix_assureur(forms.ModelChoiceField):
     def label_from_instance(self, instance):
         return instance.Get_nom(afficher_ville=True)
 
+
 class Formulaire(FormulaireBase, ModelForm):
     assureur = Form_choix_assureur(label=_("Assureur"), queryset=Assureur.objects.all().order_by("nom"), required=True, help_text=_("Cliquez sur le champ ci-dessus pour sélectionner un assureur dans la liste déroulante. Vous pouvez faire une recherche par nom ou par ville.") + " <a href='#' class='ajouter_element'>" + _("Cliquez ici pour ajouter un assureur manquant dans la liste de choix") + ".</a>",
-                                     widget=Select_avec_commandes_form(attrs={"url_ajax": "portail_ajax_ajouter_assureur", "id_form": "assureurs_form", "afficher_bouton_ajouter": False,
+                                     widget=Select_avec_commandes_form(attrs={"theme": "bootstrap-5", "url_ajax": "portail_ajax_ajouter_assureur", "id_form": "assureurs_form", "afficher_bouton_ajouter": False,
                                                                               "textes": {"champ": _("Nom de l'assureur"), "ajouter": _("Ajouter un assureur"), "modifier": _("Modifier un assureur")}}))
 
     class Meta:
@@ -70,6 +71,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Field("document"),
             Commandes(annuler_url="{% url 'portail_individu_assurances' idrattachement=rattachement.pk %}", aide=False, ajouter=False, css_class="pull-right"),
         )
+        self.Appliquer_version_bootstrap(5)
 
     def clean(self):
         if "assureur" not in self.cleaned_data:

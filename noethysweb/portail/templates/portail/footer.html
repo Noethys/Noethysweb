@@ -1,0 +1,20 @@
+<footer class="app-footer text-sm d-print-none" role="contentinfo"
+        style="font-size:13px;min-height:40px;padding: 10px 20px 10px 20px;">
+
+    <div class="float-end d-none d-sm-inline">
+        {% block footer_right %}
+            <a href="https://www.noethysweb.com" target="_blank" rel="noopener noreferrer" aria-label="Noethysweb - ouvre un nouvel onglet">
+                <span class="fw-bold">Noethysweb</span>
+            </a> {{ version_application }}
+        {% endblock %}
+    </div>
+
+    {% block footer_left %}
+        {% block legal %}
+            <span><strong>Copyright &copy; 2019-{% now "Y" %}</strong> Ivan LUCAS</span>
+        {% endblock %}
+        <span aria-hidden="true">&nbsp;|&nbsp;</span>
+        <a href="{% url 'portail_accessibilite' %}">Accessibilité : non conforme (en cours)</a>
+    {% endblock %}
+
+</footer>

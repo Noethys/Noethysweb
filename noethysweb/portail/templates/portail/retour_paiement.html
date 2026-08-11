@@ -10,35 +10,45 @@
 
 {% block contenu_page %}
     <p>
-		<a id="retour_factures" href="{% url 'portail_facturation' %}"><i class="fa fa-arrow-circle-o-left"></i> {% blocktrans %}Revenir à la page de la facturation{% endblocktrans %}</a>
-	</p>
+        <a id="retour_factures" href="{% url 'portail_facturation' %}">
+            <i class="fa fa-circle-arrow-left me-1" aria-hidden="true"></i>{% blocktrans %}Revenir à la page de la facturation{% endblocktrans %}
+        </a>
+    </p>
 
-	{% if etat == "cancel" %}
-        <div class="alert alert-danger alert-dismissible">
-            <h6><i class="icon fa fa-ban"></i> {% blocktrans %}Vous avez annulé avant d'avoir procédé au paiement !{% endblocktrans %}</h6>
-            {% blocktrans %}Vous pouvez revenir à la page des factures.{% endblocktrans %}
+    {% if etat == "cancel" %}
+        <div class="alert alert-danger" role="alert">
+            <p class="fw-bold mb-1">
+                <i class="fa fa-ban me-1" aria-hidden="true"></i>{% blocktrans %}Vous avez annulé avant d'avoir procédé au paiement !{% endblocktrans %}
+            </p>
+            <p class="mb-0">{% blocktrans %}Vous pouvez revenir à la page des factures.{% endblocktrans %}</p>
         </div>
-	{% endif %}
+    {% endif %}
 
-	{% if etat == "error" %}
-        <div class="alert alert-danger alert-dismissible">
-            <h6><i class="icon fa fa-ban"></i> {% blocktrans %}Une erreur a été rencontrée par la plate-forme de paiement !{% endblocktrans %}</h6>
-            {% blocktrans %}Vous pouvez revenir à la page des factures.{% endblocktrans %}
+    {% if etat == "error" %}
+        <div class="alert alert-danger" role="alert">
+            <p class="fw-bold mb-1">
+                <i class="fa fa-ban me-1" aria-hidden="true"></i>{% blocktrans %}Une erreur a été rencontrée par la plate-forme de paiement !{% endblocktrans %}
+            </p>
+            <p class="mb-0">{% blocktrans %}Vous pouvez revenir à la page des factures.{% endblocktrans %}</p>
         </div>
-	{% endif %}
+    {% endif %}
 
-	{% if etat == "refused" %}
-        <div class="alert alert-danger alert-dismissible">
-            <h6><i class="icon fa fa-ban"></i> {% blocktrans %}Votre paiement a été refusé !{% endblocktrans %}</h6>
-            {% blocktrans %}Vous pouvez revenir à la page des factures.{% endblocktrans %}
+    {% if etat == "refused" %}
+        <div class="alert alert-danger" role="alert">
+            <p class="fw-bold mb-1">
+                <i class="fa fa-ban me-1" aria-hidden="true"></i>{% blocktrans %}Votre paiement a été refusé !{% endblocktrans %}
+            </p>
+            <p class="mb-0">{% blocktrans %}Vous pouvez revenir à la page des factures.{% endblocktrans %}</p>
         </div>
-	{% endif %}
+    {% endif %}
 
-	{% if etat == "success" %}
-        <div class="alert alert-success alert-dismissible">
-            <h6><i class="icon fa fa-check"></i> {% blocktrans %}Votre paiement a bien été enregistré !{% endblocktrans %}</h6>
-            {% blocktrans %}Vous pouvez revenir à la page des factures.{% endblocktrans %}
+    {% if etat == "success" %}
+        <div class="alert alert-success" role="status">
+            <p class="fw-bold mb-1">
+                <i class="fa fa-check me-1" aria-hidden="true"></i>{% blocktrans %}Votre paiement a bien été enregistré !{% endblocktrans %}
+            </p>
+            <p class="mb-0">{% blocktrans %}Vous pouvez revenir à la page des factures.{% endblocktrans %}</p>
         </div>
-	{% endif %}
+    {% endif %}
 
 {% endblock contenu_page %}

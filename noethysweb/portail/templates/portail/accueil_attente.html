@@ -1,0 +1,26 @@
+{% load static %}
+
+<div class="col-lg-3 col-sm-6">
+    <div class="stat-card-portail" style="{% block card_style %}{% endblock %};">
+        <div class="stat-card-inner">
+            <div>
+                <p class="stat-card-number">
+                    {% block quantite %}{% endblock %}
+                </p>
+                <p class="stat-card-label">
+                    {% block label %}{% endblock %}
+                </p>
+            </div>
+            <div class="stat-card-icon">
+                <i class="{% block icone %}{% endblock %}" aria-hidden="true"></i>
+            </div>
+        </div>
+        <a href="{% block url %}{% endblock %}"
+            class="stat-card-footer"
+            aria-label="{% block label_aria %}{% endblock %}"
+        >
+            {% block label_action %}{% endblock %}
+            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        </a>
+    </div>
+</div>

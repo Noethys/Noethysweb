@@ -1,35 +1,43 @@
 {% load i18n %}
 {% load static %}
 
-<div class="card alert-default-secondary p-0 card_approbation">
-    <table class="table no-border m-1">
-        <tbody>
-            <tr>
-                <td class="p-1">
-                    <div id="div_{{ id }}" class="custom-control custom-checkbox">
-                        <input type="checkbox" name="{{ name }}" class="checkboxinput custom-control-input" id="{{ id }}">
-                        <label for="{{ id }}" class="custom-control-label" style="font-size: 13px;">
-                            {% if unite_consentement %}
-                                {% blocktrans %}J'ai lu et j'accepte les conditions décrites dans le document{% endblocktrans %} '{{ unite_consentement.type_consentement.nom }}'.
-                            {% endif %}
-                            {% if rattachement %}
-                                {% blocktrans %}Je certifie exact les renseignements de la fiche de{% endblocktrans %} {{ rattachement.individu.Get_nom }}.
-                            {% endif %}
-                            {% if famille %}
-                                {% blocktrans %}Je certifie exact les renseignements de la fiche famille.{% endblocktrans %}
-                            {% endif %}
-                        </label>
-                        {% if unite_consentement %}
-                            <small class="form-text text-muted">{% blocktrans %}Document mis à jour le{% endblocktrans %} {{ unite_consentement.date_debut|date:'d/m/Y' }}</small>
-                        {% endif %}
-                    </div>
-                </td>
-                {% if unite_consentement and unite_consentement.document %}
-                    <td class="text-right py-0 pt-1">
-                        <a href="{{ unite_consentement.document.url }}" style="text-decoration: none;" target="_blank" class="btn btn-light btn-xs" title="{% trans "Cliquez ici pour ouvrir le document dans un nouvel onglet" %}"><i class="fa fa-search"></i></a>
-                    </td>
-                {% endif %}
-            </tr>
-        </tbody>
-    </table>
+<div class="card p-0 bg-danger-subtle border-danger mb-3">
+    <div class="d-flex align-items-start gap-2 p-3">
+
+        <div style="display: flex; align-items: flex-start; gap: 0.5em;">
+            <input type="checkbox" name="{{ name }}" id="{{ id }}" style="margin-top: 4px; flex-shrink: 0; cursor: pointer;"
+                   {% if unite_consentement %}aria-describedby="aide_{{ id }}"{% endif %}
+            >
+            <div>
+                <label for="{{ id }}" class="custom-control-label mb-0">
+                    {% if unite_consentement %}
+                        {% blocktrans %}J'ai lu et j'accepte les conditions décrites dans le document{% endblocktrans %} '{{ unite_consentement.type_consentement.nom }}'
+                        <small>{% blocktrans %}(Document mis à jour le{% endblocktrans %} {{ unite_consentement.date_debut|date:'d/m/Y' }})</small>
+                    {% endif %}
+                    {% if rattachement %}
+                        {% blocktrans %}Je certifie exact les renseignements de la fiche de{% endblocktrans %} {{ rattachement.individu.Get_nom }}.
+                    {% endif %}
+                    {% if famille %}
+                        {% blocktrans %}Je certifie exact les renseignements de la fiche famille.{% endblocktrans %}
+                    {% endif %}
+                </label>
+            </div>
+        </div>
+
+        {# Bouton d'ouverture du document #}
+        {% if unite_consentement and unite_consentement.document %}
+            <div class="flex-shrink-0">
+                <a href="{{ unite_consentement.document.url }}"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="btn btn-light btn-xs"
+                   style="text-decoration: none;"
+                   aria-label="{% blocktrans with nom=unite_consentement.type_consentement.nom %}Ouvrir le document dans un nouvel onglet{% endblocktrans %}"
+                >
+                    <i class="fa fa-search" aria-hidden="true"></i>
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
 </div>

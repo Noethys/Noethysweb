@@ -30,6 +30,20 @@
             white-space: nowrap;
             margin-right: 8px;
         }
+        li:last-child .list-group-item {
+            border-bottom-right-radius: 5px;
+            border-bottom-left-radius: 5px;
+        }
+        .titre_fiche {
+            font-size: 1.3rem;
+            color: #ffffff;
+            text-align: center !important;
+            margin-top: 0;
+            margin-bottom: .5rem;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
     </style>
 
 {% endblock styles %}
@@ -38,40 +52,54 @@
 
     {# Lien de retour vers la page des renseignements #}
 	<div class="d-print-none" style="margin-bottom: 10px;">
-        <a id="retour_renseignements" href="{% url 'portail_renseignements' %}"><i class="fa fa-arrow-circle-o-left"></i> {% blocktrans %}Revenir à la page des renseignements{% endblocktrans %}</a>
+        <a id="retour_renseignements" href="{% url 'portail_renseignements' %}">
+            <i class="fa fa-arrow-circle-o-left" aria-hidden="true"></i> {% blocktrans %}Revenir à la page des renseignements{% endblocktrans %}
+        </a>
 	</div>
 
     <div class="row">
         <div class="col-md-3">
 
-            <div class="card card-primary widget-user-2 card-outline bg-lightblue">
+            <nav aria-label="{% trans 'Navigation de la fiche individu' %}"
+                 class="card card-primary widget-user-2" style="border: 0; background-color: #367da6;"
+            >
 
-                <div class="card-body box-profile" style="border-bottom: 1px solid rgba(0,0,0,.125);">
+                <div class="card-body box-profile" style="border-bottom: 1px solid rgba(0,0,0,.125);color: #000000;">
                     <div class="text-center">
-                        <img class="img-fluid img-circle elevation-2" src="{% if rattachement %}{{ rattachement.individu.Get_photo }}{% else %}{% static 'images/personne.png' %}{% endif %}" style="max-height: 80px">
+                        <img class="img-fluid rounded-circle shadow mb-2"
+                             src="{% if rattachement %}{{ rattachement.individu.Get_photo }}{% else %}{% static 'images/personne.png' %}{% endif %}"
+                             style="max-height: 80px"
+                             alt="Photo de {{ rattachement.individu.prenom }}"
+                        >
                     </div>
-                    <h3 class="profile-username text-center">{% if rattachement %}{{ rattachement.individu.Get_nom }}{% else %}{% blocktrans %}Famille de{% endblocktrans %} {{ famille }}{% endif %}</h3>
-{#                    <p class="text-muted text-center">{{ rattachement.get_categorie_display }}</p>#}
+                    <div class="titre_fiche">
+                        {% if rattachement %}{{ rattachement.individu.Get_nom }}{% else %}{% blocktrans %}Famille de{% endblocktrans %} {{ famille }}{% endif %}
+                    </div>
                 </div>
 
                 {# Onglets #}
-                <div class="card-footer p-0 bg-white">
-                    <ul class="list-group list-group-flush">
+                <div class="card-footer p-0 bg-white border-top-0">
+                    <ul class="list-group list-group-flush" role="list" style="list-style: none; padding-left: 0;">
                         {% for onglet in liste_onglets %}
-                            <a class="list-group-item list-group-item-action {% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% if rattachement %}{% url onglet.url idrattachement=rattachement.pk %}{% else %}{% url onglet.url %}{% endif %}">
-                                <i class="fa {{ onglet.icone }} text-light-blue fa-fw"></i> {{ onglet.label }}
-                            </a>
+                            <li role="listitem">
+                                <a class="list-group-item list-group-item-action {% if onglet_actif == onglet.code %}item_actif{% endif %}"
+                                   href="{% if rattachement %}{% url onglet.url idrattachement=rattachement.pk %}{% else %}{% url onglet.url %}{% endif %}"
+                                   {% if onglet_actif == onglet.code %}aria-current="page"{% endif %}
+                                >
+                                    <i class="fa {{ onglet.icone }} text-light-blue fa-fw" aria-hidden="true"></i> {{ onglet.label }}
+                                </a>
+                            </li>
                         {% endfor %}
                     </ul>
                 </div>
-            </div>
+            </nav>
 
         </div>
 
         {% block detail_fiche %}
             <div class="col-md-9">
                 {% embed 'core/box.html' %}
-                    {% block box_theme %}card-outline card-lightblue{% endblock %}
+                    {% block box_theme %}card-outline card-primary{% endblock %}
                     {% block box_titre %}{{ box_titre }}{% endblock %}
                     {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
                     {% block box_contenu %}{% endblock %}

@@ -1,0 +1,25 @@
+{% load crispy_forms_tags %}
+{% load static i18n %}
+
+<div class="modal fade" id="modal_mentions_legales" tabindex="-1" aria-labelledby="modal-mentions-legales-titre" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header bg-primary text-white">
+                <h2 class="modal-title h5" id="modal-mentions-legales-titre">
+                    <i class="bi bi-file-earmark-text me-2" aria-hidden="true"></i>
+                    {% trans "Mentions légales" %}
+                </h2>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="{% trans "Fermer la fenêtre des mentions légales" %}"></button>
+            </div>
+
+            <div class="modal-body p-3" style="max-height:72vh;overflow-y:auto">
+                {{ texte_mentions_legales|safe }}
+            </div>
+
+        </div>
+    </div>
+</div>

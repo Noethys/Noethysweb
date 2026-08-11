@@ -31,7 +31,8 @@ class MyPasswordResetView(ClassCommuneLogin, auth_views.PasswordResetView):
         utilisateur = Utilisateur.objects.filter(username__iexact=identifiant, is_active=True, categorie="famille").first()
         if not utilisateur or not utilisateur.famille.mail or utilisateur.famille.mail != email:
             logger.debug("Erreur : Pas de compte actif existant.")
-            return _("Il n'existe pas de compte actif correspondant à cet identifiant et cette adresse Email.")
+            form.add_error(None, "Il n'existe pas de compte actif correspondant à cet identifiant et cette adresse Email.")
+            return self.render_to_response(self.get_context_data(form=form))
 
         opts = {
             "nom_template_sujet": "portail/password_reset/emails/confirmation_sujet.txt",

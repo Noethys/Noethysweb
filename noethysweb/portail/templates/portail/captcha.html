@@ -1,0 +1,28 @@
+{% load i18n %}
+
+{% spaceless %}
+    <div class="input-group has-validation">
+
+        {# Image du captcha — alt vide car le contenu est fourni par le champ texte et le bouton audio #}
+        <span class="input-group-text p-1 captcha-wrapper">
+            <img src="{{ image }}" alt="" class="captcha-img" aria-hidden="true" data-a11y-keep>
+        </span>
+
+        {# Champ de saisie généré par Django (multiwidget : champ caché + champ texte) #}
+        {% include "django/forms/widgets/multiwidget.html" %}
+
+        {# Bouton audio — visible uniquement si la librairie génère un fichier audio #}
+        {% if audio %}
+            <a href="{{ audio }}"
+               class="input-group-text"
+               title="{% trans 'Écouter le code de sécurité' %}"
+               aria-label="{% trans 'Écouter le code de sécurité en audio' %}"
+               target="_blank"
+               rel="noopener noreferrer">
+                <i class="fa fa-fw fa-volume-up" aria-hidden="true"></i>
+                <span class="visually-hidden">(ouvre un nouvel onglet)</span>
+            </a>
+        {% endif %}
+
+    </div>
+{% endspaceless %}

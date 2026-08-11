@@ -1,9 +1,19 @@
 {% load i18n %}
 
     {# Commandes #}
-    <div class="commandes_grille d-print-none d-flex flex-wrap">
-        <button type="button" id="enregistrer" name="bouton_enregistrer" title="{% trans "Enregistrer" %}" class='btn btn-primary btn-sm' style="margin-right: 5px;"><i class="fa fa-check margin-r-5"></i>{% trans "Enregistrer" %}</button>
-        <button type="button" id="annuler" name="bouton_annuler" title="{% trans "Annuler" %}" class="btn btn-danger" style="margin-right: 5px;"><i class="fa fa-ban margin-r-5"></i>{% trans "Annuler" %}</button>
-{#        <a id="imprimer" onclick="window.print();" target="_blank" class="btn btn-default" style="margin-right: 5px;"><i class="fa fa-print margin-r-5"></i>Imprimer</a>#}
-        <button type="button" id="appliquer_semaine_type" class="btn btn-default btn-sm" onclick="$('#modal_appliquer_semaine_type').modal('show');" title="{% trans "Appliquer une semaine-type" %}"><i class="fa fa-calendar-check-o"></i> {% blocktrans %}Appliquer une semaine-type{% endblocktrans %}</button>
+    <div class="commandes_grille d-print-none d-flex flex-wrap" role="toolbar" aria-label="{% trans "Commandes du planning" %}">
+        <button type="button" id="enregistrer" name="bouton_enregistrer" class='btn btn-primary' style="margin-right: 5px;">
+            <i class="fa fa-check me-2" aria-hidden="true"></i>{% trans "Enregistrer" %}
+        </button>
+        <button type="button" id="annuler" name="bouton_annuler" class="btn btn-danger" style="margin-right: 5px;">
+            <i class="fa fa-ban me-2" aria-hidden="true"></i>{% trans "Annuler" %}
+        </button>
+        <button type="button" id="appliquer_semaine_type" class="btn btn-secondary" onclick="$('#modal_appliquer_semaine_type').modal('show');" style="margin-right: 5px;">
+            <i class="fa fa-calendar-check-o me-2" aria-hidden="true"></i>{% blocktrans %}Appliquer une semaine-type{% endblocktrans %}
+        </button>
+        <button type="button" id="btn_aides_visuelles" class="btn btn-secondary" role="switch" aria-checked="false" style="margin-right: 5px;">
+            <i class="fa fa-eye me-2" aria-hidden="true"></i>
+            <span>{% trans "Aides visuelles" %}</span>
+            <span id="badge_aides_visuelles" class="badge bg-danger" aria-hidden="true">OFF</span>
+        </button>
     </div>

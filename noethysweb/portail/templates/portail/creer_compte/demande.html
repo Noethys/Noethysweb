@@ -1,4 +1,4 @@
-{% extends "core/base_login.html" %}
+{% extends "portail/base_login.html" %}
 {% load i18n %}
 {% load static %}
 {% load crispy_forms_tags %}
@@ -28,28 +28,14 @@
 
             {% crispy form %}
 
-            <button name="creer_compte_valider" id="creer_compte_valider" class="btn btn-block btn-primary login-btn mb-3 mt-0" type="submit" title="{% trans "Cliquez ici pour valider" %}">{% trans "Valider" %}</button>
+            <button name="creer_compte_valider" id="creer_compte_valider" class="btn w-100 btn-primary login-btn mb-3 mt-0" type="submit" title="{% trans "Cliquez ici pour valider" %}">
+                <i class="fa fa-fw fa-check me-1" aria-hidden="true"></i>
+                {% trans "Valider" %}
+            </button>
 
         </form>
 
-        <a class="forgot-password-link" href="{% url 'portail_connexion' %}" title="{% trans "Revenir à la page de connexion" %}">{% blocktrans %}Revenir à la page de connexion{% endblocktrans %}</a>
-    </div>
-
-    {# Modal : Conditions d'utilisation #}
-    <div class="modal" id="modal_conditions">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">{% blocktrans %}Conditions d'utilisation{% endblocktrans %}</h4>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div style="font-size: 13px;">
-                        {{ texte_conditions|safe }}
-                    </div>
-                </div>
-            </div>
-        </div>
+        <a class="" href="{% url 'portail_connexion' %}" title="{% trans "Revenir à la page de connexion" %}"><i class="fa fa-arrow-circle-o-left me-1" aria-hidden="true"></i>{% blocktrans %}Revenir à la page de connexion{% endblocktrans %}</a>
     </div>
 
 {% endblock contenu_cadre %}

@@ -12,6 +12,8 @@ from django.templatetags.static import static
 from django.contrib.auth.models import update_last_login
 from noethysweb.version import GetVersion
 from portail.forms.login import FormLoginFamille
+from portail.forms.accessibilite import FormulaireAccessibilite
+from portail.utils import utils_accessibilite, utils_mentions_legales
 from core.models import Organisateur, ImageFond
 from core.utils import utils_portail, utils_historique
 
@@ -46,6 +48,15 @@ class ClassCommuneLogin:
             context['url_image_fond'] = ImageFond.objects.filter(pk=idimage_fond).first().image.url
         else:
             context['url_image_fond'] = static("images/portail.jpg")
+
+        # Formulaire accessibilité
+        context["form_accessibilite"] = FormulaireAccessibilite()
+
+        # Déclaration d'accessibilité
+        context["texte_declaration_accessibilite"] = utils_accessibilite.Get_declaration_accessibilite(context, self.request)
+
+        # Déclaration d'accessibilité
+        context["texte_mentions_legales"] = utils_mentions_legales.Get_mentions_legales(context, self.request)
 
         return context
 

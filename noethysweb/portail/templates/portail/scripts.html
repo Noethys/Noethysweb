@@ -1,0 +1,141 @@
+{% load static %}
+
+{% block scripts %}
+    <script src="{% static "lib/jquery/jquery.min.js" %}"></script>
+    <script src="{% static "lib/jqueryui/jquery-ui.min.js" %}"></script>
+    <script src="{% static "lib/popper/popper.min.js" %}"></script>
+    <script src="{% static "lib/bootstrap5/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "lib/adminlte4/js/adminlte.min.js" %}"></script>
+    <script src="{% static 'lib/toastr/toastr.min.js' %}"></script>
+    <script src="{% static 'lib/bootbox/6.0.4/bootbox.min.js' %}"></script>
+
+    {{ form.media.js }}
+
+    <script>
+        toastr.options = {
+            "preventDuplicates": true,
+        };
+
+        $(document).ready(function() {
+
+            // Enregistre le masquage du sidebar
+            $(".sidebar-toggle").on('click', function(e) {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_memorise_option' %}",
+                    data: {
+                        nom: "masquer-sidebar",
+                        valeur: !$("body").hasClass("sidebar-collapse"),
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                    },
+                    datatype: "json",
+                });
+            });
+        });
+
+        // Permet de masquer les modals si l'usager désactive les css
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // ==========================================
+            // 1. GESTION AUTOMATIQUE DES MODALES
+            // ==========================================
+            const modals = document.querySelectorAll('.modal');
+
+            modals.forEach(modal => {
+                // Force l'état masqué en HTML au chargement de la page
+                modal.setAttribute('hidden', '');
+
+                // Retire l'attribut "hidden" au moment où la modale s'ouvre
+                modal.addEventListener('show.bs.modal', () => {
+                    modal.removeAttribute('hidden');
+                });
+
+                // Remet l'attribut "hidden" dès que la modale est fermée
+                modal.addEventListener('hidden.bs.modal', () => {
+                    modal.setAttribute('hidden', '');
+                });
+            });
+
+
+            // ==========================================
+            // 2. GESTION AUTOMATIQUE DES DROPDOWNS
+            // ==========================================
+            const dropdownMenus = document.querySelectorAll('.dropdown-menu');
+
+            dropdownMenus.forEach(menu => {
+                // Force l'état masqué du sous-menu en HTML au chargement
+                menu.setAttribute('hidden', '');
+
+                // Récupère le bouton ou le lien qui contrôle ce menu déroulant
+                const toggleId = menu.getAttribute('aria-labelledby');
+                if (toggleId) {
+                    const toggleButton = document.getElementById(toggleId);
+
+                    if (toggleButton) {
+                        // Retire l'attribut "hidden" quand le menu se déroule
+                        toggleButton.addEventListener('show.bs.dropdown', () => {
+                            menu.removeAttribute('hidden');
+                        });
+
+                        // Remet l'attribut "hidden" quand le menu se replie
+                        toggleButton.addEventListener('hidden.bs.dropdown', () => {
+                            menu.setAttribute('hidden', '');
+                        });
+                    }
+                }
+            });
+
+            // ==========================================
+            // Pour faire disparaître totalement les skip-links d'adminlte
+            // ==========================================
+
+            // On cible les classes de skip-links courantes d'AdminLTE / Bootstrap
+            const skipLinks = document.querySelectorAll('.skip-link, .visually-hidden-focusable, [href*="content"]');
+            skipLinks.forEach(link => {
+                // On leur applique le masquage HTML pur
+                link.setAttribute('hidden', '');
+                // Sécurité supplémentaire pour les lecteurs d'écran
+                link.setAttribute('aria-hidden', 'true');
+            });
+
+            // ==========================================
+            // Pour que les nav-tabs apparaissent bien sans css
+            // ==========================================
+
+            // Fonction qui synchronise l'attribut hidden avec les classes Bootstrap
+            function synchroniserOnglets() {
+                const tabPanes = document.querySelectorAll('.tab-content .tab-pane');
+                tabPanes.forEach(pane => {
+                    if (pane.classList.contains('active')) {
+                        // Si l'onglet est actif, on s'assure qu'il est visible en HTML pur
+                        pane.removeAttribute('hidden');
+                    } else {
+                        // S'il est inactif, on lui met l'attribut hidden (crucial pour le SANS CSS)
+                        pane.setAttribute('hidden', '');
+                    }
+                });
+            }
+            // 1. On exécute la fonction au chargement initial de la page
+            synchroniserOnglets();
+            // 2. On écoute les changements d'onglets de Bootstrap pour mettre à jour les attributs
+            document.addEventListener('shown.bs.tab', () => {
+                synchroniserOnglets();
+            });
+
+        });
+
+        // ==========================================
+        // Pour que le sidebar s'agrandisse après agrandissement de la fenêtre
+        // ==========================================
+
+        window.addEventListener('resize', () => {
+            // 992px correspond au breakpoint 'lg' de Bootstrap 5
+            if (window.innerWidth >= 992) {
+                // On retire la classe de fermeture forcée pour laisser le CSS responsive reprendre le dessus
+                document.body.classList.remove('sidebar-collapse');
+            }
+        });
+
+    </script>
+
+{% endblock %}

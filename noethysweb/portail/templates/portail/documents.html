@@ -5,92 +5,146 @@
 {% load embed %}
 
 
-{% block styles %}
-    {{ block.super }}
-    <style>
-        .mailbox-attachment-icon {
-            color: #666;
-            font-size: 40px;
-            max-height: 132.5px;
-            padding: 10px 10px;
-            text-align: center;
-            border-radius: 5px 5px 0 0;
-        }
-        @media (min-width: 576px) {
-            .card-columns {
-                -webkit-column-count: 4;
-                -moz-column-count: 4;
-                column-count: 4;
-            }
-        }
-    </style>
-{% endblock %}
-
 {% block contenu_page %}
 
     {# Texte d'introduction #}
     {% if parametres_portail.documents_intro %}
-        <div style="margin-bottom: 20px;">
-            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.documents_intro }}
+        <div class="div-intro" role="note" aria-label="{% trans "Information" %}">
+            <i class="fa fa-info-circle margin-r-5" aria-hidden="true"></i>{{ parametres_portail.documents_intro }}
         </div>
     {% endif %}
+
 
     {# Liste des pièces à fournir #}
     {% embed 'core/box.html' with box_titre=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}{% blocktrans %}Pièces à fournir{% endblocktrans %}{% endblock %}
+        {% block box_titre %}
+            <i class="fa fa-files-o me-2" aria-hidden="true"></i>
+            {% blocktrans %}Pièces à fournir{% endblocktrans %}
+        {% endblock %}
         {% block box_contenu %}
             {% if pieces_fournir %}
                 <p>{% blocktrans %}Les pièces suivantes marquées d'une croix rouge sont à nous transmettre{% endblocktrans %} :</p>
                 <ul class="list-unstyled">
                     {% for piece in pieces_fournir %}
-                        <li>{% if piece.valide %}<i class='fa fa-check fa-fw text-green'></i>{% else %}<i class='fa fa-close fa-fw text-red'></i>{% endif %} {{ piece.label }}</li>
+                        <li class="piece-item {% if piece.valide %}piece-ok{% else %}piece-ko{% endif %}">
+                            {% if piece.valide %}
+                                <i class="fa fa-check-circle text-success" aria-hidden="true" style="flex-shrink:0;"></i>
+                                <span class="visually-hidden">{% trans "Fournie" %} : </span>
+                            {% else %}
+                                <i class="fa fa-times-circle" aria-hidden="true" style="flex-shrink:0;color:#bd2130;"></i>
+                                <span class="visually-hidden">{% trans "Manquante" %} : </span>
+                            {% endif %}
+                            <span>{{ piece.label }}</span>
+                        </li>
                     {% endfor %}
                 </ul>
             {% else %}
+                <i class="fa fa-check-circle text-success me-2" aria-hidden="true"></i>
                 {% blocktrans %}Aucune pièce à fournir.{% endblocktrans %}
             {% endif %}
         {% endblock box_contenu %}
     {% endembed %}
 
+
     {# Transmettre des documents #}
     {% embed 'core/box.html' with box_titre=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}{% blocktrans %}Transmettre un document{% endblocktrans %}{% endblock %}
+        {% block box_titre %}
+            <i class="fa fa-upload me-2" aria-hidden="true"></i>
+            {% blocktrans %}Transmettre un document{% endblocktrans %}
+        {% endblock %}
         {% block box_contenu %}
             <p>{% blocktrans %}Cliquez sur le bouton ci-dessous pour nous transmettre un document (une pièce du dossier, un certificat, une attestation, etc...){% endblocktrans %} :</p>
-            <a type="button" class="btn btn-success" title="{% trans "Transmettre un document" %}" href="{% url 'portail_transmettre_piece' %}"><i class="fa fa-send-o margin-r-5"></i>{% blocktrans %}Transmettre un document{% endblocktrans %}</a>
+            <a class="btn btn-primary" title="{% trans "Transmettre un document" %}" href="{% url 'portail_transmettre_piece' %}"
+                aria-label="Transmettre un document"
+            >
+                <i class="fa fa-upload me-2" aria-hidden="true"></i>{% blocktrans %}Transmettre un document{% endblocktrans %}
+            </a>
         {% endblock box_contenu %}
     {% endembed %}
+
 
     {# Liste des documents à télécharger #}
     {% if liste_documents %}
         {% embed 'core/box.html' with box_titre=True %}
             {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}{% blocktrans %}Documents à télécharger{% endblocktrans %}{% endblock %}
+            {% block box_titre %}
+                <i class="fa fa-download me-2" aria-hidden="true"></i>
+                {% blocktrans %}Documents à télécharger{% endblocktrans %}
+            {% endblock %}
             {% block box_contenu %}
-                <p>{% blocktrans %}Cliquez sur le nom d'un document pour le télécharger{% endblocktrans %} :</p>
-                <div class="card-columns">
+                <p class="mb-3">
+                    {% blocktrans %}Vous pouvez télécharger les documents suivants{% endblocktrans %} :
+                </p>
+
+                <div class="row g-3">
                     {% for document in liste_documents %}
-                        <div class="card mb-4" style="margin-top: 1px;">
-{#                            <span class="mailbox-attachment-icon bg-{{ document.couleur_fond }}">#}
-{#                                {% if document.extension|is_in_list:"jpg;JPG;png;PNG" %}#}
-{#                                    <i class="fa fa-file-image-o"></i>#}
-{#                                {% elif document.extension|is_in_list:"pdf;PDF" %}#}
-{#                                    <i class="fa fa-file-pdf-o"></i>#}
-{#                                {% elif document.extension|is_in_list:"doc;docx;DOC;DOCX" %}#}
-{#                                    <i class="fa fa-file-word-o"></i>#}
-{#                                {% else %}#}
-{#                                    <i class="fa fa-file-o"></i>#}
-{#                                {% endif %}#}
-{#                            </span>#}
-                            <div class="card-body pl-3 pr-3 pt-3 pb-1" style="background-color: #f4f6f9">
-                                <h5 class="card-title"><a href="{{ document.fichier.url }}" target="_blank" title="{% trans "Télécharger le document" %}">{{ document.titre }}</a></h5>
-                                <div class="card-text link-muted mt-1"><small>{{ document.texte|default:"&nbsp;" }}</small></div>
-                                <span class="mailbox-attachment-size clearfix mt-1 mb-2">
-                                    <span>{{ document.fichier.size|filesizeformat }} - {{ document.extension|upper }}</span>
-                                    <a href="{{ document.fichier.url }}" class="btn btn-default btn-sm float-right" target="_blank" title="{% trans "Télécharger le document" %}"><i class="fa fa-download"></i></a>
-                                </span>
+                        <div class="col-12 col-sm-6 col-lg-4">
+                            <div class="card h-100 shadow-sm border-0">
+
+                                {# Bandeau couleur selon le type #}
+                                <div class="card-header py-2 px-3 d-flex align-items-center gap-2
+                                    {% if document.extension|lower == 'pdf' %}bg-danger text-white
+                                    {% elif document.extension|lower|is_in_list:"doc;docx" %}bg-primary text-white
+                                    {% elif document.extension|lower|is_in_list:"xls;xlsx" %}bg-success text-white
+                                    {% elif document.extension|lower|is_in_list:"jpg;jpeg;png;gif" %}bg-info text-white
+                                    {% else %}bg-secondary text-white
+                                    {% endif %}">
+                                    <i class="fa
+                                        {% if document.extension|lower|is_in_list:"jpg;jpeg;png;gif" %}fa-file-image-o
+                                        {% elif document.extension|lower == 'pdf' %}fa-file-pdf-o
+                                        {% elif document.extension|lower|is_in_list:"doc;docx" %}fa-file-word-o
+                                        {% elif document.extension|lower|is_in_list:"xls;xlsx" %}fa-file-excel-o
+                                        {% else %}fa-file-o
+                                        {% endif %}"
+                                        aria-hidden="true">
+                                    </i>
+                                    <span class="small fw-semibold text-uppercase">
+                                        {{ document.extension|upper }}
+                                    </span>
+                                    <span class="ms-auto small">
+                                        {{ document.fichier.size|filesizeformat }}
+                                    </span>
+                                </div>
+
+                                <div class="card-body d-flex flex-column gap-2
+                                    {% if document.extension|lower == 'pdf' %}bg-danger-subtle
+                                        {% elif document.extension|lower|is_in_list:"doc;docx" %}bg-primary-subtle
+                                        {% elif document.extension|lower|is_in_list:"xls;xlsx" %}bg-success-subtle
+                                        {% elif document.extension|lower|is_in_list:"jpg;jpeg;png;gif" %}bg-info-subtle
+                                        {% else %}bg-secondary-subtle
+                                        {% endif %}"
+                                    >
+                                    <h3 class="card-title h6 mb-0">
+                                        {{ document.titre }}
+                                    </h3>
+
+                                    {% if document.texte %}
+                                        <p class="card-text text-muted small mb-0">
+                                            {{ document.texte }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="card-footer border-top-0 pt-0 pb-3 px-3
+                                     {% if document.extension|lower == 'pdf' %}bg-danger-subtle
+                                        {% elif document.extension|lower|is_in_list:"doc;docx" %}bg-primary-subtle
+                                        {% elif document.extension|lower|is_in_list:"xls;xlsx" %}bg-success-subtle
+                                        {% elif document.extension|lower|is_in_list:"jpg;jpeg;png;gif" %}bg-info-subtle
+                                        {% else %}bg-secondary-subtle
+                                        {% endif %}"
+                                    >
+                                    <a href="{{ document.fichier.url }}"
+                                       class="btn btn-primary btn-sm pull-right"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       aria-label="{% blocktrans %}Télécharger{% endblocktrans %} {{ document.titre }}, {{ document.extension }}, {{ document.fichier.size|filesizeformat }} {% blocktrans %}(s'ouvre dans un nouvel onglet){% endblocktrans %}">
+                                        <i class="fa fa-download me-1" aria-hidden="true"></i>
+                                        {% trans "Télécharger" %}
+                                    </a>
+                                </div>
+
                             </div>
                         </div>
                     {% endfor %}

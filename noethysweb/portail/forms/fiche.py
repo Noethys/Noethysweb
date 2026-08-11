@@ -18,6 +18,33 @@ class FormulaireBase():
             self.mode = kwargs.pop("mode", None)
         super(FormulaireBase, self).__init__(*args, **kwargs)
 
+    def Appliquer_version_bootstrap(self, num_version=5):
+        self.helper.template_pack = "bootstrap%d" % num_version
+        self.helper.include_media = False
+
+        for field in self.fields.values():
+            field.widget.attrs.update({"bootstrap_version": num_version})
+
+        for field_name, field in self.fields.items():
+            widget = field.widget
+            attrs = widget.attrs
+            widget_type = widget.__class__.__name__
+
+            if widget_type in ('RadioSelect', 'CheckboxSelectMultiple'):
+                widget.use_fieldset = False
+
+            # Attributs ARIA — RGAA
+            if field.required:
+                attrs['aria-required'] = 'true'
+
+            if field.help_text:
+                attrs['aria-describedby'] = f'id_{field_name}_helptext'
+
+            if hasattr(self, '_errors') and self._errors and field_name in self._errors:
+                attrs['aria-invalid'] = 'true'
+                existing = attrs.get('aria-describedby', '')
+                attrs['aria-describedby'] = f'{existing} {field_name}_error'.strip()
+
     def Set_layout(self):
         # Récupération des variables
         if hasattr(self, "rattachement"):
@@ -40,6 +67,7 @@ class FormulaireBase():
 
         # Préparation du layout
         self.helper.layout = Layout()
+        self.Appliquer_version_bootstrap(5)
 
         # Création des fields
         liste_renseignements_manquants = []
@@ -80,7 +108,7 @@ class FormulaireBase():
 
         # Affichage des renseignements manquants en haut du formulaire
         if liste_renseignements_manquants:
-            self.helper.layout.insert(0, HTML("""<div class='alerte'><i class='icon fa fa-warning text-danger'></i> <b>Renseignements manquants : %s</b></div>""" % ", ".join(liste_renseignements_manquants)))
+            self.helper.layout.insert(0, HTML("""<div class='alerte bg-body-secondary'><i class='icon fa fa-warning text-danger me-1'></i> <b>Renseignements manquants : %s</b></div>""" % ", ".join(liste_renseignements_manquants)))
 
         # Désactive les champs en mode consultation
         if self.mode == "CONSULTATION":
@@ -99,7 +127,7 @@ class FormulaireBase():
 
         if self.mode == "EDITION":
             self.helper.layout.append(ButtonHolder(
-                    StrictButton("<i class='fa fa-check margin-r-5'></i>%s" % _("Enregistrer les modifications"), title=_("Enregistrer"), name="enregistrer", type="submit", css_class="btn-primary"),
-                    HTML("""<a class="btn btn-danger" href='{{% url 'portail_{nom_page}' {texte_kwargs} %}}' title="{title}"><i class="fa fa-ban margin-r-5"></i>{label}</a>""".format(
+                    StrictButton('<i class=\'fa fa-check margin-r-5\' aria-hidden=\'true\'></i>%s' % _("Enregistrer les modifications"), title=_("Enregistrer"), name="enregistrer", type="submit", css_class="btn-primary"),
+                    HTML("""<a class="btn btn-danger" href='{{% url 'portail_{nom_page}' {texte_kwargs} %}}' title="{title}"><i class="fa fa-ban margin-r-5" aria-hidden="true"></i>{label}</a>""".format(
                         nom_page=self.nom_page, texte_kwargs=texte_kwargs, title=_("Annuler"), label=_("Annuler"))
                     ), css_class="pull-right"))

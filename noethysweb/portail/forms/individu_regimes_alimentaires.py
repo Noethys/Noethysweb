@@ -15,7 +15,7 @@ from portail.forms.fiche import FormulaireBase
 
 class Formulaire(FormulaireBase, ModelForm):
     regimes_alimentaires = forms.ModelMultipleChoiceField(label=_("Régimes alimentaires"),
-                            widget=Select_many_avec_plus(attrs={"url_ajax": "portail_ajax_ajouter_regime_alimentaire", "afficher_bouton_ajouter": False, "textes": {"champ": _("Nom du régime alimentaire"), "ajouter": _("Ajouter un nouveau régime alimentaire")}}),
+                            widget=Select_many_avec_plus(attrs={"theme": "bootstrap-5", "url_ajax": "portail_ajax_ajouter_regime_alimentaire", "afficher_bouton_ajouter": False, "textes": {"champ": _("Nom du régime alimentaire"), "ajouter": _("Ajouter un nouveau régime alimentaire")}}),
                             queryset=RegimeAlimentaire.objects.all().order_by("nom"), required=False)
 
     class Meta:

@@ -12,22 +12,23 @@ from django.conf import settings
 from django.utils.translation import gettext as _
 from django.utils.safestring import mark_safe
 from django.core.validators import validate_email
-from core.models import Individu
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from crispy_forms.bootstrap import Field
-from core.utils.utils_captcha import CaptchaField, CustomCaptchaTextInput
+from core.models import Individu
+from core.utils.utils_captcha import CaptchaField, CustomCaptchaTextInput_bs5
+from portail.forms.fiche import FormulaireBase
 
 
-class FormCreerCompte(forms.Form):
+class FormCreerCompte(FormulaireBase, forms.Form):
     civilite = forms.ChoiceField(label="Civilité", choices=[(1, "Monsieur"), (3, "Madame")], required=True, help_text="Sélectionnez une civilité dans la liste déroulante.")
     nom = forms.CharField(label="Nom de famille", required=True, help_text="Saisissez votre nom de famille en majuscules. Ex : DUPOND.")
     prenom = forms.CharField(label="Prénom", required=True, help_text="Saisissez votre prénom en minuscules avec la première lettre en majuscule. Ex : Sophie.")
     email = forms.CharField(label="Email", required=True, max_length=254, widget=forms.EmailInput(attrs={"autocomplete": "email"}), help_text="Saisissez votre adresse email. Elle sera utilisée pour vous envoyer un email d'activation.")
     mdp1 = forms.CharField(label="Mot de passe", required=True, widget=forms.TextInput(attrs={"type": "password"}), help_text="")
     mdp2 = forms.CharField(label="Mot de passe", required=True, widget=forms.TextInput(attrs={"type": "password"}), help_text="Saisissez une seconde fois le mot de passe choisi.")
-    captcha = CaptchaField(widget=CustomCaptchaTextInput)
-    check_conditions = forms.BooleanField(label=mark_safe("J'accepte les <a href='#' data-toggle='modal' data-target='#modal_conditions'>conditions d'utilisation</a>"), required=True, initial=False)
+    captcha = CaptchaField(widget=CustomCaptchaTextInput_bs5)
+    check_conditions = forms.BooleanField(label=mark_safe("J'accepte les <button type='button' class='btn btn-link p-0 align-baseline text-decoration-none' data-bs-toggle='modal' data-bs-target='#modal_mentions_legales'>conditions d'utilisation</button>"), required=True, initial=False)
 
     def __init__(self, *args, **kwargs):
         super(FormCreerCompte, self).__init__(*args, **kwargs)
@@ -41,7 +42,8 @@ class FormCreerCompte(forms.Form):
         self.helper.label_class = "col-md-3"
         self.helper.field_class = "col-md-9"
 
-        self.fields["captcha"].widget.attrs["placeholder"] = _("Recopiez le code de sécurité ci-contre")
+        self.fields["captcha"].widget.attrs["placeholder"] = _("Recopiez le code de sécurité")
+        self.fields["captcha"].widget.use_fieldset = False
 
         # Affichage des exigences de mot de passe dans le help_text
         exigences = ["<li>%s</li>" % v.get_help_text() for v in get_password_validators(settings.AUTH_PASSWORD_VALIDATORS)]
@@ -57,6 +59,7 @@ class FormCreerCompte(forms.Form):
             Field("captcha"),
             Field("check_conditions"),
         )
+        self.Appliquer_version_bootstrap(5)
 
     def clean(self):
         # Vérifie la cohérence de l'adresse mail

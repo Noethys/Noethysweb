@@ -3,13 +3,12 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django import forms
 from django.forms import ModelForm
 from django.utils.translation import gettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Div, ButtonHolder
 from crispy_forms.bootstrap import Field
-from core.forms.base import FormulaireBase
+from portail.forms.fiche import FormulaireBase
 from core.models import Medecin
 from core.widgets import Telephone, CodePostal, Ville, Rue
 
@@ -46,8 +45,9 @@ class Formulaire(FormulaireBase, ModelForm):
             ButtonHolder(
                 Div(
                     HTML("""<button type="button" class="btn btn-primary" id="id_medecin_bouton_valider" title="{label}"><i class="fa fa-check margin-r-5"></i>{label}</button>""".format(label=_("Valider"))),
-                    HTML("""<button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>{label}</button>""".format(label=_("Annuler"))),
+                    HTML("""<button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>{label}</button>""".format(label=_("Annuler"))),
                     css_class="modal-footer", style="padding-bottom:0px;padding-right:0px;"
                 ),
             ),
         )
+        self.Appliquer_version_bootstrap(5)

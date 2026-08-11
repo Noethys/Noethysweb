@@ -40,7 +40,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         self.helper.layout = Layout(
             Field("civilite", type="hidden"),
-            InlineRadios("categorie"),
+            Field("categorie"),
             Field("titulaire"),
             Field("civilite_representant"),
             Field("civilite_enfant"),
@@ -51,6 +51,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 enregistrer_label="<i class='fa fa-check margin-r-5'></i>%s" % _("Valider"),
                 annuler_url="{% url 'portail_renseignements' %}", ajouter=False, aide=False, css_class="pull-right"),
         )
+        self.Appliquer_version_bootstrap(5)
 
     def clean(self):
         # Formatage du nom et du prénom

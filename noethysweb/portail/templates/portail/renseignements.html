@@ -9,16 +9,6 @@
 {% block styles %}
     {{ block.super }}
     <style>
-        @media only screen and (max-width: 800px) {
-            #table-fiches td:nth-child(2) {
-                display: none;
-            }
-        }
-        @media only screen and (max-width: 600px) {
-            #table-fiches td:nth-child(3) {
-                display: none;
-            }
-        }
         .project-state {
             text-align: left !important;
         }
@@ -51,16 +41,12 @@
                 column-count: 1;
             }
         }
-        .card_approbation {
-            margin-bottom: 0px !important;
-            margin-top: 1px;
-        }
         .card-columns {
-            column-gap: 10px;
-            margin-bottom: 4px;
+            column-gap: 15px;
+            margin-bottom: 10px;
         }
-        #famille_approbations_form .form-group {
-            margin-bottom: 5px;
+        .card-columns .card {
+            break-inside: avoid;
         }
     </style>
 {% endblock %}
@@ -69,22 +55,29 @@
 
     {# Texte d'introduction #}
     {% if parametres_portail.renseignements_intro %}
-        <div style="margin-bottom: 20px;">
-            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.renseignements_intro }}
+        <div class="div-intro" role="note" aria-label="{% trans "Information" %}">
+            <i class="fa fa-info-circle margin-r-5" aria-hidden="true"></i>{{ parametres_portail.renseignements_intro }}
         </div>
     {% endif %}
 
+
     {% if parametres_portail.connexion_creation_compte or parametres_portail.renseignements_creation_individu %}
         <p>
-            <a title="{% trans "Cliquez ici pour créer une nouvelle fiche individuelle" %}" href="{% url 'portail_creer_individu' %}" class="btn btn-success mb-2" type="button"><i class="fa fa-plus margin-r-5"></i>{% blocktrans %}Saisir un nouvel individu{% endblocktrans %}</a>
+            <a href="{% url 'portail_creer_individu' %}" class="btn btn-success mb-2">
+                <i class="fa fa-plus me-2" aria-hidden="true"></i>{% blocktrans %}Saisir un nouvel individu{% endblocktrans %}
+            </a>
         </p>
     {% endif %}
+
 
     {# Approbations en attente #}
     {% if form.fields %}
         {% embed 'core/box.html' with box_introduction=True %}
-            {% block box_theme %}card-outline card-info{% endblock %}
-            {% block box_titre %}{% blocktrans %}Approbations en attente{% endblocktrans %}{% endblock %}
+            {% block box_theme %}{% endblock %}
+            {% block box_titre %}
+                <i class="fa fa-exclamation-triangle me-2" aria-hidden="true"></i>
+                {% blocktrans %}Approbations en attente{% endblocktrans %}
+            {% endblock %}
             {% block box_introduction %}{% blocktrans %}L'accès aux réservations nécessite les approbations suivantes. Après avoir vérifié les fiches, cochez les cases puis cliquez sur le bouton Valider.{% endblocktrans %}{% endblock %}
             {% block box_contenu %}
                 <form id="famille_approbations_form" method="post">
@@ -92,105 +85,148 @@
                     <div class="card-columns">
                         {% crispy form %}
                     </div>
-                    <button type="submit" title="{% trans "Enregistrer" %}" class="btn btn-primary pull-right" value="Enregistrer"><i class="fa fa-check margin-r-5"></i>{% blocktrans %}Valider les approbations cochées{% endblocktrans %}</button>
+                    <button type="submit" class="btn btn-primary pull-right" value="Enregistrer">
+                        <i class="fa fa-check me-2" aria-hidden="true"></i>{% blocktrans %}Valider les approbations cochées{% endblocktrans %}
+                    </button>
                 </form>
             {% endblock %}
         {% endembed %}
     {% endif %}
-    
+
+
     {# Liste des fiches de renseignements #}
     {% embed 'core/box.html' with box_titre=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}{% blocktrans %}Fiches de renseignements{% endblocktrans %}{% endblock %}
+        {% block box_titre %}
+            <i class="fa fa-file-text-o me-2" aria-hidden="true"></i>
+            {% blocktrans %}Fiches de renseignements{% endblocktrans %}
+        {% endblock %}
         {% block card_body_classe %}p-0{% endblock %}
         {% block box_contenu %}
+            <div class="table-responsive">
+                <table id="table-fiches" class="table table-hover projects" style="cursor: pointer;">
+                    <caption class="sr-only">
+                        {% blocktrans %}Liste des fiches de renseignements de la famille et des individus rattachés{% endblocktrans %}
+                    </caption>
+                    <thead class="sr-only">
+                        <tr>
+                            <th scope="col">{% trans "Nom" %}</th>
+                            <th scope="col">{% trans "État de la fiche" %}</th>
+                            <th scope="col">{% trans "Action" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
-            <table id="table-fiches" class="table table-hover projects" style="cursor: pointer;">
-                <tbody>
-
-                    {# Fiche famille #}
-                    <tr data-url="{% url 'portail_famille_caisse' %}">
-                        <td>
-                            <img src="{% static 'images/personne.png' %}" alt="user-avatar" class="img-circle img-fluid table-avatar" style="max-height: 80px">
-                            <span class="ml-2"><strong>{% trans "Famille" %}</strong></span>
-                        </td>
-                        <td>
-                            {% blocktrans %}Fiche famille{% endblocktrans %}
-                        </td>
-                        <td class="project-state">
-                            <small>
-                                <ul class="list-unstyled">
-                                    {% with request.user.famille.certification_date|get_etat_certification:parametres_portail.renseignements_duree_certification as etat_certification %}
-                                        {% if etat_certification == "VALIDE" %}
-                                            <li class="text-success"><i class="fa fa-check margin-r-5"></i>{% blocktrans %}Fiche certifiée exacte le{% endblocktrans %} {{ request.user.famille.certification_date|date:'d/m/Y' }}</li>
-                                        {% elif etat_certification == "EXPIRE" %}
-                                            <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Fiche en attente de certification (Certification expirée){% endblocktrans %}</li>
-                                        {% else %}
-                                            <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Fiche en attente de certification{% endblocktrans %}</li>
-                                        {% endif %}
-                                    {% endwith %}
-                                    {% for renseignement in renseignements_manquants|get_item:None %}
-                                        <li class="text-red"><i class="fa fa-remove margin-r-5"></i>{{ renseignement }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </small>
-                        </td>
-                        <td class="text-right">
-                            <a href="{% url 'portail_famille_caisse' %}" class="btn btn-sm btn-primary" title="{% trans "Ouvrir la fiche" %}">
-                                <i class="fa fa-pencil"></i>
-                            </a>
-                        </td>
-                    </tr>
-
-                    {# Fiches individuelles #}
-                    {% for rattachement in rattachements %}
-                        <tr data-url="{% url 'portail_individu_identite' idrattachement=rattachement.pk %}">
+                        {# Fiche famille #}
+                        <tr data-url="{% url 'portail_famille_caisse' %}" style="vertical-align: middle;" aria-label="{% trans "Fiche Famille — ouvrir la fiche" %}">
                             <td>
-                                <img src="{{ rattachement.individu.Get_photo }}" alt="user-avatar" class="img-circle img-fluid table-avatar" style="max-height: 80px">
-                                <span class="ml-2"><strong>{{ rattachement.individu.Get_nom }}</strong></span>
-                            </td>
-                            <td>
-                                {% if rattachement.categorie == 1 %}{% blocktrans %}Fiche représentant{% endblocktrans %}{% endif %}
-                                {% if rattachement.categorie == 2 %}{% blocktrans %}Fiche enfant{% endblocktrans %}{% endif %}
-                                {% if rattachement.categorie == 3 %}{% blocktrans %}Fiche contact{% endblocktrans %}{% endif %}
+                                {% embed 'portail/titre_individu.html' with balise_nom="div" %}
+                                    {% block styles %}p-2{% endblock %}
+                                    {% block src_photo %}{% static 'images/personne.png' %}{% endblock %}
+                                    {% block prenom_individu %}{% blocktrans %}Famille{% endblocktrans %}{% endblock %}
+                                    {% block infos %}
+                                        <span>
+                                            <i class="fa fa-file-text-o" aria-hidden="true"></i>
+                                            {% blocktrans %}Fiche famille{% endblocktrans %}
+                                        </span>
+                                    {% endblock %}
+                                {% endembed %}
                             </td>
                             <td class="project-state">
                                 <small>
-                                    <ul class="list-unstyled">
-                                        {% with rattachement.certification_date|get_etat_certification:parametres_portail.renseignements_duree_certification as etat_certification %}
+                                    <ul class="list-unstyled" aria-label="{% trans "État de la fiche famille" %}">
+                                        {% with request.user.famille.certification_date|get_etat_certification:parametres_portail.renseignements_duree_certification as etat_certification %}
                                             {% if etat_certification == "VALIDE" %}
-                                                <li class="text-success"><i class="fa fa-check margin-r-5"></i>{% blocktrans %}Fiche certifiée exacte le{% endblocktrans %} {{ rattachement.certification_date|date:'d/m/Y' }}</li>
+                                                <li class="text-success"><i class="fa fa-check margin-r-5" aria-hidden="true"></i>{% blocktrans %}Fiche certifiée exacte le{% endblocktrans %} {{ request.user.famille.certification_date|date:'d/m/Y' }}</li>
                                             {% elif etat_certification == "EXPIRE" %}
-                                                <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Fiche en attente de certification (Certification expirée){% endblocktrans %}</li>
+                                                <li class="text-danger"><i class="fa fa-remove margin-r-5" aria-hidden="true"></i>{% blocktrans %}Fiche en attente de certification (Certification expirée){% endblocktrans %}</li>
                                             {% else %}
-                                                <li class="text-danger"><i class="fa fa-remove margin-r-5"></i>{% blocktrans %}Fiche en attente de certification{% endblocktrans %}</li>
+                                                <li class="text-danger"><i class="fa fa-remove margin-r-5" aria-hidden="true"></i>{% blocktrans %}Fiche en attente de certification{% endblocktrans %}</li>
                                             {% endif %}
                                         {% endwith %}
-                                        {% for renseignement in renseignements_manquants|get_item:rattachement.individu %}
-                                            <li class="text-red"><i class="fa fa-remove margin-r-5"></i>{{ renseignement }}</li>
+                                        {% for renseignement in renseignements_manquants|get_item:None %}
+                                            <li class="text-danger"><i class="fa fa-remove margin-r-5" aria-hidden="true"></i>{{ renseignement }}</li>
                                         {% endfor %}
                                     </ul>
                                 </small>
                             </td>
                             <td class="text-right">
-                                <a href="{% url 'portail_individu_identite' idrattachement=rattachement.pk %}" class="btn btn-sm btn-primary" title="{% trans "Ouvrir la fiche" %}">
-                                    <i class="fa fa-pencil"></i>
+                                <a href="{% url 'portail_famille_caisse' %}" class="btn btn-sm btn-primary" title="{% trans "Ouvrir la fiche" %}">
+                                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                                    <span class="sr-only">{% blocktrans %}Ouvrir la fiche Famille{% endblocktrans %}</span>
                                 </a>
                             </td>
                         </tr>
-                    {% endfor %}
 
-                </tbody>
-            </table>
+                        {# Fiches individuelles #}
+                        {% for rattachement in rattachements %}
+                            <tr data-url="{% url 'portail_individu_identite' idrattachement=rattachement.pk %}" style="vertical-align: middle;"
+                                aria-label="{{ rattachement.individu.Get_nom }} — {% trans "ouvrir la fiche" %}"
+                            >
+                                <td>
+                                    {% embed 'portail/titre_individu.html' with balise_nom="div" %}
+                                        {% block styles %}p-2{% endblock %}
+                                        {% block src_photo %}{{ rattachement.individu.Get_photo }}{% endblock %}
+                                        {% block prenom_individu %}{{ rattachement.individu.prenom }}{% endblock %}
+                                        {% block infos %}
+                                            <span>
+                                                <i class="fa fa-file-text-o" aria-hidden="true"></i>
+                                                {% if rattachement.categorie == 1 %}{% blocktrans %}Fiche représentant{% endblocktrans %}{% endif %}
+                                                {% if rattachement.categorie == 2 %}{% blocktrans %}Fiche enfant{% endblocktrans %}{% endif %}
+                                                {% if rattachement.categorie == 3 %}{% blocktrans %}Fiche contact{% endblocktrans %}{% endif %}
+                                            </span>
+                                        {% endblock %}
+                                    {% endembed %}
+                                </td>
+                                <td class="project-state">
+                                    <small>
+                                        <ul class="list-unstyled" aria-label="{% blocktrans %}État de la fiche de{% endblocktrans %} {{ rattachement.individu.Get_nom }}">
+                                            {% with rattachement.certification_date|get_etat_certification:parametres_portail.renseignements_duree_certification as etat_certification %}
+                                                {% if etat_certification == "VALIDE" %}
+                                                    <li class="text-success"><i class="fa fa-check margin-r-5" aria-hidden="true"></i>{% blocktrans %}Fiche certifiée exacte le{% endblocktrans %} {{ rattachement.certification_date|date:'d/m/Y' }}</li>
+                                                {% elif etat_certification == "EXPIRE" %}
+                                                    <li class="text-danger"><i class="fa fa-remove margin-r-5" aria-hidden="true"></i>{% blocktrans %}Fiche en attente de certification (Certification expirée){% endblocktrans %}</li>
+                                                {% else %}
+                                                    <li class="text-danger"><i class="fa fa-remove margin-r-5" aria-hidden="true"></i>{% blocktrans %}Fiche en attente de certification{% endblocktrans %}</li>
+                                                {% endif %}
+                                            {% endwith %}
+                                            {% for renseignement in renseignements_manquants|get_item:rattachement.individu %}
+                                                <li class="text-danger"><i class="fa fa-remove margin-r-5" aria-hidden="true"></i>{{ renseignement }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </small>
+                                </td>
+                                <td class="text-right">
+                                    <a href="{% url 'portail_individu_identite' idrattachement=rattachement.pk %}" class="btn btn-sm btn-primary" title="{% trans "Ouvrir la fiche" %}">
+                                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                                        <span class="sr-only">{% blocktrans %}Ouvrir la fiche de{% endblocktrans %} {{ rattachement.individu.Get_nom }}</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
 
+                    </tbody>
+                </table>
+            </div>
         {% endblock box_contenu %}
     {% endembed %}
 
+
     <script>
         $(document).ready(function() {
-            $('.table-hover tbody tr').click(function() {
-                window.location = $(this).data('url');
+            {# Navigation clavier sur les lignes de tableau (RGAA 12.1 / WCAG 2.1.1)  #}
+            document.querySelectorAll('#table-fiches tbody tr[data-url]').forEach(function (row) {
+                row.addEventListener('click', function () {
+                    window.location.href = this.dataset.url;
+                });
+                row.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        window.location.href = this.dataset.url;
+                    }
+                });
             });
+
         });
     </script>
 

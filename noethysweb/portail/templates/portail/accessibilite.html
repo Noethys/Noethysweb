@@ -1,0 +1,28 @@
+{% extends "portail/page.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+
+    {# Texte d'introduction #}
+    <div class="div-intro" role="note" aria-label="{% trans "Information" %}">
+        <i class="fa fa-info-circle margin-r-5" aria-hidden="true"></i>Veuillez trouver ci-dessous la déclaration d'accessibilité de ce portail famille.
+    </div>
+
+    {# Déclaration d'accessibilité #}
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}{% blocktrans %}
+            <i class="fa fa-universal-access me-2" aria-hidden="true"></i>
+            Déclaration d'accessibilité
+        {% endblocktrans %}{% endblock %}
+        {% block box_contenu %}
+            {{ texte_declaration_accessibilite|safe }}
+        {% endblock box_contenu %}
+        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+    {% endembed %}
+
+{% endblock contenu_page %}

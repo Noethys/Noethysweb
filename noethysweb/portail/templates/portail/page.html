@@ -11,32 +11,40 @@
 
 {% block page %}
 
-    <div class="content-wrapper">
-
-        {% block messages %}
-            {% include 'core/messages.html' %}
-        {% endblock %}
+    <main class="app-main" id="main" tabindex="-1">
 
         {% block content_header %}
 
-            <div class="content-header">
+            <div class="app-content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0 text-dark">
+                            <h1 class="m-0">
                                 {{ page_titre }}
-                                <small>{% block page_description %}{% endblock %}</small>
                             </h1>
                         </div>
                         <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="{% url 'portail_accueil' %}"><i class="fa fa-home"></i> {% trans "Accueil" %}</a></li>
-                                {% for item in breadcrumb %}
-                                    {% if item.code and item.code != "portail_accueil" %}
-                                        <li class="breadcrumb-item"><a href="{{ item.GetUrl }}">{{ item.titre }}</a></li>
-                                    {% endif %}
-                                {% endfor %}
-                            </ol>
+                            <nav aria-label="Fil d'Ariane">
+                                <ol class="breadcrumb float-sm-end">
+                                    <li class="breadcrumb-item">
+                                        <a href="{% url 'portail_accueil' %}" {% if breadcrumb|length == 1 and breadcrumb.0.code == "portail_accueil" %}aria-current="page"{% endif %}>
+                                            <i class="fa fa-home" aria-hidden="true"></i> {% trans "Accueil" %}
+                                        </a>
+                                    </li>
+                                    {% for item in breadcrumb %}
+                                        {% if item.code and item.code != "portail_accueil" %}
+                                            <li class="breadcrumb-item {% if forloop.last %}active{% endif %}" {% if forloop.last %}aria-current="page"{% endif %}>
+                                                {% if forloop.last %}
+                                                    {{ item.titre }}
+                                                {% else %}
+                                                    <a href="{{ item.GetUrl }}">{{ item.titre }}</a>
+                                                {% endif %}
+                                            </li>
+                                        {% endif %}
+
+                                    {% endfor %}
+                                </ol>
+                            </nav>
                         </div>
                     </div>
                 </div>
@@ -44,16 +52,21 @@
 
         {% endblock %}
 
-        <section class="content">
+        <div class="app-content">
             <div class="container-fluid">
+
+                {% block messages %}
+                    {% include 'core/messages.html' %}
+                {% endblock %}
+
                 {% block contenu_page %}
                 {% endblock contenu_page %}
+
             </div>
-        </section>
+        </div>
 
-    </div>
+    </main>
 {% endblock page %}
-
 
 {% block scripts %}
     {{ block.super }}

@@ -5,6 +5,7 @@
 {% block styles %}
     <link rel="stylesheet" type="text/css" href="{% static 'lib/clusterize/clusterize.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'consommations/grille.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/daterangepicker/daterangepicker.css' %}">
     <style>
         {% for evt in data.liste_images_evenements %}
             .event-img-{{ evt.get_nom_image }}:before {background-image: url("{{ evt.image.url }}");}
@@ -17,8 +18,9 @@
 
 {% block scripts %}
     <script type="text/javascript" src="{% static 'lib/clusterize/clusterize.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
     <script type="text/javascript" src="{% static "consommations/grille.js" %}"></script>
+    <script type="text/javascript" src="{% static 'lib/moment/moment.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/daterangepicker/daterangepicker.js' %}"></script>
 {% endblock scripts %}
 
 
@@ -105,23 +107,20 @@
         {% endif %}
     </div>
 
-    <div class="table noselect masquer" id="table_grille" draggable="false">
-        <table cellspacing="0" id="table-grille" class="table table-bordered table-grille bg-white" style="min-width: 400px;">
+    <div class="table noselect masquer" id="table_grille" draggable="false" data-bs-theme="light">
+        <table id="table-grille" class="table table-bordered table-grille bg-white"
+               border="1" cellpadding="8" cellspacing="0"
+               style="min-width: 400px;" aria-label="Planning des réservations">
             <thead>
                 <tr>
-{% comment %}
-                    {% if data.mode == 'pointeuse' %}
-                        <th style="width:40px">Photo</th>
-                    {% endif %}
-{% endcomment %}
-                    <th>
+                    <th scope="col">
                         {% if data.mode == 'jour' or data.mode == 'pointeuse' %}Individu{% else %}Date{% endif %}
                     </th>
                     {% for unite in data.liste_unites_visibles %}
-                        <th>{{ unite.nom }}</th>
+                        <th scope="col">{{ unite.nom }}</th>
                     {% endfor %}
                     {% if data.mode != "portail" %}
-                        <th>Mémo</th>
+                        <th scope="col">Mémo</th>
                     {% endif %}
                 </tr>
             </thead>
@@ -135,7 +134,7 @@
                     {# Regroupement par date #}
                     {% if data.liste_inscriptions|length > 1 and data.mode|is_in_list:"individu;portail" %}
                         <tr>
-                            <th class="date_regroupement">{{ date|date:"l j F Y"|title }}</th>
+                            <th scope="row" class="date_regroupement">{{ date|date:"l j F Y"|title }}</th>
                                 {% for unite in data.liste_unites_visibles %}
                                     <td class="date_regroupement"></td>
                                 {% endfor %}
@@ -147,15 +146,7 @@
                     {% for inscription in data.liste_inscriptions %}
 
                         <tr>
-{% comment %}
-                            {% if data.mode == 'pointeuse' %}
-                                <th>
-                                    <img src="{{ inscription.individu.Get_photo }}" alt="photo-individu" class="img-circle img-fluid" style="max-width: 40px">
-                                </th>
-                            {% endif %}
-{% endcomment %}
-
-                            <th class="{% if date|est_en_vacances:data.liste_vacances and data.mode == 'individu' %}vacances{% endif %}">
+                            <th scope="row" class="{% if date|est_en_vacances:data.liste_vacances and data.mode == 'individu' %}vacances{% endif %}">
                                 {% if data.mode == 'date' or data.mode == 'pointeuse' %}
                                     <div>
                                         {% if data.options.tri|default:"nom" == 'prenom' %}
@@ -171,7 +162,8 @@
                                     {% if data.liste_inscriptions|length > 1 %}
                                         <div>{{ inscription.individu.prenom|default:inscription.individu.nom }}</div><div class='infos_inscription'>{% if inscription.infos %}{{ inscription.infos }}{% endif %}</div>
                                     {% else %}
-                                        <span class="texte_entete_ligne_large">{{ date|date:"l j F Y"|title }}</span><span class="texte_entete_ligne_court">{{ date|date:"D. d/m/y"|title }}</span>
+                                        <span class="texte_entete_ligne_large">{{ date|date:"l j F Y"|title }}</span>
+                                        <span class="texte_entete_ligne_court" hidden>{{ date|date:"D. d/m/y"|title }}</span>
                                     {% endif %}
                                 {% endif %}
                             </th>
@@ -189,7 +181,7 @@
 
                                     {# Création de la case #}
                                     {% if unite in data.liste_unites_visibles %}
-                                        <td
+                                        <td {% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}tabindex="0" aria-label="{{ date|date:"l j F Y"|title }} - {{ unite.nom }}"{% endif %}
                                             class="case {{ unite.type|lower }} {% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}ouvert{% endif %} {% if not ajout_allowed %}blocked{% endif %}"
                                             id="{{ key_case }}"
                                         ></td>
@@ -223,7 +215,7 @@
                             {# Création de la case mémo #}
                             {% if data.mode != "portail" %}
                                 {% creation_string_key date inscription.pk as key_memo %}
-                                <td class="memo" id="{{ key_memo }}"></td>
+                                <td class="memo" id="{{ key_memo }}" tabindex="0" aria-label="Mémo du {{ date|date:"l j F Y"|title }}"></td>
                                 <script>
                                     var case_memo = new Case_memo({
                                         key: "{{ key_memo }}",

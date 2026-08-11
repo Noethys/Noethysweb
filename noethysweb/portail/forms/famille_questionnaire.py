@@ -32,7 +32,7 @@ class Formulaire(FormulaireBase, forms.Form):
 
         # Création des champs
         for question in QuestionnaireQuestion.objects.filter(categorie="famille", visible_portail=True).order_by("ordre"):
-            nom_controle, ctrl = questionnaires.Get_controle(question)
+            nom_controle, ctrl = questionnaires.Get_controle(question, attrs={"data-theme": "bootstrap-5"})
             if ctrl:
                 self.fields[nom_controle] = ctrl
 
@@ -64,8 +64,8 @@ class Formulaire(FormulaireBase, forms.Form):
                 self.helper.layout.append(ButtonHolder(HTML("""<a class="btn btn-primary" href="{{% url 'portail_famille_questionnaire_modifier' %}}" title="{title}"><i class="fa fa-pencil margin-r-5"></i>{label}</a>""".format(title=_("Modifier"), label=_("Modifier cette page"))), css_class="pull-right"))
             if mode == "EDITION":
                 self.helper.layout.append(ButtonHolder(
-                        StrictButton("<i class='fa fa-check margin-r-5'></i>%s" % _("Enregistrer les modifications"), title=_("Enregistrer"), name="enregistrer", type="submit", css_class="btn-primary"),
-                        HTML("""<a class="btn btn-danger" href='{{% url 'portail_famille_questionnaire' %}}' title="{title}"><i class="fa fa-ban margin-r-5"></i>{label}</a>""".format(title=_("Annuler"), label=_("Annuler"))), css_class="pull-right"))
+                        StrictButton("<i class='fa fa-check margin-r-5' aria-hidden='true'></i>%s" % _("Enregistrer les modifications"), title=_("Enregistrer"), name="enregistrer", type="submit", css_class="btn-primary"),
+                        HTML("""<a class="btn btn-danger" href='{{% url 'portail_famille_questionnaire' %}}' title="{title}"><i class="fa fa-ban margin-r-5" aria-hidden="true"></i>{label}</a>""".format(title=_("Annuler"), label=_("Annuler"))), css_class="pull-right"))
 
     def clean(self):
         for key, valeur in self.cleaned_data.items():

@@ -1,0 +1,41 @@
+{% load crispy_forms_tags %}
+{% load static i18n %}
+
+<div class="modal fade" id="modal_accessibilite" tabindex="-1" aria-labelledby="modal_accessibilite_label" aria-modal="true" role="dialog">
+
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            {# ── En-tête ── #}
+            <div class="modal-header bg-primary text-white">
+                <h2 class="modal-title h5" id="modal_accessibilite_label">
+                    <i class="bi bi-universal-access-circle me-1" aria-hidden="true"></i>
+                    Réglages d'accessibilité
+                </h2>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer la fenêtre de réglages d'accessibilité"></button>
+            </div>
+
+            {# ── Corps ── #}
+            <div class="modal-body p-0" style="max-height:72vh;overflow-y:auto">
+                <form id="form_accessibilite" novalidate>
+                    {% crispy form_accessibilite %}
+                </form>
+            </div>
+
+            {# ── Pied ── #}
+            <div class="modal-footer justify-content-between">
+                <button type="button" id="btn_reinitialiser_accessibilite"
+                        class="btn btn-warning"
+                        aria-label="Réinitialiser les réglages d'accessibilité aux valeurs par défaut">
+                    <i class="fa fa-undo me-2" aria-hidden="true"></i>
+                    Réinitialiser
+                </button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                    <i class="fa fa-ban me-2" aria-hidden="true"></i>
+                    Fermer
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

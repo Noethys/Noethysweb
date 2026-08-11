@@ -19,7 +19,7 @@ from core.widgets import DatePickerWidget, ColorPickerWidget, SliderWidget, Sele
 from parametrage.widgets import Choix_questionnaire
 
 
-def Get_controle(question=None):
+def Get_controle(question=None, attrs={}):
     nom_controle = "question_%d" % question.pk
 
     if question.controle == "ligne_texte":
@@ -42,7 +42,7 @@ def Get_controle(question=None):
         ctrl = forms.TypedChoiceField(label=question.label, choices=liste_choix, widget=Selection_avec_icone(), initial=None, required=question.obligatoire, help_text=question.texte_aide)
     elif question.controle == "liste_coches":
         liste_choix = [(choix, choix) for choix in question.choix.split(";")]
-        ctrl = forms.TypedMultipleChoiceField(label=question.label, choices=liste_choix, widget=Select2MultipleWidget(), required=question.obligatoire, help_text=question.texte_aide)
+        ctrl = forms.TypedMultipleChoiceField(label=question.label, choices=liste_choix, widget=Select2MultipleWidget(attrs=attrs), required=question.obligatoire, help_text=question.texte_aide)
     elif question.controle == "case_coche":
         ctrl = forms.BooleanField(label=question.label, required=question.obligatoire, help_text=question.texte_aide)
     elif question.controle == "date":

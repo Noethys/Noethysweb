@@ -17,6 +17,65 @@
         .card-individu {
             border-radius: 5px;
         }
+
+        /* Corrige le fond blanc des onglets inactifs */
+        .nav-tabs .nav-link:not(.active) {
+            background-color: var(--bs-tertiary-bg);
+            border-color: var(--bs-border-color) var(--bs-border-color) var(--bs-border-color);
+            color: var(--bs-secondary-color);
+        }
+
+        /* Ajoute les flèches de déplacement à la nav-tabs */
+        .tabs-scroll-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        .nav-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            flex: 1;
+            border-bottom: none;
+        }
+        .nav-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .nav-tabs .nav-item {
+            flex-shrink: 0;
+        }
+        .tabs-arrow {
+            flex-shrink: 0;
+            width: 28px;
+            height: stretch;
+            background: var(--bs-tertiary-bg);
+            border: 1px solid var(--bs-border-color);
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            color: var(--bs-secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-bottom: 0;
+            align-self: flex-end;
+        }
+        .tabs-arrow:hover {
+            background: var(--bs-secondary-bg);
+            color: var(--bs-body-color);
+        }
+        .tabs-arrow:focus-visible {
+            outline: 2px solid #185FA5;
+            outline-offset: 2px;
+        }
+
+        .list-group-flush {
+            border-right: 1px solid var(--bs-border-color);
+            border-left: 1px solid var(--bs-border-color);
+            border-bottom: 1px solid var(--bs-border-color);
+        }
     </style>
 {% endblock %}
 
@@ -24,20 +83,20 @@
 
     {# Texte d'introduction #}
     {% if parametres_portail.reservations_intro %}
-        <div style="margin-bottom: 20px;">
-            <i class="fa fa-info-circle margin-r-5"></i>{{ parametres_portail.reservations_intro }}
+        <div class="div-intro" role="note" aria-label="{% trans "Information" %}">
+            <i class="fa fa-info-circle margin-r-5" aria-hidden="true"></i>{{ parametres_portail.reservations_intro }}
         </div>
     {% endif %}
 
     {% if nbre_approbations_requises > 0 %}
         <div class="alert alert-warning">
-            <i class="fa fa-warning margin-r-5"></i> {% blocktrans %}Avant d'accéder aux réservations, vous devez valider les approbations de la page{% endblocktrans %} <a href="{% url 'portail_renseignements' %}">{% trans "Renseignements" %}</a>.
+            <i class="fa fa-warning margin-r-5" aria-hidden="true"></i> {% blocktrans %}Avant d'accéder aux réservations, vous devez valider les approbations de la page{% endblocktrans %} <a href="{% url 'portail_renseignements' %}">{% trans "Renseignements" %}</a>.
         </div>
     {% endif %}
 
     {% if blocage_impayes %}
         <div class="alert alert-danger">
-            <i class="fa fa-warning margin-r-5"></i> {% blocktrans %}L'accès aux réservations a été automatiquement bloqué en raison d'un impayé. Merci de nous contacter afin de régulariser votre dossier.{% endblocktrans %}
+            <i class="fa fa-warning margin-r-5" aria-hidden="true"></i> {% blocktrans %}L'accès aux réservations a été automatiquement bloqué en raison d'un impayé. Merci de nous contacter afin de régulariser votre dossier.{% endblocktrans %}
         </div>
     {% endif %}
 
@@ -46,38 +105,71 @@
             <div class="card card-individu">
 
                 <!-- Nom de l'individu -->
-                <div class="user-block card-footer m-0" style="padding: .6rem 1rem;">
-                    <img class="img-circle" src="{{ individu.Get_photo }}" alt="Individu Image">
-                    <span class="username">{{ individu.prenom }}</span>
-                    {% if individu.Get_age %}<span class="description">{{ individu.Get_age }} {% trans "ans" %}</span>{% endif %}
-                </div>
+                {% embed 'portail/titre_individu.html' %}
+                    {% block src_photo %}{{ individu.Get_photo }}{% endblock %}
+                    {% block prenom_individu %}{{ individu.prenom }}{% endblock %}
+                    {% block infos %}
+                        <span>
+                            <i class="fa fa-star-o" aria-hidden="true"></i>
+                            {{ individu.activites|length }} activité{{ individu.activites|length|pluralize }} disponible{{ individu.activites|length|pluralize }}
+                        </span>
+                    {% endblock %}
+                {% endembed %}
 
                 <!-- Liste des périodes -->
-                <div class="card-footer p-0">
+                <div class="bg-body-secondary p-2">
                     <div>
 
-                        <ul class="nav nav-tabs">
-                            {% for activite in individu.activites %}
-                                <li class="nav-item">
-                                    <a class="nav-link {% if forloop.first %}active{% endif %}" href="#tab_{{ individu.pk }}_{{ activite.pk }}" data-toggle="tab" role="tab">{{ activite.nom }}</a>
-                                </li>
-                            {% endfor %}
-                        </ul>
+                        <div class="tabs-scroll-wrapper position-relative">
+                            <button class="tabs-arrow tabs-arrow-left" aria-label="Faire défiler les onglets vers la gauche" onclick="scrollTabs(this, -150)">
+                                <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                            </button>
+
+                            <ul class="nav nav-tabs" role="tablist">
+                                {% for activite in individu.activites %}
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link {% if forloop.first %}active{% endif %}" data-bs-target="#tab_{{ individu.pk }}_{{ activite.pk }}"
+                                            data-bs-toggle="tab" role="tab"
+                                            aria-controls="tab_{{ individu.pk }}_{{ activite.pk }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                                            id="onglet_{{ individu.pk }}_{{ activite.pk }}"
+                                        >
+                                            {{ activite.nom }}
+                                        </button>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+
+                            <button class="tabs-arrow tabs-arrow-right" aria-label="Faire défiler les onglets vers la droite" onclick="scrollTabs(this, 150)">
+                                <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                            </button>
+                        </div>
 
                         <div class="tab-content p-0">
                             {% for activite in individu.activites %}
-                                <div class="tab-pane {% if forloop.first %}show active{% endif %}" id="tab_{{ individu.pk }}_{{ activite.pk }}">
-                                    <div class="list-group list-group-flush">
+                                <div class="tab-pane {% if forloop.first %}show active{% endif %}" id="tab_{{ individu.pk }}_{{ activite.pk }}" role="tabpanel" aria-labelledby="onglet_{{ individu.pk }}_{{ activite.pk }}" tabindex="0">
+                                    <h3 class="visually-hidden">{{ activite.nom }}</h3>
+                                    <ul class="list-group list-group-flush list-unstyled">
                                         {% for periode in dict_periodes|get_item:activite %}
-                                            <a href="{% url 'portail_planning' idindividu=individu.pk idactivite=activite.pk idperiode=periode.pk %}" class="list-group-item list-group-item-action">
-                                                <i class="fa fa-calendar margin-r-5"></i>
-                                                {{ periode.nom }}
-                                                <small class="pull-right d-none d-md-block">{% trans "Du" %} {{ periode.date_debut }} {% trans "au" %} {{ periode.date_fin }}</small>
-                                            </a>
+                                            <li>
+                                                <a href="{% url 'portail_planning' idindividu=individu.pk idactivite=activite.pk idperiode=periode.pk %}"
+                                                    class="list-group-item list-group-item-action text-body"
+                                                    aria-label="{{ individu.prenom }} - {{ activite.nom }} – {{ periode.nom }} - {% trans "Du" %} {{ periode.date_debut }} {% trans "au" %} {{ periode.date_fin }}"
+                                                    style="border-radius: 0;border: 0;border-bottom: 01px solid #dee2e6;"
+                                                >
+                                                    <i class="fa fa-calendar me-2" aria-hidden="true"></i>
+                                                    {{ periode.nom }}
+                                                    <span class="pull-right d-none d-md-block text-body small" aria-hidden="true">
+                                                        {% trans "Du" %} {{ periode.date_debut }} {% trans "au" %} {{ periode.date_fin }}
+                                                    </span>
+                                                </a>
+                                            </li>
                                         {% empty %}
-                                            <div class="bg-white" style="padding: 8px 10px";><i class="fa fa-ban text-danger margin-r-5"></i> {% blocktrans %}Aucune période disponible{% endblocktrans %}</div>
+                                            <div class="bg-white" style="padding: 8px 10px";>
+                                                <i class="fa fa-ban text-danger me-2" aria-hidden="true"></i>
+                                                {% blocktrans %}Aucune période disponible{% endblocktrans %}
+                                            </div>
                                         {% endfor %}
-                                    </div>
+                                    </ul>
                                 </div>
                             {% endfor %}
                         </div>
@@ -101,5 +193,29 @@
 
         {% endfor %}
     {% endif %}
+
+    <script>
+        function scrollTabs(btn, amount) {
+            const nav = btn.closest('.tabs-scroll-wrapper').querySelector('.nav-tabs');
+            nav.scrollBy({ left: amount, behavior: 'smooth' });
+        }
+
+        function updateArrows(wrapper) {
+            const nav = wrapper.querySelector('.nav-tabs');
+            const btnLeft = wrapper.querySelector('.tabs-arrow-left');
+            const btnRight = wrapper.querySelector('.tabs-arrow-right');
+            btnLeft.style.display = nav.scrollLeft > 2 ? 'flex' : 'none';
+            btnRight.style.display = nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 2 ? 'flex' : 'none';
+        }
+
+        document.querySelectorAll('.tabs-scroll-wrapper').forEach(wrapper => {
+            const nav = wrapper.querySelector('.nav-tabs');
+            updateArrows(wrapper);
+            nav.addEventListener('scroll', () => updateArrows(wrapper));
+            nav.addEventListener('touchend', () => updateArrows(wrapper));
+            new ResizeObserver(() => updateArrows(wrapper)).observe(nav);
+        });
+
+    </script>
 
 {% endblock contenu_page %}

@@ -1,0 +1,155 @@
+{% load crispy_forms_tags %}
+{% load static i18n %}
+
+<div class="modal fade" id="modal_theme" tabindex="-1" aria-labelledby="modal-theme-titre" aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header bg-primary text-white">
+                <h2 class="modal-title h5" id="modal-theme-titre">
+                    <i class="fa fa-fw fa-adjust me-2" aria-hidden="true"></i>
+                    {% trans "Choisir le thème" %}
+                </h2>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="{% trans "Fermer la fenêtre de choix du thème" %}">
+                </button>
+            </div>
+
+            <div class="modal-body p-0">
+                <div class="px-3 py-2 bg-body-secondary border-bottom">
+                    <small class="text-muted text-uppercase fw-semibold"
+                           style="font-size:.7rem; letter-spacing:.07em;">
+                        {% trans "Apparence" %}
+                    </small>
+                </div>
+                <fieldset style="border: none; padding: 0; margin: 0;">
+                    <legend class="visually-hidden">{% trans "Choisir le thème d'affichage" %}</legend>
+
+                    <div class="d-flex align-items-center gap-3 px-3 py-3 border-bottom">
+                        <input class="form-check-input mt-0 flex-shrink-0"
+                               type="radio" name="theme_choice" id="theme_light" value="light">
+                        <label class="form-check-label flex-grow-1 d-flex align-items-center gap-2"
+                               for="theme_light" style="font-size:.875rem;">
+                            <i class="bi bi-sun-fill" aria-hidden="true"></i>
+                            {% trans "Clair" %}
+                        </label>
+                        <span id="badge-theme-light" aria-hidden="true"
+                              style="display:none; font-size:11px; background:#e8f4ec; color:#2d7a4a; padding:2px 8px; border-radius:99px; font-weight:500;">
+                            {% trans "Actuel" %}
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3 px-3 py-3 border-bottom">
+                        <input class="form-check-input mt-0 flex-shrink-0"
+                               type="radio" name="theme_choice" id="theme_dark" value="dark">
+                        <label class="form-check-label flex-grow-1 d-flex align-items-center gap-2"
+                               for="theme_dark" style="font-size:.875rem;">
+                            <i class="bi bi-moon-fill" aria-hidden="true"></i>
+                            {% trans "Sombre" %}
+                        </label>
+                        <span id="badge-theme-dark" aria-hidden="true"
+                              style="display:none; font-size:11px; background:#e8f4ec; color:#2d7a4a; padding:2px 8px; border-radius:99px; font-weight:500;">
+                            {% trans "Actuel" %}
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3 px-3 py-3">
+                        <input class="form-check-input mt-0 flex-shrink-0"
+                               type="radio" name="theme_choice" id="theme_auto" value="auto">
+                        <label class="form-check-label flex-grow-1 d-flex align-items-center gap-2"
+                               for="theme_auto" style="font-size:.875rem;">
+                            <i class="bi bi-circle-half" aria-hidden="true"></i>
+                            {% trans "Auto" %} {% trans "(Paramètres du système)" %}
+                            <span class="visually-hidden">({% trans "suit les préférences système" %})</span>
+                        </label>
+                        <span id="badge-theme-auto" aria-hidden="true"
+                              style="display:none; font-size:11px; background:#e8f4ec; color:#2d7a4a; padding:2px 8px; border-radius:99px; font-weight:500;">
+                            {% trans "Actuel" %}
+                        </span>
+                    </div>
+
+                </fieldset>
+            </div>
+
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-warning" id="btn-reinitialiser-theme" aria-label="{% trans "Réinitialiser le thème par défaut (auto)" %}">
+                    <i class="fa fa-fw fa-undo me-1" aria-hidden="true"></i>
+                    {% trans "Réinitialiser" %}
+                </button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-primary" id="btn-valider-theme">
+                        <i class="fa fa-fw fa-check me-1" aria-hidden="true"></i>
+                        {% trans "Valider" %}
+                    </button>
+                    <button type="button" class="btn btn-danger" id="btn-annuler-theme" data-bs-dismiss="modal">
+                        <i class="fa fa-fw fa-ban me-1" aria-hidden="true"></i>
+                        {% trans "Annuler" %}
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var STORAGE_KEY = 'noethysweb_theme';
+    var modalEl = document.getElementById('modal_theme');
+    if (!modalEl) return;
+
+    var themeOnOpen = 'auto';
+
+    function applyTheme(choice) {
+        var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var resolved = choice === 'auto' ? (dark ? 'dark' : 'light') : choice;
+        document.documentElement.setAttribute('data-bs-theme', resolved);
+    }
+
+    function syncRadios(choice) {
+        document.querySelectorAll('input[name="theme_choice"]').forEach(function (r) {
+            r.checked = (r.value === choice);
+        });
+    }
+
+    function syncBadge(choice) {
+        document.querySelectorAll('input[name="theme_choice"]').forEach(function (r) {
+            var badge = document.getElementById('badge-theme-' + r.value);
+            if (badge) badge.style.display = (r.value === choice) ? 'inline' : 'none';
+        });
+    }
+
+    modalEl.addEventListener('show.bs.modal', function () {
+        themeOnOpen = localStorage.getItem(STORAGE_KEY) || 'auto';
+        syncRadios(themeOnOpen);
+        syncBadge(themeOnOpen);
+    });
+
+    document.querySelectorAll('input[name="theme_choice"]').forEach(function (r) {
+        r.addEventListener('change', function () {
+            applyTheme(r.value);
+        });
+    });
+
+    document.getElementById('btn-reinitialiser-theme')?.addEventListener('click', function () {
+        syncRadios('auto');
+        syncBadge('auto');
+        applyTheme('auto');
+    });
+
+    document.getElementById('btn-annuler-theme')?.addEventListener('click', function () {
+        syncRadios(themeOnOpen);
+        syncBadge(themeOnOpen);
+        applyTheme(themeOnOpen);
+    });
+
+    document.getElementById('btn-valider-theme')?.addEventListener('click', function () {
+        var choice = document.querySelector('input[name="theme_choice"]:checked')?.value || 'auto';
+        localStorage.setItem(STORAGE_KEY, choice);
+        applyTheme(choice);
+        bootstrap.Modal.getInstance(modalEl)?.hide();
+    });
+});
+</script>

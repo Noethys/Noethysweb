@@ -1,6 +1,8 @@
-{% extends "core/base_login.html" %}
+{% extends "portail/base_login.html" %}
 {% load i18n %}
 {% load static %}
+
+{% block page_title %}{% trans "Connexion" %}{% endblock page_title %}
 
 {% block titre_contenu %}
     {% trans "Connexion" %}
@@ -8,76 +10,177 @@
 
 {% block contenu_page %}
 
-    <form name="LoginForm" method="post">
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger"
+             role="alert"
+             aria-live="assertive"
+             aria-atomic="true">
+            <p class="mb-1 fw-bold">
+                <i class="fa fa-fw fa-exclamation-triangle" aria-hidden="true"></i>
+                {% trans "Des erreurs empêchent la connexion :" %}
+            </p>
+            <ul class="mb-0 ps-3">
+                {% for error in form.non_field_errors %}
+                    <li>{{ error|escape }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form name="LoginForm" id="login-form" method="post" novalidate>
         {% csrf_token %}
 
-        {% if form.errors %}
-            {% for error in form.non_field_errors %}
-                <div class="alert alert-danger">
-                    <strong>{{ error|escape }}</strong>
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        <div class="form-group has-feedback input-group ligne">
-            <div class="input-group-prepend">
-                <span class="input-group-text">
+        {# ---- Champ identifiant ---- #}
+        <div class="mb-3">
+            <label for="id_username" class="form-label visually-hidden">
+                {% trans "Nom d'utilisateur" %}
+            </label>
+            <div class="input-group ligne {% if form.username.errors %}has-validation{% endif %}">
+                <span class="input-group-text" aria-hidden="true">
                     <i class="fa fa-fw fa-user"></i>
                 </span>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div id="error-username"
+                         class="invalid-feedback d-block"
+                         role="alert">
+                        <i class="fa fa-fw fa-exclamation-circle" aria-hidden="true"></i>
+                        {% for error in form.username.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
             </div>
-            {{ form.username }}
+            <div class="invalid-feedback">
+                {% trans "Veuillez saisir votre identifiant." %}
+            </div>
         </div>
 
-        <div class="form-group has-feedback input-group ligne">
-            <div class="input-group-prepend">
-                <span class="input-group-text">
+        {# ---- Champ mot de passe ---- #}
+        <div class="mb-3">
+            <label for="id_password" class="form-label visually-hidden">
+                {% trans "Mot de passe" %}
+            </label>
+            <div class="input-group ligne {% if form.password.errors %}has-validation{% endif %}">
+                <span class="input-group-text" aria-hidden="true">
                     <i class="fa fa-fw fa-lock"></i>
                 </span>
+                {{ form.password }}
+                <button class="input-group-text"
+                        id="id_afficher_mdp"
+                        type="button"
+                        aria-label="Afficher le mot de passe"
+                        aria-pressed="false"
+                        aria-controls="id_password">
+                    <i id="id_eye" class="fa fa-fw fa-eye-slash" aria-hidden="true"></i>
+                </button>
+                {% if form.password.errors %}
+                    <div id="error-password"
+                         class="invalid-feedback d-block"
+                         role="alert">
+                        <i class="fa fa-fw fa-exclamation-circle" aria-hidden="true"></i>
+                        {% for error in form.password.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
             </div>
-            {{ form.password }}
-            <div class="input-group-append">
-                <span class="input-group-text">
-                    <a id="id_afficher_mdp" href="" title="Afficher ou masquer le mot de passe"><i id="id_eye" class="fa fa-fw fa-eye-slash" aria-hidden="true"></i></a>
-                </span>
+            <div class="invalid-feedback">
+                {% trans "Veuillez saisir votre mot de passe." %}
             </div>
         </div>
 
-        {% if form.captcha.errors %}
-            <div class="alert alert-danger">
-                {% blocktrans %}Vous devez recopier le code de sécurité ci-dessous{% endblocktrans %}
+        {# ---- Captcha ---- #}
+        {% if form.captcha %}
+            <div class="mb-3 ligne">
+                <label for="id_captcha_1" class="visually-hidden">
+                    Code de sécurité
+                </label>
+                {{ form.captcha }}
+                {% if form.captcha.errors %}
+                    <div id="error-captcha"
+                         class="text-danger small mt-1"
+                         role="alert"
+                         aria-live="polite">
+                        <i class="fa fa-fw fa-exclamation-circle" aria-hidden="true"></i>
+                        {% blocktrans %}Vous devez recopier le code de sécurité ci-dessus.{% endblocktrans %}
+                    </div>
+                {% endif %}
             </div>
         {% endif %}
 
-        <div class="ligne">
-            {{ form.captcha }}
-        </div>
-
-        <button name="login" id="login" class="btn btn-block btn-primary login-btn mb-4" type="submit">{% blocktrans %}Se connecter{% endblocktrans %}</button>
+        <button name="login" id="login" class="btn btn-primary w-100 login-btn mb-3" type="submit">
+            <i class="fa fa-fw fa-sign-in me-1" aria-hidden="true"></i>
+            {% blocktrans %}Se connecter{% endblocktrans %}
+        </button>
 
     </form>
 
-    {# Mot de passe oublié #}
-    {% if parametres_portail.connexion_adresse_exp %}
-        <a class="forgot-password-link" href="{% url 'reset_password' %}">{% blocktrans %}Mot de passe oublié ?{% endblocktrans %}</a>
-    {% endif %}
+    {# ---- Liens secondaires ---- #}
+    <nav aria-label="{% trans 'Actions secondaires' %}" style="font-size: 0.8rem;">
+        <div class="d-flex flex-wrap column-gap-4 row-gap-0">
 
-    {% if parametres_portail.connexion_creation_compte %}
+            {% if parametres_portail.connexion_adresse_exp %}
+                <a href="{% url 'reset_password' %}">
+                    <i class="bi bi-lock" aria-hidden="true"></i>
+                    {% blocktrans %}Mot de passe oublié{% endblocktrans %}
+                </a>
+            {% endif %}
 
-        {# Créer un nouveau compte #}
-        <p class="login-card-footer-text"><a class="forgot-password-link" href="{% url 'portail_creer_compte' %}">{% blocktrans %}Créer un nouveau compte{% endblocktrans %}</a></p>
+            {% if parametres_portail.connexion_creation_compte %}
+                <a href="{% url 'portail_creer_compte' %}">
+                    <i class="bi bi-person-plus" aria-hidden="true"></i>
+                    {% blocktrans %}Créer un nouveau compte{% endblocktrans %}
+                </a>
+            {% else %}
+                <button type="button"
+                        class="btn btn-link p-0 border-0 align-baseline"
+                        style="font-size:inherit;"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modal-pas-codes"
+                        aria-haspopup="dialog">
+                    <i class="bi bi-question-circle" aria-hidden="true"></i>
+                    {% blocktrans %}Pas de codes d'accès ?{% endblocktrans %}
+                </button>
+            {% endif %}
 
-    {% else %}
+            <button type="button"
+                    class="btn btn-link p-0 border-0 align-baseline text-decoration-none"
+                    style="font-size:inherit;"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modal_mentions_legales"
+                    aria-haspopup="dialog">
+                <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                {% blocktrans %}Mentions légales{% endblocktrans %}
+            </button>
 
-        {# Pas de codes d'accès #}
-        <p class="login-card-footer-text"><a href="#" class="forgot-password-link" data-toggle="modal" data-target="#model_pas_codes">{% blocktrans %}Pas de codes d'accès ?{% endblocktrans %}</a></p>
+            <button type="button"
+                    class="btn btn-link p-0 border-0 align-baseline text-decoration-none"
+                    style="font-size:inherit;"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modal_mentions_accessibilite"
+                    aria-haspopup="dialog">
+                <i class="bi bi-universal-access-circle" aria-hidden="true"></i>
+                {% blocktrans %}Accessibilité : Non conforme (en cours){% endblocktrans %}
+            </button>
 
-        {# Modal : Pas de codes d'accès #}
-        <div class="modal" id="model_pas_codes">
+        </div>
+    </nav>
+
+    {# ---- Modal : Pas de codes d'accès ---- #}
+    {% if not parametres_portail.connexion_creation_compte %}
+        <div class="modal fade"
+             id="modal-pas-codes"
+             tabindex="-1"
+             role="dialog"
+             aria-labelledby="modal-pas-codes-titre"
+             aria-modal="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">{% blocktrans %}Pas de codes d'accès ?{% endblocktrans %}</h4>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h2 class="modal-title h5" id="modal-pas-codes-titre">
+                            {% blocktrans %}Pas de codes d'accès ?{% endblocktrans %}
+                        </h2>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="{% trans 'Fermer' %}"></button>
                     </div>
                     <div class="modal-body">
                         {{ parametres_portail.connexion_texte_pas_codes|safe }}
@@ -86,5 +189,22 @@
             </div>
         </div>
     {% endif %}
+
+
+    <script>
+        (function () {
+            var form = document.getElementById('login-form');
+            if (!form) return;
+            form.addEventListener('submit', function (e) {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var firstInvalid = form.querySelector(':invalid');
+                    if (firstInvalid) firstInvalid.focus();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        })();
+    </script>
 
 {% endblock contenu_page %}
