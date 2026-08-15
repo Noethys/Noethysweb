@@ -398,6 +398,9 @@ h1 {
     .breadcrumb {
         font-size: .775rem !important;
     }
+    .breadcrumb a {
+        color: #34779e !important;
+    }
 
     .card-title {
         font-size: 1.1rem;
