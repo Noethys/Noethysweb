@@ -1,3 +1,34 @@
+Version 1.3.3.6 (15/08/2026) :
+
+- Ajout de la conformité RGAA du portail famille
+- Ajout du widget quotients manquants sur la page d'accueil
+- Ajout de la consultation des tarifs dans le widget suivi des inscriptions
+- Ajout de la personnalisation du code compta des familles
+- Ajout du chargement global de bootbox
+- Portail famille : Nouvelle interface adaptée aux malvoyants et non-voyants
+- Portail famille : Mise en conformité de toutes les couleurs
+- Portail famille : Ajout des aides visuelles dans le planning des réservations
+- Portail famille : Ajout de la compatibilité avec les lecteurs d'écran
+- Portail famille : Ajout de la déclaration d'accessibilité
+- Portail famille : Ajout des thèmes clair et sombre
+- Portail famille : Ajout du sélecteur de taille de texte
+- Portail famille : Ajout du sélecteur de niveau de contraste
+- Portail famille : Ajout du mode daltonisme
+- Portail famille : Ajout du soulignage des liens
+- Portail famille : Ajout du masquage des images décoratives
+- Portail famille : Ajout de la police spéciale dyslexie
+- Portail famille : Ajout de l'espacement des lettres
+- Portail famille : Ajout de l'interlignage
+- Portail famille : Ajout du masque de lecture
+- Portail famille : Ajout de l'agrandissement des zones de clic
+- Portail famille : Ajout de l'agrandissement du curseur
+- Portail famille : Ajout de la réduction des animations de l'interface
+- Portail famille : Ajout du captcha audio
+- Portail famille : Ajout de la dépendance crispy-bootstrap5
+- Portail famille : Ajout des lib glightbox popper bootstrap-icons select2-bootstrap5
+- Portail famille : Upgade bootstrap 5 et adminlte 4
+- Correction sur le formatage des dates dans l'import des individus
+
 Version 1.3.3.5 (09/08/2026) :
 
 - Correction unicode dans autoreload wsgi
