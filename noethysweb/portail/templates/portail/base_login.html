@@ -62,6 +62,14 @@
                 }
 
             });
+
+            document.addEventListener('click', function (e) {
+                var lien = e.target.closest('a[href*="/captcha/audio/"]');
+                if (!lien) return;
+                e.preventDefault();
+                new Audio(lien.href).play();
+            });
+
         </script>
 
     {% endblock %}
