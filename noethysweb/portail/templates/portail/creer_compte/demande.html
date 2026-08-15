@@ -35,7 +35,10 @@
 
         </form>
 
-        <a class="" href="{% url 'portail_connexion' %}" title="{% trans "Revenir à la page de connexion" %}"><i class="fa fa-arrow-circle-o-left me-1" aria-hidden="true"></i>{% blocktrans %}Revenir à la page de connexion{% endblocktrans %}</a>
+        <a href="{% url 'portail_connexion' %}" title="{% trans "Revenir à la page de connexion" %}" class="btn btn-link p-0 border-0 align-baseline text-decoration-none" style="font-size:inherit;">
+            <i class="fa fa-arrow-circle-o-left me-1" aria-hidden="true"></i>
+            {% blocktrans %}Revenir à la page de connexion{% endblocktrans %}
+        </a>
     </div>
 
 {% endblock contenu_cadre %}

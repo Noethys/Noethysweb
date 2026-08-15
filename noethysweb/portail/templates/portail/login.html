@@ -117,20 +117,20 @@
         <div class="d-flex flex-wrap column-gap-4 row-gap-0">
 
             {% if parametres_portail.connexion_adresse_exp %}
-                <a href="{% url 'reset_password' %}">
+                <a href="{% url 'reset_password' %}" class="btn btn-link p-0 border-0 align-baseline text-decoration-none" style="font-size:inherit;">
                     <i class="bi bi-lock" aria-hidden="true"></i>
                     {% blocktrans %}Mot de passe oublié{% endblocktrans %}
                 </a>
             {% endif %}
 
             {% if parametres_portail.connexion_creation_compte %}
-                <a href="{% url 'portail_creer_compte' %}">
+                <a href="{% url 'portail_creer_compte' %}" class="btn btn-link p-0 border-0 align-baseline text-decoration-none" style="font-size:inherit;">
                     <i class="bi bi-person-plus" aria-hidden="true"></i>
                     {% blocktrans %}Créer un nouveau compte{% endblocktrans %}
                 </a>
             {% else %}
                 <button type="button"
-                        class="btn btn-link p-0 border-0 align-baseline"
+                        class="btn btn-link p-0 border-0 align-baseline text-decoration-none"
                         style="font-size:inherit;"
                         data-bs-toggle="modal"
                         data-bs-target="#modal-pas-codes"
