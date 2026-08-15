@@ -121,7 +121,7 @@ def effectuer_paiement_en_ligne(request):
         # Vérifie qu'il n'y a pas de préfacturation dedans
         if len(dict_ventilation["periode"]) > 0 :
             logger.debug(u"Page EFFECTUER_PAIEMENT_EN_LIGNE (%s): Il n'est pas possible de régler de la préfacturation avec PAYFIP", request.user.famille)
-            return JsonResponse({"erreur": "Paiement de la prefacturation impossible avec TIPI"}, status=401)
+            return JsonResponse({"erreur": "Paiement de la prefacturation impossible avec PAYFIP"}, status=401)
 
         # Envoi de la requete
         facture = liste_factures[0]
