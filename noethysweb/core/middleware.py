@@ -3,9 +3,18 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import logging
+logger = logging.getLogger(__name__)
 from django.conf import settings
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.urls.base import set_script_prefix, get_script_prefix
+
+try:
+    import geoip2.database
+    import geoip2.errors
+    GEOIP2_AVAILABLE = True
+except ImportError:
+    GEOIP2_AVAILABLE = False
 
 
 class URLPrefixMiddleware:
@@ -93,3 +102,64 @@ class URLPrefixReverseMiddleware:
         finally:
             # Restaurer le préfixe d'origine une fois la requête traitée
             set_script_prefix(original_prefix)
+
+
+class GeoBlockMiddleware:
+    """
+    Bloque l'accès aux visiteurs dont le pays n'est pas dans ALLOWED_COUNTRIES.
+    Désactivé automatiquement si :
+    - le package geoip2 n'est pas installé
+    - GEOIP_COUNTRY_DB ou GEOBLOCK_ALLOWED_COUNTRIES n'est pas défini dans les settings
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.reader = None
+
+        if not GEOIP2_AVAILABLE:
+            logger.info("GeoBlockMiddleware désactivé : le package geoip2 n'est pas installé")
+            return
+
+        geoip_db = getattr(settings, 'GEOIP_COUNTRY_DB', None)
+        allowed_countries = getattr(settings, 'GEOBLOCK_ALLOWED_COUNTRIES', None)
+
+        if not geoip_db or not allowed_countries:
+            logger.info("GeoBlockMiddleware désactivé : GEOIP_COUNTRY_DB et/ou GEOBLOCK_ALLOWED_COUNTRIES non configurés")
+            return
+
+        try:
+            self.reader = geoip2.database.Reader(geoip_db)
+        except FileNotFoundError:
+            logger.error("Base GeoIP introuvable : %s — GeoBlockMiddleware désactivé", geoip_db)
+            self.reader = None
+
+    def get_client_ip(self, request):
+        # Si Apache est en frontal direct (pas de proxy Cloudflare devant), REMOTE_ADDR suffit.
+        # Si un reverse proxy est utilisé, il faudra lire X-Forwarded-For à la place.
+        return request.META.get('REMOTE_ADDR')
+
+    def __call__(self, request):
+        if self.reader is None:
+            return self.get_response(request)
+
+        ip = self.get_client_ip(request)
+
+        # IP locales (tests internes, health checks) : toujours autorisées
+        if ip in ('127.0.0.1', 'localhost') or ip.startswith('192.168.') or ip.startswith('10.'):
+            return self.get_response(request)
+
+        try:
+            result = self.reader.country(ip)
+            country_code = result.country.iso_code
+        except geoip2.errors.AddressNotFoundError:
+            # IP non répertoriée dans la base (rare) : on laisse passer plutôt que bloquer à tort
+            return self.get_response(request)
+        except Exception as e:
+            logger.warning("Erreur lookup GeoIP pour %s : %s", ip, e)
+            return self.get_response(request)
+
+        if country_code not in settings.GEOBLOCK_ALLOWED_COUNTRIES:
+            logger.info("Accès bloqué : IP %s (pays: %s)", ip, country_code)
+            return HttpResponseForbidden("Accès refusé.")
+
+        return self.get_response(request)
