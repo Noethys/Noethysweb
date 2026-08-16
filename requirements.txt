@@ -41,3 +41,4 @@ crispy-bootstrap4
 crispy-bootstrap5
 openpyxl
 py7zr
+geoip2
