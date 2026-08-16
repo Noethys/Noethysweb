@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, os, time
 logger = logging.getLogger(__name__)
 from django.conf import settings
 from django.http import HttpResponseRedirect, HttpResponseForbidden
@@ -120,6 +120,7 @@ class GeoBlockMiddleware:
             logger.info("GeoBlockMiddleware désactivé : le package geoip2 n'est pas installé")
             return
 
+        self.max_db_age_days = 30
         geoip_db = getattr(settings, 'GEOIP_COUNTRY_DB', None)
         allowed_countries = getattr(settings, 'GEOBLOCK_ALLOWED_COUNTRIES', None)
 
@@ -133,6 +134,16 @@ class GeoBlockMiddleware:
             logger.error("Base GeoIP introuvable : %s — GeoBlockMiddleware désactivé", geoip_db)
             self.reader = None
 
+        self.geoip_db_path = geoip_db
+
+    def _is_db_stale(self):
+        """Vérifie si la base GeoIP est plus vieille que le seuil autorisé."""
+        try:
+            age_days = (time.time() - os.path.getmtime(self.geoip_db_path)) / 86400
+            return age_days > self.max_db_age_days, age_days
+        except OSError:
+            return True, None
+
     def get_client_ip(self, request):
         # Si Apache est en frontal direct (pas de proxy Cloudflare devant), REMOTE_ADDR suffit.
         # Si un reverse proxy est utilisé, il faudra lire X-Forwarded-For à la place.
@@ -141,6 +152,13 @@ class GeoBlockMiddleware:
     def __call__(self, request):
         if self.reader is None:
             return self.get_response(request)
+
+        # Vérifie la fraîcheur de la base à chaque requête
+        is_stale, age_days = self._is_db_stale()
+        if is_stale:
+            logger.warning(
+                "Base GeoIP obsolète (%.0f jours, seuil %d) — blocage géographique désactivé temporairement",
+                age_days if age_days is not None else -1, self.max_db_age_days)
 
         ip = self.get_client_ip(request)
 
