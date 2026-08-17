@@ -454,7 +454,7 @@ class Case_base {
     maj_aria_label() {
         var label = this.get_date_fr() + " — " + dict_unites[this.unite].nom;
 
-        if (this.has_conso()) {
+        if (this.consommations.length > 0) {
             var conso = this.consommations[0];
             // État de la consommation
             var etats = {
