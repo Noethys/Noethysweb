@@ -1,3 +1,9 @@
+Version 1.3.3.8 (17/08/2026) :
+
+- Ajout de la sécurité blocage géographique
+- Ajout de la dépendance geoip2
+- Correction du aria label dans la grille des consommations
+
 Version 1.3.3.7 (15/08/2026) :
 
 - Petits correctifs sur le portail famille
@@ -30,7 +36,7 @@ Version 1.3.3.6 (15/08/2026) :
 - Portail famille : Ajout du captcha audio
 - Portail famille : Ajout de la dépendance crispy-bootstrap5
 - Portail famille : Ajout des lib glightbox popper bootstrap-icons select2-bootstrap5
-- Portail famille : Upgade bootstrap 5 et adminlte 4
+- Portail famille : Upgrade bootstrap 5 et adminlte 4
 - Correction sur le formatage des dates dans l'import des individus
 
 Version 1.3.3.5 (09/08/2026) :
