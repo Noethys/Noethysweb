@@ -21,7 +21,7 @@ SECRET_KEY = 'cle_secrete_a_modifier_imperativement'
 SECRET_EXPORT_DESK = None
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 MODE_DEMO = False
 ALLOWED_HOSTS = []
 
@@ -40,7 +40,6 @@ CAPTCHA_FONT_SIZE = 30
 CAPTCHA_IMAGE_SIZE = (90, 40)
 CAPTCHA_LETTER_ROTATION = (-55, 55)
 CAPTCHA_CHALLENGE_FUNCT = "core.utils.utils_captcha.random_digit_challenge"
-CAPTCHA_FLITE_PATH = "/usr/bin/flite"
 
 # UPLOAD PHOTOS
 UPLOAD_FORM_PARALLEL_UPLOAD = False
@@ -112,7 +111,6 @@ INSTALLED_APPS = [
 # Ajout de crispy_bootstrap4 si version de crispy forms > 2
 if int(crispy_forms.__version__.split(".")[0]) >= 2:
     INSTALLED_APPS.append("crispy_bootstrap4")
-    INSTALLED_APPS.append("crispy_bootstrap5")
 
 # Liste des plugins
 PLUGINS = []
@@ -129,7 +127,7 @@ MIDDLEWARE = [
     'core.middleware.URLPrefixMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'core.middleware.GeoBlockMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -147,9 +145,7 @@ ROOT_URLCONF = 'noethysweb.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            # os.path.join(BASE_DIR, "portail", "templates"),
-        ],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -318,12 +314,6 @@ CSP_FRAME_ANCESTORS = (
     "'self'",
 )
 
-# Chargement des settings génériques
-try:
-    from noethysweb_settings_generic import *
-except:
-    pass
-
 # Chargement des settings de production
 try:
     from .settings_production import *
@@ -355,22 +345,3 @@ CSRF_COOKIE_PATH = f"{_URL_ROOT_PREFIX}/" if _URL_ROOT_PREFIX else '/'
 # Intégration des plugins
 for nom_plugin in PLUGINS:
     INSTALLED_APPS.append("plugins.%s.apps.%s" % (nom_plugin, nom_plugin))
-
-# --- Compatibilité ascendante : ancien format DBBACKUP -> nouveau format STORAGES ---
-try:
-    from importlib.metadata import version as _pkg_version
-    _dbbackup_needs_migration = tuple(map(int, _pkg_version("django-dbbackup").split(".")[:3])) >= (5, 0, 0)
-except Exception:
-    _dbbackup_needs_migration = False
-if _dbbackup_needs_migration:
-    STORAGES = {
-        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage",},
-        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",},
-    }
-    _dbbackup_storage_legacy = globals().pop("DBBACKUP_STORAGE", None)
-    _dbbackup_storage_options_legacy = globals().pop("DBBACKUP_STORAGE_OPTIONS", None)
-    if _dbbackup_storage_legacy:
-        STORAGES["dbbackup"] = {
-            "BACKEND": _dbbackup_storage_legacy,
-            "OPTIONS": _dbbackup_storage_options_legacy or {},
-        }
