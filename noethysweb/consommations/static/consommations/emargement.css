@@ -1,0 +1,61 @@
+/* Interface d'émargement : le moteur de grille reste dans le DOM mais n'est pas affiché. */
+#emargement-moteur {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+}
+
+.emargement-filtres { margin-bottom: 12px; }
+.emargement-selecteurs { display: flex; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+.emargement-label { font-weight: 600; margin-bottom: 6px; color: #495057; }
+.emargement-date-zone { flex: 0 0 auto; }
+.emargement-date-buttons { display: flex; }
+#emargement-date { min-width: 155px; border-radius: 0; }
+.emargement-activites-zone { min-width: 0; flex: 1 1 420px; }
+.emargement-activites-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 3px; scrollbar-width: thin; }
+.emargement-activite-btn { flex: 0 0 auto; white-space: nowrap; }
+
+#emargement { max-width: 1500px; margin: 0 auto; padding-bottom: 20px; }
+.emargement-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 15px; background: white; padding: 15px 20px; margin-bottom: 12px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.07); }
+.emargement-toolbar h2 { margin: 0; font-size: 1.35rem; }
+#emargement-resume { margin-top: 5px; color: #6c757d; }
+.emargement-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.emargement-recherche { position: relative; margin-bottom: 12px; }
+.emargement-recherche i { position: absolute; top: 50%; left: 14px; transform: translateY(-50%); color: #999; }
+#emargement-recherche { width: 100%; padding: 11px 15px 11px 40px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; background: white; }
+
+.emargement-individu { display: grid; grid-template-columns: minmax(190px,260px) 1fr; gap: 15px; background: white; margin-bottom: 7px; padding: 11px 12px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.emargement-identite { display: flex; align-items: center; gap: 12px; }
+.emargement-avatar { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; flex: 0 0 40px; border-radius: 50%; background: #e9ecef; font-size: 1.05rem; font-weight: bold; }
+.emargement-nom { font-size: 1.03rem; font-weight: 600; }
+.emargement-consommations { display: flex; flex-direction: column; gap: 6px; }
+.emargement-consommation { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.emargement-unite { min-width: 160px; }
+.emargement-badge { display: inline-block; margin-left: 6px; padding: 2px 7px; border-radius: 10px; background: #eee; font-size: .75rem; }
+.emargement-badge.present { background: #d4edda; color: #155724; }
+.emargement-badge.reservation { background: #fff3cd; color: #856404; }
+.emargement-badge.absentj { background: #d1ecf1; color: #0c5460; }
+.emargement-badge.absenti { background: #f8d7da; color: #721c24; }
+.emargement-boutons { display: flex; flex-wrap: wrap; gap: 5px; }
+.emargement-etat, .emargement-nouvelle-conso { border: 1px solid #ddd; padding: 7px 10px; border-radius: 5px; background: #f8f9fa; cursor: pointer; }
+.emargement-etat:hover, .emargement-nouvelle-conso:hover { background: #e9ecef; }
+.emargement-etat.present.actif { background: #28a745; border-color: #28a745; color: white; }
+.emargement-etat.absentj.actif { background: #17a2b8; border-color: #17a2b8; color: white; }
+.emargement-etat.absenti.actif { background: #dc3545; border-color: #dc3545; color: white; }
+.emargement-etat.reservation.actif { background: #ffc107; border-color: #ffc107; }
+#emargement-vide { padding: 50px; text-align: center; color: #28a745; font-size: 1.2rem; }
+#emargement-vide i { display: block; margin-bottom: 10px; font-size: 3rem; }
+
+@media (max-width: 800px) {
+    .emargement-selecteurs { display: block; }
+    .emargement-date-zone { margin-bottom: 12px; }
+    .emargement-toolbar { align-items: stretch; flex-direction: column; }
+    .emargement-individu { grid-template-columns: 1fr; }
+    .emargement-consommation { align-items: stretch; flex-direction: column; }
+    .emargement-boutons { display: grid; grid-template-columns: repeat(2,1fr); }
+    .emargement-etat, .emargement-nouvelle-conso { min-height: 44px; }
+}

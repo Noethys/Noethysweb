@@ -1,0 +1,152 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load embed %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'consommations/emargement.css' %}">
+{% endblock styles %}
+
+{% block page %}
+<div class="content-wrapper">
+    <div class="content-header pb-1">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"><i class="fa fa-check-square-o margin-r-5"></i>Émargement</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'accueil' %}"><i class="fa fa-home"></i> Accueil</a></li>
+                        <li class="breadcrumb-item active">Émargement</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            {% include 'core/messages.html' %}
+
+            <script>
+                var dict_options = JSON.parse('{{ data.options_json|escapejs }}');
+                window.emargementIndividus = {
+                    {% for inscription in data.liste_inscriptions %}
+                    "{{ inscription.pk }}": {
+                        id: {{ inscription.individu_id }},
+                        nom: "{{ inscription.individu.nom|default:''|escapejs }}",
+                        prenom: "{{ inscription.individu.prenom|default:''|escapejs }}"
+                    }{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                };
+            </script>
+
+            <div class="card card-outline card-primary emargement-filtres">
+                <div class="card-body py-3">
+                    <div class="emargement-selecteurs">
+                        <div class="emargement-date-zone">
+                            <div class="emargement-label"><i class="fa fa-calendar"></i> Date</div>
+                            <div class="btn-group emargement-date-buttons" role="group">
+                                {% if emargement_activite %}
+                                    <a class="btn btn-default" href="{% url 'pointeuse_conso_selection' date=emargement_date_precedente idactivite=emargement_activite.pk %}" title="Jour précédent"><i class="fa fa-chevron-left"></i></a>
+                                {% else %}
+                                    <a class="btn btn-default" href="{% url 'pointeuse_conso_date' date=emargement_date_precedente %}" title="Jour précédent"><i class="fa fa-chevron-left"></i></a>
+                                {% endif %}
+                                <input id="emargement-date" type="date" class="form-control" value="{{ emargement_date_iso }}" data-activite="{% if emargement_activite %}{{ emargement_activite.pk }}{% endif %}">
+                                <a class="btn btn-default" href="{% url 'pointeuse_conso' %}" title="Aujourd'hui">Aujourd'hui</a>
+                                {% if emargement_activite %}
+                                    <a class="btn btn-default" href="{% url 'pointeuse_conso_selection' date=emargement_date_suivante idactivite=emargement_activite.pk %}" title="Jour suivant"><i class="fa fa-chevron-right"></i></a>
+                                {% else %}
+                                    <a class="btn btn-default" href="{% url 'pointeuse_conso_date' date=emargement_date_suivante %}" title="Jour suivant"><i class="fa fa-chevron-right"></i></a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="emargement-activites-zone">
+                            <div class="emargement-label"><i class="fa fa-th-large"></i> Activités</div>
+                            <div class="emargement-activites-scroll">
+                                {% for activite in data.liste_activites_possibles %}
+                                    <a href="{% url 'pointeuse_conso_selection' date=emargement_date_iso idactivite=activite.pk %}"
+                                       class="btn {% if activite == data.selection_activite %}btn-primary{% else %}btn-outline-secondary{% endif %} emargement-activite-btn">
+                                        {{ activite.nom }}
+                                    </a>
+                                {% empty %}
+                                    <span class="text-muted">Aucune activité ouverte à cette date.</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="emargement">
+                <div class="emargement-toolbar">
+                    <div>
+                        <h2>{{ data.selection_activite.nom|default:"Aucune activité" }}</h2>
+                        <div class="text-muted">{{ data.titre_grille }}</div>
+                        <div id="emargement-resume">Chargement…</div>
+                    </div>
+                    <div class="emargement-actions">
+                        <button type="button" id="emargement-tous-presents" class="btn btn-success"><i class="fa fa-check"></i> Tous présents</button>
+                        <button type="button" id="emargement-afficher-reservations" class="btn btn-secondary">À pointer uniquement</button>
+                        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#modal_parametres"><i class="fa fa-cog"></i> Paramètres avancés</button>
+                    </div>
+                </div>
+
+                <div class="emargement-recherche">
+                    <i class="fa fa-search"></i>
+                    <input type="search" id="emargement-recherche" placeholder="Rechercher un enfant…" autocomplete="off">
+                </div>
+
+                <div id="emargement-liste"></div>
+                <div id="emargement-vide" style="display:none"><i class="fa fa-check-circle"></i><div>Aucun enfant à afficher.</div></div>
+            </div>
+
+            {# Le moteur de grille Noethys reste chargé mais est visuellement masqué. #}
+            <div id="emargement-moteur" aria-hidden="true">
+                {% include "consommations/grille_tableau.html" %}
+                {% include 'consommations/grille_saisie_detail.html' %}
+                {% include 'consommations/grille_saisie_memo.html' %}
+                {% include 'consommations/grille_saisie_pointage.html' %}
+                {% include 'consommations/grille_ajouter_individu.html' %}
+            </div>
+
+            {% embed 'core/modal.html' with modal_footer=True %}
+                {% block modal_id %}modal_parametres{% endblock %}
+                {% block modal_titre %}Paramètres avancés{% endblock %}
+                {% block modal_body_classe %}p-0{% endblock %}
+                {% block modal_body %}<div>{% include "consommations/gestionnaire_parametres.html" %}</div>{% endblock %}
+                {% block modal_footer %}
+                    <button type="submit" class="btn btn-primary" name="type_submit" form="form-maj" value="MAJ"><i class="fa fa-check margin-r-5"></i>Appliquer</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+                {% endblock %}
+            {% endembed %}
+        </div>
+    </section>
+</div>
+{% endblock page %}
+
+{% block extra_foot %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'consommations/emargement.js' %}"></script>
+    <script>
+        function Get_individus() { return []; }
+        function Get_inscriptions() { return []; }
+
+        $(document).ready(function() {
+            $('#emargement-date').on('change', function() {
+                var date = $(this).val();
+                var activite = $(this).data('activite');
+                var base = "{% url 'pointeuse_conso' %}";
+                if (activite) {
+                    window.location.href = base + '/' + date + '/' + activite;
+                } else {
+                    window.location.href = base + '/' + date;
+                }
+            });
+        });
+    </script>
+{% endblock extra_foot %}
