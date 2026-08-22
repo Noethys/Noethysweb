@@ -145,14 +145,26 @@ class View(CustomView, TemplateView):
         if not data['selection_classes']:
             data['selection_classes'] = [classe.pk for classe in data['liste_classes']]
 
-        # Importation des inscriptions
-        conditions = Q(date_debut__lte=data["date_min"]) & (Q(date_fin__isnull=True) | Q(date_fin__gte=data["date_max"]))
-        if ajouter_individu == "INSCRITS_TOUS":
+		# Importation des inscriptions
+		conditions = Q(date_debut__lte=data["date_min"]) & (
+            Q(date_fin__isnull=True) | Q(date_fin__gte=data["date_max"])
+		)
+
+		if getattr(self, "afficher_inscrits_sans_conso", False) or ajouter_individu == "INSCRITS_TOUS":
             conditions &= Q(activite=data["selection_activite"])
-        elif ajouter_individu and ajouter_individu.startswith("INSCRITS_GROUPE"):
-            conditions &= Q(activite=data["selection_activite"], groupe_id=int(ajouter_individu.split(":")[1])) | Q(pk__in=liste_idinscriptions)
+
+		elif ajouter_individu and ajouter_individu.startswith("INSCRITS_GROUPE"):
+            conditions &= (
+                Q(
+                    activite=data["selection_activite"],
+                    groupe_id=int(ajouter_individu.split(":")[1])
+                )
+                | Q(pk__in=liste_idinscriptions)
+            )
+
         else:
             conditions &= Q(pk__in=liste_idinscriptions)
+
 
         if len(data["selection_classes"]) < len(data["liste_classes"]):
             conditions &= Q(individu__scolarite__classe_id__in=data["selection_classes"])

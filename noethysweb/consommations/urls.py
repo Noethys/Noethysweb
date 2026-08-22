@@ -8,8 +8,8 @@ from core.views import toc
 from parametrage.views import calendrier
 from consommations.forms import grille_forfaits
 from consommations.views import grille, gestionnaire, suivi_consommations, etat_global, synthese_consommations, liste_attente, liste_absences, edition_liste_conso, \
-                                pointeuse, liste_consommations, liste_repas, etat_nomin, liste_durees, consommations_traitement_lot, evolution_reservations, \
-                                detail_consommations, liste_demandes, suivi_pointage, analyse_ia_frequentation #, pointeuse_barcodes
+                                pointeuse, emargement, liste_consommations, liste_repas, etat_nomin, liste_durees, consommations_traitement_lot, evolution_reservations, \
+                                detail_consommations, liste_demandes, suivi_pointage, analyse_ia_frequentation
 from core.decorators import secure_ajax
 
 
@@ -22,7 +22,16 @@ urlpatterns = [
     path('consommations/edition_liste_conso', edition_liste_conso.View.as_view(), name='edition_liste_conso'),
     path('consommations/gestionnaire_consommations', gestionnaire.View.as_view(), name='gestionnaire_conso'),
     path('consommations/gestionnaire_consommations/<str:date>/<int:idactivite>', gestionnaire.View.as_view(), name='gestionnaire_conso'),
-    path('consommations/pointeuse_consommations', pointeuse.View.as_view(), name='pointeuse_conso'),
+
+	# Nouvelle pointeuse simplifiée
+	path('consommations/pointeuse_consommations', emargement.View.as_view(), name='pointeuse_conso'),
+	path('consommations/pointeuse_consommations/<str:date>', emargement.View.as_view(), name='pointeuse_conso_date'),
+	path('consommations/pointeuse_consommations/<str:date>/<int:idactivite>', emargement.View.as_view(), name='pointeuse_conso_selection'),
+
+	# Ancienne interface conservée
+	path('consommations/pointeuse_consommations/classique',pointeuse.View.as_view(),name='pointeuse_conso_classique'),
+
+
     # path('consommations/pointeuse_barcodes', pointeuse_barcodes.View.as_view(), name='pointeuse_barcodes'),
     path('consommations/suivi_consommations', suivi_consommations.View.as_view(), name='suivi_consommations'),
     path('consommations/detail_consommations/<str:donnee>', detail_consommations.View.as_view(), name='detail_consommations'),

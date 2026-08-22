@@ -13,6 +13,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
 
     # ------------------------------------ Accueil ------------------------------------
     menu.Add(code="accueil", titre="Accueil", icone="home", toujours_afficher=True)
+    menu.Add(code="pointeuse_conso", titre="Émargement", icone="check-square-o", toujours_afficher=True)
 
     # ------------------------------------ Paramétrage ------------------------------------
     menu_parametrage = menu.Add(code="parametrage_toc", titre="Paramétrage", icone="gear")
@@ -358,7 +359,6 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_gestion_conso = menu_consommations.Add(titre="Gestion des consommations")
     menu_gestion_conso.Add(code="edition_liste_conso", titre="Edition de la liste des consommations", icone="file-text-o")
     menu_gestion_conso.Add(code="gestionnaire_conso", titre="Gestionnaire des consommations", icone="file-text-o")
-    menu_gestion_conso.Add(code="pointeuse_conso", titre="Pointeuse en temps réel", icone="file-text-o")
     # menu_gestion_conso.Add(code="pointeuse_barcodes", titre="Pointeuse avec codes-barres", icone="file-text-o")
     menu_gestion_conso.Add(code="suivi_consommations", titre="Suivi des consommations", icone="file-text-o")
     menu_gestion_conso.Add(code="liste_consommations", titre="Liste des consommations", icone="file-text-o")
