@@ -1,53 +1,30 @@
-FROM python:3.12
+FROM python:3.9-slim
 
-RUN apt-get update && \
-    apt-get install -y cron supervisor && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN python -m pip install gunicorn
+# Configuration d'environnement
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=noethysweb.settings
 
 WORKDIR /usr/src/app
 
+# Dépendances système minimales
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copie et installation forcée des paquets compatibles avec Django 3.2
 COPY ./requirements.txt .
+RUN pip install --no-cache-dir django==3.2.25 django-debug-toolbar==3.8.1 django-q2==1.6.2 django-autocomplete-light==3.9.4 psycopg2-binary==2.9.9 gunicorn==21.2.0
+RUN pip install --no-cache-dir -r ./requirements.txt
 
-RUN pip install psycopg2
-RUN pip3 install -r ./requirements.txt
-
-RUN cat <<'EOF' > /etc/supervisor/conf.d/supervisord.conf
-[supervisord]
-nodaemon=true
-logfile=/dev/null
-logfile_maxbytes=0
-
-[program:cron]
-command=/usr/sbin/cron -f
-autostart=true
-autorestart=true
-stdout_logfile=/dev/fd/1
-stdout_logfile_maxbytes=0
-stderr_logfile=/dev/fd/2
-stderr_logfile_maxbytes=0
-
-[program:app]
-command=gunicorn noethysweb.wsgi --bind 0.0.0.0:80
-directory=/usr/src/app/noethysweb
-autostart=true
-autorestart=true
-stdout_logfile=/dev/fd/1
-stdout_logfile_maxbytes=0
-stderr_logfile=/dev/fd/2
-stderr_logfile_maxbytes=0
-EOF
-
+# Copie de tout le code source
 COPY . .
 
-
 WORKDIR /usr/src/app/noethysweb
-
-# make sur it is executable so that we can easily manage a running instance like this:
-# docker exec noethysweb ./manage.py import_defaut
 RUN chmod +x ./manage.py
 
-RUN ./manage.py collectstatic
+# Collecte des fichiers statiques pour la production
+CMD ["/bin/bash", "-c", "./manage.py collectstatic --noinput && ./manage.py migrate && gunicorn noethysweb.wsgi --bind 0.0.0.0:10000"]
 
-CMD ["/bin/bash", "-c", "./manage.py migrate && /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"]
+# Commande de démarrage adaptée à Render (Port 10000 requis par défaut)
+CMD ["/bin/bash", "-c", "./manage.py migrate && gunicorn noethysweb.wsgi --bind 0.0.0.0:10000"]
