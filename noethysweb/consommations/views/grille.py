@@ -753,26 +753,7 @@ class Facturation():
 
                             # Vérification des quantités max
                             if IDprestationForfait and tarif.combinaison.quantite_max and not tarif.forfait_auto:
-                                dict_quantites = {}
-
-                                # Recherche la quantité de conso dans la grille affichée
-                                for key, liste_conso_temp in self.donnees["consommations"].items():
-                                    for conso in liste_conso_temp:
-                                        if (tarif.forfait_beneficiaire == "individu" and conso["inscription"] == case_tableau["inscription"]) or (tarif.forfait_beneficiaire == "famille" and conso["famille"] == case_tableau["famille"]):
-                                            dict_quantites.setdefault(key, [])
-                                            dict_quantites[key].append(conso["unite"])
-                                            dict_quantites[key].sort()
-
-                                # Recherche la quantité de conso déjà enregistrées dans la DB
-                                if "-" not in IDprestationForfait:
-                                    for conso in Consommation.objects.filter(prestation_id=IDprestationForfait):
-                                        key = "%s_%d" % (conso.date, conso.inscription_id)
-                                        dict_quantites.setdefault(key, [])
-                                        dict_quantites[key].append(conso.unite_id)
-                                        dict_quantites[key].sort()
-
-                                # Compte la quantité de conso utilisées
-                                quantite_forfait = len([key for key, unites in dict_quantites.items() if unites == tarif.combi_retenue])
+                                quantite_forfait = self.Compte_quantite_forfait_credit(tarif=tarif, IDprestationForfait=IDprestationForfait)
                                 if quantite_forfait > tarif.combinaison.quantite_max:
                                     IDprestationForfait = None
                                     messages.append(("info", "Il n'y a plus de crédit disponible dans le forfait !"))
@@ -1055,6 +1036,83 @@ class Facturation():
             "tout_recalculer": tout_recalculer,
         }
         return donnees_retour
+
+    def Compte_quantite_forfait_credit(self, tarif=None, IDprestationForfait=None):
+        """Compte les combinaisons déjà consommées dans un forfait crédit manuel."""
+        prestation_forfait = None
+        for prestations in (self.donnees.get("prestations", {}), self.dict_nouvelles_prestations):
+            for id_prestation in (IDprestationForfait, str(IDprestationForfait)):
+                if id_prestation in prestations:
+                    prestation_forfait = prestations[id_prestation]
+                    break
+            if prestation_forfait:
+                break
+
+        if not prestation_forfait:
+            return 0
+
+        date_debut = prestation_forfait.get("forfait_date_debut")
+        date_fin = prestation_forfait.get("forfait_date_fin")
+        if not date_debut or not date_fin:
+            return 0
+        date_debut, date_fin = str(date_debut), str(date_fin)
+
+        dict_quantites = {}
+        dict_suppressions = self.donnees.get("dict_suppressions") or {}
+        consommations_supprimees = {
+            str(idconso) for idconso in (dict_suppressions.get("consommations") or [])
+        }
+
+        def Ajoute_unite(key=None, unite=None):
+            if key is None or unite is None:
+                return
+            dict_quantites.setdefault(key, [])
+            if unite not in dict_quantites[key]:
+                dict_quantites[key].append(unite)
+                dict_quantites[key].sort()
+
+        # Recherche la quantité de conso dans la grille affichée. La grille
+        # peut contenir des dates extérieures à la période du forfait.
+        for key, liste_conso_temp in self.donnees.get("consommations", {}).items():
+            for conso in liste_conso_temp:
+                date_conso = conso.get("date")
+                if not date_conso or not date_debut <= str(date_conso) <= date_fin:
+                    continue
+                if conso.get("activite") != prestation_forfait.get("activite"):
+                    continue
+                if tarif.forfait_beneficiaire == "individu":
+                    if conso.get("individu") != prestation_forfait.get("individu"):
+                        continue
+                elif conso.get("famille") != prestation_forfait.get("famille"):
+                    continue
+                Ajoute_unite(key=key, unite=conso.get("unite"))
+
+        # Recherche la quantité de conso déjà enregistrées dans la DB.
+        # Le rattachement au forfait ne dispense pas de vérifier sa période,
+        # son activité et son bénéficiaire : cela protège aussi les données
+        # historiques incohérentes.
+        if "-" not in str(IDprestationForfait):
+            conditions = {
+                "prestation_id": IDprestationForfait,
+                "date__gte": date_debut,
+                "date__lte": date_fin,
+                "activite_id": prestation_forfait.get("activite"),
+            }
+            if tarif.forfait_beneficiaire == "individu":
+                conditions["individu_id"] = prestation_forfait.get("individu")
+            else:
+                conditions["inscription__famille_id"] = prestation_forfait.get("famille")
+
+            for conso in Consommation.objects.filter(**conditions):
+                if str(conso.pk) in consommations_supprimees:
+                    continue
+                if conso.inscription_id is None or conso.unite_id is None:
+                    continue
+                key = "%s_%d" % (conso.date, conso.inscription_id)
+                Ajoute_unite(key=key, unite=conso.unite_id)
+
+        # Compte les journées dont les unités correspondent à la combinaison.
+        return len([key for key, unites in dict_quantites.items() if unites == tarif.combi_retenue])
 
     def Recherche_forfait_credit(self, tarif=None, case_tableau=None):
         """ Recherche un forfait dans la liste des forfaits disponibles pour une consommation donnée """
