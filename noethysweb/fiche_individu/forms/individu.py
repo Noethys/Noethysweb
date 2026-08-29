@@ -5,13 +5,13 @@
 
 from django import forms
 from django.forms import ModelForm
-from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Submit, HTML, Div, Column, Fieldset, ButtonHolder
-from crispy_forms.bootstrap import Field, FormActions, PrependedText, StrictButton, InlineRadios
+from crispy_forms.layout import Layout, Hidden, HTML, Div, Fieldset
+from crispy_forms.bootstrap import Field, InlineRadios
+from django_select2.forms import ModelSelect2Widget
 from core.utils.utils_commandes import Commandes
 from core.models import Individu, Rattachement, CATEGORIES_RATTACHEMENT
-from core.forms.select2 import Select2Widget
+from core.forms.base import FormulaireBase
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -20,7 +20,10 @@ class Formulaire(FormulaireBase, ModelForm):
     titulaire = forms.BooleanField(label="Titulaire du dossier", initial=True, required=False)
     nom = forms.CharField(label="Nom*", required=False, help_text="Saisissez le nom de famille en majuscules. Ex : DUPOND.")
     prenom = forms.CharField(label="Prénom*", required=False, help_text="Saisissez le prénom en minuscules avec la première lettre en majuscule. Ex : Kévin.")
-    individu = forms.ModelChoiceField(label="Individu*", widget=Select2Widget(), queryset=Individu.objects.all().order_by("nom", "prenom"), required=False)
+    individu = forms.ModelChoiceField(
+        label="Individu*", queryset=Individu.objects.all().order_by("nom", "prenom"),
+        widget=ModelSelect2Widget(model=Individu, search_fields=["nom__icontains", "prenom__icontains"], attrs={"data-minimum-input-length": 0}), required=False,
+    )
 
     class Meta:
         model = Individu
