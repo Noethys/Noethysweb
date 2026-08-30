@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import argparse, importlib
+import argparse, importlib, traceback
 from django.views.generic import TemplateView
 from core.views.base import CustomView
 from outils.forms.procedures import Formulaire
@@ -76,4 +76,5 @@ class View(CustomView, TemplateView):
             self.nom_fichier = procedure.nom_fichier
             return resultat
         except Exception as err:
+            print(traceback.format_exc())
             return err
