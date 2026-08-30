@@ -878,7 +878,7 @@ class Facturation():
                             continue
                         if not tarif:
                             break
-                        resultat = self.Calcule_tarif(tarif, tarif_base.combi_retenue, case_tableau, temps_facture, quantite, evenement, modeSilencieux, action)
+                        resultat = self.Calcule_tarif(tarif, tarif_base.combi_retenue, case_tableau, temps_facture, quantite, evenement)
                         if resultat == False:
                             return False
                         elif resultat == "break":
@@ -1297,7 +1297,7 @@ class Facturation():
             duree = None
         return duree, heure_min, heure_max
 
-    def Calcule_tarif(self, tarif=None, combinaisons_unites=[], case_tableau=None, temps_facture=None, quantite=None, evenement=None, modeSilencieux=False, action="saisie"):
+    def Calcule_tarif(self, tarif=None, combinaisons_unites=[], case_tableau=None, temps_facture=None, quantite=None, evenement=None, num_enfant=1):
         nom_tarif = tarif.nom_tarif.nom
         if hasattr(tarif, "nom_evenement"):
             nom_tarif = tarif.nom_evenement
@@ -1505,7 +1505,7 @@ class Facturation():
 
             # Applique le tarif par défaut avant le recalcul lors de l'enregistrement
             if ligne_calcul:
-                montant_tarif = ligne_calcul.montant_enfant_1
+                montant_tarif = getattr(ligne_calcul, "montant_enfant_%d" % num_enfant)
 
 
         # Recherche du montant du tarif : AU PRORATA DE LA DUREE (Montant unique OU QF)
