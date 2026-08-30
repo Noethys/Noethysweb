@@ -612,6 +612,6 @@ h1 {
         --bs-text-opacity: 1;
         color: var(--bs-secondary-color) !important;
         gap: .25rem !important;
-        align-items: center !important;
+        align-items: baseline !important;
         display: flex !important;
     }
