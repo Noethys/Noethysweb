@@ -41,7 +41,7 @@ def Calcule_dates_forfait_credit_auto(parametres_tarif={}, date_conso=None):
         if code == "SUIV_VENDREDI": return date_conso + relativedelta.relativedelta(weekday=relativedelta.FR(1))
         if code == "SUIV_SAMEDI": return date_conso + relativedelta.relativedelta(weekday=relativedelta.SA(1))
         if code == "SUIV_DIMANCHE": return date_conso + relativedelta.relativedelta(weekday=relativedelta.SU(1))
-        if code == "SUIV_MOIS_DERNIER_JOUR": return relativedelta.relativedelta(day=1, months=+1, days=-1)
+        if code == "SUIV_MOIS_DERNIER_JOUR": return date_conso + relativedelta.relativedelta(day=1, months=+1, days=-1)
         if code == "SUIV_JOUR": return date_conso
         if code == "SUIV_SEMAINE_VENDREDI": return date_conso + relativedelta.relativedelta(weekday=relativedelta.MO(-1)) + relativedelta.relativedelta(weekday=relativedelta.FR(1))
         if code == "SUIV_SEMAINE_SAMEDI": return date_conso + relativedelta.relativedelta(weekday=relativedelta.MO(-1)) + relativedelta.relativedelta(weekday=relativedelta.SA(1))
