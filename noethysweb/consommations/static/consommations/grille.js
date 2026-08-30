@@ -435,7 +435,7 @@ class Case_base {
         }
 
         // Affichage de l'état dans le span groupe
-        if (mode === "portail") {
+        if ((mode === "portail") && (this.type_case !== "evenement")) {
             $("#" + this.key + " .groupe").text(aides_visuelles ? texte_etat : "");
         }
 
@@ -1000,6 +1000,7 @@ class Case_event extends Case_standard {
             nbre_places_prises = dict_places_prises[key];
         }
 
+        var texte_etat = "Disponible";
         if (capacite_max) {
             // Calcule le nombre de places disponibles
             var nbre_places_restantes = capacite_max - nbre_places_prises;
@@ -1022,7 +1023,15 @@ class Case_event extends Case_standard {
                 $("#" + this.key).removeClass("disponible dernieresplaces complet");
                 $("#" + this.key).addClass(klass);
             };
+
+            // Ajout : mise à jour du texte accessible
+            if (klass === "disponible") {texte_etat = "Disponible"}
+            if (klass === "dernieresplaces") {texte_etat = "Dernières places"}
+            if (klass === "complet") {texte_etat = "Complet"}
         };
+        if (mode === "portail") {
+            $("#" + this.key + " .groupe").text(aides_visuelles ? texte_etat : "");
+        }
     };
 
 };
