@@ -2,7 +2,7 @@
   "name": "noethysweb",
   "private": true,
   "dependencies": {
-    "jquery": ">=2.1.1",
+    "jquery": ">=3.6.4",
     "jqueryui": ">=1.12.1",
 	"fabric": ">=4.6.0"
   }
