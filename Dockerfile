@@ -8,10 +8,10 @@ RUN python -m pip install gunicorn
 
 WORKDIR /usr/src/app
 
-COPY ./requirements.txt .
+COPY ./requirements.txt ./requirements-dev.txt .
 
 RUN pip install psycopg2
-RUN pip3 install -r ./requirements.txt
+RUN pip3 install -r ./requirements-dev.txt
 
 RUN cat <<'EOF' > /etc/supervisor/conf.d/supervisord.conf
 [supervisord]
