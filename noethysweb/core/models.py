@@ -230,7 +230,7 @@ CHOIX_CATEGORIE_MODELE_DOCUMENT = [("fond", "Calque de fond"), ("facture", "Fact
                                    ("individu", "Individu"), ("famille", "Famille"), ("inscription", "Inscription"),
                                    ("cotisation", "Adhésion"), ("attestation_fiscale", "Attestation fiscale"),
                                    ("devis", "Devis"), ("location", "Location"),
-                                   ("location_demande", "Demande de location")]
+                                   ("location_demande", "Demande de location"), ("activite", "Activité")]
 
 CHOIX_FORMAT_EXPORT_TRESOR = [
     ("pes", "PES v2 ORMC Recette"),
