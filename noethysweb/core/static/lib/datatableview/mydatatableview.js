@@ -426,6 +426,12 @@ function supprimer_selections() {
     window.location = url;
 }
 
+function modifier_selections() {
+    var listepk = get_coches();
+    var url = url_modifier_plusieurs.replace("xxx", listepk.join(";"));
+    window.location = url;
+}
+
 $('.datatable th').on('click', function() {
     var code_colonne = $(this).data("code");
     if (code_colonne) {

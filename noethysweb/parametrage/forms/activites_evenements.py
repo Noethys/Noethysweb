@@ -346,3 +346,193 @@ $(document).ready(function() {
 
 </script>
 """
+
+
+class Formulaire_modifier_plusieurs(FormulaireBase, forms.Form):
+    modifier_description = forms.BooleanField(label="Modifier la description", required=False)
+    description = forms.CharField(label="Description", widget=forms.Textarea(attrs={'rows': 2}), required=False, help_text="""<i class='fa fa-exclamation-triangle'></i> 
+                                    Cette description sera visible pour les familles sur le portail. C'est ici que vous pouvez par exemple indiquer les horaires de l'évènement
+                                    ou le matériel à apporter. Exemples : RDV à 10h au port, n'oubliez pas vos casquettes...""")
+
+    modifier_heure_debut = forms.BooleanField(label="Modifier l'heure de début", required=False)
+    heure_debut = forms.TimeField(label="Heure de début", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Il est possible de renseigner ici une heure de début par défaut. Utile pour des statistiques par exemple.")
+    modifier_heure_fin = forms.BooleanField(label="Modifier l'heure de fin", required=False)
+    heure_fin = forms.TimeField(label="Heure de fin", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Il est possible de renseigner ici une heure de fin par défaut. Utile pour des statistiques par exemple.")
+
+    modifier_nbre_places = forms.BooleanField(label="Modifier le nombre de places", required=False)
+    choix_nbre_places = [("NON", "Sans limitation du nombre de places"), ("OUI", "Avec limitation du nombre de places")]
+    type_nbre_places = forms.TypedChoiceField(label="Places", choices=choix_nbre_places, initial="NON", required=False, help_text="""Il est possible de définir ici une
+                                                capacité d'accueil maximale uniquement pour cet événement.""")
+    capacite_max = forms.IntegerField(label="Nombre de places*", initial=0, min_value=0, required=False)
+
+    # Tarification
+    modifier_tarification = forms.BooleanField(label="Modifier la tarification", required=False)
+    choix_tarification = [
+        ("GRATUIT", "Gratuit"),
+        ("SIMPLE", "Tarif simple"),
+        ("AVANCE", "Tarification avancée"),
+        ("EXISTANT", "Copie des tarifs d'un événement existant")
+    ]
+    texte_aide = "Pour créer, modifier ou supprimer des tarifs avancés, sélectionnez 'Tarification avancée', cliquez sur Enregistrer puis cliquez sur le bouton <i class='fa fa-gear'></i> sur la ligne de l'événement dans la liste des événements."
+    type_tarification = forms.TypedChoiceField(label="Tarification", choices=choix_tarification, initial="GRATUIT", required=False, help_text=texte_aide)
+    copie_evenement = forms.ModelChoiceField(label="Evénement", widget=Widget_copie_tarif_evenement({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=Evenement.objects.none(), required=False)
+    montant = forms.DecimalField(label="Montant", max_digits=6, decimal_places=2, initial=0.0, required=False)
+
+    def __init__(self, *args, **kwargs):
+        idactivite = kwargs.pop("idactivite")
+        super(Formulaire_modifier_plusieurs, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'activites_evenements_form_modifier_plusieurs'
+        self.helper.form_method = 'post'
+        self.helper.use_custom_control = False
+
+        self.helper.form_class = 'form-horizontal'
+        self.helper.label_class = 'col-md-2'
+        self.helper.field_class = 'col-md-10'
+
+        # Définit l'activité associée
+        activite = Activite.objects.get(pk=idactivite)
+
+        # Sélectionne les tarifs existants
+        self.fields["copie_evenement"].queryset = Evenement.objects.filter(activite=activite).order_by("-date")
+
+        # Affichage
+        self.helper.layout = Layout(
+            Commandes(annuler_url="{{ view.get_success_url }}", ajouter=False),
+            Field("modifier_description"),
+            Field("description"),
+            Field("modifier_heure_debut"),
+            Field("heure_debut"),
+            Field("modifier_heure_fin"),
+            Field("heure_fin"),
+            Field("modifier_nbre_places"),
+            Field("type_nbre_places"),
+            Field("capacite_max"),
+            Field("modifier_tarification"),
+            Field("type_tarification"),
+            Field("montant"),
+            Field("copie_evenement"),
+            HTML(EXTRA_SCRIPT_MODIFIER_PLUSIEURS),
+        )
+
+    def clean(self):
+        # Nbre de places
+        if self.cleaned_data["modifier_nbre_places"]:
+            if self.cleaned_data["type_nbre_places"] == "OUI" and self.cleaned_data["capacite_max"] == 0:
+                self.add_error('capacite_max', "Vous devez saisir une capacité maximale")
+                return
+
+        # Tarification
+        if self.cleaned_data["modifier_tarification"]:
+            if self.cleaned_data["type_tarification"] == "SIMPLE" and self.cleaned_data["montant"] in (None, 0.0):
+                    self.add_error('montant', "Vous devez saisir un montant")
+                    return
+
+            if self.cleaned_data["type_tarification"] in ("GRATUIT", "AVANCE"):
+                self.cleaned_data["montant"] = None
+
+            if self.cleaned_data["type_tarification"] == "EXISTANT" and not self.cleaned_data["copie_evenement"]:
+                    self.add_error('copie_evenement', "Vous devez sélectionner un événement existant dont les tarifs sont à dupliquer")
+                    return
+
+        return self.cleaned_data
+
+
+EXTRA_SCRIPT_MODIFIER_PLUSIEURS = """
+<script>
+
+// Description
+function On_change_description() {
+    $('#div_id_description').hide();
+    if ($(this).prop("checked")) {
+        $('#div_id_description').show();
+    }
+}
+$(document).ready(function() {
+    $('#id_modifier_description').change(On_change_description);
+    On_change_description.call($('#id_modifier_description').get(0));
+});
+
+// Heure de début
+function On_change_heure_debut() {
+    $('#div_id_heure_debut').hide();
+    if ($(this).prop("checked")) {
+        $('#div_id_heure_debut').show();
+    }
+}
+$(document).ready(function() {
+    $('#id_modifier_heure_debut').change(On_change_heure_debut);
+    On_change_heure_debut.call($('#id_modifier_heure_debut').get(0));
+});
+
+// Heure de fin
+function On_change_heure_fin() {
+    $('#div_id_heure_fin').hide();
+    if ($(this).prop("checked")) {
+        $('#div_id_heure_fin').show();
+    }
+}
+$(document).ready(function() {
+    $('#id_modifier_heure_fin').change(On_change_heure_fin);
+    On_change_heure_fin.call($('#id_modifier_heure_fin').get(0));
+});
+
+// Nombre de places
+function On_change_nbre_places() {
+    $('#div_id_type_nbre_places').hide();
+    $('#div_id_capacite_max').hide();
+    if ($(this).prop("checked")) {
+        $('#div_id_type_nbre_places').show();
+        On_change_type_nbre_places.call($('#id_type_nbre_places').get(0));
+    }
+}
+$(document).ready(function() {
+    $('#id_modifier_nbre_places').change(On_change_nbre_places);
+    On_change_nbre_places.call($('#id_modifier_nbre_places').get(0));
+});
+
+// type_nbre_places
+function On_change_type_nbre_places() {
+    $('#div_id_capacite_max').hide();
+    if($(this).val() == 'OUI') {
+        $('#div_id_capacite_max').show();
+    }
+}
+$(document).ready(function() {
+    $('#id_type_nbre_places').change(On_change_type_nbre_places);
+    On_change_type_nbre_places.call($('#id_type_nbre_places').get(0));
+});
+
+// Tarification
+function On_change_tarification() {
+    $('#div_id_type_tarification').hide();
+    $('#div_id_montant').hide();
+    $('#div_id_copie_evenement').hide();
+    if ($(this).prop("checked")) {
+        $('#div_id_type_tarification').show();
+        On_change_type_tarification.call($('#id_type_tarification').get(0));
+    }
+}
+$(document).ready(function() {
+    $('#id_modifier_tarification').change(On_change_tarification);
+    On_change_tarification.call($('#id_modifier_tarification').get(0));
+});
+
+// type_tarification
+function On_change_type_tarification() {
+    $('#div_id_montant').hide();
+    $('#div_id_copie_evenement').hide();
+    if($(this).val() == 'SIMPLE') {
+        $('#div_id_montant').show();
+    }
+    if($(this).val() == 'EXISTANT') {
+        $('#div_id_copie_evenement').show();
+    }
+}
+$(document).ready(function() {
+    $('#id_type_tarification').change(On_change_type_tarification);
+    On_change_type_tarification.call($('#id_type_tarification').get(0));
+});
+
+</script>
+"""

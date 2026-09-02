@@ -3,17 +3,19 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import re
+import re, json
 from copy import deepcopy
 from django.urls import reverse_lazy, reverse
+from django.views.generic import TemplateView
 from django.db.models import Q, Count
 from django.contrib import messages
+from django.http import HttpResponseRedirect
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.utils import utils_preferences, utils_dates
 from core.models import Evenement, Ouverture, Tarif, TarifLigne
 from parametrage.views.activites import Onglet
-from parametrage.forms.activites_evenements import Formulaire
+from parametrage.forms.activites_evenements import Formulaire, Formulaire_modifier_plusieurs
 
 
 class Page(Onglet):
@@ -21,6 +23,7 @@ class Page(Onglet):
     url_liste = "activites_evenements_liste"
     url_ajouter = "activites_evenements_ajouter"
     url_modifier = "activites_evenements_modifier"
+    url_modifier_plusieurs = "activites_evenements_modifier_plusieurs"
     url_supprimer = "activites_evenements_supprimer"
     url_supprimer_plusieurs = "activites_evenements_supprimer_plusieurs"
     description_liste = "Vous pouvez saisir ici des événements pour l'activité. Vous devez avoir au préalable créé au moins une unité de consommation de type 'Evénementiel'."
@@ -39,6 +42,7 @@ class Page(Onglet):
         ]
         # Ajout l'idactivite à l'URL de suppression groupée
         context["url_supprimer_plusieurs"] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={"idactivite": self.kwargs.get("idactivite", None), "listepk": "xxx"})
+        context["url_modifier_plusieurs"] = reverse_lazy(self.url_modifier_plusieurs, kwargs={"idactivite": self.kwargs.get("idactivite", None), "listepk": "xxx"})
         return context
 
     def get_form_kwargs(self, **kwargs):
@@ -88,6 +92,9 @@ class Liste(Page, crud.Liste):
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
         context["active_checkbox"] = True
+        context['boutons_coches'] = json.dumps([
+            {"id": "bouton_modifier_plusieurs", "action": "modifier_selections()", "title": "Modifier plusieurs événements", "label": "<i class='fa fa-pencil margin-r-5'></i>Modifier par lot"},
+        ])
         return context
 
     class datatable_class(MyDatatable):
@@ -206,3 +213,45 @@ class Supprimer(Page, crud.Supprimer):
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
     template_name = "parametrage/activite_delete.html"
+
+
+class Modifier_plusieurs(Page, TemplateView):
+    template_name = "parametrage/activite_edit.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(Modifier_plusieurs, self).get_context_data(**kwargs)
+        context['box_titre'] = "Modifier un lot d'événéments"
+        context['box_introduction'] = "Cochez les éléments à modifier puis renseignez les nouvelles valeurs avant de cliquer sur le bouton Enregistrer."
+        context['onglet_actif'] = "evenements"
+        context['form'] = Formulaire_modifier_plusieurs(idactivite=kwargs.get("idactivite"))
+        return context
+
+    def post(self, request, **kwargs):
+        # Importation du formulaire
+        form = Formulaire_modifier_plusieurs(request.POST, request=request, idactivite=kwargs.get("idactivite"))
+        form.is_valid()
+
+        idactivite = kwargs.get("idactivite")
+        listepk = kwargs.get("listepk")
+        evenements = Evenement.objects.filter(pk__in=[int(pk) for pk in listepk.split(";")])
+
+        # Modification des événements
+        for evenement in evenements:
+            if form.cleaned_data.get("modifier_description"):
+                evenement.description = form.cleaned_data.get("description")
+            if form.cleaned_data.get("modifier_heure_debut"):
+                evenement.heure_debut = form.cleaned_data.get("heure_debut")
+            if form.cleaned_data.get("modifier_heure_fin"):
+                evenement.heure_fin = form.cleaned_data.get("heure_fin")
+            if form.cleaned_data.get("modifier_nbre_places"):
+                evenement.capacite_max = form.cleaned_data.get("capacite_max") if form.cleaned_data.get("type_nbre_places") == "OUI" else None
+            if form.cleaned_data.get("modifier_tarification"):
+                evenement.montant = form.cleaned_data.get("montant")
+                # Copie des tarifs d'un événement existant
+                if form.cleaned_data.get("type_tarification") == "EXISTANT":
+                    self.Copie_tarifs_evenement_existant(evenement=evenement, copie_evenement=form.cleaned_data.get("copie_evenement"))
+            evenement.save()
+
+        # Confirmation
+        messages.add_message(self.request, messages.SUCCESS, "Les événements ont été modifiés avec succès")
+        return HttpResponseRedirect(reverse_lazy("activites_evenements_liste", kwargs={"idactivite": idactivite}))
