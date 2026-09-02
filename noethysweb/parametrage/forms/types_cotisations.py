@@ -7,9 +7,9 @@ from django import forms
 from django.forms import ModelForm
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset
+from crispy_forms.layout import Layout, Fieldset, Div, HTML
 from crispy_forms.bootstrap import Field
-from core.models import TypeCotisation, Cotisation
+from core.models import TypeCotisation, Cotisation, Activite
 from core.utils.utils_commandes import Commandes
 
 
@@ -35,6 +35,11 @@ class Formulaire(FormulaireBase, ModelForm):
         if self.instance and Cotisation.objects.filter(type_cotisation_id=self.instance.pk):
             self.fields["type"].disabled = True
 
+        # Activités associées
+        activites_associees = []
+        if self.instance.pk:
+            activites_associees = [activite.nom for activite in Activite.objects.filter(cotisations=self.instance)]
+
         # Définir comme valeur par défaut
         self.fields['defaut'].label = "Définir comme type d'adhésion par défaut"
         if len(TypeCotisation.objects.all()) == 0 or self.instance.defaut == True:
@@ -58,6 +63,14 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset('Structure associée',
                 Field('structure'),
+            ),
+            Fieldset("Activités pour lesquelles ce type d'adhésion est obligatoire",
+                Div(
+                    HTML("""
+                    <span>%s</span>
+                    """ % (", ".join(activites_associees) if activites_associees else "Aucune activité")),
+                    css_class="alert alert-light text-center"
+                ),
             ),
         )
 

@@ -30,7 +30,7 @@ class Liste(Page, crud.Liste):
     model = TypeCotisation
 
     def get_queryset(self):
-        return TypeCotisation.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure()).annotate(nbre_cotisations=Count("cotisation"))
+        return TypeCotisation.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure()).annotate(nbre_cotisations=Count("cotisation")).annotate(nbre_activites=Count("activite_types_cotisations", distinct=True))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -45,10 +45,11 @@ class Liste(Page, crud.Liste):
         carte = columns.TextColumn("Carte", sources="carte", processor='Get_carte')
         defaut = columns.TextColumn("Défaut", sources="defaut", processor='Get_default')
         nbre_cotisations = columns.TextColumn("Adhésions associées", sources="nbre_cotisations")
+        nbre_activites = columns.TextColumn("Activités associées", sources="nbre_activites")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idtype_cotisation', 'nom', 'type', 'carte', 'defaut', 'nbre_cotisations']
+            columns = ['idtype_cotisation', 'nom', 'type', 'carte', 'defaut', 'nbre_cotisations', 'nbre_activites']
             ordering = ['nom']
 
         def Get_carte(self, instance, **kwargs):
