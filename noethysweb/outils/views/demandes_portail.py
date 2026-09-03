@@ -297,10 +297,19 @@ class Liste(Page, crud.Liste):
                 return self.dict_caisses.get(int(valeur), "?")
 
             # Allocataire
-            if instance.code in ("allocataire", "adresse_auto"):
+            if instance.code == "allocataire":
                 if not hasattr(self, "dict_individus"):
                     self.dict_individus = {individu.pk: individu.Get_nom() for individu in Individu.objects.all()}
                 return self.dict_individus.get(int(valeur), "?")
+
+            # Adresse auto
+            if instance.code == "adresse_auto":
+                if not hasattr(self, "dict_individus"):
+                    self.dict_individus = {individu.pk: individu.Get_nom() for individu in Individu.objects.all()}
+                try:
+                    return self.dict_individus.get(int(valeur), "?")
+                except:
+                    pass
 
             # Secteur
             if instance.code == "secteur":
