@@ -154,7 +154,7 @@
                                                 <a href="{% url 'portail_planning' idindividu=individu.pk idactivite=activite.pk idperiode=periode.pk %}"
                                                     class="list-group-item list-group-item-action text-body"
                                                     aria-label="{{ individu.prenom }} - {{ activite.nom }} – {{ periode.nom }} - {% trans "Du" %} {{ periode.date_debut }} {% trans "au" %} {{ periode.date_fin }}"
-                                                    style="border-radius: 0;border: 0;border-bottom: 01px solid #dee2e6;"
+                                                    style="border-radius: 0;border: 0;border-bottom: 01px solid var(--bs-border-color);"
                                                 >
                                                     <i class="fa fa-calendar me-2" aria-hidden="true"></i>
                                                     {{ periode.nom }}
@@ -164,7 +164,7 @@
                                                 </a>
                                             </li>
                                         {% empty %}
-                                            <div class="bg-white" style="padding: 8px 10px";>
+                                            <div class="list-group-item list-group-item-action text-body" style="padding: 8px 10px";>
                                                 <i class="fa fa-ban text-danger me-2" aria-hidden="true"></i>
                                                 {% blocktrans %}Aucune période disponible{% endblocktrans %}
                                             </div>
