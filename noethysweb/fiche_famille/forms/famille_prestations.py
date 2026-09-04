@@ -73,15 +73,15 @@ class Formulaire(FormulaireBase, ModelForm):
                                       queryset=Activite.objects.all().order_by("-date_fin", "nom"), required=False)
     categorie_tarif = forms.ModelChoiceField(label="Catégorie de tarif", widget=ModelSelect2Widget(
         {"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom__icontains'],
-        dependent_fields={"activite": "activite"}), queryset=CategorieTarif.objects.all(), required=False,
+        dependent_fields={"activite": "activite"}, queryset=CategorieTarif.objects.all()), queryset=CategorieTarif.objects.all(), required=False,
         help_text="Attention, modifier ici la catégorie de tarif ne changera pas automatiquement le montant de la prestation.")
     tarif = forms.ModelChoiceField(label="Tarif", widget=ModelSelect2Widget(
         {"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom_tarif__nom__icontains'],
-        dependent_fields={"activite": "activite"}), queryset=Tarif.objects.all().order_by("date_debut"), required=False,
+        dependent_fields={"activite": "activite"}, queryset=Tarif.objects.all().order_by("date_debut")), queryset=Tarif.objects.all().order_by("date_debut"), required=False,
         help_text="Attention, modifier ici le tarif ne changera pas automatiquement le montant de la prestation.")
     tarif_ligne = forms.ModelChoiceField(label="Ligne tarifaire", widget=ModelSelect2Widget(
         {"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom_tarif__nom__icontains'],
-        dependent_fields={"tarif": "tarif"}), queryset=TarifLigne.objects.all(), required=False,
+        dependent_fields={"tarif": "tarif"}, queryset=TarifLigne.objects.all()), queryset=TarifLigne.objects.all(), required=False,
         help_text="Attention, modifier ici la ligne tarifaire ne changera pas automatiquement le montant de la prestation.")
 
     class Meta:
