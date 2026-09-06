@@ -8,15 +8,14 @@
 {% block styles %}
     {{ block.super }}
 
+    <link rel="stylesheet" href="{% static 'css/menu_chips.css' %}">
+    <link rel="stylesheet" href="{% static 'css/detail_fiche.css' %}">
+
     <style>
-        .widget-user-2 .widget-user-username, .widget-user-2 .widget-user-desc {
-            margin-left: 0px;
-        }
-        .card-rubriques .card-footer {
-            border-radius: 0 0 0.25rem 0.25rem;
-        }
-        .card-rubriques .list-group a:last-child {
-            border-radius: 0 0 0.25rem 0.25rem;
+        /* ============== Thème ============== */
+        .card-informations {
+            background-color: {% if collaborateur.civilite == "MME" %}#FBEAF0{% else %}#E6F1FB{% endif %} !important;
+            border: none;
         }
     </style>
 
@@ -27,34 +26,32 @@
     <div class="row">
         <div class="col-md-3">
 
-            <div class="card card-widget widget-user-2 card-rubriques">
+            <a type='button' title="Retour à la liste des collaborateurs" class='btn btn-block btn-primary' style="margin-bottom: 20px;" href="{% url 'collaborateur_liste' %}">
+                <i class="fa fa-arrow-circle-o-left"></i> Retour à la liste des collaborateurs
+            </a>
 
-                {# Nom du collaborateur #}
-                <div class="widget-user-header bg-lightblue">
+            <div class="card card-widget widget-user-2 card-chips {% if collaborateur.civilite == "MME" %}mauve{% else %}bleu{% endif %}">
+
+                {# Nom de l'individu #}
+                <div class="widget-user-header">
                     <h3 class="widget-user-username">{{ collaborateur.nom }} {{ collaborateur.prenom }}</h3>
                 </div>
 
-                {# Onglets du collaborateur #}
-                <div class="card-footer p-0 bg-white">
-                    <ul class="list-group list-group-flush">
+                {# Menu de la fiche collaborateur #}
+                <div class="card-footer p-0">
+                    <div class="liste-chips">
                         {% for onglet in liste_onglets %}
-                            <a class="list-group-item list-group-item-action {% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% url onglet.url idcollaborateur=idcollaborateur %}">
-                                <i class="fa {{ onglet.icone }} text-light-blue fa-fw"></i> {{ onglet.label }}
+                            <a class="{% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% url onglet.url idcollaborateur=idcollaborateur %}">
+                                <i class="fa {{ onglet.icone }} fa-fw"></i> {{ onglet.label }}
                             </a>
                         {% endfor %}
-                    </ul>
+                    </div>
                 </div>
             </div>
 
             <!-- Box PHOTO -->
-            {% if collaborateur.photo %}
-                <div class="card card-outline card-lightblue d-none d-sm-block">
-                    <div class="card-header">
-                        <h3 class="card-title">Photo</h3>
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
-                        </div>
-                    </div>
+            {% if individu.photo %}
+                <div class="card card-informations d-none d-sm-block">
                     <div class="card-body">
                         {% if collaborateur.photo %}<center><img class="img-fluid img-thumbnail rounded-circle" src="{{ MEDIA_URL }}{{ collaborateur.photo }}"></center>{% endif %}
                     </div>
@@ -62,19 +59,28 @@
             {% endif %}
 
             {# Box Informations sur le collaborateur #}
-            <div class="card card-outline card-lightblue d-none d-sm-block">
-                <div class="card-header">
-                    <h3 class="card-title">Informations</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+            <div class="card card-informations d-none d-sm-block">
+                <div class="card-body">
+                    <div class="details-fiche">
+                        <div class="details-fiche-ligne">
+                            <div class="detail-item">
+                                <i class="fa fa-calendar-check-o"></i>
+                                <div>
+                                    <p class="detail-label">Créée le</p>
+                                    <p class="detail-valeur">{{ collaborateur.date_creation|date:"j F Y" }}</p>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fa fa-hashtag"></i>
+                                <div>
+                                    <p class="detail-label">ID Collaborateur</p>
+                                    <p class="detail-valeur">{{ collaborateur.pk }}</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <strong><i class="fa fa-file-text-o margin-r-5"></i>Détails de la fiche</strong>
-                    <p class="text-muted">Créée le {{ collaborateur.date_creation|date:"j F Y" }}<br>ID collaborateur : {{ collaborateur.pk }}</p>
-                </div>
             </div>
-
         </div>
 
         {% block detail_collaborateur %}
@@ -83,10 +89,8 @@
                     {% block box_theme %}card-outline card-lightblue{% endblock %}
                     {% block box_titre %}{{ box_titre }}{% endblock %}
                     {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
-
                     {% block box_contenu %}
                     {% endblock %}
-
                 {% endembed %}
             </div>
         {% endblock %}

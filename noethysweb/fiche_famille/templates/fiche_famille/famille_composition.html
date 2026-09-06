@@ -3,7 +3,6 @@
 
 <script src="{% static 'lib/css-element-queries/ResizeSensor.js' %}"></script>
 <script src="{% static 'lib/css-element-queries/ElementQueries.js' %}"></script>
-{#<script src="{% static "lib/jsplumb/jsplumb.min.js" %}"></script>#}
 
 <style>
 
@@ -13,9 +12,11 @@
         padding-left: 20px;
         padding-right: 20px;
         background-color: #e4e4e4;
+        box-shadow: inset 0 2px 6px rgba(0,0,0,0.12);
     }
     .dark-mode .composition_famille {
         background-color: #727272;
+        box-shadow: inset 0 2px 6px rgba(0,0,0,0.3);
     }
 
     .nom_categorie {
@@ -23,53 +24,6 @@
         color: #ffffff;
         font-size: 12px;
         display: block;
-    }
-
-    .homme {
-        border-left: 5px solid #3c8dbc;
-    }
-    .femme {
-        border-left: 5px solid #ff96ff;
-    }
-    .vignette .card-header {
-        height: 5px;
-        padding: 0px;
-        border: 0px;
-    }
-    .vignette .card-body {
-        padding: 10px;
-        min-height: 85px;
-    }
-    .vignette .vignette-nom {
-        margin-top: 5px;
-        margin-bottom: 5px;
-        font-size: 15px;
-        font-weight: 600;
-    }
-    .vignette-nom > a:hover {
-        color: #000000 !important;
-    }
-    .vignette .vignette-detail {
-        margin-top: 0px;
-        margin-bottom: 0px;
-        font-size: 12px;
-        font-weight: 400;
-        opacity: 0.7;
-    }
-    .vignette-contenu {
-        margin-top: 5px;
-        margin-left: 90px;
-    }
-    .vignette .vignette-image > img {
-        margin-left: 10px;
-        margin-top: 10px;
-        width: 65px;
-        height: auto;
-        float: left;
-    }
-    .vignette .card-footer {
-        padding: 0px;
-        border-radius: 0 0 0.25rem 0;
     }
 
     .vertical-align-vertical {
@@ -84,21 +38,151 @@
         display: none;
     }
 
-    .image_titulaire {
-        position:absolute;
-        margin-left: 6px;
-        font-size: 10px;
-        opacity: 0.2;
+    /* ============== Nouvelle vignette ============== */
+
+    .vignette2 {
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 4px 4px rgba(0,0,0,0.18);
+        margin-bottom: 14px;
     }
 
-    .bouton_actions {
-        margin: -8px;
-        padding-right: 3px;
+    .vignette2 .bandeau {
+        padding: 9px 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
     }
-    .bouton_actions > a {
-        color: #ffffff3d;
-        padding: 1px 2px;
+    .vignette2 .bandeau .vignette-image {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
     }
+    .vignette2 .bandeau .vignette-image .loupe-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.35);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 11px;
+    }
+    .vignette2 .bandeau .vignette-image:hover .loupe-overlay {
+        display: flex;
+    }
+    .vignette2 .bandeau .vignette-image img,
+    .vignette2 .bandeau .vignette-image .initiales {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 600;
+        color: #ffffff;
+    }
+    .vignette2 .bandeau .vignette-nom {
+        font-size: 14px;
+        font-weight: 500;
+        margin: 0;
+        color: #ffffff;
+        flex: 1 1 60px;
+        min-width: 40px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .vignette2 .bandeau .vignette-nom > a {
+        color: #ffffff !important;
+    }
+    .vignette2 .bandeau .vignette-nom > a:hover {
+        color: #ffffff !important;
+        text-decoration: underline;
+    }
+    .vignette2 .bandeau .image_titulaire {
+        background: #ffffff;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        flex-shrink: 0;
+        font-weight: 500;
+    }
+    .vignette2 .bandeau .bandeau-droite {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+    .vignette2 .bandeau .bouton_actions {
+        display: flex;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+        flex-shrink: 0;
+    }
+    .vignette2 .bandeau .bouton_actions > a {
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.25);
+        border-radius: 6px;
+        color: #ffffff !important;
+    }
+    .vignette2 .bandeau .bouton_actions > a:hover {
+        background: rgba(255,255,255,0.4);
+    }
+
+    .vignette2 .vignette-contenu {
+        padding: 10px 12px 12px;
+        margin: -8px 0 0 0;
+        font-size: 11px;
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+    }
+    .vignette2 .vignette-contenu li {
+        list-style: none;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .vignette2 .vignette-contenu i {
+        font-size: 11px;
+        margin-right: 3px;
+        width: 12px;
+        text-align: center;
+    }
+
+    /* Couleurs (homme / femme / décès) - bandeau désaturé, fond bas dans la même teinte atténuée */
+    .vignette2.homme .bandeau           { background: #5C7C99; }
+    .vignette2.homme .vignette-contenu  { background: #E6F1FB; color: #185FA5; }
+    .vignette2.homme .image_titulaire   { color: #3D5A73; }
+    .vignette2.homme .vignette-image .initiales { background: #5C7C99; }
+
+    .vignette2.femme .bandeau           { background: #A66E82; }
+    .vignette2.femme .vignette-contenu  { background: #FBEAF0; color: #993556; }
+    .vignette2.femme .image_titulaire   { color: #7A4F60; }
+    .vignette2.femme .vignette-image .initiales { background: #A66E82; }
+
+    .vignette2.deces .bandeau           { background: #5f5e5a; }
+    .vignette2.deces .vignette-contenu  { background: #f1efe8; color: #444441; }
+    .vignette2.deces .image_titulaire   { color: #444441; }
+    .vignette2.deces .vignette-image .initiales { background: #5f5e5a; }
 
 </style>
 
@@ -124,83 +208,34 @@
                 <div>
                     {% for rattachement in rattachements %}
                         {% if rattachement.categorie == num_categorie %}
-                        <div class="card card-widget vignette  {% if rattachement.individu.Get_sexe == "F" %}femme{% else %}homme{% endif %}" id="individu_{{ rattachement.individu_id }}">
+                        <div class="vignette2 {% if rattachement.individu.deces %}deces{% elif rattachement.individu.Get_sexe == "F" %}femme{% else %}homme{% endif %}" id="individu_{{ rattachement.individu_id }}">
 
-{% comment %}
-                            <div class="ribbon-wrapper">
-                                <div class="ribbon bg-lightblue">
-                                    Info
+                            <div class="bandeau">
+
+                                <div class="vignette-image" {% if rattachement.individu.Get_photo %}data-toggle="modal" data-target="#modal_photo_{{ rattachement.pk }}"{% endif %}>
+                                    {% if rattachement.individu.Get_photo %}
+                                        <img src="{{ rattachement.individu.Get_photo }}" alt="">
+                                        <div class="loupe-overlay"><i class="fa fa-search-plus"></i></div>
+                                    {% else %}
+                                        <div class="initiales"><i class="fa fa-user"></i></div>
+                                    {% endif %}
                                 </div>
-                            </div>
-{% endcomment %}
 
-                            <div class="card-header bg-light {% if rattachement.individu.deces %}bg-gray-dark{% endif %}"></div>
-                            <div class="vignette-body bg-light {% if rattachement.individu.deces %}bg-gray-dark{% endif %}">
+                                <p class="vignette-nom"><a href="{% url 'individu_resume' idfamille=idfamille idindividu=rattachement.individu.idindividu %}" title="Ouvrir la fiche individuelle">{{ rattachement.individu.Get_nom }}</a></p>
 
+                                <div class="bandeau-droite">
                                 {% if rattachement.titulaire %}
-                                    <i class="fa fa-star image_titulaire" title="Titulaire du dossier"></i>
+                                    <span class="image_titulaire" title="Titulaire du dossier"><i class="fa fa-star"></i> Titulaire</span>
                                 {% endif %}
 
-                                <div class="vignette-image">
-                                    {% if rattachement.individu.Get_photo %}<img class="rounded-circle" src="{{ rattachement.individu.Get_photo }}">{% endif %}
-                                </div>
-
-                                <div class="vignette-contenu">
-
-                                    <h3 class="vignette-nom"><a href="{% url 'individu_resume' idfamille=idfamille idindividu=rattachement.individu.idindividu %}" title="Ouvrir la fiche individuelle">{{ rattachement.individu.Get_nom }}</a></h3>
-                                    <h5 class="vignette-detail">
-                                        <ul class="list-unstyled" style="margin-bottom: 2px;">
-
-                                            {% if rattachement.individu.date_naiss %}
-                                                <li>Né{% if rattachement.individu.Get_sexe == "F" %}e{% endif %} le {{ rattachement.individu.date_naiss }} <span style="white-space: nowrap;">({{ rattachement.individu.Get_age }} ans)</span></li>
-                                            {% endif %}
-
-                                            <li>
-                                                {% if rattachement.individu.rue_resid or rattachement.individu.ville_resid %}
-                                                    <span><i class="fa fa-map-marker text-gray"></i></span>
-                                                {% endif %}
-                                                <span style="white-space: nowrap;">
-                                                    {{ rattachement.individu.Get_rue_resid|default:""|safe }}
-                                                </span>
-                                                <span style="white-space: nowrap;">{{ rattachement.individu.cp_resid|default:"" }} {{ rattachement.individu.ville_resid|default:"" }}</span>
-                                                {% if rattachement.individu.adresse_auto %}
-                                                    <i class="fa fa-link text-gray" title="Cette adresse est rattachée"></i>
-                                                {% endif %}
-                                            </li>
-
-                                            {% if rattachement.individu.tel_domicile or rattachement.individu.tel_mobile or rattachement.individu.mail %}
-                                                <li>
-                                                    {% if rattachement.individu.tel_domicile %}<span style="white-space: nowrap;"><i class="fa fa-phone"></i> {{ rattachement.individu.tel_domicile }}</span>{% endif %}
-                                                    {% if rattachement.individu.tel_mobile %}<span style="white-space: nowrap;"><i class="fa fa-mobile"></i> {{ rattachement.individu.tel_mobile }}</span>{% endif %}
-                                                    {% if rattachement.individu.mail %}<span style="white-space: nowrap;"><i class="fa fa-envelope-o"></i> {{ rattachement.individu.mail }}</span>{% endif %}
-                                                </li>
-                                            {% endif %}
-
-                                            {% if rattachement.individu_id in inscriptions_actuelles %}
-                                                <li>
-                                                    <span style="white-space: nowrap;" title="{{ inscriptions_actuelles|get_item:rattachement.individu_id|join:"" }}">
-                                                        <i class="fa fa-ticket text-gray"></i> {{ inscriptions_actuelles|get_item:rattachement.individu_id|length }}
-                                                        inscription{{ inscriptions_actuelles|get_item:rattachement.individu_id|length|pluralize }}
-                                                        active{{ inscriptions_actuelles|get_item:rattachement.individu_id|length|pluralize }}
-                                                    </span>
-                                                </li>
-                                            {% endif %}
-
-                                        </ul>
-                                    </h5>
-                                </div>
-                            </div>
-
-                            <div class="card-footer bg-light {% if rattachement.individu.deces %}bg-gray-dark{% endif %}">
-                                <div class="text-right">
-
-                                    <a type='button' class='btn {% if rattachement.individu.deces %}bg-gray-dark{% else %}btn-light{% endif %} btn-sm' title="Ouvrir la grille des consommations" href='{% url 'famille_consommations' idfamille=idfamille idindividu=rattachement.individu.idindividu %}'><i class="fa fa-calendar"></i></a>
-                                    <a type='button' class='btn {% if rattachement.individu.deces %}bg-gray-dark{% else %}btn-light{% endif %} btn-sm dropdown-toggle' title="Ouvrir le menu" data-toggle="dropdown" href='#'><i class="fa fa-bars"></i></a>
+                                <div class="bouton_actions">
+                                    <a href="{% url 'famille_consommations' idfamille=idfamille idindividu=rattachement.individu.idindividu %}" title="Ouvrir la grille des consommations"><i class="fa fa-calendar"></i></a>
+                                    <a href="#" data-toggle="dropdown" title="Ouvrir le menu"><i class="fa fa-bars"></i></a>
                                     <ul class="dropdown-menu">
                                         {# Accéder à la grille des conso #}
                                         <li class="dropdown-item"><a href="{% url 'famille_consommations' idfamille=idfamille idindividu=rattachement.individu.idindividu %}"><i class="fa fa-calendar"></i> Grille des consommations</a></li>
 
-                                        {# Ouvrir et supprimr la fiche individuelle #}
+                                        {# Ouvrir et supprimer la fiche individuelle #}
                                         <li class="dropdown-divider"></li>
                                         <li class="dropdown-item"><a href="{% url 'individu_resume' idfamille=idfamille idindividu=rattachement.individu.idindividu %}"><i class="fa fa-pencil"></i> Ouvrir la fiche</a></li>
                                         <li class="dropdown-item"><a href="{% url 'individu_supprimer' idfamille=idfamille idindividu=rattachement.individu.idindividu %}"><i class="fa fa-trash"></i> Supprimer la fiche</a></li>
@@ -218,11 +253,69 @@
                                         {% if rattachement.categorie != 2 %}<li class="dropdown-item"><a class="changer_categorie" href="#" id="categorie_{{ rattachement.pk }}_2"><i class="fa fa-exchange"></i> Convertir en enfant</a></li>{% endif %}
                                         {% if rattachement.categorie != 3 %}<li class="dropdown-item"><a class="changer_categorie" href="#" id="categorie_{{ rattachement.pk }}_3"><i class="fa fa-exchange"></i> Convertir en contact</a></li>{% endif %}
                                     </ul>
-
                                 </div>
+                                </div>
+
                             </div>
 
+                            <ul class="vignette-contenu">
+
+                                {% if rattachement.individu.date_naiss %}
+                                    <li title="Né{% if rattachement.individu.Get_sexe == "F" %}e{% endif %} le {{ rattachement.individu.date_naiss }} ({{ rattachement.individu.Get_age }} ans)"><i class="fa fa-birthday-cake"></i> {{ rattachement.individu.date_naiss }} ({{ rattachement.individu.Get_age }} ans)</li>
+                                {% endif %}
+
+                                {% if rattachement.individu.rue_resid or rattachement.individu.ville_resid %}
+                                    <li title="{{ rattachement.individu.Get_rue_resid|default:""|safe }} {{ rattachement.individu.cp_resid|default:"" }} {{ rattachement.individu.ville_resid|default:"" }}">
+                                        <i class="fa fa-map-marker"></i> {{ rattachement.individu.Get_rue_resid|default:""|safe }} {{ rattachement.individu.cp_resid|default:"" }} {{ rattachement.individu.ville_resid|default:"" }}
+                                        {% if rattachement.individu.adresse_auto %}<i class="fa fa-link" title="Cette adresse est rattachée"></i>{% endif %}
+                                    </li>
+                                {% endif %}
+
+                                {% if rattachement.individu.tel_domicile or rattachement.individu.tel_mobile %}
+                                    <li><i class="fa fa-phone"></i>
+                                        {% if rattachement.individu.tel_domicile %}
+                                            {{ rattachement.individu.tel_domicile }}&nbsp
+                                        {% endif %}
+                                        {% if rattachement.individu.tel_mobile %}
+                                            {{ rattachement.individu.tel_mobile }}
+                                        {% endif %}
+                                    </li>
+                                {% endif %}
+                                {% if rattachement.individu.mail %}
+                                    <li><i class="fa fa-envelope-o"></i> {{ rattachement.individu.mail }}</li>
+                                {% endif %}
+
+                                {% if rattachement.individu_id in inscriptions_actuelles %}
+                                    <li title="{{ inscriptions_actuelles|get_item:rattachement.individu_id|join:"" }}">
+                                        <i class="fa fa-ticket"></i> {{ inscriptions_actuelles|get_item:rattachement.individu_id|length }}
+                                        inscription{{ inscriptions_actuelles|get_item:rattachement.individu_id|length|pluralize }}
+                                        active{{ inscriptions_actuelles|get_item:rattachement.individu_id|length|pluralize }}
+                                        <i class="fa fa-info-circle"></i>
+                                    </li>
+                                {% endif %}
+
+                            </ul>
+
                         </div>
+
+                        {% if rattachement.individu.Get_photo %}
+                        <div class="modal fade" id="modal_photo_{{ rattachement.pk }}" role="dialog" aria-labelledby="modal_photo_{{ rattachement.pk }}_label">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modal_photo_{{ rattachement.pk }}_label">{{ rattachement.individu.Get_nom }}</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img src="{{ rattachement.individu.Get_photo }}" alt="" style="max-width: 100%; border-radius: 8px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
                         {% endif %}
                     {% endfor %}
                 </div>
@@ -288,32 +381,6 @@ $(document).ready(function(){
             },
         });
     });
-
-
-
 });
 
-
-
-{% comment %}
-jsPlumb.ready(function() {
-
-    jsPlumb.Defaults.Endpoint = "Blank";
-    var container = document.getElementById("row_composition");
-    jsPlumb.setContainer(container);
-
-    var endpointOptions = {isSource: true, isTarget: true};
-    var d1 = jsPlumb.addEndpoint( $('#individu_1'), {anchor: "Bottom"}, endpointOptions);
-    var d2 = jsPlumb.addEndpoint( $('#individu_2'), {anchor: "LeftMiddle"}, endpointOptions);
-
-    jsPlumb.connect({
-        source: d1,
-        target: d2,
-        detachable: false,
-    });
-
-})
-{% endcomment %}
-
 </script>
-

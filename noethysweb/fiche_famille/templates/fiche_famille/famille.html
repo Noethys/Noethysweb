@@ -8,16 +8,78 @@
 {% block styles %}
     {{ block.super }}
 
+    <link rel="stylesheet" href="{% static 'css/menu_chips.css' %}">
+    <link rel="stylesheet" href="{% static 'css/detail_fiche.css' %}">
+
     <style>
-        .widget-user-2 .widget-user-username, .widget-user-2 .widget-user-desc {
-            margin-left: 0px;
+
+        /* ============== Thème vert appliqué au cadre Informations ============== */
+
+        .card-informations {
+            background-color: #EAF3DE;
+            border: none;
         }
-        .card-rubriques .card-footer {
-            border-radius: 0 0 0.25rem 0.25rem;
+        .dark-mode .card-informations {
+            background-color: #2f3a24;
         }
-        .card-rubriques .list-group a:last-child {
-            border-radius: 0 0 0.25rem 0.25rem;
+
+        /* ============== Polaroïds (cadre Informations) ============== */
+
+        .polaroids {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            padding: 4px 4px 10px;
         }
+        .polaroid {
+            display: inline-block;
+            background-color: #ffffff;
+            padding: 4px 4px 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+            text-decoration: none;
+            flex-shrink: 0;
+            box-sizing: content-box;
+            transform: rotate(var(--rot)) translateY(var(--ty));
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+        }
+        .polaroid:hover {
+            transform: rotate(var(--rot)) translateY(var(--ty)) scale(1.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            z-index: 2;
+        }
+        .polaroid img,
+        .polaroid-couleur {
+            display: block;
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            box-sizing: content-box;
+        }
+        .polaroid-couleur.homme {
+            background-color: #5C7C99;
+        }
+        .polaroid-couleur.femme {
+            background-color: #A66E82;
+        }
+        .polaroid-couleur.contact {
+            background-color: #888780;
+        }
+        .polaroid-legende {
+            display: block;
+            margin-top: 4px;
+            font-size: 10px;
+            text-align: center;
+            color: #5f5e5a;
+            font-family: var(--font-voice, cursive);
+            width: 42px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-sizing: content-box;
+        }
+
     </style>
 
 {% endblock styles %}
@@ -26,52 +88,69 @@
 
     <div class="row">
         <div class="col-md-3">
-            <div class="card card-widget widget-user-2 card-rubriques">
+            <div class="card card-widget widget-user-2 card-chips vert">
 
                 {# Nom de la famille #}
-                <div class="widget-user-header bg-lightblue">
+                <div class="widget-user-header">
                     <h3 class="widget-user-username">{{ famille.nom }}</h3>
                 </div>
 
-                <div class="card-footer p-0 bg-white">
-                    <ul class="list-group list-group-flush">
+                {# Menu de la fiche famille #}
+                <div class="card-footer p-0">
+                    <div class="liste-chips">
                         {% for onglet in liste_onglets %}
-                            <a class="list-group-item list-group-item-action {% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% url onglet.url idfamille=famille.idfamille %}">
-                                <i class="fa {{ onglet.icone }} text-light-blue fa-fw"></i> {{ onglet.label }}
+                            <a class="{% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% url onglet.url idfamille=famille.idfamille %}">
+                                <i class="fa {{ onglet.icone }} fa-fw"></i> {{ onglet.label }}
                             </a>
                         {% endfor %}
-                    </ul>
+                    </div>
                 </div>
 
             </div>
 
             {# Box Informations sur la famille #}
-            <div class="card card-outline card-lightblue d-none d-sm-block">
-                <div class="card-header">
-                    <h3 class="card-title">Informations</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
-                    </div>
-                </div>
+            <div class="card card-informations d-none d-sm-block">
                 <div class="card-body">
-                    <strong><i class="fa fa-users margin-r-5"></i> Membres</strong>
-                    <div>
-                        {% for num_categorie, nom_categorie in categories_utilisees %}
-                            <span class="text-muted" style="font-size: 11px;">{{ nom_categorie }}s</span>
-                            <ul class="list-unstyled" style="margin-bottom: 0px;margin-left: 10px;">
-                                {% for rattachement in rattachements %}
-                                    {% if rattachement.categorie == num_categorie %}
-                                        <li><a href="{% url 'individu_resume' idfamille=idfamille idindividu=rattachement.individu.idindividu %}" title="Cliquez ici pour ouvrir la fiche individuelle"><i class="fa fa-angle-right"></i> {{ rattachement.individu.Get_nom }}</a></li>
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
+                    <div class="polaroids">
+                        {% for rattachement in rattachements %}
+                            <a class="polaroid" style="--rot: {% cycle '-8deg' '4deg' '-2deg' '9deg' '-5deg' '2deg' '-7deg' %}; --ty: {% cycle '2px' '-3px' '4px' '1px' '-2px' %};" href="{% url 'individu_resume' idfamille=idfamille idindividu=rattachement.individu.idindividu %}" title="Cliquez ici pour ouvrir la fiche individuelle">
+                                {% if rattachement.individu.Get_photo %}
+                                    <img src="{{ rattachement.individu.Get_photo }}" alt="">
+                                {% else %}
+                                    <div class="polaroid-couleur {% if rattachement.categorie == 3 %}contact{% elif rattachement.individu.Get_sexe == "F" %}femme{% else %}homme{% endif %}"></div>
+                                {% endif %}
+                                <span class="polaroid-legende">{% if rattachement.individu.prenom %}{{ rattachement.individu.prenom }}{% else %}{{ rattachement.individu.nom }}{% endif %}</span>
+                            </a>
                         {% endfor %}
                     </div>
 
                     <hr>
 
-                    <strong><i class="fa fa-file-text-o margin-r-5"></i> Détails de la fiche</strong>
-                    <p class="text-muted">Créée le {{ famille.date_creation|date:"j F Y" }}<br>ID Famille : {{ famille.pk }}</p>
+                    <div class="details-fiche">
+                        <div class="detail-item detail-pleine-largeur">
+                            <i class="fa fa-map-marker"></i>
+                            <div>
+                                <p class="detail-label">Adresse</p>
+                                <p class="detail-valeur">{{ famille.rue_resid|default:"" }} {{ famille.cp_resid|default:"" }} {{ famille.ville_resid|default:"" }}</p>
+                            </div>
+                        </div>
+                        <div class="details-fiche-ligne">
+                            <div class="detail-item">
+                                <i class="fa fa-calendar-check-o"></i>
+                                <div>
+                                    <p class="detail-label">Créée le</p>
+                                    <p class="detail-valeur">{{ famille.date_creation|date:"j F Y" }}</p>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fa fa-hashtag"></i>
+                                <div>
+                                    <p class="detail-label">ID Famille</p>
+                                    <p class="detail-valeur">{{ famille.pk }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -83,10 +162,8 @@
                     {% block box_theme %}card-outline card-lightblue{% endblock %}
                     {% block box_titre %}{{ box_titre }}{% endblock %}
                     {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
-
                     {% block box_contenu %}
                     {% endblock %}
-
                 {% endembed %}
             </div>
         {% endblock %}

@@ -8,15 +8,14 @@
 {% block styles %}
     {{ block.super }}
 
+    <link rel="stylesheet" href="{% static 'css/menu_chips.css' %}">
+    <link rel="stylesheet" href="{% static 'css/detail_fiche.css' %}">
+
     <style>
-        .widget-user-2 .widget-user-username, .widget-user-2 .widget-user-desc {
-            margin-left: 0px;
-        }
-        .card-rubriques .card-footer {
-            border-radius: 0 0 0.25rem 0.25rem;
-        }
-        .card-rubriques .list-group a:last-child {
-            border-radius: 0 0 0.25rem 0.25rem;
+        /* ============== Thème ============== */
+        .card-informations {
+            background-color: {% if individu.Get_sexe == "F" %}#FBEAF0{% else %}#E6F1FB{% endif %} !important;
+            border: none;
         }
     </style>
 
@@ -27,36 +26,32 @@
     <div class="row">
         <div class="col-md-3">
 
-            <a type='button' title="Retour à la fiche famille" class='btn btn-block btn-default' style="margin-bottom: 20px;" href="{% url 'famille_resume' idfamille=idfamille %}"><i class="fa fa-arrow-circle-o-left"></i> Retour à la fiche famille</a>
+            <a type='button' title="Retour à la fiche famille" class='btn btn-block btn-default' style="margin-bottom: 20px;background-color: #7B9A5C;color: #fff" href="{% url 'famille_resume' idfamille=idfamille %}">
+                <i class="fa fa-arrow-circle-o-left"></i> Retour à la fiche famille
+            </a>
 
-            <div class="card card-widget widget-user-2 card-rubriques">
+            <div class="card card-widget widget-user-2 card-chips {% if individu.Get_sexe == "F" %}mauve{% else %}bleu{% endif %}">
 
                 {# Nom de l'individu #}
-                <div class="widget-user-header bg-lightblue">
+                <div class="widget-user-header">
                     <h3 class="widget-user-username">{{ individu.nom }} {% if individu.prenom %}{{ individu.prenom }}{% endif %}</h3>
                 </div>
 
-                {# Onglets de l'individu #}
-                <div class="card-footer p-0 bg-white">
-                    <ul class="list-group list-group-flush">
+                {# Menu de la fiche individuelle #}
+                <div class="card-footer p-0">
+                    <div class="liste-chips">
                         {% for onglet in liste_onglets %}
-                            <a class="list-group-item list-group-item-action {% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% url onglet.url idfamille=idfamille idindividu=idindividu %}">
-                                <i class="fa {{ onglet.icone }} text-light-blue fa-fw"></i> {{ onglet.label }}
+                            <a class="{% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% url onglet.url idfamille=idfamille idindividu=idindividu %}">
+                                <i class="fa {{ onglet.icone }} fa-fw"></i> {{ onglet.label }}
                             </a>
                         {% endfor %}
-                    </ul>
+                    </div>
                 </div>
             </div>
 
             <!-- Box PHOTO -->
             {% if individu.photo %}
-                <div class="card card-outline card-lightblue d-none d-sm-block">
-                    <div class="card-header">
-                        <h3 class="card-title">Photo</h3>
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
-                        </div>
-                    </div>
+                <div class="card card-informations d-none d-sm-block">
                     <div class="card-body">
                         {% if individu.photo %}<center><img class="img-fluid img-thumbnail rounded-circle" src="{{ MEDIA_URL }}{{ individu.photo }}"></center>{% endif %}
                     </div>
@@ -64,26 +59,43 @@
             {% endif %}
 
             {# Box Informations sur l'individu #}
-            <div class="card card-outline card-lightblue d-none d-sm-block">
-                <div class="card-header">
-                    <h3 class="card-title">Informations</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
-                    </div>
-                </div>
+            <div class="card card-informations d-none d-sm-block">
                 <div class="card-body">
-                    <strong><i class="fa fa-user margin-r-5"></i>Naissance</strong>
-                    <p class="text-muted">{% if individu.date_naiss %}{{ individu.date_naiss }} ({{ individu.Get_age }} ans){% endif %}</p>
 
-                    <hr>
-
-                    <strong><i class="fa fa-map-marker margin-r-5"></i>Adresse</strong>
-                    <p class="text-muted">{{ individu.Get_adresse_complete }}</p>
-
-                    <hr>
-
-                    <strong><i class="fa fa-file-text-o margin-r-5"></i>Détails de la fiche</strong>
-                    <p class="text-muted">Créée le {{ individu.date_creation|date:"j F Y" }}<br>ID Individu : {{ individu.pk }}</p>
+                    <div class="details-fiche">
+                        {% if individu.date_naiss %}
+                            <div class="detail-item detail-pleine-largeur">
+                                <i class="fa fa-birthday-cake"></i>
+                                <div>
+                                    <p class="detail-label">Naissance</p>
+                                    <p class="detail-valeur">{{ individu.date_naiss }} ({{ individu.Get_age }} ans)</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                        <div class="detail-item detail-pleine-largeur">
+                            <i class="fa fa-map-marker"></i>
+                            <div>
+                                <p class="detail-label">Adresse</p>
+                                <p class="detail-valeur">{{ individu.Get_adresse_complete }}</p>
+                            </div>
+                        </div>
+                        <div class="details-fiche-ligne">
+                            <div class="detail-item">
+                                <i class="fa fa-calendar-check-o"></i>
+                                <div>
+                                    <p class="detail-label">Créée le</p>
+                                    <p class="detail-valeur">{{ individu.date_creation|date:"j F Y" }}</p>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fa fa-hashtag"></i>
+                                <div>
+                                    <p class="detail-label">ID Individu</p>
+                                    <p class="detail-valeur">{{ individu.pk }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -95,10 +107,8 @@
                     {% block box_theme %}card-outline card-lightblue{% endblock %}
                     {% block box_titre %}{{ box_titre }}{% endblock %}
                     {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
-
                     {% block box_contenu %}
                     {% endblock %}
-
                 {% endembed %}
             </div>
         {% endblock %}

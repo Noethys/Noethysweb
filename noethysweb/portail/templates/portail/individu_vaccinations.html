@@ -4,6 +4,10 @@
 {% load static %}
 {% load embed %}
 
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/alerte.css' %}">
+{% endblock styles %}
 
 {% block detail_fiche %}
     <div class="col-md-9">
@@ -19,10 +23,7 @@
                     <p>{{ box_introduction|safe }}</p>
                 {% endif %}
 
-                {% if assurance_manquante %}
-                    {% embed "individus/alerte.html" with titre_uniquement=True titre="<i class='icon fa fa-warning text-danger'></i> Assurance obligatoire"%}
-                    {% endembed %}
-                {% endif %}
+                {% embed "individus/alerte.html" with items=vaccins_obligatoires titre="Vaccinations obligatoires" avec_cadre=True icone="fa-medkit" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="-6deg"%}{% endembed %}
 
                 <div class="">
                     {% if liste_vaccinations %}

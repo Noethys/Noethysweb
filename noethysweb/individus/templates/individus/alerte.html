@@ -1,44 +1,35 @@
 {% load static %}
 {% load embed %}
 
-<style>
-    .alerte {
-        background: {{ couleur_fond|default:"#e4e4e4" }};
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 0.25rem;
-    }
-    .dark-mode .alerte {
-        background: #6c757d;
-    }
-    .alerte ul {
-        margin-bottom: 0px;
-    }
-    .alerte li {
-        display: inline;
-        white-space: nowrap;
-        margin-right: 8px;
-    }
-</style>
-
 {% if items or titre_uniquement %}
-    <div class="alerte">
-        <b>{{ titre }}</b>
-        <ul class="list-unstyled">
-            {% for item in items %}
-                <li>
-                    {% if item.valide %}
-                        <i class='fa fa-check text-green'></i>
-                    {% else %}
-                        <i class='fa fa-close text-red'></i>
-                    {% endif %}
-                    {% if item.href %}
-                        <a href="{{ item.href }}" {% if item.titre %}title="{{ item.titre }}"{% endif %}>{{ item.label }}</a>
-                    {% else %}
-                        {{ item.label }}
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
+    {% if avec_cadre %}
+        <div style="margin-bottom: 10px; padding: 14px 12px 5px 20px; border-radius: .8rem; border: 1px dashed #b4b2a9;">
+    {% endif %}
+        <div class="alerte-categorie">
+            <div class="alerte-icone" style="background-color: {{ couleur_fond|default:"#e4e4e4" }}; transform: rotate({{ rotation|default:"0deg" }});">
+                <i class="fa {{ icone|default:"fa-warning" }}" style="color: {{ couleur|default:"#5f5e5a" }};"></i>
+            </div>
+            <div>
+                <b class="alerte-titre">{{ titre }}</b>
+                <ul class="alerte-detail">
+                    {% for item in items %}
+                        <li>
+                            {% if item.valide %}
+                                <i class='fa fa-check text-success'></i>
+                            {% else %}
+                                <i class='fa fa-close text-danger'></i>
+                            {% endif %}
+                            {% if item.href %}
+                                <a href="{{ item.href }}" {% if item.titre %}title="{{ item.titre }}"{% endif %}>{{ item.label }}</a>
+                            {% else %}
+                                {{ item.label }}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% if avec_cadre %}
+        </div>
+    {% endif %}
 {% endif %}

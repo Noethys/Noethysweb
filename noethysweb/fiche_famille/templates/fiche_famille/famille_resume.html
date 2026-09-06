@@ -4,6 +4,11 @@
 {% load embed %}
 
 
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/alerte.css' %}">
+{% endblock styles %}
+
 
 {% block detail_famille %}
     <div class="col-md-9">
@@ -23,21 +28,6 @@
                 {% endembed %}
             {% endblock %}
         {% endembed %}
-
-        {# Rubriques #}
-{% comment %}
-        {% embed 'core/box.html' %}
-            {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}Rubriques{% endblock %}
-            {% block box_contenu %}
-                {% for onglet in liste_onglets|slice:"1:" %}
-                    <a class="btn btn-app" href="{% url onglet.url idfamille=famille.idfamille %}" style="font-size: 12px !important;">
-                        <i class="fa {{ onglet.icone }}"></i> {{ onglet.label }}
-                    </a>
-                {% endfor %}
-            {% endblock %}
-        {% endembed %}
-{% endcomment %}
 
         {# Widgets informations #}
         <div class="row">
@@ -72,18 +62,6 @@
                 </div>
             </div>
 
-{% comment %}
-            <div class="col-md-3">
-                <div class="info-box">
-                    <span class="info-box-icon bg-{% if notes|length %}orange{% else %}gray-light{% endif %}"><i class="fa fa-sticky-note-o"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Notes</span>
-                        <span class="info-box-number">{{ notes|length }}</span>
-                    </div>
-                </div>
-            </div>
-{% endcomment %}
-
             <div class="col-md-3">
                 <div class="info-box" title="Messages envoyés par la famille via le portail">
                     <span class="info-box-icon bg-{% if nbre_messages_non_lus %}orange{% else %}gray-light{% endif %}"><i class="fa fa-comments-o"></i></span>
@@ -105,17 +83,17 @@
 
                     {# Pièces à fournir #}
                     {% if pieces_fournir %}
-                        {% embed "individus/alerte.html" with items=pieces_fournir titre="Pièces à fournir"%}{% endembed %}
+                        {% embed "individus/alerte.html" with items=pieces_fournir titre="Pièces à fournir" icone="fa-file-text-o" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="-6deg"%}{% endembed %}
                     {% endif %}
 
                     {# Cotisations manquantes #}
                     {% if cotisations_manquantes %}
-                        {% embed "individus/alerte.html" with items=cotisations_manquantes titre="Adhésions manquantes"%}{% endembed %}
+                        {% embed "individus/alerte.html" with items=cotisations_manquantes titre="Adhésions manquantes" icone="fa-id-card-o" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="5deg" %}{% endembed %}
                     {% endif %}
 
                     {# Informations manquantes #}
                     {% if informations_manquantes %}
-                        {% embed "individus/alerte.html" with items=informations_manquantes titre="Informations manquantes"%}{% endembed %}
+                        {% embed "individus/alerte.html" with items=informations_manquantes titre="Informations manquantes" icone="fa-info-circle" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="-3deg" %}{% endembed %}
                     {% endif %}
 
                 {% endblock %}

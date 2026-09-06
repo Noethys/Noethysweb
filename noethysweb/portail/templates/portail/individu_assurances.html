@@ -4,6 +4,10 @@
 {% load static %}
 {% load embed %}
 
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/alerte.css' %}">
+{% endblock styles %}
 
 {% block detail_fiche %}
     <div class="col-md-9">
@@ -20,8 +24,7 @@
                 {% endif %}
 
                 {% if assurance_manquante %}
-                    {% embed "individus/alerte.html" with titre_uniquement=True titre="<i class='icon fa fa-warning text-danger'></i> Assurance obligatoire"%}
-                    {% endembed %}
+                    {% embed "individus/alerte.html" with titre_uniquement=True titre="<i class='icon fa fa-warning text-danger'></i> Assurance obligatoire" avec_cadre=True icone="fa-shield" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="-6deg"%}{% endembed %}
                 {% endif %}
 
                 <div class="">

@@ -3,6 +3,10 @@
 {% load static %}
 {% load embed %}
 
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/alerte.css' %}">
+{% endblock styles %}
 
 {% block detail_famille %}
     <div class="col-md-9">
@@ -12,7 +16,7 @@
             {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
 
             {% block box_contenu %}
-                {% embed "individus/alerte.html" with items=pieces_fournir titre="Pièces à fournir"%}{% endembed %}
+                {% embed "individus/alerte.html" with items=pieces_fournir titre="Pièces à fournir" avec_cadre=True icone="fa-file-text-o" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="-6deg"%}{% endembed %}
                 {% embed 'core/crud/liste.html' %}{% endembed %}
             {% endblock box_contenu %}
 

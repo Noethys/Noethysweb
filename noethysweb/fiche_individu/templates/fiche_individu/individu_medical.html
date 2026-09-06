@@ -6,8 +6,8 @@
 
 {% block styles %}
     {{ block.super }}
-    {% embed 'core/widgets/datatableview/styles.html' %}
-    {% endembed %}
+    {% embed 'core/widgets/datatableview/styles.html' %}{% endembed %}
+    <link rel="stylesheet" href="{% static 'css/alerte.css' %}">
 {% endblock styles %}
 
 {% block extra_head %}
@@ -81,8 +81,7 @@
 
             {% block box_contenu %}
 
-                {% embed "individus/alerte.html" with items=vaccins_obligatoires titre="Vaccinations obligatoires"%}
-                {% endembed %}
+                {% embed "individus/alerte.html" with items=vaccins_obligatoires titre="Vaccinations obligatoires" avec_cadre=True icone="fa-medkit" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="-6deg"%}{% endembed %}
 
                 <div class="btn-group">
                     {% for bouton in boutons_liste_vaccinations %}

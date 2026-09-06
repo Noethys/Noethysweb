@@ -8,15 +8,16 @@
 {% block styles %}
     {{ block.super }}
 
-    <style type="text/css">
-        .widget-user-2 .widget-user-username, .widget-user-2 .widget-user-desc {
-            margin-left: 0px;
-        }
-        .spread {
-            color: #000000;
+    <link rel="stylesheet" href="{% static 'css/menu_chips.css' %}">
+    <link rel="stylesheet" href="{% static 'css/detail_fiche.css' %}">
+
+    <style>
+        /* ============== Thème ============== */
+        .card-informations {
+            background-color: #E1F5EE !important;
+            border: none;
         }
     </style>
-
 {% endblock styles %}
 
 {% block contenu_page %}
@@ -24,31 +25,79 @@
     <div class="row">
         <div class="col-md-3">
 
-            <a type='button' title="Retour à la liste des activités" class='btn btn-block btn-default' style="margin-bottom: 20px;" href="{% url 'activites_liste' %}"><i class="fa fa-arrow-circle-o-left"></i> Retour à la liste des activités</a>
+            <a type='button' title="Retour à la liste des activités" class='btn btn-block btn-primary' style="margin-bottom: 20px;" href="{% url 'activites_liste' %}"><i class="fa fa-arrow-circle-o-left"></i> Retour à la liste des activités</a>
 
-            <div class="card card-widget widget-user-2">
+            <div class="card card-widget widget-user-2 card-chips vert-foret">
 
-                {# Nom de l'activité #}
-                <div class="widget-user-header bg-lightblue">
+                {# Nom de l'activité' #}
+                <div class="widget-user-header">
                     <h3 class="widget-user-username">{{ activite.nom }}</h3>
                 </div>
 
-                {# Onglets de l'activité #}
+                {# Menu de l'activité #}
                 <div class="card-footer p-0">
-                    <ul class="list-group list-group-flush">
+                    <div class="liste-chips">
                         {% for onglet in liste_onglets %}
                             {% if onglet.rubrique %}
-                                <li class="list-group-item small bg-gray-light" style="color: #adadad !important;padding-bottom: 0px; padding-top: 0px;">{{ onglet.rubrique }}</li>
+                                <p class="titre-categorie">{{ onglet.rubrique }}</p>
                             {% else %}
-                                <a class="list-group-item list-group-item-action {% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% url onglet.url idactivite=activite.idactivite %}">
-                                    <i class="fa {{ onglet.icone }} text-light-blue fa-fw"></i> {{ onglet.label }}
+                                <a class="{% if onglet_actif == onglet.code %}item_actif{% endif %}" href="{% url onglet.url idactivite=activite.idactivite %}">
+                                    <i class="fa {{ onglet.icone }} fa-fw"></i> {{ onglet.label }}
                                 </a>
                             {% endif %}
                         {% endfor %}
-                    </ul>
+                    </div>
                 </div>
+
             </div>
 
+            {# Box Informations sur l'activité #}
+            <div class="card card-informations d-none d-sm-block">
+                <div class="card-body">
+
+                    <div class="details-fiche">
+                        <div class="detail-item detail-pleine-largeur">
+                            <i class="fa fa-calendar"></i>
+                            <div>
+                                <p class="detail-label">Période de validité</p>
+                                <p class="detail-valeur">
+                                    {% if activite.date_fin|date:"Y" == "2999" %}
+                                        Illimitée
+                                    {% elif activite.date_debut and activite.date_fin %}
+                                        Du {{ activite.date_debut }} au {{ activite.date_fin }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="detail-item detail-pleine-largeur">
+                            <i class="fa fa-folder-open-o"></i>
+                            <div>
+                                <p class="detail-label">Groupes d'activités</p>
+                                <p class="detail-valeur">{{ activite.groupes_activites.all|join:", " }}</p>
+                            </div>
+                        </div>
+
+                        <div class="details-fiche-ligne">
+                            <div class="detail-item">
+                                <i class="fa fa-calendar-check-o"></i>
+                                <div>
+                                    <p class="detail-label">Créée le</p>
+                                    <p class="detail-valeur">{{ activite.date_creation|date:"j F Y" }}</p>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fa fa-hashtag"></i>
+                                <div>
+                                    <p class="detail-label">ID Activité</p>
+                                    <p class="detail-valeur">{{ activite.pk }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
 
         </div>
 

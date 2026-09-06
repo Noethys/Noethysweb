@@ -1,0 +1,157 @@
+/* ============================================================
+   CADRE À CHIPS (nom + onglets)
+   ============================================================ */
+
+html {
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
+}
+
+.card-chips {
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+
+.card-chips .widget-user-header {
+    background-color: var(--chips-bandeau) !important;
+    padding: 16px 12px 22px;
+}
+.card-chips .widget-user-username {
+    color: #ffffff;
+    margin-left: 0px;
+}
+.card-chips .widget-user-desc {
+    margin-left: 0px;
+}
+
+.card-chips .card-footer {
+    background-color: var(--chips-fond) !important;
+    margin-top: -10px;
+    border-radius: 0 0 0.25rem 0.25rem;
+    padding: 12px 10px !important;
+}
+
+.card-chips .liste-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.card-chips .liste-chips a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #ffffff !important;
+    border: none;
+    border-radius: 14px;
+    padding: 5px 10px 5px 8px;
+    background-color: var(--chips-bandeau);
+    line-height: 1;
+}
+.card-chips .liste-chips a i {
+    color: #ffffff;
+    font-size: 15px;
+    line-height: 1;
+}
+.card-chips .liste-chips a:hover {
+    filter: brightness(0.9);
+    text-decoration: none;
+    color: #ffffff;
+}
+.card-chips .liste-chips a.item_actif {
+    background-color: var(--chips-actif);
+}
+.card-chips .liste-chips a:focus,
+.card-chips .liste-chips a:active {
+    outline: none;
+    box-shadow: none;
+}
+
+.card-chips .liste-chips .titre-categorie {
+    flex: 1 0 100%;
+    margin: 6px 0 0;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--chips-actif);
+}
+.card-chips .liste-chips .titre-categorie:first-child {
+    margin-top: 0;
+}
+
+/* ============================================================
+   PALETTES — chaque thème ne fait que déclarer les 3 variables.
+   ============================================================ */
+
+.card-chips.vert {
+    --chips-bandeau: #7B9A5C;
+    --chips-fond: #EAF3DE;
+    --chips-actif: #4E5F38;
+}
+
+.card-chips.bleu {
+    --chips-bandeau: #5C7C99;
+    --chips-fond: #E6F1FB;
+    --chips-actif: #3D5A73;
+}
+
+.card-chips.mauve {
+    --chips-bandeau: #A66E82;
+    --chips-fond: #FBEAF0;
+    --chips-actif: #7A4F60;
+}
+
+.card-chips.anthracite {
+    --chips-bandeau: #5C5A56;
+    --chips-fond: #F1EFE8;
+    --chips-actif: #444441;
+}
+
+.card-chips.terracotta {
+    --chips-bandeau: #A56A4E;
+    --chips-fond: #FAECE7;
+    --chips-actif: #8C4526;
+}
+
+.card-chips.bleu-nuit {
+    --chips-bandeau: #4A5578;
+    --chips-fond: #EEEDFE;
+    --chips-actif: #3D3A7A;
+}
+
+.card-chips.moutarde {
+    --chips-bandeau: #A9843F;
+    --chips-fond: #FAEEDA;
+    --chips-actif: #7A5A1E;
+}
+
+.card-chips.prune {
+    --chips-bandeau: #7A5170;
+    --chips-fond: #F5EAF2;
+    --chips-actif: #6B3A5F;
+}
+
+.card-chips.turquoise {
+    --chips-bandeau: #4E8888;
+    --chips-fond: #E5F2F2;
+    --chips-actif: #2F6363;
+}
+
+.card-chips.bordeaux {
+    --chips-bandeau: #8C4B4B;
+    --chips-fond: #F7E9E9;
+    --chips-actif: #7A3535;
+}
+
+.card-chips.gris-ardoise {
+    --chips-bandeau: #6C7A82;
+    --chips-fond: #EBEFF1;
+    --chips-actif: #4A5B63;
+}
+
+.card-chips.vert-foret {
+    --chips-bandeau: #4C7D6A;
+    --chips-fond: #E1F5EE;
+    --chips-actif: #0F6E56;
+}
