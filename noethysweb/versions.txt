@@ -1,3 +1,12 @@
+Version 1.3.4.0 (06/09/2026) :
+
+- Relooking du cadre Composition de la famille dans la fiche famille
+- Relooking des rubriques de fiches et des alertes
+- Ajout de l'affichage des activités associées aux types de cotisations
+- Ajout de la modification par lot des événements
+- Correction des couleurs en dark mode sur page réservations du portail
+- Correction des listes déroulantes dans la modification d'une prestation [Abderrahmane01Rhiabi]
+
 Version 1.3.3.9 (30/08/2026) :
 
 - Optimisation de l'affichage de la page Ajouter un individu
