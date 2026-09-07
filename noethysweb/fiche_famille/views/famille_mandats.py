@@ -31,6 +31,7 @@ class Page(Onglet):
         context['onglet_actif'] = "reglements"
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
+            {"label": "Revenir à la liste des règlements", "classe": "btn btn-default", "href": reverse_lazy("famille_reglements_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-arrow-circle-o-left"},
         ]
         return context
 

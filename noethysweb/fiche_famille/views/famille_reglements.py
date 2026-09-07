@@ -129,11 +129,6 @@ class Page(Onglet):
         if not hasattr(self, "verbe_action"):
             context['box_titre'] = "Règlements"
         context['onglet_actif'] = "reglements"
-        if self.request.user.has_perm("core.famille_reglements_modifier"):
-            context['boutons_liste'] = [
-                {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-                {"label": "Régler une facture", "classe": "btn btn-default", "href": "#", "onclick": "$('#regler_facture_idfamille').val(%d);$('#modal_regler_facture').modal('show');" % self.kwargs.get('idfamille', 0), "icone": "fa fa-plus"},
-            ]
         context['bouton_supprimer'] = self.request.user.has_perm("core.famille_reglements_modifier")
         # Ajout l'idfamille à l'URL de suppression groupée
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={'idfamille': self.kwargs.get('idfamille', None), "listepk": "xxx"})

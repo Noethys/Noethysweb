@@ -18,11 +18,13 @@
 {% block box_contenu %}
 
     {# Boutons de liste #}
-    <div class="btn-group">
-        {% for bouton in boutons_liste %}
-            <a class="{{ bouton.classe }}" href="{{ bouton.href }}" {% if bouton.onclick %}onclick="{{ bouton.onclick }}"{% endif %}><i class="{{ bouton.icone }} margin-r-5"></i> {{ bouton.label }}</a>
-        {% endfor %}
-    </div>
+    {% if boutons_liste %}
+        <div>
+            {% for bouton in boutons_liste %}
+                <a class="{{ bouton.classe }}" href="{{ bouton.href }}" {% if bouton.onclick %}onclick="{{ bouton.onclick }}"{% endif %}><i class="{{ bouton.icone }} margin-r-5"></i> {{ bouton.label }}</a>
+            {% endfor %}
+        </div>
+    {% endif %}
 
     {# Filtres de liste #}
     {% if filtres_liste %}

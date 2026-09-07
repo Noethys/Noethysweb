@@ -13,31 +13,26 @@
             {% block box_titre %}{{ box_titre }}{% endblock %}
             {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
             {% block box_contenu %}
+
+                <div class="boutons_actions">
+                    {% if perms.core.famille_factures_modifier %}
+                        <a class="btn btn-success" href="{% url 'factures_generation' idfamille=idfamille %}"><i class="fa fa fa-plus margin-r-5"></i>Ajouter</a>
+                    {% endif %}
+
+                    <a class="btn btn-default {% if not perms.core.famille_factures_modifier %}disabled{% endif %}" href="{% url 'famille_abo_factures_email' idfamille=idfamille %}"
+                        title="Cliquez ici pour activer ou désactiver l'abonnement au service d'envoi des factures par Email">
+                        <i class="fa fa-envelope margin-r-5"></i>Factures par Email
+                        {% if famille.email_recus %}
+                            <span class="badge bg-success">ON</span>
+                        {% else %}
+                            <span class="badge bg-danger">OFF</span>
+                        {% endif %}
+                    </a>
+                </div>
+
                 {% embed 'core/crud/liste.html' %}{% endembed %}
             {% endblock box_contenu %}
             {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
-        {% endembed %}
-
-        {# Autres outils #}
-        {% embed 'core/box.html' with box_introduction=False box_titre=False %}
-            {% block box_theme %}card-outline{% endblock %}
-            {% block box_contenu %}
-                <div class="mt-2">
-
-                    {# Abonnement à l'envoi des factures par Email #}
-                    <a class="btn btn-app {% if not perms.core.famille_factures_modifier %}disabled{% endif %}" href="{% url 'famille_abo_factures_email' idfamille=idfamille %}" 
-                       title="Cliquez ici pour activer ou désactiver l'abonnement au service d'envoi des factures par Email" style="font-size: 12px !important;"
-                    >
-                        {% if famille.email_factures %}
-                            <span class="badge bg-success">Activé</span>
-                        {% else %}
-                            <span class="badge bg-danger">Désactivé</span>
-                        {% endif %}
-                        <i class="fa fa-envelope"></i>Factures par Email
-                    </a>
-
-                </div>
-            {% endblock box_contenu %}
         {% endembed %}
 
         {# Modal Suppression #}

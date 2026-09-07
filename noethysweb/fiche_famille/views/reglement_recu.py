@@ -119,6 +119,9 @@ class Page(Onglet):
         context = super(Page, self).get_context_data(**kwargs)
         context['box_titre'] = "Reçus"
         context['onglet_actif'] = "reglements"
+        context['boutons_liste'] = [
+            {"label": "Revenir à la liste des règlements", "classe": "btn btn-default", "href": reverse_lazy("famille_reglements_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-arrow-circle-o-left"},
+        ]
         return context
 
     def get_form_kwargs(self, **kwargs):
