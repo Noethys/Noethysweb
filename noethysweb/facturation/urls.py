@@ -13,7 +13,7 @@ from facturation.views import factures_generation, liste_prestations, liste_fact
                                 lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
                                 attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes, edition_recap_factures, \
                                 factures_modifier, export_ecritures_cloe, saisie_lot_forfaits_credits, synthese_deductions, export_ecritures_cwe, \
-                                liste_factures_detaillees, export_ecritures_ebp, export_ecritures_quadra
+                                liste_factures_detaillees, export_ecritures_ebp, export_ecritures_quadra, export_ecritures_sage
 
 urlpatterns = [
 
@@ -105,6 +105,7 @@ urlpatterns = [
     path('facturation/export_ecritures_cloe', export_ecritures_cloe.View.as_view(), name='export_ecritures_cloe'),
     path('facturation/export_ecritures_cwe', export_ecritures_cwe.View.as_view(), name='export_ecritures_cwe'),
     path('facturation/export_ecritures_quadra', export_ecritures_quadra.View.as_view(), name='export_ecritures_quadra'),
+    path('facturation/export_ecritures_sage', export_ecritures_sage.View.as_view(), name='export_ecritures_sage'),
 
     # AJAX
     path('facturation/modifier_lot_factures', secure_ajax(factures_generation.Modifier_lot_factures), name='ajax_modifier_lot_factures'),
@@ -141,6 +142,7 @@ urlpatterns = [
     path('facturation/export_ecritures_cloe/exporter', secure_ajax(export_ecritures_cloe.Exporter), name='ajax_export_ecritures_cloe_exporter'),
     path('facturation/export_ecritures_cwe/exporter', secure_ajax(export_ecritures_cwe.Exporter), name='ajax_export_ecritures_cwe_exporter'),
     path('facturation/export_ecritures_quadra/exporter', secure_ajax(export_ecritures_quadra.Exporter), name='ajax_export_ecritures_quadra_exporter'),
+    path('facturation/export_ecritures_sage/exporter', secure_ajax(export_ecritures_sage.Exporter), name='ajax_export_ecritures_sage_exporter'),
     path('facturation/ajax_saisie_lot_forfaits_credits_get_tarifs', secure_ajax(saisie_lot_forfaits_credits.Get_tarifs), name='ajax_saisie_lot_forfaits_credits_get_tarifs'),
     path('facturation/ajax_saisie_lot_forfaits_credits_appliquer', secure_ajax(saisie_lot_forfaits_credits.Appliquer), name='ajax_saisie_lot_forfaits_credits_appliquer'),
 

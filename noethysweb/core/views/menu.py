@@ -445,6 +445,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_export_ecritures.Add(code="export_ecritures_cloe", titre="Exporter vers Cloé", icone="file-text-o")
     menu_export_ecritures.Add(code="export_ecritures_cwe", titre="Exporter vers Comptabilité Web Entreprise", icone="file-text-o")
     menu_export_ecritures.Add(code="export_ecritures_quadra", titre="Exporter vers Quadra Compta", icone="file-text-o")
+    menu_export_ecritures.Add(code="export_ecritures_sage", titre="Exporter vers Sage", icone="file-text-o")
 
 
     # ------------------------------------ Règlements ------------------------------------
