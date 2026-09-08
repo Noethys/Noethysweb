@@ -3320,8 +3320,8 @@ class Mandat(models.Model):
     individu_etage = models.CharField(verbose_name="Etage", max_length=70, blank=True, null=True)
     individu_boite = models.CharField(verbose_name="Boîte postale", max_length=16, blank=True, null=True)
     individu_pays = models.CharField(verbose_name="Code pays", max_length=10, default="FR", blank=True, null=True)
-    iban = encrypt(models.CharField(verbose_name="IBAN", max_length=27, help_text="La cohérence de l'IBAN est vérifié lors de l'enregistrement du mandat."))
-    bic = encrypt(models.CharField(verbose_name="BIC", max_length=11, help_text="La cohérence du BIC est vérifié lors de l'enregistrement du mandat."))
+    iban = encrypt(models.CharField(verbose_name="IBAN", max_length=27, help_text="La validité de l'IBAN est vérifiée pendant la saisie."))
+    bic = encrypt(models.CharField(verbose_name="BIC", max_length=11, help_text="Le format du BIC est vérifié pendant la saisie (8 ou 11 caractères)."))
     memo = models.TextField(verbose_name="Observations", blank=True, null=True)
     choix_sequences = [
         ("OOFF", "Prélèvement ponctuel (OOFF)"), ("FRST", "Premier prélèvement d'une série (FRST)"),

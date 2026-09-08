@@ -1,0 +1,51 @@
+<div class="input-group">
+    <input type="{{ widget.type }}" name="{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value }}"{% endif %} class="{{ widget.attrs.class }}" id="{{ widget.attrs.id }}"{% if widget.attrs.maxlength %} maxlength="{{ widget.attrs.maxlength }}"{% endif %}{% if widget.attrs.required %} required{% endif %}>
+    <div class="input-group-append">
+        <span class="input-group-text" id="{{ widget.attrs.id }}_feedback"></span>
+    </div>
+</div>
+<script>
+(function() {
+    function ValiderIBAN(valeur) {
+        var iban = valeur.replace(/\s+/g, "").toUpperCase();
+        if (!iban) return null;
+        if (!/^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/.test(iban) || iban.length < 15 || iban.length > 34) return false;
+        var rearrange = iban.slice(4) + iban.slice(0, 4);
+        var numerique = "";
+        for (var i = 0; i < rearrange.length; i++) {
+            var c = rearrange[i];
+            numerique += /[A-Z]/.test(c) ? (c.charCodeAt(0) - 55) : c;
+        }
+        var reste = numerique;
+        while (reste.length > 2) {
+            var bloc = reste.slice(0, 9);
+            reste = (parseInt(bloc, 10) % 97) + reste.slice(bloc.length);
+        }
+        return parseInt(reste, 10) % 97 === 1;
+    }
+
+    function AfficherEtat(etat) {
+        var couleurBordure = etat === true ? "#28a745" : etat === false ? "#dc3545" : "#ced4da";
+        champ.style.borderColor = couleurBordure;
+        feedback.style.borderColor = couleurBordure;
+        if (etat === null) {
+            feedback.innerHTML = "";
+            return;
+        }
+        var couleurTexte = etat ? "#28a745" : "#dc3545";
+        var icone = etat ? "check" : "times";
+        var texte = etat ? "IBAN valide" : "IBAN non valide";
+        feedback.innerHTML = '<i class="fa fa-' + icone + '" style="color:' + couleurTexte + ';margin-right:5px"></i><span style="color:' + couleurTexte + '">' + texte + '</span>';
+    }
+
+    var champ = document.getElementById("{{ widget.attrs.id }}");
+    var feedback = document.getElementById("{{ widget.attrs.id }}_feedback");
+    champ.addEventListener("input", function() {
+        var position = champ.selectionStart;
+        champ.value = champ.value.toUpperCase();
+        champ.setSelectionRange(position, position);
+        AfficherEtat(ValiderIBAN(champ.value));
+    });
+    champ.dispatchEvent(new Event("input"));
+})();
+</script>

@@ -13,7 +13,7 @@ from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.utils import utils_texte
 from core.models import Mandat, Famille, Rattachement
-from core.widgets import DatePickerWidget, CodePostal, Ville, Rue
+from core.widgets import DatePickerWidget, CodePostal, Ville, IbanWidget, BicWidget
 from core.forms.select2 import Select2Widget, Select2MultipleWidget
 from facturation.widgets import ChampAutomatiqueWidget
 from facturation.utils import utils_prelevements
@@ -32,6 +32,8 @@ class Formulaire(FormulaireBase, ModelForm):
             "memo": forms.Textarea(attrs={"rows": 3}),
             "rum": ChampAutomatiqueWidget(attrs={"label_checkbox": "Automatique", "title": "Saisissez un numéro unique"}),
             "structures": Select2MultipleWidget(),
+            "iban": IbanWidget(),
+            "bic": BicWidget(),
         }
         labels = {
             "structures": "Sélection des structures",

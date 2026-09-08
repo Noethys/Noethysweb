@@ -5,7 +5,7 @@
 
 import datetime, json
 from django.forms.utils import flatatt
-from django.forms.widgets import Widget, Textarea, ClearableFileInput, FileInput, SelectMultiple
+from django.forms.widgets import Widget, Textarea, ClearableFileInput, FileInput, SelectMultiple, TextInput
 from django.template import loader
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
@@ -770,3 +770,11 @@ class Selection_avec_description(Widget):
         valeur = data.get(name)
         if valeur == "None": return None
         return valeur
+
+
+class IbanWidget(TextInput):
+    template_name = "core/widgets/champ_iban.html"
+
+
+class BicWidget(TextInput):
+    template_name = "core/widgets/champ_bic.html"
