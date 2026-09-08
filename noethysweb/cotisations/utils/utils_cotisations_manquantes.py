@@ -17,6 +17,7 @@ def Get_cotisations_manquantes(famille=None, date_reference=None, utilisateur=No
 
     # Importation des inscriptions
     conditions = Q(famille=famille) & Q(individu__deces=False) & (Q(date_fin__isnull=True) | Q(date_fin__gte=date_reference))
+    conditions &= (Q(activite__date_fin__isnull=True) | Q(activite__date_fin__gte=date_reference))
     if utilisateur:
         conditions &= Q(activite__structure__in=utilisateur.structures.all())
 
@@ -93,7 +94,7 @@ def Get_liste_cotisations_manquantes(date_reference=None, activites=None, presen
     # Importation des inscriptions
     conditions = Q()
     if activites:
-        conditions &= Q(activite__in=activites)
+        conditions &= Q(activite__in=activites) & (Q(activite__date_fin__isnull=True) | Q(activite__date_fin__gte=date_reference))
     if presents:
         conditions &= Q(consommation__date__gte=presents[0], consommation__date__lte=presents[1])
     inscriptions = Inscription.objects.select_related('activite', 'individu', 'famille').prefetch_related('activite__cotisations').filter(conditions).distinct()
