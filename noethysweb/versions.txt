@@ -1,3 +1,10 @@
+Version 1.3.4.1 (09/09/2026) :
+
+- Ajout de l'export des écritures comptables vers Sage
+- Ajout de la vérification en temps réel des IBAN et BIC dans la saisie des mandats
+- Déplacement des boutons d'actions dans les pages Règlements et Factures
+- Correction détection adhésions manquantes si activité terminée
+
 Version 1.3.4.0 (06/09/2026) :
 
 - Relooking du cadre Composition de la famille dans la fiche famille
