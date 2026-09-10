@@ -25,7 +25,7 @@ from core.utils import utils_texte, utils_dates
 
 CATEGORIES_TRANSPORTS = Get_liste_choix_categories()
 
-JOURS_SEMAINE = [(0, "L"), (1, "M"), (2, "M"), (3, "J"), (4, "V"), (5, "S"), (6, "D")]
+JOURS_SEMAINE = [("0", "L"), ("1", "M"), ("2", "M"), ("3", "J"), ("4", "V"), ("5", "S"), ("6", "D")]
 JOURS_COMPLETS_SEMAINE = [(0, "Lundi"), (1, "Mardi"), (2, "Mercredi"), (3, "Jeudi"), (4, "Vendredi"), (5, "Samedi"), (6, "Dimanche")]
 
 LISTE_MOIS = [(1, "Janvier"), (2, "Février"), (3, "Mars"), (4, "Avril"),
