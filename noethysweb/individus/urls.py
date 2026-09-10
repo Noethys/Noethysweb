@@ -14,7 +14,8 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
                             abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses, certifications, \
-                            certifications_individus, certifications_familles, inscriptions_saisir_lot, importer_individus, importer_quotients, liste_vaccinations_manquantes
+                            certifications_individus, certifications_familles, inscriptions_saisir_lot, importer_individus, importer_quotients, \
+                            liste_vaccinations_manquantes, etat_transports
 
 urlpatterns = [
 
@@ -171,6 +172,9 @@ urlpatterns = [
     path('individus/transports/modifier/<int:pk>', liste_transports.Modifier.as_view(), name='transports_modifier'),
     path('individus/transports/supprimer/<int:pk>', liste_transports.Supprimer.as_view(), name='transports_supprimer'),
 
+    # Etat des transports
+    path('individus/etat_transports', etat_transports.View.as_view(), name='etat_transports'),
+
     # AJAX
     path('individus/get_suivi_inscriptions', secure_ajax(suivi_inscriptions.Get_suivi_inscriptions), name='ajax_get_suivi_inscriptions'),
     path('individus/get_tarifs_activites', secure_ajax(suivi_inscriptions.Get_tarifs_activite), name='ajax_get_tarifs_activite'),
@@ -210,4 +214,5 @@ urlpatterns = [
     path('individus/importer_quotients_enregistrer', secure_ajax(importer_quotients.Enregistrer), name='ajax_importer_quotients_enregistrer'),
     path('individus/importer_quotients_envoyer_emails', secure_ajax(importer_quotients.Envoyer_emails), name='ajax_importer_quotients_envoyer_emails'),
     path('individus/liste_vaccinations_manquantes_email', secure_ajax(liste_vaccinations_manquantes.Envoi_emails), name='ajax_liste_vaccinations_manquantes_emails'),
+    path('individus/etat_transports/generer_pdf', secure_ajax(etat_transports.Generer_pdf), name='ajax_etat_transports_generer_pdf'),
 ]

@@ -1,0 +1,56 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+{% embed 'core/box.html' %}
+    {% block box_theme %}card-outline card-lightblue{% endblock %}
+    {% block box_titre %}{{ box_titre }}{% endblock %}
+    {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+    {% block box_contenu %}
+        {% crispy form %}
+    {% endblock %}
+
+{% endembed %}
+
+    {% include 'core/modal_pdf.html' %}
+
+    {{ descriptions_etats|json_script:"descriptions_etats_json" }}
+
+    <script>
+
+        // Descriptions des 40 états, transmises par la vue (individus/views/etat_transports.py)
+        var DESCRIPTIONS_ETATS = JSON.parse(document.getElementById('descriptions_etats_json').textContent);
+
+        // Affiche la description de l'état actuellement sélectionné
+        function actualiser_description_etat() {
+            var code = $('#id_type_etat').val();
+            $('#description_etat').text(DESCRIPTIONS_ETATS[code] || '');
+        };
+
+        $(document).ready(function() {
+            actualiser_description_etat();
+            $('#id_type_etat').on('change', actualiser_description_etat);
+        });
+
+        // Générer le PDF
+        function generer_pdf() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_etat_transports_generer_pdf' %}",
+                data: $("#form_parametres").serialize(),
+                datatype: "json",
+                success: function(data){
+                    charge_pdf(data);
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON.erreur);
+                }
+            })
+        };
+
+    </script>
+
+{% endblock contenu_page %}
