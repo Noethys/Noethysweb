@@ -68,6 +68,7 @@ urlpatterns = [
     path('consommations/grille/memoriser_options', grille.Memoriser_options, name='ajax_grille_memoriser_options'),
     path('consommations/get_suivi_consommations', secure_ajax(suivi_consommations.Get_suivi_consommations), name='ajax_get_suivi_consommations'),
     path('consommations/get_activites', secure_ajax(suivi_consommations.Get_activites), name='ajax_get_activites'),
+    path('consommations/suivi_consommations/exporter_excel', secure_ajax(suivi_consommations.Exporter_excel), name='ajax_suivi_consommations_exporter_excel'),
     path('consommations/etat_global/appliquer_parametres', secure_ajax(etat_global.Appliquer_parametres), name='ajax_etat_global_appliquer_parametres'),
     path('consommations/etat_global/generer_pdf', secure_ajax(etat_global.Generer_pdf), name='ajax_etat_global_generer_pdf'),
     path('consommations/edition_liste_conso/generer_pdf', secure_ajax(edition_liste_conso.Generer_pdf), name='ajax_edition_liste_conso_generer_pdf'),

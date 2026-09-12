@@ -22,6 +22,8 @@
 
                 <button type="button" id="bouton_maj_affichage" title="Actualiser l'affichage" class="btn btn-tool"><i class="fa fa-refresh"></i></button>
 
+                <button type="button" id="bouton_exporter_excel_consommations" title="Exporter vers Excel" class="btn btn-tool"><i class="fa fa-file-excel-o"></i></button>
+
                 <a type="button" class="btn btn-tool" href="{% url 'liste_attente' %}" title="Accéder à la liste d'attente"><i class="fa fa-fw fa-hourglass-half"></i></a>
 
                 <div class="btn-group">
@@ -73,6 +75,12 @@
         $("#bouton_maj_affichage").on('click', function(event) {
             event.preventDefault();
             maj_affichage();
+        });
+
+        // Bouton Exporter vers Excel
+        $("#bouton_exporter_excel_consommations").on('click', function(event) {
+            event.preventDefault();
+            exporter_excel_consommations();
         });
 
         $("#selection_periode").on("click",function(event){
@@ -145,6 +153,27 @@
                 $("#table_suivi").freezeTable({
                     'scrollBar': true,
                 });
+            }
+        });
+    };
+
+    function exporter_excel_consommations() {
+        var bouton = $("#bouton_exporter_excel_consommations");
+        bouton.prop("disabled", true).find("i").removeClass("fa-file-excel-o").addClass("fa-spinner fa-spin");
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_suivi_consommations_exporter_excel' %}",
+            data: {
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+            },
+            success: function (data) {
+                window.location = "{{ MEDIA_URL }}" + data.nom_fichier;
+            },
+            error: function (data) {
+                toastr.error(data.responseJSON ? data.responseJSON.erreur : "Une erreur est survenue lors de l'export");
+            },
+            complete: function () {
+                bouton.prop("disabled", false).find("i").removeClass("fa-spinner fa-spin").addClass("fa-file-excel-o");
             }
         });
     };

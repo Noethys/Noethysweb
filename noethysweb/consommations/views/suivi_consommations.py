@@ -3,10 +3,12 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import datetime, json
+import datetime, json, os, uuid
 from django.db.models import Q, Count
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.http import JsonResponse
+from django.conf import settings
 from core.models import Activite, Ouverture, Remplissage, UniteRemplissage, Vacance, Consommation, Evenement, Groupe
 from core.views.base import CustomView
 from core.utils import utils_dates, utils_parametres
@@ -286,6 +288,87 @@ def Get_data(parametres={}, request=None):
         "dict_unites_remplissage_unites": dict_unites_remplissage_unites,
     }
     return data
+
+
+def Exporter_excel(request):
+    """ Exporte le contenu du widget Suivi des consommations au format Excel """
+    parametres = Get_parametres(request=request)
+    data = Get_data(parametres=parametres, request=request)
+
+    if not data["liste_dates"] or not data["dict_colonnes"]["unites"]:
+        return JsonResponse({"erreur": "Aucune donnée à exporter"}, status=401)
+
+    # Création du répertoire et du nom du fichier
+    rep_temp = os.path.join("temp", str(uuid.uuid4()))
+    rep_destination = os.path.join(settings.MEDIA_ROOT, rep_temp)
+    if not os.path.isdir(rep_destination):
+        os.makedirs(rep_destination)
+    nom_fichier = "suivi_consommations.xlsx"
+
+    # Création du classeur
+    import xlsxwriter
+    classeur = xlsxwriter.Workbook(os.path.join(rep_destination, nom_fichier))
+    feuille = classeur.add_worksheet("Suivi des consommations")
+
+    format_entete = classeur.add_format({"bold": True, "bg_color": "#efefef", "border": 1, "align": "center", "valign": "vcenter"})
+    format_date = classeur.add_format({"bold": True})
+    format_cellule = classeur.add_format({"align": "center"})
+    format_complet = classeur.add_format({"align": "center", "bg_color": "#f7acb2"})
+    format_dernieresplaces = classeur.add_format({"align": "center", "bg_color": "#fefcdb"})
+    format_disponible = classeur.add_format({"align": "center", "bg_color": "#e3fedb"})
+    dict_formats_classe = {"complet": format_complet, "dernieresplaces": format_dernieresplaces, "disponible": format_disponible}
+
+    dict_colonnes = data["dict_colonnes"]
+    liste_unites = dict_colonnes["unites"]
+
+    # Ligne 0 : entêtes des activités
+    feuille.write(0, 0, "", format_entete)
+    num_colonne = 1
+    for colonne in dict_colonnes["activites"]:
+        if colonne["nbre_colonnes"] > 1:
+            feuille.merge_range(0, num_colonne, 0, num_colonne + colonne["nbre_colonnes"] - 1, colonne["activite"].nom, format_entete)
+        else:
+            feuille.write(0, num_colonne, colonne["activite"].nom, format_entete)
+        num_colonne += colonne["nbre_colonnes"]
+
+    # Ligne 1 : entêtes des groupes
+    feuille.write(1, 0, "", format_entete)
+    num_colonne = 1
+    for colonne in dict_colonnes["groupes"]:
+        if colonne["nbre_colonnes"] > 1:
+            feuille.merge_range(1, num_colonne, 1, num_colonne + colonne["nbre_colonnes"] - 1, colonne["groupe"].nom, format_entete)
+        else:
+            feuille.write(1, num_colonne, colonne["groupe"].nom, format_entete)
+        num_colonne += colonne["nbre_colonnes"]
+
+    # Ligne 2 : entêtes des unités
+    feuille.write(2, 0, "Date", format_entete)
+    for num_colonne, colonne in enumerate(liste_unites):
+        feuille.write(2, num_colonne + 1, colonne["unite"].nom, format_entete)
+        feuille.set_column(num_colonne + 1, num_colonne + 1, 14)
+    feuille.set_column(0, 0, 26)
+
+    # Lignes de données (une par date)
+    num_ligne = 3
+    for date in data["liste_dates"]:
+        feuille.write(num_ligne, 0, utils_dates.ConvertDateToFR(date), format_date)
+        for num_colonne, colonne in enumerate(liste_unites):
+            key_case = "%s_%s_%s" % (date, colonne["unite"].pk, colonne["groupe"].pk)
+            info_case = data["dict_cases"].get(key_case)
+            if info_case is None:
+                feuille.write(num_ligne, num_colonne + 1, "", format_cellule)
+                continue
+            format_cellule_classe = dict_formats_classe.get(info_case["classe"], format_cellule)
+            if info_case["evenements"]:
+                valeur = " / ".join("%s : %s" % (evenement.nom, evenement.valeur) for evenement in info_case["evenements"])
+            else:
+                valeur = info_case["valeur"]
+            feuille.write(num_ligne, num_colonne + 1, valeur, format_cellule_classe)
+        num_ligne += 1
+
+    classeur.close()
+
+    return JsonResponse({"nom_fichier": os.path.join(rep_temp, nom_fichier)})
 
 
 class View(CustomView, TemplateView):
