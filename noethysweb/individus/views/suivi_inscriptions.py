@@ -3,11 +3,12 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import datetime, json
+import datetime, json, os, uuid
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 from django.db.models import Q, Count
 from django.shortcuts import render
+from django.conf import settings
 from core.models import Activite, Inscription, Groupe
 from core.views.base import CustomView
 from core.utils import utils_parametres
@@ -139,6 +140,59 @@ def Get_data(parametres={}, filtre=None, request=None):
         liste_resultats.append(dict_activite)
 
     return liste_resultats
+
+
+def Exporter_excel(request):
+    """ Exporte le contenu du widget Suivi des inscriptions au format Excel """
+    filtre = request.POST.get("filtre", None)
+    parametres = Get_parametres(request=request)
+    liste_resultats = Get_data(parametres=parametres, filtre=filtre, request=request)
+
+    if not liste_resultats:
+        return JsonResponse({"erreur": "Aucune donnée à exporter"}, status=401)
+
+    # Création du répertoire et du nom du fichier
+    rep_temp = os.path.join("temp", str(uuid.uuid4()))
+    rep_destination = os.path.join(settings.MEDIA_ROOT, rep_temp)
+    if not os.path.isdir(rep_destination):
+        os.makedirs(rep_destination)
+    nom_fichier = "suivi_inscriptions.xlsx"
+
+    # Création du classeur
+    import xlsxwriter
+    classeur = xlsxwriter.Workbook(os.path.join(rep_destination, nom_fichier))
+    feuille = classeur.add_worksheet("Suivi des inscriptions")
+    format_entete = classeur.add_format({"bold": True, "bg_color": "#efefef", "border": 1})
+    format_activite = classeur.add_format({"bold": True})
+
+    # Entêtes
+    colonnes = ("Activité/Groupe", "Inscrits", "Max.", "Dispo.", "Attente", "Refus")
+    for num_colonne, label_colonne in enumerate(colonnes):
+        feuille.set_column(num_colonne, num_colonne, 30 if num_colonne == 0 else 12)
+        feuille.write(0, num_colonne, label_colonne, format_entete)
+
+    # Lignes
+    num_ligne = 1
+    for activite in liste_resultats:
+        feuille.write(num_ligne, 0, activite["activite"].nom, format_activite)
+        feuille.write(num_ligne, 1, activite["nbre_inscrits"], format_activite)
+        feuille.write(num_ligne, 2, activite["nbre_max"] or "", format_activite)
+        feuille.write(num_ligne, 3, activite["nbre_dispo"] or "", format_activite)
+        feuille.write(num_ligne, 4, activite["nbre_attente"], format_activite)
+        feuille.write(num_ligne, 5, activite["nbre_refus"], format_activite)
+        num_ligne += 1
+        for groupe in activite["groupes"]:
+            feuille.write(num_ligne, 0, groupe["groupe"].nom)
+            feuille.write(num_ligne, 1, groupe["nbre_inscrits"])
+            feuille.write(num_ligne, 2, groupe["nbre_max"] or "")
+            feuille.write(num_ligne, 3, groupe["nbre_dispo"] or "")
+            feuille.write(num_ligne, 4, groupe["nbre_attente"])
+            feuille.write(num_ligne, 5, groupe["nbre_refus"])
+            num_ligne += 1
+
+    classeur.close()
+
+    return JsonResponse({"nom_fichier": os.path.join(rep_temp, nom_fichier)})
 
 
 class View(CustomView, TemplateView):

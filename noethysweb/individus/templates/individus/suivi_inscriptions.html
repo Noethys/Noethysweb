@@ -34,6 +34,8 @@
 
                 <button type="button" id="bouton_maj_affichage_inscriptions" title="Actualiser l'affichage" class="btn btn-tool"><i class="fa fa-refresh"></i></button>
 
+                <button type="button" id="bouton_exporter_excel_inscriptions" title="Exporter vers Excel" class="btn btn-tool"><i class="fa fa-file-excel-o"></i></button>
+
                 <div class="btn-group">
                     <button href="#" class="btn btn-tool" title="Ajuster les options" data-toggle="dropdown"><i class="fa fa-gear"></i></button>
                     <div class="dropdown-menu dropdown-menu-right" role="menu">
@@ -92,6 +94,12 @@
         $("#bouton_maj_affichage_inscriptions").on('click', function(event) {
             event.preventDefault();
             maj_affichage_inscriptions();
+        });
+
+        // Bouton Exporter vers Excel
+        $("#bouton_exporter_excel_inscriptions").on('click', function(event) {
+            event.preventDefault();
+            exporter_excel_inscriptions();
         });
 
         $("#selection_activites_inscriptions").on("click",function(event){
@@ -158,6 +166,28 @@
                     'shadow': true,
                     'scrollBar': true,
                 });
+            }
+        });
+    };
+
+    function exporter_excel_inscriptions() {
+        var bouton = $("#bouton_exporter_excel_inscriptions");
+        bouton.prop("disabled", true).find("i").removeClass("fa-file-excel-o").addClass("fa-spinner fa-spin");
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_suivi_inscriptions_exporter_excel' %}",
+            data: {
+                filtre: $("#champ_recherche_activite").val(),
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+            },
+            success: function (data) {
+                window.location = "{{ MEDIA_URL }}" + data.nom_fichier;
+            },
+            error: function (data) {
+                toastr.error(data.responseJSON ? data.responseJSON.erreur : "Une erreur est survenue lors de l'export");
+            },
+            complete: function () {
+                bouton.prop("disabled", false).find("i").removeClass("fa-spinner fa-spin").addClass("fa-file-excel-o");
             }
         });
     };

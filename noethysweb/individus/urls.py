@@ -180,6 +180,7 @@ urlpatterns = [
     path('individus/get_tarifs_activites', secure_ajax(suivi_inscriptions.Get_tarifs_activite), name='ajax_get_tarifs_activite'),
     path('individus/get_form_activites', secure_ajax(suivi_inscriptions.Get_form_activites), name='ajax_get_form_activites'),
     path('individus/valider_form_activites', secure_ajax(suivi_inscriptions.Valider_form_activites), name='ajax_valider_form_activites'),
+    path('individus/suivi_inscriptions/exporter_excel', secure_ajax(suivi_inscriptions.Exporter_excel), name='ajax_suivi_inscriptions_exporter_excel'),
     path('individus/importation_photos/analyse/get_individus', secure_ajax(importation_photos.Get_individus), name='ajax_importation_photos_get_individus'),
     path('individus/liste_anniversaires/generer_pdf', secure_ajax(liste_anniversaires.Generer_pdf), name='ajax_liste_anniversaires_generer_pdf'),
     path('individus/etiquettes_impression_pdf', secure_ajax(etiquettes.Impression_pdf), name='ajax_etiquettes_impression_pdf'),
