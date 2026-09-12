@@ -147,6 +147,7 @@ def Generation_factures(request):
 
     # Recherche des régies
     dict_regies = {activite.pk: activite.regie for activite in Activite.objects.select_related("regie").filter(regie__isnull=False)}
+    regie_selectionnee = form.cleaned_data.get("regie")
 
     liste_factures_generees = []
     liste_id_factures = []
@@ -154,9 +155,12 @@ def Generation_factures(request):
     for dict_facture in liste_factures:
         if dict_facture["IDfamille"] in liste_factures_cochees:
             # Recherche de la régie associée
-            regie = None
-            if dict_facture["liste_activites"]:
-                regie = dict_regies.get(dict_facture["liste_activites"][0], None)
+            if regie_selectionnee:
+                regie = regie_selectionnee
+            else:
+                regie = None
+                if dict_facture["liste_activites"]:
+                    regie = dict_regies.get(dict_facture["liste_activites"][0], None)
 
             # Enregistrement de la facture
             facture = Facture.objects.create(

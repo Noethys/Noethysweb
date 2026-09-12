@@ -14,7 +14,7 @@ from crispy_forms.bootstrap import Field
 from core.forms.select2 import Select2MultipleWidget, Select2Widget
 from core.utils.utils_commandes import Commandes
 from core.widgets import DatePickerWidget, DateRangePickerWidget, Select_avec_commandes, SelectionActivitesWidget
-from core.models import LotFactures, PrefixeFacture, Facture, Famille
+from core.models import LotFactures, PrefixeFacture, Facture, Famille, FactureRegie
 from core.forms.base import FormulaireBase
 from core.utils import utils_parametres
 from facturation.widgets import ChampAutomatiqueWidget
@@ -52,6 +52,10 @@ class Formulaire(FormulaireBase, forms.Form):
     famille = forms.ModelChoiceField(label="Famille", widget=Select2Widget(), queryset=Famille.objects.all().order_by("nom"), required=False, help_text="Sélectionnez la famille pour laquelle vous souhaitez générer une facture dans la liste proposée.")
     date_limite_paiement = forms.DateField(label="Date limite paiement en ligne", required=False, widget=DatePickerWidget({"afficher_check": True, "label_checkbox": "Interdire le paiement en ligne après le"}), help_text="Vous pouvez saisir une date à partir de laquelle il deviendra impossible de régler cette facture via le paiement en ligne sur le portail.")
     observations = forms.CharField(label="Observations", required=False, help_text="Vous pouvez ajouter un commentaire qui sera mémorisé dans la facture uniquement pour un usage interne par défaut.", widget=forms.Textarea(attrs={"rows": 2}))
+    regie = forms.ModelChoiceField(label="Régie", queryset=FactureRegie.objects.all().order_by("nom"), required=False,
+        help_text="Sélectionnez la régie à associer aux factures qui vont être générées. "
+                  "Si vous ne sélectionnez aucune régie ici, Noethysweb utilisera automatiquement "
+                  "la régie associée à l'activité de chaque facture, si elle est renseignée.")
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -104,6 +108,7 @@ class Formulaire(FormulaireBase, forms.Form):
                 Field('inclure_cotisations_si_conso'),
                 Field('prestations_anterieures'),
                 Field('date_limite_paiement'),
+                Field('regie'),
                 Field('selection_familles'),
                 Field('famille'),
             ),
