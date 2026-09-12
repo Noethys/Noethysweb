@@ -110,13 +110,15 @@ class MyDatatable(Datatable):
         # Importation initiale des parents
         if not hasattr(self, "dict_parents"):
             self.dict_parents = {}
-            self.liste_enfants = []
-            for rattachement in Rattachement.objects.select_related("individu").all():
+            self.liste_enfants = set()
+            for rattachement in Rattachement.objects.filter(categorie__in=(1, 2)).select_related("individu").only(
+                "categorie", "famille_id", "individu_id", "individu__prenom", "individu__tel_mobile", "individu__mail"
+            ):
                 if rattachement.categorie == 1:
                     self.dict_parents.setdefault(rattachement.famille_id, [])
                     self.dict_parents[rattachement.famille_id].append(rattachement.individu)
                 if rattachement.categorie == 2:
-                    self.liste_enfants.append((rattachement.famille_id, rattachement.individu_id))
+                    self.liste_enfants.add((rattachement.famille_id, rattachement.individu_id))
 
     def Calc_tel_parents(self, idfamille=None, idindividu=None):
         self.Init_dict_parents()
