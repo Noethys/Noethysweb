@@ -1,3 +1,14 @@
+Version 1.3.4.2 (12/09/2026) :
+
+- Ajout de l'état récapitulatif des transports
+- Ajout de l'export excel du suivi des inscriptions
+- Ajout de l'export excel du suivi des consommations
+- Ajout des réglages de la monnaie dans les settings
+- Ajout des totaux de liste dans les datatables
+- Optimisation de Init_dict_parents dans mydatatableview
+- Correction de la suppression d'individu
+- Correction de l'application de forfaits
+
 Version 1.3.4.1 (09/09/2026) :
 
 - Ajout de l'export des écritures comptables vers Sage
