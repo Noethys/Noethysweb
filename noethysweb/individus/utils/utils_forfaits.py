@@ -116,9 +116,10 @@ class Forfaits():
         for IDindividu in self.selection_individus:
             for IDactivite, activite in dict_activites.items():
                 for inscription in dict_inscriptions.get((IDindividu, IDactivite), []):
-                    # Récupère la catégorie de tarif
-                    if not categorie_tarif:
-                        categorie_tarif = inscription.categorie_tarif
+                    # Récupère la catégorie de tarif (propre à cette inscription, sans écraser le paramètre
+                    # partagé entre les inscriptions traitées dans cette même boucle - important lorsqu'un
+                    # individu a plusieurs inscriptions sur la même activité avec des catégories différentes)
+                    categorie_tarif_inscription = categorie_tarif or inscription.categorie_tarif
 
                     for tarif in getattr(activite, "tarifs", []):
                         # Conditions
@@ -178,7 +179,11 @@ class Forfaits():
                                 if dates_anomalies:
                                     message = "Impossible d'appliquer le forfait '%s' car des consommations existent déjà sur les dates suivantes : %s." % (label_forfait, ", ".join([utils_dates.ConvertDateToFR(date) for date in dates_anomalies]))
                                     messages.add_message(self.request, messages.ERROR, message)
-                                    return
+                                    # On passe au tarif/inscription suivant plutôt que d'interrompre tout le traitement :
+                                    # avec les inscriptions multiples, cette méthode reboucle sur TOUTES les inscriptions
+                                    # de l'individu sur l'activité (pas seulement la nouvelle), donc un "return" ici
+                                    # empêchait le forfait des autres groupes d'être appliqué.
+                                    continue
 
                             # ------------------ Recherche du tarif -------------------
 
@@ -298,7 +303,7 @@ class Forfaits():
                             prestation = Prestation.objects.create(
                                 famille=inscription.famille, date=date_facturation, categorie="consommation", label=label_forfait,
                                 montant_initial=montant_initial, montant=montant_final, activite=activite, tarif=tarif, individu=inscription.individu,
-                                forfait=type_forfait, categorie_tarif=categorie_tarif, tva=tarif.tva,
+                                forfait=type_forfait, categorie_tarif=categorie_tarif_inscription, tva=tarif.tva,
                             )
 
                             # Sauvegarde des déductions
@@ -314,7 +319,7 @@ class Forfaits():
                                 conso = Consommation(
                                     individu=inscription.individu, inscription=inscription, activite=inscription.activite, date=date,
                                     unite=unite, groupe=inscription.groupe, heure_debut=dict_unites[unite.pk].heure_debut,
-                                    heure_fin=dict_unites[unite.pk].heure_fin, etat="reservation", categorie_tarif=categorie_tarif,
+                                    heure_fin=dict_unites[unite.pk].heure_fin, etat="reservation", categorie_tarif=categorie_tarif_inscription,
                                     forfait=type_forfait, prestation=prestation, date_saisie=datetime.datetime.now(),
                                 )
                                 liste_ajouts.append(conso)
