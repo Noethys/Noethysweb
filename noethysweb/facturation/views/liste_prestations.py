@@ -3,11 +3,10 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
+import json
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Prestation
-from core.utils import utils_preferences
 
 
 class Page(crud.Page):
@@ -33,6 +32,7 @@ class Liste(Page, crud.Liste):
         context['impression_conclusion'] = ""
         context['afficher_menu_brothers'] = True
         context['active_checkbox'] = True
+        context['totaux'] = json.dumps(["quantite", "montant"])
         return context
 
     class datatable_class(MyDatatable):
@@ -54,6 +54,7 @@ class Liste(Page, crud.Liste):
             }
             ordering = ["date"]
             hidden_columns = ["quantite"]
+            footer = True
 
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):

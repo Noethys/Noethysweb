@@ -36,6 +36,7 @@ class Liste(Page, crud.Liste):
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
         context['active_checkbox'] = True
+        context['totaux'] = json.dumps(["total", "solde", "solde_actuel"])
         context['boutons_coches'] = json.dumps([
             {"id": "bouton_tout_annuler", "action": "tout_annuler()", "title": "Annuler les factures cochées", "label": "<i class='fa fa-times margin-r-5'></i>Annuler"},
         ])
@@ -64,12 +65,12 @@ class Liste(Page, crud.Liste):
             }
             ordering = ["date_edition"]
             hidden_columns = ["regie", "date_limite_paiement", "observations", "etat"]
+            footer = True
 
         def Get_solde_actuel(self, instance, **kwargs):
             if instance.etat == "annulation":
                 return "<span class='text-red'><i class='fa fa-trash'></i> Annulée</span>"
-            icone = "fa-check text-green" if instance.solde_actuel == 0 else "fa-close text-red"
-            return "<i class='fa %s margin-r-5'></i>  %0.2f %s" % (icone, instance.solde_actuel, utils_preferences.Get_symbole_monnaie())
+            return "<span class='%s'>%0.2f</span>" % ("text-green" if instance.solde_actuel == 0 else "text-red", instance.solde_actuel)
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             html = [

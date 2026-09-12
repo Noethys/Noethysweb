@@ -3,6 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
 from decimal import Decimal
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Sum
@@ -138,6 +139,7 @@ class Liste(Page, crud.Liste):
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
         context['active_checkbox'] = True
+        context['totaux'] = json.dumps(["montant", "quantite"])
         return context
 
     class datatable_class(MyDatatable):
@@ -159,6 +161,7 @@ class Liste(Page, crud.Liste):
             }
             ordering = ['date']
             hidden_columns = ['quantite']
+            footer = True
 
         def Formate_montant(self, instance, **kwargs):
             ventile = Decimal(instance.ventile or 0.0)
@@ -170,8 +173,8 @@ class Liste(Page, crud.Liste):
                 title = "Prestation totalement payée"
             else:
                 classe = "text-orange"
-                title = "Prestation partiellement payée (%s)" % utils_texte.Formate_montant(ventile)
-            return "<span title='%s' class='%s'>%s</span>" % (title, classe, utils_texte.Formate_montant(instance.montant))
+                title = "Prestation partiellement payée (%s)" % utils_texte.Formate_montant(ventile, avec_symbole=False)
+            return "<span title='%s' class='%s'>%s</span>" % (title, classe, utils_texte.Formate_montant(instance.montant, avec_symbole=False))
 
         def Formate_individu(self, instance, **kwargs):
             return instance.individu.Get_nom() if instance.individu else ""

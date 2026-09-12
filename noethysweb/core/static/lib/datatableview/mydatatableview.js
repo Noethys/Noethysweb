@@ -200,9 +200,21 @@ $(document).ready(function() {
                     .column(j, {page: 'current'})
                     .data()
                     .reduce(function (a, b) {
-                        return Number(a) + Number(b);
+                        var parse = function (valeur) {
+                            if (typeof valeur !== "string") {
+                                return Number(valeur) || 0;
+                            }
+                            // Retire les balises HTML éventuelles (colonnes avec mise en forme conditionnelle, ex: montant colorisé)
+                            valeur = valeur.replace(/<[^>]*>/g, "");
+                            // Ne garde que les chiffres, le signe négatif et les séparateurs décimaux
+                            valeur = valeur.replace(/[^0-9,\.\-]/g, "");
+                            // Gère le format français (virgule décimale)
+                            valeur = valeur.replace(",", ".");
+                            return parseFloat(valeur) || 0;
+                        };
+                        return parse(a) + parse(b);
                     }, 0);
-                if ((jQuery.inArray(nom_colonne, totaux) > -1) && (pageTotal)) {
+                if (jQuery.inArray(nom_colonne, totaux) > -1) {
                     label = parseFloat(pageTotal).toFixed(2);
                 } else {
                     label = "";
@@ -248,7 +260,7 @@ $(document).ready(function() {
         },
         fixedHeader: {
             header: true,
-            footer: true
+            footer: false
         },
     };
 

@@ -105,6 +105,7 @@ class Liste(Page, crud.Liste):
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
         context['afficher_menu_brothers'] = True
+        context['totaux'] = json.dumps(["nbre_pieces", "montant_pieces"])
         return context
 
     class datatable_class(MyDatatable):
@@ -120,9 +121,10 @@ class Liste(Page, crud.Liste):
                 "date": helpers.format_date("%d/%m/%Y"),
             }
             ordering = ["date"]
+            footer = True
 
         def Formate_montant(self, instance, **kwargs):
-            return utils_texte.Formate_montant(instance.montant_pieces)
+            return utils_texte.Formate_montant(instance.montant_pieces, avec_symbole=False)
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             view = kwargs["view"]

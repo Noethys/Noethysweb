@@ -169,6 +169,7 @@ class Liste(Page, crud.Liste):
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
         context['active_checkbox'] = True
+        context['totaux'] = json.dumps(["montant", "ventile"])
         return context
 
     class datatable_class(MyDatatable):
@@ -192,6 +193,7 @@ class Liste(Page, crud.Liste):
                 'montant': "Formate_montant_standard",
             }
             ordering = ['date']
+            footer = True
 
         def Formate_ventile(self, instance, **kwargs):
             if not instance.ventile:
@@ -202,7 +204,7 @@ class Liste(Page, crud.Liste):
                 classe = "text-green"
             else:
                 classe = "text-orange"
-            return "<span class='%s'>%s</span>" % (classe, utils_texte.Formate_montant(instance.ventile))
+            return "<span class='%s'>%s</span>" % (classe, utils_texte.Formate_montant(instance.ventile, avec_symbole=False))
 
         def Get_date_depot(self, instance, *args, **kwargs):
             if instance.depot:

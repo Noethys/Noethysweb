@@ -34,9 +34,12 @@ def Fusionner_motscles(texte, dict_motscles={}):
         texte = texte.replace(motcle, str(valeur))
     return texte
 
-def Formate_montant(montant=0.0):
+def Formate_montant(montant=0.0, avec_symbole=True):
     if not montant: montant = 0.0
-    return "%.02f %s" % (montant, utils_preferences.Get_symbole_monnaie())
+    texte = "%.02f" % montant
+    if avec_symbole:
+        texte += " %s" % utils_preferences.Get_symbole_monnaie()
+    return texte
 
 
 def ConvertStrToListe(texte=None, siVide=[], separateur=";", typeDonnee="entier"):

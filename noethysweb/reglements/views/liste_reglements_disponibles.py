@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.urls import reverse_lazy, reverse
+import json
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Reglement
@@ -28,6 +28,7 @@ class Liste(Page, crud.Liste):
         context['afficher_menu_brothers'] = True
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
+        context['totaux'] = json.dumps(["montant"])
         return context
 
     class datatable_class(MyDatatable):
@@ -44,3 +45,4 @@ class Liste(Page, crud.Liste):
                 'date': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ["date"]
+            footer = True
