@@ -1964,7 +1964,7 @@ function maj_box_facturation() {
                         var dict_prestation = dict_prestations[idprestation];
                         var label = dict_prestation.label;
                         if (dict_prestation.aides.length > 0) {label += " <span class='exposant'>(Aide)</span>"};
-                        html += "<tr class='ligne_prestation'><td class='label_prestation'>" + label + "</td><td class='montant_prestation'>" + dict_prestation.montant.toFixed(2) + " €";
+                        html += "<tr class='ligne_prestation'><td class='label_prestation'>" + label + "</td><td class='montant_prestation'>" + dict_prestation.montant.toFixed(2) + " " + SYMBOLE_MONNAIE;
                         if (afficher_quantites) {html += " (" + dict_prestation.quantite + ")"}
                         html += "</td></tr>";
                         total_individu['montant'] += dict_prestation.montant;
@@ -1974,13 +1974,13 @@ function maj_box_facturation() {
             };
         };
         $('#detail_facturation_individu_' + key_individu[0] + '_' + key_individu[1]).html(html);
-        var texte = total_individu['montant'].toFixed(2) + " €";
+        var texte = total_individu['montant'].toFixed(2) + " " + SYMBOLE_MONNAIE;
         if (afficher_quantites) {texte += " (" + total_individu['quantite'] + ")"}
         $('#total_facturation_individu_' + key_individu[0] + '_' + key_individu[1]).html(texte);
         total_individus['montant'] += total_individu['montant'];
         total_individus['quantite'] += total_individu['quantite'];
     };
-    var texte = total_individus['montant'].toFixed(2) + " €";
+    var texte = total_individus['montant'].toFixed(2) + " " + SYMBOLE_MONNAIE;
     if (afficher_quantites) {texte += " (" + total_individus['quantite'] + ")"}
     $('#total_facturation_individus').html(texte);
 };
@@ -2041,7 +2041,7 @@ function appliquer_tarif_special(case_tableau, data, maj_facturation) {
         if ((dict_tarif.unites.indexOf(case_tableau.unite) !== -1) && (dict_tarif.categories_tarifs.indexOf(case_tableau.categorie_tarif) !== -1)) {
             for (var ligne of dict_tarif.lignes) {
                 liste_choix_tarifs.push({
-                    "text": ligne.montant.toFixed(2) + (ligne.label ? " € : " + ligne.label: ""),
+                    "text": ligne.montant.toFixed(2) + (ligne.label ? " " + SYMBOLE_MONNAIE + " : " + ligne.label: ""),
                     "value": "choix_tarif=" + ligne.idligne
                 })
             }

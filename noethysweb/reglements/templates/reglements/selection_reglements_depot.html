@@ -78,7 +78,7 @@
         if (nbre === 0) {
             texte = "Cochez les règlements à inclure dans le dépôt"
         } else {
-            texte = nbre + " règlements sélectionnés (" + total.toFixed(2) + " €)"
+            texte = nbre + " règlements sélectionnés (" + total.toFixed(2) + " {{ SYMBOLE_MONNAIE }})"
         }
         $(".pagination-info").html(texte)
     }

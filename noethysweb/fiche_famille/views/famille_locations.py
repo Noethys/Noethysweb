@@ -11,7 +11,7 @@ from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Location, Vacance, Ferie, Produit, TarifProduit, Prestation
-from core.utils import utils_dates
+from core.utils import utils_dates, utils_preferences
 from locations.utils import utils_locations
 from locations.forms.supprimer_occurences import Formulaire as Formulaire_supprimer_occurences
 from fiche_famille.forms.famille_locations import Formulaire, FORMSET_PRESTATIONS
@@ -54,7 +54,7 @@ def Get_tarif_location(request):
                     "montant": montant,
                     "tva": tarif.tva or 0.0,
                 })
-                tarifs_selections.append({"text" : "%s : %s €" % (produit.nom, montant), "value": index})
+                tarifs_selections.append({"text" : "%s : %s %s" % (produit.nom, montant, utils_preferences.Get_symbole_monnaie()), "value": index})
                 index += 1
     return JsonResponse({"tarifs": tarifs_trouves, "selections": tarifs_selections})
 

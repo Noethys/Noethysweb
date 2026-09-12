@@ -126,7 +126,7 @@
                                 var montant_unitaire = "{{ sms.configuration_sms.montant_unitaire|stringformat:".4f" }}";
                                 if (montant_unitaire) {
                                     var cout_envoi = montant_unitaire * nbre_destinataires
-                                    texte_message += "<br><i class='fa fa-info-circle margin-r-5'></i>Cet envoi vous coûtera environ " + cout_envoi.toFixed(2) + " €";
+                                    texte_message += "<br><i class='fa fa-info-circle margin-r-5'></i>Cet envoi vous coûtera environ " + cout_envoi.toFixed(2) + " {{ SYMBOLE_MONNAIE }}";
                                 }
 
                                 // Vérification du solde du compte prépayé

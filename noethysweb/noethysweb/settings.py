@@ -159,6 +159,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
                 'core.context_processors.url_root',
+                'core.context_processors.monnaie',
             ],
         },
     },

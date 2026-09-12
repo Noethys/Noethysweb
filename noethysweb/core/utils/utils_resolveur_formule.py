@@ -4,19 +4,21 @@
 #  Distribué sous licence GNU GPL.
 
 import re
+from core.utils import utils_preferences
 
 def ResolveurCalcul(texte="", dictValeurs={}):
     """ Pour résoudre les calculs """
     resultat = ""
-    resultatEuros = False
+    resultat_monetaire = False
+    symbole_monnaie = utils_preferences.Get_symbole_monnaie()
     # Remplacement des valeurs
     for motcle, valeur in dictValeurs.items():
         if motcle in texte:
             # Conversion de la valeur
-            if "€" in valeur:
-                resultatEuros = True
+            if symbole_monnaie in valeur:
+                resultat_monetaire = True
 
-            for caract in " €abcdefghijklmnopqrstuvwxyzéè-_":
+            for caract in " %sabcdefghijklmnopqrstuvwxyzéè-_" % symbole_monnaie:
                 valeur = valeur.replace(caract, "")
                 valeur = valeur.replace(caract.upper(), "")
 
@@ -26,8 +28,8 @@ def ResolveurCalcul(texte="", dictValeurs={}):
     # Réalisation du calcul
     try:
         resultat = eval(texte)
-        if resultatEuros == True:
-            resultat = "%.02f %s" % (resultat, "€")
+        if resultat_monetaire == True:
+            resultat = "%.02f %s" % (resultat, symbole_monnaie)
         else:
             resultat = str(resultat)
     except:

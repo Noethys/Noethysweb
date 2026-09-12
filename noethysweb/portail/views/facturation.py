@@ -17,7 +17,7 @@ from django.contrib import messages
 from eopayment import Payment
 from portail.views.base import CustomView
 from core.models import Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur, ModeReglement, CompteBancaire, PortailRenseignement, ModeleImpression, Mandat
-from core.utils import utils_portail, utils_fichiers, utils_dates, utils_texte
+from core.utils import utils_portail, utils_fichiers, utils_dates, utils_texte, utils_preferences
 
 ETATS_PAIEMENTS = {1: "RECEIVED", 2: "ACCEPTED", 3: "PAID", 4: "DENIED", 5: "CANCELLED", 6: "WAITING", 99: "ERROR"}
 
@@ -72,7 +72,7 @@ def effectuer_paiement_en_ligne(request):
 
     # Vérifie que le montant est supérieur au montant minimal fixé
     if montant_reglement < decimal.Decimal(parametres_portail.get("paiement_ligne_montant_minimal", 0.0)):
-        return JsonResponse({"erreur": _("Le paiement en ligne nécessite un montant minimal de %.2f € !") % parametres_portail.paiement_ligne_montant_minimal}, status=401)
+        return JsonResponse({"erreur": _("Le paiement en ligne nécessite un montant minimal de %.2f %s !") % (parametres_portail.paiement_ligne_montant_minimal, utils_preferences.Get_symbole_monnaie())}, status=401)
 
     # Vérifie que la famille a une adresse mail
     if not request.user.famille.mail:
@@ -157,7 +157,7 @@ def effectuer_paiement_en_ligne(request):
             # Vérifie le montant minimal pour le paiement échelonné
             montant_minimal_echelonnement = decimal.Decimal("30.0")
             if montant_reglement < montant_minimal_echelonnement:
-                return JsonResponse({"erreur": "Le paiement en plusieurs fois nécessite un montant minimal de %s € !" % montant_minimal_echelonnement}, status=401)
+                return JsonResponse({"erreur": "Le paiement en plusieurs fois nécessite un montant minimal de %s %s !" % (montant_minimal_echelonnement, utils_preferences.Get_symbole_monnaie())}, status=401)
 
             # 3 fois standard
             montant_total = float(montant_reglement) * 100

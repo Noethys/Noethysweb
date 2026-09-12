@@ -9,7 +9,7 @@ from urllib.request import urlretrieve
 from xml.dom.minidom import Document
 from django.conf import settings
 from core.models import PrelevementsLot, Prelevements, Organisateur
-from core.utils import utils_texte, utils_fichiers, utils_adresse
+from core.utils import utils_texte, utils_fichiers, utils_adresse, utils_preferences
 
 
 class Exporter():
@@ -486,7 +486,10 @@ class Exporter():
                 InstdAmt = doc.createElement("InstdAmt")
                 DrctDbtTxInf.appendChild(InstdAmt)
                 InstdAmt.appendChild(doc.createTextNode(str(transaction.montant)))
-                InstdAmt.setAttribute("Ccy", "EUR")
+                # ATTENTION : rendre ce code dynamique ne suffit pas à rendre l'export utilisable hors zone EUR/SEPA.
+                # Le format pain.008 généré ici est un prélèvement SEPA, structurellement lié à l'EUR ; pour une monnaie
+                # comme le CHF, c'est tout ce module d'export qu'il faut remplacer par l'équivalent suisse (LSV+/e-facture/QR-facture).
+                InstdAmt.setAttribute("Ccy", utils_preferences.Get_code_iso_monnaie())
 
                 # DrctDbtTx
                 DrctDbtTx = doc.createElement("DrctDbtTx")

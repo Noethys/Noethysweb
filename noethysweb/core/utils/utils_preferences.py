@@ -8,5 +8,9 @@
 def Get_symbole_monnaie():
     return "€"
 
+def Get_code_iso_monnaie():
+    """ Code ISO 4217 de la monnaie, utilisé dans les exports comptables et SEPA """
+    return "EUR"
+
 def Get_monnaie():
-    return {"symbole": "€", "singulier": "Euro", "pluriel": "Euros", "division": "Centime"}
+    return {"symbole": "€", "code_iso": "EUR", "singulier": "Euro", "pluriel": "Euros", "division": "Centime"}

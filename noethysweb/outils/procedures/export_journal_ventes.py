@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 from core.models import Prestation
 from outils.views.procedures import BaseProcedure
 from facturation.utils.utils_export_ecritures import BaseExporter
+from core.utils import utils_preferences
 
 
 class Exporter(BaseExporter):
@@ -29,7 +30,7 @@ class Exporter(BaseExporter):
                 "montant": prestation.montant,
                 "sens": "C",
                 "facture": prestation.facture.numero if prestation.facture else None,
-                "monnaie": "EUR",
+                "monnaie": utils_preferences.Get_code_iso_monnaie(),
             })
 
         # Définition des colonnes

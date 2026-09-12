@@ -18,6 +18,7 @@
 
 {% block scripts %}
     <script type="text/javascript" src="{% static 'lib/clusterize/clusterize.min.js' %}"></script>
+    <script type="text/javascript">var SYMBOLE_MONNAIE = "{{ SYMBOLE_MONNAIE }}";</script>
     <script type="text/javascript" src="{% static "consommations/grille.js" %}"></script>
     <script type="text/javascript" src="{% static 'lib/moment/moment.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'lib/daterangepicker/daterangepicker.js' %}"></script>

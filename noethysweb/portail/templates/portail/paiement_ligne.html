@@ -71,7 +71,7 @@
                         <tr>
                             <td>
                                 <input type="checkbox" class="form-check-input check_impaye" name="check_impaye" id="facture-{{ facture.pk }}"
-                                    value="{{ facture.solde_actuel|stringformat:'.2f' }}" aria-label="{% blocktrans with num=facture.numero solde=facture.solde_actuel %}Sélectionner la facture n°{{ num }}, reste à régler : {{ solde }} €{% endblocktrans %}"
+                                    value="{{ facture.solde_actuel|stringformat:'.2f' }}" aria-label="{% blocktrans with num=facture.numero solde=facture.solde_actuel symbole=SYMBOLE_MONNAIE %}Sélectionner la facture n°{{ num }}, reste à régler : {{ solde }} {{ symbole }}{% endblocktrans %}"
                                     data-type="facture" data-id="{{ facture.pk }}" data-num="{{ facture.numero }}" data-solde="{{ facture.solde_actuel|stringformat:'.2f' }}"
                                 >
                             </td>
@@ -101,7 +101,7 @@
                         <tr>
                             <td>
                                 <input type="checkbox" class="form-check-input check_impaye" name="check_impaye" id="periode-{{ periode.pk }}"
-                                    value="{{ periode.solde|stringformat:'.2f' }}" aria-label="{% blocktrans with nom=periode.nom solde=periode.solde %}Sélectionner {{ nom }}, reste à régler : {{ solde }} €{% endblocktrans %}"
+                                    value="{{ periode.solde|stringformat:'.2f' }}" aria-label="{% blocktrans with nom=periode.nom solde=periode.solde symbole=SYMBOLE_MONNAIE %}Sélectionner {{ nom }}, reste à régler : {{ solde }} {{ symbole }}{% endblocktrans %}"
                                     data-type="periode" data-id="{{ periode.pk }}" data-solde="{{ periode.solde|stringformat:'.2f' }}"
                                 >
                             </td>
@@ -123,7 +123,7 @@
                             <td>
                                 <input type="checkbox" class="form-check-input check_impaye" name="check_impaye" id="cotisation-{{ prestation_cotisation.pk }}"
                                     value="{{ prestation_cotisation.solde|stringformat:'.2f' }}"
-                                    aria-label="{% blocktrans with label=prestation_cotisation.label solde=prestation_cotisation.solde %}Sélectionner {{ label }}, reste à régler : {{ solde }} €{% endblocktrans %}"
+                                    aria-label="{% blocktrans with label=prestation_cotisation.label solde=prestation_cotisation.solde symbole=SYMBOLE_MONNAIE %}Sélectionner {{ label }}, reste à régler : {{ solde }} {{ symbole }}{% endblocktrans %}"
                                     data-type="cotisation" data-id="{{ prestation_cotisation.pk }}" data-solde="{{ prestation_cotisation.solde|stringformat:'.2f' }}"
                                 >
                             </td>
@@ -145,7 +145,7 @@
 
         <div class="d-flex justify-content-between align-items-center p-3 bg-body-secondary rounded mt-2" aria-live="polite" aria-atomic="true">
             <span class="">{% blocktrans %}Montant du règlement{% endblocktrans %} :</span>
-            <strong class="fs-5 me-4 total" id="total" aria-label="{% trans 'Montant total sélectionné : 0.00 €' %}">0.00 €</strong>
+            <strong class="fs-5 me-4 total" id="total" aria-label="{% blocktrans with symbole=SYMBOLE_MONNAIE %}Montant total sélectionné : 0.00 {{ symbole }}{% endblocktrans %}">0.00 {{ SYMBOLE_MONNAIE }}</strong>
         </div>
 
 
@@ -188,7 +188,7 @@
         $("input[name='check_impaye']:checked").each(function() {
             montant_reglement += parseFloat($(this).val());
         });
-        const formatted = parseFloat(montant_reglement).toFixed(2) + " €";
+        const formatted = parseFloat(montant_reglement).toFixed(2) + " {{ SYMBOLE_MONNAIE }}";
         $('.total').html(formatted);
         document.getElementById('total').setAttribute('aria-label', '{% trans "Montant total sélectionné" %} : ' + formatted);
     }

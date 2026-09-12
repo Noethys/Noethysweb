@@ -29,7 +29,7 @@
                 {% for key_individu in liste_individus_coches %}
                     <tr class="ligne_total">
                         <th class='individu_prestation'>{{ key_individu.0.Get_nom }}</th>
-                        <th id="total_facturation_individu_{{ key_individu.0.pk }}_{{ key_individu.1 }}" class='montant_prestation'>0.00 €</th>
+                        <th id="total_facturation_individu_{{ key_individu.0.pk }}_{{ key_individu.1 }}" class='montant_prestation'>0.00 {{ SYMBOLE_MONNAIE }}</th>
                     </tr>
                     <tbody id="detail_facturation_individu_{{ key_individu.0.pk }}_{{ key_individu.1 }}"></tbody>
                 {% endfor %}
@@ -38,7 +38,7 @@
                     <tfoot>
                         <tr class="ligne_total">
                             <th class='individu_prestation'>Total</th>
-                            <th id="total_facturation_individus" class="montant_prestation">0.00 €</th>
+                            <th id="total_facturation_individus" class="montant_prestation">0.00 {{ SYMBOLE_MONNAIE }}</th>
                         </tr>
                     </tfoot>
                 {% endif %}

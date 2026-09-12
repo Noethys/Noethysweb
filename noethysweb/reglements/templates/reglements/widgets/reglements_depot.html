@@ -74,7 +74,7 @@
             var aujourdhui = new Date();
             $table.bootstrapTable('getSelections').forEach(function (row) {
                 if ((row.date_differe) && (new Date(row.date_differe) > aujourdhui)) {
-                    toastr.warning("Attention, le règlement par " + row.mode + " de " + row.montant + " € de " + row.payeur + " a une date d'encaissement différée postérieur à aujourd'hui !")
+                    toastr.warning("Attention, le règlement par " + row.mode + " de " + row.montant + " {{ SYMBOLE_MONNAIE }} de " + row.payeur + " a une date d'encaissement différée postérieur à aujourd'hui !")
                 }
                 liste_idreglements.push(row.pk);
             });
