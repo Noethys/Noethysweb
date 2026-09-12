@@ -3,14 +3,21 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-# from core.utils import utils_parametres
+from django.conf import settings
+
 
 def Get_symbole_monnaie():
-    return "€"
+    return getattr(settings, "MONNAIE_SYMBOLE", "€")
 
 def Get_code_iso_monnaie():
     """ Code ISO 4217 de la monnaie, utilisé dans les exports comptables et SEPA """
-    return "EUR"
+    return getattr(settings, "MONNAIE_CODE_ISO", "EUR")
 
 def Get_monnaie():
-    return {"symbole": "€", "code_iso": "EUR", "singulier": "Euro", "pluriel": "Euros", "division": "Centime"}
+    return {
+        "symbole": Get_symbole_monnaie(),
+        "code_iso": Get_code_iso_monnaie(),
+        "singulier": getattr(settings, "MONNAIE_SINGULIER", "Euro"),
+        "pluriel": getattr(settings, "MONNAIE_PLURIEL", "Euros"),
+        "division": getattr(settings, "MONNAIE_DIVISION", "Centime"),
+    }

@@ -196,6 +196,14 @@ USE_L10N = True
 USE_TZ = False
 DATE_FORMAT = "d/m/Y"
 TELEPHONE_FORMAT_FR = True
+
+# Monnaie
+MONNAIE_SYMBOLE = "€"
+MONNAIE_CODE_ISO = "EUR"
+MONNAIE_SINGULIER = "Euro"
+MONNAIE_PLURIEL = "Euros"
+MONNAIE_DIVISION = "Centime"
+
 LANGUAGES = (
     ("en", "English"),
     ("fr", "Français"),

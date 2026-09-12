@@ -128,6 +128,23 @@ DATABASES = {
 # ]
 
 #########################################################################################
+# MONNAIE : Décommentez et modifiez les lignes ci-dessous pour changer la monnaie utilisée
+# (symbole, code ISO 4217, et libellés utilisés dans les montants en toutes lettres).
+# Exemple pour la Suisse :
+# MONNAIE_SYMBOLE = "CHF"
+# MONNAIE_CODE_ISO = "CHF"
+# MONNAIE_SINGULIER = "Franc"
+# MONNAIE_PLURIEL = "Francs"
+# MONNAIE_DIVISION = "Centime"
+#########################################################################################
+
+# MONNAIE_SYMBOLE = "€"
+# MONNAIE_CODE_ISO = "EUR"
+# MONNAIE_SINGULIER = "Euro"
+# MONNAIE_PLURIEL = "Euros"
+# MONNAIE_DIVISION = "Centime"
+
+#########################################################################################
 # SECURITE : Les paramètres par défaut conviendront généralement.
 #########################################################################################
 
