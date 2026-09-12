@@ -3,6 +3,8 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import logging
+logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import Template, RequestContext
@@ -297,13 +299,14 @@ class Supprimer_individu(Page, crud.Supprimer):
 
     def get_success_url(self):
         """ Renvoie vers la fiche famille après la suppression """
-        # Revient à la liste des familles si la famille n'existe plus
         if not Famille.objects.filter(pk=self.kwargs['idfamille']).exists():
             return reverse_lazy("famille_liste")
 
-        # Revient à la page Résumé de la fiche famille
-        self.famille = self.get_famille()
-        self.famille.Maj_infos()
+        self.famille = Famille.objects.get(pk=self.Get_idfamille())
+        try:
+            self.famille.Maj_infos()
+        except Exception:
+            logger.exception("Erreur lors de la MAJ des infos de la famille %s après suppression/détachement d'un individu", self.famille.pk)
         return reverse_lazy("famille_resume", kwargs={'idfamille': self.Get_idfamille()})
 
 
