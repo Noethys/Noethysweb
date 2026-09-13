@@ -129,7 +129,7 @@ LISTE_PARAMETRES = [
     Parametre(code="facturation_modele_impression_facture", label="Modèle d'impression des factures", type="modeles_impressions_factures", valeur=None, help_text="Vous devez au préalable créer un modèle d'impression pour la catégorie facture depuis le menu Paramétrage > Modèles d'impressions."),
 
     # Paiement en ligne
-    Parametre(code="paiement_ligne_systeme", label="Paiement en ligne", type="choix", valeur=None, choix=[(None, "Aucun"), ("payfip", "PayFIP"), ("payzen", "Payzen"), ("demo", "Mode démo")], help_text="Sélectionnez un système de paiement en ligne."),
+    Parametre(code="paiement_ligne_systeme", label="Paiement en ligne", type="choix", valeur=None, choix=[(None, "Aucun"), ("payfip", "PayFIP"), ("payzen", "Payzen"), ("helloasso", "HelloAsso"), ("demo", "Mode démo")], help_text="Sélectionnez un système de paiement en ligne."),
     Parametre(code="paiement_ligne_mode_reglement", label="Mode de règlement", type="modes_reglements", valeur=None, help_text="Sélectionnez le mode de règlement qui est associé aux paiements en ligne."),
     Parametre(code="paiement_ligne_compte_bancaire", label="Compte bancaire", type="comptes_bancaires", valeur=None, help_text="Sélectionnez le compte bancaire qui est associé aux paiements en ligne."),
     Parametre(code="paiement_ligne_montant_minimal", label="Montant minimal autorisé", type="decimal", valeur=decimal.Decimal("1.00")),
@@ -142,6 +142,11 @@ LISTE_PARAMETRES = [
     Parametre(code="payzen_mode", label="Mode de fonctionnement", type="choix", valeur="TEST", choix=[("TEST", "Test"), ("PRODUCTION", "Production")], help_text="Sélectionnez un mode de fonctionnement."),
     Parametre(code="payzen_algo", label="Algorithme de signature", type="choix", valeur="sha1", choix=[("sha1", "SHA-1"), ("hmac_sha256", "HMAC-SHA-256")], help_text="Sélectionnez l'algorithme de signature qui a été paramétré sur votre backoffice Payzen."),
     Parametre(code="payzen_echelonnement", label="Proposer le paiement en 3 fois", type="boolean", valeur=False),
+    Parametre(code="helloasso_organisation_slug", label="Identifiant de l'organisation (slug)", type="char_1ligne", valeur="", help_text="Saisissez l'identifiant de votre organisation tel qu'il apparaît dans l'URL de votre page HelloAsso (ex : 'mon-association')."),
+    Parametre(code="helloasso_client_id", label="Client ID", type="char_1ligne", valeur="", help_text="Saisissez le Client ID obtenu depuis votre espace HelloAsso (Mon compte > Configuration de l'API)."),
+    Parametre(code="helloasso_client_secret", label="Client secret", type="char_1ligne", valeur="", help_text="Saisissez le Client secret obtenu depuis votre espace HelloAsso (Mon compte > Configuration de l'API)."),
+    Parametre(code="helloasso_mode", label="Mode de fonctionnement", type="choix", valeur="sandbox", choix=[("sandbox", "Test (sandbox)"), ("production", "Production")], help_text="Sélectionnez un mode de fonctionnement. Le mode Test utilise l'environnement de test d'HelloAsso (api.helloasso-sandbox.com)."),
+    Parametre(code="helloasso_cle_notification", label="Clé de sécurité des notifications", type="char_1ligne", valeur="", help_text="Saisissez une chaîne de caractères secrète et difficile à deviner (ex : 40 caractères aléatoires). Cette clé doit être incluse dans l'URL de notification configurée sur votre espace HelloAsso, sous la forme '.../notification_helloasso/VOTRE_CLE'. Elle empêche des tiers de déclencher de fausses notifications."),
 
     # Règlements
     Parametre(code="reglements_afficher_page", label="Afficher la page", type="boolean", valeur=True),

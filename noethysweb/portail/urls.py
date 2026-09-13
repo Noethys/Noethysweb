@@ -136,6 +136,10 @@ urlpatterns = [
     path('retour_payzen_success', facturation.View_retour_paiement.as_view(etat="success"), name='retour_payzen_success'),
     path('ipn_payzen', facturation.ipn_payzen, name='ipn_payzen'),
     path('retour_payfip', facturation.retour_payfip, name='retour_payfip'),
+    path('retour_helloasso_cancel', facturation.View_retour_paiement.as_view(etat="cancel"), name='retour_helloasso_cancel'),
+    path('retour_helloasso_error', facturation.View_retour_paiement.as_view(etat="error"), name='retour_helloasso_error'),
+    path('retour_helloasso_success', facturation.View_retour_paiement.as_view(etat="success"), name='retour_helloasso_success'),
+    path('notification_helloasso/<str:cle>', facturation.notification_helloasso, name='notification_helloasso'),
     path('attente_paiement', attente_paiement.View.as_view(), name='portail_attente_paiement'),
 
     # Règlements

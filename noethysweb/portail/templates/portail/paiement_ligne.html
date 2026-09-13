@@ -13,6 +13,9 @@
         {% if parametres_portail.paiement_ligne_systeme|is_in_list:"payzen;demo" %}
             <img src="{% static "images/payzen.png" %}" class="pull-right" alt="{% trans 'Logo PayZen — prestataire de paiement sécurisé' %}">
             <p>{% blocktrans %}Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PayZen. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.{% endblocktrans %}</p>
+        {% elif parametres_portail.paiement_ligne_systeme == "helloasso" %}
+            <img src="{% static "images/helloasso.png" %}" class="pull-right" alt="{% trans 'Logo HelloAsso — prestataire de paiement sécurisé' %}">
+            <p>{% blocktrans %}Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne HelloAsso. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.{% endblocktrans %}</p>
         {% else %}
             <img src="{% static "images/payfip.jpg" %}" class="pull-right" alt="{% trans 'Logo PayFip — prestataire de paiement sécurisé' %}">
             <p>{% blocktrans %}Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PAYFIP. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.{% endblocktrans %}</p>
@@ -149,7 +152,7 @@
         </div>
 
 
-        {% if parametres_portail.payzen_echelonnement %}
+        {% if parametres_portail.paiement_ligne_systeme == "payzen" and parametres_portail.payzen_echelonnement %}
             <div class="p-3 border rounded mt-3 ml-3 bg-body-secondary">
                 <input type="checkbox" class="form-check-input" id="check_echelonnement" name="check_echelonnement" aria-describedby="desc-echelonnement">
                 <label class="form-check-label fw-medium" for="check_echelonnement">
@@ -252,6 +255,9 @@
                         $('#modal_selection_factures').modal('hide');
                         window.open(data.urltoredirect, '_blank', 'height=700, width=900, toolbar=no, menubar=no, scrollbars=no, resizable=yes, location=no, directories=no, status=no');
                         window.location.href = "{% url 'portail_attente_paiement' %}"
+                    }
+                    if (data.systeme_paiement === "helloasso") {
+                        window.location.href = data.urltoredirect;
                     }
                 },
                 error: function(data) {

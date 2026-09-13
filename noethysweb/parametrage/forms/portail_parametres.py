@@ -29,7 +29,8 @@ LISTE_RUBRIQUES = [
                                 "facturation_autoriser_detail_facture", "facturation_autoriser_telechargement_facture", "facturation_modele_impression_facture"]),
     ("Paiement en ligne", ["paiement_ligne_systeme", "paiement_ligne_mode_reglement", "paiement_ligne_compte_bancaire", "paiement_ligne_montant_minimal",
                            "paiement_ligne_multi_factures", "paiement_ligne_off_si_prelevement", "payfip_mode", "payzen_site_id", "payzen_certificat_test",
-                           "payzen_certificat_production", "payzen_mode", "payzen_algo", "payzen_echelonnement"]),
+                           "payzen_certificat_production", "payzen_mode", "payzen_algo", "payzen_echelonnement",
+                           "helloasso_organisation_slug", "helloasso_client_id", "helloasso_client_secret", "helloasso_mode", "helloasso_cle_notification"]),
     ("Page des règlements", ["reglements_afficher_page", "reglements_intro", "reglements_afficher_encaissement", "reglements_autoriser_telechargement_recu", "reglements_modele_impression_recu"]),
     ("Page contact", ["contact_afficher_page", "contact_intro", "messagerie_intro", "messagerie_envoyer_notification_famille", "messagerie_envoyer_notification_admin", "contact_afficher_coords_structures", "contact_afficher_coords_organisateur"]),
     ("Page des mentions légales", ["mentions_afficher_page", "mentions_intro", "mentions_type", "mentions_html"]),
@@ -84,6 +85,16 @@ class Formulaire(FormulaireBase, forms.Form):
                 if not self.cleaned_data["payzen_certificat_production"]:
                     self.add_error("payzen_certificat_production", "Vous devez saisir le certificat de production pour le paiement en ligne.")
 
+            if self.cleaned_data["paiement_ligne_systeme"] == "helloasso":
+                if not self.cleaned_data["helloasso_organisation_slug"]:
+                    self.add_error("helloasso_organisation_slug", "Vous devez saisir l'identifiant de votre organisation pour le paiement en ligne.")
+                if not self.cleaned_data["helloasso_client_id"]:
+                    self.add_error("helloasso_client_id", "Vous devez saisir le Client ID pour le paiement en ligne.")
+                if not self.cleaned_data["helloasso_client_secret"]:
+                    self.add_error("helloasso_client_secret", "Vous devez saisir le Client secret pour le paiement en ligne.")
+                if not self.cleaned_data["helloasso_cle_notification"]:
+                    self.add_error("helloasso_cle_notification", "Vous devez saisir une clé de sécurité pour les notifications HelloAsso.")
+
         return self.cleaned_data
 
 
@@ -102,6 +113,11 @@ EXTRA_HTML = """
         $('#div_id_payzen_mode').hide();
         $('#div_id_payzen_algo').hide();
         $('#div_id_payzen_echelonnement').hide();
+        $('#div_id_helloasso_organisation_slug').hide();
+        $('#div_id_helloasso_client_id').hide();
+        $('#div_id_helloasso_client_secret').hide();
+        $('#div_id_helloasso_mode').hide();
+        $('#div_id_helloasso_cle_notification').hide();
         if ($("#id_paiement_ligne_systeme").val()) {
             $('#div_id_paiement_ligne_compte_bancaire').show();
             $('#div_id_paiement_ligne_mode_reglement').show();
@@ -119,6 +135,13 @@ EXTRA_HTML = """
             $('#div_id_payzen_mode').show();
             $('#div_id_payzen_algo').show();
             $('#div_id_payzen_echelonnement').show();
+        };
+        if ($("#id_paiement_ligne_systeme").val() == "helloasso") {
+            $('#div_id_helloasso_organisation_slug').show();
+            $('#div_id_helloasso_client_id').show();
+            $('#div_id_helloasso_client_secret').show();
+            $('#div_id_helloasso_mode').show();
+            $('#div_id_helloasso_cle_notification').show();
         };
     }
     $(document).ready(function() {
