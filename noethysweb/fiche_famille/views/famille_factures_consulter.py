@@ -9,7 +9,7 @@ from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Facture, Prestation
-from core.utils import utils_texte
+from core.utils import utils_texte, utils_dates, utils_historique
 from fiche_famille.forms.famille_factures import Formulaire
 from fiche_famille.views.famille import Onglet
 from facturation.utils import utils_factures
@@ -108,8 +108,13 @@ class Supprimer_prestation(Page, crud.Supprimer):
     def delete(self, request, *args, **kwargs):
         # Modification de la prestation
         prestation = self.get_object()
+        idfacture = prestation.facture_id
         prestation.facture = None
         prestation.save()
+
+        # Sauvegarde de l'historique
+        utils_historique.Ajouter(titre="Suppression d'une prestation d'une facture", detail="%s du %s (facture N°%d)" % (prestation.label, utils_dates.ConvertDateToFR(prestation.date), idfacture),
+                                 utilisateur=request.user, famille=prestation.famille_id, individu=prestation.individu_id, objet="Facture", idobjet=idfacture, classe="Facture", activite=prestation.activite_id)
 
         # Enregistrement des totaux de la facture
         utils_factures.Maj_total_factures(IDfacture=self.kwargs["idfacture"])
@@ -129,9 +134,19 @@ class Supprimer_plusieurs_prestations(Page, crud.Supprimer_plusieurs):
 
     def post(self, request, **kwargs):
         # Modification des prestations
+        liste_historique = []
         for prestation in self.get_objets():
+            idfacture = prestation.facture_id
             prestation.facture = None
             prestation.save()
+            liste_historique.append({
+                "titre": "Suppression d'une prestation d'une facture", "detail": "%s du %s (facture N°%d)" % (prestation.label, utils_dates.ConvertDateToFR(prestation.date), idfacture),
+                "utilisateur": request.user, "famille_id": prestation.famille_id, "individu_id": prestation.individu_id,
+                "objet": "Facture", "idobjet": idfacture, "classe": "Facture", "activite_id": prestation.activite_id,
+            })
+
+        # Sauvegarde de l'historique
+        utils_historique.Ajouter_plusieurs(liste_historique)
 
         # Enregistrement des totaux de la facture
         utils_factures.Maj_total_factures(IDfacture=self.kwargs["idfacture"])

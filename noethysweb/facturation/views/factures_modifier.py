@@ -10,7 +10,7 @@ from django.http import JsonResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Facture
-from core.utils import utils_preferences
+from core.utils import utils_preferences, utils_historique
 from facturation.forms.factures_modifier import Formulaire
 
 
@@ -40,8 +40,24 @@ def Appliquer(request):
     if not liste_champs_modifier:
         return JsonResponse({"erreur": "Vous n'avez sélectionné aucun paramètre à modifier"}, status=401)
 
+    # Préparation de l'historique
+    liste_historique = []
+    for facture in factures:
+        details = []
+        for champ in liste_champs_modifier:
+            label_champ = Facture._meta.get_field(champ).verbose_name
+            valeur_champ = getattr(facture, champ)
+            details.append("%s=%s" % (label_champ, valeur_champ))
+        liste_historique.append({
+            "titre": "Modification d'une facture par lot", "detail": ", ".join(details), "utilisateur": request.user,
+            "famille_id": facture.famille_id, "objet": "Facture", "idobjet": facture.pk, "classe": "Facture",
+        })
+
     # Enregistrement des modifications
     Facture.objects.bulk_update(factures, liste_champs_modifier, batch_size=50)
+
+    # Sauvegarde de l'historique
+    utils_historique.Ajouter_plusieurs(liste_historique)
 
     logger.debug("Application des modifications des factures terminée.")
     return JsonResponse({"success": True})

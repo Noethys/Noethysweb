@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Facture, Prestation
-from core.utils import utils_texte
+from core.utils import utils_texte, utils_dates, utils_historique
 from facturation.utils import utils_factures
 from fiche_famille.views.famille import Onglet
 
@@ -60,21 +60,30 @@ class Liste(Onglet, crud.Liste):
     def post(self, request, **kwargs):
         idfacture = self.kwargs.get("pk")
         liste_selections = json.loads(request.POST.get("selections"))
-        Enregistrement_prestations(idfacture=idfacture, liste_idprestation=liste_selections)
+        Enregistrement_prestations(idfacture=idfacture, liste_idprestation=liste_selections, request=request)
         return HttpResponseRedirect(reverse_lazy("famille_factures_consulter", kwargs={"idfamille": self.kwargs["idfamille"], "pk": idfacture}))
 
 
-def Enregistrement_prestations(idfacture=None, liste_idprestation=[]):
+def Enregistrement_prestations(idfacture=None, liste_idprestation=[], request=None):
     # Importation des données
     facture = Facture.objects.get(pk=idfacture)
     nouvelles_prestations = Prestation.objects.filter(pk__in=liste_idprestation)
 
     # Modification des prestations
     liste_modifications = []
+    liste_historique = []
     for prestation in nouvelles_prestations:
         prestation.facture = facture
         liste_modifications.append(prestation)
+        liste_historique.append({
+            "titre": "Ajout d'une prestation dans une facture", "detail": "%s du %s (facture N°%d)" % (prestation.label, utils_dates.ConvertDateToFR(prestation.date), facture.pk),
+            "utilisateur": request.user if request else None, "famille_id": prestation.famille_id, "individu_id": prestation.individu_id,
+            "objet": "Facture", "idobjet": facture.pk, "classe": "Facture", "activite_id": prestation.activite_id,
+        })
     Prestation.objects.bulk_update(liste_modifications, ["facture"], batch_size=50)
+
+    # Sauvegarde de l'historique
+    utils_historique.Ajouter_plusieurs(liste_historique)
 
     # Enregistrement des totaux de la facture
     utils_factures.Maj_total_factures(IDfacture=idfacture)
