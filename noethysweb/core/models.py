@@ -2517,9 +2517,37 @@ class ModeleDocument(models.Model):
         return self.nom
 
 
+class QuestionnaireGroupe(models.Model):
+    idgroupe = models.AutoField(verbose_name="ID", db_column='IDgroupe', primary_key=True)
+    categorie = models.CharField(verbose_name="Catégorie", max_length=200, choices=LISTE_CATEGORIES_QUESTIONNAIRES)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    ordre = models.IntegerField(verbose_name="Ordre")
+
+    class Meta:
+        db_table = 'questionnaire_groupes'
+        verbose_name = "regroupement de questions"
+        verbose_name_plural = "regroupements de questions"
+
+    def __str__(self):
+        return self.nom
+
+    def delete(self, *args, **kwargs):
+        # Supprime l'objet
+        super().delete(*args, **kwargs)
+        # Après la suppression, on rectifie l'ordre
+        liste_objects = QuestionnaireGroupe.objects.filter(categorie=self.categorie).order_by("ordre")
+        ordre = 1
+        for objet in liste_objects:
+            if objet.ordre != ordre:
+                objet.ordre = ordre
+                objet.save()
+            ordre += 1
+
+
 class QuestionnaireQuestion(models.Model):
     idquestion = models.AutoField(verbose_name="ID", db_column='IDquestion', primary_key=True)
     categorie = models.CharField(verbose_name="Catégorie", max_length=200, choices=LISTE_CATEGORIES_QUESTIONNAIRES)
+    groupe = models.ForeignKey(QuestionnaireGroupe, verbose_name="Regroupement", on_delete=models.SET_NULL, blank=True, null=True)
     ordre = models.IntegerField(verbose_name="Ordre")
     visible = models.BooleanField(verbose_name="Visible sur le bureau", default=True)
     label = models.CharField(verbose_name="Label", max_length=250)

@@ -14,7 +14,7 @@ from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.forms.select2 import Select2MultipleWidget
-from core.models import QuestionnaireQuestion, QuestionnaireChoix
+from core.models import QuestionnaireQuestion, QuestionnaireChoix, QuestionnaireGroupe
 from core.widgets import DatePickerWidget, ColorPickerWidget, SliderWidget, Selection_avec_icone
 from parametrage.widgets import Choix_questionnaire
 
@@ -85,6 +85,11 @@ class Formulaire(FormulaireBase, ModelForm):
         else:
             self.fields['ordre'].initial = self.instance.ordre
 
+        # Regroupement de questions (groupe), limité aux regroupements de la même catégorie de questionnaire
+        self.fields['groupe'].queryset = QuestionnaireGroupe.objects.filter(categorie=categorie).order_by("ordre")
+        self.fields['groupe'].required = False
+        self.fields['groupe'].help_text = "Vous pouvez créer de nouveaux regroupements de questions depuis le menu Paramétrage > Regroupements de questions."
+
         # Liste de choix avancés
         liste_choix = QuestionnaireChoix.objects.filter(question_id=self.instance.pk if self.instance else 0).order_by("ordre")
         self.fields["liste_choix"].initial = json.dumps([model_to_dict(choix) for choix in liste_choix])
@@ -100,6 +105,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Hidden('ordre', value=self.fields['ordre'].initial),
             Fieldset("Généralités",
                 Field('label'),
+                Field('groupe'),
                 Field('controle'),
                 Field('texte_aide'),
             ),

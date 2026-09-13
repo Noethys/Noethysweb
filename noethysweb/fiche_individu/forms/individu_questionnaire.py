@@ -29,12 +29,15 @@ class Formulaire(FormulaireBase, forms.Form):
         # self.helper.label_class = 'col-md-2'
         # self.helper.field_class = 'col-md-10'
 
-        # Création des champs
+        # Création des champs, regroupés par catégorie de questions
         condition_structure = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
-        for question in QuestionnaireQuestion.objects.filter(condition_structure, categorie="individu", visible=True).order_by("ordre"):
+        dict_groupes = {}
+        for question in QuestionnaireQuestion.objects.select_related("groupe").filter(condition_structure, categorie="individu", visible=True).order_by("groupe__ordre", "ordre"):
             nom_controle, ctrl = questionnaires.Get_controle(question)
             if ctrl:
                 self.fields[nom_controle] = ctrl
+                dict_groupes.setdefault(question.groupe_id, {"nom": question.groupe.nom if question.groupe else None, "champs": []})
+                dict_groupes[question.groupe_id]["champs"].append(nom_controle)
 
         # Importation des réponses
         for reponse in QuestionnaireReponse.objects.filter(individu_id=self.idindividu):
@@ -56,9 +59,14 @@ class Formulaire(FormulaireBase, forms.Form):
             else:
                 commandes = Commandes(annuler_url="{% url 'individu_questionnaire' idfamille=idfamille idindividu=idindividu %}", ajouter=False)
             self.helper.layout.append(commandes)
-            # Création des contrôles
-            for (nom_controle, ctrl) in self.fields.items():
-                self.helper.layout.append(Field(nom_controle))
+            # Création des contrôles, regroupés par catégorie de questions
+            for infos_groupe in dict_groupes.values():
+                champs_layout = [Field(nom_controle) for nom_controle in infos_groupe["champs"]]
+                if infos_groupe["nom"]:
+                    self.helper.layout.append(Fieldset(infos_groupe["nom"], *champs_layout))
+                else:
+                    for champ in champs_layout:
+                        self.helper.layout.append(champ)
 
     def clean(self):
         for key, valeur in self.cleaned_data.items():

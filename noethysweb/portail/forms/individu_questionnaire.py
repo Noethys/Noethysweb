@@ -7,7 +7,7 @@ import json
 from django import forms
 from django.utils.translation import gettext as _
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, HTML, ButtonHolder
+from crispy_forms.layout import Layout, HTML, ButtonHolder, Fieldset
 from crispy_forms.bootstrap import Field, StrictButton
 from core.models import QuestionnaireQuestion, QuestionnaireReponse, PortailRenseignement
 from parametrage.forms import questionnaires
@@ -30,10 +30,12 @@ class Formulaire(FormulaireBase, forms.Form):
         dict_renseignements = {renseignement.code: json.loads(renseignement.nouvelle_valeur) for renseignement in renseignements}
 
         # Création des champs
-        for question in QuestionnaireQuestion.objects.filter(categorie="individu", visible_portail=True).order_by("ordre"):
+        dict_groupes_par_code = {}
+        for question in QuestionnaireQuestion.objects.select_related("groupe").filter(categorie="individu", visible_portail=True).order_by("groupe__ordre", "ordre"):
             nom_controle, ctrl = questionnaires.Get_controle(question)
             if ctrl:
                 self.fields[nom_controle] = ctrl
+                dict_groupes_par_code[nom_controle] = question.groupe
 
         # Importation des réponses
         for reponse in QuestionnaireReponse.objects.filter(individu=rattachement.individu, question__categorie="individu"):
@@ -41,8 +43,9 @@ class Formulaire(FormulaireBase, forms.Form):
             if key in self.fields:
                 self.fields[key].initial = reponse.Get_reponse_for_ctrl()
 
-        # Préparation du layout
+        # Préparation du layout, en regroupant les champs par catégorie de questions
         self.helper.layout = Layout()
+        dict_groupes = {}
         for (code, ctrl) in self.fields.items():
             # Si mode consultation
             if mode == "CONSULTATION":
@@ -52,7 +55,18 @@ class Formulaire(FormulaireBase, forms.Form):
             if code in dict_renseignements and self.fields[code].initial != dict_renseignements[code]:
                 self.fields[code].initial = dict_renseignements[code]
                 self.fields[code].help_text = "<span class='text-orange'><i class='fa fa-exclamation-circle margin-r-5'></i>%s</span>" % _("Modification en attente de validation par l'administrateur.")
-            self.helper.layout.append(Field(code, css_class="text-orange" if code in dict_renseignements else None))
+            champ = Field(code, css_class="text-orange" if code in dict_renseignements else None)
+            groupe = dict_groupes_par_code.get(code)
+            cle_groupe = groupe.pk if groupe else None
+            dict_groupes.setdefault(cle_groupe, {"nom": groupe.nom if groupe else None, "champs": []})
+            dict_groupes[cle_groupe]["champs"].append(champ)
+
+        for infos_groupe in dict_groupes.values():
+            if infos_groupe["nom"]:
+                self.helper.layout.append(Fieldset(infos_groupe["nom"], *infos_groupe["champs"]))
+            else:
+                for champ in infos_groupe["champs"]:
+                    self.helper.layout.append(champ)
 
         if not self.fields:
             # Si aucun questionnaire paramétré

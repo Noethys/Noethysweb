@@ -60,6 +60,7 @@ class Page(crud.Page):
         context['liste_categories'] = LISTE_CATEGORIES_QUESTIONNAIRES
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'categorie': self.Get_categorie()}), "icone": "fa fa-plus"},
+            {"label": "Regroupements de questions", "classe": "btn btn-default", "href": reverse_lazy("questionnaires_groupes_liste", kwargs={'categorie': self.Get_categorie()}), "icone": "fa fa-sitemap"},
         ]
         return context
 
@@ -115,7 +116,7 @@ class Liste(Page, crud.Liste):
     template_name = "core/crud/liste_avec_categorie.html"
 
     def get_queryset(self):
-        return QuestionnaireQuestion.objects.filter(Q(categorie=self.Get_categorie()) & self.Get_filtres("Q"), self.Get_condition_structure()).annotate(nbre_reponses=Count("questionnairereponse"))
+        return QuestionnaireQuestion.objects.select_related("groupe").filter(Q(categorie=self.Get_categorie()) & self.Get_filtres("Q"), self.Get_condition_structure()).annotate(nbre_reponses=Count("questionnairereponse"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -126,14 +127,15 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["idquestion", 'label']
+        filtres = ["idquestion", 'label', 'groupe__nom']
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         controle = columns.TextColumn("Contrôle", sources="controle", processor='Get_controle')
+        groupe = columns.TextColumn("Regroupement", sources=['groupe__nom'])
         nbre_reponses = columns.TextColumn("Réponses associées", sources="nbre_reponses")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idquestion", 'ordre', 'label', 'controle', 'nbre_reponses']
+            columns = ["idquestion", 'ordre', 'groupe', 'label', 'controle', 'nbre_reponses']
             ordering = ['ordre']
 
         def Get_controle(self, instance, **kwargs):

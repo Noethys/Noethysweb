@@ -27,12 +27,15 @@ class Formulaire(FormulaireBase, forms.Form):
         # self.helper.label_class = 'col-md-2'
         # self.helper.field_class = 'col-md-10'
 
-        # Création des champs
+        # Création des champs, regroupés par catégorie de questions
         condition_structure = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
-        for question in QuestionnaireQuestion.objects.filter(condition_structure, categorie="famille", visible=True).order_by("ordre"):
+        dict_groupes = {}
+        for question in QuestionnaireQuestion.objects.select_related("groupe").filter(condition_structure, categorie="famille", visible=True).order_by("groupe__ordre", "ordre"):
             nom_controle, ctrl = questionnaires.Get_controle(question)
             if ctrl:
                 self.fields[nom_controle] = ctrl
+                dict_groupes.setdefault(question.groupe_id, {"nom": question.groupe.nom if question.groupe else None, "champs": []})
+                dict_groupes[question.groupe_id]["champs"].append(nom_controle)
 
         # Importation des réponses
         for reponse in QuestionnaireReponse.objects.filter(famille_id=self.idfamille, question__categorie="famille"):

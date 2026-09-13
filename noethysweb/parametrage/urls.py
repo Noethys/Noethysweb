@@ -18,7 +18,7 @@ from parametrage.views import organisateur, structures, \
     activites_ouvertures, activites_evenements, activites_evenements_tarifs, activites_categories_tarifs, activites_noms_tarifs, \
     activites_tarifs, activites_portail_parametres, activites_portail_periodes, \
     modeles_documents, modeles_emails, modeles_sms, modeles_rappels, signatures_emails, \
-    questionnaires, adresses_mail, activites_assistant, activites_assistant_sejour, activites_assistant_cantine, \
+    questionnaires, questionnaires_groupes, adresses_mail, activites_assistant, activites_assistant_sejour, activites_assistant_cantine, \
     activites_assistant_sorties, activites_assistant_stage, activites_assistant_annuelle, \
     portail_parametres, types_regimes_alimentaires, assureurs, categories_compte_internet, modeles_pes, \
     types_consentements, unites_consentements, articles, images_articles, albums, images_fond, portail_documents, portail_parametres_renseignements, \
@@ -487,11 +487,20 @@ urlpatterns = [
     path('parametrage/modeles_prestations/supprimer/<int:pk>', modeles_prestations.Supprimer.as_view(), name='modeles_prestations_supprimer'),
 
     # Questions des questionnaires
+    path('parametrage/questions/liste/deplacer_lignes', secure_ajax(questionnaires.Deplacer.as_view()), name='ajax_deplacer_lignes_questionnaires_bis'),
     path('parametrage/questions/liste', questionnaires.Liste.as_view(), name='questions_liste'),
     path('parametrage/questions/liste/<str:categorie>', questionnaires.Liste.as_view(), name='questions_liste'),
     path('parametrage/questions/ajouter/<str:categorie>', questionnaires.Ajouter.as_view(), name='questions_ajouter'),
     path('parametrage/questions/modifier/<str:categorie>/<int:pk>', questionnaires.Modifier.as_view(), name='questions_modifier'),
     path('parametrage/questions/supprimer/<str:categorie>/<int:pk>', questionnaires.Supprimer.as_view(), name='questions_supprimer'),
+
+    # Catégories de questions des questionnaires
+    path('parametrage/questionnaires_groupes/liste/deplacer_lignes', secure_ajax(questionnaires_groupes.Deplacer.as_view()), name='ajax_deplacer_lignes_questionnaires_groupes_bis'),
+    path('parametrage/questionnaires_groupes/liste', questionnaires_groupes.Liste.as_view(), name='questionnaires_groupes_liste'),
+    path('parametrage/questionnaires_groupes/liste/<str:categorie>', questionnaires_groupes.Liste.as_view(), name='questionnaires_groupes_liste'),
+    path('parametrage/questionnaires_groupes/ajouter/<str:categorie>', questionnaires_groupes.Ajouter.as_view(), name='questionnaires_groupes_ajouter'),
+    path('parametrage/questionnaires_groupes/modifier/<str:categorie>/<int:pk>', questionnaires_groupes.Modifier.as_view(), name='questionnaires_groupes_modifier'),
+    path('parametrage/questionnaires_groupes/supprimer/<str:categorie>/<int:pk>', questionnaires_groupes.Supprimer.as_view(), name='questionnaires_groupes_supprimer'),
 
     # Adresses mail
     path('parametrage/adresses_mail/liste', adresses_mail.Liste.as_view(), name='adresses_mail_liste'),
@@ -691,6 +700,7 @@ urlpatterns = [
     path('parametrage/get_fond_modele', secure_ajax(modeles_documents.Get_fond_modele), name='ajax_get_fond_modele'),
     path('parametrage/export_svg', secure_ajax(modeles_documents.Export_svg), name='ajax_export_svg'),
     path('parametrage/questions/deplacer_lignes', secure_ajax(questionnaires.Deplacer.as_view()), name='ajax_deplacer_lignes_questionnaires'),
+    path('parametrage/questionnaires_groupes/deplacer_lignes', secure_ajax(questionnaires_groupes.Deplacer.as_view()), name='ajax_deplacer_lignes_questionnaires_groupes'),
     path('parametrage/adresses_mail/envoyer_mail_test', secure_ajax(adresses_mail.Envoyer_mail_test), name='ajax_envoyer_mail_test'),
     path('parametrage/configurations_sms/envoyer_sms_test', secure_ajax(configurations_sms.Envoyer_sms_test), name='ajax_envoyer_sms_test'),
     path('parametrage/albums/importer_photos_album', secure_ajax(albums.Importer_photos_album), name="ajax_importer_photos_album"),
