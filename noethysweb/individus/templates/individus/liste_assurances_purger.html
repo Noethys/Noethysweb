@@ -1,0 +1,66 @@
+{% extends "core/crud/edit.html" %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        $(document).on("submit", "#form_purge_assurances", function(event) {
+            var form = $(this);
+
+            // Si la confirmation a déjà été obtenue, on laisse le formulaire s'envoyer normalement
+            if ($("#id_confirme_purge", form).val() === "1") {
+                return true;
+            }
+
+            event.preventDefault();
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_previsualiser_purge_assurances' %}",
+                data: form.serialize(),
+                success: function (data) {
+                    if (data.nombre === 0) {
+                        toastr.warning("Aucune assurance ne correspond aux critères sélectionnés.");
+                        return;
+                    }
+
+                    var message = "<p>Les <strong>" + data.nombre + "</strong> assurance(s) suivante(s) vont être <strong>définitivement supprimées</strong> :</p>";
+                    message += "<div style='max-height: 350px; overflow-y: auto;'><table class='table table-sm table-bordered'>";
+                    message += "<thead><tr><th>Individu</th><th>Assureur</th><th>Début</th><th>Fin</th></tr></thead><tbody>";
+                    $.each(data.lignes, function (index, ligne) {
+                        message += "<tr><td>" + ligne.individu + "</td><td>" + ligne.assureur + "</td><td>" + ligne.date_debut + "</td><td>" + (ligne.date_fin || "") + "</td></tr>";
+                    });
+                    message += "</tbody></table></div>";
+
+                    bootbox.dialog({
+                        title: "Confirmation de la purge",
+                        message: message,
+                        buttons: {
+                            cancel: {
+                                label: "<i class='fa fa-ban'></i> Annuler",
+                                className: "btn-default",
+                            },
+                            ok: {
+                                label: "<i class='fa fa-trash-o'></i> Confirmer la suppression",
+                                className: "btn-danger",
+                                callback: function () {
+                                    if ($("#id_confirme_purge", form).length === 0) {
+                                        form.append("<input type='hidden' id='id_confirme_purge' name='confirme_purge' value='1'>");
+                                    } else {
+                                        $("#id_confirme_purge", form).val("1");
+                                    }
+                                    // Soumission native du formulaire : form.trigger("submit") ou form.submit() échouent
+                                    // silencieusement ici car le bouton d'enregistrement est nommé "submit", ce qui masque
+                                    // la méthode native submit() du formulaire (form.submit référence alors le bouton).
+                                    HTMLFormElement.prototype.submit.call(form.get(0));
+                                }
+                            },
+                        }
+                    });
+                },
+                error: function (data) {
+                    toastr.error((data.responseJSON && data.responseJSON.erreur) || "Une erreur est survenue.");
+                }
+            });
+        });
+    </script>
+{% endblock %}

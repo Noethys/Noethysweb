@@ -15,7 +15,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
                             abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses, certifications, \
                             certifications_individus, certifications_familles, inscriptions_saisir_lot, importer_individus, importer_quotients, \
-                            liste_vaccinations_manquantes, etat_transports
+                            liste_vaccinations_manquantes, etat_transports, liste_assurances
 
 urlpatterns = [
 
@@ -86,6 +86,7 @@ urlpatterns = [
     path('individus/liste_pieces_manquantes', liste_pieces_manquantes.Liste.as_view(), name='liste_pieces_manquantes'),
     path('individus/liste_pieces_fournies', liste_pieces_fournies.Liste.as_view(), name='liste_pieces_fournies'),
     path('individus/pieces_supprimer_plusieurs/<str:listepk>', liste_pieces_fournies.Supprimer_plusieurs.as_view(), name='pieces_supprimer_plusieurs'),
+    path('individus/pieces_purger', liste_pieces_fournies.Purger.as_view(), name='pieces_purger'),
 
     # Informations
     path('individus/edition_renseignements', edition_renseignements.Liste.as_view(), name='edition_renseignements'),
@@ -120,6 +121,12 @@ urlpatterns = [
     path('individus/informations/supprimer/<int:pk>', liste_informations.Supprimer.as_view(), name='informations_supprimer'),
 
     path('individus/liste_vaccinations_manquantes', liste_vaccinations_manquantes.Liste.as_view(), name='liste_vaccinations_manquantes'),
+
+    path('individus/assurances/liste', liste_assurances.Liste.as_view(), name='liste_assurances'),
+    path('individus/assurances/supprimer/<int:pk>', liste_assurances.Supprimer.as_view(), name='assurances_supprimer'),
+    path('individus/assurances/supprimer_plusieurs/<str:listepk>', liste_assurances.Supprimer_plusieurs.as_view(), name='assurances_supprimer_plusieurs'),
+    path('individus/assurances/purger', liste_assurances.Purger.as_view(), name='assurances_purger'),
+    path('individus/assurances/previsualiser_purge', secure_ajax(liste_assurances.Previsualiser_purge), name='ajax_previsualiser_purge_assurances'),
 
     path('individus/edition_informations', edition_informations.View.as_view(), name='edition_informations'),
 
@@ -211,6 +218,7 @@ urlpatterns = [
     path('individus/inscriptions_saisir_lot', secure_ajax(inscriptions_saisir_lot.Appliquer), name='ajax_inscriptions_saisir_lot'),
     path('individus/importer_individus/importer', secure_ajax(importer_individus.Importer), name='ajax_importer_individus_importer'),
     path('individus/pieces_fournies_modifier_lot', secure_ajax(liste_pieces_fournies.Modifier_lot), name='ajax_pieces_fournies_modifier_lot'),
+    path('individus/pieces_fournies/previsualiser_purge', secure_ajax(liste_pieces_fournies.Previsualiser_purge), name='ajax_previsualiser_purge_pieces'),
     path('individus/importer_quotients_rechercher', secure_ajax(importer_quotients.Rechercher), name='ajax_importer_quotients_rechercher'),
     path('individus/importer_quotients_enregistrer', secure_ajax(importer_quotients.Enregistrer), name='ajax_importer_quotients_enregistrer'),
     path('individus/importer_quotients_envoyer_emails', secure_ajax(importer_quotients.Envoyer_emails), name='ajax_importer_quotients_envoyer_emails'),
