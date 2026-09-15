@@ -22,7 +22,7 @@
                     <a class="btn btn-default {% if not perms.core.famille_factures_modifier %}disabled{% endif %}" href="{% url 'famille_abo_factures_email' idfamille=idfamille %}"
                         title="Cliquez ici pour activer ou désactiver l'abonnement au service d'envoi des factures par Email">
                         <i class="fa fa-envelope margin-r-5"></i>Factures par Email
-                        {% if famille.email_recus %}
+                        {% if famille.email_factures %}
                             <span class="badge bg-success">ON</span>
                         {% else %}
                             <span class="badge bg-danger">OFF</span>
