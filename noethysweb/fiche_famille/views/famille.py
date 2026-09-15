@@ -177,7 +177,7 @@ class Onglet(CustomView):
         context['famille'] = Famille.objects.get(pk=self.kwargs['idfamille'])
         context['idfamille'] = self.kwargs['idfamille']
         context['categories'] = CATEGORIES_RATTACHEMENT
-        context['rattachements'] = Rattachement.objects.prefetch_related('individu').filter(famille_id=self.kwargs['idfamille']).order_by("individu__civilite")
+        context['rattachements'] = Rattachement.objects.prefetch_related('individu').filter(famille_id=self.kwargs['idfamille']).order_by("individu__pk")
         context['categories_utilisees'] = self.Get_categories_utilisees(context['rattachements'])
         return context
 
