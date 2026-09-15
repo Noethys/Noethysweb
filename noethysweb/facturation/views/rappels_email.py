@@ -11,10 +11,29 @@ from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.utils import utils_texte
-from core.models import Mail, DocumentJoint, Rappel, Destinataire, ModeleEmail, ModeleImpression
+from core.models import Mail, DocumentJoint, Rappel, Facture, Destinataire, ModeleEmail, ModeleImpression, ModeleDocument
 from facturation.forms.rappels_options_impression import Formulaire as Form_parametres
 from facturation.forms.rappels_choix_modele import Formulaire as Form_modele
 from facturation.forms.choix_modele_impression import Formulaire as Form_modele_impression
+from facturation.forms.factures_options_impression import Formulaire as Form_parametres_facture
+
+
+def Get_dict_options_facture(request):
+    """ Reconstitue des options d'impression par défaut pour les factures (mêmes valeurs mémorisées que
+    dans le menu Facturation > Factures > Envoyer par Email), utilisées pour générer les PDF des factures
+    impayées jointes aux lettres de rappel. Renvoie None si aucun modèle de document de facture n'est défini. """
+    modele = ModeleDocument.objects.filter(categorie="facture", defaut=True).first() or ModeleDocument.objects.filter(categorie="facture").order_by("nom").first()
+    if not modele:
+        return None
+    form_parametres_facture = Form_parametres_facture(request=request)
+    dict_options = {nom: champ.initial for nom, champ in form_parametres_facture.fields.items()}
+    dict_options["modele"] = modele
+    return dict_options
+
+
+def Get_factures_impayees(famille):
+    """ Renvoie la liste des factures impayées (solde actuel positif) d'une famille """
+    return list(Facture.objects.filter(famille=famille, solde_actuel__gt=0).exclude(etat="annulation"))
 
 
 def Impression_pdf(request):
@@ -67,15 +86,35 @@ def Impression_pdf(request):
         utilisateur=request.user,
     )
 
+    # Détermine si les factures impayées doivent être jointes aux emails
+    joindre_factures_impayees = dict_options.get("joindre_factures_impayees", True)
+    dict_options_facture = Get_dict_options_facture(request) if joindre_factures_impayees else None
+    if joindre_factures_impayees and not dict_options_facture:
+        logger.warning("Aucun modèle de document de facture n'est défini : les factures impayées ne seront pas jointes.")
+
     # Création des destinataires et des documents joints
     logger.debug("Enregistrement des destinataires et documents joints...")
     liste_anomalies = []
+    from facturation.utils import utils_facturation
     for IDrappel, donnees in resultat["noms_fichiers"].items():
         rappel = Rappel.objects.select_related('famille').get(pk=IDrappel)
         if rappel.famille.mail:
             destinataire = Destinataire.objects.create(categorie="famille", famille=rappel.famille, adresse=rappel.famille.mail, valeurs=json.dumps(donnees["valeurs"]))
             document_joint = DocumentJoint.objects.create(nom="Lettre de rappel", fichier=donnees["nom_fichier"])
             destinataire.documents.add(document_joint)
+
+            # Joint les factures impayées de la famille
+            if dict_options_facture:
+                factures_impayees = Get_factures_impayees(rappel.famille)
+                if factures_impayees:
+                    facturation = utils_facturation.Facturation()
+                    resultat_factures = facturation.Impression(liste_factures=[facture.pk for facture in factures_impayees], dict_options=dict_options_facture, mode_email=True)
+                    if resultat_factures:
+                        dict_factures = {facture.pk: facture for facture in factures_impayees}
+                        for IDfacture, donnees_facture in resultat_factures["noms_fichiers"].items():
+                            document_joint_facture = DocumentJoint.objects.create(nom="Facture %s" % dict_factures[IDfacture].numero, fichier=donnees_facture["nom_fichier"])
+                            destinataire.documents.add(document_joint_facture)
+
             mail.destinataires.add(destinataire)
         else:
             liste_anomalies.append(rappel.famille.nom)

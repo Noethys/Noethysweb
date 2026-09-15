@@ -16,6 +16,7 @@ class Formulaire(FormulaireBase, forms.Form):
     memoriser_parametres = forms.BooleanField(label="Mémoriser les paramètres", initial=False, required=False)
     afficher_coupon_reponse = forms.BooleanField(label="Afficher le coupon-réponse", initial=True, required=False)
     afficher_codes_barres = forms.BooleanField(label="Afficher les codes-barres", initial=True, required=False)
+    joindre_factures_impayees = forms.BooleanField(label="Joindre les factures impayées lors de l'envoi par Email", help_text="Les factures dont le solde actuel est positif seront jointes en pièce jointe, en plus de la lettre de rappel", initial=False, required=False)
 
     def __init__(self, *args, **kwargs):
         self.memorisation = kwargs.pop("memorisation", True)
@@ -41,6 +42,9 @@ class Formulaire(FormulaireBase, forms.Form):
             Fieldset("Eléments à afficher",
                 Field("afficher_coupon_reponse"),
                 Field("afficher_codes_barres"),
+            ),
+            Fieldset("Envoi par Email",
+                Field("joindre_factures_impayees"),
             ),
         )
 
