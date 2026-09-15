@@ -203,6 +203,7 @@ class Grille_virtuelle():
 
     def Enregistrer(self):
         # Calcul de la facturation
+        self.data_initial.setdefault("dict_suppressions", {})["consommations"] = list(self.conso_supprimees)
         facturation = Facturation(donnees=self.data_initial)
         donnees_retour = facturation.Facturer()
 
