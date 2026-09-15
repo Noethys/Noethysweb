@@ -123,6 +123,9 @@
                     {% if data.mode != "portail" %}
                         <th scope="col">Mémo</th>
                     {% endif %}
+                    {% if data.mode == "pointeuse" and data.options.affichage_informations == "colonne" %}
+                        <th scope="col">Informations</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -159,6 +162,9 @@
                                     <div class='infos_inscription'>
                                         {% if inscription.infos %}{{ inscription.infos }}{% endif %}
                                     </div>
+                                    {% if data.mode == "pointeuse" and data.options.affichage_informations == "case_nom" %}
+                                        {% include "consommations/grille_badges_informations.html" %}
+                                    {% endif %}
                                 {% else %}
                                     {% if data.liste_inscriptions|length > 1 %}
                                         <div>{{ inscription.individu.prenom|default:inscription.individu.nom }}</div><div class='infos_inscription'>{% if inscription.infos %}{{ inscription.infos }}{% endif %}</div>
@@ -227,6 +233,13 @@
                                 </script>
                             {% endif %}
 
+                            {# Colonne Informations (pointeuse uniquement) #}
+                            {% if data.mode == "pointeuse" and data.options.affichage_informations == "colonne" %}
+                                <td class="colonne_informations">
+                                    {% include "consommations/grille_badges_informations.html" %}
+                                </td>
+                            {% endif %}
+
                         </tr>
                     {% endfor %}
                     {% endwith %}
@@ -235,6 +248,9 @@
             </tbody>
         </table>
     </div>
+
+    {# Bulle d'affichage du détail d'une information au tap (pointeuses tactiles) ou au clic #}
+    <div id="popover_badge_information" class="popover_badge_information" style="display:none;" role="tooltip"></div>
 
     {# MAJ de la page #}
     <form method="post" id="form-maj">

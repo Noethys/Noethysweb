@@ -441,6 +441,46 @@ td.complet {
     font-size: 10px;
     font-weight: normal;
 }
+.badges_informations {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3px;
+    margin-top: 3px;
+}
+.badge_information {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    cursor: help;
+}
+.dark-mode .badge_information {
+    background-color: #454d55;
+}
+.badge_information img {
+    width: 11px;
+    height: 11px;
+}
+td.colonne_informations {
+    white-space: normal;
+    padding: 6px !important;
+    min-width: 90px;
+}
+.popover_badge_information {
+    position: fixed;
+    z-index: 2000;
+    max-width: 260px;
+    background-color: #343a40;
+    color: white;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
 #div_table_traitement_lot {
     display: inline-block;
     height: 130px;

@@ -1,0 +1,10 @@
+{% if inscription.badges_informations %}
+    <div class="badges_informations">
+        {% for badge in inscription.badges_informations %}
+            <span class="badge_information" tabindex="0" title="{% if badge.titre %}{{ badge.titre }} : {% endif %}{{ badge.texte }}"
+                  data-texte="{% if badge.titre %}{{ badge.titre }} : {% endif %}{{ badge.texte }}">
+                <img src="{{ badge.icone }}" alt="{{ badge.titre }}">
+            </span>
+        {% endfor %}
+    </div>
+{% endif %}

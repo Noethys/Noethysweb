@@ -2073,3 +2073,33 @@ function appliquer_tarif_special(case_tableau, data, maj_facturation) {
     }
     return false
 }
+
+
+// Affichage du détail d'une information (badges de la pointeuse) au clic ou au tap, pour les pointeuses tactiles
+$(document).on('click', '.badge_information', function (event) {
+    event.stopPropagation();
+    var popover = $('#popover_badge_information');
+    // Toujours rattacher la bulle directement à <body> : évite qu'un ancêtre avec un CSS "transform"
+    // (ex. le menu latéral d'AdminLTE) ne change le référentiel du "position: fixed" et ne l'affiche
+    // à un endroit inattendu (ex. tout en bas de la page).
+    if (!popover.parent().is('body')) {
+        popover.appendTo('body');
+    }
+    var deja_ouvert_ici = (popover.data('cible') === this) && popover.is(':visible');
+    popover.hide().data('cible', null);
+    if (deja_ouvert_ici) {
+        return;
+    }
+    popover.text($(this).attr('data-texte'));
+    var position = this.getBoundingClientRect();
+    popover.css({
+        top: position.bottom + 6,
+        left: Math.max(4, Math.min(position.left, window.innerWidth - 270))
+    });
+    popover.data('cible', this).show();
+});
+$(document).on('click', function (event) {
+    if (!$(event.target).closest('.badge_information, #popover_badge_information').length) {
+        $('#popover_badge_information').hide();
+    }
+});

@@ -18,6 +18,8 @@ class Formulaire(FormulaireBase, forms.Form):
     afficher_classe = forms.ChoiceField(label="Afficher la classe", choices=[("oui", "Oui"), ("non", "Non")], initial="non", required=False)
     afficher_niveau_scolaire = forms.ChoiceField(label="Afficher le niveau scolaire", choices=[("oui", "Oui"), ("non", "Non")], initial="non", required=False)
     afficher_presents_totaux = forms.ChoiceField(label="Afficher présents dans totaux", choices=[("oui", "Oui"), ("non", "Non")], initial="non", required=False)
+    affichage_informations = forms.ChoiceField(label="Afficher les informations",
+        choices=[("non", "Ne pas afficher"), ("case_nom", "Dans la case du nom"), ("colonne", "Dans une colonne à part")], initial="case_nom", required=False, help_text="Régimes alimentaires, informations personnelles, adhésions et pièces manquantes, anniversaires, sieste, messages.")
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -37,4 +39,5 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("afficher_classe"),
             Field("afficher_niveau_scolaire"),
             Field("afficher_presents_totaux"),
+            Field("affichage_informations"),
         )

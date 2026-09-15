@@ -13,12 +13,16 @@ from django.template.context_processors import csrf
 from django.db.models import Q, Count
 from django.core import serializers
 from django.conf import settings
+from django.templatetags.static import static
 from crispy_forms.utils import render_crispy_form
 from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite, Consommation, MemoJournee, Evenement, Groupe, Ventilation, Famille, \
-                        Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Individu, Activite, Scolarite, QuestionnaireReponse, Inscription
+                        Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Individu, Activite, Scolarite, QuestionnaireReponse, Inscription, \
+                        Note, Information
 from core.utils import utils_dates, utils_decimal, utils_historique, utils_parametres
 from consommations.utils import utils_consommations
 from consommations.forms.grille_questionnaire import Formulaire as Formulaire_questionnaire
+from cotisations.utils import utils_cotisations_manquantes
+from individus.utils import utils_pieces_manquantes
 
 
 def Memoriser_options(request):
@@ -145,6 +149,98 @@ def Maj_tarifs_fratries(activite=None, prestations=[], liste_IDprestation_exista
                         Ventilation.objects.filter(prestation=prestation).delete()
 
 
+ICONES_INFORMATIONS = {
+    "message": "mail.png",
+    "cotisation": "cotisation.png",
+    "piece": "piece.png",
+    "sieste": "reveil.png",
+    "anniversaire": "anniversaire.png",
+    "info": "information.png",
+    "regime": "repas.png",
+}
+
+
+def Get_informations_individus(data):
+    """ Construit, pour chaque individu de la grille, la liste des informations à afficher dans la pointeuse
+    (mêmes catégories que celles de la colonne 'Information' de l'édition de la liste des consommations) """
+    urls_icones = {type: static("images/%s" % nom_fichier) for type, nom_fichier in ICONES_INFORMATIONS.items()}
+    liste_inscriptions = data["liste_inscriptions"]
+    liste_idindividu = [individu.pk for individu in data["liste_individus"]]
+    dict_famille_individu = {inscription.individu_id: inscription.famille_id for inscription in liste_inscriptions}
+    liste_idfamille = list({idfamille for idfamille in dict_famille_individu.values()})
+    date_min, date_max = data["date_min"], data["date_max"]
+    activites = [data["selection_activite"]] if data.get("selection_activite") else None
+
+    dict_informations = {individu_id: [] for individu_id in liste_idindividu}
+
+    # Messages familiaux et individuels
+    notes = Note.objects.filter((Q(individu_id__in=liste_idindividu) | Q(famille_id__in=liste_idfamille)) & Q(afficher_liste=True))
+    dict_messages_familles, dict_messages_individus = {}, {}
+    for note in notes:
+        if note.individu_id:
+            dict_messages_individus.setdefault(note.individu_id, []).append(note)
+        if note.famille_id:
+            dict_messages_familles.setdefault(note.famille_id, []).append(note)
+
+    # Cotisations manquantes
+    dict_cotisations = utils_cotisations_manquantes.Get_liste_cotisations_manquantes(date_reference=date_min, activites=activites, presents=(date_min, date_max), only_concernes=True)
+
+    # Pièces manquantes
+    dict_pieces = utils_pieces_manquantes.Get_liste_pieces_manquantes(date_reference=date_min, activites=activites, presents=(date_min, date_max), only_concernes=True)
+
+    # Informations personnelles
+    dict_infos_perso = {}
+    conditions = Q(individu_id__in=liste_idindividu) & Q(diffusion_listing_conso=True) & (Q(date_debut__lte=date_min) | Q(date_debut__isnull=True)) & (Q(date_fin__gte=date_max) | Q(date_fin__isnull=True))
+    for info in Information.objects.select_related("individu", "categorie").filter(conditions):
+        dict_infos_perso.setdefault(info.individu_id, []).append(info)
+
+    for individu in data["liste_individus"]:
+        badges = dict_informations[individu.pk]
+        idfamille = dict_famille_individu.get(individu.pk)
+
+        # Messages
+        for note in dict_messages_familles.get(idfamille, []) + dict_messages_individus.get(individu.pk, []):
+            badges.append({"type": "message", "icone": urls_icones["message"], "titre": "Message", "texte": note.texte})
+
+        # Cotisations manquantes
+        if idfamille in dict_cotisations:
+            dictCotis = dict_cotisations[idfamille]
+            texte = ("1 adhésion manquante : %s" % dictCotis["texte"]) if dictCotis["nbre"] == 1 else ("%d adhésions manquantes : %s" % (dictCotis["nbre"], dictCotis["texte"]))
+            badges.append({"type": "cotisation", "icone": urls_icones["cotisation"], "titre": "", "texte": texte})
+
+        # Pièces manquantes
+        if idfamille in dict_pieces:
+            dictP = dict_pieces[idfamille]
+            texte = ("1 pièce manquante : %s." % dictP["texte"]) if dictP["nbre"] == 1 else ("%d pièces manquantes : %s." % (dictP["nbre"], dictP["texte"]))
+            badges.append({"type": "piece", "icone": urls_icones["piece"], "titre": "", "texte": texte})
+
+        # Sieste
+        if individu.type_sieste:
+            badges.append({"type": "sieste", "icone": urls_icones["sieste"], "titre": "Sieste", "texte": individu.type_sieste.nom})
+
+        # Anniversaire
+        if individu.date_naiss:
+            for date in {date_min, date_max}:
+                if individu.date_naiss.strftime("%d/%m") == date.strftime("%d/%m"):
+                    badges.append({"type": "anniversaire", "icone": urls_icones["anniversaire"], "titre": "Anniversaire",
+                                   "texte": "C'est l'anniversaire de %s (%s ans) !" % (individu.prenom or individu.nom, individu.Get_age(today=date))})
+                    break
+
+        # Informations personnelles (santé, allergies, etc.)
+        for info in dict_infos_perso.get(individu.pk, []):
+            texte = ("%s : %s" % (info.intitule, info.description)) if info.description else info.intitule
+            if info.traitement_medical and info.description_traitement:
+                texte += " Traitement : %s." % info.description_traitement
+            badges.append({"type": "info", "icone": urls_icones["info"], "titre": "Information", "texte": texte})
+
+        # Régimes alimentaires
+        regimes = list(individu.regimes_alimentaires.all())
+        if regimes:
+            badges.append({"type": "regime", "icone": urls_icones["regime"], "titre": "Régime alimentaire", "texte": ", ".join([regime.nom for regime in regimes])})
+
+    return dict_informations
+
+
 def Get_generic_data(data={}):
     """ Renvoie les données communes à la grille des conso et au gestionnaire des conso """
     # Création de listes de données
@@ -173,8 +269,14 @@ def Get_generic_data(data={}):
         conditions = Q(individu_id__in=data["liste_key_individus"]) & Q(date_debut__lte=data["date_max"]) & Q(date_fin__gte=data["date_min"])
         dict_scolarites = {scolarite.individu: scolarite for scolarite in Scolarite.objects.select_related("individu", "classe", "niveau").filter(conditions)}
 
+    # Informations à afficher dans la pointeuse (régimes alimentaires, cotisations/pièces manquantes, etc.)
+    dict_informations_individus = {}
+    if data.get("mode") == "pointeuse" and data["options"].get("affichage_informations", "non") != "non":
+        dict_informations_individus = Get_informations_individus(data)
+
     for inscription in data["liste_inscriptions"]:
         inscription.infos = []
+        inscription.badges_informations = dict_informations_individus.get(inscription.individu_id, [])
 
         # Ajout des informations différentes
         for info in ("groupe", "famille", "categorie_tarif"):
