@@ -5,7 +5,31 @@
 
 import datetime
 from django.db.models import Q
-from core.models import Assurance
+from django.urls import reverse_lazy
+from core.models import Assurance, Inscription
+
+
+def Get_assurances_manquantes_famille(famille=None, date_reference=None):
+    """ Retourne la liste des assurances obligatoires manquantes pour les individus inscrits de la famille (pour affichage dans le cadre Alertes de la fiche famille) """
+    if not date_reference:
+        date_reference = datetime.date.today()
+
+    # Importation des inscriptions actuelles de la famille
+    conditions = Q(famille=famille) & Q(individu__deces=False) & (Q(date_fin__isnull=True) | Q(date_fin__gte=date_reference))
+    conditions &= (Q(activite__date_fin__isnull=True) | Q(activite__date_fin__gte=date_reference))
+    inscriptions = Inscription.objects.select_related("activite", "individu").filter(conditions)
+
+    # Recherche des assurances manquantes
+    liste_resultats = []
+    for individu in Get_assurances_manquantes_by_inscriptions(famille=famille, inscriptions=inscriptions):
+        liste_resultats.append({
+            "label": "Assurance de %s" % (individu.prenom or individu.nom),
+            "valide": False,
+            "titre": "Cliquez ici pour accéder à la page des assurances de l'individu",
+            "href": reverse_lazy("individu_assurances_liste", kwargs={"idfamille": famille.pk, "idindividu": individu.pk}),
+        })
+
+    return liste_resultats
 
 
 def Get_assurances_manquantes_by_inscriptions(famille=None, inscriptions=None):

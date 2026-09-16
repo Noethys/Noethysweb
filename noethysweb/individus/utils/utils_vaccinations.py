@@ -5,7 +5,8 @@
 
 import datetime
 from django.db.models import Count, Q
-from core.models import TypeMaladie, TypeVaccin, Vaccin, Individu
+from django.urls import reverse_lazy
+from core.models import TypeMaladie, TypeVaccin, Vaccin, Individu, Inscription
 from core.utils import utils_dates
 
 
@@ -61,6 +62,30 @@ def Get_vaccins_obligatoires_by_inscriptions(inscriptions=None):
                     resultats[(famille, individu)].append({"label": maladie.nom, "valide": valide})
 
     return resultats
+
+
+def Get_vaccins_manquants_famille(famille=None, date_reference=None):
+    """ Retourne la liste des vaccinations obligatoires manquantes pour les individus inscrits de la famille (pour affichage dans le cadre Alertes de la fiche famille) """
+    if not date_reference:
+        date_reference = datetime.date.today()
+
+    # Importation des inscriptions actuelles de la famille
+    conditions = Q(famille=famille) & Q(individu__deces=False) & (Q(date_fin__isnull=True) | Q(date_fin__gte=date_reference))
+    conditions &= (Q(activite__date_fin__isnull=True) | Q(activite__date_fin__gte=date_reference))
+    inscriptions = Inscription.objects.select_related("activite", "individu").filter(conditions)
+
+    # Recherche des vaccinations manquantes
+    liste_resultats = []
+    for (famille_inscription, individu), liste_vaccinations in Get_vaccins_obligatoires_by_inscriptions(inscriptions=inscriptions).items():
+        for vaccination in liste_vaccinations:
+            liste_resultats.append({
+                "label": "%s de %s" % (vaccination["label"], individu.prenom or individu.nom),
+                "valide": False,
+                "titre": "Cliquez ici pour accéder à la page médicale de l'individu",
+                "href": reverse_lazy("individu_medical_liste", kwargs={"idfamille": famille.pk, "idindividu": individu.pk}),
+            })
+
+    return liste_resultats
 
 
 def Get_tous_vaccins():

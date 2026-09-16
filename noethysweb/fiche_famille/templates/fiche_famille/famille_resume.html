@@ -77,7 +77,7 @@
         {# Alertes #}
         {% if nbre_alertes %}
             {% embed 'core/box.html' %}
-                {% block box_theme %}box-warning{% endblock %}
+                {% block box_theme %}card-outline card-lightblue{% endblock %}
                 {% block box_titre %}Alertes{% endblock %}
                 {% block box_contenu %}
 
@@ -94,6 +94,16 @@
                     {# Informations manquantes #}
                     {% if informations_manquantes %}
                         {% embed "individus/alerte.html" with items=informations_manquantes titre="Informations manquantes" icone="fa-info-circle" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="-3deg" %}{% endembed %}
+                    {% endif %}
+
+                    {# Vaccinations manquantes #}
+                    {% if vaccinations_manquantes %}
+                        {% embed "individus/alerte.html" with items=vaccinations_manquantes titre="Vaccinations manquantes" icone="fa-medkit" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="4deg" %}{% endembed %}
+                    {% endif %}
+
+                    {# Assurances manquantes #}
+                    {% if assurances_manquantes %}
+                        {% embed "individus/alerte.html" with items=assurances_manquantes titre="Assurances manquantes" icone="fa-shield" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="-4deg" %}{% endembed %}
                     {% endif %}
 
                 {% endblock %}
