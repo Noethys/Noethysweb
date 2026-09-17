@@ -49,7 +49,8 @@ class View(CustomView, TemplateView):
 
     def Get_data_grille(self, kwargs={}):
         data = {"mode": self.mode_grille, "consommations": {}, "prestations": {}, "memos": {}}
-        options_defaut = {"tri": "nom", "afficher_date_naiss": "non", "afficher_age": "non", "afficher_groupe": "non", "afficher_classe": "non", "afficher_niveau_scolaire": "non", "afficher_presents_totaux": "non"}
+        options_defaut = {"tri": "nom", "afficher_date_naiss": "non", "afficher_age": "non", "afficher_groupe": "non", "afficher_classe": "non",
+                          "afficher_niveau_scolaire": "non", "afficher_presents_totaux": "non", "affichage_informations": "case_nom"}
 
         # Sélections par défaut
         if self.request.POST:
