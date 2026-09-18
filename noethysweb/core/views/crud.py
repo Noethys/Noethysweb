@@ -196,10 +196,19 @@ class Liste_commun():
                 # Filtre pour champ crypté
                 if "*" in filtre["condition"]:
                     champs_temp = champ.split("__")
+
+                    # Restreint le balayage Python aux lignes qui correspondent déjà aux conditions
+                    # non cryptées accumulées jusqu'ici (au lieu de tout le tableau à chaque fois).
+                    # Ne supprime pas le balayage complet quand ce filtre crypté est seul, mais réduit
+                    # fortement le volume dès qu'il est combiné à d'autres critères (date, famille, etc.),
+                    # et limite la mémoire/la charge CPU (déchiffrement) via .only()/.iterator().
+                    queryset_base = self.model.objects.filter(conditions)
                     if len(champs_temp) > 1:
-                        tous_objets = self.model.objects.select_related(champs_temp[0]).all()
+                        queryset_base = queryset_base.select_related(champs_temp[0])
                     else:
-                        tous_objets = self.model.objects.all()
+                        queryset_base = queryset_base.only("pk", champs_temp[0])
+                    tous_objets = queryset_base.iterator(chunk_size=2000)
+
                     def Get_objet(objet):
                         try:
                             return attrgetter(".".join(champs_temp))(objet)

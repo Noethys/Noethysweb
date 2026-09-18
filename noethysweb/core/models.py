@@ -2908,7 +2908,7 @@ class Devis(models.Model):
 
 class Historique(models.Model):
     idaction = models.AutoField(verbose_name="ID", db_column='IDaction', primary_key=True)
-    horodatage = models.DateTimeField(verbose_name="Horodatage", auto_now_add=True)
+    horodatage = models.DateTimeField(verbose_name="Horodatage", auto_now_add=True, db_index=True)
     utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.PROTECT)
     famille = models.ForeignKey(Famille, verbose_name="Famille", blank=True, null=True, on_delete=models.CASCADE)
     individu = models.ForeignKey(Individu, verbose_name="Individu", blank=True, null=True, on_delete=models.CASCADE)
