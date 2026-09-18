@@ -5,9 +5,11 @@
 
 import json, random, datetime, calendar, operator
 from django.views.generic import TemplateView
-from django.db.models import Q, Count, F, Max, Min
+from django.db.models import Q, Count, Sum, F, Max, Min
+from django.db.models.functions import ExtractYear
 from core.views.base import CustomView
-from core.models import Activite, Consommation, Inscription, Famille, Individu, Vacance, Cotisation, LISTE_MOIS, Historique, Quotient, Rattachement
+from core.models import Activite, Consommation, Inscription, Famille, Individu, Vacance, Cotisation, LISTE_MOIS, \
+    Historique, Quotient, Rattachement, Prestation, Facture, Reglement, Rappel, LISTE_ETATS_CONSO
 from core.utils import utils_dates
 from outils.forms.statistiques import Formulaire
 
@@ -74,29 +76,31 @@ class Histogramme(Element):
         self.chronologie = chronologie # "date"
 
 
-def Calcule_periodes_comparatives(parametres={}, presents=None, liste_activites=[]):
-    dates_extremes = Consommation.objects.filter(activite__in=liste_activites, etat__in=parametres["etats"]).aggregate(Min('date'), Max('date'))
+def Calcule_periodes_comparatives_generique(parametres={}, presents=None, dates_extremes=(None, None)):
+    """ Version générique : calcule les périodes comparatives à partir d'un couple (date_min, date_max)
+        fourni par l'appelant, quel que soit le modèle d'origine (Consommation, Prestation, Facture, etc.) """
     liste_periodes = []
-    if dates_extremes["date__min"] and dates_extremes["date__max"]:
+    date_min, date_max = dates_extremes
+    if date_min and date_max:
 
         if parametres["condition"] == "VACANCES":
-            for vacance in Vacance.objects.filter(nom=parametres["vacances"], date_debut__gte=dates_extremes["date__min"], date_fin__lte=dates_extremes["date__max"]).order_by("date_debut"):
+            for vacance in Vacance.objects.filter(nom=parametres["vacances"], date_debut__gte=date_min, date_fin__lte=date_max).order_by("date_debut"):
                 liste_periodes.append({"date_debut": vacance.date_debut, "date_fin": vacance.date_fin, "label": "%s %d" % (parametres["vacances"], vacance.annee)})
 
         if parametres["condition"] == "MOIS":
-            for annee in range(dates_extremes["date__min"].year, dates_extremes["date__max"].year + 1):
+            for annee in range(date_min.year, date_max.year + 1):
                 liste_periodes.append(
                     {"date_debut": datetime.date(annee, int(parametres["mois"]), 1),
                      "date_fin": datetime.date(annee, int(parametres["mois"]), calendar.monthrange(annee, int(parametres["mois"]))[1]),
                      "label": "%s %d" % (LISTE_MOIS[int(parametres["mois"]) - 1][1], annee)})
 
         if parametres["condition"] == "ANNEE":
-            for annee in range(dates_extremes["date__min"].year, dates_extremes["date__max"].year + 1):
+            for annee in range(date_min.year, date_max.year + 1):
                 liste_periodes.append({"date_debut": datetime.date(annee, 1, 1), "date_fin": datetime.date(annee, 12, 31), "label": "Année %d" % annee})
 
         if parametres["condition"] == "PERIODE":
             if presents[0].year == presents[1].year:
-                for annee in range(dates_extremes["date__min"].year, dates_extremes["date__max"].year + 1):
+                for annee in range(date_min.year, date_max.year + 1):
                     nbreJoursMois = calendar.monthrange(annee, presents[0].month)[1]
                     if presents[0].day < nbreJoursMois:
                         date_debut_temp = datetime.date(annee, presents[0].month, presents[0].day)
@@ -111,6 +115,12 @@ def Calcule_periodes_comparatives(parametres={}, presents=None, liste_activites=
                     dictTemp = {"date_debut": date_debut_temp, "date_fin": date_fin_temp, "label": label}
                     liste_periodes.append(dictTemp)
     return liste_periodes
+
+
+def Calcule_periodes_comparatives(parametres={}, presents=None, liste_activites=[]):
+    """ Version historique, basée sur les dates extrêmes des consommations des activités sélectionnées """
+    dates_extremes = Consommation.objects.filter(activite__in=liste_activites, etat__in=parametres["etats"]).aggregate(Min('date'), Max('date'))
+    return Calcule_periodes_comparatives_generique(parametres, presents, (dates_extremes["date__min"], dates_extremes["date__max"]))
 
 
 class View(CustomView, TemplateView):
@@ -429,6 +439,61 @@ class View(CustomView, TemplateView):
                     ))
 
 
+                # ---------------------------- INDIVIDUS : Situation familiale -------------------------------
+                if rubrique == "individus_situation_familiale":
+                    data.append(Titre(texte="Situation familiale des parents"))
+
+                    dict_labels = dict(Individu._meta.get_field("situation_familiale").choices)
+                    individus = Individu.objects.filter(condition).values_list("situation_familiale").annotate(nbre=Count("idindividu", distinct=True)).order_by("-nbre")
+
+                    data.append(Tableau(
+                        titre="Répartition par situation familiale",
+                        colonnes=["Situation familiale", "Nombre d'individus"],
+                        lignes=[(dict_labels.get(item[0], "Non renseignée"), item[1]) for item in individus]
+                    ))
+                    data.append(Camembert(
+                        titre="Répartition par situation familiale",
+                        labels=[dict_labels.get(item[0], "Non renseignée") for item in individus],
+                        valeurs=[item[1] for item in individus],
+                    ))
+
+
+                # ---------------------------- INDIVIDUS : Type de garde -------------------------------
+                if rubrique == "individus_type_garde":
+                    data.append(Titre(texte="Type de garde"))
+
+                    dict_labels = dict(Individu._meta.get_field("type_garde").choices)
+                    individus = Individu.objects.filter(condition).values_list("type_garde").annotate(nbre=Count("idindividu", distinct=True)).order_by("-nbre")
+
+                    data.append(Tableau(
+                        titre="Répartition par type de garde",
+                        colonnes=["Type de garde", "Nombre d'individus"],
+                        lignes=[(dict_labels.get(item[0], "Non renseigné"), item[1]) for item in individus]
+                    ))
+                    data.append(Camembert(
+                        titre="Répartition par type de garde",
+                        labels=[dict_labels.get(item[0], "Non renseigné") for item in individus],
+                        valeurs=[item[1] for item in individus],
+                    ))
+
+
+                # ---------------------------- INDIVIDUS : Régime alimentaire -------------------------------
+                if rubrique == "individus_regime_alimentaire":
+                    data.append(Titre(texte="Régimes alimentaires déclarés"))
+
+                    individus = Individu.objects.filter(condition).values_list("regimes_alimentaires__nom").annotate(nbre=Count("idindividu", distinct=True)).order_by("-nbre")
+
+                    data.append(Tableau(
+                        titre="Répartition par régime alimentaire déclaré",
+                        colonnes=["Régime alimentaire", "Nombre d'individus"],
+                        lignes=[(item[0] if item[0] else "Aucun régime particulier déclaré", item[1]) for item in individus]
+                    ))
+                    data.append(Camembert(
+                        titre="Répartition par régime alimentaire déclaré",
+                        labels=[item[0] if item[0] else "Aucun régime particulier déclaré" for item in individus],
+                        valeurs=[item[1] for item in individus],
+                    ))
+
 
                 # ================================ FAMILLES ====================================
 
@@ -597,6 +662,147 @@ class View(CustomView, TemplateView):
                         labels=[Formate_tranche(tranche) for tranche, nbre in dict_tranches.items()],
                         valeurs=[nbre for tranche, nbre in dict_tranches.items()]))
 
+                # ---------------------------- FAMILLES : Secteur -------------------------------
+
+                if rubrique == "familles_secteur":
+                    data.append(Titre(texte="Répartition des familles par secteur"))
+
+                    familles = Famille.objects.filter(pk__in=liste_idfamille).values_list("secteur__nom").annotate(nbre=Count("idfamille", distinct=True)).order_by("-nbre")
+
+                    data.append(Tableau(titre="Répartition des familles par secteur",
+                        colonnes=["Secteur", "Nombre de familles"],
+                        lignes=[(item[0] if item[0] else "Secteur non renseigné", item[1]) for item in familles]))
+                    data.append(Camembert(titre="Répartition des familles par secteur",
+                        labels=[item[0] if item[0] else "Secteur non renseigné" for item in familles],
+                        valeurs=[item[1] for item in familles]))
+
+                # ---------------------------- FAMILLES : Régime social -------------------------------
+
+                if rubrique == "familles_regime_social":
+                    data.append(Titre(texte="Répartition des familles par régime social"))
+
+                    familles = Famille.objects.filter(pk__in=liste_idfamille).values_list("caisse__regime__nom").annotate(nbre=Count("idfamille", distinct=True)).order_by("-nbre")
+
+                    data.append(Tableau(titre="Répartition des familles par régime social",
+                        colonnes=["Régime social", "Nombre de familles"],
+                        lignes=[(item[0] if item[0] else "Non renseigné", item[1]) for item in familles]))
+                    data.append(Camembert(titre="Répartition des familles par régime social",
+                        labels=[item[0] if item[0] else "Non renseigné" for item in familles],
+                        valeurs=[item[1] for item in familles]))
+
+                # ---------------------------- FAMILLES : Ancienneté -------------------------------
+
+                if rubrique == "familles_anciennete":
+                    data.append(Titre(texte="Ancienneté des familles"))
+
+                    familles = Famille.objects.filter(pk__in=liste_idfamille).annotate(annee=ExtractYear("date_creation")).values_list("annee").annotate(nbre=Count("idfamille", distinct=True)).order_by("annee")
+
+                    data.append(Tableau(titre="Répartition des familles par année de création du dossier",
+                        colonnes=["Année de création", "Nombre de familles"],
+                        lignes=[(item[0], item[1]) for item in familles]))
+                    data.append(Histogramme(titre="Répartition des familles par année de création du dossier", type_chart="bar",
+                        labels=[item[0] for item in familles],
+                        valeurs=[item[1] for item in familles]))
+
+                # ---------------------------- CONSOMMATIONS : Nombre -------------------------------
+
+                if rubrique == "consommations_nombre":
+                    data.append(Titre(texte="Nombre de consommations"))
+
+                    if not presents:
+                        data.append(Texte(texte="Donnée accessible uniquement avec le mode Présents."))
+                    else:
+                        conso = Consommation.objects.filter(activite__in=liste_activites, date__range=presents, etat__in=parametres["etats"])
+
+                        # Texte : Nombre total
+                        data.append(Texte(texte="%d consommations enregistrées sur la période sélectionnée." % conso.count()))
+
+                        # Tableau et camembert : Répartition par activité
+                        resultats = conso.values_list("activite__nom").annotate(nbre=Count("idconso")).order_by("-nbre")
+                        data.append(Tableau(titre="Répartition des consommations par activité",
+                            colonnes=["Activité", "Nombre de consommations"],
+                            lignes=[(item[0], item[1]) for item in resultats]))
+                        data.append(Camembert(titre="Répartition des consommations par activité",
+                            labels=[item[0] for item in resultats],
+                            valeurs=[item[1] for item in resultats]))
+
+                # ---------------------------- CONSOMMATIONS : Etats -------------------------------
+
+                if rubrique == "consommations_etats":
+                    data.append(Titre(texte="Etats des consommations"))
+
+                    if not presents:
+                        data.append(Texte(texte="Donnée accessible uniquement avec le mode Présents."))
+                    else:
+                        dict_labels_etats = dict(LISTE_ETATS_CONSO)
+                        resultats = Consommation.objects.filter(activite__in=liste_activites, date__range=presents).values_list("etat").annotate(nbre=Count("idconso")).order_by("-nbre")
+
+                        data.append(Tableau(titre="Répartition des consommations par état",
+                            colonnes=["Etat", "Nombre de consommations"],
+                            lignes=[(dict_labels_etats.get(item[0], item[0] or "Non renseigné"), item[1]) for item in resultats]))
+                        data.append(Camembert(titre="Répartition des consommations par état",
+                            labels=[dict_labels_etats.get(item[0], item[0] or "Non renseigné") for item in resultats],
+                            valeurs=[item[1] for item in resultats]))
+
+                # ---------------------------- CONSOMMATIONS : Absentéisme -------------------------------
+
+                if rubrique == "consommations_absenteisme":
+                    data.append(Titre(texte="Absentéisme"))
+
+                    if not presents:
+                        data.append(Texte(texte="Donnée accessible uniquement avec le mode Présents."))
+                    else:
+                        conso = Consommation.objects.filter(activite__in=liste_activites, date__range=presents, etat__in=("present", "absentj", "absenti"))
+                        nbre_total = conso.count()
+                        nbre_absentj = conso.filter(etat="absentj").count()
+                        nbre_absenti = conso.filter(etat="absenti").count()
+                        nbre_present = nbre_total - nbre_absentj - nbre_absenti
+                        taux = round((nbre_absentj + nbre_absenti) / nbre_total * 100, 1) if nbre_total else 0
+
+                        data.append(Texte(texte="Taux d'absentéisme : %s%% (%d absences sur %d présences prévues)." % (taux, nbre_absentj + nbre_absenti, nbre_total)))
+                        data.append(Tableau(titre="Répartition présents / absents",
+                            colonnes=["Statut", "Nombre"],
+                            lignes=[("Présents", nbre_present), ("Absences justifiées", nbre_absentj), ("Absences injustifiées", nbre_absenti)]))
+                        data.append(Camembert(titre="Répartition présents / absents",
+                            labels=["Présents", "Absences justifiées", "Absences injustifiées"],
+                            valeurs=[nbre_present, nbre_absentj, nbre_absenti],
+                            couleurs=["rgba(75, 192, 100, 0.5)", "rgba(255, 206, 86, 0.5)", "rgba(255, 99, 132, 0.5)"]))
+
+                # ---------------------------- CONSOMMATIONS : Groupes -------------------------------
+
+                if rubrique == "consommations_groupes":
+                    data.append(Titre(texte="Répartition par groupe"))
+
+                    if not presents:
+                        data.append(Texte(texte="Donnée accessible uniquement avec le mode Présents."))
+                    else:
+                        resultats = Consommation.objects.filter(activite__in=liste_activites, date__range=presents, etat__in=parametres["etats"]).values_list("groupe__nom").annotate(nbre=Count("idconso")).order_by("-nbre")
+                        data.append(Tableau(titre="Répartition des consommations par groupe",
+                            colonnes=["Groupe", "Nombre de consommations"],
+                            lignes=[(item[0] if item[0] else "Groupe non renseigné", item[1]) for item in resultats]))
+                        data.append(Camembert(titre="Répartition des consommations par groupe",
+                            labels=[item[0] if item[0] else "Groupe non renseigné" for item in resultats],
+                            valeurs=[item[1] for item in resultats]))
+
+                # ---------------------------- CONSOMMATIONS : Evénements -------------------------------
+
+                if rubrique == "consommations_evenements":
+                    data.append(Titre(texte="Consommations liées à des événements"))
+
+                    if not presents:
+                        data.append(Texte(texte="Donnée accessible uniquement avec le mode Présents."))
+                    else:
+                        resultats = Consommation.objects.filter(activite__in=liste_activites, date__range=presents, etat__in=parametres["etats"], evenement__isnull=False).values_list("evenement__nom").annotate(nbre=Count("idconso")).order_by("-nbre")
+                        if not resultats:
+                            data.append(Texte(texte="Aucune consommation liée à un événement sur la période sélectionnée."))
+                        else:
+                            data.append(Tableau(titre="Répartition des consommations par événement",
+                                colonnes=["Evénement", "Nombre de consommations"],
+                                lignes=[(item[0], item[1]) for item in resultats]))
+                            data.append(Camembert(titre="Répartition des consommations par événement",
+                                labels=[item[0] for item in resultats],
+                                valeurs=[item[1] for item in resultats]))
+
                 # ---------------------------- CONSOMMATIONS : Saisie -------------------------------
 
                 if rubrique == "consommations_saisie":
@@ -642,6 +848,361 @@ class View(CustomView, TemplateView):
                             labels=[str(date) for date, nbre in donnees],
                             valeurs=[nbre for date, nbre in donnees],
                         ))
+
+                # ================================ PRESTATIONS ====================================
+
+                condition_dates_prestations = parametres["condition"] in ("ANNEE", "MOIS", "VACANCES", "PERIODE")
+
+                # ---------------------------- PRESTATIONS : Nombre -------------------------------
+
+                if rubrique == "prestations_nombre":
+                    data.append(Titre(texte="Nombre et montant des prestations"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        prestations = Prestation.objects.filter(activite__in=liste_activites, date__range=presents)
+                        montant_total = prestations.aggregate(Sum("montant"))["montant__sum"] or 0
+
+                        data.append(Texte(texte="%d prestations enregistrées, pour un montant total de %.2f €." % (prestations.count(), montant_total)))
+
+                        resultats = prestations.values_list("categorie_tarif__nom").annotate(nbre=Count("idprestation"), montant=Sum("montant")).order_by("-montant")
+                        data.append(Tableau(titre="Répartition du montant par catégorie de tarif",
+                            colonnes=["Catégorie de tarif", "Nombre de prestations", "Montant (€)"],
+                            lignes=[(item[0] if item[0] else "Non renseignée", item[1], float(item[2] or 0)) for item in resultats]))
+
+                # ---------------------------- PRESTATIONS : Catégorie -------------------------------
+
+                if rubrique == "prestations_categorie":
+                    data.append(Titre(texte="Répartition par catégorie de prestation"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        dict_labels_categorie = dict(Prestation._meta.get_field("categorie").choices)
+                        resultats = Prestation.objects.filter(date__range=presents).values_list("categorie").annotate(nbre=Count("idprestation"), montant=Sum("montant")).order_by("-montant")
+
+                        data.append(Tableau(titre="Répartition du montant par catégorie de prestation",
+                            colonnes=["Catégorie", "Nombre de prestations", "Montant (€)"],
+                            lignes=[(dict_labels_categorie.get(item[0], item[0]), item[1], float(item[2] or 0)) for item in resultats]))
+                        data.append(Camembert(titre="Répartition du montant par catégorie de prestation",
+                            labels=[dict_labels_categorie.get(item[0], item[0]) for item in resultats],
+                            valeurs=[float(item[2] or 0) for item in resultats]))
+
+                # ---------------------------- PRESTATIONS : Activité -------------------------------
+
+                if rubrique == "prestations_activite":
+                    data.append(Titre(texte="Répartition du montant des prestations par activité"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        resultats = Prestation.objects.filter(activite__in=liste_activites, date__range=presents).values_list("activite__nom").annotate(montant=Sum("montant")).order_by("-montant")
+
+                        data.append(Tableau(titre="Répartition du montant des prestations par activité",
+                            colonnes=["Activité", "Montant (€)"],
+                            lignes=[(item[0] if item[0] else "Activité non renseignée", float(item[1] or 0)) for item in resultats]))
+                        data.append(Camembert(titre="Répartition du montant des prestations par activité",
+                            labels=[item[0] if item[0] else "Activité non renseignée" for item in resultats],
+                            valeurs=[float(item[1] or 0) for item in resultats]))
+
+                # ---------------------------- PRESTATIONS : Evolution -------------------------------
+
+                if rubrique == "prestations_evolution":
+                    data.append(Titre(texte="Evolution du montant des prestations"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        dates_extremes = Prestation.objects.filter(activite__in=liste_activites).aggregate(Min("date"), Max("date"))
+                        liste_periodes = Calcule_periodes_comparatives_generique(parametres, presents, (dates_extremes["date__min"], dates_extremes["date__max"]))
+                        if not liste_periodes:
+                            data.append(Texte(texte="Impossible de calculer des périodes comparatives (données insuffisantes)."))
+                        else:
+                            liste_labels, liste_valeurs = [], []
+                            for dict_periode in liste_periodes:
+                                montant = Prestation.objects.filter(activite__in=liste_activites, date__gte=dict_periode["date_debut"], date__lte=dict_periode["date_fin"]).aggregate(Sum("montant"))["montant__sum"] or 0
+                                liste_labels.append(dict_periode["label"])
+                                liste_valeurs.append(float(montant))
+                            data.append(Histogramme(titre="Evolution du montant des prestations", type_chart="bar", labels=liste_labels, valeurs=liste_valeurs))
+
+                # ================================ ADHESIONS ====================================
+
+                # ---------------------------- ADHESIONS : Nombre -------------------------------
+
+                if rubrique == "adhesions_nombre":
+                    data.append(Titre(texte="Nombre d'adhésions"))
+
+                    if parametres["condition"] != "ADHERENTS_PERIODE":
+                        data.append(Texte(texte="Donnée accessible uniquement avec la condition 'Adhérents sur une période de dates'."))
+                    else:
+                        data.append(Texte(texte="%d adhésions enregistrées sur la période sélectionnée." % liste_cotisations.count()))
+
+                        resultats = liste_cotisations.values_list("activites__nom").annotate(nbre=Count("idcotisation", distinct=True)).order_by("-nbre")
+                        data.append(Tableau(titre="Répartition des adhésions par activité",
+                            colonnes=["Activité", "Nombre d'adhésions"],
+                            lignes=[(item[0] if item[0] else "Aucune activité associée", item[1]) for item in resultats]))
+
+                # ---------------------------- ADHESIONS : Type -------------------------------
+
+                if rubrique == "adhesions_type":
+                    data.append(Titre(texte="Répartition par type d'adhésion"))
+
+                    if parametres["condition"] != "ADHERENTS_PERIODE":
+                        data.append(Texte(texte="Donnée accessible uniquement avec la condition 'Adhérents sur une période de dates'."))
+                    else:
+                        resultats = liste_cotisations.values_list("type_cotisation__nom").annotate(nbre=Count("idcotisation", distinct=True)).order_by("-nbre")
+                        data.append(Tableau(titre="Répartition des adhésions par type",
+                            colonnes=["Type d'adhésion", "Nombre d'adhésions"],
+                            lignes=[(item[0], item[1]) for item in resultats]))
+                        data.append(Camembert(titre="Répartition des adhésions par type",
+                            labels=[item[0] for item in resultats],
+                            valeurs=[item[1] for item in resultats]))
+
+                # ---------------------------- ADHESIONS : Montant -------------------------------
+
+                if rubrique == "adhesions_montant":
+                    data.append(Titre(texte="Montant des adhésions"))
+
+                    if parametres["condition"] != "ADHERENTS_PERIODE":
+                        data.append(Texte(texte="Donnée accessible uniquement avec la condition 'Adhérents sur une période de dates'."))
+                    else:
+                        montant_total = liste_cotisations.aggregate(Sum("prestation__montant"))["prestation__montant__sum"] or 0
+                        data.append(Texte(texte="Montant total des adhésions : %.2f €." % montant_total))
+
+                        resultats = liste_cotisations.values_list("type_cotisation__nom").annotate(montant=Sum("prestation__montant")).order_by("-montant")
+                        data.append(Tableau(titre="Répartition du montant des adhésions par type",
+                            colonnes=["Type d'adhésion", "Montant (€)"],
+                            lignes=[(item[0], float(item[1] or 0)) for item in resultats]))
+                        data.append(Camembert(titre="Répartition du montant des adhésions par type",
+                            labels=[item[0] for item in resultats],
+                            valeurs=[float(item[1] or 0) for item in resultats]))
+
+                # ---------------------------- ADHESIONS : Evolution -------------------------------
+
+                if rubrique == "adhesions_evolution":
+                    data.append(Titre(texte="Evolution du nombre d'adhésions"))
+
+                    if parametres["condition"] != "ADHERENTS_PERIODE":
+                        data.append(Texte(texte="Donnée accessible uniquement avec la condition 'Adhérents sur une période de dates'."))
+                    else:
+                        # NB : la notion de période comparative (Année/Mois/Vacances) ne s'applique pas à la
+                        # condition "Adhérents sur une période de dates" ; on présente donc une évolution par année civile.
+                        dates_extremes = Cotisation.objects.filter(type_cotisation__in=parametres["types_cotisations"]).aggregate(Min("date_debut"), Max("date_debut"))
+                        date_min, date_max = dates_extremes["date_debut__min"], dates_extremes["date_debut__max"]
+                        if not date_min or not date_max:
+                            data.append(Texte(texte="Données insuffisantes pour calculer une évolution."))
+                        else:
+                            liste_labels, liste_valeurs = [], []
+                            for annee in range(date_min.year, date_max.year + 1):
+                                nbre = Cotisation.objects.filter(type_cotisation__in=parametres["types_cotisations"], date_debut__year=annee).count()
+                                liste_labels.append(str(annee))
+                                liste_valeurs.append(nbre)
+                            data.append(Histogramme(titre="Evolution du nombre d'adhésions par année", type_chart="bar", labels=liste_labels, valeurs=liste_valeurs))
+
+                # ================================ FACTURATION ====================================
+
+                # ---------------------------- FACTURATION : Nombre -------------------------------
+
+                if rubrique == "factures_nombre":
+                    data.append(Titre(texte="Nombre et montant des factures"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        factures = Facture.objects.filter(date_edition__range=presents).exclude(etat="annulation")
+                        montant_total = factures.aggregate(Sum("total"))["total__sum"] or 0
+                        data.append(Texte(texte="%d factures émises, pour un montant total de %.2f €." % (factures.count(), montant_total)))
+
+                # ---------------------------- FACTURATION : Etat -------------------------------
+
+                if rubrique == "factures_etat":
+                    data.append(Titre(texte="Répartition des factures par état"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        factures = Facture.objects.filter(date_edition__range=presents)
+                        nbre_annulees = factures.filter(etat="annulation").count()
+                        nbre_validees = factures.count() - nbre_annulees
+                        data.append(Tableau(titre="Répartition des factures par état",
+                            colonnes=["Etat", "Nombre de factures"],
+                            lignes=[("Validées", nbre_validees), ("Annulées", nbre_annulees)]))
+                        data.append(Camembert(titre="Répartition des factures par état",
+                            labels=["Validées", "Annulées"],
+                            valeurs=[nbre_validees, nbre_annulees],
+                            couleurs=["rgba(75, 192, 100, 0.5)", "rgba(255, 99, 132, 0.5)"]))
+
+                # ---------------------------- FACTURATION : Impayés -------------------------------
+
+                if rubrique == "factures_impayes":
+                    data.append(Titre(texte="Impayés"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        factures_impayees = Facture.objects.filter(date_edition__range=presents, solde_actuel__gt=0).exclude(etat="annulation")
+                        montant_impaye = factures_impayees.aggregate(Sum("solde_actuel"))["solde_actuel__sum"] or 0
+                        data.append(Texte(texte="%d factures avec un solde impayé, pour un montant total de %.2f €." % (factures_impayees.count(), montant_impaye)))
+
+                        tranches = [(0, 50), (50, 100), (100, 300), (300, None)]
+                        lignes = []
+                        for tranche_min, tranche_max in tranches:
+                            if tranche_max:
+                                nbre = factures_impayees.filter(solde_actuel__gte=tranche_min, solde_actuel__lt=tranche_max).count()
+                                label = "%d € - %d €" % (tranche_min, tranche_max)
+                            else:
+                                nbre = factures_impayees.filter(solde_actuel__gte=tranche_min).count()
+                                label = "Plus de %d €" % tranche_min
+                            lignes.append((label, nbre))
+                        data.append(Tableau(titre="Répartition des impayés par tranche de montant",
+                            colonnes=["Tranche de montant", "Nombre de factures"],
+                            lignes=lignes))
+                        data.append(Camembert(titre="Répartition des impayés par tranche de montant",
+                            labels=[l[0] for l in lignes],
+                            valeurs=[l[1] for l in lignes]))
+
+                # ---------------------------- FACTURATION : Evolution -------------------------------
+
+                if rubrique == "factures_evolution":
+                    data.append(Titre(texte="Evolution du montant facturé"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        dates_extremes = Facture.objects.exclude(etat="annulation").aggregate(Min("date_edition"), Max("date_edition"))
+                        liste_periodes = Calcule_periodes_comparatives_generique(parametres, presents, (dates_extremes["date_edition__min"], dates_extremes["date_edition__max"]))
+                        if not liste_periodes:
+                            data.append(Texte(texte="Impossible de calculer des périodes comparatives (données insuffisantes)."))
+                        else:
+                            liste_labels, liste_valeurs = [], []
+                            for dict_periode in liste_periodes:
+                                montant = Facture.objects.exclude(etat="annulation").filter(date_edition__gte=dict_periode["date_debut"], date_edition__lte=dict_periode["date_fin"]).aggregate(Sum("total"))["total__sum"] or 0
+                                liste_labels.append(dict_periode["label"])
+                                liste_valeurs.append(float(montant))
+                            data.append(Histogramme(titre="Evolution du montant facturé", type_chart="bar", labels=liste_labels, valeurs=liste_valeurs))
+
+                # ================================ REGLEMENTS ====================================
+
+                # ---------------------------- REGLEMENTS : Nombre -------------------------------
+
+                if rubrique == "reglements_nombre":
+                    data.append(Titre(texte="Nombre et montant des règlements"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        reglements = Reglement.objects.filter(date__range=presents)
+                        montant_total = reglements.aggregate(Sum("montant"))["montant__sum"] or 0
+                        data.append(Texte(texte="%d règlements enregistrés, pour un montant total encaissé de %.2f €." % (reglements.count(), montant_total)))
+
+                # ---------------------------- REGLEMENTS : Mode -------------------------------
+
+                if rubrique == "reglements_mode":
+                    data.append(Titre(texte="Répartition par mode de règlement"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        resultats = Reglement.objects.filter(date__range=presents).values_list("mode__label").annotate(nbre=Count("idreglement"), montant=Sum("montant")).order_by("-montant")
+                        data.append(Tableau(titre="Répartition du montant encaissé par mode de règlement",
+                            colonnes=["Mode de règlement", "Nombre", "Montant (€)"],
+                            lignes=[(item[0], item[1], float(item[2] or 0)) for item in resultats]))
+                        data.append(Camembert(titre="Répartition du montant encaissé par mode de règlement",
+                            labels=[item[0] for item in resultats],
+                            valeurs=[float(item[2] or 0) for item in resultats]))
+
+                # ---------------------------- REGLEMENTS : Evolution -------------------------------
+
+                if rubrique == "reglements_evolution":
+                    data.append(Titre(texte="Evolution du montant encaissé"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        dates_extremes = Reglement.objects.aggregate(Min("date"), Max("date"))
+                        liste_periodes = Calcule_periodes_comparatives_generique(parametres, presents, (dates_extremes["date__min"], dates_extremes["date__max"]))
+                        if not liste_periodes:
+                            data.append(Texte(texte="Impossible de calculer des périodes comparatives (données insuffisantes)."))
+                        else:
+                            liste_labels, liste_valeurs = [], []
+                            for dict_periode in liste_periodes:
+                                montant = Reglement.objects.filter(date__gte=dict_periode["date_debut"], date__lte=dict_periode["date_fin"]).aggregate(Sum("montant"))["montant__sum"] or 0
+                                liste_labels.append(dict_periode["label"])
+                                liste_valeurs.append(float(montant))
+                            data.append(Histogramme(titre="Evolution du montant encaissé", type_chart="bar", labels=liste_labels, valeurs=liste_valeurs))
+
+                # ================================ RAPPELS ====================================
+
+                # ---------------------------- RAPPELS : Nombre -------------------------------
+
+                if rubrique == "rappels_nombre":
+                    data.append(Titre(texte="Nombre et montant des rappels"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        rappels = Rappel.objects.filter(date_edition__range=presents)
+                        montant_total = rappels.aggregate(Sum("solde"))["solde__sum"] or 0
+                        data.append(Texte(texte="%d rappels envoyés, pour un solde rappelé total de %.2f €." % (rappels.count(), montant_total)))
+
+                        resultats = rappels.values_list("modele__label").annotate(nbre=Count("idrappel")).order_by("-nbre")
+                        data.append(Tableau(titre="Répartition des rappels par modèle",
+                            colonnes=["Modèle de rappel", "Nombre de rappels"],
+                            lignes=[(item[0], item[1]) for item in resultats]))
+
+                # ================================ APPLICATION ====================================
+
+                # ---------------------------- APPLICATION : Actions -------------------------------
+
+                if rubrique == "application_actions":
+                    data.append(Titre(texte="Actions les plus fréquentes dans le logiciel"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        resultats = Historique.objects.filter(horodatage__date__range=presents).values_list("titre").annotate(nbre=Count("idaction")).order_by("-nbre")[:20]
+                        data.append(Tableau(titre="Top 20 des actions les plus fréquentes",
+                            colonnes=["Action", "Nombre d'occurrences"],
+                            lignes=[(item[0], item[1]) for item in resultats]))
+
+                # ---------------------------- APPLICATION : Connexions au portail -------------------------------
+
+                if rubrique == "application_connexions":
+                    data.append(Titre(texte="Connexions au portail famille"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        connexions = Historique.objects.filter(portail=True, titre="Connexion au portail", horodatage__date__range=presents)
+                        data.append(Texte(texte="%d connexions au portail famille sur la période sélectionnée." % connexions.count()))
+
+                        resultats = connexions.values_list("horodatage__date").annotate(nbre=Count("idaction")).order_by("horodatage__date")
+                        data.append(Histogramme(titre="Nombre de connexions au portail par jour", type_chart="line", chronologie="date",
+                            labels=[str(item[0]) for item in resultats],
+                            valeurs=[item[1] for item in resultats]))
+
+                # ================================ PORTAIL ====================================
+
+                # ---------------------------- PORTAIL : Réservations -------------------------------
+
+                if rubrique == "portail_reservations":
+                    data.append(Titre(texte="Réservations effectuées depuis le portail famille"))
+
+                    if not condition_dates_prestations:
+                        data.append(Texte(texte="Donnée accessible uniquement avec une condition de type période de dates (Année, Mois, Vacances ou Période)."))
+                    else:
+                        condition = Q(titre="Ajout d'une consommation") & Q(portail=True, activite__in=liste_activites, horodatage__date__range=presents)
+                        reservations = Historique.objects.filter(condition)
+                        data.append(Texte(texte="%d réservations effectuées depuis le portail famille sur la période sélectionnée." % reservations.count()))
+
+                        resultats = reservations.values_list("activite__nom").annotate(nbre=Count("idaction")).order_by("-nbre")
+                        data.append(Tableau(titre="Répartition des réservations portail par activité",
+                            colonnes=["Activité", "Nombre de réservations"],
+                            lignes=[(item[0] if item[0] else "Activité non renseignée", item[1]) for item in resultats]))
+                        data.append(Camembert(titre="Répartition des réservations portail par activité",
+                            labels=[item[0] if item[0] else "Activité non renseignée" for item in resultats],
+                            valeurs=[item[1] for item in resultats]))
 
                 data.append(Espace(hauteur=50))
 

@@ -23,18 +23,62 @@ class Formulaire(FormulaireBase, forms.Form):
             ("individus_coordonnees", "Coordonnées des individus"),
             ("individus_scolarite", "Scolarité des individus"),
             ("individus_profession", "Profession des individus"),
+            ("individus_situation_familiale", "Situation familiale des parents"),
+            ("individus_type_garde", "Type de garde"),
+            ("individus_regime_alimentaire", "Régime alimentaire déclaré"),
         )),
         ("Familles", (
             ("familles_nombre", "Nombre de familles"),
             ("familles_caisse", "Caisse des familles"),
             ("familles_composition", "Composition des familles"),
             ("familles_qf", "Quotients familiaux des familles"),
+            ("familles_secteur", "Secteur des familles"),
+            ("familles_regime_social", "Régime social des familles"),
+            ("familles_anciennete", "Ancienneté des familles"),
         )),
         ("Consommations", (
             ("consommations_saisie", "Saisie des consommations"),
+            ("consommations_nombre", "Nombre de consommations"),
+            ("consommations_etats", "Etats des consommations"),
+            ("consommations_absenteisme", "Absentéisme"),
+            ("consommations_groupes", "Répartition par groupe"),
+            ("consommations_evenements", "Consommations liées à des événements"),
+        )),
+        ("Prestations", (
+            ("prestations_nombre", "Nombre et montant des prestations"),
+            ("prestations_categorie", "Répartition par catégorie de prestation"),
+            ("prestations_activite", "Répartition du montant par activité"),
+            ("prestations_evolution", "Evolution du montant des prestations"),
+        )),
+        ("Adhésions", (
+            ("adhesions_nombre", "Nombre d'adhésions"),
+            ("adhesions_type", "Répartition par type d'adhésion"),
+            ("adhesions_montant", "Montant des adhésions"),
+            ("adhesions_evolution", "Evolution du nombre d'adhésions"),
+        )),
+        ("Facturation", (
+            ("factures_nombre", "Nombre et montant des factures"),
+            ("factures_etat", "Répartition des factures par état"),
+            ("factures_impayes", "Impayés"),
+            ("factures_evolution", "Evolution du montant facturé"),
+        )),
+        ("Règlements", (
+            ("reglements_nombre", "Nombre et montant des règlements"),
+            ("reglements_mode", "Répartition par mode de règlement"),
+            ("reglements_evolution", "Evolution du montant encaissé"),
+        )),
+        ("Rappels", (
+            ("rappels_nombre", "Nombre et montant des rappels"),
+        )),
+        ("Application", (
+            ("application_actions", "Actions les plus fréquentes"),
+            ("application_connexions", "Connexions au portail famille"),
+        )),
+        ("Portail", (
+            ("portail_reservations", "Réservations effectuées depuis le portail"),
         )),
     ]
-    rubriques = forms.MultipleChoiceField(label="Rubriques", choices=choix_rubrique, required=True, help_text="Sélectionnez une ou plusieurs rubriques.")
+    rubriques = forms.MultipleChoiceField(label="Rubriques", widget=forms.SelectMultiple(attrs={"size": "10"}), choices=choix_rubrique, required=True, help_text="Sélectionnez une ou plusieurs rubriques.")
     choix_condition = [
         ("INSCRITS", "Inscrits"),
         ("INSCRITS_PERIODE", "Inscrits sur une période de dates"),
