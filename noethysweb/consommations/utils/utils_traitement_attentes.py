@@ -15,6 +15,7 @@ from consommations.utils.utils_grille_virtuelle import Grille_virtuelle
 
 def Traiter_attentes(request=None, selections=None, test=False):
     logger.debug("Recherche de places en attente à réattribuer...")
+    liste_erreurs = []
 
     if selections:
         condition_activites = Q(pk__in=list({dict_temp["idactivite"]: True for dict_temp in selections}.keys()))
@@ -62,16 +63,22 @@ def Traiter_attentes(request=None, selections=None, test=False):
 
         # Recherche de l'adresse d'expédition du mail
         if not activite.reattribution_adresse_exp:
-            logger.error("Aucune adresse d'expédition paramétrée pour l'envoi des places disponibles.")
+            message_erreur = "Activité '%s' : Aucune adresse d'expédition paramétrée pour l'envoi des places disponibles." % activite.nom
+            logger.error(message_erreur)
+            liste_erreurs.append(message_erreur)
             continue
         if not activite.reattribution_adresse_exp.actif:
-            logger.error("L'adresse d'expédition paramétrée n'est pas activée.")
+            message_erreur = "Activité '%s' : L'adresse d'expédition paramétrée n'est pas activée." % activite.nom
+            logger.error(message_erreur)
+            liste_erreurs.append(message_erreur)
             continue
 
         # Création du mail
         logger.debug("Création du mail des places en attente à réattribuer...")
         if not activite.reattribution_modele_email:
-            logger.error("Erreur : Aucun modèle d'email de catégorie 'portail_places_disponibles' n'a été paramétré !")
+            message_erreur = "Activité '%s' : Aucun modèle d'email de catégorie 'Attribution de places disponibles' n'a été paramétré !" % activite.nom
+            logger.error(message_erreur)
+            liste_erreurs.append(message_erreur)
             continue
 
         mail = Mail.objects.create(
@@ -123,3 +130,4 @@ def Traiter_attentes(request=None, selections=None, test=False):
                             grille.Enregistrer()
 
     logger.debug("Fin de la procédure de réattribution des places en attente.")
+    return {"erreurs": liste_erreurs}

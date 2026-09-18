@@ -164,7 +164,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("validation_type"),
                 Field("validation_modele_email"),
             ),
-            Fieldset("Réattribution automatique des places en attente",
+            Fieldset("Réattribution des places en attente",
                 Field("reattribution_auto"),
                 Field("reattribution_delai"),
                 Field("reattribution_modele_email"),

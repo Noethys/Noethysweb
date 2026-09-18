@@ -46,7 +46,7 @@
                     {% endif %}
 
                     <div class="buttonHolder">
-                        <a class="btn btn-primary" href="{% url 'liste_attente_traitement_automatique' %}" title="L'application va réattribuer les places disponibles et envoyer des emails de notification aux familles concernées"><i class='fa fa-magic margin-r-5'></i>Attribuer les places disponibles</a>
+                        <button class="btn btn-primary" id="bouton_attribution_automatique" title="L'application va réattribuer les places disponibles et envoyer des emails de notification aux familles concernées"><i class='fa fa-magic margin-r-5'></i>Attribuer les places disponibles</button>
                         <button class="btn btn-default" id="bouton_attribution_manuelle" title="L'application va réattribuer les places sélectionnées et envoyer des emails de notification aux familles concernées"><i class='fa fa-magic margin-r-5'></i>Attribuer les places cochées</button>
                     </div>
 
@@ -56,9 +56,8 @@
                     </script>
 
                     <style>
-                        .case_date {
-                            background-color: #efefef;
-                            font-weight: bold;
+                        #table input[type="checkbox"]:disabled {
+                            display: none;
                         }
                     </style>
 
@@ -77,7 +76,11 @@
                     <script>
                         function formate_case(value, row, index) {
                             if (row.type === "date") {
-                                return {classes: 'case_date'};
+                                // Utilise une couleur de fond en style inline plutôt qu'une classe CSS :
+                                // pour la colonne "case à cocher", bootstrap-table génère un attribut
+                                // class="bs-checkbox" en dur sur la cellule, ce qui empêche une classe
+                                // supplémentaire ('classes': ...) de s'appliquer sur cette colonne précise.
+                                return {css: {"background-color": "#efefef", "font-weight": "bold"}};
                             };
                             return {};
                         };
@@ -88,6 +91,50 @@
                                 }
                             }
                             return value
+                        }
+
+                        $("#bouton_attribution_automatique").on("click", function(event) {
+                            var box = bootbox.dialog({
+                                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Attribution des places en cours</b><br><br>Veuillez patienter...</p>",
+                                closeButton: false
+                            });
+                            $.ajax({
+                                type: "POST",
+                                url: "{% url 'liste_attente_traitement_automatique' %}",
+                                data: {
+                                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                                },
+                                datatype: "json",
+                                success: function (data) {
+                                    afficher_resultat_reattribution(data.erreurs);
+                                },
+                                error: function(data) {
+                                    bootbox.hideAll();
+                                    toastr.error(data.responseJSON.erreur);
+                                }
+                            });
+                        });
+
+                        // Affiche le résultat d'une réattribution de places (succès ou erreurs remontées par le serveur)
+                        function afficher_resultat_reattribution(liste_erreurs) {
+                            bootbox.hideAll();
+                            if (liste_erreurs && liste_erreurs.length > 0) {
+                                var message = "<p>Certaines places n'ont pas pu être réattribuées :</p><ul>";
+                                $.each(liste_erreurs, function(index, erreur) {
+                                    message += "<li>" + erreur + "</li>";
+                                });
+                                message += "</ul>";
+                                bootbox.alert({
+                                    title: "Erreurs de réattribution",
+                                    message: message,
+                                    callback: function() {
+                                        location.reload(true);
+                                    }
+                                });
+                            } else {
+                                toastr.success("Attribution des places effectuée");
+                                location.reload(true);
+                            }
                         }
 
                         $("#bouton_attribution_manuelle").on("click",function(event){
@@ -105,6 +152,10 @@
                                         label: "<i class='fa fa-check'></i> Réattribuer",
                                         className: 'btn-primary',
                                         callback: function(){
+                                            var box = bootbox.dialog({
+                                                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Attribution des places en cours</b><br><br>Veuillez patienter...</p>",
+                                                closeButton: false
+                                            });
                                             $.ajax({
                                                 type: "POST",
                                                 url: "{% url 'liste_attente_attribution_manuelle' %}",
@@ -113,11 +164,10 @@
                                                     csrfmiddlewaretoken: "{{ csrf_token }}",
                                                 },
                                                 success: function (data) {
-                                                    bootbox.hideAll();
-                                                    toastr.success("Attribution des places effectuée");
-                                                    location.reload(true);
+                                                    afficher_resultat_reattribution(data.erreurs);
                                                 },
                                                 error: function(data) {
+                                                    bootbox.hideAll();
                                                     toastr.error(data.responseJSON.erreur);
                                                 }
                                             });

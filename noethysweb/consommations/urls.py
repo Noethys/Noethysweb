@@ -41,7 +41,7 @@ urlpatterns = [
     path('consommations/liste_attente', liste_attente.View.as_view(etat="attente"), name='liste_attente'),
     path('consommations/liste_refus', liste_attente.View.as_view(etat="refus"), name='liste_refus'),
     path('consommations/liste_absences', liste_absences.Liste.as_view(), name='liste_absences'),
-    path('consommations/traitement_automatique', liste_attente.Traitement_automatique, name='liste_attente_traitement_automatique'),
+    path('consommations/traitement_automatique', secure_ajax(liste_attente.Traitement_automatique), name='liste_attente_traitement_automatique'),
     path('consommations/liste_repas', liste_repas.View.as_view(), name='liste_repas'),
     path('consommations/liste_durees', liste_durees.View.as_view(), name='liste_durees'),
     path('consommations/liste_demandes', liste_demandes.View.as_view(), name='liste_demandes'),

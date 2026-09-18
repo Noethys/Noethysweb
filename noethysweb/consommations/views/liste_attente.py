@@ -25,16 +25,16 @@ def Traitement_automatique(request):
         raise PermissionDenied()
 
     from consommations.utils import utils_traitement_attentes
-    utils_traitement_attentes.Traiter_attentes(request=request)
-    return HttpResponseRedirect(reverse_lazy("liste_attente"))
+    resultat = utils_traitement_attentes.Traiter_attentes(request=request)
+    return JsonResponse({"erreurs": resultat["erreurs"]})
 
 
 def Attribution_manuelle(request):
     """ Attribution manuelle des places sélectionnées """
     selections = json.loads(request.POST.get("selections"))
     from consommations.utils import utils_traitement_attentes
-    utils_traitement_attentes.Traiter_attentes(request=request, selections=selections)
-    return JsonResponse({"resultat": True})
+    resultat = utils_traitement_attentes.Traiter_attentes(request=request, selections=selections)
+    return JsonResponse({"resultat": True, "erreurs": resultat["erreurs"]})
 
 
 def Get_form_modifier_reservation(request):
@@ -88,9 +88,11 @@ class View(CustomView, TemplateView):
         form = Formulaire(request.POST, request=self.request)
         if form.is_valid() == False:
             return self.render_to_response(self.get_context_data(form_parametres=form))
+        liste_resultats = Get_resultats(parametres=form.cleaned_data, etat=self.etat, request=self.request)
         context = {
             "form_parametres": form,
-            "resultats": json.dumps(Get_resultats(parametres=form.cleaned_data, etat=self.etat, request=self.request)),
+            "resultats": json.dumps(liste_resultats),
+            "nbre_disponibilites": len([1 for resultat in liste_resultats if resultat.get("place_dispo", False)]),
         }
         return self.render_to_response(self.get_context_data(**context))
 
