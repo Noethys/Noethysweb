@@ -1873,12 +1873,8 @@ def Valider_traitement_lot(request):
     return JsonResponse(resultat)
 
 
-def Impression_pdf(request):
-    # Récupération des données du formulaire
-    liste_conso = json.loads(request.POST.get("consommations"))
-    dict_prestations = json.loads(request.POST.get("prestations"))
-    idfamille = int(request.POST.get("idfamille"))
-
+def Preparer_dict_donnees_reservations(liste_conso=[], dict_prestations={}):
+    """ Prépare le dictionnaire de données nécessaire à la génération du PDF de la liste des réservations """
     # Importation des données de la DB
     liste_dates = []
     dict_prepa = {"individus": [], "activites": [], "unites": []}
@@ -1890,8 +1886,7 @@ def Impression_pdf(request):
     dict_individus = {individu.pk: individu for individu in Individu.objects.filter(pk__in=dict_prepa["individus"])}
     dict_activites = {activite.pk: activite for activite in Activite.objects.filter(pk__in=dict_prepa["activites"])}
     dict_unites = {unite.pk: unite for unite in Unite.objects.filter(pk__in=dict_prepa["unites"])}
-    if liste_dates:
-        date_min = min(liste_dates)
+    date_min = min(liste_dates) if liste_dates else None
 
     # Préparation des données pour le pdf
     dict_donnees = {"reservations": {}, "evenements": []}
@@ -1913,6 +1908,17 @@ def Impression_pdf(request):
         )
         if conso["evenement"] and conso["evenement"] not in dict_donnees["evenements"]:
             dict_donnees["evenements"].append(conso["evenement"])
+    return dict_donnees
+
+
+def Impression_pdf(request):
+    # Récupération des données du formulaire
+    liste_conso = json.loads(request.POST.get("consommations"))
+    dict_prestations = json.loads(request.POST.get("prestations"))
+    idfamille = int(request.POST.get("idfamille"))
+
+    # Préparation des données pour le pdf
+    dict_donnees = Preparer_dict_donnees_reservations(liste_conso=liste_conso, dict_prestations=dict_prestations)
 
     # Création du PDF
     from consommations.utils import utils_impression_reservations

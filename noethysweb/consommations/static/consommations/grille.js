@@ -2043,6 +2043,42 @@ function impression_pdf(email=false) {
 };
 
 
+// Impression du PDF des réservations affichées dans le planning du portail famille
+function imprimer_reservations_portail() {
+    var liste_conso_impression = [];
+    var dict_prestations_impression = {}
+    $("td[class*='ouvert']").each(function() {
+        var case_tableau = dict_cases[$(this).attr('id')];
+        for (var conso of case_tableau.consommations) {
+            liste_conso_impression.push(conso);
+            if (conso.prestation in dict_prestations) {
+                dict_prestations_impression[conso.prestation] = dict_prestations[conso.prestation]
+            };
+        };
+    });
+    if (liste_conso_impression.length === 0) {
+        toastr.warning("Aucune réservation à imprimer.");
+        return;
+    }
+    $.ajax({
+        type: "POST",
+        url: url_impression_pdf_portail,
+        data: {
+            consommations: JSON.stringify(liste_conso_impression),
+            prestations: JSON.stringify(dict_prestations_impression),
+            csrfmiddlewaretoken: csrf_token,
+        },
+        datatype: "json",
+        success: function(data){
+            window.location = MEDIA_URL_JS + data.nom_fichier;
+        },
+        error: function(data) {
+            toastr.error(data.responseJSON.erreur);
+        }
+    })
+};
+
+
 function appliquer_tarif_special(case_tableau, data, maj_facturation) {
     var liste_choix_tarifs = [];
     $.each(dict_tarifs_speciaux, function (idtarif, dict_tarif) {

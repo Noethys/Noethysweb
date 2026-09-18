@@ -7,9 +7,10 @@ import logging
 logger = logging.getLogger(__name__)
 from reportlab.platypus import Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.enums import TA_CENTER
 from reportlab.lib import colors
 from core.utils import utils_dates, utils_impression, utils_preferences, utils_polices
-from core.models import Evenement
+from core.models import Evenement, LISTE_ETATS_CONSO
 
 
 class Impression(utils_impression.Impression):
@@ -22,6 +23,8 @@ class Impression(utils_impression.Impression):
         largeurContenu = 520
         couleurFond = (0.8, 0.8, 1)
         couleurFondActivite = (0.92, 0.92, 1)
+        afficher_prestations = self.dict_options.get("afficher_prestations", True)
+        dict_libelles_etats = dict(LISTE_ETATS_CONSO)
 
         # Texte si aucune réservation
         if len(self.dict_donnees["reservations"]) == 0:
@@ -89,10 +92,15 @@ class Impression(utils_impression.Impression):
 
                 # Colonnes : Date, Consos, Etat, Prestations, Montant
                 dataTableau = []
-                largeursColonnes = [55, 165, 80, 160, 60]
-                dataTableau.append(["Date", "Consommations", "Etat", "Prestations", "Total"])
+                if afficher_prestations:
+                    largeursColonnes = [55, 165, 80, 160, 60]
+                    dataTableau.append(["Date", "Consommations", "Etat", "Prestations", "Total"])
+                else:
+                    largeursColonnes = [70, 300, 150]
+                    dataTableau.append(["Date", "Consommations", "Etat"])
 
                 paraStyle = ParagraphStyle(name="standard", fontName=utils_polices.FONT_NORMAL, fontSize=8, leading=10, spaceAfter=0)
+                paraStyleDate = ParagraphStyle(name="date", fontName=utils_polices.FONT_NORMAL, fontSize=8, leading=10, spaceAfter=0, alignment=TA_CENTER)
 
                 # lignes DATES
                 listeDates = []
@@ -105,7 +113,7 @@ class Impression(utils_impression.Impression):
                     listeLigne = []
 
                     # Insertion de la date
-                    texteDate = Paragraph(utils_dates.ConvertDateToFR(str(date)), paraStyle)
+                    texteDate = Paragraph(utils_dates.ConvertDateToFR(str(date)), paraStyleDate)
 
                     # Insertion des consommations
                     listeEtats = []
@@ -146,7 +154,7 @@ class Impression(utils_impression.Impression):
                     texteConsos = Paragraph(" + ".join(listeConso), paraStyle)
 
                     # Insertion de l'état
-                    texteEtat = Paragraph(" / ".join(listeEtats), paraStyle)
+                    texteEtat = Paragraph(" / ".join([dict_libelles_etats.get(etat, etat) for etat in listeEtats]), paraStyle)
 
                     # Insertion des prestations et montants
                     textePrestations = []
@@ -163,7 +171,10 @@ class Impression(utils_impression.Impression):
                             totalFacturationFamille += montant
 
                     if len(listeConso) > 0:
-                        dataTableau.append([texteDate, texteConsos, texteEtat, textePrestations, texteMontants])
+                        if afficher_prestations:
+                            dataTableau.append([texteDate, texteConsos, texteEtat, textePrestations, texteMontants])
+                        else:
+                            dataTableau.append([texteDate, texteConsos, texteEtat])
 
                 tableau = Table(dataTableau, largeursColonnes)
                 listeStyles = [
@@ -179,28 +190,29 @@ class Impression(utils_impression.Impression):
                 self.story.append(tableau)
 
             # Insertion du total par individu
-            dataTableau = []
-            montantIndividu = Paragraph("<para align='right'>%.02f %s</para>" % (totalFacturationIndividu, utils_preferences.Get_symbole_monnaie()), paraStyle)
-            dataTableau.append([Paragraph("<para align='right'>Total :</para>", paraStyle), montantIndividu])
+            if afficher_prestations:
+                dataTableau = []
+                montantIndividu = Paragraph("<para align='right'>%.02f %s</para>" % (totalFacturationIndividu, utils_preferences.Get_symbole_monnaie()), paraStyle)
+                dataTableau.append([Paragraph("<para align='right'>Total :</para>", paraStyle), montantIndividu])
 
-            listeStyles = [
-                    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                    ('FONT', (0, 0), (-1, -1), utils_polices.FONT_NORMAL, 8),
-                    ('GRID', (-1, -1), (-1,-1), 0.25, colors.black),
-                    ('ALIGN', (-1, -1), (-1, -1), 'CENTRE'),
-                    ('BACKGROUND', (-1, -1), (-1, -1), couleurFond),
-                    ]
+                listeStyles = [
+                        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                        ('FONT', (0, 0), (-1, -1), utils_polices.FONT_NORMAL, 8),
+                        ('GRID', (-1, -1), (-1,-1), 0.25, colors.black),
+                        ('ALIGN', (-1, -1), (-1, -1), 'CENTRE'),
+                        ('BACKGROUND', (-1, -1), (-1, -1), couleurFond),
+                        ]
 
-            # Création du tableau
-            largeursColonnesTotal = [460, 60]
-            tableau = Table(dataTableau, largeursColonnesTotal)
-            tableau.setStyle(TableStyle(listeStyles))
-            self.story.append(tableau)
-            self.story.append(Spacer(0, 12))
+                # Création du tableau
+                largeursColonnesTotal = [460, 60]
+                tableau = Table(dataTableau, largeursColonnesTotal)
+                tableau.setStyle(TableStyle(listeStyles))
+                self.story.append(tableau)
+                self.story.append(Spacer(0, 12))
 
         # Total facturation Famille
         nbreIndividus = len(self.dict_donnees["reservations"])
-        if nbreIndividus > 1:
+        if afficher_prestations and nbreIndividus > 1:
             dataTableau = []
             montantFamille = Paragraph("<para align='right'>%.02f %s</para>" % (totalFacturationFamille, utils_preferences.Get_symbole_monnaie()), paraStyle)
             dataTableau.append([Paragraph("<para align='right'>TOTAL :</para>", paraStyle), montantFamille])

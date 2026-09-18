@@ -9,12 +9,12 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 from django.shortcuts import redirect
 from django.utils.translation import gettext as _
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib import messages
-from core.models import Individu, Inscription, PortailPeriode, Vacance, Ferie, Activite, JOURS_COMPLETS_SEMAINE, AdresseMail, ModeleEmail, Mail, Destinataire
+from core.models import Individu, Inscription, PortailPeriode, Vacance, Ferie, Activite, JOURS_COMPLETS_SEMAINE, AdresseMail, ModeleEmail, Mail, Destinataire, Rattachement
 from core.utils import utils_portail
 from outils.utils import utils_email
-from consommations.views.grille import Get_periode, Get_generic_data, Save_grille
+from consommations.views.grille import Get_periode, Get_generic_data, Save_grille, Preparer_dict_donnees_reservations
 from consommations.forms.grille_forfaits import Formulaire as form_forfaits
 from portail.forms.appliquer_semaine_type import Formulaire as form_appliquer_semaine_type
 from portail.templatetags.planning import is_ajout_allowed
@@ -233,3 +233,23 @@ class View(CustomView, TemplateView):
         # Envoi du mail
         logger.debug("Envoi du mail de confirmation des modifications de réservations.")
         utils_email.Envoyer_model_mail(idmail=mail.pk, request=request)
+
+
+def imprimer_reservations(request):
+    """ Génère le PDF de la liste des réservations affichées dans le planning du portail famille """
+    liste_conso = json.loads(request.POST.get("consommations", "[]"))
+    dict_prestations = json.loads(request.POST.get("prestations", "{}"))
+
+    # Sécurité : ne conserve que les consommations des individus rattachés à la famille connectée
+    liste_idindividus_famille = list(Rattachement.objects.filter(famille=request.user.famille).values_list("individu_id", flat=True))
+    liste_conso = [conso for conso in liste_conso if conso.get("individu") in liste_idindividus_famille]
+
+    if not liste_conso:
+        return JsonResponse({"erreur": "Aucune réservation à imprimer."}, status=400)
+
+    # Préparation des données et création du PDF
+    dict_donnees = Preparer_dict_donnees_reservations(liste_conso=liste_conso, dict_prestations=dict_prestations)
+    from consommations.utils import utils_impression_reservations
+    impression = utils_impression_reservations.Impression(titre="Réservations", dict_donnees=dict_donnees, dict_options={"afficher_prestations": False})
+
+    return JsonResponse({"nom_fichier": impression.Get_nom_fichier()})
