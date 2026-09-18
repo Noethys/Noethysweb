@@ -342,6 +342,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_etat_cotisations.Add(code="cotisations_email", titre="Envoyer des adhésions par Email", icone="file-text-o")
 
     menu_etat_cotisations.Add(code="liste_cotisations_manquantes", titre="Liste des adhésions manquantes", icone="file-text-o")
+    menu_etat_cotisations.Add(code="liste_adherents", titre="Liste des adhérents", icone="file-text-o")
 
     # Gestion
     menu_gestion_cotisations = menu_cotisations.Add(titre="Gestion des adhésions")
