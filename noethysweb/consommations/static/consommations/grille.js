@@ -110,6 +110,7 @@ var cases_touchees = [];
 var chrono;
 var touche_clavier = null;
 var aides_visuelles = false;
+if (typeof portail_masquer_capacite === "undefined") {var portail_masquer_capacite = false;}
 
 
 class Case_memo {
@@ -394,7 +395,10 @@ class Case_base {
 
         // Envoie les valeurs à l'affichage de la case
         var texte_etat = "";
-        if (nbre_places_restantes !== null && (!$("#" + this.key).hasClass("fermeture"))) {
+        if (mode === "portail" && portail_masquer_capacite) {
+            // Option d'activité : masque les couleurs et les mentions de capacité d'accueil sur le portail
+            $("#" + this.key).removeClass("disponible dernieresplaces complet");
+        } else if (nbre_places_restantes !== null && (!$("#" + this.key).hasClass("fermeture"))) {
             var klass = null;
             if (nbre_places_restantes > seuil_alerte) {
                 klass = "disponible"
@@ -1001,7 +1005,11 @@ class Case_event extends Case_standard {
         }
 
         var texte_etat = "Disponible";
-        if (capacite_max) {
+        if (mode === "portail" && portail_masquer_capacite) {
+            // Option d'activité : masque les couleurs et les mentions de capacité d'accueil sur le portail
+            $("#" + this.key).removeClass("disponible dernieresplaces complet");
+            texte_etat = "";
+        } else if (capacite_max) {
             // Calcule le nombre de places disponibles
             var nbre_places_restantes = capacite_max - nbre_places_prises;
 

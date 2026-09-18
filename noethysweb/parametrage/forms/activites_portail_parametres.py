@@ -54,7 +54,7 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Activite
         fields = ["portail_inscriptions_affichage", "portail_inscriptions_date_debut", "portail_inscriptions_date_fin", "portail_reservations_affichage",
-                  "portail_reservations_limite", "portail_reservations_limite_suppr", "portail_afficher_dates_passees", "portail_inscriptions_bloquer_si_complet", "portail_inscriptions_imposer_pieces",
+                  "portail_reservations_limite", "portail_reservations_limite_suppr", "portail_afficher_dates_passees", "portail_masquer_capacite", "portail_inscriptions_bloquer_si_complet", "portail_inscriptions_imposer_pieces",
                   "reattribution_auto", "reattribution_adresse_exp", "reattribution_delai", "reattribution_modele_email",
                   "validation_type", "validation_modele_email",
                   ]
@@ -64,6 +64,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "portail_inscriptions_bloquer_si_complet": "L'usager ne peut pas envoyer sa demande d'inscription si l'activité est complète.",
             "portail_inscriptions_imposer_pieces": "Cochez cette case si vous souhaitez que l'usager fournisse obligatoirement les pièces manquantes depuis le portail pour valider sa demande d'inscription.",
             "portail_afficher_dates_passees": "Vous pouvez sélectionner la période passée que l'usager pourra visualiser dans le planning des réservations sur le portail. Ces dates passées seront bien-sûr uniquement en mode lecture.",
+            "portail_masquer_capacite": "Cochez cette case pour ne pas afficher, dans le planning du portail famille, les couleurs indiquant la capacité d'accueil (disponible, dernières places, complet) ni les mentions associées. Les cases resteront blanches.",
             "reattribution_adresse_exp": "Sélectionnez l'adresse d'expédition d'emails qui sera utilisée pour envoyer des notifications par email aux familles (Réattributions de places ou validations manuelles de réservations).",
             "reattribution_modele_email": "Sélectionnez le modèle d'email qui sera utilisé pour notifier les familles par email de la réattribution. Si aucun modèle n'est disponible, vous devez le créer dans le menu Paramétrage > Modèles d'emails > Catégorie = Attribution de places disponibles. N'oubliez pas de sélectionner également au bas de cette page l'adresse d'expédition souhaitée.",
             "validation_type": "Sélectionnez Automatique pour que la réservation soit instantanée ou Manuelle pour effectuer vous-même la validation manuelle de chaque réservation.",
@@ -137,6 +138,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("portail_reservations_affichage"),
 
                 Field("portail_afficher_dates_passees"),
+                Field("portail_masquer_capacite"),
                 ),
             Fieldset("Délai d'ajout d'une réservation",
                 Field("limite_delai_ajout"),

@@ -111,9 +111,11 @@
                             <ul class="list-unstyled">
                                 <li><i class="fa fa-square margin-r-5" style="color: #FF9E1E;"></i>{% trans "Réservation" %}</li>
                                 <li><i class="fa fa-square margin-r-5" style="color: #abcbff;"></i>{% trans "Attente" %}</li>
-                                <li><i class="fa fa-square margin-r-5" style="color: rgba(227, 254, 219, 0.73);"></i>{% trans "Disponible" %}</li>
-                                <li><i class="fa fa-square margin-r-5" style="color: #FEFCDB;"></i>{% blocktrans %}Dernières places{% endblocktrans %}</li>
-                                <li><i class="fa fa-square margin-r-5" style="color: rgba(247, 172, 178, 0.36);"></i>{% trans "Complet" %}</li>
+                                {% if not data.periode_reservation.activite.portail_masquer_capacite %}
+                                    <li><i class="fa fa-square margin-r-5" style="color: rgba(227, 254, 219, 0.73);"></i>{% trans "Disponible" %}</li>
+                                    <li><i class="fa fa-square margin-r-5" style="color: #FEFCDB;"></i>{% blocktrans %}Dernières places{% endblocktrans %}</li>
+                                    <li><i class="fa fa-square margin-r-5" style="color: rgba(247, 172, 178, 0.36);"></i>{% trans "Complet" %}</li>
+                                {% endif %}
                                 <li><i class="fa fa-check-circle-o text-success margin-r-5"></i>{% trans "Présent" %}</li>
                                 <li><i class="fa fa-lock text-danger margin-r-5"></i>{% blocktrans %}Non modifiable{% endblocktrans %}</li>
                             </ul>

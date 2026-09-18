@@ -11,9 +11,11 @@
         <button type="button" id="appliquer_semaine_type" class="btn btn-secondary" onclick="$('#modal_appliquer_semaine_type').modal('show');" style="margin-right: 5px;">
             <i class="fa fa-calendar-check-o me-2" aria-hidden="true"></i>{% blocktrans %}Appliquer une semaine-type{% endblocktrans %}
         </button>
-        <button type="button" id="btn_aides_visuelles" class="btn btn-secondary" role="switch" aria-checked="false" style="margin-right: 5px;">
-            <i class="fa fa-eye me-2" aria-hidden="true"></i>
-            <span>{% trans "Aides visuelles" %}</span>
-            <span id="badge_aides_visuelles" class="badge bg-danger" aria-hidden="true">OFF</span>
-        </button>
+        {% if not data.selection_activite.portail_masquer_capacite %}
+            <button type="button" id="btn_aides_visuelles" class="btn btn-secondary" role="switch" aria-checked="false" style="margin-right: 5px;">
+                <i class="fa fa-eye me-2" aria-hidden="true"></i>
+                <span>{% trans "Aides visuelles" %}</span>
+                <span id="badge_aides_visuelles" class="badge bg-danger" aria-hidden="true">OFF</span>
+            </button>
+        {% endif %}
     </div>
