@@ -70,18 +70,22 @@ class Form_lot(forms.Form):
 
         self.helper.layout = Layout(
             Fieldset("Action",
-                Field("action_type"),
-                Field("date_modele"),
+                Div(
+                    Field("action_type", wrapper_class="col-md-6"),
+                    Field("date_modele", wrapper_class="col-md-6"),
+                    css_class="form-row",
+                ),
             ),
             Fieldset("Période d'application",
-                Field("date_debut"),
-                Field("date_fin"),
-                Field("inclure_feries"),
-            ),
-            Fieldset("Jours",
+                Div(
+                    Field("date_debut", wrapper_class="col-md-6"),
+                    Field("date_fin", wrapper_class="col-md-6"),
+                    css_class="form-row",
+                ),
                 InlineCheckboxes("jours_scolaires"),
                 InlineCheckboxes("jours_vacances"),
                 Field("frequence_type"),
+                Field("inclure_feries"),
             ),
             ButtonHolder(
                 Div(
