@@ -64,6 +64,9 @@ LISTE_CHAMPS = [
     Champ(page="individu_coords", code="employeur", label="Employeur", representant="MODIFIABLE", enfant="MASQUER", contact="MODIFIABLE", choix_obligatoire=True),
     Champ(page="individu_coords", code="travail_tel", label="Tél pro.", representant="MODIFIABLE", enfant="MASQUER", contact="MODIFIABLE", choix_obligatoire=True),
     Champ(page="individu_coords", code="travail_mail", label="Email pro.", representant="MODIFIABLE", enfant="MASQUER", contact="MODIFIABLE", choix_obligatoire=True),
+    Champ(page="individu_coords", code="tel_domicile_sms", label="Autoriser l'envoi de SMS vers le tél domicile", representant="MASQUER", enfant="MASQUER", contact="MASQUER"),
+    Champ(page="individu_coords", code="tel_mobile_sms", label="Autoriser l'envoi de SMS vers le tél portable", representant="MASQUER", enfant="MASQUER", contact="MASQUER"),
+    Champ(page="individu_coords", code="travail_tel_sms", label="Autoriser l'envoi de SMS vers le tél pro.", representant="MASQUER", enfant="MASQUER", contact="MASQUER"),
 
     Champ(page="individu_questionnaire", code="questionnaire", label="Questionnaire", representant="MASQUER", enfant="MODIFIABLE", contact="MASQUER"),
 

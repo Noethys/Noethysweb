@@ -85,6 +85,7 @@ class Formulaire(FormulaireBase, ModelForm):
             {"titre": _("Adresse de résidence"), "champs": ["type_adresse", "adresse_auto", "rue_resid", "cp_resid", "ville_resid", "secteur"]},
             {"titre": _("Coordonnées"), "champs": ["tel_domicile", "tel_mobile", "mail"]},
             {"titre": _("Activité professionnelle"), "champs": ["categorie_travail", "profession", "employeur", "travail_tel", "travail_mail"]},
+            {"titre": _("Envoi de SMS"), "champs": ["tel_domicile_sms", "tel_mobile_sms", "travail_tel_sms"]},
         ]
 
         # Finalisation du layout
