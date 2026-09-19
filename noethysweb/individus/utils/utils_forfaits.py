@@ -96,6 +96,14 @@ class Forfaits():
         if request:
             self.request = request
 
+        # Mémorisation des résultats par (individu, activité, tarif) : permet de ne pas afficher
+        # un message d'erreur "consommations déjà existantes" pour une inscription si le forfait
+        # a par ailleurs bien été appliqué avec succès sur une autre inscription du même individu
+        # sur la même activité (cas des inscriptions multiples).
+        dict_resultats_forfaits = {}
+        def Get_resultat_forfait(cle):
+            return dict_resultats_forfaits.setdefault(cle, {"succes": False, "erreurs": []})
+
         if type(categorie_tarif) == int :
             categorie_tarif = CategorieTarif.objects.get(pk=categorie_tarif)
 
@@ -178,7 +186,10 @@ class Forfaits():
                                 dates_anomalies = [conso[0] for conso in liste_consommations if conso in consommations_existantes]
                                 if dates_anomalies:
                                     message = "Impossible d'appliquer le forfait '%s' car des consommations existent déjà sur les dates suivantes : %s." % (label_forfait, ", ".join([utils_dates.ConvertDateToFR(date) for date in dates_anomalies]))
-                                    messages.add_message(self.request, messages.ERROR, message)
+                                    # Le message n'est pas affiché tout de suite : si le forfait est appliqué avec
+                                    # succès sur une autre inscription du même individu/activité, cette erreur
+                                    # "collatérale" sera finalement ignorée (voir fin de méthode).
+                                    Get_resultat_forfait((IDindividu, IDactivite, tarif.pk))["erreurs"].append(message)
                                     # On passe au tarif/inscription suivant plutôt que d'interrompre tout le traitement :
                                     # avec les inscriptions multiples, cette méthode reboucle sur TOUTES les inscriptions
                                     # de l'individu sur l'activité (pas seulement la nouvelle), donc un "return" ici
@@ -326,6 +337,14 @@ class Forfaits():
                             Consommation.objects.bulk_create(liste_ajouts)
 
                             # Message
+                            Get_resultat_forfait((IDindividu, IDactivite, tarif.pk))["succes"] = True
                             messages.add_message(self.request, messages.SUCCESS, "Application du forfait '%s'" % label_forfait)
+
+        # Affichage différé des erreurs "consommations déjà existantes" : uniquement si le forfait
+        # n'a pu être appliqué sur AUCUNE inscription de l'individu pour cette activité.
+        for resultat in dict_resultats_forfaits.values():
+            if not resultat["succes"]:
+                for message in resultat["erreurs"]:
+                    messages.add_message(self.request, messages.ERROR, message)
 
         return True
