@@ -708,6 +708,14 @@ class Select_activite(Widget):
             context['value'] = int(value)
         if "afficher_tout" not in context:
             context['afficher_tout'] = False
+        # Si la valeur actuelle (sélection en cours, y compris après un rejet du formulaire pour
+        # cause de validation) correspond à une activité obsolète, la case "Afficher les activités
+        # obsolètes" doit rester cochée : sinon l'option correspondante est rendue "disabled" alors
+        # qu'elle est justement celle sélectionnée.
+        if context.get('value') and not context['afficher_tout']:
+            activite_selectionnee = next((activite for activite in context["activites"] if activite.pk == context['value']), None)
+            if activite_selectionnee and not activite_selectionnee.Is_active():
+                context['afficher_tout'] = True
         if "donnees_extra" not in context:
             context['donnees_extra'] = {}
         context['donnees_extra'] = json.dumps(context['donnees_extra'])
