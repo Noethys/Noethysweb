@@ -126,5 +126,12 @@ def nom_mois(value):
     return dict_mois[value]
 
 @register.filter
+def has_field_errors(form):
+    """ Renvoie True si au moins un champ du formulaire (hors erreur globale __all__) est en erreur.
+    Utile pour ne pas afficher un cadre d'erreur vide quand le formulaire ne contient qu'une erreur
+    globale (form.add_error(None, ...)), déjà affichée par ailleurs (ex : par crispy-forms). """
+    return any(field.errors for field in form)
+
+@register.filter
 def date_eng_fr(value):
     return utils_dates.ConvertDateENGtoFR(value)

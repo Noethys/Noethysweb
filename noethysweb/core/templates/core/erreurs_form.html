@@ -1,5 +1,6 @@
 
-{% if form.errors %}
+{% load get_item %}
+{% if form|has_field_errors %}
     <div class="alert alert-danger">
         <ul class="fa-ul" style="margin-bottom: 1px;">
             {% for field in form %}
