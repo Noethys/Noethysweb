@@ -123,7 +123,7 @@
 
             {# Messagerie #}
             {% if liste_messages_non_lus %}
-                <li class="nav-item dropdown">
+                <li class="nav-item dropdown" id="navbar_messages">
 
                     <a class="nav-link" data-toggle="dropdown" href="#" title="Vous avez {{ liste_messages_non_lus|length }} message{{ liste_messages_non_lus|length|pluralize }}">
                         <i class="fa fa-comments"></i>
@@ -131,23 +131,33 @@
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-xl dropdown-menu-left">
+                        <style>
+                            #navbar_messages .fm-liste { max-height: 400px; overflow-y: auto; }
+                            #navbar_messages .fm-item { white-space: normal; padding: .75rem 1rem; }
+                            #navbar_messages .fm-avatar { width: 38px; height: 38px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; }
+                            #navbar_messages .fm-texte { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+                        </style>
+
                         <span class="dropdown-item dropdown-header text-center">{{ liste_messages_non_lus|length }} nouveau{{ liste_messages_non_lus|length|pluralize:"x" }} message{{ liste_messages_non_lus|length|pluralize }}</span>
                         <div class="dropdown-divider"></div>
 
-                        {% for message in liste_messages_non_lus %}
-                            <a href="{% url 'messagerie_portail' idfamille=message.famille_id idstructure=message.structure_id %}" class="dropdown-item" title="{{ message.texte|striptags }}">
-                                <div class="media">
-                                    <div class="media-body">
-                                        <h3 class="dropdown-item-title">
-                                            <i class="fa fa-envelope text-danger mr-1"></i> {{ message.famille.nom }}
-                                        </h3>
-                                        <p class="text-xs">{{ message.texte|striptags|truncatechars:55 }}</p>
-                                        <p class="mt-1 text-muted" style="font-size: 10px;"><i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }} | <i class="fa fa-home mr-1"></i>{{ message.structure }}</p>
+                        <div class="fm-liste">
+                            {% for message in liste_messages_non_lus %}
+                                <a href="{% url 'messagerie_portail' idfamille=message.famille_id idstructure=message.structure_id %}" class="dropdown-item fm-item d-flex align-items-start" title="{{ message.texte|striptags }}">
+                                    <div class="fm-avatar bg-primary mr-3"><i class="fa fa-comment" aria-hidden="true"></i></div>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <div class="d-flex justify-content-between align-items-baseline">
+                                            <strong class="text-truncate mr-2">{{ message.famille.nom }}</strong>
+                                            <span class="text-muted text-nowrap" style="font-size: 12px;"><i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }}</span>
+                                        </div>
+                                        <div class="fm-texte text-muted small mt-1">{{ message.texte|striptags|truncatechars:160 }}</div>
+                                        <span class="badge border text-muted font-weight-normal mt-2"><i class="fa fa-home mr-1"></i>{{ message.structure }}</span>
                                     </div>
-                                </div>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                        {% endfor %}
+                                </a>
+                                {% if not forloop.last %}<div class="dropdown-divider m-0"></div>{% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="dropdown-divider m-0"></div>
 
                         <a href="{% url 'messagerie_portail' %}" class="dropdown-item dropdown-footer">
                             Voir tous les nouveaux messages

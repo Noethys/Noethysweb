@@ -1,41 +1,47 @@
-{% load crispy_forms_tags %}
-{% load static %}
-{% load embed %}
+<style>
+    #widget_messages .fm-liste { max-height: 360px; overflow-y: auto; }
+    #widget_messages .fm-item, #widget_messages .fm-item:hover { padding: .75rem 1rem; color: inherit; }
+    #widget_messages .fm-avatar { width: 38px; height: 38px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; }
+    #widget_messages .fm-texte { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+</style>
 
-{% block contenu_page %}
-
-    <div class="card bg-gradient-{% if liste_messages_non_lus %}danger{% else %}success{% endif %}">
-        <div class="card-header">
-            <h3 class="card-title"><i class="fa fa-comments margin-r-5"></i> {% if liste_messages_non_lus %}{{ liste_messages_non_lus|length }} message{{ liste_messages_non_lus|length|pluralize }} en attente{% else %}Messages{% endif %}</h3>
-            <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                    <i class="fa fa-minus"></i>
-                </button>
-            </div>
-        </div>
-        <div class="card-body p-0">
-            <ul class="products-list product-list-in-card">
-                {% for message in liste_messages_non_lus %}
-                    <li class="item p-0 bg-transparent" title="{{ message.texte|striptags }}">
-                        <a href="{% url 'messagerie_portail' idfamille=message.famille_id idstructure=message.structure_id %}" class="dropdown-item">
-                            <div class="media">
-                                <div class="media-body">
-                                    <p class="mb-0 text-bold">
-                                        {{ message.famille.nom }}
-                                    </p>
-                                    <p class="text-xs mb-0">{{ message.texte|striptags|truncatechars:55 }}</p>
-                                    <p class="mt-1 mb-0" style="font-size: 10px;"><i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }} | <i class="fa fa-home mr-1"></i>{{ message.structure }}</p>
-                                </div>
-                            </div>
-                        </a>
-                    </li>
-                {% empty %}
-                    <div class="p-3">
-                        Aucun message.
-                    </div>
-                {% endfor %}
-            </ul>
+<div class="card card-outline card-{% if liste_messages_non_lus %}danger{% else %}success{% endif %}" id="widget_messages">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fa fa-comments margin-r-5"></i>
+            Messages
+            {% if liste_messages_non_lus %}<span class="badge badge-danger ml-1">{{ liste_messages_non_lus|length }} en attente</span>{% endif %}
+        </h3>
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fa fa-minus"></i>
+            </button>
         </div>
     </div>
 
-{% endblock contenu_page %}
+    <div class="card-body p-0">
+        {% if liste_messages_non_lus %}
+            <div class="list-group list-group-flush fm-liste">
+                {% for message in liste_messages_non_lus %}
+                    <a href="{% url 'messagerie_portail' idfamille=message.famille_id idstructure=message.structure_id %}" class="list-group-item list-group-item-action fm-item d-flex align-items-start" title="{{ message.texte|striptags }}">
+                        <div class="fm-avatar bg-primary mr-3"><i class="fa fa-comment" aria-hidden="true"></i></div>
+                        <div class="flex-grow-1" style="min-width: 0;">
+                            <div class="d-flex justify-content-between align-items-baseline">
+                                <strong class="text-truncate mr-2">{{ message.famille.nom }}</strong>
+                                <span class="text-muted text-nowrap" style="font-size: 12px;"><i class="fa fa-clock-o mr-1"></i>{{ message.date_creation|timesince }}</span>
+                            </div>
+                            <div class="fm-texte text-muted small mt-1">{{ message.texte|striptags|truncatechars:160 }}</div>
+                            <span class="badge border text-muted font-weight-normal mt-2"><i class="fa fa-home mr-1"></i>{{ message.structure }}</span>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-4 px-3">
+                <i class="fa fa-check-circle text-success" style="font-size: 32px;"></i>
+                <div class="mt-2"><strong>Aucun message en attente</strong></div>
+                <div class="text-muted small">Les nouveaux messages des familles apparaîtront ici.</div>
+            </div>
+        {% endif %}
+    </div>
+</div>
