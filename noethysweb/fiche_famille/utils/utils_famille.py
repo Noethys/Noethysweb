@@ -12,7 +12,7 @@ LISTE_ONGLETS = [
     {"code": "cotisations", "label": "Adhésions", "icone": "fa-folder-o", "url": "famille_cotisations_liste"},
     {"code": "caisse", "label": "Caisse", "icone": "fa-institution ", "url": "famille_caisse"},
     {"code": "aides", "label": "Aides", "icone": "fa-euro", "url": "famille_aides_liste"},
-    {"code": "quotients", "label": "Quotients familiaux", "icone": "fa-euro", "url": "famille_quotients_liste"},
+    {"code": "quotients", "label": "Quotients familiaux", "icone": "fa-calculator", "url": "famille_quotients_liste"},
     {"code": "prestations", "label": "Prestations", "icone": "fa-euro", "url": "famille_prestations_liste"},
     {"code": "factures", "label": "Factures", "icone": "fa-euro", "url": "famille_factures_liste"},
     {"code": "reglements", "label": "Règlements", "icone": "fa-money", "url": "famille_reglements_liste"},
