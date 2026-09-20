@@ -1,0 +1,148 @@
+<style>
+    /* grille.css (chargé par le widget de suivi des consommations) impose des .table th / .table td en !important
+       et centre les en-têtes : on reprend la main avec des sélecteurs préfixés par l'ID du widget (plus spécifiques). */
+    /* Cases à cocher : la marge par défaut de Bootstrap est calculée pour un texte de 1rem ; ici le texte est en .small */
+    #widget_factures_impayees .form-check-input { margin-top: .2rem; }
+    #widget_factures_impayees .fi-tableau th, #widget_factures_impayees .fi-tableau td { padding: .3rem !important; text-align: left; }
+    #widget_factures_impayees .fi-tableau th:first-child, #widget_factures_impayees .fi-tableau td:first-child { padding-left: 1rem !important; }
+    #widget_factures_impayees .fi-tableau th:last-child, #widget_factures_impayees .fi-tableau td:last-child { padding-right: 1rem !important; text-align: right; }
+</style>
+<div class="card" id="widget_factures_impayees">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fa fa-file-text-o margin-r-5"></i>
+            Factures impayées
+        </h3>
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-toggle="collapse" data-target="#fi_criteres" title="Critères de sélection">
+                <i class="fa fa-filter"></i>
+                {% if factures_impayees_nb_criteres %}<span class="badge badge-info">{{ factures_impayees_nb_criteres }}</span>{% endif %}
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fa fa-minus"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+        {% with c=factures_impayees_criteres %}
+        <div id="fi_criteres" class="collapse border-bottom bg-light p-3">
+            <div class="row small">
+                <div class="col-md-4 mb-2">
+                    <strong>Statut</strong>
+                    <div class="form-check"><input class="form-check-input fi-statut" type="checkbox" value="retard" id="fi_s1" {% if 'retard' in c.statuts %}checked{% endif %}><label class="form-check-label" for="fi_s1">En retard</label></div>
+                    <div class="form-check"><input class="form-check-input fi-statut" type="checkbox" value="echeance" id="fi_s2" {% if 'echeance' in c.statuts %}checked{% endif %}><label class="form-check-label" for="fi_s2">À échéance</label></div>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" id="fi_partiel" {% if c.partiel %}checked{% endif %}><label class="form-check-label" for="fi_partiel">Inclure les partiellement réglées</label></div>
+                    <label class="mb-0 mt-3" for="fi_tri"><strong>Trier par</strong></label>
+                    <select class="form-control form-control-sm" id="fi_tri">
+                        <option value="echeance" {% if c.tri == 'echeance' %}selected{% endif %}>Échéance</option>
+                        <option value="montant" {% if c.tri == 'montant' %}selected{% endif %}>Montant restant dû</option>
+                        <option value="famille" {% if c.tri == 'famille' %}selected{% endif %}>Famille (A-Z)</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <strong>Groupes d'activités</strong>
+                    <div class="border rounded bg-white px-2 py-1 mt-1" style="height: 140px; overflow-y: auto;">
+                        {% for groupe in factures_impayees_groupes %}
+                        <div class="form-check"><input class="form-check-input fi-groupe" type="checkbox" value="{{ groupe.pk }}" id="fi_g{{ groupe.pk }}" {% if groupe.pk in c.groupes %}checked{% endif %}><label class="form-check-label" for="fi_g{{ groupe.pk }}">{{ groupe.nom }}</label></div>
+                        {% endfor %}
+                    </div>
+                    <div class="text-muted mt-1">Aucun coché = tous</div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label class="mb-0" for="fi_montant_min">Restant dû minimum ({{ SYMBOLE_MONNAIE }})</label>
+                    <input type="number" step="0.01" min="0" class="form-control form-control-sm mb-2" id="fi_montant_min" value="{{ c.montant_min }}">
+                    <label class="mb-0" for="fi_jours_min">Retard minimum (jours)</label>
+                    <input type="number" min="0" class="form-control form-control-sm mb-2" id="fi_jours_min" value="{{ c.jours_min }}">
+                    <label class="mb-0" for="fi_jours_max">Retard maximal (jours)</label>
+                    <input type="number" min="0" class="form-control form-control-sm" id="fi_jours_max" value="{{ c.jours_max }}">
+                    <div id="fi_erreur" class="text-danger mt-1" style="display: none;"></div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center border-top pt-2 mt-1">
+                <button type="button" class="btn btn-sm btn-warning" id="fi_reinitialiser"><i class="fa fa-undo margin-r-5"></i>Réinitialiser</button>
+                <button type="button" class="btn btn-sm btn-primary" id="fi_appliquer"><i class="fa fa-check margin-r-5"></i>Appliquer</button>
+            </div>
+        </div>
+        {% endwith %}
+
+        <div class="d-flex px-3 py-2 border-bottom">
+            <div class="mr-4"><span class="text-muted small">Factures</span><br><strong>{{ factures_impayees_nb }}</strong></div>
+            <div><span class="text-muted small">Total restant dû</span><br><strong>{{ factures_impayees_total|floatformat:2 }} {{ SYMBOLE_MONNAIE }}</strong></div>
+        </div>
+
+        {% if factures_impayees_lignes %}
+        <div class="table-responsive fi-tableau" style="max-height: 420px; overflow: auto;">
+            <table class="table table-sm table-hover mb-0" style="font-size: 13px;">
+                <thead>
+                    <tr><th>N°</th><th>Famille</th><th>Échéance</th><th>Statut</th><th class="text-right">Restant dû</th></tr>
+                </thead>
+                <tbody>
+                    {% for ligne in factures_impayees_lignes %}
+                    <tr>
+                        <td>{{ ligne.facture.numero }}</td>
+                        <td>{{ ligne.facture.famille.nom }}</td>
+                        <td>{{ ligne.facture.date_echeance|date:"d/m/Y"|default:"-" }}</td>
+                        <td>
+                            {% if ligne.jours_retard %}<span class="badge badge-danger">Retard {{ ligne.jours_retard }} j</span>{% else %}<span class="badge badge-warning">À échéance</span>{% endif %}
+                            {% if ligne.partiel %}<span class="small text-muted">partiel</span>{% endif %}
+                        </td>
+                        <td class="text-right"><strong>{{ ligne.restant|floatformat:2 }} {{ SYMBOLE_MONNAIE }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if factures_impayees_nb_masquees %}
+        <div class="px-3 py-1 small text-muted">+ {{ factures_impayees_nb_masquees }} autre{{ factures_impayees_nb_masquees|pluralize }} facture{{ factures_impayees_nb_masquees|pluralize }} (affinez les critères).</div>
+        {% endif %}
+        {% else %}
+        <div class="text-muted text-center py-3">Aucune facture ne correspond à ces critères.</div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        function fi_erreur(message) {
+            $("#fi_erreur").text(message || "").toggle(!!message);
+            $("#fi_jours_min, #fi_jours_max").toggleClass("is-invalid", !!message);
+        }
+        $("#fi_jours_min, #fi_jours_max").on("input", function() { fi_erreur(""); });
+
+        function fi_envoyer(criteres) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_factures_impayees_set_criteres' %}",
+                data: {criteres: JSON.stringify(criteres), csrfmiddlewaretoken: "{{ csrf_token }}"},
+                success: function() { location.reload(); },
+                error: function(xhr) {
+                    if (xhr.responseJSON && xhr.responseJSON.erreur) { fi_erreur(xhr.responseJSON.erreur); }
+                    else { toastr.error("Impossible de mémoriser les critères"); }
+                }
+            });
+        }
+        $("#fi_appliquer").on("click", function(event) {
+            event.preventDefault();
+            var jours_min = parseInt($("#fi_jours_min").val()) || 0;
+            var jours_max = parseInt($("#fi_jours_max").val()) || 0;
+            if (jours_max > 0 && jours_max < jours_min) {
+                fi_erreur("Le retard maximal doit être supérieur ou égal au retard minimum.");
+                return;
+            }
+            fi_envoyer({
+                statuts: $(".fi-statut:checked").map(function() { return this.value; }).get(),
+                partiel: $("#fi_partiel").is(":checked"),
+                groupes: $(".fi-groupe:checked").map(function() { return this.value; }).get(),
+                montant_min: $("#fi_montant_min").val() || 0,
+                jours_min: $("#fi_jours_min").val() || 0,
+                jours_max: $("#fi_jours_max").val() || 0,
+                tri: $("#fi_tri").val()
+            });
+        });
+        $("#fi_reinitialiser").on("click", function(event) {
+            event.preventDefault();
+            fi_envoyer({});
+        });
+    });
+</script>
