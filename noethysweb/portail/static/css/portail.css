@@ -108,20 +108,6 @@ h1 {
 }
 
 
-
-
-/* ================================== TESTS ============================================ */
-
-
-
-
-/* ===========================
-   RADIOSELECT — help_text aligné sur col-md-10
-   Quand use_fieldset=False, le help_text est rendu
-   en dehors de la grille par crispy.
-   On le pousse de col-md-2 (16.666%) vers la droite.
-=========================== */
-
 /* Cible le help_text qui suit directement un label dans une row */
 .mb-3.row > .form-text,
 .mb-3.row > small.form-text {
@@ -274,53 +260,6 @@ h1 {
     [data-bs-theme="dark"] fieldset legend {
         background-color: #6c6c6c;
     }
-
-
-
-
-/* ===========================
-   SELECT2
-=========================== */
-/*
-    .largeur_pleine .select2-container {
-        width: 100% !important;
-    }
-    .select2-container--default .select2-selection--single {
-        border: 1px solid #ccc !important;
-        border-radius: 0px !important;
-        padding-left: 10px !important;
-    }
-    .select2-container .select2-selection--single {
-        height: 35px !important;
-    }
-    .select2-container--default .select2-selection--multiple {
-        border: 1px solid #ccc !important;
-        border-radius: 0px !important;
-    }
-    .select2-container--default .select2-selection--multiple .select2-selection__choice {
-        background-color: #3c8dbc !important;
-        border-color: #367fa9!important;
-        padding: 1px 10px!important;
-        color: #fff!important;
-    }
-    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-        margin-right: 5px !important;
-        color: rgba(255, 255, 255, 0.7) !important;
-    }
-    .dark-mode .select2-container--default .select2-selection--multiple {
-        background: rgba(255, 255, 255, 0) !important;
-    }
-    .dark-mode .select2-container--default.select2-container--disabled .select2-selection--multiple {
-        background: rgba(255, 255, 255, 0) !important;
-    }
-    .dark-mode .select2-selection--single {
-        background: rgba(255, 255, 255, 0) !important;
-    }
-    .dark-mode .select2-selection__rendered {
-        color: #ffffff !important;
-    }
-*/
-
 
 
     .checkbox label, .radio label {
