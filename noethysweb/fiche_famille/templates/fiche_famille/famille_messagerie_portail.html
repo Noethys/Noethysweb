@@ -4,6 +4,26 @@
 {% load embed %}
 
 
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .direct-chat {
+            --lte-direct-chat-color: #ffffff !important;
+            --lte-direct-chat-bg: #367da6 !important;
+        }
+        .direct-chat-text a {
+            color: var(--lte-direct-chat-color) !important;
+            text-decoration: underline !important;
+        }
+        .direct-chat-text a:hover,
+        .direct-chat-text a:focus {
+            color: var(--lte-direct-chat-color) !important;
+            opacity: .85 !important;
+        }
+    </style>
+{% endblock %}
+
+
 {% block detail_famille %}
     <div class="col-md-9">
 
