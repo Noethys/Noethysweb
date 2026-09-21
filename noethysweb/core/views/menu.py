@@ -275,7 +275,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_infos_individus.Add(code="informations_liste", titre="Liste des informations personnelles", icone="file-text-o")
     menu_infos_individus.Add(code="liste_vaccinations_manquantes", titre="Liste des vaccinations manquantes", icone="file-text-o")
     menu_infos_individus.Add(code="liste_assurances", titre="Liste des assurances", icone="file-text-o")
-    menu_infos_individus.Add(code="edition_informations", titre="Edition des informations et régimes", icone="file-text-o")
+    menu_infos_individus.Add(code="edition_informations", titre="Edition des informations", icone="file-text-o")
     menu_infos_individus.Add(code="liste_comptes_internet", titre="Liste des comptes internet", icone="file-text-o")
     menu_infos_individus.Add(code="mails_liste", titre="Liste des Emails", icone="file-text-o")
     menu_infos_individus.Add(code="certifications_individus", titre="Liste des certifications", icone="file-text-o")

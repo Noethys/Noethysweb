@@ -15,6 +15,8 @@ def Generer_pdf(request):
     # Récupération des options
     form = Formulaire(request.POST, request=request)
     if not form.is_valid():
+        if form.errors.get("colonnes"):
+            return JsonResponse({"erreur": form.errors["colonnes"][0]}, status=401)
         return JsonResponse({"erreur": "Veuillez compléter les paramètres"}, status=401)
     options = form.cleaned_data
 
@@ -32,7 +34,7 @@ def Generer_pdf(request):
 
     # Création du PDF
     from individus.utils import utils_impression_informations
-    impression = utils_impression_informations.Impression(titre="Edition des informations et régimes", dict_donnees=options)
+    impression = utils_impression_informations.Impression(titre="Edition des informations", dict_donnees=options)
     if impression.erreurs:
         return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
     nom_fichier = impression.Get_nom_fichier()
@@ -46,8 +48,8 @@ class View(CustomView, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
-        context['page_titre'] = "Edition des informations et régimes"
-        context['box_titre'] = "Edition des informations et régimes"
+        context['page_titre'] = "Edition des informations"
+        context['box_titre'] = "Edition des informations"
         context['box_introduction'] = "Renseignez les paramètres et cliquez sur le bouton Générer le PDF. La génération du document peut nécessiter quelques instants d'attente."
         if "form" not in kwargs:
             context['form'] = Formulaire(request=self.request)

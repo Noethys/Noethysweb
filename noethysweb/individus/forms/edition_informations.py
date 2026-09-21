@@ -5,17 +5,35 @@
 
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, HTML, Fieldset
-from crispy_forms.bootstrap import Field
+from crispy_forms.layout import Layout, HTML, Fieldset, Div
+from crispy_forms.bootstrap import Field, InlineCheckboxes
 from core.utils.utils_commandes import Commandes
+from core.utils.utils_texte import Creation_tout_cocher
 from core.widgets import SelectionActivitesWidget, DateRangePickerWidget
 from core.forms.base import FormulaireBase
+
+
+# Colonnes pouvant être incluses dans le document (l'ordre ci-dessous est l'ordre d'affichage dans le PDF)
+CHOIX_COLONNES = [
+    ("infos_perso", "Informations personnelles"),
+    ("regimes", "Régimes alimentaires"),
+    ("sieste", "Sieste"),
+    ("parents", "Coordonnées des parents"),
+    ("contacts", "Contacts d'urgence et de sortie"),
+]
+COLONNES_DEFAUT = ["infos_perso", "regimes"]
 
 
 class Formulaire(FormulaireBase, forms.Form):
     activites = forms.CharField(label="Inscrits aux activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": True}))
     presents = forms.CharField(label="Uniquement les présents", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
-    orientation = forms.ChoiceField(label="Orientation de la page", choices=[("portrait", "Portrait"), ("paysage", "Paysage")], initial="portrait", required=False, help_text="Sélectionnez l'orientation de la page.")
+    colonnes = forms.MultipleChoiceField(
+        label="", required=True, widget=forms.CheckboxSelectMultiple,
+        choices=CHOIX_COLONNES, initial=COLONNES_DEFAUT,
+        help_text=Creation_tout_cocher("colonnes"),
+        error_messages={"required": "Veuillez cocher au moins une colonne"},
+    )
+    orientation = forms.ChoiceField(label="Orientation de la page", choices=[("portrait", "Portrait"), ("paysage", "Paysage")], initial="portrait", required=False, help_text="Sélectionnez l'orientation de la page. Le format paysage est conseillé au-delà de trois colonnes.")
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -35,6 +53,13 @@ class Formulaire(FormulaireBase, forms.Form):
             Fieldset("Sélection des individus",
                 Field('activites'),
                 Field('presents'),
+            ),
+            Fieldset("Colonnes à inclure dans le document",
+                Div(
+                    Div(css_class="col-md-2"),  # colonne vide, à la place du label
+                    Div(InlineCheckboxes("colonnes"), css_class="col-md-10"),
+                    css_class="row",
+                ),
             ),
             Fieldset("Options",
                 Field('orientation'),
