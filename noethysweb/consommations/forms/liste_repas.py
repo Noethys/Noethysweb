@@ -17,6 +17,7 @@ class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
     categories_informations = forms.MultipleChoiceField(label="Catégories d'informations", required=False, widget=Select2MultipleWidget(), choices=[], initial=[], help_text="Sélectionnez les catégories à inclure.")
+    afficher_regimes = forms.BooleanField(label="Afficher une colonne par type de régime", required=False, initial=False, help_text="Ajoute à droite du total une colonne par régime alimentaire utilisé sur la période.")
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -33,4 +34,5 @@ class Formulaire(FormulaireBase, forms.Form):
             Field('periode'),
             Field('activites'),
             Field('categories_informations'),
+            Field('afficher_regimes'),
         )

@@ -71,6 +71,8 @@ class View(CustomView, TemplateView):
         # Analyse des consommations
         dict_individus_date = {}
         dict_repas = {}
+        dict_regimes_utilises = {}
+        dict_repas_regimes = {}
         for consommation in liste_consommations:
 
             # Mémorisation du repas
@@ -78,13 +80,24 @@ class View(CustomView, TemplateView):
             dict_repas.setdefault(key, 0)
             dict_repas[key] += consommation.quantite or 1
 
+            # Mémorisation des repas par type de régime (un individu ayant plusieurs régimes est compté dans chacun)
+            if parametres.get("afficher_regimes"):
+                for regime in consommation.individu.regimes_alimentaires.all():
+                    dict_regimes_utilises[regime.pk] = regime.nom
+                    key_regime = (consommation.date, regime.pk)
+                    dict_repas_regimes.setdefault(key_regime, 0)
+                    dict_repas_regimes[key_regime] += consommation.quantite or 1
+
             # Mémorisation des individus présents sur la date
             if consommation.individu not in dict_individus_date.get(consommation.date, []):
                 dict_individus_date.setdefault(consommation.date, [])
                 dict_individus_date[consommation.date].append(consommation.individu)
 
+        # Régimes utilisés sur la période, triés par nom (une colonne par régime, à droite du total)
+        liste_regimes = sorted(dict_regimes_utilises.items(), key=lambda regime: regime[1].lower())
+
         # Création des colonnes
-        liste_colonnes = ["Date", *[groupe.nom for groupe in liste_groupes], "Total", "Informations"]
+        liste_colonnes = ["Date", *[groupe.nom for groupe in liste_groupes], "Total", *[nom for idregime, nom in liste_regimes], "Informations"]
 
         # Création des lignes
         liste_lignes = []
@@ -99,6 +112,10 @@ class View(CustomView, TemplateView):
                 ligne.append(nbre_repas)
                 total_ligne += nbre_repas
             ligne.append(total_ligne)
+
+            # Nbre de repas par régime
+            for idregime, nom in liste_regimes:
+                ligne.append(dict_repas_regimes.get((date, idregime), 0))
 
             # Informations
             liste_infos = []
