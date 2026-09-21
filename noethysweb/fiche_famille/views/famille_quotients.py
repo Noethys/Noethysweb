@@ -8,6 +8,8 @@ logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Min, Max
 from django.http import JsonResponse
+from crispy_forms.layout import Fieldset, HTML
+from crispy_forms.bootstrap import Field
 from django.core.cache import cache
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
@@ -64,7 +66,7 @@ def Enregistrer_quotient_api_particulier(request):
         return JsonResponse({"erreur": liste_erreurs}, status=401)
 
     # Validation et recalcul des prestations si besoins
-    resultat, form = Validation_form(form, request=request, idfamille=request.POST["idfamille"], verbe_action="Ajouter")
+    resultat, form = Validation_form(form, request=request, idfamille=request.POST["idfamille"], verbe_action="Ajouter", confirmation_possible=False)
     if not resultat:
         liste_erreurs = ", ".join([erreur[0].message for field, erreur in form.errors.as_data().items()])
         return JsonResponse({"erreur": liste_erreurs}, status=401)
@@ -115,7 +117,7 @@ class Page(Onglet):
         return reverse_lazy(url, kwargs={'idfamille': self.kwargs.get('idfamille', None)})
 
 
-def Validation_form(form=None, request=None, idfamille=None, object=None, verbe_action=None):
+def Validation_form(form=None, request=None, idfamille=None, object=None, verbe_action=None, confirmation_possible=True):
     # Vérifie que ce quotient n'est pas en conflit avec un autre quotient existant
     conditions = Q(famille_id=idfamille, type_quotient=form.cleaned_data["type_quotient"], date_debut__lte=form.cleaned_data["date_fin"], date_fin__gte=form.cleaned_data["date_debut"])
     quotients = Quotient.objects.filter(conditions).exclude(pk=object.pk if object else None)
@@ -133,14 +135,30 @@ def Validation_form(form=None, request=None, idfamille=None, object=None, verbe_
         # Recherche s'il y a des prestations facturées sur cette période
         prestations_facturees = Prestation.objects.filter(famille=form.cleaned_data["famille"], date__range=(date_min, date_max), facture__isnull=False).aggregate(Min("date"), Max("date"))
         if prestations_facturees["date__min"]:
-            # Si le montant du QF a été modifié
-            if "quotient" in form.changed_data:
-                form.add_error(None, "Vous ne pouvez pas modifier le montant du quotient car des prestations sont déjà facturées sur la période du %s au %s. Créez plutôt un nouveau QF." % (prestations_facturees["date__min"].strftime("%d/%m/%Y"), prestations_facturees["date__max"].strftime("%d/%m/%Y")))
-                return False, form
-            # Si ce sont seulement les dates du QF qui ont été modifiées
-            if (form.cleaned_data["date_debut"] > prestations_facturees["date__min"]) or (form.cleaned_data["date_fin"] < prestations_facturees["date__max"]):
-                form.add_error(None, "Ces nouvelles dates sont erronées car des prestations sont déjà facturées sur la période du %s au %s. Créez plutôt un nouveau QF." % (prestations_facturees["date__min"].strftime("%d/%m/%Y"), prestations_facturees["date__max"].strftime("%d/%m/%Y")))
-                return False, form
+            periode = "du %s au %s" % (prestations_facturees["date__min"].strftime("%d/%m/%Y"), prestations_facturees["date__max"].strftime("%d/%m/%Y"))
+            montant_modifie = "quotient" in form.changed_data
+            dates_erronees = (form.cleaned_data["date_debut"] > prestations_facturees["date__min"]) or (form.cleaned_data["date_fin"] < prestations_facturees["date__max"])
+
+            if montant_modifie or dates_erronees:
+                # Sans confirmation possible (ex : import API Particulier), on conserve le blocage
+                if not confirmation_possible:
+                    if montant_modifie:
+                        form.add_error(None, "Vous ne pouvez pas modifier le montant du quotient car des prestations sont déjà facturées sur la période %s. Créez plutôt un nouveau QF." % periode)
+                    else:
+                        form.add_error(None, "Ces nouvelles dates sont erronées car des prestations sont déjà facturées sur la période %s. Créez plutôt un nouveau QF." % periode)
+                    return False, form
+
+                # Sinon, demande une confirmation explicite à l'utilisateur
+                if not form.cleaned_data.get("confirmer_facturees"):
+                    form.helper.layout.insert(1, Fieldset("Confirmation requise",
+                        HTML("""<div class="alert alert-warning">
+                            <i class="fa fa-exclamation-triangle mr-2"></i>Des prestations sont déjà facturées sur la période %s.
+                            Elles ne seront pas modifiées : seules les prestations non facturées seront recalculées avec ce quotient.
+                            Les factures déjà émises conserveront l'ancien calcul.
+                        </div>""" % periode),
+                        Field("confirmer_facturees"),
+                    ))
+                    return False, form
 
         # Enregistrement du quotient
         if verbe_action == "Modifier":

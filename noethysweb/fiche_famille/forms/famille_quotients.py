@@ -16,6 +16,8 @@ from core.utils import utils_preferences
 
 
 class Formulaire(FormulaireBase, ModelForm):
+    # Case de confirmation, affichée uniquement si des prestations sont déjà facturées (voir Validation_form)
+    confirmer_facturees = forms.BooleanField(label="Je confirme vouloir enregistrer ce quotient malgré l'alerte", required=False)
 
     class Meta:
         model = Quotient
