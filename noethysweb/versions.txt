@@ -1,3 +1,9 @@
+Version 1.3.4.7 (21/09/2026) :
+
+- Ajout des colonnes régimes dans la liste des repas du menu Consommations
+- Ajout de la confirmation utilisateur lors de la modification d'un QF avec alerte
+- Amélioration de l'édition des informations dans le menu Individus
+
 Version 1.3.4.6 (20/09/2026) :
 
 - Ajout du widget Factures impayées sur la page d'accueil
