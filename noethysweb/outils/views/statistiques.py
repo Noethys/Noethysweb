@@ -167,7 +167,7 @@ class View(CustomView, TemplateView):
                     presents = (datetime.date(parametres["annee"], int(parametres["mois"]), 1),
                                 datetime.date(parametres["annee"], int(parametres["mois"]), calendar.monthrange(parametres["annee"], int(parametres["mois"]))[1]))
                 if parametres["condition"] == "VACANCES":
-                    vacance = Vacance.objects.get(nom=parametres["vacances"], annee=parametres["annee"])
+                    vacance = Vacance.objects.filter(nom=parametres["vacances"], annee=parametres["annee"]).first()
                     presents = (vacance.date_debut, vacance.date_fin)
                 if parametres["condition"] == "PERIODE":
                     presents = utils_dates.ConvertDateRangePicker(parametres["periode"])

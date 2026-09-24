@@ -46,7 +46,7 @@ class View(CustomView, TemplateView):
                 elif parametres["type_periode"] == "MOIS":
                     dates = (datetime.date(parametres["annee"], int(parametres["mois"]), 1), datetime.date(parametres["annee"], int(parametres["mois"]), calendar.monthrange(parametres["annee"], int(parametres["mois"]))[1]))
                 elif parametres["type_periode"] == "VACANCES":
-                    vacance = Vacance.objects.get(nom=parametres["vacances"], annee=parametres["annee"])
+                    vacance = Vacance.objects.filter(nom=parametres["vacances"], annee=parametres["annee"]).first()
                     dates = (vacance.date_debut, vacance.date_fin)
                 elif parametres["type_periode"] == "PERIODE":
                     dates = (utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[0]), utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[1]))
