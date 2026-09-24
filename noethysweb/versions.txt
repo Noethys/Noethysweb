@@ -1,3 +1,8 @@
+Version 1.3.4.8 (24/09/2026) :
+
+- Ajout du tarif au taux d'effort et par tranches de QF au prorata d'une durée
+- Correction des statistiques quand une période de vacances est doublée
+
 Version 1.3.4.7 (21/09/2026) :
 
 - Ajout des colonnes régimes dans la liste des repas du menu Consommations
