@@ -1825,6 +1825,97 @@ class Facturation():
                         nom_tarif = label
                     break
 
+        # Recherche du montant du tarif : PAR TAUX D'EFFORT ET PAR TRANCHES DE QF AU PRORATA D'UNE DUREE
+        if methode_calcul == "duree_taux_qf_prorata":
+            montant_tarif = 0.0
+            lignes_calcul = Get_lignes_tarif()
+
+            # Recherche QF de la famille
+            qf_famille = self.Recherche_QF(tarif, case_tableau)
+
+            # Recherche des heures debut et fin des unités cochées
+            duree, heure_debut_delta, heure_fin_delta = self.Calcule_duree(case_tableau, combinaisons_unites)
+
+            for ligne_calcul in lignes_calcul:
+                duree_min = utils_dates.TimeEnDelta(ligne_calcul.duree_min)
+                duree_max = utils_dates.TimeEnDelta(ligne_calcul.duree_max)
+                duree_seuil = utils_dates.TimeEnDelta(ligne_calcul.duree_seuil)
+                duree_plafond = utils_dates.TimeEnDelta(ligne_calcul.duree_plafond)
+                duree_arrondi = utils_dates.TimeEnDelta(ligne_calcul.duree_arrondi)
+                unite_horaire = utils_dates.TimeEnDelta(ligne_calcul.unite_horaire)
+
+                duree_temp = copy.copy(duree)
+
+                # Arrondi inférieur de la durée
+                if duree_arrondi:
+                    duree_arrondie = utils_dates.ArrondirDelta(duree=duree_temp, delta_minutes=int(duree_arrondi.total_seconds() // 60), sens="inf")
+                    if duree_arrondie > datetime.timedelta(0):
+                        duree_temp = duree_arrondie
+
+                if duree_min == None:
+                    duree_min = datetime.timedelta(0)
+                if duree_max == None or duree_max == datetime.timedelta(0):
+                    duree_max = datetime.timedelta(hours=23, minutes=59)
+
+                # Vérifie si QF ok pour le calcul basé également sur paliers de QF
+                conditionQF = True
+                if qf_famille != None:
+                    if qf_famille >= ligne_calcul.qf_min and qf_famille <= ligne_calcul.qf_max:
+                        conditionQF = True
+                    else:
+                        conditionQF = False
+                else:
+                    # Sélectionne la dernière ligne pour les familles sans QF
+                    if ligne_calcul.num_ligne < len(lignes_calcul) - 1:
+                        conditionQF = False
+
+                if duree_min <= duree_temp <= duree_max and conditionQF == True:
+                    # Vérifie durées seuil et plafond
+                    if duree_seuil:
+                        if duree_temp < duree_seuil: duree_temp = duree_seuil
+                    if duree_plafond and duree_plafond.seconds > 0:
+                        if duree_temp > duree_plafond: duree_temp = duree_plafond
+
+                    # Calcul du nombre d'unités horaires contenues dans la durée (arrondi à l'entier supérieur)
+                    nbre = int(math.ceil(1.0 * duree_temp.seconds / unite_horaire.seconds))
+
+                    # Calcul du tarif : taux d'effort appliqué au QF, au prorata du nombre d'unités horaires
+                    if qf_famille != None:
+                        montant_tarif = nbre * (qf_famille * ligne_calcul.taux)
+                        montant_tarif = float(decimal.Decimal(str(montant_tarif)))
+                    else:
+                        if ligne_calcul.montant_max:
+                            montant_tarif = float(ligne_calcul.montant_max)
+
+                    # Montants seuil et plafond
+                    if ligne_calcul.montant_min:
+                        if montant_tarif < ligne_calcul.montant_min:
+                            montant_tarif = float(ligne_calcul.montant_min)
+                    if ligne_calcul.montant_max:
+                        if montant_tarif > ligne_calcul.montant_max:
+                            montant_tarif = float(ligne_calcul.montant_max)
+
+                    # Application de l'ajustement (majoration ou déduction)
+                    if ligne_calcul.ajustement:
+                        montant_tarif = montant_tarif + float(ligne_calcul.ajustement)
+                        if montant_tarif < 0.0:
+                            montant_tarif = 0.0
+
+                    # Calcul du temps facturé
+                    temps_facture = unite_horaire * nbre
+
+                    # Création du label personnalisé
+                    label = ligne_calcul.label
+                    if label:
+                        if "{TAUX}" in label: label = label.replace("{TAUX}", str(ligne_calcul.taux))
+                        if "{QUANTITE}" in label: label = label.replace("{QUANTITE}", str(nbre))
+                        if "{TEMPS_REALISE}" in label: label = label.replace("{TEMPS_REALISE}", utils_dates.DeltaEnStr(duree_temp))
+                        if "{TEMPS_FACTURE}" in label: label = label.replace("{TEMPS_FACTURE}", utils_dates.DeltaEnStr(temps_facture))
+                        if "{HEURE_DEBUT}" in label: label = label.replace("{HEURE_DEBUT}", utils_dates.DeltaEnStr(heure_debut_delta))
+                        if "{HEURE_FIN}" in label: label = label.replace("{HEURE_FIN}", utils_dates.DeltaEnStr(heure_fin_delta))
+                        nom_tarif = label
+                    break
+
         # Si unité de type QUANTITE
         if quantite and quantite > 1:
             montant_tarif = montant_tarif * quantite
