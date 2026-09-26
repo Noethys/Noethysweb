@@ -157,6 +157,9 @@ class Formulaire_question(FormulaireBase, ModelForm):
         # Empêche la modification de contrôle
         if self.instance.pk:
             self.fields["controle"].disabled = True
+        else:
+            # La liste déroulante avancée n'est pas gérée dans les formulaires (choix liés aux questionnaires)
+            self.fields["controle"].choices = [choix for choix in self.fields["controle"].choices if choix[0] != "liste_deroulante_avancee"]
 
         # Affichage
         self.helper.layout = Layout(

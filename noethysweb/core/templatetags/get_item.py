@@ -130,6 +130,9 @@ def has_field_errors(form):
     """ Renvoie True si au moins un champ du formulaire (hors erreur globale __all__) est en erreur.
     Utile pour ne pas afficher un cadre d'erreur vide quand le formulaire ne contient qu'une erreur
     globale (form.add_error(None, ...)), déjà affichée par ailleurs (ex : par crispy-forms). """
+    # Certaines pages incluent erreurs_form.html sans variable 'form' dans le contexte (ex : formulaires du portail)
+    if not form or not hasattr(form, "fields"):
+        return False
     return any(field.errors for field in form)
 
 @register.filter
