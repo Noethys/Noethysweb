@@ -29,7 +29,7 @@ class MyPasswordResetView(ClassCommuneLogin, auth_views.PasswordResetView):
 
         # Recherche l'utilisateur
         utilisateur = Utilisateur.objects.filter(username__iexact=identifiant, is_active=True, categorie="famille").first()
-        if not utilisateur or not utilisateur.famille.mail or utilisateur.famille.mail != email:
+        if not utilisateur or not utilisateur.famille.mail or utilisateur.famille.mail.strip().lower() != email.strip().lower():
             logger.debug("Erreur : Pas de compte actif existant.")
             form.add_error(None, "Il n'existe pas de compte actif correspondant à cet identifiant et cette adresse Email.")
             return self.render_to_response(self.get_context_data(form=form))

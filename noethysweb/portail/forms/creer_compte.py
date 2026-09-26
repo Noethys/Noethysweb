@@ -70,7 +70,7 @@ class FormCreerCompte(FormulaireBase, forms.Form):
 
         # Vérifie que cette adresse mail n'est pas déjà utilisée
         for individu in Individu.objects.filter(mail__isnull=False):
-            if individu.mail == self.cleaned_data["email"] :
+            if individu.mail.strip().lower() == self.cleaned_data["email"].strip().lower():
                 raise ValidationError(_("Cette adresse mail est déjà répertoriée, vous ne pouvez donc pas créer de nouveau compte. Contactez l'administrateur."))
 
         # Vérifie que les deux mots de passe sont identiques
