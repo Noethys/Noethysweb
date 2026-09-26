@@ -21,8 +21,12 @@ DICT_ZONES_SCOLAIRES = {
 
 
 def Rechercher_zone_scolaire(cp=""):
+    departement = (cp or "").strip()[:2]
+    if not departement.isdigit():
+        # Code postal absent ou non numérique (ex : Corse 2A/2B)
+        return None
     for zone, liste_departements in DICT_ZONES_SCOLAIRES.items():
-        if int((cp or None)[:2]) in liste_departements: return zone
+        if int(departement) in liste_departements: return zone
     return None
 
 
@@ -78,8 +82,9 @@ class View(CustomView, TemplateView):
             return HttpResponseRedirect(reverse_lazy("vacances_importation", args=zone))
 
         # Sauvegarde des périodes cochées
-        if zone == "x":
-            zone = self.Get_zone_organisateur()
+        if zone not in ("a", "b", "c"):
+            # Même logique que l'affichage : zone de l'organisateur, sinon zone A par défaut
+            zone = self.Get_zone_organisateur() or "A"
         liste_periodes = self.Get_liste_periodes(zone=zone)
         for index in reponses:
             dict_vacance = liste_periodes[index]
