@@ -16,7 +16,10 @@ from django.db import transaction
 from django.db.models import Sum, Q
 from django.core.cache import cache
 from django.contrib import messages
-from eopayment import Payment
+from eopayment import Payment, systempayv2
+# eopayment limite vads_payment_config à "SINGLE" ou "MULTI" (sans paramètres) : on lève cette restriction
+# pour autoriser "MULTI:first=...;count=...;period=..." et "MULTI_EXT:..."
+systempayv2.PARAMETER_MAP["vads_payment_config"].choices = None
 from portail.views.base import CustomView
 from core.models import Facture, Prestation, Ventilation, PortailPeriode, Paiement, Reglement, Payeur, ModeReglement, CompteBancaire, PortailRenseignement, ModeleImpression, Mandat
 from core.utils import utils_portail, utils_fichiers, utils_dates, utils_texte, utils_preferences, utils_helloasso
@@ -162,7 +165,7 @@ def effectuer_paiement_en_ligne(request):
                 return JsonResponse({"erreur": "Le paiement en plusieurs fois nécessite un montant minimal de %s %s !" % (montant_minimal_echelonnement, utils_preferences.Get_symbole_monnaie())}, status=401)
 
             # 3 fois standard
-            montant_total = float(montant_reglement) * 100
+            montant_total = int("%.0f" % (100 * montant_reglement))
             vads_payment_config = "MULTI:first=%d;count=3;period=30" % ((montant_total // 3) + (montant_total % 3))
 
             # N fois avancé : Calcul des dates et montants échelonnés
