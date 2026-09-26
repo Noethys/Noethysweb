@@ -82,7 +82,7 @@ def creation_string_key2(*args):
 def surligner(texte, expression):
     pattern = re.compile(re.escape(expression), re.IGNORECASE)
     try:
-        return mark_safe(pattern.sub('<span class="surlignage">\g<0></span>', texte))
+        return mark_safe(pattern.sub(r'<span class="surlignage">\g<0></span>', texte))
     except:
         return texte
 
