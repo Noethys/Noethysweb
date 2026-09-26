@@ -12,6 +12,8 @@ from individus.forms.edition_informations import Formulaire
 
 
 def Generer_pdf(request):
+    time.sleep(1)
+
     # Récupération des options
     form = Formulaire(request.POST, request=request)
     if not form.is_valid():
@@ -38,7 +40,7 @@ def Generer_pdf(request):
     if impression.erreurs:
         return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
     nom_fichier = impression.Get_nom_fichier()
-    time.sleep(1)
+
     return JsonResponse({"nom_fichier": nom_fichier})
 
 
