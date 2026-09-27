@@ -1,3 +1,11 @@
+Version 1.3.4.9 (27/09/2026) :
+
+- Correction du paiement en trois fois de Payzen
+- Correction de l'importation des périodes de vacances de la zone A
+- Correction de la comparaison des adresses mail dans reset password et créer compte
+- Correction des formulaires du portail
+- Correction de l'édition PDF des informations
+
 Version 1.3.4.8 (24/09/2026) :
 
 - Ajout du tarif au taux d'effort et par tranches de QF au prorata d'une durée
