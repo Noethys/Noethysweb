@@ -11,6 +11,7 @@ from django.db.models.query import QuerySet
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from django.db.models.fields.files import FieldFile
 from core.models import Rattachement, Individu
@@ -25,6 +26,24 @@ class Onglet(CustomView):
     rattachement = None
     onglet_actif = None
     dict_onglet_actif = None
+
+    def dispatch(self, request, *args, **kwargs):
+        """ Redirige vers le premier onglet visible si l'onglet demandé est masqué """
+        if request.user.is_authenticated and getattr(request.user, "categorie", None) == "famille":
+            liste_onglets, kwargs_url = None, {}
+            if self.onglet_actif.startswith("individu_"):
+                rattachement = Rattachement.objects.filter(pk=self.kwargs.get("idrattachement"), famille=request.user.famille).first()
+                if rattachement:
+                    liste_onglets = utils_onglets.Get_onglets(categorie=rattachement.categorie)
+                    kwargs_url = {"idrattachement": rattachement.pk}
+            else:
+                liste_onglets = utils_onglets.Get_onglets(categorie="famille")
+
+            if liste_onglets is not None and self.onglet_actif not in [onglet.code for onglet in liste_onglets]:
+                if liste_onglets:
+                    return HttpResponseRedirect(reverse(liste_onglets[0].url, kwargs=kwargs_url))
+                return HttpResponseRedirect(reverse("portail_renseignements"))
+        return super(Onglet, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(Onglet, self).get_context_data(**kwargs)

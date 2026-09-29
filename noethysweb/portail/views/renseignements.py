@@ -7,7 +7,7 @@ import logging, datetime
 logger = logging.getLogger(__name__)
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.db.models import Q
 from django.utils.translation import gettext as _
 from core.views import crud
@@ -15,7 +15,7 @@ from core.models import Consentement, Rattachement, Inscription
 from individus.utils import utils_vaccinations, utils_assurances
 from portail.views.base import CustomView
 from portail.forms.approbations import Formulaire
-from portail.utils import utils_champs
+from portail.utils import utils_champs, utils_onglets
 
 
 class View(CustomView, crud.Modifier):
@@ -27,6 +27,10 @@ class View(CustomView, crud.Modifier):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = _("Renseignements")
+
+        # URL de la fiche famille : premier onglet famille visible
+        onglets_famille = utils_onglets.Get_onglets(categorie="famille")
+        context['url_fiche_famille'] = reverse(onglets_famille[0].url) if onglets_famille else None
         context['rattachements'] = Rattachement.objects.prefetch_related('individu').filter(famille=self.request.user.famille, individu__deces=False) \
                                     .exclude(individu__in=self.request.user.famille.individus_masques.all()) \
                                     .order_by("individu__nom", "individu__prenom")

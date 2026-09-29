@@ -118,7 +118,7 @@
                     <tbody>
 
                         {# Fiche famille #}
-                        <tr data-url="{% url 'portail_famille_caisse' %}" style="vertical-align: middle;" aria-label="{% trans "Fiche Famille — ouvrir la fiche" %}">
+                        <tr {% if url_fiche_famille %}data-url="{{ url_fiche_famille }}" {% endif %}style="vertical-align: middle;" aria-label="{% trans "Fiche Famille — ouvrir la fiche" %}">
                             <td>
                                 {% embed 'portail/titre_individu.html' with balise_nom="div" %}
                                     {% block styles %}p-2{% endblock %}
@@ -151,10 +151,12 @@
                                 </small>
                             </td>
                             <td class="text-right">
-                                <a href="{% url 'portail_famille_caisse' %}" class="btn btn-sm btn-primary" title="{% trans "Ouvrir la fiche" %}">
-                                    <i class="fa fa-pencil" aria-hidden="true"></i>
-                                    <span class="sr-only">{% blocktrans %}Ouvrir la fiche Famille{% endblocktrans %}</span>
-                                </a>
+                                {% if url_fiche_famille %}
+                                    <a href="{{ url_fiche_famille }}" class="btn btn-sm btn-primary" title="{% trans "Ouvrir la fiche" %}">
+                                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                                        <span class="sr-only">{% blocktrans %}Ouvrir la fiche Famille{% endblocktrans %}</span>
+                                    </a>
+                                {% endif %}
                             </td>
                         </tr>
 
