@@ -186,11 +186,26 @@ def Exporter_activite(activite, depuis=None, jusqua=None, tous_les_tarifs=False,
     dates_ouvertures = defaultdict(list)
     for unite_id, groupe_id, date in Ouverture.objects.filter(activite=activite, date__range=(depuis, jusqua)).values_list("unite_id", "groupe_id", "date"):
         dates_ouvertures[(unite_id, groupe_id)].append(date)
-    unites = {u.pk: u.nom for u in Unite.objects.filter(activite=activite)}
-    groupes = {g.pk: g.nom for g in Groupe.objects.filter(activite=activite)}
-    liste_ouvertures = []
+    unites = {u.pk: u.nom for u in Unite.objects.filter(activite=activite).order_by("ordre", "pk")}
+    groupes = {g.pk: g.nom for g in Groupe.objects.filter(activite=activite).order_by("ordre", "pk")}
+
+    # Fusion des unités et groupes qui ont exactement les mêmes dates d'ouverture
+    calendriers = defaultdict(list)
     for (unite_id, groupe_id), dates in sorted(dates_ouvertures.items()):
-        liste_ouvertures.append({"unite": {"id": unite_id, "libelle": unites.get(unite_id)}, "groupe": {"id": groupe_id, "libelle": groupes.get(groupe_id)}, **Resume_dates(dates)})
+        calendriers[tuple(sorted(dates))].append((unite_id, groupe_id))
+    ordre_unites, ordre_groupes = list(unites), list(groupes)
+    liste_ouvertures = []
+    for dates, couples in calendriers.items():
+        ids_unites = sorted({u for u, g in couples}, key=lambda u: ordre_unites.index(u) if u in ordre_unites else 0)
+        ids_groupes = sorted({g for u, g in couples}, key=lambda g: ordre_groupes.index(g) if g in ordre_groupes else 0)
+        if len(couples) == len(ids_unites) * len(ids_groupes):
+            # Toutes les combinaisons unité / groupe ont ces dates
+            cible = {"unites": [{"id": u, "libelle": unites.get(u)} for u in ids_unites],
+                     "groupes": [{"id": g, "libelle": groupes.get(g)} for g in ids_groupes]}
+        else:
+            cible = {"unites_groupes": [{"unite": {"id": u, "libelle": unites.get(u)}, "groupe": {"id": g, "libelle": groupes.get(g)}} for u, g in couples]}
+        liste_ouvertures.append({**cible, **Resume_dates(list(dates))})
+    liste_ouvertures.sort(key=lambda o: o["premiere_date"])
 
     # Remplissage (capacités résumées par unité de remplissage et groupe)
     remplissages = defaultdict(list)
@@ -230,7 +245,7 @@ def Exporter_activite(activite, depuis=None, jusqua=None, tous_les_tarifs=False,
                 "Aucune donnée personnelle des familles n'est incluse : seules des statistiques agrégées.",
                 "Les ouvertures, remplissages et événements sont limités à la période analysée.",
                 "Les tarifs terminés avant la période analysée sont exclus%s." % (" (option --tous-les-tarifs active : ils sont inclus)" if tous_les_tarifs else ""),
-                "Les dates d'ouverture sont résumées par unité et groupe (plages de dates consécutives).",
+                "Les dates d'ouverture sont résumées en plages de dates consécutives. Les unités et groupes qui ont exactement les mêmes dates d'ouverture sont regroupés dans un même bloc (toutes les combinaisons des unités et groupes listés ont ces dates).",
                 "Les jours fériés fixes légaux français sont contrôlés dans les ouvertures même s'ils ne sont pas saisis dans Noethysweb (voir calendrier.feries_fixes_legaux_non_saisis).",
             ],
         },
@@ -277,8 +292,8 @@ def Get_version():
 
 
 def Get_json(activite, **kwargs):
-    """ Renvoie l'export sous forme de texte JSON """
-    return json.dumps(Exporter_activite(activite, **kwargs), ensure_ascii=False, indent=1, default=Encodeur)
+    """ Renvoie l'export sous forme de texte JSON compact (sans indentation ni espaces) pour limiter le nombre de tokens """
+    return json.dumps(Exporter_activite(activite, **kwargs), ensure_ascii=False, separators=(",", ":"), default=Encodeur)
 
 
 def Get_nom_fichier(activite):
