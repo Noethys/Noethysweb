@@ -1,3 +1,13 @@
+Version 1.3.5.1 (04/10/2026) :
+
+- Ajout des statistiques des prestations dans le menu Prestations
+- Ajout des statistiques des consommations dans le menu Consommations
+- Ajout des statistiques des adhésions dans le menu Adhésions
+- Relooking de la page de correction de la ventilation
+- Relooking du sélecteur d'activités et de groupes d'activités
+- Relooking du datepicker et du daterangepicker
+- Amélioration de l'affichage des options de la grille des consommations
+
 Version 1.3.5.0 (30/09/2026) :
 
 - Ajout du contrôle IA du paramétrage d'une activité
