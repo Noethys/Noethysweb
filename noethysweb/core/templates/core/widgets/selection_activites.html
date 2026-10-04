@@ -31,6 +31,165 @@
     .obsolete {
         display: none;
     }
+
+    /* Lignes : liste épurée, ligne entière cliquable */
+    .table_activites {
+        margin: 0;
+        border: 0;
+    }
+    .table_activites tr.ligne_item td {
+        padding: 6px 10px !important;
+        border: 0;
+        border-bottom: 1px solid #f1f3f5;
+        font-size: 14px;
+        vertical-align: middle;
+        transition: background-color .1s;
+    }
+    .table_activites tr.ligne_item {
+        cursor: pointer;
+        user-select: none;
+    }
+    .table_activites tr.ligne_item:hover td {
+        background-color: #f6f9fb;
+    }
+    .table_activites .form-inline {
+        flex-wrap: nowrap;
+    }
+    .table_activites input[type=checkbox] {
+        width: 15px;
+        height: 15px;
+        margin: 0;
+        accent-color: #3c8dbc;
+        cursor: pointer;
+    }
+    .table_activites .nom_item {
+        margin-left: 10px !important;
+    }
+    .dark-mode .table_activites tr.ligne_item td {border-bottom-color: rgba(255, 255, 255, .07)}
+    .dark-mode .table_activites tr.ligne_item:hover td {background-color: rgba(255, 255, 255, .05)}
+
+    /* Recherche rapide : dernière ligne du cadre de la liste */
+    .div_table_activites {
+        border-bottom: 0;
+        vertical-align: top; /* supprime l'espace de ligne de base sous le bloc inline-block */
+    }
+    .recherche_activites {
+        position: relative;
+    }
+    .recherche_activites .icone_recherche {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 11px;
+        color: #c3cad1;
+        pointer-events: none;
+    }
+    .recherche_activites input {
+        height: 28px;
+        padding-left: 30px;
+        padding-right: 90px;
+        border: 1px solid #e5e5e5;
+        border-top: 1px dashed #e5e5e5;
+        border-radius: 0;
+        background: #fafbfc;
+        font-size: 12.5px;
+        box-shadow: none !important;
+    }
+    .recherche_activites input:focus {
+        background: #ffffff;
+        border-color: #e5e5e5;
+    }
+    .recherche_activites .infos_recherche {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: #adb5bd;
+    }
+    .recherche_activites .effacer_recherche {
+        display: none;
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: #6c757d;
+        font-size: 11px;
+        line-height: 20px;
+    }
+    .recherche_activites .effacer_recherche:hover {background: #e9ecef; color: #1f2d3d}
+    .recherche_activites.active .effacer_recherche {display: inline-block}
+    .actions_recherche {
+        display: none;
+        margin: 3px 0 0 4px;
+    }
+    .actions_recherche button {padding: 0; margin-right: 14px; border: 0; background: none; color: #8a96a3; font-size: 11px}
+    .actions_recherche button:hover {color: #3c8dbc; text-decoration: underline}
+    .recherche_activites.active + .actions_recherche {display: block}
+    .masquer_recherche {
+        display: none !important;
+    }
+
+    /* Activités obsolètes : filtre dans la barre de recherche */
+    .recherche_activites .bouton_obsoletes {
+        display: none;
+        padding: 1px 9px;
+        border: 1px solid #dee2e6;
+        border-radius: 999px;
+        background: #ffffff;
+        color: #6c757d;
+        font-size: 11px;
+        line-height: 16px;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background-color .12s, color .12s, border-color .12s;
+    }
+    .recherche_activites.avec_obsoletes .bouton_obsoletes {display: inline-block}
+    .recherche_activites .bouton_obsoletes:hover {border-color: #3c8dbc; color: #3c8dbc}
+    .recherche_activites .bouton_obsoletes.actif {background: #3c8dbc; border-color: #3c8dbc; color: #ffffff}
+    .afficher_obsoletes tr.obsolete {
+        display: table-row;
+    }
+    .table_activites tr.obsolete .nom_item {
+        color: #98a2ad;
+    }
+    .table_activites .tag_obsolete {
+        display: inline-block;
+        margin-left: -12px;
+        padding: 1px 7px;
+        border-radius: 999px;
+        background: #f1f3f5;
+        color: #8a96a3;
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: .02em;
+        white-space: nowrap;
+    }
+    .dark-mode .recherche_activites .bouton_obsoletes {background: transparent; border-color: #6c757d; color: #ced4da}
+    .dark-mode .recherche_activites .bouton_obsoletes.actif {background: #3c8dbc; border-color: #3c8dbc; color: #ffffff}
+    .dark-mode .table_activites .tag_obsolete {background: #454d55; color: #adb5bd}
+    .table_activites mark {
+        padding: 0 1px;
+        border-radius: 3px;
+        background: rgba(255, 193, 7, .35);
+        color: inherit;
+    }
+    .table_activites .ligne_vide td {
+        color: #6c757d;
+        font-style: italic;
+        text-align: center;
+    }
+    .dark-mode .recherche_activites input {background: #3a4047; color: #e9ecef}
+    .dark-mode .recherche_activites input:focus {background: #343a40}
+    .dark-mode .recherche_activites .effacer_recherche {color: #ced4da}
+    .dark-mode .recherche_activites .effacer_recherche:hover {background: #4b545c; color: #ffffff}
+    .dark-mode .table_activites mark {background: rgba(255, 193, 7, .3)}
 </style>
 
 {% endblock styles %}
@@ -50,22 +209,16 @@
         <label class="form-check-label" for="radio_choix_groupes_{{ id }}">Groupes</label>
     </div>
     {% endif %}
-    <div id="div_activites_obsoletes" class="pull-right masquer">
-        <span class="custom-switch custom-switch-on-primary" title="Afficher les activités obsolètes">
-            <input type="checkbox" class="custom-control-input case_switch" id="switch_activites_obsoletes">
-            <label class="custom-control-label" for="switch_activites_obsoletes"></label>
-        </span>
-    </div>
 </div>
 
 <div id="div_table_groupes_activites_{{ id }}" class="div_table_activites {% if selection.type != "groupes_activites" %}masquer{% endif %}">
     <table id="table_groupes_activites_{{ id }}" class="table table-bordered table_activites">
         {% for groupe in groupes_activites %}
-            <tr>
-                <td style="padding: 5px !important;">
+            <tr class="ligne_item">
+                <td>
                     <div class="form-inline">
                         <input name="liste_groupes_activites" type="checkbox" value="{{ groupe.pk }}" {% if selection.type == "groupes_activites" and groupe.pk in selection.ids %}checked{% endif %}>
-                        <span style="margin-left: 5px;margin-right:20px;">{{ groupe.nom }}</span>
+                        <span class="nom_item" style="margin-left: 5px;margin-right:20px;">{{ groupe.nom }}</span>
                     </div>
                 </td>
             </tr>
@@ -76,15 +229,15 @@
 <div id="div_table_activites_{{ id }}" class="div_table_activites {% if selection.type != "activites" %}masquer{% endif %}">
     <table id="table_activites_{{ id }}" class="table table-bordered table_activites">
         {% for activite in activites %}
-            <tr class="{% if not activite.Is_active %}obsolete{% endif %}">
-                <td style="padding: 5px !important;">
+            <tr class="ligne_item {% if not activite.Is_active %}obsolete{% endif %}">
+                <td>
                     <div class="form-inline">
                         <input name="liste_activites" type="checkbox" value="{{ activite.pk }}" {% if selection.type == "activites" and activite.pk in selection.ids %}checked{% endif %}>
-                        <span style="margin-left: 5px;margin-right:20px;">{{ activite.nom }}</span>
+                        <span class="nom_item" style="margin-left: 5px;margin-right:20px;">{{ activite.nom }}</span>{% if not activite.Is_active %}<span class="tag_obsolete">Terminée</span>{% endif %}
                     </div>
                 </td>
                 {% if afficher_colonne_detail %}
-                    <td style="padding: 5px !important;">
+                    <td>
                         <span style="font-size: 12px; color: #cbcbcb;">{{ activite.Get_validite_str }}</span>
                     </td>
                 {% endif %}
@@ -99,11 +252,11 @@
         <table id="table_groupes_{{ id }}" class="table table-bordered table_activites">
             {% for activite in activites %}
                 {% for groupe in groupes|get_item:activite %}
-                    <tr class="{% if not groupe.activite.Is_active %}obsolete{% endif %}">
+                    <tr class="ligne_item {% if not groupe.activite.Is_active %}obsolete{% endif %}">
                         <td>
                             <div class="form-inline">
                                 <input name="liste_groupes" type="checkbox" value="{{ groupe.pk }}" {% if selection.type == "groupes" and groupe.pk in selection.ids %}checked{% endif %}>
-                                <span style="margin-left: 5px;margin-right:20px;">{{ groupe.nom }}</span>
+                                <span class="nom_item" style="margin-left: 5px;margin-right:20px;">{{ groupe.nom }}</span>{% if not groupe.activite.Is_active %}<span class="tag_obsolete">Terminée</span>{% endif %}
                             </div>
                         </td>
                         {% if afficher_colonne_detail %}
@@ -119,15 +272,30 @@
 
 {% endif %}
 
+<div class="recherche_activites" id="div_recherche_activites_{{ id }}">
+    <i class="fa fa-search icone_recherche" aria-hidden="true"></i>
+    <input type="text" id="recherche_activites_{{ id }}" class="form-control form-control-sm" placeholder="Rechercher..." aria-label="Rechercher dans la liste" autocomplete="off">
+    <span class="infos_recherche">
+        <span id="nbre_resultats_{{ id }}" role="status" aria-live="polite"></span>
+        <button type="button" class="bouton_obsoletes" id="bouton_obsoletes_{{ id }}" aria-pressed="false" title="Afficher les activités obsolètes (terminées)">Terminées <span class="nbre_obsoletes"></span></button>
+        <button type="button" class="effacer_recherche" id="effacer_recherche_{{ id }}" title="Effacer la recherche" aria-label="Effacer la recherche"><i class="fa fa-times" aria-hidden="true"></i></button>
+    </span>
+</div>
+<div class="actions_recherche">
+    <button type="button" id="cocher_resultats_{{ id }}"><i class="fa fa-check-square-o" aria-hidden="true"></i> Cocher les résultats</button>
+    <button type="button" id="decocher_resultats_{{ id }}"><i class="fa fa-square-o" aria-hidden="true"></i> Décocher les résultats</button>
+</div>
+
 <script>
 
 $(document).ready(function() {
+
+    var conteneurs_lignes_{{ id }} = "#div_table_groupes_activites_{{ id }}, #div_table_activites_{{ id }}, #div_table_groupes_{{ id }}";
 
     // On radio change
     $('input[name=choix_activites]').on('change', function(){
         $("#div_table_groupes_activites_{{ id }}").addClass("masquer");
         $("#div_table_activites_{{ id }}").addClass("masquer");
-        $("#div_activites_obsoletes").hide();
         {% if afficher_groupes %}
             $("#div_table_groupes_{{ id }}").addClass("masquer");
         {% endif %}
@@ -136,21 +304,166 @@ $(document).ready(function() {
         };
         if ($("#radio_choix_activites_{{ id }}").prop("checked")) {
             $("#div_table_activites_{{ id }}").removeClass("masquer");
-            $("#div_activites_obsoletes").show();
         };
             {% if afficher_groupes %}
             if ($("#radio_choix_groupes_{{ id }}").prop("checked")) {
                 $("#div_table_groupes_{{ id }}").removeClass("masquer");
-                $("#div_activites_obsoletes").show();
-            };
+                };
         {% endif %}
     });
 
-    $("#switch_activites_obsoletes").on("change", function(e) {
-        $(".obsolete").toggle();
-    })
+    // Affichage des activités obsolètes (bouton "Terminées" de la barre de recherche)
+    function afficher_obsoletes_{{ id }}(actif) {
+        $("#bouton_obsoletes_{{ id }}").toggleClass("actif", actif).attr("aria-pressed", actif);
+        $(conteneurs_lignes_{{ id }}).toggleClass("afficher_obsoletes", actif);
+        filtrer_activites_{{ id }}();
+    }
+    $("#bouton_obsoletes_{{ id }}").on("click", function () {
+        afficher_obsoletes_{{ id }}(!$(this).hasClass("actif"));
+    });
+
+    // Le bouton n'apparaît que si le tableau affiché contient des activités obsolètes
+    function maj_bouton_obsoletes_{{ id }}() {
+        var nbre = $(conteneurs_lignes_{{ id }}).not(".masquer").find("tr.obsolete").length;
+        $("#bouton_obsoletes_{{ id }} .nbre_obsoletes").text("(" + nbre + ")");
+        $("#div_recherche_activites_{{ id }}").toggleClass("avec_obsoletes", nbre > 0);
+        ajuster_marge_recherche_{{ id }}();
+    }
+    $('input[name=choix_activites]').on('change', maj_bouton_obsoletes_{{ id }});
 
     $("input[name=choix_activites]").trigger("change");
+    maj_bouton_obsoletes_{{ id }}();
+
+    // Au chargement (ex : après "Actualiser"), on affiche les activités terminées si l'une d'elles est cochée
+    if ($(conteneurs_lignes_{{ id }}).find("tr.obsolete input[type=checkbox]:checked").length) {
+        afficher_obsoletes_{{ id }}(true);
+    }
+
+    // Un clic n'importe où sur la ligne coche ou décoche la case
+    $(conteneurs_lignes_{{ id }}).on("click", "tr.ligne_item", function (event) {
+        if ($(event.target).is("input, a, button, label")) {return}
+        var case_a_cocher = $(this).find("input[type=checkbox]").first();
+        case_a_cocher.prop("checked", !case_a_cocher.prop("checked")).trigger("change");
+    });
+
+    // ---------------- Recherche rapide ----------------
+
+    var conteneurs_{{ id }} = "#div_table_groupes_activites_{{ id }}, #div_table_activites_{{ id }}, #div_table_groupes_{{ id }}";
+
+    // Texte sans accents ni majuscules
+    function normaliser(texte) {
+        return (texte || "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
+
+    function echapper(texte) {
+        return $("<div>").text(texte).html();
+    }
+
+    // Surligne les mots trouvés, sans tenir compte des accents
+    function surligner(texte, mots) {
+        var texte_normalise = "", positions = [];
+        for (var i = 0; i < texte.length; i++) {
+            var lettre = normaliser(texte[i]);
+            for (var j = 0; j < lettre.length; j++) {positions.push(i)}
+            texte_normalise += lettre;
+        }
+        var marques = new Array(texte.length).fill(false);
+        mots.forEach(function (mot) {
+            var debut = texte_normalise.indexOf(mot);
+            while (debut !== -1) {
+                for (var k = debut; k < debut + mot.length; k++) {marques[positions[k]] = true}
+                debut = texte_normalise.indexOf(mot, debut + mot.length);
+            }
+        });
+        var html = "", ouvert = false;
+        for (var i = 0; i < texte.length; i++) {
+            if (marques[i] && !ouvert) {html += "<mark>"; ouvert = true}
+            if (!marques[i] && ouvert) {html += "</mark>"; ouvert = false}
+            html += echapper(texte[i]);
+        }
+        return html + (ouvert ? "</mark>" : "");
+    }
+
+    // Ligne masquée par le switch des activités obsolètes ?
+    function est_obsolete_masquee(ligne) {
+        return ligne.hasClass("obsolete") && !$("#bouton_obsoletes_{{ id }}").hasClass("actif");
+    }
+
+    // Lignes visibles du tableau actuellement affiché
+    function get_lignes_visibles_{{ id }}() {
+        return $(conteneurs_{{ id }}).not(".masquer").find("tr.ligne_item").filter(function () {
+            return !$(this).hasClass("masquer_recherche") && !est_obsolete_masquee($(this));
+        });
+    }
+
+    // Réserve à droite du champ juste la place occupée par le compteur, le bouton "Terminées" et la croix
+    function ajuster_marge_recherche_{{ id }}() {
+        var largeur = $("#div_recherche_activites_{{ id }} .infos_recherche").outerWidth() || 0;
+        $("#recherche_activites_{{ id }}").css("padding-right", (largeur + 14) + "px");
+    }
+
+    function filtrer_activites_{{ id }}() {
+        var recherche = $("#recherche_activites_{{ id }}").val();
+        var mots = normaliser(recherche).trim().split(/\s+/).filter(Boolean);
+        $("#div_recherche_activites_{{ id }}").toggleClass("active", mots.length > 0);
+
+        $(conteneurs_{{ id }}).each(function () {
+            var conteneur = $(this);
+            conteneur.find("tr.ligne_item").each(function () {
+                var ligne = $(this);
+                var nom = ligne.find(".nom_item");
+                if (nom.data("texte_origine") === undefined) {nom.data("texte_origine", nom.text())}
+                var texte_ligne = normaliser(ligne.text());
+                var trouve = mots.every(function (mot) {return texte_ligne.indexOf(mot) !== -1});
+                ligne.toggleClass("masquer_recherche", !trouve);
+                nom.html(mots.length && trouve ? surligner(nom.data("texte_origine"), mots) : echapper(nom.data("texte_origine")));
+            });
+
+            // Message si aucun résultat
+            var table = conteneur.find("table");
+            var ligne_vide = table.find("tr.ligne_vide");
+            if (!ligne_vide.length) {
+                ligne_vide = $('<tr class="ligne_vide"><td colspan="2"></td></tr>').appendTo(table);
+            }
+            var nbre_visibles = conteneur.find("tr.ligne_item").filter(function () {
+                return !$(this).hasClass("masquer_recherche") && !est_obsolete_masquee($(this));
+            }).length;
+            ligne_vide.find("td").text("Aucun résultat pour « " + recherche.trim() + " »");
+            ligne_vide.toggleClass("masquer", !(mots.length && nbre_visibles === 0));
+        });
+
+        // Compteur de résultats
+        if (mots.length) {
+            var total = $(conteneurs_{{ id }}).not(".masquer").find("tr.ligne_item").filter(function () {return !est_obsolete_masquee($(this))}).length;
+            $("#nbre_resultats_{{ id }}").text(get_lignes_visibles_{{ id }}().length + " / " + total);
+        } else {
+            $("#nbre_resultats_{{ id }}").text("");
+        }
+        ajuster_marge_recherche_{{ id }}();
+    }
+
+    $("#recherche_activites_{{ id }}").on("input", filtrer_activites_{{ id }});
+
+    $("#recherche_activites_{{ id }}").on("keydown", function (event) {
+        if (event.key === "Enter") {event.preventDefault()}
+        if (event.key === "Escape") {$(this).val(""); filtrer_activites_{{ id }}()}
+    });
+
+    $("#effacer_recherche_{{ id }}").on("click", function () {
+        $("#recherche_activites_{{ id }}").val("").trigger("focus");
+        filtrer_activites_{{ id }}();
+    });
+
+    $('input[name=choix_activites]').on('change', function () {
+        filtrer_activites_{{ id }}();
+    });
+
+    // Cocher / décocher tous les résultats affichés
+    function cocher_resultats_{{ id }}(etat) {
+        get_lignes_visibles_{{ id }}().find("input[type=checkbox]").prop("checked", etat).trigger("change");
+    }
+    $("#cocher_resultats_{{ id }}").on("click", function () {cocher_resultats_{{ id }}(true)});
+    $("#decocher_resultats_{{ id }}").on("click", function () {cocher_resultats_{{ id }}(false)});
 
 });
 
