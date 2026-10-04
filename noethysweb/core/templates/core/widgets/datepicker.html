@@ -55,13 +55,26 @@ $(function () {
         $('#checkbox_{{ id }}').trigger('change');
     {% endif %}
 
-    $('.datepicker_{{ id }}').on('show', function () {
-        document.querySelector('.datepicker-dropdown')?.setAttribute('data-bs-theme', 'light');
-    });
-
 });
 
 function maj_datepicker_{{ id }}(data){
+
+    // Initiales des jours (L M M J V S D)
+    if ($.fn.datepicker.dates.fr) {
+        $.fn.datepicker.dates.fr.daysMin = ["D", "L", "M", "M", "J", "V", "S"];
+    }
+
+    // Recherche de la période de vacances contenant une date (format YYYY-MM-DD)
+    function get_vacance(date_iso) {
+        for (var idvacance in data.vacances) {
+            var vacance = data.vacances[idvacance];
+            if ((date_iso >= vacance.date_debut) && (date_iso <= vacance.date_fin)) {
+                return vacance;
+            }
+        }
+        return null;
+    }
+
     $(".datepicker_{{ id }}").datepicker({
         autoclose: true,
         todayBtn: "linked",
@@ -69,66 +82,236 @@ function maj_datepicker_{{ id }}(data){
         todayHighlight: true,
         multidate: multidate_{{ id }},
         multidateSeparator: ";",
+        templates: {
+            leftArrow: '<i class="fa fa-chevron-left" aria-hidden="true"></i>',
+            rightArrow: '<i class="fa fa-chevron-right" aria-hidden="true"></i>'
+        },
         beforeShowDay: function (date) {
-            var date_fixe = moment(date).format('YYYY-MM-DD'); // jQuery.datepicker.formatDate('yy-mm-dd', date);
-            var date_variable = moment(date).format('0-MM-DD'); // jQuery.datepicker.formatDate('0-mm-dd', date);
+            var classes = [];
+            var infos = [];
+            var date_fixe = moment(date).format('YYYY-MM-DD');
+            var date_variable = moment(date).format('0-MM-DD');
+
+            // Week-ends
+            if (date.getDay() == 0 || date.getDay() == 6) {
+                classes.push("calendrier_weekends");
+            }
+
+            // Vacances : bande continue avec extrémités arrondies
+            var vacance = get_vacance(date_fixe);
+            if (vacance) {
+                classes.push("calendrier_vacances");
+                if (!get_vacance(moment(date).subtract(1, 'days').format('YYYY-MM-DD'))) {classes.push("vacances_debut")}
+                if (!get_vacance(moment(date).add(1, 'days').format('YYYY-MM-DD'))) {classes.push("vacances_fin")}
+                infos.push(vacance.nom ? vacance.nom : "Vacances");
+            }
 
             // Jours fériés
             if ((data.feries.hasOwnProperty(date_fixe)) || (data.feries.hasOwnProperty(date_variable))) {
-                return "calendrier_feries";
-            }
-            // Week-ends
-            if (date.getDay() == 0 || date.getDay() == 6) {
-                return "calendrier_weekends";
+                classes.push("calendrier_feries");
+                infos.push("Jour férié");
             }
 
-            // Vacances
-            for (var idvacance in data.vacances) {
-                var date_debut = new Date(data.vacances[idvacance].date_debut);
-                date_debut.setHours(0,0,0,0)
-                var date_fin = new Date(data.vacances[idvacance].date_fin);
-                date_fin.setHours(0,0,0,0)
-                if ((date >= date_debut) && (date <= date_fin)) {
-                    return "calendrier_vacances";
-                }
-            }
+            return {
+                classes: classes.join(" "),
+                tooltip: infos.join(" - "),
+                content: '<span class="jour">' + date.getDate() + '</span>'
+            };
         }
+    });
 
-    })};
+    // Ajout de la légende sous les jours
+    $(".datepicker_{{ id }}").each(function () {
+        var datepicker = $(this).data('datepicker');
+        if (datepicker && !datepicker.picker.find('.dp-legende').length) {
+            datepicker.picker.find('.datepicker-days').append(
+                '<div class="dp-legende">' +
+                    '<span><i class="dp-pastille dp-pastille-vacances"></i>Vacances</span>' +
+                    '<span><i class="dp-pastille dp-pastille-feries"></i>Férié</span>' +
+                    '<span><i class="dp-pastille dp-pastille-today"></i>Aujourd\'hui</span>' +
+                '</div>'
+            );
+        }
+    });
+};
 </script>
 
 <style>
-{% comment %}
-    .calendrier_vacances, .calendrier_feries, .calendrier_weekends {
-        border: solid !important;
-        border-width: 2px !important;
-        border-color: transparent !important;
+    /* Calendrier moderne aux couleurs Noethysweb (AdminLTE 3 lightblue) */
+    .datepicker {
+        --dp-bleu: #3c8dbc;
+        --dp-bleu-ombre: rgba(60, 141, 188, .35);
+        --dp-survol: rgba(60, 141, 188, .10);
+        --dp-texte: #1f2d3d;
+        --dp-secondaire: #6c757d;
+        --dp-muet: #c3cad1;
+        --dp-weekends: #8a96a3;
+        --dp-vacances: rgba(255, 193, 7, .16);
+        --dp-vacances-attenue: rgba(255, 193, 7, .07);
+        --dp-vacances-texte: #8a6400;
+        --dp-feries: #e0485a;
+        --dp-separateur: #edf0f3;
+        --dp-fond: #ffffff;
+        padding: 14px 14px 10px;
+        color: var(--dp-texte);
+        font-variant-numeric: tabular-nums;
     }
-{% endcomment %}
-    .datepicker-inline {
-        width: 100%;
+    .dark-mode .datepicker {
+        --dp-bleu-ombre: rgba(0, 0, 0, .4);
+        --dp-survol: rgba(255, 255, 255, .07);
+        --dp-texte: #eef1f4;
+        --dp-secondaire: #adb5bd;
+        --dp-muet: #5d6670;
+        --dp-weekends: #8f9aa5;
+        --dp-vacances: rgba(255, 193, 7, .14);
+        --dp-vacances-attenue: rgba(255, 193, 7, .06);
+        --dp-vacances-texte: #ffd666;
+        --dp-feries: #ff7b8a;
+        --dp-separateur: #454d55;
+        --dp-fond: #2f353b;
     }
-    .datepicker_{{ id }} table {
-        width: 100%;
+
+    /* Fenêtre déroulante : carte flottante, sans flèche, apparition douce */
+    .datepicker-dropdown {
+        background: var(--dp-fond);
+        border: 0;
+        border-radius: 14px;
+        box-shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 12px 32px rgba(16, 24, 40, .14);
+        margin-top: 6px;
+        animation: dp-apparition .14s ease-out;
     }
-    .datepicker_{{ id }} tr td {
-        border-radius: 0px !important;
+    .dark-mode .datepicker-dropdown {box-shadow: 0 0 0 1px rgba(255, 255, 255, .06), 0 12px 32px rgba(0, 0, 0, .45)}
+    .datepicker-dropdown:before, .datepicker-dropdown:after {display: none}
+    .datepicker-dropdown.datepicker-orient-top {margin-top: -6px}
+    @keyframes dp-apparition {from {opacity: 0; transform: translateY(-4px)} to {opacity: 1; transform: none}}
+    @media (prefers-reduced-motion: reduce) {.datepicker-dropdown {animation: none}}
+
+    /* En-tête : mois centré entre deux flèches rondes */
+    .datepicker table {border-collapse: separate; border-spacing: 0 3px}
+    .datepicker table tr th {color: var(--dp-texte); border-radius: 8px; transition: background-color .12s}
+    .datepicker .datepicker-switch {font-size: 15px; font-weight: 600; text-transform: capitalize}
+    .datepicker th.prev, .datepicker th.next {
+        width: 32px; height: 32px; border-radius: 50%;
+        color: var(--dp-secondaire); font-size: 11px;
     }
-    .calendrier_vacances {
-        background-color: #fbffb8;
+    .datepicker .datepicker-switch:hover, .datepicker .prev:hover, .datepicker .next:hover {
+        background: var(--dp-survol) !important;
     }
-    .dark-mode .calendrier_vacances {
-        background-color: #585a4b;
+    .datepicker table tr th.dow {
+        font-size: 11px; font-weight: 600; letter-spacing: .04em;
+        color: var(--dp-secondaire); height: 24px;
     }
-    .calendrier_feries {
-        background-color: lightgrey;
+
+    /* Jours : cercles, bande de vacances translucide */
+    .datepicker table tr td.day {
+        --dp-fond-jour: transparent;
+        background: var(--dp-fond-jour) !important;
+        text-shadow: none;
+        border-radius: 0;
+        width: 36px;
+        height: 34px;
+        padding: 0;
+        color: var(--dp-texte);
+        font-size: 13px;
     }
-    .calendrier_weekends{
-        background-color: #f4f4f4;
+    .datepicker table tr td.day .jour {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        color: inherit;
+        transition: background-color .12s, color .12s, box-shadow .12s;
     }
-    .dark-mode .calendrier_weekends{
-        background-color: #414141;
+    .datepicker table tr td.day:hover .jour,
+    .datepicker table tr td.day.focused .jour {background: var(--dp-survol)}
+
+    .datepicker table tr td.day.calendrier_weekends {color: var(--dp-weekends)}
+    .datepicker table tr td.day.calendrier_vacances {
+        --dp-fond-jour: var(--dp-vacances);
+        color: var(--dp-vacances-texte);
     }
+    .datepicker table tr td.day.vacances_debut,
+    .datepicker table tr td.day.calendrier_vacances:first-child {border-top-left-radius: 17px; border-bottom-left-radius: 17px}
+    .datepicker table tr td.day.vacances_fin,
+    .datepicker table tr td.day.calendrier_vacances:last-child {border-top-right-radius: 17px; border-bottom-right-radius: 17px}
+
+    /* Fériés : texte rouge et point */
+    .datepicker table tr td.day.calendrier_feries {color: var(--dp-feries); font-weight: 600}
+    .datepicker table tr td.day.calendrier_feries .jour:before {
+        content: ""; position: absolute; top: 4px; right: 5px;
+        width: 5px; height: 5px; border-radius: 50%; background: var(--dp-feries);
+    }
+
+    .datepicker table tr td.day.old,
+    .datepicker table tr td.day.new {color: var(--dp-muet); font-weight: normal}
+    .datepicker table tr td.day.old.calendrier_vacances,
+    .datepicker table tr td.day.new.calendrier_vacances {--dp-fond-jour: var(--dp-vacances-attenue)}
+    .datepicker table tr td.day.old .jour:before,
+    .datepicker table tr td.day.new .jour:before {display: none}
+    .datepicker table tr td.day.disabled .jour {color: var(--dp-muet); cursor: not-allowed}
+
+    /* Aujourd'hui : point bleu sous le chiffre */
+    .datepicker table tr td.day.today .jour {color: var(--dp-bleu); font-weight: 700}
+    .datepicker table tr td.day.today .jour:after {
+        content: ""; position: absolute; bottom: 4px; left: 50%;
+        width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--dp-bleu);
+    }
+
+    /* Date sélectionnée : cercle plein avec halo */
+    .datepicker table tr td.day.active .jour,
+    .datepicker table tr td.day.active:hover .jour {
+        background: var(--dp-bleu);
+        color: #ffffff;
+        font-weight: 600;
+        box-shadow: 0 4px 10px var(--dp-bleu-ombre);
+    }
+    .datepicker table tr td.day.active .jour:after {background: #ffffff}
+
+    /* Mois / années / décennies */
+    .datepicker table tr td span {border-radius: 10px; transition: background-color .12s}
+    .datepicker table tr td span:hover, .datepicker table tr td span.focused {background: var(--dp-survol)}
+    .datepicker table tr td span.active, .datepicker table tr td span.active:hover,
+    .datepicker table tr td span.active.active {
+        background: var(--dp-bleu) !important; color: #ffffff !important; text-shadow: none;
+    }
+
+    /* Pied : bouton "Aujourd'hui" en pilule */
+    .datepicker tfoot tr th.today {
+        display: table-cell;
+        padding: 7px 0;
+        border-radius: 999px;
+        background: var(--dp-survol);
+        color: var(--dp-bleu);
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .datepicker tfoot tr th.today:hover {background: var(--dp-bleu) !important; color: #ffffff}
+
+    /* Légende */
+    .datepicker .dp-legende {
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--dp-separateur);
+        font-size: 11px;
+        color: var(--dp-secondaire);
+    }
+    .datepicker .dp-pastille {
+        display: inline-block; width: 8px; height: 8px; margin-right: 5px;
+        border-radius: 50%; vertical-align: 0;
+    }
+    .datepicker .dp-pastille-vacances {background: #ffc107}
+    .datepicker .dp-pastille-feries {background: var(--dp-feries)}
+    .datepicker .dp-pastille-today {background: var(--dp-bleu)}
+
+    /* Mode intégré (inline) */
+    .datepicker-inline {width: 100%}
+    .datepicker_{{ id }} table {width: 100%}
 </style>
 
 {% if affichage_inline %}

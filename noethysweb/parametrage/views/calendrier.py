@@ -13,7 +13,7 @@ def Get_calendrier(request):
 
     # Vacances
     for vacance in Vacance.objects.all():
-        dict_resultats["vacances"][vacance.idvacance] = {"date_debut": str(vacance.date_debut), "date_fin": str(vacance.date_fin)}
+        dict_resultats["vacances"][vacance.idvacance] = {"nom": vacance.nom, "date_debut": str(vacance.date_debut), "date_fin": str(vacance.date_fin)}
 
     # Fériés
     for ferie in Ferie.objects.all():
