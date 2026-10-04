@@ -120,6 +120,20 @@ function maj_datepicker_{{ id }}(data){
         }
     });
 
+    // Animation d'ouverture : bootstrap-datepicker redéclenche "show" (et réinsère la fenêtre) à chaque changement
+    // de mois, ce qui relancerait l'animation. On ne l'applique donc qu'à la première ouverture.
+    $(".datepicker_{{ id }}").off(".dp_animation").on("show.dp_animation", function () {
+        var datepicker = $(this).data("datepicker");
+        if (!datepicker || datepicker.isInline || datepicker.picker.data("dp_ouvert")) {return}
+        var picker = datepicker.picker;
+        picker.data("dp_ouvert", true).addClass("dp-ouverture").one("animationend", function () {
+            picker.removeClass("dp-ouverture");
+        });
+    }).on("hide.dp_animation", function () {
+        var datepicker = $(this).data("datepicker");
+        if (datepicker) {datepicker.picker.data("dp_ouvert", false).removeClass("dp-ouverture")}
+    });
+
     // Ajout de la légende sous les jours
     $(".datepicker_{{ id }}").each(function () {
         var datepicker = $(this).data('datepicker');
@@ -178,13 +192,16 @@ function maj_datepicker_{{ id }}(data){
         border-radius: 14px;
         box-shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 12px 32px rgba(16, 24, 40, .14);
         margin-top: 6px;
+    }
+    /* Animation jouée uniquement à l'ouverture (la classe est retirée à la fin de l'animation) */
+    .datepicker-dropdown.dp-ouverture {
         animation: dp-apparition .14s ease-out;
     }
     .dark-mode .datepicker-dropdown {box-shadow: 0 0 0 1px rgba(255, 255, 255, .06), 0 12px 32px rgba(0, 0, 0, .45)}
     .datepicker-dropdown:before, .datepicker-dropdown:after {display: none}
     .datepicker-dropdown.datepicker-orient-top {margin-top: -6px}
     @keyframes dp-apparition {from {opacity: 0; transform: translateY(-4px)} to {opacity: 1; transform: none}}
-    @media (prefers-reduced-motion: reduce) {.datepicker-dropdown {animation: none}}
+    @media (prefers-reduced-motion: reduce) {.datepicker-dropdown.dp-ouverture {animation: none}}
 
     /* En-tête : mois centré entre deux flèches rondes */
     .datepicker table {border-collapse: separate; border-spacing: 0 3px}
