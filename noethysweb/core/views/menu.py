@@ -353,6 +353,10 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_depots_cotisations.Add(code="liste_cotisations_disponibles", titre="Liste des adhésions non déposées", icone="file-text-o")
     menu_depots_cotisations.Add(code="depots_cotisations_liste", titre="Dépôts d'adhésions", icone="file-text-o")
 
+    # Analyse
+    menu_analyse_cotisations = menu_cotisations.Add(titre="Analyse")
+    menu_analyse_cotisations.Add(code="statistiques_cotisations", titre="Statistiques des adhésions", icone="file-text-o")
+
 
     # ------------------------------------ Consommations ------------------------------------
     menu_consommations = menu.Add(code="consommations_toc", titre="Consommations", icone="calendar")

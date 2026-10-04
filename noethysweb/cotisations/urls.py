@@ -8,7 +8,7 @@ from core.views import toc
 from core.decorators import secure_ajax
 from cotisations.views import liste_cotisations, liste_cotisations_disponibles, depots_cotisations, saisie_lot_cotisations, liste_cotisations_manquantes, \
                             cotisations_impression, cotisations_email, depots_cotisations_selection, saisie_lot_cotisations_individus, saisie_lot_cotisations_familles, \
-                            liste_adherents, liste_adherents_individus, liste_adherents_familles
+                            liste_adherents, liste_adherents_individus, liste_adherents_familles, statistiques_cotisations
 
 urlpatterns = [
 
@@ -27,6 +27,9 @@ urlpatterns = [
     path('cotisations/liste_adherents', liste_adherents.Selection.as_view(), name='liste_adherents'),
     path('cotisations/liste_adherents/individus/<int:idunite_cotisation>', liste_adherents_individus.Liste.as_view(), name='liste_adherents_individus'),
     path('cotisations/liste_adherents/familles/<int:idunite_cotisation>', liste_adherents_familles.Liste.as_view(), name='liste_adherents_familles'),
+
+    # Statistiques des adhésions
+    path('cotisations/statistiques', statistiques_cotisations.View.as_view(), name='statistiques_cotisations'),
 
     # Gestion des cotisations
     path('cotisations/saisie_lot_cotisations', saisie_lot_cotisations.Selection_type_cotisation.as_view(), name='saisie_lot_cotisations'),
@@ -49,5 +52,10 @@ urlpatterns = [
     path('cotisations/saisie_lot_cotisations/appliquer', secure_ajax(saisie_lot_cotisations.Appliquer), name='ajax_saisie_lot_cotisations_appliquer'),
     path('cotisations/cotisations_impression_pdf', secure_ajax(cotisations_impression.Impression_pdf), name='ajax_cotisations_impression_pdf'),
     path('cotisations/cotisations_email_pdf', secure_ajax(cotisations_email.Impression_pdf), name='ajax_cotisations_email_pdf'),
+
+
+    # AJAX statistiques des adhésions
+    path('cotisations/statistiques/exporter_excel', secure_ajax(statistiques_cotisations.Exporter_excel), name='ajax_statistiques_cotisations_exporter_excel'),
+    path('cotisations/statistiques/generer_pdf', secure_ajax(statistiques_cotisations.Generer_pdf), name='ajax_statistiques_cotisations_generer_pdf'),
 
 ]
