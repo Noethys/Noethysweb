@@ -90,14 +90,16 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    <div class="mb-2">
+                        <button type="submit" form="form_statistiques_cotisations" class="btn btn-primary btn-block" title="Actualiser les résultats"><i class="fa fa-refresh margin-r-5"></i> Actualiser</button>
+                        {% if data.nbre_cotisations %}
+                            <div class="d-flex mt-2" style="gap: 6px;">
+                                <button type="button" class="btn btn-default btn-sm flex-fill" id="bouton_excel" title="Exporter les statistiques au format Excel"><i class="fa fa-file-excel-o margin-r-5"></i> Excel</button>
+                                <button type="button" class="btn btn-default btn-sm flex-fill" id="bouton_pdf" title="Exporter les statistiques au format PDF"><i class="fa fa-file-pdf-o margin-r-5"></i> PDF</button>
+                            </div>
+                        {% endif %}
+                    </div>
                     {% crispy form_parametres %}
-                    <button type="submit" form="form_statistiques_cotisations" class="btn btn-primary btn-block" title="Actualiser les résultats"><i class="fa fa-refresh margin-r-5"></i> Actualiser</button>
-                    {% if data.nbre_cotisations %}
-                        <div class="d-flex mt-2" style="gap: 6px;">
-                            <button type="button" class="btn btn-default btn-sm flex-fill" id="bouton_excel" title="Exporter les statistiques au format Excel"><i class="fa fa-file-excel-o margin-r-5"></i> Excel</button>
-                            <button type="button" class="btn btn-default btn-sm flex-fill" id="bouton_pdf" title="Exporter les statistiques au format PDF"><i class="fa fa-file-pdf-o margin-r-5"></i> PDF</button>
-                        </div>
-                    {% endif %}
                 </div>
             </div>
 

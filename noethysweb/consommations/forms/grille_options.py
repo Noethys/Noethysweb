@@ -26,7 +26,7 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper = FormHelper()
         self.helper.form_id = 'form_options'
         self.helper.form_method = 'post'
-        
+
         self.helper.layout = Layout(
             Field("tri"),
             Field("afficher_age"),
