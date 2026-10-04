@@ -16,8 +16,13 @@ def Get_calendrier(request):
         dict_resultats["vacances"][vacance.idvacance] = {"nom": vacance.nom, "date_debut": str(vacance.date_debut), "date_fin": str(vacance.date_fin)}
 
     # Fériés
+    # (fériés fixes identifiés par leur type, comme dans utils_dates.EstFerie, quelle que soit l'année enregistrée)
     for ferie in Ferie.objects.all():
-        dict_resultats["feries"]["%d-%02d-%02d" % (ferie.annee, ferie.mois, ferie.jour)] = None
+        if ferie.type == "fixe":
+            cle = "0-%02d-%02d" % (ferie.mois, ferie.jour)
+        else:
+            cle = "%d-%02d-%02d" % (ferie.annee, ferie.mois, ferie.jour)
+        dict_resultats["feries"][cle] = ferie.nom
 
     return JsonResponse(dict_resultats)
 

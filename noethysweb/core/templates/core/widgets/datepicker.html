@@ -109,7 +109,7 @@ function maj_datepicker_{{ id }}(data){
             // Jours fériés
             if ((data.feries.hasOwnProperty(date_fixe)) || (data.feries.hasOwnProperty(date_variable))) {
                 classes.push("calendrier_feries");
-                infos.push("Jour férié");
+                infos.push(data.feries[date_fixe] || data.feries[date_variable] || "Jour férié");
             }
 
             return {
