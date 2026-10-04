@@ -48,6 +48,7 @@ urlpatterns = [
 
     # Ventilation
     path('reglements/corriger_ventilation', corriger_ventilation.View.as_view(), name='corriger_ventilation'),
+    path('reglements/corriger_ventilation/apercu', secure_ajax(corriger_ventilation.Get_apercu), name='ajax_corriger_ventilation_apercu'),
 
     # AJAX
     path('facturation/depots_reglements_impression_pdf', secure_ajax(depots_reglements.Impression_pdf), name='ajax_depots_reglements_impression_pdf'),

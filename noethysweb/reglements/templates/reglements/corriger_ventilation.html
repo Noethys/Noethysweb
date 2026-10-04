@@ -1,5 +1,4 @@
 {% extends "core/box_in_page.html" %}
-{% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
 
@@ -8,30 +7,78 @@
     {{ block.super }}
 
     <style>
-        .div_table_lignes {
-            display: inline-block;
-            height: 300px;
-            overflow-y: scroll;
-            width: 100%;
-            border: solid 1px #e5e5e5;
-        }
-        .table_lignes th, td{
-            /*font-size: 12px;*/
-            padding: 5px;
-        }
-        .table_lignes th {
-            background-color: #f1f1f1;
-            font-weight: bold;
-            text-align: center;
+        /* Indicateurs */
+        .ventil-kpi {background: #fff; border: 1px solid #e9ecef; border-radius: .25rem; padding: 12px 16px; display: flex; align-items: center; gap: 14px; height: 100%;}
+        .ventil-kpi .ic {width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex: none;}
+        .ventil-kpi .v {font-size: 22px; font-weight: 700; color: #1f2d3d; line-height: 1.1; font-variant-numeric: tabular-nums;}
+        .ventil-kpi .l {font-size: 12.5px; color: #6c757d;}
+
+        /* Barre d'outils */
+        .ventil-outils {display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;}
+        .ventil-recherche {position: relative; flex: 0 1 280px;}
+        .ventil-recherche i {position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #adb5bd; font-size: 12px;}
+        .ventil-recherche input {padding-left: 30px; border-radius: 999px; height: 32px; font-size: 13px;}
+        .ventil-filtre {border: 1px solid #dee2e6; background: #fff; border-radius: 999px; padding: 3px 11px; font-size: 12.5px; color: #495057; cursor: pointer;}
+        .ventil-filtre:hover {border-color: #3c8dbc; color: #3c8dbc;}
+        .ventil-filtre.actif {background: #3c8dbc; border-color: #3c8dbc; color: #fff;}
+        .ventil-outils .droite {margin-left: auto; display: flex; gap: 6px;}
+
+        /* Tableau */
+        .ventil-table {border: 1px solid #e5e5e5; border-radius: 4px; max-height: 60vh; overflow-y: auto;}
+        .ventil-table table {margin: 0; width: 100%; border-collapse: separate; border-spacing: 0;}
+        .ventil-table th {position: sticky; top: 0; z-index: 1; background: #f8f9fa; font-size: 12px; color: #6c757d; font-weight: 600; border-bottom: 1px solid #e5e5e5; padding: 8px 10px; white-space: nowrap;}
+        .ventil-table td {padding: 7px 10px; border-top: 1px solid #f1f3f5; vertical-align: middle; font-size: 13.5px;}
+        .ventil-table tr.ligne:hover td {background: #f6f9fb;}
+        .ventil-table tr.ouvert td {background: #f6f9fb;}
+        .ventil-table input[type=checkbox] {accent-color: #3c8dbc; width: 15px; height: 15px; vertical-align: -2px; cursor: pointer;}
+        .ventil-table .num {text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap;}
+        .ventil-table .aventiler {font-weight: 700; color: #1f2d3d;}
+        .ventil-mini {height: 4px; border-radius: 2px; background: #e9ecef; margin-top: 4px; overflow: hidden; width: 90px; margin-left: auto;}
+        .ventil-mini span {display: block; height: 100%; background: #3c8dbc;}
+        .ventil-badge {font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap;}
+        .ventil-badge.du {background: #fdecee; color: #a8323e;}
+        .ventil-badge.avoir {background: #e6f4ea; color: #2d6a1f;}
+        .ventil-badge.solde0 {background: #f1f3f5; color: #6c757d;}
+        .ventil-badge.manuelle {background: #fff3cd; color: #856404; margin-left: 6px;}
+        .ventil-act {display: flex; gap: 4px; justify-content: flex-end;}
+        .ventil-act .btn {width: 30px; height: 30px; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center;}
+        .ventil-act .btn:disabled {opacity: .4;}
+        .ventil-act .btn.actif {background: #e3eff7; color: #3c8dbc; border-color: #c5dcec;}
+        .ventil-aucun td {text-align: center; color: #6c757d; padding: 20px !important;}
+
+        /* Aperçu */
+        .ventil-table tr.detail td {background: #fbfcfd; padding: 12px 16px 14px 44px;}
+        .ventil-apercu {display: grid; grid-template-columns: 1fr 34px 1fr; gap: 10px; align-items: start;}
+        .ventil-apercu h6 {font-size: 12px; color: #6c757d; font-weight: 600; margin: 0 0 6px;}
+        .ventil-apercu ul {list-style: none; margin: 0; padding: 0; border: 1px solid #e9ecef; border-radius: 6px; background: #fff; max-height: 232px; overflow-y: auto;}
+        .ventil-apercu li {display: flex; justify-content: space-between; gap: 10px; padding: 6px 10px; border-top: 1px solid #f1f3f5; font-size: 13px;}
+        .ventil-apercu li:first-child {border-top: 0;}
+        .ventil-apercu li small {color: #8a96a3;}
+        .ventil-apercu li b {white-space: nowrap; font-variant-numeric: tabular-nums;}
+        .ventil-apercu .fleche {align-self: center; text-align: center; color: #3c8dbc; font-size: 18px; padding-top: 18px;}
+        .ventil-resume {margin-top: 10px; font-size: 12.5px; color: #495057;}
+        .ventil-alerte-neg {font-size: 12.5px; color: #856404; background: #fff8e1; border: 1px solid #ffe8a1; border-radius: 6px; padding: 6px 10px;}
+        @media (max-width: 767px) {
+            .ventil-apercu {grid-template-columns: 1fr;}
+            .ventil-apercu .fleche {display: none;}
+            .ventil-table tr.detail td {padding-left: 12px;}
         }
 
-        .montant {
-            text-align: right;
-        }
+        /* Résumé de la sélection */
+        .ventil-selection-txt {display: block !important; font-size: 13px; color: #6c757d;}
+        .ventil-selection-txt b {color: #1f2d3d; font-variant-numeric: tabular-nums;}
 
+        /* Alertes de résultat */
+        .ventil-alerte {font-size: 13.5px; border-radius: 6px;}
+        .ventil-alerte.succes {background: #e6f4ea; border: 1px solid #c3e6cb; color: #1e5a2b;}
+        .ventil-alerte.attention {background: #fff8e1; border: 1px solid #ffe8a1; color: #856404;}
+        .ventil-alerte a {color: #6b4f00 !important; text-decoration: underline !important;}
+
+        /* Aucune anomalie */
+        .ventil-vide {text-align: center; padding: 40px 20px;}
+        .ventil-vide .ic {width: 64px; height: 64px; border-radius: 50%; background: #e6f4ea; color: #2d6a1f; display: inline-flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 12px;}
     </style>
 {% endblock styles %}
-
 
 
 {% block contenu_page %}
@@ -42,66 +89,122 @@
 
     {% block box_contenu %}
 
-        <div class="buttonHolder commandes">
-            <button id="bouton_valider" type="button" class="btn btn-primary" name="bouton_valider" title="Ventilation automatique"><i class='fa fa-magic margin-r-5'></i>Ventiler automatiquement</button>
-            {% if request.GET.next %}
-                <a class="btn btn-danger" href="{{ request.GET.next }}?correction_ventilation=off"><i class='fa fa-ban margin-r-5'></i>Fermer</a>
-            {% else %}
-                <a class="btn btn-danger" href="{% url 'reglements_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
+        <div class="buttonHolder commandes mb-3">
+            {% if items %}
+                <button type="button" class="btn btn-primary" id="bouton_valider" title="Ventiler automatiquement les familles cochées"><i class="fa fa-magic margin-r-5"></i>Ventiler la sélection</button>
             {% endif %}
-            <button type="button" class="btn btn-default" onclick="tout_cocher()" ><i class="fa fa-check-square-o margin-r-5"></i> Tout cocher</button>
-            <button type="button" class="btn btn-default" onclick="tout_decocher()"><i class="fa fa-square-o margin-r-5"></i> Tout décocher</button>
-            <button type="button" class="btn btn-default" id="bouton_actualiser"><i class="fa fa-refresh margin-r-5"></i> Actualiser</button>
-
+            {% if request.GET.next %}
+                <a class="btn btn-danger" href="{{ request.GET.next }}?correction_ventilation=off"><i class="fa fa-ban margin-r-5"></i>Fermer</a>
+            {% else %}
+                <a class="btn btn-danger" href="{% url 'reglements_toc' %}"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
+            {% endif %}
+            <button type="button" class="btn btn-default bouton_actualiser" title="Recalculer les anomalies"><i class="fa fa-refresh margin-r-5"></i>Actualiser</button>
         </div>
 
         <form method="post" id="form-general">
             {% csrf_token %}
-            <input type="text" name="selections" id="selections" value="" hidden/>
-            <input type="text" name="action" id="action" value="" hidden/>
+            <input type="hidden" name="selections" id="selections" value=""/>
+            <input type="hidden" name="action" id="action" value=""/>
         </form>
 
-        <div id="div_table_lignes" class="div_table_lignes margin-bottom">
-            <table id="table_lignes" class="table table-bordered table_lignes">
+        {# Résultat de la dernière ventilation #}
+        {% if resultat %}
+            {% if resultat.nbre_familles %}
+                <div class="alert ventil-alerte succes">
+                    <i class="fa fa-check-circle margin-r-5"></i><b>{{ resultat.nbre_familles }} famille{{ resultat.nbre_familles|pluralize }} ventilée{{ resultat.nbre_familles|pluralize }}</b> :
+                    {{ resultat.total_str }} affectés aux prestations ({{ resultat.nbre_creations }} ventilation{{ resultat.nbre_creations|pluralize }} créée{{ resultat.nbre_creations|pluralize }}).
+                </div>
+            {% endif %}
+            {% if resultat.familles_manuelles %}
+                <div class="alert ventil-alerte attention">
+                    <i class="fa fa-hand-paper-o margin-r-5"></i><b>{{ resultat.familles_manuelles|length }} famille{{ resultat.familles_manuelles|length|pluralize }}</b>
+                    nécessite{{ resultat.familles_manuelles|length|pluralize:"nt" }} une ventilation manuelle (prestation au montant négatif) :
+                    {% for famille in resultat.familles_manuelles %}<a href="{% url 'famille_reglements_liste' idfamille=famille.pk %}" target="_blank">{{ famille.nom }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.
+                </div>
+            {% endif %}
+        {% endif %}
 
-                <thead>
-                    <tr>
-                        <th>Famille</th>
-                        <th>Solde</th>
-                        <th>Prestations</th>
-                        <th>Règlements</th>
-                        <th>Ventilé</th>
-                        <th>A ventiler</th>
-                        <th width="80px;">Actions</th>
-                    </tr>
-                </thead>
+        {% if items %}
 
-                <tbody>
-                    {% for item in items %}
+            {# Indicateurs #}
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="ventil-kpi"><div class="ic" style="background:#fff3cd;color:#856404"><i class="fa fa-exclamation-triangle"></i></div>
+                    <div><div class="v">{{ nbre_anomalies }}</div><div class="l">famille{{ nbre_anomalies|pluralize }} à corriger</div></div></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="ventil-kpi"><div class="ic" style="background:#e3eff7;color:#3c8dbc"><i class="fa fa-random"></i></div>
+                    <div><div class="v">{{ total_a_ventiler|montant }}</div><div class="l">restant à ventiler</div></div></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="ventil-kpi"><div class="ic" style="background:#f1f3f5;color:#6c757d"><i class="fa fa-hand-paper-o"></i></div>
+                    <div><div class="v">{{ nbre_manuelles }}</div><div class="l">famille{{ nbre_manuelles|pluralize }} à ventiler manuellement</div></div></div>
+                </div>
+            </div>
+
+            {# Barre d'outils #}
+            <div class="ventil-outils">
+                <div class="ventil-recherche"><i class="fa fa-search"></i><input type="search" id="ventil_recherche" class="form-control" placeholder="Rechercher une famille..." autocomplete="off"></div>
+                <button type="button" class="ventil-filtre actif" data-filtre="toutes">Toutes ({{ nbre_anomalies }})</button>
+                <button type="button" class="ventil-filtre" data-filtre="auto">Ventilation auto possible ({{ nbre_auto }})</button>
+                <button type="button" class="ventil-filtre" data-filtre="manuelle">Ventilation manuelle ({{ nbre_manuelles }})</button>
+                <div class="droite ventil-selection-txt" id="ventil_selection_txt"></div>
+            </div>
+
+            {# Liste des anomalies #}
+            <div class="ventil-table">
+                <table id="table_lignes">
+                    <thead>
                         <tr>
-                            <td>
-                                <div class="form-inline">
-                                    <input class="check_ligne" type="checkbox" name="selections" value="{{ item.famille.pk }}" checked>
-                                    <span style="margin-right:20px;">{{ item.famille.nom }}</span>
-                                </div>
-                            </td>
-                            <td class="montant">{{ item.valeurs.solde|montant }}</td>
-                            <td class="montant">{{ item.valeurs.total_prestations|montant }}</td>
-                            <td class="montant">{{ item.valeurs.total_reglements|montant }}</td>
-                            <td class="montant">{{ item.valeurs.total_ventilations|montant }}</td>
-                            <td class="montant text-blue"><b>{{ item.valeurs.reste_a_ventiler|montant }}</b></td>
-                            <td>
-                                <center>
-                                    <a type="button" class="btn btn-default btn-sm ventiler_famille" href="#" data-idfamille="{{ item.famille.pk }}" title="Ventiler automatiquement"><i class="fa fa-magic"></i></a>
-                                    <a type="button" class="btn btn-default btn-sm" href="{% url 'famille_reglements_liste' idfamille=item.famille.pk %}" target="_blank" title="Ouvrir la fiche famille"><i class="fa fa-users"></i></a>
-                                </center>
-                            </td>
+                            <th style="width:34px"><input type="checkbox" id="check_tout" title="Tout cocher / décocher"></th>
+                            <th>Famille</th>
+                            <th class="num">Prestations</th>
+                            <th class="num">Règlements</th>
+                            <th class="num">Ventilé</th>
+                            <th class="num">À ventiler</th>
+                            <th class="num">Solde</th>
+                            <th style="width:108px"></th>
                         </tr>
-                    {% endfor %}
-                </tbody>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                            <tr class="ligne" data-idfamille="{{ item.famille.pk }}" data-nom="{{ item.famille.nom|lower }}" data-reste="{{ item.valeurs.reste_a_ventiler|stringformat:'.2f' }}" data-manuelle="{% if item.manuelle %}1{% else %}0{% endif %}">
+                                <td><input class="check_ligne" type="checkbox" value="{{ item.famille.pk }}" {% if not item.manuelle %}checked{% endif %}></td>
+                                <td>{{ item.famille.nom }}{% if item.manuelle %}<span class="ventil-badge manuelle" title="Une prestation est ventilée au-delà de son montant (montant négatif) : la ventilation doit être faite depuis la fiche famille">Ventilation manuelle</span>{% endif %}</td>
+                                <td class="num">{{ item.valeurs.total_prestations|montant }}</td>
+                                <td class="num">{{ item.valeurs.total_reglements|montant }}</td>
+                                <td class="num">{{ item.valeurs.total_ventilations|montant }}</td>
+                                <td class="num" title="{{ item.taux_ventile }} % déjà ventilé"><span class="aventiler">{{ item.valeurs.reste_a_ventiler|montant }}</span><div class="ventil-mini"><span style="width:{{ item.taux_ventile }}%"></span></div></td>
+                                <td class="num">
+                                    {% if item.valeurs.solde < 0 %}<span class="ventil-badge du">Dû {{ item.valeurs.solde|inverse_signe|montant }}</span>
+                                    {% elif item.valeurs.solde > 0 %}<span class="ventil-badge avoir">Avoir {{ item.valeurs.solde|montant }}</span>
+                                    {% else %}<span class="ventil-badge solde0">Soldé</span>{% endif %}
+                                </td>
+                                <td>
+                                    <div class="ventil-act">
+                                        <button type="button" class="btn btn-default bouton_apercu" title="Aperçu de la ventilation"><i class="fa fa-chevron-down"></i></button>
+                                        <button type="button" class="btn btn-default bouton_ventiler" title="{% if item.manuelle %}Ventilation automatique impossible{% else %}Ventiler automatiquement{% endif %}" {% if item.manuelle %}disabled{% endif %}><i class="fa fa-magic"></i></button>
+                                        <a class="btn btn-default" href="{% url 'famille_reglements_liste' idfamille=item.famille.pk %}" target="_blank" title="Ouvrir la fiche famille"><i class="fa fa-users"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr class="ventil-aucun" style="display:none;"><td colspan="8">Aucune famille ne correspond à la recherche</td></tr>
+                    </tbody>
+                </table>
+            </div>
 
-            </table>
-        </div>
+        {% else %}
+
+            {# Aucune anomalie #}
+            <div class="ventil-vide">
+                <div class="ic"><i class="fa fa-check"></i></div>
+                <h5 style="font-weight:600;margin-bottom:6px">La ventilation est à jour</h5>
+                <p class="text-muted" style="font-size:13px;margin-bottom:16px">Tous les règlements sont affectés aux prestations.<br>Dernière vérification aujourd'hui à {{ heure_verification }}.</p>
+                <button type="button" class="btn btn-default btn-sm bouton_actualiser"><i class="fa fa-refresh margin-r-5"></i>Vérifier à nouveau</button>
+            </div>
+
+        {% endif %}
 
         {# Affichage des messages en mémoire #}
         {% include 'core/messages.html' %}
@@ -109,57 +212,150 @@
     {% endblock %}
 
 {% endembed %}
-
 {% endblock contenu_page %}
 
 
 {% block scripts %}
     {{ block.super }}
-    <script type="text/javascript" src="{% static 'lib/freeze-table/js/freeze-table.min.js' %}"></script>
 
     <script>
-        $(document).ready(function() {
-            $("#div_table_lignes").freezeTable({
-                'scrollable': true,
-            });
-            $("#bouton_valider").on("click",function(event) {
-                $("#action").val("valider");
-                $("#selections").val(JSON.stringify(get_lignes_cochees()));
-                $("#form-general").submit();
-            });
-            $("#bouton_actualiser").on("click",function(event) {
-                $("#action").val("actualiser");
-                $("#form-general").submit();
-            });
-            $(".ventiler_famille").on("click",function(event) {
-                $("#selections").val(JSON.stringify([$(this).data("idfamille"),]));
-                $("#action").val("valider");
-                $("#form-general").submit();
-            });
-        });
+        var symbole_monnaie = "{{ symbole_monnaie }}";
+        var filtre_actif = "toutes";
 
-        function tout_cocher() {
-            $(".check_ligne").each(function (index) {
-                $(this).prop("checked", true);
-            });
+        function format_montant(valeur) {
+            return valeur.toFixed(2) + " " + symbole_monnaie;
         };
-        function tout_decocher() {
-            $(".check_ligne").each(function (index) {
-                $(this).prop("checked", false);
-            });
+
+        function echapper(texte) {
+            return $("<div>").text(texte).html();
         };
+
+        function soumettre(action, selections) {
+            $("#action").val(action);
+            $("#selections").val(JSON.stringify(selections || []));
+            $("#form-general").submit();
+        };
+
         function get_lignes_cochees() {
-            var liste_lignes = [];
-            $(".check_ligne").each(function (index) {
+            var liste = [];
+            $(".check_ligne:checked").each(function () {
                 var id = parseInt($(this).val());
-                if (($(this).prop("checked")) && (!(liste_lignes.includes(id)))) {
-                    liste_lignes.push(id);
+                if (!liste.includes(id)) {liste.push(id)};
+            });
+            return liste;
+        };
+
+        // Mise à jour de la barre de sélection et de la case "tout cocher"
+        function maj_selection() {
+            var nbre = 0, total = 0;
+            $(".check_ligne:checked").each(function () {
+                nbre += 1;
+                total += parseFloat($(this).closest("tr").data("reste"));
+            });
+            var texte = nbre ? "<b>" + nbre + " famille" + (nbre > 1 ? "s" : "") + "</b> sélectionnée" + (nbre > 1 ? "s" : "") + " · <b>" + format_montant(total) + "</b> à ventiler" : "Aucune famille sélectionnée";
+            $("#ventil_selection_txt").html(texte);
+            $("#bouton_valider").prop("disabled", nbre === 0);
+            var visibles = $("tr.ligne:visible .check_ligne");
+            var cochees = visibles.filter(":checked").length;
+            $("#check_tout").prop("checked", visibles.length > 0 && cochees === visibles.length).prop("indeterminate", cochees > 0 && cochees < visibles.length);
+        };
+
+        // Recherche et filtres
+        function appliquer_filtres() {
+            var texte = $("#ventil_recherche").val().trim().toLowerCase();
+            var nbre_visibles = 0;
+            $("tr.ligne").each(function () {
+                var ligne = $(this);
+                var visible = (!texte || ligne.data("nom").toString().indexOf(texte) !== -1);
+                if (filtre_actif === "auto") {visible = visible && ligne.data("manuelle") == 0};
+                if (filtre_actif === "manuelle") {visible = visible && ligne.data("manuelle") == 1};
+                ligne.toggle(visible);
+                if (!visible) {fermer_apercu(ligne)} else {nbre_visibles += 1};
+            });
+            $("tr.ventil-aucun").toggle(nbre_visibles === 0);
+            maj_selection();
+        };
+
+        // Aperçu de la ventilation
+        function fermer_apercu(ligne) {
+            ligne.removeClass("ouvert").next("tr.detail").remove();
+            ligne.find(".bouton_apercu").removeClass("actif").attr("title", "Aperçu de la ventilation").find("i").attr("class", "fa fa-chevron-down");
+        };
+
+        function ouvrir_apercu(ligne) {
+            ligne.addClass("ouvert");
+            ligne.find(".bouton_apercu").addClass("actif").attr("title", "Masquer l'aperçu").find("i").attr("class", "fa fa-chevron-up");
+            var detail = $("<tr class='detail'><td colspan='8'><i class='fa fa-spinner fa-spin margin-r-5'></i>Calcul de la ventilation...</td></tr>").insertAfter(ligne);
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_corriger_ventilation_apercu' %}",
+                data: {idfamille: ligne.data("idfamille"), csrfmiddlewaretoken: "{{ csrf_token }}"},
+                datatype: "json",
+                success: function (data) {
+                    detail.find("td").html(construire_apercu(data));
+                },
+                error: function (xhr) {
+                    var message = (xhr.responseJSON && xhr.responseJSON.erreur) ? xhr.responseJSON.erreur : "Impossible de calculer l'aperçu";
+                    detail.find("td").html("<div class='ventil-alerte-neg'><i class='fa fa-exclamation-triangle margin-r-5'></i>" + echapper(message) + "</div>");
                 }
             });
-            return liste_lignes;
         };
+
+        function construire_apercu(data) {
+            if (!data.possible) {
+                return "<div class='ventil-alerte-neg'><i class='fa fa-hand-paper-o margin-r-5'></i>La ventilation automatique est impossible car une prestation de cette famille a un montant négatif (ou est ventilée au-delà de son montant). Ouvrez la fiche famille pour ventiler manuellement.</div>";
+            };
+            if (!data.nbre_affectations) {
+                return "<div class='text-muted' style='font-size:12.5px'><i class='fa fa-info-circle margin-r-5'></i>Aucune ventilation ne peut être créée automatiquement pour cette famille.</div>";
+            };
+            var html_reglements = "", html_prestations = "";
+            $.each(data.reglements, function (i, r) {
+                html_reglements += "<li><span>" + r.date + " · " + echapper(r.mode) + (r.numero ? " <small>· n° " + echapper(r.numero) + "</small>" : "") + "</span><b>" + r.montant + "</b></li>";
+            });
+            $.each(data.prestations, function (i, p) {
+                html_prestations += "<li><span>" + p.date + " · " + echapper(p.label) + (p.activite ? " <small>· " + echapper(p.activite) + "</small>" : "") + "</span><b>" + p.montant + "</b></li>";
+            });
+            var html = "<div class='ventil-apercu'>";
+            html += "<div><h6><i class='fa fa-credit-card margin-r-5'></i>Règlements avec un montant disponible</h6><ul>" + html_reglements + "</ul></div>";
+            html += "<div class='fleche'><i class='fa fa-long-arrow-right'></i></div>";
+            html += "<div><h6><i class='fa fa-file-text-o margin-r-5'></i>Prestations qui seront réglées</h6><ul>" + html_prestations + "</ul></div>";
+            html += "</div>";
+            html += "<div class='ventil-resume'><i class='fa fa-info-circle text-info margin-r-5'></i>La ventilation automatique affectera <b>" + data.total + "</b> en <b>" + data.nbre_affectations + " opération" + (data.nbre_affectations > 1 ? "s" : "") + "</b>.";
+            if (data.reste_du) {html += " Il restera <b>" + data.reste_du + "</b> de prestations non réglées."};
+            html += "</div>";
+            return html;
+        };
+
+        $(document).ready(function () {
+            maj_selection();
+
+            $(".bouton_actualiser").on("click", function () {soumettre("actualiser")});
+            $("#bouton_valider").on("click", function () {
+                var selections = get_lignes_cochees();
+                if (selections.length) {soumettre("ventilation", selections)};
+            });
+            $(".bouton_ventiler").on("click", function () {
+                soumettre("ventilation", [$(this).closest("tr").data("idfamille")]);
+            });
+            $(".bouton_apercu").on("click", function () {
+                var ligne = $(this).closest("tr");
+                if (ligne.hasClass("ouvert")) {fermer_apercu(ligne)} else {ouvrir_apercu(ligne)};
+            });
+
+            $(document).on("change", ".check_ligne", maj_selection);
+            $("#check_tout").on("change", function () {
+                $("tr.ligne:visible .check_ligne").prop("checked", $(this).prop("checked"));
+                maj_selection();
+            });
+
+            $("#ventil_recherche").on("input", appliquer_filtres);
+            $(".ventil-filtre").on("click", function () {
+                $(".ventil-filtre").removeClass("actif");
+                $(this).addClass("actif");
+                filtre_actif = $(this).data("filtre");
+                appliquer_filtres();
+            });
+        });
     </script>
 
 {% endblock scripts %}
-
-

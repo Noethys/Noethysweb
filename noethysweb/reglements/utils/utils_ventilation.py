@@ -46,103 +46,99 @@ def GetAnomaliesVentilation(idfamille=None):
     return dict_anomalies
 
 
-def Ventilation_auto(IDfamille=None):
-    """ Effectue la ventilation automatique """
+def Calculer_ventilation_auto(IDfamille=None, enregistrer=False):
+    """ Calcule la ventilation automatique d'une famille.
+    Si enregistrer=False, c'est une simple simulation : rien n'est écrit dans la base.
+    Retourne un dict : possible (bool), affectations [(reglement, prestation, montant)], total, nbre_creations """
+    resultat = {"possible": True, "affectations": [], "total": Decimal(0), "nbre_creations": 0}
     condition_famille = Q(famille_id=IDfamille)
 
     # Récupère la ventilation
-    ventilations = Ventilation.objects.filter(condition_famille)
-
     dictVentilations = {}
     dictVentilationsReglement = {}
     dictVentilationsPrestation = {}
-    for ventilation in ventilations:
+    for ventilation in Ventilation.objects.filter(condition_famille):
         dictVentilations[ventilation.pk] = ventilation
+        dictVentilationsReglement.setdefault(ventilation.reglement_id, []).append(ventilation.pk)
+        dictVentilationsPrestation.setdefault(ventilation.prestation_id, []).append(ventilation.pk)
 
-        if ventilation.reglement_id not in dictVentilationsReglement:
-            dictVentilationsReglement[ventilation.reglement_id] = []
-        dictVentilationsReglement[ventilation.reglement_id].append(ventilation.pk)
-
-        if ventilation.prestation_id not in dictVentilationsPrestation:
-            dictVentilationsPrestation[ventilation.prestation_id] = []
-        dictVentilationsPrestation[ventilation.prestation_id].append(ventilation.pk)
+    def Get_montant_ventile(liste_idventilations=[]):
+        return sum([dictVentilations[IDventilation].montant for IDventilation in liste_idventilations], Decimal(0))
 
     # Récupère les prestations
-    prestations = Prestation.objects.filter(condition_famille)
+    prestations = list(Prestation.objects.select_related("activite").filter(condition_famille))
 
-    # Vérifie qu'il n'y a pas de prestations négatives
+    # Vérifie qu'il n'y a pas de prestations négatives (ou ventilées au-delà de leur montant)
     for prestation in prestations:
-
-        montantVentilation = Decimal(0.0)
-        for IDventilation in dictVentilationsPrestation.get(prestation.pk, []):
-            montantVentilation += dictVentilations[IDventilation].montant
-
-        ResteAVentiler = prestation.montant - montantVentilation
-        if ResteAVentiler < Decimal(0.0):
-            print("La ventilation automatique n'est pas compatible avec les prestations comportant un montant négatif ! Vous devez donc effectuer une ventilation manuelle.")
-            return False
-
-    # Récupère les règlements
-    reglements = Reglement.objects.filter(condition_famille)
+        if prestation.montant - Get_montant_ventile(dictVentilationsPrestation.get(prestation.pk, [])) < Decimal(0):
+            logger.debug("La ventilation automatique n'est pas compatible avec les prestations comportant un montant négatif.")
+            resultat["possible"] = False
+            return resultat
 
     # Vérification de la ventilation de chaque règlement
-    for reglement in reglements:
+    cle_temporaire = 0
+    for reglement in Reglement.objects.select_related("mode").filter(condition_famille):
 
         # Recherche s'il reste du crédit à ventiler dans ce règlement
-        montantVentilation = Decimal(0.0)
-        for IDventilation in dictVentilationsReglement.get(reglement.pk, []):
-            montantVentilation += dictVentilations[IDventilation].montant
+        credit = reglement.montant - Get_montant_ventile(dictVentilationsReglement.get(reglement.pk, []))
+        if credit <= Decimal(0):
+            continue
 
-        credit = reglement.montant - montantVentilation
+        # Recherche s'il reste des prestations à ventiler pour cette famille
+        for prestation in prestations:
+            ResteAVentiler = prestation.montant - Get_montant_ventile(dictVentilationsPrestation.get(prestation.pk, []))
+            montant = min(ResteAVentiler, credit)
+            if montant <= Decimal(0):
+                continue
 
-        if credit > Decimal(0.0):
+            # Modification d'une ventilation existante entre ce règlement et cette prestation
+            ventilation_existante = None
+            for IDventilation in dictVentilationsPrestation.get(prestation.pk, []):
+                if dictVentilations[IDventilation].reglement_id == reglement.pk:
+                    ventilation_existante = dictVentilations[IDventilation]
+                    break
 
-            # Recherche s'il reste des prestations à ventiler pour cette famille
-            for prestation in prestations:
+            if ventilation_existante:
+                ventilation_existante.montant += montant
+                if enregistrer:
+                    ventilation_existante.save()
+            else:
+                # Création d'une ventilation
+                if enregistrer:
+                    ventilation = Ventilation.objects.create(famille_id=IDfamille, reglement=reglement, prestation=prestation, montant=montant)
+                    cle = ventilation.pk
+                else:
+                    cle_temporaire -= 1
+                    cle = cle_temporaire
+                    ventilation = Ventilation(famille_id=IDfamille, reglement=reglement, prestation=prestation, montant=montant)
+                dictVentilations[cle] = ventilation
+                dictVentilationsReglement.setdefault(reglement.pk, []).append(cle)
+                dictVentilationsPrestation.setdefault(prestation.pk, []).append(cle)
+                resultat["nbre_creations"] += 1
 
-                montantVentilation = Decimal(0.0)
-                for IDventilation in dictVentilationsPrestation.get(prestation.pk, []):
-                    montantVentilation += dictVentilations[IDventilation].montant
-
-                ResteAVentiler = prestation.montant - montantVentilation
-                if ResteAVentiler > Decimal(0.0):
-
-                    # Calcul du montant qui peut être ventilé
-                    montant = ResteAVentiler
-                    if credit < montant:
-                        montant = credit
-
-                    if montant > Decimal(0.0):
-
-                        # Modification d'une ventilation existante
-                        ventilationTrouvee = False
-                        for IDventilation in dictVentilationsPrestation.get(prestation.pk, []):
-                            if dictVentilations[IDventilation].reglement == reglement:
-                                nouveauMontant = montant + montantVentilation
-
-                                # Mémorisation du nouveau montant
-                                dictVentilations[IDventilation].montant = nouveauMontant
-                                dictVentilations[IDventilation].save()
-                                ResteAVentiler -= montant
-                                credit -= montant
-                                ventilationTrouvee = True
-
-                        # Création d'une ventilation
-                        if not ventilationTrouvee:
-                            ventilation = Ventilation.objects.create(famille_id=IDfamille, reglement=reglement, prestation=prestation, montant=montant)
-
-                            # Mémorisation de la nouvelle ventilation
-                            dictVentilations[ventilation.pk] = ventilation
-                            if reglement.pk not in dictVentilationsReglement:
-                                dictVentilationsReglement[reglement.pk] = []
-                            dictVentilationsReglement[reglement.pk].append(ventilation.pk)
-                            if prestation.pk not in dictVentilationsPrestation:
-                                dictVentilationsPrestation[prestation.pk] = []
-                            dictVentilationsPrestation[prestation.pk].append(ventilation.pk)
-                            ResteAVentiler -= montant
-                            credit -= montant
+            resultat["affectations"].append((reglement, prestation, montant))
+            resultat["total"] += montant
+            credit -= montant
+            if credit <= Decimal(0):
+                break
 
     # Ajuster les soldes des factures de la famille
-    utils_factures.Maj_solde_actuel_factures(IDfamille=IDfamille)
+    if enregistrer:
+        utils_factures.Maj_solde_actuel_factures(IDfamille=IDfamille)
 
-    return True
+    return resultat
+
+
+def Ventilation_auto(IDfamille=None):
+    """ Effectue la ventilation automatique. Retourne False si elle est impossible (prestation négative). """
+    return Calculer_ventilation_auto(IDfamille=IDfamille, enregistrer=True)["possible"]
+
+
+def Get_familles_ventilation_manuelle(liste_idfamilles=[]):
+    """ Familles pour lesquelles la ventilation automatique est impossible :
+    au moins une prestation dont le montant est inférieur au montant déjà ventilé (prestation négative notamment) """
+    from django.db.models import F, DecimalField, Value
+    from django.db.models.functions import Coalesce
+    return set(Prestation.objects.filter(famille_id__in=liste_idfamilles)
+               .annotate(ventile=Coalesce(Sum("ventilation__montant"), Value(Decimal(0)), output_field=DecimalField()))
+               .filter(montant__lt=F("ventile")).values_list("famille_id", flat=True).distinct())
