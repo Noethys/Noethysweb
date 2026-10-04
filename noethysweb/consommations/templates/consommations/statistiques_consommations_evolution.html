@@ -1,0 +1,1 @@
+<span class="statistiques_evolution {% if valeur > 0 %}hausse{% elif valeur < 0 %}baisse{% else %}stable{% endif %}">{% if valeur > 0 %}▲ +{% elif valeur < 0 %}▼ {% endif %}{{ valeur }} {{ unite }}</span>

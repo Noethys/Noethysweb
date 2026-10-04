@@ -1,0 +1,392 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        /* États pris en compte : deux colonnes */
+        .statistiques_etats > div {columns: 2; column-gap: 12px}
+        .statistiques_etats .form-check {break-inside: avoid; padding-top: 2px; padding-bottom: 2px}
+        .statistiques_etats input[type=checkbox] {accent-color: #3c8dbc}
+        .statistiques_suivi.vertical li:last-child {border-bottom: 0}
+
+        /* Indicateurs clés */
+        .statistiques_kpi {
+            height: 100%;
+            padding: 14px 16px;
+            border-radius: .25rem;
+            background: #ffffff;
+            box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
+        }
+        .statistiques_kpi .libelle {display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #6c757d}
+        .statistiques_kpi .libelle i {color: #3c8dbc}
+        .statistiques_kpi .valeur {margin-top: 4px; font-size: clamp(20px, 1.9vw, 28px); white-space: nowrap; font-weight: 700; line-height: 1.2; color: #1f2d3d; font-variant-numeric: tabular-nums}
+        .statistiques_kpi .detail {margin-top: 2px; font-size: 12px; color: #6c757d}
+        .statistiques_evolution {display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11.5px; font-weight: 600}
+        .statistiques_evolution.hausse {background: #e6f4ea; color: #2d6a1f}
+        .statistiques_evolution.baisse {background: #fdecee; color: #a8323e}
+        .statistiques_evolution.stable {background: #f1f3f5; color: #6c757d}
+        .statistiques_barre {height: 6px; margin-top: 8px; overflow: hidden; border-radius: 3px; background: #e9ecef}
+        .statistiques_barre > span {display: block; height: 100%; border-radius: 3px; background: #3c8dbc}
+
+        /* Cartes */
+        .statistiques_page .card-title {font-size: 15px}
+        .statistiques_page .card-tools .badge {font-weight: 500}
+        .statistiques_graphe {position: relative; height: 250px}
+        .statistiques_remarque {margin-top: 6px; font-size: 11.5px; color: #8a96a3}
+
+        /* Tableau des unités */
+        .table_unites th {border-top: 0; font-size: 12px; font-weight: 600; color: #6c757d}
+        .table_unites td, .table_unites th {padding: .45rem .75rem}
+        .table_unites .nombre {text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap}
+        .table_unites tr.total td {font-weight: 700; background: #f8f9fa}
+
+        /* Suivi administratif */
+        .statistiques_suivi {display: grid; grid-template-columns: 1fr; column-gap: 20px}
+        .statistiques_suivi li {display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 0; border-bottom: 1px solid #f1f3f5; font-size: 13.5px}
+        @media (min-width: 768px) {.statistiques_suivi:not(.vertical) {grid-template-columns: repeat(2, 1fr)}}
+        @media (min-width: 1200px) {
+            .statistiques_suivi:not(.vertical) {grid-template-columns: repeat(4, 1fr)}
+            .statistiques_suivi:not(.vertical) li {border-bottom: 0}
+            .statistiques_suivi:not(.vertical) li + li {padding-left: 20px; border-left: 1px solid #f1f3f5}
+        }
+        .statistiques_suivi .nombre {margin-right: 10px; font-size: 16px; font-weight: 700; color: #1f2d3d}
+        .statistiques_suivi a {font-size: 12px; white-space: nowrap}
+
+        /* Mode sombre */
+        .dark-mode .statistiques_kpi {background: #343a40}
+        .dark-mode .statistiques_kpi .valeur, .dark-mode .statistiques_suivi .nombre {color: #ffffff}
+        .dark-mode .statistiques_barre {background: #454d55}
+        .dark-mode .table_unites tr.total td {background: #3f474e}
+        .dark-mode .statistiques_suivi li {border-color: rgba(255, 255, 255, .07)}
+    </style>
+{% endblock styles %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/chartjs/chart.umd.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    <div class="row statistiques_page">
+        <div class="col-lg-3">
+
+            <!-- Paramètres -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Paramètres</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <button type="submit" form="form_statistiques_consommations" class="btn btn-primary btn-block" title="Actualiser les résultats"><i class="fa fa-refresh margin-r-5"></i> Actualiser</button>
+                        {% if data.nbre_consos %}
+                            <div class="d-flex mt-2" style="gap: 6px;">
+                                <button type="button" class="btn btn-default btn-sm flex-fill" id="bouton_excel" title="Exporter les statistiques au format Excel"><i class="fa fa-file-excel-o margin-r-5"></i> Excel</button>
+                                <button type="button" class="btn btn-default btn-sm flex-fill" id="bouton_pdf" title="Exporter les statistiques au format PDF"><i class="fa fa-file-pdf-o margin-r-5"></i> PDF</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% crispy form_parametres %}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-9">
+
+            {% if not data %}
+
+                <div class="callout callout-info">
+                    <p>Sélectionnez une ou plusieurs activités, une période et les états à prendre en compte, puis cliquez sur <b>Actualiser</b>.</p>
+                </div>
+
+            {% elif not data.nbre_consos %}
+
+                <div class="callout callout-warning">
+                    <p>Aucune consommation n'a été trouvée du {{ data.date_debut_str }} au {{ data.date_fin_str }} pour les activités et les états sélectionnés.</p>
+                </div>
+
+            {% else %}
+
+                <!-- Indicateurs clés -->
+                <div class="row mb-3">
+                    <div class="col-md-6 col-xl-3 mb-3 mb-xl-0">
+                        <div class="statistiques_kpi">
+                            <div class="libelle"><i class="fa fa-calendar-check-o" aria-hidden="true"></i>Consommations</div>
+                            <div class="valeur">{{ data.nbre_consos_str }}</div>
+                            <div class="detail">
+                                {% if data.comparer and data.evolution_consos is not None %}
+                                    {% include "consommations/statistiques_consommations_evolution.html" with valeur=data.evolution_consos unite="%" %}
+                                    vs période précédente{% if data.en_cours %} à date équivalente{% endif %}
+                                {% else %}
+                                    du {{ data.date_debut_str }} au {{ data.date_fin_str }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3 mb-3 mb-xl-0">
+                        <div class="statistiques_kpi">
+                            <div class="libelle"><i class="fa fa-child" aria-hidden="true"></i>Individus accueillis</div>
+                            <div class="valeur">{{ data.nbre_individus_str }}</div>
+                            <div class="detail">{{ data.nbre_familles_str }} famille{{ data.nbre_familles|pluralize }} · {{ data.consos_par_individu }} consos / individu</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3 mb-3 mb-md-0">
+                        <div class="statistiques_kpi" title="Présents ÷ (présents + absences), sur les dates déjà passées">
+                            <div class="libelle"><i class="fa fa-check-circle-o" aria-hidden="true"></i>Taux de présence</div>
+                            {% if data.taux_presence is not None %}
+                                <div class="valeur">{{ data.taux_presence }} %</div>
+                                <div class="detail">{{ data.taux_absj }} % abs. justifiées · {{ data.taux_absi }} % injustifiées</div>
+                                <div class="statistiques_barre" role="img" aria-label="{{ data.taux_presence }} % de présence"><span style="width: {{ data.taux_presence }}%;"></span></div>
+                            {% else %}
+                                <div class="valeur">-</div>
+                                <div class="detail">Aucune consommation pointée</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="statistiques_kpi">
+                            <div class="libelle"><i class="fa fa-eur" aria-hidden="true"></i>Montant facturé</div>
+                            <div class="valeur">{{ data.montant_str }}</div>
+                            <div class="detail">
+                                {{ data.cout_moyen }} par consommation
+                                {% if data.comparer and data.evolution_montant is not None %}
+                                    {% include "consommations/statistiques_consommations_evolution.html" with valeur=data.evolution_montant unite="%" %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphiques -->
+                <div class="row">
+                    <div class="col-xl-7">
+                        <div class="card">
+                            <div class="card-header"><h3 class="card-title">Consommations par mois</h3></div>
+                            <div class="card-body"><div class="statistiques_graphe"><canvas id="graphique_mois" role="img" aria-label="Consommations par mois"></canvas></div></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-5">
+                        <div class="card">
+                            <div class="card-header"><h3 class="card-title">États des consommations</h3></div>
+                            <div class="card-body"><div class="statistiques_graphe"><canvas id="graphique_etats" role="img" aria-label="États des consommations"></canvas></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-7">
+                        <div class="card">
+                            <div class="card-header"><h3 class="card-title">{{ data.titre_repartition }}</h3></div>
+                            <div class="card-body"><div class="statistiques_graphe"><canvas id="graphique_repartition" role="img" aria-label="{{ data.titre_repartition }}"></canvas></div></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-5">
+                        {% include "consommations/statistiques_consommations_jours.html" %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-7">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Âge des individus accueillis</h3>
+                                {% if data.age_moyen %}<div class="card-tools"><span class="badge badge-light">Âge moyen : {{ data.age_moyen }} ans</span></div>{% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div class="statistiques_graphe"><canvas id="graphique_ages" role="img" aria-label="Âge des individus accueillis"></canvas></div>
+                                {% if data.nbre_ages_inconnus %}<div class="statistiques_remarque">{{ data.nbre_ages_inconnus }} individu{{ data.nbre_ages_inconnus|pluralize }} sans date de naissance non comptabilisé{{ data.nbre_ages_inconnus|pluralize }}.</div>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-5">
+                        <div class="card">
+                            <div class="card-header"><h3 class="card-title">Suivi administratif</h3></div>
+                            <div class="card-body py-1">
+                                <ul class="list-unstyled statistiques_suivi vertical mb-0">
+                                    <li><span><span class="nombre">{{ data.suivi.non_pointees }}</span>réservation{{ data.suivi.non_pointees|pluralize }} passée{{ data.suivi.non_pointees|pluralize }} non pointée{{ data.suivi.non_pointees|pluralize }}</span><a href="{% url 'suivi_pointage' %}">Voir <i class="fa fa-angle-right"></i></a></li>
+                                    <li><span><span class="nombre">{{ data.suivi.demandes }}</span>demande{{ data.suivi.demandes|pluralize }} du portail à traiter</span><a href="{% url 'liste_demandes' %}">Voir <i class="fa fa-angle-right"></i></a></li>
+                                    <li><span><span class="nombre">{{ data.suivi.attente }}</span>place{{ data.suivi.attente|pluralize }} en liste d'attente</span><a href="{% url 'liste_attente' %}">Voir <i class="fa fa-angle-right"></i></a></li>
+                                    <li><span><span class="nombre">{{ data.suivi.sans_prestation }}</span>consommation{{ data.suivi.sans_prestation|pluralize }} passée{{ data.suivi.sans_prestation|pluralize }} sans prestation</span><a href="{% url 'liste_consommations' %}">Voir <i class="fa fa-angle-right"></i></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header"><h3 class="card-title">Détail par activité et par unité</h3></div>
+                            <div class="card-body p-0 table-responsive">
+                                <table class="table table_unites mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Activité</th><th>Unité</th><th class="nombre">Consos</th><th class="nombre">Individus</th>
+                                            <th class="nombre" title="Taux de présence sur les dates passées">Présence</th><th class="nombre" title="Taux d'absences injustifiées sur les dates passées">Abs. inj.</th>
+                                            <th class="nombre">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ligne in data.lignes %}
+                                            <tr>
+                                                <td>{{ ligne.activite }}</td>
+                                                <td>{{ ligne.unite }}</td>
+                                                <td class="nombre">{{ ligne.nbre_str }}</td>
+                                                <td class="nombre">{{ ligne.individus_str }}</td>
+                                                <td class="nombre">{{ ligne.taux_presence_str }}</td>
+                                                <td class="nombre">{{ ligne.taux_absi_str }}</td>
+                                                <td class="nombre">{{ ligne.montant_str }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        <tr class="total">
+                                            <td colspan="2">Total</td>
+                                            <td class="nombre">{{ data.nbre_consos_str }}</td>
+                                            <td class="nombre">{{ data.nbre_individus_str }}</td>
+                                            <td class="nombre">{% if data.taux_presence is not None %}{{ data.taux_presence }} %{% else %}-{% endif %}</td>
+                                            <td class="nombre">{{ data.taux_absi }} %</td>
+                                            <td class="nombre">{{ data.montant_str }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{ data.graphes|json_script:"donnees_graphes" }}
+
+            {% endif %}
+
+        </div>
+    </div>
+
+    {% include 'core/modal_pdf.html' %}
+
+    <script>
+        $(function () {
+            var element_donnees = document.getElementById("donnees_graphes");
+            if (!element_donnees) {return}
+            var graphes = JSON.parse(element_donnees.textContent);
+            var comparer = {{ data.comparer|yesno:"true,false" }};
+
+            // Palette validée (daltonisme et contraste) : lightblue Noethysweb en premier
+            var couleurs = ["#3c8dbc", "#d0790a", "#7a6fc4", "#4f8f35", "#c2477a"];
+            var sombre = $("body").hasClass("dark-mode");
+            var couleur_grille = sombre ? "rgba(255, 255, 255, .08)" : "#eef0f2";
+            var couleur_fond = sombre ? "#343a40" : "#ffffff";
+            var couleur_neutre = sombre ? "#6c757d" : "#b8c2cc";
+            Chart.defaults.font.family = '"Source Sans Pro", -apple-system, "Segoe UI", Roboto, Arial, sans-serif';
+            Chart.defaults.font.size = 12;
+            Chart.defaults.color = sombre ? "#adb5bd" : "#6c757d";
+            Chart.defaults.animation = false;
+            var nombre = new Intl.NumberFormat("fr-FR");
+            var nombre_compact = new Intl.NumberFormat("fr-FR", {notation: "compact"});
+            var legende = {position: "top", align: "end", labels: {boxWidth: 10, boxHeight: 10}};
+            var axes = {
+                x: {grid: {display: false}, border: {display: false}},
+                y: {grid: {color: couleur_grille}, border: {display: false}, ticks: {precision: 0, callback: function (v) {return nombre.format(v)}}, beginAtZero: true}
+            };
+            var barres = {borderRadius: 4, borderSkipped: "bottom", maxBarThickness: 18};
+            function Creer(id, config) {
+                var canvas = document.getElementById(id);
+                if (canvas) {new Chart(canvas, config)}
+            }
+
+            // Consommations par mois
+            var series_mois = [$.extend({label: "Période sélectionnée", data: graphes.mois.valeurs, backgroundColor: couleurs[0]}, barres)];
+            if (comparer) {
+                series_mois.push($.extend({label: "Période précédente", data: graphes.mois.valeurs_precedentes, backgroundColor: sombre ? "#4a6576" : "#c9dceb"}, barres));
+            }
+            Creer("graphique_mois", {type: "bar", data: {labels: graphes.mois.labels, datasets: series_mois},
+                options: {maintainAspectRatio: false, scales: axes, plugins: {legend: comparer ? legende : {display: false}}}});
+
+            // États (couleur fixe par état)
+            var couleurs_etats = {present: couleurs[0], reservation_future: couleur_neutre, reservation_passee: couleurs[2], absentj: couleurs[1], absenti: couleurs[4], attente: couleurs[3], refus: sombre ? "#adb5bd" : "#5f6b77"};
+            Creer("graphique_etats", {type: "doughnut",
+                data: {labels: graphes.etats.labels, datasets: [{data: graphes.etats.valeurs, backgroundColor: graphes.etats.codes.map(function (c) {return couleurs_etats[c]}), borderColor: couleur_fond, borderWidth: 2}]},
+                options: {maintainAspectRatio: false, cutout: "62%", plugins: {
+                    legend: {position: "bottom", labels: {boxWidth: 10, boxHeight: 10, padding: 8}},
+                    tooltip: {callbacks: {label: function (c) {
+                        var total = c.dataset.data.reduce(function (a, b) {return a + b}, 0);
+                        return " " + c.label + " : " + nombre.format(c.raw) + " (" + Math.round(100 * c.raw / total) + " %)";
+                    }}}
+                }}});
+
+            // Répartition par activité ou par unité ("Autres" en gris)
+            Creer("graphique_repartition", {type: "bar",
+                data: {labels: graphes.repartition.labels, datasets: [{label: "Consommations", data: graphes.repartition.valeurs, borderRadius: 4, maxBarThickness: 14,
+                    backgroundColor: graphes.repartition.labels.map(function (l) {return l === "Autres" ? couleur_neutre : couleurs[0]})}]},
+                options: {indexAxis: "y", maintainAspectRatio: false,
+                    scales: {
+                        x: {grid: {color: couleur_grille}, border: {display: false}, beginAtZero: true, ticks: {maxRotation: 0, maxTicksLimit: 5, callback: function (v) {return nombre_compact.format(v)}}},
+                        y: {grid: {display: false}, border: {display: false}, ticks: {callback: function (v) {
+                            var label = this.getLabelForValue(v);
+                            return label.length > 24 ? label.substring(0, 23) + "…" : label;
+                        }}}
+                    },
+                    plugins: {legend: {display: false}}}});
+
+            // Fréquentation moyenne par jour de la semaine
+            Creer("graphique_jours", {type: "bar",
+                data: {labels: graphes.jours.labels, datasets: [$.extend({label: "Moyenne par jour d'activité", data: graphes.jours.valeurs, backgroundColor: couleurs[0]}, barres, {maxBarThickness: 24})]},
+                options: {maintainAspectRatio: false, scales: axes, plugins: {legend: {display: false}}}});
+
+            // Âge et sexe
+            Creer("graphique_ages", {type: "bar",
+                data: {labels: graphes.ages.labels, datasets: [
+                    $.extend({label: "Filles / femmes", data: graphes.ages.femmes, backgroundColor: couleurs[4]}, barres, {maxBarThickness: 16}),
+                    $.extend({label: "Garçons / hommes", data: graphes.ages.hommes, backgroundColor: couleurs[0]}, barres, {maxBarThickness: 16})
+                ]},
+                options: {maintainAspectRatio: false, scales: axes, plugins: {legend: legende}}});
+
+            // ------------------- Exports -------------------
+            function Exporter(url, avec_graphiques, callback, bouton) {
+                var donnees = $("#form_statistiques_consommations").serializeArray();
+                if (avec_graphiques) {
+                    ["mois", "etats", "repartition", "ages", "jours"].forEach(function (nom) {
+                        var canvas = document.getElementById("graphique_" + nom);
+                        if (canvas) {
+                            var copie = document.createElement("canvas");
+                            copie.width = canvas.width; copie.height = canvas.height;
+                            var contexte = copie.getContext("2d");
+                            contexte.fillStyle = "#ffffff"; contexte.fillRect(0, 0, copie.width, copie.height);
+                            contexte.drawImage(canvas, 0, 0);
+                            donnees.push({name: "graphique_" + nom, value: copie.toDataURL("image/png")});
+                        }
+                    });
+                }
+                var icone = bouton.find("i"), classe_icone = icone.attr("class");
+                bouton.prop("disabled", true);
+                icone.attr("class", "fa fa-spinner fa-spin margin-r-5");
+                $.ajax({
+                    type: "POST", url: url, data: $.param(donnees), datatype: "json",
+                    success: callback,
+                    error: function (data) {
+                        toastr.error(data.responseJSON ? data.responseJSON.erreur : "Une erreur est survenue lors de l'export");
+                    },
+                    complete: function () {
+                        bouton.prop("disabled", false);
+                        icone.attr("class", classe_icone);
+                    }
+                });
+            }
+            $("#bouton_excel").on("click", function () {
+                Exporter("{% url 'ajax_statistiques_consommations_exporter_excel' %}", false, function (data) {
+                    window.location = "{{ MEDIA_URL }}" + data.nom_fichier;
+                }, $(this));
+            });
+            $("#bouton_pdf").on("click", function () {
+                Exporter("{% url 'ajax_statistiques_consommations_generer_pdf' %}", true, function (data) {
+                    charge_pdf(data);
+                }, $(this));
+            });
+        });
+    </script>
+
+{% endblock contenu_page %}

@@ -9,7 +9,7 @@ from parametrage.views import calendrier
 from consommations.forms import grille_forfaits
 from consommations.views import grille, gestionnaire, suivi_consommations, etat_global, synthese_consommations, liste_attente, liste_absences, edition_liste_conso, \
                                 pointeuse, liste_consommations, liste_repas, etat_nomin, liste_durees, consommations_traitement_lot, evolution_reservations, \
-                                detail_consommations, liste_demandes, suivi_pointage, analyse_ia_frequentation #, pointeuse_barcodes
+                                detail_consommations, liste_demandes, suivi_pointage, analyse_ia_frequentation, statistiques_consommations #, pointeuse_barcodes
 from core.decorators import secure_ajax
 
 
@@ -45,6 +45,7 @@ urlpatterns = [
     path('consommations/liste_repas', liste_repas.View.as_view(), name='liste_repas'),
     path('consommations/liste_durees', liste_durees.View.as_view(), name='liste_durees'),
     path('consommations/liste_demandes', liste_demandes.View.as_view(), name='liste_demandes'),
+    path('consommations/statistiques', statistiques_consommations.View.as_view(), name='statistiques_consommations'),
 
     # Analyse
     path('consommations/etat_global', etat_global.View.as_view(), name='etat_global'),
@@ -84,5 +85,10 @@ urlpatterns = [
     path('consommations/suivi_pointage_get_form_parametres', secure_ajax(suivi_pointage.Get_form_parametres), name='ajax_suivi_pointage_get_form_parametres'),
     path('consommations/suivi_pointage_valider_form_parametres', secure_ajax(suivi_pointage.Valider_form_parametres), name='ajax_suivi_pointage_valider_form_parametres'),
     path('consommations/analyse_ia_frequentation/exporter', secure_ajax(analyse_ia_frequentation.Exporter), name='ajax_analyse_ia_frequentation_exporter'),
+
+
+    # AJAX statistiques des consommations
+    path('consommations/statistiques/exporter_excel', secure_ajax(statistiques_consommations.Exporter_excel), name='ajax_statistiques_consommations_exporter_excel'),
+    path('consommations/statistiques/generer_pdf', secure_ajax(statistiques_consommations.Generer_pdf), name='ajax_statistiques_consommations_generer_pdf'),
 
 ]
