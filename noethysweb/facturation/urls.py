@@ -8,7 +8,7 @@ from core.views import toc
 from core.decorators import Verifie_ventilation
 from core.decorators import secure_ajax
 from facturation.views import factures_generation, liste_prestations, liste_factures, liste_deductions, liste_soldes, synthese_impayes, \
-                                synthese_prestations, liste_tarifs, rappels_generation, liste_rappels, factures_impression, factures_email, \
+                                synthese_prestations, statistiques_prestations, liste_tarifs, rappels_generation, liste_rappels, factures_impression, factures_email, \
                                 rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations, \
                                 lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
                                 attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes, edition_recap_factures, \
@@ -85,6 +85,7 @@ urlpatterns = [
     path('facturation/prestations_supprimer_plusieurs/<str:listepk>', liste_prestations.Supprimer_plusieurs.as_view(), name='prestations_supprimer_plusieurs'),
     path('facturation/liste_soldes', liste_soldes.View.as_view(), name='liste_soldes'),
     path('facturation/synthese_prestations', synthese_prestations.View.as_view(), name='synthese_prestations'),
+    path('facturation/statistiques_prestations', statistiques_prestations.View.as_view(), name='statistiques_prestations'),
     path('facturation/edition_prestations', edition_prestations.View.as_view(), name='edition_prestations'),
     path('facturation/recalculer_prestations', recalculer_prestations.View.as_view(), name='recalculer_prestations'),
     path('facturation/saisie_lot_forfaits_credits', saisie_lot_forfaits_credits.View.as_view(), name='saisie_lot_forfaits_credits'),
@@ -145,5 +146,10 @@ urlpatterns = [
     path('facturation/export_ecritures_sage/exporter', secure_ajax(export_ecritures_sage.Exporter), name='ajax_export_ecritures_sage_exporter'),
     path('facturation/ajax_saisie_lot_forfaits_credits_get_tarifs', secure_ajax(saisie_lot_forfaits_credits.Get_tarifs), name='ajax_saisie_lot_forfaits_credits_get_tarifs'),
     path('facturation/ajax_saisie_lot_forfaits_credits_appliquer', secure_ajax(saisie_lot_forfaits_credits.Appliquer), name='ajax_saisie_lot_forfaits_credits_appliquer'),
+
+
+    # AJAX statistiques des prestations
+    path('facturation/statistiques_prestations/exporter_excel', secure_ajax(statistiques_prestations.Exporter_excel), name='ajax_statistiques_prestations_exporter_excel'),
+    path('facturation/statistiques_prestations/generer_pdf', secure_ajax(statistiques_prestations.Generer_pdf), name='ajax_statistiques_prestations_generer_pdf'),
 
 ]

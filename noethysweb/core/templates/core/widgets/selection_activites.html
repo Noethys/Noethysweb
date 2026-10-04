@@ -132,6 +132,7 @@
     .actions_recherche button {padding: 0; margin-right: 14px; border: 0; background: none; color: #8a96a3; font-size: 11px}
     .actions_recherche button:hover {color: #3c8dbc; text-decoration: underline}
     .recherche_activites.active + .actions_recherche {display: block}
+    .recherche_activites.masquer, .actions_recherche.masquer {display: none !important}
     .masquer_recherche {
         display: none !important;
     }
@@ -195,8 +196,14 @@
 {% endblock styles %}
 
 <div class="boutons_radios">
+    {% if afficher_toutes %}
     <div class="form-check form-check-inline">
-        <input class="form-check-input" type="radio" name="choix_activites" id="radio_choix_groupes_activites_{{ id }}" title="Sélectionner des groupes d'activités" value="groupes_activites" checked>
+        <input class="form-check-input" type="radio" name="choix_activites" id="radio_choix_toutes_{{ id }}" title="Toutes les activités" value="toutes" {% if selection.type == "toutes" %}checked{% endif %}>
+        <label class="form-check-label" for="radio_choix_toutes_{{ id }}">Toutes les activités</label>
+    </div>
+    {% endif %}
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="choix_activites" id="radio_choix_groupes_activites_{{ id }}" title="Sélectionner des groupes d'activités" value="groupes_activites" {% if selection.type != "activites" and selection.type != "groupes" and selection.type != "toutes" %}checked{% endif %}>
         <label class="form-check-label" for="radio_choix_groupes_activites_{{ id }}" >Groupes d'activités</label>
     </div>
     <div class="form-check form-check-inline">
@@ -281,7 +288,7 @@
         <button type="button" class="effacer_recherche" id="effacer_recherche_{{ id }}" title="Effacer la recherche" aria-label="Effacer la recherche"><i class="fa fa-times" aria-hidden="true"></i></button>
     </span>
 </div>
-<div class="actions_recherche">
+<div class="actions_recherche" id="actions_recherche_{{ id }}">
     <button type="button" id="cocher_resultats_{{ id }}"><i class="fa fa-check-square-o" aria-hidden="true"></i> Cocher les résultats</button>
     <button type="button" id="decocher_resultats_{{ id }}"><i class="fa fa-square-o" aria-hidden="true"></i> Décocher les résultats</button>
 </div>
@@ -310,6 +317,9 @@ $(document).ready(function() {
                 $("#div_table_groupes_{{ id }}").removeClass("masquer");
                 };
         {% endif %}
+        // "Toutes les activités" : aucune liste ni recherche à afficher
+        var toutes = $("#radio_choix_toutes_{{ id }}").prop("checked") === true;
+        $("#div_recherche_activites_{{ id }}, #actions_recherche_{{ id }}").toggleClass("masquer", toutes);
     });
 
     // Affichage des activités obsolètes (bouton "Terminées" de la barre de recherche)

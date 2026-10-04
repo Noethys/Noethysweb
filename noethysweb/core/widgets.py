@@ -517,6 +517,8 @@ class SelectionActivitesWidget(Widget):
                     dict_valeurs[dict_temp["name"].replace("liste_", "")].append(int(dict_temp["value"]))
             return json.dumps({"type": choix_activites, "ids": dict_valeurs.get(choix_activites, [])})
         else:
+            if data.get("choix_activites") == "toutes":
+                return json.dumps({"type": "toutes", "ids": []})
             if data.get("choix_activites") == "groupes_activites":
                 return json.dumps({"type": "groupes_activites", "ids": [int(x) for x in data.getlist("liste_groupes_activites", [])]})
             if data.get("choix_activites") == "activites":
