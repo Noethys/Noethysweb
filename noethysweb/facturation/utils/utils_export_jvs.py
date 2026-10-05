@@ -226,6 +226,21 @@ class Exporter(ExporterBase):
                             Nature.setAttribute("V", IDposte)
                             InfoLignePiece.appendChild(Nature)
 
+                            if self.lot.modele.fonction:
+                                fonction = doc.createElement("Fonction")
+                                fonction.setAttribute("V", self.lot.modele.fonction)
+                                InfoLignePiece.appendChild(fonction)
+
+                            if self.lot.modele.service1:
+                                CptAna = doc.createElement("CptAna")
+                                CptAna.setAttribute("V", self.lot.modele.service1)
+                                InfoLignePiece.appendChild(CptAna)
+
+                            if self.lot.modele.service2:
+                                Ventilation = doc.createElement("Ventilation")
+                                Ventilation.setAttribute("V", self.lot.modele.service2)
+                                InfoLignePiece.appendChild(Ventilation)
+
                             Majo = doc.createElement("Majo")
                             Majo.setAttribute("V", "0")
                             InfoLignePiece.appendChild(Majo)
