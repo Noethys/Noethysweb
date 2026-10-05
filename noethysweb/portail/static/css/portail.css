@@ -519,33 +519,6 @@ h1 {
     }
 
 
-    /* Ruban d'angle — compatible AdminLTE 4 / Bootstrap 5 */
-    .ribbon-wrapper {
-        position: absolute;
-        top: -2px;
-        right: -2px;
-        width: 100px;
-        height: 100px;
-        overflow: hidden;
-        z-index: 10;
-        pointer-events: none;
-    }
-
-    .ribbon {
-        position: absolute;
-        top: 16px;
-        right: -32px;
-        width: 120px;
-        padding: 3px 0;
-        transform: rotate(45deg);
-        text-align: center;
-        font-size: .75rem;
-        font-weight: 500;
-        line-height: 1.3;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
-    }
-
-
     .detail_infos_individu span {
         font-size: 12px !important;
         --bs-text-opacity: 1;
