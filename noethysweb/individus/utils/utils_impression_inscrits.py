@@ -23,6 +23,9 @@ class Impression(utils_impression.Impression):
     def Draw(self):
         # Importation des inscriptions
         conditions = Q(activite=self.dict_donnees["activite"]) & (Q(date_fin__isnull=True) | Q(date_fin__gte=self.dict_donnees["date_situation"]))
+        groupes = self.dict_donnees.get("groupes", None)
+        if groupes:
+            conditions &= Q(groupe__in=groupes)
         inscriptions = Inscription.objects.select_related("famille", "individu", "groupe", "categorie_tarif", "activite", "activite__structure").filter(conditions).order_by("individu__nom", "individu__prenom")
 
         # Calcul des soldes
@@ -110,6 +113,11 @@ class Impression(utils_impression.Impression):
 
         # Nom de l'activité
         self.story.append(Paragraph(self.dict_donnees["activite"].nom, style_activite))
+
+        # Groupes sélectionnés
+        if groupes:
+            style_groupes = ParagraphStyle(name="groupes", fontName=utils_polices.FONT_NORMAL, alignment=1, fontSize=7, spaceBefore=0, spaceAfter=14, leading=9)
+            self.story.append(Paragraph("Groupe%s : %s" % ("s" if len(groupes) > 1 else "", ", ".join([groupe.nom for groupe in groupes])), style_groupes))
 
         # Préparation du tableau
         data_tableau, largeurs_colonnes, ligne = [], [], []

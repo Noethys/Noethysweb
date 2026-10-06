@@ -6,7 +6,7 @@
 import json
 from django.views.generic import TemplateView
 from django.http import JsonResponse, QueryDict
-from core.models import Parametre
+from core.models import Parametre, Groupe
 from core.views.base import CustomView
 from individus.forms.imprimer_liste_inscrits import Formulaire
 
@@ -19,9 +19,19 @@ def get_data_profil(donnees=None, request=None):
 
     data = form.cleaned_data
     data["activite"] = data["activite"].pk
+    data["groupes"] = [groupe.pk for groupe in data["groupes"]]
     data.pop("profil")
     data.pop("date_situation")
     return data
+
+
+def Get_groupes(request):
+    """ Renvoie la liste des groupes de l'activité sélectionnée """
+    idactivite = request.POST.get("idactivite", None)
+    groupes = []
+    if idactivite and idactivite.isdigit():
+        groupes = [{"id": groupe.pk, "nom": groupe.nom} for groupe in Groupe.objects.filter(activite_id=int(idactivite), activite__structure__in=request.user.structures.all()).order_by("ordre")]
+    return JsonResponse({"groupes": groupes})
 
 
 def Check_options(request):
@@ -63,7 +73,7 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context["page_titre"] = "Imprimer une liste d'inscrits"
         context["box_titre"] = "Imprimer une liste d'inscrits"
-        context["box_introduction"] = "Sélectionnez une activité et créez les colonnes du document. Il est possible de mémoriser ces paramètres grâce au profil de configuration."
+        context["box_introduction"] = "Sélectionnez une activité, éventuellement un ou plusieurs groupes, et créez les colonnes du document. Il est possible de mémoriser ces paramètres grâce au profil de configuration."
 
         # Copie le request_post pour préparer l'application du profil de configuration
         request_post = self.request.POST.copy()
