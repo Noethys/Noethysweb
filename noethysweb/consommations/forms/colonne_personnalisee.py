@@ -18,6 +18,7 @@ class Formulaire(FormulaireBase, forms.Form):
         ("ville_naissance", "Ville de naissance"), ("medecin_nom", "Nom du médecin"),
         ("tel_mobile", "Tél. mobile"), ("tel_domicile", "Tél. domicile"), ("mail", "Email"),
         ("noms_responsables", "Noms responsables"), ("noms_responsables_titulaires", "Noms responsables titulaires"), ("tel_responsables", "Tél. responsables"), ("mail_responsables", "Email responsables"),
+        ("contacts_urgence_sortie", "Contacts d'urgence et de sortie"), ("contacts_urgence", "Contacts d'urgence"), ("contacts_sortie", "Contacts autorisés à la sortie"),
         ("ville_residence", "Ville de résidence"), ("adresse_residence", "Adresse complète de résidence"),
         ("secteur", "Secteur géographique"), ("secteur_colore", "Secteur géographique coloré"), ("nom_ecole", "Ecole"), ("nom_classe", "Classe"),
         ("nom_niveau_scolaire", "Niveau scolaire"), ("famille", "Famille"), ("regime", "Régime social"),

@@ -17,7 +17,7 @@ from reportlab.lib import colors
 from reportlab.graphics.barcode import code39
 from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires, utils_polices
 from core.models import Activite, Ouverture, Unite, UniteRemplissage, Consommation, MemoJournee, Note, Information, Individu, \
-                        Inscription, Scolarite, Classe, Ecole, Evenement, QuestionnaireQuestion, QuestionnaireChoix, Rattachement
+                        Inscription, Scolarite, Classe, Ecole, Evenement, QuestionnaireQuestion, QuestionnaireChoix, Rattachement, ContactUrgence
 from individus.utils import utils_pieces_manquantes
 from cotisations.utils import utils_cotisations_manquantes
 
@@ -286,6 +286,12 @@ class Impression(utils_impression.Impression):
                 self.dict_parents[rattachement.famille_id].append(rattachement.individu)
             if rattachement.categorie == 2:
                 self.liste_enfants.append((rattachement.famille_id, rattachement.individu_id))
+
+        # Récupération des contacts d'urgence et de sortie
+        self.dict_contacts = {}
+        if any(colonne.get("code") in ("contacts_urgence_sortie", "contacts_urgence", "contacts_sortie") for colonne in colonnes_perso or []):
+            for contact in ContactUrgence.objects.filter(individu_id__in=liste_idindividu).order_by("nom", "prenom"):
+                self.dict_contacts.setdefault((contact.famille_id, contact.individu_id), []).append(contact)
 
         # --------------------------------------- Création du PDF ----------------------------------------------
 
@@ -889,6 +895,21 @@ class Impression(utils_impression.Impression):
                                                             if individu.tel_mobile and individu.pk != inscription.individu_id:
                                                                 liste_tel.append("%s : %s" % (individu.prenom, individu.tel_mobile))
                                                     donnee = " | ".join(liste_tel)
+
+                                                # Contacts d'urgence et de sortie
+                                                if dictColonnePerso["code"] in ("contacts_urgence_sortie", "contacts_urgence", "contacts_sortie"):
+                                                    liste_contacts = []
+                                                    for contact in self.dict_contacts.get((inscription.famille_id, inscription.individu_id), []):
+                                                        if dictColonnePerso["code"] == "contacts_urgence" and not contact.autorisation_appel: continue
+                                                        if dictColonnePerso["code"] == "contacts_sortie" and not contact.autorisation_sortie: continue
+                                                        texte = contact.Get_nom()
+                                                        if contact.lien:
+                                                            texte += " (%s)" % contact.lien
+                                                        tel = contact.tel_mobile or contact.tel_domicile or contact.tel_travail
+                                                        if tel:
+                                                            texte += " : %s" % tel
+                                                        liste_contacts.append(texte)
+                                                    donnee = " | ".join(liste_contacts)
 
                                                 # Mail responsables
                                                 if dictColonnePerso["code"] == "mail_responsables":
