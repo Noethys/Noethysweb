@@ -23,6 +23,7 @@ class Formulaire(FormulaireBase, forms.Form):
         ("secteur", "Secteur géographique"), ("secteur_colore", "Secteur géographique coloré"), ("nom_ecole", "Ecole"), ("nom_classe", "Classe"),
         ("nom_niveau_scolaire", "Niveau scolaire"), ("famille", "Famille"), ("regime", "Régime social"),
         ("regimes_alimentaires", "Régimes alimentaires"),
+        ("montant_prestations", "Montant des prestations (coloré selon le règlement)"),
         ("caisse", "Caisse d'allocations"), ("codebarres_individu", "Code-barres de l'individu")]
 
     # Intégration des questionnaires

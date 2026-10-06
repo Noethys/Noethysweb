@@ -3,23 +3,65 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, json, operator, datetime, os, uuid
+import logging, json, operator, datetime, os, uuid, decimal
 logger = logging.getLogger(__name__)
 logging.getLogger('PIL').setLevel(logging.WARNING)
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.conf import settings
 from django.templatetags.static import static
 from reportlab.platypus import Paragraph, Spacer, Table, TableStyle, PageBreak
-from reportlab.platypus.flowables import ParagraphAndImage, Image
+from reportlab.platypus.flowables import ParagraphAndImage, Image, Flowable
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
 from reportlab.graphics.barcode import code39
-from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires, utils_polices
+from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires, utils_polices, utils_texte
 from core.models import Activite, Ouverture, Unite, UniteRemplissage, Consommation, MemoJournee, Note, Information, Individu, \
-                        Inscription, Scolarite, Classe, Ecole, Evenement, QuestionnaireQuestion, QuestionnaireChoix, Rattachement, ContactUrgence
+                        Inscription, Scolarite, Classe, Ecole, Evenement, QuestionnaireQuestion, QuestionnaireChoix, Rattachement, ContactUrgence, Prestation, Ventilation
 from individus.utils import utils_pieces_manquantes
 from cotisations.utils import utils_cotisations_manquantes
+
+
+class IconeReglement(Flowable):
+    """ Pastille vectorielle indiquant l'état du règlement : payé, partiel ou impayé """
+    couleurs = {"paye": colors.HexColor("#2E7D32"), "partiel": colors.HexColor("#EF6C00"), "impaye": colors.HexColor("#C62828")}
+
+    def __init__(self, statut="paye", taille=8, marge_gauche=1.5):
+        Flowable.__init__(self)
+        self.statut = statut
+        self.taille = taille
+        self.marge_gauche = marge_gauche
+
+    def wrap(self, *args):
+        return self.taille + self.marge_gauche, self.taille
+
+    def draw(self):
+        t = self.taille
+        c = self.canv
+        c.saveState()
+        c.translate(self.marge_gauche, 0)
+        c.setFillColor(self.couleurs[self.statut])
+        c.circle(t / 2.0, t / 2.0, t / 2.0, stroke=0, fill=1)
+        c.setStrokeColor(colors.white)
+        c.setFillColor(colors.white)
+        c.setLineWidth(t * 0.14)
+        c.setLineCap(1)
+        if self.statut == "paye":
+            # Coche
+            path = c.beginPath()
+            path.moveTo(t * 0.27, t * 0.52)
+            path.lineTo(t * 0.43, t * 0.34)
+            path.lineTo(t * 0.73, t * 0.67)
+            c.drawPath(path, stroke=1, fill=0)
+        elif self.statut == "partiel":
+            # Point d'exclamation
+            c.line(t * 0.5, t * 0.75, t * 0.5, t * 0.45)
+            c.circle(t * 0.5, t * 0.26, t * 0.07, stroke=0, fill=1)
+        else:
+            # Croix
+            c.line(t * 0.32, t * 0.32, t * 0.68, t * 0.68)
+            c.line(t * 0.32, t * 0.68, t * 0.68, t * 0.32)
+        c.restoreState()
 
 
 class Impression(utils_impression.Impression):
@@ -166,7 +208,7 @@ class Impression(utils_impression.Impression):
                                                              cles=[conso.date, conso.unite_id],
                                                              valeur=[])
 
-                    detail_conso = {"heure_debut": conso.heure_debut, "heure_fin": conso.heure_fin, "etat": conso.etat, "quantite": conso.quantite, "extra": conso.extra, "IDfamille": conso.inscription.famille_id, "evenement": conso.evenement}  #, "etiquettes": etiquettes}
+                    detail_conso = {"heure_debut": conso.heure_debut, "heure_fin": conso.heure_fin, "etat": conso.etat, "quantite": conso.quantite, "extra": conso.extra, "IDfamille": conso.inscription.famille_id, "evenement": conso.evenement, "IDprestation": conso.prestation_id}  #, "etiquettes": etiquettes}
                     dictConso[conso.activite_id][IDgroupe][scolarite][IDevenement][IDetiquette][conso.inscription]["listeConso"][conso.date][conso.unite_id].append(detail_conso)
                     if conso.inscription not in liste_inscriptions:
                         liste_inscriptions.append(conso.inscription)
@@ -275,6 +317,15 @@ class Impression(utils_impression.Impression):
                                                                 cotisationsManquantes=False, piecesManquantes=False, questionnaires=True, scolarite=True, liste_familles=liste_idfamille)
             dictInfosIndividus = infosIndividus.GetDictValeurs(mode="individu", ID=None, formatChamp=False)
             dictInfosFamilles = infosIndividus.GetDictValeurs(mode="famille", ID=None, formatChamp=False)
+
+        # Récupération des montants et règlements des prestations
+        dict_prestations = {}
+        if any(colonne.get("code") == "montant_prestations" for colonne in colonnes_perso or []):
+            liste_idprestation = {conso.prestation_id for conso in liste_conso if conso.prestation_id}
+            dict_ventilations = {temp["prestation_id"]: temp["total"] for temp in Ventilation.objects.filter(prestation_id__in=liste_idprestation).values("prestation_id").annotate(total=Sum("montant"))}
+            for prestation in Prestation.objects.filter(pk__in=liste_idprestation).values("pk", "montant"):
+                dict_prestations[prestation["pk"]] = {"montant": prestation["montant"] or decimal.Decimal(0), "regle": dict_ventilations.get(prestation["pk"], decimal.Decimal(0))}
+        couleurs_reglement = {"paye": colors.HexColor("#C8E6C9"), "partiel": colors.HexColor("#FFE0B2"), "impaye": colors.HexColor("#FFCDD2")}
 
         # Récupération des coordonnées des parents
         self.dict_parents = {}
@@ -454,6 +505,7 @@ class Impression(utils_impression.Impression):
 
                                 # Initialisation du tableau
                                 dataTableau = []
+                                styles_cellules = []
                                 largeursColonnes = []
                                 labelsColonnes = []
                                 recapitulatif = {"informations": [], "regimes": []}
@@ -636,6 +688,7 @@ class Impression(utils_impression.Impression):
 
                                     dictInscription = dictConso[activite.pk][IDgroupe][scolarite][IDevenement][IDetiquette][inscription]
                                     ligne = []
+                                    couleurs_ligne = []
                                     indexColonne = 0
                                     ligneVide = True
 
@@ -829,6 +882,7 @@ class Impression(utils_impression.Impression):
                                     # Colonnes personnalisées
                                     for dictColonnePerso in colonnes_perso:
                                         type_donnee = "unicode"
+                                        couleur_cellule = None
                                         if not dictColonnePerso["code"]:
                                             donnee = ""
                                         else:
@@ -911,6 +965,25 @@ class Impression(utils_impression.Impression):
                                                         liste_contacts.append(texte)
                                                     donnee = " | ".join(liste_contacts)
 
+                                                # Montant des prestations des consommations affichées
+                                                if dictColonnePerso["code"] == "montant_prestations":
+                                                    donnee = ""
+                                                    liste_idprestation = {dictConsoTemp["IDprestation"] for dictUnitesTemp in dictInscription["listeConso"].values() for listeConsoTemp in dictUnitesTemp.values() for dictConsoTemp in listeConsoTemp if dictConsoTemp.get("IDprestation")}
+                                                    if liste_idprestation:
+                                                        montant = sum([dict_prestations[idprestation]["montant"] for idprestation in liste_idprestation if idprestation in dict_prestations], decimal.Decimal(0))
+                                                        regle = sum([dict_prestations[idprestation]["regle"] for idprestation in liste_idprestation if idprestation in dict_prestations], decimal.Decimal(0))
+                                                        texte = utils_texte.Formate_montant(montant)
+                                                        if regle >= montant:
+                                                            statut = "paye"
+                                                        elif regle > 0:
+                                                            statut = "partiel"
+                                                            texte += "<br/>Reste %s" % utils_texte.Formate_montant(montant - regle)
+                                                        else:
+                                                            statut = "impaye"
+                                                        couleur_cellule = couleurs_reglement[statut]
+                                                        type_donnee = "montant_prestations"
+                                                        donnee = [ParagraphAndImage(Paragraph(texte, styleNormal), IconeReglement(statut), xpad=2, ypad=0, side="left")]
+
                                                 # Mail responsables
                                                 if dictColonnePerso["code"] == "mail_responsables":
                                                     liste_mail = []
@@ -927,6 +1000,8 @@ class Impression(utils_impression.Impression):
                                             ligne.append(Paragraph(str(donnee), styleNormal))
                                         else:
                                             ligne.append(donnee)
+                                        if couleur_cellule:
+                                            couleurs_ligne.append((len(ligne) - 1, couleur_cellule))
 
 
                                     # Informations personnelles
@@ -1035,6 +1110,8 @@ class Impression(utils_impression.Impression):
                                     if not ligneVide or self.dict_donnees["afficher_inscrits"]:
                                         # Ajout de la ligne individuelle dans le tableau
                                         dataTableau.append(ligne)
+                                        for index_colonne, couleur in couleurs_ligne:
+                                            styles_cellules.append(('BACKGROUND', (index_colonne, len(dataTableau) - 1), (index_colonne, len(dataTableau) - 1), couleur))
                                         # Mémorise les lignes pour export Excel
                                         listeLignesExport.append(ligne)
                                         indexLigne += 1
@@ -1081,6 +1158,9 @@ class Impression(utils_impression.Impression):
                                 else:
                                     style.append(('GRID', (0,0), (-1, -1), 0.25, colors.black))
                                     style.append(('BACKGROUND', (0, 0), (-1, 0), self.dict_donnees["couleur_fond_entetes"]))
+
+                                # Couleurs des cellules (montant des prestations)
+                                style.extend(styles_cellules)
 
                                 # Vérifie si la largeur du tableau est inférieure à la largeur de la page
                                 if not mode_export_excel:
@@ -1340,7 +1420,7 @@ class Impression(utils_impression.Impression):
                 for valeur in ligne:
                     # Si c'est un Paragraph
                     if isinstance(valeur, Paragraph):
-                        valeur = valeur.text
+                        valeur = valeur.text.replace("<br/>", " - ")
                     # Largeur colonne
                     if type(valeur) == str and ("Nom - " in valeur or valeur == "Informations"):
                         feuille.set_column(numColonne, numColonne, 50)
@@ -1358,6 +1438,7 @@ class Impression(utils_impression.Impression):
                                 valeur = element.text
                             except:
                                 valeur = element.P.text
+                            valeur = valeur.replace("<br/>", " - ")
                             if valeur == "X":
                                 valeur = "1"
                             listeInfos.append(valeur)
