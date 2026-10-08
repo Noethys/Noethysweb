@@ -21,6 +21,7 @@
 
                 <div class="">
                     {% if liste_contacts %}
+                        <div class="table-responsive">
                         <table class="table table-bordered align-middle" aria-label="{% trans "Liste des contacts" %}">
                             <thead>
                                 <tr class="text-center">
@@ -59,6 +60,7 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                        </div>
                     {% else %}
                         <b class="fw-bold">{% blocktrans %}Aucun contact enregistré.{% endblocktrans %}</b>
                     {% endif %}

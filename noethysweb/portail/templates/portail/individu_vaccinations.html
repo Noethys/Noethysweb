@@ -27,6 +27,7 @@
 
                 <div class="">
                     {% if liste_vaccinations %}
+                        <div class="table-responsive">
                         <table class="table table-bordered align-middle" aria-label="{% trans "Liste des vaccinations" %}">
                             <thead>
                                 <tr class="text-center">
@@ -60,6 +61,7 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                        </div>
                     {% else %}
                         <b class="fw-bold">{% blocktrans %}Aucune vaccination enregistrée.{% endblocktrans %}</b>
                     {% endif %}

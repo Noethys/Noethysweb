@@ -114,7 +114,7 @@
     <div class="table noselect masquer" id="table_grille" draggable="false" data-bs-theme="light">
         <table id="table-grille" class="table table-bordered table-grille bg-white"
                border="1" cellpadding="8" cellspacing="0"
-               style="min-width: 400px;" aria-label="Planning des réservations">
+               {% if data.mode != "portail" %}style="min-width: 400px;" {% endif %}aria-label="Planning des réservations">
             <thead>
                 <tr>
                     <th scope="col">
@@ -145,7 +145,7 @@
                                 {% for unite in data.liste_unites_visibles %}
                                     <td class="date_regroupement"></td>
                                 {% endfor %}
-                            <td class="date_regroupement"></td>
+                            {% if data.mode != "portail" %}<td class="date_regroupement"></td>{% endif %}
                         </tr>
                     {% endif %}
 

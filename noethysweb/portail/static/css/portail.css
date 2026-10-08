@@ -464,7 +464,7 @@ h1 {
         margin-bottom: 0px;
     }
 
-    @media (min-width: 376px) {
+    @media (min-width: 576px) {
         .sidebar-expand-sm.layout-fixed .app-sidebar {
             position: sticky;
             top: 0;

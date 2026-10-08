@@ -15,6 +15,7 @@
 
                 <div class="">
                     {% if liste_quotients %}
+                        <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead>
                                 <tr class="text-center">
@@ -38,6 +39,7 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                        </div>
                     {% else %}
                         <b>{% blocktrans %}Aucun quotient enregistré.{% endblocktrans %}</b>
                     {% endif %}

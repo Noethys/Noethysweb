@@ -20,6 +20,7 @@
                 {% endif %}
 
                 {% if liste_informations %}
+                    <div class="table-responsive">
                     <table class="table table-bordered align-middle" aria-label="{% trans "Liste des informations" %}">
                         <thead>
                             <tr class="text-center">
@@ -51,6 +52,7 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                    </div>
                 {% else %}
                     <p class="fw-bold">{% blocktrans %}Aucune information enregistrée.{% endblocktrans %}</p>
                 {% endif %}

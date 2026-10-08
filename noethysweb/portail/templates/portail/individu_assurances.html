@@ -29,6 +29,7 @@
 
                 <div class="">
                     {% if liste_assurances %}
+                        <div class="table-responsive">
                         <table class="table table-bordered align-middle" aria-label="{% trans "Liste des assurances" %}">
                             <thead>
                                 <tr class="text-center">
@@ -66,6 +67,7 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                        </div>
                     {% else %}
                         <b class="fw-bold">{% blocktrans %}Aucune assurance enregistrée.{% endblocktrans %}</b>
                     {% endif %}
