@@ -1,0 +1,463 @@
+{# Éditeur de la méthode de calcul "Formule de calcul personnalisée" #}
+<style>
+    .formule-chip { font-family: SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; margin: 0 4px 6px 0; }
+    #formule_texte_{{ id }} { font-family: SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; line-height: 1.6; }
+    #formule_resultat_{{ id }} { font-size: 1.6rem; font-weight: 500; }
+    .formule-exemple { border: 1px solid #dee2e6; border-radius: .25rem; padding: .6rem .75rem; margin-bottom: .5rem; }
+    .formule-exemple code { display: block; white-space: pre-wrap; word-break: break-word; background: #f4f6f9; color: #212529; border-radius: .2rem; padding: .35rem .5rem; margin: .4rem 0; }
+    .formule-theme.active { color: #fff; }
+    #formule_modal_exemples_{{ id }} .modal-body { max-height: 60vh; overflow-y: auto; }
+    .dark-mode .formule-exemple { border-color: #4b545c; }
+    .dark-mode .formule-exemple code { background: #343a40; color: #f8f9fa; }
+    .formule-recap { white-space: pre-wrap; word-break: break-word; background: #f4f6f9; color: #212529; border-radius: .25rem; padding: .5rem .75rem; font-size: 13px; max-height: 10rem; overflow-y: auto; }
+    .formule-resultat-zone { background: #f4f6f9; border-radius: .25rem; padding: .75rem 1rem; }
+    .dark-mode .formule-recap, .dark-mode .formule-resultat-zone { background: #343a40; color: #f8f9fa; }
+</style>
+
+<div class="form-group mb-2">
+    <div class="d-flex flex-wrap justify-content-between align-items-end mb-1">
+        <label for="formule_texte_{{ id }}" class="mb-0">Formule</label>
+        <div>
+            <button type="button" class="btn btn-xs btn-outline-success" id="formule_bouton_tester_{{ id }}" data-toggle="modal" data-target="#formule_modal_test_{{ id }}">
+                <i class="fa fa-flask" aria-hidden="true"></i> Tester la formule
+            </button>
+            <button type="button" class="btn btn-xs btn-outline-info ml-1" id="formule_bouton_exemples_{{ id }}" data-toggle="modal" data-target="#formule_modal_exemples_{{ id }}">
+                <i class="fa fa-lightbulb-o" aria-hidden="true"></i> Exemples de formules
+            </button>
+        </div>
+    </div>
+    <textarea id="formule_texte_{{ id }}" class="form-control" rows="4" maxlength="2000" spellcheck="false"
+              aria-describedby="formule_statut_{{ id }} formule_aide_{{ id }}"
+              placeholder="SI(VACANCES; TRANCHE(QF; 600; 8; 1000; 12; 15); 6)"></textarea>
+    <div id="formule_statut_{{ id }}" class="small mt-1" role="status" aria-live="polite"></div>
+</div>
+
+<div class="mb-1"><small class="text-muted">Variables (cliquez pour insérer)</small></div>
+<div>
+    {% for code, description in variables_formule.items %}
+        <button type="button" class="btn btn-xs btn-outline-primary formule-chip formule-inserer-{{ id }}" data-insertion="{{ code }}" title="{{ description }}">{{ code }}</button>
+    {% endfor %}
+</div>
+<div class="mb-1 mt-1"><small class="text-muted">Fonctions</small></div>
+<div>
+    {% for code, infos in fonctions_formule.items %}
+        <button type="button" class="btn btn-xs btn-outline-secondary formule-chip formule-inserer-{{ id }}" data-insertion="{{ code }}(" title="{{ infos.0 }} : {{ infos.1 }}">{{ code }}</button>
+    {% endfor %}
+</div>
+<p id="formule_aide_{{ id }}" class="form-text text-muted mt-1">
+    <small>
+        <i class="fa fa-info-circle" aria-hidden="true"></i>
+        Séparez les paramètres par un point-virgule. Décimales avec virgule ou point. Opérateurs : + - * / ( ) = &lt;&gt; &lt; &lt;= &gt; &gt;= ET OU NON.
+        Survolez une variable ou une fonction pour voir sa description.
+    </small>
+</p>
+
+{# mx-0 + colonnes sans padding externe : une .row classique déborde du conteneur overflow:auto du widget (barre de défilement horizontale) #}
+<div class="row mx-0">
+    <div class="col-md-3 form-group px-0 pr-md-2">
+        <label for="formule_montant_min_{{ id }}" class="mb-1">Montant plancher</label>
+        <input type="text" inputmode="decimal" id="formule_montant_min_{{ id }}" class="form-control form-control-sm" placeholder="Aucun">
+    </div>
+    <div class="col-md-3 form-group px-0 pr-md-2">
+        <label for="formule_montant_max_{{ id }}" class="mb-1">Montant plafond</label>
+        <input type="text" inputmode="decimal" id="formule_montant_max_{{ id }}" class="form-control form-control-sm" placeholder="Aucun">
+    </div>
+    <div class="col-md-6 form-group px-0">
+        <label for="formule_label_{{ id }}" class="mb-1">Label de la prestation (optionnel)</label>
+        <input type="text" id="formule_label_{{ id }}" class="form-control form-control-sm" maxlength="300" placeholder="Accueil - QF {QF}"
+               title="Variables utilisables : {QF}, {AGE}, {DUREE}, {HEURE_DEBUT}, {HEURE_FIN}, {RANG_ENFANT}...">
+    </div>
+</div>
+
+{# Modal du testeur de formule #}
+<div class="modal fade" id="formule_modal_test_{{ id }}" tabindex="-1" role="dialog" aria-labelledby="formule_modal_test_titre_{{ id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="formule_modal_test_titre_{{ id }}"><i class="fa fa-flask" aria-hidden="true"></i> Tester la formule</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="small text-muted mb-1">Formule testée</div>
+                <pre id="formule_recap_{{ id }}" class="formule-recap mb-3"></pre>
+                <div class="row" id="formule_valeurs_{{ id }}">
+                    <div class="col-6 col-md-4 form-group mb-2">
+                        <label for="formule_test_QF_{{ id }}" class="mb-0 small">QF</label>
+                        <input type="number" id="formule_test_QF_{{ id }}" data-variable="QF" class="form-control form-control-sm" value="750" placeholder="Sans QF">
+                    </div>
+                    <div class="col-6 col-md-4 form-group mb-2">
+                        <label for="formule_test_AGE_{{ id }}" class="mb-0 small">Âge</label>
+                        <input type="number" id="formule_test_AGE_{{ id }}" data-variable="AGE" class="form-control form-control-sm" value="8" min="0">
+                    </div>
+                    <div class="col-6 col-md-4 form-group mb-2">
+                        <label for="formule_test_HEURE_DEBUT_{{ id }}" class="mb-0 small">Heure début</label>
+                        <input type="time" id="formule_test_HEURE_DEBUT_{{ id }}" data-variable="HEURE_DEBUT" data-type="heure" class="form-control form-control-sm" value="09:00">
+                    </div>
+                    <div class="col-6 col-md-4 form-group mb-2">
+                        <label for="formule_test_HEURE_FIN_{{ id }}" class="mb-0 small">Heure fin</label>
+                        <input type="time" id="formule_test_HEURE_FIN_{{ id }}" data-variable="HEURE_FIN" data-type="heure" class="form-control form-control-sm" value="12:30">
+                    </div>
+                    <div class="col-6 col-md-4 form-group mb-2">
+                        <label for="formule_test_RANG_ENFANT_{{ id }}" class="mb-0 small">Rang enfant</label>
+                        <input type="number" id="formule_test_RANG_ENFANT_{{ id }}" data-variable="RANG_ENFANT" class="form-control form-control-sm" value="1" min="1">
+                    </div>
+                    <div class="col-6 col-md-4 form-group mb-2">
+                        <label for="formule_test_NB_ENFANTS_INSCRITS_{{ id }}" class="mb-0 small">Nb inscrits famille</label>
+                        <input type="number" id="formule_test_NB_ENFANTS_INSCRITS_{{ id }}" data-variable="NB_ENFANTS_INSCRITS" class="form-control form-control-sm" value="1" min="1">
+                    </div>
+                    <div class="col-6 col-md-4 form-group mb-2">
+                        <label for="formule_test_JOUR_SEMAINE_{{ id }}" class="mb-0 small">Jour</label>
+                        <select id="formule_test_JOUR_SEMAINE_{{ id }}" data-variable="JOUR_SEMAINE" class="form-control form-control-sm">
+                            <option value="1">Lundi</option><option value="2">Mardi</option><option value="3" selected>Mercredi</option><option value="4">Jeudi</option>
+                            <option value="5">Vendredi</option><option value="6">Samedi</option><option value="7">Dimanche</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-4 form-group mb-2">
+                        <label for="formule_test_MOIS_{{ id }}" class="mb-0 small">Mois</label>
+                        <select id="formule_test_MOIS_{{ id }}" data-variable="MOIS" class="form-control form-control-sm">
+                            <option value="1">Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option>
+                            <option value="5">Mai</option><option value="6">Juin</option><option value="7" selected>Juillet</option><option value="8">Août</option>
+                            <option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-4 form-group mb-2">
+                        <label for="formule_test_VACANCES_{{ id }}" class="mb-0 small">Période</label>
+                        <select id="formule_test_VACANCES_{{ id }}" data-variable="VACANCES" class="form-control form-control-sm">
+                            <option value="1" selected>Vacances</option><option value="0">Hors vacances</option>
+                        </select>
+                    </div>
+                    <div id="formule_questions_{{ id }}" class="col-12 row mx-0 px-0"></div>
+                </div>
+                <div class="formule-resultat-zone mt-2">
+                    <span class="text-muted mr-2">Montant calculé</span>
+                    <span id="formule_resultat_{{ id }}" aria-live="polite">–</span>
+                    <small id="formule_resultat_detail_{{ id }}" class="text-muted ml-2"></small>
+                    <div id="formule_resultat_erreur_{{ id }}" class="text-danger small mt-1" style="display: none;"></div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <small class="text-muted">Le montant se recalcule à chaque modification. La durée est calculée à partir des heures de début et de fin.</small>
+                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Modal des exemples de formules #}
+<div class="modal fade" id="formule_modal_exemples_{{ id }}" tabindex="-1" role="dialog" aria-labelledby="formule_modal_titre_{{ id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="formule_modal_titre_{{ id }}"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> Exemples de formules</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="px-3 pt-3 pb-2 border-bottom">
+                    <label for="formule_recherche_{{ id }}" class="sr-only">Rechercher un exemple</label>
+                    <input type="search" id="formule_recherche_{{ id }}" class="form-control form-control-sm mb-2" placeholder="Rechercher : vacances, fratrie, durée, arrondi...">
+                    <div role="group" aria-label="Filtrer par thème">
+                        <button type="button" class="btn btn-xs btn-outline-primary formule-theme active mb-1" data-theme="" aria-pressed="true">Tous</button>
+                        {% for theme in themes_exemples_formule %}
+                            <button type="button" class="btn btn-xs btn-outline-primary formule-theme mb-1" data-theme="{{ theme }}" aria-pressed="false">{{ theme }}</button>
+                        {% endfor %}
+                    </div>
+                    <div id="formule_confirmation_{{ id }}" class="alert alert-warning py-2 px-3 mt-2 mb-0 small" role="alert" style="display: none;">
+                        La formule actuelle sera remplacée.
+                        <button type="button" class="btn btn-xs btn-warning ml-2" id="formule_confirmer_{{ id }}">Remplacer</button>
+                        <button type="button" class="btn btn-xs btn-default" id="formule_annuler_{{ id }}">Annuler</button>
+                    </div>
+            </div>
+            <div class="modal-body">
+                <div id="formule_liste_exemples_{{ id }}">
+                    {% for theme, titre, description, formule in exemples_formule %}
+                        <div class="formule-exemple" data-theme="{{ theme }}" data-index="{{ forloop.counter0 }}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <strong>{{ titre }}</strong>
+                                <span class="badge badge-light ml-2">{{ theme }}</span>
+                            </div>
+                            <div class="small text-muted">{{ description }}</div>
+                            <code class="formule-exemple-texte">{{ formule }}</code>
+                            <div class="text-right">
+                                <button type="button" class="btn btn-xs btn-default formule-copier"><i class="fa fa-copy" aria-hidden="true"></i> Copier</button>
+                                <button type="button" class="btn btn-xs btn-primary formule-utiliser">Utiliser cette formule</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <p id="formule_aucun_exemple_{{ id }}" class="text-muted text-center py-3 mb-0" style="display: none;">Aucun exemple ne correspond à votre recherche.</p>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <small class="text-muted"><span id="formule_nbre_exemples_{{ id }}"></span> — pensez à adapter les montants et les seuils à votre structure.</small>
+                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var id = "{{ id }}";
+    var $texte = $("#formule_texte_" + id);
+    var $min = $("#formule_montant_min_" + id);
+    var $max = $("#formule_montant_max_" + id);
+    var $label = $("#formule_label_" + id);
+    var minuteur = null, requete = null;
+
+    // Chargement des données existantes : [[formule, montant_min, montant_max, label]]
+    {% if methode == "formule" %}
+        var donnees = JSON.parse("{{ tarifs_lignes_data|escapejs }}");
+        var ligne = donnees.length ? donnees[0] : [];
+        $texte.val(ligne[0] || "");
+        Ajuster_hauteur();
+        $min.val(ligne[1] ? String(ligne[1]).replace(".", ",") : "");
+        $max.val(ligne[2] ? String(ligne[2]).replace(".", ",") : "");
+        $label.val(ligne[3] || "");
+    {% endif %}
+
+    // Insertion d'une variable ou d'une fonction à la position du curseur
+    $(".formule-inserer-" + id).on("click", function() {
+        var el = $texte[0], texte = $(this).data("insertion");
+        var debut = el.selectionStart, fin = el.selectionEnd;
+        el.value = el.value.slice(0, debut) + texte + el.value.slice(fin);
+        el.focus();
+        el.selectionStart = el.selectionEnd = debut + texte.length;
+        Planifier_test();
+    });
+
+    function Heure_en_decimal(valeur) {
+        if (!valeur) {return 0}
+        var morceaux = valeur.split(":");
+        return parseInt(morceaux[0], 10) + (parseInt(morceaux[1], 10) || 0) / 60;
+    }
+
+    function Get_valeurs() {
+        var valeurs = {QUESTIONNAIRES: {}};
+        $("#formule_valeurs_" + id + " [data-variable]").each(function() {
+            var code = $(this).data("variable"), val = $(this).val();
+            if ($(this).data("type") === "heure") {
+                valeurs[code] = Heure_en_decimal(val);
+            } else if (code === "QF") {
+                valeurs[code] = val === "" ? null : parseFloat(val);
+            } else {
+                valeurs[code] = val === "" ? 0 : parseFloat(val);
+            }
+        });
+        valeurs.DUREE = Math.max(valeurs.HEURE_FIN - valeurs.HEURE_DEBUT, 0);
+        $("#formule_questions_" + id + " [data-question]").each(function() {
+            valeurs.QUESTIONNAIRES[$(this).data("question")] = $(this).val().replace(",", ".") || 0;
+        });
+        return valeurs;
+    }
+
+    function Afficher_statut(type, texte) {
+        var icones = {succes: "fa-check text-success", erreur: "fa-exclamation-circle text-danger", attente: "fa-spinner fa-spin text-muted"};
+        var $statut = $("#formule_statut_" + id).empty();
+        $("<i>", {"class": "fa " + icones[type], "aria-hidden": "true"}).appendTo($statut);
+        $("<span>", {"class": type === "erreur" ? "text-danger ml-1" : "ml-1"}).text(texte).appendTo($statut);
+        $texte.toggleClass("is-invalid", type === "erreur");
+    }
+
+    // Champs de saisie pour les questions utilisées par QUESTIONNAIRE(id)
+    function Maj_questions(questions) {
+        var $zone = $("#formule_questions_" + id);
+        var actuelles = $zone.find("[data-question]").map(function() {return String($(this).data("question"))}).get();
+        if (JSON.stringify(actuelles) === JSON.stringify((questions || []).map(String))) {return}
+        var anciennes = {};
+        $zone.find("[data-question]").each(function() {anciennes[$(this).data("question")] = $(this).val()});
+        $zone.empty();
+        (questions || []).forEach(function(idquestion) {
+            var idchamp = "formule_test_question_" + idquestion + "_" + id;
+            var $col = $("<div>", {"class": "col-6 col-md-4 form-group mb-2"}).appendTo($zone);
+            $("<label>", {"for": idchamp, "class": "mb-0 small"}).text("Question n°" + idquestion).appendTo($col);
+            $("<input>", {type: "text", inputmode: "decimal", id: idchamp, "class": "form-control form-control-sm", "data-question": idquestion, value: anciennes[idquestion] || "0"})
+                .on("input", Planifier_test).appendTo($col);
+        });
+    }
+
+    // Résultat affiché dans la modal de test : montant ou message d'erreur
+    function Afficher_resultat(montant, detail, erreur) {
+        $("#formule_resultat_" + id).text(montant || "–");
+        $("#formule_resultat_detail_" + id).text(detail || "");
+        $("#formule_resultat_erreur_" + id).text(erreur || "").toggle(!!erreur);
+    }
+
+    function Maj_recapitulatif() {
+        var formule = $.trim($texte.val());
+        $("#formule_recap_" + id).text(formule || "Aucune formule saisie").toggleClass("text-muted", !formule);
+    }
+
+    function Tester() {
+        var formule = $.trim($texte.val());
+        Maj_recapitulatif();
+        if (!formule) {
+            $("#formule_statut_" + id).empty();
+            $texte.removeClass("is-invalid");
+            Afficher_resultat(null, null, "Saisissez une formule ou choisissez un exemple pour la tester.");
+            return;
+        }
+        if (requete) {requete.abort()}
+        Afficher_statut("attente", "Vérification...");
+        requete = $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_tester_formule_tarif' %}",
+            data: {
+                formule: formule,
+                valeurs: JSON.stringify(Get_valeurs()),
+                montant_min: $min.val(),
+                montant_max: $max.val(),
+                csrfmiddlewaretoken: $("#{{ id_form }} input[name=csrfmiddlewaretoken]").val(),
+            },
+            datatype: "json",
+            success: function(data) {
+                Maj_questions(data.questions);
+                if (data.erreur) {
+                    var message = data.valide ? "Erreur de calcul : " + data.erreur : data.erreur;
+                    Afficher_statut("erreur", message);
+                    Afficher_resultat(null, null, message);
+                    return;
+                }
+                Afficher_statut("succes", "Formule valide" + (data.variables.length ? " — variables utilisées : " + data.variables.join(", ") : ""));
+                Afficher_resultat(
+                    parseFloat(data.montant).toLocaleString("fr-FR", {style: "currency", currency: "EUR"}),
+                    data.montant_brut ? "(résultat brut " + parseFloat(data.montant_brut).toLocaleString("fr-FR") + " avant plancher/plafond)" : "",
+                    null);
+            },
+            error: function(xhr) {
+                if (xhr.statusText === "abort") {return}
+                var message = (xhr.responseJSON && xhr.responseJSON.erreur) || "Le test n'a pas pu être effectué";
+                Afficher_statut("erreur", message);
+                Afficher_resultat(null, null, message);
+            },
+        });
+    }
+
+    function Planifier_test() {
+        clearTimeout(minuteur);
+        minuteur = setTimeout(Tester, 400);
+    }
+
+    // Modal des exemples
+    var $modal = $("#formule_modal_exemples_" + id);
+    var $exemples = $modal.find(".formule-exemple");
+    var $confirmation = $("#formule_confirmation_" + id);
+    var exemple_en_attente = null, focus_editeur = false;
+
+    function Normaliser(texte) {
+        return texte.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    }
+
+    function Filtrer_exemples() {
+        var recherche = Normaliser($.trim($("#formule_recherche_" + id).val()));
+        var theme = $modal.find(".formule-theme.active").data("theme");
+        var nbre = 0;
+        $exemples.each(function() {
+            var visible = (!theme || $(this).data("theme") === theme) && (!recherche || Normaliser($(this).text()).indexOf(recherche) >= 0);
+            $(this).toggle(visible);
+            if (visible) {nbre++}
+        });
+        $("#formule_aucun_exemple_" + id).toggle(nbre === 0);
+        $("#formule_nbre_exemples_" + id).text(nbre + (nbre > 1 ? " exemples" : " exemple"));
+    }
+
+    function Ajuster_hauteur() {
+        var nbre_lignes = $texte.val().split("\n").length;
+        $texte.attr("rows", Math.max(4, Math.min(12, nbre_lignes + 1)));
+    }
+
+    function Appliquer_exemple($exemple) {
+        $texte.val($exemple.find(".formule-exemple-texte").text());
+        Ajuster_hauteur();
+        exemple_en_attente = null;
+        $confirmation.hide();
+        focus_editeur = true;
+        $modal.modal("hide");
+        Tester();
+    }
+
+    $modal.find(".formule-theme").on("click", function() {
+        $modal.find(".formule-theme").removeClass("active").attr("aria-pressed", "false");
+        $(this).addClass("active").attr("aria-pressed", "true");
+        Filtrer_exemples();
+    });
+    $("#formule_recherche_" + id).on("input", Filtrer_exemples);
+
+    $modal.find(".formule-utiliser").on("click", function() {
+        var $exemple = $(this).closest(".formule-exemple");
+        var actuelle = $.trim($texte.val());
+        if (actuelle && actuelle !== $exemple.find(".formule-exemple-texte").text()) {
+            exemple_en_attente = $exemple;
+            $confirmation.show();
+            $("#formule_confirmer_" + id).focus();
+            return;
+        }
+        Appliquer_exemple($exemple);
+    });
+    $("#formule_confirmer_" + id).on("click", function() {
+        if (exemple_en_attente) {Appliquer_exemple(exemple_en_attente)}
+    });
+    $("#formule_annuler_" + id).on("click", function() {
+        var $exemple = exemple_en_attente;
+        exemple_en_attente = null;
+        $confirmation.hide();
+        if ($exemple) {$exemple.find(".formule-utiliser").focus()}
+    });
+
+    $modal.find(".formule-copier").on("click", function() {
+        var $bouton = $(this), texte = $bouton.closest(".formule-exemple").find(".formule-exemple-texte").text();
+        function Confirmer() {
+            $bouton.html('<i class="fa fa-check" aria-hidden="true"></i> Copiée');
+            setTimeout(function() {$bouton.html('<i class="fa fa-copy" aria-hidden="true"></i> Copier')}, 1500);
+        }
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(texte).then(Confirmer);
+        } else {
+            var $temp = $("<textarea>").val(texte).css({position: "absolute", left: "-9999px"}).appendTo("body");
+            $temp[0].select();
+            try {document.execCommand("copy"); Confirmer()} catch (err) {}
+            $temp.remove();
+        }
+    });
+
+    $modal.on("shown.bs.modal", function() {
+        $("#formule_recherche_" + id).trigger("focus");
+    });
+    $modal.on("hidden.bs.modal", function() {
+        exemple_en_attente = null;
+        $confirmation.hide();
+        if (focus_editeur) {
+            // Différé : Bootstrap redonne d'abord le focus au bouton déclencheur
+            focus_editeur = false;
+            setTimeout(function() {$texte.trigger("focus")}, 0);
+        }
+    });
+    // Modal du testeur : test immédiat à l'ouverture, avec les valeurs conservées d'une ouverture à l'autre
+    var $modal_test = $("#formule_modal_test_" + id);
+    $modal_test.on("show.bs.modal", function() {
+        clearTimeout(minuteur);
+        Tester();
+    });
+    $modal_test.on("shown.bs.modal", function() {
+        $("#formule_test_QF_" + id).trigger("focus");
+    });
+
+    // Modals rattachées au body pour éviter les problèmes d'empilement dans les onglets AdminLTE
+    $modal.appendTo("body");
+    $modal_test.appendTo("body");
+    Filtrer_exemples();
+
+    $texte.on("input", Planifier_test);
+    $min.add($max).on("input", Planifier_test);
+    $("#formule_valeurs_" + id + " [data-variable]").on("input change", Planifier_test);
+
+    // Envoi des données dans le champ caché lors de l'enregistrement
+    $("#{{ id_form }}").submit(function() {
+        if (GetCodeMethode_{{ id }}() === "formule") {
+            var ligne = [$.trim($texte.val()), $min.val().replace(",", "."), $max.val().replace(",", "."), $label.val()];
+            $("#{{ id_tarifs_lignes_data }}").val(JSON.stringify([ligne]));
+        }
+    });
+
+    $(document).ready(function() {
+        if ($.trim($texte.val())) {Tester()}
+    });
+})();
+</script>

@@ -85,6 +85,8 @@ LISTE_METHODES_TARIFS = [
     { "code": "duree_taux_qf", "label":u"Par taux d'effort et par tranches de QF en fonction d'une durée", "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "duree_min", "duree_max", "temps_facture", "taux", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("qf_min", "qf_max", "duree_min", "duree_max", "taux"), "tarifs_compatibles": ("JOURN",) },
     { "code": "duree_taux_qf_prorata", "label":u"Par taux d'effort et par tranches de QF au prorata d'une durée", "type": "horaire", "nbre_lignes_max": None, "entete": None, "champs": ("qf_min", "qf_max", "duree_min", "duree_max", "duree_seuil", "duree_plafond", "duree_arrondi", "unite_horaire", "taux", "montant_min", "montant_max", "ajustement", "label"), "champs_obligatoires": ("qf_min", "qf_max", "unite_horaire", "taux"), "tarifs_compatibles": ("JOURN",) },
 
+    { "code": "formule", "label":u"Formule de calcul personnalisée", "type": "unitaire", "nbre_lignes_max": 1, "entete": None, "champs": ("formule", "montant_min", "montant_max", "label"), "champs_obligatoires": ("formule",), "tarifs_compatibles": ("JOURN",) },
+
     # Lignes PSU
     # { "code": "forfait_contrat", "label":u"Forfait contrat"), "type": "unitaire", "nbre_lignes_max": 0, "entete": None, "champs": (), "champs_obligatoires": (), "tarifs_compatibles": ("CREDIT",) },
     # { "code": "psu_revenu", "label":u"Barême PSU selon revenus"), "type": "unitaire", "nbre_lignes_max": None, "entete": None, "champs": ("revenu_min", "revenu_max", "taux", "montant_min", "montant_max", "ajustement"), "champs_obligatoires": ("revenu_min", "revenu_max", "taux"), "tarifs_compatibles": ("BAREME",) },
@@ -128,6 +130,7 @@ DICT_COLONNES_TARIFS = {
     "duree_plafond": {"label": "Durée plafond", "largeur": 70, "editeur": "heure", "infobulle": "Durée plafond"},
     "duree_arrondi": {"label": "Durée arrondi", "largeur": 70, "editeur": "heure", "infobulle": "Durée arrondi"},
     "taux": {"label": "Taux", "largeur": 70, "editeur": "decimal6", "infobulle": "Taux d'effort"},
+    "formule": {"label": "Formule", "largeur": 300, "editeur": "formule", "infobulle": "Formule de calcul du tarif"},
     "ajustement": {"label": "Majoration/Déduction", "largeur": 75, "editeur": "decimal4", "infobulle": "Montant à majorer ou à déduire sur le tarif"},
 }
 
@@ -1600,6 +1603,7 @@ class TarifLigne(models.Model):
     revenu_min = models.DecimalField(verbose_name="Montant revenu min", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
     revenu_max = models.DecimalField(verbose_name="Montant revenu max", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
     duree_arrondi = models.TimeField(verbose_name="Durée arrondi", blank=True, null=True)
+    formule = models.TextField(verbose_name="Formule", blank=True, null=True)
     # modele_prestation = models.ForeignKey(ModelePrestation, verbose_name="Modèle de prestation", on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:

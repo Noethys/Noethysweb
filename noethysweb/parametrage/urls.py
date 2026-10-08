@@ -27,7 +27,7 @@ from parametrage.views import organisateur, structures, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
     modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
     modeles_word, releves_bancaires, sondages, achats_categories, achats_fournisseurs, modeles_commandes, modeles_commandes_colonnes, \
-    activites_evenements_categories, activites_import_export, api_particulier, activites_controle_ia
+    activites_evenements_categories, activites_import_export, api_particulier, activites_controle_ia, activites_tarifs_formule
 
 
 urlpatterns = [
@@ -696,6 +696,7 @@ urlpatterns = [
     path('parametrage/activites/unites_remplissage/liste/deplacer_lignes', secure_ajax(activites_unites_remplissage.Deplacer.as_view()), name='ajax_deplacer_lignes_activites_unites_remplissage'),
     path('parametrage/get_calendrier_annuel_ouvertures', secure_ajax(activites_calendrier.Get_calendrier_annuel_ouvertures), name='ajax_get_calendrier_annuel_ouvertures'),
     path('parametrage/get_calendrier_ouvertures', secure_ajax(activites_ouvertures.Get_calendrier_ouvertures), name='ajax_get_calendrier_ouvertures'),
+    path('parametrage/activites/tarifs/tester_formule', secure_ajax(activites_tarifs_formule.Tester_formule), name='ajax_tester_formule_tarif'),
     path('parametrage/traitement_lot_ouvertures', secure_ajax(activites_ouvertures.Traitement_lot_ouvertures), name='ajax_traitement_lot_ouvertures'),
     path('parametrage/valider_calendrier_ouvertures', secure_ajax(activites_ouvertures.Valider_calendrier_ouvertures), name='ajax_valider_calendrier_ouvertures'),
     path('parametrage/get_fond_modele', secure_ajax(modeles_documents.Get_fond_modele), name='ajax_get_fond_modele'),

@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.views.generic import TemplateView
+from django.utils.html import escape
 from core.views.base import CustomView
 from core.models import Tarif, TarifLigne, LISTE_METHODES_TARIFS, DICT_COLONNES_TARIFS
 from core.utils import utils_dates, utils_texte
@@ -58,6 +59,8 @@ def Get_html_tarifs_activite(activite=None):
                     if codeChamp == "date" and valeur != None:
                         valeur = utils_dates.ConvertDateToFR(valeur)
                     if valeur == None: valeur = ""
+                    if codeChamp == "formule" and valeur:
+                        valeur = "<code>%s</code>" % escape(valeur)
                     ligne.append(valeur)
 
                     if valeur != "":

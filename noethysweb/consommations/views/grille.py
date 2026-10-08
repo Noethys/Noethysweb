@@ -18,7 +18,7 @@ from crispy_forms.utils import render_crispy_form
 from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite, Consommation, MemoJournee, Evenement, Groupe, Ventilation, Famille, \
                         Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Individu, Activite, Scolarite, QuestionnaireReponse, Inscription, \
                         Note, Information
-from core.utils import utils_dates, utils_decimal, utils_historique, utils_parametres
+from core.utils import utils_dates, utils_decimal, utils_historique, utils_parametres, utils_formule_tarif
 from consommations.utils import utils_consommations
 from consommations.forms.grille_questionnaire import Formulaire as Formulaire_questionnaire
 from cotisations.utils import utils_cotisations_manquantes
@@ -776,6 +776,9 @@ class Facturation():
         self.dict_combi_tarif = {}
         self.dict_aides = {}
         self.tarif_fratries_exists = False
+        self.dict_dates_naiss = {}
+        self.dict_inscrits_formules = {}
+        self.messages_formules = []
 
     def Facturer(self):
         messages = []
@@ -1148,6 +1151,8 @@ class Facturation():
         # Messages d'information
         if self.tarif_fratries_exists and self.donnees["mode"] in ("individu", "date"):
             messages.append(("info", "Notez que les tarifs selon le nombre d'individus par famille seront calculés uniquement après l'enregistrement"))
+        for texte in self.messages_formules:
+            messages.append(("erreur", texte))
 
         donnees_retour = {
             "anciennes_prestations": self.liste_anciennes_prestations,
@@ -1916,6 +1921,13 @@ class Facturation():
                         nom_tarif = label
                     break
 
+        # Recherche du montant du tarif : FORMULE PERSONNALISEE
+        if methode_calcul == "formule":
+            ligne_calcul = Get_lignes_tarif().first()
+            montant_tarif, label = self.Calcule_tarif_formule(tarif, ligne_calcul, combinaisons_unites, case_tableau)
+            if label:
+                nom_tarif = label
+
         # Si unité de type QUANTITE
         if quantite and quantite > 1:
             montant_tarif = montant_tarif * quantite
@@ -1938,6 +1950,105 @@ class Facturation():
         montant_tarif = utils_decimal.FloatToDecimal(montant_tarif, plusProche=True)
 
         return montant_tarif, nom_tarif, temps_facture, quantite, ligne_calcul
+
+    def Calcule_tarif_formule(self, tarif=None, ligne_calcul=None, combinaisons_unites=[], case_tableau=None):
+        """ Méthode 'formule' : renvoie (montant, label personnalisé ou None) """
+        if not ligne_calcul or not ligne_calcul.formule:
+            return decimal.Decimal(0), None
+
+        cache_variables = {}
+        def Get_variable(code):
+            if code not in cache_variables:
+                cache_variables[code] = self.Get_variable_formule(code, tarif, combinaisons_unites, case_tableau, cache_variables)
+            return cache_variables[code]
+
+        try:
+            formule = utils_formule_tarif.Get_formule(ligne_calcul.formule)
+            montant_tarif = formule.Evaluer(Get_variable, fonction_questionnaire=lambda idquestion: self.Get_montant_questionnaire(IDquestion=idquestion, case_tableau=case_tableau))
+        except utils_formule_tarif.ErreurFormule as err:
+            logger.warning("Formule du tarif ID%d invalide : %s" % (tarif.pk, err))
+            texte = "Tarif '%s' : la formule n'a pas pu être calculée (%s). Le montant a été fixé à 0." % (tarif.nom_tarif.nom if tarif.nom_tarif else tarif.pk, err)
+            if texte not in self.messages_formules:
+                self.messages_formules.append(texte)
+            return decimal.Decimal(0), None
+
+        # Montants plancher et plafond (0 = non renseigné, comme pour les autres méthodes)
+        if ligne_calcul.montant_min and montant_tarif < ligne_calcul.montant_min:
+            montant_tarif = ligne_calcul.montant_min
+        if ligne_calcul.montant_max and montant_tarif > ligne_calcul.montant_max:
+            montant_tarif = ligne_calcul.montant_max
+        if montant_tarif < 0:
+            montant_tarif = decimal.Decimal(0)
+
+        # Label personnalisé : remplace les {VARIABLE} présentes dans le label
+        label = ligne_calcul.label
+        if label:
+            for code in utils_formule_tarif.VARIABLES:
+                if "{%s}" % code in label:
+                    valeur = Get_variable(code)
+                    if code in ("DUREE", "HEURE_DEBUT", "HEURE_FIN"):
+                        valeur = utils_dates.DeltaEnStr(datetime.timedelta(seconds=round(float(valeur or 0) * 3600)), si_null="0h00")
+                    elif code == "QF" and not Get_variable("QF_CONNU"):
+                        valeur = "-"
+                    else:
+                        valeur = decimal.Decimal(str(valeur or 0))
+                        valeur = "%d" % valeur if valeur == valeur.to_integral_value() else ("%.2f" % valeur).replace(".", ",")
+                    label = label.replace("{%s}" % code, valeur)
+
+        return montant_tarif, label
+
+    def Get_variable_formule(self, code="", tarif=None, combinaisons_unites=[], case_tableau=None, cache_variables={}):
+        """ Calcule une variable de formule à la demande (seules les variables utilisées sont calculées) """
+        date = utils_dates.ConvertDateENGtoDate(case_tableau["date"])
+
+        if code in ("QF", "QF_CONNU"):
+            qf = self.Recherche_QF(tarif, case_tableau)
+            if code == "QF_CONNU":
+                return 1 if qf is not None else 0
+            # Famille sans QF : valeur très élevée = tranche la plus haute, comme pour les autres méthodes
+            return qf if qf is not None else 999999
+
+        if code == "AGE":
+            idindividu = case_tableau["individu"]
+            if idindividu not in self.dict_dates_naiss:
+                self.dict_dates_naiss[idindividu] = Individu.objects.filter(pk=idindividu).values_list("date_naiss", flat=True).first()
+            date_naiss = self.dict_dates_naiss[idindividu]
+            if not date_naiss:
+                return 0
+            return date.year - date_naiss.year - ((date.month, date.day) < (date_naiss.month, date_naiss.day))
+
+        if code in ("DUREE", "HEURE_DEBUT", "HEURE_FIN"):
+            if "_duree" not in cache_variables:
+                cache_variables["_duree"] = self.Calcule_duree(case_tableau, combinaisons_unites)
+            duree, heure_min, heure_max = cache_variables["_duree"]
+            delta = {"DUREE": duree, "HEURE_DEBUT": heure_min, "HEURE_FIN": heure_max}[code]
+            return decimal.Decimal(delta.total_seconds()) / 3600 if delta else 0
+
+        if code in ("RANG_ENFANT", "NB_ENFANTS_INSCRITS"):
+            key = (case_tableau["famille"], case_tableau["activite"])
+            if key not in self.dict_inscrits_formules:
+                # Tri en Python : date_naiss est un champ chiffré, un order_by en base n'aurait pas de sens
+                inscriptions = Inscription.objects.select_related("individu").filter(famille_id=case_tableau["famille"], activite_id=case_tableau["activite"])
+                inscriptions = sorted(inscriptions, key=lambda inscription: (inscription.individu.date_naiss or datetime.date(1950, 1, 1), inscription.individu_id), reverse=not settings.ATTRIBUTION_TARIF_FRATERIE_AINES)
+                self.dict_inscrits_formules[key] = [(inscription.individu_id, inscription.date_debut, inscription.date_fin) for inscription in inscriptions]
+            liste_individus = []
+            for idindividu, date_debut, date_fin in self.dict_inscrits_formules[key]:
+                if date_debut <= date and (not date_fin or date_fin >= date) and idindividu not in liste_individus:
+                    liste_individus.append(idindividu)
+            if code == "NB_ENFANTS_INSCRITS":
+                return len(liste_individus)
+            return liste_individus.index(case_tableau["individu"]) + 1 if case_tableau["individu"] in liste_individus else 1
+
+        if code == "JOUR_SEMAINE":
+            return date.isoweekday()
+
+        if code == "MOIS":
+            return date.month
+
+        if code == "VACANCES":
+            return 1 if utils_dates.EstEnVacances(date, self.donnees["liste_vacances"]) else 0
+
+        raise utils_formule_tarif.ErreurFormule("Variable inconnue : %s" % code)
 
     def Get_montant_questionnaire(self, IDquestion=None, case_tableau=None):
         conditions = Q(question_id=IDquestion) & ((Q(question__categorie="famille") & Q(famille_id=case_tableau["famille"]) | Q(question__categorie="individu") & Q(individu_id=case_tableau["individu"])))

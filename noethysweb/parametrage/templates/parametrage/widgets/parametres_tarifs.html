@@ -36,7 +36,9 @@
 <div class="clearfix">
     {% for dict_methode in liste_methodes_tarifs %}
         <div id="div_{{ dict_methode.code }}_{{ id }}" class="div_spread_{{ id }} controls">
-            {% if dict_methode.champs|length > 0 %}
+            {% if dict_methode.code == "formule" %}
+                {% include "parametrage/widgets/parametres_tarifs_formule.html" %}
+            {% elif dict_methode.champs|length > 0 %}
                 <div style="overflow-x:auto; white-space: nowrap;margin-bottom: 10px;">
                     <div class="spread" id="spreadsheet_{{ dict_methode.code }}_{{ id }}"></div>
                 </div>

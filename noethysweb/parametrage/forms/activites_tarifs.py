@@ -16,6 +16,7 @@ from crispy_forms.bootstrap import Field, PrependedText, TabHolder, Tab, InlineC
 from core.forms.base import FormulaireBase
 from core.forms.select2 import Select2MultipleWidget
 from core.utils.utils_commandes import Commandes
+from core.utils import utils_formule_tarif
 from core.models import Tarif, CategorieTarif, Activite, Groupe, TypeCotisation, Caisse, TarifLigne, \
                                 LISTE_METHODES_TARIFS, DICT_COLONNES_TARIFS, CombiTarif, Unite, Evenement, QuestionnaireQuestion
 from core.widgets import DatePickerWidget, Formset
@@ -610,6 +611,11 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.add_error('methode', "Le type 'Forfait daté' n'est compatible qu'avec les méthodes 'Montant unique', 'En fonction du QF' et 'au choix'.")
                 return
 
+        # Formule personnalisée : uniquement pour les tarifs journaliers
+        if self.cleaned_data["methode"] == "formule" and self.cleaned_data["type"] != "JOURN":
+            self.add_error('methode', "La méthode 'Formule de calcul personnalisée' n'est compatible qu'avec le type 'Prestation journalière'.")
+            return
+
         # Forfait crédit : Automatique
         if self.cleaned_data["type"] == "CREDIT" and self.cleaned_data["type_application"] == "AUTO" and self.cleaned_data["forfait_beneficiaire"] == "individu":
             self.cleaned_data["forfait_auto"] = json.dumps({
@@ -704,6 +710,15 @@ def Clean_tarifs_lignes_data(self=None, tarifs_lignes_data=[], code_methode=""):
                 except Exception as err:
                     print("erreur=", err)
                     RaiseError()
+
+            if valeur and dict_colonne["editeur"] == "formule":
+                valeur = valeur.strip()
+                erreur_formule = utils_formule_tarif.Valider_formule(valeur)
+                if erreur_formule:
+                    if self:
+                        self.add_error("parametres_tarif", "Formule invalide : %s" % erreur_formule)
+                    else:
+                        raise ValidationError("Paramètres du tarif : Formule invalide : %s" % erreur_formule)
 
             if valeur not in ("", None):
                 dict_ligne[code_colonne] = valeur
