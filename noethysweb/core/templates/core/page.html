@@ -14,11 +14,25 @@
 
         {% block content_header %}
 
+            <style>
+                .titre-page {display: flex; align-items: center; flex-wrap: wrap; gap: 10px;}
+                .titre-page-icone {width: 34px; height: 34px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0;}
+                .titre-page-icone-a {background: #E6F1FB; color: #185FA5;}
+                .titre-page-icone-l {background: #E1F5EE; color: #0F6E56;}
+                .titre-page-icone-e {background: #FAEEDA; color: #854F0B;}
+                .titre-page-icone-s {background: #EEEDFE; color: #534AB7;}
+                .dark-mode .titre-page-icone-a {background: #0C447C; color: #B5D4F4;}
+                .dark-mode .titre-page-icone-l {background: #085041; color: #9FE1CB;}
+                .dark-mode .titre-page-icone-e {background: #633806; color: #FAC775;}
+                .dark-mode .titre-page-icone-s {background: #3C3489; color: #CECBF6;}
+            </style>
+
             <div class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0 text-dark">
+                            <h1 class="m-0 text-dark titre-page">
+                                {% if menu_actif.code and menu_actif.icone %}<span class="titre-page-icone titre-page-icone-{{ menu_actif.nature|default:'a' }}" aria-hidden="true"><i class="fa fa-{{ menu_actif.icone }}"></i></span>{% endif %}
                                 {{ page_titre }}
                                 <small>{% block page_description %}{% endblock %}</small>
                             </h1>
