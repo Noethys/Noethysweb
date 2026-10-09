@@ -7,39 +7,105 @@
 {% block detail_famille %}
     <div class="col-md-9">
 
-        <div class="card">
-            <div class="card-header with-border">
-                <h3 class="card-title">Outils</h3>
-            </div>
-            <div class="card-body">
-                <p>Cliquez ci-dessous sur l'outil souhaité.</p>
-            </div>
-        </div>
+        {% include "core/toc_styles.html" %}
 
-        <div class="row">
-        {% for liste in items_menu %}
-            <div class="col-md-6">
-                {% for submenu in liste %}
-                    <div class="card card-solid">
-                        {% if submenu.titre %}
-                            <div class="card-header">
-                                <h3 class="card-title">{{ submenu.titre }}</h3>
-                            </div>
-                        {% endif %}
-                        <div class="card-body p-0">
-                            <ul class="list-group list-group-flush">
-                                {% for item in submenu.items %}
-                                    <a class="list-group-item list-group-item-action" href="{{ item.url }}"><i class="fa fa-{{ item.icone }} mr-1"></i> {{ item.titre }}</a>
-                                {% endfor %}
-                            </ul>
-                        </div>
+        <div id="toc_page" class="toc-page {% if affichage_condense %}toc-condense{% endif %}">
+
+            <!-- Description, filtre et type d'affichage -->
+            <div class="toc-entete">
+                <div class="toc-entete-description">{{ description_outils }}</div>
+                <div class="toc-outils">
+                    <div class="toc-filtre">
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                        <input type="search" id="toc_filtre" class="form-control form-control-sm" placeholder="Filtrer les outils..." aria-label="Filtrer les outils" autocomplete="off">
                     </div>
+                    <div class="btn-group toc-affichage" role="group" aria-label="Type d'affichage">
+                        <button type="button" class="btn btn-default btn-sm toc-bouton-affichage {% if not affichage_condense %}active{% endif %}" data-condense="0" title="Affichage détaillé" aria-pressed="{% if affichage_condense %}false{% else %}true{% endif %}"><i class="fa fa-th-large" aria-hidden="true"></i></button>
+                        <button type="button" class="btn btn-default btn-sm toc-bouton-affichage {% if affichage_condense %}active{% endif %}" data-condense="1" title="Affichage condensé" aria-pressed="{% if affichage_condense %}true{% else %}false{% endif %}"><i class="fa fa-th-list" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rubriques -->
+            {% for rubrique in items_menu %}
+                <div class="toc-section">
+                    <div class="toc-rubrique">
+                        <i class="fa fa-{{ rubrique.icone }}" aria-hidden="true"></i> {{ rubrique.titre }}
+                        <span class="toc-nbre">{{ rubrique.items|length }}</span>
+                    </div>
+                    <div class="toc-grille">
+                        {% for item in rubrique.items %}
+                            <div class="toc-tuile" data-recherche="{{ item.titre }} {{ item.description }}">
+                                <a class="toc-lien" href="{{ item.url }}" style="padding-right: 11px;" data-description="{{ item.description }}" {% if affichage_condense %}title="{{ item.description }}"{% endif %}>
+                                    <span class="toc-icone toc-nature-{{ item.nature }}"><i class="fa fa-{{ item.icone }}" aria-hidden="true"></i></span>
+                                    <span>
+                                        <span class="toc-titre d-block">{{ item.titre }}</span>
+                                        <span class="toc-description d-block">{{ item.description }}</span>
+                                    </span>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class="toc-vide" id="toc_vide" style="display: none;"><i class="fa fa-info-circle margin-r-5"></i>Aucun outil ne correspond à votre recherche.</div>
+
+            <!-- Légende des couleurs -->
+            <div class="toc-legende" aria-hidden="true">
+                {% for code_nature, label_nature in natures.items %}
+                    <span class="toc-legende-{{ code_nature }}">{{ label_nature }}</span>
                 {% endfor %}
             </div>
-        {% endfor %}
+
         </div>
 
+        <script>
+            (function() {
+                function normaliser(texte) {
+                    return (texte || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+                }
+
+                // Filtre des outils
+                $(document).on("input", "#toc_filtre", function() {
+                    var recherche = normaliser(($(this).val() || "").trim());
+                    var nbre_visibles = 0;
+                    $(".toc-section").each(function() {
+                        var nbre_section = 0;
+                        $(this).find(".toc-tuile").each(function() {
+                            var visible = !recherche || normaliser(String($(this).data("recherche"))).indexOf(recherche) !== -1;
+                            $(this).toggle(visible);
+                            if (visible) {nbre_section++;}
+                        });
+                        $(this).toggle(nbre_section > 0);
+                        nbre_visibles += nbre_section;
+                    });
+                    $("#toc_vide").toggle(nbre_visibles === 0);
+                });
+
+                // Type d'affichage : détaillé ou condensé (réglage commun avec les pages des menus)
+                $(document).on("click", ".toc-bouton-affichage", function() {
+                    var condense = $(this).data("condense") == 1;
+                    $("#toc_page").toggleClass("toc-condense", condense);
+                    $(".toc-bouton-affichage").each(function() {
+                        var actif = ($(this).data("condense") == 1) === condense;
+                        $(this).toggleClass("active", actif).attr("aria-pressed", actif ? "true" : "false");
+                    });
+                    $(".toc-lien").each(function() {
+                        var description = $(this).data("description");
+                        if (condense && description) {$(this).attr("title", description);} else {$(this).removeAttr("title");}
+                    });
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'ajax_menu_affichage' %}",
+                        data: {condense: condense ? "1" : "0", csrfmiddlewaretoken: "{{ csrf_token }}"},
+                        error: function() {
+                            toastr.error("Impossible de mémoriser le type d'affichage");
+                        }
+                    });
+                });
+            })();
+        </script>
 
     </div>
 {% endblock %}
-
