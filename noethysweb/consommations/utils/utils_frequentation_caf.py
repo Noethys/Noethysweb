@@ -157,10 +157,15 @@ def Get_activites_autorisees(selection=None, request=None):
     return activites.distinct().order_by("date_debut", "nom")
 
 
+def Filtrer_activites_periode(activites=None, date_debut=None, date_fin=None):
+    """ Conserve uniquement les activités ouvertes sur la période """
+    condition_periode = (Q(date_debut__lte=date_fin) | Q(date_debut__isnull=True)) & (Q(date_fin__gte=date_debut) | Q(date_fin__isnull=True))
+    return activites.filter(condition_periode)
+
+
 def Get_unites(activites=None, date_debut=None, date_fin=None):
     """ Unités des activités ouvertes sur la période, regroupées par activité, avec les méthodes suggérées """
-    condition_periode = Q(date_debut__lte=date_fin) & (Q(date_fin__gte=date_debut) | Q(date_fin__isnull=True))
-    activites = activites.filter(condition_periode)
+    activites = Filtrer_activites_periode(activites, date_debut, date_fin)
     unites = Unite.objects.select_related("activite").filter(activite__in=activites).order_by("activite__date_debut", "activite_id", "ordre")
 
     # Unités pour lesquelles des prestations de la période ont un temps facturé
@@ -404,9 +409,9 @@ def Normaliser_parametres(donnees=None, request=None):
     if selection["type"] != "toutes" and not selection["ids"]:
         raise Erreur_parametres("Veuillez sélectionner au moins une activité.")
     p["selection_activites"] = selection
-    p["activites"] = list(Get_activites_autorisees(selection, request=request))
+    p["activites"] = list(Filtrer_activites_periode(Get_activites_autorisees(selection, request=request), p["date_debut"], p["date_fin"]))
     if not p["activites"]:
-        raise Erreur_parametres("Aucune activité accessible ne correspond à la sélection.")
+        raise Erreur_parametres("Aucune activité accessible et ouverte sur la période ne correspond à la sélection.")
     ids_activites = {activite.pk for activite in p["activites"]}
 
     # Jours
