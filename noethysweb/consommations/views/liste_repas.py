@@ -47,6 +47,8 @@ class View(CustomView, TemplateView):
             condition_activites = Q(activite__groupes_activites__in=param_activites["ids"])
         if param_activites["type"] == "activites":
             condition_activites = Q(activite__in=param_activites["ids"])
+        if param_activites["type"] == "groupes":
+            condition_activites = Q(groupe__in=param_activites["ids"])
 
         # Importation des ouvertures
         liste_dates = []

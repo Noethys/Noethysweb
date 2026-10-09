@@ -66,6 +66,24 @@
         margin-left: 10px !important;
     }
     .dark-mode .table_activites tr.ligne_item td {border-bottom-color: rgba(255, 255, 255, .07)}
+    /* Sélection par groupes : en-tête par activité, groupes en retrait */
+    .table_activites tr.entete_activite td {
+        padding: 5px 10px !important;
+        border: 0;
+        border-bottom: 1px solid #e9ecef;
+        background-color: #f8f9fa;
+        color: #6c757d;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        user-select: none;
+    }
+    .table_activites tr.entete_activite:hover td {color: #3c8dbc}
+    .table_activites tr.entete_activite .tag_obsolete {margin-left: 8px}
+    .table_activites tr.ligne_groupe td {
+        padding-left: 24px !important;
+    }
+    .dark-mode .table_activites tr.entete_activite td {background-color: #3a4047; color: #ced4da; border-bottom-color: rgba(255, 255, 255, .07)}
     .dark-mode .table_activites tr.ligne_item:hover td {background-color: rgba(255, 255, 255, .05)}
 
     /* Recherche rapide : dernière ligne du cadre de la liste */
@@ -258,21 +276,25 @@
     <div id="div_table_groupes_{{ id }}" class="div_table_activites {% if selection.type != "groupes" %}masquer{% endif %}">
         <table id="table_groupes_{{ id }}" class="table table-bordered table_activites">
             {% for activite in activites %}
-                {% for groupe in groupes|get_item:activite %}
-                    <tr class="ligne_item {% if not groupe.activite.Is_active %}obsolete{% endif %}">
-                        <td>
-                            <div class="form-inline">
-                                <input name="liste_groupes" type="checkbox" value="{{ groupe.pk }}" {% if selection.type == "groupes" and groupe.pk in selection.ids %}checked{% endif %}>
-                                <span class="nom_item" style="margin-left: 5px;margin-right:20px;">{{ groupe.nom }}</span>{% if not groupe.activite.Is_active %}<span class="tag_obsolete">Terminée</span>{% endif %}
-                            </div>
-                        </td>
-                        {% if afficher_colonne_detail %}
+                {% with liste_groupes_activite=groupes|get_item:activite %}
+                    {% if liste_groupes_activite %}
+                        <tr class="entete_activite {% if not activite.Is_active %}obsolete{% endif %}" data-activite="{{ activite.pk }}" title="Cocher ou décocher tous les groupes de cette activité">
                             <td>
-                                <span style="font-size: 12px; color: #cbcbcb;">{{ activite.nom }}</span>
+                                <span class="nom_entete">{{ activite.nom }}</span>{% if not activite.Is_active %}<span class="tag_obsolete">Terminée</span>{% endif %}
                             </td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
+                        </tr>
+                        {% for groupe in liste_groupes_activite %}
+                            <tr class="ligne_item ligne_groupe {% if not activite.Is_active %}obsolete{% endif %}" data-activite="{{ activite.pk }}" data-nom-activite="{{ activite.nom }}">
+                                <td>
+                                    <div class="form-inline">
+                                        <input name="liste_groupes" type="checkbox" value="{{ groupe.pk }}" {% if selection.type == "groupes" and groupe.pk in selection.ids %}checked{% endif %}>
+                                        <span class="nom_item" style="margin-left: 5px;margin-right:20px;">{{ groupe.nom }}</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
             {% endfor %}
         </table>
     </div>
@@ -334,7 +356,7 @@ $(document).ready(function() {
 
     // Le bouton n'apparaît que si le tableau affiché contient des activités obsolètes
     function maj_bouton_obsoletes_{{ id }}() {
-        var nbre = $(conteneurs_lignes_{{ id }}).not(".masquer").find("tr.obsolete").length;
+        var nbre = $(conteneurs_lignes_{{ id }}).not(".masquer").find("tr.ligne_item.obsolete").length;
         $("#bouton_obsoletes_{{ id }} .nbre_obsoletes").text("(" + nbre + ")");
         $("#div_recherche_activites_{{ id }}").toggleClass("avec_obsoletes", nbre > 0);
         ajuster_marge_recherche_{{ id }}();
@@ -354,6 +376,16 @@ $(document).ready(function() {
         if ($(event.target).is("input, a, button, label")) {return}
         var case_a_cocher = $(this).find("input[type=checkbox]").first();
         case_a_cocher.prop("checked", !case_a_cocher.prop("checked")).trigger("change");
+    });
+
+    // Un clic sur l'en-tête d'une activité coche ou décoche tous ses groupes visibles
+    $("#div_table_groupes_{{ id }}").on("click", "tr.entete_activite", function () {
+        var lignes = $("#div_table_groupes_{{ id }} tr.ligne_groupe[data-activite='" + $(this).data("activite") + "']").filter(function () {
+            return !$(this).hasClass("masquer_recherche") && !est_obsolete_masquee($(this));
+        });
+        var cases = lignes.find("input[type=checkbox]");
+        var etat = cases.filter(":checked").length < cases.length;
+        cases.prop("checked", etat).trigger("change");
     });
 
     // ---------------- Recherche rapide ----------------
@@ -423,10 +455,22 @@ $(document).ready(function() {
                 var ligne = $(this);
                 var nom = ligne.find(".nom_item");
                 if (nom.data("texte_origine") === undefined) {nom.data("texte_origine", nom.text())}
-                var texte_ligne = normaliser(ligne.text());
+                var texte_ligne = normaliser(ligne.text() + " " + (ligne.data("nom-activite") || ""));
                 var trouve = mots.every(function (mot) {return texte_ligne.indexOf(mot) !== -1});
                 ligne.toggleClass("masquer_recherche", !trouve);
                 nom.html(mots.length && trouve ? surligner(nom.data("texte_origine"), mots) : echapper(nom.data("texte_origine")));
+            });
+
+            // En-têtes d'activités : masqués si aucun de leurs groupes n'est visible
+            conteneur.find("tr.entete_activite").each(function () {
+                var entete = $(this);
+                var nom = entete.find(".nom_entete");
+                if (nom.data("texte_origine") === undefined) {nom.data("texte_origine", nom.text())}
+                var nbre_groupes = conteneur.find("tr.ligne_groupe[data-activite='" + entete.data("activite") + "']").filter(function () {
+                    return !$(this).hasClass("masquer_recherche");
+                }).length;
+                entete.toggleClass("masquer_recherche", nbre_groupes === 0);
+                nom.html(mots.length ? surligner(nom.data("texte_origine"), mots) : echapper(nom.data("texte_origine")));
             });
 
             // Message si aucun résultat
