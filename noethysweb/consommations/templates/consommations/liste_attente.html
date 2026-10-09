@@ -26,6 +26,11 @@
                 </div>
             </div>
 
+            <!-- Statistiques -->
+            {% if statistiques %}
+                {% include "consommations/liste_attente_statistiques.html" %}
+            {% endif %}
+
         </div>
 
         <div class="col-md-9">

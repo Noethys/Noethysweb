@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 import json, datetime
+from collections import Counter
 from operator import itemgetter
 from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView
@@ -82,6 +83,7 @@ class View(CustomView, TemplateView):
             liste_resultats = Get_resultats(parametres=parametres, etat=self.etat, request=self.request)
             context['resultats'] = json.dumps(liste_resultats)
             context['nbre_disponibilites'] = len([1 for resultat in liste_resultats if resultat.get("place_dispo", False)])
+            context['statistiques'] = Get_statistiques(liste_resultats=liste_resultats, etat=self.etat)
         return context
 
     def post(self, request, **kwargs):
@@ -93,8 +95,81 @@ class View(CustomView, TemplateView):
             "form_parametres": form,
             "resultats": json.dumps(liste_resultats),
             "nbre_disponibilites": len([1 for resultat in liste_resultats if resultat.get("place_dispo", False)]),
+            "statistiques": Get_statistiques(liste_resultats=liste_resultats, etat=self.etat),
         }
         return self.render_to_response(self.get_context_data(**context))
+
+
+def Get_statistiques(liste_resultats=[], etat="attente"):
+    """ Calcule les statistiques de la liste d'attente (ou des refus) à partir des résultats affichés """
+    demandes = [resultat for resultat in liste_resultats if resultat["type"] == "individu"]
+    stats = {"etat": etat, "nbre_demandes": len(demandes)}
+    if not demandes:
+        return stats
+
+    # Synthèse
+    nbre_dispo = len([1 for demande in demandes if demande.get("place_dispo", False)])
+    stats.update({
+        "nbre_individus": len({demande["idindividu"] for demande in demandes}),
+        "nbre_familles": len({demande["idfamille"] for demande in demandes}),
+        "nbre_dates": len({demande["date"] for demande in demandes}),
+        "nbre_dispo": nbre_dispo,
+        "pourcentage_dispo": round(100.0 * nbre_dispo / len(demandes)),
+    })
+
+    # Ancienneté des demandes
+    maintenant = datetime.datetime.now()
+    tranches = [
+        {"label": "< 7 jours", "min": 0, "max": 7, "couleur": "success"},
+        {"label": "7 à 30 jours", "min": 7, "max": 30, "couleur": "warning"},
+        {"label": "1 à 3 mois", "min": 30, "max": 90, "couleur": "orange"},
+        {"label": "> 3 mois", "min": 90, "max": None, "couleur": "danger"},
+    ]
+    for tranche in tranches:
+        tranche["nbre"] = 0
+    liste_jours = []
+    plus_ancienne = None
+    for demande in demandes:
+        date_saisie = datetime.datetime.strptime(demande["date_saisie"], "%d/%m/%Y %H:%M:%S")
+        jours = max((maintenant - date_saisie).days, 0)
+        liste_jours.append(jours)
+        for tranche in tranches:
+            if jours >= tranche["min"] and (tranche["max"] is None or jours < tranche["max"]):
+                tranche["nbre"] += 1
+                break
+        if not plus_ancienne or date_saisie < plus_ancienne["date_saisie"]:
+            plus_ancienne = {"date_saisie": date_saisie, "nom_individu": demande.get("nom_individu", "")}
+    for tranche in tranches:
+        tranche["pourcentage"] = round(100.0 * tranche["nbre"] / len(demandes), 1)
+    stats.update({
+        "tranches": tranches,
+        "attente_moyenne": round(sum(liste_jours) / len(liste_jours)),
+        "plus_ancienne": plus_ancienne,
+    })
+
+    # Répartition par groupe ou évènement
+    compteur_groupes = Counter()
+    dict_evenements = {}
+    for demande in demandes:
+        label = demande.get("nom_evenement") or demande.get("label_groupe", "")
+        compteur_groupes[label] += 1
+        dict_evenements[label] = bool(demande.get("nom_evenement"))
+    liste_groupes = compteur_groupes.most_common()
+    if len(liste_groupes) > 6:
+        liste_groupes = liste_groupes[:5] + [("Autres", sum([nbre for label, nbre in liste_groupes[5:]]))]
+    nbre_max = max([nbre for label, nbre in liste_groupes])
+    stats["repartition"] = [{"label": label, "nbre": nbre, "evenement": dict_evenements.get(label, False),
+                             "pourcentage": round(100.0 * nbre / nbre_max)} for label, nbre in liste_groupes]
+    stats["avec_evenements"] = any([groupe["evenement"] for groupe in stats["repartition"]])
+
+    # Dates les plus demandées
+    compteur_dates = Counter([demande["date"] for demande in demandes])
+    compteur_dispo = Counter([demande["date"] for demande in demandes if demande.get("place_dispo", False)])
+    liste_dates = sorted(compteur_dates.items(), key=lambda item: (-item[1], item[0]))[:5]
+    stats["dates"] = [{"label": utils_dates.DateComplete(utils_dates.ConvertDateENGtoDate(date), abrege=True),
+                       "nbre": nbre, "nbre_dispo": compteur_dispo.get(date, 0)} for date, nbre in liste_dates]
+
+    return stats
 
 
 def Get_resultats(parametres={}, etat="attente", request=None):
@@ -297,6 +372,8 @@ def Get_resultats(parametres={}, etat="attente", request=None):
                             "id": "individu_%s" % inscription.individu_id, "pid": id_evenement, "type": "individu", "label": label, "idfamille": inscription.famille_id, "idindividu": inscription.individu_id,
                             "unites": texteUnites[:-3], "date_saisie": dateSaisie.strftime("%d/%m/%Y %H:%M:%S"), "action": action, "idactivite": activite.pk,
                             "liste_IDunite": listeIDunite, "date": str(date), "place_dispo": placeDispo, "nom_activite": activite.nom, "liste_IDconso": listeIDconso,
+                            "nom_individu": inscription.individu.Get_nom(), "label_groupe": "%s - %s" % (activite.nom, groupe.nom),
+                            "nom_evenement": evenement.nom if evenement else None,
                         })
 
                         num += 1

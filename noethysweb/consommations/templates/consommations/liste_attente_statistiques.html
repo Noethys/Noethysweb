@@ -1,0 +1,130 @@
+{# Cadres de statistiques de la liste d'attente / des refus #}
+
+<style>
+    .stats-attente .stat-bloc {background-color: rgba(0,0,0,.04); border-radius: 4px; padding: 6px 8px;}
+    .stats-attente .stat-label {font-size: 0.8rem; color: #6c757d;}
+    .stats-attente .stat-valeur {font-size: 1.3rem; font-weight: bold; line-height: 1.2;}
+    .stats-attente .progress {height: 8px; margin-bottom: 0;}
+    .stats-attente .stat-ligne-groupe {display: flex; align-items: center; margin-bottom: 6px; font-size: 0.85rem;}
+    .stats-attente .stat-ligne-groupe .stat-nom {width: 45%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 6px;}
+    .stats-attente .stat-ligne-groupe .stat-barre {flex: 1;}
+    .stats-attente .stat-ligne-groupe .stat-nbre {width: 30px; text-align: right; color: #6c757d;}
+</style>
+
+<div class="stats-attente">
+
+    {% if statistiques.nbre_demandes %}
+
+        <!-- Synthèse -->
+        <div class="card card-default">
+            <div class="card-header with-border">
+                <h3 class="card-title"><i class="fa fa-pie-chart margin-r-5"></i> Synthèse</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="card-body p-2">
+                <div class="row no-gutters">
+                    <div class="col-6 p-1"><div class="stat-bloc"><div class="stat-label">Individus</div><div class="stat-valeur">{{ statistiques.nbre_individus }}</div></div></div>
+                    <div class="col-6 p-1"><div class="stat-bloc"><div class="stat-label">Familles</div><div class="stat-valeur">{{ statistiques.nbre_familles }}</div></div></div>
+                    <div class="col-6 p-1"><div class="stat-bloc"><div class="stat-label">{% if statistiques.etat == "attente" %}Demandes{% else %}Refus{% endif %}</div><div class="stat-valeur">{{ statistiques.nbre_demandes }}</div></div></div>
+                    <div class="col-6 p-1"><div class="stat-bloc"><div class="stat-label">Dates concernées</div><div class="stat-valeur">{{ statistiques.nbre_dates }}</div></div></div>
+                    {% if statistiques.etat == "attente" %}
+                        <div class="col-12 p-1">
+                            <div class="stat-bloc {% if statistiques.nbre_dispo %}bg-success{% endif %}" {% if statistiques.nbre_dispo %}style="opacity:.9;"{% endif %}>
+                                <div class="stat-label {% if statistiques.nbre_dispo %}text-white{% endif %}">Places réattribuables</div>
+                                <div class="stat-valeur">{{ statistiques.nbre_dispo }} <small style="font-size:.8rem;font-weight:normal;">sur {{ statistiques.nbre_demandes }} demande{{ statistiques.nbre_demandes|pluralize }} ({{ statistiques.pourcentage_dispo }} %)</small></div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Ancienneté -->
+        <div class="card card-default">
+            <div class="card-header with-border">
+                <h3 class="card-title"><i class="fa fa-hourglass-half margin-r-5"></i> Ancienneté des {% if statistiques.etat == "attente" %}demandes{% else %}refus{% endif %}</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-2" style="height:14px;">
+                    {% for tranche in statistiques.tranches %}
+                        {% if tranche.nbre %}
+                            <div class="progress-bar bg-{{ tranche.couleur }}" role="progressbar" style="width: {{ tranche.pourcentage|stringformat:'s' }}%;" title="{{ tranche.label }} : {{ tranche.nbre }}"></div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="row" style="font-size:0.85rem;">
+                    {% for tranche in statistiques.tranches %}
+                        <div class="col-6"><i class="fa fa-square text-{{ tranche.couleur }} margin-r-5"></i>{{ tranche.label }} : <b>{{ tranche.nbre }}</b></div>
+                    {% endfor %}
+                </div>
+                <hr class="my-2">
+                <div style="font-size:0.85rem;">
+                    Attente moyenne : <b>{{ statistiques.attente_moyenne }} jour{{ statistiques.attente_moyenne|pluralize }}</b><br>
+                    Plus ancienne : <b>{{ statistiques.plus_ancienne.date_saisie|date:"d/m/Y" }}</b> ({{ statistiques.plus_ancienne.nom_individu }})
+                </div>
+            </div>
+        </div>
+
+        <!-- Répartition par groupe -->
+        <div class="card card-default">
+            <div class="card-header with-border">
+                <h3 class="card-title"><i class="fa fa-bar-chart margin-r-5"></i> Répartition par groupe</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% for groupe in statistiques.repartition %}
+                    <div class="stat-ligne-groupe">
+                        <span class="stat-nom" title="{{ groupe.label }}">{{ groupe.label }}</span>
+                        <span class="stat-barre"><div class="progress"><div class="progress-bar {% if groupe.evenement %}bg-purple{% else %}bg-info{% endif %}" style="width: {{ groupe.pourcentage }}%;"></div></div></span>
+                        <span class="stat-nbre">{{ groupe.nbre }}</span>
+                    </div>
+                {% endfor %}
+                {% if statistiques.avec_evenements %}
+                    <small class="text-muted"><i class="fa fa-square text-purple margin-r-5"></i>Évènement</small>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Dates les plus demandées -->
+        <div class="card card-default">
+            <div class="card-header with-border">
+                <h3 class="card-title"><i class="fa fa-calendar margin-r-5"></i> Dates les plus demandées</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush" style="font-size:0.85rem;">
+                    {% for date in statistiques.dates %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-1 px-3">
+                            <span>{{ date.label }}</span>
+                            <span>
+                                <b>{{ date.nbre }}</b>
+                                {% if date.nbre_dispo and statistiques.etat == "attente" %}
+                                    <small class="badge badge-pill badge-success ml-1">{{ date.nbre_dispo }} dispo</small>
+                                {% endif %}
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+    {% else %}
+
+        <div class="card card-default">
+            <div class="card-body text-muted text-center" style="font-size:0.9rem;">
+                <i class="fa fa-info-circle margin-r-5"></i> Aucune {% if statistiques.etat == "attente" %}demande en attente{% else %}place refusée{% endif %} sur cette sélection.
+            </div>
+        </div>
+
+    {% endif %}
+
+</div>
