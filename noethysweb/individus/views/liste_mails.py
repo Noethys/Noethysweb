@@ -24,8 +24,8 @@ class Liste(Page, crud.Liste):
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
-        context['page_titre'] = "Emails"
-        context['box_titre'] = "Liste des Emails"
+        context['page_titre'] = "Adresses emails"
+        context['box_titre'] = "Liste des adresses emails"
         return context
 
     class datatable_class(MyDatatable):

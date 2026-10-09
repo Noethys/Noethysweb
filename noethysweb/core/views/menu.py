@@ -108,23 +108,17 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_restauration.Add(code="modeles_commandes_liste", titre="Modèles de commandes", icone="file-text-o")
     menu_restauration.Add(code="modeles_commandes_colonnes_liste", titre="Colonnes des modèles de commandes", icone="file-text-o")
 
-    # Notes
-    menu_notes = menu_parametrage.Add(titre="Notes")
+    # Organisation
+    menu_notes = menu_parametrage.Add(titre="Organisation")
     menu_notes.Add(code="notes_categories_liste", titre="Catégories de notes", icone="file-text-o")
+    menu_notes.Add(code="taches_recurrentes_liste", titre="Tâches récurrentes", icone="file-text-o")
 
-    # Tâches récurrentes
-    menu_taches_recurrentes = menu_parametrage.Add(titre="Tâches")
-    menu_taches_recurrentes.Add(code="taches_recurrentes_liste", titre="Tâches récurrentes", icone="file-text-o")
-
-    # Emails
-    menu_emails = menu_parametrage.Add(titre="Emails")
+    # Communication
+    menu_emails = menu_parametrage.Add(titre="Communication")
     menu_emails.Add(code="adresses_mail_liste", titre="Adresses d'expédition d'emails", icone="file-text-o", compatible_demo=False)
     menu_emails.Add(code="signatures_emails_liste", titre="Signatures d'emails", icone="file-text-o")
     menu_emails.Add(code="listes_diffusion_liste", titre="Listes de diffusion", icone="file-text-o")
-
-    # SMS
-    menu_sms = menu_parametrage.Add(titre="SMS")
-    menu_sms.Add(code="configurations_sms_liste", titre="Configurations SMS", icone="file-text-o", compatible_demo=False)
+    menu_emails.Add(code="configurations_sms_liste", titre="Configurations SMS", icone="file-text-o", compatible_demo=False)
 
     # Calendrier
     menu_calendrier = menu_parametrage.Add(titre="Calendrier")
@@ -168,62 +162,46 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     # ------------------------------------ Outils ------------------------------------
     menu_outils = menu.Add(code="outils_toc", titre="Outils", icone="wrench")
 
-    # Statistiques
-    menu_stats = menu_outils.Add(titre="Statistiques")
-    menu_stats.Add(code="statistiques", titre="Statistiques générales", icone="file-text-o")
-    menu_stats.Add(code="statistiques_portail", titre="Statistiques du portail", icone="file-text-o")
-
-    # Emails
-    menu_emails = menu_outils.Add(titre="Emails")
-    menu_emails.Add(code="contacts_liste", titre="Carnets d'adresses", icone="file-text-o")
-    menu_emails.Add(code="editeur_emails", titre="Editeur d'Emails", icone="file-text-o")
-    menu_emails.Add(code="emails_liste", titre="Liste des Emails", icone="file-text-o")
-
-    # SMS
-    menu_sms = menu_outils.Add(titre="SMS")
-    menu_sms.Add(code="editeur_sms", titre="Editeur de SMS", icone="file-text-o")
-    menu_sms.Add(code="sms_liste", titre="Liste des SMS", icone="file-text-o")
-
-    # Outils
-    menu_historique = menu_outils.Add(titre="Historique")
-    menu_historique.Add(code="historique", titre="Historique", icone="file-text-o")
-    menu_historique.Add(code="notes_liste", titre="Notes", icone="file-text-o")
-    menu_historique.Add(code="taches_liste", titre="Tâches", icone="file-text-o")
-
-    # Maintenance
-    menu_maintenance = menu_outils.Add(titre="Maintenance")
-    menu_maintenance.Add(code="update", titre="Mise à jour de l'application", icone="file-text-o")
-    menu_maintenance.Add(code="notes_versions", titre="Notes de versions", icone="file-text-o")
-    menu_maintenance.Add(code="utilisateurs_bloques_liste", titre="Utilisateurs bloqués", icone="file-text-o")
-
-    # Calendrier
-    menu_calendrier = menu_outils.Add(titre="Calendrier")
-    menu_calendrier.Add(code="calendrier_annuel", titre="Calendrier annuel", icone="file-text-o")
-
-    # Sauvegarde
-    menu_sauvegarde = menu_outils.Add(titre="Sauvegardes")
-    menu_sauvegarde.Add(code="sauvegarde_creer", titre="Créer une sauvegarde", icone="file-text-o", compatible_demo=False)
-    menu_sauvegarde.Add(code="desk_creer", titre="Récupérer les données", icone="file-text-o", compatible_demo=False, superutilisateur_only=True, masquer=not settings.SECRET_EXPORT_DESK)
-
-    # Restauration
-    menu_restauration = menu_outils.Add(titre="Restauration")
-    menu_restauration.Add(code="commandes_liste", titre="Commandes des repas", icone="file-text-o")
-
     # Portail
     menu_portail = menu_outils.Add(titre="Portail")
     menu_portail.Add(code="messagerie_portail", titre="Messages non lus à traiter", icone="file-text-o")
     menu_portail.Add(code="messages_portail_liste", titre="Messages du portail", icone="file-text-o")
     menu_portail.Add(code="demandes_portail_liste", titre="Historique du portail", icone="file-text-o")
     menu_portail.Add(code="suivi_reservations", titre="Suivi des réservations", icone="file-text-o")
+    menu_portail.Add(code="statistiques_portail", titre="Statistiques du portail", icone="file-text-o")
+
+    # Communication
+    menu_communication = menu_outils.Add(titre="Communication")
+    menu_communication.Add(code="contacts_liste", titre="Carnets d'adresses", icone="file-text-o")
+    menu_communication.Add(code="editeur_emails", titre="Editeur d'Emails", icone="file-text-o")
+    menu_communication.Add(code="emails_liste", titre="Liste des Emails", icone="file-text-o")
+    menu_communication.Add(code="editeur_sms", titre="Editeur de SMS", icone="file-text-o")
+    menu_communication.Add(code="sms_liste", titre="Liste des SMS", icone="file-text-o")
+
+    # Organisation
+    menu_organisation = menu_outils.Add(titre="Organisation")
+    menu_organisation.Add(code="notes_liste", titre="Notes", icone="file-text-o")
+    menu_organisation.Add(code="taches_liste", titre="Tâches", icone="file-text-o")
+    menu_organisation.Add(code="calendrier_annuel", titre="Calendrier annuel", icone="file-text-o")
+
+    # Suivi de l'activité
+    menu_suivi_activite = menu_outils.Add(titre="Suivi de l'activité")
+    menu_suivi_activite.Add(code="statistiques", titre="Statistiques générales", icone="file-text-o")
+    menu_suivi_activite.Add(code="historique", titre="Historique", icone="file-text-o")
+
+    # Administration
+    menu_administration = menu_outils.Add(titre="Administration")
+    menu_administration.Add(code="utilisateurs_bloques_liste", titre="Utilisateurs bloqués", icone="file-text-o")
+    menu_administration.Add(code="sauvegarde_creer", titre="Créer une sauvegarde", icone="file-text-o", compatible_demo=False)
+    menu_administration.Add(code="desk_creer", titre="Récupérer les données", icone="file-text-o", compatible_demo=False, superutilisateur_only=True, masquer=not settings.SECRET_EXPORT_DESK)
+    menu_administration.Add(code="update", titre="Mise à jour de l'application", icone="file-text-o")
+    menu_administration.Add(code="notes_versions", titre="Notes de versions", icone="file-text-o")
+    menu_administration.Add(code="procedures", titre="Procédures", icone="file-text-o", compatible_demo=False)
 
     # Dépannage
     menu_depannage = menu_outils.Add(titre="Dépannage")
     menu_depannage.Add(code="correcteur", titre="Correcteur d'anomalies", icone="file-text-o")
     menu_depannage.Add(code="liste_conso_sans_presta", titre="Liste des consommations sans prestations", icone="file-text-o")
-
-    # Utilitaires
-    menu_utilitaires = menu_outils.Add(titre="Utilitaires")
-    menu_utilitaires.Add(code="procedures", titre="Procédures", icone="file-text-o", compatible_demo=False)
 
 
     # ------------------------------------ Individus ------------------------------------
@@ -246,73 +224,73 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_inscriptions.Add(code="liste_inscriptions_refus", titre="Liste des inscriptions refusées", icone="file-text-o")
     menu_inscriptions.Add(code="inscriptions_activite_liste", titre="Liste des inscriptions à une activité", icone="file-text-o")
     menu_inscriptions.Add(code="liste_familles_sans_inscriptions", titre="Liste des familles sans inscriptions", icone="file-text-o")
-    menu_inscriptions.Add(code="imprimer_liste_inscrits", titre="Imprimer une liste d'inscrits", icone="file-text-o")
     menu_inscriptions.Add(code="suivi_inscriptions", titre="Suivi des inscriptions", icone="file-text-o")
-    menu_inscriptions.Add(code="inscriptions_impression", titre="Imprimer des inscriptions", icone="file-text-o")
-    menu_inscriptions.Add(code="inscriptions_email", titre="Envoyer des inscriptions par Email", icone="file-text-o")
-    menu_inscriptions.Add(code="inscriptions_saisir_lot", titre="Saisir un lot d'inscriptions", icone="file-text-o")
-    menu_inscriptions.Add(code="inscriptions_modifier", titre="Modifier des inscriptions par lot", icone="file-text-o")
-    menu_inscriptions.Add(code="inscriptions_changer_groupe", titre="Changer de groupe par lot", icone="file-text-o")
+
+    # Gestion des inscriptions
+    menu_gestion_inscriptions = menu_individus.Add(titre="Gestion des inscriptions")
+    menu_gestion_inscriptions.Add(code="imprimer_liste_inscrits", titre="Imprimer une liste d'inscrits", icone="file-text-o")
+    menu_gestion_inscriptions.Add(code="inscriptions_impression", titre="Imprimer des inscriptions", icone="file-text-o")
+    menu_gestion_inscriptions.Add(code="inscriptions_email", titre="Envoyer des inscriptions par Email", icone="file-text-o")
+    menu_gestion_inscriptions.Add(code="inscriptions_saisir_lot", titre="Saisir un lot d'inscriptions", icone="file-text-o")
+    menu_gestion_inscriptions.Add(code="inscriptions_modifier", titre="Modifier des inscriptions par lot", icone="file-text-o")
+    menu_gestion_inscriptions.Add(code="inscriptions_changer_groupe", titre="Changer de groupe par lot", icone="file-text-o")
 
     # Inscriptions scolaires
     menu_scolarite = menu_individus.Add(titre="Scolarité")
     menu_scolarite.Add(code="inscriptions_scolaires_liste", titre="Inscriptions scolaires", icone="file-text-o")
     menu_scolarite.Add(code="scolarites_liste", titre="Etapes de scolarité", icone="file-text-o")
 
-    # Informations
-    menu_infos_individus = menu_individus.Add(titre="Informations")
-    menu_infos_individus.Add(code="edition_renseignements", titre="Edition des fiches de renseignements", icone="file-text-o")
-    menu_infos_individus.Add(code="liste_anniversaires", titre="Edition des anniversaires", icone="file-text-o")
-    menu_infos_individus.Add(code="liste_regimes_caisses", titre="Liste des régimes et des caisses", icone="file-text-o")
-    menu_infos_individus.Add(code="liste_quotients", titre="Liste des quotients familiaux/revenus", icone="file-text-o")
-    menu_infos_individus.Add(code="importer_quotients", titre="Importer des quotients depuis l'API Particulier", icone="file-text-o")
-    menu_infos_individus.Add(code="liste_codes_comptables", titre="Liste des codes comptables", icone="file-text-o")
-    menu_infos_individus.Add(code="liste_titulaires_helios", titre="Liste des titulaires Hélios", icone="file-text-o")
-    menu_infos_individus.Add(code="mandats_liste", titre="Liste des mandats SEPA", icone="file-text-o")
-    menu_infos_individus.Add(code="contacts_urgence_liste", titre="Liste des contacts d'urgence et de sortie", icone="file-text-o")
-    menu_infos_individus.Add(code="edition_contacts", titre="Edition des contacts", icone="file-text-o")
-    menu_infos_individus.Add(code="regimes_alimentaires_liste", titre="Liste des régimes alimentaires", icone="file-text-o")
-    menu_infos_individus.Add(code="maladies_liste", titre="Liste des maladies", icone="file-text-o")
-    menu_infos_individus.Add(code="informations_liste", titre="Liste des informations personnelles", icone="file-text-o")
-    menu_infos_individus.Add(code="liste_vaccinations_manquantes", titre="Liste des vaccinations manquantes", icone="file-text-o")
-    menu_infos_individus.Add(code="liste_assurances", titre="Liste des assurances", icone="file-text-o")
-    menu_infos_individus.Add(code="edition_informations", titre="Edition des informations", icone="file-text-o")
-    menu_infos_individus.Add(code="liste_comptes_internet", titre="Liste des comptes internet", icone="file-text-o")
-    menu_infos_individus.Add(code="mails_liste", titre="Liste des Emails", icone="file-text-o")
-    menu_infos_individus.Add(code="certifications_individus", titre="Liste des certifications", icone="file-text-o")
+    # Renseignements
+    menu_renseignements_individus = menu_individus.Add(titre="Renseignements")
+    menu_renseignements_individus.Add(code="edition_renseignements", titre="Edition des fiches de renseignements", icone="file-text-o")
+    menu_renseignements_individus.Add(code="certifications_individus", titre="Liste des certifications", icone="file-text-o")
+    menu_renseignements_individus.Add(code="informations_liste", titre="Liste des informations personnelles", icone="file-text-o")
+    menu_renseignements_individus.Add(code="edition_informations", titre="Edition des informations", icone="file-text-o")
+    menu_renseignements_individus.Add(code="regimes_alimentaires_liste", titre="Liste des régimes alimentaires", icone="file-text-o")
+    menu_renseignements_individus.Add(code="maladies_liste", titre="Liste des maladies", icone="file-text-o")
+    menu_renseignements_individus.Add(code="liste_vaccinations_manquantes", titre="Liste des vaccinations manquantes", icone="file-text-o")
 
-    # Pièces
-    menu_pieces_individus = menu_individus.Add(titre="Pièces")
+    # Données administratives
+    menu_administratif_individus = menu_individus.Add(titre="Données administratives")
+    menu_administratif_individus.Add(code="liste_regimes_caisses", titre="Liste des régimes et des caisses", icone="file-text-o")
+    menu_administratif_individus.Add(code="liste_quotients", titre="Liste des quotients familiaux/revenus", icone="file-text-o")
+    menu_administratif_individus.Add(code="importer_quotients", titre="Importer des quotients depuis l'API Particulier", icone="file-text-o")
+    menu_administratif_individus.Add(code="liste_assurances", titre="Liste des assurances", icone="file-text-o")
+    menu_administratif_individus.Add(code="liste_codes_comptables", titre="Liste des codes comptables", icone="file-text-o")
+    menu_administratif_individus.Add(code="liste_titulaires_helios", titre="Liste des titulaires Hélios", icone="file-text-o")
+    menu_administratif_individus.Add(code="mandats_liste", titre="Liste des mandats SEPA", icone="file-text-o")
+
+    # Contacts
+    menu_contacts_individus = menu_individus.Add(titre="Contacts")
+    menu_contacts_individus.Add(code="contacts_urgence_liste", titre="Liste des contacts d'urgence et de sortie", icone="file-text-o")
+    menu_contacts_individus.Add(code="edition_contacts", titre="Edition des contacts", icone="file-text-o")
+    menu_contacts_individus.Add(code="liste_comptes_internet", titre="Liste des comptes internet", icone="file-text-o")
+    menu_contacts_individus.Add(code="mails_liste", titre="Liste des adresses emails", icone="file-text-o")
+    menu_contacts_individus.Add(code="abonnes_listes_diffusion_liste", titre="Gestion des abonnés", icone="file-text-o")
+
+    # Pièces et photos
+    menu_pieces_individus = menu_individus.Add(titre="Pièces et photos")
     menu_pieces_individus.Add(code="liste_pieces_manquantes", titre="Liste des pièces manquantes", icone="file-text-o")
     menu_pieces_individus.Add(code="liste_pieces_fournies", titre="Liste des pièces fournies", icone="file-text-o")
+    menu_pieces_individus.Add(code="liste_photos_manquantes", titre="Liste des photos manquantes", icone="file-text-o")
+    menu_pieces_individus.Add(code="importation_photos", titre="Importer des photos individuelles", icone="file-text-o")
 
-    # Questionnaires
-    menu_infos_questionnaires = menu_individus.Add(titre="Questionnaires")
-    menu_infos_questionnaires.Add(code="questionnaires_familles_liste", titre="Liste des questionnaires familiaux", icone="file-text-o")
-    menu_infos_questionnaires.Add(code="questionnaires_individus_liste", titre="Liste des questionnaires individuels", icone="file-text-o")
+    # Questionnaires et formulaires
+    menu_questionnaires_individus = menu_individus.Add(titre="Questionnaires et formulaires")
+    menu_questionnaires_individus.Add(code="questionnaires_familles_liste", titre="Liste des questionnaires familiaux", icone="file-text-o")
+    menu_questionnaires_individus.Add(code="questionnaires_individus_liste", titre="Liste des questionnaires individuels", icone="file-text-o")
+    menu_questionnaires_individus.Add(code="sondages_reponses_resume", titre="Réponses", icone="file-text-o")
 
-    # Sondages
-    menu_infos_sondages = menu_individus.Add(titre="Formulaires")
-    menu_infos_sondages.Add(code="sondages_reponses_resume", titre="Réponses", icone="file-text-o")
-
-    # Impression
-    menu_impression_individus = menu_individus.Add(titre="Impression")
-    menu_impression_individus.Add(code="etiquettes_individus", titre="Edition d'étiquettes et de badges", icone="file-text-o")
-
-    # Photos
-    menu_photos_individus = menu_individus.Add(titre="Photos")
-    menu_photos_individus.Add(code="liste_photos_manquantes", titre="Liste des photos manquantes", icone="file-text-o")
-    menu_photos_individus.Add(code="importation_photos", titre="Importer des photos individuelles", icone="file-text-o")
+    # Editions
+    menu_editions_individus = menu_individus.Add(titre="Editions")
+    menu_editions_individus.Add(code="liste_anniversaires", titre="Edition des anniversaires", icone="file-text-o")
+    menu_editions_individus.Add(code="etiquettes_individus", titre="Edition d'étiquettes et de badges", icone="file-text-o")
 
     # Transports
     menu_transports = menu_individus.Add(titre="Transports")
     menu_transports.Add(code="progtransports_liste", titre="Liste des programmations de transports", icone="file-text-o")
     menu_transports.Add(code="transports_liste", titre="Liste des transports", icone="file-text-o")
     menu_transports.Add(code="etat_transports", titre="Etat récapitulatif des transports", icone="file-text-o")
-
-    # Liste de diffusion
-    menu_listes_diffusion = menu_individus.Add(titre="Listes de diffusion")
-    menu_listes_diffusion.Add(code="abonnes_listes_diffusion_liste", titre="Gestion des abonnés", icone="file-text-o")
 
 
     # ------------------------------------ Locations ------------------------------------
@@ -348,11 +326,8 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     # Gestion
     menu_gestion_cotisations = menu_cotisations.Add(titre="Gestion des adhésions")
     menu_gestion_cotisations.Add(code="saisie_lot_cotisations", titre="Saisir un lot d'adhésions", icone="file-text-o")
-
-    # Dépôts
-    menu_depots_cotisations = menu_cotisations.Add(titre="Dépôts d'adhésions")
-    menu_depots_cotisations.Add(code="liste_cotisations_disponibles", titre="Liste des adhésions non déposées", icone="file-text-o")
-    menu_depots_cotisations.Add(code="depots_cotisations_liste", titre="Dépôts d'adhésions", icone="file-text-o")
+    menu_gestion_cotisations.Add(code="liste_cotisations_disponibles", titre="Liste des adhésions non déposées", icone="file-text-o")
+    menu_gestion_cotisations.Add(code="depots_cotisations_liste", titre="Dépôts d'adhésions", icone="file-text-o")
 
     # Analyse
     menu_analyse_cotisations = menu_cotisations.Add(titre="Analyse")
@@ -379,8 +354,12 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_listes_etat.Add(code="liste_refus", titre="Liste des places refusées", icone="file-text-o")
     menu_listes_etat.Add(code="liste_absences", titre="Liste des absences", icone="file-text-o")
     menu_listes_etat.Add(code="liste_demandes", titre="Liste des demandes de réservations", icone="file-text-o")
-    menu_listes_etat.Add(code="liste_repas", titre="Liste des repas", icone="file-text-o")
     menu_listes_etat.Add(code="liste_durees", titre="Liste des durées", icone="file-text-o")
+
+    # Restauration
+    menu_restauration = menu_consommations.Add(titre="Restauration")
+    menu_restauration.Add(code="liste_repas", titre="Liste des repas", icone="file-text-o")
+    menu_restauration.Add(code="commandes_liste", titre="Commandes des repas", icone="file-text-o")
 
     # Analyse
     menu_analyse = menu_consommations.Add(titre="Analyse")
@@ -431,24 +410,18 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_prestations.Add(code="edition_prestations", titre="Edition des prestations", icone="file-text-o")
     menu_prestations.Add(code="recalculer_prestations", titre="Recalculer des prestations", icone="file-text-o")
     menu_prestations.Add(code="saisie_lot_forfaits_credits", titre="Saisir un lot de forfaits-crédits", icone="file-text-o")
+    menu_prestations.Add(code="liste_tarifs", titre="Liste des tarifs", icone="file-text-o")
 
-    # Déductions
-    menu_deductions = menu_facturation.Add(titre="Déductions")
+    # Déductions et aides
+    menu_deductions = menu_facturation.Add(titre="Déductions et aides")
     menu_deductions.Add(code="liste_deductions", titre="Liste des déductions", icone="file-text-o")
     menu_deductions.Add(code="synthese_deductions", titre="Synthèse des déductions", icone="file-text-o")
-
-    # Aides
-    menu_aides = menu_facturation.Add(titre="Aides")
-    menu_aides.Add(code="aides_liste", titre="Liste des aides", icone="file-text-o")
+    menu_deductions.Add(code="aides_liste", titre="Liste des aides", icone="file-text-o")
 
     # Impayés
     menu_impayes = menu_facturation.Add(titre="Impayés")
     menu_impayes.Add(code="synthese_impayes", titre="Synthèse des impayés", icone="file-text-o")
     menu_impayes.Add(code="solder_impayes", titre="Solder les impayés", icone="file-text-o")
-
-    # Tarifs
-    menu_tarifs = menu_facturation.Add(titre="Tarifs")
-    menu_tarifs.Add(code="liste_tarifs", titre="Liste des tarifs", icone="file-text-o")
 
     # Export des écritures comptables
     menu_export_ecritures = menu_facturation.Add(titre="Export des écritures comptables")
@@ -466,47 +439,44 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_listes = menu_reglements.Add(titre="Règlements")
     menu_listes.Add(code="liste_reglements", titre="Liste des règlements", icone="file-text-o")
     menu_listes.Add(code="liste_detaillee_reglements", titre="Liste détaillée des règlements", icone="file-text-o")
-    menu_listes.Add(code="detail_ventilations_reglements", titre="Détail des ventilations des règlements", icone="file-text-o")
-    menu_listes.Add(code="edition_ventilations_reglements", titre="Edition des ventilations des règlements", icone="file-text-o")
     menu_listes.Add(code="reglements_lot_factures", titre="Liste des règlements associés à un lot de factures", icone="file-text-o")
-    menu_listes.Add(code="synthese_modes_reglements", titre="Synthèse des modes de règlements", icone="file-text-o")
-    menu_listes.Add(code="statistiques_reglements", titre="Statistiques des règlements", icone="file-text-o")
+    menu_listes.Add(code="liste_recus", titre="Liste des reçus de règlements", icone="file-text-o")
+    menu_listes.Add(code="liste_paiements", titre="Liste des paiements en ligne", icone="file-text-o")
+
+    # Ventilation
+    menu_ventilation = menu_reglements.Add(titre="Ventilation")
+    menu_ventilation.Add(code="detail_ventilations_reglements", titre="Détail des ventilations des règlements", icone="file-text-o")
+    menu_ventilation.Add(code="edition_ventilations_reglements", titre="Edition des ventilations des règlements", icone="file-text-o")
+    menu_ventilation.Add(code="corriger_ventilation", titre="Corriger la ventilation", icone="file-text-o")
 
     # Dépôts
     menu_depots_reglements = menu_reglements.Add(titre="Dépôts de règlements")
     menu_depots_reglements.Add(code="liste_reglements_disponibles", titre="Liste des règlements non déposés", icone="file-text-o")
+    menu_depots_reglements.Add(code="depots_reglements_liste", titre="Dépôts de règlements", icone="file-text-o")
     menu_depots_reglements.Add(code="detail_prestations_depot", titre="Détail des prestations d'un dépôt", icone="file-text-o")
     menu_depots_reglements.Add(code="detail_ventilations_depots", titre="Détail des ventilations des dépôts", icone="file-text-o")
-    menu_depots_reglements.Add(code="depots_reglements_liste", titre="Dépôts de règlements", icone="file-text-o")
 
-    # Divers
-    menu_reglements_divers = menu_reglements.Add(titre="Divers")
-    menu_reglements_divers.Add(code="liste_recus", titre="Liste des reçus de règlements", icone="file-text-o")
-    menu_reglements_divers.Add(code="liste_paiements", titre="Liste des paiements en ligne", icone="file-text-o")
-
-    # Ventilation
-    menu_ventilation = menu_reglements.Add(titre="Ventilation")
-    menu_ventilation.Add(code="corriger_ventilation", titre="Corriger la ventilation", icone="file-text-o")
+    # Analyse
+    menu_analyse_reglements = menu_reglements.Add(titre="Analyse")
+    menu_analyse_reglements.Add(code="synthese_modes_reglements", titre="Synthèse des modes de règlements", icone="file-text-o")
+    menu_analyse_reglements.Add(code="statistiques_reglements", titre="Statistiques des règlements", icone="file-text-o")
 
 
     # ------------------------------------ Comptabilité ------------------------------------
     menu_comptabilite = menu.Add(code="comptabilite_toc", titre="Comptabilité", icone="line-chart")
 
-    # Opérations
-    menu_comptabilite_operations = menu_comptabilite.Add(titre="Opérations")
-    menu_comptabilite_operations.Add(code="comptabilite_liste_comptes", titre="Liste des comptes", icone="file-text-o")
-    menu_comptabilite_operations.Add(code="operations_tresorerie_liste", titre="Liste des opérations de trésorerie", icone="file-text-o")
-    menu_comptabilite_operations.Add(code="operations_budgetaires_liste", titre="Liste des opérations budgétaires", icone="file-text-o")
-    menu_comptabilite_operations.Add(code="virements_liste", titre="Liste des virements", icone="file-text-o")
+    # Trésorerie
+    menu_comptabilite_tresorerie = menu_comptabilite.Add(titre="Trésorerie")
+    menu_comptabilite_tresorerie.Add(code="comptabilite_liste_comptes", titre="Liste des comptes", icone="file-text-o")
+    menu_comptabilite_tresorerie.Add(code="operations_tresorerie_liste", titre="Liste des opérations de trésorerie", icone="file-text-o")
+    menu_comptabilite_tresorerie.Add(code="virements_liste", titre="Liste des virements", icone="file-text-o")
+    menu_comptabilite_tresorerie.Add(code="rapprochements_liste", titre="Rapprochement bancaire", icone="file-text-o")
+    menu_comptabilite_tresorerie.Add(code="suivi_tresorerie", titre="Suivi de la trésorerie", icone="file-text-o")
 
-    # Analyse
-    menu_comptabilite_analyse = menu_comptabilite.Add(titre="Analyse")
-    menu_comptabilite_analyse.Add(code="suivi_tresorerie", titre="Suivi de la trésorerie", icone="file-text-o")
-    menu_comptabilite_analyse.Add(code="suivi_budget", titre="Suivi du budget", icone="file-text-o")
-
-    # Outils
-    menu_comptabilite_outils = menu_comptabilite.Add(titre="Outils")
-    menu_comptabilite_outils.Add(code="rapprochements_liste", titre="Rapprochement bancaire", icone="file-text-o")
+    # Budget
+    menu_comptabilite_budget = menu_comptabilite.Add(titre="Budget")
+    menu_comptabilite_budget.Add(code="operations_budgetaires_liste", titre="Liste des opérations budgétaires", icone="file-text-o")
+    menu_comptabilite_budget.Add(code="suivi_budget", titre="Suivi du budget", icone="file-text-o")
 
     # Achats
     menu_comptabilite_achats = menu_comptabilite.Add(titre="Gestion des achats")
