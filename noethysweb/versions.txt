@@ -1,3 +1,27 @@
+Version 1.3.5.3 (09/10/2026) :
+
+Nouveautés
+
+- Tarifs : nouvelle méthode de calcul "Formule personnalisée"
+- Consommations : ajout de la fréquentation CAF dans le menu Consommations
+- Règlements : ajout des statistiques des règlements dans le menu Règlements
+- Liste d’attente : ajout de statistiques
+
+Améliorations
+
+- Edition de la liste des consommations : Ajout des colonnes personnalisées des contacts
+- Edition de la liste des consommations : Ajout de la colonne personnalisée Montant
+- Imprimer une liste d’inscrits : ajout de la sélection des groupes
+- Grille des consommations : relooking des panneaux de paramètres
+- Liste des repas : ajout de la sélection des groupes
+- Menus : Relooking général des menus et réorganisation des rubriques
+- Fiche famille : relooking du menu Outils
+- Liste d’attente : relooking
+
+Corrections
+
+- Portail : correction de l’affichage sur smartphone
+
 Version 1.3.5.2 (05/10/2026) :
 
 - Ajout fonction, analytique et ventilation dans l'export JVS
