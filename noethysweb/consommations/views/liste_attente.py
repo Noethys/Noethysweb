@@ -3,8 +3,9 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import json, datetime
+import json, datetime, os, uuid
 from collections import Counter
+from django.conf import settings
 from operator import itemgetter
 from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView
@@ -36,6 +37,71 @@ def Attribution_manuelle(request):
     from consommations.utils import utils_traitement_attentes
     resultat = utils_traitement_attentes.Traiter_attentes(request=request, selections=selections)
     return JsonResponse({"resultat": True, "erreurs": resultat["erreurs"]})
+
+
+def Exporter_excel(request):
+    """ Exporte au format Excel les lignes affichées (après filtrage) dans la liste d'attente """
+    try:
+        lignes = json.loads(request.POST.get("lignes", "[]"))
+    except ValueError:
+        lignes = []
+    if not lignes:
+        return JsonResponse({"erreur": "Aucune donnée à exporter"}, status=401)
+    etat = "refus" if request.POST.get("etat") == "refus" else "attente"
+
+    # Création du répertoire et du nom du fichier
+    rep_temp = os.path.join("temp", str(uuid.uuid4()))
+    rep_destination = os.path.join(settings.MEDIA_ROOT, rep_temp)
+    if not os.path.isdir(rep_destination):
+        os.makedirs(rep_destination)
+    nom_fichier = "liste_attente.xlsx" if etat == "attente" else "liste_refus.xlsx"
+
+    # Création du classeur
+    import xlsxwriter
+    classeur = xlsxwriter.Workbook(os.path.join(rep_destination, nom_fichier))
+    feuille = classeur.add_worksheet("Liste d'attente" if etat == "attente" else "Places refusées")
+    format_entete = classeur.add_format({"bold": True, "bg_color": "#efefef", "border": 1})
+    format_date = classeur.add_format({"num_format": "dd/mm/yyyy"})
+    format_datetime = classeur.add_format({"num_format": "dd/mm/yyyy hh:mm:ss"})
+    format_dispo = classeur.add_format({"bg_color": "#d4edda"})
+
+    # Entêtes
+    colonnes = [("Date", 12), ("Activité - Groupe", 35), ("Evènement", 25), ("Rang", 7), ("Individu", 30), ("Famille", 35),
+                ("Consommations", 25), ("Date de réservation", 20), ("Ancienneté (jours)", 12)]
+    if etat == "attente":
+        colonnes.append(("Place disponible", 12))
+    for num_colonne, (label_colonne, largeur) in enumerate(colonnes):
+        feuille.set_column(num_colonne, num_colonne, largeur)
+        feuille.write(0, num_colonne, label_colonne, format_entete)
+
+    # Lignes
+    maintenant = datetime.datetime.now()
+    for num_ligne, ligne in enumerate(lignes, start=1):
+        date = utils_dates.ConvertDateENGtoDate(ligne.get("date"))
+        try:
+            date_saisie = datetime.datetime.strptime(ligne.get("date_saisie", ""), "%d/%m/%Y %H:%M:%S")
+        except ValueError:
+            date_saisie = None
+        dispo = bool(ligne.get("place_dispo", False))
+        if date:
+            feuille.write_datetime(num_ligne, 0, datetime.datetime.combine(date, datetime.time()), format_date)
+        feuille.write(num_ligne, 1, ligne.get("label_groupe", ""))
+        feuille.write(num_ligne, 2, ligne.get("nom_evenement") or "")
+        feuille.write(num_ligne, 3, ligne.get("rang", ""))
+        feuille.write(num_ligne, 4, ligne.get("nom_individu", ""))
+        feuille.write(num_ligne, 5, ligne.get("nom_famille", ""))
+        feuille.write(num_ligne, 6, ligne.get("unites", ""))
+        if date_saisie:
+            feuille.write_datetime(num_ligne, 7, date_saisie, format_datetime)
+            feuille.write(num_ligne, 8, max((maintenant - date_saisie).days, 0))
+        if etat == "attente":
+            feuille.write(num_ligne, 9, "Oui" if dispo else "Non", format_dispo if dispo else None)
+
+    feuille.autofilter(0, 0, len(lignes), len(colonnes) - 1)
+    feuille.freeze_panes(1, 0)
+    classeur.close()
+
+    return JsonResponse({"nom_fichier": os.path.join(rep_temp, nom_fichier)})
 
 
 def Get_form_modifier_reservation(request):
@@ -73,6 +139,7 @@ class View(CustomView, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
+        context['etat'] = self.etat
         if self.etat == "attente":
             context['page_titre'] = "Liste d'attente"
         else:
@@ -229,7 +296,7 @@ def Get_resultats(parametres={}, etat="attente", request=None):
     })
 
     # Importation des consommations en attente
-    consommations = Consommation.objects.select_related('unite', 'activite', 'groupe', 'evenement', 'inscription', 'individu', "inscription__individu").filter(conditions_periodes, condition_activites, etat=etat)
+    consommations = Consommation.objects.select_related('unite', 'activite', 'groupe', 'evenement', 'inscription', 'individu', "inscription__individu", "inscription__famille").filter(conditions_periodes, condition_activites, etat=etat)
 
     dictConso = {}
     for conso in consommations:
@@ -373,6 +440,7 @@ def Get_resultats(parametres={}, etat="attente", request=None):
                             "unites": texteUnites[:-3], "date_saisie": dateSaisie.strftime("%d/%m/%Y %H:%M:%S"), "action": action, "idactivite": activite.pk,
                             "liste_IDunite": listeIDunite, "date": str(date), "place_dispo": placeDispo, "nom_activite": activite.nom, "liste_IDconso": listeIDconso,
                             "nom_individu": inscription.individu.Get_nom(), "label_groupe": "%s - %s" % (activite.nom, groupe.nom),
+                            "nom_famille": inscription.famille.nom or "", "rang": num,
                             "nom_evenement": evenement.nom if evenement else None,
                         })
 

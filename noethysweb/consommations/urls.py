@@ -83,6 +83,7 @@ urlpatterns = [
     path('consommations/liste_demandes/valider_demande', secure_ajax(liste_demandes.Valider_demande), name='ajax_liste_demandes_valider_demande'),
     path('consommations/liste_attente/get_form_modifier_reservation', secure_ajax(liste_attente.Get_form_modifier_reservation), name='ajax_liste_attente_modifier_reservation'),
     path('consommations/liste_attente/valider_form_modifier_reservation', secure_ajax(liste_attente.Valider_form_modifier_reservation), name='ajax_liste_attente_valider_modifier_reservation'),
+    path('consommations/liste_attente/exporter_excel', secure_ajax(liste_attente.Exporter_excel), name='ajax_liste_attente_exporter_excel'),
     path('consommations/suivi_pointage_get_form_parametres', secure_ajax(suivi_pointage.Get_form_parametres), name='ajax_suivi_pointage_get_form_parametres'),
     path('consommations/suivi_pointage_valider_form_parametres', secure_ajax(suivi_pointage.Valider_form_parametres), name='ajax_suivi_pointage_valider_form_parametres'),
     path('consommations/analyse_ia_frequentation/exporter', secure_ajax(analyse_ia_frequentation.Exporter), name='ajax_analyse_ia_frequentation_exporter'),

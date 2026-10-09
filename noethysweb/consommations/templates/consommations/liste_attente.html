@@ -50,53 +50,295 @@
                         </div>
                     {% endif %}
 
-                    <div class="buttonHolder">
-                        <button class="btn btn-primary" id="bouton_attribution_automatique" title="L'application va réattribuer les places disponibles et envoyer des emails de notification aux familles concernées"><i class='fa fa-magic margin-r-5'></i>Attribuer les places disponibles</button>
-                        <button class="btn btn-default" id="bouton_attribution_manuelle" title="L'application va réattribuer les places sélectionnées et envoyer des emails de notification aux familles concernées"><i class='fa fa-magic margin-r-5'></i>Attribuer les places cochées</button>
+                    <!-- Boutons d'action -->
+                    <div class="buttonHolder d-flex flex-wrap align-items-center mb-3">
+                        <button class="btn btn-primary mr-1 mb-1" id="bouton_attribution_automatique" title="L'application va réattribuer les places disponibles et envoyer des emails de notification aux familles concernées"><i class='fa fa-magic margin-r-5'></i>Attribuer les places disponibles</button>
+                        <button class="btn btn-default mr-1 mb-1" id="bouton_attribution_manuelle" title="L'application va réattribuer les places sélectionnées et envoyer des emails de notification aux familles concernées"><i class='fa fa-magic margin-r-5'></i>Attribuer les places cochées</button>
+                        <span id="la_nbre_selection" class="badge badge-primary ml-1 mb-1" style="display:none;"></span>
                     </div>
 
-                    <script>
-                        var contenu_table = JSON.parse('{{ resultats|escapejs }}');
-                        var affiche_pagination = false;
-                    </script>
-
                     <style>
-                        #table input[type="checkbox"]:disabled {
-                            display: none;
+                        .la-barre {display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 0; border-top: 1px solid rgba(0,0,0,.1); border-bottom: 1px solid rgba(0,0,0,.1); margin-bottom: 8px;}
+                        .la-filtre {border: 1px solid #ced4da; background: transparent; border-radius: 14px; padding: 2px 10px; font-size: .85rem; color: #6c757d; cursor: pointer;}
+                        .la-filtre:hover {background: rgba(0,0,0,.04);}
+                        .la-filtre.active {background: #e7f1ff; border-color: #80bdff; color: #0056b3;}
+                        .la-filtre .la-compteur {font-weight: bold; margin-left: 3px;}
+                        .la-recherche {position: relative; flex: 0 1 280px; min-width: 180px; margin-left: auto;}
+                        .la-recherche-icone {position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: #adb5bd; font-size: .8rem; pointer-events: none;}
+                        .la-recherche input {padding-left: 26px;}
+                        .la-entetes, .la-ligne {display: grid; grid-template-columns: 24px 30px minmax(0, 2fr) minmax(0, 1.4fr) 130px 100px; gap: 8px; align-items: center;}
+                        .la-entetes {font-size: .75rem; text-transform: uppercase; color: #6c757d; padding: 4px 10px 4px 28px;}
+                        .la-date-entete {display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,.05); padding: 7px 10px; font-weight: bold; cursor: pointer; border-radius: 3px; margin-top: 8px; user-select: none;}
+                        .la-groupe-entete {display: flex; justify-content: space-between; align-items: center; padding: 5px 10px 5px 26px; color: #495057; font-weight: 600; font-size: .9rem; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,.08); user-select: none;}
+                        .la-evenement-entete {padding: 4px 10px 4px 46px; font-size: .85rem; color: #6f42c1; font-weight: 600;}
+                        .la-chevron {width: 14px; display: inline-block; color: #6c757d;; margin-right: 6px;}
+                        .la-compteurs {font-weight: normal; font-size: .82rem; color: #6c757d;}
+                        .la-ligne {padding: 6px 10px 6px 28px; border-bottom: 1px solid rgba(0,0,0,.06); border-left: 3px solid transparent; font-size: .9rem;}
+                        .la-ligne:hover {background: rgba(0,0,0,.025);}
+                        .la-ligne.la-dispo {border-left-color: #28a745; background: rgba(40,167,69,.07);}
+                        .la-ligne.la-selection {background: rgba(0,123,255,.08);}
+                        .la-rang {display: inline-flex; width: 24px; height: 24px; border-radius: 50%; align-items: center; justify-content: center; background: rgba(0,0,0,.07); font-size: .8rem; font-weight: bold; color: #495057;}
+                        .la-dispo .la-rang {background: #28a745; color: #fff;}
+                        .la-nom {font-weight: 600;}
+                        .la-sous {font-size: .78rem; color: #6c757d;}
+                        .la-unite {display: inline-block; padding: 1px 7px; border-radius: 10px; background: rgba(0,0,0,.06); font-size: .78rem; margin: 1px 2px 1px 0;}
+                        .la-pastille {display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px;}
+                        .la-col-date > div:first-child {font-size: .82rem;}
+                        .la-actions {text-align: right; white-space: nowrap;}
+                        .la-vide {text-align: center; color: #6c757d; padding: 30px 0;}
+                        @media (max-width: 767px) {
+                            .la-entetes {display: none;}
+                            .la-ligne {grid-template-columns: 24px 30px minmax(0, 1fr); padding-left: 10px;}
+                            .la-ligne .la-col-unites, .la-ligne .la-col-date, .la-ligne .la-actions {grid-column: 3; text-align: left;}
                         }
                     </style>
 
-                    <table id="table" class="table-sm" data-tree-show-field='label'>
-                        <thead>
-                            <tr>
-                                <th data-field="label" data-halign="center" data-align="left" data-cell-style="formate_case">Individu</th>
-                                <th data-field="unites" data-halign="center" data-align="center" data-cell-style="formate_case">Consommations</th>
-                                <th data-field="date_saisie" data-halign="center" data-align="center" data-cell-style="formate_case">Date de la réservation</th>
-                                <th data-field="action" data-halign="center" data-align="center" data-cell-style="formate_case">Action</th>
-                                <th data-field="select" data-checkbox="true" data-halign="center" data-align="center" data-cell-style="formate_case" data-formatter="stateFormatter">select</th>
-                            </tr>
-                        </thead>
-                    </table>
+                    <!-- Barre d'outils -->
+                    <div class="la-barre">
+                        <input type="checkbox" id="la_tout_cocher" title="Cocher / décocher toutes les lignes affichées" class="mx-1">
+                        <button type="button" class="la-filtre active" data-filtre="toutes">Toutes<span class="la-compteur" id="la_compteur_toutes"></span></button>
+                        {% if etat == "attente" %}
+                            <button type="button" class="la-filtre" data-filtre="dispo">Disponibles<span class="la-compteur" id="la_compteur_dispo"></span></button>
+                        {% endif %}
+                        <button type="button" class="la-filtre" data-filtre="anciennes" title="Demandes saisies il y a plus de 30 jours">&gt; 30 jours<span class="la-compteur" id="la_compteur_anciennes"></span></button>
+                        <div class="la-recherche">
+                            <i class="fa fa-search la-recherche-icone" aria-hidden="true"></i>
+                            <input type="search" id="la_recherche" class="form-control form-control-sm" placeholder="Rechercher un individu ou une famille..." aria-label="Rechercher un individu ou une famille">
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-default btn-sm" id="la_bouton_deplier" title="Replier / déplier toutes les dates"><i class="fa fa-compress"></i></button>
+                            <button type="button" class="btn btn-default btn-sm" id="la_bouton_export" title="Exporter les lignes affichées au format Excel"><i class="fa fa-file-excel-o"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="la-entetes">
+                        <span></span><span>#</span><span>Individu</span><span>Consommations</span><span>Réservation</span><span></span>
+                    </div>
+                    <div id="la_liste"></div>
 
                     <script>
-                        function formate_case(value, row, index) {
-                            if (row.type === "date") {
-                                // Utilise une couleur de fond en style inline plutôt qu'une classe CSS :
-                                // pour la colonne "case à cocher", bootstrap-table génère un attribut
-                                // class="bs-checkbox" en dur sur la cellule, ce qui empêche une classe
-                                // supplémentaire ('classes': ...) de s'appliquer sur cette colonne précise.
-                                return {css: {"background-color": "#efefef", "font-weight": "bold"}};
-                            };
-                            return {};
-                        };
-                        function stateFormatter(value, row, index) {
-                            if (!(row.type === "individu")) {
-                                return {
-                                    disabled: true,
-                                }
+                        var contenu_table = JSON.parse('{{ resultats|default:"[]"|escapejs }}');
+
+                        var liste_attente = (function() {
+                            var etat = "{{ etat|default:'attente' }}";
+                            var labels_dates = {};
+                            var lignes = [];
+                            var selection = {};
+                            var replies = {};
+                            var filtre = "toutes";
+                            var recherche = "";
+
+                            function echapper(texte) {
+                                return $("<div>").text(texte === null || texte === undefined ? "" : String(texte)).html();
                             }
-                            return value
-                        }
+                            function normaliser(texte) {
+                                return (texte || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+                            }
+                            function calculer_jours(date_saisie) {
+                                var m = (date_saisie || "").match(/(\d+)\/(\d+)\/(\d+) (\d+):(\d+):(\d+)/);
+                                if (!m) {return 0;}
+                                var date = new Date(m[3], m[2] - 1, m[1], m[4], m[5], m[6]);
+                                return Math.max(0, Math.floor((Date.now() - date.getTime()) / 86400000));
+                            }
+                            function couleur_anciennete(jours) {
+                                if (jours < 7) {return "#28a745";}
+                                if (jours < 30) {return "#ffc107";}
+                                if (jours < 90) {return "#fd7e14";}
+                                return "#dc3545";
+                            }
+                            function texte_anciennete(jours) {
+                                if (jours === 0) {return "aujourd'hui";}
+                                if (jours === 1) {return "hier";}
+                                return "il y a " + jours + " j";
+                            }
+
+                            // Préparation des lignes
+                            $.each(contenu_table, function(index, ligne) {
+                                if (ligne.type === "date") {labels_dates[ligne.id] = ligne.label;}
+                                if (ligne.type === "individu") {
+                                    ligne._idx = lignes.length;
+                                    ligne._jours = calculer_jours(ligne.date_saisie);
+                                    ligne._recherche = normaliser((ligne.nom_individu || "") + " " + (ligne.nom_famille || ""));
+                                    lignes.push(ligne);
+                                }
+                            });
+
+                            function est_visible(ligne) {
+                                if (filtre === "dispo" && !ligne.place_dispo) {return false;}
+                                if (filtre === "anciennes" && ligne._jours < 30) {return false;}
+                                if (recherche && ligne._recherche.indexOf(recherche) === -1) {return false;}
+                                return true;
+                            }
+                            function get_visibles() {
+                                return $.grep(lignes, est_visible);
+                            }
+
+                            function compteurs(liste) {
+                                var nbre_dispo = $.grep(liste, function(l) {return l.place_dispo;}).length;
+                                var texte = liste.length + " en attente";
+                                if (etat === "refus") {texte = liste.length + " refus";}
+                                if (nbre_dispo && etat === "attente") {texte += " · <span class='text-success'>" + nbre_dispo + " disponible" + (nbre_dispo > 1 ? "s" : "") + "</span>";}
+                                return texte;
+                            }
+
+                            function html_ligne(ligne) {
+                                var unites = $.map((ligne.unites || "").split(" + "), function(unite) {
+                                    return unite ? "<span class='la-unite'>" + echapper(unite) + "</span>" : null;
+                                }).join("");
+                                var badge = (ligne.place_dispo && etat === "attente") ? " <span class='badge badge-pill badge-success'>Place disponible</span>" : "";
+                                var coche = selection[ligne._idx] ? "checked" : "";
+                                return "<div class='la-ligne" + (ligne.place_dispo && etat === "attente" ? " la-dispo" : "") + (selection[ligne._idx] ? " la-selection" : "") + "'>" +
+                                    "<div><input type='checkbox' class='la-check' data-idx='" + ligne._idx + "' " + coche + " aria-label='Sélectionner " + echapper(ligne.nom_individu) + "'></div>" +
+                                    "<div><span class='la-rang'>" + echapper(ligne.rang) + "</span></div>" +
+                                    "<div><div class='la-nom'>" + echapper(ligne.nom_individu) + badge + "</div><div class='la-sous'>" + echapper(ligne.nom_famille) + "</div></div>" +
+                                    "<div class='la-col-unites'>" + unites + "</div>" +
+                                    "<div class='la-col-date'><div>" + echapper((ligne.date_saisie || "").substring(0, 16)) + "</div>" +
+                                    "<div class='la-sous'><span class='la-pastille' style='background:" + couleur_anciennete(ligne._jours) + "'></span>" + texte_anciennete(ligne._jours) + "</div></div>" +
+                                    "<div class='la-actions'>" + ligne.action + "</div>" +
+                                    "</div>";
+                            }
+
+                            function afficher() {
+                                var visibles = get_visibles();
+
+                                // Regroupement par date > groupe > évènement (dans l'ordre fourni par le serveur)
+                                var dates = [], dict_dates = {};
+                                $.each(visibles, function(index, ligne) {
+                                    if (!dict_dates[ligne.date]) {dict_dates[ligne.date] = {lignes: [], groupes: [], dict_groupes: {}}; dates.push(ligne.date);}
+                                    var d = dict_dates[ligne.date];
+                                    d.lignes.push(ligne);
+                                    if (!d.dict_groupes[ligne.label_groupe]) {d.dict_groupes[ligne.label_groupe] = {label: ligne.label_groupe, lignes: [], evenements: [], dict_evenements: {}}; d.groupes.push(d.dict_groupes[ligne.label_groupe]);}
+                                    var g = d.dict_groupes[ligne.label_groupe];
+                                    g.lignes.push(ligne);
+                                    var cle_evt = ligne.nom_evenement || "";
+                                    if (!g.dict_evenements[cle_evt]) {g.dict_evenements[cle_evt] = {label: cle_evt, lignes: []}; g.evenements.push(g.dict_evenements[cle_evt]);}
+                                    g.dict_evenements[cle_evt].lignes.push(ligne);
+                                });
+
+                                var html = "";
+                                if (!visibles.length) {
+                                    html = "<div class='la-vide'><i class='fa fa-info-circle margin-r-5'></i>" + (lignes.length ? "Aucune ligne ne correspond aux filtres." : "Aucune donnée à afficher.") + "</div>";
+                                }
+                                $.each(dates, function(index, date) {
+                                    var d = dict_dates[date];
+                                    var cle_date = "d_" + date;
+                                    html += "<div class='la-date-entete' data-cle='" + echapper(cle_date) + "'><span><span class='la-chevron'><i class='fa fa-chevron-" + (replies[cle_date] ? "right" : "down") + "'></i></span>" +
+                                        echapper(labels_dates[date] || date) + "</span><span class='la-compteurs'>" + compteurs(d.lignes) + "</span></div>";
+                                    if (replies[cle_date]) {return;}
+                                    $.each(d.groupes, function(index, g) {
+                                        var cle_groupe = "g_" + date + "_" + g.label;
+                                        html += "<div class='la-groupe-entete' data-cle='" + echapper(cle_groupe) + "'><span><span class='la-chevron'><i class='fa fa-chevron-" + (replies[cle_groupe] ? "right" : "down") + "'></i></span>" +
+                                            echapper(g.label) + "</span><span class='la-compteurs'>" + compteurs(g.lignes) + "</span></div>";
+                                        if (replies[cle_groupe]) {return;}
+                                        $.each(g.evenements, function(index, e) {
+                                            if (e.label) {html += "<div class='la-evenement-entete'><i class='fa fa-star-o margin-r-5'></i>" + echapper(e.label) + "</div>";}
+                                            $.each(e.lignes, function(index, ligne) {html += html_ligne(ligne);});
+                                        });
+                                    });
+                                });
+                                $("#la_liste").html(html);
+
+                                // Compteurs des filtres
+                                $("#la_compteur_toutes").text(lignes.length);
+                                $("#la_compteur_dispo").text($.grep(lignes, function(l) {return l.place_dispo;}).length);
+                                $("#la_compteur_anciennes").text($.grep(lignes, function(l) {return l._jours >= 30;}).length);
+                                maj_selection();
+                            }
+
+                            function maj_selection() {
+                                var nbre = Object.keys(selection).length;
+                                $("#la_nbre_selection").text(nbre + " ligne" + (nbre > 1 ? "s" : "") + " cochée" + (nbre > 1 ? "s" : "")).toggle(nbre > 0);
+                                var visibles = get_visibles();
+                                var nbre_visibles_coches = $.grep(visibles, function(l) {return selection[l._idx];}).length;
+                                $("#la_tout_cocher").prop("checked", visibles.length > 0 && nbre_visibles_coches === visibles.length)
+                                    .prop("indeterminate", nbre_visibles_coches > 0 && nbre_visibles_coches < visibles.length);
+                            }
+
+                            function retirer_selection_masquee() {
+                                $.each(lignes, function(index, ligne) {
+                                    if (!est_visible(ligne)) {delete selection[ligne._idx];}
+                                });
+                            }
+
+                            // Evènements
+                            $("#la_liste").on("click", ".la-date-entete, .la-groupe-entete", function() {
+                                var cle = $(this).data("cle");
+                                replies[cle] = !replies[cle];
+                                afficher();
+                            });
+                            $("#la_liste").on("change", ".la-check", function() {
+                                var idx = $(this).data("idx");
+                                if (this.checked) {selection[idx] = true;} else {delete selection[idx];}
+                                $(this).closest(".la-ligne").toggleClass("la-selection", this.checked);
+                                maj_selection();
+                            });
+                            $("#la_tout_cocher").on("change", function() {
+                                var coche = this.checked;
+                                $.each(get_visibles(), function(index, ligne) {
+                                    if (coche) {selection[ligne._idx] = true;} else {delete selection[ligne._idx];}
+                                });
+                                afficher();
+                            });
+                            $(".la-filtre").on("click", function() {
+                                $(".la-filtre").removeClass("active");
+                                $(this).addClass("active");
+                                filtre = $(this).data("filtre");
+                                retirer_selection_masquee();
+                                afficher();
+                            });
+                            $("#la_recherche").on("input", function() {
+                                recherche = normaliser(($(this).val() || "").trim());
+                                retirer_selection_masquee();
+                                afficher();
+                            });
+                            $("#la_bouton_deplier").on("click", function() {
+                                var tout_deplie = $.isEmptyObject($.grep(Object.keys(replies), function(cle) {return replies[cle];}));
+                                replies = {};
+                                if (tout_deplie) {
+                                    $.each(lignes, function(index, ligne) {replies["d_" + ligne.date] = true;});
+                                }
+                                $(this).find("i").toggleClass("fa-compress", !tout_deplie).toggleClass("fa-expand", tout_deplie);
+                                afficher();
+                            });
+                            $("#la_bouton_export").on("click", function() {
+                                var bouton = $(this);
+                                var visibles = $.map(get_visibles(), function(l) {
+                                    return {date: l.date, label_groupe: l.label_groupe, nom_evenement: l.nom_evenement, rang: l.rang, nom_individu: l.nom_individu,
+                                            nom_famille: l.nom_famille, unites: l.unites, date_saisie: l.date_saisie, place_dispo: l.place_dispo};
+                                });
+                                if (!visibles.length) {
+                                    toastr.error("Aucune ligne à exporter");
+                                    return;
+                                }
+                                bouton.prop("disabled", true).find("i").removeClass("fa-file-excel-o").addClass("fa-spinner fa-spin");
+                                $.ajax({
+                                    type: "POST",
+                                    url: "{% url 'ajax_liste_attente_exporter_excel' %}",
+                                    data: {
+                                        lignes: JSON.stringify(visibles),
+                                        etat: etat,
+                                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                                    },
+                                    success: function(data) {
+                                        window.location = "{{ MEDIA_URL }}" + data.nom_fichier;
+                                    },
+                                    error: function(data) {
+                                        toastr.error(data.responseJSON ? data.responseJSON.erreur : "Une erreur est survenue lors de l'export");
+                                    },
+                                    complete: function() {
+                                        bouton.prop("disabled", false).find("i").removeClass("fa-spinner fa-spin").addClass("fa-file-excel-o");
+                                    }
+                                });
+                            });
+
+                            $(document).ready(afficher);
+
+                            return {
+                                get_selections: function() {
+                                    return $.map(Object.keys(selection), function(idx) {return lignes[idx];});
+                                }
+                            };
+                        })();
 
                         $("#bouton_attribution_automatique").on("click", function(event) {
                             var box = bootbox.dialog({
@@ -143,15 +385,16 @@
                         }
 
                         $("#bouton_attribution_manuelle").on("click",function(event){
+                            var selections = liste_attente.get_selections();
                             // Vérifie qu'une ligne est cochée
-                            if ($("#table").bootstrapTable('getSelections').length === 0) {
+                            if (selections.length === 0) {
                                 toastr.error("Vous devez cocher au moins une ligne dans la liste");
                                 return;
                             }
                             // Demande la confirmation du lancement de la procédure
                             var dlg = bootbox.dialog({
                                 title: "Confirmation",
-                                message: "Confirmez-vous l'attribution des " + $("#table").bootstrapTable('getSelections').length + " places cochées ?",
+                                message: "Confirmez-vous l'attribution des " + selections.length + " places cochées ?",
                                 buttons: {
                                     ok: {
                                         label: "<i class='fa fa-check'></i> Réattribuer",
@@ -165,7 +408,7 @@
                                                 type: "POST",
                                                 url: "{% url 'liste_attente_attribution_manuelle' %}",
                                                 data: {
-                                                    selections: JSON.stringify($("#table").bootstrapTable('getSelections')),
+                                                    selections: JSON.stringify(selections),
                                                     csrfmiddlewaretoken: "{{ csrf_token }}",
                                                 },
                                                 success: function (data) {
@@ -194,8 +437,6 @@
 
         </div>
     </div>
-
-    {% include 'core/widgets/bootstrap-table.html' %}
 
     {# Modal Modifier la réservation #}
     {% embed 'core/modal.html' %}
