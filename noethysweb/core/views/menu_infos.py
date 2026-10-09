@@ -474,6 +474,7 @@ COMMANDES = {
     "edition_ventilations_reglements": ("print", "e", "Imprimer la ventilation des règlements par période."),
     "reglements_lot_factures": ("files-o", "l", "Lister les paiements reçus pour un lot de factures."),
     "synthese_modes_reglements": ("pie-chart", "s", "Totaliser les encaissements par mode de paiement."),
+    "statistiques_reglements": ("bar-chart", "s", "Tableau de bord des encaissements, dépôts et délais de paiement."),
     "liste_reglements_disponibles": ("clock-o", "l", "Lister les chèques et espèces restant à déposer."),
     "detail_prestations_depot": ("shopping-bag", "l", "Voir les prestations réglées par un dépôt."),
     "detail_ventilations_depots": ("random", "l", "Ventiler un dépôt par activité ou par poste."),
@@ -519,6 +520,7 @@ NOUVEAUTES = {
     "statistiques_consommations": "2026-10-04",
     "statistiques_prestations": "2026-10-04",
     "frequentation_caf": "2026-10-09",
+    "statistiques_reglements": "2026-10-09",
 }
 
 

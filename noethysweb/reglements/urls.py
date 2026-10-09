@@ -10,7 +10,8 @@ from core.decorators import Verifie_ventilation
 from reglements.views import liste_reglements, liste_recus, liste_detaillee_reglements, synthese_modes_reglements, \
                             depots_reglements, depots_reglements_selection, detail_prestations_depot, \
                             liste_reglements_disponibles, corriger_ventilation, liste_paiements, reglements_lot_factures, \
-                            detail_ventilations_depots, detail_ventilations_reglements, depots_reglements_avis, edition_ventilations_reglements
+                            detail_ventilations_depots, detail_ventilations_reglements, depots_reglements_avis, edition_ventilations_reglements, \
+                            statistiques_reglements
 
 
 urlpatterns = [
@@ -32,6 +33,7 @@ urlpatterns = [
     path('reglements/detail_prestations_depot', Verifie_ventilation(detail_prestations_depot.View.as_view()), name='detail_prestations_depot'),
     path('reglements/detail_ventilations_depots', Verifie_ventilation(detail_ventilations_depots.View.as_view()), name='detail_ventilations_depots'),
     path('reglements/synthese_modes_reglements', Verifie_ventilation(synthese_modes_reglements.View.as_view()), name='synthese_modes_reglements'),
+    path('reglements/statistiques_reglements', statistiques_reglements.View.as_view(), name='statistiques_reglements'),
 
     # Dépôts de règlements
     path('reglements/liste_reglements_disponibles', liste_reglements_disponibles.Liste.as_view(), name='liste_reglements_disponibles'),
@@ -53,4 +55,6 @@ urlpatterns = [
     # AJAX
     path('facturation/depots_reglements_impression_pdf', secure_ajax(depots_reglements.Impression_pdf), name='ajax_depots_reglements_impression_pdf'),
     path('facturation/edition_ventilations_reglements/generer_pdf', secure_ajax(edition_ventilations_reglements.Generer_pdf), name='ajax_edition_ventilations_reglements_generer_pdf'),
+    path('reglements/statistiques_reglements/exporter_excel', secure_ajax(statistiques_reglements.Exporter_excel), name='ajax_statistiques_reglements_exporter_excel'),
+    path('reglements/statistiques_reglements/generer_pdf', secure_ajax(statistiques_reglements.Generer_pdf), name='ajax_statistiques_reglements_generer_pdf'),
 ]

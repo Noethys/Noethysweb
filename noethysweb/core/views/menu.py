@@ -470,6 +470,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_listes.Add(code="edition_ventilations_reglements", titre="Edition des ventilations des règlements", icone="file-text-o")
     menu_listes.Add(code="reglements_lot_factures", titre="Liste des règlements associés à un lot de factures", icone="file-text-o")
     menu_listes.Add(code="synthese_modes_reglements", titre="Synthèse des modes de règlements", icone="file-text-o")
+    menu_listes.Add(code="statistiques_reglements", titre="Statistiques des règlements", icone="file-text-o")
 
     # Dépôts
     menu_depots_reglements = menu_reglements.Add(titre="Dépôts de règlements")
