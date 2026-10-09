@@ -4,39 +4,34 @@
 {% block contenu_page %}
 
     <!-- Box Facturation -->
-    <div class="card card-default">
+    <div class="card card-default facturation-cadre">
         <div class="card-header with-border">
             <h3 class="card-title"><i class="fa fa-euro margin-r-5"></i>Prestations</h3>
-                <div class="card-tools">
-                    
-                    {% if data.mode != "portail" %}
-                        <div class="btn-group">
-                            <button href="#" class="btn btn-tool" title="Ajuster les options" data-toggle="dropdown"><i class="fa fa-gear"></i></button>
-                            <div class="dropdown-menu dropdown-menu-right" role="menu">
-                                <h6 class="dropdown-header"><strong>Options</strong></h6>
-                                <a href="#" id="afficher_quantites" class="dropdown-item option_affichage_facturation {% if data.options.afficher_quantites %}menu-checked{% endif %}" title="Afficher les quantités">Afficher les quantités</a>
-                            </div>
-                        </div>
-                    {% endif %}
-
-                </div>
+            {% if data.mode != "portail" %}
+                <label class="facturation-option" for="afficher_quantites">
+                    Quantités
+                    <button type="button" id="afficher_quantites" class="facturation-switch" role="switch" aria-checked="{% if data.options.afficher_quantites %}true{% else %}false{% endif %}" title="Afficher les quantités"></button>
+                </label>
+            {% endif %}
         </div>
-        <div class="card-body p-0">
+        <div class="card-body p-0 facturation-defilement">
 
             <table id="table_facturation" class="table table-sm">
 
                 {% get_liste_individus_coches data as liste_individus_coches %}
                 {% for key_individu in liste_individus_coches %}
-                    <tr class="ligne_total">
-                        <th class='individu_prestation'>{{ key_individu.0.Get_nom }}</th>
-                        <th id="total_facturation_individu_{{ key_individu.0.pk }}_{{ key_individu.1 }}" class='montant_prestation'>0.00 {{ SYMBOLE_MONNAIE }}</th>
-                    </tr>
+                    <tbody>
+                        <tr class="ligne_total" data-individu="{{ key_individu.0.pk }}_{{ key_individu.1 }}" data-nom="{{ key_individu.0.Get_nom }}">
+                            <th class='individu_prestation' title="{{ key_individu.0.Get_nom }}">{{ key_individu.0.Get_nom }}</th>
+                            <th id="total_facturation_individu_{{ key_individu.0.pk }}_{{ key_individu.1 }}" class='montant_prestation'>0.00 {{ SYMBOLE_MONNAIE }}</th>
+                        </tr>
+                    </tbody>
                     <tbody id="detail_facturation_individu_{{ key_individu.0.pk }}_{{ key_individu.1 }}"></tbody>
                 {% endfor %}
 
                 {% if liste_individus_coches|length > 1 %}
                     <tfoot>
-                        <tr class="ligne_total">
+                        <tr class="ligne_total_general">
                             <th class='individu_prestation'>Total</th>
                             <th id="total_facturation_individus" class="montant_prestation">0.00 {{ SYMBOLE_MONNAIE }}</th>
                         </tr>
@@ -55,24 +50,25 @@
 
     <script>
         $(document).ready(function() {
-    
-            // Click sur l'option Afficher les quantités
-            $(".option_affichage_facturation").on("click",function(event){
+
+            // Interrupteur Afficher les quantités
+            $("#afficher_quantites").on("click", function(event) {
                 event.preventDefault();
-                $(this).hasClass("menu-checked") ? $(this).removeClass("menu-checked") : $(this).addClass("menu-checked");
-                dict_options.afficher_quantites = $(this).hasClass("menu-checked");
+                var actif = $(this).attr("aria-checked") !== "true";
+                $(this).attr("aria-checked", actif ? "true" : "false");
+                dict_options.afficher_quantites = actif;
                 memorise_options_grille();
                 maj_box_facturation();
             });
-    
+
         });
-    
+
         function memorise_options_grille() {
             $.ajax({
                 type: "POST",
                 url: "{% url 'ajax_grille_memoriser_options' %}",
                 data: {
-                    afficher_quantites: $("#afficher_quantites").hasClass("menu-checked"),
+                    afficher_quantites: $("#afficher_quantites").attr("aria-checked") === "true",
                     csrfmiddlewaretoken: "{{ csrf_token }}",
                 },
                 success: function (data) {
@@ -80,7 +76,7 @@
                 }
             });
         };
-    
+
     </script>
 
 {% endblock contenu_page %}

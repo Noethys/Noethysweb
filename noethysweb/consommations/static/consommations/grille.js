@@ -1443,37 +1443,53 @@ function maj_remplissage(date) {
         };
     });
 
-    // Ajout des places des individus non affichés
-    Object.assign(dict_places_prises, dict_places);
+    // Ajout des places des individus non affichés (additionnées : une même clé peut exister des deux côtés)
+    $.each(dict_places, function (key, nbre) {
+        dict_places_prises[key] = (dict_places_prises[key] || 0) + nbre;
+    });
 
     dict_places_temp = dict_places_prises;
     if ($("#id_afficher_presents_totaux").val() === "oui") {
         dict_places_temp = dict_places_presents;
     }
 
-    // Maj de la box totaux
-    $("#table_totaux td[id^='total_']").each(function() {
+    // Maj de la box totaux : consommations
+    $("#table_totaux td[id^='total_']").not("[id^='total_remplissage_']").each(function() {
         var key = periode_json.selections.jour + "_" + this.id.slice(6);
-        if (key in dict_places_temp) {
-            $(this).html(dict_places_temp[key]);
-        } else {
-            $(this).html(0);
-        };
+        var nbre = (key in dict_places_temp) ? dict_places_temp[key] : 0;
+        $(this).html(nbre).toggleClass("totaux-zero", nbre === 0);
     });
 
+    // Maj de la box totaux : remplissage (places prises, case colorée selon la capacité de l'unité de remplissage)
+    var afficher_presents = (dict_places_temp === dict_places_presents);
     $("#table_totaux td[id^='total_remplissage_']").each(function() {
-        idunite_remplissage = $(this).data("idunite");
-        idgroupe = $(this).data("idgroupe");
-        var nbre_places_prises = 0;
+        var idunite_remplissage = $(this).data("idunite");
+        var idgroupe = $(this).data("idgroupe");
+        var nbre_affiche = 0;
+        var nbre_inscrits = 0;
         if (idunite_remplissage in dict_unites_remplissage) {
             for (var idunite_conso of dict_unites_remplissage[idunite_remplissage]["unites_conso"]) {
                 var key = periode_json.selections.jour + "_" + idunite_conso + "_" + idgroupe;
-                if (key in dict_places_temp) {
-                    nbre_places_prises += dict_places_temp[key]
-                };
+                nbre_affiche += dict_places_temp[key] || 0;
+                nbre_inscrits += dict_places_prises[key] || 0;
             };
         };
-        $(this).html(nbre_places_prises);
+
+        // Capacité et seuil d'alerte (même règle de couleur que les cases de la grille)
+        var classe = "";
+        var titre = $(this).data("libelle") + " : ";
+        if (afficher_presents) {titre += nbre_affiche + " présent" + (nbre_affiche > 1 ? "s" : "") + " · "};
+        var capacite = dict_capacite[periode_json.selections.jour + "_" + idunite_remplissage + "_" + idgroupe];
+        if (capacite) {
+            var restantes = capacite - nbre_inscrits;
+            var seuil = (idunite_remplissage in dict_unites_remplissage) ? dict_unites_remplissage[idunite_remplissage]["seuil_alerte"] : 0;
+            classe = restantes <= 0 ? "totaux-complet" : (restantes <= seuil ? "totaux-dernieresplaces" : "totaux-disponible");
+            titre += nbre_inscrits + " / " + capacite + " places · " + (restantes <= 0 ? "complet" : restantes + " restante" + (restantes > 1 ? "s" : ""));
+        } else {
+            titre += nbre_inscrits + " place" + (nbre_inscrits > 1 ? "s" : "") + " prise" + (nbre_inscrits > 1 ? "s" : "") + " · aucune capacité définie";
+        };
+        $(this).removeClass("totaux-disponible totaux-dernieresplaces totaux-complet").addClass(classe).attr("title", titre);
+        $(this).find("span").text(nbre_affiche);
     });
 
     // MAJ du remplissage des cases
@@ -1958,22 +1974,23 @@ function maj_box_facturation() {
                 }
                 // Affiche la date et la prestation
                 if (valide === true) {
-                    var datefr = new Date(date);
-                    datefr = datefr.toLocaleDateString('fr-FR', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
                     if ((mode == "individu") || (mode == "portail")) {
-                        html += "<tr><td class='date_prestation'>" + datefr + "</td><td class='montant_prestation'></td></tr>";
+                        // Date courte : l'année n'est affichée que si elle diffère de l'année en cours
+                        var options_date = {weekday: 'long', month: 'long', day: 'numeric'};
+                        if (date.slice(0, 4) != new Date().getFullYear()) {options_date.year = 'numeric'};
+                        var datefr = new Date(date).toLocaleDateString('fr-FR', options_date);
+                        html += "<tr class='date_prestation'><td colspan='2'>" + datefr + "</td></tr>";
                     };
                     for (var idprestation of dict_dates[date].sort()) {
                         var dict_prestation = dict_prestations[idprestation];
                         var label = dict_prestation.label;
-                        if (dict_prestation.aides.length > 0) {label += " <span class='exposant'>(Aide)</span>"};
-                        html += "<tr class='ligne_prestation'><td class='label_prestation'>" + label + "</td><td class='montant_prestation'>" + dict_prestation.montant.toFixed(2) + " " + SYMBOLE_MONNAIE;
-                        if (afficher_quantites) {html += " (" + dict_prestation.quantite + ")"}
+                        var titre = $("<div>").html(label).text();
+                        if (dict_prestation.aides.length > 0) {
+                            label += " <span class='aide_prestation' title='Une aide a été déduite'>Aide</span>";
+                            titre += " (aide déduite)";
+                        };
+                        html += "<tr class='ligne_prestation'><td class='label_prestation' title=\"" + titre.replace(/"/g, "&quot;") + "\">" + label + "</td><td class='montant_prestation'>" + dict_prestation.montant.toFixed(2) + " " + SYMBOLE_MONNAIE;
+                        if (afficher_quantites) {html += " <span class='quantite_prestation'>(" + dict_prestation.quantite + ")</span>"}
                         html += "</td></tr>";
                         total_individu['montant'] += dict_prestation.montant;
                         total_individu['quantite'] += dict_prestation.quantite;
@@ -1981,15 +1998,17 @@ function maj_box_facturation() {
                 };
             };
         };
+        // Individu sans prestation : mention explicite sur la fiche famille et le portail (dans le gestionnaire, le montant à 0 suffit)
+        if ((html === "") && ((mode == "individu") || (mode == "portail"))) {html = "<tr class='ligne_vide'><td colspan='2'>Aucune prestation</td></tr>"};
         $('#detail_facturation_individu_' + key_individu[0] + '_' + key_individu[1]).html(html);
         var texte = total_individu['montant'].toFixed(2) + " " + SYMBOLE_MONNAIE;
-        if (afficher_quantites) {texte += " (" + total_individu['quantite'] + ")"}
-        $('#total_facturation_individu_' + key_individu[0] + '_' + key_individu[1]).html(texte);
+        if (afficher_quantites) {texte += " <span class='quantite_prestation'>(" + total_individu['quantite'] + ")</span>"}
+        $('#total_facturation_individu_' + key_individu[0] + '_' + key_individu[1]).html(texte).closest(".ligne_total").toggleClass("sans_prestation", total_individu['montant'] === 0 && total_individu['quantite'] === 0);
         total_individus['montant'] += total_individu['montant'];
         total_individus['quantite'] += total_individu['quantite'];
     };
     var texte = total_individus['montant'].toFixed(2) + " " + SYMBOLE_MONNAIE;
-    if (afficher_quantites) {texte += " (" + total_individus['quantite'] + ")"}
+    if (afficher_quantites) {texte += " <span class='quantite_prestation'>(" + total_individus['quantite'] + ")</span>"}
     $('#total_facturation_individus').html(texte);
 };
 

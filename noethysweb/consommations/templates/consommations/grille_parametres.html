@@ -4,136 +4,212 @@
 
 {% block contenu_page %}
 
+    {% include "consommations/parametres_commun.html" %}
+
     <style>
-        #accordeon_parametres {
-            margin-bottom: 0px;
-        }
-        #accordeon_parametres .card {
-            border-radius: 0px;
-            border: 0px;
-            margin-bottom: 0px;
-            margin-top: 0px;
-        }
-        #accordeon_parametres .card-header {
-            padding: 7px 5px 7px 10px;
-        }
-        #accordeon_parametres .card-title {
-            font-size: 14px;
-            font-weight: bold;
-        }
-        #accordeon_parametres .form-control {
-            border-radius: 0px;
-        }
+        /* Type de période : boutons accolés */
+        .param-type-periode {display: flex; margin: 0 0 8px; border: 1px solid #ced4da; border-radius: .25rem; overflow: hidden;}
+        .param-type-periode input {position: absolute; opacity: 0; pointer-events: none;}
+        .param-type-periode label {flex: 1; margin: 0; padding: 4px 0; text-align: center; font-size: 12.5px; font-weight: normal; cursor: pointer; color: #495057;}
+        .param-type-periode label + input + label {border-left: 1px solid #ced4da;}
+        .param-type-periode input:checked + label {background: #e7f1ff; color: #0056b3; font-weight: 600;}
+        .param-type-periode input:focus-visible + label {box-shadow: inset 0 0 0 2px rgba(0, 123, 255, .35);}
+
+        /* Année : flèches autour du champ */
+        .param-annee {display: flex; align-items: stretch; gap: 4px; margin-bottom: 6px;}
+        .param-annee input {text-align: center; font-weight: 600; border-bottom: 1px solid #ced4da !important;}
+        .param-annee button {width: 36px; flex-shrink: 0; height: auto;}
+
+        /* Mois : grille de boutons */
+        .param-mois {display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;}
+        .param-mois button {padding: 4px 0; font-size: 12px; border: 1px solid #dee2e6; border-radius: 4px; background: transparent; color: #495057; cursor: pointer;}
+        .param-mois button:hover {background: rgba(0, 0, 0, .04);}
+        .param-mois button[aria-pressed=true] {background: #007bff; border-color: #007bff; color: #fff;}
+        .param-aide {margin-top: 6px; font-size: 11.5px; color: #6c757d;}
+
+        /* Individus */
+        .param-contenu .individus {margin: 0; padding: 0;}
+        .param-contenu .individus .checkbox {display: flex; align-items: center; gap: 7px; margin: 0; padding: 3px 2px; font-size: 13px;}
+        .param-contenu .individus input[type=checkbox] {accent-color: #3c8dbc;}
+
+        .dark-mode .param-type-periode input:checked + label {background: #0C447C; color: #B5D4F4;}
+        .dark-mode .param-mois button {color: #ced4da; border-color: #6c757d;}
+        .dark-mode .param-mois button[aria-pressed=true] {background: #3c8dbc; border-color: #3c8dbc; color: #fff;}
     </style>
 
     <!-- Box Paramètres -->
-    <div class="card card-default">
+    <div class="card card-default param-cadre">
 
         <div class="card-header">
             <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i>Paramètres</h3>
-            <div class="card-tools">
-                <button type="submit" name="type_submit" form="form-maj" style="margin : -5px 10px -4px 0px;" value="MAJ" class="btn btn-default btn-xs" title="Appliquer les paramètres sélectionnés">Appliquer</button>
-            </div>
+            <button type="submit" name="type_submit" form="form-maj" value="MAJ" class="btn btn-primary btn-sm param-bouton-appliquer" title="Appliquer les paramètres sélectionnés"><i class="fa fa-refresh margin-r-5"></i>Appliquer</button>
         </div>
 
         <div class="card-body p-0">
 
-            <div id="accordeon_parametres">
+            {# Onglets #}
+            <div class="param-onglets" role="tablist" aria-label="Paramètres">
+                <button type="button" class="param-onglet {% if data.liste_individus_possibles %}active{% endif %}" role="tab" aria-controls="panneau_1"><span class="param-onglet-point"></span><i class="fa fa-users" aria-hidden="true"></i><span class="param-onglet-titre">Individus</span><span class="param-onglet-valeur"></span></button>
+                <button type="button" class="param-onglet" role="tab" aria-controls="panneau_2"><span class="param-onglet-point"></span><i class="fa fa-cube" aria-hidden="true"></i><span class="param-onglet-titre">Activité</span><span class="param-onglet-valeur"></span></button>
+                <button type="button" class="param-onglet {% if not data.liste_individus_possibles %}active{% endif %}" role="tab" aria-controls="panneau_3"><span class="param-onglet-point"></span><i class="fa fa-calendar" aria-hidden="true"></i><span class="param-onglet-titre">Période</span><span class="param-onglet-valeur"></span></button>
+            </div>
 
-                {# Panneau Individus #}
-                <div class="card">
-                    <div class="card-header" id="head_1">
-                        <h4 class="card-title w-100">
-                            <a class="d-block w-100" data-toggle="collapse" data-target="#panneau_1" href="#panneau_1" aria-expanded="{% if data.liste_individus_possibles %}true{% else %}false{% endif %}" aria-controls="panneau_1">
-                                <i class="fa fa-angle-down margin-r-5"></i>Individus
-                                {% if data.liste_individus_possibles|length > 1 %}
-                                    <span class="badge badge-info pull-right" title="Individus disponibles">{{ data.liste_individus_possibles|length }}</span>
-                                {% endif %}
-                            </a>
-                        </h4>
-                    </div>
-                    <div id="panneau_1" class="collapse {% if data.liste_individus_possibles %}show{% endif %}" aria-labelledby="head_1" data-parent="#accordeon_parametres">
-                        <div class="card-body p-0">
-                            {% include "consommations/grille_selection_individus.html" %}
-                        </div>
+            <div class="param-contenus">
+
+                {# Individus #}
+                <div class="param-contenu {% if data.liste_individus_possibles %}active{% endif %}" id="panneau_1" role="tabpanel">
+                    {% if data.liste_individus_possibles|length > 1 %}
+                        <div class="param-liens"><a onclick="Cocher_individus(true)">Tout</a><a onclick="Cocher_individus(false)">Rien</a></div>
+                    {% endif %}
+                    <div class="param-liste">
+                        {% include "consommations/grille_selection_individus.html" %}
                     </div>
                 </div>
 
-                {# Panneau Activités #}
-                <div class="card">
-                    <div class="card-header" id="head_2">
-                        <h4 class="card-title w-100">
-                            <a class="d-block w-100" data-toggle="collapse" data-target="#panneau_2" href="#panneau_2" aria-expanded="false" aria-controls="panneau_2">
-                                <i class="fa fa-angle-down margin-r-5"></i>Activité
-                                {% if data.liste_activites_possibles|length > 1 %}
-                                    <span class="badge badge-info pull-right" title="Activités disponibles">{{ data.liste_activites_possibles|length }}</span>
-                                {% endif %}
-                            </a>
-                        </h4>
-                    </div>
-                    <div id="panneau_2" class="collapse" aria-labelledby="head_2" data-parent="#accordeon_parametres">
-                        <div class="card-body p-0">
-
-                            <select class="form-control" id="selection_activite">
-                                {% for activite in data.liste_activites_possibles %}
-                                    <option value="{{ activite.pk }}" {% if activite == data.selection_activite %}selected{% endif %}>{{ activite.nom }}</option>
-                                {% endfor %}
-                            </select>
-
-                        </div>
-                    </div>
+                {# Activité #}
+                <div class="param-contenu" id="panneau_2" role="tabpanel">
+                    <select class="form-control" id="selection_activite" aria-label="Activité">
+                        {% for activite in data.liste_activites_possibles %}
+                            <option value="{{ activite.pk }}" {% if activite == data.selection_activite %}selected{% endif %}>{{ activite.nom }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
-                {# Panneau Période #}
-                <div class="card">
-                    <div class="card-header" id="head_3">
-                        <h4 class="card-title w-100">
-                            <a class="d-block w-100" data-toggle="collapse" data-target="#panneau_3" data-parent="#accordeon_parametres" href="#panneau_3" aria-expanded="false" aria-controls="panneau_3">
-                                <i class="fa fa-angle-down margin-r-5"></i>Période
-                            </a>
-                        </h4>
+                {# Période #}
+                <div class="param-contenu {% if not data.liste_individus_possibles %}active{% endif %}" id="panneau_3" role="tabpanel">
+
+                    <div class="param-type-periode" role="radiogroup" aria-label="Type de période">
+                        <input class="choix_type_periode" type="radio" id="inlineRadio1" value="mois" name="choix_type_periode" checked onClick="Set_mode_periode('mois')"><label for="inlineRadio1">Mois</label>
+                        <input class="choix_type_periode" type="radio" id="inlineRadio2" value="vacances" name="choix_type_periode" onClick="Set_mode_periode('vacances')"><label for="inlineRadio2">Vacances</label>
+                        <input class="choix_type_periode" type="radio" id="inlineRadio3" value="dates" name="choix_type_periode" onClick="Set_mode_periode('dates')"><label for="inlineRadio3">Dates</label>
                     </div>
-                    <div id="panneau_3" class="collapse" aria-labelledby="head_3" data-parent="#accordeon_parametres">
-                        <div class="card-body p-0">
 
-                            <div style="padding: 5px;">
-                                <form class="text-center">
+                    {% include 'consommations/selecteur_periode.html' %}
 
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input choix_type_periode" type="radio" id="inlineRadio1" value="mois" name="choix_type_periode" checked onClick="Set_mode_periode('mois')">
-                                        <label class="form-check-label" for="inlineRadio1">Mois</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input choix_type_periode" type="radio" id="inlineRadio2" value="vacances" name="choix_type_periode" onClick="Set_mode_periode('vacances')">
-                                        <label class="form-check-label" for="inlineRadio2">Vacances</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input choix_type_periode" type="radio" id="inlineRadio3" value="dates" name="choix_type_periode" onClick="Set_mode_periode('dates')">
-                                        <label class="form-check-label" for="inlineRadio3">Dates</label>
-                                    </div>
+                    <script>
+                        Set_periode();
+                        $(document).ready(function() {
+                            $('.choix_type_periode').on('change', function (event) {
+                                event.preventDefault();
+                                Set_mode_periode($(this).val());
+                                Maj_valeurs_parametres();
+                            });
+                        });
+                    </script>
 
-                                </form>
-                            </div>
-
-                            {% include 'consommations/selecteur_periode.html' %}
-
-                            <script>
-                                Set_periode();
-                                $(document).ready(function() {
-                                    $('.choix_type_periode').on('change', function (event) {
-                                        event.preventDefault();
-                                        Set_mode_periode($(this).val());
-                                    });
-                                });
-                            </script>
-
-                        </div>
-                    </div>
                 </div>
 
             </div>
 
         </div>
     </div>
+
+<script>
+    var MOIS_PARAMETRES = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+    var MOIS_PARAMETRES_COURTS = ["Janv.", "Févr.", "Mars", "Avr.", "Mai", "Juin", "Juil.", "Août", "Sept.", "Oct.", "Nov.", "Déc."];
+
+    function Cocher_individus(etat) {
+        $("[id^='check_individu_']").prop("checked", etat);
+        Marquer_parametres_modifies("panneau_1");
+    }
+
+    // ---------- Présentation améliorée du sélecteur de période (les champs d'origine restent la source des valeurs) ----------
+    function Maj_boutons_mois() {
+        var selection = $("#selection_mois").val() || [];
+        $(".param-mois button").each(function() {
+            $(this).attr("aria-pressed", selection.indexOf(String($(this).data("mois"))) !== -1 ? "true" : "false");
+        });
+    }
+    function Maj_cases_vacances() {
+        var liste = $("#param_liste_vacances").empty();
+        var options = $("#selection_vacances option");
+        if (!options.length) {
+            liste.append($("<span class='text-muted' style='font-size: 13px;'></span>").text("Aucune période de vacances pour cette année"));
+        }
+        options.each(function() {
+            var option = this;
+            var case_a_cocher = $("<input type='checkbox'>").prop("checked", option.selected).on("change", function() {
+                option.selected = this.checked;
+                $("#selection_vacances").trigger("change");
+            });
+            liste.append($("<label></label>").append(case_a_cocher).append(document.createTextNode(option.text)));
+        });
+    }
+    $(function() {
+        // Année avec flèches
+        var annee = $("#selection_annee");
+        annee.wrap("<div class='param-annee'></div>");
+        annee.before($("<button type='button' class='btn btn-default' aria-label='Année précédente'><i class='fa fa-chevron-left'></i></button>").on("click", function() {annee.val(parseInt(annee.val() || 0) - 1).trigger("change");}));
+        annee.after($("<button type='button' class='btn btn-default' aria-label='Année suivante'><i class='fa fa-chevron-right'></i></button>").on("click", function() {annee.val(parseInt(annee.val() || 0) + 1).trigger("change");}));
+
+        // Mois en boutons
+        var grille_mois = $("<div class='param-mois' role='group' aria-label='Mois'></div>");
+        $("#selection_mois option").each(function() {
+            var option = this;
+            $("<button type='button' aria-pressed='false'></button>").text(MOIS_PARAMETRES_COURTS[parseInt(option.value) - 1]).attr("title", option.text).data("mois", option.value)
+                .on("click", function() {
+                    option.selected = !option.selected;
+                    $("#selection_mois").trigger("change");
+                }).appendTo(grille_mois);
+        });
+        $("#selection_mois").addClass("d-none").after(grille_mois);
+        grille_mois.after("<div class='param-aide'>Cliquez sur plusieurs mois pour les combiner.</div>");
+        $("#selection_mois").on("change", Maj_boutons_mois);
+        Maj_boutons_mois();
+
+        // Vacances en cases à cocher (la liste est rechargée par le sélecteur à chaque changement d'année)
+        $("#selection_vacances").addClass("d-none").after("<div class='param-liste' id='param_liste_vacances'></div>");
+        new MutationObserver(Maj_cases_vacances).observe(document.getElementById("selection_vacances"), {childList: true});
+        $("#selection_vacances").on("change", function() {
+            var selection = $(this).val() || [];
+            $("#param_liste_vacances input").each(function(index) {
+                this.checked = selection.indexOf($("#selection_vacances option").eq(index).val()) !== -1;
+            });
+            Maj_valeurs_parametres();
+        });
+        Maj_cases_vacances();
+
+        $("#selection_mois, #selection_annee").on("change", Maj_valeurs_parametres);
+        $("#selection_dates").on("apply.daterangepicker", Maj_valeurs_parametres);
+        Maj_valeurs_parametres();
+    });
+
+    // ---------- Valeurs affichées sous les onglets [valeur courte, info-bulle] ----------
+    valeurs_parametres["panneau_1"] = function() {
+        var cases = $("[id^='check_individu_']");
+        if (!cases.length) {return ["–", "Aucun individu"];}
+        var cochees = cases.filter(":checked");
+        var noms = cochees.map(function() {return $(this).parent().text().trim();}).get().join(", ");
+        if (cochees.length === cases.length) {return [cases.length > 1 ? "Tous" : "1/1", noms];}
+        if (!cochees.length) {return ["Aucun", "Aucun individu sélectionné"];}
+        return [cochees.length + "/" + cases.length, noms];
+    };
+    valeurs_parametres["panneau_2"] = function() {
+        var nom = $("#selection_activite option:selected").text().trim();
+        return nom ? [nom, nom] : ["–", "Aucune activité"];
+    };
+    valeurs_parametres["panneau_3"] = function() {
+        var periode = Get_periode();
+        var selections = periode.selections || {};
+        if (periode.mode === "mois") {
+            var mois = selections.liste_mois || [];
+            if (!mois.length) {return ["Aucun mois", "Aucun mois sélectionné"];}
+            var noms = mois.map(function(m) {return MOIS_PARAMETRES[parseInt(m) - 1];}).join(", ") + " " + selections.annee;
+            if (mois.length === 1) {return [MOIS_PARAMETRES_COURTS[parseInt(mois[0]) - 1] + " " + selections.annee, noms];}
+            return [mois.length + " mois", noms];
+        }
+        if (periode.mode === "vacances") {
+            var vacances = $("#selection_vacances option:selected");
+            if (!vacances.length) {return ["Aucune", "Aucune période de vacances sélectionnée"];}
+            var liste = vacances.map(function() {return this.text;}).get().join(", ");
+            return [vacances.length === 1 ? vacances.text().trim() : vacances.length + " périodes", liste];
+        }
+        if (periode.mode === "dates" && selections.date_debut) {
+            return [moment(selections.date_debut).format("DD/MM") + "–" + moment(selections.date_fin).format("DD/MM"),
+                    "Du " + moment(selections.date_debut).format("DD/MM/YYYY") + " au " + moment(selections.date_fin).format("DD/MM/YYYY")];
+        }
+        return ["", ""];
+    };
+</script>
 
 {% endblock contenu_page %}

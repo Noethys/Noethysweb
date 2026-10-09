@@ -1,0 +1,157 @@
+{# Cadre Paramètres à onglets, commun au gestionnaire, à la pointeuse et à la grille des consommations #}
+
+<style>
+    /* En-tête du cadre */
+    .param-cadre .card-header {display: flex; align-items: center; gap: 6px; padding: 7px 8px 7px 12px;}
+    .param-cadre .card-header .card-title {flex: 1; float: none; margin: 0;}
+    .param-cadre .card-header::after {display: none;}
+    .param-cadre.param-modifie .param-bouton-appliquer {background: #e8590c; border-color: #e8590c;}
+
+    /* Onglets */
+    .param-onglets {display: flex; margin: 0; padding: 0; list-style: none; background: #f8f9fa; border-bottom: 1px solid #dee2e6;}
+    .param-onglet {position: relative; flex: 1 1 0; min-width: 0; padding: 6px 2px 5px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #6c757d; text-align: center; cursor: pointer; line-height: 1.2;}
+    .param-onglet:hover {background: rgba(0, 0, 0, .03);}
+    .param-onglet:focus {outline: none; box-shadow: inset 0 0 0 2px rgba(0, 123, 255, .25);}
+    .param-onglet .fa {display: block; font-size: 16px; margin-bottom: 2px;}
+    .param-onglet-titre {display: block; font-size: 11px;}
+    .param-onglet-valeur {display: block; font-size: 10.5px; font-weight: 600; color: #0056b3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px;}
+    .param-onglet.active {background: #fff; color: #0056b3; border-bottom-color: #007bff;}
+    .param-onglet-point {display: none; position: absolute; top: 5px; left: calc(50% + 9px); width: 7px; height: 7px; border-radius: 50%; background: #e8590c;}
+    .param-onglet.modifie .param-onglet-point {display: block;}
+    .param-contenu {display: none; padding: 10px 12px;}
+    .param-contenu.active {display: block;}
+    .param-contenu .form-group {margin-bottom: 6px;}
+
+    /* Listes à cocher et raccourcis */
+    .param-liens {margin-bottom: 4px;}
+    .param-liens a {font-size: 12px; margin-right: 10px; cursor: pointer;}
+    .param-liste {max-height: 240px; overflow-y: auto;}
+    .param-liste label {display: flex; align-items: center; gap: 7px; margin: 0; padding: 3px 2px; font-size: 13px; font-weight: normal; cursor: pointer;}
+    .param-liste input[type=checkbox] {accent-color: #3c8dbc; flex-shrink: 0;}
+    .param-raccourcis {display: flex; gap: 4px; margin-top: 6px;}
+    .param-raccourcis button {flex: 1; padding: 2px 0; font-size: 12px; border: 1px solid #dee2e6; border-radius: 12px; background: transparent; color: #495057; cursor: pointer;}
+    .param-raccourcis button:hover {background: rgba(0, 0, 0, .04);}
+
+    /* Interrupteurs des options */
+    .param-switch-ligne {display: flex; align-items: center; justify-content: space-between; gap: 10px;}
+    .param-switch-ligne > label {margin: 0; font-weight: normal; font-size: 13px;}
+    .param-switch {position: relative; flex-shrink: 0; width: 32px; height: 18px; padding: 0; border: 0; border-radius: 9px; background: #ced4da; cursor: pointer; transition: background .15s;}
+    .param-switch::after {content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: left .15s;}
+    .param-switch[aria-checked=true] {background: #3c8dbc;}
+    .param-switch[aria-checked=true]::after {left: 16px;}
+    .param-switch:focus {outline: none; box-shadow: 0 0 0 2px rgba(0, 123, 255, .3);}
+
+    /* Mode sombre */
+    .dark-mode .param-onglets {background: rgba(255, 255, 255, .03); border-color: rgba(255, 255, 255, .1);}
+    .dark-mode .param-onglet {color: #adb5bd;}
+    .dark-mode .param-onglet.active {background: transparent; color: #8fc1f0; border-bottom-color: #3c8dbc;}
+    .dark-mode .param-onglet-valeur {color: #8fc1f0;}
+    .dark-mode .param-switch {background: #6c757d;}
+    .dark-mode .param-raccourcis button {color: #ced4da; border-color: #6c757d;}
+</style>
+
+<script>
+    // Valeurs affichées sous les onglets (renseignées par les gabarits) : {"panneau_1": function() {return ["valeur courte", "info-bulle"]}}
+    var valeurs_parametres = valeurs_parametres || {};
+    var parametres_suivi_actif = false;
+
+    function Maj_valeurs_parametres() {
+        $.each(valeurs_parametres, function(id_panneau, fonction) {
+            var valeur = ["", ""];
+            try {valeur = fonction() || ["", ""];} catch (erreur) {valeur = ["", ""];}
+            var onglet = $(".param-onglet[aria-controls='" + id_panneau + "']");
+            onglet.find(".param-onglet-valeur").text(valeur[0] || "–");
+            onglet.attr("title", onglet.find(".param-onglet-titre").text() + (valeur[1] || valeur[0] ? " : " + (valeur[1] || valeur[0]) : ""));
+        });
+    }
+
+    function Marquer_parametres_modifies(id_panneau) {
+        if (!parametres_suivi_actif) {return;}
+        if (typeof id_panneau !== "string") {id_panneau = $(".param-contenu.active").attr("id");}
+        $(".param-onglet[aria-controls='" + id_panneau + "']").addClass("modifie");
+        $(".param-cadre").addClass("param-modifie");
+        Maj_valeurs_parametres();
+    }
+
+    function Afficher_onglet_parametres(id_panneau) {
+        $(".param-onglet").each(function() {
+            var actif = $(this).attr("aria-controls") === id_panneau;
+            $(this).toggleClass("active", actif).attr("aria-selected", actif ? "true" : "false").attr("tabindex", actif ? "0" : "-1");
+        });
+        $(".param-contenu").each(function() {
+            $(this).toggleClass("active", this.id === id_panneau);
+        });
+    }
+
+    // Onglet affiché, mémorisé par le serveur entre deux applications
+    // (sauf si la page définit déjà sa propre fonction, comme la grille de la fiche famille)
+    if (typeof window.Get_mode_parametres !== "function") {
+        window.Get_mode_parametres = function() {
+            return $(".param-contenu.active").attr("id") || null;
+        };
+    }
+
+    $(function() {
+
+        // Transformation des listes Oui/Non des options en interrupteurs (la liste masquée reste la valeur envoyée)
+        $("#form_options select").each(function() {
+            var select = $(this);
+            var valeurs = select.find("option").map(function() {return this.value;}).get().sort().join(",");
+            if (valeurs !== "non,oui") {return;}
+            var groupe = select.closest(".form-group");
+            var label = groupe.find("label").first();
+            var interrupteur = $("<button type='button' class='param-switch' role='switch'></button>")
+                .attr("aria-label", (label.text() || "").trim())
+                .attr("aria-checked", select.val() === "oui" ? "true" : "false");
+            interrupteur.on("click", function() {
+                var actif = $(this).attr("aria-checked") !== "true";
+                $(this).attr("aria-checked", actif ? "true" : "false");
+                select.val(actif ? "oui" : "non").trigger("change");
+            });
+            // Crispy-forms place le select dans un div intermédiaire : on le masque et on ajoute l'interrupteur à la ligne
+            select.addClass("d-none").attr("aria-hidden", "true").attr("tabindex", "-1");
+            select.parent().not(groupe).addClass("d-none");
+            groupe.addClass("param-switch-ligne").append(interrupteur);
+        });
+
+        // Navigation dans les onglets (clic et flèches du clavier)
+        $(".param-onglets").on("click", ".param-onglet", function() {
+            Afficher_onglet_parametres($(this).attr("aria-controls"));
+        });
+        $(".param-onglets").on("keydown", ".param-onglet", function(event) {
+            if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") {return;}
+            var onglets = $(".param-onglet");
+            var index = onglets.index(this) + (event.key === "ArrowRight" ? 1 : -1);
+            var cible = onglets.eq((index + onglets.length) % onglets.length);
+            Afficher_onglet_parametres(cible.attr("aria-controls"));
+            cible.trigger("focus");
+            event.preventDefault();
+        });
+
+        // Suivi des modifications non appliquées
+        $(".param-contenus").on("change input", "input, select", function() {
+            Marquer_parametres_modifies($(this).closest(".param-contenu").attr("id"));
+        });
+        $(".param-contenus").on("click", ".param-liens a, .param-raccourcis button, .btn", function() {
+            var id_panneau = $(this).closest(".param-contenu").attr("id");
+            setTimeout(function() {Marquer_parametres_modifies(id_panneau);}, 0);
+        });
+        $(".param-contenus").on("changeDate apply.daterangepicker", function(event) {
+            Marquer_parametres_modifies($(event.target).closest(".param-contenu").attr("id"));
+        });
+        $(".param-bouton-appliquer").on("click", function() {
+            parametres_suivi_actif = false;
+        });
+
+        Maj_valeurs_parametres();
+
+        // Le suivi démarre une fois les initialisations de la page terminées (dates, vacances...)
+        function Demarrer_suivi() {
+            setTimeout(function() {
+                Maj_valeurs_parametres();
+                parametres_suivi_actif = true;
+            }, 600);
+        }
+        if (document.readyState === "complete") {Demarrer_suivi();} else {$(window).on("load", Demarrer_suivi);}
+    });
+</script>

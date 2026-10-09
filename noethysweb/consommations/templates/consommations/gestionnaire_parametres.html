@@ -4,173 +4,93 @@
 
 {% block contenu_page %}
 
-    <style>
-        #accordeon_parametres {
-            margin-bottom: 0px;
-        }
-        #accordeon_parametres .card {
-            border-radius: 0px;
-            border: 0px;
-            margin-bottom: 0px;
-            margin-top: 0px;
-        }
-        #accordeon_parametres .card-header {
-            padding: 7px 5px 7px 10px;
-        }
-        #accordeon_parametres .card-title {
-            font-size: 14px;
-            font-weight: bold;
-        }
-        #accordeon_parametres .form-control {
-            border-radius: 0px;
-        }
-    </style>
+    {% include "consommations/parametres_commun.html" %}
 
     <!-- Box Paramètres -->
     {% if data.mode != 'pointeuse' %}
-    <div class="card card-default">
+    <div class="card card-default param-cadre">
 
         <div class="card-header">
             <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i>Paramètres</h3>
-            <div class="card-tools">
-                <button type="submit" name="type_submit" form="form-maj" style="margin : -5px 10px -4px 0px;" value="MAJ" class="btn btn-default btn-xs" title="Appliquer les paramètres sélectionnés">Appliquer</button>
-            </div>
+            <button type="submit" name="type_submit" form="form-maj" value="MAJ" class="btn btn-primary btn-sm param-bouton-appliquer" title="Appliquer les paramètres sélectionnés"><i class="fa fa-refresh margin-r-5"></i>Appliquer</button>
         </div>
 
         <div class="card-body p-0">
     {% endif %}
-            <div id="accordeon_parametres">
 
-                {# Panneau Date #}
-                <div class="card">
-                    <div class="card-header" id="head_1">
-                        <h4 class="card-title w-100">
-                            <a class="d-block w-100" data-toggle="collapse" data-target="#panneau_1" href="#panneau_1" aria-expanded="true" aria-controls="panneau_1">
-                                <i class="fa fa-angle-down margin-r-5"></i>Date
-                            </a>
-                        </h4>
-                    </div>
-                    <div id="panneau_1" class="collapse {% if data.mode_parametres|default:"panneau_1" == "panneau_1" %}show{% endif %}" aria-labelledby="head_1" data-parent="#accordeon_parametres">
-                        <div class="card-body p-0">
-                            {% include "consommations/grille_selection_date.html" %}
-                        </div>
-                    </div>
-                </div>
+            {% with onglet_actif=data.mode_parametres|default:"panneau_1" %}
 
+            {# Onglets #}
+            <div class="param-onglets" role="tablist" aria-label="Paramètres">
+                <button type="button" class="param-onglet {% if onglet_actif == "panneau_1" %}active{% endif %}" role="tab" aria-controls="panneau_1"><span class="param-onglet-point"></span><i class="fa fa-calendar" aria-hidden="true"></i><span class="param-onglet-titre">Date</span><span class="param-onglet-valeur"></span></button>
+                <button type="button" class="param-onglet {% if onglet_actif == "panneau_2" %}active{% endif %}" role="tab" aria-controls="panneau_2"><span class="param-onglet-point"></span><i class="fa fa-cube" aria-hidden="true"></i><span class="param-onglet-titre">Activité</span><span class="param-onglet-valeur"></span></button>
+                <button type="button" class="param-onglet {% if onglet_actif == "panneau_3" %}active{% endif %}" role="tab" aria-controls="panneau_3"><span class="param-onglet-point"></span><i class="fa fa-users" aria-hidden="true"></i><span class="param-onglet-titre">Groupes</span><span class="param-onglet-valeur"></span></button>
+                <button type="button" class="param-onglet {% if onglet_actif == "panneau_4" %}active{% endif %}" role="tab" aria-controls="panneau_4"><span class="param-onglet-point"></span><i class="fa fa-graduation-cap" aria-hidden="true"></i><span class="param-onglet-titre">Classes</span><span class="param-onglet-valeur"></span></button>
+                <button type="button" class="param-onglet {% if onglet_actif == "panneau_5" %}active{% endif %}" role="tab" aria-controls="panneau_5"><span class="param-onglet-point"></span><i class="fa fa-sliders" aria-hidden="true"></i><span class="param-onglet-titre">Options</span><span class="param-onglet-valeur"></span></button>
+            </div>
 
-                {# Panneau Activités #}
-                <div class="card">
-                    <div class="card-header" id="head_2">
-                        <h4 class="card-title w-100">
-                            <a class="d-block w-100" data-toggle="collapse" href="#panneau_2" aria-expanded="false" aria-controls="panneau_2">
-                                <i class="fa fa-angle-down margin-r-5"></i>Activité
-                                {% if data.liste_activites_possibles|length > 1 %}
-                                    <span class="badge badge-info pull-right" title="Activités disponibles">{{ data.liste_activites_possibles|length }}</span>
-                                {% endif %}
-                            </a>
-                        </h4>
-                    </div>
-                    <div id="panneau_2" class="collapse {% if data.mode_parametres == "panneau_2" %}show{% endif %}" data-parent="#accordeon_parametres" aria-labelledby="head_2">
-                        <div class="card-body p-0">
+            <div class="param-contenus">
 
-                            <select class="form-control" id="selection_activite">
-                                {% for activite in data.liste_activites_possibles %}
-                                    <option value="{{ activite.pk }}" {% if activite == data.selection_activite %}selected{% endif %}>{{ activite.nom }}</option>
-                                {% endfor %}
-                            </select>
-
-                        </div>
+                {# Date #}
+                <div class="param-contenu {% if onglet_actif == "panneau_1" %}active{% endif %}" id="panneau_1" role="tabpanel">
+                    {% include "consommations/grille_selection_date.html" %}
+                    <div class="param-raccourcis">
+                        <button type="button" onclick="Selectionner_jour(-1)">Hier</button>
+                        <button type="button" onclick="Selectionner_jour(0)">Aujourd'hui</button>
+                        <button type="button" onclick="Selectionner_jour(1)">Demain</button>
                     </div>
                 </div>
 
+                {# Activité #}
+                <div class="param-contenu {% if onglet_actif == "panneau_2" %}active{% endif %}" id="panneau_2" role="tabpanel">
+                    <select class="form-control" id="selection_activite" aria-label="Activité">
+                        {% for activite in data.liste_activites_possibles %}
+                            <option value="{{ activite.pk }}" {% if activite == data.selection_activite %}selected{% endif %}>{{ activite.nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-                {# Panneau Groupes #}
-                <div class="card">
-                    <div class="card-header" id="head_3">
-                        <h4 class="card-title w-100">
-                            <a class="d-block w-100" data-toggle="collapse" data-target="#panneau_3" href="#panneau_3" aria-expanded="false" aria-controls="panneau_3">
-                                <i class="fa fa-angle-down margin-r-5"></i>Groupes
-                                {% if data.liste_groupes|length > 1 %}
-                                    <span class="badge badge-info pull-right" title="Groupes disponibles">{{ data.selection_groupes|length }}/{{ data.liste_groupes|length }}</span>
-                                {% endif %}
-                            </a>
-                        </h4>
-                    </div>
-                    <div id="panneau_3" class="collapse {% if data.mode_parametres == "panneau_3" %}show{% endif %}" data-parent="#accordeon_parametres" aria-labelledby="head_3">
-                        <div class="card-body p-0">
-                            <select multiple class="form-control" id="selection_groupes" size="8">
-                                {% for groupe in data.liste_groupes %}
-                                    <option value="{{ groupe.pk }}" {% if groupe.pk in data.selection_groupes %}selected{% endif %}>{{ groupe.nom }}</option>
-                                {% endfor %}
-                            </select>
-                            <script>
-                                function Get_groupes() {
-                                    return $('#selection_groupes').val();
-                                };
-                            </script>
-                        </div>
+                {# Groupes #}
+                <div class="param-contenu {% if onglet_actif == "panneau_3" %}active{% endif %}" id="panneau_3" role="tabpanel">
+                    {% if data.liste_groupes|length > 1 %}
+                        <div class="param-liens"><a onclick="Cocher_tous('#selection_groupes', true)">Tout</a><a onclick="Cocher_tous('#selection_groupes', false)">Rien</a></div>
+                    {% endif %}
+                    <div class="param-liste" id="selection_groupes">
+                        {% for groupe in data.liste_groupes %}
+                            <label><input type="checkbox" value="{{ groupe.pk }}" {% if groupe.pk in data.selection_groupes %}checked{% endif %}>{{ groupe.nom }}</label>
+                        {% empty %}
+                            <span class="text-muted" style="font-size: 13px;">Aucun groupe</span>
+                        {% endfor %}
                     </div>
                 </div>
 
-
-                {# Panneau Classes #}
-                <div class="card">
-                    <div class="card-header" id="head_4">
-                        <h4 class="card-title w-100">
-                            <a class="d-block w-100" data-toggle="collapse" data-target="#panneau_4" href="#panneau_4" aria-expanded="false" aria-controls="panneau_4">
-                                <i class="fa fa-angle-down margin-r-5"></i>Classes
-                                {% if data.liste_classes|length > 1 %}
-                                    <span class="badge badge-info pull-right" title="Classes disponibles">{{ data.selection_classes|length }}/{{ data.liste_classes|length }}</span>
-                                {% endif %}
-                            </a>
-                        </h4>
-                    </div>
-                    <div id="panneau_4" class="collapse {% if data.mode_parametres == "panneau_4" %}show{% endif %}" aria-labelledby="head_4" data-parent="#accordeon_parametres">
-                        <div class="card-body p-0">
-                            <select multiple class="form-control" id="selection_classes" size="15">
-                                {% for classe in data.liste_classes %}
-                                    <option value="{{ classe.pk }}" {% if classe.pk in data.selection_classes %}selected{% endif %} data-ecole="{{ classe.ecole_id }}">{{ classe.ecole.nom|truncatechars:15 }} | {{ classe.nom }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="ml-2 mr-2 mb-2">
-                                <button type="button" class="btn btn-default btn-xs mt-2" onclick="Tout_cocher(etat=false)" title="Tout décocher"><i class="fa fa-square-o"></i> Rien</button>
-                                <button type="button" class="btn btn-default btn-xs mt-2" onclick="Tout_cocher(etat=true)" title="Tout cocher"><i class="fa fa-check-square-o"></i> Tout</button>
-                                {% for ecole in data.liste_ecoles %}
-                                    <button type="button" class="btn btn-default btn-xs mt-2" onclick="Cocher_ecole(idecole={{ ecole.pk }})" title="Cocher les classes de {{ ecole.nom }}"><i class="fa fa-check-square-o"></i> {{ ecole.nom|truncatechars:15 }}</button>
-                                {% endfor %}
-                            </div>
-                            <script>
-                                function Get_classes() {
-                                    return $('#selection_classes').val();
-                                };
-                            </script>
+                {# Classes #}
+                <div class="param-contenu {% if onglet_actif == "panneau_4" %}active{% endif %}" id="panneau_4" role="tabpanel">
+                    {% if data.liste_classes %}
+                        <div class="param-liens">
+                            <a onclick="Cocher_tous('#selection_classes', true)">Tout</a><a onclick="Cocher_tous('#selection_classes', false)">Rien</a>
+                            {% for ecole in data.liste_ecoles %}
+                                <a onclick="Cocher_ecole({{ ecole.pk }})" title="Cocher les classes de {{ ecole.nom }}">{{ ecole.nom|truncatechars:18 }}</a>
+                            {% endfor %}
                         </div>
+                    {% endif %}
+                    <div class="param-liste" id="selection_classes">
+                        {% for classe in data.liste_classes %}
+                            <label><input type="checkbox" value="{{ classe.pk }}" data-ecole="{{ classe.ecole_id }}" {% if classe.pk in data.selection_classes %}checked{% endif %}>{{ classe.ecole.nom|truncatechars:15 }} | {{ classe.nom }}</label>
+                        {% empty %}
+                            <span class="text-muted" style="font-size: 13px;">Aucune classe</span>
+                        {% endfor %}
                     </div>
                 </div>
 
-
-                {# Panneau Options #}
-                <div class="card">
-                    <div class="card-header" id="head_5">
-                        <h4 class="card-title w-100">
-                            <a class="d-block w-100" data-toggle="collapse" data-target="#panneau_5" href="#panneau_5" aria-expanded="true" aria-controls="panneau_5">
-                                <i class="fa fa-angle-down margin-r-5"></i>Options
-                            </a>
-                        </h4>
-                    </div>
-                    <div id="panneau_5" class="collapse {% if data.mode_parametres == "panneau_5" %}show{% endif %}" aria-labelledby="head_5" data-parent="#accordeon_parametres">
-                        <div class="card-body">
-                            {% crispy form_options %}
-                            <script>
-                                function Get_options() {
-                                    return $("#form_options").serializeArray()
-                                };
-                            </script>
-                        </div>
-                    </div>
+                {# Options #}
+                <div class="param-contenu {% if onglet_actif == "panneau_5" %}active{% endif %}" id="panneau_5" role="tabpanel">
+                    {% crispy form_options %}
                 </div>
 
             </div>
+
+            {% endwith %}
 
     {% if data.mode != 'pointeuse' %}
         </div>
@@ -178,18 +98,74 @@
     {% endif %}
 
 <script>
+    var JOURS_PARAMETRES = ["Dim.", "Lun.", "Mar.", "Mer.", "Jeu.", "Ven.", "Sam."];
+    var JOURS_PARAMETRES_LONGS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+    var MOIS_PARAMETRES = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
 
-    function Tout_cocher(etat) {
-        $("#selection_classes option").prop('selected', etat);
-    };
-
-    function Cocher_ecole(idecole) {
-        $("#selection_classes option[data-ecole='" + idecole + "']").prop("selected", true);
+    // ---------- Valeurs envoyées au serveur (lues par grille.js) ----------
+    function Get_groupes() {
+        return $("#selection_groupes input:checked").map(function() {return this.value;}).get();
+    }
+    function Get_classes() {
+        return $("#selection_classes input:checked").map(function() {return this.value;}).get();
+    }
+    function Get_options() {
+        return $("#form_options").serializeArray();
     }
 
-    function Get_mode_parametres() {
-        return $(".collapse[data-parent='#accordeon_parametres']:visible").attr("id");
+    // ---------- Actions ----------
+    function Cocher_tous(selecteur, etat) {
+        $(selecteur + " input[type=checkbox]").prop("checked", etat);
+        Marquer_parametres_modifies($(selecteur).closest(".param-contenu").attr("id"));
+    }
+    function Cocher_ecole(idecole) {
+        $("#selection_classes input[data-ecole='" + idecole + "']").prop("checked", true);
+        Marquer_parametres_modifies("panneau_4");
+    }
+    function Selectionner_jour(decalage) {
+        // Appelé uniquement au clic, donc après l'initialisation du calendrier par Noethysweb
+        var date = new Date();
+        date.setDate(date.getDate() + decalage);
+        $("#id_date").datepicker("setDate", date);
+        Marquer_parametres_modifies("panneau_1");
+    }
+
+    // ---------- Valeurs affichées sous les onglets [valeur courte, info-bulle] ----------
+    function Valeur_cases(selecteur, feminin) {
+        var cases = $(selecteur + " input[type=checkbox]");
+        if (!cases.length) {return ["–", feminin ? "Aucune" : "Aucun"];}
+        var cochees = cases.filter(":checked");
+        var noms = cochees.map(function() {return $(this).parent().text().trim();}).get().join(", ");
+        if (cochees.length === cases.length) {return [feminin ? "Toutes" : "Tous", (feminin ? "Toutes" : "Tous") + " (" + cases.length + ")"];}
+        if (!cochees.length) {return [feminin ? "Aucune" : "Aucun", feminin ? "Aucune" : "Aucun"];}
+        return [cochees.length + "/" + cases.length, noms];
+    }
+    valeurs_parametres["panneau_1"] = function() {
+        // Lecture du champ texte : ne pas appeler .datepicker() ici, il initialiserait le calendrier avant Noethysweb
+        var date_moment = moment($("#id_date").val(), "DD/MM/YYYY", true);
+        if (!date_moment.isValid()) {return ["", ""];}
+        var date = date_moment.toDate();
+        var jour = ("0" + date.getDate()).slice(-2) + "/" + ("0" + (date.getMonth() + 1)).slice(-2);
+        return [JOURS_PARAMETRES[date.getDay()] + " " + jour, JOURS_PARAMETRES_LONGS[date.getDay()] + " " + date.getDate() + " " + MOIS_PARAMETRES[date.getMonth()] + " " + date.getFullYear()];
     };
+    valeurs_parametres["panneau_2"] = function() {
+        var nom = $("#selection_activite option:selected").text().trim();
+        return nom ? [nom, nom] : ["–", "Aucune activité ouverte à cette date"];
+    };
+    valeurs_parametres["panneau_3"] = function() {return Valeur_cases("#selection_groupes", false);};
+    valeurs_parametres["panneau_4"] = function() {return Valeur_cases("#selection_classes", true);};
+    valeurs_parametres["panneau_5"] = function() {
+        var interrupteurs = $("#form_options .param-switch");
+        var actifs = interrupteurs.filter("[aria-checked=true]");
+        var tri = $("#form_options [name=tri] option:selected").text().toLowerCase();
+        var noms = actifs.map(function() {return $(this).attr("aria-label").replace(/^Afficher (les |le |la |l')?/i, "");}).get().join(", ");
+        return [actifs.length + "/" + interrupteurs.length, "Tri par " + tri + (noms ? " · " + noms : "")];
+    };
+
+    $(function() {
+        $("#id_date").on("changeDate", Maj_valeurs_parametres);
+        Maj_valeurs_parametres();
+    });
 </script>
 
 {% endblock contenu_page %}

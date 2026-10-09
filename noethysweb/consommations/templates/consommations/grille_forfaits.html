@@ -3,17 +3,37 @@
 
 {% block contenu_page %}
 
+    <style>
+        .forfaits-cadre .card-header {display: flex; align-items: center; gap: 6px;}
+        .forfaits-cadre .card-header .card-title {flex: 1; float: none; margin: 0;}
+        .forfaits-cadre .card-header::after {display: none;}
+        .forfaits-ajouter {padding: 1px 8px; font-size: 12px;}
+        #table_forfaits {max-height: 260px; overflow-y: auto;}
+        .forfait-ligne {display: flex; align-items: flex-start; gap: 6px; padding: 7px 10px 7px 9px; border-left: 3px solid transparent; border-top: 1px solid #f0f0f0;}
+        .forfait-ligne:first-child {border-top: 0;}
+        .forfait-infos {flex: 1; min-width: 0;}
+        .forfait-label {font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+        .forfait-details {font-size: 11.5px; color: #6c757d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+        .forfait-actions {display: flex; gap: 2px; flex-shrink: 0; opacity: .35; transition: opacity .15s;}
+        .forfait-ligne:hover .forfait-actions, .forfait-actions:focus-within {opacity: 1;}
+        .forfait-actions button {border: 0; background: transparent; padding: 1px 5px; color: #495057; border-radius: 4px; cursor: pointer;}
+        .forfait-actions button:hover {background: rgba(0, 0, 0, .06);}
+        .forfait-verrou {flex-shrink: 0; font-size: 12px; color: #adb5bd; padding-top: 2px;}
+        .forfaits-vide {padding: 12px 10px; text-align: center; font-size: 12.5px; color: #6c757d;}
+        .forfaits-vide .btn {margin-top: 6px;}
+        .dark-mode .forfait-ligne {border-top-color: rgba(255, 255, 255, .08);}
+        .dark-mode .forfait-details, .dark-mode .forfaits-vide {color: #adb5bd;}
+        .dark-mode .forfait-actions button {color: #ced4da;}
+    </style>
+
     <!-- Box forfaits credits -->
-    <div class="card card-default">
+    <div class="card card-default forfaits-cadre">
         <div class="card-header with-border">
-            <h3 class="card-title"><i class="fa fa-euro margin-r-5"></i>Forfaits</h3>
-            <div class="card-tools">
-                <a type="button" class="btn btn-tool" title="Ajouter un forfait-crédit" href="javascript:void(0)" onclick="$('#modal_forfaits').modal('show');"><i class="fa fa-plus-circle"></i></a>
-            </div>
+            <h3 class="card-title"><i class="fa fa-ticket margin-r-5"></i>Forfaits</h3>
+            <button type="button" class="btn btn-default btn-sm forfaits-ajouter" title="Ajouter un forfait-crédit" onclick="$('#modal_forfaits').modal('show');"><i class="fa fa-plus margin-r-5"></i>Ajouter</button>
         </div>
         <div class="card-body p-0" style="min-height: 0">
-            <table id="table_forfaits" class="table table-sm">
-            </table>
+            <div id="table_forfaits"></div>
         </div>
     </div>
 
@@ -21,19 +41,42 @@
 
     <script>
 
-    // Dessine la table forfaits
+    // Dessine la liste des forfaits
     function maj_box_forfaits() {
-        var html = "";
+        var liste = $("#table_forfaits").empty();
+        var nbre = 0;
         $.each(dict_prestations, function (idprestation, prestation) {
             if ((prestation.activite == selection_activite) && (prestation.forfait_date_debut)) {
-                html += "<tr><td class='date_prestation' style='font-size: 13px;'><i class='fa fa-tag margin-r-5 ml-1' style='color: " + prestation.couleur + ";' title='Forfait crédit'></i>" + prestation.label + "</td>"
-                html += "<td style='width: 45px;text-align: right;'>"
-                html += "<a type='button' class='btn-xs' href='#' onclick='modifier_forfait(&quot;" + idprestation + "&quot;)' title='Modifier'><i class='fa fa-pencil'></i></a>"
-                html += "<a type='button' class='btn-xs' href='#' onclick='supprimer_forfait(&quot;" + idprestation + "&quot;)' title='Supprimer'><i class='fa fa-trash'></i></a>"
-                html += "</tr>";
+                nbre += 1;
+                // Détails : période du forfait et individu (nom repris du cadre Prestations)
+                var details = [];
+                if (prestation.forfait_date_fin) {
+                    details.push(moment(prestation.forfait_date_debut).format("DD/MM/YYYY") + " → " + moment(prestation.forfait_date_fin).format("DD/MM/YYYY"));
+                } else {
+                    details.push("À partir du " + moment(prestation.forfait_date_debut).format("DD/MM/YYYY"));
+                }
+                var nom = $(".ligne_total[data-individu='" + prestation.individu + "_" + prestation.famille + "']").data("nom");
+                if (nom) {details.push(nom)};
+
+                var ligne = $("<div class='forfait-ligne'></div>").css("border-left-color", prestation.couleur);
+                var infos = $("<div class='forfait-infos'></div>")
+                    .append($("<div class='forfait-label'></div>").text(prestation.label).attr("title", prestation.label))
+                    .append($("<div class='forfait-details'></div>").text(details.join(" · ")).attr("title", details.join(" · ")));
+                ligne.append(infos);
+                if (prestation.facture) {
+                    ligne.append("<i class='fa fa-lock forfait-verrou' title='Forfait déjà facturé : il ne peut plus être modifié ni supprimé'></i>");
+                } else {
+                    ligne.append($("<div class='forfait-actions'></div>")
+                        .append($("<button type='button' title='Modifier' aria-label='Modifier le forfait'><i class='fa fa-pencil'></i></button>").on("click", function() {modifier_forfait(idprestation)}))
+                        .append($("<button type='button' title='Supprimer' aria-label='Supprimer le forfait'><i class='fa fa-trash'></i></button>").on("click", function() {supprimer_forfait(idprestation)})));
+                }
+                liste.append(ligne);
             };
         });
-        $("#table_forfaits").html(html);
+        $(".forfaits-ajouter").toggleClass("d-none", nbre === 0);
+        if (nbre === 0) {
+            liste.html("<div class='forfaits-vide'>Aucun forfait sur cette période<br><button type='button' class='btn btn-default btn-sm' onclick=\"$('#modal_forfaits').modal('show');\"><i class='fa fa-plus margin-r-5'></i>Ajouter un forfait</button></div>");
+        }
     }
 
     $(document).ready(function() {

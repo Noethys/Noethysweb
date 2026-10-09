@@ -6,6 +6,7 @@
 <link rel="stylesheet" type="text/css" href="{% static 'lib/daterangepicker/daterangepicker.css' %}">
 <script src="{% static 'lib/moment/moment.min.js' %}" type="text/javascript"></script>
 <script src="{% static 'lib/daterangepicker/daterangepicker.js' %}" type="text/javascript"></script>
+{% include 'core/widgets/daterangepicker_styles.html' %}
 
 <div>
     <div id="div_periode_annee">
@@ -32,7 +33,10 @@
         </select>
     </div>
     <div id="div_periode_dates">
-        <input type="text" id="selection_dates" class="form-control"/>
+        <div class="input-group">
+            <div class="input-group-prepend"><i class="fa fa-calendar input-group-text" aria-hidden="true"></i></div>
+            <input type="text" autocomplete="off" id="selection_dates" class="form-control"/>
+        </div>
     </div>
 
 </div>
@@ -142,6 +146,23 @@
         })
     };
 
+    // Sélecteur de dates identique au widget Noethysweb (vacances, jours fériés et légende)
+    var calendrier_periode = {vacances: {}, feries: {}};
+
+    function get_vacance_periode(date_iso) {
+        for (var idvacance in calendrier_periode.vacances) {
+            var vacance = calendrier_periode.vacances[idvacance];
+            if ((date_iso >= vacance.date_debut) && (date_iso <= vacance.date_fin)) {
+                return vacance;
+            }
+        }
+        return null;
+    }
+
+    function est_ferie_periode(date) {
+        return calendrier_periode.feries.hasOwnProperty(date.format('YYYY-MM-DD')) || calendrier_periode.feries.hasOwnProperty(date.format('0-MM-DD'));
+    }
+
     init_daterangepicker()
 
     function init_daterangepicker() {
@@ -150,7 +171,18 @@
             showDropdowns: false,
             alwaysShowCalendars: true,
             applyButtonClasses: "btn-primary",
-
+            isCustomDate: function (date) {
+                var classes = [];
+                if (get_vacance_periode(date.format('YYYY-MM-DD'))) {
+                    classes.push("calendrier_vacances");
+                    if (!get_vacance_periode(date.clone().subtract(1, 'days').format('YYYY-MM-DD'))) {classes.push("vacances_debut")}
+                    if (!get_vacance_periode(date.clone().add(1, 'days').format('YYYY-MM-DD'))) {classes.push("vacances_fin")}
+                }
+                if (est_ferie_periode(date)) {
+                    classes.push("calendrier_feries");
+                }
+                return classes;
+            },
             ranges: {
                 "Aujourd'hui": [moment(), moment()],
                 "Cette semaine": [moment().startOf('isoweek'), moment().endOf('isoweek')],
@@ -168,30 +200,50 @@
                 "toLabel": "à",
                 "weekLabel": "N°",
                 "customRangeLabel": "Période personnalisée",
-                "daysOfWeek": [
-                    "Dim",
-                    "Lun",
-                    "Mar",
-                    "Mer",
-                    "Jeu",
-                    "Ven",
-                    "Sam"
-                ],
-                "monthNames": [
-                    "Janvier",
-                    "Février",
-                    "Mars",
-                    "Avril",
-                    "Mai",
-                    "Juin",
-                    "Juillet",
-                    "Août",
-                    "Septembre",
-                    "Octobre",
-                    "Novembre",
-                    "Décembre"
-                ],
+                "daysOfWeek": ["D", "L", "M", "M", "J", "V", "S"],
+                "monthNames": ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
                 "firstDay": 1
+            }
+        });
+
+        // Rendu enrichi : numéro du jour dans une pastille + infobulle vacances/férié
+        var picker = $("#selection_dates").data('daterangepicker');
+        var renderCalendar_origine = picker.renderCalendar;
+        picker.renderCalendar = function (side) {
+            renderCalendar_origine.call(this, side);
+            var calendrier = this[side + 'Calendar'].calendar;
+            this.container.find('.drp-calendar.' + side + ' tbody td').each(function () {
+                var td = $(this);
+                var position = /r(\d+)c(\d+)/.exec(td.attr('data-title'));
+                if (!position) {return}
+                var date = calendrier[position[1]][position[2]];
+                var infos = [];
+                var vacance = get_vacance_periode(date.format('YYYY-MM-DD'));
+                if (vacance) {infos.push(vacance.nom ? vacance.nom : "Vacances")}
+                if (est_ferie_periode(date)) {infos.push(calendrier_periode.feries[date.format('YYYY-MM-DD')] || calendrier_periode.feries[date.format('0-MM-DD')] || "Jour férié")}
+                td.html('<span class="jour">' + td.text() + '</span>');
+                if (infos.length) {td.attr('title', infos.join(" - "))}
+            });
+        };
+
+        // Légende
+        picker.container.find('.drp-buttons').prepend(
+            '<div class="drp-legende">' +
+                '<span><i class="drp-pastille drp-pastille-vacances"></i>Vacances</span>' +
+                '<span><i class="drp-pastille drp-pastille-feries"></i>Férié</span>' +
+                '<span><i class="drp-pastille drp-pastille-today"></i>Aujourd\'hui</span>' +
+            '</div>'
+        );
+        picker.updateView();
+
+        // Chargement des vacances et fériés
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_get_calendrier' %}",
+            datatype: "json",
+            success: function (data) {
+                calendrier_periode = data;
+                picker.updateView();
             }
         });
     };

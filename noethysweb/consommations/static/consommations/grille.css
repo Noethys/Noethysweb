@@ -319,54 +319,129 @@ td.complet {
 
 /* Tableau facturation */
 
+.facturation-cadre .card-header {display: flex; align-items: center; gap: 6px;}
+.facturation-cadre .card-header .card-title {flex: 1; float: none; margin: 0;}
+.facturation-cadre .card-header::after {display: none;}
+.facturation-option {display: flex; align-items: center; gap: 6px; margin: 0; font-size: 12px; font-weight: normal; color: #6c757d; cursor: pointer;}
+.facturation-switch {position: relative; flex-shrink: 0; width: 30px; height: 17px; padding: 0; border: 0; border-radius: 9px; background: #ced4da; cursor: pointer; transition: background .15s;}
+.facturation-switch::after {content: ""; position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; border-radius: 50%; background: #fff; transition: left .15s;}
+.facturation-switch[aria-checked=true] {background: #3c8dbc;}
+.facturation-switch[aria-checked=true]::after {left: 15px;}
+.facturation-switch:focus {outline: none; box-shadow: 0 0 0 2px rgba(0, 123, 255, .3);}
+
+/* Hauteur limitée : le nom de l'individu reste collé en haut et le total en bas */
+.facturation-defilement {max-height: 360px; overflow-y: auto;}
+
 #table_facturation {
-    vertical-align: middle !important;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 13px;
+    margin: 0;
 }
 #table_facturation tbody {
     border-top: 0px solid;
 }
 #table_facturation td, #table_facturation th {
-    padding-top: 1px;
-    padding-bottom: 1px;
-    padding-left: 4px !important;
+    padding: 2px 4px !important;
     text-align: left;
+    vertical-align: middle !important;
     border-top: 0px solid;
+}
+#table_facturation .ligne_total th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #f6f6f6;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    border-top: 1px solid #e9ecef;
+}
+#table_facturation tbody:first-child .ligne_total th {
+    border-top: 0;
+}
+#table_facturation .sans_prestation th {
+    color: #adb5bd;
+    font-weight: normal;
 }
 #table_facturation .individu_prestation {
     overflow: hidden;
-    position: absolute;
     text-overflow: ellipsis;
     white-space: nowrap;
-    padding-left: 3px !important;
-    width: calc(100% - 70px);
+    padding-left: 10px !important;
 }
-#table_facturation .date_prestation {
-    text-transform:capitalize;
-    /*border-top: 1px solid #f4f4f4;*/
+#table_facturation .date_prestation td {
+    padding-top: 6px !important;
+    padding-left: 10px !important;
+    font-size: 11.5px;
+    color: #6c757d;
 }
-#table_facturation .ligne_prestation td {
-    border-top: 0px solid #ffffff !important;
-    color: #b1b1b1;
+#table_facturation .date_prestation td::first-letter {
+    text-transform: uppercase;
 }
 #table_facturation .label_prestation {
-    padding-left: 20px;
+    padding-left: 10px !important;
     overflow: hidden;
-    position: absolute;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: calc(100% - 70px);
 }
 #table_facturation .montant_prestation {
+    width: 92px;
     text-align: right;
-    padding-right: 3px !important;
-    width: 70px;
+    padding-right: 10px !important;
+    white-space: nowrap;
 }
-#table_facturation .ligne_total {
-    background-color: #f6f6f6;
+#table_facturation .ligne_prestation:last-child td,
+#table_facturation .ligne_vide td {
+    padding-bottom: 6px !important;
 }
-.dark-mode #table_facturation .ligne_total {
+#table_facturation .ligne_vide td {
+    padding-left: 10px !important;
+    color: #adb5bd;
+    font-style: italic;
+}
+#table_facturation .quantite_prestation {
+    color: #868e96;
+    font-weight: normal;
+}
+#table_facturation .aide_prestation {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 0 6px;
+    border-radius: 8px;
+    font-size: 10.5px;
+    line-height: 16px;
+    background: #e1f5ee;
+    color: #085041;
+}
+#table_facturation tfoot th {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    background-color: #eef1f4;
+    border-top: 1px solid #ced4da;
+    padding-top: 7px !important;
+    padding-bottom: 7px !important;
+    font-size: 14px;
+}
+.dark-mode #table_facturation .ligne_total th {
+    background-color: #4b545c;
+    border-color: rgba(255, 255, 255, .08);
+}
+.dark-mode #table_facturation tfoot th {
     background-color: #5a5a5a;
+    border-color: rgba(255, 255, 255, .15);
+}
+.dark-mode #table_facturation .date_prestation td,
+.dark-mode #table_facturation .quantite_prestation {
+    color: #adb5bd;
+}
+.dark-mode #table_facturation .aide_prestation {
+    background: #085041;
+    color: #9fe1cb;
+}
+.dark-mode .facturation-switch {
+    background: #6c757d;
 }
 
 /* Tableau */

@@ -3,12 +3,52 @@
 
 {% block styles %}
     <style>
-        .entete-colonne {
-            background-color: #f1f1f1;
-        }
-        .dark-mode .entete-colonne {
-            background-color: #5a5a5a;
-        }
+        /* Inscrits / Présents */
+        .totaux-mode {display: inline-flex; border: 1px solid #ced4da; border-radius: 4px; overflow: hidden; vertical-align: middle;}
+        .totaux-mode button {border: 0; background: transparent; padding: 1px 8px; font-size: 11.5px; color: #6c757d; cursor: pointer; line-height: 1.6;}
+        .totaux-mode button + button {border-left: 1px solid #ced4da;}
+        .totaux-mode button[aria-pressed=true] {background: #e7f1ff; color: #0056b3; font-weight: 600;}
+        .totaux-mode button:focus-visible {outline: none; box-shadow: inset 0 0 0 2px rgba(0, 123, 255, .35);}
+        .totaux-cadre .card-header {display: flex; align-items: center; gap: 6px;}
+        .totaux-cadre .card-header .card-title {flex: 1; float: none; margin: 0;}
+        .totaux-cadre .card-header::after {display: none;}
+        .totaux-barre {display: flex; justify-content: flex-end; padding: 8px 10px; border-bottom: 1px solid #dee2e6;}
+
+        /* Tableau */
+        #table_totaux {font-size: 13px; border-collapse: separate; border-spacing: 0; margin: 0;}
+        #table_totaux td, #table_totaux th {text-align: center; vertical-align: middle; padding: 4px 3px !important; border: 0; border-top: 1px solid #f0f0f0;}
+        #table_totaux .totaux-libelle {text-align: left; padding-left: 10px !important; font-weight: 600; white-space: nowrap;}
+        #table_totaux .totaux-section td {background: #f8f9fa; color: #6c757d; font-size: 11.5px; font-weight: normal; text-align: left; padding: 5px 10px 3px !important; border-top: 1px solid #dee2e6;}
+        #table_totaux tr:first-child.totaux-section td {border-top: 0;}
+        #table_totaux .totaux-section td {padding: 0 !important;}
+        .totaux-plier {display: flex; align-items: center; gap: 6px; width: 100%; border: 0; background: transparent; padding: 5px 10px 4px; color: inherit; font-size: 11.5px; text-align: left; cursor: pointer;}
+        .totaux-plier:hover {color: #343a40;}
+        .totaux-plier:focus-visible {outline: none; box-shadow: inset 0 0 0 2px rgba(0, 123, 255, .35);}
+        .totaux-plier .fa {width: 10px; font-size: 10px; transition: transform .15s;}
+        .totaux-plier[aria-expanded=false] .fa {transform: rotate(-90deg);}
+        #table_totaux.replie-consommations .sec-consommations, #table_totaux.replie-remplissage .sec-remplissage {display: none;}
+        .dark-mode .totaux-plier:hover {color: #f8f9fa;}
+        #table_totaux .totaux-entetes td {color: #6c757d; font-size: 11.5px; border-top: 0; padding-top: 3px !important; padding-bottom: 2px !important;}
+        #table_totaux .totaux-somme {font-weight: 600;}
+        #table_totaux .totaux-zero {color: #adb5bd;}
+
+        /* Remplissage : cases colorées comme celles de la grille */
+        #table_totaux .totaux-remplissage td {border-top: 0; padding: 2px !important;}
+        #table_totaux .totaux-remplissage td.totaux-libelle {padding-left: 10px !important;}
+        #table_totaux .totaux-remplissage td[id^='total_remplissage_'] span {display: block; min-width: 26px; border-radius: 4px; padding: 2px 0; font-weight: 600;}
+        #table_totaux td.totaux-disponible span {background: rgba(227, 254, 219, .9); color: #2b6a12;}
+        #table_totaux td.totaux-dernieresplaces span {background: #fdf0c6; color: #7a5b00;}
+        #table_totaux td.totaux-complet span {background: rgba(247, 172, 178, .55); color: #9b1c25;}
+        #table_totaux .totaux-remplissage:last-child td {padding-bottom: 6px !important;}
+
+        .dark-mode .totaux-mode button {color: #ced4da;}
+        .dark-mode .totaux-mode button[aria-pressed=true] {background: #0C447C; color: #B5D4F4;}
+        .dark-mode #table_totaux td, .dark-mode #table_totaux th {border-color: rgba(255, 255, 255, .08);}
+        .dark-mode #table_totaux .totaux-section td {background: rgba(255, 255, 255, .04); color: #adb5bd;}
+        .dark-mode #table_totaux .totaux-zero {color: #6c757d;}
+        .dark-mode #table_totaux td.totaux-disponible span {background: rgba(99, 153, 34, .3); color: #c0dd97;}
+        .dark-mode #table_totaux td.totaux-dernieresplaces span {background: rgba(239, 159, 39, .3); color: #fac775;}
+        .dark-mode #table_totaux td.totaux-complet span {background: rgba(226, 75, 74, .35); color: #f7c1c1;}
     </style>
 {% endblock styles %}
 
@@ -16,61 +56,135 @@
 
     <!-- Box Totaux -->
     {% if data.mode != 'pointeuse' %}
-    <div class="card card-default">
+    <div class="card card-default totaux-cadre">
         <div class="card-header with-border">
-            <h3 class="card-title"><i class="fa fa-calendar margin-r-5"></i> Totaux</h3>
-            <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+            <h3 class="card-title"><i class="fa fa-bar-chart margin-r-5"></i>Totaux</h3>
+            <div class="totaux-mode" role="group" aria-label="Places comptées">
+                <button type="button" data-presents="non" aria-pressed="true" title="Compter les réservations et les présents">Inscrits</button>
+                <button type="button" data-presents="oui" aria-pressed="false" title="Compter uniquement les présents">Présents</button>
             </div>
         </div>
-        <div class="card-body p-0" style="display: block;overflow-x: auto;white-space: nowrap;">
+        <div class="card-body p-0" style="display: block; overflow-x: auto; white-space: nowrap;">
+    {% else %}
+        <div class="totaux-barre">
+            <div class="totaux-mode" role="group" aria-label="Places comptées">
+                <button type="button" data-presents="non" aria-pressed="true" title="Compter les réservations et les présents">Inscrits</button>
+                <button type="button" data-presents="oui" aria-pressed="false" title="Compter uniquement les présents">Présents</button>
+            </div>
+        </div>
+        <div style="overflow-x: auto; white-space: nowrap;">
     {% endif %}
-            <table id="table_totaux" class="table table-sm table-bordered">
-                <thead>
-                    <tr class="entete-colonne">
-                        <th></th>
-                        {% for groupe in data.liste_groupes %}
-                            <th>{% firstof groupe.abrege groupe.nom %}</th>
-                        {% endfor %}
-                    </tr>
-                </thead>
+
+            <table id="table_totaux" class="table table-sm">
                 <tbody>
+
+                    {# Consommations #}
+                    <tr class="totaux-section"><td colspan="{{ data.liste_groupes|length|add:2 }}"><button type="button" class="totaux-plier" data-section="consommations" aria-expanded="true"><i class="fa fa-chevron-down" aria-hidden="true"></i>Consommations</button></td></tr>
+                    <tr class="sec-consommations totaux-entetes">
+                        <td></td>
+                        {% for groupe in data.liste_groupes %}
+                            <td title="{{ groupe.nom }}">{% firstof groupe.abrege groupe.nom %}</td>
+                        {% endfor %}
+                        <td title="Tous les groupes">Total</td>
+                    </tr>
                     {% for unite in data.liste_unites %}
-                        <tr>
-                            <td style="text-align: center;" title="Unité de consommation : {{ unite.nom }}">{% firstof unite.abrege unite.nom %}</td>
+                        <tr class="sec-consommations">
+                            <td class="totaux-libelle" title="Unité de consommation : {{ unite.nom }}">{% firstof unite.abrege unite.nom %}</td>
                             {% for groupe in data.liste_groupes %}
-                                <td id="total_{{ unite.pk }}_{{ groupe.pk }}" title="Unité de consommation : {{ unite.nom }} / {{ groupe.nom }}" style="text-align: center;">0</td>
+                                <td id="total_{{ unite.pk }}_{{ groupe.pk }}" title="{{ unite.nom }} / {{ groupe.nom }}">0</td>
                             {% endfor %}
+                            <td id="total_{{ unite.pk }}_0" class="totaux-somme" title="{{ unite.nom }} / Tous les groupes">0</td>
                         </tr>
                     {% endfor %}
                     {% for evenement in data.liste_evenements %}
                         {% if evenement.activite_id == activite.pk %}
-                            <tr>
-                                <td style="text-align: center;">{{ evenement.nom }}</td>
+                            <tr class="sec-consommations">
+                                <td class="totaux-libelle" title="Événement : {{ evenement.nom }}">{{ evenement.nom }}</td>
                                 {% for groupe in data.liste_groupes %}
                                     {% if groupe.pk == evenement.groupe_id %}
-                                        <td id="total_{{ evenement.unite_id }}_{{ groupe.pk }}_{{ evenement.pk }}" style="text-align: center;">0</td>
+                                        <td id="total_{{ evenement.unite_id }}_{{ groupe.pk }}_{{ evenement.pk }}">0</td>
                                     {% else %}
                                         <td></td>
                                     {% endif %}
                                 {% endfor %}
+                                <td id="total_{{ evenement.unite_id }}_0_{{ evenement.pk }}" class="totaux-somme">0</td>
                             </tr>
                         {% endif %}
                     {% endfor %}
-                    {% for unite_remplissage in data.liste_unites_remplissage %}
-                        <tr class="entete-colonne">
-                            <td style="text-align: center;" title="Unité de remplissage : {{ unite_remplissage.nom }}">{% firstof unite_remplissage.abrege unite_remplissage.nom %}</td>
+
+                    {# Remplissage : places prises, case colorée selon la capacité de l'unité de remplissage #}
+                    {% if data.liste_unites_remplissage %}
+                        <tr class="totaux-section"><td colspan="{{ data.liste_groupes|length|add:2 }}"><button type="button" class="totaux-plier" data-section="remplissage" aria-expanded="true"><i class="fa fa-chevron-down" aria-hidden="true"></i>Remplissage</button></td></tr>
+                        <tr class="sec-remplissage totaux-entetes">
+                            <td></td>
                             {% for groupe in data.liste_groupes %}
-                                <td id="total_remplissage_{{ unite_remplissage.pk }}_{{ groupe.pk }}" style="text-align: center;" title="Unité de remplissage : {{ unite_remplissage.nom }} / {{ groupe.nom }}" data-idunite="{{ unite_remplissage.pk }}" data-idgroupe="{{ groupe.pk }}">0</td>
+                                <td title="{{ groupe.nom }}">{% firstof groupe.abrege groupe.nom %}</td>
                             {% endfor %}
+                            <td title="Capacité commune à tous les groupes">Tous</td>
                         </tr>
-                    {% endfor %}
+                        {% for unite_remplissage in data.liste_unites_remplissage %}
+                            <tr class="sec-remplissage totaux-remplissage">
+                                <td class="totaux-libelle" title="Unité de remplissage : {{ unite_remplissage.nom }}">{% firstof unite_remplissage.abrege unite_remplissage.nom %}</td>
+                                {% for groupe in data.liste_groupes %}
+                                    <td id="total_remplissage_{{ unite_remplissage.pk }}_{{ groupe.pk }}" data-idunite="{{ unite_remplissage.pk }}" data-idgroupe="{{ groupe.pk }}" data-libelle="{{ unite_remplissage.nom }} / {{ groupe.nom }}"><span>0</span></td>
+                                {% endfor %}
+                                <td id="total_remplissage_{{ unite_remplissage.pk }}_0" data-idunite="{{ unite_remplissage.pk }}" data-idgroupe="0" data-libelle="{{ unite_remplissage.nom }} / Tous les groupes"><span>0</span></td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+
                 </tbody>
             </table>
 
     {% if data.mode != 'pointeuse' %}
         </div>
     </div>
+    {% else %}
+        </div>
     {% endif %}
+
+    <script>
+        // Bascule Inscrits / Présents : pilote l'option « Afficher présents dans totaux » des paramètres
+        function Maj_mode_totaux() {
+            var presents = $("#id_afficher_presents_totaux").val() === "oui";
+            $(".totaux-mode button").each(function() {
+                $(this).attr("aria-pressed", ($(this).data("presents") === "oui") === presents ? "true" : "false");
+            });
+        }
+        $(function() {
+            Maj_mode_totaux();
+
+            // Parties Consommations et Remplissage repliables (état mémorisé dans le navigateur)
+            function Plier_section_totaux(section, replier) {
+                $("#table_totaux").toggleClass("replie-" + section, replier);
+                $(".totaux-plier[data-section='" + section + "']").attr("aria-expanded", replier ? "false" : "true");
+            }
+            $(".totaux-plier").each(function() {
+                var section = $(this).data("section");
+                var replier = false;
+                try {replier = localStorage.getItem("noethysweb_totaux_replie_" + section) === "1";} catch (erreur) {}
+                Plier_section_totaux(section, replier);
+            });
+            $(".totaux-plier").on("click", function() {
+                var section = $(this).data("section");
+                var replier = $(this).attr("aria-expanded") === "true";
+                Plier_section_totaux(section, replier);
+                try {localStorage.setItem("noethysweb_totaux_replie_" + section, replier ? "1" : "0");} catch (erreur) {}
+            });
+
+            $(".totaux-mode").on("click", "button", function() {
+                var valeur = $(this).data("presents");
+                var select = $("#id_afficher_presents_totaux");
+                if (!select.length || select.val() === valeur) {return;}
+                select.val(valeur);
+                select.closest(".form-group").find(".param-switch").attr("aria-checked", valeur === "oui" ? "true" : "false");
+                select.trigger("change");
+            });
+            $(document).on("change", "#id_afficher_presents_totaux", function() {
+                Maj_mode_totaux();
+                if (typeof maj_remplissage === "function") {maj_remplissage();}
+            });
+        });
+    </script>
 
 {% endblock contenu_page %}

@@ -1,0 +1,188 @@
+{# Styles du sélecteur de période Noethysweb (partagés avec consommations/selecteur_periode.html) #}
+<style>
+    /* Sélecteur de période moderne aux couleurs Noethysweb (AdminLTE 3 lightblue) */
+    .daterangepicker {
+        --dp-bleu: #3c8dbc;
+        --dp-bleu-fonce: #367fa9;
+        --dp-bleu-ombre: rgba(60, 141, 188, .35);
+        --dp-plage: rgba(60, 141, 188, .14);
+        --dp-survol: rgba(60, 141, 188, .10);
+        --dp-texte: #1f2d3d;
+        --dp-secondaire: #6c757d;
+        --dp-muet: #c3cad1;
+        --dp-weekends: #8a96a3;
+        --dp-vacances: rgba(255, 193, 7, .16);
+        --dp-vacances-texte: #8a6400;
+        --dp-feries: #e0485a;
+        --dp-separateur: #edf0f3;
+        --dp-fond: #ffffff;
+        color: var(--dp-texte);
+        background: var(--dp-fond);
+        border: 0;
+        border-radius: 14px;
+        box-shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 12px 32px rgba(16, 24, 40, .14);
+        margin-top: 6px;
+        font-family: inherit;
+        font-variant-numeric: tabular-nums;
+        animation: drp-apparition .14s ease-out;
+    }
+    .dark-mode .daterangepicker {
+        --dp-bleu-ombre: rgba(0, 0, 0, .4);
+        --dp-plage: rgba(60, 141, 188, .28);
+        --dp-survol: rgba(255, 255, 255, .07);
+        --dp-texte: #eef1f4;
+        --dp-secondaire: #adb5bd;
+        --dp-muet: #5d6670;
+        --dp-weekends: #8f9aa5;
+        --dp-vacances: rgba(255, 193, 7, .14);
+        --dp-vacances-texte: #ffd666;
+        --dp-feries: #ff7b8a;
+        --dp-separateur: #454d55;
+        --dp-fond: #2f353b;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, .06), 0 12px 32px rgba(0, 0, 0, .45);
+    }
+    .daterangepicker:before, .daterangepicker:after {display: none}
+    .daterangepicker.drop-up {margin-top: -6px}
+    @keyframes drp-apparition {from {opacity: 0; transform: translateY(-4px)} to {opacity: 1; transform: none}}
+    @media (prefers-reduced-motion: reduce) {.daterangepicker {animation: none}}
+
+    /* Périodes prédéfinies */
+    .daterangepicker .ranges {margin: 0}
+    .daterangepicker .ranges ul {padding: 10px 8px; width: auto; min-width: 160px}
+    .daterangepicker .ranges li {
+        padding: 5px 10px;
+        margin-bottom: 1px;
+        border-radius: 8px;
+        font-size: 13px;
+        white-space: nowrap;
+        color: var(--dp-texte);
+        background: transparent;
+        transition: background-color .12s;
+    }
+    .daterangepicker .ranges li:hover {background: var(--dp-survol)}
+    .daterangepicker .ranges li.active {background: var(--dp-bleu); color: #ffffff; font-weight: 600}
+    .daterangepicker.show-ranges.ltr .drp-calendar.left {border-left: 1px solid var(--dp-separateur)}
+
+    /* Calendriers */
+    .daterangepicker .drp-calendar {max-width: none; padding: 8px 8px 2px}
+    .daterangepicker .calendar-table {background: transparent; border: 0}
+    .daterangepicker .calendar-table table {border-collapse: separate; border-spacing: 0 1px}
+    .daterangepicker .calendar-table th.month {font-size: 14px; font-weight: 600; color: var(--dp-texte)}
+    .daterangepicker .calendar-table th.prev, .daterangepicker .calendar-table th.next {
+        width: 28px; height: 28px; min-width: 28px; border-radius: 50%; transition: background-color .12s;
+    }
+    .daterangepicker .calendar-table th.prev:hover, .daterangepicker .calendar-table th.next:hover {background: var(--dp-survol)}
+    .daterangepicker .calendar-table .next span, .daterangepicker .calendar-table .prev span {
+        border-color: var(--dp-secondaire); border-width: 0 2px 2px 0; padding: 3px;
+    }
+    .daterangepicker .calendar-table thead tr:nth-child(2) th {
+        font-size: 11px; font-weight: 600; letter-spacing: .04em;
+        color: var(--dp-secondaire); height: 22px;
+    }
+
+    /* Jours : le fond de la cellule porte les bandes, la pastille porte la sélection */
+    .daterangepicker .calendar-table td {
+        --dp-fond-jour: transparent;
+        background: var(--dp-fond-jour) !important;
+        border: 0;
+        border-radius: 0;
+        width: 32px;
+        min-width: 32px;
+        height: 28px;
+        line-height: normal;
+        padding: 0;
+        font-size: 12.5px;
+        color: var(--dp-texte);
+    }
+    .daterangepicker .calendar-table td .jour {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 27px;
+        height: 27px;
+        border-radius: 50%;
+        pointer-events: none;
+        transition: background-color .12s, color .12s, box-shadow .12s;
+    }
+    .daterangepicker .calendar-table td.available:hover .jour {background: var(--dp-survol)}
+    .daterangepicker .calendar-table td.weekend {color: var(--dp-weekends)}
+
+    /* Vacances */
+    .daterangepicker .calendar-table td.calendrier_vacances {--dp-fond-jour: var(--dp-vacances); color: var(--dp-vacances-texte)}
+    .daterangepicker .calendar-table td.vacances_debut,
+    .daterangepicker .calendar-table td.calendrier_vacances:first-child {border-top-left-radius: 14px; border-bottom-left-radius: 14px}
+    .daterangepicker .calendar-table td.vacances_fin,
+    .daterangepicker .calendar-table td.calendrier_vacances:last-child {border-top-right-radius: 14px; border-bottom-right-radius: 14px}
+
+    /* Fériés */
+    .daterangepicker .calendar-table td.calendrier_feries {color: var(--dp-feries); font-weight: 600}
+    .daterangepicker .calendar-table td.calendrier_feries .jour:before {
+        content: ""; position: absolute; top: 2px; right: 3px;
+        width: 5px; height: 5px; border-radius: 50%; background: var(--dp-feries);
+    }
+
+    /* Plage sélectionnée : bande bleue (prioritaire sur les vacances) */
+    .daterangepicker .calendar-table td.in-range {--dp-fond-jour: var(--dp-plage); border-radius: 0; color: var(--dp-texte)}
+    .daterangepicker .calendar-table td.in-range.calendrier_vacances {color: var(--dp-vacances-texte)}
+    .daterangepicker .calendar-table td.in-range:first-child {border-top-left-radius: 14px; border-bottom-left-radius: 14px}
+    .daterangepicker .calendar-table td.in-range:last-child {border-top-right-radius: 14px; border-bottom-right-radius: 14px}
+    .daterangepicker .calendar-table td.start-date {--dp-fond-jour: linear-gradient(to right, transparent 50%, var(--dp-plage) 50%); border-radius: 0}
+    .daterangepicker .calendar-table td.end-date {--dp-fond-jour: linear-gradient(to left, transparent 50%, var(--dp-plage) 50%); border-radius: 0}
+    .daterangepicker .calendar-table td.start-date.end-date,
+    .daterangepicker .calendar-table td.start-date:last-child,
+    .daterangepicker .calendar-table td.end-date:first-child {--dp-fond-jour: transparent}
+
+    /* Jours des mois voisins */
+    .daterangepicker .calendar-table td.off,
+    .daterangepicker .calendar-table td.off.in-range,
+    .daterangepicker .calendar-table td.off.start-date,
+    .daterangepicker .calendar-table td.off.end-date {--dp-fond-jour: transparent; color: var(--dp-muet); font-weight: normal}
+    .daterangepicker .calendar-table td.off .jour:before,
+    .daterangepicker .calendar-table td.off .jour:after {display: none}
+    .daterangepicker .calendar-table td.disabled {color: var(--dp-muet); text-decoration: none; cursor: not-allowed}
+
+    /* Aujourd'hui : point bleu sous le chiffre */
+    .daterangepicker .calendar-table td.today .jour {color: var(--dp-bleu); font-weight: 700}
+    .daterangepicker .calendar-table td.today .jour:after {
+        content: ""; position: absolute; bottom: 2px; left: 50%;
+        width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--dp-bleu);
+    }
+
+    /* Début et fin de période : cercle plein avec halo */
+    .daterangepicker .calendar-table td.active:not(.off) .jour,
+    .daterangepicker .calendar-table td.active:not(.off):hover .jour {
+        background: var(--dp-bleu);
+        color: #ffffff;
+        font-weight: 600;
+        box-shadow: 0 4px 10px var(--dp-bleu-ombre);
+    }
+    .daterangepicker .calendar-table td.active .jour:after {background: #ffffff}
+
+    /* Pied : légende, période choisie et boutons en pilule */
+    .daterangepicker .drp-buttons,
+    .daterangepicker.show-calendar .drp-buttons {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-top: 1px solid var(--dp-separateur);
+    }
+    .daterangepicker .drp-legende {display: flex; gap: 14px; margin-right: auto; font-size: 11px; color: var(--dp-secondaire)}
+    .daterangepicker .drp-pastille {display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%}
+    .daterangepicker .drp-pastille-vacances {background: #ffc107}
+    .daterangepicker .drp-pastille-feries {background: var(--dp-feries)}
+    .daterangepicker .drp-pastille-today {background: var(--dp-bleu)}
+    .daterangepicker .drp-selected {padding: 0 4px 0 0; font-size: 13px; font-weight: 600; color: var(--dp-texte)}
+    .daterangepicker .drp-buttons .btn {margin-left: 0; padding: 4px 14px; border-radius: 999px; font-size: 13px; font-weight: 600}
+    .daterangepicker .drp-buttons .cancelBtn {background: transparent; border: 1px solid var(--dp-separateur); color: var(--dp-secondaire)}
+    .daterangepicker .drp-buttons .cancelBtn:hover {background: var(--dp-survol)}
+    .daterangepicker .drp-buttons .applyBtn {background: var(--dp-bleu); border: 1px solid var(--dp-bleu); color: #ffffff}
+    .daterangepicker .drp-buttons .applyBtn:hover {background: var(--dp-bleu-fonce); border-color: var(--dp-bleu-fonce)}
+
+    /* Écrans étroits : légende au-dessus des boutons */
+    @media (max-width: 563px) {
+        .daterangepicker .drp-buttons {flex-wrap: wrap}
+        .daterangepicker .drp-legende {width: 100%; justify-content: center}
+    }
+</style>

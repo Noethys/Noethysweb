@@ -28,12 +28,12 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.form_method = 'post'
 
         self.helper.layout = Layout(
-            Field("tri"),
             Field("afficher_age"),
             Field("afficher_date_naiss"),
             Field("afficher_groupe"),
             Field("afficher_classe"),
             Field("afficher_niveau_scolaire"),
             Field("afficher_presents_totaux"),
+            Field("tri"),
             Field("affichage_informations"),
         )
