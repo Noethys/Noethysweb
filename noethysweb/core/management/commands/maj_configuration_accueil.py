@@ -16,4 +16,7 @@ class Command(BaseCommand):
         # Ajout du widget Astuce du jour s'il n'est pas déjà sélectionné
         utils_widgets.Ajouter_widget_to_configuration(nom_widget="astuce", apres_widget="messages")
 
+        # Ajout du widget Mes favoris sous le widget Messages s'il n'est pas déjà sélectionné
+        utils_widgets.Ajouter_widget_to_configuration(nom_widget="mes_favoris", apres_widget="messages")
+
         self.stdout.write(self.style.SUCCESS("Ajout widgets page accueil ok."))

@@ -1,0 +1,112 @@
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+
+    {% include "core/toc_styles.html" %}
+    <style>
+        .favoris-grille {display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; padding: 10px;}
+        .favoris-grille .toc-lien {padding: 8px 9px; gap: 9px; align-items: center;}
+        .favoris-grille .toc-icone {width: 28px; height: 28px; font-size: 14px; border-radius: 6px;}
+        .favoris-grille .toc-titre {font-size: .85rem;}
+        .favoris-menu {font-size: .72rem; color: #adb5bd;}
+        .favoris-vide {text-align: center; padding: 20px 16px; color: #6c757d; font-size: .9rem;}
+        .favoris-vide .fa-star-o {font-size: 28px; color: #ced4da;}
+        .favoris-gestion-ligne {display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-bottom: 1px solid rgba(0,0,0,.08);}
+        .favoris-gestion-ligne:last-child {border-bottom: none;}
+        .favoris-gestion-ligne .favoris-gestion-titre {flex: 1;}
+    </style>
+
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}<i class="fa fa-star margin-r-5" style="color: #EF9F27;"></i> Mes favoris{% endblock %}
+        {% block box_outils %}
+            {% if widget_favoris %}
+                <button type="button" class="btn btn-tool" title="Gérer mes favoris" data-toggle="modal" data-target="#modal_gestion_favoris"><i class="fa fa-pencil"></i></button>
+            {% endif %}
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+        {% endblock %}
+        {% block card_body_classe %}p-0{% endblock %}
+        {% block box_contenu %}
+            {% if widget_favoris %}
+                <div class="favoris-grille">
+                    {% for favori in widget_favoris %}
+                        <div class="toc-tuile" title="{{ favori.description }}">
+                            <a class="toc-lien" href="{{ favori.url }}" style="padding-right: 9px;">
+                                <span class="toc-icone toc-nature-{{ favori.nature }}"><i class="fa fa-{{ favori.icone }}" aria-hidden="true"></i></span>
+                                <span>
+                                    <span class="toc-titre d-block">{{ favori.titre }}{% if favori.nouveau %} <span class="toc-badge-nouveau">Nouveau</span>{% endif %}</span>
+                                    <span class="favoris-menu d-block">{{ favori.menu }}</span>
+                                </span>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="favoris-vide">
+                    <i class="fa fa-star-o" aria-hidden="true"></i>
+                    <div class="font-weight-bold mt-2 mb-1">Épinglez vos commandes préférées</div>
+                    <div style="font-size: .82rem;">Cliquez sur l'étoile <i class="fa fa-star" style="color: #EF9F27;" aria-hidden="true"></i> d'une commande dans les pages des menus pour la retrouver ici.</div>
+                </div>
+            {% endif %}
+        {% endblock %}
+    {% endembed %}
+
+    {% if widget_favoris %}
+        {# Modal de gestion des favoris #}
+        {% embed 'core/modal.html' %}
+            {% block modal_id %}modal_gestion_favoris{% endblock %}
+            {% block modal_titre %}Gérer mes favoris{% endblock %}
+            {% block modal_body %}
+                <p class="text-muted" style="font-size: .9rem;">Réorganisez vos favoris avec les flèches ou retirez-les de la liste.</p>
+                <div id="favoris_gestion_liste">
+                    {% for favori in widget_favoris %}
+                        <div class="favoris-gestion-ligne" data-code="{{ favori.code }}">
+                            <span class="toc-icone toc-nature-{{ favori.nature }}" style="width: 26px; height: 26px; font-size: 13px;"><i class="fa fa-{{ favori.icone }}" aria-hidden="true"></i></span>
+                            <span class="favoris-gestion-titre">{{ favori.titre }} <small class="text-muted">({{ favori.menu }})</small></span>
+                            <button type="button" class="btn btn-default btn-xs favoris-monter" title="Monter" aria-label="Monter {{ favori.titre }}"><i class="fa fa-fw fa-arrow-up"></i></button>
+                            <button type="button" class="btn btn-default btn-xs favoris-descendre" title="Descendre" aria-label="Descendre {{ favori.titre }}"><i class="fa fa-fw fa-arrow-down"></i></button>
+                            <button type="button" class="btn btn-default btn-xs favoris-retirer" title="Retirer" aria-label="Retirer {{ favori.titre }}"><i class="fa fa-fw fa-trash text-danger"></i></button>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="modal-footer" style="padding-bottom: 0; padding-right: 0;">
+                    <button type="button" class="btn btn-primary" id="favoris_enregistrer"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban margin-r-5"></i>Annuler</button>
+                </div>
+            {% endblock %}
+        {% endembed %}
+
+        <script>
+            $(function() {
+                var liste = $("#favoris_gestion_liste");
+                liste.on("click", ".favoris-monter", function() {
+                    var ligne = $(this).closest(".favoris-gestion-ligne");
+                    ligne.prev().before(ligne);
+                });
+                liste.on("click", ".favoris-descendre", function() {
+                    var ligne = $(this).closest(".favoris-gestion-ligne");
+                    ligne.next().after(ligne);
+                });
+                liste.on("click", ".favoris-retirer", function() {
+                    $(this).closest(".favoris-gestion-ligne").remove();
+                });
+                $("#favoris_enregistrer").on("click", function() {
+                    var codes = liste.children(".favoris-gestion-ligne").map(function() {return String($(this).data("code"));}).get();
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'ajax_menu_favoris' %}",
+                        data: {action: "ordonner", codes: JSON.stringify(codes), csrfmiddlewaretoken: "{{ csrf_token }}"},
+                        success: function() {
+                            location.reload();
+                        },
+                        error: function(data) {
+                            toastr.error(data.responseJSON ? data.responseJSON.erreur : "Impossible d'enregistrer les favoris");
+                        }
+                    });
+                });
+            });
+        </script>
+    {% endif %}
+
+{% endblock contenu_page %}

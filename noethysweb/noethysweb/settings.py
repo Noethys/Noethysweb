@@ -62,7 +62,7 @@ PORTAIL_AUTORISER_AJOUT_REGIME = True
 # CONFIGURATION ACCUEIL
 CONFIG_ACCUEIL_DEFAUT = [
     [[6, "citation", "anniversaires"], [6, "celebrations", "anniversaires_demain"]],
-    [[8, "notes", "taches", "suivi_consommations", "suivi_inscriptions", "suivi_reservations"], [4, "graphe_individus", "messages", "astuce"]],
+    [[8, "notes", "taches", "suivi_consommations", "suivi_inscriptions", "suivi_reservations"], [4, "graphe_individus", "messages", "mes_favoris", "astuce"]],
 ]
 
 # Application definition

@@ -6,6 +6,7 @@
 import copy, importlib
 from django.urls import reverse_lazy
 from django.conf import settings
+from core.views import menu_infos
 
 
 def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
@@ -588,6 +589,15 @@ class Menu():
         self.masquer = masquer
         self.force_permissions = force_permissions
 
+        # Informations d'affichage (pages sommaires, favoris)
+        self.nature = "a"
+        self.description = menu_infos.DESCRIPTIONS_MENUS.get(code, "")
+        if code in menu_infos.COMMANDES:
+            self.icone, self.nature, self.description = menu_infos.COMMANDES[code]
+        self.nouveau = menu_infos.Est_nouveau(code)
+        if not code and titre:
+            self.icone = menu_infos.ICONES_RUBRIQUES.get(titre, "folder-o")
+
     def __repr__(self):
         return "<Menu '%s'>" % self.titre
 
@@ -644,6 +654,22 @@ class Menu():
                 if resultat != None :
                     return resultat
         return boucle(self.GetChildren())
+
+    def GetMenuRacine(self):
+        """ Renvoie le menu de premier niveau (ex : Consommations) auquel appartient l'item """
+        menu = self
+        while menu.parent and menu.parent.parent:
+            menu = menu.parent
+        return menu
+
+    def GetCommandes(self):
+        """ Renvoie toutes les commandes (items avec code) contenues dans ce menu """
+        liste = []
+        for child in self.GetChildren():
+            if child.code and not child.HasChildren():
+                liste.append(child)
+            liste.extend(child.GetCommandes())
+        return liste
 
     def GetBreadcrumb(self):
         breadcrumb = [self,]

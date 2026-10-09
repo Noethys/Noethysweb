@@ -1,0 +1,13 @@
+{# Tuile d'une commande de menu (pages sommaires). Variables : item (Menu), favori (bool) #}
+<div class="toc-tuile {% if mode_demo and not item.compatible_demo %}disabled{% endif %}" data-code="{{ item.code }}" data-recherche="{{ item.titre }} {{ item.description }}{% if item.nouveau %} nouveau{% endif %}">
+    <a class="toc-lien" href="{{ item.GetUrl }}" data-description="{{ item.description }}" {% if affichage_condense and item.description %}title="{{ item.description }}"{% endif %} {% if mode_demo and not item.compatible_demo %}tabindex="-1" aria-disabled="true"{% endif %}>
+        <span class="toc-icone toc-nature-{{ item.nature }}"><i class="fa fa-{{ item.icone }}" aria-hidden="true"></i></span>
+        <span>
+            <span class="toc-titre d-block">{{ item.titre }}{% if item.nouveau %} <span class="toc-badge-nouveau">Nouveau</span>{% endif %}{% if mode_demo and not item.compatible_demo %} <small class="badge badge-warning"><i class="fa fa-lock"></i> Mode démo</small>{% endif %}</span>
+            {% if item.description %}<span class="toc-description d-block">{{ item.description }}</span>{% endif %}
+        </span>
+    </a>
+    <button type="button" class="toc-etoile {% if favori %}active{% endif %}" data-code="{{ item.code }}" aria-pressed="{% if favori %}true{% else %}false{% endif %}" title="{% if favori %}Retirer de mes favoris{% else %}Ajouter à mes favoris{% endif %}" aria-label="Favori : {{ item.titre }}">
+        <i class="fa {% if favori %}fa-star{% else %}fa-star-o{% endif %}" aria-hidden="true"></i>
+    </button>
+</div>

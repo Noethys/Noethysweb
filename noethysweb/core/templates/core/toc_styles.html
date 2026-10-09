@@ -1,0 +1,64 @@
+{# Styles des tuiles de commandes (pages sommaires des menus et widget "Mes favoris") #}
+<style>
+    .toc-entete {display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin: 4px 4px 6px;}
+    .toc-affichage .btn {color: #6c757d;}
+    .toc-affichage .btn.active {background: #e7f1ff; border-color: #80bdff; color: #0056b3; box-shadow: none;}
+    .toc-filtre {position: relative; width: 260px; max-width: 100%;}
+    .toc-filtre .fa {position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #adb5bd; pointer-events: none;}
+    .toc-filtre input {padding-left: 30px;}
+    .toc-legende {display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; font-size: .8rem; color: #6c757d; margin: 26px 4px 0; padding: 12px 0 30px; border-top: 1px solid rgba(0,0,0,.08);}
+    .dark-mode .toc-legende {border-top-color: rgba(255,255,255,.1);}
+    .toc-legende span::before {content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px;}
+    .toc-legende .toc-legende-a::before {background: #378ADD;}
+    .toc-legende .toc-legende-l::before {background: #1D9E75;}
+    .toc-legende .toc-legende-e::before {background: #EF9F27;}
+    .toc-legende .toc-legende-s::before {background: #7F77DD;}
+
+    .toc-rubrique {margin: 18px 4px 8px; font-weight: 600; color: #495057; display: flex; align-items: center; gap: 7px;}
+    .toc-rubrique .toc-nbre {font-weight: normal; color: #adb5bd; font-size: .85rem;}
+    .toc-rubrique-favoris .fa {color: #EF9F27;}
+    .toc-grille {display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin: 0 4px;}
+
+    .toc-tuile {position: relative; background: #fff; border: 1px solid #e3e6ea; border-radius: 6px; transition: border-color .15s, box-shadow .15s;}
+    .toc-tuile:hover {border-color: #b9c2cc; box-shadow: 0 1px 4px rgba(0,0,0,.08);}
+    .toc-tuile:focus-within {border-color: #80bdff; box-shadow: 0 0 0 .2rem rgba(0,123,255,.2);}
+    .toc-lien {display: flex; gap: 11px; align-items: flex-start; padding: 11px 34px 11px 11px; color: inherit !important; text-decoration: none !important; height: 100%; outline: none;}
+    .toc-tuile.disabled .toc-lien {pointer-events: none; opacity: .55;}
+    .toc-icone {width: 34px; height: 34px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;}
+    .toc-titre {font-weight: 600; font-size: .92rem; line-height: 1.25; color: #212529;}
+    .toc-description {font-size: .8rem; color: #6c757d; line-height: 1.35; margin-top: 2px;}
+    .toc-etoile {position: absolute; top: 6px; right: 6px; border: none; background: transparent; color: #ced4da; padding: 2px 5px; border-radius: 4px; cursor: pointer; line-height: 1;}
+    .toc-etoile:hover {color: #EF9F27; background: rgba(0,0,0,.04);}
+    .toc-etoile.active {color: #EF9F27;}
+    .toc-badge-nouveau {display: inline-block; font-size: .65rem; font-weight: 600; line-height: 1; padding: 3px 6px; border-radius: 8px; background: #e7f1ff; color: #0056b3; vertical-align: 1px; margin-left: 3px; white-space: nowrap;}
+    .toc-vide {text-align: center; color: #6c757d; padding: 40px 0;}
+
+    .toc-nature-a {background: #E6F1FB; color: #185FA5;}
+    .toc-nature-l {background: #E1F5EE; color: #0F6E56;}
+    .toc-nature-e {background: #FAEEDA; color: #854F0B;}
+    .toc-nature-s {background: #EEEDFE; color: #534AB7;}
+
+    /* Affichage condensé */
+    .toc-condense .toc-grille {grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 7px;}
+    .toc-condense .toc-lien {padding: 7px 30px 7px 8px; gap: 9px; align-items: center;}
+    .toc-condense .toc-icone {width: 26px; height: 26px; font-size: 13px; border-radius: 6px;}
+    .toc-condense .toc-titre {font-size: .88rem;}
+    .toc-condense .toc-description {display: none !important;}
+    .toc-condense .toc-etoile {top: 50%; transform: translateY(-50%);}
+    .toc-condense .toc-rubrique {margin: 12px 4px 6px;}
+
+    /* Mode sombre */
+    .dark-mode .toc-tuile {background: #343a40; border-color: #4b545c;}
+    .dark-mode .toc-tuile:hover {border-color: #6c757d;}
+    .dark-mode .toc-titre {color: #f8f9fa;}
+    .dark-mode .toc-description, .dark-mode .toc-legende {color: #adb5bd;}
+    .dark-mode .toc-rubrique {color: #ced4da;}
+    .dark-mode .toc-etoile {color: #6c757d;}
+    .dark-mode .toc-affichage .btn.active {background: #0C447C; border-color: #185FA5; color: #B5D4F4;}
+    .dark-mode .toc-badge-nouveau {background: #0C447C; color: #B5D4F4;}
+    .dark-mode .toc-etoile.active, .dark-mode .toc-etoile:hover {color: #EF9F27;}
+    .dark-mode .toc-nature-a {background: #0C447C; color: #B5D4F4;}
+    .dark-mode .toc-nature-l {background: #085041; color: #9FE1CB;}
+    .dark-mode .toc-nature-e {background: #633806; color: #FAC775;}
+    .dark-mode .toc-nature-s {background: #3C3489; color: #CECBF6;}
+</style>

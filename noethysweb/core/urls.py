@@ -4,7 +4,7 @@
 
 from django.urls import include, path
 from django.contrib.auth import views as auth_views
-from core.views import login, accueil, accueil_configuration, recherche, base, profil_configuration, profil_utilisateur, change_password_utilisateur, select_avec_commandes_advanced
+from core.views import login, accueil, accueil_configuration, recherche, base, profil_configuration, profil_utilisateur, change_password_utilisateur, select_avec_commandes_advanced, menu_favoris
 from core.forms import filtre_liste
 from core.decorators import secure_ajax
 from core.utils import utils_graphique_individus, utils_factures_impayees
@@ -25,6 +25,8 @@ urlpatterns = [
 
     # AJAX
     path('core/filtre_liste', secure_ajax(filtre_liste.Get_form_filtres), name='ajax_get_form_filtre_liste'),
+    path('core/menu_favoris', secure_ajax(menu_favoris.Modifier_favoris), name='ajax_menu_favoris'),
+    path('core/menu_affichage', secure_ajax(menu_favoris.Modifier_affichage), name='ajax_menu_affichage'),
     path('core/ajouter_filtre_liste', secure_ajax(filtre_liste.Ajouter_filtre), name='ajax_ajouter_filtre_liste'),
     path('core/supprimer_filtre_liste/<int:idfiltre>', filtre_liste.Supprimer_filtre, name='ajax_supprimer_filtre_liste'),
     path('core/memoriser_recherche', secure_ajax(recherche.Memoriser_recherche), name='ajax_memoriser_recherche'),
