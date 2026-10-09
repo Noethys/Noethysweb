@@ -12,8 +12,10 @@
 {% block contenu_page %}
 <div id="toc_page" class="toc-page {% if affichage_condense %}toc-condense{% endif %}">
 
-    <!-- Filtre et type d'affichage -->
+    <!-- Description du menu, filtre et type d'affichage -->
     <div class="toc-entete">
+        {% if menu_actif.description %}<div class="toc-entete-description">{{ menu_actif.description }}</div>{% endif %}
+        <div class="toc-outils">
         <div class="toc-filtre">
             <i class="fa fa-search" aria-hidden="true"></i>
             <input type="search" id="toc_filtre" class="form-control form-control-sm" placeholder="Filtrer les commandes..." aria-label="Filtrer les commandes de ce menu" autocomplete="off">
@@ -21,6 +23,7 @@
         <div class="btn-group toc-affichage" role="group" aria-label="Type d'affichage">
             <button type="button" class="btn btn-default btn-sm toc-bouton-affichage {% if not affichage_condense %}active{% endif %}" data-condense="0" title="Affichage détaillé" aria-pressed="{% if affichage_condense %}false{% else %}true{% endif %}"><i class="fa fa-th-large" aria-hidden="true"></i></button>
             <button type="button" class="btn btn-default btn-sm toc-bouton-affichage {% if affichage_condense %}active{% endif %}" data-condense="1" title="Affichage condensé" aria-pressed="{% if affichage_condense %}true{% else %}false{% endif %}"><i class="fa fa-th-list" aria-hidden="true"></i></button>
+        </div>
         </div>
     </div>
 

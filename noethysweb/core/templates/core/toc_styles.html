@@ -1,6 +1,8 @@
 {# Styles des tuiles de commandes (pages sommaires des menus et widget "Mes favoris") #}
 <style>
-    .toc-entete {display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin: 4px 4px 6px;}
+    .toc-entete {display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px 16px; margin: 4px 4px 6px;}
+    .toc-entete-description {flex: 1 1 260px; color: #6c757d; font-size: .9rem; line-height: 1.4;}
+    .toc-outils {display: flex; align-items: center; gap: 6px; margin-left: auto;}
     .toc-affichage .btn {color: #6c757d;}
     .toc-affichage .btn.active {background: #e7f1ff; border-color: #80bdff; color: #0056b3; box-shadow: none;}
     .toc-filtre {position: relative; width: 260px; max-width: 100%;}
@@ -51,7 +53,7 @@
     .dark-mode .toc-tuile {background: #343a40; border-color: #4b545c;}
     .dark-mode .toc-tuile:hover {border-color: #6c757d;}
     .dark-mode .toc-titre {color: #f8f9fa;}
-    .dark-mode .toc-description, .dark-mode .toc-legende {color: #adb5bd;}
+    .dark-mode .toc-description, .dark-mode .toc-legende, .dark-mode .toc-entete-description {color: #adb5bd;}
     .dark-mode .toc-rubrique {color: #ced4da;}
     .dark-mode .toc-etoile {color: #6c757d;}
     .dark-mode .toc-affichage .btn.active {background: #0C447C; border-color: #185FA5; color: #B5D4F4;}
