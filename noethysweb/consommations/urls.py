@@ -9,7 +9,7 @@ from parametrage.views import calendrier
 from consommations.forms import grille_forfaits
 from consommations.views import grille, gestionnaire, suivi_consommations, etat_global, synthese_consommations, liste_attente, liste_absences, edition_liste_conso, \
                                 pointeuse, liste_consommations, liste_repas, etat_nomin, liste_durees, consommations_traitement_lot, evolution_reservations, \
-                                detail_consommations, liste_demandes, suivi_pointage, analyse_ia_frequentation, statistiques_consommations #, pointeuse_barcodes
+                                detail_consommations, liste_demandes, suivi_pointage, analyse_ia_frequentation, statistiques_consommations, frequentation_caf #, pointeuse_barcodes
 from core.decorators import secure_ajax
 
 
@@ -49,6 +49,7 @@ urlpatterns = [
 
     # Analyse
     path('consommations/etat_global', etat_global.View.as_view(), name='etat_global'),
+    path('consommations/frequentation_caf', frequentation_caf.View.as_view(), name='frequentation_caf'),
     path('consommations/etat_nomin', etat_nomin.View.as_view(), name='etat_nomin'),
     path('consommations/synthese_consommations', synthese_consommations.View.as_view(), name='synthese_consommations'),
     path('consommations/evolution_reservations', evolution_reservations.View.as_view(), name='evolution_reservations'),
@@ -86,6 +87,15 @@ urlpatterns = [
     path('consommations/suivi_pointage_valider_form_parametres', secure_ajax(suivi_pointage.Valider_form_parametres), name='ajax_suivi_pointage_valider_form_parametres'),
     path('consommations/analyse_ia_frequentation/exporter', secure_ajax(analyse_ia_frequentation.Exporter), name='ajax_analyse_ia_frequentation_exporter'),
 
+
+    # AJAX fréquentation CAF
+    path('consommations/frequentation_caf/get_unites', secure_ajax(frequentation_caf.Get_unites), name='ajax_frequentation_caf_get_unites'),
+    path('consommations/frequentation_caf/compter', secure_ajax(frequentation_caf.Compter_population), name='ajax_frequentation_caf_compter'),
+    path('consommations/frequentation_caf/exemple', secure_ajax(frequentation_caf.Get_exemple), name='ajax_frequentation_caf_exemple'),
+    path('consommations/frequentation_caf/calculer', secure_ajax(frequentation_caf.Calculer), name='ajax_frequentation_caf_calculer'),
+    path('consommations/frequentation_caf/exporter_excel', secure_ajax(frequentation_caf.Exporter_excel), name='ajax_frequentation_caf_exporter_excel'),
+    path('consommations/frequentation_caf/generer_pdf', secure_ajax(frequentation_caf.Generer_pdf), name='ajax_frequentation_caf_generer_pdf'),
+    path('consommations/frequentation_caf/get_profil', secure_ajax(frequentation_caf.Get_profil), name='ajax_frequentation_caf_get_profil'),
 
     # AJAX statistiques des consommations
     path('consommations/statistiques/exporter_excel', secure_ajax(statistiques_consommations.Exporter_excel), name='ajax_statistiques_consommations_exporter_excel'),

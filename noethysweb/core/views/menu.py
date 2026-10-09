@@ -384,6 +384,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     # Analyse
     menu_analyse = menu_consommations.Add(titre="Analyse")
     menu_analyse.Add(code="etat_global", titre="Etat global", icone="file-text-o")
+    menu_analyse.Add(code="frequentation_caf", titre="Fréquentation CAF", icone="file-text-o")
     menu_analyse.Add(code="etat_nomin", titre="Etat nominatif", icone="file-text-o")
     menu_analyse.Add(code="synthese_consommations", titre="Synthèse des consommations", icone="file-text-o")
     menu_analyse.Add(code="statistiques_consommations", titre="Statistiques des consommations", icone="file-text-o")

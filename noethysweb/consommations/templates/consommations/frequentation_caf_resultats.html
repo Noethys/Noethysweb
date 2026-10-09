@@ -1,0 +1,181 @@
+{# Résultats de la fréquentation CAF (chargés en AJAX) #}
+
+{% if not resultats.tableaux %}
+
+    <div class="callout callout-warning mb-0">
+        <p>Aucune consommation ne correspond aux paramètres sélectionnés.</p>
+        {% if resultats.population.exclus %}<p class="mb-0">{{ resultats.population.exclus }} individu(s) ont été écartés par les filtres de population.</p>{% endif %}
+    </div>
+
+{% else %}
+
+    {# Indicateurs clés #}
+    <div class="row mb-2">
+        {% for total in resultats.kpi.totaux_str %}
+            <div class="col-sm-6 col-lg mb-3">
+                <div class="fcaf_kpi">
+                    <div class="libelle"><i class="fa fa-clock-o" aria-hidden="true"></i>{{ total.label_heures }}</div>
+                    <div class="valeur">{{ total.valeur }}</div>
+                    <div class="detail">{% if resultats.format == "horaire" %}au format heures:minutes{% else %}en heures décimales{% endif %}</div>
+                </div>
+            </div>
+        {% endfor %}
+        {% if resultats.kpi.taux is not None %}
+            <div class="col-sm-6 col-lg mb-3">
+                <div class="fcaf_kpi">
+                    <div class="libelle"><i class="fa fa-percent" aria-hidden="true"></i>Taux réalisé / facturé</div>
+                    <div class="valeur">{{ resultats.kpi.taux|floatformat:1 }} %</div>
+                    <div class="detail">heures réalisées rapportées aux heures facturées</div>
+                </div>
+            </div>
+        {% endif %}
+        <div class="col-sm-6 col-lg mb-3">
+            <div class="fcaf_kpi">
+                <div class="libelle"><i class="fa fa-users" aria-hidden="true"></i>Individus distincts</div>
+                <div class="valeur">{{ resultats.kpi.individus }}</div>
+                <div class="detail">{{ resultats.kpi.familles }} famille{{ resultats.kpi.familles|pluralize }}</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg mb-3">
+            <div class="fcaf_kpi">
+                <div class="libelle"><i class="fa fa-calendar-check-o" aria-hidden="true"></i>Journées-enfants</div>
+                <div class="valeur">{{ resultats.kpi.journees }}</div>
+                <div class="detail">jours de présence distincts ({{ resultats.kpi.colonne_journees }})</div>
+            </div>
+        </div>
+    </div>
+
+    {# Sous-totaux "dont" #}
+    {% for dont in resultats.kpi.dont %}
+        <div class="fcaf_dont mb-3">
+            <i class="fa fa-filter margin-r-5" aria-hidden="true"></i><b>Dont {{ dont.label }}</b> :
+            {{ dont.individus }} individu{{ dont.individus|pluralize }}{% for total in dont.totaux_str %}, {{ total.valeur }} h {{ total.label|lower }}{% endfor %}
+        </div>
+    {% endfor %}
+
+    {# Contrôles qualité #}
+    {% if resultats.controles %}
+        <div class="card card-outline card-warning">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fa fa-exclamation-triangle margin-r-5"></i> Points à vérifier avant de déclarer</h3>
+                <div class="card-tools"><button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button></div>
+            </div>
+            <div class="card-body p-0">
+                <ul class="fcaf_controles">
+                    {% for controle in resultats.controles %}
+                        <li class="niveau_{{ controle.niveau }}">
+                            <div class="d-flex justify-content-between align-items-start" style="gap: 10px;">
+                                <span>
+                                    <i class="fa {% if controle.niveau == 'danger' %}fa-times-circle text-danger{% elif controle.niveau == 'warning' %}fa-exclamation-circle text-warning{% else %}fa-info-circle text-info{% endif %} margin-r-5" aria-hidden="true"></i>
+                                    {{ controle.message }}
+                                </span>
+                                <span class="text-nowrap">
+                                    {% if controle.details %}<a href="#" class="fcaf_voir_details" data-cible="#fcaf_details_{{ forloop.counter }}">Voir la liste</a>{% endif %}
+                                    {% if controle.lien %}{% if controle.details %} · {% endif %}<a href="{{ controle.lien }}" target="_blank">{{ controle.libelle_lien }}</a>{% endif %}
+                                </span>
+                            </div>
+                            {% if controle.details %}
+                                <ul id="fcaf_details_{{ forloop.counter }}" class="fcaf_details" style="display: none;">
+                                    {% for detail in controle.details %}
+                                        <li>{% if detail.lien %}<a href="{{ detail.lien }}" target="_blank">{{ detail.label }}</a>{% else %}{{ detail.label }}{% endif %}</li>
+                                    {% endfor %}
+                                    {% if controle.nombre_details_masques %}<li class="text-muted">… et {{ controle.nombre_details_masques }} autre(s)</li>{% endif %}
+                                </ul>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    {# Graphique mensuel #}
+    {% if resultats.graphe.labels|length > 1 %}
+        <div class="card card-default">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fa fa-bar-chart margin-r-5"></i> Heures par mois</h3>
+                <div class="card-tools"><button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button></div>
+            </div>
+            <div class="card-body">
+                <div class="fcaf_graphe"><canvas id="fcaf_graphique_mois" role="img" aria-label="Heures par mois"></canvas></div>
+            </div>
+        </div>
+    {% endif %}
+
+    {# Tableaux #}
+    <div class="card card-default">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fa fa-table margin-r-5"></i> Détail des heures</h3>
+        </div>
+        <div class="card-body">
+            {% for tableau in resultats.tableaux %}
+                {% if tableau.label %}<h5 class="fcaf_titre_regroupement">{{ tableau.label }}</h5>{% endif %}
+                <div class="table-responsive mb-4">
+                    <table class="table table-sm table-bordered fcaf_tableau">
+                        <thead>
+                            <tr>
+                                <th scope="col">Période</th>
+                                {% for entete in resultats.entetes %}
+                                    <th scope="col" class="nombre {% if entete.total %}colonne_total{% endif %}">{{ entete.haut }}<br><span class="font-weight-normal">{{ entete.bas }}</span></th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bloc in tableau.blocs %}
+                                {% if bloc.label %}
+                                    <tr class="ligne_age"><th scope="rowgroup" colspan="{{ resultats.entetes|length|add:1 }}">{{ bloc.label }}</th></tr>
+                                {% endif %}
+                                {% for ligne in bloc.lignes %}
+                                    <tr>
+                                        <th scope="row" class="font-weight-normal">{{ ligne.label }}{% if ligne.detail %}<br><small class="text-muted">{{ ligne.detail }}</small>{% endif %}</th>
+                                        {% for cellule in ligne.cellules %}<td class="nombre">{{ cellule }}</td>{% endfor %}
+                                    </tr>
+                                {% endfor %}
+                                {% if tableau.multi_blocs %}
+                                    <tr class="ligne_sous_total">
+                                        <th scope="row">Total{% if bloc.label %} {{ bloc.label|lower }}{% endif %}</th>
+                                        {% for cellule in bloc.cellules_total %}<td class="nombre">{{ cellule }}</td>{% endfor %}
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="ligne_total">
+                                <th scope="row">Total</th>
+                                {% for cellule in tableau.cellules_total %}<td class="nombre">{{ cellule }}</td>{% endfor %}
+                            </tr>
+                            {% for dont in tableau.dont %}
+                                <tr class="ligne_dont">
+                                    <th scope="row" class="font-weight-normal">{{ dont.label }}</th>
+                                    {% for cellule in dont.cellules %}<td class="nombre">{{ cellule }}</td>{% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tfoot>
+                    </table>
+                </div>
+            {% endfor %}
+
+            {% if resultats.tableaux|length > 1 %}
+                <table class="table table-sm table-bordered fcaf_tableau mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">&nbsp;</th>
+                            {% for entete in resultats.entetes %}<th scope="col" class="nombre">{{ entete.haut }}<br><span class="font-weight-normal">{{ entete.bas }}</span></th>{% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="ligne_total">
+                            <th scope="row">Total général</th>
+                            {% for cellule in resultats.cellules_total_general %}<td class="nombre">{{ cellule }}</td>{% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            {% endif %}
+
+            <div class="fcaf_rappel mt-3">
+                {% for label, valeur in resume %}<div><b>{{ label }} :</b> {{ valeur }}</div>{% endfor %}
+            </div>
+        </div>
+    </div>
+
+{% endif %}

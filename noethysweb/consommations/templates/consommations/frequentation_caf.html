@@ -1,0 +1,1011 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    {{ form_selection.media.css }}
+    <style>
+        /* Étapes */
+        .fcaf_etapes {display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none}
+        .fcaf_etapes button {display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid #dee2e6; border-radius: 999px; background: #ffffff; color: #495057; font-size: 13.5px}
+        .fcaf_etapes button .numero {display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #e9ecef; font-size: 12px; font-weight: 700}
+        .fcaf_etapes button.active {border-color: #3c8dbc; background: #e8f1f8; color: #1d5a80; font-weight: 600}
+        .fcaf_etapes button.active .numero {background: #3c8dbc; color: #ffffff}
+        .fcaf_etapes button.valide .numero {background: #28a745; color: #ffffff}
+        .fcaf_etape {display: none}
+        .fcaf_etape.active {display: block}
+        .fcaf_etape h4 {margin-bottom: 4px; font-size: 17px; font-weight: 600}
+        .fcaf_etape .fcaf_intro {margin-bottom: 16px; color: #6c757d}
+        .fcaf_section {margin-top: 22px; padding-top: 16px; border-top: 1px solid #f1f3f5}
+        .fcaf_section h5 {font-size: 15px; font-weight: 600}
+        .fcaf_raccourcis {display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px}
+        .fcaf_raccourcis .btn.active {border-color: #3c8dbc; background: #e8f1f8; color: #1d5a80}
+
+        /* Mise en page commune des champs */
+        .fcaf_grille {display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px 32px; align-items: start}
+        @media (min-width: 992px) {.fcaf_grille {grid-template-columns: repeat(2, minmax(0, 1fr))}}
+        .fcaf_champ {min-width: 0; text-align: left}
+        .fcaf_champ > label, .fcaf_champ .fcaf_label, .fcaf_champ #fcaf_ligne_qf > label {display: block; margin-bottom: 6px; font-weight: 600; text-align: left}
+        .fcaf_champ .form-check-label {font-weight: normal}
+        .fcaf_selection .form-group {margin-bottom: 18px}
+        .fcaf_selection .form-group > label {text-align: left}
+
+        /* Barre des profils */
+        .fcaf_barre_profil {display: flex; flex-wrap: wrap; align-items: center; gap: 10px}
+        .fcaf_profil {flex: 1 1 420px; min-width: 0}
+        .fcaf_profil form, .fcaf_profil .form-group {margin-bottom: 0}
+        .fcaf_barre_profil .dropdown > .btn {height: calc(2.25rem + 2px); white-space: nowrap}
+
+        /* États */
+        .fcaf_table_etats {max-width: 560px}
+        .fcaf_table_etats td, .fcaf_table_etats th {vertical-align: middle}
+        .fcaf_table_etats .centre {width: 120px; text-align: center}
+        .fcaf_table_etats input[type=checkbox] {width: 17px; height: 17px; accent-color: #3c8dbc}
+        .fcaf_jours {display: grid; grid-template-columns: 170px repeat(7, 42px); align-items: center; gap: 4px; margin-top: 8px}
+        .fcaf_jours label {margin: 0; font-weight: normal; text-align: center}
+
+        /* Filtres */
+        .fcaf_filtre {display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.4fr) minmax(0, 1.8fr) minmax(0, 1.5fr) 38px; gap: 8px; align-items: start; margin-bottom: 8px}
+        .fcaf_filtre select[multiple] {min-height: 38px}
+        .fcaf_filtre .valeurs:empty {display: none}
+        .fcaf_compteur {display: inline-block; padding: 4px 12px; border-radius: 999px; background: #e8f1f8; color: #1d5a80; font-size: 13.5px}
+        @media (max-width: 991px) {.fcaf_filtre {grid-template-columns: 1fr 1fr} .fcaf_filtre > :last-child {justify-self: end}}
+
+        /* Unités */
+        .fcaf_unites th {font-size: 12.5px; color: #6c757d; font-weight: 600; border-top: 0}
+        .fcaf_unites td {vertical-align: middle}
+        .fcaf_unites tr.activite td {background: #f4f6f9; font-weight: 600}
+        .fcaf_unites tr.desactivee td:not(:first-child) {opacity: .45}
+        .fcaf_unites .infos {font-size: 12px; color: #6c757d}
+        .fcaf_unites select {min-width: 210px}
+        .fcaf_unites tr.detail > td {padding: 0; background: #fbfcfd}
+        .fcaf_detail {display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; padding: 14px 16px}
+        .fcaf_detail h6 {font-size: 13px; font-weight: 700; color: #1d5a80; text-transform: uppercase; letter-spacing: .02em}
+        .fcaf_detail .form-row label {font-size: 12.5px; margin-bottom: 2px; color: #495057}
+        .fcaf_exemple {margin-top: 8px; padding: 6px 10px; border-radius: 4px; background: #f1f3f5; font-size: 12.5px; color: #495057}
+        .fcaf_exemple.erreur {background: #fdecee; color: #a8323e}
+        .fcaf_lien {padding: 0; border: 0; background: none; color: #3c8dbc; font-size: 13px; white-space: nowrap}
+        .fcaf_lien:hover, .fcaf_lien:focus {text-decoration: underline}
+
+        /* Résultats */
+        .fcaf_kpi {height: 100%; padding: 14px 16px; border-radius: .25rem; background: #ffffff; box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2)}
+        .fcaf_kpi .libelle {display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #6c757d}
+        .fcaf_kpi .libelle i {color: #3c8dbc}
+        .fcaf_kpi .valeur {margin-top: 4px; font-size: clamp(20px, 1.9vw, 28px); font-weight: 700; line-height: 1.2; color: #1f2d3d; white-space: nowrap; font-variant-numeric: tabular-nums}
+        .fcaf_kpi .detail {margin-top: 2px; font-size: 12px; color: #6c757d}
+        .fcaf_dont {padding: 8px 12px; border-left: 3px solid #3c8dbc; background: #f4f8fb}
+        .fcaf_controles {margin: 0; padding: 0; list-style: none}
+        .fcaf_controles > li {padding: 10px 16px; border-bottom: 1px solid #f1f3f5; font-size: 13.5px}
+        .fcaf_controles > li:last-child {border-bottom: 0}
+        .fcaf_details {margin: 8px 0 0 22px; padding-left: 14px; columns: 2; font-size: 12.5px}
+        .fcaf_graphe {position: relative; height: 240px}
+        .fcaf_tableau th, .fcaf_tableau td {padding: .35rem .6rem; font-size: 13px}
+        .fcaf_tableau thead th {background: #f4f6f9; font-size: 12.5px; vertical-align: middle}
+        .fcaf_tableau .nombre {text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums}
+        .fcaf_tableau .colonne_total {background: #e8eef3}
+        .fcaf_tableau tr.ligne_age th {background: #e9ecef; font-weight: 600}
+        .fcaf_tableau tr.ligne_sous_total th, .fcaf_tableau tr.ligne_sous_total td {background: #f8f9fa; font-weight: 600}
+        .fcaf_tableau tr.ligne_total th, .fcaf_tableau tr.ligne_total td {background: #e8eef3; font-weight: 700}
+        .fcaf_tableau tr.ligne_dont th, .fcaf_tableau tr.ligne_dont td {font-style: italic; color: #495057}
+        .fcaf_titre_regroupement {padding: 6px 10px; border-radius: 3px; background: #3c8dbc; color: #ffffff; font-size: 14.5px}
+        .fcaf_rappel {font-size: 12px; color: #6c757d}
+
+        /* Mode sombre */
+        .dark-mode .fcaf_etapes button {border-color: #6c757d; background: #343a40; color: #ced4da}
+        .dark-mode .fcaf_etapes button .numero {background: #4b545c}
+        .dark-mode .fcaf_etapes button.active, .dark-mode .fcaf_raccourcis .btn.active, .dark-mode .fcaf_compteur {border-color: #3f8fc5; background: #24435a; color: #d7e9f6}
+        .dark-mode .fcaf_section, .dark-mode .fcaf_controles > li {border-color: rgba(255, 255, 255, .07)}
+        .dark-mode .fcaf_unites tr.activite td, .dark-mode .fcaf_tableau thead th, .dark-mode .fcaf_tableau tr.ligne_age th {background: #3f474e}
+        .dark-mode .fcaf_unites tr.detail > td, .dark-mode .fcaf_tableau tr.ligne_sous_total th, .dark-mode .fcaf_tableau tr.ligne_sous_total td {background: #3a4047}
+        .dark-mode .fcaf_detail .form-row label, .dark-mode .fcaf_tableau tr.ligne_dont th, .dark-mode .fcaf_tableau tr.ligne_dont td {color: #ced4da}
+        .dark-mode .fcaf_detail h6 {color: #8fc1e3}
+        .dark-mode .fcaf_exemple {background: #454d55; color: #e9ecef}
+        .dark-mode .fcaf_kpi {background: #343a40}
+        .dark-mode .fcaf_kpi .valeur {color: #ffffff}
+        .dark-mode .fcaf_dont {background: #2f3a43}
+        .dark-mode .fcaf_tableau .colonne_total, .dark-mode .fcaf_tableau tr.ligne_total th, .dark-mode .fcaf_tableau tr.ligne_total td {background: #34414b}
+    </style>
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    {% csrf_token %}
+
+    {# ---------------------------- Profils ---------------------------- #}
+    <div class="card card-default">
+        <div class="card-body py-2">
+            <div class="fcaf_barre_profil">
+                <div class="fcaf_profil">{% crispy form_profil %}</div>
+                {% if profils_etat_global %}
+                    <div class="dropdown">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Reprendre les paramètres d'un profil de l'état global">
+                            <i class="fa fa-download margin-r-5" aria-hidden="true"></i>Importer de l'état global
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            {% for profil in profils_etat_global %}
+                                <a class="dropdown-item fcaf_import_etat_global" href="#" data-idprofil="{{ profil.pk }}">{{ profil.nom }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# ---------------------------- Assistant ---------------------------- #}
+    <div class="card card-default" id="fcaf_assistant">
+        <div class="card-header">
+            <ol class="fcaf_etapes" aria-label="Étapes de l'assistant">
+                <li><button type="button" data-etape="1" class="active" aria-current="step"><span class="numero">1</span>Activités et période</button></li>
+                <li><button type="button" data-etape="2"><span class="numero">2</span>Que compter ?</button></li>
+                <li><button type="button" data-etape="3"><span class="numero">3</span>Méthode par unité</button></li>
+                <li><button type="button" data-etape="4"><span class="numero">4</span>Règles</button></li>
+                <li><button type="button" data-etape="5"><span class="numero">5</span>Présentation</button></li>
+            </ol>
+        </div>
+
+        <div class="card-body">
+
+            {# ---------- Étape 1 : Activités et période ---------- #}
+            <section class="fcaf_etape active" data-etape="1" aria-labelledby="fcaf_titre_1">
+                <h4 id="fcaf_titre_1">Activités et période</h4>
+                <p class="fcaf_intro">Choisissez la période à déclarer et les activités concernées.</p>
+                <div class="fcaf_raccourcis" role="group" aria-label="Périodes prédéfinies">
+                    <button type="button" class="btn btn-default btn-sm fcaf_periode" data-periode="annee_precedente">Année <span class="annee_precedente"></span> (déclaration annuelle)</button>
+                    <button type="button" class="btn btn-default btn-sm fcaf_periode" data-periode="annee_en_cours">Année <span class="annee_en_cours"></span></button>
+                    <button type="button" class="btn btn-default btn-sm fcaf_periode" data-periode="annee_scolaire">Année scolaire précédente</button>
+                    <button type="button" class="btn btn-default btn-sm fcaf_periode" data-periode="trimestre">Trimestre précédent</button>
+                    <button type="button" class="btn btn-default btn-sm fcaf_periode" data-periode="mois">Mois précédent</button>
+                </div>
+                <div class="fcaf_selection">{% crispy form_selection %}</div>
+            </section>
+
+            {# ---------- Étape 2 : Que compter ? ---------- #}
+            <section class="fcaf_etape" data-etape="2" aria-labelledby="fcaf_titre_2">
+                <h4 id="fcaf_titre_2">Que faut-il compter ?</h4>
+                <p class="fcaf_intro">Le réalisé et le facturé sont calculés en même temps. Décochez une colonne si vous n'avez besoin que d'un seul chiffre.</p>
+
+                <table class="table table-sm fcaf_table_etats">
+                    <thead>
+                        <tr>
+                            <th scope="col">État des consommations</th>
+                            <th scope="col" class="centre"><label class="mb-0"><input type="checkbox" class="fcaf_colonne_active" data-colonne="realise" checked> Réalisé</label></th>
+                            <th scope="col" class="centre"><label class="mb-0"><input type="checkbox" class="fcaf_colonne_active" data-colonne="facture" checked> Facturé</label></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for code, label in config.etats %}
+                            <tr>
+                                <td>{{ label }}</td>
+                                <td class="centre"><input type="checkbox" class="fcaf_etat" data-colonne="realise" value="{{ code }}" aria-label="{{ label }} : réalisé"></td>
+                                <td class="centre"><input type="checkbox" class="fcaf_etat" data-colonne="facture" value="{{ code }}" aria-label="{{ label }} : facturé"></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="fcaf_section">
+                    <h5>Quels jours ?</h5>
+                    <div class="fcaf_raccourcis" role="group" aria-label="Jours prédéfinis">
+                        <button type="button" class="btn btn-default btn-sm fcaf_jours_preset" data-hors="0,1,2,3,4,5,6" data-vacs="0,1,2,3,4,5,6">Tous les jours</button>
+                        <button type="button" class="btn btn-default btn-sm fcaf_jours_preset" data-hors="2" data-vacs="">Mercredis (hors vacances)</button>
+                        <button type="button" class="btn btn-default btn-sm fcaf_jours_preset" data-hors="0,1,3,4" data-vacs="">Périscolaire lun-mar-jeu-ven</button>
+                        <button type="button" class="btn btn-default btn-sm fcaf_jours_preset" data-hors="" data-vacs="0,1,2,3,4,5,6">Vacances uniquement</button>
+                        <button type="button" class="btn btn-default btn-sm fcaf_jours_preset" data-hors="0,1,2,3,4,5,6" data-vacs="">Hors vacances uniquement</button>
+                        <button type="button" class="fcaf_lien ml-2" data-toggle="collapse" data-target="#fcaf_jours_detail" aria-expanded="false" aria-controls="fcaf_jours_detail">Détailler les jours</button>
+                    </div>
+                    <div class="collapse" id="fcaf_jours_detail">
+                        <div class="fcaf_jours">
+                            <span></span>
+                            {% for jour in "LMMJVSD" %}<span class="text-center font-weight-bold">{{ jour }}</span>{% endfor %}
+                            <span>Jours hors vacances</span>
+                            {% for index in "0123456" %}<label><input type="checkbox" class="fcaf_jour" data-type="hors" value="{{ index }}" aria-label="Hors vacances, jour {{ forloop.counter }}"></label>{% endfor %}
+                            <span>Jours de vacances</span>
+                            {% for index in "0123456" %}<label><input type="checkbox" class="fcaf_jour" data-type="vacs" value="{{ index }}" aria-label="Vacances, jour {{ forloop.counter }}"></label>{% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fcaf_section">
+                    <h5><i class="fa fa-users margin-r-5" aria-hidden="true"></i>Qui compter ?</h5>
+                    <p class="text-muted mb-2">Par défaut, tous les individus ayant des consommations sur la période. Ajoutez un filtre pour ne retenir qu'une partie d'entre eux (« Uniquement ») ou pour afficher un sous-total en plus du total (« En plus du total »).</p>
+                    <div id="fcaf_filtres"></div>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mt-2" style="gap: 8px;">
+                        <button type="button" class="btn btn-default btn-sm" id="fcaf_ajouter_filtre"><i class="fa fa-plus margin-r-5" aria-hidden="true"></i>Ajouter un filtre</button>
+                        <span class="fcaf_compteur" id="fcaf_compteur" aria-live="polite"></span>
+                    </div>
+                    <div id="fcaf_compteur_alertes" class="mt-2" aria-live="polite"></div>
+                </div>
+            </section>
+
+            {# ---------- Étape 3 : Méthode par unité ---------- #}
+            <section class="fcaf_etape" data-etape="3" aria-labelledby="fcaf_titre_3">
+                <h4 id="fcaf_titre_3">Comment compter chaque unité ?</h4>
+                <p class="fcaf_intro">Une méthode est proposée pour chaque unité selon son paramétrage. Cliquez sur « Affiner » pour régler l'arrondi, les durées minimum et maximum ou les horaires retenus.</p>
+                <div id="fcaf_unites_chargement" class="text-muted" style="display: none;"><i class="fa fa-spinner fa-spin margin-r-5" aria-hidden="true"></i>Chargement des unités…</div>
+                <div class="table-responsive">
+                    <table class="table table-sm fcaf_unites" id="fcaf_table_unites">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="width: 34%;">Unité</th>
+                                <th scope="col" class="fcaf_col_realise">Méthode pour le réalisé</th>
+                                <th scope="col" class="fcaf_col_facture">Méthode pour le facturé</th>
+                                <th scope="col"><span class="sr-only">Réglages</span></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            {# ---------- Étape 4 : Règles complémentaires ---------- #}
+            <section class="fcaf_etape" data-etape="4" aria-labelledby="fcaf_titre_4">
+                <h4 id="fcaf_titre_4">Règles complémentaires</h4>
+                <p class="fcaf_intro">Ces règles sont facultatives. Laissez-les vides si votre CAF ne les demande pas.</p>
+                <div class="fcaf_grille">
+                    <div class="fcaf_champ">
+                        <label for="fcaf_plafond">Plafond journalier par enfant</label>
+                        <input type="text" id="fcaf_plafond" class="form-control" placeholder="10:00" aria-describedby="fcaf_plafond_aide">
+                        <small id="fcaf_plafond_aide" class="form-text text-muted">Durée maximale retenue par enfant et par jour, toutes activités confondues (format hh:mm). Laissez vide pour ne pas plafonner.</small>
+                    </div>
+                    <div class="fcaf_champ">
+                        <label for="fcaf_regime_inconnu">Familles sans régime connu</label>
+                        <select id="fcaf_regime_inconnu" class="form-control" aria-describedby="fcaf_regime_aide">
+                            <option value="">Les afficher dans « Sans régime »</option>
+                            {% for idregime, nom in config.regimes %}<option value="{{ idregime }}">Les rattacher au régime « {{ nom }} »</option>{% endfor %}
+                        </select>
+                        <small id="fcaf_regime_aide" class="form-text text-muted">Les familles concernées sont listées dans les points à vérifier.</small>
+                    </div>
+                </div>
+            </section>
+
+            {# ---------- Étape 5 : Présentation ---------- #}
+            <section class="fcaf_etape" data-etape="5" aria-labelledby="fcaf_titre_5">
+                <h4 id="fcaf_titre_5">Comment présenter les résultats ?</h4>
+                <p class="fcaf_intro">La présentation proposée convient à la plupart des déclarations. Adaptez-la à la demande de votre CAF.</p>
+                <div class="fcaf_grille">
+                    <div class="fcaf_champ" role="radiogroup" aria-labelledby="fcaf_label_ventilation">
+                        <span class="fcaf_label" id="fcaf_label_ventilation">Lignes du tableau</span>
+                        {% for code, label in config.ventilations %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="fcaf_ventilation" id="fcaf_ventilation_{{ code }}" value="{{ code }}" {% if forloop.first %}checked{% endif %}>
+                                <label class="form-check-label" for="fcaf_ventilation_{{ code }}">{{ label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="fcaf_champ">
+                        <label for="fcaf_tranches_age">Tranches d'âge</label>
+                        <div class="fcaf_raccourcis mb-2" role="group" aria-label="Tranches d'âge prédéfinies">
+                            <button type="button" class="btn btn-default btn-sm fcaf_age_preset" data-valeur="">Aucune</button>
+                            <button type="button" class="btn btn-default btn-sm fcaf_age_preset" data-valeur="6">Moins de 6 ans / 6 ans et plus</button>
+                            <button type="button" class="btn btn-default btn-sm fcaf_age_preset" data-valeur="3, 6, 12">Moins de 3, 3-6, 6-12, 12 ans et plus</button>
+                        </div>
+                        <input type="text" id="fcaf_tranches_age" class="form-control" placeholder="6" aria-describedby="fcaf_age_aide">
+                        <small id="fcaf_age_aide" class="form-text text-muted">Âges limites séparés par des virgules. L'âge est calculé à la date de chaque consommation.</small>
+                    </div>
+                    <div class="fcaf_champ">
+                        <label for="fcaf_regroupement">Un tableau par</label>
+                        <select id="fcaf_regroupement" class="form-control">
+                            {% for code, label in config.regroupements %}<option value="{{ code }}">{% if code == "aucun" %}Un seul tableau{% else %}{{ label }}{% endif %}</option>{% endfor %}
+                        </select>
+                        <div id="fcaf_ligne_qf" class="mt-3" style="display: none;">
+                            <label for="fcaf_tranches_qf">Tranches de QF</label>
+                            <input type="text" id="fcaf_tranches_qf" class="form-control" placeholder="650, 800, 1200" aria-describedby="fcaf_qf_aide">
+                            <small id="fcaf_qf_aide" class="form-text text-muted">Bornes des tranches séparées par des virgules.</small>
+                        </div>
+                    </div>
+                    <div class="fcaf_champ">
+                        <span class="fcaf_label">Options</span>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="fcaf_par_regime">
+                            <label class="form-check-label" for="fcaf_par_regime">Une colonne par régime social (général, MSA…)</label>
+                        </div>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="radio" name="fcaf_format" id="fcaf_format_decimal" value="decimal" checked>
+                            <label class="form-check-label" for="fcaf_format_decimal">Heures décimales (8,50)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="fcaf_format" id="fcaf_format_horaire" value="horaire">
+                            <label class="form-check-label" for="fcaf_format_horaire">Heures et minutes (8h30)</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <div class="card-footer">
+          <div class="d-flex flex-wrap justify-content-between" style="gap: 8px;">
+            <div>
+                <button type="button" class="btn btn-default" id="fcaf_precedent"><i class="fa fa-arrow-left margin-r-5" aria-hidden="true"></i>Précédent</button>
+                <button type="button" class="btn btn-default" id="fcaf_suivant">Suivant<i class="fa fa-arrow-right ml-1" aria-hidden="true"></i></button>
+            </div>
+            <div>
+                <button type="button" class="btn btn-primary" id="fcaf_calculer"><i class="fa fa-calculator margin-r-5" aria-hidden="true"></i>Calculer</button>
+                <a class="btn btn-default" href="{% url 'etat_global' %}" title="Ouvrir l'état global (mode expert)"><i class="fa fa-sliders margin-r-5" aria-hidden="true"></i>État global</a>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    {# ---------------------------- Résultats ---------------------------- #}
+    <div id="fcaf_zone_resultats" style="display: none;">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-2" style="gap: 8px;">
+            <h3 class="mb-0" style="font-size: 20px;">Résultats</h3>
+            <div>
+                <button type="button" class="btn btn-default btn-sm" id="fcaf_excel"><i class="fa fa-file-excel-o margin-r-5" aria-hidden="true"></i>Excel</button>
+                <button type="button" class="btn btn-default btn-sm" id="fcaf_pdf"><i class="fa fa-file-pdf-o margin-r-5" aria-hidden="true"></i>PDF</button>
+            </div>
+        </div>
+        <div id="fcaf_resultats" aria-live="polite"></div>
+    </div>
+
+    {# Aide sur les formules #}
+    <template id="fcaf_aide_formule">
+        <small class="form-text text-muted">
+            Exemples : <code>unite12.duree</code>, <code>SI(unite12.etat == 'present', HEURE('08:00'), 0)</code>, <code>MAX(duree, HEURE('01:00'))</code>.
+            Variables : <code>debut</code>, <code>fin</code>, <code>duree</code>, <code>uniteXX.debut</code>, <code>.fin</code>, <code>.duree</code>, <code>.etat</code>, <code>.quantite</code>.
+            Opérateurs : ET, OU, +, -, *, /.
+        </small>
+    </template>
+
+    {{ config|json_script:"fcaf_config" }}
+
+    {% include 'core/modal_pdf.html' %}
+
+{% endblock contenu_page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    {{ form_selection.media.js }}
+    <script type="text/javascript" src="{% static 'lib/chartjs/chart.umd.min.js' %}"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            var CONFIG = JSON.parse(document.getElementById("fcaf_config").textContent);
+            var COLONNES = [["realise", "Réalisé"], ["facture", "Facturé"]];
+            var TYPES = CONFIG.types_calcul;
+            var URLS = {
+                unites: "{% url 'ajax_frequentation_caf_get_unites' %}",
+                compter: "{% url 'ajax_frequentation_caf_compter' %}",
+                exemple: "{% url 'ajax_frequentation_caf_exemple' %}",
+                calculer: "{% url 'ajax_frequentation_caf_calculer' %}",
+                excel: "{% url 'ajax_frequentation_caf_exporter_excel' %}",
+                pdf: "{% url 'ajax_frequentation_caf_generer_pdf' %}",
+                profil: "{% url 'ajax_frequentation_caf_get_profil' %}"
+            };
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            $.ajaxSetup({beforeSend: function (xhr, settings) {if (!/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type) && !this.crossDomain) {xhr.setRequestHeader("X-CSRFToken", csrftoken)}}});
+
+            var etape_actuelle = 1;
+            var activites_unites = [];          // Unités chargées depuis le serveur
+            var parametres_unites = {};         // {idunite: {actif, realise: {...}, facture: {...}}}
+            var cle_unites_chargees = null;     // Période + activités des unités chargées
+            var parametres_en_attente = null;   // Paramètres d'un profil à appliquer aux unités après chargement
+            var graphique = null;
+
+            function echapper(texte) {return $("<div>").text(texte === null || texte === undefined ? "" : texte).html()}
+            function differer(fonction, delai) {
+                var minuteur = null;
+                return function () {var args = arguments, contexte = this; clearTimeout(minuteur); minuteur = setTimeout(function () {fonction.apply(contexte, args)}, delai)};
+            }
+
+            // ======================================= Étape 1 =======================================
+
+            $(".annee_precedente").text(moment().year() - 1);
+            $(".annee_en_cours").text(moment().year());
+
+            function get_picker() {return $("#id_periode").data("daterangepicker")}
+
+            function get_periode() {
+                var valeur = $("#id_periode").val() || "";
+                var morceaux = valeur.split(" - ");
+                if (morceaux.length !== 2) {return null}
+                var debut = moment(morceaux[0].trim(), "DD/MM/YYYY", true), fin = moment(morceaux[1].trim(), "DD/MM/YYYY", true);
+                if (!debut.isValid() || !fin.isValid()) {return null}
+                return {date_debut: debut.format("YYYY-MM-DD"), date_fin: fin.format("YYYY-MM-DD")};
+            }
+
+            function set_periode(debut, fin) {
+                var picker = get_picker();
+                if (picker) {
+                    picker.setStartDate(debut);
+                    picker.setEndDate(fin);
+                }
+                $("#id_periode").val(debut.format("DD/MM/YYYY") + " - " + fin.format("DD/MM/YYYY")).trigger("change");
+            }
+
+            $(".fcaf_periode").on("click", function () {
+                var code = $(this).data("periode"), debut, fin;
+                if (code === "annee_precedente") {debut = moment().subtract(1, "year").startOf("year"); fin = moment().subtract(1, "year").endOf("year")}
+                if (code === "annee_en_cours") {debut = moment().startOf("year"); fin = moment().endOf("year")}
+                if (code === "annee_scolaire") {
+                    var annee = moment().month() >= 8 ? moment().year() - 1 : moment().year() - 2;
+                    debut = moment([annee, 8, 1]); fin = moment([annee + 1, 7, 31]);
+                }
+                if (code === "trimestre") {debut = moment().subtract(1, "quarter").startOf("quarter"); fin = moment().subtract(1, "quarter").endOf("quarter")}
+                if (code === "mois") {debut = moment().subtract(1, "month").startOf("month"); fin = moment().subtract(1, "month").endOf("month")}
+                set_periode(debut, fin);
+                $(".fcaf_periode").removeClass("active");
+                $(this).addClass("active");
+            });
+
+            function get_activites() {
+                var type = $("input[name=choix_activites]:checked").val() || "groupes_activites";
+                var ids = [];
+                if (type !== "toutes") {
+                    $("input[name=liste_" + type + "]:checked").each(function () {ids.push(parseInt($(this).val()))});
+                }
+                return {type: type, ids: ids};
+            }
+
+            function set_activites(selection) {
+                if (!selection || !selection.type) {return}
+                $("input[name=choix_activites][value=" + selection.type + "]").prop("checked", true).trigger("change");
+                if (selection.type !== "toutes") {
+                    $("input[name=liste_" + selection.type + "]").each(function () {
+                        $(this).prop("checked", selection.ids.indexOf(parseInt($(this).val())) !== -1);
+                    });
+                }
+            }
+
+            // ======================================= Étape 2 =======================================
+
+            function set_etats(colonnes) {
+                $(".fcaf_etat").each(function () {
+                    var colonne = colonnes[$(this).data("colonne")];
+                    $(this).prop("checked", !!colonne && colonne.etats.indexOf($(this).val()) !== -1);
+                });
+                $(".fcaf_colonne_active").each(function () {
+                    var colonne = colonnes[$(this).data("colonne")];
+                    $(this).prop("checked", !!colonne && colonne.active !== false);
+                });
+                maj_colonnes();
+            }
+
+            function colonne_active(code) {return $(".fcaf_colonne_active[data-colonne=" + code + "]").prop("checked")}
+
+            function maj_colonnes() {
+                COLONNES.forEach(function (colonne) {
+                    var active = colonne_active(colonne[0]);
+                    $(".fcaf_etat[data-colonne=" + colonne[0] + "]").prop("disabled", !active);
+                    $(".fcaf_col_" + colonne[0]).toggle(active);
+                });
+            }
+            $(".fcaf_colonne_active").on("change", function () {
+                if (!colonne_active("realise") && !colonne_active("facture")) {
+                    $(this).prop("checked", true);
+                    toastr.warning("Au moins une des deux colonnes doit rester active");
+                }
+                maj_colonnes();
+                compter_population();
+            });
+            $(".fcaf_etat").on("change", function () {compter_population()});
+
+            function set_jours(hors, vacs) {
+                $(".fcaf_jour").each(function () {
+                    var liste = $(this).data("type") === "hors" ? hors : vacs;
+                    $(this).prop("checked", liste.indexOf($(this).val()) !== -1);
+                });
+                maj_presets_jours();
+            }
+            function get_jours(type) {
+                var jours = [];
+                $(".fcaf_jour[data-type=" + type + "]:checked").each(function () {jours.push($(this).val())});
+                return jours;
+            }
+            function maj_presets_jours() {
+                var hors = get_jours("hors").join(","), vacs = get_jours("vacs").join(",");
+                $(".fcaf_jours_preset").each(function () {
+                    $(this).toggleClass("active", String($(this).data("hors")) === hors && String($(this).data("vacs")) === vacs);
+                });
+            }
+            $(".fcaf_jours_preset").on("click", function () {
+                var hors = String($(this).data("hors")), vacs = String($(this).data("vacs"));
+                set_jours(hors ? hors.split(",") : [], vacs ? vacs.split(",") : []);
+            });
+            $(".fcaf_jour").on("change", maj_presets_jours);
+
+            // ---------- Filtres de population ----------
+
+            var CHAMPS = {};
+            CONFIG.champs_filtres.forEach(function (champ) {CHAMPS[champ.code] = champ});
+
+            function html_select_champs() {
+                var groupes = {}, ordre = [];
+                CONFIG.champs_filtres.forEach(function (champ) {
+                    if (!groupes[champ.groupe]) {groupes[champ.groupe] = []; ordre.push(champ.groupe)}
+                    groupes[champ.groupe].push(champ);
+                });
+                var html = "<option value=''>- Choisissez un critère -</option>";
+                ordre.forEach(function (groupe) {
+                    html += "<optgroup label='" + echapper(groupe) + "'>";
+                    groupes[groupe].forEach(function (champ) {html += "<option value='" + echapper(champ.code) + "'>" + echapper(champ.label) + "</option>"});
+                    html += "</optgroup>";
+                });
+                return html;
+            }
+
+            var compteur_filtres = 0;
+            function ajouter_filtre(filtre) {
+                filtre = filtre || {};
+                compteur_filtres += 1;
+                var id = "fcaf_filtre_" + compteur_filtres;
+                var ligne = $("<div class='fcaf_filtre' id='" + id + "'>" +
+                    "<select class='form-control champ' aria-label='Critère du filtre'>" + html_select_champs() + "</select>" +
+                    "<select class='form-control operateur' aria-label='Condition'></select>" +
+                    "<div class='valeurs'></div>" +
+                    "<select class='form-control mode' aria-label='Effet du filtre'><option value='uniquement'>Uniquement ceux-là</option><option value='dont'>En plus du total (« dont »)</option></select>" +
+                    "<button type='button' class='btn btn-default supprimer' title='Retirer le filtre' aria-label='Retirer le filtre'><i class='fa fa-times' aria-hidden='true'></i></button>" +
+                    "</div>");
+                $("#fcaf_filtres").append(ligne);
+                ligne.find(".champ").val(filtre.champ || "");
+                maj_operateurs(ligne, filtre);
+                ligne.find(".mode").val(filtre.mode || "uniquement");
+            }
+
+            function maj_operateurs(ligne, filtre) {
+                filtre = filtre || {};
+                var champ = CHAMPS[ligne.find(".champ").val()];
+                var select = ligne.find(".operateur").empty();
+                if (!champ) {ligne.find(".valeurs").empty(); return}
+                CONFIG.operateurs[champ.type].forEach(function (op) {select.append($("<option>").val(op[0]).text(op[1]))});
+                if (filtre.operateur) {select.val(filtre.operateur)}
+                maj_valeurs(ligne, filtre);
+            }
+
+            function maj_valeurs(ligne, filtre) {
+                filtre = filtre || {};
+                var champ = CHAMPS[ligne.find(".champ").val()], operateur = ligne.find(".operateur").val();
+                var zone = ligne.find(".valeurs").empty();
+                if (!champ || ["coche", "non_coche", "vide", "non_vide"].indexOf(operateur) !== -1) {return}
+                if (champ.type === "choix" || champ.type === "liste") {
+                    var select = $("<select multiple class='form-control valeur' aria-label='Valeurs'></select>").attr("size", Math.min(4, Math.max(2, champ.choix.length)));
+                    var selection = (filtre.valeur || []).map(String);
+                    champ.choix.forEach(function (choix) {
+                        select.append($("<option>").val(choix[0]).text(choix[1]).prop("selected", selection.indexOf(String(choix[0])) !== -1));
+                    });
+                    zone.append(select);
+                    return;
+                }
+                var type_input = champ.type === "date" ? "date" : (champ.type === "nombre" ? "number" : "text");
+                zone.append($("<input class='form-control valeur' aria-label='Valeur'>").attr("type", type_input).attr("step", "any").val(filtre.valeur !== undefined ? filtre.valeur : ""));
+                if (operateur === "entre") {
+                    zone.addClass("d-flex").css("gap", "6px");
+                    zone.append($("<input class='form-control valeur2' aria-label='Seconde valeur'>").attr("type", type_input).attr("step", "any").val(filtre.valeur2 !== undefined && filtre.valeur2 !== null ? filtre.valeur2 : ""));
+                } else {
+                    zone.removeClass("d-flex");
+                }
+            }
+
+            $("#fcaf_ajouter_filtre").on("click", function () {ajouter_filtre(); $("#fcaf_filtres .fcaf_filtre:last .champ").focus()});
+            $("#fcaf_filtres").on("change", ".champ", function () {maj_operateurs($(this).closest(".fcaf_filtre")); compter_population()});
+            $("#fcaf_filtres").on("change", ".operateur", function () {maj_valeurs($(this).closest(".fcaf_filtre")); compter_population()});
+            $("#fcaf_filtres").on("change input", ".valeur, .valeur2, .mode", function () {compter_population()});
+            $("#fcaf_filtres").on("click", ".supprimer", function () {$(this).closest(".fcaf_filtre").remove(); compter_population()});
+
+            function get_filtres() {
+                var filtres = [];
+                $("#fcaf_filtres .fcaf_filtre").each(function () {
+                    var champ = $(this).find(".champ").val();
+                    if (!champ) {return}
+                    var valeur = $(this).find(".valeur");
+                    filtres.push({
+                        champ: champ, operateur: $(this).find(".operateur").val(), mode: $(this).find(".mode").val(),
+                        valeur: valeur.length ? valeur.val() : "", valeur2: $(this).find(".valeur2").val() || ""
+                    });
+                });
+                return filtres;
+            }
+
+            var compter_population = differer(function () {
+                if (!activites_unites.length) {$("#fcaf_compteur").text(""); return}
+                var parametres = get_parametres();
+                $.ajax({
+                    type: "POST", url: URLS.compter, data: {parametres: JSON.stringify(parametres)}, datatype: "json",
+                    success: function (data) {
+                        $("#fcaf_compteur").text(data.retenus + " individu" + (data.retenus > 1 ? "s" : "") + " retenu" + (data.retenus > 1 ? "s" : "") + " sur " + data.tous);
+                        var html = "";
+                        data.sans_reponse.forEach(function (item) {
+                            html += "<div class='text-warning small'><i class='fa fa-exclamation-triangle margin-r-5' aria-hidden='true'></i>" + item.nombre +
+                                " individu(s) n'ont jamais répondu à « " + echapper(item.question) + " » : ils sont exclus par ce filtre.</div>";
+                        });
+                        $("#fcaf_compteur_alertes").html(html);
+                    },
+                    error: function (data) {
+                        $("#fcaf_compteur").text("");
+                        $("#fcaf_compteur_alertes").html(data.responseJSON ? "<div class='text-danger small'>" + echapper(data.responseJSON.erreur) + "</div>" : "");
+                    }
+                });
+            }, 500);
+
+            // ======================================= Étape 3 : unités =======================================
+
+            function cle_selection() {return JSON.stringify([get_periode(), get_activites()])}
+
+            function charger_unites(callback) {
+                var periode = get_periode(), activites = get_activites();
+                if (!periode) {toastr.error("Veuillez sélectionner une période"); return}
+                if (activites.type !== "toutes" && !activites.ids.length) {toastr.error("Veuillez sélectionner au moins une activité"); return}
+                var cle = cle_selection();
+                if (cle === cle_unites_chargees && !parametres_en_attente) {if (callback) {callback()} return}
+                $("#fcaf_unites_chargement").show();
+                $.ajax({
+                    type: "POST", url: URLS.unites, datatype: "json",
+                    data: {parametres: JSON.stringify($.extend({}, periode, {activites: activites}))},
+                    success: function (data) {
+                        cle_unites_chargees = cle;
+                        activites_unites = data.activites;
+                        initialiser_parametres_unites();
+                        construire_table_unites();
+                        compter_population();
+                        if (callback) {callback()}
+                    },
+                    error: function (data) {
+                        activites_unites = [];
+                        cle_unites_chargees = null;
+                        $("#fcaf_table_unites tbody").empty();
+                        toastr.error(data.responseJSON ? data.responseJSON.erreur : "Erreur lors du chargement des unités");
+                    },
+                    complete: function () {$("#fcaf_unites_chargement").hide()}
+                });
+            }
+
+            function initialiser_parametres_unites() {
+                var anciens = parametres_unites;
+                parametres_unites = {};
+                var profil = parametres_en_attente;
+                activites_unites.forEach(function (activite) {
+                    activite.unites.forEach(function (unite) {
+                        var id = String(unite.id);
+                        if (profil) {
+                            // Paramètres d'un profil : unité active si elle figure dans au moins une colonne
+                            var dans_profil = false, valeurs = {actif: false};
+                            COLONNES.forEach(function (colonne) {
+                                var colonne_profil = (profil.colonnes || {})[colonne[0]] || {};
+                                var p = (colonne_profil.unites || {})[id];
+                                if (p) {dans_profil = true; valeurs[colonne[0]] = $.extend({}, unite.parametres[colonne[0]], p)}
+                                else {valeurs[colonne[0]] = $.extend({}, unite.parametres[colonne[0]])}
+                            });
+                            valeurs.actif = dans_profil;
+                            parametres_unites[id] = valeurs;
+                        } else if (anciens[id]) {
+                            parametres_unites[id] = anciens[id];
+                        } else {
+                            parametres_unites[id] = {actif: unite.actif, realise: $.extend({}, unite.parametres.realise), facture: $.extend({}, unite.parametres.facture)};
+                        }
+                    });
+                });
+                parametres_en_attente = null;
+            }
+
+            function options_types(valeur) {
+                return TYPES.map(function (type) {return "<option value='" + type[0] + "'" + (type[0] === valeur ? " selected" : "") + ">" + echapper(type[1]) + "</option>"}).join("");
+            }
+
+            function construire_table_unites() {
+                var tbody = $("#fcaf_table_unites tbody").empty();
+                activites_unites.forEach(function (activite) {
+                    tbody.append("<tr class='activite'><td colspan='4'>" + echapper(activite.nom) + "</td></tr>");
+                    activite.unites.forEach(function (unite) {
+                        var p = parametres_unites[String(unite.id)];
+                        var infos = [unite.remarque];
+                        if (unite.horaires) {infos.push(unite.horaires)}
+                        if (unite.equiv_heures) {infos.push("équivalence " + unite.equiv_heures)}
+                        var ligne = $("<tr class='unite' data-idunite='" + unite.id + "'>" +
+                            "<td><div class='form-check'><input class='form-check-input actif' type='checkbox' id='fcaf_unite_" + unite.id + "'>" +
+                            "<label class='form-check-label' for='fcaf_unite_" + unite.id + "'>" + echapper(unite.nom) + "</label></div>" +
+                            "<div class='infos ml-4'>" + echapper(infos.join(" · ")) + "</div></td>" +
+                            "<td class='fcaf_col_realise'><select class='form-control form-control-sm type' data-colonne='realise' aria-label='Méthode pour le réalisé de " + echapper(unite.nom) + "'>" + options_types(p.realise.type) + "</select></td>" +
+                            "<td class='fcaf_col_facture'><select class='form-control form-control-sm type' data-colonne='facture' aria-label='Méthode pour le facturé de " + echapper(unite.nom) + "'>" + options_types(p.facture.type) + "</select></td>" +
+                            "<td class='text-right'><button type='button' class='fcaf_lien affiner' aria-expanded='false' aria-controls='fcaf_detail_" + unite.id + "'><i class='fa fa-chevron-down margin-r-5' aria-hidden='true'></i>Affiner</button></td>" +
+                            "</tr>");
+                        ligne.find(".actif").prop("checked", p.actif);
+                        ligne.toggleClass("desactivee", !p.actif);
+                        tbody.append(ligne);
+                        tbody.append("<tr class='detail' id='fcaf_detail_" + unite.id + "' data-idunite='" + unite.id + "' style='display: none;'><td colspan='4'></td></tr>");
+                    });
+                });
+                maj_colonnes();
+            }
+
+            function get_unite(idunite) {
+                var resultat = null;
+                activites_unites.forEach(function (activite) {activite.unites.forEach(function (unite) {if (String(unite.id) === String(idunite)) {resultat = unite}})});
+                return resultat;
+            }
+
+            function html_reglages(idunite, colonne) {
+                var p = parametres_unites[idunite][colonne], unite = get_unite(idunite);
+                var html = "<div class='fcaf_reglages fcaf_col_" + colonne + "' data-colonne='" + colonne + "'><h6>" + (colonne === "realise" ? "Réalisé" : "Facturé") + "</h6>";
+                var prefixe = "fcaf_" + colonne + "_" + idunite + "_";
+                if (p.type === "1") {
+                    html += "<div class='form-row'>" +
+                        "<div class='col-12 mb-2'><label for='" + prefixe + "arrondi'>Arrondi</label><select id='" + prefixe + "arrondi' class='form-control form-control-sm champ' data-champ='arrondi'>" +
+                        CONFIG.arrondis.map(function (a) {return "<option value='" + a[0] + "'" + (a[0] === (p.arrondi || "") ? " selected" : "") + ">" + echapper(a[1]) + "</option>"}).join("") + "</select></div>" +
+                        "<div class='col-6 mb-2'><label for='" + prefixe + "duree_seuil'>Durée minimum retenue</label><input id='" + prefixe + "duree_seuil' class='form-control form-control-sm champ' data-champ='duree_seuil' placeholder='hh:mm' value='" + echapper(p.duree_seuil) + "'></div>" +
+                        "<div class='col-6 mb-2'><label for='" + prefixe + "duree_plafond'>Durée maximum retenue</label><input id='" + prefixe + "duree_plafond' class='form-control form-control-sm champ' data-champ='duree_plafond' placeholder='hh:mm' value='" + echapper(p.duree_plafond) + "'></div>" +
+                        "<div class='col-6 mb-2'><label for='" + prefixe + "heure_seuil'>Compter à partir de</label><input id='" + prefixe + "heure_seuil' class='form-control form-control-sm champ' data-champ='heure_seuil' placeholder='hh:mm' value='" + echapper(p.heure_seuil) + "'></div>" +
+                        "<div class='col-6 mb-2'><label for='" + prefixe + "heure_plafond'>Compter jusqu'à</label><input id='" + prefixe + "heure_plafond' class='form-control form-control-sm champ' data-champ='heure_plafond' placeholder='hh:mm' value='" + echapper(p.heure_plafond) + "'></div>" +
+                        "</div>";
+                } else if (p.type === "0") {
+                    html += "<label for='" + prefixe + "coeff' class='small mb-1'>Durée retenue pour une unité</label>" +
+                        "<input id='" + prefixe + "coeff' class='form-control form-control-sm champ' data-champ='coeff' placeholder='08:00' value='" + echapper(p.coeff) + "' style='max-width: 140px;'>" +
+                        "<small class='form-text text-muted'>Format hh:mm (08:00) ou en heures décimales (8 ou 1,5). Multipliée par la quantité consommée.</small>";
+                } else if (p.type === "3") {
+                    html += "<label for='" + prefixe + "formule' class='small mb-1'>Formule</label>" +
+                        "<textarea id='" + prefixe + "formule' class='form-control form-control-sm champ' data-champ='formule' rows='2' spellcheck='false' style='font-family: monospace;'>" + echapper(p.formule) + "</textarea>" +
+                        document.getElementById("fcaf_aide_formule").innerHTML +
+                        "<small class='form-text text-muted'>Identifiants : " + activites_unites.map(function (a) {return a.unites.map(function (u) {return "unite" + u.id + " = " + echapper(u.nom)}).join(", ")}).join(", ") + "</small>";
+                } else if (p.type === "2") {
+                    html += "<p class='small text-muted mb-0'>Reprend le temps facturé enregistré sur la prestation (paramétré dans le tarif de l'activité). Une prestation commune à plusieurs consommations n'est comptée qu'une fois.</p>";
+                } else if (p.type === "4") {
+                    html += "<p class='small text-muted mb-0'>" + (unite.equiv_heures ? "Chaque consommation compte pour " + echapper(unite.equiv_heures) + " (équivalence paramétrée dans l'unité, ou celle de l'évènement)." :
+                        "<span class='text-danger'>Aucune équivalence n'est paramétrée pour cette unité : renseignez-la dans le paramétrage de l'activité.</span>") + "</p>";
+                }
+                html += "<div class='fcaf_exemple' aria-live='polite'><i class='fa fa-lightbulb-o margin-r-5' aria-hidden='true'></i><span>Calcul de l'exemple…</span></div>";
+                html += "<button type='button' class='fcaf_lien mt-2 similaires'><i class='fa fa-clone margin-r-5' aria-hidden='true'></i>Appliquer aux unités du même type</button>";
+                html += "</div>";
+                return html;
+            }
+
+            function afficher_detail(idunite) {
+                var cellule = $("#fcaf_detail_" + idunite + " > td");
+                cellule.html("<div class='fcaf_detail'>" + html_reglages(idunite, "realise") + html_reglages(idunite, "facture") + "</div>");
+                maj_colonnes();
+                COLONNES.forEach(function (colonne) {if (colonne_active(colonne[0])) {charger_exemple(idunite, colonne[0])}});
+            }
+
+            $("#fcaf_table_unites").on("click", ".affiner", function () {
+                var idunite = String($(this).closest("tr").data("idunite"));
+                var detail = $("#fcaf_detail_" + idunite), ouvert = detail.is(":visible");
+                if (!ouvert) {afficher_detail(idunite)}
+                detail.toggle(!ouvert);
+                $(this).attr("aria-expanded", !ouvert).find("i").toggleClass("fa-chevron-down", ouvert).toggleClass("fa-chevron-up", !ouvert);
+                $(this).contents().last()[0].textContent = ouvert ? "Affiner" : "Masquer";
+            });
+
+            $("#fcaf_table_unites").on("change", ".actif", function () {
+                var idunite = String($(this).closest("tr").data("idunite"));
+                parametres_unites[idunite].actif = $(this).prop("checked");
+                $(this).closest("tr").toggleClass("desactivee", !parametres_unites[idunite].actif);
+                compter_population();
+            });
+
+            $("#fcaf_table_unites").on("change", "select.type", function () {
+                var idunite = String($(this).closest("tr").data("idunite")), colonne = $(this).data("colonne");
+                parametres_unites[idunite][colonne].type = $(this).val();
+                if ($(this).val() === "0" && !parametres_unites[idunite][colonne].coeff) {
+                    var unite = get_unite(idunite);
+                    parametres_unites[idunite][colonne].coeff = unite.equiv_heures ? unite.equiv_heures.replace("h", ":") : "";
+                }
+                if ($("#fcaf_detail_" + idunite).is(":visible")) {afficher_detail(idunite)}
+            });
+
+            var exemple_differe = {};
+            $("#fcaf_table_unites").on("change input", ".fcaf_reglages .champ", function () {
+                var bloc = $(this).closest(".fcaf_reglages"), idunite = String(bloc.closest("tr").data("idunite")), colonne = bloc.data("colonne");
+                parametres_unites[idunite][colonne][$(this).data("champ")] = $(this).val();
+                var cle = idunite + colonne;
+                if (!exemple_differe[cle]) {exemple_differe[cle] = differer(function () {charger_exemple(idunite, colonne)}, 600)}
+                exemple_differe[cle]();
+            });
+
+            $("#fcaf_table_unites").on("click", ".similaires", function () {
+                var bloc = $(this).closest(".fcaf_reglages"), idunite = String(bloc.closest("tr").data("idunite")), colonne = bloc.data("colonne");
+                var reference = get_unite(idunite), nombre = 0;
+                activites_unites.forEach(function (activite) {
+                    activite.unites.forEach(function (unite) {
+                        if (String(unite.id) !== idunite && unite.type_unite === reference.type_unite) {
+                            parametres_unites[String(unite.id)][colonne] = $.extend({}, parametres_unites[idunite][colonne]);
+                            $("tr.unite[data-idunite=" + unite.id + "] select.type[data-colonne=" + colonne + "]").val(parametres_unites[idunite][colonne].type);
+                            if ($("#fcaf_detail_" + unite.id).is(":visible")) {afficher_detail(String(unite.id))}
+                            nombre += 1;
+                        }
+                    });
+                });
+                toastr.success(nombre ? "Réglages appliqués à " + nombre + " unité(s) de type « " + reference.type_unite + " »" : "Aucune autre unité de ce type");
+            });
+
+            function charger_exemple(idunite, colonne) {
+                var zone = $("#fcaf_detail_" + idunite + " .fcaf_reglages[data-colonne=" + colonne + "] .fcaf_exemple");
+                if (!zone.length) {return}
+                $.ajax({
+                    type: "POST", url: URLS.exemple, datatype: "json",
+                    data: {parametres: JSON.stringify(get_parametres()), idunite: idunite, colonne: colonne},
+                    success: function (data) {
+                        zone.toggleClass("erreur", !!data.erreur).find("span").text(data.texte || "");
+                        zone.toggle(!!data.texte);
+                    }
+                });
+            }
+
+            // ======================================= Étapes 4 et 5 =======================================
+
+            function lire_hhmm_en_minutes(texte) {
+                texte = (texte || "").trim();
+                if (!texte) {return 0}
+                var resultat = /^(\d{1,2})\s*[:hH]\s*(\d{0,2})$/.exec(texte);
+                if (!resultat) {return null}
+                return parseInt(resultat[1]) * 60 + parseInt(resultat[2] || "0");
+            }
+            function minutes_en_hhmm(minutes) {
+                minutes = parseInt(minutes || 0);
+                if (!minutes) {return ""}
+                return ("0" + Math.floor(minutes / 60)).slice(-2) + ":" + ("0" + (minutes % 60)).slice(-2);
+            }
+
+            $(".fcaf_age_preset").on("click", function () {$("#fcaf_tranches_age").val($(this).data("valeur")).trigger("input")});
+            $("#fcaf_tranches_age").on("input", function () {
+                var valeur = $(this).val().replace(/\s/g, "");
+                $(".fcaf_age_preset").each(function () {$(this).toggleClass("active", String($(this).data("valeur")).replace(/\s/g, "") === valeur)});
+            });
+            $("#fcaf_regroupement").on("change", function () {$("#fcaf_ligne_qf").toggle($(this).val() === "qf_perso")});
+
+            // ======================================= Paramètres =======================================
+
+            function get_parametres() {
+                var periode = get_periode() || {};
+                var colonnes = {};
+                COLONNES.forEach(function (colonne) {
+                    var code = colonne[0], etats = [], unites = {};
+                    $(".fcaf_etat[data-colonne=" + code + "]:checked").each(function () {etats.push($(this).val())});
+                    $.each(parametres_unites, function (idunite, p) {if (p.actif) {unites[idunite] = p[code]}});
+                    colonnes[code] = {active: colonne_active(code), etats: etats, unites: unites};
+                });
+                return {
+                    date_debut: periode.date_debut, date_fin: periode.date_fin, activites: get_activites(),
+                    jours_hors_vacances: get_jours("hors"), jours_vacances: get_jours("vacs"),
+                    colonnes: colonnes, filtres: get_filtres(),
+                    plafond_journalier: lire_hhmm_en_minutes($("#fcaf_plafond").val()),
+                    associer_regime_inconnu: $("#fcaf_regime_inconnu").val(),
+                    regroupement_principal: $("#fcaf_regroupement").val(),
+                    regroupement_age: $("#fcaf_tranches_age").val(),
+                    tranches_qf_perso: $("#fcaf_tranches_qf").val(),
+                    ventilation_periodes: $("input[name=fcaf_ventilation]:checked").val(),
+                    regroupement_regime: $("#fcaf_par_regime").prop("checked"),
+                    format_donnees: $("input[name=fcaf_format]:checked").val()
+                };
+            }
+
+            function appliquer_parametres(p, nom_profil) {
+                set_etats(p.colonnes || {});
+                set_jours(p.jours_hors_vacances || [], p.jours_vacances || []);
+                $("#fcaf_filtres").empty();
+                (p.filtres || []).forEach(function (filtre) {ajouter_filtre(filtre)});
+                $("#fcaf_plafond").val(minutes_en_hhmm(p.plafond_journalier));
+                $("#fcaf_regime_inconnu").val(p.associer_regime_inconnu || "");
+                $("#fcaf_regroupement").val(p.regroupement_principal || "aucun").trigger("change");
+                $("#fcaf_tranches_age").val(p.regroupement_age || "").trigger("input");
+                $("#fcaf_tranches_qf").val(p.tranches_qf_perso || "");
+                $("input[name=fcaf_ventilation][value=" + (p.ventilation_periodes || "mercredis") + "]").prop("checked", true);
+                $("#fcaf_par_regime").prop("checked", !!p.regroupement_regime);
+                $("input[name=fcaf_format][value=" + (p.format_donnees || "decimal") + "]").prop("checked", true);
+                if (p.activites) {set_activites(p.activites)}
+                // Les méthodes par unité seront appliquées au prochain chargement des unités
+                parametres_en_attente = p;
+                cle_unites_chargees = null;
+                charger_unites(function () {
+                    toastr.success("Profil « " + nom_profil + " » appliqué. Vérifiez la période avant de calculer.");
+                    aller_etape(1);
+                });
+            }
+
+            // Valeurs par défaut
+            set_etats({realise: {active: true, etats: CONFIG.etats_defaut.realise}, facture: {active: true, etats: CONFIG.etats_defaut.facture}});
+            set_jours(["0", "1", "2", "3", "4", "5", "6"], ["0", "1", "2", "3", "4", "5", "6"]);
+            $("#fcaf_tranches_age").val("6").trigger("input");
+
+            // ======================================= Navigation =======================================
+
+            function aller_etape(numero) {
+                numero = Math.max(1, Math.min(5, numero));
+                var suite = function () {
+                    etape_actuelle = numero;
+                    $(".fcaf_etape").removeClass("active");
+                    $(".fcaf_etape[data-etape=" + numero + "]").addClass("active");
+                    $(".fcaf_etapes button").removeClass("active").removeAttr("aria-current").each(function () {
+                        $(this).toggleClass("valide", parseInt($(this).data("etape")) < numero);
+                    });
+                    $(".fcaf_etapes button[data-etape=" + numero + "]").addClass("active").attr("aria-current", "step");
+                    $("#fcaf_precedent").prop("disabled", numero === 1);
+                    $("#fcaf_suivant").toggle(numero < 5);
+                    $("#fcaf_titre_" + numero).attr("tabindex", "-1").focus();
+                };
+                if (numero > 1) {charger_unites(suite)} else {suite()}
+            }
+            $(".fcaf_etapes button").on("click", function () {aller_etape(parseInt($(this).data("etape")))});
+            $("#fcaf_precedent").on("click", function () {aller_etape(etape_actuelle - 1)});
+            $("#fcaf_suivant").on("click", function () {aller_etape(etape_actuelle + 1)});
+            $("#fcaf_precedent").prop("disabled", true);
+
+            // ======================================= Calcul et exports =======================================
+
+            function verifier_avant_envoi() {
+                if (!get_periode()) {toastr.error("Veuillez sélectionner une période"); aller_etape(1); return false}
+                if (lire_hhmm_en_minutes($("#fcaf_plafond").val()) === null) {toastr.error("Le plafond journalier doit être au format hh:mm"); aller_etape(4); return false}
+                return true;
+            }
+
+            function envoyer(url, bouton, succes) {
+                var icone = bouton.find("i"), classe = icone.attr("class");
+                bouton.prop("disabled", true);
+                icone.attr("class", "fa fa-spinner fa-spin margin-r-5");
+                $.ajax({
+                    type: "POST", url: url, datatype: "json", data: {parametres: JSON.stringify(get_parametres())},
+                    success: succes,
+                    error: function (data) {toastr.error(data.responseJSON ? data.responseJSON.erreur : "Une erreur est survenue")},
+                    complete: function () {bouton.prop("disabled", false); icone.attr("class", classe)}
+                });
+            }
+
+            $("#fcaf_calculer").on("click", function () {
+                if (!verifier_avant_envoi()) {return}
+                var bouton = $(this);
+                charger_unites(function () {
+                    envoyer(URLS.calculer, bouton, function (data) {
+                        $("#fcaf_resultats").html(data.html);
+                        $("#fcaf_zone_resultats").show();
+                        dessiner_graphique(data.graphe);
+                        $("html, body").animate({scrollTop: $("#fcaf_zone_resultats").offset().top - 60}, 300);
+                    });
+                });
+            });
+            $("#fcaf_excel").on("click", function () {
+                envoyer(URLS.excel, $(this), function (data) {window.location = "{{ MEDIA_URL }}" + data.nom_fichier});
+            });
+            $("#fcaf_pdf").on("click", function () {
+                envoyer(URLS.pdf, $(this), function (data) {charge_pdf(data)});
+            });
+
+            $("#fcaf_resultats").on("click", ".fcaf_voir_details", function (event) {
+                event.preventDefault();
+                var cible = $($(this).data("cible")), visible = cible.is(":visible");
+                cible.toggle(!visible);
+                $(this).text(visible ? "Voir la liste" : "Masquer la liste");
+            });
+
+            function dessiner_graphique(graphe) {
+                if (graphique) {graphique.destroy(); graphique = null}
+                var canvas = document.getElementById("fcaf_graphique_mois");
+                if (!canvas || typeof Chart === "undefined") {return}
+                var sombre = $("body").hasClass("dark-mode");
+                var couleurs = {realise: "#3c8dbc", facture: sombre ? "#7a8a99" : "#b8c7d3"};
+                var texte = sombre ? "#ced4da" : "#495057", grille = sombre ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.06)";
+                var format = new Intl.NumberFormat("fr-FR", {maximumFractionDigits: 2});
+                graphique = new Chart(canvas, {
+                    type: "bar",
+                    data: {labels: graphe.labels, datasets: graphe.series.map(function (serie) {
+                        return {label: serie.label_heures, data: serie.valeurs, backgroundColor: couleurs[serie.code], borderRadius: 3, maxBarThickness: 28};
+                    })},
+                    options: {
+                        maintainAspectRatio: false,
+                        scales: {x: {grid: {display: false}, ticks: {color: texte}}, y: {beginAtZero: true, grid: {color: grille}, ticks: {color: texte, callback: function (v) {return format.format(v)}}}},
+                        plugins: {legend: {labels: {color: texte, boxWidth: 12}}, tooltip: {callbacks: {label: function (c) {return " " + c.dataset.label + " : " + format.format(c.raw) + " h"}}}}
+                    }
+                });
+            }
+
+            // ======================================= Profils =======================================
+
+            window.get_parametres_profil = function () {return JSON.stringify(get_parametres())};
+
+            function charger_profil(idprofil, source) {
+                $.ajax({
+                    type: "POST", url: URLS.profil, datatype: "json", data: {idprofil: idprofil, source: source},
+                    success: function (data) {appliquer_parametres(data.parametres, data.nom)},
+                    error: function (data) {toastr.error(data.responseJSON ? data.responseJSON.erreur : "Impossible de charger ce profil")}
+                });
+            }
+            window.appliquer_profil = function (idprofil) {charger_profil(idprofil, "assistant")};
+            $(".fcaf_import_etat_global").on("click", function (event) {
+                event.preventDefault();
+                charger_profil($(this).data("idprofil"), "etat_global");
+            });
+
+        });
+    </script>
+{% endblock scripts %}
