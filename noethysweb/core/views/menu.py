@@ -368,12 +368,12 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_gestion_conso.Add(code="pointeuse_conso", titre="Pointeuse en temps réel", icone="file-text-o")
     # menu_gestion_conso.Add(code="pointeuse_barcodes", titre="Pointeuse avec codes-barres", icone="file-text-o")
     menu_gestion_conso.Add(code="suivi_consommations", titre="Suivi des consommations", icone="file-text-o")
-    menu_gestion_conso.Add(code="liste_consommations", titre="Liste des consommations", icone="file-text-o")
     menu_gestion_conso.Add(code="consommations_traitement_lot", titre="Traitement par lot", icone="file-text-o")
     menu_gestion_conso.Add(code="suivi_pointage", titre="Suivi du pointage", icone="file-text-o")
 
     # Liste par état
     menu_listes_etat = menu_consommations.Add(titre="Listes")
+    menu_listes_etat.Add(code="liste_consommations", titre="Liste des consommations", icone="file-text-o")
     menu_listes_etat.Add(code="liste_attente", titre="Liste d'attente", icone="file-text-o")
     menu_listes_etat.Add(code="liste_refus", titre="Liste des places refusées", icone="file-text-o")
     menu_listes_etat.Add(code="liste_absences", titre="Liste des absences", icone="file-text-o")
