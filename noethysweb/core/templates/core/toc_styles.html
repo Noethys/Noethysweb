@@ -16,9 +16,11 @@
     .toc-legende .toc-legende-e::before {background: #EF9F27;}
     .toc-legende .toc-legende-s::before {background: #7F77DD;}
 
-    .toc-rubrique {margin: 18px 4px 8px; font-weight: 600; color: #495057; display: flex; align-items: center; gap: 7px;}
-    .toc-rubrique .toc-nbre {font-weight: normal; color: #adb5bd; font-size: .85rem;}
-    .toc-rubrique-favoris .fa {color: #EF9F27;}
+    /* Intertitre de rubrique : icône et titre en petites capitales, filet jusqu'au bord droit */
+    .toc-rubrique {margin: 20px 4px 12px; display: flex; align-items: center; gap: 8px; color: #185FA5; font-size: .78rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;}
+    .toc-rubrique .fa {font-size: .95rem; width: 16px; text-align: center;}
+    .toc-rubrique::after {content: ""; flex: 1; height: 1px; margin-left: 4px; background: rgba(0,0,0,.12);}
+    .toc-rubrique-favoris {color: #BA7517;}
     .toc-grille {display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin: 0 4px;}
 
     .toc-tuile {position: relative; background: #fff; border: 1px solid #e3e6ea; border-radius: 6px; transition: border-color .15s, box-shadow .15s;}
@@ -47,14 +49,16 @@
     .toc-condense .toc-titre {font-size: .88rem;}
     .toc-condense .toc-description {display: none !important;}
     .toc-condense .toc-etoile {top: 50%; transform: translateY(-50%);}
-    .toc-condense .toc-rubrique {margin: 12px 4px 6px;}
+    .toc-condense .toc-rubrique {margin: 14px 4px 9px;}
 
     /* Mode sombre */
     .dark-mode .toc-tuile {background: #343a40; border-color: #4b545c;}
     .dark-mode .toc-tuile:hover {border-color: #6c757d;}
     .dark-mode .toc-titre {color: #f8f9fa;}
     .dark-mode .toc-description, .dark-mode .toc-legende, .dark-mode .toc-entete-description {color: #adb5bd;}
-    .dark-mode .toc-rubrique {color: #ced4da;}
+    .dark-mode .toc-rubrique {color: #85B7EB;}
+    .dark-mode .toc-rubrique::after {background: rgba(255,255,255,.15);}
+    .dark-mode .toc-rubrique-favoris {color: #FAC775;}
     .dark-mode .toc-etoile {color: #6c757d;}
     .dark-mode .toc-affichage .btn.active {background: #0C447C; border-color: #185FA5; color: #B5D4F4;}
     .dark-mode .toc-badge-nouveau {background: #0C447C; color: #B5D4F4;}
