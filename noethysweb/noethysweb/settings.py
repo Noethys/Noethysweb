@@ -383,3 +383,16 @@ if _dbbackup_needs_migration:
             "BACKEND": _dbbackup_storage_legacy,
             "OPTIONS": _dbbackup_storage_options_legacy or {},
         }
+
+# --- Fichiers statiques versionnés (évite le CTRL+F5 après une mise à jour) ---
+import django
+if django.VERSION >= (4, 2):
+    STORAGES = globals().get("STORAGES", {"default": {"BACKEND": "django.core.files.storage.FileSystemStorage"}})
+    # Reprise d'un éventuel DEFAULT_FILE_STORAGE (incompatible avec STORAGES à partir de Django 4.2)
+    _default_file_storage_legacy = globals().pop("DEFAULT_FILE_STORAGE", None)
+    if _default_file_storage_legacy:
+        STORAGES["default"] = {"BACKEND": _default_file_storage_legacy}
+    globals().pop("STATICFILES_STORAGE", None)
+    STORAGES["staticfiles"] = {"BACKEND": "core.utils.utils_static.StaticFilesVersionnes"}
+else:
+    STATICFILES_STORAGE = "core.utils.utils_static.StaticFilesVersionnes"
