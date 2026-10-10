@@ -176,7 +176,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
 class Formulaire_selection_activite(FormulaireBase, forms.Form):
     activite = forms.ModelChoiceField(label="Activité", widget=Select_activite(), queryset=Activite.objects.all(), required=True)
-    modele_aide = forms.ModelChoiceField(label="Modèle d'aide", widget=ModelSelect2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom__icontains'], dependent_fields={"activite": "activite"}), queryset=Aide.objects.filter(famille__isnull=True), required=False)
+    modele_aide = forms.ModelChoiceField(label="Modèle d'aide", widget=ModelSelect2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom__icontains'], dependent_fields={"activite": "activite"}, queryset=Aide.objects.filter(famille__isnull=True)), queryset=Aide.objects.filter(famille__isnull=True), required=False)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire_selection_activite, self).__init__(*args, **kwargs)
