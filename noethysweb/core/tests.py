@@ -7,7 +7,7 @@ import datetime
 from django.test import TestCase
 from django.urls import reverse
 from core.models import *
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 
 class Classe_commune(TestCase):
@@ -21,10 +21,14 @@ class Classe_commune(TestCase):
     def setUp(self):
         """ Remplissage de données fictives """
         # Création d'un utilisateur
-        self.utilisateur = User.objects.create_user(username="Utilisateur", password="123456")
+        self.utilisateur = get_user_model().objects.create_user(username="Utilisateur", password="123456")
+
+        # Création d'une structure
+        self.structure = Structure.objects.create(nom="Structure unique")
 
         # Création d'une activité
-        self.activite_alsh = Activite.objects.create(nom="Accueil de loisirs", date_debut=datetime.date(1977, 1, 1), date_fin=datetime.date(2999, 12, 31))
+        self.activite_alsh = Activite.objects.create(nom="Accueil de loisirs", abrege="ALSH", structure=self.structure,
+                                                     date_debut=datetime.date(1977, 1, 1), date_fin=datetime.date(2999, 12, 31))
 
         # Création d'un groupe
         self.groupe_alsh = Groupe.objects.create(nom="Groupe unique", ordre=1, activite=self.activite_alsh)
@@ -58,12 +62,13 @@ class Classe_commune(TestCase):
         Rattachement.objects.create(categorie=2, titulaire=False, famille=self.famille, individu=self.enfant)
         self.inscription = Inscription.objects.create(
             activite=self.activite_alsh, groupe=self.groupe_alsh, categorie_tarif=self.categorie_tarif_alsh,
-            famille=self.famille, individu=self.enfant)
+            famille=self.famille, individu=self.enfant, date_debut=datetime.date(1977, 1, 1))
 
         # Création de consommations
         self.conso = Consommation.objects.create(
             individu=self.enfant, inscription=self.inscription, activite=self.activite_alsh,
-            date=datetime.date(2020, 1, 1), etat="reservation", groupe=self.groupe_alsh, unite=self.unite_journee)
+            date=datetime.date(2020, 1, 1), etat="reservation", groupe=self.groupe_alsh, unite=self.unite_journee,
+            date_saisie=datetime.datetime.now())
 
 
 
