@@ -11,7 +11,7 @@ from outils.views import editeur_emails, editeur_emails_express, historique, upd
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
                         demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur, editeur_sms, editeur_sms_familles, \
                         editeur_sms_individus, editeur_sms_collaborateurs, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures, editeur_sms_express, taches, \
-                        suivi_reservations, commandes, desk_creer
+                        suivi_reservations, commandes, desk_creer, rapport_activite
 
 urlpatterns = [
 
@@ -21,6 +21,9 @@ urlpatterns = [
     # Statistiques
     path('outils/statistiques', statistiques.View.as_view(), name='statistiques'),
     path('outils/statistiques_portail', statistiques_portail.View.as_view(), name='statistiques_portail'),
+
+    # Rapport d'activité
+    path('outils/rapport_activite', rapport_activite.View.as_view(), name='rapport_activite'),
 
     # Carnets de contacts
     path('outils/contacts/liste', contacts.Liste.as_view(), name='contacts_liste'),
@@ -111,6 +114,7 @@ urlpatterns = [
     path('outils/procedures', procedures.View.as_view(), name='procedures'),
 
     # AJAX
+    path('outils/rapport_activite/generer_pdf', secure_ajax(rapport_activite.Generer_pdf), name='ajax_rapport_activite_generer_pdf'),
     path('outils/get_modele_email', secure_ajax(editeur_emails.Get_modele_email), name='ajax_get_modele_email'),
     path('outils/get_signature_email', secure_ajax(editeur_emails.Get_signature_email), name='ajax_get_signature_email'),
     path('outils/get_view_editeur_email', secure_ajax(editeur_emails_express.Get_view_editeur_email), name='ajax_get_view_editeur_email'),

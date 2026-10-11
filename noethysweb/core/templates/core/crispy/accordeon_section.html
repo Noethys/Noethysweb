@@ -1,0 +1,15 @@
+<div class="accordeon-section{% if div.css_class %} {{ div.css_class }}{% endif %}">
+    <div class="accordeon-titre" id="entete_{{ div.css_id }}">
+        <a class="{% if not div.active %}collapsed{% endif %}" data-toggle="collapse" href="#{{ div.css_id }}" role="button"
+           aria-expanded="{% if div.active %}true{% else %}false{% endif %}" aria-controls="{{ div.css_id }}">
+            <span>{% if div.icone %}<i class="fa fa-fw {{ div.icone }} margin-r-5" aria-hidden="true"></i>{% endif %}{{ div.name }}</span>
+            <i class="fa fa-chevron-down accordeon-chevron" aria-hidden="true"></i>
+        </a>
+    </div>
+    <div id="{{ div.css_id }}" class="collapse{% if div.active %} show{% endif %}" role="region"
+         aria-labelledby="entete_{{ div.css_id }}"{% if div.data_parent %} data-parent="#{{ div.data_parent }}"{% endif %}>
+        <div class="accordeon-contenu">
+            {{ fields }}
+        </div>
+    </div>
+</div>

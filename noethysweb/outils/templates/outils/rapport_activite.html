@@ -1,0 +1,230 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        #form_rapport_activite input[type="color"] {
+            height: 38px;
+            padding: 2px 4px;
+            cursor: pointer;
+        }
+        .rapport-nuancier {
+            display: flex;
+            gap: 6px;
+            margin-top: -8px;
+        }
+        .rapport-pastille {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            padding: 0;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px #ced4da;
+        }
+        .rapport-pastille:focus, .rapport-pastille.active {
+            box-shadow: 0 0 0 2px #343a40;
+        }
+        .rapport-rubriques {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 10px;
+        }
+        .rapport-rubrique {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin: 0;
+            cursor: pointer;
+            font-weight: normal !important;
+            transition: border-color .15s, background-color .15s;
+        }
+        .rapport-rubrique:hover {
+            border-color: #3c8dbc;
+        }
+        .rapport-rubrique.cochee {
+            border-color: #3c8dbc;
+            background-color: rgba(60, 141, 188, .06);
+        }
+        .rapport-rubrique input {
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+        .rapport-rubrique strong {
+            display: block;
+            margin-bottom: 2px;
+        }
+        .rapport-rubrique small {
+            color: #6c757d;
+            line-height: 1.35;
+            display: block;
+        }
+        #rapport_attente {
+            display: none;
+        }
+    </style>
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    <form id="form_rapport_activite" method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <div class="row">
+
+            {# Paramètres #}
+            <div class="col-lg-4">
+                <div class="card card-default">
+                    <div class="card-header with-border">
+                        <h3 class="card-title"><i class="fa fa-gear margin-r-5" aria-hidden="true"></i> Paramètres</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus" aria-hidden="true"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% crispy form %}
+                    </div>
+                </div>
+            </div>
+
+            {# Rubriques #}
+            <div class="col-lg-8">
+                <div class="card card-default">
+                    <div class="card-header with-border">
+                        <h3 class="card-title"><i class="fa fa-list-ul margin-r-5" aria-hidden="true"></i> Rubriques à intégrer</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" onclick="cocher_rubriques(true)">Tout cocher</button>
+                            <button type="button" class="btn btn-tool" onclick="cocher_rubriques(false)">Tout décocher</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning" role="note">
+                            <i class="icon fa fa-exclamation-triangle" aria-hidden="true"></i>
+                            <strong>Fonction expérimentale :</strong> vérifiez les résultats obtenus avant toute diffusion du rapport.
+                        </div>
+                        <p class="text-muted">
+                            Sélectionnez les rubriques à intégrer au rapport, puis cliquez sur <strong>Générer le PDF</strong>.
+                            Chaque rubrique comporte des chiffres clés, une analyse rédigée automatiquement, des graphiques et des tableaux.
+                        </p>
+                        <div class="mb-4 d-flex align-items-center flex-wrap" style="gap: 12px;">
+                            <button type="button" id="bouton_generer" class="btn btn-primary" onclick="generer_pdf()">
+                                <i class="fa fa-file-pdf-o margin-r-5" aria-hidden="true"></i> Générer le PDF
+                            </button>
+                            <span id="rapport_attente" class="text-muted" role="status" aria-live="polite">
+                                <i class="fa fa-refresh fa-spin margin-r-5" aria-hidden="true"></i> Calcul du rapport en cours, cette opération peut prendre quelques instants...
+                            </span>
+                        </div>
+                        <fieldset>
+                            <legend class="sr-only">Rubriques</legend>
+                            <div class="rapport-rubriques">
+                                {% for rubrique in rubriques %}
+                                    <label class="rapport-rubrique{% if rubrique.coche %} cochee{% endif %}" for="rubrique_{{ rubrique.code }}">
+                                        <input type="checkbox" name="rubriques" value="{{ rubrique.code }}" id="rubrique_{{ rubrique.code }}" {% if rubrique.coche %}checked{% endif %}>
+                                        <span>
+                                            <strong>{{ rubrique.titre }}</strong>
+                                            <small>{{ rubrique.description }}</small>
+                                        </span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+    {% include 'core/modal_pdf.html' %}
+
+    <script>
+
+        // Affichage des champs selon le type de période
+        function maj_periode() {
+            var type = $("#id_periode_type").val();
+            $("#div_id_annee").toggle(type === "annee_civile");
+            $("#div_id_annee_scolaire").toggle(type === "annee_scolaire");
+            $("#div_id_periode").toggle(type === "personnalisee");
+        }
+
+        // Affichage du champ fichier du logo
+        function maj_logo() {
+            $("#div_id_logo_fichier").toggle($("#id_logo_source").val() === "personnalise");
+        }
+
+        // Affichage des tranches de QF si la rubrique Familles est cochée
+        function maj_tranches_qf() {
+            $("#div_id_tranches_qf").toggle($("#rubrique_familles").prop("checked"));
+        }
+
+        // Mise en évidence des rubriques cochées
+        function maj_rubriques() {
+            $(".rapport-rubrique").each(function() {
+                $(this).toggleClass("cochee", $(this).find("input").prop("checked"));
+            });
+            maj_tranches_qf();
+        }
+
+        function cocher_rubriques(etat) {
+            $("input[name='rubriques']").prop("checked", etat);
+            maj_rubriques();
+        }
+
+        // Pastilles de couleurs
+        function maj_pastilles() {
+            $(".rapport-pastille").each(function() {
+                var valeur = ($("#" + $(this).data("champ")).val() || "").toLowerCase();
+                $(this).toggleClass("active", valeur === String($(this).data("couleur")).toLowerCase());
+            });
+        }
+
+        $(document).ready(function() {
+            $("#id_periode_type").on("change", maj_periode);
+            $("#id_logo_source").on("change", maj_logo);
+            $("input[name='rubriques']").on("change", maj_rubriques);
+            $(".rapport-pastille").on("click", function() {
+                $("#" + $(this).data("champ")).val($(this).data("couleur"));
+                maj_pastilles();
+            });
+            $("#id_couleur_principale, #id_couleur_comparaison").on("input change", maj_pastilles);
+            maj_periode();
+            maj_logo();
+            maj_rubriques();
+            maj_pastilles();
+        });
+
+        // Génération du PDF
+        function generer_pdf() {
+            if ($("input[name='rubriques']:checked").length === 0) {
+                toastr.error("Veuillez cocher au moins une rubrique");
+                return;
+            }
+            var bouton = $("#bouton_generer");
+            bouton.prop("disabled", true);
+            $("#rapport_attente").show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_rapport_activite_generer_pdf' %}",
+                data: new FormData(document.getElementById("form_rapport_activite")),
+                processData: false,
+                contentType: false,
+                dataType: "json",
+                success: function(data) {
+                    charge_pdf(data);
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON ? data.responseJSON.erreur : "Une erreur est survenue lors de la génération du rapport");
+                },
+                complete: function() {
+                    bouton.prop("disabled", false);
+                    $("#rapport_attente").hide();
+                }
+            });
+        }
+
+    </script>
+
+{% endblock contenu_page %}

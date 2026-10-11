@@ -187,6 +187,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     # Suivi de l'activité
     menu_suivi_activite = menu_outils.Add(titre="Suivi de l'activité")
     menu_suivi_activite.Add(code="statistiques", titre="Statistiques générales", icone="file-text-o")
+    menu_suivi_activite.Add(code="rapport_activite", titre="Rapport d'activité", icone="file-text-o")
     menu_suivi_activite.Add(code="historique", titre="Historique", icone="file-text-o")
 
     # Administration

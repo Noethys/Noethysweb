@@ -257,6 +257,7 @@ COMMANDES = {
     # Statistiques
     "statistiques": ("bar-chart", "s", "Statistiques sur les individus, familles, consommations et finances."),
     "statistiques_portail": ("line-chart", "s", "Mesurer l'utilisation du portail famille."),
+    "rapport_activite": ("file-pdf-o", "s", "Éditer un rapport d'activité complet en PDF avec analyses, graphiques et tableaux."),
 
     # Emails
     "contacts_liste": ("address-book-o", "a", "Gérer les carnets d'adresses."),
@@ -522,7 +523,7 @@ COMMANDES = {
 }
 
 
-DUREE_NOUVEAUTE = 31
+DUREE_NOUVEAUTE = 60
 
 NOUVEAUTES = {
     "export_ecritures_sage": "2026-09-07",
@@ -534,6 +535,7 @@ NOUVEAUTES = {
     "statistiques_prestations": "2026-10-04",
     "frequentation_caf": "2026-10-09",
     "statistiques_reglements": "2026-10-09",
+    "rapport_activite": "2026-10-10",
 }
 
 

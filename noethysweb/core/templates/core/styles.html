@@ -29,6 +29,43 @@
     .dark-mode fieldset legend {
         background-color: #6c6c6c;
     }
+    /* Accordéon de formulaire (core/forms/accordeon.py) : même rendu que les legend, avec chevron */
+    .accordeon-titre a {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 5px;
+        margin-bottom: 10px;
+        font-size: 12px;
+        line-height: inherit;
+        color: #333;
+        background-color: #f1f0f0;
+        text-transform: uppercase;
+        text-decoration: none;
+    }
+    .accordeon-titre a:hover {
+        background-color: #e6e5e5;
+    }
+    .accordeon-titre a:focus-visible {
+        outline: 2px solid #3c8dbc;
+        outline-offset: 1px;
+    }
+    .dark-mode .accordeon-titre a {
+        background-color: #6c6c6c;
+    }
+    .dark-mode .accordeon-titre a:hover {
+        background-color: #7a7a7a;
+    }
+    .accordeon-contenu {
+        padding: 4px 0 10px 0;
+    }
+    .accordeon-chevron {
+        transition: transform .2s;
+    }
+    .accordeon-titre a.collapsed .accordeon-chevron {
+        transform: rotate(-90deg);
+    }
     .largeur_pleine .select2-container {
         width: 100% !important;
     }
