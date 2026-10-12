@@ -108,6 +108,7 @@
                         <div>
                             <button type="button" class="btn btn-default btn-sm" id="la_bouton_deplier" title="Replier / déplier toutes les dates"><i class="fa fa-compress"></i></button>
                             <button type="button" class="btn btn-default btn-sm" id="la_bouton_export" title="Exporter les lignes affichées au format Excel"><i class="fa fa-file-excel-o"></i></button>
+                            <button type="button" class="btn btn-default btn-sm" id="la_bouton_pdf" title="Exporter les lignes affichées au format PDF"><i class="fa fa-file-pdf-o"></i></button>
                         </div>
                     </div>
 
@@ -300,8 +301,7 @@
                                 $(this).find("i").toggleClass("fa-compress", !tout_deplie).toggleClass("fa-expand", tout_deplie);
                                 afficher();
                             });
-                            $("#la_bouton_export").on("click", function() {
-                                var bouton = $(this);
+                            function exporter(bouton, url, icone, callback) {
                                 var visibles = $.map(get_visibles(), function(l) {
                                     return {date: l.date, label_groupe: l.label_groupe, nom_evenement: l.nom_evenement, rang: l.rang, nom_individu: l.nom_individu,
                                             nom_famille: l.nom_famille, unites: l.unites, date_saisie: l.date_saisie, place_dispo: l.place_dispo};
@@ -310,24 +310,32 @@
                                     toastr.error("Aucune ligne à exporter");
                                     return;
                                 }
-                                bouton.prop("disabled", true).find("i").removeClass("fa-file-excel-o").addClass("fa-spinner fa-spin");
+                                bouton.prop("disabled", true).find("i").removeClass(icone).addClass("fa-spinner fa-spin");
                                 $.ajax({
                                     type: "POST",
-                                    url: "{% url 'ajax_liste_attente_exporter_excel' %}",
+                                    url: url,
                                     data: {
                                         lignes: JSON.stringify(visibles),
                                         etat: etat,
                                         csrfmiddlewaretoken: "{{ csrf_token }}",
                                     },
-                                    success: function(data) {
-                                        window.location = "{{ MEDIA_URL }}" + data.nom_fichier;
-                                    },
+                                    success: callback,
                                     error: function(data) {
                                         toastr.error(data.responseJSON ? data.responseJSON.erreur : "Une erreur est survenue lors de l'export");
                                     },
                                     complete: function() {
-                                        bouton.prop("disabled", false).find("i").removeClass("fa-spinner fa-spin").addClass("fa-file-excel-o");
+                                        bouton.prop("disabled", false).find("i").removeClass("fa-spinner fa-spin").addClass(icone);
                                     }
+                                });
+                            }
+                            $("#la_bouton_export").on("click", function() {
+                                exporter($(this), "{% url 'ajax_liste_attente_exporter_excel' %}", "fa-file-excel-o", function(data) {
+                                    window.location = "{{ MEDIA_URL }}" + data.nom_fichier;
+                                });
+                            });
+                            $("#la_bouton_pdf").on("click", function() {
+                                exporter($(this), "{% url 'ajax_liste_attente_exporter_pdf' %}", "fa-file-pdf-o", function(data) {
+                                    charge_pdf(data);
                                 });
                             });
 
@@ -437,6 +445,9 @@
 
         </div>
     </div>
+
+    {# Aperçu PDF #}
+    {% include 'core/modal_pdf.html' %}
 
     {# Modal Modifier la réservation #}
     {% embed 'core/modal.html' %}

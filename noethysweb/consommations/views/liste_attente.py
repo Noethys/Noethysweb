@@ -104,6 +104,24 @@ def Exporter_excel(request):
     return JsonResponse({"nom_fichier": os.path.join(rep_temp, nom_fichier)})
 
 
+def Exporter_pdf(request):
+    """ Exporte au format PDF les lignes affichées (après filtrage) dans la liste d'attente """
+    try:
+        lignes = json.loads(request.POST.get("lignes", "[]"))
+    except ValueError:
+        lignes = []
+    if not lignes:
+        return JsonResponse({"erreur": "Aucune donnée à exporter"}, status=401)
+    etat = "refus" if request.POST.get("etat") == "refus" else "attente"
+
+    from consommations.utils import utils_impression_liste_attente
+    impression = utils_impression_liste_attente.Impression(titre="Liste d'attente" if etat == "attente" else "Liste des places refusées",
+                                                           dict_donnees={"lignes": lignes, "etat": etat}, request=request)
+    if impression.erreurs:
+        return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
+    return JsonResponse({"nom_fichier": impression.Get_nom_fichier()})
+
+
 def Get_form_modifier_reservation(request):
     listeidconso = request.POST.get("listeidconso")
 
