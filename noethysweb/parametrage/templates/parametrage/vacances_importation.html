@@ -43,19 +43,25 @@
                 </div>
             {% endif %}
 
+            {% if erreur %}
+                <div class="alert alert-danger">
+                    <i class="icon fa fa-exclamation-triangle"></i>Le calendrier scolaire n'a pas pu être téléchargé depuis data.gouv.fr. Veuillez réessayer dans quelques instants.
+                </div>
+            {% endif %}
+
             {# Liste des périodes à importer #}
             <table class="table table-sm">
                 <tbody>
                     {% for item in items %}
                         <tr>
-                            <td><input type="checkbox" name="items" value={{ forloop.counter0 }} checked /></td>
+                            <td><input type="checkbox" name="items" value="{{ item.cle }}" checked /></td>
                             <td>{{ item.annee }}</td>
                             <td>{{ item.nom }}</td>
                             <td>{{ item.date_debut|date:"l j F Y"|title }}</td>
                             <td>{{ item.date_fin|date:"l j F Y"|title }}</td>
                         </tr>
                     {% empty %}
-                        Aucune donnée à importer...
+                        {% if not erreur %}Aucune donnée à importer...{% endif %}
                     {% endfor %}
                 </tbody>
             </table>

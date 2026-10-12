@@ -49,7 +49,7 @@ class View(CustomView, TemplateView):
             context["zone"] = self.kwargs["zone"].upper()
 
         # Récupération des périodes
-        context["items"] = self.Get_liste_periodes(zone=context["zone"])
+        context["items"], context["erreur"] = self.Get_liste_periodes(zone=context["zone"])
 
         return context
 
@@ -62,19 +62,25 @@ class View(CustomView, TemplateView):
         return zone_organisateur
 
     def Get_liste_periodes(self, zone="a"):
+        """ Renvoie (liste des périodes absentes de la base, message d'erreur éventuel) """
         # Importation des vacances existantes
-        vacances_existantes = [(vacance.annee, vacance.nom) for vacance in Vacance.objects.all()]
+        vacances_existantes = set(Vacance.objects.values_list("annee", "nom"))
 
-        # Lecture du icalendar
+        # Lecture du calendrier scolaire
         cal = utils_vacances.Calendrier(zone=zone)
 
         # Récupération des périodes absentes
-        liste_periodes = [dict_vacance for dict_vacance in cal.GetVacances() if not (dict_vacance["annee"], dict_vacance["nom"]) in vacances_existantes]
-        return liste_periodes
+        liste_periodes = []
+        for dict_vacance in cal.GetVacances():
+            if (dict_vacance["annee"], dict_vacance["nom"]) not in vacances_existantes:
+                # Clé stable pour retrouver la période au moment de l'import
+                dict_vacance["cle"] = "%s|%s" % (dict_vacance["date_debut"].isoformat(), dict_vacance["nom"])
+                liste_periodes.append(dict_vacance)
+        return liste_periodes, cal.erreur
 
     def post(self, request, zone="a"):
-        # Récupération de la liste des périodes
-        reponses = [int(id) for id in request.POST.getlist("items")]
+        # Récupération de la liste des périodes cochées
+        reponses = request.POST.getlist("items")
 
         # Vérifie qu'au moins une réponse a été cochée
         if len(reponses) == 0:
@@ -85,8 +91,14 @@ class View(CustomView, TemplateView):
         if zone not in ("a", "b", "c"):
             # Même logique que l'affichage : zone de l'organisateur, sinon zone A par défaut
             zone = self.Get_zone_organisateur() or "A"
-        liste_periodes = self.Get_liste_periodes(zone=zone)
-        for index in reponses:
-            dict_vacance = liste_periodes[index]
-            Vacance.objects.create(nom=dict_vacance["nom"], annee=dict_vacance["annee"], date_debut=dict_vacance["date_debut"], date_fin=dict_vacance["date_fin"])
+        liste_periodes, erreur = self.Get_liste_periodes(zone=zone)
+        if erreur:
+            messages.add_message(self.request, messages.ERROR, "Importation impossible : Le calendrier scolaire n'a pas pu être téléchargé. Veuillez réessayer.")
+            return HttpResponseRedirect(reverse_lazy("vacances_importation", args=zone))
+
+        dict_periodes = {dict_vacance["cle"]: dict_vacance for dict_vacance in liste_periodes}
+        for cle in reponses:
+            dict_vacance = dict_periodes.get(cle)
+            if dict_vacance:
+                Vacance.objects.create(nom=dict_vacance["nom"], annee=dict_vacance["annee"], date_debut=dict_vacance["date_debut"], date_fin=dict_vacance["date_fin"])
         return HttpResponseRedirect(reverse_lazy("vacances_liste"))
