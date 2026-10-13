@@ -22,6 +22,7 @@ from django.urls import reverse
 from core.models import Activite, Unite, Consommation, Vacance, Regime, Caisse, Famille, Individu, Quotient, TarifLigne, Evenement, \
                         QuestionnaireQuestion, QuestionnaireReponse, QuestionnaireChoix, Rattachement
 from core.utils import utils_dates
+from core.data.data_departements import Get_departement
 
 
 # ------------------------------------------------------------------------------------------------------------------
@@ -67,7 +68,8 @@ REGROUPEMENTS = [("aucun", "Aucun"), ("jour", "Jour"), ("mois", "Mois"), ("annee
     ("activite", "Activité"), ("groupe", "Groupe"), ("evenement", "Evènement"),
     ("evenement_date", "Evènement (avec date)"),
     ("unite_conso", "Unité de consommation"), ("categorie_tarif", "Catégorie de tarif"),
-    ("ville_residence", "Ville de résidence"), ("secteur", "Secteur géographique"),
+    ("ville_residence", "Ville de résidence"), ("departement_residence", "Département de résidence"),
+    ("secteur", "Secteur géographique"),
     ("genre", "Genre (M/F)"), ("age", "Age"), ("ville_naissance", "Ville de naissance"),
     ("nom_ecole", "Ecole"), ("nom_classe", "Classe"), ("nom_niveau_scolaire", "Niveau scolaire"),
     ("individu", "Individu"), ("famille", "Famille"), ("regime", "Régime social"),
@@ -78,7 +80,7 @@ REGROUPEMENTS = [("aucun", "Aucun"), ("jour", "Jour"), ("mois", "Mois"), ("annee
     ("categorie_travail_mere", "Catégorie de travail de la mère")]
 
 # Regroupements qui nécessitent le chargement des informations individuelles complètes
-REGROUPEMENTS_INFOS = ("ville_residence", "secteur", "genre", "ville_naissance", "nom_ecole", "nom_classe", "nom_niveau_scolaire",
+REGROUPEMENTS_INFOS = ("ville_residence", "departement_residence", "secteur", "genre", "ville_naissance", "nom_ecole", "nom_classe", "nom_niveau_scolaire",
                        "individu", "famille", "categorie_travail", "categorie_travail_pere", "categorie_travail_mere")
 
 # Filtres de population : opérateurs selon le type de donnée
@@ -923,6 +925,7 @@ class Calcul():
             if code == "categorie_tarif": return conso.categorie_tarif.nom if conso.categorie_tarif_id else None
             if code == "unite_conso": return conso.unite.nom
             if code == "ville_residence": return ii.get("INDIVIDU_VILLE") or ""
+            if code == "departement_residence": return Get_departement(ii.get("INDIVIDU_CP"))
             if code == "secteur": return ii.get("INDIVIDU_SECTEUR")
             if code == "genre": return ii.get("INDIVIDU_SEXE")
             if code == "age": return age if age >= 0 else None
