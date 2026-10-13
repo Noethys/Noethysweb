@@ -347,6 +347,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     # menu_gestion_conso.Add(code="pointeuse_barcodes", titre="Pointeuse avec codes-barres", icone="file-text-o")
     menu_gestion_conso.Add(code="suivi_consommations", titre="Suivi des consommations", icone="file-text-o")
     menu_gestion_conso.Add(code="consommations_traitement_lot", titre="Traitement par lot", icone="file-text-o")
+    menu_gestion_conso.Add(code="assistant_traitement_lot", titre="Assistant de traitement par lot", icone="file-text-o")
     menu_gestion_conso.Add(code="suivi_pointage", titre="Suivi du pointage", icone="file-text-o")
 
     # Liste par état

@@ -1,0 +1,1079 @@
+{% extends "core/page.html" %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    {{ form_activite.media.css }}
+    <style>
+        /* Étapes */
+        .atl_etapes {display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none}
+        .atl_etapes button {display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid #dee2e6; border-radius: 999px; background: #ffffff; color: #495057; font-size: 13.5px}
+        .atl_etapes button:disabled {cursor: default; opacity: .75}
+        .atl_etapes button .numero {display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #e9ecef; font-size: 12px; font-weight: 700}
+        .atl_etapes button.active {border-color: #3c8dbc; background: #e8f1f8; color: #1d5a80; font-weight: 600}
+        .atl_etapes button.active .numero {background: #3c8dbc; color: #ffffff}
+        .atl_etapes button.valide .numero {background: #28a745; color: #ffffff}
+        .atl_etape {display: none}
+        .atl_etape.active {display: block}
+        .atl_etape h4 {margin-bottom: 4px; font-size: 17px; font-weight: 600}
+        .atl_etape .atl_intro {margin-bottom: 16px; color: #6c757d}
+        .atl_section {margin-top: 22px; padding-top: 16px; border-top: 1px solid #f1f3f5}
+        .atl_section h5 {font-size: 15px; font-weight: 600}
+        .atl_label {display: block; margin-bottom: 6px; font-weight: 600}
+        .atl_champ {max-width: 560px; margin-bottom: 18px}
+        .atl_ligne_champs {display: flex; flex-wrap: wrap; gap: 16px}
+        .atl_ligne_champs .atl_champ {width: 210px}
+        .atl_radio {display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; font-weight: normal}
+        .atl_radio > input[type=radio], .atl_radio > input[type=checkbox] {flex-shrink: 0; position: relative; top: 1px}
+        .atl_radio.riche {flex-wrap: wrap; align-items: center}
+        .atl_cases {display: flex; flex-wrap: wrap; gap: 6px 18px}
+        .atl_cases label {display: flex; align-items: center; gap: 6px; margin: 0; font-weight: normal}
+        .atl_pastilles {display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px}
+        .atl_pastille {display: inline-block; padding: 2px 9px; border-radius: 4px; background: #f1f3f5; color: #495057; font-size: 13px}
+        .atl_cartes {display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px}
+        .atl_cartes button {text-align: left; border: 2px solid #dee2e6; background: #ffffff; border-radius: 6px; padding: 12px 14px; color: #212529; min-height: 72px}
+        .atl_cartes button .titre {display: block; font-weight: 600; font-size: 15.5px}
+        .atl_cartes button .description {display: block; font-size: 13.5px; color: #6c757d; margin-top: 2px}
+        .atl_cartes button[aria-checked=true], .atl_cartes button[aria-selected=true] {border-color: #3c8dbc; background: #f0f7fc}
+        .atl_aide {background: #f8f9fa; border-radius: 4px; padding: 10px 14px; color: #495057; font-size: 14px}
+        .atl_compteur {display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 4px; background: #e8f1f8; color: #1d5a80}
+        .atl_compteur .valeur {font-size: 22px; font-weight: 700}
+        .atl_compteur.erreur {background: #fdecea; color: #8a1c13}
+        .atl_raccourcis {display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px}
+        .atl_raccourcis .btn.active {border-color: #3c8dbc; background: #e8f1f8; color: #1d5a80}
+
+        /* Jours et calendrier */
+        .atl_table_jours th, .atl_table_jours td {padding: 4px 7px; text-align: center}
+        .atl_table_jours th:first-child, .atl_table_jours td:first-child {text-align: left; padding-left: 0}
+        .atl_periode {display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 24px; align-items: start}
+        @media (max-width: 991px) {.atl_periode {grid-template-columns: minmax(0, 1fr)}}
+        .atl_periode .atl_ligne_champs .atl_champ {width: 170px}
+        .atl_apercu_dates {border: 1px solid #dee2e6; border-radius: 6px; background: #fcfdfe; padding: 14px 16px}
+        .atl_apercu_dates .entete_apercu {display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid #eef0f2}
+        .atl_apercu_dates .entete_apercu .valeur {font-size: 26px; font-weight: 700; color: #1d5a80; line-height: 1}
+        .atl_apercu_dates .entete_apercu .titre {font-weight: 600}
+        .atl_apercu_dates .entete_apercu .texte {color: #495057; font-size: 14px; flex-basis: 100%}
+        .atl_apercu_dates.erreur .entete_apercu .valeur, .atl_apercu_dates.erreur .entete_apercu .texte {color: #a52714}
+        .atl_calendrier {display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 18px 22px}
+        .atl_mois {max-width: 260px}
+        .atl_calendrier:empty {display: none}
+        .atl_mois .nom {font-weight: 600; margin-bottom: 6px; padding-left: 2px}
+        .atl_mois .grille {display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px}
+        .atl_mois .entete {font-size: 12px; color: #6c757d; text-align: center; padding-bottom: 2px}
+        .atl_jour {display: flex; align-items: center; justify-content: center; height: 30px; border-radius: 4px; font-size: 13px; color: #212529}
+        .atl_jour.hors {color: #9aa0a6}
+        .atl_jour.vacances {background: #fff3cd; color: #5c4300}
+        .atl_jour.retenu {background: #3c8dbc; color: #ffffff; font-weight: 700}
+        .atl_jour.ferie {border: 1px dashed #c0392b; color: #a52714; text-decoration: line-through}
+        .atl_jour.ferme {border: 1px dashed #6c757d; color: #6c757d; text-decoration: line-through}
+        .atl_legende {display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: #495057; margin-top: 14px; padding-top: 10px; border-top: 1px solid #eef0f2}
+        .atl_legende span {display: inline-flex; gap: 6px; align-items: center}
+        .atl_legende i {display: inline-block; width: 14px; height: 14px; border-radius: 3px}
+
+        /* Unités */
+        .atl_table_unites td {vertical-align: top}
+        .atl_table_unites tr.inactive td:not(:first-child) {opacity: .55}
+        .atl_plage {display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 6px}
+        .atl_plage input[type=time] {width: 120px}
+        .atl_evenement {display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-bottom: 4px; font-weight: normal}
+        .atl_etats_cibles {display: flex; flex-wrap: wrap; gap: 20px; align-items: stretch}
+        .atl_etats_cibles fieldset {border: 1px solid #dee2e6; border-radius: 6px; padding: 10px 16px; margin: 0; flex: 1 1 240px; max-width: 360px}
+        .atl_etats_cibles legend {font-size: 15px; font-weight: 600; width: auto; padding: 0 6px; margin: 0}
+
+        /* Recherche */
+        .atl_etiquette {display: inline-flex; align-items: center; gap: 4px; background: #e8f1f8; color: #1d5a80; border-radius: 3px; padding: 2px 4px 2px 8px; font-size: 14px}
+        .atl_etiquette button {border: 0; background: transparent; color: inherit; padding: 0 3px; font-size: 16px; line-height: 1}
+        .atl_resultats_recherche {max-width: 620px; border: 1px solid #dee2e6; border-radius: 4px; margin-top: 4px; max-height: 240px; overflow-y: auto}
+        .atl_resultats_recherche button {display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid #f1f3f5; background: #ffffff; padding: 6px 10px}
+        .atl_resultats_recherche button:hover, .atl_resultats_recherche button:focus {background: #f0f7fc}
+
+        /* Simulation */
+        .atl_kpis {display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 18px}
+        .atl_kpi {background: #f8f9fa; border-radius: 4px; padding: 10px 12px}
+        .atl_kpi .valeur {font-weight: 700; font-size: 22px}
+        .atl_kpi .libelle {font-size: 13px; color: #495057}
+        .atl_kpi.succes {background: #e8f6ec} .atl_kpi.succes .valeur, .atl_kpi.succes .libelle {color: #1b5e2b}
+        .atl_kpi.attention {background: #fff8e6} .atl_kpi.attention .valeur {color: #8a4b00} .atl_kpi.attention .libelle {color: #5c4300}
+        .atl_avertissement {background: #fff3cd; border: 1px solid #ffe08a; border-radius: 4px; padding: 12px 14px; margin-bottom: 18px}
+        .atl_barre_outils {display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px}
+        .atl_barre_outils label {margin: 0; font-weight: normal; display: flex; gap: 6px; align-items: center}
+        .atl_table td, .atl_table th {vertical-align: middle; font-size: 14px}
+        .atl_table tr.decoche td:not(:first-child) {opacity: .5}
+        .atl_badge {display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12.5px; margin: 1px 2px 1px 0}
+        .atl_badge.alerte {background: #fff3cd; color: #6b4e00}
+        .atl_badge.neutre {background: #e9ecef; color: #495057}
+        .atl_pagination {display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: flex-end}
+
+        /* Traitement */
+        .atl_progression {height: 14px; background: #e9ecef; border-radius: 7px; overflow: hidden; margin: 14px 0}
+        .atl_progression div {height: 14px; width: 0; background: #3c8dbc; transition: width .3s}
+        .atl_journal {list-style: none; padding: 0; margin: 0; font-size: 14px; color: #495057; max-height: 140px; overflow-y: auto}
+        .atl_succes {display: flex; gap: 16px; align-items: center; margin-bottom: 18px}
+        .atl_succes i {font-size: 40px; color: #28a745}
+
+        /* Barre du bas */
+        .atl_barre_bas {position: sticky; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 20px; background: #ffffff; border-top: 1px solid #dee2e6; box-shadow: 0 -2px 6px rgba(0,0,0,.06)}
+        .atl_barre_bas .atl_espace {flex-grow: 1}
+
+        .dark-mode .atl_etapes button, .dark-mode .atl_cartes button, .dark-mode .atl_barre_bas, .dark-mode .atl_resultats_recherche button {background: #343a40; color: #e9ecef; border-color: #6c757d}
+        .dark-mode .atl_etapes button .numero {background: #495057; color: #e9ecef}
+        .dark-mode .atl_etapes button.active, .dark-mode .atl_cartes button[aria-checked=true], .dark-mode .atl_cartes button[aria-selected=true] {background: #2f3a43; color: #8fc1e3; border-color: #3c8dbc}
+        .dark-mode .atl_etapes button.active .numero {background: #3c8dbc; color: #ffffff}
+        .dark-mode .atl_etapes button.valide .numero {background: #28a745; color: #ffffff}
+        .dark-mode .atl_cartes button .description, .dark-mode .atl_kpi .libelle {color: #adb5bd}
+        .dark-mode .atl_compteur, .dark-mode .atl_etiquette {background: #2f3a43; color: #8fc1e3}
+        .dark-mode .atl_aide, .dark-mode .atl_pastille, .dark-mode .atl_kpi, .dark-mode .atl_badge.neutre {background: #3a4047; color: #ced4da}
+        .dark-mode .atl_kpi.succes {background: #1f3a28}
+        .dark-mode .atl_avertissement, .dark-mode .atl_badge.alerte, .dark-mode .atl_kpi.attention, .dark-mode .atl_jour.vacances {background: #4d3d12; color: #ffe08a; border-color: #6b5518}
+        .dark-mode .atl_jour {color: #e9ecef}
+        .dark-mode .atl_jour.hors {color: #7d858c}
+        .dark-mode .atl_apercu_dates {background: #343a40; border-color: #4b545c}
+        .dark-mode .atl_apercu_dates .entete_apercu, .dark-mode .atl_legende {border-color: #4b545c}
+        .dark-mode .atl_apercu_dates .entete_apercu .valeur {color: #8fc1e3}
+        .dark-mode .atl_apercu_dates .entete_apercu .texte, .dark-mode .atl_legende {color: #ced4da}
+        .dark-mode .atl_section {border-top-color: #454d55}
+    </style>
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    {% csrf_token %}
+    {{ config|json_script:"atl_config" }}
+
+    {% if lot_precedent %}
+        <div class="alert alert-light border d-flex flex-wrap align-items-center" id="atl_bandeau_lot" style="gap: 10px;">
+            <span class="flex-grow-1"><i class="fa fa-info-circle margin-r-5" aria-hidden="true"></i>Vous pouvez encore annuler les consommations ajoutées par votre dernier traitement par lot.</span>
+            <button type="button" class="btn btn-outline-danger btn-sm atl_annuler_lot">Annuler le dernier traitement</button>
+        </div>
+    {% endif %}
+
+    <div class="card card-default" id="atl_assistant">
+        <div class="card-header">
+            <ol class="atl_etapes" aria-label="Étapes de l'assistant">
+                <li><button type="button" data-etape="1" class="active" aria-current="step"><span class="numero">1</span>Activité et action</button></li>
+                <li><button type="button" data-etape="2" disabled><span class="numero">2</span>Période</button></li>
+                <li><button type="button" data-etape="3" disabled><span class="numero">3</span>Unités</button></li>
+                <li><button type="button" data-etape="4" disabled><span class="numero">4</span>Individus</button></li>
+                <li><button type="button" data-etape="5" disabled><span class="numero">5</span>Simulation</button></li>
+            </ol>
+        </div>
+
+        <div class="card-body">
+
+            {# ---------- Étape 1 : Activité et action ---------- #}
+            <section class="atl_etape active" data-etape="1" aria-labelledby="atl_titre_1">
+                <h4 id="atl_titre_1">Que voulez-vous faire ?</h4>
+                <p class="atl_intro">Choisissez l'activité, puis l'action à appliquer à plusieurs individus en une seule fois.</p>
+                <div class="atl_champ">
+                    <label class="atl_label" for="atl_activite">Activité</label>
+                    {{ form_activite.activite }}
+                    <div class="atl_pastilles" id="atl_resume_activite" aria-live="polite"></div>
+                </div>
+                <span class="atl_label" id="atl_label_action">Action</span>
+                <div class="atl_cartes" role="radiogroup" aria-labelledby="atl_label_action">
+                    <button type="button" role="radio" aria-checked="true" data-action="ajouter"><span class="titre">Ajouter des consommations</span><span class="description">Réserver des jours, des plages horaires ou des événements.</span></button>
+                    <button type="button" role="radio" aria-checked="false" data-action="modifier"><span class="titre">Modifier l'état</span><span class="description">Pointer en présent, absent, passer en attente...</span></button>
+                    <button type="button" role="radio" aria-checked="false" data-action="supprimer"><span class="titre">Supprimer des consommations</span><span class="description">Retirer des réservations non pointées.</span></button>
+                </div>
+                <div class="atl_aide" id="atl_aide_action" aria-live="polite"></div>
+            </section>
+
+            {# ---------- Étape 2 : Période ---------- #}
+            <section class="atl_etape" data-etape="2" aria-labelledby="atl_titre_2">
+                <h4 id="atl_titre_2">Quels jours ?</h4>
+                <p class="atl_intro">Partez d'un raccourci ou saisissez la période. Le calendrier montre immédiatement les dates retenues.</p>
+                <div class="atl_raccourcis" id="atl_raccourcis" role="group" aria-label="Périodes prédéfinies"></div>
+                <div class="atl_periode">
+                    <div>
+                        <div class="atl_ligne_champs">
+                            <div class="atl_champ">
+                                <label class="atl_label" for="atl_date_debut">Du</label>
+                                <input type="date" class="form-control" id="atl_date_debut">
+                            </div>
+                            <div class="atl_champ">
+                                <label class="atl_label" for="atl_date_fin">Au</label>
+                                <input type="date" class="form-control" id="atl_date_fin">
+                            </div>
+                        </div>
+                        <table class="atl_table_jours mb-3">
+                            <thead><tr><th scope="col">Jours</th>{% for jour in "LMMJVSD" %}<th scope="col">{{ jour }}</th>{% endfor %}</tr></thead>
+                            <tbody>
+                                <tr><th scope="row" class="font-weight-normal">Hors vacances</th>{% for index in "0123456" %}<td><input type="checkbox" class="atl_jour_case" data-type="scolaires" value="{{ index }}" aria-label="Hors vacances, jour {{ forloop.counter }}"{% if index == "2" %} checked{% endif %}></td>{% endfor %}</tr>
+                                <tr><th scope="row" class="font-weight-normal">Vacances</th>{% for index in "0123456" %}<td><input type="checkbox" class="atl_jour_case" data-type="vacances" value="{{ index }}" aria-label="Vacances, jour {{ forloop.counter }}"></td>{% endfor %}</tr>
+                            </tbody>
+                        </table>
+                        <div class="atl_champ" style="max-width: 300px;">
+                            <label class="atl_label" for="atl_frequence">Fréquence</label>
+                            <select class="form-control" id="atl_frequence">
+                                <option value="1">Toutes les semaines</option><option value="2">Une semaine sur deux</option><option value="3">Une semaine sur trois</option>
+                                <option value="4">Une semaine sur quatre</option><option value="5">Les semaines paires</option><option value="6">Les semaines impaires</option>
+                            </select>
+                        </div>
+                        <label class="atl_radio"><input type="checkbox" id="atl_inclure_feries"> Inclure les jours fériés</label>
+                        <label class="atl_radio"><input type="checkbox" id="atl_ouvertures" checked> Uniquement les jours d'ouverture de l'activité</label>
+                    </div>
+                    <div class="atl_apercu_dates" id="atl_compteur_dates">
+                        <div class="entete_apercu" role="status" aria-live="polite">
+                            <span class="valeur">–</span><span class="titre">dates retenues</span>
+                            <span class="texte">Renseignez la période.</span>
+                        </div>
+                        <div class="atl_calendrier" id="atl_calendrier" aria-hidden="true"></div>
+                        <div class="atl_legende" aria-hidden="true">
+                            <span><i style="background: #3c8dbc;"></i>Date retenue</span>
+                            <span><i style="background: #fff3cd; border: 1px solid #e0c36b;"></i>Vacances</span>
+                            <span><i style="border: 1px dashed #c0392b;"></i>Férié exclu</span>
+                            <span><i style="border: 1px dashed #6c757d;"></i>Activité fermée</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {# ---------- Étape 3 : Unités ---------- #}
+            <section class="atl_etape" data-etape="3" aria-labelledby="atl_titre_3">
+                <h4 id="atl_titre_3"></h4>
+                <p class="atl_intro" id="atl_intro_3"></p>
+                <div class="table-responsive">
+                    <table class="table table-sm atl_table_unites">
+                        <thead><tr><th scope="col" style="width: 34px;"><span class="sr-only">Cocher</span></th><th scope="col">Unité</th><th scope="col">Type</th><th scope="col" class="atl_colonne_parametres">Paramètres</th></tr></thead>
+                        <tbody id="atl_unites"></tbody>
+                    </table>
+                </div>
+
+                <div class="atl_bloc_action" data-action="ajouter">
+                    <div class="d-flex flex-wrap" style="gap: 28px;">
+                        <div class="atl_champ" style="width: 260px;">
+                            <label class="atl_label" for="atl_etat">État des consommations créées</label>
+                            <select class="form-control" id="atl_etat"><option value="reservation">Réservation</option><option value="attente">Attente</option><option value="present">Présent</option></select>
+                        </div>
+                        <fieldset class="atl_champ">
+                            <legend class="atl_label" style="font-size: inherit;">Si le groupe ou l'événement est complet</legend>
+                            <label class="atl_radio"><input type="radio" name="atl_complet" value="attente" checked> Créer en « Attente » au-delà des places</label>
+                            <label class="atl_radio"><input type="radio" name="atl_complet" value="ignorer"> Ne pas créer la consommation</label>
+                            <label class="atl_radio"><input type="radio" name="atl_complet" value="forcer"> Créer quand même</label>
+                        </fieldset>
+                    </div>
+                    <p class="text-muted mb-0" style="font-size: 14px;">Une consommation déjà présente sur la même unité et le même jour est toujours conservée telle quelle.</p>
+                </div>
+
+                <div class="atl_bloc_action" data-action="modifier">
+                    <div class="atl_etats_cibles">
+                        <fieldset>
+                            <legend>État actuel</legend>
+                            <div id="atl_etats_source"></div>
+                        </fieldset>
+                        <div class="d-flex align-items-center" aria-hidden="true" style="font-size: 26px; color: #6c757d;">→</div>
+                        <fieldset>
+                            <legend>Nouvel état</legend>
+                            <div id="atl_etats_cible"></div>
+                        </fieldset>
+                    </div>
+                    <p class="text-muted mt-3 mb-0" style="font-size: 14px;">Les consommations facturées ou liées à un forfait ne sont jamais modifiées. Les prestations sont recalculées automatiquement.</p>
+                </div>
+
+                <div class="atl_bloc_action" data-action="supprimer">
+                    <fieldset class="atl_champ">
+                        <legend class="atl_label" style="font-size: inherit;">États des consommations à supprimer</legend>
+                        <div class="atl_cases" id="atl_etats_suppression"></div>
+                    </fieldset>
+                    <p class="text-muted mb-0" style="font-size: 14px;">Les consommations pointées (présent, absent), facturées ou liées à un forfait sont toujours conservées et signalées dans la simulation.</p>
+                </div>
+            </section>
+
+            {# ---------- Étape 4 : Individus ---------- #}
+            <section class="atl_etape" data-etape="4" aria-labelledby="atl_titre_4">
+                <h4 id="atl_titre_4">Pour qui ?</h4>
+                <p class="atl_intro">Seuls les individus inscrits à l'activité sur la période sont proposés.</p>
+                <div class="atl_cartes" role="tablist" aria-label="Manière de sélectionner les individus">
+                    <button type="button" role="tab" aria-selected="true" data-source="inscrits"><span class="titre">Inscrits à l'activité</span><span class="description">Par groupe ou catégorie de tarif</span></button>
+                    <button type="button" role="tab" aria-selected="false" data-source="liste"><span class="titre">Liste nominative</span><span class="description">Recherche ou copier-coller</span></button>
+                </div>
+                <div class="atl_bloc_source" data-source="inscrits">
+                    <div class="d-flex flex-wrap" style="gap: 28px;">
+                        <div><span class="atl_label">Groupes</span><div class="atl_cases" id="atl_groupes" style="flex-direction: column;"></div></div>
+                        <div><span class="atl_label">Catégories de tarifs</span><div class="atl_cases" id="atl_categories" style="flex-direction: column;"></div></div>
+                    </div>
+                </div>
+                <div class="atl_bloc_source" data-source="liste" style="display: none;">
+                    <div class="atl_champ">
+                        <label class="atl_label" for="atl_recherche">Rechercher un inscrit</label>
+                        <input type="search" class="form-control" id="atl_recherche" placeholder="Nom, prénom..." autocomplete="off" aria-describedby="atl_aide_recherche">
+                        <small class="form-text text-muted" id="atl_aide_recherche">Tapez au moins 2 lettres puis cliquez sur un résultat pour l'ajouter.</small>
+                        <div class="atl_resultats_recherche" id="atl_resultats_recherche" style="display: none;" role="listbox" aria-label="Résultats de la recherche"></div>
+                        <div class="atl_pastilles" id="atl_individus_ajoutes" aria-live="polite"></div>
+                    </div>
+                    <div class="atl_champ">
+                        <label class="atl_label" for="atl_liste_texte">Ou coller une liste <span class="font-weight-normal text-muted">(un « NOM Prénom » par ligne)</span></label>
+                        <textarea class="form-control" id="atl_liste_texte" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span class="atl_label">Inscriptions</span>
+                    <label class="atl_radio"><input type="checkbox" id="atl_validees" checked> Inscriptions validées uniquement</label>
+                    <label class="atl_radio"><input type="checkbox" id="atl_toute_periode"> Inscriptions actives sur toute la période</label>
+                </div>
+
+                <div class="atl_section">
+                    <h5>Affiner <span class="font-weight-normal text-muted">(facultatif, cumulable)</span></h5>
+                    <label class="atl_radio"><input type="checkbox" class="atl_activer_filtre" data-filtre="age"> Par âge</label>
+                    <div class="atl_filtre ml-4 mb-2" data-filtre="age" style="display: none;">
+                        <label class="atl_radio riche">De <input type="number" min="0" max="120" class="form-control form-control-sm" id="atl_age_min" style="width: 75px;" aria-label="Âge minimum"> à
+                            <input type="number" min="0" max="120" class="form-control form-control-sm" id="atl_age_max" style="width: 75px;" aria-label="Âge maximum"> ans au début de la période</label>
+                    </div>
+                    <label class="atl_radio"><input type="checkbox" class="atl_activer_filtre" data-filtre="scolarite"> Par scolarité</label>
+                    <div class="atl_filtre ml-4 mb-2" data-filtre="scolarite" style="display: none;">
+                        <span class="atl_label font-weight-normal">Écoles <span class="text-muted">(aucune cochée = toutes)</span></span>
+                        <div class="atl_cases mb-2">{% for ecole in config.scolarite.ecoles %}<label><input type="checkbox" class="atl_ecole" value="{{ ecole.id }}"> {{ ecole.nom }}</label>{% empty %}<span class="text-muted">Aucune école paramétrée</span>{% endfor %}</div>
+                        <span class="atl_label font-weight-normal">Niveaux <span class="text-muted">(aucun coché = tous)</span></span>
+                        <div class="atl_cases">{% for niveau in config.scolarite.niveaux %}<label><input type="checkbox" class="atl_niveau" value="{{ niveau.id }}"> {{ niveau.nom }}</label>{% empty %}<span class="text-muted">Aucun niveau paramétré</span>{% endfor %}</div>
+                    </div>
+                    <label class="atl_radio"><input type="checkbox" class="atl_activer_filtre" data-filtre="consommations"> Selon les consommations déjà saisies sur les dates retenues</label>
+                    <div class="atl_filtre ml-4 mb-2" data-filtre="consommations" style="display: none;">
+                        <label class="atl_radio"><input type="radio" name="atl_filtre_consos" value="avec"> Uniquement ceux qui ont déjà au moins une consommation</label>
+                        <label class="atl_radio"><input type="radio" name="atl_filtre_consos" value="sans" checked> Uniquement ceux qui n'ont encore aucune consommation</label>
+                    </div>
+                </div>
+
+                <div class="atl_compteur mt-3" id="atl_compteur" role="status" aria-live="polite"><span class="valeur">–</span><span class="texte"></span></div>
+            </section>
+
+            {# ---------- Étape 5 : Simulation ---------- #}
+            <section class="atl_etape" data-etape="5" aria-labelledby="atl_titre_5">
+                <h4 id="atl_titre_5">Voici ce qui va se passer</h4>
+                <p class="atl_intro">Simulation calculée sans rien enregistrer. Décochez un individu pour l'exclure du traitement.</p>
+                <div id="atl_simulation"></div>
+            </section>
+
+            {# ---------- Traitement ---------- #}
+            <section class="atl_etape" data-etape="6" aria-labelledby="atl_titre_6" tabindex="-1">
+                <h4 id="atl_titre_6">Traitement en cours…</h4>
+                <div class="atl_progression" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Avancement du traitement"><div></div></div>
+                <p id="atl_etat_traitement" aria-live="polite"></p>
+                <ul class="atl_journal" id="atl_journal"></ul>
+                <p class="text-muted mt-3" style="font-size: 14px;">Le traitement se fait par paquets d'individus pour ne pas bloquer le serveur. Si vous l'interrompez, les paquets déjà traités restent enregistrés.</p>
+                <button type="button" class="btn btn-outline-danger" id="atl_interrompre">Interrompre après ce paquet</button>
+            </section>
+
+            {# ---------- Compte rendu ---------- #}
+            <section class="atl_etape" data-etape="7" aria-labelledby="atl_titre_7" tabindex="-1">
+                <div id="atl_compte_rendu"></div>
+            </section>
+        </div>
+
+        <div class="atl_barre_bas" id="atl_barre_bas">
+            <a href="{% url 'consommations_toc' %}" class="btn btn-link text-secondary">Annuler</a>
+            <span class="atl_espace"></span>
+            <button type="button" class="btn btn-default" id="atl_bouton_precedent" style="display: none;"><i class="fa fa-arrow-left margin-r-5" aria-hidden="true"></i>Précédent</button>
+            <button type="button" class="btn btn-primary" id="atl_bouton_suivant"></button>
+            <button type="button" class="btn btn-success" id="atl_bouton_appliquer" style="display: none;"><i class="fa fa-bolt margin-r-5" aria-hidden="true"></i><span>Appliquer</span></button>
+        </div>
+    </div>
+
+{% endblock contenu_page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    {{ form_activite.media.js }}
+
+    <script>
+        $(document).ready(function () {
+
+            var CONFIG = JSON.parse(document.getElementById("atl_config").textContent);
+            var URLS = {
+                infos: "{% url 'ajax_assistant_traitement_lot_infos' %}",
+                calendrier: "{% url 'ajax_assistant_traitement_lot_calendrier' %}",
+                compter: "{% url 'ajax_assistant_traitement_lot_compter' %}",
+                rechercher: "{% url 'ajax_assistant_traitement_lot_rechercher' %}",
+                simuler: "{% url 'ajax_assistant_traitement_lot_simuler' %}",
+                appliquer: "{% url 'ajax_assistant_traitement_lot_appliquer' %}",
+                annuler: "{% url 'ajax_assistant_traitement_lot_annuler' %}",
+                excel: "{% url 'ajax_assistant_traitement_lot_exporter_excel' %}",
+                grille: "{% url 'famille_consommations' idfamille=999999991 idindividu=999999992 %}",
+                nouveau: "{% url 'assistant_traitement_lot' %}"
+            };
+            var TITRES_ETAPES = {1: "Activité et action", 2: "Période", 3: "Unités", 4: "Individus", 5: "Simulation"};
+            var AIDES = {
+                ajouter: "Les consommations sont créées dans l'état choisi et les prestations sont calculées comme dans la grille. Les jours déjà réservés sont laissés tels quels.",
+                modifier: "Seules les consommations dans l'état actuel choisi sont modifiées. Les consommations facturées ne sont jamais touchées.",
+                supprimer: "Les consommations pointées (présent, absent) ou facturées sont conservées et signalées dans la simulation."
+            };
+            var LIBELLES_ETATS = {reservation: "Réservation", present: "Présent", absenti: "Absence injustifiée", absentj: "Absence justifiée", attente: "Attente", refus: "Refus", demande: "Demande"};
+            var JOURS = ["Lun.", "Mar.", "Mer.", "Jeu.", "Ven.", "Sam.", "Dim."];
+            var MOIS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+            var PAR_PAGE = 50;
+
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            $.ajaxSetup({beforeSend: function (xhr, settings) {if (!/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type) && !this.crossDomain) {xhr.setRequestHeader("X-CSRFToken", csrftoken)}}});
+
+            var etat = {
+                etape: 1, etape_max: 1, activite: null, action: "ajouter", source: "inscrits", individus_liste: {},
+                calendrier: null, compteurs: {}, simulation: null, cle_simulation: null, page: 1, exclus: {},
+                interrompre: false, compte_rendu: null
+            };
+            var initialisation = true;
+
+            // ---------------------------------------- Outils ----------------------------------------
+
+            function Echapper(texte) {return $("<div>").text(texte === null || texte === undefined ? "" : String(texte)).html()}
+            function Normaliser(texte) {return String(texte || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").trim().toUpperCase()}
+            function Date_iso(date) {return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0")}
+            function Date_fr(iso) {if (!iso) {return ""} var m = iso.split("-"); return m[2] + "/" + m[1] + "/" + m[0]}
+            function Nombre(n) {return Number(n || 0).toLocaleString("fr-FR")}
+            function Pluriel(nbre, singulier, pluriel) {return Nombre(nbre) + " " + (nbre > 1 ? (pluriel || singulier + "s") : singulier)}
+            function Erreur_ajax(data) {
+                var message = (data && data.responseJSON && data.responseJSON.erreur) || "Une erreur s'est produite. Veuillez réessayer.";
+                toastr.error(message);
+                return message;
+            }
+            function Poster(url, donnees) {return $.ajax({type: "POST", url: url, data: donnees, dataType: "json"})}
+            function Valeurs(selecteur) {return $(selecteur).map(function () {return this.value}).get()}
+
+            // ---------------------------------------- Navigation ----------------------------------------
+
+            function Aller_etape(numero) {
+                etat.etape = numero;
+                etat.etape_max = Math.max(etat.etape_max, Math.min(numero, 5));
+                $(".atl_etape").removeClass("active").filter("[data-etape='" + numero + "']").addClass("active");
+                $(".atl_etapes button").each(function () {
+                    var n = parseInt($(this).data("etape"));
+                    $(this).toggleClass("active", n === numero).toggleClass("valide", n < etat.etape_max && n !== numero)
+                        .prop("disabled", numero >= 6 || n > etat.etape_max).attr("aria-current", n === numero ? "step" : null);
+                });
+                $("#atl_barre_bas").toggle(numero < 6);
+                $("#atl_bouton_precedent").toggle(numero > 1);
+                $("#atl_bouton_suivant").toggle(numero < 5).html("Suivant : " + Echapper(TITRES_ETAPES[numero + 1] || "") + "<i class='fa fa-arrow-right ml-2' aria-hidden='true'></i>");
+                $("#atl_bouton_appliquer").toggle(numero === 5);
+                if (numero === 2) {Preparer_raccourcis(); Charger_calendrier()}
+                if (numero === 3) {Preparer_etape_3()}
+                if (numero === 4) {Preparer_etape_4(); Compter()}
+                if (numero === 5) {Charger_simulation()}
+                if (!initialisation) {$("html, body").scrollTop($("#atl_assistant").offset().top - 70)}
+            }
+
+            function Valider_etape(numero) {
+                if (numero === 1 && !etat.activite) {toastr.error("Veuillez sélectionner une activité"); return false}
+                if (numero === 2) {
+                    if (!$("#atl_date_debut").val() || !$("#atl_date_fin").val()) {toastr.error("Renseignez la période"); return false}
+                    if (!etat.calendrier || !etat.calendrier.dates.length) {toastr.error("Aucune date n'est retenue avec ces paramètres"); return false}
+                }
+                if (numero === 3) {
+                    var unites = Get_parametres_unites();
+                    if (!Object.keys(unites).length) {toastr.error("Cochez au moins une unité"); return false}
+                    if (etat.action === "ajouter") {
+                        for (var idunite in unites) {
+                            var unite = etat.activite.unites.find(function (u) {return u.id === parseInt(idunite)});
+                            if (unite.type === "Multihoraires" && !unites[idunite].plages.length) {toastr.error("Ajoutez au moins une plage horaire pour " + unite.nom); return false}
+                            if (unite.type === "Evenement" && !unites[idunite].evenements.length) {toastr.error("Cochez au moins un événement pour " + unite.nom); return false}
+                            var incompatible = unite.incompatibilites.find(function (id) {return id in unites});
+                            if (incompatible) {toastr.error("Les unités " + unite.nom + " et " + etat.activite.unites.find(function (u) {return u.id === incompatible}).nom + " sont incompatibles"); return false}
+                        }
+                    }
+                    if (etat.action === "modifier") {
+                        if (!$(".atl_etat_source:checked").length) {toastr.error("Cochez au moins un état actuel"); return false}
+                        if (!$("[name=atl_etat_cible]:checked").length) {toastr.error("Choisissez le nouvel état"); return false}
+                    }
+                    if (etat.action === "supprimer" && !$(".atl_etat_suppression:checked").length) {toastr.error("Cochez au moins un état"); return false}
+                }
+                if (numero === 4) {
+                    if (etat.compteurs.erreur) {toastr.error(etat.compteurs.erreur); return false}
+                    if (!etat.compteurs.nbre) {toastr.error("Aucun individu ne correspond à la sélection"); return false}
+                }
+                return true;
+            }
+
+            $("#atl_bouton_suivant").on("click", function () {if (Valider_etape(etat.etape)) {Aller_etape(etat.etape + 1)}});
+            $("#atl_bouton_precedent").on("click", function () {Aller_etape(etat.etape - 1)});
+            $(".atl_etapes button").on("click", function () {
+                var numero = parseInt($(this).data("etape"));
+                if (numero < etat.etape) {Aller_etape(numero); return}
+                for (var n = etat.etape; n < numero; n++) {
+                    if (n === 2 && !etat.calendrier) {Aller_etape(2); return}
+                    if (!Valider_etape(n)) {return}
+                }
+                Aller_etape(numero);
+            });
+
+            // ---------------------------------------- Étape 1 ----------------------------------------
+
+            $("#atl_activite").on("change", function () {
+                etat.activite = null; etat.calendrier = null; etat.cle_simulation = null; etat.etape_max = 1;
+                $("#atl_resume_activite").empty();
+                if (!$(this).val()) {return}
+                Poster(URLS.infos, {idactivite: $(this).val()}).done(function (data) {
+                    etat.activite = data.activite;
+                    var a = data.activite, pastilles = [];
+                    if (a.illimitee) {pastilles.push("Validité illimitée")} else if (a.date_debut_fr) {pastilles.push("Du " + a.date_debut_fr + " au " + a.date_fin_fr)}
+                    pastilles.push(Pluriel(a.inscrits, "inscrit") + " · " + Pluriel(a.groupes.length, "groupe"));
+                    pastilles.push(Pluriel(a.unites.length, "unité") + (a.unites.length ? " : " + a.unites.map(function (u) {return u.nom}).join(", ") : ""));
+                    $("#atl_resume_activite").html(pastilles.map(function (p) {return "<span class='atl_pastille'>" + Echapper(p) + "</span>"}).join(""));
+                    // Période par défaut : du jour (ou du début de l'activité) jusqu'au dernier jour avant les prochaines vacances
+                    var aujourdhui = Date_iso(new Date());
+                    var debut = a.date_debut && a.date_debut > aujourdhui ? a.date_debut : aujourdhui;
+                    $("#atl_date_debut").val(debut);
+                    var vacances = a.vacances.find(function (v) {return v.date_debut > debut});
+                    var fin_defaut = a.illimitee ? Date_iso(new Date(new Date(debut + "T12:00:00").getTime() + 30 * 86400000)) : (a.date_fin || debut);
+                    var fin = vacances ? Date_iso(new Date(new Date(vacances.date_debut + "T12:00:00").getTime() - 86400000)) : fin_defaut;
+                    $("#atl_date_fin").val(!a.illimitee && a.date_fin && fin > a.date_fin ? a.date_fin : fin);
+                }).fail(Erreur_ajax);
+            });
+
+            $(".atl_cartes[role=radiogroup] button").on("click", function () {
+                etat.action = $(this).data("action");
+                $(".atl_cartes[role=radiogroup] button").attr("aria-checked", "false");
+                $(this).attr("aria-checked", "true");
+                $("#atl_aide_action").text(AIDES[etat.action]);
+                etat.cle_simulation = null;
+                etat.etape_max = Math.min(etat.etape_max, 2);
+            });
+            $(".atl_cartes[role=radiogroup]").on("keydown", "button", function (e) {
+                if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") {return}
+                e.preventDefault();
+                var $boutons = $(".atl_cartes[role=radiogroup] button"), index = $boutons.index(this);
+                $boutons.eq((index + (e.key === "ArrowRight" ? 1 : $boutons.length - 1)) % $boutons.length).trigger("focus").trigger("click");
+            });
+            $("#atl_aide_action").text(AIDES.ajouter);
+
+            // ---------------------------------------- Étape 2 ----------------------------------------
+
+            function Preparer_raccourcis() {
+                var a = etat.activite, html = "";
+                var aujourdhui = Date_iso(new Date());
+                var prochaines = a.vacances.filter(function (v) {return v.date_fin >= aujourdhui});
+                if (prochaines.length) {
+                    var fin_scolaire = Date_iso(new Date(new Date(prochaines[0].date_debut + "T12:00:00").getTime() - 86400000));
+                    html += "<button type='button' class='btn btn-default btn-sm atl_raccourci' data-debut='" + aujourdhui + "' data-fin='" + fin_scolaire + "' data-scolaires='2' data-vacances=''>Mercredis jusqu'aux prochaines vacances</button>";
+                }
+                prochaines.slice(0, 3).forEach(function (v) {
+                    html += "<button type='button' class='btn btn-default btn-sm atl_raccourci' data-debut='" + v.date_debut + "' data-fin='" + v.date_fin + "' data-scolaires='' data-vacances='0,1,2,3,4'>Vacances " + Echapper(v.nom) + "</button>";
+                });
+                var maintenant = new Date(), debut_mois = new Date(maintenant.getFullYear(), maintenant.getMonth() + 1, 1), fin_mois = new Date(maintenant.getFullYear(), maintenant.getMonth() + 2, 0);
+                html += "<button type='button' class='btn btn-default btn-sm atl_raccourci' data-debut='" + Date_iso(debut_mois) + "' data-fin='" + Date_iso(fin_mois) + "'>Mois prochain</button>";
+                if (a.illimitee) {
+                    // Activité sans fin : la période est limitée aux 12 prochains mois
+                    var debut_annee = a.date_debut && a.date_debut > aujourdhui ? a.date_debut : aujourdhui;
+                    html += "<button type='button' class='btn btn-default btn-sm atl_raccourci' data-debut='" + debut_annee + "' data-fin='" + Date_iso(new Date(new Date(debut_annee + "T12:00:00").getTime() + 364 * 86400000)) + "'>Les 12 prochains mois</button>";
+                } else if (a.date_debut && a.date_fin) {html += "<button type='button' class='btn btn-default btn-sm atl_raccourci' data-debut='" + (a.date_debut > aujourdhui ? a.date_debut : aujourdhui) + "' data-fin='" + a.date_fin + "'>Toute l'activité</button>"}
+                $("#atl_raccourcis").html(html);
+            }
+            $("#atl_raccourcis").on("click", ".atl_raccourci", function () {
+                $(".atl_raccourci").removeClass("active"); $(this).addClass("active");
+                $("#atl_date_debut").val($(this).data("debut")); $("#atl_date_fin").val($(this).data("fin"));
+                if ($(this).data("scolaires") !== undefined) {
+                    var scolaires = String($(this).data("scolaires")).split(",").filter(Boolean), vacances = String($(this).data("vacances")).split(",").filter(Boolean);
+                    $(".atl_jour_case[data-type=scolaires]").each(function () {this.checked = scolaires.indexOf(this.value) !== -1});
+                    $(".atl_jour_case[data-type=vacances]").each(function () {this.checked = vacances.indexOf(this.value) !== -1});
+                }
+                Charger_calendrier();
+            });
+
+            function Get_periode() {
+                return {
+                    date_debut: $("#atl_date_debut").val(), date_fin: $("#atl_date_fin").val(),
+                    jours_scolaires: Valeurs(".atl_jour_case[data-type=scolaires]:checked"), jours_vacances: Valeurs(".atl_jour_case[data-type=vacances]:checked"),
+                    frequence: $("#atl_frequence").val(), inclure_feries: $("#atl_inclure_feries").prop("checked"), ouvertures_uniquement: $("#atl_ouvertures").prop("checked")
+                };
+            }
+
+            var minuterie_calendrier = null, requete_calendrier = null;
+            function Charger_calendrier() {
+                clearTimeout(minuterie_calendrier);
+                minuterie_calendrier = setTimeout(function () {
+                    if (!etat.activite) {return}
+                    if (requete_calendrier) {requete_calendrier.abort()}
+                    var $compteur = $("#atl_compteur_dates");
+                    $compteur.find(".valeur").html("<i class='fa fa-spinner fa-spin' aria-hidden='true'></i>");
+                    requete_calendrier = Poster(URLS.calendrier, {parametres: JSON.stringify({idactivite: etat.activite.id, periode: Get_periode()})}).done(function (data) {
+                        etat.calendrier = data;
+                        etat.cle_simulation = null;
+                        Dessiner_calendrier(data);
+                        var textes = [];
+                        if (data.feries_exclus.length) {textes.push(Pluriel(data.feries_exclus.length, "jour férié exclu", "jours fériés exclus") + " (" + data.feries_exclus.join(", ") + ")")}
+                        if (data.fermes_exclus.length) {textes.push(Pluriel(data.fermes_exclus.length, "jour de fermeture exclu", "jours de fermeture exclus"))}
+                        $compteur.removeClass("erreur").find(".valeur").text(Nombre(data.dates.length));
+                        $compteur.find(".titre").text(data.dates.length > 1 ? "dates retenues" : "date retenue");
+                        $compteur.find(".texte").text(textes.join(" · ")).toggle(textes.length > 0);
+                    }).fail(function (data) {
+                        if (data.statusText === "abort") {return}
+                        etat.calendrier = null;
+                        $("#atl_calendrier").empty();
+                        $compteur.addClass("erreur").find(".valeur").text("–");
+                        $compteur.find(".texte").text((data.responseJSON && data.responseJSON.erreur) || "Erreur").show();
+                    });
+                }, 250);
+            }
+            $("#atl_date_debut, #atl_date_fin, #atl_frequence, #atl_inclure_feries, #atl_ouvertures, .atl_jour_case").on("change", function () {
+                if ($(this).is(".atl_jour_case, #atl_date_debut, #atl_date_fin")) {$(".atl_raccourci").removeClass("active")}
+                Charger_calendrier();
+            });
+
+            function Dessiner_calendrier(data) {
+                var mois = {};
+                data.jours.forEach(function (jour) {var cle = jour.date.slice(0, 7); (mois[cle] = mois[cle] || []).push(jour)});
+                var cles = Object.keys(mois).slice(0, 14), html = "";
+                cles.forEach(function (cle) {
+                    var premier = new Date(cle + "-01T12:00:00"), decalage = (premier.getDay() + 6) % 7;
+                    var nb_jours = new Date(premier.getFullYear(), premier.getMonth() + 1, 0).getDate();
+                    var par_date = {};
+                    mois[cle].forEach(function (j) {par_date[parseInt(j.date.slice(8, 10))] = j});
+                    html += "<div class='atl_mois'><div class='nom'>" + MOIS[premier.getMonth()] + " " + premier.getFullYear() + "</div><div class='grille'>";
+                    "LMMJVSD".split("").forEach(function (l) {html += "<span class='entete'>" + l + "</span>"});
+                    for (var i = 0; i < decalage; i++) {html += "<span></span>"}
+                    for (var d = 1; d <= nb_jours; d++) {
+                        var j = par_date[d], classes = "atl_jour";
+                        if (j) {
+                            if (j.vacances) {classes += " vacances"}
+                            if (j.statut) {classes += " " + j.statut}
+                        } else {classes += " hors"}
+                        html += "<span class='" + classes + "'>" + d + "</span>";
+                    }
+                    html += "</div></div>";
+                });
+                $("#atl_calendrier").html(html);
+            }
+
+            // ---------------------------------------- Étape 3 ----------------------------------------
+
+            function Preparer_etape_3() {
+                var titres = {ajouter: "Quelles consommations ajouter ?", modifier: "Quelles consommations modifier ?", supprimer: "Quelles consommations supprimer ?"};
+                var intros = {ajouter: "Cochez les unités à réserver chaque jour retenu.", modifier: "Cochez les unités concernées, puis l'état actuel et le nouvel état.", supprimer: "Cochez les unités dont les consommations doivent être supprimées."};
+                $("#atl_titre_3").text(titres[etat.action]);
+                $("#atl_intro_3").text(intros[etat.action]);
+                $(".atl_bloc_action").hide().filter("[data-action=" + etat.action + "]").show();
+                $(".atl_colonne_parametres").toggle(etat.action === "ajouter");
+                // Mémorise les choix déjà faits pour ne pas les perdre
+                var coches = Valeurs(".atl_unite:checked").map(Number);
+                var deja_dessine = $("#atl_unites").data("activite") === etat.activite.id;
+                var evenements_coches = Valeurs(".atl_evenement_case:checked").map(Number);
+                var html = "";
+                etat.activite.unites.forEach(function (unite) {
+                    var coche = deja_dessine ? coches.indexOf(unite.id) !== -1 : false;
+                    var parametres = "";
+                    if (etat.action === "ajouter") {
+                        if (unite.type === "Horaire") {
+                            parametres = "<span class='atl_plage'><label for='atl_hd_" + unite.id + "' class='mb-0'>De</label><input type='time' class='form-control form-control-sm atl_heure_debut' id='atl_hd_" + unite.id + "' value='" + Echapper(unite.heure_debut) + "'>" +
+                                         "<label for='atl_hf_" + unite.id + "' class='mb-0'>à</label><input type='time' class='form-control form-control-sm atl_heure_fin' id='atl_hf_" + unite.id + "' value='" + Echapper(unite.heure_fin) + "'></span>";
+                        } else if (unite.type === "Quantite") {
+                            parametres = "<span class='atl_plage'><label for='atl_qte_" + unite.id + "' class='mb-0'>Quantité</label><input type='number' min='1' value='1' class='form-control form-control-sm atl_quantite' id='atl_qte_" + unite.id + "' style='width: 90px;'></span>";
+                        } else if (unite.type === "Multihoraires") {
+                            var existantes = $("#atl_plages_" + unite.id).length ? $("#atl_plages_" + unite.id).html() : "";
+                            parametres = "<div class='atl_plages' id='atl_plages_" + unite.id + "' data-unite='" + unite.id + "'>" + existantes + "</div>" +
+                                         "<button type='button' class='btn btn-default btn-xs atl_ajouter_plage' data-unite='" + unite.id + "'><i class='fa fa-plus margin-r-5' aria-hidden='true'></i>Ajouter une plage horaire</button>" +
+                                         "<div class='text-muted mt-1' style='font-size: 13px;'>Une consommation par plage et par jour. Une plage qui chevauche une consommation existante n'est pas créée.</div>";
+                        } else if (unite.type === "Evenement") {
+                            var evenements = (etat.calendrier ? etat.calendrier.evenements : []).filter(function (e) {return e.unite === unite.id});
+                            parametres = evenements.length ? "<div class='text-muted mb-1' style='font-size: 13px;'>Événements programmés sur les dates retenues :</div>" + evenements.map(function (e) {
+                                var places = e.capacite ? e.places_prises + " / " + e.capacite + " places" : "places illimitées";
+                                return "<label class='atl_evenement'><input type='checkbox' class='atl_evenement_case' data-unite='" + unite.id + "' value='" + e.id + "'" + (evenements_coches.indexOf(e.id) !== -1 ? " checked" : "") + "> <b>" + JOURS[e.jour] + " " + Echapper(e.date_fr.slice(0, 5)) + " · " + Echapper(e.nom) + "</b> <span class='text-muted'>· " +
+                                       Echapper(e.groupe_nom) + (e.heure_debut ? " · " + Echapper(e.heure_debut) + "-" + Echapper(e.heure_fin) : "") + " · " + places + (e.montant ? " · " + e.montant.toFixed(2).replace(".", ",") + " €" : "") + "</span></label>";
+                            }).join("") + "<div class='text-muted mt-1' style='font-size: 13px;'>Chaque individu n'est inscrit qu'aux événements de son groupe.</div>"
+                                : "<span class='text-muted'>Aucun événement programmé sur les dates retenues</span>";
+                        } else {
+                            parametres = unite.incompatibilites.length ? "<span class='text-muted'>Incompatible avec " + Echapper(unite.incompatibilites.map(function (id) {var u = etat.activite.unites.find(function (x) {return x.id === id}); return u ? u.nom : ""}).filter(Boolean).join(", ")) + "</span>" : "<span class='text-muted'>—</span>";
+                        }
+                    }
+                    html += "<tr class='" + (coche ? "" : "inactive") + "'><td><input type='checkbox' class='atl_unite' value='" + unite.id + "' id='atl_unite_" + unite.id + "'" + (coche ? " checked" : "") + "></td>" +
+                            "<td><label for='atl_unite_" + unite.id + "' class='mb-0'>" + Echapper(unite.nom) + "</label></td><td>" + Echapper(unite.type_label) + "</td>" +
+                            (etat.action === "ajouter" ? "<td>" + parametres + "</td>" : "") + "</tr>";
+                });
+                $("#atl_unites").html(html || "<tr><td colspan='4' class='text-muted'>Aucune unité de consommation pour cette activité</td></tr>").data("activite", etat.activite.id);
+                // Une plage par défaut pour les multihoraires
+                $(".atl_plages").each(function () {
+                    if (!$(this).children().length) {
+                        var unite = etat.activite.unites.find(function (u) {return u.id === parseInt($(this).data("unite"))}.bind(this));
+                        Ajouter_plage($(this), unite.heure_debut, unite.heure_fin);
+                    }
+                });
+                // États (modifier / supprimer)
+                if (!$("#atl_etats_source").children().length) {
+                    var etats = etat.activite.etats;
+                    $("#atl_etats_source").html(etats.map(function (e) {return "<label class='atl_radio'><input type='checkbox' class='atl_etat_source' value='" + e[0] + "'" + (e[0] === "reservation" ? " checked" : "") + "> " + Echapper(e[1]) + "</label>"}).join(""));
+                    $("#atl_etats_cible").html(etats.map(function (e) {return "<label class='atl_radio'><input type='radio' name='atl_etat_cible' value='" + e[0] + "'" + (e[0] === "present" ? " checked" : "") + "> " + Echapper(e[1]) + "</label>"}).join(""));
+                    $("#atl_etats_suppression").html(etats.filter(function (e) {return ["reservation", "attente", "demande", "refus"].indexOf(e[0]) !== -1}).map(function (e) {
+                        return "<label><input type='checkbox' class='atl_etat_suppression' value='" + e[0] + "'" + (e[0] === "reservation" || e[0] === "attente" ? " checked" : "") + "> " + Echapper(e[1]) + "</label>";
+                    }).join(""));
+                }
+            }
+            function Ajouter_plage($zone, debut, fin) {
+                var n = $zone.children().length + 1, id = $zone.data("unite") + "_" + Date.now() + "_" + n;
+                $zone.append("<div class='atl_plage'><span style='min-width: 58px;'>Plage " + n + "</span><label for='atl_pd_" + id + "' class='mb-0'>de</label><input type='time' class='form-control form-control-sm atl_plage_debut' id='atl_pd_" + id + "' value='" + Echapper(debut || "") + "'>" +
+                             "<label for='atl_pf_" + id + "' class='mb-0'>à</label><input type='time' class='form-control form-control-sm atl_plage_fin' id='atl_pf_" + id + "' value='" + Echapper(fin || "") + "'>" +
+                             "<button type='button' class='btn btn-link btn-sm text-secondary atl_retirer_plage' aria-label='Retirer la plage " + n + "'><i class='fa fa-times' aria-hidden='true'></i></button></div>");
+            }
+            $("#atl_unites").on("click", ".atl_ajouter_plage", function () {Ajouter_plage($("#atl_plages_" + $(this).data("unite")), "", "")});
+            $("#atl_unites").on("click", ".atl_retirer_plage", function () {$(this).closest(".atl_plage").remove()});
+            $("#atl_unites").on("change", ".atl_unite", function () {$(this).closest("tr").toggleClass("inactive", !this.checked)});
+            $("#atl_unites").on("change", "input:not(.atl_unite)", function () {
+                var $case = $(this).closest("tr").find(".atl_unite");
+                if (!$case.prop("checked")) {$case.prop("checked", true).trigger("change")}
+            });
+
+            function Get_parametres_unites() {
+                var unites = {};
+                $(".atl_unite:checked").each(function () {
+                    var id = this.value, $ligne = $(this).closest("tr"), unite = etat.activite.unites.find(function (u) {return u.id === parseInt(id)});
+                    var options = {};
+                    if (etat.action === "ajouter") {
+                        if (unite.type === "Horaire") {options = {heure_debut: $ligne.find(".atl_heure_debut").val(), heure_fin: $ligne.find(".atl_heure_fin").val()}}
+                        if (unite.type === "Quantite") {options = {quantite: $ligne.find(".atl_quantite").val()}}
+                        if (unite.type === "Multihoraires") {
+                            options = {plages: $ligne.find(".atl_plage").filter(function () {return $(this).find(".atl_plage_debut").length}).map(function () {
+                                return [[$(this).find(".atl_plage_debut").val(), $(this).find(".atl_plage_fin").val()]];
+                            }).get().filter(function (p) {return p[0] || p[1]})};
+                        }
+                        if (unite.type === "Evenement") {options = {evenements: Valeurs($ligne.find(".atl_evenement_case:checked"))}}
+                    }
+                    unites[id] = options;
+                });
+                return unites;
+            }
+
+            // ---------------------------------------- Étape 4 ----------------------------------------
+
+            function Preparer_etape_4() {
+                if ($("#atl_groupes").data("activite") === etat.activite.id) {return}
+                $("#atl_groupes").html(etat.activite.groupes.map(function (g) {return "<label><input type='checkbox' class='atl_groupe' value='" + g.id + "' checked> " + Echapper(g.nom) + " <span class='text-muted atl_nbre_groupe' data-id='" + g.id + "'></span></label>"}).join("") || "<span class='text-muted'>Aucun groupe</span>").data("activite", etat.activite.id);
+                $("#atl_categories").html(etat.activite.categories.map(function (c) {return "<label><input type='checkbox' class='atl_categorie' value='" + c.id + "' checked> " + Echapper(c.nom) + " <span class='text-muted atl_nbre_categorie' data-id='" + c.id + "'></span></label>"}).join("") || "<span class='text-muted'>Aucune catégorie</span>");
+            }
+            $(".atl_cartes[role=tablist] button").on("click", function () {
+                etat.source = $(this).data("source");
+                $(".atl_cartes[role=tablist] button").attr("aria-selected", "false");
+                $(this).attr("aria-selected", "true");
+                $(".atl_bloc_source").hide().filter("[data-source=" + etat.source + "]").show();
+                Compter_differe();
+            });
+            $(".atl_activer_filtre").on("change", function () {
+                $(".atl_filtre[data-filtre=" + $(this).data("filtre") + "]").toggle(this.checked);
+                Compter_differe();
+            });
+            $("#atl_assistant").on("change", "[data-etape='4'] input, [data-etape='4'] select", function () {if (!$(this).is("#atl_recherche, .atl_activer_filtre")) {Compter_differe()}});
+            $("#atl_liste_texte, #atl_age_min, #atl_age_max").on("input", function () {Compter_differe()});
+
+            var minuterie_recherche = null;
+            $("#atl_recherche").on("input", function () {
+                clearTimeout(minuterie_recherche);
+                var texte = $(this).val();
+                if (texte.trim().length < 2) {$("#atl_resultats_recherche").hide().empty(); return}
+                minuterie_recherche = setTimeout(function () {
+                    Poster(URLS.rechercher, {idactivite: etat.activite.id, texte: texte}).done(function (data) {
+                        var html = data.resultats.map(function (r) {
+                            return "<button type='button' role='option' data-id='" + r.id + "' data-label='" + Echapper(r.label) + "'><b>" + Echapper(r.label) + "</b> <span class='text-muted'>· " + Echapper(r.groupes) + "</span></button>";
+                        }).join("");
+                        $("#atl_resultats_recherche").html(html || "<div class='p-2 text-muted'>Aucun inscrit trouvé</div>").show();
+                    });
+                }, 300);
+            });
+            $("#atl_resultats_recherche").on("click", "button", function () {
+                etat.individus_liste[$(this).data("id")] = $(this).data("label");
+                $("#atl_recherche").val("").trigger("focus");
+                $("#atl_resultats_recherche").hide().empty();
+                Dessiner_individus_liste(); Compter();
+            });
+            function Dessiner_individus_liste() {
+                var $zone = $("#atl_individus_ajoutes").empty();
+                Object.keys(etat.individus_liste).forEach(function (id) {
+                    var $etiquette = $("<span class='atl_etiquette'></span>").text(etat.individus_liste[id]);
+                    $etiquette.append($("<button type='button'>×</button>").attr("aria-label", "Retirer " + etat.individus_liste[id]).on("click", function () {
+                        delete etat.individus_liste[id]; Dessiner_individus_liste(); Compter();
+                    }));
+                    $zone.append($etiquette);
+                });
+            }
+
+            function Get_parametres() {
+                var individus = {type: etat.source, validees: $("#atl_validees").prop("checked"), toute_periode: $("#atl_toute_periode").prop("checked")};
+                if (etat.source === "liste") {
+                    individus.individus = Object.keys(etat.individus_liste);
+                    individus.texte = $("#atl_liste_texte").val();
+                } else if ($("#atl_groupes").data("activite") === (etat.activite && etat.activite.id)) {
+                    individus.groupes = Valeurs(".atl_groupe:checked");
+                    individus.categories = Valeurs(".atl_categorie:checked");
+                }
+                var filtres = {};
+                if ($(".atl_activer_filtre[data-filtre=age]").prop("checked")) {filtres.age = {min: $("#atl_age_min").val(), max: $("#atl_age_max").val()}}
+                if ($(".atl_activer_filtre[data-filtre=scolarite]").prop("checked")) {filtres.scolarite = {ecoles: Valeurs(".atl_ecole:checked"), niveaux: Valeurs(".atl_niveau:checked")}}
+                if ($(".atl_activer_filtre[data-filtre=consommations]").prop("checked")) {filtres.consommations = $("[name=atl_filtre_consos]:checked").val()}
+                return {
+                    idactivite: etat.activite ? etat.activite.id : null, action: etat.action, periode: Get_periode(),
+                    unites: Get_parametres_unites(), etat: $("#atl_etat").val(), complet: $("[name=atl_complet]:checked").val(),
+                    modifier: {etats_source: Valeurs(".atl_etat_source:checked"), etat_cible: $("[name=atl_etat_cible]:checked").val()},
+                    supprimer: {etats: Valeurs(".atl_etat_suppression:checked")},
+                    individus: individus, filtres: filtres
+                };
+            }
+
+            var minuterie_compter = null, requete_compter = null;
+            function Compter_differe() {clearTimeout(minuterie_compter); minuterie_compter = setTimeout(Compter, 350)}
+            function Compter() {
+                if (etat.etape !== 4 || !etat.activite) {return}
+                if (requete_compter) {requete_compter.abort()}
+                var $compteur = $("#atl_compteur");
+                $compteur.find(".valeur").html("<i class='fa fa-spinner fa-spin' aria-hidden='true'></i>");
+                requete_compter = Poster(URLS.compter, {parametres: JSON.stringify(Get_parametres())}).done(function (data) {
+                    etat.compteurs = data;
+                    var textes = [data.nbre > 1 ? "inscriptions concernées" : "inscription concernée"];
+                    if (data.nbre_individus !== data.nbre) {textes.push(Pluriel(data.nbre_individus, "individu"))}
+                    if (data.nbre_sans_date_naiss) {textes.push(Pluriel(data.nbre_sans_date_naiss, "individu sans date de naissance écarté", "individus sans date de naissance écartés"))}
+                    if (data.non_trouves.length) {textes.push("non trouvés parmi les inscrits : " + data.non_trouves.join(", "))}
+                    if (data.ambigus.length) {textes.push("homonymes à ajouter par la recherche : " + data.ambigus.join(", "))}
+                    $compteur.removeClass("erreur").find(".valeur").text(Nombre(data.nbre));
+                    $compteur.find(".texte").text(textes.join(" · "));
+                    $(".atl_nbre_groupe").each(function () {$(this).text("(" + (data.par_groupe[$(this).data("id")] || 0) + ")")});
+                    $(".atl_nbre_categorie").each(function () {$(this).text("(" + (data.par_categorie[$(this).data("id")] || 0) + ")")});
+                }).fail(function (data) {
+                    if (data.statusText === "abort") {return}
+                    etat.compteurs = {erreur: (data.responseJSON && data.responseJSON.erreur) || "Erreur pendant le comptage"};
+                    $compteur.addClass("erreur").find(".valeur").text("–");
+                    $compteur.find(".texte").text(etat.compteurs.erreur);
+                });
+            }
+
+            // ---------------------------------------- Étape 5 : simulation ----------------------------------------
+
+            function Charger_simulation() {
+                var cle = JSON.stringify(Get_parametres());
+                if (cle === etat.cle_simulation) {Dessiner_simulation(); return}
+                $("#atl_simulation").html("<div class='text-center text-muted py-4'><i class='fa fa-spinner fa-spin margin-r-5' aria-hidden='true'></i>Simulation en cours...</div>");
+                $("#atl_bouton_appliquer").prop("disabled", true);
+                Poster(URLS.simuler, {parametres: cle}).done(function (data) {
+                    etat.simulation = data;
+                    etat.cle_simulation = cle;
+                    etat.exclus = {};
+                    etat.page = 1;
+                    Dessiner_simulation();
+                }).fail(function (data) {
+                    $("#atl_simulation").html("<div class='text-danger py-3'>" + Echapper(Erreur_ajax(data)) + "</div>");
+                });
+            }
+
+            function Get_lignes_a_traiter() {
+                return etat.simulation.lignes.filter(function (l) {return l.a_traiter > 0 && !etat.exclus[l.inscription]});
+            }
+
+            function Dessiner_simulation() {
+                var s = etat.simulation, t = s.totaux, statuts = s.statuts;
+                var principal = {ajouter: t.creer || 0, modifier: t.modifier || 0, supprimer: t.supprimer || 0}[s.action];
+                var verbe = {ajouter: "à créer", modifier: "à modifier", supprimer: "à supprimer"}[s.action];
+                var html = "<div class='atl_kpis'><div class='atl_kpi succes'><div class='valeur'>" + Nombre(principal + (t.attente || 0)) + "</div><div class='libelle'>consommations " + verbe + "</div></div>";
+                if (t.attente) {html += "<div class='atl_kpi attention'><div class='valeur'>dont " + Nombre(t.attente) + "</div><div class='libelle'>en attente (complet)</div></div>"}
+                Object.keys(t).forEach(function (code) {
+                    if (["creer", "attente", "modifier", "supprimer"].indexOf(code) === -1) {
+                        html += "<div class='atl_kpi'><div class='valeur'>" + Nombre(t[code]) + "</div><div class='libelle'>" + Echapper(statuts[code]) + "</div></div>";
+                    }
+                });
+                html += "<div class='atl_kpi'><div class='valeur'>" + Nombre(s.nbre_inscriptions) + "</div><div class='libelle'>inscriptions · " + Pluriel(s.nbre_dates, "date") + "</div></div></div>";
+                if (s.depassements.length) {
+                    var regle = {attente: "Les dernières demandes par ordre alphabétique sont créées en attente.", ignorer: "Les demandes au-delà des places ne sont pas créées.", forcer: ""}[$("[name=atl_complet]:checked").val()];
+                    html += "<div class='atl_avertissement'><b>" + Pluriel(s.depassements.length, "dépassement") + " de capacité</b><ul class='mb-1 mt-1 pl-3'>" + s.depassements.slice(0, 12).map(function (d) {
+                        return "<li>" + Echapper(d.date_fr) + " · " + Echapper(d.libelle) + " (" + d.capacite + " places) : " + Pluriel(d.nbre, "demande") + " au-delà</li>";
+                    }).join("") + (s.depassements.length > 12 ? "<li>...</li>" : "") + "</ul><span style='font-size: 14px;'>" + regle + " <a href='#' class='atl_retour_unites'>Modifier ce choix</a></span></div>";
+                }
+                if (!principal && !t.attente) {
+                    html += "<div class='alert alert-light border'>Il n'y a rien à faire avec ces paramètres : vérifiez la période, les unités ou les individus.</div>";
+                }
+                html += "<div class='atl_barre_outils'><input type='search' class='form-control form-control-sm' id='atl_filtre_simulation' placeholder='Filtrer la liste...' style='width: 220px;' aria-label='Filtrer la liste'>" +
+                        "<label><input type='checkbox' id='atl_avec_remarque'> Uniquement avec remarque</label><span class='flex-grow-1'></span>" +
+                        "<button type='button' class='btn btn-default btn-sm' id='atl_detail_dates' aria-expanded='false'>Voir le détail par date</button></div>" +
+                        "<div id='atl_zone_detail_dates' style='display: none;'></div>" +
+                        "<div class='table-responsive'><table class='table table-sm table-hover atl_table'><thead><tr><th scope='col' style='width: 34px;'><input type='checkbox' id='atl_tout_cocher' aria-label='Cocher ou décocher les individus affichés'></th>" +
+                        "<th scope='col'>Individu</th><th scope='col'>Groupe</th><th scope='col' class='text-right'>" + verbe.charAt(0).toUpperCase() + verbe.slice(1) + "</th><th scope='col' class='text-right'>Autres</th><th scope='col'>Remarque</th></tr></thead><tbody id='atl_corps_simulation'></tbody></table></div>" +
+                        "<div class='atl_pagination'><span class='text-muted mr-auto' id='atl_info_pagination'></span><div id='atl_boutons_pagination' class='btn-group btn-group-sm' role='group' aria-label='Pages'></div></div>";
+                $("#atl_simulation").html(html);
+                Dessiner_lignes_simulation();
+            }
+
+            function Get_lignes_filtrees() {
+                var filtre = Normaliser($("#atl_filtre_simulation").val()), remarque = $("#atl_avec_remarque").prop("checked");
+                return etat.simulation.lignes.filter(function (l) {
+                    if (filtre && Normaliser(l.nom).indexOf(filtre) === -1) {return false}
+                    if (remarque && !l.remarques.length) {return false}
+                    return true;
+                });
+            }
+            function Dessiner_lignes_simulation() {
+                var lignes = Get_lignes_filtrees(), groupes = {};
+                etat.activite.groupes.forEach(function (g) {groupes[g.id] = g.nom});
+                var nbre_pages = Math.max(1, Math.ceil(lignes.length / PAR_PAGE));
+                etat.page = Math.min(etat.page, nbre_pages);
+                var debut = (etat.page - 1) * PAR_PAGE;
+                var html = lignes.slice(debut, debut + PAR_PAGE).map(function (l) {
+                    var principal = (l.compteurs.creer || 0) + (l.compteurs.attente || 0) + (l.compteurs.modifier || 0) + (l.compteurs.supprimer || 0);
+                    var autres = Object.keys(l.compteurs).reduce(function (total, code) {return total + (["creer", "attente", "modifier", "supprimer"].indexOf(code) === -1 ? l.compteurs[code] : 0)}, 0);
+                    var exclu = !!etat.exclus[l.inscription];
+                    var badges = l.remarques.map(function (r) {return "<span class='atl_badge " + (r.statut === "attente" || r.statut === "complet" ? "alerte" : "neutre") + "'>" + Echapper(r.texte) + "</span>"}).join("");
+                    return "<tr data-inscription='" + l.inscription + "' class='" + (exclu ? "decoche" : "") + "'><td><input type='checkbox' class='atl_inclure' aria-label='Inclure " + Echapper(l.nom) + "'" + (exclu ? "" : " checked") + (l.a_traiter ? "" : " disabled") + "></td>" +
+                           "<td class='font-weight-bold'>" + Echapper(l.nom) + "</td><td>" + Echapper(groupes[l.groupe] || "") + "</td><td class='text-right'>" + Nombre(principal) + "</td><td class='text-right'>" + Nombre(autres) + "</td><td>" + badges + "</td></tr>";
+                }).join("");
+                $("#atl_corps_simulation").html(html || "<tr><td colspan='6' class='text-center text-muted py-3'>Aucun individu à afficher</td></tr>");
+                $("#atl_tout_cocher").prop("checked", lignes.length > 0 && lignes.every(function (l) {return !etat.exclus[l.inscription]}));
+                $("#atl_info_pagination").text(lignes.length ? "Affichage de " + (debut + 1) + " à " + Math.min(debut + PAR_PAGE, lignes.length) + " sur " + lignes.length : "");
+                var boutons = "";
+                if (nbre_pages > 1) {
+                    var pages = [];
+                    for (var p = 1; p <= nbre_pages; p++) {if (p === 1 || p === nbre_pages || Math.abs(p - etat.page) <= 2) {pages.push(p)} else if (pages[pages.length - 1] !== "...") {pages.push("...")}}
+                    boutons += "<button type='button' class='btn btn-default atl_page' data-page='" + (etat.page - 1) + "' aria-label='Page précédente'" + (etat.page === 1 ? " disabled" : "") + ">‹</button>";
+                    pages.forEach(function (p) {
+                        boutons += p === "..." ? "<button type='button' class='btn btn-default' disabled>…</button>" : "<button type='button' class='btn " + (p === etat.page ? "btn-primary" : "btn-default") + " atl_page' data-page='" + p + "'" + (p === etat.page ? " aria-current='page'" : "") + ">" + p + "</button>";
+                    });
+                    boutons += "<button type='button' class='btn btn-default atl_page' data-page='" + (etat.page + 1) + "' aria-label='Page suivante'" + (etat.page === nbre_pages ? " disabled" : "") + ">›</button>";
+                }
+                $("#atl_boutons_pagination").html(boutons);
+                Maj_bouton_appliquer();
+            }
+            function Maj_bouton_appliquer() {
+                var lignes = Get_lignes_a_traiter(), total = 0;
+                lignes.forEach(function (l) {total += (l.compteurs.creer || 0) + (l.compteurs.attente || 0) + (l.compteurs.modifier || 0) + (l.compteurs.supprimer || 0)});
+                var verbes = {ajouter: "créer", modifier: "modifier", supprimer: "supprimer"};
+                $("#atl_bouton_appliquer").prop("disabled", total === 0).find("span").text("Appliquer : " + verbes[etat.simulation.action] + " " + Pluriel(total, "consommation"));
+            }
+            $("#atl_simulation").on("change", ".atl_inclure", function () {
+                var id = $(this).closest("tr").data("inscription");
+                if (this.checked) {delete etat.exclus[id]} else {etat.exclus[id] = true}
+                $(this).closest("tr").toggleClass("decoche", !this.checked);
+                Maj_bouton_appliquer();
+            });
+            $("#atl_simulation").on("change", "#atl_tout_cocher", function () {
+                var coche = this.checked;
+                Get_lignes_filtrees().forEach(function (l) {if (coche) {delete etat.exclus[l.inscription]} else {etat.exclus[l.inscription] = true}});
+                Dessiner_lignes_simulation();
+            });
+            $("#atl_simulation").on("click", ".atl_page", function () {etat.page = parseInt($(this).data("page")); Dessiner_lignes_simulation()});
+            var minuterie_filtre = null;
+            $("#atl_simulation").on("input", "#atl_filtre_simulation", function () {clearTimeout(minuterie_filtre); minuterie_filtre = setTimeout(function () {etat.page = 1; Dessiner_lignes_simulation()}, 200)});
+            $("#atl_simulation").on("change", "#atl_avec_remarque", function () {etat.page = 1; Dessiner_lignes_simulation()});
+            $("#atl_simulation").on("click", ".atl_retour_unites", function (e) {e.preventDefault(); Aller_etape(3)});
+            $("#atl_simulation").on("click", "#atl_detail_dates", function () {
+                var $zone = $("#atl_zone_detail_dates"), visible = $zone.is(":visible");
+                if (!visible) {
+                    var codes = [];
+                    etat.simulation.par_date.forEach(function (j) {Object.keys(j).forEach(function (k) {if (k in etat.simulation.statuts && codes.indexOf(k) === -1) {codes.push(k)}})});
+                    $zone.html("<div class='table-responsive'><table class='table table-sm' style='max-width: 900px;'><thead><tr><th scope='col'>Date</th>" + codes.map(function (c) {return "<th scope='col' class='text-right'>" + Echapper(etat.simulation.statuts[c]) + "</th>"}).join("") + "</tr></thead><tbody>" +
+                        etat.simulation.par_date.map(function (j) {return "<tr><td>" + JOURS[(new Date(j.date + "T12:00:00").getDay() + 6) % 7] + " " + Echapper(j.date_fr) + "</td>" + codes.map(function (c) {return "<td class='text-right'>" + Nombre(j[c] || 0) + "</td>"}).join("") + "</tr>"}).join("") + "</tbody></table></div>");
+                }
+                $zone.toggle(!visible);
+                $(this).attr("aria-expanded", visible ? "false" : "true").text(visible ? "Voir le détail par date" : "Masquer le détail par date");
+            });
+
+            // ---------------------------------------- Application par paquets ----------------------------------------
+
+            $("#atl_bouton_appliquer").on("click", function () {
+                var lignes = Get_lignes_a_traiter();
+                if (!lignes.length) {return}
+                var parametres = etat.cle_simulation, paquets = [];
+                for (var i = 0; i < lignes.length; i += CONFIG.taille_paquet) {paquets.push(lignes.slice(i, i + CONFIG.taille_paquet))}
+                var cumul = {totaux: {}, erreurs: [], traites: 0, lignes: [], debut: Date.now(), nbre_crees: 0};
+                etat.interrompre = false;
+                $("#atl_journal").empty();
+                $("#atl_interrompre").prop("disabled", false).text("Interrompre après ce paquet");
+                $("#atl_bandeau_lot").remove();
+                Aller_etape(6);
+                $(".atl_etape[data-etape='6']").trigger("focus");
+
+                function Avancer(index) {
+                    var pourcentage = Math.round(100 * index / paquets.length);
+                    $(".atl_progression").attr("aria-valuenow", pourcentage).find("div").css("width", pourcentage + "%");
+                    var faits = Object.keys(cumul.totaux).reduce(function (t, k) {return t + (["creer", "attente", "modifier", "supprimer"].indexOf(k) !== -1 ? cumul.totaux[k] : 0)}, 0);
+                    var restant = index ? Math.round((Date.now() - cumul.debut) / index * (paquets.length - index) / 1000) : null;
+                    $("#atl_etat_traitement").html("<b>" + Nombre(cumul.traites) + "</b> / " + Nombre(lignes.length) + " inscriptions traitées · <b>" + Nombre(faits) + "</b> consommations traitées" + (restant !== null && index < paquets.length ? " · environ " + (restant > 60 ? Math.ceil(restant / 60) + " min" : restant + " s") + " restantes" : ""));
+                    if (index >= paquets.length || etat.interrompre) {Terminer(index < paquets.length); return}
+                    var paquet = paquets[index];
+                    Poster(URLS.appliquer, {parametres: parametres, inscriptions: JSON.stringify(paquet.map(function (l) {return l.inscription})), premier: index === 0 ? "true" : "false"}).done(function (data) {
+                        cumul.traites += data.traites;
+                        cumul.erreurs = cumul.erreurs.concat(data.erreurs);
+                        cumul.lignes = cumul.lignes.concat(data.lignes);
+                        cumul.nbre_crees += data.nbre_crees || 0;
+                        Object.keys(data.totaux).forEach(function (k) {cumul.totaux[k] = (cumul.totaux[k] || 0) + data.totaux[k]});
+                        $("#atl_journal").prepend("<li>Paquet " + (index + 1) + " / " + paquets.length + " : " + Echapper(paquet[0].nom) + (paquet.length > 1 ? " … " + Echapper(paquet[paquet.length - 1].nom) : "") + " — terminé" + (data.erreurs.length ? " (" + data.erreurs.length + " erreur" + (data.erreurs.length > 1 ? "s" : "") + ")" : "") + "</li>");
+                        Avancer(index + 1);
+                    }).fail(function (data) {
+                        cumul.erreurs.push({nom: "Paquet " + (index + 1), message: (data.responseJSON && data.responseJSON.erreur) || "Le serveur n'a pas répondu"});
+                        Terminer(true);
+                    });
+                }
+                function Terminer(interrompu) {
+                    cumul.interrompu = interrompu;
+                    cumul.duree = Math.round((Date.now() - cumul.debut) / 1000);
+                    etat.compte_rendu = cumul;
+                    Dessiner_compte_rendu(cumul);
+                    Aller_etape(7);
+                    $(".atl_etape[data-etape='7']").trigger("focus");
+                }
+                Avancer(0);
+            });
+            $("#atl_interrompre").on("click", function () {etat.interrompre = true; $(this).prop("disabled", true).text("Interruption après ce paquet...")});
+
+            // ---------------------------------------- Compte rendu ----------------------------------------
+
+            function Dessiner_compte_rendu(cumul) {
+                var s = etat.simulation, t = cumul.totaux, action = s.action;
+                var principal = {ajouter: (t.creer || 0) + (t.attente || 0), modifier: t.modifier || 0, supprimer: t.supprimer || 0}[action];
+                var libelles = {ajouter: ["consommation créée", "consommations créées"], modifier: ["consommation modifiée", "consommations modifiées"], supprimer: ["consommation supprimée", "consommations supprimées"]}[action];
+                var html = "<div class='atl_succes'><i class='fa " + (cumul.interrompu ? "fa-pause-circle text-warning" : "fa-check-circle") + "' aria-hidden='true'></i><div><h4 id='atl_titre_7' class='mb-0'>" + Pluriel(principal, libelles[0], libelles[1]) + (cumul.interrompu ? " (traitement interrompu)" : "") + "</h4>" +
+                           "<div class='text-muted'>" + Echapper(etat.activite.nom) + " · " + Pluriel(s.nbre_dates, "date") + " · " + Pluriel(cumul.traites, "inscription traitée", "inscriptions traitées") + " · " + (cumul.duree < 1 ? "moins d'une seconde" : cumul.duree + " s") + "</div></div></div>";
+                html += "<div class='atl_kpis'>";
+                if (action === "ajouter") {
+                    html += "<div class='atl_kpi'><div class='valeur'>" + Nombre(t.creer || 0) + "</div><div class='libelle'>" + Echapper(LIBELLES_ETATS[$("#atl_etat").val()] || "") + "</div></div>";
+                    if (t.attente) {html += "<div class='atl_kpi attention'><div class='valeur'>" + Nombre(t.attente) + "</div><div class='libelle'>en attente</div></div>"}
+                }
+                var ignorees = Object.keys(s.totaux).reduce(function (total, k) {return total + (["creer", "attente", "modifier", "supprimer"].indexOf(k) === -1 ? s.totaux[k] : 0)}, 0);
+                if (ignorees) {html += "<div class='atl_kpi'><div class='valeur'>" + Nombre(ignorees) + "</div><div class='libelle'>non traitées (voir ci-dessous)</div></div>"}
+                html += "</div>";
+                var a_traiter = [];
+                cumul.erreurs.forEach(function (e) {a_traiter.push({nom: e.nom, texte: e.message, famille: null})});
+                // Seuls les cas qui demandent une action sont listés (pas les jours fermés ni les consommations déjà existantes)
+                var A_VERIFIER = ["attente", "complet", "incompatible", "facturee", "pointee", "forfait", "interdit"];
+                s.lignes.filter(function (l) {return !etat.exclus[l.inscription]}).forEach(function (l) {
+                    var remarques = l.remarques.filter(function (r) {return A_VERIFIER.indexOf(r.statut) !== -1});
+                    if (remarques.length) {a_traiter.push({nom: l.nom, texte: remarques.map(function (r) {return r.texte}).join(" · "), famille: l.famille, individu: l.individu})}
+                });
+                if (a_traiter.length) {
+                    html += "<h5 style='font-size: 15px; font-weight: 600;'>À vérifier (" + a_traiter.length + ")</h5><div class='table-responsive' style='max-height: 360px; overflow-y: auto;'><table class='table table-sm'><tbody>" + a_traiter.map(function (x) {
+                        var lien = x.famille ? "<a href='" + URLS.grille.replace("999999991", x.famille).replace("999999992", x.individu) + "' target='_blank' rel='noopener'>Ouvrir la grille</a>" : "";
+                        return "<tr><td class='font-weight-bold'>" + Echapper(x.nom) + "</td><td>" + Echapper(x.texte) + "</td><td class='text-right'>" + lien + "</td></tr>";
+                    }).join("") + "</tbody></table></div>";
+                }
+                html += "<div class='d-flex flex-wrap align-items-center pt-3 border-top' style='gap: 10px;'>" +
+                        "<button type='button' class='btn btn-default' id='atl_exporter'><i class='fa fa-file-excel-o margin-r-5' aria-hidden='true'></i>Exporter le compte rendu (Excel)</button>" +
+                        "<a class='btn btn-default' href='" + URLS.nouveau + "'>Nouveau traitement</a><span class='flex-grow-1'></span>" +
+                        (action === "ajouter" && cumul.nbre_crees ? "<button type='button' class='btn btn-outline-danger atl_annuler_lot'>Annuler ce traitement</button>" : "") + "</div>" +
+                        (action === "ajouter" && cumul.nbre_crees ? "<p class='text-muted mt-2 mb-0' style='font-size: 13px;'>« Annuler ce traitement » supprime les " + Nombre(cumul.nbre_crees) + " consommations créées et recalcule les prestations, sauf celles pointées ou facturées entre-temps. Possible jusqu'au prochain traitement ou à la déconnexion.</p>" : "");
+                $("#atl_compte_rendu").html(html);
+            }
+
+            $("#atl_compte_rendu").on("click", "#atl_exporter", function () {
+                var cr = {titre: $("#atl_compte_rendu h4").text() + " · " + etat.activite.nom, statuts: etat.simulation.statuts, lignes: etat.compte_rendu.lignes};
+                Poster(URLS.excel, {compte_rendu: JSON.stringify(cr)}).done(function (data) {window.location.href = data.nom_fichier}).fail(Erreur_ajax);
+            });
+
+            $(document).on("click", ".atl_annuler_lot", function () {
+                var $bouton = $(this);
+                bootbox.dialog({
+                    title: "Annuler le traitement",
+                    message: "Confirmez-vous la suppression des consommations ajoutées par le dernier traitement ?",
+                    buttons: {
+                        ok: {label: "<i class='fa fa-check'></i> Supprimer les consommations", className: "btn-danger", callback: function () {
+                            var supprimees = 0, conservees = 0;
+                            $(".atl_annuler_lot").prop("disabled", true).html("<i class='fa fa-spinner fa-spin margin-r-5' aria-hidden='true'></i>Annulation en cours...");
+                            function Paquet() {
+                                Poster(URLS.annuler, {}).done(function (data) {
+                                    supprimees += data.supprimees; conservees += data.conservees;
+                                    if (data.restantes) {Paquet(); return}
+                                    toastr.success(Pluriel(supprimees, "consommation supprimée", "consommations supprimées") + (conservees ? " · " + Pluriel(conservees, "conservée") + " (pointée ou facturée)" : ""));
+                                    $("#atl_bandeau_lot").remove();
+                                    $(".atl_annuler_lot").text("Traitement annulé");
+                                }).fail(function (data) {Erreur_ajax(data); $(".atl_annuler_lot").prop("disabled", false).text("Annuler ce traitement")});
+                            }
+                            Paquet();
+                        }},
+                        cancel: {label: "<i class='fa fa-ban'></i> Retour", className: "btn-default"}
+                    }
+                });
+            });
+
+            // ---------------------------------------- Initialisation ----------------------------------------
+
+            Aller_etape(1);
+            initialisation = false;
+            if ($("#atl_activite").val()) {$("#atl_activite").trigger("change")}
+        });
+    </script>
+{% endblock scripts %}

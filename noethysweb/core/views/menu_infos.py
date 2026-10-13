@@ -406,6 +406,7 @@ COMMANDES = {
     "pointeuse_conso": ("clock-o", "a", "Pointer les arrivées et départs au fil de la journée."),
     "suivi_consommations": ("tachometer", "s", "Visualiser le remplissage des activités par date."),
     "consommations_traitement_lot": ("clone", "a", "Ajouter ou supprimer des consommations en masse."),
+    "assistant_traitement_lot": ("magic", "a", "Ajouter, pointer ou supprimer des consommations en masse, avec simulation."),
     "suivi_pointage": ("check-square-o", "l", "Repérer les consommations non pointées."),
 
     # Listes
@@ -538,6 +539,7 @@ NOUVEAUTES = {
     "statistiques_reglements": "2026-10-09",
     "rapport_activite": "2026-10-10",
     "inscriptions_assistant_lot": "2026-10-13",
+    "assistant_traitement_lot": "2026-10-13",
 }
 
 

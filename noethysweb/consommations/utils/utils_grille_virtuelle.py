@@ -106,7 +106,9 @@ class Grille_virtuelle():
         """ Recalcule toute les cases de la grille virtuelle """
         self.Modifier(criteres={}, modifications={})
 
-    def Ajouter(self, criteres={}, parametres={}):
+    def Ajouter(self, criteres={}, parametres={}, plusieurs=False):
+        """ plusieurs=True : autorise plusieurs consommations dans une même case (unités multihoraires),
+        à condition que leurs horaires ne se chevauchent pas. Par défaut, une case déjà occupée est ignorée. """
         for key_case, dict_case in self.dict_cases.items():
             valide = True
             for champ, valeur in criteres.items():
@@ -114,7 +116,11 @@ class Grille_virtuelle():
                     valide = False
 
             # Vérifie qu'une conso n'existe pas déjà
-            if self.dict_cases[key_case]["consommations"]:
+            if valide and plusieurs:
+                if self.Chevauchement(key_case, parametres.get("heure_debut", None), parametres.get("heure_fin", None)):
+                    logger.debug("Impossible de créer une conso le %s car une conso existe déjà sur cette plage horaire." % dict_case["date"])
+                    valide = False
+            elif self.dict_cases[key_case]["consommations"]:
                 logger.debug("Impossible de créer une conso le %s car une conso existe déjà." % dict_case["date"])
                 valide = False
 
@@ -131,6 +137,8 @@ class Grille_virtuelle():
                 dict_conso["evenement"] = dict_case["evenement"]
                 dict_conso["heure_debut"] = parametres.get("heure_debut", None)
                 dict_conso["heure_fin"] = parametres.get("heure_fin", None)
+                if parametres.get("quantite", None):
+                    dict_conso["quantite"] = parametres["quantite"]
 
                 logger.debug("Ajout d'une nouvelle conso : %s" % dict_conso)
 
@@ -139,6 +147,24 @@ class Grille_virtuelle():
                 self.data_initial["consommations"][key_conso].append(dict_conso)
                 if key_case not in self.data_initial["cases_touchees"]:
                     self.data_initial["cases_touchees"][key_case] = self.dict_cases[key_case]
+
+    def Chevauchement(self, key_case=None, heure_debut=None, heure_fin=None):
+        """ Indique si la plage horaire chevauche une conso existante ou déjà ajoutée dans la case """
+        def Normaliser(heure):
+            return str(heure)[:5] if heure else None
+        heure_debut, heure_fin = Normaliser(heure_debut), Normaliser(heure_fin)
+        consommations = list(self.dict_cases[key_case]["consommations"])
+        dict_case = self.dict_cases[key_case]
+        for dict_conso in self.data_initial["consommations"].get("%s_%s" % (dict_case["date"], dict_case["inscription"]), []):
+            if dict_conso.get("key_case") == key_case and dict_conso not in consommations:
+                consommations.append(dict_conso)
+        for dict_conso in consommations:
+            debut, fin = Normaliser(dict_conso.get("heure_debut")), Normaliser(dict_conso.get("heure_fin"))
+            if not (heure_debut and heure_fin and debut and fin):
+                return True
+            if heure_debut < fin and debut < heure_fin:
+                return True
+        return False
 
     def Modifier(self, criteres={}, modifications={}):
         for key_conso, liste_conso in self.data_initial["consommations"].items():

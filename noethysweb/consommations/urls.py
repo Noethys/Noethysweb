@@ -8,7 +8,7 @@ from core.views import toc
 from parametrage.views import calendrier
 from consommations.forms import grille_forfaits
 from consommations.views import grille, gestionnaire, suivi_consommations, etat_global, synthese_consommations, liste_attente, liste_absences, edition_liste_conso, \
-                                pointeuse, liste_consommations, liste_repas, etat_nomin, liste_durees, consommations_traitement_lot, evolution_reservations, \
+                                pointeuse, liste_consommations, liste_repas, etat_nomin, liste_durees, consommations_traitement_lot, assistant_traitement_lot, evolution_reservations, \
                                 detail_consommations, liste_demandes, suivi_pointage, analyse_ia_frequentation, statistiques_consommations, frequentation_caf #, pointeuse_barcodes
 from core.decorators import secure_ajax
 
@@ -34,6 +34,7 @@ urlpatterns = [
 
     path('consommations/consommations_traitement_lot/selection_activite', consommations_traitement_lot.Selection_activite.as_view(), name='consommations_traitement_lot'),
     path('consommations/consommations_traitement_lot/liste/<int:idactivite>', consommations_traitement_lot.Liste.as_view(), name='consommations_traitement_lot_liste'),
+    path('consommations/assistant_traitement_lot', assistant_traitement_lot.View.as_view(), name='assistant_traitement_lot'),
 
     path('consommations/suivi_pointage', suivi_pointage.View.as_view(), name='suivi_pointage'),
 
@@ -90,6 +91,16 @@ urlpatterns = [
     path('consommations/suivi_pointage_valider_form_parametres', secure_ajax(suivi_pointage.Valider_form_parametres), name='ajax_suivi_pointage_valider_form_parametres'),
     path('consommations/analyse_ia_frequentation/exporter', secure_ajax(analyse_ia_frequentation.Exporter), name='ajax_analyse_ia_frequentation_exporter'),
 
+
+    # AJAX assistant de traitement par lot
+    path('consommations/assistant_traitement_lot/infos', secure_ajax(assistant_traitement_lot.Get_infos_activite), name='ajax_assistant_traitement_lot_infos'),
+    path('consommations/assistant_traitement_lot/calendrier', secure_ajax(assistant_traitement_lot.Get_calendrier), name='ajax_assistant_traitement_lot_calendrier'),
+    path('consommations/assistant_traitement_lot/compter', secure_ajax(assistant_traitement_lot.Compter), name='ajax_assistant_traitement_lot_compter'),
+    path('consommations/assistant_traitement_lot/rechercher', secure_ajax(assistant_traitement_lot.Rechercher), name='ajax_assistant_traitement_lot_rechercher'),
+    path('consommations/assistant_traitement_lot/simuler', secure_ajax(assistant_traitement_lot.Simuler), name='ajax_assistant_traitement_lot_simuler'),
+    path('consommations/assistant_traitement_lot/appliquer', secure_ajax(assistant_traitement_lot.Appliquer), name='ajax_assistant_traitement_lot_appliquer'),
+    path('consommations/assistant_traitement_lot/annuler', secure_ajax(assistant_traitement_lot.Annuler), name='ajax_assistant_traitement_lot_annuler'),
+    path('consommations/assistant_traitement_lot/exporter_excel', secure_ajax(assistant_traitement_lot.Exporter_excel), name='ajax_assistant_traitement_lot_exporter_excel'),
 
     # AJAX fréquentation CAF
     path('consommations/frequentation_caf/get_unites', secure_ajax(frequentation_caf.Get_unites), name='ajax_frequentation_caf_get_unites'),
