@@ -590,7 +590,7 @@
                     etat.activite = data.activite;
                     etat.source = data.source || null;
                     var a = data.activite, pastilles = [];
-                    if (a.date_debut_fr) {pastilles.push(a.date_fin_fr ? "Du " + a.date_debut_fr + " au " + a.date_fin_fr : "À partir du " + a.date_debut_fr)}
+                    if (a.illimitee) {pastilles.push("Validité illimitée")} else if (a.date_debut_fr) {pastilles.push("Du " + a.date_debut_fr + " au " + a.date_fin_fr)}
                     var places = a.groupes.reduce(function (total, g) {return total + (g.max || 0)}, 0);
                     pastilles.push(Pluriel(a.groupes.length, "groupe") + (places ? " · " + places + " places" : ""));
                     pastilles.push(Pluriel(a.categories.length, "catégorie") + " de tarifs");
@@ -599,7 +599,7 @@
                     // Date de début : début de l'activité, ou aujourd'hui si l'activité a déjà commencé
                     var aujourdhui = Date_iso(new Date());
                     $("#ail_date_debut").val(a.date_debut && a.date_debut > aujourdhui ? a.date_debut : aujourdhui);
-                    $("#ail_date_debut").attr("max", a.date_fin || null);
+                    $("#ail_date_debut").attr("max", a.illimitee ? null : (a.date_fin || null));
                     $("#ail_ligne_forfaits").toggle(a.forfaits.length > 0);
                     $("#ail_noms_forfaits").text(a.forfaits.length ? "(" + a.forfaits.join(", ") + ")" : "");
                     Remplir_selects();

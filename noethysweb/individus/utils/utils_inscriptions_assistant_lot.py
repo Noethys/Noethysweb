@@ -134,6 +134,7 @@ def Get_infos_activite(activite=None):
         "date_fin": str(activite.date_fin) if activite.date_fin else "",
         "date_debut_fr": utils_dates.ConvertDateToFR(activite.date_debut) if activite.date_debut else "",
         "date_fin_fr": utils_dates.ConvertDateToFR(activite.date_fin) if activite.date_fin else "",
+        "illimitee": Is_validite_illimitee(activite),
         "max": activite.nbre_inscrits_max or None,
         "inscrits": sum(inscrits_ok.values()),
         "inscriptions": Inscription.objects.filter(activite=activite).count(),
@@ -141,6 +142,11 @@ def Get_infos_activite(activite=None):
         "categories": categories,
         "forfaits": forfaits,
     }
+
+
+def Is_validite_illimitee(activite=None):
+    """ Une activité dont l'année de fin est 2999 (ou sans date de fin) a une validité illimitée """
+    return not activite.date_fin or activite.date_fin.year >= 2999
 
 
 def Get_tarifs_forfaits_auto(activite=None):
@@ -171,7 +177,7 @@ def Get_infos_source(activite_source=None, activite=None):
     return {
         "id": activite_source.pk,
         "nom": activite_source.nom,
-        "date_fin": str(activite_source.date_fin) if activite_source.date_fin else "",
+        "date_fin": "" if Is_validite_illimitee(activite_source) else str(activite_source.date_fin),
         "groupes": groupes,
         "categories": categories,
         "correspondances_groupes": Proposer_correspondances(groupes, infos_destination["groupes"]),
