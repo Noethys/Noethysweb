@@ -11,6 +11,7 @@ from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
 from core.models import Evenement, Regime, Vacance, Activite, Quotient, TarifLigne, Consommation, Famille, Individu, LISTE_ETATS_CONSO, JOURS_COMPLETS_SEMAINE
 from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires, utils_polices
+from core.data.data_departements import Get_departement
 from core.utils.utils_dates import HeureStrEnDelta as HEURE # Ne pas supprimer : est utilisé pour la formule
 
 
@@ -228,6 +229,7 @@ class Impression(utils_impression.Impression):
                 if dict_options["regroupement_principal"] == "categorie_tarif": regroupement = conso.categorie_tarif.nom
                 if dict_options["regroupement_principal"] == "unite_conso": regroupement = conso.unite.nom
                 if dict_options["regroupement_principal"] == "ville_residence": regroupement = dictInfosIndividus[conso.individu_id]["INDIVIDU_VILLE"] or ""
+                if dict_options["regroupement_principal"] == "departement_residence": regroupement = Get_departement(dictInfosIndividus[conso.individu_id]["INDIVIDU_CP"])
                 if dict_options["regroupement_principal"] == "secteur": regroupement = dictInfosIndividus[conso.individu_id]["INDIVIDU_SECTEUR"]
                 if dict_options["regroupement_principal"] == "genre": regroupement = dictInfosIndividus[conso.individu_id]["INDIVIDU_SEXE"]
                 if dict_options["regroupement_principal"] == "age": regroupement = dictInfosIndividus[conso.individu_id]["INDIVIDU_AGE_INT"]
