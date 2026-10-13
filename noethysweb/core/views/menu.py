@@ -233,6 +233,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_gestion_inscriptions.Add(code="inscriptions_impression", titre="Imprimer des inscriptions", icone="file-text-o")
     menu_gestion_inscriptions.Add(code="inscriptions_email", titre="Envoyer des inscriptions par Email", icone="file-text-o")
     menu_gestion_inscriptions.Add(code="inscriptions_saisir_lot", titre="Saisir un lot d'inscriptions", icone="file-text-o")
+    menu_gestion_inscriptions.Add(code="inscriptions_assistant_lot", titre="Assistant de saisie d'inscriptions par lot", icone="file-text-o")
     menu_gestion_inscriptions.Add(code="inscriptions_modifier", titre="Modifier des inscriptions par lot", icone="file-text-o")
     menu_gestion_inscriptions.Add(code="inscriptions_changer_groupe", titre="Changer de groupe par lot", icone="file-text-o")
 

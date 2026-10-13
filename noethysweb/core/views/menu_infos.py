@@ -323,6 +323,7 @@ COMMANDES = {
     "inscriptions_impression": ("file-pdf-o", "e", "Imprimer les confirmations d'inscription."),
     "inscriptions_email": ("envelope-o", "e", "Envoyer les confirmations d'inscription."),
     "inscriptions_saisir_lot": ("clone", "a", "Inscrire plusieurs individus en une fois."),
+    "inscriptions_assistant_lot": ("magic", "a", "Réinscrire ou inscrire des centaines d'individus en quelques clics."),
     "inscriptions_modifier": ("pencil-square-o", "a", "Modifier plusieurs inscriptions en une fois."),
     "inscriptions_changer_groupe": ("exchange", "a", "Déplacer plusieurs inscrits vers un autre groupe."),
 
@@ -536,6 +537,7 @@ NOUVEAUTES = {
     "frequentation_caf": "2026-10-09",
     "statistiques_reglements": "2026-10-09",
     "rapport_activite": "2026-10-10",
+    "inscriptions_assistant_lot": "2026-10-13",
 }
 
 

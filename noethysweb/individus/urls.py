@@ -14,7 +14,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
                             abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses, certifications, \
-                            certifications_individus, certifications_familles, inscriptions_saisir_lot, importer_individus, importer_quotients, \
+                            certifications_individus, certifications_familles, inscriptions_saisir_lot, inscriptions_assistant_lot, importer_individus, importer_quotients, \
                             liste_vaccinations_manquantes, etat_transports, liste_assurances
 
 urlpatterns = [
@@ -66,6 +66,7 @@ urlpatterns = [
 
     path('individus/inscriptions_saisir_lot/selection_activite', inscriptions_saisir_lot.Selection_activite.as_view(), name='inscriptions_saisir_lot'),
     path('individus/inscriptions_saisir_lot/liste/<int:idactivite>', inscriptions_saisir_lot.Liste.as_view(), name='inscriptions_saisir_lot_liste'),
+    path('individus/inscriptions_assistant_lot', inscriptions_assistant_lot.View.as_view(), name='inscriptions_assistant_lot'),
 
     # Inscriptions scolaires
     path('individus/inscriptions_scolaires', inscriptions_scolaires.Liste.as_view(), name='inscriptions_scolaires_liste'),
@@ -217,6 +218,14 @@ urlpatterns = [
     path('individus/imprimer_liste_inscrits/get_groupes', secure_ajax(imprimer_liste_inscrits.Get_groupes), name='ajax_imprimer_liste_inscrits_get_groupes'),
     path('individus/certifications_reinitialiser', secure_ajax(certifications.Reinitialiser), name='ajax_certifications_reinitialiser'),
     path('individus/inscriptions_saisir_lot', secure_ajax(inscriptions_saisir_lot.Appliquer), name='ajax_inscriptions_saisir_lot'),
+    path('individus/inscriptions_assistant_lot/infos', secure_ajax(inscriptions_assistant_lot.Get_infos_activite), name='ajax_inscriptions_assistant_lot_infos'),
+    path('individus/inscriptions_assistant_lot/compter', secure_ajax(inscriptions_assistant_lot.Compter), name='ajax_inscriptions_assistant_lot_compter'),
+    path('individus/inscriptions_assistant_lot/apercu', secure_ajax(inscriptions_assistant_lot.Get_apercu), name='ajax_inscriptions_assistant_lot_apercu'),
+    path('individus/inscriptions_assistant_lot/rechercher', secure_ajax(inscriptions_assistant_lot.Rechercher_individus), name='ajax_inscriptions_assistant_lot_rechercher'),
+    path('individus/inscriptions_assistant_lot/villes', secure_ajax(inscriptions_assistant_lot.Get_villes), name='ajax_inscriptions_assistant_lot_villes'),
+    path('individus/inscriptions_assistant_lot/generer', secure_ajax(inscriptions_assistant_lot.Generer), name='ajax_inscriptions_assistant_lot_generer'),
+    path('individus/inscriptions_assistant_lot/annuler', secure_ajax(inscriptions_assistant_lot.Annuler), name='ajax_inscriptions_assistant_lot_annuler'),
+    path('individus/inscriptions_assistant_lot/exporter_excel', secure_ajax(inscriptions_assistant_lot.Exporter_excel), name='ajax_inscriptions_assistant_lot_exporter_excel'),
     path('individus/importer_individus/importer', secure_ajax(importer_individus.Importer), name='ajax_importer_individus_importer'),
     path('individus/pieces_fournies_modifier_lot', secure_ajax(liste_pieces_fournies.Modifier_lot), name='ajax_pieces_fournies_modifier_lot'),
     path('individus/pieces_fournies/previsualiser_purge', secure_ajax(liste_pieces_fournies.Previsualiser_purge), name='ajax_previsualiser_purge_pieces'),

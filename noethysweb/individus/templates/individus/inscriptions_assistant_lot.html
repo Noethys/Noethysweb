@@ -1,0 +1,1130 @@
+{% extends "core/page.html" %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    {{ form_activite.media.css }}
+    <style>
+        /* Étapes */
+        .ail_etapes {display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none}
+        .ail_etapes button {display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid #dee2e6; border-radius: 999px; background: #ffffff; color: #495057; font-size: 13.5px}
+        .ail_etapes button:disabled {cursor: default; opacity: .75}
+        .ail_etapes button .numero {display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #e9ecef; font-size: 12px; font-weight: 700}
+        .ail_etapes button.active {border-color: #3c8dbc; background: #e8f1f8; color: #1d5a80; font-weight: 600}
+        .ail_etapes button.active .numero {background: #3c8dbc; color: #ffffff}
+        .ail_etapes button.valide .numero {background: #28a745; color: #ffffff}
+        .ail_etape {display: none}
+        .ail_etape.active {display: block}
+        .ail_etape h4 {margin-bottom: 4px; font-size: 17px; font-weight: 600}
+        .ail_etape .ail_intro {margin-bottom: 16px; color: #6c757d}
+        .ail_section {margin-top: 22px; padding-top: 16px; border-top: 1px solid #f1f3f5}
+        .ail_section h5 {font-size: 15px; font-weight: 600}
+        .ail_label {display: block; margin-bottom: 6px; font-weight: 600}
+        .ail_champ {max-width: 560px; margin-bottom: 18px}
+        .ail_ligne_champs {display: flex; flex-wrap: wrap; gap: 16px}
+        .ail_ligne_champs .ail_champ {width: 210px}
+        .ail_radio {display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; font-weight: normal}
+        .ail_radio > input[type=radio], .ail_radio > input[type=checkbox] {flex-shrink: 0; position: relative; top: 1px}
+        .ail_radio.riche {flex-wrap: wrap; align-items: center}
+        .ail_radio input {margin: 0}
+        .ail_sous_bloc {margin: 4px 0 12px 24px}
+        .ail_pastilles {display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px}
+        .ail_pastille {display: inline-block; padding: 2px 9px; border-radius: 4px; background: #f1f3f5; color: #495057; font-size: 13px}
+        .ail_cases {display: flex; flex-wrap: wrap; gap: 6px 18px}
+        .ail_cases label {display: flex; align-items: center; gap: 6px; margin: 0; font-weight: normal}
+        .ail_cases_defilement {max-height: 170px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 4px; padding: 8px 10px; flex-direction: column; flex-wrap: nowrap}
+
+        /* Onglets de source */
+        .ail_sources {display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 18px}
+        .ail_sources button {text-align: left; border: 2px solid #dee2e6; background: #ffffff; border-radius: 6px; padding: 10px 12px; color: #212529; min-height: 64px}
+        .ail_sources button .titre {display: block; font-weight: 600}
+        .ail_sources button .description {display: block; font-size: 13px; color: #6c757d}
+        .ail_sources button[aria-selected=true] {border-color: #3c8dbc; background: #f0f7fc}
+        .ail_affiner_ligne {margin-bottom: 10px}
+        .ail_affiner_ligne > label {font-weight: normal; display: flex; align-items: center; gap: 8px; margin-bottom: 6px}
+        .ail_affiner_ligne .ail_bloc_filtre {margin-left: 24px}
+        .ail_compteur {display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 4px; background: #e8f1f8; color: #1d5a80}
+        .ail_compteur .valeur {font-size: 22px; font-weight: 700}
+        .ail_compteur.erreur {background: #fdecea; color: #8a1c13}
+
+        /* Étiquettes (villes, individus) */
+        .ail_etiquettes {display: flex; flex-wrap: wrap; gap: 6px; align-items: center; border: 1px solid #ced4da; border-radius: 4px; padding: 5px 6px; min-height: 38px; max-width: 620px; background: #ffffff}
+        .ail_etiquettes input {flex: 1 1 140px; border: 0; outline: none; padding: 3px 4px; min-width: 120px; background: transparent}
+        .ail_etiquette {display: inline-flex; align-items: center; gap: 4px; background: #e8f1f8; color: #1d5a80; border-radius: 3px; padding: 2px 4px 2px 8px; font-size: 14px}
+        .ail_etiquette button {border: 0; background: transparent; color: inherit; padding: 0 3px; font-size: 16px; line-height: 1}
+        .ail_resultats_recherche {max-width: 620px; border: 1px solid #dee2e6; border-radius: 4px; margin-top: 4px; max-height: 240px; overflow-y: auto}
+        .ail_resultats_recherche button {display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid #f1f3f5; background: #ffffff; padding: 6px 10px}
+        .ail_resultats_recherche button:hover, .ail_resultats_recherche button:focus {background: #f0f7fc}
+
+        /* Aperçu */
+        .ail_barre_outils {display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px}
+        .ail_barre_outils label {margin: 0; font-weight: normal; display: flex; gap: 6px; align-items: center}
+        .ail_table td, .ail_table th {vertical-align: middle; font-size: 14px}
+        .ail_table select {height: 30px; padding: 2px 6px; font-size: 14px}
+        .ail_table tr.deja td {color: #6c757d; background: #f8f9fa}
+        .ail_table tr.decoche td:not(:first-child) {opacity: .5}
+        .ail_badge {display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12.5px; margin: 1px 2px 1px 0}
+        .ail_badge.alerte {background: #fff3cd; color: #6b4e00}
+        .ail_badge.info {background: #e8f1f8; color: #1d5a80}
+        .ail_badge.neutre {background: #e9ecef; color: #495057}
+        .ail_pagination {display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: flex-end}
+
+        /* Barre du bas */
+        .ail_barre_bas {position: sticky; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 20px; background: #ffffff; border-top: 1px solid #dee2e6; box-shadow: 0 -2px 6px rgba(0,0,0,.06)}
+        .ail_barre_bas .ail_espace {flex-grow: 1}
+        .ail_jauges {display: flex; flex-wrap: wrap; gap: 14px; flex-grow: 1; font-size: 13px}
+        .ail_jauge {display: flex; flex-direction: column; gap: 3px; min-width: 140px}
+        .ail_jauge .fond {display: block; height: 6px; background: #e9ecef; border-radius: 3px}
+        .ail_jauge .barre {display: block; height: 6px; background: #3c8dbc; border-radius: 3px}
+        .ail_jauge.depassement {color: #8a4b00; font-weight: 600}
+        .ail_jauge.depassement .barre {background: #e8590c}
+
+        /* Vérification et compte rendu */
+        .ail_kpis {display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 18px}
+        .ail_kpi {background: #f8f9fa; border-radius: 4px; padding: 10px 12px}
+        .ail_kpi .libelle {font-size: 13px; color: #6c757d}
+        .ail_kpi .valeur {font-weight: 700; font-size: 18px}
+        .ail_kpi.attention {background: #fff8e6}
+        .ail_avertissement {background: #fff3cd; border: 1px solid #ffe08a; border-radius: 4px; padding: 12px 14px; margin-bottom: 18px}
+        .ail_liste_actions {list-style: none; padding: 0; margin: 0}
+        .ail_liste_actions li {padding: 2px 0}
+        .ail_liste_actions li i {color: #28a745; width: 18px}
+        .ail_succes {display: flex; gap: 16px; align-items: center; margin-bottom: 18px}
+        .ail_succes i {font-size: 40px; color: #28a745}
+
+        .dark-mode .ail_etapes button, .dark-mode .ail_sources button, .dark-mode .ail_etiquettes, .dark-mode .ail_barre_bas, .dark-mode .ail_resultats_recherche button {background: #343a40; color: #e9ecef; border-color: #6c757d}
+        .dark-mode .ail_etapes button.active, .dark-mode .ail_sources button[aria-selected=true] {background: #2f3a43; color: #8fc1e3; border-color: #3c8dbc}
+        .dark-mode .ail_etapes button .numero {background: #495057; color: #e9ecef}
+        .dark-mode .ail_etapes button.active .numero {background: #3c8dbc; color: #ffffff}
+        .dark-mode .ail_etapes button.valide .numero {background: #28a745; color: #ffffff}
+        .dark-mode .ail_sources button .description, .dark-mode .ail_kpi .libelle {color: #adb5bd}
+        .dark-mode .ail_compteur, .dark-mode .ail_etiquette, .dark-mode .ail_badge.info {background: #2f3a43; color: #8fc1e3}
+        .dark-mode .ail_pastille, .dark-mode .ail_kpi, .dark-mode .ail_badge.neutre, .dark-mode .ail_table tr.deja td {background: #3a4047; color: #ced4da}
+        .dark-mode .ail_avertissement, .dark-mode .ail_badge.alerte, .dark-mode .ail_kpi.attention {background: #4d3d12; color: #ffe08a; border-color: #6b5518}
+        .dark-mode .ail_section {border-top-color: #454d55}
+    </style>
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    {% csrf_token %}
+    {{ config|json_script:"ail_config" }}
+
+    {% if lot_precedent %}
+        <div class="alert alert-light border d-flex flex-wrap align-items-center" id="ail_bandeau_lot" style="gap: 10px;">
+            <span class="flex-grow-1"><i class="fa fa-info-circle margin-r-5" aria-hidden="true"></i>Vous pouvez encore annuler le dernier lot d'inscriptions que vous avez généré.</span>
+            <button type="button" class="btn btn-outline-danger btn-sm ail_annuler_lot">Annuler le dernier lot</button>
+        </div>
+    {% endif %}
+
+    <div class="card card-default" id="ail_assistant">
+        <div class="card-header">
+            <ol class="ail_etapes" aria-label="Étapes de l'assistant">
+                <li><button type="button" data-etape="1" class="active" aria-current="step"><span class="numero">1</span>Activité</button></li>
+                <li><button type="button" data-etape="2" disabled><span class="numero">2</span>Individus</button></li>
+                <li><button type="button" data-etape="3" disabled><span class="numero">3</span>Groupes et tarifs</button></li>
+                <li><button type="button" data-etape="4" disabled><span class="numero">4</span>Aperçu</button></li>
+                <li><button type="button" data-etape="5" disabled><span class="numero">5</span>Vérification</button></li>
+            </ol>
+        </div>
+
+        <div class="card-body">
+
+            {# ---------- Étape 1 : Activité ---------- #}
+            <section class="ail_etape active" data-etape="1" aria-labelledby="ail_titre_1">
+                <h4 id="ail_titre_1">À quelle activité voulez-vous inscrire des individus ?</h4>
+                <p class="ail_intro">Les groupes et catégories de tarifs proposés ensuite dépendent de cette activité.</p>
+
+                <div class="ail_champ">
+                    <label class="ail_label" for="ail_activite">Activité</label>
+                    {{ form_activite.activite }}
+                    <div class="ail_pastilles" id="ail_resume_activite" aria-live="polite"></div>
+                </div>
+
+                <div class="ail_ligne_champs">
+                    <div class="ail_champ">
+                        <label class="ail_label" for="ail_date_debut">Date de début</label>
+                        <input type="date" class="form-control" id="ail_date_debut">
+                        <small class="form-text text-muted">Début de l'activité par défaut</small>
+                    </div>
+                    <div class="ail_champ">
+                        <label class="ail_label" for="ail_date_fin">Date de fin <span class="font-weight-normal text-muted">(facultatif)</span></label>
+                        <input type="date" class="form-control" id="ail_date_fin">
+                    </div>
+                </div>
+
+                <fieldset class="ail_champ">
+                    <legend class="ail_label" style="font-size: inherit;">Statut des inscriptions</legend>
+                    <label class="ail_radio"><input type="radio" name="ail_statut" value="ok" checked> Inscription validée</label>
+                    <label class="ail_radio"><input type="radio" name="ail_statut" value="attente"> Inscription en attente</label>
+                </fieldset>
+
+                <fieldset class="ail_champ">
+                    <legend class="ail_label" style="font-size: inherit;">Options</legend>
+                    <label class="ail_radio"><input type="checkbox" id="ail_internet_reservations" checked> Autoriser les réservations sur le portail</label>
+                    <label class="ail_radio" id="ail_ligne_forfaits"><input type="checkbox" id="ail_appliquer_forfaits" checked> Appliquer les forfaits datés de l'activité <span class="text-muted" id="ail_noms_forfaits"></span></label>
+                </fieldset>
+            </section>
+
+            {# ---------- Étape 2 : Individus ---------- #}
+            <section class="ail_etape" data-etape="2" aria-labelledby="ail_titre_2">
+                <h4 id="ail_titre_2">Qui voulez-vous inscrire ?</h4>
+                <p class="ail_intro">Choisissez une manière de trouver les individus, puis affinez si besoin. Les individus déjà inscrits à l'activité seront écartés automatiquement.</p>
+
+                <div class="ail_sources" role="tablist" aria-label="Manière de sélectionner les individus">
+                    <button type="button" role="tab" data-source="reinscription" aria-selected="true" aria-controls="ail_zone_source"><span class="titre">Réinscription</span><span class="description">Inscrits à une autre activité</span></button>
+                    <button type="button" role="tab" data-source="scolarite" aria-selected="false" aria-controls="ail_zone_source"><span class="titre">Scolarité</span><span class="description">École ou niveau scolaire</span></button>
+                    <button type="button" role="tab" data-source="age" aria-selected="false" aria-controls="ail_zone_source"><span class="titre">Âge</span><span class="description">Tranche d'âge ou de naissance</span></button>
+                    <button type="button" role="tab" data-source="liste" aria-selected="false" aria-controls="ail_zone_source"><span class="titre">Liste nominative</span><span class="description">Recherche ou copier-coller</span></button>
+                </div>
+
+                <div id="ail_zone_source" role="tabpanel">
+
+                    <div class="ail_bloc_source" data-source="reinscription">
+                        <div class="ail_champ">
+                            <label class="ail_label" for="ail_source_activite">Individus inscrits à l'activité</label>
+                            <select class="form-control" id="ail_source_activite">
+                                <option value="">----------</option>
+                                {% for id, nom, active in activites_source %}<option value="{{ id }}">{{ nom }}{% if not active %} (terminée){% endif %}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="ail_champ" id="ail_bloc_groupes_origine" style="display: none;">
+                            <span class="ail_label">Groupes d'origine</span>
+                            <div class="ail_cases" id="ail_groupes_origine"></div>
+                        </div>
+                        <label class="ail_radio riche"><input type="checkbox" id="ail_actives_uniquement" checked> Uniquement les inscriptions validées et non terminées au
+                            <input type="date" class="form-control form-control-sm" id="ail_date_reference" style="width: 160px;" aria-label="Date de référence des inscriptions d'origine"></label>
+                    </div>
+
+                    <div class="ail_bloc_source" data-source="liste" style="display: none;">
+                        <div class="ail_champ">
+                            <label class="ail_label" for="ail_recherche">Rechercher un individu</label>
+                            <input type="search" class="form-control" id="ail_recherche" placeholder="Nom, prénom..." autocomplete="off" aria-describedby="ail_aide_recherche">
+                            <small class="form-text text-muted" id="ail_aide_recherche">Tapez au moins 2 lettres puis cliquez sur un résultat pour l'ajouter.</small>
+                            <div class="ail_resultats_recherche" id="ail_resultats_recherche" style="display: none;" role="listbox" aria-label="Résultats de la recherche"></div>
+                            <div class="ail_pastilles" id="ail_individus_ajoutes" aria-live="polite"></div>
+                        </div>
+                        <div class="ail_champ">
+                            <label class="ail_label" for="ail_liste_texte">Ou coller une liste <span class="font-weight-normal text-muted">(un « NOM Prénom » par ligne, depuis un tableur)</span></label>
+                            <textarea class="form-control" id="ail_liste_texte" rows="5" placeholder="DUPONT Léa&#10;MARTIN Hugo"></textarea>
+                        </div>
+                    </div>
+
+                </div>
+
+                {# Blocs de critères : placés dans la zone source ou dans "Affiner" selon l'onglet #}
+                <div class="d-none" id="ail_reserve_blocs">
+                    <div class="ail_bloc_filtre" data-filtre="scolarite">
+                        <div class="ail_ligne_champs">
+                            <div class="ail_champ" style="width: 320px;">
+                                <span class="ail_label">Écoles <span class="font-weight-normal text-muted">(aucune cochée = toutes)</span></span>
+                                <div class="ail_cases ail_cases_defilement" id="ail_ecoles">
+                                    {% for ecole in config.scolarite.ecoles %}<label><input type="checkbox" class="ail_ecole" value="{{ ecole.id }}"> {{ ecole.nom }}</label>{% empty %}<span class="text-muted">Aucune école paramétrée</span>{% endfor %}
+                                </div>
+                            </div>
+                            <div class="ail_champ">
+                                <label class="ail_label" for="ail_date_scolarite">Scolarisés au</label>
+                                <input type="date" class="form-control" id="ail_date_scolarite">
+                            </div>
+                        </div>
+                        <div class="ail_champ" style="max-width: none;">
+                            <span class="ail_label">Niveaux scolaires <span class="font-weight-normal text-muted">(aucun coché = tous)</span></span>
+                            <div class="ail_cases">
+                                {% for niveau in config.scolarite.niveaux %}<label><input type="checkbox" class="ail_niveau" value="{{ niveau.id }}"> {{ niveau.nom }}</label>{% empty %}<span class="text-muted">Aucun niveau paramétré</span>{% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ail_bloc_filtre" data-filtre="age">
+                        <label class="ail_radio riche"><input type="radio" name="ail_mode_age" value="age" checked> Âgés de
+                            <input type="number" min="0" max="120" class="form-control form-control-sm" id="ail_age_min" style="width: 75px;" aria-label="Âge minimum"> à
+                            <input type="number" min="0" max="120" class="form-control form-control-sm" id="ail_age_max" style="width: 75px;" aria-label="Âge maximum"> ans au
+                            <input type="date" class="form-control form-control-sm" id="ail_date_age" style="width: 160px;" aria-label="Date de calcul de l'âge"></label>
+                        <label class="ail_radio riche"><input type="radio" name="ail_mode_age" value="naissance"> Nés entre le
+                            <input type="date" class="form-control form-control-sm" id="ail_naiss_min" style="width: 160px;" aria-label="Né à partir du"> et le
+                            <input type="date" class="form-control form-control-sm" id="ail_naiss_max" style="width: 160px;" aria-label="Né jusqu'au"></label>
+                    </div>
+
+                    <div class="ail_bloc_filtre" data-filtre="villes">
+                        <div class="ail_etiquettes" id="ail_villes_filtre" data-placeholder="Ajouter une ville..."></div>
+                    </div>
+                </div>
+
+                <div class="ail_section">
+                    <h5>Affiner <span class="font-weight-normal text-muted">(facultatif, cumulable)</span></h5>
+                    <div class="ail_affiner_ligne" id="ail_ligne_profil">
+                        <label for="ail_profil">Profil des individus :</label>
+                        <div class="ail_bloc_filtre">
+                            <select class="form-control" id="ail_profil" style="max-width: 260px;">
+                                {% for code, label in config.profils %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="ail_affiner_ligne" data-affiner="scolarite"><label><input type="checkbox" class="ail_activer_filtre" data-filtre="scolarite"> Par scolarité</label><div class="ail_emplacement"></div></div>
+                    <div class="ail_affiner_ligne" data-affiner="age"><label><input type="checkbox" class="ail_activer_filtre" data-filtre="age"> Par âge</label><div class="ail_emplacement"></div></div>
+                    <div class="ail_affiner_ligne" data-affiner="villes"><label><input type="checkbox" class="ail_activer_filtre" data-filtre="villes"> Par ville de résidence de la famille</label><div class="ail_emplacement"></div></div>
+                </div>
+
+                <div class="ail_compteur mt-3" id="ail_compteur" role="status" aria-live="polite">
+                    <span class="valeur" id="ail_compteur_valeur">–</span>
+                    <span id="ail_compteur_texte">Choisissez une manière de sélectionner les individus.</span>
+                </div>
+            </section>
+
+            {# ---------- Étape 3 : Groupes et tarifs ---------- #}
+            <section class="ail_etape" data-etape="3" aria-labelledby="ail_titre_3">
+                <h4 id="ail_titre_3">Dans quel groupe et avec quel tarif ?</h4>
+                <p class="ail_intro">Vous pourrez encore modifier le groupe et la catégorie de chaque individu à l'étape suivante.</p>
+
+                <fieldset class="ail_champ" style="max-width: none;">
+                    <legend class="ail_label" style="font-size: 15px;">Groupe</legend>
+                    <div id="ail_bloc_groupe_origine">
+                        <label class="ail_radio"><input type="radio" name="ail_mode_groupe" value="origine"> Correspondance avec les groupes d'origine</label>
+                        <div class="ail_sous_bloc table-responsive" id="ail_corr_groupes"></div>
+                    </div>
+                    <label class="ail_radio riche"><input type="radio" name="ail_mode_groupe" value="unique"> Un seul groupe pour tous :
+                        <select class="form-control form-control-sm ail_select_groupes" id="ail_groupe_unique" style="width: auto;" aria-label="Groupe unique"></select></label>
+                    <label class="ail_radio"><input type="radio" name="ail_mode_groupe" value="individuel"> Je choisirai individu par individu à l'étape suivante</label>
+                </fieldset>
+
+                <fieldset class="ail_champ ail_section" style="max-width: none;">
+                    <legend class="ail_label" style="font-size: 15px;">Catégorie de tarif</legend>
+                    <div id="ail_bloc_tarif_origine">
+                        <label class="ail_radio"><input type="radio" name="ail_mode_tarif" value="origine"> Même catégorie que dans l'activité d'origine</label>
+                        <div class="ail_sous_bloc table-responsive" id="ail_corr_categories"></div>
+                    </div>
+                    <label class="ail_radio"><input type="radio" name="ail_mode_tarif" value="ville"> Selon la ville de résidence de la famille</label>
+                    <div class="ail_sous_bloc" id="ail_bloc_tarif_ville">
+                        <div class="ail_radio riche">
+                            <select class="form-control form-control-sm ail_select_categories" id="ail_categorie_ville" style="width: auto;" aria-label="Catégorie si la ville fait partie de la liste"></select>
+                            <span>si la ville est l'une de :</span>
+                        </div>
+                        <div class="ail_etiquettes mb-2" id="ail_villes_tarif" data-placeholder="Ajouter une ville..."></div>
+                        <div class="ail_radio riche">
+                            <span>sinon</span>
+                            <select class="form-control form-control-sm ail_select_categories" id="ail_categorie_autre" style="width: auto;" aria-label="Catégorie pour les autres villes"></select>
+                        </div>
+                    </div>
+                    <label class="ail_radio riche"><input type="radio" name="ail_mode_tarif" value="unique"> Une seule catégorie pour tous :
+                        <select class="form-control form-control-sm ail_select_categories" id="ail_categorie_unique" style="width: auto;" aria-label="Catégorie unique"></select></label>
+                </fieldset>
+                <datalist id="ail_liste_villes"></datalist>
+            </section>
+
+            {# ---------- Étape 4 : Aperçu ---------- #}
+            <section class="ail_etape" data-etape="4" aria-labelledby="ail_titre_4">
+                <div class="d-flex flex-wrap align-items-start" style="gap: 10px;">
+                    <div class="flex-grow-1">
+                        <h4 id="ail_titre_4">Vérifiez et ajustez la liste</h4>
+                        <p class="ail_intro mb-2">Décochez les individus à ne pas inscrire, modifiez une famille, un groupe ou une catégorie si besoin.</p>
+                    </div>
+                    <div id="ail_badges_apercu"></div>
+                </div>
+
+                <div class="ail_barre_outils">
+                    <input type="search" class="form-control form-control-sm" id="ail_filtre_apercu" placeholder="Filtrer la liste..." style="width: 220px;" aria-label="Filtrer la liste">
+                    <label><input type="checkbox" id="ail_uniquement_verifier"> Uniquement « à vérifier »</label>
+                    <label><input type="checkbox" id="ail_afficher_deja"> Afficher les déjà inscrits</label>
+                    <span class="flex-grow-1"></span>
+                    <span class="text-muted">Pour les individus cochés affichés :</span>
+                    <select class="form-control form-control-sm ail_select_groupes" id="ail_lot_groupe" style="width: auto;" aria-label="Changer le groupe des individus cochés"></select>
+                    <select class="form-control form-control-sm ail_select_categories" id="ail_lot_categorie" style="width: auto;" aria-label="Changer la catégorie de tarif des individus cochés"></select>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover ail_table mb-2">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="width: 34px;"><input type="checkbox" id="ail_tout_cocher" aria-label="Cocher ou décocher les individus affichés"></th>
+                                <th scope="col">Individu</th>
+                                <th scope="col">Famille</th>
+                                <th scope="col">Âge</th>
+                                <th scope="col">Ville</th>
+                                <th scope="col" id="ail_entete_origine">Origine</th>
+                                <th scope="col">Groupe</th>
+                                <th scope="col">Catégorie de tarif</th>
+                                <th scope="col">Remarque</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ail_corps_apercu"></tbody>
+                    </table>
+                </div>
+                <div class="ail_pagination">
+                    <span class="text-muted mr-auto" id="ail_info_pagination"></span>
+                    <div id="ail_boutons_pagination" class="btn-group btn-group-sm" role="group" aria-label="Pages"></div>
+                </div>
+            </section>
+
+            {# ---------- Étape 5 : Vérification ---------- #}
+            <section class="ail_etape" data-etape="5" aria-labelledby="ail_titre_5">
+                <h4 id="ail_titre_5">Tout est prêt : vérifiez une dernière fois</h4>
+                <p class="ail_intro">Rien n'est encore enregistré. Les inscriptions seront créées au clic sur le bouton « Générer ».</p>
+                <div id="ail_verification"></div>
+            </section>
+
+            {# ---------- Compte rendu ---------- #}
+            <section class="ail_etape" data-etape="6" aria-labelledby="ail_titre_6" tabindex="-1">
+                <div id="ail_compte_rendu"></div>
+            </section>
+        </div>
+
+        <div class="ail_barre_bas" id="ail_barre_bas">
+            <a href="{% url 'individus_toc' %}" class="btn btn-link text-secondary" id="ail_bouton_annuler">Annuler</a>
+            <div class="ail_jauges" id="ail_jauges" aria-live="polite"></div>
+            <span class="ail_espace"></span>
+            <button type="button" class="btn btn-default" id="ail_bouton_precedent" style="display: none;"><i class="fa fa-arrow-left margin-r-5" aria-hidden="true"></i>Précédent</button>
+            <button type="button" class="btn btn-primary" id="ail_bouton_suivant">Suivant : Individus<i class="fa fa-arrow-right ml-2" aria-hidden="true"></i></button>
+            <button type="button" class="btn btn-success" id="ail_bouton_generer" style="display: none;"><i class="fa fa-bolt margin-r-5" aria-hidden="true"></i><span>Générer les inscriptions</span></button>
+        </div>
+    </div>
+
+{% endblock contenu_page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    {{ form_activite.media.js }}
+
+    <script>
+        $(document).ready(function () {
+
+            var CONFIG = JSON.parse(document.getElementById("ail_config").textContent);
+            var URLS = {
+                infos: "{% url 'ajax_inscriptions_assistant_lot_infos' %}",
+                compter: "{% url 'ajax_inscriptions_assistant_lot_compter' %}",
+                apercu: "{% url 'ajax_inscriptions_assistant_lot_apercu' %}",
+                rechercher: "{% url 'ajax_inscriptions_assistant_lot_rechercher' %}",
+                villes: "{% url 'ajax_inscriptions_assistant_lot_villes' %}",
+                generer: "{% url 'ajax_inscriptions_assistant_lot_generer' %}",
+                annuler: "{% url 'ajax_inscriptions_assistant_lot_annuler' %}",
+                excel: "{% url 'ajax_inscriptions_assistant_lot_exporter_excel' %}",
+                liste_inscrits: "{% url 'inscriptions_activite_liste' activite='A0' %}",
+                nouveau: "{% url 'inscriptions_assistant_lot' %}"
+            };
+            var TITRES_ETAPES = {1: "Activité", 2: "Individus", 3: "Groupes et tarifs", 4: "Aperçu", 5: "Vérification"};
+            var PAR_PAGE = 50;
+
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            $.ajaxSetup({beforeSend: function (xhr, settings) {if (!/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type) && !this.crossDomain) {xhr.setRequestHeader("X-CSRFToken", csrftoken)}}});
+
+            var etat = {
+                etape: 1, etape_max: 1, activite: null, source: null, onglet: "reinscription", individus_liste: {},
+                lignes: [], deja_inscrits: [], compteurs: {}, cle_apercu: null, page: 1, compte_rendu: null, villes: null
+            };
+
+            // ---------------------------------------- Outils ----------------------------------------
+
+            function Echapper(texte) {
+                return $("<div>").text(texte === null || texte === undefined ? "" : String(texte)).html();
+            }
+            function Normaliser(texte) {
+                return String(texte || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[\s\-']+/g, " ").trim().toUpperCase();
+            }
+            function Date_iso(date) {
+                return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+            }
+            function Date_fr(iso) {
+                if (!iso) {return ""}
+                var morceaux = iso.split("-");
+                return morceaux[2] + "/" + morceaux[1] + "/" + morceaux[0];
+            }
+            function Pluriel(nbre, singulier, pluriel) {
+                return nbre + " " + (nbre > 1 ? (pluriel || singulier + "s") : singulier);
+            }
+            function Erreur_ajax(data) {
+                var message = (data && data.responseJSON && data.responseJSON.erreur) || "Une erreur s'est produite. Veuillez réessayer.";
+                toastr.error(message);
+                return message;
+            }
+            function Poster(url, donnees) {
+                return $.ajax({type: "POST", url: url, data: donnees, dataType: "json"});
+            }
+            function Get_groupe(id) {
+                return (etat.activite ? etat.activite.groupes : []).find(function (g) {return g.id === id}) || null;
+            }
+            function Get_categorie(id) {
+                return (etat.activite ? etat.activite.categories : []).find(function (c) {return c.id === id}) || null;
+            }
+            function Options(liste, valeur, vide) {
+                var html = vide ? "<option value=''>" + Echapper(vide) + "</option>" : "";
+                liste.forEach(function (item) {
+                    html += "<option value='" + item.id + "'" + (item.id === valeur ? " selected" : "") + ">" + Echapper(item.nom) + "</option>";
+                });
+                return html;
+            }
+
+            // ---------------------------------------- Étiquettes (villes) ----------------------------------------
+
+            function Etiquettes(selecteur, quand_change) {
+                var $zone = $(selecteur), valeurs = [];
+                var $input = $("<input type='text' list='ail_liste_villes' autocomplete='off'>").attr("placeholder", $zone.data("placeholder")).attr("aria-label", $zone.data("placeholder"));
+                $zone.append($input);
+                $zone.on("click", function (e) {if (e.target === this) {$input.trigger("focus")}});
+                function Dessiner() {
+                    $zone.find(".ail_etiquette").remove();
+                    valeurs.forEach(function (valeur, index) {
+                        var $etiquette = $("<span class='ail_etiquette'></span>").text(valeur);
+                        $etiquette.append($("<button type='button'>×</button>").attr("aria-label", "Retirer " + valeur).on("click", function () {
+                            valeurs.splice(index, 1); Dessiner(); quand_change();
+                        }));
+                        $input.before($etiquette);
+                    });
+                }
+                function Ajouter(texte) {
+                    texte = String(texte || "").trim().toUpperCase();
+                    if (texte && !valeurs.some(function (v) {return Normaliser(v) === Normaliser(texte)})) {
+                        valeurs.push(texte); Dessiner(); quand_change();
+                    }
+                    $input.val("");
+                }
+                $input.on("keydown", function (e) {
+                    if (e.key === "Enter" || e.key === ",") {e.preventDefault(); Ajouter($input.val())}
+                    if (e.key === "Backspace" && !$input.val() && valeurs.length) {valeurs.pop(); Dessiner(); quand_change()}
+                });
+                // Sélection dans les suggestions
+                $input.on("input", function () {
+                    var texte = $input.val();
+                    if (etat.villes && etat.villes.indexOf(texte.toUpperCase()) !== -1 && texte.length > 1 && $input.data("precedent") !== undefined && Math.abs(texte.length - $input.data("precedent").length) > 1) {
+                        Ajouter(texte);
+                    }
+                    $input.data("precedent", $input.val());
+                });
+                $input.on("blur", function () {if ($input.val().trim()) {Ajouter($input.val())}});
+                return {get: function () {return valeurs.slice()}, focus: function () {$input.trigger("focus")}};
+            }
+
+            function Charger_villes() {
+                if (etat.villes) {return}
+                etat.villes = [];
+                Poster(URLS.villes, {}).done(function (data) {
+                    etat.villes = data.villes;
+                    $("#ail_liste_villes").html(data.villes.map(function (ville) {return "<option value='" + Echapper(ville) + "'>"}).join(""));
+                });
+            }
+
+            var villes_filtre = Etiquettes("#ail_villes_filtre", function () {Compter_differe()});
+            var villes_tarif = Etiquettes("#ail_villes_tarif", function () {});
+
+            // ---------------------------------------- Navigation ----------------------------------------
+
+            var initialisation = true;
+            function Aller_etape(numero) {
+                etat.etape = numero;
+                etat.etape_max = Math.max(etat.etape_max, numero);
+                $(".ail_etape").removeClass("active").filter("[data-etape='" + numero + "']").addClass("active");
+                $(".ail_etapes button").each(function () {
+                    var n = parseInt($(this).data("etape"));
+                    $(this).toggleClass("active", n === numero).toggleClass("valide", n < etat.etape_max && n !== numero)
+                        .prop("disabled", numero === 6 || n > etat.etape_max).attr("aria-current", n === numero ? "step" : null);
+                });
+                $("#ail_bouton_precedent").toggle(numero > 1 && numero < 6);
+                $("#ail_bouton_suivant").toggle(numero < 5).html("Suivant : " + Echapper(TITRES_ETAPES[numero + 1] || "") + "<i class='fa fa-arrow-right ml-2' aria-hidden='true'></i>");
+                $("#ail_bouton_generer").toggle(numero === 5);
+                $("#ail_bouton_annuler").toggle(numero < 6);
+                $("#ail_barre_bas").toggle(numero < 6);
+                $("#ail_jauges").toggle(numero === 4 || numero === 5);
+                if (numero === 2) {Charger_villes(); Compter()}
+                if (numero === 3) {Charger_villes(); Preparer_etape_3()}
+                if (numero === 4) {Charger_apercu()}
+                if (numero === 5) {Dessiner_verification()}
+                if (!initialisation) {$("html, body").scrollTop($("#ail_assistant").offset().top - 70)}
+            }
+
+            function Valider_etape(numero) {
+                if (numero === 1) {
+                    if (!etat.activite) {toastr.error("Veuillez sélectionner une activité"); return false}
+                    if (!$("#ail_date_debut").val()) {toastr.error("Veuillez renseigner la date de début"); return false}
+                    if ($("#ail_date_fin").val() && $("#ail_date_fin").val() < $("#ail_date_debut").val()) {toastr.error("La date de fin doit être supérieure à la date de début"); return false}
+                    if (!etat.activite.groupes.length || !etat.activite.categories.length) {toastr.error("Cette activité n'a pas de groupe ou de catégorie de tarif"); return false}
+                }
+                if (numero === 2) {
+                    if (etat.compteurs.erreur) {toastr.error(etat.compteurs.erreur); return false}
+                    if (!etat.compteurs.nbre) {toastr.error("Aucun individu à inscrire ne correspond à la sélection"); return false}
+                }
+                if (numero === 3) {
+                    var regles = Get_regles();
+                    if (regles.groupes.mode === "unique" && !regles.groupes.idgroupe) {toastr.error("Choisissez le groupe"); return false}
+                    if (regles.tarifs.mode === "unique" && !regles.tarifs.idcategorie) {toastr.error("Choisissez la catégorie de tarif"); return false}
+                    if (regles.tarifs.mode === "ville") {
+                        if (!regles.tarifs.villes.length) {toastr.error("Ajoutez au moins une ville"); villes_tarif.focus(); return false}
+                        if (!regles.tarifs.ville_categorie || !regles.tarifs.autre_categorie) {toastr.error("Choisissez les deux catégories de tarif"); return false}
+                    }
+                }
+                if (numero === 4) {
+                    var cochees = etat.lignes.filter(function (l) {return l.coche});
+                    if (!cochees.length) {toastr.error("Cochez au moins un individu à inscrire"); return false}
+                    var incompletes = cochees.filter(function (l) {return !l.famille || !l.groupe || !l.categorie_tarif});
+                    if (incompletes.length) {
+                        toastr.error(Pluriel(incompletes.length, "individu coché n'a", "individus cochés n'ont") + " pas de famille, de groupe ou de catégorie de tarif");
+                        $("#ail_uniquement_verifier").prop("checked", true); etat.page = 1; Dessiner_apercu();
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            $("#ail_bouton_suivant").on("click", function () {
+                if (Valider_etape(etat.etape)) {Aller_etape(etat.etape + 1)}
+            });
+            $("#ail_bouton_precedent").on("click", function () {Aller_etape(etat.etape - 1)});
+            $(".ail_etapes button").on("click", function () {
+                var numero = parseInt($(this).data("etape"));
+                if (numero < etat.etape) {Aller_etape(numero); return}
+                // Avancer : chaque étape intermédiaire doit être valide
+                for (var n = etat.etape; n < numero; n++) {if (!Valider_etape(n)) {return}}
+                if (numero === 5 && etat.etape < 4 && Get_cle_apercu() !== etat.cle_apercu) {
+                    toastr.info("La sélection a changé : vérifiez d'abord la nouvelle liste");
+                    numero = 4;
+                }
+                Aller_etape(numero);
+            });
+
+            // ---------------------------------------- Étape 1 : activité ----------------------------------------
+
+            $("#ail_activite").on("change", function () {
+                var idactivite = $(this).val();
+                etat.activite = null; etat.cle_apercu = null;
+                $("#ail_resume_activite").empty();
+                if (!idactivite) {return}
+                Poster(URLS.infos, {idactivite: idactivite, idsource: $("#ail_source_activite").val()}).done(function (data) {
+                    etat.activite = data.activite;
+                    etat.source = data.source || null;
+                    var a = data.activite, pastilles = [];
+                    if (a.date_debut_fr) {pastilles.push(a.date_fin_fr ? "Du " + a.date_debut_fr + " au " + a.date_fin_fr : "À partir du " + a.date_debut_fr)}
+                    var places = a.groupes.reduce(function (total, g) {return total + (g.max || 0)}, 0);
+                    pastilles.push(Pluriel(a.groupes.length, "groupe") + (places ? " · " + places + " places" : ""));
+                    pastilles.push(Pluriel(a.categories.length, "catégorie") + " de tarifs");
+                    pastilles.push(Pluriel(a.inscriptions, "inscription") + " actuellement");
+                    $("#ail_resume_activite").html(pastilles.map(function (p) {return "<span class='ail_pastille'>" + Echapper(p) + "</span>"}).join(""));
+                    // Date de début : début de l'activité, ou aujourd'hui si l'activité a déjà commencé
+                    var aujourdhui = Date_iso(new Date());
+                    $("#ail_date_debut").val(a.date_debut && a.date_debut > aujourdhui ? a.date_debut : aujourdhui);
+                    $("#ail_date_debut").attr("max", a.date_fin || null);
+                    $("#ail_ligne_forfaits").toggle(a.forfaits.length > 0);
+                    $("#ail_noms_forfaits").text(a.forfaits.length ? "(" + a.forfaits.join(", ") + ")" : "");
+                    Remplir_selects();
+                    Initialiser_dates();
+                }).fail(Erreur_ajax);
+            });
+
+            function Remplir_selects() {
+                var a = etat.activite;
+                $("#ail_groupe_unique").html(Options(a.groupes, a.groupes.length === 1 ? a.groupes[0].id : null, a.groupes.length > 1 ? "Choisir..." : null));
+                $(".ail_select_categories").not("#ail_lot_categorie").each(function () {
+                    $(this).html(Options(a.categories, a.categories.length === 1 ? a.categories[0].id : null, a.categories.length > 1 ? "Choisir..." : null));
+                });
+                $("#ail_lot_groupe").html(Options(a.groupes, null, "Groupe..."));
+                $("#ail_lot_categorie").html(Options(a.categories, null, "Catégorie de tarif..."));
+            }
+
+            function Initialiser_dates() {
+                var debut = $("#ail_date_debut").val();
+                ["#ail_date_scolarite", "#ail_date_age"].forEach(function (id) {if (!$(id).data("modifie")) {$(id).val(debut)}});
+                if (!$("#ail_date_reference").data("modifie")) {
+                    var reference = etat.source && etat.source.date_fin ? etat.source.date_fin : Date_iso(new Date());
+                    $("#ail_date_reference").val(reference);
+                }
+            }
+            $("#ail_date_scolarite, #ail_date_age, #ail_date_reference").on("change", function () {$(this).data("modifie", true)});
+            $("#ail_date_debut").on("change", function () {Initialiser_dates()});
+
+            // ---------------------------------------- Étape 2 : individus ----------------------------------------
+
+            function Choisir_onglet(onglet) {
+                etat.onglet = onglet;
+                $(".ail_sources button").each(function () {$(this).attr("aria-selected", $(this).data("source") === onglet ? "true" : "false")});
+                $(".ail_bloc_source").hide().filter("[data-source=" + onglet + "]").show();
+                // Les critères "scolarité" et "âge" servent de source ou de filtre selon l'onglet
+                ["scolarite", "age", "villes"].forEach(function (filtre) {
+                    var $bloc = $(".ail_bloc_filtre[data-filtre=" + filtre + "]");
+                    var $ligne = $(".ail_affiner_ligne[data-affiner=" + filtre + "]");
+                    if (filtre === onglet) {
+                        $("#ail_zone_source").append($bloc.show());
+                        $ligne.hide();
+                    } else {
+                        $ligne.show().find(".ail_emplacement").append($bloc);
+                        $bloc.toggle($ligne.find(".ail_activer_filtre").prop("checked"));
+                    }
+                });
+                $("#ail_ligne_profil").toggle(onglet === "scolarite" || onglet === "age");
+                Compter_differe();
+            }
+            $(".ail_sources button").on("click", function () {Choisir_onglet($(this).data("source"))});
+            $(".ail_sources").on("keydown", "button", function (e) {
+                var $boutons = $(".ail_sources button"), index = $boutons.index(this);
+                if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                    e.preventDefault();
+                    var cible = $boutons.eq((index + (e.key === "ArrowRight" ? 1 : $boutons.length - 1)) % $boutons.length);
+                    cible.trigger("focus").trigger("click");
+                }
+            });
+            $(".ail_activer_filtre").on("change", function () {
+                var filtre = $(this).data("filtre");
+                $(".ail_bloc_filtre[data-filtre=" + filtre + "]").toggle($(this).prop("checked"));
+                if (filtre === "villes" && $(this).prop("checked")) {villes_filtre.focus()}
+                Compter_differe();
+            });
+
+            $("#ail_source_activite").on("change", function () {
+                etat.source = null;
+                $("#ail_bloc_groupes_origine").hide();
+                $("#ail_groupes_origine").empty();
+                if (!$(this).val() || !etat.activite) {Compter_differe(); return}
+                Poster(URLS.infos, {idactivite: etat.activite.id, idsource: $(this).val()}).done(function (data) {
+                    etat.source = data.source;
+                    $("#ail_groupes_origine").html(data.source.groupes.map(function (g) {
+                        return "<label><input type='checkbox' class='ail_groupe_origine' value='" + g.id + "' checked> " + Echapper(g.nom) + " <span class='text-muted'>(" + g.nbre + ")</span></label>";
+                    }).join("") || "<span class='text-muted'>Aucun groupe</span>");
+                    $("#ail_bloc_groupes_origine").show();
+                    if (!$("#ail_date_reference").data("modifie")) {$("#ail_date_reference").val(data.source.date_fin || Date_iso(new Date()))}
+                    Compter();
+                }).fail(Erreur_ajax);
+            });
+
+            // Recherche nominative
+            var minuterie_recherche = null;
+            $("#ail_recherche").on("input", function () {
+                clearTimeout(minuterie_recherche);
+                var texte = $(this).val();
+                if (texte.trim().length < 2) {$("#ail_resultats_recherche").hide().empty(); return}
+                minuterie_recherche = setTimeout(function () {
+                    Poster(URLS.rechercher, {texte: texte}).done(function (data) {
+                        var html = data.resultats.map(function (r) {
+                            return "<button type='button' role='option' data-id='" + r.id + "' data-label='" + Echapper(r.label) + "'><b>" + Echapper(r.label) + "</b>" + (r.familles ? " <span class='text-muted'>· " + Echapper(r.familles) + "</span>" : "") + "</button>";
+                        }).join("");
+                        $("#ail_resultats_recherche").html(html || "<div class='p-2 text-muted'>Aucun individu trouvé</div>").show();
+                    });
+                }, 300);
+            });
+            $("#ail_resultats_recherche").on("click", "button", function () {
+                etat.individus_liste[$(this).data("id")] = $(this).data("label");
+                $("#ail_recherche").val("").trigger("focus");
+                $("#ail_resultats_recherche").hide().empty();
+                Dessiner_individus_liste(); Compter();
+            });
+            function Dessiner_individus_liste() {
+                var $zone = $("#ail_individus_ajoutes").empty();
+                Object.keys(etat.individus_liste).forEach(function (id) {
+                    var $etiquette = $("<span class='ail_etiquette'></span>").text(etat.individus_liste[id]);
+                    $etiquette.append($("<button type='button'>×</button>").attr("aria-label", "Retirer " + etat.individus_liste[id]).on("click", function () {
+                        delete etat.individus_liste[id]; Dessiner_individus_liste(); Compter();
+                    }));
+                    $zone.append($etiquette);
+                });
+            }
+
+            function Get_parametres_selection() {
+                var source;
+                if (etat.onglet === "reinscription") {
+                    source = {type: "reinscription", idactivite: $("#ail_source_activite").val(), groupes: $(".ail_groupe_origine:checked").map(function () {return this.value}).get(),
+                              actives_uniquement: $("#ail_actives_uniquement").prop("checked"), date_reference: $("#ail_date_reference").val()};
+                    if (!$("#ail_bloc_groupes_origine").is(":visible")) {delete source.groupes}
+                } else if (etat.onglet === "liste") {
+                    source = {type: "liste", individus: Object.keys(etat.individus_liste), texte: $("#ail_liste_texte").val()};
+                } else {
+                    source = {type: "tous"};
+                }
+                function Actif(filtre) {return etat.onglet === filtre || $(".ail_activer_filtre[data-filtre=" + filtre + "]").prop("checked")}
+                var filtres = {profils: [$("#ail_profil").val()]};
+                if (Actif("scolarite")) {
+                    filtres.scolarite = {date: $("#ail_date_scolarite").val(), ecoles: $(".ail_ecole:checked").map(function () {return this.value}).get(),
+                                         niveaux: $(".ail_niveau:checked").map(function () {return this.value}).get()};
+                }
+                if (Actif("age")) {
+                    filtres.age = {mode: $("[name=ail_mode_age]:checked").val(), min: $("#ail_age_min").val(), max: $("#ail_age_max").val(), date: $("#ail_date_age").val(),
+                                   naiss_min: $("#ail_naiss_min").val(), naiss_max: $("#ail_naiss_max").val()};
+                }
+                if (Actif("villes") && villes_filtre.get().length) {filtres.villes = villes_filtre.get()}
+                return {
+                    idactivite: etat.activite ? etat.activite.id : null, date_debut: $("#ail_date_debut").val(), date_fin: $("#ail_date_fin").val(),
+                    statut: $("[name=ail_statut]:checked").val(), internet_reservations: $("#ail_internet_reservations").prop("checked"),
+                    appliquer_forfaits: $("#ail_appliquer_forfaits").prop("checked") && $("#ail_ligne_forfaits").is(":visible"),
+                    source: source, filtres: filtres
+                };
+            }
+
+            var minuterie_compter = null, requete_compter = null;
+            function Compter_differe() {
+                clearTimeout(minuterie_compter);
+                minuterie_compter = setTimeout(Compter, 400);
+            }
+            function Compter() {
+                if (etat.etape !== 2 || !etat.activite) {return}
+                if (etat.onglet === "reinscription" && !$("#ail_source_activite").val()) {
+                    Afficher_compteur(null, "Choisissez l'activité d'origine."); etat.compteurs = {erreur: "Choisissez l'activité d'origine"}; return;
+                }
+                if (requete_compter) {requete_compter.abort()}
+                $("#ail_compteur_valeur").html("<i class='fa fa-spinner fa-spin' aria-hidden='true'></i>");
+                requete_compter = Poster(URLS.compter, {parametres: JSON.stringify(Get_parametres_selection())}).done(function (data) {
+                    etat.compteurs = data;
+                    var textes = [Pluriel(data.nbre, "individu correspond", "individus correspondent")];
+                    if (data.nbre_deja_inscrits) {textes.push("+ " + Pluriel(data.nbre_deja_inscrits, "déjà inscrit écarté", "déjà inscrits écartés"))}
+                    if (data.nbre_plusieurs_familles) {textes.push(Pluriel(data.nbre_plusieurs_familles, "rattaché", "rattachés") + " à plusieurs familles")}
+                    if (data.nbre_sans_date_naiss) {textes.push(Pluriel(data.nbre_sans_date_naiss, "individu sans date de naissance écarté", "individus sans date de naissance écartés"))}
+                    if (data.non_trouves.length) {textes.push("non trouvés : " + data.non_trouves.join(", "))}
+                    if (data.ambigus.length) {textes.push("homonymes à ajouter par la recherche : " + data.ambigus.join(", "))}
+                    var nbre_texte = textes.shift().replace(/^\d+ /, "");
+                    Afficher_compteur(data.nbre, nbre_texte + (textes.length ? " · " + textes.join(" · ") : ""));
+                    // Nombre d'individus par groupe d'origine selon les critères
+                    $(".ail_groupe_origine").each(function () {
+                        $(this).parent().find(".text-muted").text("(" + (data.par_groupe_origine[this.value] || 0) + (this.checked ? "" : " · décoché") + ")");
+                    });
+                }).fail(function (data) {
+                    if (data.statusText === "abort") {return}
+                    var message = (data.responseJSON && data.responseJSON.erreur) || "Erreur pendant le comptage";
+                    etat.compteurs = {erreur: message};
+                    Afficher_compteur(null, message, true);
+                });
+            }
+            function Afficher_compteur(valeur, texte, erreur) {
+                $("#ail_compteur").toggleClass("erreur", !!erreur);
+                $("#ail_compteur_valeur").text(valeur === null ? "–" : valeur);
+                $("#ail_compteur_texte").text(texte);
+            }
+            $("#ail_zone_source, #ail_reserve_blocs, .ail_affiner_ligne").on("change", "input, select", function () {
+                if (!$(this).is("#ail_source_activite, #ail_recherche")) {Compter_differe()}
+            });
+            $("#ail_profil").on("change", Compter_differe);
+            $("#ail_liste_texte, #ail_age_min, #ail_age_max").on("input", Compter_differe);
+
+            // ---------------------------------------- Étape 3 : groupes et tarifs ----------------------------------------
+
+            function Preparer_etape_3() {
+                var reinscription = etat.onglet === "reinscription" && etat.source;
+                $("#ail_bloc_groupe_origine, #ail_bloc_tarif_origine").toggle(!!reinscription);
+                if (reinscription) {
+                    var compteurs = etat.compteurs.par_groupe_origine || {};
+                    var groupes_coches = $(".ail_groupe_origine:checked").map(function () {return this.value}).get();
+                    var html = "<table class='table table-sm mb-1' style='max-width: 720px;'><thead><tr><th scope='col'>Groupe d'origine</th><th scope='col'>Nouveau groupe</th><th scope='col' class='text-right'>Individus</th><th scope='col' class='text-right'>Places restantes</th></tr></thead><tbody>";
+                    etat.source.groupes.filter(function (g) {return groupes_coches.indexOf(String(g.id)) !== -1}).forEach(function (g) {
+                        var valeur = $("#ail_corr_groupe_" + g.id).length ? parseInt($("#ail_corr_groupe_" + g.id).val()) || null : etat.source.correspondances_groupes[g.id];
+                        html += "<tr><td>" + Echapper(g.nom) + "</td><td><select class='form-control form-control-sm ail_corr_groupe' id='ail_corr_groupe_" + g.id + "' data-origine='" + g.id + "' aria-label='Nouveau groupe pour " + Echapper(g.nom) + "'>" +
+                                Options(etat.activite.groupes, valeur, "À choisir dans l'aperçu") + "</select></td><td class='text-right'>" + (compteurs[g.id] || 0) + "</td><td class='text-right ail_places' data-origine='" + g.id + "'></td></tr>";
+                    });
+                    $("#ail_corr_groupes").html(html + "</tbody></table><small class='text-muted'>Correspondance proposée automatiquement d'après le nom des groupes.</small>");
+                    var html_cat = "<table class='table table-sm mb-1' style='max-width: 560px;'><thead><tr><th scope='col'>Catégorie d'origine</th><th scope='col'>Nouvelle catégorie</th></tr></thead><tbody>";
+                    etat.source.categories.forEach(function (c) {
+                        var valeur = $("#ail_corr_categorie_" + c.id).length ? parseInt($("#ail_corr_categorie_" + c.id).val()) || null : etat.source.correspondances_categories[c.id];
+                        html_cat += "<tr><td>" + Echapper(c.nom) + "</td><td><select class='form-control form-control-sm ail_corr_categorie' id='ail_corr_categorie_" + c.id + "' data-origine='" + c.id + "' aria-label='Nouvelle catégorie pour " + Echapper(c.nom) + "'>" +
+                                    Options(etat.activite.categories, valeur, "À choisir dans l'aperçu") + "</select></td></tr>";
+                    });
+                    $("#ail_corr_categories").html(html_cat + "</tbody></table>");
+                    Dessiner_places_correspondances();
+                }
+                // Modes par défaut
+                if (!$("[name=ail_mode_groupe]:checked").length || ($("[name=ail_mode_groupe]:checked").val() === "origine" && !reinscription)) {
+                    $("[name=ail_mode_groupe][value=" + (reinscription ? "origine" : "unique") + "]").prop("checked", true);
+                }
+                if (!$("[name=ail_mode_tarif]:checked").length || ($("[name=ail_mode_tarif]:checked").val() === "origine" && !reinscription)) {
+                    $("[name=ail_mode_tarif][value=" + (reinscription ? "origine" : "unique") + "]").prop("checked", true);
+                }
+                Actualiser_modes();
+            }
+            function Dessiner_places_correspondances() {
+                $(".ail_places").each(function () {
+                    var idgroupe = parseInt($("#ail_corr_groupe_" + $(this).data("origine")).val());
+                    var groupe = Get_groupe(idgroupe);
+                    var places = groupe && groupe.max ? groupe.max - groupe.inscrits : null;
+                    $(this).text(places === null ? (groupe ? "Illimitées" : "") : places).toggleClass("text-warning font-weight-bold", places !== null && places <= 0);
+                });
+            }
+            function Actualiser_modes() {
+                $("#ail_corr_groupes").toggle($("[name=ail_mode_groupe]:checked").val() === "origine");
+                $("#ail_corr_categories").toggle($("[name=ail_mode_tarif]:checked").val() === "origine");
+                $("#ail_bloc_tarif_ville").toggle($("[name=ail_mode_tarif]:checked").val() === "ville");
+            }
+            $("[name=ail_mode_groupe], [name=ail_mode_tarif]").on("change", Actualiser_modes);
+            $("#ail_corr_groupes").on("change", "select", Dessiner_places_correspondances);
+            $("#ail_groupe_unique").on("change", function () {$("[name=ail_mode_groupe][value=unique]").prop("checked", true); Actualiser_modes()});
+            $("#ail_categorie_unique").on("change", function () {$("[name=ail_mode_tarif][value=unique]").prop("checked", true); Actualiser_modes()});
+
+            function Get_regles() {
+                var correspondances_groupes = {}, correspondances_categories = {};
+                $(".ail_corr_groupe").each(function () {correspondances_groupes[$(this).data("origine")] = $(this).val() || null});
+                $(".ail_corr_categorie").each(function () {correspondances_categories[$(this).data("origine")] = $(this).val() || null});
+                return {
+                    groupes: {mode: $("[name=ail_mode_groupe]:checked").val() || "unique", idgroupe: $("#ail_groupe_unique").val(), correspondances: correspondances_groupes},
+                    tarifs: {mode: $("[name=ail_mode_tarif]:checked").val() || "unique", idcategorie: $("#ail_categorie_unique").val(), correspondances: correspondances_categories,
+                             villes: villes_tarif.get(), ville_categorie: $("#ail_categorie_ville").val(), autre_categorie: $("#ail_categorie_autre").val()}
+                };
+            }
+            function Get_parametres() {
+                return $.extend(Get_parametres_selection(), Get_regles(), {depassement: $("[name=ail_depassement]:checked").val() || "valider"});
+            }
+
+            // ---------------------------------------- Étape 4 : aperçu ----------------------------------------
+
+            function Get_cle_apercu() {
+                var parametres = Get_parametres();
+                delete parametres.depassement;
+                return JSON.stringify(parametres);
+            }
+            function Charger_apercu() {
+                var cle = Get_cle_apercu();
+                if (cle === etat.cle_apercu) {Dessiner_apercu(); return}
+                $("#ail_corps_apercu").html("<tr><td colspan='9' class='text-center text-muted py-4'><i class='fa fa-spinner fa-spin margin-r-5' aria-hidden='true'></i>Chargement de la liste...</td></tr>");
+                $("#ail_jauges").empty();
+                Poster(URLS.apercu, {parametres: cle}).done(function (data) {
+                    etat.cle_apercu = cle;
+                    etat.activite = data.activite;
+                    etat.deja_inscrits = data.deja_inscrits;
+                    etat.lignes = data.lignes.map(function (ligne) {ligne.coche = true; ligne.cle = Normaliser(ligne.nom + " " + ligne.familles.map(function (f) {return f.nom + " " + f.ville}).join(" ")); return ligne});
+                    etat.page = 1;
+                    $("#ail_entete_origine").toggle(etat.onglet === "reinscription");
+                    Dessiner_apercu();
+                }).fail(function (data) {
+                    $("#ail_corps_apercu").html("<tr><td colspan='9' class='text-center text-danger py-4'>" + Echapper(Erreur_ajax(data)) + "</td></tr>");
+                });
+            }
+
+            function Get_remarques(ligne) {
+                var alertes = [], infos = [];
+                if (!ligne.famille) {alertes.push("Rattaché à " + ligne.familles.length + " familles")}
+                if (!ligne.groupe) {alertes.push("Groupe à choisir")}
+                if (!ligne.categorie_tarif) {alertes.push("Catégorie à choisir")}
+                if (!ligne.date_naiss) {alertes.push("Date de naissance manquante")}
+                var famille = ligne.familles.find(function (f) {return f.id === ligne.famille});
+                if (famille && famille.groupe && ligne.groupe && famille.groupe !== ligne.groupe) {infos.push("Groupe modifié")}
+                return {alertes: alertes, infos: infos, a_verifier: alertes.length > 0};
+            }
+
+            function Get_lignes_filtrees() {
+                var filtre = Normaliser($("#ail_filtre_apercu").val()), verifier = $("#ail_uniquement_verifier").prop("checked");
+                return etat.lignes.filter(function (ligne) {
+                    if (filtre && ligne.cle.indexOf(filtre) === -1) {return false}
+                    if (verifier && !Get_remarques(ligne).a_verifier) {return false}
+                    return true;
+                });
+            }
+
+            function Dessiner_apercu() {
+                var lignes = Get_lignes_filtrees(), afficher_origine = etat.onglet === "reinscription";
+                var nbre_pages = Math.max(1, Math.ceil(lignes.length / PAR_PAGE));
+                etat.page = Math.min(etat.page, nbre_pages);
+                var debut = (etat.page - 1) * PAR_PAGE, page = lignes.slice(debut, debut + PAR_PAGE);
+                var html = page.map(function (ligne) {
+                    var index = etat.lignes.indexOf(ligne), remarques = Get_remarques(ligne);
+                    var famille = ligne.familles.find(function (f) {return f.id === ligne.famille});
+                    var cellule_famille = ligne.familles.length > 1
+                        ? "<select class='form-control ail_champ_ligne' data-champ='famille' aria-label='Famille de " + Echapper(ligne.nom) + "'>" + Options(ligne.familles, ligne.famille, "Choisir...") + "</select>"
+                        : Echapper(ligne.familles[0].nom);
+                    var badges = remarques.alertes.map(function (r) {return "<span class='ail_badge alerte'>" + Echapper(r) + "</span>"}).join("") +
+                                 remarques.infos.map(function (r) {return "<span class='ail_badge info'>" + Echapper(r) + "</span>"}).join("");
+                    return "<tr data-index='" + index + "' class='" + (ligne.coche ? "" : "decoche") + "'>" +
+                        "<td><input type='checkbox' class='ail_coche' aria-label='Inscrire " + Echapper(ligne.nom) + "'" + (ligne.coche ? " checked" : "") + "></td>" +
+                        "<td class='font-weight-bold'>" + Echapper(ligne.nom) + "</td>" +
+                        "<td>" + cellule_famille + "</td>" +
+                        "<td>" + (ligne.age === null ? "–" : Pluriel(ligne.age, "an")) + "</td>" +
+                        "<td>" + Echapper(famille ? famille.ville : ligne.familles.map(function (f) {return f.ville}).join(" / ")) + "</td>" +
+                        (afficher_origine ? "<td class='text-muted'>" + Echapper(famille ? famille.groupe_origine : (ligne.familles[0].groupe_origine || "")) + "</td>" : "") +
+                        "<td><select class='form-control ail_champ_ligne' data-champ='groupe' aria-label='Groupe de " + Echapper(ligne.nom) + "'>" + Options(etat.activite.groupes, ligne.groupe, "Choisir...") + "</select></td>" +
+                        "<td><select class='form-control ail_champ_ligne' data-champ='categorie_tarif' aria-label='Catégorie de tarif de " + Echapper(ligne.nom) + "'>" + Options(etat.activite.categories, ligne.categorie_tarif, "Choisir...") + "</select></td>" +
+                        "<td>" + badges + "</td></tr>";
+                }).join("");
+                if ($("#ail_afficher_deja").prop("checked") && etat.page === nbre_pages) {
+                    html += etat.deja_inscrits.map(function (d) {
+                        return "<tr class='deja'><td></td><td>" + Echapper(d.nom) + "</td><td>" + Echapper(d.famille) + "</td><td colspan='" + (afficher_origine ? 5 : 4) + "'></td><td><span class='ail_badge neutre'>Déjà inscrit</span></td></tr>";
+                    }).join("");
+                }
+                $("#ail_corps_apercu").html(html || "<tr><td colspan='9' class='text-center text-muted py-4'>Aucun individu à afficher</td></tr>");
+                $(".ail_table .ail_champ_ligne").closest("td").find("select").css("min-width", "130px");
+                $("#ail_tout_cocher").prop("checked", lignes.length > 0 && lignes.every(function (l) {return l.coche}));
+                $("#ail_info_pagination").text(lignes.length ? "Affichage de " + (debut + 1) + " à " + Math.min(debut + PAR_PAGE, lignes.length) + " sur " + lignes.length : "");
+                // Pagination
+                var boutons = "";
+                if (nbre_pages > 1) {
+                    var pages = [];
+                    for (var p = 1; p <= nbre_pages; p++) {if (p === 1 || p === nbre_pages || Math.abs(p - etat.page) <= 2) {pages.push(p)} else if (pages[pages.length - 1] !== "...") {pages.push("...")}}
+                    boutons += "<button type='button' class='btn btn-default ail_page' data-page='" + (etat.page - 1) + "' aria-label='Page précédente'" + (etat.page === 1 ? " disabled" : "") + ">‹</button>";
+                    pages.forEach(function (p) {
+                        boutons += p === "..." ? "<button type='button' class='btn btn-default' disabled>…</button>"
+                            : "<button type='button' class='btn " + (p === etat.page ? "btn-primary" : "btn-default") + " ail_page' data-page='" + p + "'" + (p === etat.page ? " aria-current='page'" : "") + ">" + p + "</button>";
+                    });
+                    boutons += "<button type='button' class='btn btn-default ail_page' data-page='" + (etat.page + 1) + "' aria-label='Page suivante'" + (etat.page === nbre_pages ? " disabled" : "") + ">›</button>";
+                }
+                $("#ail_boutons_pagination").html(boutons);
+                // Compteurs
+                var nbre_verifier = etat.lignes.filter(function (l) {return l.coche && Get_remarques(l).a_verifier}).length;
+                $("#ail_badges_apercu").html("<span class='ail_badge neutre font-weight-bold'>" + etat.lignes.filter(function (l) {return l.coche}).length + " à inscrire" + "</span>" +
+                    (etat.deja_inscrits.length ? "<span class='ail_badge neutre'>" + Pluriel(etat.deja_inscrits.length, "déjà inscrit") + "</span>" : "") +
+                    (nbre_verifier ? "<span class='ail_badge alerte font-weight-bold'>" + nbre_verifier + " à vérifier</span>" : ""));
+                Dessiner_jauges();
+            }
+
+            $("#ail_corps_apercu").on("change", ".ail_coche", function () {
+                etat.lignes[$(this).closest("tr").data("index")].coche = this.checked;
+                $(this).closest("tr").toggleClass("decoche", !this.checked);
+                Dessiner_apercu();
+            });
+            $("#ail_corps_apercu").on("change", ".ail_champ_ligne", function () {
+                var ligne = etat.lignes[$(this).closest("tr").data("index")], champ = $(this).data("champ");
+                ligne[champ] = parseInt($(this).val()) || null;
+                if (champ === "famille") {
+                    var famille = ligne.familles.find(function (f) {return f.id === ligne.famille});
+                    if (famille) {
+                        if (famille.groupe) {ligne.groupe = famille.groupe}
+                        if (famille.categorie_tarif) {ligne.categorie_tarif = famille.categorie_tarif}
+                    }
+                }
+                Dessiner_apercu();
+            });
+            $("#ail_tout_cocher").on("change", function () {
+                var coche = this.checked;
+                Get_lignes_filtrees().forEach(function (l) {l.coche = coche});
+                Dessiner_apercu();
+            });
+            $("#ail_boutons_pagination").on("click", ".ail_page", function () {etat.page = parseInt($(this).data("page")); Dessiner_apercu()});
+            var minuterie_filtre = null;
+            $("#ail_filtre_apercu").on("input", function () {clearTimeout(minuterie_filtre); minuterie_filtre = setTimeout(function () {etat.page = 1; Dessiner_apercu()}, 200)});
+            $("#ail_uniquement_verifier, #ail_afficher_deja").on("change", function () {etat.page = 1; Dessiner_apercu()});
+            $("#ail_lot_groupe, #ail_lot_categorie").on("change", function () {
+                var valeur = parseInt($(this).val()) || null, champ = this.id === "ail_lot_groupe" ? "groupe" : "categorie_tarif";
+                if (!valeur) {return}
+                var lignes = Get_lignes_filtrees().filter(function (l) {return l.coche});
+                lignes.forEach(function (l) {l[champ] = valeur});
+                toastr.success((champ === "groupe" ? "Groupe" : "Catégorie de tarif") + " appliqué(e) à " + Pluriel(lignes.length, "individu"));
+                $(this).val("");
+                Dessiner_apercu();
+            });
+
+            function Get_capacites() {
+                var statut_ok = $("[name=ail_statut]:checked").val() === "ok";
+                var nouveaux = {};
+                etat.lignes.forEach(function (l) {if (l.coche && l.groupe) {nouveaux[l.groupe] = (nouveaux[l.groupe] || 0) + 1}});
+                return etat.activite.groupes.map(function (g) {
+                    var total = g.inscrits + (statut_ok ? (nouveaux[g.id] || 0) : 0);
+                    return {groupe: g, nouveaux: nouveaux[g.id] || 0, total: total, depassement: g.max ? Math.max(0, total - g.max) : 0};
+                });
+            }
+            function Dessiner_jauges() {
+                if (!etat.activite) {return}
+                var cochees = etat.lignes.filter(function (l) {return l.coche}).length;
+                var html = "<span class='align-self-center' style='font-size: 16px;'><b>" + cochees + "</b> coché" + (cochees > 1 ? "s" : "") + "</span>";
+                Get_capacites().forEach(function (c) {
+                    if (!c.nouveaux && !c.groupe.max) {return}
+                    var largeur = c.groupe.max ? Math.min(100, Math.round(100 * c.total / c.groupe.max)) : 100;
+                    html += "<span class='ail_jauge" + (c.depassement ? " depassement" : "") + "'>" + Echapper(c.groupe.nom) + " · " + c.total + (c.groupe.max ? " / " + c.groupe.max : "") + (c.depassement ? " — dépassement" : "") +
+                            "<span class='fond'><span class='barre' style='width: " + largeur + "%;'></span></span></span>";
+                });
+                $("#ail_jauges").html(html);
+            }
+
+            // ---------------------------------------- Étape 5 : vérification ----------------------------------------
+
+            function Dessiner_verification() {
+                var p = Get_parametres_selection(), cochees = etat.lignes.filter(function (l) {return l.coche});
+                var libelles_source = {reinscription: "Réinscription depuis " + (etat.source ? etat.source.nom : ""), scolarite: "Selon la scolarité", age: "Selon l'âge", liste: "Liste nominative"};
+                var html = "<div class='ail_kpis'>" +
+                    "<div class='ail_kpi'><div class='libelle'>Activité</div><div class='valeur' style='font-size: 15px;'>" + Echapper(etat.activite.nom) + "</div></div>" +
+                    "<div class='ail_kpi'><div class='libelle'>À partir du</div><div class='valeur' style='font-size: 15px;'>" + Date_fr(p.date_debut) + (p.date_fin ? " au " + Date_fr(p.date_fin) : "") + " · " + (p.statut === "ok" ? "validée" : "en attente") + "</div></div>" +
+                    "<div class='ail_kpi'><div class='libelle'>Individus</div><div class='valeur' style='font-size: 15px;'>" + Echapper(libelles_source[etat.onglet]) + "</div></div>" +
+                    "<div class='ail_kpi'><div class='libelle'>Inscriptions à créer</div><div class='valeur'>" + cochees.length + "</div></div></div>";
+
+                var par_categorie = {};
+                cochees.forEach(function (l) {var cle = l.groupe + "_" + l.categorie_tarif; par_categorie[cle] = (par_categorie[cle] || 0) + 1});
+                html += "<div class='table-responsive'><table class='table table-sm' style='max-width: 900px;'><thead><tr><th scope='col'>Groupe</th><th scope='col' class='text-right'>Déjà inscrits</th><th scope='col' class='text-right'>Nouveaux</th><th scope='col' class='text-right'>Total / places</th><th scope='col'>Répartition par catégorie</th></tr></thead><tbody>";
+                var depassements = [];
+                Get_capacites().forEach(function (c) {
+                    if (!c.nouveaux) {return}
+                    var repartition = etat.activite.categories.map(function (cat) {var n = par_categorie[c.groupe.id + "_" + cat.id]; return n ? Echapper(cat.nom) + " : " + n : null}).filter(Boolean).join(" · ");
+                    if (c.depassement) {depassements.push(c)}
+                    html += "<tr" + (c.depassement ? " class='table-warning'" : "") + "><td" + (c.depassement ? " class='font-weight-bold'" : "") + ">" + Echapper(c.groupe.nom) + "</td><td class='text-right'>" + c.groupe.inscrits + "</td><td class='text-right'>" + c.nouveaux + "</td>" +
+                            "<td class='text-right" + (c.depassement ? " font-weight-bold" : "") + "'>" + c.total + (c.groupe.max ? " / " + c.groupe.max : "") + "</td><td>" + repartition + "</td></tr>";
+                });
+                html += "</tbody></table></div>";
+
+                var depassement_activite = etat.activite.max && p.statut === "ok" ? Math.max(0, etat.activite.inscrits + cochees.length - etat.activite.max) : 0;
+                if (depassements.length || depassement_activite) {
+                    var phrases = depassements.map(function (c) {return "le groupe " + Echapper(c.groupe.nom) + " dépassera sa capacité de " + Pluriel(c.depassement, "place")});
+                    if (depassement_activite) {phrases.push("l'activité dépassera sa capacité totale de " + Pluriel(depassement_activite, "place"))}
+                    var choix = $("[name=ail_depassement]:checked").val() || "attente";
+                    html += "<div class='ail_avertissement'><b>Attention : " + phrases.join(" et ") + ".</b>" +
+                        "<label class='ail_radio mt-2'><input type='radio' name='ail_depassement' value='attente'" + (choix === "attente" ? " checked" : "") + "> Inscrire les derniers (ordre alphabétique) en « Inscription en attente »</label>" +
+                        "<label class='ail_radio'><input type='radio' name='ail_depassement' value='valider'" + (choix === "valider" ? " checked" : "") + "> Inscrire tout le monde en « validée » malgré le dépassement</label>" +
+                        "<span>Ou <a href='#' class='ail_retour_apercu'>revenir à l'aperçu</a> pour changer des groupes.</span></div>";
+                }
+
+                var actions = [];
+                if (p.appliquer_forfaits && p.statut === "ok") {actions.push("Forfait(s) daté(s) " + Echapper(etat.activite.forfaits.join(", ")) + " appliqué(s) à chaque inscription validée")}
+                actions.push("Une ligne d'historique par inscription");
+                actions.push(p.internet_reservations ? "Réservations sur le portail autorisées" : "Réservations sur le portail non autorisées");
+                html += "<h5 class='mt-2' style='font-size: 15px; font-weight: 600;'>Sera fait également</h5><ul class='ail_liste_actions'>" +
+                        actions.map(function (a) {return "<li><i class='fa fa-check' aria-hidden='true'></i>" + a + "</li>"}).join("") + "</ul>";
+                $("#ail_verification").html(html);
+                $("#ail_bouton_generer span").text("Générer " + (cochees.length > 1 ? "les " + cochees.length + " inscriptions" : "l'inscription"));
+                Dessiner_jauges();
+            }
+            $("#ail_verification").on("click", ".ail_retour_apercu", function (e) {e.preventDefault(); Aller_etape(4)});
+
+            // ---------------------------------------- Génération ----------------------------------------
+
+            $("#ail_bouton_generer").on("click", function () {
+                var $bouton = $(this);
+                var lignes = etat.lignes.filter(function (l) {return l.coche}).map(function (l) {return {individu: l.individu, famille: l.famille, groupe: l.groupe, categorie_tarif: l.categorie_tarif}});
+                $bouton.prop("disabled", true).find("i").attr("class", "fa fa-spinner fa-spin margin-r-5");
+                Poster(URLS.generer, {parametres: JSON.stringify(Get_parametres()), lignes: JSON.stringify(lignes)}).done(function (data) {
+                    etat.compte_rendu = data;
+                    Dessiner_compte_rendu(data);
+                    Aller_etape(6);
+                    $("#ail_bandeau_lot").remove();
+                    $(".ail_etape[data-etape='6']").trigger("focus");
+                }).fail(Erreur_ajax).always(function () {
+                    $bouton.prop("disabled", false).find("i").attr("class", "fa fa-bolt margin-r-5");
+                });
+            });
+
+            function Dessiner_compte_rendu(data) {
+                var html = "<div class='ail_succes'><i class='fa fa-check-circle' aria-hidden='true'></i><div><h4 id='ail_titre_6' class='mb-0'>" + Pluriel(data.nbre, "inscription créée", "inscriptions créées") + "</h4>" +
+                           "<div class='text-muted'>" + Echapper(data.activite.nom) + " · à partir du " + Echapper(data.date_debut) + " · générées en " + (data.duree < 1 ? "moins d'une seconde" : String(data.duree).replace(".", ",") + " s") + "</div></div></div>";
+                html += "<div class='ail_kpis'><div class='ail_kpi'><div class='valeur'>" + data.nbre_ok + "</div><div class='libelle'>validées</div></div>" +
+                        (data.nbre_attente ? "<div class='ail_kpi attention'><div class='valeur'>" + data.nbre_attente + "</div><div class='libelle'>en attente</div></div>" : "") +
+                        (data.forfaits_appliques ? "<div class='ail_kpi'><div class='valeur'>" + data.forfaits_appliques + "</div><div class='libelle'>forfaits datés appliqués</div></div>" : "") +
+                        (data.nbre_ignores ? "<div class='ail_kpi'><div class='valeur'>" + data.nbre_ignores + "</div><div class='libelle'>déjà inscrits entre-temps, ignorés</div></div>" : "") + "</div>";
+                var a_traiter = [];
+                data.en_attente.forEach(function (x) {a_traiter.push([x.nom, "En attente · groupe " + x.groupe + " complet", x.url, "Ouvrir l'inscription"])});
+                data.a_choisir.forEach(function (x) {a_traiter.push([x.nom, "Forfait daté à plusieurs montants : choix à faire", x.url, "Choisir le montant"])});
+                data.erreurs_forfaits.forEach(function (x) {a_traiter.push([x.nom, x.message, null, null])});
+                if (a_traiter.length) {
+                    html += "<h5 style='font-size: 15px; font-weight: 600;'>À traiter</h5><div class='table-responsive'><table class='table table-sm' style='max-width: 900px;'><tbody>" + a_traiter.map(function (x) {
+                        return "<tr><td class='font-weight-bold'>" + Echapper(x[0]) + "</td><td>" + Echapper(x[1]) + "</td><td class='text-right'>" + (x[2] ? "<a href='" + Echapper(x[2]) + "' target='_blank' rel='noopener'>" + Echapper(x[3]) + "</a>" : "") + "</td></tr>";
+                    }).join("") + "</tbody></table></div>";
+                }
+                html += "<div class='d-flex flex-wrap align-items-center pt-3 border-top' style='gap: 10px;'>" +
+                        "<a class='btn btn-primary' href='" + URLS.liste_inscrits.replace("A0", "A" + data.activite.id) + "'><i class='fa fa-list margin-r-5' aria-hidden='true'></i>Voir la liste des inscrits</a>" +
+                        "<button type='button' class='btn btn-default' id='ail_exporter'><i class='fa fa-file-excel-o margin-r-5' aria-hidden='true'></i>Exporter le compte rendu (Excel)</button>" +
+                        "<a class='btn btn-default' href='" + URLS.nouveau + "'>Nouveau lot</a><span class='flex-grow-1'></span>" +
+                        "<button type='button' class='btn btn-outline-danger ail_annuler_lot'>Annuler ce lot</button></div>" +
+                        "<p class='text-muted mt-2 mb-0' style='font-size: 13px;'>« Annuler ce lot » supprime les inscriptions créées et leurs forfaits, tant qu'aucune consommation, prestation facturée ou règlement ne leur est associé. Possible jusqu'au prochain lot ou à la déconnexion.</p>";
+                $("#ail_compte_rendu").html(html);
+            }
+
+            $("#ail_compte_rendu").on("click", "#ail_exporter", function () {
+                Poster(URLS.excel, {compte_rendu: JSON.stringify(etat.compte_rendu)}).done(function (data) {window.location.href = data.nom_fichier}).fail(Erreur_ajax);
+            });
+
+            $(document).on("click", ".ail_annuler_lot", function () {
+                bootbox.dialog({
+                    title: "Annuler le lot",
+                    message: "Confirmez-vous la suppression des inscriptions du dernier lot généré ?",
+                    buttons: {
+                        ok: {label: "<i class='fa fa-check'></i> Supprimer les inscriptions", className: "btn-danger", callback: function () {
+                            Poster(URLS.annuler, {}).done(function (data) {
+                                toastr.success(Pluriel(data.nbre, "inscription supprimée", "inscriptions supprimées"));
+                                $("#ail_bandeau_lot").remove();
+                                $(".ail_annuler_lot").prop("disabled", true).text("Lot annulé");
+                            }).fail(Erreur_ajax);
+                        }},
+                        cancel: {label: "<i class='fa fa-ban'></i> Retour", className: "btn-default"}
+                    }
+                });
+            });
+
+            // ---------------------------------------- Initialisation ----------------------------------------
+
+            Choisir_onglet("reinscription");
+            Aller_etape(1);
+            initialisation = false;
+            if ($("#ail_activite").val()) {$("#ail_activite").trigger("change")}
+        });
+    </script>
+{% endblock scripts %}
