@@ -5,7 +5,7 @@
 
 import os, uuid
 from django.conf import settings
-from core.models import Prestation
+from core.models import Prestation, Facture
 
 
 class BaseExporter():
@@ -39,34 +39,31 @@ class BaseExporter():
         os.makedirs(self.rep_destination)
 
     def Get_detail_factures(self, factures=[]):
-        prestations = Prestation.objects.select_related("activite", "individu", "facture", "cotisation", "cotisation__type_cotisation").filter(facture__in=factures)
+        """ Renvoie le détail des prestations regroupées par facture : {facture: [{label, code_compta, code_analytique, montant}, ...]} """
+        # Lecture des seuls champs utiles en une requête (évite d'instancier et de déchiffrer les individus)
+        prestations = Prestation.objects.filter(facture__in=factures).values_list(
+            "facture_id", "label", "montant", "code_compta", "code_analytique",
+            "activite__code_comptable", "activite__code_analytique",
+            "cotisation__type_cotisation__code_comptable", "cotisation__type_cotisation__code_analytique")
 
         dict_resultats = {}
-        for prestation in prestations:
+        for idfacture, label, montant, code_compta_prestation, code_analytique_prestation, code_compta_activite, code_analytique_activite, code_compta_cotisation, code_analytique_cotisation in prestations:
             # Recherche le code compta et le code analytique
-            code_compta = None
-            code_analytique = None
-            if prestation.activite:
-                if prestation.activite.code_comptable: code_compta = prestation.activite.code_comptable
-                if prestation.activite.code_analytique: code_analytique = prestation.activite.code_analytique
-            if hasattr(prestation, "cotisation"):
-                if prestation.cotisation.type_cotisation.code_comptable: code_compta = prestation.cotisation.type_cotisation.code_comptable
-                if prestation.cotisation.type_cotisation.code_analytique: code_analytique = prestation.cotisation.type_cotisation.code_analytique
-            if prestation.code_compta: code_compta = prestation.code_compta
-            if prestation.code_analytique: code_analytique = prestation.code_analytique
+            code_compta = code_compta_prestation or code_compta_cotisation or code_compta_activite or None
+            code_analytique = code_analytique_prestation or code_analytique_cotisation or code_analytique_activite or None
 
             # Mémorisation
-            key = (prestation.label, code_compta, code_analytique)
-            dict_resultats.setdefault(prestation.facture, {})
-            dict_resultats[prestation.facture].setdefault(key, 0)
-            dict_resultats[prestation.facture][key] += prestation.montant
+            key = (label, code_compta, code_analytique)
+            dict_facture = dict_resultats.setdefault(idfacture, {})
+            dict_facture[key] = dict_facture.get(key, 0) + montant
 
+        # Les résultats sont indexés par facture
+        dict_factures = {facture.pk: facture for facture in factures}
         dict_resultats2 = {}
-        for facture, dict_facture in dict_resultats.items():
-            dict_resultats2.setdefault(facture, [])
-            for (label, code_compta, code_analytique), montant in dict_facture.items():
-                dict_resultats2[facture].append({"label": label, "code_compta": code_compta, "code_analytique": code_analytique, "montant": montant})
-            dict_resultats2[facture].sort(key=lambda x: x["label"])
+        for idfacture, dict_facture in dict_resultats.items():
+            liste = [{"label": label, "code_compta": code_compta, "code_analytique": code_analytique, "montant": montant} for (label, code_compta, code_analytique), montant in dict_facture.items()]
+            liste.sort(key=lambda x: x["label"])
+            dict_resultats2[dict_factures.get(idfacture) or Facture(pk=idfacture)] = liste
 
         return dict_resultats2
 
@@ -82,11 +79,5 @@ class BaseExporter():
         return html
 
     def Generer_fichier_texte(self, format_export=None, lignes=[]):
-        texte = []
-        for valeurs_ligne in lignes:
-            ligne = []
-            for code_colonne, nom_colonne, taille_colonne in format_export:
-                valeur = str(valeurs_ligne.get(code_colonne, "") or "")
-                ligne.append(valeur[:taille_colonne].ljust(taille_colonne))
-            texte.append("".join(ligne))
-        return "\n".join(texte)
+        colonnes = [(code_colonne, taille_colonne) for code_colonne, nom_colonne, taille_colonne in format_export]
+        return "\n".join(["".join([str(valeurs_ligne.get(code_colonne, "") or "")[:taille_colonne].ljust(taille_colonne) for code_colonne, taille_colonne in colonnes]) for valeurs_ligne in lignes])

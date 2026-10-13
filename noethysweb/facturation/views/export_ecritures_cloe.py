@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import json, time
+import time
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 from core.views.base import CustomView
