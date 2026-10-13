@@ -8,6 +8,7 @@ from collections import Counter
 from django.conf import settings
 from operator import itemgetter
 from django.urls import reverse_lazy, reverse
+from django.utils.html import escape
 from django.views.generic import TemplateView
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
@@ -16,7 +17,7 @@ from django.template.context_processors import csrf
 from crispy_forms.utils import render_crispy_form
 from core.views.base import CustomView
 from core.utils import utils_dates, utils_dictionnaires
-from core.models import Activite, Consommation
+from core.models import Activite, Consommation, Individu, Famille
 from consommations.views import suivi_consommations
 from consommations.forms.liste_attente import Formulaire, Formulaire_modifier_reservation
 
@@ -120,6 +121,59 @@ def Exporter_pdf(request):
     if impression.erreurs:
         return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
     return JsonResponse({"nom_fichier": impression.Get_nom_fichier()})
+
+
+def Exporter_pdf_individu(request):
+    """ Imprime (ou prépare l'envoi par email) des places en attente affichées d'un individu """
+    try:
+        idindividu = int(request.POST.get("idindividu"))
+        idfamille = int(request.POST.get("idfamille"))
+        lignes_affichees = json.loads(request.POST.get("lignes", "[]"))
+    except (TypeError, ValueError):
+        return JsonResponse({"erreur": "Données invalides"}, status=401)
+    individu = Individu.objects.filter(pk=idindividu).first()
+    famille = Famille.objects.filter(pk=idfamille).first()
+    if not individu or not famille:
+        return JsonResponse({"erreur": "Individu ou famille introuvable"}, status=401)
+
+    # Récupération des consommations en attente de l'individu (contrôlées en base)
+    liste_idconso = [int(idconso) for ligne in lignes_affichees for idconso in ligne.get("liste_IDconso", [])]
+    dict_consos = {conso.pk: conso for conso in Consommation.objects.select_related("activite", "groupe", "evenement", "unite").filter(
+        pk__in=liste_idconso, individu_id=idindividu, inscription__famille_id=idfamille, etat="attente")}
+
+    # Une ligne par date/groupe/évènement, comme dans la liste d'attente
+    lignes = []
+    for ligne in lignes_affichees:
+        consos = sorted([dict_consos[int(idconso)] for idconso in ligne.get("liste_IDconso", []) if int(idconso) in dict_consos], key=lambda conso: conso.unite.ordre)
+        if not consos:
+            continue
+        conso = consos[0]
+        try:
+            rang = int(ligne.get("rang"))
+        except (TypeError, ValueError):
+            rang = None
+        lignes.append({
+            "date": conso.date, "activite": conso.activite.nom, "groupe": conso.groupe.nom,
+            "evenement": conso.evenement.nom if conso.evenement else None,
+            "unites": " + ".join([c.unite.nom for c in consos]),
+            "rang": rang, "place_dispo": bool(ligne.get("place_dispo", False)),
+        })
+
+    # Génération du PDF
+    from consommations.utils import utils_impression_liste_attente
+    impression = utils_impression_liste_attente.Impression_individu(titre="Places en attente", request=request, dict_donnees={
+        "individu": individu, "famille": famille, "lignes": lignes,
+        "{INDIVIDU_NOM}": individu.nom or "", "{INDIVIDU_PRENOM}": individu.prenom or "",
+        "{NBRE_PLACES_ATTENTE}": str(len(lignes)),
+    })
+    if impression.erreurs:
+        return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
+
+    # Données pour l'envoi par email
+    from core.data import data_modeles_emails
+    champs = {motcle: impression.Get_champs_fusion().get(motcle, "") for motcle, label in data_modeles_emails.Get_mots_cles("liste_attente")}
+    return JsonResponse({"nom_fichier": impression.Get_nom_fichier(), "categorie": "liste_attente", "label_fichier": "Places en attente",
+                         "champs": champs, "idfamille": idfamille})
 
 
 def Get_form_modifier_reservation(request):
@@ -446,12 +500,23 @@ def Get_resultats(parametres={}, etat="attente", request=None):
                         else:
                             label = "<i class='fa fa-remove margin-r-5 text-red'></i> %s" % texteIndividu
 
-                        # URL fiche famille
-                        action = " ".join([
-                            """<a type='button' title="Accéder à la fiche famille" class='btn btn-default btn-xs' href='%s'><i class='fa fa-fw fa-folder-open-o'></i></a>""" % reverse("famille_resume", args=[inscription.famille_id]),
-                            """<a type='button' title="Accéder aux consommations de l'individu" class='btn btn-default btn-xs' href='%s'><i class='fa fa-fw fa-calendar'></i></a>""" % reverse("famille_consommations", args=[inscription.famille_id, inscription.individu_id]),
-                            """<button title="Modifier la date et l'heure de la réservation&#13(Permet de modifier la position dans la liste d'attente)" class="btn btn-default btn-xs" onclick="ouvre_modal_modifier_reservation('%s')"><i class="fa fa-fw fa-clock-o"></i></button>""" % ";".join([str(idconso) for idconso in listeIDconso]),
-                        ])
+                        # Menu des actions
+                        items = [
+                            """<a class="dropdown-item" href="%s"><i class="fa fa-fw fa-folder-open-o margin-r-5"></i>Fiche famille</a>""" % reverse("famille_resume", args=[inscription.famille_id]),
+                            """<a class="dropdown-item" href="%s"><i class="fa fa-fw fa-calendar margin-r-5"></i>Consommations de l'individu</a>""" % reverse("famille_consommations", args=[inscription.famille_id, inscription.individu_id]),
+                            """<button type="button" class="dropdown-item" title="Permet de modifier la position dans la liste d'attente" onclick="ouvre_modal_modifier_reservation('%s')"><i class="fa fa-fw fa-clock-o margin-r-5"></i>Modifier la date de réservation</button>""" % ";".join([str(idconso) for idconso in listeIDconso]),
+                        ]
+                        if etat == "attente":
+                            items.extend([
+                                """<div class="dropdown-divider"></div>""",
+                                """<button type="button" class="dropdown-item" onclick="imprimer_attentes_individu(%d, %d, false)"><i class="fa fa-fw fa-file-pdf-o margin-r-5"></i>Imprimer les places en attente</button>""" % (inscription.individu_id, inscription.famille_id),
+                                """<button type="button" class="dropdown-item" onclick="imprimer_attentes_individu(%d, %d, true)"><i class="fa fa-fw fa-envelope-o margin-r-5"></i>Envoyer par email à la famille</button>""" % (inscription.individu_id, inscription.famille_id),
+                            ])
+                        titre_menu = escape("Actions pour %s" % inscription.individu.Get_nom())
+                        action = """<div class="dropdown la-menu">""" \
+                                 """<button type="button" class="la-menu-bouton" data-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false" title="%s" aria-label="%s">""" \
+                                 """<i class="fa fa-ellipsis-h"></i></button>""" \
+                                 """<div class="dropdown-menu dropdown-menu-right">%s</div></div>""" % (titre_menu, titre_menu, "".join(items))
 
                         liste_resultats.append({
                             "id": "individu_%s" % inscription.individu_id, "pid": id_evenement, "type": "individu", "label": label, "idfamille": inscription.famille_id, "idindividu": inscription.individu_id,

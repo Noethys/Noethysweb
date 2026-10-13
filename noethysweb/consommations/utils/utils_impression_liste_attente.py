@@ -9,7 +9,7 @@ logging.getLogger('PIL').setLevel(logging.WARNING)
 from xml.sax.saxutils import escape
 from reportlab.platypus import Spacer, Paragraph, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.pagesizes import A4, landscape, portrait
 from reportlab.lib import colors
 from core.utils import utils_dates, utils_impression, utils_polices
 
@@ -103,3 +103,98 @@ class Impression(utils_impression.Impression):
             tableau.setStyle(TableStyle(styles))
             self.story.append(tableau)
             self.story.append(Spacer(0, 15))
+
+
+class Impression_individu(utils_impression.Impression):
+    """ Impression PDF des places en attente d'un individu (document destiné à la famille) """
+    def __init__(self, *args, **kwds):
+        kwds["taille_page"] = portrait(A4)
+        utils_impression.Impression.__init__(self, *args, **kwds)
+
+    def Draw(self):
+        individu = self.dict_donnees["individu"]
+        famille = self.dict_donnees["famille"]
+        lignes = self.dict_donnees.get("lignes", [])
+        if not lignes:
+            self.erreurs.append("Aucune place en attente à imprimer pour cet individu")
+            return
+
+        # Entête
+        self.Insert_header(espace_apres=15)
+
+        # Styles
+        largeur_contenu = self.taille_page[0] - 75
+        style_normal = ParagraphStyle(name="normal", fontName=utils_polices.FONT_NORMAL, fontSize=8, leading=10)
+        style_centre = ParagraphStyle(name="centre", parent=style_normal, alignment=1)
+        style_entete = ParagraphStyle(name="entete", parent=style_centre, fontName=utils_polices.FONT_BOLD)
+        style_nom = ParagraphStyle(name="nom", parent=style_normal, fontName=utils_polices.FONT_BOLD, fontSize=12, leading=15)
+        style_discret = ParagraphStyle(name="discret", parent=style_normal, textColor=colors.HexColor("#555555"))
+        style_activite = ParagraphStyle(name="activite", parent=style_normal, fontName=utils_polices.FONT_BOLD, textColor=colors.white)
+        style_note = ParagraphStyle(name="note", parent=style_discret, fontSize=7, leading=9)
+
+        # Bloc identité et synthèse
+        infos_individu = [Paragraph(escape(individu.Get_nom()), style_nom)]
+        if individu.date_naiss:
+            age = individu.Get_age()
+            infos_individu.append(Paragraph("Né%s le %s (%d an%s)" % ("e" if individu.civilite in (2, 3, 5) else "", utils_dates.ConvertDateToFR(individu.date_naiss), age, "s" if age > 1 else ""), style_discret))
+        infos_individu.append(Paragraph("Famille : %s" % escape(famille.nom or ""), style_discret))
+        nbre_demandes = len(lignes)
+        # Pastille avec le nombre de demandes
+        pastille = Table([[Paragraph("<b>%d</b> demande%s en attente" % (nbre_demandes, "s" if nbre_demandes > 1 else ""),
+                                     ParagraphStyle(name="pastille", parent=style_normal, alignment=1, textColor=colors.white))]], [110])
+        pastille.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), (0.5, 0.5, 0.5)), ('ROUNDEDCORNERS', [8, 8, 8, 8]),
+            ('TOPPADDING', (0, 0), (-1, -1), 3), ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        # Bloc sur fond gris clair avec un liseré gris à gauche
+        tableau = Table([[infos_individu, pastille]], [largeur_contenu * 0.65, largeur_contenu * 0.35])
+        tableau.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), (0.95, 0.95, 0.95)), ('LINEBEFORE', (0, 0), (0, 0), 2, (0.5, 0.5, 0.5)),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'), ('ALIGN', (1, 0), (1, 0), 'RIGHT'), ('TOPPADDING', (0, 0), (-1, -1), 8), ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('LEFTPADDING', (0, 0), (0, 0), 10), ('RIGHTPADDING', (1, 0), (1, 0), 10),
+        ]))
+        self.story.append(tableau)
+        self.story.append(Spacer(0, 15))
+
+        # Colonnes (la colonne Groupe absorbe l'espace restant)
+        # Les colonnes Groupe et Consommations se partagent à parts égales l'espace restant
+        colonnes = [("Rang", 35), ("Date", 125), ("Groupe / Évènement", 0), ("Consommations", 0)]
+        largeurs_colonnes = [largeur for label, largeur in colonnes]
+        largeurs_colonnes[2] = largeurs_colonnes[3] = (largeur_contenu - sum(largeurs_colonnes)) / 2
+
+        # Regroupement par activité
+        dict_activites = {}
+        for ligne in sorted(lignes, key=lambda ligne: (ligne["activite"], ligne["date"], ligne["groupe"])):
+            dict_activites.setdefault(ligne["activite"], []).append(ligne)
+
+        for activite, lignes_activite in dict_activites.items():
+            data_tableau = [
+                [Paragraph(escape(activite), style_activite)] + [""] * (len(colonnes) - 1),
+                [Paragraph(label, style_entete) for label, largeur in colonnes],
+            ]
+            styles = [
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'), ('GRID', (0, 0), (-1, -1), 0.25, colors.black),
+                ('SPAN', (0, 0), (-1, 0)), ('BACKGROUND', (0, 0), (-1, 0), (0.5, 0.5, 0.5)),
+                ('BACKGROUND', (0, 1), (-1, 1), (0.9, 0.9, 0.9)),
+            ]
+            for num_ligne, ligne in enumerate(lignes_activite, start=2):
+                groupe = escape(ligne["groupe"])
+                if ligne["evenement"]:
+                    groupe += "<br/><i>%s</i>" % escape(ligne["evenement"])
+                data_tableau.append([
+                    Paragraph(str(ligne["rang"] or ""), style_centre),
+                    Paragraph(utils_dates.DateComplete(ligne["date"]).capitalize(), style_normal),
+                    Paragraph(groupe, style_normal),
+                    Paragraph(escape(ligne["unites"]), style_normal),
+                ])
+            tableau = Table(data_tableau, largeurs_colonnes, repeatRows=2)
+            tableau.setStyle(TableStyle(styles))
+            self.story.append(tableau)
+            self.story.append(Spacer(0, 12))
+
+        # Note explicative
+        note = Paragraph("Le rang indique la position de la demande dans la liste d'attente du groupe (ou de l'évènement) à la date d'édition. "
+                         "Il peut évoluer en fonction des annulations et des réattributions de places.", style_note)
+        tableau = Table([[note]], [largeur_contenu])
+        tableau.setStyle(TableStyle([('LEFTPADDING', (0, 0), (-1, -1), 0)]))
+        self.story.append(tableau)

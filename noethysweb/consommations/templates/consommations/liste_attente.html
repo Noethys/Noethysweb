@@ -66,7 +66,7 @@
                         .la-recherche {position: relative; flex: 0 1 280px; min-width: 180px; margin-left: auto;}
                         .la-recherche-icone {position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: #adb5bd; font-size: .8rem; pointer-events: none;}
                         .la-recherche input {padding-left: 26px;}
-                        .la-entetes, .la-ligne {display: grid; grid-template-columns: 24px 30px minmax(0, 2fr) minmax(0, 1.4fr) 130px 100px; gap: 8px; align-items: center;}
+                        .la-entetes, .la-ligne {display: grid; grid-template-columns: 24px 30px minmax(0, 2fr) minmax(0, 1.4fr) 130px 60px; gap: 8px; align-items: center;}
                         .la-entetes {font-size: .75rem; text-transform: uppercase; color: #6c757d; padding: 4px 10px 4px 28px;}
                         .la-date-entete {display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,.05); padding: 7px 10px; font-weight: bold; cursor: pointer; border-radius: 3px; margin-top: 8px; user-select: none;}
                         .la-groupe-entete {display: flex; justify-content: space-between; align-items: center; padding: 5px 10px 5px 26px; color: #495057; font-weight: 600; font-size: .9rem; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,.08); user-select: none;}
@@ -85,6 +85,11 @@
                         .la-pastille {display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px;}
                         .la-col-date > div:first-child {font-size: .82rem;}
                         .la-actions {text-align: right; white-space: nowrap;}
+                        .la-menu .dropdown-menu {font-size: .85rem;}
+                        .la-menu-bouton {width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 1px solid #ced4da; background: #fff; color: #6c757d; font-size: 13px; line-height: 24px; text-align: center; cursor: pointer; transition: background-color .12s, border-color .12s, color .12s;}
+                        .la-menu-bouton:hover, .la-menu-bouton:focus, .la-menu.show .la-menu-bouton {background: #e7f1ff; border-color: #80bdff; color: #007bff; outline: none;}
+                        .la-menu-bouton:focus-visible {box-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);}
+                        .la-menu .dropdown-item {cursor: pointer;}
                         .la-vide {text-align: center; color: #6c757d; padding: 30px 0;}
                         @media (max-width: 767px) {
                             .la-entetes {display: none;}
@@ -342,6 +347,7 @@
                             $(document).ready(afficher);
 
                             return {
+                                get_visibles: get_visibles,
                                 get_selections: function() {
                                     return $.map(Object.keys(selection), function(idx) {return lignes[idx];});
                                 }
@@ -448,6 +454,7 @@
 
     {# Aperçu PDF #}
     {% include 'core/modal_pdf.html' %}
+    {% include 'outils/modal_editeur_emails.html' %}
 
     {# Modal Modifier la réservation #}
     {% embed 'core/modal.html' %}
@@ -460,6 +467,54 @@
     {% endembed %}
     
     <script>
+        // Impression ou envoi par email des places en attente affichées d'un individu
+        function imprimer_attentes_individu(idindividu, idfamille, email) {
+            var lignes = $.map(liste_attente.get_visibles(), function(l) {
+                if (l.idindividu === idindividu && l.idfamille === idfamille) {
+                    return {liste_IDconso: l.liste_IDconso, rang: l.rang, place_dispo: l.place_dispo};
+                }
+            });
+            if (!lignes.length) {
+                toastr.error("Aucune place en attente affichée pour cet individu");
+                return;
+            }
+            var box = bootbox.dialog({
+                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Génération du PDF en cours</b><br><br>Veuillez patienter...</p>",
+                closeButton: false
+            });
+            // Bootstrap ignore la fermeture d'une fenêtre pendant son animation d'ouverture :
+            // on attend qu'elle soit entièrement affichée avant de la fermer, puis qu'elle soit fermée avant la suite.
+            var box_affichee = false;
+            box.one("shown.bs.modal", function() {box_affichee = true;});
+            function fermer_attente(suite) {
+                var fermer = function() {
+                    box.one("hidden.bs.modal", suite);
+                    box.modal("hide");
+                };
+                if (box_affichee) {fermer();} else {box.one("shown.bs.modal", fermer);}
+            }
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_liste_attente_exporter_pdf_individu' %}",
+                data: {
+                    idindividu: idindividu,
+                    idfamille: idfamille,
+                    lignes: JSON.stringify(lignes),
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                },
+                success: function(data) {
+                    fermer_attente(function() {
+                        if (email) {envoyer_email(data);} else {charge_pdf(data);}
+                    });
+                },
+                error: function(data) {
+                    fermer_attente(function() {
+                        toastr.error(data.responseJSON ? data.responseJSON.erreur : "Une erreur est survenue lors de l'impression");
+                    });
+                }
+            });
+        }
+
         function ouvre_modal_modifier_reservation(listeidconso) {
             $.ajax({
                 url: "{% url 'ajax_liste_attente_modifier_reservation' %}",

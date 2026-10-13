@@ -35,6 +35,7 @@ CATEGORIES = [
     ("commande_repas", "Commande de repas"),
     ("inscription", "Inscription"),
     ("devis", "Devis"),
+    ("liste_attente", "Places en attente"),
 ]
 
 MOTSCLES_STANDARDS = [
@@ -303,6 +304,12 @@ MOTSCLES = {
         ("{INDIVIDU_NOM}", "Nom de famille de l'individu"),
         ("{INDIVIDU_PRENOM}", "Prénom de l'individu"),
         ("{INDIVIDU_DATE_NAISS}", "Date de naissance de l'individu"),
+    ],
+
+    "liste_attente": [
+        ("{INDIVIDU_NOM}", "Nom de famille de l'individu"),
+        ("{INDIVIDU_PRENOM}", "Prénom de l'individu"),
+        ("{NBRE_PLACES_ATTENTE}", "Nombre de places en attente"),
     ],
 
     "devis": [
