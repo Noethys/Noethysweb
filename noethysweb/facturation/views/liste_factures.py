@@ -43,7 +43,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fgenerique:famille", 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde',
+        filtres = ["fgenerique:famille", 'fprelevement_actif:famille__mandats__actif', 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde',
                    'solde_actuel', 'etat', 'lot__nom', "regie__nom", "date_limite_paiement", "observations"]
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
