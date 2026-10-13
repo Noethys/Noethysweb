@@ -5,6 +5,7 @@
 
 import os, datetime, shutil, uuid
 from django.conf import settings
+from django.db.models import Q
 from core.models import Famille, Facture, Depot, Reglement, Ventilation
 from core.utils import utils_dates
 from facturation.utils.utils_export_ecritures import BaseExporter
@@ -56,19 +57,27 @@ class Exporter(BaseExporter):
         with open(os.path.join(self.rep_destination, "%s-%s.TXT" % (nom_fichier, datetime.date.today().strftime("%d%m%Y"))), "w") as fichier:
             fichier.write(texte)
 
-    def Creation_fichiers(self):
-        # Récupération de la période
-        date_debut = utils_dates.ConvertDateENGtoDate(self.options["periode"].split(";")[0])
-        date_fin = utils_dates.ConvertDateENGtoDate(self.options["periode"].split(";")[1])
+    def Creation_fichier_comptes(self, date_debut=None, date_fin=None, dict_familles={}):
+        """ Génération du fichier des comptes clients selon l'option 'comptes_clients' """
+        selection = self.options.get("comptes_clients", "toutes")
+        if selection == "aucune":
+            return
 
-        # Génération du fichier des comptes auxiliaires
+        familles = Famille.objects.all()
+        if selection == "utilisees":
+            # Uniquement les familles concernées par les factures et règlements exportés
+            factures = Facture.objects.filter(date_edition__gte=date_debut, date_edition__lte=date_fin, etat__isnull=True).values("famille_id")
+            reglements = Reglement.objects.filter(depot__date__gte=date_debut, depot__date__lte=date_fin).values("famille_id")
+            familles = familles.filter(Q(pk__in=factures) | Q(pk__in=reglements))
+        elif selection == "creees_depuis":
+            # Uniquement les familles créées depuis la date donnée (incluse)
+            familles = familles.filter(date_creation__date__gte=self.options["date_creation_familles"])
+
         # Seuls les champs utiles sont lus : cela évite de déchiffrer tous les champs chiffrés de chaque famille
-        dict_familles = {}
         lignes = []
         compte_collectif = self.options["compte_collectif"] or ""
-        for idfamille, nom, code_compta, rue_resid, cp_resid, ville_resid in Famille.objects.order_by("nom").values_list("pk", "nom", "code_compta", "rue_resid", "cp_resid", "ville_resid"):
-            code_famille = self.Get_code_compta_famille(idfamille=idfamille, code_compta=code_compta)
-            dict_familles[idfamille] = (code_famille, nom)
+        for idfamille, rue_resid, cp_resid, ville_resid in familles.order_by("nom").values_list("pk", "rue_resid", "cp_resid", "ville_resid"):
+            code_famille, nom = dict_familles[idfamille]
             lignes_rue = rue_resid.split("\n") if rue_resid else []
             lignes.append({
                 "num_compte": code_famille,
@@ -81,8 +90,20 @@ class Exporter(BaseExporter):
             })
         self.Ecrire_fichier(nom_fichier="CPT", format_export=format_export_cpt, lignes=lignes)
 
+    def Creation_fichiers(self):
+        # Récupération de la période
+        date_debut = utils_dates.ConvertDateENGtoDate(self.options["periode"].split(";")[0])
+        date_fin = utils_dates.ConvertDateENGtoDate(self.options["periode"].split(";")[1])
+
+        # Codes et noms de toutes les familles (champs non chiffrés, donc lecture rapide)
+        dict_familles = {idfamille: (self.Get_code_compta_famille(idfamille=idfamille, code_compta=code_compta), nom) for idfamille, nom, code_compta in Famille.objects.values_list("pk", "nom", "code_compta")}
+
+        # Génération du fichier des comptes auxiliaires
+        self.Creation_fichier_comptes(date_debut=date_debut, date_fin=date_fin, dict_familles=dict_familles)
+
         # Génération du fichier des factures
-        factures = list(Facture.objects.filter(date_edition__gte=date_debut, date_edition__lte=date_fin, etat__isnull=True).order_by("pk"))
+        # Le queryset (et non une liste) est transmis pour que le filtre des prestations soit une sous-requête
+        factures = Facture.objects.filter(date_edition__gte=date_debut, date_edition__lte=date_fin, etat__isnull=True).order_by("pk")
         details_factures = self.Get_detail_factures(factures=factures)
         lignes = []
         for index_facture, facture in enumerate(factures, 1):
@@ -126,7 +147,7 @@ class Exporter(BaseExporter):
         self.Ecrire_fichier(nom_fichier="FAC", format_export=format_export_fac, lignes=lignes)
 
         # Génération du fichier des règlements
-        depots = list(Depot.objects.filter(date__gte=date_debut, date__lte=date_fin).order_by("pk"))
+        depots = Depot.objects.filter(date__gte=date_debut, date__lte=date_fin).order_by("pk")
 
         # Numéro de facture associé à chaque règlement
         ventilations = Ventilation.objects.filter(reglement__depot__in=depots, prestation__facture__isnull=False).values_list("reglement_id", "prestation__facture__numero")

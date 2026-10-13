@@ -36,6 +36,7 @@
                 <ul>
                     <li>Les factures dont la date de génération est comprise dans la période sélectionnée.</li>
                     <li>Les règlements dont la date de dépôt est comprise dans la période sélectionnée.</li>
+                    <li>Les comptes clients des familles sélectionnées dans le paramètre "Comptes clients" : toutes les familles, uniquement celles concernées par les factures et règlements exportés, ou uniquement celles créées depuis une date donnée (Pratique pour n'exporter que les nouvelles familles depuis le dernier import).</li>
                 </ul>
             </p>
 
@@ -64,25 +65,46 @@
 
     <script>
 
-        // Générer le PDF
+        // Affiche la date de création uniquement si nécessaire
+        function On_change_comptes_clients() {
+            $("#div_id_date_creation_familles").toggle($("#id_comptes_clients").val() === "creees_depuis");
+        };
+        $(document).ready(function() {
+            $("#id_comptes_clients").change(On_change_comptes_clients);
+            On_change_comptes_clients();
+        });
+
+        // Générer l'export
         function exporter() {
             var box = bootbox.dialog({
                     message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Génération de l'export en cours</b><br><br>Veuillez patienter...</p>",
                     closeButton: false
                 });
+            // La fenêtre d'attente n'est fermée qu'une fois complètement affichée (sinon le fond gris peut rester bloqué)
+            var attente_affichee = false, suite = null;
+            box.one("shown.bs.modal", function() {
+                attente_affichee = true;
+                if (suite) {suite()};
+            });
+            function Terminer(callback) {
+                suite = function() {bootbox.hideAll(); callback()};
+                if (attente_affichee) {suite()};
+            };
             $.ajax({
                 type: "POST",
                 url: "{% url 'ajax_export_ecritures_cloe_exporter' %}",
                 data: $("#form_parametres").serialize(),
                 datatype: "json",
                 success: function(data){
-                    bootbox.hideAll();
-                    $("#download").attr("href", data.nom_fichier);
-                    document.getElementById("download").click();
+                    Terminer(function() {
+                        $("#download").attr("href", data.nom_fichier);
+                        document.getElementById("download").click();
+                    });
                 },
                 error: function(data) {
-                    bootbox.hideAll();
-                    toastr.error(data.responseJSON.erreur);
+                    Terminer(function() {
+                        toastr.error((data.responseJSON && data.responseJSON.erreur) || "Erreur lors de l'export");
+                    });
                 }
             })
         };

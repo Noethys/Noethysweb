@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import time
+import json
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 from core.views.base import CustomView
@@ -14,9 +14,10 @@ from facturation.utils import utils_export_cloe
 def Exporter(request):
     """ Générer le fichier d'export """
     # Récupération des options
-    time.sleep(1)
     form = Formulaire(request.POST, request=request)
     if not form.is_valid():
+        if "date_creation_familles" in form.errors:
+            return JsonResponse({"erreur": form.errors["date_creation_familles"][0]}, status=401)
         return JsonResponse({"erreur": "Veuillez compléter les paramètres"}, status=401)
     options = form.cleaned_data
 
