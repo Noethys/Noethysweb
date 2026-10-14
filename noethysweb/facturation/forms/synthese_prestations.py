@@ -5,12 +5,13 @@
 
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, HTML, Fieldset
+from crispy_forms.layout import Layout, HTML
 from crispy_forms.bootstrap import Field
 from core.widgets import DateRangePickerWidget, SelectionActivitesWidget
 from core.forms.select2 import Select2MultipleWidget
 from core.utils import utils_questionnaires
 from core.forms.base import FormulaireBase
+from core.forms.accordeon import Accordeon, Section
 
 
 def Get_regroupements():
@@ -69,21 +70,27 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.form_method = 'post'
 
         self.helper.layout = Layout(
-            Fieldset("Données",
-                Field('periode'),
-                Field('type_activites'),
-                Field('activites'),
-            ),
-            Fieldset("Affichage",
-                Field('donnee_ligne'),
-                Field('donnee_colonne'),
-                Field('donnee_detail'),
-                Field('donnee_case'),
-            ),
-            Fieldset("Filtres",
-                Field('donnees'),
-                Field('filtre_reglements_saisis'),
-                Field('filtre_reglements_deposes'),
+            Accordeon(
+                Section("Données",
+                    Field('periode'),
+                    Field('type_activites'),
+                    Field('activites'),
+                    icone="fa-database",
+                ),
+                Section("Affichage",
+                    Field('donnee_ligne'),
+                    Field('donnee_colonne'),
+                    Field('donnee_detail'),
+                    Field('donnee_case'),
+                    icone="fa-table",
+                ),
+                Section("Filtres",
+                    Field('donnees'),
+                    Field('filtre_reglements_saisis'),
+                    Field('filtre_reglements_deposes'),
+                    icone="fa-filter",
+                ),
+                css_id="accordeon_synthese_prestations",
             ),
             HTML(EXTRA_HTML),
         )

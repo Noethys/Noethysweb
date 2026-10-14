@@ -5,11 +5,12 @@
 
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, HTML
+from crispy_forms.layout import Layout, HTML
 from crispy_forms.bootstrap import Field
 from django_select2.forms import Select2Widget
 from core.forms.select2 import Select2MultipleWidget
 from core.forms.base import FormulaireBase
+from core.forms.accordeon import Accordeon, Section
 from core.widgets import DateRangePickerWidget
 from core.models import Famille, ModeReglement
 
@@ -39,23 +40,29 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.form_method = 'post'
 
         self.helper.layout = Layout(
-            Fieldset("Données",
-                Field("type_selection"),
-                Field("periode"),
-                Field("famille"),
-            ),
-            Fieldset("Options",
-                Field("regroupement_colonne"),
-                Field("afficher_detail"),
-                Field("afficher_id"),
-                Field("afficher_date"),
-                Field("afficher_mode"),
-                Field("afficher_famille"),
-                Field("afficher_montant"),
-            ),
-            Fieldset("Filtres",
-                Field("filtre_modes"),
-                Field("selection_modes"),
+            Accordeon(
+                Section("Données",
+                    Field("type_selection"),
+                    Field("periode"),
+                    Field("famille"),
+                    icone="fa-database",
+                ),
+                Section("Options",
+                    Field("regroupement_colonne"),
+                    Field("afficher_detail"),
+                    Field("afficher_id"),
+                    Field("afficher_date"),
+                    Field("afficher_mode"),
+                    Field("afficher_famille"),
+                    Field("afficher_montant"),
+                    icone="fa-sliders",
+                ),
+                Section("Filtres",
+                    Field("filtre_modes"),
+                    Field("selection_modes"),
+                    icone="fa-filter",
+                ),
+                css_id="accordeon_detail_ventilations_reglements",
             ),
             HTML(EXTRA_HTML),
         )

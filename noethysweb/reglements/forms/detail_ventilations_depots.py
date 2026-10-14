@@ -5,10 +5,11 @@
 
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, HTML
+from crispy_forms.layout import Layout, HTML
 from crispy_forms.bootstrap import Field
 from core.widgets import DateRangePickerWidget
 from core.forms.base import FormulaireBase
+from core.forms.accordeon import Accordeon, Section
 from core.models import Depot
 
 
@@ -31,17 +32,22 @@ class Formulaire(FormulaireBase, forms.Form):
         self.fields["depots"].widget.attrs = {"style": "height:250px"}
 
         self.helper.layout = Layout(
-            Fieldset("Données",
-                Field("type_selection"),
-                Field("periode"),
-                Field("depots"),
-            ),
-            Fieldset("Options",
-                Field("regroupement_colonne"),
-                Field("afficher_detail"),
-                Field("afficher_date_depot"),
-                Field("afficher_montant_depot"),
-                Field("afficher_code_compta"),
+            Accordeon(
+                Section("Données",
+                    Field("type_selection"),
+                    Field("periode"),
+                    Field("depots"),
+                    icone="fa-database",
+                ),
+                Section("Options",
+                    Field("regroupement_colonne"),
+                    Field("afficher_detail"),
+                    Field("afficher_date_depot"),
+                    Field("afficher_montant_depot"),
+                    Field("afficher_code_compta"),
+                    icone="fa-sliders",
+                ),
+                css_id="accordeon_detail_ventilations_depots",
             ),
             HTML(EXTRA_HTML),
         )
