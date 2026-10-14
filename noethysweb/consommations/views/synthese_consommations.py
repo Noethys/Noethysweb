@@ -11,6 +11,12 @@ from core.models import Unite, Evenement, Consommation, Groupe
 from consommations.forms.synthese_consommations import Formulaire
 
 
+# Regroupements qui n'utilisent pas les informations individuelles ou familiales
+REGROUPEMENTS_SANS_INFOS = ("jour", "mois", "annee", "activite", "groupe", "evenement", "evenement_date", "categorie_tarif")
+# Regroupements qui n'utilisent que les informations familiales
+REGROUPEMENTS_FAMILLE = ("famille", "regime", "caisse", "qf")
+
+
 class View(CustomView, TemplateView):
     menu_code = "synthese_consommations"
     template_name = "consommations/synthese_consommations.html"
@@ -40,12 +46,6 @@ class View(CustomView, TemplateView):
         date_debut = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[0])
         date_fin = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[1])
 
-        # Récupération des informations familiales et individuelles
-        infosIndividus = utils_infos_individus.Informations(date_reference=date_debut, qf=True, inscriptions=True, messages=False, infosMedicales=False,
-                                                                 cotisationsManquantes=False, piecesManquantes=False, questionnaires=True, scolarite=True)
-        dictInfosIndividus = infosIndividus.GetDictValeurs(mode="individu", ID=None, formatChamp=False)
-        dictInfosFamilles = infosIndividus.GetDictValeurs(mode="famille", ID=None, formatChamp=False)
-
         # Unités
         liste_unites = Unite.objects.filter(activite=parametres["activite"])
 
@@ -56,6 +56,22 @@ class View(CustomView, TemplateView):
 
         # Consommations
         consommations = Consommation.objects.values("date", "individu_id", "inscription__famille_id", "quantite", "groupe_id", "evenement_id", "heure_debut", "heure_fin", "unite_id", "prestation_id", "prestation__temps_facture", "activite__nom", "groupe__nom", "categorie_tarif__nom").filter(activite=parametres["activite"], date__gte=date_debut, date__lte=date_fin, etat__in=parametres["etats"]).order_by("date")
+        consommations = list(consommations)
+
+        # Récupération des informations familiales et individuelles : uniquement si le regroupement en a besoin,
+        # et uniquement pour les familles et individus présents dans les consommations
+        dictInfosIndividus, dictInfosFamilles = {}, {}
+        regroupement_choisi = parametres["regroupement"]
+        if regroupement_choisi not in REGROUPEMENTS_SANS_INFOS:
+            infosIndividus = utils_infos_individus.Informations(date_reference=date_debut, qf=(regroupement_choisi == "qf"), inscriptions=False, messages=False, infosMedicales=False,
+                                                                cotisationsManquantes=False, piecesManquantes=False, cotisations=False, coordonnees=False,
+                                                                individus=not (regroupement_choisi in REGROUPEMENTS_FAMILLE or regroupement_choisi.startswith("question_famille")),
+                                                                questionnaires=regroupement_choisi.startswith("question_"),
+                                                                scolarite=regroupement_choisi in ("nom_ecole", "nom_classe", "nom_niveau_scolaire"),
+                                                                liste_familles={conso["inscription__famille_id"] for conso in consommations},
+                                                                liste_individus={conso["individu_id"] for conso in consommations})
+            dictInfosIndividus = infosIndividus.GetDictValeurs(mode="individu", ID=None, formatChamp=False)
+            dictInfosFamilles = infosIndividus.GetDictValeurs(mode="famille", ID=None, formatChamp=False)
 
         # Calcul des données
         dictResultats = {}

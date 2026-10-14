@@ -235,11 +235,33 @@ def GetNomsChampsPossibles(mode="individu+famille"):
     return listeChamps
 
 
+TAILLE_LOT = 900
+
+# Champs chiffrés de coordonnées, inutiles pour les synthèses (leur déchiffrement est coûteux)
+CHAMPS_COORDONNEES = ("rue_resid", "profession", "employeur", "travail_tel", "travail_fax", "travail_mail", "tel_domicile", "tel_mobile", "tel_fax", "mail", "ville_naiss_insee")
+
+
+def Filtrer_par_lots(queryset, champ, ids):
+    """ Itère sur un queryset filtré par 'champ__in=ids', découpé en lots pour respecter
+        la limite de paramètres SQL (999 sous SQLite). Si ids est None : aucun filtre. """
+    if ids is None:
+        yield from queryset
+        return
+    ids = list(ids)
+    for index in range(0, len(ids), TAILLE_LOT):
+        yield from queryset.filter(**{"%s__in" % champ: ids[index:index + TAILLE_LOT]})
+
+
 class Informations():
-    def __init__(self, date_reference=datetime.date.today(), qf=True, inscriptions=True, messages=True,
+    def __init__(self, date_reference=None, qf=True, inscriptions=True, messages=True,
                  infosMedicales=True, cotisationsManquantes=True, piecesManquantes=True, questionnaires=True,
-                 scolarite=True, cotisations=True, liste_familles=[]):
-        self.date_reference = date_reference
+                 scolarite=True, cotisations=True, liste_familles=None, liste_individus=None, coordonnees=True, individus=True):
+        """ liste_familles : restreint le calcul à ces familles (et à leurs membres). None = toute la base.
+            liste_individus : individus à inclure en plus des membres des familles (ex : individu détaché d'une famille).
+            Une liste vide (aucune famille concernée) ne charge aucune donnée.
+            coordonnees=False : ne lit pas les téléphones, mails, rue, profession... (champs chiffrés coûteux), laissés vides.
+            individus=False : ne charge que les informations familiales (aucun individu). """
+        self.date_reference = date_reference or datetime.date.today()
         self.qf = qf
         self.inscriptions = inscriptions
         self.messages = messages
@@ -249,23 +271,45 @@ class Informations():
         self.questionnaires = questionnaires
         self.scolarite = scolarite
         self.cotisations = cotisations
-        self.liste_familles = liste_familles
+        self.coordonnees = coordonnees
 
-        # Condition familles
-        if len(self.liste_familles) > 999:
-            self.liste_familles = []
-        if self.liste_familles:
-            self.condition_familles = Q(famille__in=self.liste_familles)
-        else:
-            self.condition_familles = Q()
+        # Périmètre : None = toute la base. Plus de plafond à 999 familles : les requêtes sont découpées en lots.
+        ids_familles = {int(idfamille) for idfamille in (liste_familles or []) if idfamille}
+        ids_individus = {int(idindividu) for idindividu in (liste_individus or []) if idindividu}
+        self.restreint = liste_familles is not None or liste_individus is not None
+        self.liste_familles = sorted(ids_familles) if self.restreint else None
+        self.liste_individus = None
+        if not individus:
+            self.liste_individus = []
+        elif self.restreint:
+            for idindividu in Filtrer_par_lots(Rattachement.objects.values_list("individu_id", flat=True), "famille_id", self.liste_familles):
+                if idindividu:
+                    ids_individus.add(idindividu)
+            self.liste_individus = sorted(ids_individus)
 
-        # Condition individus
-        self.liste_individus = []
-        if self.liste_familles:
-            self.liste_individus = [r.individu_id for r in Rattachement.objects.filter(famille_id__in=self.liste_familles)]
+        # Cache des champs INDIVIDU_* de chaque individu (recopiés dans les liens et rattachements)
+        self._cache_champs_individu = {}
 
         # Lancement du calcul
         self.Run()
+
+    def Filtrer_familles(self, queryset, champ="famille_id"):
+        return Filtrer_par_lots(queryset, champ, self.liste_familles)
+
+    def Filtrer_individus(self, queryset, champ="individu_id"):
+        return Filtrer_par_lots(queryset, champ, self.liste_individus)
+
+    def Get_champs_individu(self, IDindividu):
+        """ Renvoie la liste (suffixe, valeur) des champs INDIVIDU_* d'un individu (calculée une seule fois) """
+        if IDindividu not in self._cache_champs_individu:
+            self._cache_champs_individu[IDindividu] = [(code[8:], valeur) for code, valeur in self.dictIndividus.get(IDindividu, {}).items() if code.startswith("INDIVIDU")]
+        return self._cache_champs_individu[IDindividu]
+
+    def Copier_champs_individu(self, IDindividu, prefixe, *dicts_cibles):
+        for suffixe, valeur in self.Get_champs_individu(IDindividu):
+            code = prefixe + suffixe
+            for dict_cible in dicts_cibles:
+                dict_cible[code] = valeur
 
     def Run(self):
         """ Procédure de recherche et de calcul des résultats """
@@ -322,12 +366,15 @@ class Informations():
 
         dict_civilites = data_civilites.GetDictCivilites()
 
-        conditions = Q()
-        if self.liste_individus:
-            conditions = Q(pk__in=self.liste_individus)
-
-        individus = Individu.objects.select_related('secteur', 'medecin', 'categorie_travail').filter(conditions)
+        queryset = Individu.objects.select_related('secteur', 'medecin', 'categorie_travail')
+        if not self.coordonnees:
+            queryset = queryset.defer(*CHAMPS_COORDONNEES)
+        individus = self.Filtrer_individus(queryset, champ="pk")
         for individu in individus:
+            if not self.coordonnees:
+                # Valeur vide pour les champs non chargés (évite une requête par individu)
+                for champ in CHAMPS_COORDONNEES:
+                    individu.__dict__[champ] = None
             age = individu.Get_age()
             dictTemp[individu.pk] = {
                 "IDINDIVIDU": individu.pk,
@@ -368,7 +415,7 @@ class Informations():
                 "INDIVIDU_MEMO": individu.memo,
                 "INDIVIDU_DATE_CREATION": utils_dates.ConvertDateToFR(individu.date_creation),
                 "INDIVIDU_AGE": "%d ans" % age if age else "",
-                "INDIVIDU_AGE_INT": individu.Get_age(),
+                "INDIVIDU_AGE_INT": age,
                 "INDIVIDU_CIVILITE_COURT": dict_civilites[individu.civilite]["abrege"],
                 "INDIVIDU_CIVILITE_LONG": dict_civilites[individu.civilite]["label"],
                 "INDIVIDU_SEXE": dict_civilites[individu.civilite]["sexe"],
@@ -383,15 +430,19 @@ class Informations():
                 "SCOLARITE_ABREGE_NIVEAU": "",
             }
 
+        # Périmètre restreint : récupère aussi les adresses rattachées à des individus hors périmètre
+        adresses = {IDindividu: (d["INDIVIDU_RUE"], d["INDIVIDU_CP"], d["INDIVIDU_VILLE"], d["INDIVIDU_SECTEUR"]) for IDindividu, d in dictTemp.items()}
+        manquants = {d["individu_adresse_auto"] for d in dictTemp.values() if d["individu_adresse_auto"] and d["individu_adresse_auto"] not in dictTemp}
+        if manquants:
+            for individu in Filtrer_par_lots(Individu.objects.select_related("secteur").only("rue_resid", "cp_resid", "ville_resid", "secteur__nom"), "pk", manquants):
+                adresses[individu.pk] = (individu.rue_resid if self.coordonnees else None, individu.cp_resid, individu.ville_resid, individu.secteur.nom if individu.secteur else "")
+
         # Recherche les adresses de chaque individu
         dictIndividus = {}
         for IDindividu, dictIndividu in dictTemp.items():
             adresse_auto = dictIndividu["individu_adresse_auto"]
-            if adresse_auto and adresse_auto in dictTemp:
-                dictIndividu["INDIVIDU_RUE"] = dictTemp[adresse_auto]["INDIVIDU_RUE"]
-                dictIndividu["INDIVIDU_CP"] = dictTemp[adresse_auto]["INDIVIDU_CP"]
-                dictIndividu["INDIVIDU_VILLE"] = dictTemp[adresse_auto]["INDIVIDU_VILLE"]
-                dictIndividu["INDIVIDU_SECTEUR"] = dictTemp[adresse_auto]["INDIVIDU_SECTEUR"]
+            if adresse_auto and adresse_auto in adresses:
+                dictIndividu["INDIVIDU_RUE"], dictIndividu["INDIVIDU_CP"], dictIndividu["INDIVIDU_VILLE"], dictIndividu["INDIVIDU_SECTEUR"] = adresses[adresse_auto]
 
             # Mémorisation
             dictIndividus[IDindividu] = dictIndividu
@@ -400,13 +451,13 @@ class Informations():
 
     def GetRattachements(self):
         """ Récupération des rattachements """
-        rattachements = Rattachement.objects.filter(self.condition_familles)
+        rattachements = self.Filtrer_familles(Rattachement.objects.values_list("idrattachement", "individu_id", "famille_id", "categorie", "titulaire", named=True))
 
         dictRattachementsFamilles = {}
         dictRattachementsIndividus = {}
         for rattachement in rattachements:
             valeurs = {
-                "IDrattachement": rattachement.pk, "IDindividu": rattachement.individu_id,
+                "IDrattachement": rattachement.idrattachement, "IDindividu": rattachement.individu_id,
                 "IDfamille": rattachement.famille_id, "IDcategorie": rattachement.categorie, "titulaire": rattachement.titulaire
             }
             dictRattachementsFamilles.setdefault(rattachement.famille_id, [])
@@ -438,14 +489,12 @@ class Informations():
                     codeCible = dictCibles[IDcategorie]["code"] + "_%d" % index
 
                     # Récupération des infos sur l'individu pour transfert vers dictFamilles
-                    for code, valeur in self.dictIndividus.get(IDindividu, {}).items():
-                        if code.startswith("INDIVIDU"):
-                            self.dictFamilles[IDfamille][code.replace("INDIVIDU", codeCible)] = valeur
+                    self.Copier_champs_individu(IDindividu, codeCible, self.dictFamilles[IDfamille])
                     self.dictFamilles[IDfamille][codeCible + "_TITULAIRE"] = titulaireStr
 
                     # Récupération du lien de l'individu rattaché dans les liens
                     listeLiens = []
-                    nom_sujet = self.dictIndividus[IDindividu]["INDIVIDU_PRENOM"]
+                    nom_sujet = self.dictIndividus.get(IDindividu, {}).get("INDIVIDU_PRENOM", "")
                     for dictLien in self.dictFamilles[IDfamille]["liens"]:
                         if dictLien["IDindividu_sujet"] == IDindividu:
                             nom_objet = self.dictIndividus[dictLien["IDindividu_objet"]]["INDIVIDU_PRENOM"]
@@ -466,7 +515,7 @@ class Informations():
         dict_autorisations = {code: label for code, label in CHOIX_AUTORISATIONS}
 
         # Importation des liens
-        liens = Lien.objects.filter(self.condition_familles)
+        liens = self.Filtrer_familles(Lien.objects.values_list("famille_id", "individu_sujet_id", "individu_objet_id", "idtype_lien", "autorisation", named=True))
         dictLiens = {}
         for lien in liens:
             if lien.famille_id in self.dictFamilles and lien.individu_objet_id in self.dictIndividus and lien.individu_sujet_id in self.dictIndividus:
@@ -496,20 +545,14 @@ class Informations():
                             codeCible = "PERE"
                         else:
                             codeCible = "MERE"
-                        for code, valeur in self.dictIndividus[lien.individu_sujet_id].items():
-                            if code.startswith("INDIVIDU"):
-                                # Mémorisation dans dictIndividus
-                                self.dictIndividus[lien.individu_objet_id][code.replace("INDIVIDU", codeCible)] = valeur
-                                # Mémorisation dans dictFamilles
-                                self.dictFamilles[lien.famille_id][code.replace("INDIVIDU", codeCible)] = valeur
+                        # Mémorisation dans dictIndividus et dans dictFamilles
+                        self.Copier_champs_individu(lien.individu_sujet_id, codeCible, self.dictIndividus[lien.individu_objet_id], self.dictFamilles[lien.famille_id])
                         self.dictIndividus[lien.individu_objet_id][codeCible + "_AUTORISATION"] = autorisation
                         self.dictIndividus[lien.individu_objet_id][codeCible + "_NOM_LIEN"] = nomLien
 
                     # Mémorisation des informations sur le conjoint de l'individu uniquement au format texte
                     elif lien.idtype_lien in (10, 11):
-                        for code, valeur in self.dictIndividus[lien.individu_sujet_id].items():
-                            if code.startswith("INDIVIDU"):
-                                self.dictIndividus[lien.individu_objet_id][code.replace("INDIVIDU", "CONJOINT")] = valeur
+                        self.Copier_champs_individu(lien.individu_sujet_id, "CONJOINT", self.dictIndividus[lien.individu_objet_id])
                         self.dictIndividus[lien.individu_objet_id]["CONJOINT_AUTORISATION"] = autorisation
                         self.dictIndividus[lien.individu_objet_id]["CONJOINT_NOM_LIEN"] = nomLien
 
@@ -517,12 +560,8 @@ class Informations():
                     elif lien.idtype_lien == 2:
                         self.dictIndividus[lien.individu_objet_id]["NBRE_ENFANTS"] += 1
                         codeCible = "ENFANT_%d" % self.dictIndividus[lien.individu_objet_id]["NBRE_ENFANTS"]
-                        for code, valeur in self.dictIndividus[lien.individu_sujet_id].items():
-                            if code.startswith("INDIVIDU"):
-                                # Mémorisation dans dictIndividus
-                                self.dictIndividus[lien.individu_objet_id][code.replace("INDIVIDU", codeCible)] = valeur
-                                # Mémorisation dans dictFamilles
-                                self.dictFamilles[lien.famille_id][code.replace("INDIVIDU", codeCible)] = valeur
+                        # Mémorisation dans dictIndividus et dans dictFamilles
+                        self.Copier_champs_individu(lien.individu_sujet_id, codeCible, self.dictIndividus[lien.individu_objet_id], self.dictFamilles[lien.famille_id])
                         self.dictIndividus[lien.individu_objet_id][codeCible + "_AUTORISATION"] = autorisation
                         self.dictIndividus[lien.individu_objet_id][codeCible + "_NOM_LIEN"] = nomLien
 
@@ -530,12 +569,8 @@ class Informations():
                     else:
                         self.dictIndividus[lien.individu_objet_id]["NBRE_AUTRES_LIENS"] += 1
                         codeCible = "AUTRE_LIEN_%d" % self.dictIndividus[lien.individu_objet_id]["NBRE_AUTRES_LIENS"]
-                        for code, valeur in self.dictIndividus[lien.individu_sujet_id].items():
-                            if code.startswith("INDIVIDU"):
-                                # Mémorisation dans dictIndividus
-                                self.dictIndividus[lien.individu_objet_id][code.replace("INDIVIDU", codeCible)] = valeur
-                                # Mémorisation dans dictFamilles
-                                self.dictFamilles[lien.famille_id][code.replace("INDIVIDU", codeCible)] = valeur
+                        # Mémorisation dans dictIndividus et dans dictFamilles
+                        self.Copier_champs_individu(lien.individu_sujet_id, codeCible, self.dictIndividus[lien.individu_objet_id], self.dictFamilles[lien.famille_id])
                         self.dictIndividus[lien.individu_objet_id][codeCible + "_AUTORISATION"] = autorisation
                         self.dictIndividus[lien.individu_objet_id][codeCible + "_NOM_LIEN"] = nomLien
 
@@ -543,8 +578,7 @@ class Informations():
 
     def GetDictFamilles(self):
         """ Récupération des infos de base sur les familles """
-        condition = Q(pk__in=self.liste_familles) if self.liste_familles else Q()
-        familles = Famille.objects.select_related('caisse', 'caisse__regime', 'secteur').filter(condition)
+        familles = self.Filtrer_familles(Famille.objects.select_related('caisse', 'caisse__regime', 'secteur'), champ="pk")
         dictFamilles = {}
         for famille in familles:
             dictFamilles[famille.pk] = {
@@ -553,7 +587,7 @@ class Informations():
                 "FAMILLE_NOM_REGIME": famille.caisse.regime.nom if famille.caisse else "",
                 "FAMILLE_NUM_ALLOCATAIRE": famille.num_allocataire,
                 "IDallocataire": famille.allocataire_id,
-                "FAMILLE_NOM_ALLOCATAIRE": self.dictIndividus[famille.allocataire_id]["INDIVIDU_NOM_COMPLET"] if famille.allocataire_id else "",
+                "FAMILLE_NOM_ALLOCATAIRE": self.dictIndividus.get(famille.allocataire_id, {}).get("INDIVIDU_NOM_COMPLET", "") if famille.allocataire_id else "",
                 "FAMILLE_MEMO": famille.memo,
                 "FAMILLE_NOM": famille.nom,
                 "FAMILLE_RUE": famille.rue_resid,
@@ -570,7 +604,7 @@ class Informations():
 
     def RechercheQF(self):
         """ Recherche les QF des familles """
-        quotients = Quotient.objects.filter(self.condition_familles)
+        quotients = self.Filtrer_familles(Quotient.objects.all())
         for quotient in quotients:
             if quotient.famille_id in self.dictFamilles:
                 # Mémorisation du QF actuel au format texte
@@ -587,8 +621,10 @@ class Informations():
 
     def RechercheInscriptions(self):
         """ Récupération des inscriptions à des activités """
-        inscriptions = Inscription.objects.select_related('famille', 'activite', 'groupe', 'categorie_tarif').filter(self.condition_familles)
+        inscriptions = self.Filtrer_familles(Inscription.objects.select_related('famille', 'activite', 'groupe', 'categorie_tarif'))
         for inscription in inscriptions:
+            if inscription.individu_id not in self.dictIndividus:
+                continue
             # Mémorise le nombre d'inscriptions
             if "inscriptions" not in self.dictIndividus[inscription.individu_id]:
                 self.dictIndividus[inscription.individu_id]["inscriptions"] = {"nombre": 0, "liste": []}
@@ -612,12 +648,10 @@ class Informations():
 
     def RechercheInfosMedicales(self):
         """ Récupération des informations personnelles des individus """
-        condition = Q()
-        if self.liste_individus:
-            condition = Q(individu_id__in=self.liste_individus)
-
-        problemes = Information.objects.select_related('categorie').filter(condition)
+        problemes = self.Filtrer_individus(Information.objects.select_related('categorie'))
         for probleme in problemes:
+            if probleme.individu_id not in self.dictIndividus:
+                continue
             # Mémorise le nombre d'informations personnelles
             if "medical" not in self.dictIndividus[probleme.individu_id]:
                 self.dictIndividus[probleme.individu_id]["medical"] = {"nombre": 0, "liste": []}
@@ -643,11 +677,7 @@ class Informations():
 
     def RechercheMessages(self):
         """ Recherche les messages des familles et des individus """
-        condition = Q()
-        if self.liste_familles:
-            condition = Q(famille_id__in=self.liste_familles)
-
-        notes = Note.objects.select_related('categorie').filter(condition)
+        notes = self.Filtrer_familles(Note.objects.select_related('categorie'))
         for note in notes:
             for ID, dictCible in [(note.individu_id, self.dictIndividus), (note.famille_id, self.dictFamilles)]:
                 if ID:
@@ -683,39 +713,50 @@ class Informations():
 
     def RecherchePiecesManquantes(self):
         """ Recherche des pièces manquantes """
-        dictPieces = utils_pieces_manquantes.Get_liste_pieces_manquantes(date_reference=self.date_reference, liste_familles=self.liste_familles)
+        # Au-delà d'un lot, pas de filtre SQL (limite de paramètres) : le filtrage se fait ci-dessous
+        liste_familles = self.liste_familles if (self.liste_familles and len(self.liste_familles) <= TAILLE_LOT) else []
+        dictPieces = utils_pieces_manquantes.Get_liste_pieces_manquantes(date_reference=self.date_reference, liste_familles=liste_familles)
         for IDfamille, dictValeurs in dictPieces.items():
             if IDfamille in self.dictFamilles:
                 self.dictFamilles[IDfamille]["PIECES_MANQUANTES"] = dictValeurs["texte"]
 
     def RechercheQuestionnaires(self):
         """ Récupération des questionnaires familiaux et individuels """
-        for public, dictPublic in [("famille", self.dictFamilles), ("individu", self.dictIndividus)]:
-            if public == "famille":
-                condition = Q(famille_id__in=dictPublic.keys())
+        questionnaires = utils_questionnaires.Questionnaires()
+        for public, dictPublic, ids in [("famille", self.dictFamilles, self.liste_familles), ("individu", self.dictIndividus, self.liste_individus)]:
+            if not dictPublic:
+                continue
+            questions = questionnaires.GetQuestions(categorie=public)
+
+            # Réponses : une seule requête sur toute la base, ou par lots si le périmètre est restreint
+            # (avant : un "IN" contenant tous les ID de la base, très lent et au-delà de la limite SQLite)
+            if ids is None:
+                dictReponses = questionnaires.GetReponses(categorie=public)
             else:
-                condition = Q(individu_id__in=dictPublic.keys())
-            q = utils_questionnaires.ChampsEtReponses(categorie=public, filtre_reponses=condition)
-            for ID in list(dictPublic.keys()):
-                if ID in dictPublic:
-                    if "questionnaires" not in dictPublic[ID]:
-                        dictPublic[ID]["questionnaires"] = []
-                    listeDonnees = q.GetDonnees(ID, formatStr=False)
-                    for donnee in listeDonnees:
-                        # Mémorisation de la liste
-                        dictPublic[ID]["questionnaires"].append(donnee)
-                        # Mémorisation au format texte
-                        code = donnee["champ"].replace("{", "").replace("}", "")
-                        dictPublic[ID][code] = donnee["reponse"]
+                dictReponses = {}
+                for index in range(0, len(ids), TAILLE_LOT):
+                    lot = questionnaires.GetReponses(categorie=public, filtre=Q(**{"%s_id__in" % public: ids[index:index + TAILLE_LOT]}))
+                    for IDquestion, reponses in lot.items():
+                        dictReponses.setdefault(IDquestion, {}).update(reponses)
+
+            # Pré-calcul des éléments communs à tous les ID
+            infos_questions = [(dictQuestion, "QUESTION_%d" % dictQuestion["IDquestion"], dictReponses.get(dictQuestion["IDquestion"], {})) for dictQuestion in questions]
+            for ID, dictValeurs in dictPublic.items():
+                liste_questionnaires = dictValeurs.setdefault("questionnaires", [])
+                for dictQuestion, code, reponses in infos_questions:
+                    reponse = reponses.get(ID, "")
+                    liste_questionnaires.append({
+                        "champ": "{%s}" % code, "reponse": reponse, "IDquestion": dictQuestion["IDquestion"], "label": dictQuestion["label"],
+                        "categorie": dictQuestion["categorie"], "controle": dictQuestion["controle"], "visible_fiche_renseignement": dictQuestion["visible_fiche_renseignement"],
+                    })
+                    dictValeurs[code] = reponse
 
     def RechercheScolarite(self):
         """ Recherche les étapes de scolarité des individus """
-        condition = Q()
-        if self.liste_individus:
-            condition = Q(individu_id__in=self.liste_individus)
-
-        scolarites = Scolarite.objects.select_related('ecole', 'classe', 'niveau').filter(condition)
+        scolarites = self.Filtrer_individus(Scolarite.objects.select_related('ecole', 'classe', 'niveau'))
         for scolarite in scolarites:
+            if scolarite.individu_id not in self.dictIndividus:
+                continue
             if scolarite.date_debut <= self.date_reference and scolarite.date_fin >= self.date_reference:
                 self.dictIndividus[scolarite.individu_id]["SCOLARITE_DATE_DEBUT"] = utils_dates.ConvertDateToFR(scolarite.date_debut)
                 self.dictIndividus[scolarite.individu_id]["SCOLARITE_DATE_FIN"] = utils_dates.ConvertDateToFR(scolarite.date_fin)
@@ -741,13 +782,9 @@ class Informations():
 
     def RechercheCotisations(self):
         """ Recherche la cotisation actuelle des individus """
-        condition = Q()
-        if self.liste_familles:
-            condition = Q(famille_id__in=self.liste_familles)
-
-        cotisations = Cotisation.objects.select_related('type_cotisation', 'unite_cotisation').filter(condition)
+        cotisations = self.Filtrer_familles(Cotisation.objects.select_related('type_cotisation', 'unite_cotisation'))
         for cotisation in cotisations:
-            if cotisation.individu_id:
+            if cotisation.individu_id and cotisation.individu_id in self.dictIndividus:
                 if cotisation.date_debut <= self.date_reference and cotisation.date_fin >= self.date_reference:
                     self.dictIndividus[cotisation.individu_id]["COTISATION_DATE_DEBUT"] = utils_dates.ConvertDateToFR(cotisation.date_debut)
                     self.dictIndividus[cotisation.individu_id]["COTISATION_DATE_FIN"] = utils_dates.ConvertDateToFR(cotisation.date_fin)

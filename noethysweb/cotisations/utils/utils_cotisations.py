@@ -57,7 +57,8 @@ class Cotisations():
 
         # Récupération des infos de base individus et familles
         logger.debug("Recherche des données utils_infos_individus...")
-        self.infosIndividus = utils_infos_individus.Informations(liste_familles=liste_idfamille)
+        # Les individus sont ajoutés explicitement : une adhésion individuelle peut ne pas avoir de famille
+        self.infosIndividus = utils_infos_individus.Informations(liste_familles=liste_idfamille, liste_individus=[cotisation.individu_id for cotisation in cotisations])
 
         dictDonnees = {}
         dictChampsFusion = {}

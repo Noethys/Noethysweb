@@ -314,7 +314,7 @@ class Impression(utils_impression.Impression):
         if colonnes_perso:
             # Chargement des informations individuelles
             infosIndividus = utils_infos_individus.Informations(date_reference=self.dict_donnees["dates"][0], qf=False, inscriptions=False, messages=False, infosMedicales=False,
-                                                                cotisationsManquantes=False, piecesManquantes=False, questionnaires=True, scolarite=True, liste_familles=liste_idfamille)
+                                                                cotisationsManquantes=False, piecesManquantes=False, questionnaires=True, scolarite=True, liste_familles=liste_idfamille, liste_individus=liste_idindividu)
             dictInfosIndividus = infosIndividus.GetDictValeurs(mode="individu", ID=None, formatChamp=False)
             dictInfosFamilles = infosIndividus.GetDictValeurs(mode="famille", ID=None, formatChamp=False)
 

@@ -104,7 +104,7 @@ class Export():
             dictReglements[reglement.famille_id].append(reglement)
 
         # Récupération des infos individus
-        infos = utils_infos_individus.Informations()
+        infos = utils_infos_individus.Informations(liste_familles=[self.famille.pk])
 
         # Génération du XML
         doc = Document()

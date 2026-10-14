@@ -767,9 +767,15 @@ class Calcul():
         self.infos_individus, self.infos_familles = {}, {}
         if p["regroupement_principal"] in REGROUPEMENTS_INFOS or p["regroupement_principal"].startswith("question_"):
             from core.utils import utils_infos_individus
+            # Uniquement les familles et individus présents dans les consommations de la période
+            perimetre = set(Consommation.objects.filter(date__gte=self.date_debut, date__lte=self.date_fin, activite__in=p["activites"], unite_id__in=self.ids_unites)
+                            .values_list("inscription__famille_id", "individu_id").distinct())
             infos = utils_infos_individus.Informations(date_reference=self.date_debut, qf=False, inscriptions=False, messages=False, infosMedicales=False,
-                                                       cotisationsManquantes=False, piecesManquantes=False,
-                                                       questionnaires=p["regroupement_principal"].startswith("question_"), scolarite=True)
+                                                       cotisationsManquantes=False, piecesManquantes=False, cotisations=False, coordonnees=False,
+                                                       questionnaires=p["regroupement_principal"].startswith("question_"),
+                                                       scolarite=p["regroupement_principal"] in ("nom_ecole", "nom_classe", "nom_niveau_scolaire"),
+                                                       liste_familles={idfamille for idfamille, idindividu in perimetre if idfamille},
+                                                       liste_individus={idindividu for idfamille, idindividu in perimetre if idindividu})
             self.infos_individus = infos.GetDictValeurs(mode="individu", ID=None, formatChamp=False)
             self.infos_familles = infos.GetDictValeurs(mode="famille", ID=None, formatChamp=False)
 

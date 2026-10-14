@@ -40,13 +40,15 @@ class View(CustomView, TemplateView):
         date_debut = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[0])
         date_fin = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[1])
 
-        # Récupération des informations familiales et individuelles
-        infosIndividus = utils_infos_individus.Informations(date_reference=date_debut, qf=False, inscriptions=False, messages=False, infosMedicales=False,
-                                                                 cotisationsManquantes=False, piecesManquantes=False, questionnaires=True, scolarite=False)
-        dictInfosFamilles = infosIndividus.GetDictValeurs(mode="famille", ID=None, formatChamp=False)
-
         # Locations
-        locations = Location.objects.select_related("famille", "produit", "produit__categorie").filter(date_fin__gte=date_debut, date_debut__lte=date_fin, produit__categorie__in=parametres["categories_produits"])
+        locations = list(Location.objects.select_related("famille", "produit", "produit__categorie").filter(date_fin__gte=date_debut, date_debut__lte=date_fin, produit__categorie__in=parametres["categories_produits"]))
+
+        # Récupération des informations familiales (uniquement pour les familles concernées)
+        infosIndividus = utils_infos_individus.Informations(date_reference=date_debut, qf=False, inscriptions=False, messages=False, infosMedicales=False,
+                                                            cotisationsManquantes=False, piecesManquantes=False, cotisations=False, coordonnees=False, individus=False,
+                                                            questionnaires=parametres["regroupement"].startswith("question_"), scolarite=False,
+                                                            liste_familles={location.famille_id for location in locations})
+        dictInfosFamilles = infosIndividus.GetDictValeurs(mode="famille", ID=None, formatChamp=False)
 
         # Calcul des données
         dictResultats = {}

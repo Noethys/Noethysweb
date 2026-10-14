@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.units import mm
 from core.utils import utils_modeles_documents, utils_infos_individus, utils_impression, utils_fichiers
+from core.models import Rattachement
 
 
 def Impression(dict_options={}):
@@ -54,8 +55,15 @@ def Impression(dict_options={}):
     nbre_lignes = (dict_options["hauteur"] - dict_options["marge_haut"] - dict_options["marge_bas"] + dict_options["espace_vertical"]) / (modele_doc.modele.hauteur + dict_options["espace_vertical"])
 
     # Recherche les valeurs de fusion
+    # Uniquement pour les familles ou individus cochés (et les familles de ces individus)
+    liste_coches = [int(ID) for ID in dict_options["coches"]]
+    if dict_options["categorie"] == "famille":
+        perimetre = {"liste_familles": liste_coches}
+    else:
+        perimetre = {"liste_individus": liste_coches, "liste_familles": set(utils_infos_individus.Filtrer_par_lots(
+            Rattachement.objects.values_list("famille_id", flat=True), "individu_id", liste_coches))}
     infosIndividus = utils_infos_individus.Informations(qf=True, inscriptions=True, messages=False, infosMedicales=False, cotisationsManquantes=False,
-                                                        piecesManquantes=False, questionnaires=True, scolarite=True)
+                                                        piecesManquantes=False, questionnaires=True, scolarite=True, **perimetre)
     dict_infos = infosIndividus.GetDictValeurs(mode=dict_options["categorie"], ID=None, formatChamp=True)
 
     # Ajoute les données de l'organisateur

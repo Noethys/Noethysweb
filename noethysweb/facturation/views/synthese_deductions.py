@@ -46,11 +46,6 @@ class View(CustomView, TemplateView):
         if param_activites["type"] == "activites":
             liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
 
-        # Récupération des informations familiales et individuelles
-        infosIndividus = utils_infos_individus.Informations(date_reference=date_debut, qf=False, inscriptions=False, messages=False, infosMedicales=False,
-                                                                 cotisationsManquantes=False, piecesManquantes=False, questionnaires=True, scolarite=False)
-        dictInfosFamilles = infosIndividus.GetDictValeurs(mode="famille", ID=None, formatChamp=False)
-
         # Déductions
         conditions = Q(date__gte=date_debut, date__lte=date_fin)
         if parametres["inclure_sans_activite"]:
@@ -62,6 +57,14 @@ class View(CustomView, TemplateView):
         else:
             conditions &= Q(aide__caisse__in=parametres["caisses"])
         deductions = Deduction.objects.select_related("famille", "famille__caisse", "prestation", "prestation__individu", "aide").filter(conditions)
+        deductions = list(deductions)
+
+        # Récupération des informations familiales (uniquement pour les familles concernées)
+        infosIndividus = utils_infos_individus.Informations(date_reference=date_debut, qf=False, inscriptions=False, messages=False, infosMedicales=False,
+                                                            cotisationsManquantes=False, piecesManquantes=False, cotisations=False, coordonnees=False, individus=False,
+                                                            questionnaires=parametres["regroupement"].startswith("question_"), scolarite=False,
+                                                            liste_familles={deduction.famille_id for deduction in deductions})
+        dictInfosFamilles = infosIndividus.GetDictValeurs(mode="famille", ID=None, formatChamp=False)
 
         # Calcul des données
         dictResultats = {}

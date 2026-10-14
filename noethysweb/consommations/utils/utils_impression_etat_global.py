@@ -18,6 +18,10 @@ from core.utils.utils_dates import HeureStrEnDelta as HEURE # Ne pas supprimer :
 # Regex pour formule
 REGEX_UNITES = re.compile(r"unite[0-9]+")
 
+# Regroupements principaux qui utilisent les informations individuelles ou familiales
+REGROUPEMENTS_INFOS = ("ville_residence", "departement_residence", "secteur", "genre", "age", "ville_naissance", "nom_ecole", "nom_classe", "nom_niveau_scolaire",
+                       "famille", "individu", "regime", "caisse", "categorie_travail", "categorie_travail_pere", "categorie_travail_mere")
+
 
 class Unite_conso():
     def __init__(self, IDunite=None, heure_debut=None, heure_fin=None, etat=None, quantite=1):
@@ -63,16 +67,6 @@ class Impression(utils_impression.Impression):
         date_fin = self.dict_donnees["date_fin"]
         dict_options = self.dict_donnees["options"]
         dict_parametres = self.dict_donnees["parametres"]
-
-        # Chargement des informations individuelles
-        infosIndividus = utils_infos_individus.Informations(date_reference=self.dict_donnees["date_debut"], qf=True, inscriptions=True, messages=False, infosMedicales=False,
-                                                            cotisationsManquantes=False, piecesManquantes=False, questionnaires=True, scolarite=True)
-        dictInfosIndividus = infosIndividus.GetDictValeurs(mode="individu", ID=None, formatChamp=False)
-        dictInfosFamilles = infosIndividus.GetDictValeurs(mode="famille", ID=None, formatChamp=False)
-
-        # Récupération des familles et des individus
-        dict_familles = {famille.pk: famille for famille in Famille.objects.select_related("caisse").all()}
-        dict_individus = {individu.pk: individu for individu in Individu.objects.all()}
 
         # Récupération des activités
         liste_idunite = [int(idunite) for idunite in dict_parametres.keys()]
@@ -201,7 +195,26 @@ class Impression(utils_impression.Impression):
 
         # Récupération des consommations
         self.dict_unites = {}
-        liste_conso = Consommation.objects.select_related("unite", "activite", "groupe", "prestation", "categorie_tarif", "inscription", "evenement").filter(date__gte=date_debut, date__lte=date_fin, activite__in=activites)
+        liste_conso = list(Consommation.objects.select_related("unite", "activite", "groupe", "prestation", "categorie_tarif", "inscription", "evenement").filter(date__gte=date_debut, date__lte=date_fin, activite__in=activites))
+        liste_idfamille = {conso.inscription.famille_id for conso in liste_conso if conso.inscription_id}
+        liste_idindividu = {conso.individu_id for conso in liste_conso}
+
+        # Récupération des familles et des individus concernés uniquement
+        dict_familles = {famille.pk: famille for famille in utils_infos_individus.Filtrer_par_lots(Famille.objects.select_related("caisse"), "pk", liste_idfamille)}
+        dict_individus = {individu.pk: individu for individu in utils_infos_individus.Filtrer_par_lots(Individu.objects.all(), "pk", liste_idindividu)}
+
+        # Chargement des informations individuelles : uniquement si le regroupement principal en a besoin
+        dictInfosIndividus, dictInfosFamilles = {}, {}
+        regroupement_principal = dict_options["regroupement_principal"]
+        if regroupement_principal in REGROUPEMENTS_INFOS or regroupement_principal.startswith("question_"):
+            infosIndividus = utils_infos_individus.Informations(date_reference=self.dict_donnees["date_debut"], qf=False, inscriptions=False, messages=False, infosMedicales=False,
+                                                                cotisationsManquantes=False, piecesManquantes=False, cotisations=False, coordonnees=False,
+                                                                individus=not (regroupement_principal in ("famille", "regime", "caisse") or regroupement_principal.startswith("question_famille")),
+                                                                questionnaires=regroupement_principal.startswith("question_"),
+                                                                scolarite=regroupement_principal in ("nom_ecole", "nom_classe", "nom_niveau_scolaire"),
+                                                                liste_familles=liste_idfamille, liste_individus=liste_idindividu)
+            dictInfosIndividus = infosIndividus.GetDictValeurs(mode="individu", ID=None, formatChamp=False)
+            dictInfosFamilles = infosIndividus.GetDictValeurs(mode="famille", ID=None, formatChamp=False)
         for conso in liste_conso:
             self.dict_unites[(conso.date, conso.inscription_id, conso.unite_id)] = Unite_conso(conso.unite_id, conso.heure_debut, conso.heure_fin, conso.etat, conso.quantite)
 
@@ -237,10 +250,10 @@ class Impression(utils_impression.Impression):
                 if dict_options["regroupement_principal"] == "nom_ecole": regroupement = dictInfosIndividus[conso.individu_id]["SCOLARITE_NOM_ECOLE"]
                 if dict_options["regroupement_principal"] == "nom_classe": regroupement = dictInfosIndividus[conso.individu_id]["SCOLARITE_NOM_CLASSE"]
                 if dict_options["regroupement_principal"] == "nom_niveau_scolaire": regroupement = dictInfosIndividus[conso.individu_id]["SCOLARITE_NOM_NIVEAU"]
-                if dict_options["regroupement_principal"] == "famille": regroupement = dictInfosFamilles[conso.individu_id]["FAMILLE_NOM"]
+                if dict_options["regroupement_principal"] == "famille": regroupement = dictInfosFamilles[conso.inscription.famille_id]["FAMILLE_NOM"]
                 if dict_options["regroupement_principal"] == "individu": regroupement = dictInfosIndividus[conso.individu_id]["INDIVIDU_NOM_COMPLET"]
-                if dict_options["regroupement_principal"] == "regime": regroupement = dictInfosFamilles[conso.individu_id]["FAMILLE_NOM_REGIME"]
-                if dict_options["regroupement_principal"] == "caisse": regroupement = dictInfosFamilles[conso.individu_id]["FAMILLE_NOM_CAISSE"]
+                if dict_options["regroupement_principal"] == "regime": regroupement = dictInfosFamilles[conso.inscription.famille_id]["FAMILLE_NOM_REGIME"]
+                if dict_options["regroupement_principal"] == "caisse": regroupement = dictInfosFamilles[conso.inscription.famille_id]["FAMILLE_NOM_CAISSE"]
                 if dict_options["regroupement_principal"] == "categorie_travail": regroupement = dictInfosIndividus[conso.individu_id]["INDIVIDU_CATEGORIE_TRAVAIL"]
                 if dict_options["regroupement_principal"] == "categorie_travail_pere": regroupement = dictInfosIndividus[conso.individu_id]["PERE_CATEGORIE_TRAVAIL"]
                 if dict_options["regroupement_principal"] == "categorie_travail_mere": regroupement = dictInfosIndividus[conso.individu_id]["MERE_CATEGORIE_TRAVAIL"]
