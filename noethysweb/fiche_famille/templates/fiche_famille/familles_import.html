@@ -1,0 +1,288 @@
+{% extends "core/box_in_page.html" %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .transfert-titre {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 5px; margin: 20px 0 10px 0; font-size: 12px; color: #333;
+            background-color: #f1f0f0; text-transform: uppercase;
+        }
+        .dark-mode .transfert-titre { background-color: #6c6c6c; color: #fff; }
+        .transfert-defilement { max-height: 400px; overflow-y: auto; border: solid 1px #e5e5e5; }
+        .transfert-table { margin-bottom: 0; }
+        .transfert-table th { background-color: #f1f1f1; position: sticky; top: 0; z-index: 1; }
+        .dark-mode .transfert-table th { background-color: #555; }
+        .transfert-table td, .transfert-table th { vertical-align: middle !important; padding: 5px 8px; }
+        .transfert-table tr.coche td { background-color: rgba(60, 141, 188, 0.08); }
+        .transfert-chiffre { font-size: 22px; font-weight: bold; display: block; }
+        .transfert-masque { display: none; }
+    </style>
+{% endblock styles %}
+
+
+{% block contenu_page %}
+    {% embed 'core/box.html' %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}{{ box_titre }}{% endblock %}
+        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+        {% block box_contenu %}
+
+            {# ------------------------------- Étape 1 : envoi ------------------------------- #}
+            {% if etape == "envoi" %}
+                <form method="post" enctype="multipart/form-data" id="form_envoi" style="max-width: 600px;">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_fichier">Fichier d'export Noethysweb (.7z)</label>
+                        <input type="file" name="fichier" id="id_fichier" class="form-control-file" accept=".7z" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_mot_de_passe">Mot de passe</label>
+                        <input type="password" name="mot_de_passe" id="id_mot_de_passe" class="form-control" autocomplete="off" required>
+                    </div>
+                    <p class="text-muted"><i class="fa fa-info-circle margin-r-5"></i>Rien n'est encore enregistré : l'étape suivante présente une analyse complète avant l'import.</p>
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-search margin-r-5"></i>Analyser le fichier</button>
+                    <a class="btn btn-danger" href="{% url 'famille_liste' %}"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
+                </form>
+                <div id="loader_envoi" class="text-primary transfert-masque" style="text-align: center; margin: 40px;">
+                    <h4><i class="fa fa-spinner fa-spin margin-r-5"></i><strong>Lecture du fichier en cours</strong></h4>
+                </div>
+            {% endif %}
+
+            {# ------------------------------- Étape 2 : analyse ------------------------------- #}
+            {% if etape == "analyse" %}
+                <p class="text-muted">
+                    Export du {{ manifeste.date_fr }}{% if manifeste.origine %} depuis « {{ manifeste.origine }} »{% endif %}
+                    — {{ familles|length }} famille{{ familles|length|pluralize }}, {{ manifeste.nbre_individus }} individu{{ manifeste.nbre_individus|pluralize }},
+                    {{ nbre_fichiers }} pièce{{ nbre_fichiers|pluralize }} et photo{{ nbre_fichiers|pluralize }}
+                    — version de format {{ manifeste.version }}, compatible
+                </p>
+
+                <form method="post" action="{% url 'familles_importer_executer' %}" id="form_import">
+                    {% csrf_token %}
+
+                    {# Familles #}
+                    <div class="transfert-titre"><span>Familles à importer</span><span id="compteur_familles"></span></div>
+                    <div class="d-flex mb-2" style="gap: 6px;">
+                        <input type="search" id="recherche_familles" class="form-control" placeholder="Rechercher une famille, un individu, une ville">
+                        <button type="button" class="btn btn-default text-nowrap" onclick="cocher_familles(true)">Tout cocher</button>
+                        <button type="button" class="btn btn-default text-nowrap" onclick="cocher_familles(false)">Tout décocher</button>
+                    </div>
+                    <div class="transfert-defilement">
+                        <table class="table table-sm transfert-table" id="table_familles">
+                            <thead><tr><th style="width: 30px;"></th><th>Famille</th><th>Membres</th><th>Ville</th><th style="width: 140px;">État</th></tr></thead>
+                            <tbody>
+                                {% for famille in familles %}
+                                    <tr data-recherche="{{ famille.nom|lower }} {{ famille.membres|lower }} {{ famille.ville|lower }}">
+                                        <td><input type="checkbox" name="familles" value="{{ famille.id }}" class="coche_famille" {% if famille.coche %}checked{% endif %}></td>
+                                        <td>{{ famille.nom }}</td>
+                                        <td>{{ famille.membres }}</td>
+                                        <td>{{ famille.ville }}</td>
+                                        <td>
+                                            {% if famille.etat == "nouvelle" %}<span class="badge badge-success">Nouvelle</span>
+                                            {% elif famille.etat == "doublons" %}<span class="badge badge-warning">{{ famille.nbre_doublons }} doublon{{ famille.nbre_doublons|pluralize }}</span>
+                                            {% elif famille.etat == "presente" %}<span class="badge badge-warning">Déjà présente</span>
+                                            {% else %}<span class="badge badge-secondary">Sans membre</span>{% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-muted mt-1"><small>Par défaut, toutes les familles sont cochées, sauf celles dont tous les membres existent déjà dans cette base.</small></p>
+
+                    {# Doublons #}
+                    {% if doublons %}
+                        <div class="transfert-titre"><span>Doublons dans les familles cochées</span><span id="compteur_doublons"></span></div>
+                        <p class="text-muted"><small>Ces individus existent déjà dans cette base (même nom, prénom et date de naissance). Un individu ignoré n'est pas importé et ses liens sont abandonnés.</small></p>
+                        <table class="table table-sm transfert-table">
+                            <thead><tr><th>Individu</th><th style="width: 130px;">Né(e) le</th><th style="width: 160px;">Déjà présent dans</th><th style="width: 200px;">Action</th></tr></thead>
+                            <tbody>
+                                {% for doublon in doublons %}
+                                    <tr class="ligne_filtree" data-familles="{{ doublon.familles|join:',' }}">
+                                        <td>{{ doublon.nom }}</td>
+                                        <td>{{ doublon.date_naiss }}</td>
+                                        <td>{% if doublon.idfamille_cible %}<a href="{% url 'famille_resume' idfamille=doublon.idfamille_cible %}" target="_blank">Famille n° {{ doublon.idfamille_cible }}</a>{% else %}Sans famille{% endif %}</td>
+                                        <td>
+                                            <select name="doublon_{{ doublon.id }}" class="form-control form-control-sm">
+                                                <option value="ignorer">Ignorer</option>
+                                                <option value="creer">Créer quand même</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+
+                    {# Correspondances #}
+                    <div class="transfert-titre"><span>Correspondances des paramètres</span><span id="compteur_correspondances"></span></div>
+                    {% if correspondances %}
+                        <table class="table table-sm transfert-table">
+                            <thead><tr><th style="width: 22%;">Paramètre</th><th style="width: 33%;">Dans le fichier</th><th>Dans cette base</th></tr></thead>
+                            <tbody>
+                                {% for ligne in correspondances %}
+                                    <tr class="ligne_filtree" data-familles="{{ ligne.familles|join:',' }}">
+                                        <td>{{ ligne.modele }}</td>
+                                        <td>{{ ligne.label }}</td>
+                                        <td>
+                                            <select name="{{ ligne.champ }}" id="{{ ligne.champ }}" class="form-control form-control-sm select_ref" data-parents="{{ ligne.parents|join:',' }}">
+                                                <option value="creer" {% if ligne.defaut == "creer" %}selected{% endif %}>Créer « {{ ligne.label }} »</option>
+                                                <option value="ignorer" {% if ligne.defaut == "ignorer" %}selected{% endif %}>Ignorer</option>
+                                                {% if ligne.choix %}
+                                                    <optgroup label="Associer à un élément existant">
+                                                        {% for pk, label in ligne.choix %}<option value="{{ pk }}">{{ label }}</option>{% endfor %}
+                                                    </optgroup>
+                                                {% endif %}
+                                            </select>
+                                            <small class="text-warning message_parent transfert-masque">Le paramètre dont il dépend est ignoré : il sera ignoré aussi.</small>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-muted">Tous les paramètres utilisés existent déjà dans cette base.</p>
+                    {% endif %}
+                    {% if correspondances_auto %}
+                        <details class="mt-1">
+                            <summary class="text-muted"><small>{{ correspondances_auto|length }} correspondance{{ correspondances_auto|length|pluralize }} automatique{{ correspondances_auto|length|pluralize }}</small></summary>
+                            <table class="table table-sm transfert-table mt-2">
+                                {% for ligne in correspondances_auto %}
+                                    <tr class="ligne_filtree" data-familles="{{ ligne.familles|join:',' }}"><td style="width: 22%;">{{ ligne.modele }}</td><td style="width: 33%;">{{ ligne.label }}</td><td><i class="fa fa-check text-success margin-r-5"></i>{{ ligne.cible }}</td></tr>
+                                {% endfor %}
+                            </table>
+                        </details>
+                    {% endif %}
+                    <p class="text-muted mt-2"><small>Seuls les paramètres utilisés par les familles cochées sont listés. Les pièces et questions sans équivalent sont ignorées par défaut, pour ne pas multiplier les types de pièces ni ajouter des questions à toutes les familles.</small></p>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <a class="btn btn-default" href="{% url 'familles_importer' %}"><i class="fa fa-arrow-left margin-r-5"></i>Choisir un autre fichier</a>
+                        <button type="submit" class="btn btn-primary" id="bouton_importer"><i class="fa fa-check margin-r-5"></i><span id="label_importer">Importer</span></button>
+                    </div>
+                </form>
+                <div id="loader_import" class="text-primary transfert-masque" style="text-align: center; margin: 40px;">
+                    <h4><i class="fa fa-spinner fa-spin margin-r-5"></i><strong>Import en cours</strong></h4>
+                    <p>Veuillez patienter, cela peut prendre quelques minutes...</p>
+                </div>
+            {% endif %}
+
+            {# ------------------------------- Étape 3 : rapport ------------------------------- #}
+            {% if etape == "rapport" %}
+                <div class="row text-center" id="rapport_chiffres">
+                    <div class="col-sm-3"><span class="transfert-chiffre">{{ rapport.familles }}</span>famille{{ rapport.familles|pluralize }} créée{{ rapport.familles|pluralize }}</div>
+                    <div class="col-sm-3"><span class="transfert-chiffre">{{ rapport.individus }}</span>individu{{ rapport.individus|pluralize }} créé{{ rapport.individus|pluralize }}</div>
+                    <div class="col-sm-3"><span class="transfert-chiffre">{{ rapport.individus_ignores }}</span>doublon{{ rapport.individus_ignores|pluralize }} ignoré{{ rapport.individus_ignores|pluralize }}</div>
+                    <div class="col-sm-3"><span class="transfert-chiffre">{{ rapport.parametres_crees|length }}</span>paramètre{{ rapport.parametres_crees|length|pluralize }} créé{{ rapport.parametres_crees|length|pluralize }}</div>
+                </div>
+                <div id="rapport_detail">
+                    {% if rapport.avertissements %}
+                        <div class="transfert-titre"><span>Avertissements</span></div>
+                        <ul>{% for texte in rapport.avertissements %}<li>{{ texte }}</li>{% endfor %}</ul>
+                    {% endif %}
+                    {% if rapport.familles_non_importees %}
+                        <div class="transfert-titre"><span>Familles non importées (tous leurs membres sont des doublons ignorés)</span></div>
+                        <ul>{% for nom in rapport.familles_non_importees %}<li>{{ nom }}</li>{% endfor %}</ul>
+                    {% endif %}
+                    {% if rapport.parametres_crees %}
+                        <div class="transfert-titre"><span>Paramètres créés</span></div>
+                        <ul>{% for texte in rapport.parametres_crees %}<li>{{ texte }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+                <div class="mt-3">
+                    <button type="button" class="btn btn-default" onclick="telecharger_rapport()"><i class="fa fa-download margin-r-5"></i>Télécharger le rapport</button>
+                    <a class="btn btn-primary" href="{% url 'famille_liste' %}"><i class="fa fa-users margin-r-5"></i>Retour à la liste des familles</a>
+                </div>
+            {% endif %}
+
+        {% endblock box_contenu %}
+    {% endembed %}
+{% endblock contenu_page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        $(document).ready(function() {
+            // Étape 1
+            $("#form_envoi").on("submit", function() {
+                $(this).hide();
+                $("#loader_envoi").show();
+            });
+
+            // Étape 2
+            $("#table_familles").on("change", ".coche_famille", maj_analyse);
+            $("#recherche_familles").on("input", function() {
+                var texte = $(this).val().toLowerCase().trim();
+                $("#table_familles tbody tr").each(function() {
+                    $(this).toggle(!texte || $(this).data("recherche").indexOf(texte) !== -1);
+                });
+            });
+            $(".select_ref").on("change", maj_parents);
+            $("#form_import").on("submit", function(e) {
+                if (!$(".coche_famille:checked").length) {
+                    e.preventDefault();
+                    toastr.error("Veuillez cocher au moins une famille à importer.");
+                    return;
+                }
+                $(this).hide();
+                $("#loader_import").show();
+            });
+            if ($("#table_familles").length) { maj_analyse(); maj_parents(); }
+        });
+
+        function cocher_familles(etat) {
+            // Uniquement les familles visibles (recherche en cours)
+            $("#table_familles tbody tr:visible .coche_famille").prop("checked", etat);
+            maj_analyse();
+        }
+
+        function maj_analyse() {
+            var cochees = {};
+            $(".coche_famille").each(function() {
+                $(this).closest("tr").toggleClass("coche", this.checked);
+                if (this.checked) { cochees[$(this).val()] = true; }
+            });
+            var nbre = Object.keys(cochees).length;
+            $("#compteur_familles").text(nbre + " sur " + $(".coche_famille").length + " cochée" + (nbre > 1 ? "s" : ""));
+            $("#label_importer").text(nbre ? "Importer " + nbre + " famille" + (nbre > 1 ? "s" : "") : "Importer");
+            $("#bouton_importer").prop("disabled", !nbre);
+
+            // Doublons et correspondances : uniquement ceux des familles cochées
+            $(".ligne_filtree").each(function() {
+                var familles = String($(this).data("familles")).split(",");
+                $(this).toggle(familles.some(function(idfamille) { return cochees[idfamille]; }));
+            });
+            $("#compteur_doublons").text($("select[name^='doublon_']:visible").length);
+            var nbre_decisions = $(".select_ref:visible").length;
+            $("#compteur_correspondances").text(nbre_decisions + " à décider");
+        }
+
+        function maj_parents() {
+            // Un paramètre dont le parent obligatoire est ignoré ne peut pas être créé (ex : classe d'une école ignorée)
+            $(".select_ref").each(function() {
+                var parents = String($(this).data("parents") || "").split(",").filter(Boolean);
+                var parent_ignore = parents.some(function(id) { return $("#" + id).val() === "ignorer"; });
+                $(this).find("option[value='creer']").prop("disabled", parent_ignore);
+                if (parent_ignore && $(this).val() === "creer") { $(this).val("ignorer"); }
+                $(this).siblings(".message_parent").toggle(parent_ignore);
+            });
+        }
+
+        function telecharger_rapport() {
+            var lignes = ["Import de fiches familles - " + new Date().toLocaleString("fr-FR"), ""];
+            $("#rapport_chiffres > div").each(function() { lignes.push($(this).text().replace(/\s+/g, " ").trim()); });
+            $("#rapport_detail").children().each(function() {
+                if ($(this).hasClass("transfert-titre")) { lignes.push("", $(this).text().trim().toUpperCase()); }
+                $(this).find("li").each(function() { lignes.push("- " + $(this).text().trim()); });
+            });
+            var lien = document.createElement("a");
+            lien.href = URL.createObjectURL(new Blob([lignes.join("\r\n")], {type: "text/plain;charset=utf-8"}));
+            lien.download = "rapport_import_familles.txt";
+            lien.click();
+        }
+    </script>
+{% endblock scripts %}

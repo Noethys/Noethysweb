@@ -5,6 +5,7 @@
 
 from django.urls import include, path
 from core.decorators import secure_ajax
+from fiche_famille.views import familles_transfert
 from fiche_famille.views import famille, famille_questionnaire, famille_notes, famille_ajouter, famille_pieces, famille_cotisations, famille_caisse, famille_aides, famille_quotients, famille_divers, \
                             famille_prestations, famille_reglements, famille_consommations, famille_factures, famille_voir_facture, famille_voir_cotisation, famille_abo_factures_email, \
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, famille_sms, \
@@ -21,6 +22,10 @@ urlpatterns = [
 
     # Familles
     path('individus/familles/liste', famille.Liste.as_view(), name='famille_liste'),
+    path('individus/familles/importer', familles_transfert.Importer.as_view(), name='familles_importer'),
+    path('individus/familles/importer/analyse', familles_transfert.Analyser.as_view(), name='familles_importer_analyse'),
+    path('individus/familles/importer/executer', familles_transfert.Executer.as_view(), name='familles_importer_executer'),
+    path('individus/familles/exporter', secure_ajax(familles_transfert.Exporter), name='familles_exporter'),
     path('individus/familles/ajouter', famille_ajouter.Creer_famille.as_view(), name='famille_ajouter'),
     path('individus/familles/supprimer/<int:idfamille>', famille.Supprimer_famille.as_view(), name='famille_supprimer'),
     path('individus/familles/resume/<int:idfamille>', famille.Resume.as_view(), name='famille_resume'),

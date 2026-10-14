@@ -18,6 +18,7 @@ from core.models import Famille, Note, Rattachement, CATEGORIES_RATTACHEMENT, Pr
 from individus.utils import utils_pieces_manquantes, utils_informations_manquantes, utils_vaccinations, utils_assurances
 from fiche_individu.forms.individu import Formulaire
 from fiche_famille.utils.utils_famille import LISTE_ONGLETS
+from fiche_famille.utils import utils_transfert_familles
 from cotisations.utils import utils_cotisations_manquantes
 
 
@@ -102,14 +103,32 @@ class Page(crud.Page):
 
 class Liste(Page, crud.Liste):
     model = Famille
+    template_name = "fiche_famille/familles_liste_transfert.html"
 
     def get_queryset(self):
         return Famille.objects.filter(self.Get_filtres("Q"))
+
+    def Transfert_autorise(self):
+        """ Export et import de fiches familles : réservés aux super-utilisateurs """
+        return self.request.user.is_superuser
+
+    def get_datatable_class(self):
+        # Colonne de cases à cocher uniquement pour ceux qui peuvent exporter
+        return self.datatable_class_transfert if self.Transfert_autorise() else self.datatable_class
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
+        if self.Transfert_autorise():
+            context['transfert_autorise'] = True
+            context['active_checkbox'] = True
+            context['bouton_supprimer'] = False
+            context['mdp_longueur_min'] = utils_transfert_familles.MDP_LONGUEUR_MIN
+            context['boutons_liste'] = list(context['boutons_liste']) + [
+                {"label": "Exporter la sélection", "classe": "btn btn-default", "href": "#", "onclick": "ouvrir_export_familles(); return false;", "icone": "fa fa-download"},
+                {"label": "Importer", "classe": "btn btn-default", "href": reverse_lazy("familles_importer"), "icone": "fa fa-upload"},
+            ]
         return context
 
     class datatable_class(MyDatatable):
@@ -154,6 +173,20 @@ class Liste(Page, crud.Liste):
 
         def Get_portable(self, instance, *args, **kwargs):
             return instance.mobile
+
+
+    class datatable_class_transfert(datatable_class):
+        """ Liste avec cases à cocher pour l'export de fiches familles """
+        check = columns.CheckBoxSelectColumn(label="")
+
+        class Meta:
+            structure_template = MyDatatable.structure_template
+            columns = ["check", "idfamille", "nom", "rue_resid", "cp_resid", "ville_resid", "mail", "portable", "secteur", "date_creation"]
+            hidden_columns = ["secteur", "date_creation"]
+            processors = {
+                "date_creation": helpers.format_date("%d/%m/%Y %H:%M"),
+            }
+            ordering = ["nom"]
 
 
 class Supprimer_famille(Page, crud.Supprimer):

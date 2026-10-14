@@ -1,0 +1,119 @@
+{% extends "core/crud/liste_in_box.html" %}
+{% load static %}
+
+
+{% block contenu_page %}
+    {{ block.super }}
+
+    {% if transfert_autorise %}
+        {# Fenêtre d'export des fiches familles cochées #}
+        <div class="modal fade" id="modal_export_familles" tabindex="-1" role="dialog" aria-labelledby="titre_export_familles" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="titre_export_familles"><i class="fa fa-download margin-r-5"></i>Exporter des fiches familles</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="export_resume"></p>
+                        <div class="form-group">
+                            <label for="export_mot_de_passe">Mot de passe de l'archive</label>
+                            <input type="password" id="export_mot_de_passe" class="form-control" autocomplete="new-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="export_confirmation">Confirmation</label>
+                            <input type="password" id="export_confirmation" class="form-control" autocomplete="new-password">
+                        </div>
+                        <p class="text-muted"><small><i class="fa fa-lock margin-r-5"></i>Le fichier contient des données personnelles en clair, protégées uniquement par ce mot de passe
+                            ({{ mdp_longueur_min }} caractères minimum). Il n'est pas récupérable en cas d'oubli. Transmettez-le par un autre canal que le fichier.</small></p>
+                        <div class="alert alert-danger" id="export_erreur" style="display: none;"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-primary" id="export_valider" onclick="valider_export_familles()"><i class="fa fa-download margin-r-5"></i>Générer l'archive</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock contenu_page %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    {% if transfert_autorise %}
+        <script>
+            var mdp_longueur_min = {{ mdp_longueur_min }};
+
+            function familles_cochees() {
+                var table = new $.fn.dataTable.Api('.datatable');
+                return table.rows({selected: true}).data().toArray().map(function(valeurs) {
+                    // DOMParser n'exécute aucun script ni gestionnaire (onerror...) contrairement à $().html()
+                    var nom = new DOMParser().parseFromString(String(valeurs[2]), "text/html").body.textContent;
+                    return {id: parseInt(valeurs[1]), nom: nom};
+                });
+            }
+
+            // Libellé du bouton : nombre de familles cochées
+            $(document).ready(function() {
+                $('.datatable').on('select.dt deselect.dt draw.dt', function() {
+                    var nbre = familles_cochees().length;
+                    $("a[onclick^='ouvrir_export_familles']").html("<i class='fa fa-download margin-r-5'></i> Exporter la sélection" + (nbre ? " (" + nbre + ")" : ""));
+                });
+            });
+
+            function ouvrir_export_familles() {
+                var familles = familles_cochees();
+                if (!familles.length) {
+                    toastr.error("Cochez au moins une famille dans la liste. La case de l'en-tête coche toutes les familles affichées.");
+                    return;
+                }
+                var noms = familles.slice(0, 5).map(function(f) { return f.nom; }).join(", ");
+                if (familles.length > 5) { noms += " et " + (familles.length - 5) + " autre" + (familles.length > 6 ? "s" : ""); }
+                $("#export_resume").html("<b>" + familles.length + " famille" + (familles.length > 1 ? "s" : "") + " sélectionnée" + (familles.length > 1 ? "s" : "") +
+                    "</b> (" + $("<div>").text(noms).html() + ") seront exportées avec leurs membres.");
+                $("#export_mot_de_passe, #export_confirmation").val("");
+                $("#export_erreur").hide();
+                $("#modal_export_familles").modal("show");
+            }
+
+            function valider_export_familles() {
+                var mdp = $("#export_mot_de_passe").val();
+                var erreur = "";
+                if (mdp.length < mdp_longueur_min) { erreur = "Le mot de passe doit contenir au moins " + mdp_longueur_min + " caractères."; }
+                else if (mdp !== $("#export_confirmation").val()) { erreur = "Le mot de passe et sa confirmation sont différents."; }
+                if (erreur) { $("#export_erreur").text(erreur).show(); return; }
+
+                var donnees = new FormData();
+                donnees.append("idfamilles", JSON.stringify(familles_cochees().map(function(f) { return f.id; })));
+                donnees.append("mot_de_passe", mdp);
+                donnees.append("confirmation", $("#export_confirmation").val());
+                donnees.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+                var bouton = $("#export_valider");
+                bouton.prop("disabled", true).html("<i class='fa fa-spinner fa-spin margin-r-5'></i>Génération en cours...");
+                $("#export_erreur").hide();
+
+                fetch("{% url 'familles_exporter' %}", {method: "POST", body: donnees, headers: {"X-Requested-With": "XMLHttpRequest"}, credentials: "same-origin"})
+                    .then(function(reponse) {
+                        if (!reponse.ok) {
+                            return reponse.json().catch(function() { return {erreur: "L'export a échoué."}; }).then(function(d) { throw new Error(d.erreur); });
+                        }
+                        var nom = (reponse.headers.get("Content-Disposition") || "").split('filename="')[1];
+                        return reponse.blob().then(function(blob) { return {blob: blob, nom: nom ? nom.replace('"', '') : "export_familles.7z"}; });
+                    })
+                    .then(function(fichier) {
+                        var lien = document.createElement("a");
+                        lien.href = URL.createObjectURL(fichier.blob);
+                        lien.download = fichier.nom;
+                        document.body.appendChild(lien);
+                        lien.click();
+                        lien.remove();
+                        $("#modal_export_familles").modal("hide");
+                        toastr.success("L'archive a été générée.");
+                    })
+                    .catch(function(err) { $("#export_erreur").text(err.message).show(); })
+                    .finally(function() { bouton.prop("disabled", false).html("<i class='fa fa-download margin-r-5'></i>Générer l'archive"); });
+            }
+        </script>
+    {% endif %}
+{% endblock scripts %}
