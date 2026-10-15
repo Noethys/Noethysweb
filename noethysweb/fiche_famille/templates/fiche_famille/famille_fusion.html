@@ -1,0 +1,162 @@
+{% extends "fiche_famille/famille.html" %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+    {% include "fiche_famille/famille_fusion_styles.html" %}
+{% endblock styles %}
+
+{% block detail_famille %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+
+                {# ------------------------------- Étape 1 : sélection ------------------------------- #}
+                {% if etape == "selection" %}
+                    {{ form.media }}
+
+                    {% if suggestions %}
+                        <div class="fusion-titre">Doublons probables</div>
+                        <p class="text-muted"><small>Ces familles comportent un individu portant le même nom et le même prénom qu'un membre de cette famille.</small></p>
+                        <table class="table table-sm table-bordered fusion-table mb-3">
+                            <thead><tr><th>Famille</th><th>Individus en commun</th><th style="width: 130px;"></th></tr></thead>
+                            <tbody>
+                                {% for suggestion in suggestions %}
+                                    <tr>
+                                        <td><a href="{% url 'famille_resume' idfamille=suggestion.famille.pk %}" target="_blank" title="Ouvrir la fiche dans un nouvel onglet">{{ suggestion.famille.nom|default:"Famille sans nom" }} (ID{{ suggestion.famille.pk }})</a></td>
+                                        <td>{{ suggestion.individus|join:", " }}</td>
+                                        <td><a class="btn btn-xs btn-default" href="?famille={{ suggestion.famille.pk }}"><i class="fa fa-search margin-r-5"></i>Analyser</a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+
+                    <div class="fusion-titre">Rechercher une famille</div>
+                    <form method="get" style="max-width: 600px;" id="form_selection" novalidate>
+                        <div class="form-group">
+                            <label for="{{ form.famille.id_for_label }}">{{ form.famille.label }}</label>
+                            {{ form.famille }}
+                            <div id="erreur_famille" class="text-danger small mt-1 fusion-masque" role="alert">Recherchez puis sélectionnez la famille en double.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fa fa-search margin-r-5"></i>Analyser la fusion</button>
+                        <a class="btn btn-danger" href="{% url 'famille_outils' idfamille=famille.pk %}"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
+                    </form>
+                    <script>
+                        $(function() {
+                            $("#{{ form.famille.id_for_label }}").on("change", function() {$("#erreur_famille").hide();});
+                            $("#form_selection").on("submit", function(e) {
+                                if (!$("#{{ form.famille.id_for_label }}").val()) {$("#erreur_famille").show(); e.preventDefault(); return false;}
+                            });
+                        });
+                    </script>
+                {% endif %}
+
+                {# ------------------------------- Étape 2 : analyse ------------------------------- #}
+                {% if etape == "analyse" %}
+                    <form method="post" id="form_fusion">
+                        {% csrf_token %}
+                        <input type="hidden" name="famille_doublon" value="{{ famille_doublon.pk }}">
+
+                        <div class="fusion-fiches">
+                            <div class="fusion-fiche absorbee">
+                                <div class="fusion-fiche-etat"><i class="fa fa-trash-o margin-r-5"></i>Famille absorbée</div>
+                                <div class="fusion-fiche-nom"><a href="{% url 'famille_resume' idfamille=famille_doublon.pk %}" target="_blank">{{ famille_doublon.nom|default:"Famille sans nom" }}</a> <small class="text-muted">ID{{ famille_doublon.pk }}</small></div>
+                                <div class="text-muted"><small>{{ famille_doublon.ville_resid|default:"" }} — créée le {{ famille_doublon.date_creation|date:"d/m/Y" }}</small></div>
+                            </div>
+                            <div class="fusion-fleche"><i class="fa fa-arrow-right" aria-hidden="true"></i></div>
+                            <div class="fusion-fiche conservee">
+                                <div class="fusion-fiche-etat"><i class="fa fa-check margin-r-5"></i>Famille conservée</div>
+                                <div class="fusion-fiche-nom">{{ famille.nom|default:"Famille sans nom" }} <small class="text-muted">ID{{ famille.pk }}</small></div>
+                                <div class="text-muted"><small>{{ famille.ville_resid|default:"" }} — créée le {{ famille.date_creation|date:"d/m/Y" }}</small></div>
+                            </div>
+                        </div>
+                        <p class="mt-2 mb-0"><small><a href="{% url 'famille_fusion' idfamille=famille_doublon.pk %}?famille={{ famille.pk }}"><i class="fa fa-exchange margin-r-5"></i>Inverser : conserver plutôt la famille {{ famille_doublon.nom|default:"" }} (ID{{ famille_doublon.pk }})</a></small></p>
+
+                        <div class="fusion-titre">Données transférées</div>
+                        <table class="table table-sm table-bordered fusion-table" style="max-width: 600px;">
+                            <thead><tr><th></th><th class="text-right">Famille absorbée</th><th class="text-right">Famille conservée</th></tr></thead>
+                            <tbody>
+                                {% for label, nbre_doublon, nbre_garde in stats %}
+                                    <tr><td>{{ label }}</td><td class="text-right {% if nbre_doublon %}font-weight-bold{% endif %}">{{ nbre_doublon }}</td><td class="text-right">{{ nbre_garde }}</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <p class="text-muted mt-1 mb-0"><small>Toutes les autres données (pièces, notes, adhésions, aides, mandats, historique, messages du portail...) sont également transférées.</small></p>
+
+                        <div class="fusion-titre">Individus de la famille absorbée</div>
+                        <p class="text-muted"><small>Pour chaque individu, indiquez s'il s'agit d'une personne déjà présente dans la famille conservée. Les doublons détectés (même nom, prénom et date de naissance) sont présélectionnés.</small></p>
+                        <table class="table table-sm table-bordered fusion-table">
+                            <thead><tr><th>Individu</th><th style="width: 110px;">Né(e) le</th><th style="width: 90px;" class="text-center">Inscriptions</th><th style="width: 320px;">Action</th></tr></thead>
+                            <tbody>
+                                {% for ligne in lignes_individus %}
+                                    <tr>
+                                        <td>
+                                            {{ ligne.individu.Get_nom }} <small class="text-muted">ID{{ ligne.individu.pk }}</small>
+                                            {% if ligne.score == 2 %}<span class="badge badge-danger ml-1">Doublon certain</span>
+                                            {% elif ligne.score == 1 %}<span class="badge badge-warning ml-1">Doublon probable</span>{% endif %}
+                                        </td>
+                                        <td>{{ ligne.individu.date_naiss|date:"d/m/Y" }}</td>
+                                        <td class="text-center">{{ ligne.nbre_inscriptions }}</td>
+                                        <td>
+                                            {% if ligne.deja_membre %}
+                                                <span class="text-muted"><i class="fa fa-check margin-r-5"></i>Déjà membre de la famille conservée</span>
+                                            {% else %}
+                                                <select name="individu_{{ ligne.individu.pk }}" class="form-control form-control-sm choix_individu" aria-label="Action pour {{ ligne.individu.Get_nom }}">
+                                                    <option value="">Ajouter à la famille conservée</option>
+                                                    {% for individu in individus_garde %}
+                                                        <option value="{{ individu.pk }}" {% if individu.pk == ligne.proposition %}selected{% endif %}>Fusionner avec {{ individu.Get_nom }}{% if individu.date_naiss %} ({{ individu.date_naiss|date:"d/m/Y" }}){% endif %}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div id="erreur_individus" class="text-danger fusion-masque mt-1" role="alert"><i class="fa fa-exclamation-circle margin-r-5"></i>Un même individu de la famille conservée ne peut être sélectionné qu'une seule fois.</div>
+
+                        {% include "fiche_famille/famille_fusion_commun.html" %}
+
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-danger" id="bouton_fusion"><i class="fa fa-compress margin-r-5"></i>Fusionner les familles</button>
+                            <a class="btn btn-default" href="{% url 'famille_fusion' idfamille=famille.pk %}"><i class="fa fa-arrow-left margin-r-5"></i>Choisir une autre famille</a>
+                        </div>
+                    </form>
+                    <div id="loader_fusion" class="text-primary fusion-masque" style="text-align: center; margin: 40px;">
+                        <h4><i class="fa fa-spinner fa-spin margin-r-5"></i><strong>Fusion en cours, veuillez patienter...</strong></h4>
+                    </div>
+
+                    <script>
+                        $(function() {
+                            function verifier_individus() {
+                                var choix = [], doublon = false;
+                                $(".choix_individu").each(function() {
+                                    var valeur = $(this).val();
+                                    if (valeur) {
+                                        if (choix.indexOf(valeur) !== -1) {doublon = true;}
+                                        choix.push(valeur);
+                                    }
+                                });
+                                $("#erreur_individus").toggle(doublon);
+                                return !doublon;
+                            }
+                            $(".choix_individu").on("change", verifier_individus);
+                            $("#form_fusion").on("submit", function(e) {
+                                if (!verifier_individus()) {e.preventDefault(); return false;}
+                                $("#bouton_fusion").prop("disabled", true);
+                                $("#form_fusion").hide();
+                                $("#loader_fusion").show();
+                            });
+                        });
+                    </script>
+                {% endif %}
+
+            {% endblock box_contenu %}
+        {% endembed %}
+    </div>
+{% endblock %}

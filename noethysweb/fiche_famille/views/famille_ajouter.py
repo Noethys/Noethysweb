@@ -6,8 +6,8 @@
 import logging
 logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy, reverse
-from django.http import HttpResponse, HttpResponseRedirect
-from django.template import Template, RequestContext
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.contrib import messages
 from django.db.models import ProtectedError
 from django.db import transaction
@@ -18,60 +18,23 @@ from core.utils import utils_historique, utils_questionnaires
 from fiche_individu.forms.individu import Formulaire
 from fiche_individu.views import individu as INDIVIDU
 from fiche_famille.views.famille import Onglet
-from fiche_famille.utils import utils_internet
+from fiche_famille.utils import utils_internet, utils_doublons
 
 
 def Get_individus_existants(request):
-    nom = request.POST.get("nom", "")
-    prenom = request.POST.get("prenom", "")
-    resultat = ""
-    if nom or prenom:
-        html = ""
-
-        # Recherche les noms exactement identiques
-        individus_identiques = Individu.objects.filter(nom__iexact=nom, prenom__iexact=prenom).order_by('nom')
-        if individus_identiques.exists():
-            if len(individus_identiques) == 1:
-                texte = "Un individu existant dans la base de données porte"
-            else:
-                texte = "%d individus existants dans la base de données portent" % len(individus_identiques)
-            html += """
-            <div class="alert alert-warning alert-dismissible">
-                <h4><i class="icon fa fa-warning"></i> Attention au doublon !</h4>
-                %s exactement le même nom que vous avez saisi. Vérifiez que l'individu que vous souhaitez créer n'est pas celui qui existe déjà.
-            </div>
-            """ % texte
-
-        # Recherche les noms approchant
-        individus_approchant = Individu.objects.filter(nom__icontains=nom, prenom__icontains=prenom).order_by('nom')[:20]
-        if individus_approchant.exists():
-            html += """
-            <style>
-                .doublons {
-                    background: #f4f4f4;
-                    padding: 10px;
-                    margin-bottom: 10px;
-                }
-                .doublons li {
-                    display: inline;
-                    white-space: nowrap;
-                    margin-right: 20px;
-                }
-            </style>
-            <div class="doublons">
-                <strong>Individus paronymes existants</strong>
-                <ul class="list-unstyled">
-                    {% for individu in individus %}
-                        <li><i class="icon fa fa-caret-right"></i> {{ individu.nom }} {{ individu.prenom }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            """
-
-        context = {'individus': individus_approchant}
-        resultat = Template(html).render(RequestContext(request, context))
-
-    return HttpResponse(resultat)
+    """ Renvoie le panneau des individus existants pouvant être des doublons de la saisie en cours """
+    try:
+        civilite = int(request.POST.get("civilite") or 1)
+    except ValueError:
+        civilite = 1
+    try:
+        idfamille = int(request.POST.get("idfamille") or 0)
+    except ValueError:
+        idfamille = 0
+    doublons = utils_doublons.Rechercher_doublons(nom=request.POST.get("nom", ""), prenom=request.POST.get("prenom", ""),
+                                                  sans_prenom=civilite >= 6, idfamille=idfamille)
+    context = {"doublons": doublons, "nbre_tres_probables": len([doublon for doublon in doublons if doublon["niveau"] == 3])}
+    return render(request, "fiche_famille/individu_doublons.html", context)
 
 
 
@@ -133,6 +96,11 @@ class Ajouter(crud.Ajouter):
                         self.object.save()
                         self.object.Maj_infos()
                         break
+
+            # Mémorise la création malgré un doublon très probable signalé
+            if getattr(form, "doublons_ignores", None):
+                utils_historique.Ajouter(titre="Création d'un individu malgré un doublon possible", utilisateur=self.request.user, famille=famille.pk, individu=self.object.pk,
+                                         detail="Création de %s confirmée par l'utilisateur. Doublons signalés : %s." % (self.object.Get_nom(), ", ".join(form.doublons_ignores)))
 
             # Renvoie vers la fiche individuelle
             url_success = reverse_lazy("individu_resume", kwargs={'idindividu': self.object.idindividu, 'idfamille': famille.pk})

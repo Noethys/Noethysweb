@@ -8,6 +8,7 @@ from core.models import Famille
 from django.views.generic.detail import DetailView
 from fiche_famille.views.famille import Onglet
 from core.views import menu_infos
+from fiche_famille.utils import utils_fusion
 
 
 class View(Onglet, DetailView):
@@ -51,6 +52,13 @@ class View(Onglet, DetailView):
                 Item("Export XML", "famille_export_xml", "file-code-o", "e", "Exporter les données de la famille (demande RGPD...)."),
             ]},
         ]
+
+        # Fusion des doublons
+        if utils_fusion.Autorise(self.request.user):
+            context['items_menu'].append({"titre": "Doublons", "icone": "clone", "items": [
+                Item("Fusionner avec une autre famille", "famille_fusion", "compress", "a", "Regrouper dans cette fiche une famille saisie en double."),
+                Item("Fusionner un individu en double", "famille_fusion_individus", "user-times", "a", "Regrouper deux fiches individuelles d'une même personne."),
+            ]})
 
         # Légende : seules les natures utilisées sur la page sont affichées
         natures_utilisees = {item["nature"] for rubrique in context['items_menu'] for item in rubrique["items"]}

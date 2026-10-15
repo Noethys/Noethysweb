@@ -1,0 +1,39 @@
+{# Panneau des doublons possibles affiché pendant la saisie d'un nouvel individu #}
+{% if doublons %}
+    <div class="doublons-panneau" data-tres-probable="{% if nbre_tres_probables %}1{% else %}0{% endif %}" role="region" aria-live="polite" aria-label="Individus existants ressemblant à la saisie">
+        <div class="doublons-entete">
+            <i class="fa fa-exclamation-triangle margin-r-5" aria-hidden="true"></i>
+            {% if doublons|length == 1 %}Un individu existant ressemble{% else %}{{ doublons|length }} individus existants ressemblent{% endif %} à votre saisie
+        </div>
+        <ul class="list-unstyled mb-0">
+            {% for doublon in doublons %}
+                <li class="doublons-ligne">
+                    <span class="badge doublons-niveau-{{ doublon.niveau }}" title="{{ doublon.motif }}">{{ doublon.label_niveau }}</span>
+                    <span class="doublons-identite">
+                        <strong>{{ doublon.individu.Get_nom }}</strong>
+                        <small class="text-muted">
+                            ID{{ doublon.individu.pk }}
+                            {% if doublon.individu.nom_jfille %} · né(e) {{ doublon.individu.nom_jfille }}{% endif %}
+                            {% if doublon.individu.date_naiss %} · né(e) le {{ doublon.individu.date_naiss|date:"d/m/Y" }} ({{ doublon.age }} an{{ doublon.age|pluralize }}){% endif %}
+                            {% for famille in doublon.familles %}
+                                · <a href="{% url 'famille_resume' idfamille=famille.pk %}" target="_blank" title="Ouvrir la fiche famille dans un nouvel onglet">famille {{ famille.nom|default:"sans nom" }}</a>
+                            {% empty %} · sans famille{% endfor %}
+                        </small>
+                    </span>
+                    <span class="doublons-actions">
+                        {% if doublon.deja_membre %}
+                            <span class="badge badge-danger">Déjà membre de cette famille</span>
+                        {% else %}
+                            <button type="button" class="btn btn-xs btn-default bouton_rattacher_doublon" data-id="{{ doublon.individu.pk }}" data-label="{{ doublon.individu.Get_nom }} (ID{{ doublon.individu.pk }})">
+                                <i class="fa fa-link margin-r-5" aria-hidden="true"></i>Rattacher cet individu
+                            </button>
+                        {% endif %}
+                        {% with famille=doublon.familles|first %}{% if famille %}
+                            <a class="btn btn-xs btn-default" href="{% url 'individu_resume' idfamille=famille.pk idindividu=doublon.individu.pk %}" target="_blank">Voir la fiche</a>
+                        {% endif %}{% endwith %}
+                    </span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

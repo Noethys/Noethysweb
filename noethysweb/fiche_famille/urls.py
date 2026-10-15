@@ -5,7 +5,7 @@
 
 from django.urls import include, path
 from core.decorators import secure_ajax
-from fiche_famille.views import familles_transfert
+from fiche_famille.views import familles_transfert, famille_fusion
 from fiche_famille.views import famille, famille_questionnaire, famille_notes, famille_ajouter, famille_pieces, famille_cotisations, famille_caisse, famille_aides, famille_quotients, famille_divers, \
                             famille_prestations, famille_reglements, famille_consommations, famille_factures, famille_voir_facture, famille_voir_cotisation, famille_abo_factures_email, \
                             famille_abo_recus_email, famille_abo_depots_email, famille_outils, famille_attestations, famille_devis, famille_historique, famille_export_xml, famille_sms, \
@@ -153,6 +153,10 @@ urlpatterns = [
 
     # Outils
     path('individus/familles/outils/<int:idfamille>', famille_outils.View.as_view(), name='famille_outils'),
+    path('individus/familles/fusion/<int:idfamille>', famille_fusion.Fusion_familles.as_view(), name='famille_fusion'),
+    path('individus/familles/fusion_individus/<int:idfamille>', famille_fusion.Fusion_individus.as_view(), name='famille_fusion_individus'),
+    path('individus/familles/fusion/rechercher_familles', secure_ajax(famille_fusion.Rechercher_familles), name='ajax_fusion_rechercher_familles'),
+    path('individus/familles/fusion/rechercher_individus', secure_ajax(famille_fusion.Rechercher_individus), name='ajax_fusion_rechercher_individus'),
     path('individus/familles/historique/<int:idfamille>', famille_historique.Liste.as_view(), name='famille_historique'),
     path('individus/familles/export_xml/<int:idfamille>', famille_export_xml.View.as_view(), name='famille_export_xml'),
     path('individus/familles/edition_renseignements/<int:idfamille>', famille_edition_renseignements.View.as_view(), name='famille_edition_renseignements'),

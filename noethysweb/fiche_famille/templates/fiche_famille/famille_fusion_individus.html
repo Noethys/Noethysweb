@@ -1,0 +1,166 @@
+{% extends "fiche_famille/famille.html" %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+    {% include "fiche_famille/famille_fusion_styles.html" %}
+{% endblock styles %}
+
+{% block detail_famille %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+
+                {# ------------------------------- Étape 1 : sélection ------------------------------- #}
+                {% if etape == "selection" %}
+                    {{ form.media }}
+
+                    {% if suggestions %}
+                        <div class="fusion-titre">Doublons probables</div>
+                        <table class="table table-sm table-bordered fusion-table mb-3">
+                            <thead><tr><th>Membre de la famille</th><th>Doublon probable</th><th>Famille du doublon</th><th style="width: 130px;"></th></tr></thead>
+                            <tbody>
+                                {% for suggestion in suggestions %}
+                                    <tr>
+                                        <td>{{ suggestion.garde.Get_nom }} <small class="text-muted">ID{{ suggestion.garde.pk }}{% if suggestion.garde.date_naiss %} — {{ suggestion.garde.date_naiss|date:"d/m/Y" }}{% endif %}</small></td>
+                                        <td>
+                                            {{ suggestion.doublon.Get_nom }} <small class="text-muted">ID{{ suggestion.doublon.pk }}{% if suggestion.doublon.date_naiss %} — {{ suggestion.doublon.date_naiss|date:"d/m/Y" }}{% endif %}</small>
+                                            {% if suggestion.score == 2 %}<span class="badge badge-danger ml-1">Certain</span>{% else %}<span class="badge badge-warning ml-1">Probable</span>{% endif %}
+                                        </td>
+                                        <td>
+                                            {% if suggestion.famille %}
+                                                {% if suggestion.famille.pk == famille.pk %}Cette famille
+                                                {% else %}<a href="{% url 'famille_resume' idfamille=suggestion.famille.pk %}" target="_blank">{{ suggestion.famille.nom|default:"Famille sans nom" }} (ID{{ suggestion.famille.pk }})</a>{% endif %}
+                                            {% else %}<span class="text-muted">Aucune</span>{% endif %}
+                                        </td>
+                                        <td><a class="btn btn-xs btn-default" href="?garde={{ suggestion.garde.pk }}&doublon={{ suggestion.doublon.pk }}"><i class="fa fa-search margin-r-5"></i>Analyser</a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+
+                    <div class="fusion-titre">Sélectionner les individus</div>
+                    <form method="get" style="max-width: 600px;" id="form_selection" novalidate>
+                        <div class="form-group" role="radiogroup" aria-labelledby="label_garde" aria-describedby="erreur_garde">
+                            <div id="label_garde" class="font-weight-bold mb-1">1. Cochez la fiche à conserver</div>
+                            {% for membre in membres %}
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input" name="garde" id="garde_{{ membre.pk }}" value="{{ membre.pk }}">
+                                    <label class="custom-control-label" for="garde_{{ membre.pk }}">{{ membre.Get_nom }} <small class="text-muted">ID{{ membre.pk }}{% if membre.date_naiss %} — né(e) le {{ membre.date_naiss|date:"d/m/Y" }}{% endif %}</small></label>
+                                </div>
+                            {% endfor %}
+                            <div id="erreur_garde" class="text-danger small mt-1 fusion-masque" role="alert"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.doublon.id_for_label }}">2. Recherchez sa fiche en double (dans cette famille ou dans une autre)</label>
+                            {{ form.doublon }}
+                            <div id="erreur_doublon" class="text-danger small mt-1 fusion-masque" role="alert"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fa fa-search margin-r-5"></i>Analyser la fusion</button>
+                        <a class="btn btn-danger" href="{% url 'famille_outils' idfamille=famille.pk %}"><i class="fa fa-ban margin-r-5"></i>Annuler</a>
+                    </form>
+                    <script>
+                        $(function() {
+                            function erreur(id, texte) {
+                                $(id).text(texte || "").toggle(!!texte);
+                            }
+                            $("input[name='garde']").on("change", function() {erreur("#erreur_garde");});
+                            $("#{{ form.doublon.id_for_label }}").on("change", function() {erreur("#erreur_doublon");});
+                            $("#form_selection").on("submit", function(e) {
+                                var garde = $("input[name='garde']:checked").val();
+                                var doublon = $("#{{ form.doublon.id_for_label }}").val();
+                                erreur("#erreur_garde", garde ? "" : "Cochez la fiche à conserver.");
+                                erreur("#erreur_doublon", !doublon ? "Recherchez puis sélectionnez la fiche en double." : (doublon === garde ? "La fiche en double doit être différente de la fiche à conserver." : ""));
+                                if (!garde || !doublon || doublon === garde) {e.preventDefault(); return false;}
+                            });
+                        });
+                    </script>
+                {% endif %}
+
+                {# ------------------------------- Étape 2 : analyse ------------------------------- #}
+                {% if etape == "analyse" %}
+                    <form method="post" id="form_fusion">
+                        {% csrf_token %}
+                        <input type="hidden" name="individu_garde" value="{{ individu_garde.pk }}">
+                        <input type="hidden" name="individu_doublon" value="{{ individu_doublon.pk }}">
+
+                        <div class="fusion-fiches">
+                            <div class="fusion-fiche absorbee">
+                                <div class="fusion-fiche-etat"><i class="fa fa-trash-o margin-r-5"></i>Fiche absorbée</div>
+                                <div class="fusion-fiche-nom">{{ individu_doublon.Get_nom }} <small class="text-muted">ID{{ individu_doublon.pk }}</small></div>
+                                <div class="text-muted"><small>{% if individu_doublon.date_naiss %}Né(e) le {{ individu_doublon.date_naiss|date:"d/m/Y" }} — {% endif %}créée le {{ individu_doublon.date_creation|date:"d/m/Y" }}</small></div>
+                            </div>
+                            <div class="fusion-fleche"><i class="fa fa-arrow-right" aria-hidden="true"></i></div>
+                            <div class="fusion-fiche conservee">
+                                <div class="fusion-fiche-etat"><i class="fa fa-check margin-r-5"></i>Fiche conservée</div>
+                                <div class="fusion-fiche-nom">{{ individu_garde.Get_nom }} <small class="text-muted">ID{{ individu_garde.pk }}</small></div>
+                                <div class="text-muted"><small>{% if individu_garde.date_naiss %}Né(e) le {{ individu_garde.date_naiss|date:"d/m/Y" }} — {% endif %}créée le {{ individu_garde.date_creation|date:"d/m/Y" }}</small></div>
+                            </div>
+                        </div>
+                        {% if inversion_possible %}
+                            <p class="mt-2 mb-0"><small><a href="?garde={{ individu_doublon.pk }}&doublon={{ individu_garde.pk }}"><i class="fa fa-exchange margin-r-5"></i>Inverser : conserver plutôt la fiche ID{{ individu_doublon.pk }}</a></small></p>
+                        {% endif %}
+
+                        <div class="fusion-titre">Données transférées</div>
+                        <table class="table table-sm table-bordered fusion-table" style="max-width: 600px;">
+                            <thead><tr><th></th><th class="text-right">Fiche absorbée</th><th class="text-right">Fiche conservée</th></tr></thead>
+                            <tbody>
+                                {% for label, nbre_doublon, nbre_garde in stats %}
+                                    <tr><td>{{ label }}</td><td class="text-right {% if nbre_doublon %}font-weight-bold{% endif %}">{{ nbre_doublon }}</td><td class="text-right">{{ nbre_garde }}</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <p class="text-muted mt-1 mb-0"><small>Toutes les autres données (pièces, scolarité, assurances, contacts, transports, régimes alimentaires, historique...) sont également transférées. Les vaccins, informations et étapes de scolarité identiques ne sont conservés qu'une fois.</small></p>
+
+                        {% if familles_doublon %}
+                            <div class="fusion-titre">Familles de la fiche absorbée</div>
+                            <ul class="mb-0">
+                                {% for famille_doublon, deja in familles_doublon %}
+                                    <li>
+                                        <a href="{% url 'famille_resume' idfamille=famille_doublon.pk %}" target="_blank">{{ famille_doublon.nom|default:"Famille sans nom" }} (ID{{ famille_doublon.pk }})</a>
+                                        {% if deja %}<span class="text-muted">— la fiche conservée y est déjà rattachée</span>{% else %}<span class="text-muted">— la fiche conservée y sera rattachée</span>{% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+
+                        {% if inscriptions_fusionnees %}
+                            <div class="fusion-titre">Inscriptions fusionnées</div>
+                            <p class="text-muted"><small>Ces inscriptions portent sur la même activité, dans la même famille et sur des périodes qui se chevauchent : leurs consommations sont regroupées dans l'inscription de la fiche conservée, dont la période est élargie.</small></p>
+                            <ul class="mb-0">
+                                {% for garde, doublon in inscriptions_fusionnees %}
+                                    <li>{{ garde.activite.nom }} : du {{ doublon.date_debut|date:"d/m/Y" }}{% if doublon.date_fin %} au {{ doublon.date_fin|date:"d/m/Y" }}{% endif %} et du {{ garde.date_debut|date:"d/m/Y" }}{% if garde.date_fin %} au {{ garde.date_fin|date:"d/m/Y" }}{% endif %}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+
+                        {% include "fiche_famille/famille_fusion_commun.html" %}
+
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-danger" id="bouton_fusion"><i class="fa fa-compress margin-r-5"></i>Fusionner les individus</button>
+                            <a class="btn btn-default" href="{% url 'famille_fusion_individus' idfamille=famille.pk %}"><i class="fa fa-arrow-left margin-r-5"></i>Choisir d'autres individus</a>
+                        </div>
+                    </form>
+                    <div id="loader_fusion" class="text-primary fusion-masque" style="text-align: center; margin: 40px;">
+                        <h4><i class="fa fa-spinner fa-spin margin-r-5"></i><strong>Fusion en cours, veuillez patienter...</strong></h4>
+                    </div>
+                    <script>
+                        $(function() {
+                            $("#form_fusion").on("submit", function() {
+                                $("#bouton_fusion").prop("disabled", true);
+                                $("#form_fusion").hide();
+                                $("#loader_fusion").show();
+                            });
+                        });
+                    </script>
+                {% endif %}
+
+            {% endblock box_contenu %}
+        {% endembed %}
+    </div>
+{% endblock %}

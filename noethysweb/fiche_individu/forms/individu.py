@@ -12,6 +12,7 @@ from django_select2.forms import ModelSelect2Widget
 from core.utils.utils_commandes import Commandes
 from core.models import Individu, Rattachement, CATEGORIES_RATTACHEMENT
 from core.forms.base import FormulaireBase
+from fiche_famille.utils import utils_doublons
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -20,6 +21,7 @@ class Formulaire(FormulaireBase, ModelForm):
     titulaire = forms.BooleanField(label="Titulaire du dossier", initial=True, required=False)
     nom = forms.CharField(label="Nom*", required=False, help_text="Saisissez le nom de famille en majuscules. Ex : DUPOND.")
     prenom = forms.CharField(label="Prénom*", required=False, help_text="Saisissez le prénom en minuscules avec la première lettre en majuscule. Ex : Kévin.")
+    confirmation_doublon = forms.BooleanField(label="Je confirme qu'il s'agit d'une personne différente des individus signalés ci-dessus", required=False)
     individu = forms.ModelChoiceField(
         label="Individu*", queryset=Individu.objects.all().order_by("nom", "prenom"),
         widget=ModelSelect2Widget(model=Individu, search_fields=["nom__icontains", "prenom__icontains"], attrs={"data-minimum-input-length": 0}), required=False,
@@ -89,6 +91,8 @@ class Formulaire(FormulaireBase, ModelForm):
                     Field("civilite"),
                     Field('nom'),
                     Field('prenom'),
+                    HTML('<div id="individus_suggestions"></div>'),
+                    Div(Field('confirmation_doublon'), id="div_confirmation_doublon", css_class="doublons-confirmation"),
                     id="saisie_identite",
                 ),
                 Div(
@@ -131,6 +135,21 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.add_error("prenom", "Vous devez saisir un prénom")
                 return
 
+            # Doublon très probable : confirmation obligatoire
+            doublons = utils_doublons.Rechercher_doublons(nom=self.cleaned_data["nom"], prenom=self.cleaned_data["prenom"],
+                                                          sans_prenom=self.cleaned_data["civilite"] >= 6, idfamille=self.idfamille)
+            tres_probables = ["%s (ID%d)" % (doublon["individu"].Get_nom(), doublon["individu"].pk) for doublon in doublons if doublon["niveau"] == 3]
+            membres = ["%s (ID%d)" % (doublon["individu"].Get_nom(), doublon["individu"].pk) for doublon in doublons if doublon["niveau"] == 3 and doublon["deja_membre"]]
+            if tres_probables:
+                if not self.cleaned_data.get("confirmation_doublon"):
+                    if membres:
+                        message = "%s fait déjà partie de cette famille. Cochez cette case uniquement s'il s'agit d'une autre personne." % ", ".join(membres)
+                    else:
+                        message = "Un individu très ressemblant existe déjà : %s. Rattachez-le plutôt à la famille ou, s'il s'agit d'une autre personne, cochez cette case pour confirmer la création." % ", ".join(tres_probables)
+                    self.add_error("confirmation_doublon", message)
+                    return
+                self.doublons_ignores = tres_probables
+
         # Action RATTACHER
         if self.cleaned_data["action"] == "RATTACHER":
 
@@ -151,10 +170,19 @@ class Formulaire(FormulaireBase, ModelForm):
 
 EXTRA_SCRIPT = """
 
-<div id="individus_suggestions"></div>
-
-
 <style>
+
+.doublons-panneau { border: 1px solid #f0ad4e; border-radius: 4px; margin: 0 0 15px 0; }
+.doublons-entete { background-color: #fcf8e3; color: #8a6d3b; padding: 6px 10px; font-weight: bold; }
+.dark-mode .doublons-entete { background-color: #5c4a1e; color: #fff3cd; }
+.doublons-ligne { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 6px 10px; border-top: 1px solid #eee; }
+.dark-mode .doublons-ligne { border-top-color: #555; }
+.doublons-identite { flex: 1; min-width: 220px; }
+.doublons-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.doublons-niveau-3 { background-color: #dc3545; color: #fff; }
+.doublons-niveau-2 { background-color: #ffc107; color: #212529; }
+.doublons-niveau-1 { background-color: #e9ecef; color: #495057; }
+.doublons-confirmation { display: none; border: 1px solid #dc3545; border-radius: 4px; padding: 8px 10px 0 10px; margin-bottom: 15px; }
 
 .radio-inline {
     padding-left: 0px;
@@ -214,23 +242,40 @@ $(document).ready(function() {
 });
 
 
-// Nom
-function On_change_nom() {
-    nom = $('#id_nom').val();
-    prenom = $('#id_prenom').val();
-    $.ajax({
+// Recherche des doublons (temporisée, la requête précédente est annulée)
+var requete_doublons = null, minuteur_doublons = null;
+function Rechercher_doublons() {
+    if (requete_doublons) {requete_doublons.abort();}
+    requete_doublons = $.ajax({
         type: "POST",
         url: "{% url 'ajax_get_individus_existants' %}",
-        data: {'nom': nom, 'prenom': prenom},
+        data: {'nom': $('#id_nom').val(), 'prenom': $('#id_prenom').val(), 'civilite': $('#id_civilite').val(), 'idfamille': $('input[name=idfamille]').val()},
         success: function(data) {
             $("#individus_suggestions").html(data);
+            var tres_probable = $("#individus_suggestions .doublons-panneau").data("tres-probable") == 1;
+            $("#div_confirmation_doublon").toggle(tres_probable || $("#div_confirmation_doublon .invalid-feedback, #div_confirmation_doublon .is-invalid").length > 0);
         },
     });
 }
+function On_change_nom(e) {
+    // Une nouvelle saisie annule une confirmation donnée pour un autre nom
+    if (e) {$("#id_confirmation_doublon").prop("checked", false);}
+    clearTimeout(minuteur_doublons);
+    minuteur_doublons = setTimeout(Rechercher_doublons, 300);
+}
 $(document).ready(function() {
-    $('#id_nom').on('input', On_change_nom);
-    $('#id_prenom').on('input', On_change_nom);
-    On_change_nom.call($('#id_nom').get(0));
+    $('#id_nom, #id_prenom').on('input', On_change_nom);
+    $('#id_civilite').on('change', On_change_nom);
+    if ($("#div_confirmation_doublon .invalid-feedback, #div_confirmation_doublon .is-invalid").length) {$("#div_confirmation_doublon").show();}
+    Rechercher_doublons();
+
+    // Rattacher directement un individu existant proposé
+    $(document).on("click", ".bouton_rattacher_doublon", function() {
+        $("input[type=radio][name=action][value=RATTACHER]").prop("checked", true).trigger("change");
+        var option = new Option($(this).data("label"), $(this).data("id"), true, true);
+        $("#id_individu").empty().append(option).trigger("change");
+        $("#id_individu").closest(".form-group").get(0).scrollIntoView({behavior: "smooth", block: "center"});
+    });
 });
 
 

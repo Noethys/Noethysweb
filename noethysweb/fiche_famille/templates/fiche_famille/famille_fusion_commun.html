@@ -1,0 +1,44 @@
+{# Blocs communs aux pages de fusion : avertissements, comparaison des champs, confirmation #}
+
+{% if avertissements %}
+    <div class="alert alert-warning mt-3 mb-0">
+        <strong><i class="fa fa-exclamation-triangle margin-r-5"></i>Points à vérifier</strong>
+        <ul class="mb-0 pl-3">
+            {% for avertissement in avertissements %}<li>{{ avertissement }}</li>{% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+{% if comparaison %}
+    <div class="fusion-titre">Informations de la fiche</div>
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered fusion-table">
+            <thead><tr><th>Champ</th><th>Fiche absorbée</th><th>Fiche conservée</th><th style="width: 160px;">Après la fusion</th></tr></thead>
+            <tbody>
+                {% for ligne in comparaison %}
+                    <tr>
+                        <td>{{ ligne.label }}</td>
+                        <td class="fusion-valeur">{{ ligne.absorbe }}</td>
+                        <td class="fusion-valeur">{{ ligne.conserve|default:"<span class='text-muted'>Vide</span>" }}</td>
+                        <td>
+                            {% if ligne.action == "completer" %}<span class="badge badge-success">Complété</span>
+                            {% elif ligne.action == "concatener" %}<span class="badge badge-info">Textes regroupés</span>
+                            {% else %}<span class="badge badge-secondary">Valeur conservée</span>{% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p class="text-muted mt-1 mb-0"><small>Seuls les champs renseignés dans la fiche absorbée sont affichés. Une valeur déjà présente dans la fiche conservée n'est jamais remplacée.</small></p>
+{% endif %}
+
+<div class="fusion-confirmation">
+    <div class="custom-control custom-checkbox">
+        <input type="checkbox" class="custom-control-input" id="id_confirmation" name="confirmation" value="1" required>
+        <label class="custom-control-label" for="id_confirmation">
+            J'ai vérifié les informations ci-dessus et je comprends que cette opération est <strong>irréversible</strong>.
+        </label>
+    </div>
+    <p class="text-muted mb-0 mt-2"><small><i class="fa fa-info-circle margin-r-5"></i>Pensez à effectuer une sauvegarde de la base avant une fusion importante. En cas d'erreur pendant le traitement, aucune donnée n'est modifiée.</small></p>
+</div>

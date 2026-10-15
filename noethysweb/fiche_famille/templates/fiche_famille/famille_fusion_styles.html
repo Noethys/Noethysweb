@@ -1,0 +1,27 @@
+<style>
+    .fusion-titre {
+        padding: 5px 8px; margin: 20px 0 10px 0; font-size: 12px; color: #333;
+        background-color: #f1f0f0; text-transform: uppercase;
+    }
+    .dark-mode .fusion-titre { background-color: #6c6c6c; color: #fff; }
+    .fusion-fiches { display: flex; align-items: stretch; gap: 10px; }
+    .fusion-fiche { flex: 1; min-width: 0; border: solid 1px #dee2e6; border-top-width: 3px; border-radius: 4px; padding: 10px 12px; }
+    .fusion-fiche.absorbee { border-top-color: #dc3545; }
+    .fusion-fiche.conservee { border-top-color: #28a745; }
+    .fusion-fiche-etat { font-size: 12px; text-transform: uppercase; font-weight: bold; }
+    .fusion-fiche.absorbee .fusion-fiche-etat { color: #dc3545; }
+    .fusion-fiche.conservee .fusion-fiche-etat { color: #28a745; }
+    .fusion-fiche-nom { font-size: 16px; font-weight: bold; margin: 4px 0; }
+    .fusion-fleche { display: flex; align-items: center; font-size: 22px; color: #6c757d; }
+    .fusion-table { margin-bottom: 0; }
+    .fusion-table th { background-color: #f1f1f1; }
+    .dark-mode .fusion-table th { background-color: #555; }
+    .fusion-table td, .fusion-table th { vertical-align: middle !important; padding: 5px 8px; }
+    .fusion-valeur { max-width: 260px; white-space: pre-line; word-break: break-word; }
+    .fusion-confirmation { margin-top: 20px; padding: 12px; border: solid 1px #dc3545; border-radius: 4px; }
+    .fusion-masque { display: none; }
+    @media (max-width: 767px) {
+        .fusion-fiches { flex-direction: column; }
+        .fusion-fleche { justify-content: center; transform: rotate(90deg); }
+    }
+</style>
