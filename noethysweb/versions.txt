@@ -1,3 +1,17 @@
+Version 1.3.5.8 (15/10/2026) :
+
+Nouveautés
+- Impression des factures : ajout du filtre Prélèvement actif
+- Menu outils > Calendrier annuel : ajout de l'impression d'un calendrier A4
+- Fiche famille > Rubrique Outils : ajout de la fusion des fiches en doublon
+Améliorations
+- Widget suivi des consommations : ajout de l'heure de saisie dans la page de détail des réservations
+- Grille des consommations : relooking et correction du positionnement du menu contextuel
+- Saisie d'une fiche individuelle : amélioration de la détection des doublons
+Corrections
+- Payzen : correction sur la double notification
+- Saisie d'une adhésion : correction sur l'incrémentation du numéro
+
 Version 1.3.5.7 (14/10/2026) :
 
 Nouveautés
