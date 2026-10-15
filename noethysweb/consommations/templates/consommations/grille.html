@@ -37,25 +37,37 @@
         {% endif %}
 
         {# Menu contextuel des consommations #}
-        <div id="contextMenu" class="dropdown clearfix">
-            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
+        <div id="contextMenu" role="menu" aria-labelledby="ctx_titre">
+            <div class="ctx_entete">
+                <b id="ctx_titre"></b>
+                <span id="ctx_date"></span>
+            </div>
+            <div class="ctx_corps">
+                <div class="ctx_section">État</div>
+                <div class="ctx_choix">
+                    <button type="button" role="menuitemradio" class="ctx_action ctx_etat" data-etat="reservation"><span class="ctx_pastille reservation"></span>Réservation</button>
+                    <button type="button" role="menuitemradio" class="ctx_action ctx_etat" data-etat="attente"><span class="ctx_pastille attente"></span>Attente</button>
+                    <button type="button" role="menuitemradio" class="ctx_action ctx_etat" data-etat="refus"><span class="ctx_pastille refus"></span>Refus</button>
+                    <button type="button" role="menuitemradio" class="ctx_action ctx_etat" data-etat="demande"><span class="ctx_pastille demande"></span>Demande</button>
+                </div>
+                <div class="ctx_section">Pointage</div>
+                <div class="ctx_choix">
+                    <button type="button" role="menuitemradio" class="ctx_action ctx_etat" data-etat="present"><span class="ctx_pastille present"></span>Présent</button>
+                    <button type="button" role="menuitemradio" class="ctx_action ctx_etat" data-etat="absentj" title="Absence justifiée"><span class="ctx_pastille absentj"></span>Abs. justifiée</button>
+                    <button type="button" role="menuitemradio" class="ctx_action ctx_etat" data-etat="absenti" title="Absence injustifiée"><span class="ctx_pastille absenti"></span>Abs. injustifiée</button>
+                </div>
+                <div id="ctx_bloc_groupes">
+                    <div class="ctx_section">Groupe</div>
+                    <div class="ctx_groupes"></div>
+                </div>
+            </div>
+            <div class="ctx_actions">
                 {% if data.tarifs_credits_exists %}
-                    <li class="dropdown-item"><a tabindex="-1" href="#" id="contextmenu_forfait">Appliquer un forfait crédit</a></li>
-                    <li class="dropdown-divider"></li>
+                    <button type="button" role="menuitem" class="ctx_action" data-action="forfait" title="Appliquer un forfait crédit"><i class="fa fa-ticket"></i>Forfait</button>
                 {% endif %}
-                <li class="dropdown-item"><a tabindex="-1" href="#" id="contextmenu_modifier">Modifier</a></li>
-                <li class="dropdown-item"><a tabindex="-1" href="#" id="contextmenu_supprimer">Supprimer</a></li>
-                <li class="dropdown-divider"></li>
-                <li class="dropdown-item"><a tabindex="-1" href="#" data-etat="reservation" id="contextmenu_reservation">Réservation</a></li>
-                <li class="dropdown-item"><a tabindex="-1" href="#" data-etat="attente" id="contextmenu_attente">Attente</a></li>
-                <li class="dropdown-item"><a tabindex="-1" href="#" data-etat="refus" id="contextmenu_refus">Refus</a></li>
-                <li class="dropdown-item"><a tabindex="-1" href="#" data-etat="demande" id="contextmenu_demande">Demande</a></li>
-                <li class="dropdown-divider"></li>
-                <li class="dropdown-item"><a tabindex="-1" href="#" data-etat="present" id="contextmenu_present">Présent</a></li>
-                <li class="dropdown-item"><a tabindex="-1" href="#" data-etat="absentj" id="contextmenu_absentj">Absence justifiée</a></li>
-                <li class="dropdown-item"><a tabindex="-1" href="#" data-etat="absenti" id="contextmenu_absenti">Absence injustifiée</a></li>
-                <li class="dropdown-divider"></li>
-            </ul>
+                <button type="button" role="menuitem" class="ctx_action" data-action="modifier"><i class="fa fa-pencil"></i>Modifier</button>
+                <button type="button" role="menuitem" class="ctx_action ctx_danger" data-action="supprimer"><i class="fa fa-trash-o"></i>Supprimer</button>
+            </div>
         </div>
 
     </div>

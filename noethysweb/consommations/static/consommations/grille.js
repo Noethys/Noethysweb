@@ -1308,29 +1308,59 @@ $(function () {
     };
 
     // Menu contextuel
+    function afficher_menu_contextuel(x, y) {
+        var menu = $("#contextMenu");
+        var liste = menu.children(".ctx_corps");
+        var marge = 5;
+        // Mesure le menu dans sa taille naturelle, sans l'afficher
+        liste.css({"max-height": "", "overflow-y": ""});
+        menu.css({display: "block", visibility: "hidden", left: 0, top: 0});
+        var largeur = menu.outerWidth(true);
+        var hauteur = menu.outerHeight(true);
+        var largeur_fenetre = window.innerWidth;
+        var hauteur_fenetre = window.innerHeight;
+
+        // Si le menu dépasse en bas, il s'ouvre au-dessus du curseur
+        if (y + hauteur > hauteur_fenetre - marge) {
+            y = (y - hauteur >= marge) ? y - hauteur : Math.max(marge, hauteur_fenetre - hauteur - marge);
+        }
+        // Si le menu dépasse à droite, il s'ouvre à gauche du curseur
+        if (x + largeur > largeur_fenetre - marge) {
+            x = Math.max(marge, x - largeur);
+        }
+        // Si le menu est plus haut que la fenêtre, il devient défilant
+        if (hauteur > hauteur_fenetre - 2 * marge) {
+            y = marge;
+            liste.css({"max-height": (hauteur_fenetre - 2 * marge - (hauteur - liste.outerHeight())) + "px", "overflow-y": "auto"});
+        }
+        menu.css({left: x, top: y, visibility: "visible"});
+    };
+
     $(document).on('contextmenu', ".ouvert", function(e) {
         case_contextmenu = dict_cases[$(this).attr('id')];
         if (!$("#contextMenu").is(':visible') && case_contextmenu.has_conso()) {
-            // Rajoute les groupes à la fin du menu
-            $("#contextMenu .ctx_groupe").remove();
+            var conso = case_contextmenu.consommations[0];
+
+            // En-tête : unité et date
+            var date = case_contextmenu.get_date_fr();
+            $("#ctx_titre").text(case_contextmenu.unite in dict_unites ? dict_unites[case_contextmenu.unite].nom : "");
+            $("#ctx_date").text(date.charAt(0).toUpperCase() + date.slice(1));
+
+            // Groupes de l'activité
+            var conteneur = $("#contextMenu .ctx_groupes").empty();
             liste_groupes.forEach(function(groupe) {
                 if (groupe.fields.activite === case_contextmenu.activite) {
-                    $("#contextMenu ul").append("<li><a tabindex='-1' href='#' class='dropdown-item ctx_groupe' data-groupe=" + groupe.pk + ">" + groupe.fields.nom + "</a></li>");
+                    conteneur.append($("<button type='button' role='menuitemradio' class='ctx_action ctx_groupe'>").attr({"data-groupe": groupe.pk, "title": groupe.fields.nom}).text(groupe.fields.nom));
                 };
             });
+            $("#ctx_bloc_groupes").toggle(conteneur.children().length > 0);
 
             // Met en évidence l'état et le groupe de la conso
-            $("#contextMenu a").css('font-weight', 'normal');
-            $("#contextMenu a").removeClass("menu-checked");
-            $("#contextMenu a[data-etat='" + case_contextmenu.consommations[0].etat + "']").css('font-weight', 'bold').addClass("menu-checked");
-            $("#contextMenu a[data-groupe='" + case_contextmenu.consommations[0].groupe + "']").css('font-weight', 'bold').addClass("menu-checked");
+            $("#contextMenu .ctx_action").removeClass("ctx_actif").attr("aria-checked", null);
+            $("#contextMenu .ctx_etat[data-etat='" + conso.etat + "'], #contextMenu .ctx_groupe[data-groupe='" + conso.groupe + "']").addClass("ctx_actif").attr("aria-checked", "true");
 
-            // Affiche le menu
-            $("#contextMenu").css({
-                display: "block",
-                left: e.clientX,
-                top: e.clientY
-            });
+            // Affiche le menu en le gardant dans la fenêtre
+            afficher_menu_contextuel(e.clientX, e.clientY);
         } else {
             $("#contextMenu").css({display: "none"});
         }
@@ -1339,20 +1369,20 @@ $(function () {
     $('html').click(function() {
          $("#contextMenu").hide();
     });
-    $(document).on('click', "#contextMenu li a", function(e) {
-        var id = $(this).attr('id');
-        if (id === "contextmenu_forfait") {case_contextmenu.appliquer_forfait()};
-        if (id === "contextmenu_modifier") {case_contextmenu.detail("modifier")};
-        if (id === "contextmenu_supprimer") {case_contextmenu.supprimer()};
-        if (id === "contextmenu_reservation") {case_contextmenu.set_etat("reservation")};
-        if (id === "contextmenu_attente") {case_contextmenu.set_etat("attente")};
-        if (id === "contextmenu_refus") {case_contextmenu.set_etat("refus")};
-        if (id === "contextmenu_present") {case_contextmenu.set_etat("present")};
-        if (id === "contextmenu_absentj") {case_contextmenu.set_etat("absentj")};
-        if (id === "contextmenu_absenti") {case_contextmenu.set_etat("absenti")};
-        if (id === "contextmenu_demande") {case_contextmenu.set_etat("demande")};
-        if ($(this).hasClass("ctx_groupe")) {case_contextmenu.set_groupe(this.dataset.groupe)};
+    $(document).on('keydown', function(e) {
+        if (e.key === "Escape") {$("#contextMenu").hide()};
+    });
+    $(document).on('contextmenu', "#contextMenu", function() {
+        return false;
+    });
+    $(document).on('click', "#contextMenu .ctx_action", function(e) {
+        var action = this.dataset.action;
         $("#contextMenu").hide();
+        if (action === "forfait") {case_contextmenu.appliquer_forfait()};
+        if (action === "modifier") {case_contextmenu.detail("modifier")};
+        if (action === "supprimer") {case_contextmenu.supprimer()};
+        if (this.dataset.etat) {case_contextmenu.set_etat(this.dataset.etat)};
+        if (this.dataset.groupe) {case_contextmenu.set_groupe(this.dataset.groupe)};
         return false;
     });
 
