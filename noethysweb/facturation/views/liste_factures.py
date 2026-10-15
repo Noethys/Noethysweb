@@ -29,7 +29,8 @@ class Liste(Page, crud.Liste):
     model = Facture
 
     def get_queryset(self):
-        return Facture.objects.select_related('famille', 'lot', 'prefixe', 'regie').filter(self.Get_filtres("Q"))
+        # distinct() : une famille avec plusieurs mandats actifs ne doit pas dupliquer ses factures
+        return Facture.objects.select_related('famille', 'lot', 'prefixe', 'regie').filter(self.Get_filtres("Q")).distinct()
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
