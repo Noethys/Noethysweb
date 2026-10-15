@@ -23,7 +23,10 @@
         {% block box_titre %}{{ box_titre }}{% endblock %}
         {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
         {% block box_contenu %}
-            <div class="mt-4">
+            <div class="mt-3">
+                <button type="button" class="btn btn-primary" id="bouton_imprimer_calendrier" title="Imprimer un calendrier annuel au format A4 paysage"><i class="fa fa-print margin-r-5"></i> Imprimer</button>
+            </div>
+            <div class="mt-2">
                 <div id="calendar"></div>
                 <script>
                     let calendar = new Calendar('#calendar', {
@@ -59,5 +62,89 @@
         {% endblock %}
 
     {% endembed %}
+
+    {# Paramètres de l'impression #}
+    <div class="modal fade" id="modal_imprimer_calendrier" tabindex="-1" role="dialog" aria-labelledby="titre_imprimer_calendrier">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-lightblue">
+                    <h5 class="modal-title" id="titre_imprimer_calendrier"><strong><i class="fa fa-print margin-r-5"></i> Imprimer le calendrier annuel</strong></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Période</label>
+                        <div class="custom-control custom-radio">
+                            <input class="custom-control-input" type="radio" id="type_annee_scolaire" name="type_annee" value="scolaire" checked>
+                            <label class="custom-control-label font-weight-normal" for="type_annee_scolaire">Année scolaire (septembre à août)</label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <input class="custom-control-input" type="radio" id="type_annee_civile" name="type_annee" value="civile">
+                            <label class="custom-control-label font-weight-normal" for="type_annee_civile">Année civile (janvier à décembre)</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="annee_impression">Année</label>
+                        <select class="form-control" id="annee_impression"></select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="bouton_valider_impression"><i class="fa fa-print margin-r-5"></i> Imprimer</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban margin-r-5"></i> Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'core/modal_pdf.html' %}
+
+    <script>
+        var annees_impression = {{ annees_impression|safe }};
+
+        function maj_annees_impression(annee_selection) {
+            var type_annee = $("input[name='type_annee']:checked").val();
+            var annees = annees_impression.slice();
+            if (annees.indexOf(annee_selection) === -1) {annees.push(annee_selection); annees.sort();}
+            var select = $("#annee_impression").empty();
+            $.each(annees, function(index, annee) {
+                var label = type_annee === "scolaire" ? annee + "-" + (annee + 1) : String(annee);
+                select.append($("<option>", {value: annee, text: label, selected: annee === annee_selection}));
+            });
+        };
+
+        $("input[name='type_annee']").on("change", function() {
+            var type_annee = $("input[name='type_annee']:checked").val();
+            maj_annees_impression(type_annee === "scolaire" ? {{ annee_scolaire_courante }} : calendar.getYear());
+        });
+
+        $("#bouton_imprimer_calendrier").on("click", function() {
+            $("input[name='type_annee']").trigger("change");
+            $("#modal_imprimer_calendrier").modal("show");
+        });
+
+        $("#bouton_valider_impression").on("click", function() {
+            var bouton = $(this).prop("disabled", true);
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_imprimer_calendrier_annuel' %}",
+                data: {
+                    type_annee: $("input[name='type_annee']:checked").val(),
+                    annee: $("#annee_impression").val(),
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                },
+                dataType: "json",
+                success: function(data) {
+                    $("#modal_imprimer_calendrier").modal("hide");
+                    charge_pdf(data);
+                },
+                error: function(data) {
+                    toastr.error(data.responseJSON ? data.responseJSON.erreur : "Une erreur est survenue lors de la génération du calendrier");
+                },
+                complete: function() {
+                    bouton.prop("disabled", false);
+                }
+            });
+        });
+    </script>
 
 {% endblock %}

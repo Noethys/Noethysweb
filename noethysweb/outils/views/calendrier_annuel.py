@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from core.views.base import CustomView
 from core.models import Vacance, Ferie
+from outils.utils import utils_impression_calendrier_annuel
 
 
 def Get_calendrier_annuel(request):
@@ -32,6 +33,28 @@ def Get_calendrier_annuel(request):
     return JsonResponse(events, safe=False)
 
 
+def Get_annee_scolaire_courante():
+    aujourdhui = datetime.date.today()
+    return aujourdhui.year if aujourdhui.month >= 8 else aujourdhui.year - 1
+
+
+def Imprimer_calendrier_annuel(request):
+    """ Génère le PDF A4 paysage du calendrier annuel """
+    if not request.user.has_perm("core.calendrier_annuel"):
+        return JsonResponse({"erreur": "Vous n'avez pas la permission d'accéder à cette fonctionnalité"}, status=401)
+    type_annee = request.POST.get("type_annee")
+    try:
+        annee = int(request.POST.get("annee"))
+    except (TypeError, ValueError):
+        annee = None
+    if type_annee not in ("scolaire", "civile") or not annee or not 1900 <= annee <= 2200:
+        return JsonResponse({"erreur": "Veuillez sélectionner une année valide"}, status=401)
+    impression = utils_impression_calendrier_annuel.Impression(annee=annee, type_annee=type_annee)
+    if impression.erreurs:
+        return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
+    return JsonResponse({"nom_fichier": impression.Get_nom_fichier()})
+
+
 class View(CustomView, TemplateView):
     template_name = "outils/calendrier_annuel.html"
     menu_code = "calendrier_annuel"
@@ -41,4 +64,8 @@ class View(CustomView, TemplateView):
         context['page_titre'] = "Calendrier annuel"
         context['box_titre'] = ""
         context['box_introduction'] = "Ce calendrier annuel vous permet notamment de vérifier si les périodes de vacances et les jours fériés ont bien été paramétrés."
+        annee_scolaire = Get_annee_scolaire_courante()
+        context['annees_impression'] = list(range(annee_scolaire - 2, annee_scolaire + 4))
+        context['annee_scolaire_courante'] = annee_scolaire
+        context['annee_civile_courante'] = datetime.date.today().year
         return context
