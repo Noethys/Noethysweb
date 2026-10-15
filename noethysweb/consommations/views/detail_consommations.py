@@ -48,7 +48,7 @@ class View(CustomView, TemplateView):
         for individu, liste_conso in dict_conso.items():
             label = individu.Get_nom()
             unites = " + ".join(["%s (%s)" % (conso.unite.nom, conso.get_etat_display()) for conso in liste_conso])
-            date_saisie = str(liste_conso[0].date_saisie.date().strftime("%d/%m/%Y"))
+            date_saisie = liste_conso[0].date_saisie.strftime("%d/%m/%Y %H:%M")
             action = " ".join([
                 "<a type='button' title='Accéder à la fiche famille' class='btn btn-default btn-xs' href='%s'><i class='fa fa-folder-open-o'></i></a>" % reverse("famille_resume", args=[liste_conso[0].inscription.famille_id]),
                 "<a type='button' title='Accéder aux consommations' class='btn btn-default btn-xs' href='%s'><i class='fa fa-fw fa-calendar'></i></a>" % reverse("famille_consommations", args=[liste_conso[0].inscription.famille_id, liste_conso[0].inscription.individu_id]),
