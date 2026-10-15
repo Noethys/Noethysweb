@@ -13,6 +13,13 @@ from decimal import Decimal
 from cotisations.utils import utils_impression_cotisation
 
 
+def Get_prochain_numero():
+    """ Renvoie le numéro à proposer pour une nouvelle carte d'adhésion : numéro de la dernière adhésion saisie avec un numéro, incrémenté de 1.
+    Les adhésions sans carte (numéro vide) sont ignorées, sinon la numérotation repartirait à 1. """
+    derniere_cotisation = Cotisation.objects.exclude(numero__isnull=True).exclude(numero="").order_by("pk").last()
+    return utils_texte.Incrementer(str(derniere_cotisation.numero if derniere_cotisation else 0))
+
+
 class Cotisations():
     def __init__(self):
         """ Récupération de toutes les données de base """

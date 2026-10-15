@@ -14,7 +14,7 @@ from core.models import Famille, Cotisation, TypeCotisation, UniteCotisation, Pr
 from core.utils import utils_dates, utils_texte
 from fiche_famille.forms.famille_cotisations import Formulaire
 from fiche_famille.views.famille import Onglet
-from cotisations.utils import utils_cotisations_manquantes
+from cotisations.utils import utils_cotisations_manquantes, utils_cotisations
 
 
 def On_change_type_cotisation(request):
@@ -56,9 +56,7 @@ def On_change_unite_cotisation(request):
     date_creation_carte = datetime.date.today()
 
     # Numéro
-    derniere_cotisation = Cotisation.objects.last()
-    numero = derniere_cotisation.numero if derniere_cotisation and derniere_cotisation.numero else 0
-    numero = utils_texte.Incrementer(numero)
+    numero = utils_cotisations.Get_prochain_numero()
 
     # Tarif
     montant = 0.0

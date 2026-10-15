@@ -19,6 +19,7 @@ from core.utils.utils_commandes import Commandes
 from core.utils import utils_preferences, utils_texte
 from cotisations.widgets import Selection_beneficiaires_cotisation
 from fiche_famille.widgets import Prestation_cotisation
+from cotisations.utils import utils_cotisations
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -103,9 +104,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.fields["date_facturation"].initial = datetime.date.today()
 
         # Numéro
-        derniere_cotisation = Cotisation.objects.last()
-        numero = derniere_cotisation.numero if derniere_cotisation and derniere_cotisation.numero else 0
-        self.fields["numero"].initial = utils_texte.Incrementer(str(numero))
+        self.fields["numero"].initial = utils_cotisations.Get_prochain_numero()
 
         # Importation
         individu_type = ""
