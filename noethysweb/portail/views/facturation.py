@@ -27,6 +27,54 @@ from core.utils import utils_portail, utils_fichiers, utils_dates, utils_texte, 
 ETATS_PAIEMENTS = {1: "RECEIVED", 2: "ACCEPTED", 3: "PAID", 4: "DENIED", 5: "CANCELLED", 6: "WAITING", 99: "ERROR"}
 
 
+def Montant_en_centimes(montant):
+    """ Convertit un montant décimal en nombre entier de centimes """
+    return int((decimal.Decimal(montant) * 100).quantize(decimal.Decimal("1"), rounding=decimal.ROUND_HALF_UP))
+
+
+def Centimes_en_montant(centimes):
+    """ Convertit un nombre entier de centimes en montant décimal à 2 décimales """
+    return (decimal.Decimal(int(centimes)) / 100).quantize(decimal.Decimal("0.01"))
+
+
+def Calcul_echeances_payzen(vads_payment_config="", montant=decimal.Decimal(0)):
+    """ Renvoie la liste des échéances [(montant, date), ...] d'un paiement Payzen d'après son vads_payment_config.
+        Renvoie None si la configuration est invalide ou incohérente avec le montant total. """
+    montant_total = Montant_en_centimes(montant)
+    aujourdhui = datetime.date.today()
+    vads_payment_config = (vads_payment_config or "SINGLE").replace(">", "=")
+
+    if not vads_payment_config.startswith("MULTI"):
+        return [(Centimes_en_montant(montant_total), aujourdhui)]
+
+    try:
+        if vads_payment_config.startswith("MULTI_EXT:"):
+            # Paiement avancé en plusieurs fois : MULTI_EXT:AAAAMMJJ=montant;AAAAMMJJ=montant;...
+            echeances = [(int(centimes), datetime.datetime.strptime(date, "%Y%m%d").date()) for date, centimes in re.findall(r"([0-9]{8})=([0-9]+)", vads_payment_config)]
+        else:
+            # Paiement simple en plusieurs fois : MULTI:first=xxx;count=n;period=j
+            params = dict(param.split("=", 1) for param in vads_payment_config.split(":", 1)[1].split(";") if "=" in param)
+            premier, nbre, periode = int(params["first"]), int(params["count"]), int(params["period"])
+            if nbre < 1 or premier > montant_total:
+                return None
+            echeances = [(premier, aujourdhui)]
+            if nbre > 1:
+                reste = montant_total - premier
+                montant_echeance = reste // (nbre - 1)
+                for index in range(1, nbre):
+                    # Le reliquat éventuel de l'arrondi est affecté à la dernière échéance
+                    centimes = montant_echeance + (reste - montant_echeance * (nbre - 1) if index == nbre - 1 else 0)
+                    echeances.append((centimes, aujourdhui + datetime.timedelta(days=periode * index)))
+    except (KeyError, ValueError, IndexError):
+        return None
+
+    # Vérifie la cohérence avec le montant total
+    if not echeances or any(centimes <= 0 for centimes, date in echeances) or sum(centimes for centimes, date in echeances) != montant_total:
+        return None
+
+    return [(Centimes_en_montant(centimes), date) for centimes, date in echeances]
+
+
 def GetPaymentPayzen(request=None, parametres_portail={}):
     # Création de la requete Payzen
     p = Payment("payzen", {
@@ -66,7 +114,7 @@ def effectuer_paiement_en_ligne(request):
     # Récupération des paramètres
     liste_impayes = request.POST.get("liste_impayes").split(",")
     montant_reglement = decimal.Decimal(request.POST.get("montant_reglement"))
-    paiement_echelonne = int(request.POST.get("paiement_echelonne"))
+    paiement_echelonne = int(request.POST.get("paiement_echelonne", 0) or 0)
 
     # Récupération des paramètres généraux du portail
     parametres_portail = utils_portail.Get_dict_parametres()
@@ -76,8 +124,9 @@ def effectuer_paiement_en_ligne(request):
         return JsonResponse({"erreur": _("Le montant doit être supérieur à zéro !")}, status=401)
 
     # Vérifie que le montant est supérieur au montant minimal fixé
-    if montant_reglement < decimal.Decimal(parametres_portail.get("paiement_ligne_montant_minimal", 0.0)):
-        return JsonResponse({"erreur": _("Le paiement en ligne nécessite un montant minimal de %.2f %s !") % (parametres_portail.paiement_ligne_montant_minimal, utils_preferences.Get_symbole_monnaie())}, status=401)
+    montant_minimal = decimal.Decimal(str(parametres_portail.get("paiement_ligne_montant_minimal") or 0))
+    if montant_reglement < montant_minimal:
+        return JsonResponse({"erreur": _("Le paiement en ligne nécessite un montant minimal de %.2f %s !") % (montant_minimal, utils_preferences.Get_symbole_monnaie())}, status=401)
 
     # Vérifie que la famille a une adresse mail
     if not request.user.famille.mail:
@@ -159,13 +208,17 @@ def effectuer_paiement_en_ligne(request):
         p = GetPaymentPayzen(request=request, parametres_portail=parametres_portail)
 
         if paiement_echelonne == 1:
+            # Le paiement échelonné doit être activé dans les paramètres du portail (contrôle côté serveur)
+            if not parametres_portail.get("payzen_echelonnement"):
+                return JsonResponse({"erreur": "Le paiement en plusieurs fois n'est pas proposé."}, status=401)
+
             # Vérifie le montant minimal pour le paiement échelonné
             montant_minimal_echelonnement = decimal.Decimal("30.0")
             if montant_reglement < montant_minimal_echelonnement:
                 return JsonResponse({"erreur": "Le paiement en plusieurs fois nécessite un montant minimal de %s %s !" % (montant_minimal_echelonnement, utils_preferences.Get_symbole_monnaie())}, status=401)
 
-            # 3 fois standard
-            montant_total = int("%.0f" % (100 * montant_reglement))
+            # 3 fois standard (calcul en centimes)
+            montant_total = Montant_en_centimes(montant_reglement)
             vads_payment_config = "MULTI:first=%d;count=3;period=30" % ((montant_total // 3) + (montant_total % 3))
 
             # N fois avancé : Calcul des dates et montants échelonnés
@@ -183,7 +236,8 @@ def effectuer_paiement_en_ligne(request):
         logger.debug("Page EFFECTUER_PAIEMENT_EN_LIGNE PAYZEN (Famille %s) : IDtransaction=%s montant=%s ventilation_str=%s", request.user.famille, transaction_id, str(montant_reglement), ventilation_str)
 
         # Enregistrement du paiement
-        Paiement.objects.create(famille=request.user.famille, systeme_paiement="payzen", idtransaction=transaction_id,
+        # Le champ objet (inutilisé pour Payzen) mémorise la configuration d'échéances envoyée : elle fait foi lors de l'IPN
+        Paiement.objects.create(famille=request.user.famille, systeme_paiement="payzen", idtransaction=transaction_id, objet=vads_payment_config,
                                 montant=montant_reglement, saisie=parametres_portail.get("payzen_mode"), ventilation=ventilation_str)
 
         # Renvoie le formulaire de paiement au template
@@ -282,38 +336,83 @@ def ipn_payzen(request):
 
     # Récupération des données et calcul de la signature
     p = GetPaymentPayzen(request=request, parametres_portail=parametres_portail)
-    reponse = p.response(data.urlencode())
+    try:
+        reponse = p.response(data.urlencode())
+    except Exception as err:
+        logger.error("IPN PAYZEN : notification illisible (%s).", err)
+        return HttpResponse("Notification invalide", status=400)
 
-    # Vérifie que la signature de la réponse est correcte
-    if reponse.signed != True:
-        logger.debug(u"Paiement en ligne IDtransaction=%s : ATTENTION, erreur de signature dans la réponse !" % reponse.order_id)
+    # Une notification dont la signature est invalide est rejetée : elle peut avoir été forgée
+    if reponse.signed is not True:
+        logger.error("IPN PAYZEN IDtransaction=%s : signature invalide, notification rejetée.", reponse.order_id)
+        return HttpResponse("Signature invalide", status=400)
+
+    # eopayment choisit la clé de signature (test ou production) d'après le vads_ctx_mode fourni par la notification
+    # elle-même : on refuse donc toute notification dont le mode ou la boutique ne correspondent pas au paramétrage,
+    # sinon une notification signée avec la clé de test serait acceptée sur un portail en production.
+    if data.get("vads_ctx_mode") != parametres_portail.get("payzen_mode") or (data.get("vads_site_id") or "").strip() != str(parametres_portail.get("payzen_site_id") or "").strip():
+        logger.error("IPN PAYZEN IDtransaction=%s : mode (%s) ou boutique (%s) non conforme au paramétrage, notification rejetée.", reponse.order_id, data.get("vads_ctx_mode"), data.get("vads_site_id"))
+        return HttpResponse("Notification non conforme", status=400)
 
     # Recherche l'état du paiement
-    resultat = ETATS_PAIEMENTS[reponse.result]
-
-    # Recherche s'il s'agit un paiement MULTI
-    if resultat == "ERROR":
-        vads_card_brand = data.get("vads_card_brand", 0, type=str)
-        vads_result = data.get("vads_result", 0, type=str)
-        if reponse.signed == True and vads_card_brand == "MULTI" and vads_result == "00":
-            resultat = "PAID"
-
-    # Affichage de la réponse dans le log
-    logger.debug(u"Paiement en ligne IDtransaction=%s : signature=%s, resultat=%s" % (reponse.order_id, reponse.signed, resultat))
-
-    # Modification du paiement préenregistré
-    paiement = Paiement.objects.get(idtransaction=reponse.order_id)
-    paiement.resultat = resultat
-    paiement.message = reponse.bank_status
-    paiement.save()
-
-    # Paiement échelonné
+    resultat = ETATS_PAIEMENTS.get(reponse.result, "ERROR")
+    vads_url_check_src = data.get("vads_url_check_src", "")
     vads_payment_config = data.get("vads_payment_config", "SINGLE")
-    vads_payment_config = vads_payment_config.replace("=", ">")
 
-    # Enregistrement de l'action
-    if resultat == "PAID":
-        Enregistrement_reglement(paiement=paiement, vads_payment_config=vads_payment_config)
+    logger.debug("IPN PAYZEN IDtransaction=%s : resultat=%s, origine=%s, payment_config=%s", reponse.order_id, resultat, vads_url_check_src, vads_payment_config)
+
+    # Recherche du paiement préenregistré
+    paiement = Paiement.objects.filter(idtransaction=reponse.order_id, systeme_paiement="payzen").last()
+    if not paiement:
+        logger.error("IPN PAYZEN IDtransaction=%s : paiement pré-enregistré introuvable.", reponse.order_id)
+        return HttpResponse("Notification processed")
+
+    # Payzen peut envoyer plusieurs notifications pour une même transaction (rejeu, retour boutique,
+    # opérations Back Office, échéances d'un paiement en plusieurs fois...), éventuellement simultanées.
+    # Le verrouillage de la ligne et la transaction garantissent que les règlements ne sont créés qu'une seule fois,
+    # et qu'aucun règlement partiel n'est conservé en cas d'erreur pendant l'enregistrement.
+    with transaction.atomic():
+        paiement = Paiement.objects.select_for_update().get(pk=paiement.pk)
+
+        if paiement.resultat == "PAID" or paiement.reglements.exists():
+            if resultat != "PAID":
+                # Par exemple le refus d'une échéance ultérieure : on ne touche pas aux règlements, mais on le signale
+                logger.warning("IPN PAYZEN IDtransaction=%s (IDpaiement %d) : notification '%s' reçue pour un paiement déjà enregistré (origine=%s, message=%s). Vérification manuelle conseillée.",
+                               reponse.order_id, paiement.pk, resultat, vads_url_check_src, reponse.bank_status)
+            else:
+                logger.debug("IPN PAYZEN IDtransaction=%s : paiement déjà enregistré, notification ignorée.", reponse.order_id)
+            return HttpResponse("Notification already processed")
+
+        # Calcul des échéances et contrôle du montant notifié par Payzen
+        liste_echeances = None
+        message = reponse.bank_status
+        if resultat == "PAID":
+            # La configuration mémorisée à la création du paiement est prioritaire sur celle de la notification
+            config_attendue = paiement.objet if (paiement.objet or "").startswith(("SINGLE", "MULTI")) else None
+            if config_attendue and vads_payment_config != config_attendue:
+                logger.warning("IPN PAYZEN IDtransaction=%s : payment_config notifié (%s) différent de celui envoyé (%s), utilisation de ce dernier.", reponse.order_id, vads_payment_config, config_attendue)
+            vads_payment_config = config_attendue or vads_payment_config
+            liste_echeances = Calcul_echeances_payzen(vads_payment_config=vads_payment_config, montant=paiement.montant)
+
+            # Contrôle du montant notifié : montant total, ou montant de la 1re échéance pour un paiement en plusieurs fois
+            vads_amount = data.get("vads_amount", "")
+            montants_acceptes = {Montant_en_centimes(paiement.montant)}
+            if liste_echeances:
+                montants_acceptes.add(Montant_en_centimes(liste_echeances[0][0]))
+
+            if not liste_echeances:
+                logger.error("IPN PAYZEN IDtransaction=%s : configuration d'échéances invalide (%s).", reponse.order_id, vads_payment_config)
+                resultat, message = "ERROR", "Configuration d'échéances invalide"
+            elif not vads_amount.isdigit() or int(vads_amount) not in montants_acceptes:
+                logger.error("IPN PAYZEN IDtransaction=%s : montant notifié (%s centimes) incohérent avec le montant attendu (%s).", reponse.order_id, vads_amount, paiement.montant)
+                resultat, message, liste_echeances = "ERROR", "Montant notifié incohérent", None
+
+        paiement.resultat = resultat
+        paiement.message = (message or "")[:450]
+        paiement.save()
+
+        if resultat == "PAID":
+            Enregistrement_reglement(paiement=paiement, liste_echeances=liste_echeances)
 
     return HttpResponse("Notification processed")
 
@@ -409,7 +508,9 @@ def notification_helloasso(request, cle=None):
         cache.delete(cle_verrou)
 
 
-def Enregistrement_reglement(paiement=None, vads_payment_config=None):
+def Enregistrement_reglement(paiement=None, liste_echeances=None):
+    """ Création des règlements et ventilations d'un paiement en ligne.
+        liste_echeances : [(montant, date), ...] pour un paiement en plusieurs fois (Payzen) """
     IDtransaction = paiement.idtransaction.split("_")[1] if "_" in paiement.idtransaction else paiement.idtransaction
 
     # Récupération des paramètres généraux du portail
@@ -434,19 +535,8 @@ def Enregistrement_reglement(paiement=None, vads_payment_config=None):
     if "payzen" in paiement.systeme_paiement:
         compte = CompteBancaire.objects.get(pk=int(parametres_portail.get("paiement_ligne_compte_bancaire")))
         num_piece = IDtransaction
-        if vads_payment_config.startswith("MULTI"):
-            if "first" in vads_payment_config:
-                # Paiement simple en 3 fois
-                params = {param.split(">")[0]: param.split(">")[1] for param in vads_payment_config[6:].split(";")}
-                premier_montant = decimal.Decimal(float(params["first"]) / 100)
-                liste_paiements = [
-                    (premier_montant, datetime.date.today()),
-                    ((paiement.montant-premier_montant) / 2, datetime.date.today() + datetime.timedelta(days=int(params["period"]))),
-                    ((paiement.montant-premier_montant) / 2, datetime.date.today() + datetime.timedelta(days=int(params["period"])*2)),
-                ]
-            else:
-                # Paiement avancé en plusieurs fois
-                liste_paiements = [(decimal.Decimal(float(montant) / 100), datetime.datetime.strptime(date, "%Y%m%d")) for date, montant in re.findall(r"([0-9]+)>([0-9]+)", vads_payment_config)]
+        if liste_echeances:
+            liste_paiements = liste_echeances
 
     if "payfip" in paiement.systeme_paiement:
         compte = factures[0].regie.compte_bancaire
