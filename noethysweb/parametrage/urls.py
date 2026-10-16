@@ -27,7 +27,7 @@ from parametrage.views import organisateur, structures, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
     modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
     modeles_word, releves_bancaires, sondages, achats_categories, achats_fournisseurs, modeles_commandes, modeles_commandes_colonnes, \
-    activites_evenements_categories, activites_import_export, api_particulier, activites_controle_ia, activites_tarifs_formule
+    activites_evenements_categories, activites_import_export, api_particulier, activites_controle_ia, activites_tarifs_formule, activites_evenements_import
 
 
 urlpatterns = [
@@ -100,6 +100,11 @@ urlpatterns = [
     path('parametrage/activites/evenements/supprimer/<int:idactivite>/<int:pk>', activites_evenements.Supprimer.as_view(), name='activites_evenements_supprimer'),
     path('parametrage/activites/evenements/supprimer_plusieurs/<int:idactivite>/<str:listepk>', activites_evenements.Supprimer_plusieurs.as_view(), name='activites_evenements_supprimer_plusieurs'),
     path('parametrage/activites/evenements/modifier_plusieurs/<int:idactivite>/<str:listepk>', activites_evenements.Modifier_plusieurs.as_view(), name='activites_evenements_modifier_plusieurs'),
+    path('parametrage/activites/evenements/importer/<int:idactivite>', activites_evenements_import.View.as_view(), name='activites_evenements_importer'),
+    path('parametrage/activites/evenements/importer/exemple/<int:idactivite>', activites_evenements_import.Exemple.as_view(), name='activites_evenements_importer_exemple'),
+    path('parametrage/activites/evenements/importer/lire_fichier', secure_ajax(activites_evenements_import.Lire_fichier), name='ajax_activites_evenements_importer_lire'),
+    path('parametrage/activites/evenements/importer/apercu', secure_ajax(activites_evenements_import.Get_apercu), name='ajax_activites_evenements_importer_apercu'),
+    path('parametrage/activites/evenements/importer/importer', secure_ajax(activites_evenements_import.Importer), name='ajax_activites_evenements_importer_importer'),
 
     path('parametrage/activites/tarifs_evenements/liste/<int:idactivite>/<int:evenement>', activites_evenements_tarifs.Liste.as_view(), name='activites_evenements_tarifs_liste'),
     path('parametrage/activites/tarifs_evenements/ajouter/<int:idactivite>/<int:evenement>', activites_evenements_tarifs.Ajouter.as_view(), name='activites_evenements_tarifs_ajouter'),

@@ -39,6 +39,7 @@ class Page(Onglet):
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idactivite': self.Get_idactivite()}), "icone": "fa fa-plus"},
             {"label": "Catégories d'événements", "classe": "btn btn-default", "href": reverse_lazy("activites_evenements_categories_liste", kwargs={'idactivite': self.Get_idactivite()}), "icone": "fa fa-gear"},
+            {"label": "Importer depuis Excel", "classe": "btn btn-default", "href": reverse_lazy("activites_evenements_importer", kwargs={'idactivite': self.Get_idactivite()}), "icone": "fa fa-download"},
         ]
         # Ajout l'idactivite à l'URL de suppression groupée
         context["url_supprimer_plusieurs"] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={"idactivite": self.kwargs.get("idactivite", None), "listepk": "xxx"})

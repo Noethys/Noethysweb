@@ -1,0 +1,411 @@
+{% extends "parametrage/activite.html" %}
+{% load static %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        /* Etapes (même style que l'assistant de saisie d'inscriptions par lot) */
+        .iev_etapes {display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 18px; padding: 0 0 14px; list-style: none; border-bottom: 1px solid #dee2e6}
+        .iev_etapes button {display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid #dee2e6; border-radius: 999px; background: #ffffff; color: #495057; font-size: 13.5px}
+        .iev_etapes button:disabled {cursor: default; opacity: .75}
+        .iev_etapes button .numero {display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #e9ecef; font-size: 12px; font-weight: 700}
+        .iev_etapes button.active {border-color: #3c8dbc; background: #e8f1f8; color: #1d5a80; font-weight: 600}
+        .iev_etapes button.active .numero {background: #3c8dbc; color: #ffffff}
+        .iev_etapes button.valide .numero {background: #28a745; color: #ffffff}
+        .iev_etape {display: none}
+        .iev_etape.active {display: block}
+        .iev_etape h4 {margin-bottom: 4px; font-size: 17px; font-weight: 600}
+        .iev_etape .iev_intro {margin-bottom: 16px; color: #6c757d}
+        /* Barre des boutons en bas du cadre */
+        .iev_barre_bas {display: flex; align-items: center; justify-content: space-between; gap: 12px}
+        .iev_barre_bas .iev_info_etape {color: #6c757d; font-size: 13px}
+        .iev_groupes label {font-weight: normal; margin-right: 14px}
+        .iev_aide_defaut {color: #6c757d; font-size: 13px}
+        .iev_table td, .iev_table th {vertical-align: middle; padding: 6px 8px}
+        .iev_exemple {color: #6c757d; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap}
+        .iev_compteurs .badge {font-size: 13px; font-weight: 500; padding: 6px 10px; margin-right: 6px; cursor: pointer}
+        .iev_compteurs .badge.inactif {opacity: .45}
+        .iev_avertissement {display: block; color: #b8860b; font-size: 12px; white-space: normal}
+        .iev_table .badge {white-space: normal; text-align: left; line-height: 1.35}
+        .iev_nowrap {white-space: nowrap}
+        .iev_liens_aide {font-size: 13px; margin-top: 6px}
+        .iev_doc table td, .iev_doc table th {font-size: 13px; padding: 6px 8px}
+        .iev_doc ul {padding-left: 20px; margin-bottom: 8px}
+        .iev_doc code {white-space: nowrap}
+        .dark-mode .iev_exemple, .dark-mode .iev_aide_defaut {color: #adb5bd}
+        .dark-mode .iev_avertissement {color: #f0c36d}
+        .dark-mode .iev_etapes {border-color: #454d55}
+        .dark-mode .iev_etapes button {background: #343a40; color: #e9ecef; border-color: #6c757d}
+        .dark-mode .iev_etapes button.active {background: #2f3a43; color: #8fc1e3; border-color: #3c8dbc}
+        .dark-mode .iev_etapes button .numero {background: #495057; color: #e9ecef}
+        .dark-mode .iev_etapes button.active .numero {background: #3c8dbc; color: #ffffff}
+        .dark-mode .iev_etapes button.valide .numero {background: #28a745; color: #ffffff}
+        .dark-mode .iev_etape .iev_intro, .dark-mode .iev_barre_bas .iev_info_etape {color: #adb5bd}
+    </style>
+{% endblock styles %}
+
+{% block detail_activite %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_outils %}
+                <a href="{% url 'activites_evenements_liste' idactivite=activite.idactivite %}" class="btn btn-tool" title="Retour à la liste des événements"><i class="fa fa-times"></i></a>
+            {% endblock %}
+
+            {% block box_contenu %}
+                {% csrf_token %}
+
+                {% if not unites or not groupes %}
+                    <div class="alert alert-warning">
+                        <i class="fa fa-exclamation-triangle margin-r-5"></i>
+                        {% if not unites %}L'activité ne possède aucune unité de consommation de type <b>Evénementiel</b>. Créez-en une dans la rubrique Unités de consommation avant d'importer des événements.{% endif %}
+                        {% if not groupes %}L'activité ne possède aucun groupe. Créez-en un dans la rubrique Groupes avant d'importer des événements.{% endif %}
+                    </div>
+                {% else %}
+
+                <ol class="iev_etapes" aria-label="Étapes de l'import">
+                    <li><button type="button" data-etape="1" class="active" aria-current="step"><span class="numero">1</span>Fichier</button></li>
+                    <li><button type="button" data-etape="2" disabled><span class="numero">2</span>Colonnes</button></li>
+                    <li><button type="button" data-etape="3" disabled><span class="numero">3</span>Aperçu</button></li>
+                </ol>
+
+                {# ======================= Étape 1 ======================= #}
+                <section class="iev_etape active" data-etape="1" aria-labelledby="iev_titre_1">
+                    <h4 id="iev_titre_1">Fichier et valeurs par défaut</h4>
+                    <p class="iev_intro">Sélectionnez le fichier Excel contenant les événements à importer.</p>
+                    <div>
+                        <div class="form-group row">
+                            <label for="iev_fichier" class="col-md-3 col-form-label">Fichier XLSX*</label>
+                            <div class="col-md-9">
+                                <input type="file" id="iev_fichier" class="form-control-file" accept=".xlsx,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                                <small class="form-text iev_liens_aide">
+                                    <a href="#" data-toggle="modal" data-target="#iev_modal_aide"><i class="fa fa-question-circle margin-r-5"></i>Comment préparer le fichier Excel ?</a>
+                                    <span class="text-muted mx-2">·</span>
+                                    <a href="{% url 'activites_evenements_importer_exemple' idactivite=activite.idactivite %}"><i class="fa fa-download margin-r-5"></i>Télécharger un fichier exemple</a>
+                                </small>
+                            </div>
+                        </div>
+                        <div class="form-group row" id="iev_ligne_feuille" style="display: none;">
+                            <label for="iev_feuille" class="col-md-3 col-form-label">Feuille</label>
+                            <div class="col-md-9"><select id="iev_feuille" class="form-control" style="max-width: 320px;"></select></div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="iev_unite" class="col-md-3 col-form-label">Unité par défaut</label>
+                            <div class="col-md-9">
+                                <select id="iev_unite" class="form-control" style="max-width: 320px;">
+                                    <option value="">— Aucune (colonne Unité obligatoire) —</option>
+                                    {% for unite in unites %}<option value="{{ unite.pk }}" {% if forloop.first %}selected{% endif %}>{{ unite.nom }}</option>{% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <span class="col-md-3 col-form-label">Groupe(s) par défaut</span>
+                            <div class="col-md-9 iev_groupes" style="padding-top: 6px;">
+                                {% for groupe in groupes %}
+                                    <label><input type="checkbox" class="iev_groupe" value="{{ groupe.pk }}" {% if groupes|length == 1 %}checked{% endif %}> {{ groupe.nom }}</label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p class="iev_aide_defaut mb-0">L'unité et les groupes par défaut sont utilisés lorsque la colonne Unité ou Groupe(s) est absente du fichier ou que la cellule est vide. Plusieurs groupes = un événement créé par groupe.</p>
+                    </div>
+                </section>
+
+                {# ======================= Étape 2 ======================= #}
+                <section class="iev_etape" data-etape="2" aria-labelledby="iev_titre_2">
+                    <h4 id="iev_titre_2">Association des colonnes</h4>
+                    <p class="iev_intro" id="iev_infos_feuille"></p>
+                    <table class="table table-sm iev_table mb-0">
+                        <thead><tr><th style="width: 32%;">Colonne du fichier</th><th style="width: 30%;">Exemple</th><th>Champ de l'événement</th></tr></thead>
+                        <tbody id="iev_corps_associations"></tbody>
+                    </table>
+                </section>
+
+                {# ======================= Étape 3 ======================= #}
+                <section class="iev_etape" data-etape="3" aria-labelledby="iev_titre_3">
+                    <h4 id="iev_titre_3">Aperçu avant import</h4>
+                    <p class="iev_intro">Vérifiez les événements avant de lancer l'importation : rien n'est encore créé.</p>
+                    <div class="iev_compteurs mb-2" id="iev_compteurs"></div>
+                    <p class="text-muted" id="iev_infos_apercu"></p>
+                    <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
+                        <table class="table table-sm table-striped iev_table mb-0">
+                            <thead><tr><th>Ligne</th><th>Date</th><th>Nom</th><th>Groupe</th><th>Horaires</th><th>Tarification</th><th>État</th></tr></thead>
+                            <tbody id="iev_corps_apercu"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                {# ======================= Compte rendu ======================= #}
+                <section class="iev_etape" data-etape="4" id="iev_resultat" tabindex="-1"></section>
+
+
+                {% endif %}
+            {% endblock %}
+
+            {% block box_conclusion %}
+                {% if unites and groupes %}
+                    {# ======================= Barre des boutons ======================= #}
+                    <div class="iev_barre_bas" id="iev_barre_bas">
+                        <button type="button" class="btn btn-default" id="iev_bouton_precedent" style="visibility: hidden;"><i class="fa fa-arrow-left margin-r-5" aria-hidden="true"></i>Précédent</button>
+                        <button type="button" class="btn btn-default" id="iev_bouton_nouveau" style="display: none;"><i class="fa fa-upload margin-r-5" aria-hidden="true"></i>Importer un autre fichier</button>
+                        <span class="iev_info_etape" id="iev_info_etape" aria-live="polite">Étape 1 sur 3</span>
+                        <button type="button" class="btn btn-primary" id="iev_bouton_suivant"></button>
+                        <a href="{% url 'activites_evenements_liste' idactivite=activite.idactivite %}" class="btn btn-primary" id="iev_lien_liste" style="display: none;"><i class="fa fa-list margin-r-5" aria-hidden="true"></i>Voir la liste des événements</a>
+                    </div>
+                {% endif %}
+            {% endblock %}
+        {% endembed %}
+
+    {# ======================= Aide : modale "Comment préparer le fichier Excel ?" ======================= #}
+    {% if unites and groupes %}
+    <div class="modal fade iev_doc" id="iev_modal_aide" tabindex="-1" role="dialog" aria-labelledby="iev_modal_aide_titre" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="iev_modal_aide_titre"><i class="fa fa-question-circle margin-r-5"></i>Comment préparer le fichier Excel ?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                                <p>
+                                    Le fichier doit être au format <b>XLSX</b> (Excel 2007 ou ultérieur, LibreOffice : <i>Enregistrer sous &gt; Excel 2007-365</i>).
+                                    Chaque ligne du tableau correspond à un événement. La <b>première ligne</b> doit contenir les titres des colonnes.
+                                    Les titres sont libres : vous associerez chaque colonne à un champ à l'étape 2. Les colonnes inutiles peuvent être conservées, elles seront ignorées.
+                                </p>
+                                <p>
+                                    <a href="{% url 'activites_evenements_importer_exemple' idactivite=activite.idactivite %}" class="btn btn-default btn-sm"><i class="fa fa-download margin-r-5"></i>Télécharger un fichier exemple</a>
+                                    <span class="text-muted margin-l-5">Le fichier exemple contient déjà les bons titres de colonnes et quelques lignes d'exemple à remplacer.</span>
+                                </p>
+
+                                <table class="table table-sm table-bordered">
+                                    <thead><tr><th style="width: 28%;">Champ</th><th>Contenu attendu</th></tr></thead>
+                                    <tbody>
+                                        {% for champ in champs %}
+                                            <tr><td><b>{{ champ.label }}</b>{% if champ.obligatoire %} <span class="badge badge-danger">obligatoire</span>{% endif %}</td><td>{{ champ.aide }}</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+
+                                <p class="mb-1"><b>Valeurs disponibles dans cette activité :</b></p>
+                                <ul>
+                                    <li>Unités de type Evénementiel : {% for unite in unites %}<code>{{ unite.nom }}</code>{% if unite.abrege %} ({{ unite.abrege }}){% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</li>
+                                    <li>Groupes : {% for groupe in groupes %}<code>{{ groupe.nom }}</code>{% if groupe.abrege %} ({{ groupe.abrege }}){% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</li>
+                                    <li>Catégories d'événements : {% for categorie in categories %}<code>{{ categorie.nom }}</code>{% if not forloop.last %}, {% endif %}{% empty %}<span class="text-muted">aucune</span>{% endfor %}</li>
+                                </ul>
+
+                                <p class="mb-1"><b>Bon à savoir :</b></p>
+                                <ul>
+                                    <li>Les majuscules et les accents ne sont pas pris en compte pour reconnaître les unités, groupes et catégories.</li>
+                                    <li>Pour la tarification, renseignez soit un <b>Montant</b> (tarif simple), soit dans la colonne <b>Tarification à recopier</b> l'ID d'un événement existant dont la tarification doit être recopiée (tarif simple ou tarifs avancés). Sans l'un ni l'autre, l'événement est gratuit.</li>
+                                    <li>Si l'unité n'est pas encore ouverte dans le calendrier à la date de l'événement pour le groupe concerné, l'ouverture est <b>créée automatiquement</b>.</li>
+                                    <li>Un événement ayant la même date, le même nom, la même unité et le même groupe qu'un événement existant est <b>ignoré</b> : vous pouvez donc réimporter un fichier complété sans créer de doublons.</li>
+                                    <li>Les lignes en erreur sont écartées et listées dans l'aperçu : rien n'est créé avant que vous cliquiez sur le bouton Importer.</li>
+                                    <li>{{ max_lignes }} lignes au maximum par feuille. Si le classeur contient plusieurs feuilles, vous choisirez celle à importer.</li>
+                                </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        $(function () {
+            var URLS = {
+                lire: "{% url 'ajax_activites_evenements_importer_lire' %}",
+                apercu: "{% url 'ajax_activites_evenements_importer_apercu' %}",
+                importer: "{% url 'ajax_activites_evenements_importer_importer' %}"
+            };
+            var IDACTIVITE = {{ activite.idactivite }};
+            var CHAMPS = {{ champs_json|safe }};
+            var etat = {feuilles: [], filtre: "tous", lignes: [], compteurs: null, etape: 1, etape_max: 1};
+
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            function Echapper(texte) {return $("<div>").text(texte === null || texte === undefined ? "" : String(texte)).html()}
+            function Pluriel(nbre, singulier, pluriel) {return nbre + " " + (nbre > 1 ? (pluriel || singulier + "s") : singulier)}
+            function Erreur(xhr) {
+                var message = (xhr.responseJSON && xhr.responseJSON.erreur) || "Une erreur est survenue. Veuillez réessayer.";
+                toastr.error(message);
+            }
+            function Poster(url, donnees) {
+                return $.ajax({url: url, type: "POST", data: donnees, headers: {"X-CSRFToken": csrftoken}, dataType: "json"}).fail(Erreur);
+            }
+            // ------------------------- Navigation entre les étapes -------------------------
+            var initialisation = true;
+            function Aller_etape(numero) {
+                etat.etape = numero;
+                etat.etape_max = Math.max(etat.etape_max, numero);
+                $(".iev_etape").removeClass("active").filter("[data-etape='" + numero + "']").addClass("active");
+                $(".iev_etapes button").each(function () {
+                    var n = parseInt($(this).data("etape"));
+                    $(this).toggleClass("active", n === numero).toggleClass("valide", numero === 4 || (n < etat.etape_max && n !== numero))
+                        .prop("disabled", numero === 4 || n > etat.etape_max).attr("aria-current", n === numero ? "step" : null);
+                });
+                $("#iev_bouton_precedent").css("visibility", numero === 2 || numero === 3 ? "visible" : "hidden").toggle(numero < 4);
+                $("#iev_info_etape").text(numero < 4 ? "Étape " + numero + " sur 3" : "");
+                $("#iev_bouton_nouveau, #iev_lien_liste").toggle(numero === 4);
+                Dessiner_bouton_suivant();
+                if (!initialisation) {$("html, body").scrollTop($(".iev_etapes").closest(".card").offset().top - 70)}
+            }
+            function Dessiner_bouton_suivant() {
+                var $bouton = $("#iev_bouton_suivant").toggle(etat.etape < 4).prop("disabled", false).removeClass("btn-primary btn-success");
+                if (etat.etape === 1) {$bouton.addClass("btn-primary").html("Lire le fichier<i class='fa fa-arrow-right ml-2' aria-hidden='true'></i>")}
+                if (etat.etape === 2) {$bouton.addClass("btn-primary").html("Aperçu<i class='fa fa-arrow-right ml-2' aria-hidden='true'></i>")}
+                if (etat.etape === 3) {
+                    var nbre = etat.compteurs ? etat.compteurs.a_creer : 0;
+                    $bouton.addClass("btn-success").prop("disabled", !nbre).html("<i class='fa fa-check margin-r-5' aria-hidden='true'></i>" + (nbre ? "Importer " + Pluriel(nbre, "événement") : "Aucun événement à importer"));
+                }
+            }
+            function Occuper_bouton_suivant() {
+                $("#iev_bouton_suivant").prop("disabled", true).html("<i class='fa fa-spinner fa-spin margin-r-5' aria-hidden='true'></i>Patientez...");
+            }
+            function Invalider_apercu() {
+                // Un paramètre a changé : l'aperçu doit être recalculé avant d'importer
+                if (etat.etape_max > 2) {etat.etape_max = 2; Aller_etape(Math.min(etat.etape, 2))}
+            }
+            $(".iev_etapes button").on("click", function () {Aller_etape(parseInt($(this).data("etape")))});
+            $("#iev_bouton_precedent").on("click", function () {Aller_etape(etat.etape - 1)});
+            $("#iev_bouton_nouveau").on("click", function () {window.location.reload()});
+            $("#iev_bouton_suivant").on("click", function () {
+                if (etat.etape === 1) {Lire_fichier()}
+                if (etat.etape === 2) {Charger_apercu()}
+                if (etat.etape === 3) {Importer()}
+            });
+            $("#iev_unite").on("change", Invalider_apercu);
+            $(".iev_groupe").on("change", Invalider_apercu);
+
+            function Get_parametres() {
+                var associations = {};
+                $(".iev_association").each(function () {if (this.value) {associations[$(this).data("index")] = this.value}});
+                return {
+                    idactivite: IDACTIVITE, feuille: parseInt($("#iev_feuille").val() || 0), idunite: $("#iev_unite").val(),
+                    idgroupes: $(".iev_groupe:checked").map(function () {return this.value}).get(), associations: associations
+                };
+            }
+
+            // ------------------------- Étape 1 : lecture du fichier -------------------------
+            function Lire_fichier() {
+                var fichier = $("#iev_fichier")[0].files[0];
+                if (!fichier) {toastr.error("Sélectionnez un fichier XLSX"); return}
+                Occuper_bouton_suivant();
+                var donnees = new FormData();
+                donnees.append("fichier", fichier);
+                donnees.append("idactivite", IDACTIVITE);
+                $.ajax({url: URLS.lire, type: "POST", data: donnees, processData: false, contentType: false, headers: {"X-CSRFToken": csrftoken}, dataType: "json"})
+                    .done(function (data) {
+                        etat.feuilles = data.feuilles;
+                        var index_defaut = 0;
+                        $("#iev_feuille").empty();
+                        $.each(data.feuilles, function (index, feuille) {
+                            if (!data.feuilles[index_defaut].nbre_lignes && feuille.nbre_lignes) {index_defaut = index}
+                            $("#iev_feuille").append($("<option>").val(index).text(feuille.nom + " (" + Pluriel(feuille.nbre_lignes, "ligne") + ")"));
+                        });
+                        $("#iev_feuille").val(index_defaut);
+                        $("#iev_ligne_feuille").toggle(data.feuilles.length > 1);
+                        Dessiner_associations();
+                        etat.etape_max = 2;
+                        Aller_etape(2);
+                    })
+                    .fail(function (xhr) {Erreur(xhr); Dessiner_bouton_suivant()});
+            }
+            $("#iev_fichier").on("change", function () {$("#iev_ligne_feuille").hide(); etat.feuilles = []; etat.etape_max = 1; Aller_etape(1)});
+            $("#iev_feuille").on("change", function () {if (etat.feuilles.length) {Dessiner_associations(); Invalider_apercu()}});
+
+            // ------------------------- Étape 2 : association des colonnes -------------------------
+            function Dessiner_associations() {
+                var feuille = etat.feuilles[parseInt($("#iev_feuille").val() || 0)];
+                $("#iev_infos_feuille").text("Feuille « " + feuille.nom + " » : " + Pluriel(feuille.nbre_lignes, "ligne") + " à analyser. Les associations ont été proposées d'après les titres des colonnes : vérifiez-les.");
+                var html = "";
+                $.each(feuille.colonnes, function (index, colonne) {
+                    var options = "<option value=''>— Ne pas importer —</option>";
+                    $.each(CHAMPS, function (i, champ) {
+                        options += "<option value='" + champ.code + "'" + (feuille.associations[index] === champ.code ? " selected" : "") + ">" + Echapper(champ.label + (champ.obligatoire ? " *" : "")) + "</option>";
+                    });
+                    html += "<tr><td>" + Echapper(colonne) + "</td><td class='iev_exemple' title='" + Echapper(feuille.exemples[index]) + "'>" + Echapper(feuille.exemples[index]) + "</td>" +
+                            "<td><label class='sr-only' for='iev_asso_" + index + "'>Champ associé à la colonne " + Echapper(colonne) + "</label>" +
+                            "<select class='form-control form-control-sm iev_association' id='iev_asso_" + index + "' data-index='" + index + "'>" + options + "</select></td></tr>";
+                });
+                $("#iev_corps_associations").html(html);
+            }
+            $("#iev_corps_associations").on("change", ".iev_association", function () {
+                // Un champ ne peut être associé qu'à une seule colonne : on libère l'éventuelle association précédente
+                var valeur = this.value, select = this;
+                Invalider_apercu();
+                if (!valeur) {return}
+                $(".iev_association").each(function () {if (this !== select && this.value === valeur) {$(this).val("")}});
+            });
+
+            function Charger_apercu() {
+                var parametres = Get_parametres(), codes = $.map(parametres.associations, function (code) {return code});
+                var manquants = $.grep(CHAMPS, function (champ) {return champ.obligatoire && codes.indexOf(champ.code) === -1});
+                if (manquants.length) {toastr.error("Associez une colonne au champ obligatoire « " + manquants[0].label + " »"); return}
+                Occuper_bouton_suivant();
+                Poster(URLS.apercu, {parametres: JSON.stringify(parametres)}).done(function (data) {
+                    etat.lignes = data.lignes;
+                    etat.filtre = data.compteurs.erreurs ? "erreur" : "tous";
+                    Dessiner_apercu(data.compteurs);
+                    Aller_etape(3);
+                }).fail(Dessiner_bouton_suivant);
+            }
+
+            // ------------------------- Étape 3 : aperçu -------------------------
+            var STATUTS = {creer: {classe: "badge-success", label: "à créer"}, doublon: {classe: "badge-warning", label: "doublon ignoré", pluriel: "doublons ignorés"}, erreur: {classe: "badge-danger", label: "ligne en erreur", pluriel: "lignes en erreur"}};
+            function Dessiner_apercu(compteurs) {
+                etat.compteurs = compteurs;
+                var badges = "<span class='badge badge-secondary iev_filtre' data-filtre='tous'>Tout afficher</span>" +
+                    "<span class='badge badge-success iev_filtre' data-filtre='creer'>" + Pluriel(compteurs.a_creer, "événement à créer", "événements à créer") + "</span>";
+                if (compteurs.doublons) {badges += "<span class='badge badge-warning iev_filtre' data-filtre='doublon'>" + Pluriel(compteurs.doublons, "doublon ignoré", "doublons ignorés") + "</span>"}
+                if (compteurs.erreurs) {badges += "<span class='badge badge-danger iev_filtre' data-filtre='erreur'>" + Pluriel(compteurs.erreurs, "ligne en erreur", "lignes en erreur") + "</span>"}
+                $("#iev_compteurs").html(badges);
+                var infos = [];
+                if (compteurs.ouvertures) {infos.push(Pluriel(compteurs.ouvertures, "ouverture sera créée", "ouvertures seront créées") + " automatiquement dans le calendrier.")}
+                if (compteurs.tarifs_avances) {infos.push("Les tarifs avancés seront recopiés pour " + Pluriel(compteurs.tarifs_avances, "événement") + ".")}
+                if (compteurs.erreurs) {infos.push("Les lignes en erreur ne seront pas importées : corrigez le fichier puis recommencez, ou importez dès maintenant les autres lignes.")}
+                $("#iev_infos_apercu").text(infos.join(" "));
+                Dessiner_lignes();
+            }
+            function Dessiner_lignes() {
+                $(".iev_filtre").each(function () {$(this).toggleClass("inactif", etat.filtre !== "tous" && $(this).data("filtre") !== etat.filtre)});
+                var html = "";
+                $.each(etat.lignes, function (i, ligne) {
+                    if (etat.filtre !== "tous" && ligne.statut !== etat.filtre) {return}
+                    var avertissements = $.map(ligne.avertissements || [], function (a) {return "<span class='iev_avertissement'><i class='fa fa-exclamation-triangle'></i> " + Echapper(a) + "</span>"}).join("");
+                    html += "<tr><td>" + ligne.ligne + "</td><td class='iev_nowrap'>" + Echapper(ligne.date) + "</td><td>" + Echapper(ligne.nom) + "</td><td>" + Echapper(ligne.groupe) + "</td>" +
+                            "<td class='iev_nowrap'>" + Echapper(ligne.horaires) + "</td><td>" + Echapper(ligne.tarification) + "</td>" +
+                            "<td><span class='badge " + STATUTS[ligne.statut].classe + "'>" + Echapper(ligne.message) + "</span>" + avertissements + "</td></tr>";
+                });
+                $("#iev_corps_apercu").html(html || "<tr><td colspan='7' class='text-center text-muted'>Aucune ligne</td></tr>");
+            }
+            $("#iev_compteurs").on("click", ".iev_filtre", function () {etat.filtre = $(this).data("filtre"); Dessiner_lignes()});
+
+            // ------------------------- Importation -------------------------
+            function Importer() {
+                Occuper_bouton_suivant();
+                Poster(URLS.importer, {parametres: JSON.stringify(Get_parametres())}).done(function (data) {
+                    var c = data.compteurs;
+                    var html = "<h4>Importation terminée</h4><div class='alert alert-success mt-3'><h5><i class='fa fa-check margin-r-5'></i>" + Pluriel(c.a_creer, "événement importé", "événements importés") + "</h5><ul class='mb-0'>";
+                    if (c.ouvertures) {html += "<li>" + Pluriel(c.ouvertures, "ouverture créée", "ouvertures créées") + " dans le calendrier</li>"}
+                    if (c.tarifs_avances) {html += "<li>Tarifs avancés recopiés pour " + Pluriel(c.tarifs_avances, "événement") + "</li>"}
+                    if (c.doublons) {html += "<li>" + Pluriel(c.doublons, "doublon ignoré", "doublons ignorés") + "</li>"}
+                    html += "</ul></div>";
+                    if (data.erreurs.length) {
+                        html += "<div class='alert alert-warning'><b>" + Pluriel(data.erreurs.length, "ligne n'a pas été importée", "lignes n'ont pas été importées") + " :</b><ul class='mb-0'>" +
+                                $.map(data.erreurs, function (e) {return "<li>Ligne " + e.ligne + " : " + Echapper(e.message) + "</li>"}).join("") + "</ul></div>";
+                    }
+                    $("#iev_resultat").html(html);
+                    Aller_etape(4);
+                    $("#iev_resultat").trigger("focus");
+                }).fail(Dessiner_bouton_suivant);
+            }
+
+            Aller_etape(1);
+            initialisation = false;
+        });
+    </script>
+{% endblock scripts %}
