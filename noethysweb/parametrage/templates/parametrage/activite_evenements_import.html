@@ -224,10 +224,13 @@
             };
             var IDACTIVITE = {{ activite.idactivite }};
             var CHAMPS = {{ champs_json|safe }};
-            var etat = {feuilles: [], filtre: "tous", lignes: [], compteurs: null, etape: 1, etape_max: 1};
+            var etat = {jeton: null, feuilles: [], filtre: "tous", lignes: [], compteurs: null, etape: 1, etape_max: 1};
 
             var csrftoken = $("[name=csrfmiddlewaretoken]").val();
-            function Echapper(texte) {return $("<div>").text(texte === null || texte === undefined ? "" : String(texte)).html()}
+            function Echapper(texte) {
+                // Echappe aussi les guillemets : le résultat est parfois utilisé dans un attribut HTML
+                return $("<div>").text(texte === null || texte === undefined ? "" : String(texte)).html().replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+            }
             function Pluriel(nbre, singulier, pluriel) {return nbre + " " + (nbre > 1 ? (pluriel || singulier + "s") : singulier)}
             function Erreur(xhr) {
                 var message = (xhr.responseJSON && xhr.responseJSON.erreur) || "Une erreur est survenue. Veuillez réessayer.";
@@ -284,7 +287,7 @@
                 var associations = {};
                 $(".iev_association").each(function () {if (this.value) {associations[$(this).data("index")] = this.value}});
                 return {
-                    idactivite: IDACTIVITE, feuille: parseInt($("#iev_feuille").val() || 0), idunite: $("#iev_unite").val(),
+                    idactivite: IDACTIVITE, jeton: etat.jeton, feuille: parseInt($("#iev_feuille").val() || 0), idunite: $("#iev_unite").val(),
                     idgroupes: $(".iev_groupe:checked").map(function () {return this.value}).get(), associations: associations
                 };
             }
@@ -299,6 +302,7 @@
                 donnees.append("idactivite", IDACTIVITE);
                 $.ajax({url: URLS.lire, type: "POST", data: donnees, processData: false, contentType: false, headers: {"X-CSRFToken": csrftoken}, dataType: "json"})
                     .done(function (data) {
+                        etat.jeton = data.jeton;
                         etat.feuilles = data.feuilles;
                         var index_defaut = 0;
                         $("#iev_feuille").empty();

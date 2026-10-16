@@ -15,13 +15,18 @@ Principe :
        et recopie de la tarification d'un événement existant si demandé.
 """
 
-import datetime, decimal, io, logging, re, unicodedata
+import datetime, decimal, io, logging, re, unicodedata, uuid
 logger = logging.getLogger(__name__)
 from django.db import transaction
 from core.models import Activite, Unite, Groupe, CategorieEvenement, Evenement, Ouverture, Tarif, TarifLigne
 from core.utils import utils_dates, utils_historique, utils_preferences
 
 MAX_LIGNES = 2000
+MAX_TAILLE_FICHIER = 10 * 1024 * 1024    # 10 Mo
+MAX_FICHIERS_SESSION = 3                 # Fichiers conservés en session (un par onglet ouvert)
+MAX_CAPACITE = 100000
+MAX_MONTANT = decimal.Decimal("99999999.99")   # Evenement.montant : DecimalField(max_digits=10, decimal_places=2)
+MAX_ID = 2147483647
 CLE_SESSION = "import_evenements"
 
 
@@ -127,7 +132,7 @@ def _Lire_date(texte):
         annee, mois, jour = [int(x) for x in resultat.groups()]
         return datetime.date(annee, mois, jour)
     # Format français jj/mm/aaaa, jj-mm-aaaa, jj.mm.aaaa ou jj/mm/aa
-    resultat = re.match(r"^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2}|\d{4})$", texte)
+    resultat = re.match(r"^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2}|\d{4})(?:[ T]+\d{1,2}[:h]\d{2}(?::\d{2})?)?$", texte)
     if resultat:
         jour, mois, annee = [int(x) for x in resultat.groups()]
         if annee < 100:
@@ -164,7 +169,7 @@ def Lire_heure(texte, nom="L'heure"):
     raise ValueError("%s '%s' n'est pas valide (format attendu : 13:30 ou 13h30)" % (nom, texte))
 
 
-def Lire_nombre(texte, nom="Le montant", entier=False):
+def Lire_nombre(texte, nom="Le montant", entier=False, maximum=None):
     texte = texte.strip().replace(" ", "").replace(" ", "").replace("€", "").replace(",", ".")
     if not texte:
         return None
@@ -174,6 +179,8 @@ def Lire_nombre(texte, nom="Le montant", entier=False):
         raise ValueError("%s '%s' n'est pas un nombre valide" % (nom, texte))
     if nombre < 0:
         raise ValueError("%s ne peut pas être négatif" % nom)
+    if maximum is not None and nombre > maximum:
+        raise ValueError("%s '%s' dépasse le maximum autorisé (%s)" % (nom, texte, "{:,}".format(maximum).replace(",", " ").replace(".", ",")))
     if entier:
         if nombre != nombre.to_integral_value():
             raise ValueError("%s '%s' doit être un nombre entier" % (nom, texte))
@@ -209,6 +216,8 @@ def Lire_fichier(fichier=None):
         raise Erreur("Sélectionnez un fichier XLSX")
     if not fichier.name.lower().endswith((".xlsx", ".xlsm")):
         raise Erreur("Le fichier doit être au format XLSX (Excel 2007 ou ultérieur). Pour un fichier .xls ou .ods, enregistrez-le au préalable au format .xlsx.")
+    if fichier.size > MAX_TAILLE_FICHIER:
+        raise Erreur("Le fichier est trop volumineux (%d Mo maximum)" % (MAX_TAILLE_FICHIER // (1024 * 1024)))
     try:
         classeur = load_workbook(filename=io.BytesIO(fichier.read()), data_only=True, read_only=True)
     except Exception as err:
@@ -250,6 +259,30 @@ def Lire_fichier(fichier=None):
     if not feuilles or not any(feuille["lignes"] for feuille in feuilles):
         raise Erreur("Le fichier ne contient aucune donnée. La première ligne doit contenir les titres des colonnes et les lignes suivantes les événements.")
     return {"nom_fichier": fichier.name, "feuilles": feuilles}
+
+
+def Memoriser_fichier(session=None, idactivite=None, donnees={}):
+    """ Mémorise le fichier lu en session sous un jeton propre à l'onglet (plusieurs imports peuvent être ouverts en parallèle) """
+    fichiers = dict(session.get(CLE_SESSION, {}).get("fichiers", {}))
+    jeton = uuid.uuid4().hex
+    fichiers[jeton] = {"idactivite": idactivite, "nom_fichier": donnees["nom_fichier"], "feuilles": donnees["feuilles"]}
+    while len(fichiers) > MAX_FICHIERS_SESSION:
+        del fichiers[next(iter(fichiers))]
+    session[CLE_SESSION] = {"fichiers": fichiers}
+    return jeton
+
+
+def Get_fichier_session(session=None, jeton="", idactivite=None):
+    fichier = session.get(CLE_SESSION, {}).get("fichiers", {}).get(str(jeton or ""))
+    if not fichier or fichier.get("idactivite") != idactivite:
+        raise Erreur("Le fichier n'est plus disponible. Veuillez le sélectionner à nouveau.")
+    return fichier
+
+
+def Oublier_fichier(session=None, jeton=""):
+    fichiers = dict(session.get(CLE_SESSION, {}).get("fichiers", {}))
+    fichiers.pop(str(jeton or ""), None)
+    session[CLE_SESSION] = {"fichiers": fichiers}
 
 
 def Proposer_associations(colonnes=[]):
@@ -418,12 +451,12 @@ def Analyser(activite=None, feuille={}, parametres={}):
 
         # Capacité et montant
         try:
-            valeurs["capacite_max"] = Lire_nombre(Valeur(ligne, "capacite_max"), nom="La capacité", entier=True) or None
+            valeurs["capacite_max"] = Lire_nombre(Valeur(ligne, "capacite_max"), nom="La capacité", entier=True, maximum=MAX_CAPACITE) or None
         except ValueError as err:
             valeurs["capacite_max"] = None
             resultat["erreurs"].append(str(err))
         try:
-            valeurs["montant"] = Lire_nombre(Valeur(ligne, "montant"), nom="Le montant")
+            valeurs["montant"] = Lire_nombre(Valeur(ligne, "montant"), nom="Le montant", maximum=MAX_MONTANT)
         except ValueError as err:
             valeurs["montant"] = None
             resultat["erreurs"].append(str(err))
@@ -438,7 +471,7 @@ def Analyser(activite=None, feuille={}, parametres={}):
                 idmodele = None
                 resultat["erreurs"].append(str(err))
             if idmodele is not None:
-                modele = referentiel.Get_modele(idmodele)
+                modele = referentiel.Get_modele(idmodele) if idmodele <= MAX_ID else None
                 if not modele:
                     resultat["erreurs"].append("L'événement modèle ID%d n'existe pas dans cette activité" % idmodele)
                 else:
@@ -551,12 +584,15 @@ def Copier_tarifs(evenement=None, modele=None, tarifs_modele=None):
 
 
 def Importer(activite=None, feuille={}, parametres={}, request=None, nom_fichier=""):
-    analyse = Analyser(activite, feuille, parametres)
-    if not analyse["a_creer"]:
-        raise Erreur("Aucun événement à créer")
-
     tarifs_modeles = {}
     with transaction.atomic():
+        # Verrou sur l'activité : deux importations simultanées sont traitées l'une après l'autre,
+        # la seconde voit alors les événements de la première comme des doublons
+        Activite.objects.select_for_update().filter(pk=activite.pk).first()
+        analyse = Analyser(activite, feuille, parametres)
+        if not analyse["a_creer"]:
+            raise Erreur("Aucun événement à créer")
+
         # Ouvertures manquantes dans le calendrier
         Ouverture.objects.bulk_create([Ouverture(activite=activite, date=date, unite_id=idunite, groupe_id=idgroupe) for date, idunite, idgroupe in analyse["ouvertures"]])
 

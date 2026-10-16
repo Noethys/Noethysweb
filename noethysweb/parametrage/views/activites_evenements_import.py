@@ -39,10 +39,8 @@ def Verifier_permission(fonction):
 
 
 def Get_feuille(request, activite=None, parametres={}):
-    """ Feuille du fichier mémorisé en session pour cette activité """
-    donnees = request.session.get(moteur.CLE_SESSION)
-    if not donnees or donnees.get("idactivite") != activite.pk:
-        raise moteur.Erreur("Le fichier n'est plus disponible. Veuillez le sélectionner à nouveau.")
+    """ Feuille du fichier mémorisé en session pour cet onglet et cette activité """
+    donnees = moteur.Get_fichier_session(request.session, parametres.get("jeton"), activite.pk)
     try:
         return donnees, donnees["feuilles"][int(parametres.get("feuille", 0))]
     except (IndexError, TypeError, ValueError):
@@ -63,8 +61,8 @@ def Lire_fichier(request):
     """ Lecture du fichier envoyé et mémorisation en session """
     activite = Get_activite(request, request.POST.get("idactivite"))
     donnees = moteur.Lire_fichier(request.FILES.get("fichier"))
-    request.session[moteur.CLE_SESSION] = {"idactivite": activite.pk, "nom_fichier": donnees["nom_fichier"], "feuilles": donnees["feuilles"]}
-    return JsonResponse({"nom_fichier": donnees["nom_fichier"], "feuilles": [moteur.Get_infos_feuille(feuille) for feuille in donnees["feuilles"]]})
+    jeton = moteur.Memoriser_fichier(request.session, activite.pk, donnees)
+    return JsonResponse({"jeton": jeton, "nom_fichier": donnees["nom_fichier"], "feuilles": [moteur.Get_infos_feuille(feuille) for feuille in donnees["feuilles"]]})
 
 
 @Verifier_permission
@@ -81,7 +79,7 @@ def Importer(request):
     activite = Get_activite(request, parametres.get("idactivite"))
     donnees, feuille = Get_feuille(request, activite, parametres)
     resultat = moteur.Importer(activite, feuille, parametres, request=request, nom_fichier=donnees.get("nom_fichier", ""))
-    del request.session[moteur.CLE_SESSION]
+    moteur.Oublier_fichier(request.session, parametres.get("jeton"))
     return JsonResponse(resultat)
 
 
