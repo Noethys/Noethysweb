@@ -61,7 +61,7 @@ class Liste(Page, crud.Liste):
     template_name = "parametrage/activite_liste.html"
 
     def get_queryset(self):
-        return UniteRemplissage.objects.filter(Q(activite=self.Get_idactivite()) & self.Get_filtres("Q"))
+        return UniteRemplissage.objects.prefetch_related("unites").filter(Q(activite=self.Get_idactivite()) & self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -71,12 +71,18 @@ class Liste(Page, crud.Liste):
     class datatable_class(MyDatatable):
         filtres = ['idunite_remplissage', 'nom', 'abrege']
 
+        unites_conso = columns.TextColumn("Unités de conso. associées", sources=None, processor='Get_unites_conso')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idunite_remplissage', 'ordre', 'nom', 'abrege']
+            columns = ['idunite_remplissage', 'ordre', 'nom', 'abrege', 'unites_conso']
             ordering = ['ordre']
+
+        def Get_unites_conso(self, instance, *args, **kwargs):
+            """ Liste des unités de consommation associées, triées par ordre """
+            unites = sorted(instance.unites.all(), key=lambda unite: unite.ordre or 0)
+            return ", ".join([unite.nom for unite in unites]) or "<span class='text-muted'>Aucune</span>"
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idactivite dans les boutons d'actions """
