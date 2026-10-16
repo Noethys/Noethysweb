@@ -738,7 +738,7 @@
                 return {
                     idactivite: etat.activite ? etat.activite.id : null, date_debut: $("#ail_date_debut").val(), date_fin: $("#ail_date_fin").val(),
                     statut: $("[name=ail_statut]:checked").val(), internet_reservations: $("#ail_internet_reservations").prop("checked"),
-                    appliquer_forfaits: $("#ail_appliquer_forfaits").prop("checked") && $("#ail_ligne_forfaits").is(":visible"),
+                    appliquer_forfaits: $("#ail_appliquer_forfaits").prop("checked") && Boolean(etat.activite && etat.activite.forfaits && etat.activite.forfaits.length),
                     source: source, filtres: filtres
                 };
             }
