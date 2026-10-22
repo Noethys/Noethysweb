@@ -29,7 +29,7 @@ stderr_logfile=/dev/fd/2
 stderr_logfile_maxbytes=0
 
 [program:app]
-command=gunicorn noethysweb.wsgi --bind 0.0.0.0:80
+command=gunicorn noethysweb.wsgi --bind 127.0.0.1:8000 --limit-request-line 8188 --access-logfile - --error-logfile - --capture-output --log-level info
 directory=/usr/src/app/noethysweb
 autostart=true
 autorestart=true
