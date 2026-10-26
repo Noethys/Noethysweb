@@ -55,6 +55,15 @@ def is_modif_allowed(date, data, action="ajout"):
         nbre_jours = int(parametres_limite[0])
         heure = datetime.datetime.strptime(parametres_limite[1], "%H:%M")
 
+        # Délai spécifique au jour de la semaine (ex : jour4=3@09:30)
+        for chaine in parametres_limite[2:]:
+            if chaine.startswith("jour%d=" % date.weekday()):
+                delai_jour, heure_jour = chaine.split("=")[1].split("@")
+                if delai_jour == "-1":
+                    return True
+                nbre_jours = int(delai_jour)
+                heure = datetime.datetime.strptime(heure_jour, "%H:%M")
+
         jours_semaine = [relativedelta.MO, relativedelta.TU, relativedelta.WE, relativedelta.TH, relativedelta.FR, relativedelta.SA, relativedelta.SU]
         date_limite = datetime.datetime(year=date.year, month=date.month, day=date.day, hour=heure.hour, minute=heure.minute)
 

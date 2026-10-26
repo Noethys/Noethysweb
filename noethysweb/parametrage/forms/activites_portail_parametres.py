@@ -51,6 +51,11 @@ class Formulaire(FormulaireBase, ModelForm):
     exclure_feries_suppr = forms.BooleanField(label="Exclure les jours fériés", required=False, initial=False)
     exclure_jours_suppr = forms.MultipleChoiceField(label="Exclure les jours", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("exclure_jours"))
 
+    # Délais spécifiques par jour de la semaine
+    delais_jours_ajout = forms.BooleanField(label="Définir un délai différent selon le jour de la semaine", required=False, initial=False)
+    delais_jours_suppr = forms.BooleanField(label="Définir un délai différent selon le jour de la semaine", required=False, initial=False)
+    liste_choix_jour = [(None, "Identique au délai général"), (-1, "Aucun délai")] + liste_choix[1:]
+
     class Meta:
         model = Activite
         fields = ["portail_inscriptions_affichage", "portail_inscriptions_date_debut", "portail_inscriptions_date_fin", "portail_reservations_affichage",
@@ -108,6 +113,21 @@ class Formulaire(FormulaireBase, ModelForm):
                     if "exclure_jours" in chaine:
                         self.fields["exclure_jours_suppr"].initial = [int(num_jour) for num_jour in chaine.replace("exclure_jours", "")]
 
+        # Délais spécifiques par jour de la semaine
+        for action, valeur in (("ajout", self.instance.portail_reservations_limite), ("suppr", self.instance.portail_reservations_limite_suppr)):
+            for num_jour, label_jour in JOURS_COMPLETS_SEMAINE:
+                self.fields["delai_jour%d_%s" % (num_jour, action)] = forms.TypedChoiceField(label=label_jour, choices=self.liste_choix_jour, initial=None, required=False, widget=forms.Select(attrs={"class": "form-control form-control-sm"}))
+                self.fields["heure_jour%d_%s" % (num_jour, action)] = forms.TimeField(label="Heure limite", required=False, widget=forms.TimeInput(attrs={"type": "time", "class": "form-control form-control-sm"}))
+            if valeur and valeur != "-1":
+                for chaine in valeur.split("#")[2:]:
+                    if chaine.startswith("jour") and "=" in chaine:
+                        num_jour = int(chaine[4])
+                        delai_jour, heure_jour = chaine.split("=")[1].split("@")
+                        self.fields["delais_jours_%s" % action].initial = True
+                        self.fields["delai_jour%d_%s" % (num_jour, action)].initial = int(delai_jour)
+                        if heure_jour:
+                            self.fields["heure_jour%d_%s" % (num_jour, action)].initial = datetime.datetime.strptime(heure_jour, "%H:%M")
+
         # Modèle d'email de validation
         self.fields["validation_modele_email"].queryset = ModeleEmail.objects.filter(categorie="portail_demande_reservation")
 
@@ -147,6 +167,8 @@ class Formulaire(FormulaireBase, ModelForm):
                     Field("exclure_weekends_ajout"),
                     Field("exclure_feries_ajout"),
                     InlineCheckboxes("exclure_jours_ajout"),
+                    Field("delais_jours_ajout"),
+                    HTML(Get_html_delais_jours("ajout")),
                     id="bloc_limite_ajout"
                 ),
             ),
@@ -157,6 +179,8 @@ class Formulaire(FormulaireBase, ModelForm):
                     Field("exclure_weekends_suppr"),
                     Field("exclure_feries_suppr"),
                     InlineCheckboxes("exclure_jours_suppr"),
+                    Field("delais_jours_suppr"),
+                    HTML(Get_html_delais_jours("suppr")),
                     id="bloc_limite_suppr"
                 ),
             ),
@@ -200,6 +224,8 @@ class Formulaire(FormulaireBase, ModelForm):
             if self.cleaned_data["exclure_weekends_ajout"]: parametres_limite.append("exclure_weekends")
             if self.cleaned_data["exclure_feries_ajout"]: parametres_limite.append("exclure_feries")
             if self.cleaned_data["exclure_jours_ajout"]: parametres_limite.append("exclure_jours%s" % "".join(str(num_jour) for num_jour in self.cleaned_data["exclure_jours_ajout"]))
+            if not self.Ajouter_delais_jours(parametres_limite, "ajout"):
+                return
             self.cleaned_data["portail_reservations_limite"] = "#".join(parametres_limite)
         else:
             self.cleaned_data["portail_reservations_limite"] = None
@@ -215,6 +241,8 @@ class Formulaire(FormulaireBase, ModelForm):
             if self.cleaned_data["exclure_weekends_suppr"]: parametres_limite.append("exclure_weekends")
             if self.cleaned_data["exclure_feries_suppr"]: parametres_limite.append("exclure_feries")
             if self.cleaned_data["exclure_jours_suppr"]: parametres_limite.append("exclure_jours%s" % "".join(str(num_jour) for num_jour in self.cleaned_data["exclure_jours_suppr"]))
+            if not self.Ajouter_delais_jours(parametres_limite, "suppr"):
+                return
             self.cleaned_data["portail_reservations_limite_suppr"] = "#".join(parametres_limite)
         else:
             self.cleaned_data["portail_reservations_limite_suppr"] = None
@@ -229,6 +257,42 @@ class Formulaire(FormulaireBase, ModelForm):
                 return
 
         return self.cleaned_data
+
+    def Ajouter_delais_jours(self, parametres_limite, action="ajout"):
+        """ Ajoute les délais spécifiques par jour de la semaine sous la forme jour4=3@09:30 """
+        if not self.cleaned_data["delais_jours_%s" % action]:
+            return True
+        for num_jour, label_jour in JOURS_COMPLETS_SEMAINE:
+            delai_jour = self.cleaned_data["delai_jour%d_%s" % (num_jour, action)]
+            if not delai_jour:
+                continue
+            heure_jour = self.cleaned_data["heure_jour%d_%s" % (num_jour, action)]
+            if delai_jour != "-1" and not heure_jour:
+                self.add_error("heure_jour%d_%s" % (num_jour, action), "Vous devez spécifier une heure limite pour le %s" % label_jour.lower())
+                return False
+            parametres_limite.append("jour%d=%s@%s" % (num_jour, delai_jour, heure_jour.strftime("%H:%M") if heure_jour and delai_jour != "-1" else ""))
+        return True
+
+
+def Get_html_delais_jours(action="ajout"):
+    """ Tableau des délais spécifiques par jour de la semaine """
+    lignes = "".join("""
+        <tr>
+            <td class="align-middle">%s</td>
+            <td>{{ form.delai_jour%d_%s }}</td>
+            <td>{{ form.heure_jour%d_%s }}{%% for error in form.heure_jour%d_%s.errors %%}<div class="text-danger small">{{ error }}</div>{%% endfor %%}</td>
+        </tr>""" % (label_jour, num_jour, action, num_jour, action, num_jour, action) for num_jour, label_jour in JOURS_COMPLETS_SEMAINE)
+    return """
+    <div class="form-group row" id="bloc_delais_jours_%s">
+        <div class="col-md-3"></div>
+        <div class="col-md-9">
+            <table class="table table-sm table-bordered mb-1" style="max-width: 650px;">
+                <thead class="thead-light"><tr><th style="width: 110px;">Jour</th><th>Délai</th><th style="width: 140px;">Heure limite</th></tr></thead>
+                <tbody>%s</tbody>
+            </table>
+            <small class="form-text text-muted">Les exclusions ci-dessus (week-ends, fériés, jours) s'appliquent également aux délais spécifiques.</small>
+        </div>
+    </div>""" % (action, lignes)
 
 
 EXTRA_SCRIPT = """
@@ -270,6 +334,14 @@ $(document).ready(function() {
     On_change_limite_reservations_suppr.call($('#id_limite_delai_suppr').get(0));
 });
 
+// Délais par jour
+function On_change_delais_jours() {
+    var action = this.id.replace('id_delais_jours_', '');
+    $('#bloc_delais_jours_' + action).toggle($(this).prop('checked'));
+}
+$(document).ready(function() {
+    $('#id_delais_jours_ajout, #id_delais_jours_suppr').change(On_change_delais_jours).each(On_change_delais_jours);
+});
 
 </script>
 """
