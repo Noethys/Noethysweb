@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "achats_categories_ajouter"
     url_modifier = "achats_categories_modifier"
     url_supprimer = "achats_categories_supprimer"
-    description_liste = "Voici ci-dessous la liste des catégories d'articles pour les achats."
-    description_saisie = "Saisissez toutes les informations concernant la catégorie à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les catégories d'articles permettent de classer les articles saisis dans les demandes d'achats (exemples : Fournitures de bureau, Alimentation, Matériel pédagogique). Elles facilitent le suivi et l'impression des achats par catégorie."
+    description_saisie = "Saisissez le nom de la catégorie d'articles et, si besoin, la structure concernée, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une catégorie d'articles"
     objet_pluriel = "des catégories d'articles"
     boutons_liste = [

@@ -18,8 +18,8 @@ class Page(crud.Page):
     url_ajouter = "modeles_prestations_ajouter"
     url_modifier = "modeles_prestations_modifier"
     url_supprimer = "modeles_prestations_supprimer"
-    description_liste = "Voici ci-dessous la liste des modèles de prestations."
-    description_saisie = "Saisissez toutes les informations concernant le modèle de prestation à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les modèles de prestations permettent de saisir rapidement depuis la fiche famille des prestations ponctuelles qui ne dépendent pas des consommations : frais de dossier, sortie exceptionnelle, vente de matériel..."
+    description_saisie = "Renseignez la catégorie, le label, l'activité éventuelle et le montant de la prestation puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un modèle de prestation"
     objet_pluriel = "des modèles de prestations"
     boutons_liste = [

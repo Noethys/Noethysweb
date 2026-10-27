@@ -26,8 +26,8 @@ class Formulaire(FormulaireBase, ModelForm):
                                            on fait une inscription initiale qu'une seule fois (Exemples : Accueil de loisirs, cantine, secteur jeunes, périscolaire...) et on choisira 'Limitée' pour
                                            les activités qui commencent à une date donnée et se terminent à une date donnée et pour lesquelles on doit se réinscrire régulièrement
                                            (Exemples : Club de gym - Saison 2024-25, séjour à la neige - Février 2026, Stage de magie - Noël 2023...).""")
-    validite_date_debut = forms.DateField(label="Date de début*", required=False, widget=DatePickerWidget())
-    validite_date_fin = forms.DateField(label="Date de fin*", required=False, widget=DatePickerWidget())
+    validite_date_debut = forms.DateField(label="Date de début*", required=False, widget=DatePickerWidget(), help_text="Saisissez la date de début de l'activité. Exemple : 01/09/2025 pour une saison 2025-26.")
+    validite_date_fin = forms.DateField(label="Date de fin*", required=False, widget=DatePickerWidget(), help_text="Saisissez la date de fin de l'activité. Exemple : 30/06/2026 pour une saison 2025-26.")
 
     # Groupes d'activités
     groupes_activites = forms.ModelMultipleChoiceField(label="Groupes d'activités", widget=Select2MultipleWidget(), queryset=TypeGroupeActivite.objects.all(), required=False,
@@ -72,6 +72,16 @@ class Formulaire(FormulaireBase, ModelForm):
             "code_comptable" : "A renseigner si vous utilisez certains exports d'écritures comptables vers des logiciels de comptabilité ou des exports vers Hélios.",
             "code_analytique": "A renseigner si vous utilisez certains exports d'écritures comptables vers des logiciels de comptabilité ou des exports vers Hélios.",
             "code_produit_local": "Cette option n'est utilisée que par les structures publiques pour des exports vers des logiciels de comptabilité publique.",
+            "rue": "Saisissez le numéro et le nom de la voie. Exemple : 12 rue des Lilas.",
+            "cp": "Saisissez le code postal. La ville correspondante vous sera proposée automatiquement.",
+            "ville": "Saisissez le nom de la ville.",
+            "tel": "Saisissez le numéro de téléphone de l'activité. Exemple : 02 98 12 34 56.",
+            "fax": "Saisissez si besoin le numéro de fax.",
+            "mail": "Saisissez l'adresse email de l'activité. Exemple : alsh@mairie.fr.",
+            "site": "Saisissez l'adresse du site internet. Exemple : www.mairie.fr.",
+            "logo": "Sélectionnez l'image qui servira de logo à cette activité, notamment sur les documents imprimés.",
+            "nbre_inscrits_max": "Saisissez le nombre maximal d'inscriptions autorisées pour cette activité. Exemple : 20 pour un club limité à 20 adhérents.",
+            "inscriptions_multiples": "Cochez cette case uniquement si un même individu peut être inscrit plusieurs fois en même temps à cette activité, par exemple sur plusieurs groupes.",
         }
 
     def __init__(self, *args, **kwargs):

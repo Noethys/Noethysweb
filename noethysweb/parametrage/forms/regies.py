@@ -17,6 +17,12 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = FactureRegie
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom de la régie. Exemple : Régie périscolaire.",
+            "numclitipi": "Saisissez le numéro client PayFiP (anciennement TIPI) attribué par la DGFiP pour le paiement en ligne des factures de cette régie.",
+            "email_regisseur": "Saisissez l'adresse email du régisseur.",
+            "compte_bancaire": "Sélectionnez le compte bancaire sur lequel sont encaissés les règlements de cette régie, notamment les paiements en ligne.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

@@ -18,7 +18,7 @@ class Consulter(Onglet, crud.Modifier):
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Paramètres du portail"
-        context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
+        context['box_introduction'] = "Voici les paramètres de l'activité sur le portail famille : inscriptions en ligne, réservations, délais de modification, validation et réattribution des places. Cliquez sur le bouton Modifier pour les changer."
         context['onglet_actif'] = "portail_parametres"
         return context
 
@@ -31,7 +31,7 @@ class Modifier(Consulter):
 
     def get_context_data(self, **kwargs):
         context = super(Modifier, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Renseignez les paramètres de l'activité pour le portail."
+        context['box_introduction'] = "Indiquez si les familles peuvent s'inscrire et réserver depuis le portail, et jusqu'à quand elles peuvent ajouter ou supprimer une réservation. Pour proposer des réservations, vous devez également créer des périodes de réservation."
         return context
 
     def get_success_url(self):

@@ -19,8 +19,8 @@ class Page(crud.Page):
     url_modifier = "articles_modifier"
     url_supprimer = "articles_supprimer"
     url_dupliquer = "articles_dupliquer"
-    description_liste = "Voici ci-dessous la liste des articles à afficher sur le portail."
-    description_saisie = "Saisissez toutes les informations concernant l'article et cliquez sur le bouton Enregistrer."
+    description_liste = "Les articles sont les actualités publiées sur la page d'accueil du portail famille : ouverture des inscriptions, programme des vacances, informations pratiques... Vous pouvez définir leur période de publication et leur associer une image, un document à télécharger, un album photos ou un formulaire."
+    description_saisie = "Saisissez le titre et le texte de l'article, choisissez si besoin une image et sa période de publication puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un article"
     objet_pluriel = "des articles"
     boutons_liste = [

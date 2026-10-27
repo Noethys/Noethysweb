@@ -14,12 +14,15 @@ from core.models import Ferie, LISTE_MOIS
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    jour = forms.IntegerField(min_value=1, max_value=31)
-    mois = forms.ChoiceField(choices=LISTE_MOIS)
+    jour = forms.IntegerField(min_value=1, max_value=31, help_text="Saisissez le jour du mois (de 1 à 31). Exemple : 25 pour Noël.")
+    mois = forms.ChoiceField(choices=LISTE_MOIS, help_text="Sélectionnez le mois. Exemple : Décembre pour Noël.")
 
     class Meta:
         model = Ferie
         fields = ['type', 'nom', 'annee', 'jour', 'mois']
+        help_texts = {
+            "nom": "Saisissez le nom du jour férié. Exemples : Jour de l'an, Fête du travail, Noël...",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

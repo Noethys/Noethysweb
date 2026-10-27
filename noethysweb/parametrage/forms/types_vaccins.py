@@ -15,18 +15,21 @@ from core.forms.select2 import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    types_maladies = forms.ModelMultipleChoiceField(label="Types de maladies associées", widget=Select2MultipleWidget(), queryset=TypeMaladie.objects.all())
+    types_maladies = forms.ModelMultipleChoiceField(label="Types de maladies associées", widget=Select2MultipleWidget(), queryset=TypeMaladie.objects.all(), help_text="Sélectionnez les maladies contre lesquelles ce vaccin protège. Exemple : Diphtérie, Tétanos et Poliomyélite pour le DTP.")
 
     # Champs libres pour la durée de validité
     choix_validite = [("ILLIMITEE", "Validité illimitée"), ("DUREE", "Une durée")]
-    validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='ILLIMITEE', required=True)
-    validite_jours = forms.IntegerField(label="Jours", required=False)
-    validite_mois = forms.IntegerField(label="Mois", required=False)
-    validite_annees = forms.IntegerField(label="Années", required=False)
+    validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='ILLIMITEE', required=True, help_text="Indiquez si le vaccin est valable sans limite de temps ou pendant une durée donnée (rappel nécessaire ensuite).")
+    validite_jours = forms.IntegerField(label="Jours", required=False, help_text="Saisissez le nombre de jours de la durée de validité. Exemple : 15.")
+    validite_mois = forms.IntegerField(label="Mois", required=False, help_text="Saisissez le nombre de mois de la durée de validité. Exemple : 6.")
+    validite_annees = forms.IntegerField(label="Années", required=False, help_text="Saisissez le nombre d'années de la durée de validité. Exemple : 10.")
 
     class Meta:
         model = TypeVaccin
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom du vaccin. Exemples : DTP, ROR, Hépatite B...",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

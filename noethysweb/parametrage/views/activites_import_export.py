@@ -24,7 +24,7 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Gestion des activités"
         context['box_titre'] = "Importer/Exporter des activités"
-        context['box_introduction'] = "Vous pouvez ici exporter dans un fichier un ou plusieurs paramétrages d'activités, ou importer des paramétrages d'activités contenus dans un fichier NWA. Renseignez les paramètres et cliquez sur le bouton Exécuter."
+        context['box_introduction'] = "Exportez dans un fichier NWA le paramétrage d'une ou plusieurs activités (groupes, unités, tarifs...), par exemple pour le transférer vers une autre base de données, ou importez un paramétrage d'activité à partir d'un fichier NWA. Seul le paramétrage est concerné : aucune donnée sur les familles, inscriptions ou consommations n'est exportée. Renseignez les paramètres et cliquez sur le bouton Exécuter."
         if "form" not in kwargs:
             context['form'] = Formulaire(request=self.request)
         return context

@@ -15,11 +15,21 @@ from core.utils.utils_commandes import Commandes
 
 class Formulaire(FormulaireBase, ModelForm):
     # Modification du label de la checkbox
-    carte = forms.BooleanField(label="Est représentée par une carte adhérent.", required=False)
+    carte = forms.BooleanField(label="Est représentée par une carte adhérent.", required=False, help_text="Cochez cette case si cette adhésion donne lieu à la remise d'une carte d'adhérent.")
 
     class Meta:
         model = TypeCotisation
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom du type d'adhésion. Exemples : Adhésion annuelle, Carte famille, Licence sportive...",
+            "type": "Indiquez si l'adhésion est souscrite pour toute la famille ou pour un individu.",
+            "code_comptable": "Saisissez si besoin le code comptable, pour les exports comptables.",
+            "code_analytique": "Saisissez si besoin le code analytique, pour les exports comptables.",
+            "code_produit_local": "Cette option n'est utilisée que par les structures publiques pour des exports vers des logiciels de comptabilité publique.",
+            "defaut": "Cochez cette case pour que ce type d'adhésion soit proposé par défaut lors de la saisie d'une adhésion.",
+            "activite": "Sélectionnez si besoin l'activité à laquelle seront rattachées les prestations de cette adhésion. Utile notamment pour les exports comptables par activité.",
+            "structure": "Sélectionnez la structure associée à ce type d'adhésion. Laissez 'Toutes les structures' pour que ce type d'adhésion soit disponible dans toutes les structures.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

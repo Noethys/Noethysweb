@@ -40,8 +40,8 @@ class Page(crud.Page):
     url_ajouter = "configurations_sms_ajouter"
     url_modifier = "configurations_sms_modifier"
     url_supprimer = "configurations_sms_supprimer"
-    description_liste = "Voici ci-dessous la liste des configurations SMS."
-    description_saisie = "Saisissez toutes les informations concernant la configuration à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les configurations SMS définissent le service utilisé pour envoyer des SMS aux familles (Mailjet, OVH, Brevo). Un compte doit avoir été ouvert au préalable auprès du fournisseur."
+    description_saisie = "Sélectionnez le fournisseur, saisissez le token qu'il vous a communiqué et le nom d'expéditeur affiché dans les SMS, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une configuration SMS"
     objet_pluriel = "des configurations SMS"
     boutons_liste = [

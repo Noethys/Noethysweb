@@ -18,8 +18,8 @@ class Page(crud.Page):
     url_ajouter = "types_pieces_collaborateurs_ajouter"
     url_modifier = "types_pieces_collaborateurs_modifier"
     url_supprimer = "types_pieces_collaborateurs_supprimer"
-    description_liste = "Voici ci-dessous la liste des types de pièces pour les collaborateurs."
-    description_saisie = "Saisissez toutes les informations concernant le type de pièce à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les types de pièces sont les documents demandés aux collaborateurs : diplômes, extrait de casier judiciaire, certificat médical..."
+    description_saisie = "Saisissez le nom du type de pièce et sa durée de validité puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un type de pièce"
     objet_pluriel = "des types de pièces"
     boutons_liste = [

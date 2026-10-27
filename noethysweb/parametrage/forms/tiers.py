@@ -20,6 +20,11 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             "observations": forms.Textarea(attrs={'rows': 3}),
         }
+        help_texts = {
+            "nom": "Saisissez le nom du tiers. Exemples : CAF du Finistère, Fournisseur de matériel, Conseil départemental...",
+            "observations": "Vous pouvez saisir ici des informations complémentaires sur ce tiers.",
+            "structure": "Sélectionnez la structure associée à ce tiers. Laissez 'Toutes les structures' pour que ce tiers soit disponible dans toutes les structures.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

@@ -23,6 +23,11 @@ class Formulaire(FormulaireBase, ModelForm):
             'cp': CodePostal(attrs={"id_ville": "id_ville"}),
             'ville': Ville(attrs={"id_codepostal": "id_cp"}),
         }
+        help_texts = {
+            "nom": "Saisissez le nom du lieu. Exemples : Gare de Brest, Aéroport de Nantes...",
+            "cp": "Saisissez le code postal. La ville correspondante vous sera proposée automatiquement.",
+            "ville": "Saisissez le nom de la ville.",
+        }
 
     def __init__(self, *args, **kwargs):
         categorie = kwargs.pop("categorie", None)

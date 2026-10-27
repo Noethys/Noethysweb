@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "images_fond_ajouter"
     url_modifier = "images_fond_modifier"
     url_supprimer = "images_fond_supprimer"
-    description_liste = "Voici ci-dessous la liste des images à intégrer dans la page de connexion du portail."
-    description_saisie = "Saisissez un titre et une image puis cliquez sur le bouton Enregistrer."
+    description_liste = "Les images de fond peuvent être affichées en arrière-plan de la page de connexion du portail famille. L'image utilisée se choisit dans les paramètres du portail."
+    description_saisie = "Saisissez un titre et sélectionnez l'image puis cliquez sur le bouton Enregistrer. Privilégiez une image de grande taille et peu chargée, pour que le formulaire de connexion reste lisible."
     objet_singulier = "une image de fond"
     objet_pluriel = "des images de fond"
     boutons_liste = [

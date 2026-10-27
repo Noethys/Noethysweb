@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "unites_consentements_ajouter"
     url_modifier = "unites_consentements_modifier"
     url_supprimer = "unites_consentements_supprimer"
-    description_liste = "Voici ci-dessous la liste des unités de consentements. Il s'agit généralement des différentes version des documents (Exemple : Règlement intérieur de la structure)."
-    description_saisie = "Saisissez toutes les informations concernant l'unité de consentement à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les unités de consentements correspondent aux versions successives d'un document à faire accepter (exemple : règlement intérieur 2025-26). Lorsqu'une nouvelle version est créée, les usagers sont invités à l'accepter à nouveau."
+    description_saisie = "Saisissez la date de la version et importez le document correspondant puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une unité de consentement"
     objet_pluriel = "des unités de consentements"
 
@@ -35,7 +35,7 @@ class Page(crud.Page):
             ]
         else:
             # Si aucun type de consentement n'existe
-            context['box_introduction'] = "Vous pouvez saisir ici des unités de consentement pour chaque type de consentement.<br><b>Vous devez avoir enregistré au moins un type de consentement avant de pouvoir ajouter des unités !</b>"
+            context['box_introduction'] = "Les unités de consentements correspondent aux versions successives de chaque document à faire accepter.<br><b>Vous devez d'abord créer au moins un type de consentement (menu Paramétrage > Portail > Types de consentements) avant de pouvoir ajouter des unités.</b>"
         return context
 
     def Get_categorie(self):

@@ -18,6 +18,10 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = NiveauScolaire
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom du niveau scolaire. Exemples : Petite section, CP, CM2...",
+            "abrege": "Saisissez le nom abrégé du niveau. Exemples : PS, CP, CM2...",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

@@ -21,6 +21,13 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             "compte_comptable": Select_avec_commandes_advanced(attrs={"id_form": "comptes_comptables_form", "module_form": "parametrage.forms.comptes_comptables", "nom_objet": "un compte comptable", "champ_nom": "nom"}),
         }
+        help_texts = {
+            "type": "Sélectionnez 'Débit' pour une catégorie de dépenses ou 'Crédit' pour une catégorie de recettes.",
+            "nom": "Saisissez le nom de la catégorie comptable. Exemples : Fournitures, Subventions, Participations des familles...",
+            "abrege": "Saisissez si besoin un nom abrégé (quelques caractères). Exemples : FOURN, SUBV...",
+            "compte_comptable": "Sélectionnez le compte comptable associé à cette catégorie.",
+            "structure": "Sélectionnez la structure associée à cette catégorie. Laissez 'Toutes les structures' pour que cette catégorie soit disponible dans toutes les structures.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "modeles_prelevements_creer"
     url_modifier = "modeles_prelevements_modifier"
     url_supprimer = "modeles_prelevements_supprimer"
-    description_liste = "Voici ci-dessous la liste des modèles de prélèvements."
-    description_saisie = "Saisissez toutes les informations concernant le modèle à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les modèles de prélèvements définissent les paramètres des fichiers de prélèvements SEPA transmis à la banque ou à la trésorerie : compte bancaire, format, perception, libellés... Ils sont utilisés depuis le menu Facturation pour générer les lots de prélèvements."
+    description_saisie = "Renseignez le compte bancaire, les options et les libellés des prélèvements, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un modèle de prélèvement"
     objet_pluriel = "des modèles de prélèvements"
     boutons_liste = [
@@ -59,7 +59,7 @@ class Creer(Page, crud.Ajouter):
 
     def get_context_data(self, **kwargs):
         context = super(Creer, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Vous devez sélectionner un format."
+        context['box_introduction'] = "Sélectionnez le format de prélèvement : 'Secteur privé' pour une association ou 'Secteur public DFT' pour une collectivité, puis cliquez sur le bouton Valider."
         return context
 
     def post(self, request, **kwargs):

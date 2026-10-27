@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "achats_fournisseurs_ajouter"
     url_modifier = "achats_fournisseurs_modifier"
     url_supprimer = "achats_fournisseurs_supprimer"
-    description_liste = "Voici ci-dessous la liste des fournisseurs."
-    description_saisie = "Saisissez toutes les informations concernant le fournisseur à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les fournisseurs sont les commerces et prestataires auprès desquels vous effectuez vos achats. Ils sont proposés lors de la saisie des demandes d'achats."
+    description_saisie = "Saisissez le nom du fournisseur et, si besoin, des observations (contact, conditions de vente...), puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un fournisseur"
     objet_pluriel = "des fournisseurs"
     boutons_liste = [

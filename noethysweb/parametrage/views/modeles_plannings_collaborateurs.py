@@ -55,8 +55,8 @@ class Page(crud.Page):
     url_ajouter = "modeles_plannings_collaborateurs_ajouter"
     url_modifier = "modeles_plannings_collaborateurs_modifier"
     url_supprimer = "modeles_plannings_collaborateurs_supprimer"
-    description_liste = "Voici ci-dessous la liste des modèles de plannings pour les collaborateurs."
-    description_saisie = "Saisissez toutes les informations concernant le modèle de planning à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les modèles de plannings sont des semaines types d'événements (horaires de travail, réunions...) que vous pouvez appliquer en une seule fois au planning d'un ou plusieurs collaborateurs."
+    description_saisie = "Saisissez le nom du modèle et ajoutez les événements qui le composent puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un modèle de planning"
     objet_pluriel = "des modèles de planning"
     boutons_liste = [

@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "taches_recurrentes_ajouter"
     url_modifier = "taches_recurrentes_modifier"
     url_supprimer = "taches_recurrentes_supprimer"
-    description_liste = "Voici ci-dessous la liste des tâches récurrentes."
-    description_saisie = "Saisissez toutes les informations concernant la tâche récurrente à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les tâches récurrentes génèrent automatiquement des tâches à intervalle régulier (exemples : envoyer les factures chaque début de mois, préparer les inscriptions avant chaque vacances). Les tâches générées apparaissent dans le widget Tâches de la page d'accueil."
+    description_saisie = "Saisissez le titre de la tâche, sa période de validité, sa fréquence de répétition et les utilisateurs concernés, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une tâche récurrente"
     objet_pluriel = "des tâches récurrentes"
     boutons_liste = [

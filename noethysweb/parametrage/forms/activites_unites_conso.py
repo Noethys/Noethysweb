@@ -28,18 +28,18 @@ class Formulaire(FormulaireBase, ModelForm):
     # Durée de validité
     choix_validite = [("ILLIMITEE", "Durée illimitée"), ("LIMITEE", "Durée limitée")]
     validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='ILLIMITEE', required=True, help_text="Généralement, la durée sera illimitée. A modifier uniquement si vous souhaitez masquer cette unité de la grille des consommations à partir d'une date donnée (Dans le cas d'une unité obsolète par exemple).")
-    validite_date_debut = forms.DateField(label="Date de début*", required=False, widget=DatePickerWidget())
-    validite_date_fin = forms.DateField(label="Date de fin*", required=False, widget=DatePickerWidget())
+    validite_date_debut = forms.DateField(label="Date de début*", required=False, widget=DatePickerWidget(), help_text="Saisissez la date à partir de laquelle cette unité est utilisable.")
+    validite_date_fin = forms.DateField(label="Date de fin*", required=False, widget=DatePickerWidget(), help_text="Saisissez la date jusqu'à laquelle cette unité est utilisable.")
 
     # Groupes
     choix_groupes = [("TOUS", "Tous les groupes"), ("SELECTION", "Uniquement certains groupes")]
     groupes_type = forms.TypedChoiceField(label="Groupes associés", choices=choix_groupes, initial='TOUS', required=True, help_text="A renseigner si vous souhaitez que cette unité apparaisse uniquement dans la grille des consommations des individus inscrits sur un groupe donné. Exemple : Pour afficher une unité 'Sieste' uniquement pour les enfants du groupe 'Maternel'.")
-    groupes = forms.ModelMultipleChoiceField(label="Sélection des groupes", widget=Select2MultipleWidget(), queryset=Groupe.objects.none(), required=False)
+    groupes = forms.ModelMultipleChoiceField(label="Sélection des groupes", widget=Select2MultipleWidget(), queryset=Groupe.objects.none(), required=False, help_text="Sélectionnez les groupes pour lesquels cette unité est proposée.")
 
     # Catégories de tarifs
     choix_categories = [("TOUS", "Toutes les catégories de tarifs"), ("SELECTION", "Uniquement certaines catégories de tarifs")]
     categories_tarifs_type = forms.TypedChoiceField(label="Catégories de tarifs associées", choices=choix_categories, initial='TOUS', required=True, help_text="A renseigner uniquement pour que cette unité apparaisse dans la grille des consommations des individus inscrits sur une catégorie de tarif donnée. Exemple : Pour afficher une unité 'Transport' pour les enfants inscrits avec la catégorie de tarif 'Hors commune'.")
-    categories_tarifs = forms.ModelMultipleChoiceField(label="Sélection des catégories", widget=Select2MultipleWidget(), queryset=CategorieTarif.objects.none(), required=False)
+    categories_tarifs = forms.ModelMultipleChoiceField(label="Sélection des catégories", widget=Select2MultipleWidget(), queryset=CategorieTarif.objects.none(), required=False, help_text="Sélectionnez les catégories de tarifs pour lesquelles cette unité est proposée.")
 
     # Incompatibilités
     incompatibilites = forms.ModelMultipleChoiceField(label="Incompatibilités", widget=Select2MultipleWidget(), queryset=Unite.objects.none(), required=False,
@@ -72,6 +72,8 @@ class Formulaire(FormulaireBase, ModelForm):
             "touche_raccourci": "Il suffira de conserver cette touche enfoncée pour saisir une consommation de cette unité en même temps qu'une autre dans la grille des consommations.",
             "visible_portail": "Décochez cette case uniquement si vous souhaitez que cette unité ne soit pas visible par un usager sur le planning de réservations du portail. Seuls les utilisateurs pourront la voir dans la grille des consommations.",
             "imposer_saisie_valeur": "Par défaut, un usager ne peut pas saisir d'horaire ou de quantité sur le portail. En cochant cette case, vous imposez à l'usager de renseigner cette information lors de la saisie de la réservation. Cette option n'est utile que si vous avez sélectionné un type Horaire ou Quantité.",
+            "repas": "Cochez cette case si cette unité comprend un repas. Ses consommations seront alors comptabilisées dans la liste des repas.",
+            "restaurateur": "Sélectionnez si besoin le restaurateur qui fournit les repas de cette unité. Cette information est indicative : les commandes de repas utilisent le restaurateur défini dans le modèle de commande.",
         }
         widgets = {
             "equiv_heures": forms.TimeInput(attrs={'type': 'time'}),

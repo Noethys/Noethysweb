@@ -21,6 +21,9 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             'vaccin_date_naiss_min': DatePickerWidget(),
         }
+        help_texts = {
+            "nom": "Saisissez le nom du type. Exemples : Rougeole, Tétanos, Coqueluche...",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

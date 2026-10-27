@@ -16,12 +16,18 @@ from core.utils import utils_texte
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    couleur = forms.CharField(label="Couleur", required=False, widget=ColorPickerWidget(), initial="#FFFFFF")
-    html = forms.CharField(label="Texte", widget=forms.Textarea(attrs={"rows": 12}), required=True)
+    couleur = forms.CharField(label="Couleur", required=False, widget=ColorPickerWidget(), initial="#FFFFFF", help_text="Sélectionnez si besoin une couleur pour identifier ce modèle de rappel.")
+    html = forms.CharField(label="Texte", widget=forms.Textarea(attrs={"rows": 12}), required=True, help_text="Saisissez le texte de la lettre de rappel. Cliquez sur un mot-clé ci-dessous pour l'insérer : il sera remplacé par la valeur correspondante.")
 
     class Meta:
         model = ModeleRappel
         fields = "__all__"
+        help_texts = {
+            "label": "Saisissez le nom du modèle de lettre de rappel. Exemples : 1er rappel, Relance avant contentieux...",
+            "retard_min": "Saisissez le nombre minimal de jours de retard à partir duquel ce modèle est proposé. Exemple : 15.",
+            "retard_max": "Saisissez le nombre maximal de jours de retard jusqu'auquel ce modèle est proposé. Exemple : 30.",
+            "titre": "Saisissez le titre de la lettre de rappel. Exemple : Rappel de paiement.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

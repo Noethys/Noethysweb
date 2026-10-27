@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "caisses_ajouter"
     url_modifier = "caisses_modifier"
     url_supprimer = "caisses_supprimer"
-    description_liste = "Voici ci-dessous la liste des caisses."
-    description_saisie = "Saisissez toutes les informations concernant la caisse à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les caisses sont les organismes d'allocations familiales auxquels les familles sont rattachées (exemples : CAF du Finistère, MSA d'Armorique). La caisse est renseignée dans la fiche famille et peut conditionner certains tarifs et certaines aides."
+    description_saisie = "Saisissez le nom de la caisse et son régime social puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une caisse"
     objet_pluriel = "des caisses"
     boutons_liste = [

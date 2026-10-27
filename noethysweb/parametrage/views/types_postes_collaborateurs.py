@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "types_postes_collaborateurs_ajouter"
     url_modifier = "types_postes_collaborateurs_modifier"
     url_supprimer = "types_postes_collaborateurs_supprimer"
-    description_liste = "Voici ci-dessous la liste des types de postes pour les collaborateurs."
-    description_saisie = "Saisissez toutes les informations concernant le type de poste à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les types de postes décrivent les fonctions occupées par les collaborateurs (animateur, directeur, agent d'entretien...)."
+    description_saisie = "Saisissez le nom du type de poste puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un type de poste"
     objet_pluriel = "des types de postes"
     boutons_liste = [

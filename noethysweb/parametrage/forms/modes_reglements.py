@@ -24,6 +24,20 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             'image': Crop_image(attrs={"largeur_min": 132, "hauteur_min": 72, "ratio": "132/72"}),
         }
+        help_texts = {
+            "label": "Saisissez le nom du mode de règlement. Exemples : Chèque, Espèces, Virement, Carte bancaire, Chèques vacances...",
+            "image": "Sélectionnez si besoin une image pour illustrer ce mode de règlement.",
+            "numero_piece": "Sélectionnez un type si les règlements de ce mode comportent un numéro de pièce (exemple : numéro de chèque). Le champ 'Numéro de pièce' sera alors proposé lors de la saisie des règlements.",
+            "nbre_chiffres": "Saisissez si besoin le nombre de caractères du numéro de pièce. Exemple : 7 pour un numéro de chèque.",
+            "frais_gestion": "Indiquez si des frais de gestion s'appliquent aux règlements effectués avec ce mode.",
+            "frais_montant": "Saisissez le montant fixe des frais de gestion. Exemple : 0.50.",
+            "frais_pourcentage": "Saisissez le pourcentage du montant du règlement appliqué comme frais de gestion. Exemple : 1.5.",
+            "frais_arrondi": "Sélectionnez la méthode d'arrondi du montant des frais.",
+            "frais_label": "Saisissez le label de la prestation de frais de gestion. Exemple : Frais de traitement carte bancaire.",
+            "type_comptable": "Indiquez si les règlements de ce mode sont encaissés en banque ou en caisse.",
+            "code_compta": "Saisissez si besoin le compte comptable de ce mode de règlement. Il est utilisé dans les exports comptables lorsque le dépôt n'a pas de compte comptable.",
+            "code_journal": "Saisissez si besoin le code journal utilisé pour les règlements de ce mode dans les exports comptables. Exemple : BQ.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

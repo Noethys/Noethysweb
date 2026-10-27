@@ -17,6 +17,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = CategorieTravail
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom de la catégorie socio-professionnelle. Exemples : Employés, Cadres, Artisans, Sans emploi...",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

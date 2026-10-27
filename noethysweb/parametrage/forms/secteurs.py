@@ -21,7 +21,8 @@ class Formulaire(FormulaireBase, ModelForm):
             "couleur": ColorPickerWidget(),
         }
         help_texts = {
-            "couleur": "Cliquez sur le champ pour afficher le sélecteur de couleur. Cette couleur peut être appliquée dans certaines fonctionnalités de l'application."
+            "couleur": "Cliquez sur le champ pour afficher le sélecteur de couleur. Cette couleur peut être appliquée dans certaines fonctionnalités de l'application.",
+            "nom": "Saisissez le nom du secteur géographique. Exemples : Centre-bourg, Quartier nord, Hors commune...",
         }
 
     def __init__(self, *args, **kwargs):

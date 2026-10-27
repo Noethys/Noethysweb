@@ -25,6 +25,14 @@ class Formulaire(FormulaireBase, ModelForm):
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
             "memo": forms.Textarea(attrs={'rows': 3}),
         }
+        help_texts = {
+            "nom": "Saisissez le nom de la compagnie d'assurance. Exemples : MAIF, MACIF, AXA...",
+            "rue_resid": "Saisissez le numéro et le nom de la voie. Exemple : 12 rue des Lilas.",
+            "cp_resid": "Saisissez le code postal. La ville correspondante vous sera proposée automatiquement.",
+            "ville_resid": "Saisissez le nom de la ville.",
+            "telephone": "Saisissez le numéro de téléphone. Exemple : 02 98 12 34 56.",
+            "memo": "Vous pouvez saisir ici des informations complémentaires sur cet assureur.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

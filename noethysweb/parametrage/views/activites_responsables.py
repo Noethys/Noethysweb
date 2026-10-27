@@ -18,8 +18,8 @@ class Page(Onglet):
     url_ajouter = "activites_responsables_ajouter"
     url_modifier = "activites_responsables_modifier"
     url_supprimer = "activites_responsables_supprimer"
-    description_liste = "Saisissez au moins un responsable d'activité. Celui-ci est utilisé en tant que signataire de certains documents édités par le logiciel."
-    description_saisie = "Saisissez toutes les informations concernant le responsable à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Saisissez au moins un responsable pour l'activité (directeur, coordinateur...). Il est utilisé comme signataire de certains documents édités par l'application. Si plusieurs responsables sont saisis, définissez celui qui doit être utilisé par défaut."
+    description_saisie = "Saisissez le nom, le sexe et la fonction du responsable puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un responsable de l'activité"
     objet_pluriel = "des responsables de l'activité"
 

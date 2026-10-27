@@ -58,7 +58,6 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "API particulier"
         context['box_titre'] = "Paramétrer l'accès à API Particulier"
-        context['box_introduction'] = "_"
         context['afficher_menu_brothers'] = True
         context["form"] = Formulaire(request=self.request)
         context["token_exists"] = self.request.user.token_api_particulier != None

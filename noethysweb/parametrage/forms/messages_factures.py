@@ -21,6 +21,10 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             'texte': forms.Textarea(attrs={'rows': 4}),
         }
+        help_texts = {
+            "titre": "Saisissez le titre du message. Exemple : Information.",
+            "texte": "Saisissez le texte du message. Il sera imprimé sur les factures si l'option 'Afficher les messages' est cochée lors de l'impression.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

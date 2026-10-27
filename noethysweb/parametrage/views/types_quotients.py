@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "types_quotients_ajouter"
     url_modifier = "types_quotients_modifier"
     url_supprimer = "types_quotients_supprimer"
-    description_liste = "Voici ci-dessous la liste des types de quotients."
-    description_saisie = "Saisissez toutes les informations concernant le type de quotient à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les types de quotients distinguent l'origine des quotients familiaux saisis pour les familles (quotient CAF, quotient MSA, quotient communal...). Ils peuvent être utilisés dans le calcul des tarifs."
+    description_saisie = "Saisissez le nom du type de quotient puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un type de quotient"
     objet_pluriel = "des types de quotients"
     boutons_liste = [

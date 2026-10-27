@@ -18,11 +18,11 @@ from django.utils.dateparse import parse_date
 
 class Formulaire(FormulaireBase, ModelForm):
     choix_validite = [("ILLIMITEE", "Validité illimitée"), ("DUREE", "Une durée"), ("DATE", "Une date"), ]
-    validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='ILLIMITEE', required=True)
-    validite_jours = forms.IntegerField(label="Jours", required=False)
-    validite_mois = forms.IntegerField(label="Mois", required=False)
-    validite_annees = forms.IntegerField(label="Années", required=False)
-    validite_date = forms.DateField(label="Date de fin de validité*", required=False, widget=DatePickerWidget())
+    validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='ILLIMITEE', required=True, help_text="Indiquez combien de temps une pièce de ce type reste valable : sans limite, pendant une durée à partir de sa date de début (exemple : 1 an) ou jusqu'à une date donnée.")
+    validite_jours = forms.IntegerField(label="Jours", required=False, help_text="Saisissez le nombre de jours de la durée de validité. Exemple : 15.")
+    validite_mois = forms.IntegerField(label="Mois", required=False, help_text="Saisissez le nombre de mois de la durée de validité. Exemple : 6.")
+    validite_annees = forms.IntegerField(label="Années", required=False, help_text="Saisissez le nombre d'années de la durée de validité. Exemple : 1.")
+    validite_date = forms.DateField(label="Date de fin de validité*", required=False, widget=DatePickerWidget(), help_text="Saisissez la date jusqu'à laquelle les pièces de ce type sont valables. Exemple : 31/08/2026 pour une fiche valable jusqu'à la fin de l'année scolaire.")
 
     class Meta:
         model = TypePieceCollaborateur
@@ -34,7 +34,8 @@ class Formulaire(FormulaireBase, ModelForm):
         help_texts = {
             "obligatoire": "Précisez si cette pièce est obligatoire pour les collaborateurs",
             "qualifications": "Si cette pièce doit être associée à une qualification, sélectionnez-la dans la liste proposée.",
-            "postes": "Si cette pièce doit être associée à un poste, sélectionnez-le dans la liste proposée."
+            "postes": "Si cette pièce doit être associée à un poste, sélectionnez-le dans la liste proposée.",
+            "nom": "Saisissez le nom du type de pièce. Exemples : Diplôme BAFA, Extrait de casier judiciaire, Certificat médical...",
         }
 
     def __init__(self, *args, **kwargs):

@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "budgets_ajouter"
     url_modifier = "budgets_modifier"
     url_supprimer = "budgets_supprimer"
-    description_liste = "Voici ci-dessous la liste des budgets."
-    description_saisie = "Saisissez toutes les informations concernant le budget à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les budgets permettent de comparer les dépenses et les recettes prévues avec les opérations réellement enregistrées dans la comptabilité, sur une période donnée et par poste analytique."
+    description_saisie = "Saisissez le nom du budget, sa période et les postes analytiques suivis, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un budget"
     objet_pluriel = "des budgets"
     boutons_liste = [

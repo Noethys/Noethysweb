@@ -17,6 +17,12 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = ResponsableActivite
         fields = "__all__"
+        help_texts = {
+            "sexe": "Sélectionnez le sexe du responsable.",
+            "nom": "Saisissez le nom et le prénom du responsable. Exemple : Marie DUPONT.",
+            "fonction": "Saisissez la fonction du responsable. Exemples : Directeur, Directrice adjointe, Coordinateur enfance...",
+            "defaut": "Cochez cette case pour définir ce responsable comme le responsable principal de l'activité. Un seul responsable peut être défini par défaut.",
+        }
 
     def __init__(self, *args, **kwargs):
         idactivite = kwargs.pop("idactivite")

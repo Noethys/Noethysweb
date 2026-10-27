@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "vacances_ajouter"
     url_modifier = "vacances_modifier"
     url_supprimer = "vacances_supprimer"
-    description_liste = "Voici ci-dessous la liste des périodes de vacances."
-    description_saisie = "Saisissez toutes les informations concernant la période de vacances à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les périodes de vacances scolaires sont utilisées dans toute l'application : tarifs et jours différents en vacances, calendrier des ouvertures, assistants, statistiques... Utilisez le bouton d'importation pour récupérer automatiquement le calendrier officiel de votre zone."
+    description_saisie = "Sélectionnez la période, saisissez l'année et les dates du premier et du dernier jour des vacances, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une période de vacances"
     objet_pluriel = "des périodes de vacances"
     boutons_liste = [

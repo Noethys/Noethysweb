@@ -24,6 +24,11 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             "image": Crop_image(attrs={"largeur_min": 447, "hauteur_min": 167, "ratio": "447/167"}),
         }
+        help_texts = {
+            "titre": "Saisissez un titre pour retrouver facilement cette image. Exemple : Enfants à la plage.",
+            "image": "Sélectionnez l'image à ajouter à la banque d'images des articles du portail.",
+            "structure": "Sélectionnez la structure associée à cette image. Laissez 'Toutes les structures' pour que cette image soit disponible dans toutes les structures.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

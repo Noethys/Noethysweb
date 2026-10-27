@@ -21,8 +21,8 @@ class Page(crud.Page):
     url_modifier = "modeles_impressions_modifier"
     url_supprimer = "modeles_impressions_supprimer"
     url_dupliquer = "modeles_impressions_dupliquer"
-    description_liste = "Sélectionnez une catégorie et consultez les modèles correspondants."
-    description_saisie = "Saisissez toutes les informations concernant le modèle à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les modèles d'impressions mémorisent un modèle de document et des options d'impression réutilisables, par exemple pour imprimer les factures toujours de la même façon. Sélectionnez une catégorie dans la liste pour consulter les modèles correspondants."
+    description_saisie = "Saisissez le nom du modèle, sélectionnez le modèle de document et réglez les options d'impression, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un modèle d'impression"
     objet_pluriel = "des modèles d'impressions"
 

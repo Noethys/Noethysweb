@@ -24,6 +24,11 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             'image': Crop_image(attrs={"largeur_min": 132, "hauteur_min": 72, "ratio": "132/72"}),
         }
+        help_texts = {
+            "mode": "Sélectionnez le mode de règlement associé à cet émetteur. Exemple : Chèque pour une banque, Bons vacances pour un organisme.",
+            "nom": "Saisissez le nom de l'émetteur. Exemples : Crédit Agricole, Banque Populaire, ANCV...",
+            "image": "Sélectionnez si besoin une image (logo de l'émetteur) affichée lors de la saisie des règlements.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

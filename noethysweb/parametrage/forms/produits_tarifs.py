@@ -16,16 +16,25 @@ from core.widgets import DatePickerWidget
 
 class Formulaire(FormulaireBase, ModelForm):
     # Dates de validité
-    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
-    date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget())
+    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget(), help_text="Saisissez la date à partir de laquelle ce tarif s'applique.")
+    date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(), help_text="Saisissez si besoin la date jusqu'à laquelle ce tarif s'applique. Laissez vide pour un tarif sans fin.")
 
     # Label prestation
     choix_label = [("NOM_TARIF", "Nom du produit"), ("DESCRIPTION", "Description de ce tarif"), ("PERSO", "Un label personnalisé")]
-    label_type = forms.TypedChoiceField(label="Label de la prestation", choices=choix_label, initial='NOM_TARIF', required=False)
+    label_type = forms.TypedChoiceField(label="Label de la prestation", choices=choix_label, initial='NOM_TARIF', required=False, help_text="Indiquez le label donné aux prestations générées : le nom du produit, la description de ce tarif ou un label personnalisé à saisir ci-dessous.")
 
     class Meta:
         model = TarifProduit
         fields = "__all__"
+        help_texts = {
+            "description": "Saisissez si besoin une courte description pour distinguer ce tarif. Exemple : Tarif week-end.",
+            "observations": "Vous pouvez saisir ici des informations complémentaires sur ce tarif.",
+            "tva": "Saisissez si besoin le taux de TVA applicable. Exemple : 20.",
+            "label_prestation": "Saisissez le label personnalisé des prestations générées par ce tarif. Exemple : Location de la salle polyvalente.",
+            "code_compta": "Saisissez si besoin le code comptable des prestations, pour les exports comptables.",
+            "methode": "Sélectionnez la méthode de calcul : un montant unique quelle que soit la quantité louée, ou un montant multiplié par la quantité louée.",
+            "montant": "Saisissez le montant du tarif. Exemple : 150.00.",
+        }
 
     def __init__(self, *args, **kwargs):
         idproduit = kwargs.pop("idproduit", None)

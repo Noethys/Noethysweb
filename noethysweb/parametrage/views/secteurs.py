@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "secteurs_ajouter"
     url_modifier = "secteurs_modifier"
     url_supprimer = "secteurs_supprimer"
-    description_liste = "Voici ci-dessous la liste des secteurs géographiques."
-    description_saisie = "Saisissez toutes les informations concernant le secteur géographique à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les secteurs géographiques permettent de classer les familles et les individus selon leur lieu de résidence (quartier, commune...). Ils peuvent être rattachés aux écoles et utilisés pour les statistiques."
+    description_saisie = "Saisissez le nom du secteur géographique puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un secteur géographique"
     objet_pluriel = "des secteurs géographiques"
     boutons_liste = [

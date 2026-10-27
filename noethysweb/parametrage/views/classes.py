@@ -42,8 +42,8 @@ class Page(crud.Page):
     url_modifier = "classes_modifier"
     url_supprimer = "classes_supprimer"
     url_supprimer_plusieurs = "classes_supprimer_plusieurs"
-    description_liste = "Voici ci-dessous la liste des classes. Il est possible de dupliquer des classes existantes en les cochant dans la liste puis en cliquant sur le bouton Dupliquer."
-    description_saisie = "Saisissez toutes les informations concernant la classe à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les classes sont rattachées à une école et à une année scolaire. Elles servent à renseigner la scolarité des individus. En début d'année scolaire, vous pouvez dupliquer les classes existantes : cochez-les dans la liste puis cliquez sur le bouton Dupliquer."
+    description_saisie = "Sélectionnez l'école, saisissez le nom de la classe, les dates de l'année scolaire et les niveaux concernés, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une classe"
     objet_pluriel = "des classes"
     boutons_liste = [

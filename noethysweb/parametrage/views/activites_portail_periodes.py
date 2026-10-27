@@ -18,8 +18,8 @@ class Page(Onglet):
     url_ajouter = "activites_portail_periodes_ajouter"
     url_modifier = "activites_portail_periodes_modifier"
     url_supprimer = "activites_portail_periodes_supprimer"
-    description_liste = "Vous pouvez saisir ici des périodes de réservation pour l'activité. Elles sont nécessaires si vous souhaitez permettre aux usagers d'enregistrer des réservations depuis le portail famille."
-    description_saisie = "Saisissez toutes les informations concernant la période de réservation à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les périodes de réservation définissent les dates que les familles peuvent réserver sur le portail (exemples : Décembre 2025, Vacances d'hiver 2026), ainsi que leur période d'affichage. Elles sont indispensables pour permettre aux usagers d'enregistrer des réservations depuis le portail famille."
+    description_saisie = "Saisissez le nom de la période, les dates réservables et les conditions d'affichage sur le portail puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une période de réservation"
     objet_pluriel = "des périodes de réservation"
 

@@ -18,8 +18,8 @@ class Page(crud.Page):
     url_ajouter = "unites_cotisations_ajouter"
     url_modifier = "unites_cotisations_modifier"
     url_supprimer = "unites_cotisations_supprimer"
-    description_liste = "Voici ci-dessous la liste des unités d'adhésions."
-    description_saisie = "Saisissez toutes les informations concernant l'unité d'adhésion à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les unités d'adhésions définissent, pour chaque type d'adhésion, les périodes de validité et les tarifs (exemples : 2025-26, Trimestre 1). Elles sont proposées lors de la saisie d'une adhésion."
+    description_saisie = "Saisissez le nom de l'unité, sa validité (période ou durée) et son tarif puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une unité d'adhésion"
     objet_pluriel = "des unités d'adhésions"
 
@@ -36,7 +36,7 @@ class Page(crud.Page):
             ]
         else:
             # Si aucun type de cotisation n'existe
-            context['box_introduction'] = "Vous pouvez saisir ici des unités d'adhésion pour chaque type d'adhésion.<br><b>Vous devez avoir enregistré au moins un type d'adhésion avant de pouvoir ajouter des unités !</b>"
+            context['box_introduction'] = "Les unités d'adhésions définissent les périodes et les tarifs de chaque type d'adhésion.<br><b>Vous devez d'abord créer au moins un type d'adhésion (menu Paramétrage > Adhésions > Types d'adhésions) avant de pouvoir ajouter des unités.</b>"
         return context
 
     def Get_categorie(self):

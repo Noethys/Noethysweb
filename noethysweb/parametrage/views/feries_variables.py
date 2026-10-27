@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "feries_variables_ajouter"
     url_modifier = "feries_variables_modifier"
     url_supprimer = "feries_variables_supprimer"
-    description_liste = "Voici ci-dessous la liste des jours fériés variables."
-    description_saisie = "Saisissez toutes les informations concernant le jour férié variable et cliquez sur le bouton Enregistrer."
+    description_liste = "Les jours fériés variables changent de date chaque année (exemples : lundi de Pâques, Ascension, lundi de Pentecôte). Ils doivent être saisis pour chaque année : utilisez le bouton de génération automatique pour les créer en une seule fois sur plusieurs années."
+    description_saisie = "Saisissez le nom du jour férié, l'année, le jour et le mois puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un jour férié variable"
     objet_pluriel = "des jours fériés variables"
     boutons_liste = [

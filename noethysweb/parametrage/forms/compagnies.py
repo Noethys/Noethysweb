@@ -25,6 +25,14 @@ class Formulaire(FormulaireBase, ModelForm):
             'cp': CodePostal(attrs={"id_ville": "id_ville"}),
             'ville': Ville(attrs={"id_codepostal": "id_cp"}),
         }
+        help_texts = {
+            "nom": "Saisissez le nom de la compagnie de transport. Exemples : Bibus, Transports Le Roux...",
+            "rue": "Saisissez le numéro et le nom de la voie. Exemple : 12 rue des Lilas.",
+            "cp": "Saisissez le code postal. La ville correspondante vous sera proposée automatiquement.",
+            "ville": "Saisissez le nom de la ville.",
+            "tel": "Saisissez le numéro de téléphone. Exemple : 02 98 12 34 56.",
+            "mail": "Saisissez l'adresse email. Exemple : contact@mairie.fr.",
+        }
 
     def __init__(self, *args, **kwargs):
         categorie = kwargs.pop("categorie", None)

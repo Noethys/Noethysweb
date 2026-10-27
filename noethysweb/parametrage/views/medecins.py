@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "medecins_ajouter"
     url_modifier = "medecins_modifier"
     url_supprimer = "medecins_supprimer"
-    description_liste = "Voici ci-dessous la liste des médecins."
-    description_saisie = "Saisissez toutes les informations concernant le médecin à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "L'annuaire des médecins est utilisé pour renseigner le médecin traitant dans les fiches individuelles. Ses coordonnées figurent ensuite sur les fiches sanitaires et de renseignements."
+    description_saisie = "Saisissez le nom, le prénom et les coordonnées du médecin puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un médecin"
     objet_pluriel = "des médecins"
     boutons_liste = [

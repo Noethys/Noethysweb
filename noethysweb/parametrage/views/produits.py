@@ -17,7 +17,7 @@ class Page(crud.Page):
     url_ajouter = "produits_ajouter"
     url_modifier = "produits_modifier"
     url_supprimer = "produits_supprimer"
-    description_liste = "Voici ci-dessous la liste des produits."
+    description_liste = "Les produits sont les biens proposés à la location : salles, matériel, véhicules... Leur quantité disponible est contrôlée dans le planning des locations. Définissez ensuite leurs tarifs."
     description_saisie = "Saisissez au minimum un nom puis cliquez sur le bouton Enregistrer. Notez que vous pouvez créer des questionnaires pour les produits depuis le menu Paramétrage > Questionnaires afin d'obtenir des champs de saisie personnalisés."
     objet_singulier = "un produit"
     objet_pluriel = "des produits"

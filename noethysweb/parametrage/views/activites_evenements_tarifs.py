@@ -21,8 +21,8 @@ class Page(Onglet):
     url_modifier = "activites_evenements_tarifs_modifier"
     url_supprimer = "activites_evenements_tarifs_supprimer"
     url_dupliquer = "activites_evenements_tarifs_dupliquer"
-    description_liste = "Vous pouvez saisir ici des tarifs avancés pour l'événement."
-    description_saisie = "Saisissez toutes les informations concernant le tarif et cliquez sur le bouton Enregistrer."
+    description_liste = "Saisissez ici les tarifs avancés de l'événement, par exemple un montant différent selon le quotient familial ou selon la catégorie de tarif. Pour un montant unique, utilisez plutôt l'option 'Tarif simple' dans la fiche de l'événement."
+    description_saisie = "Renseignez la période d'application, les catégories de tarifs concernées et la méthode de calcul du tarif puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un tarif d'événement"
     objet_pluriel = "des tarifs d'événement"
 

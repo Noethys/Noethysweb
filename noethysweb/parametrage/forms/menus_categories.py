@@ -18,6 +18,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = MenuCategorie
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom de la catégorie de plats. Exemples : Entrée, Plat principal, Dessert, Goûter...",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "prefixes_factures_ajouter"
     url_modifier = "prefixes_factures_modifier"
     url_supprimer = "prefixes_factures_supprimer"
-    description_liste = "Voici ci-dessous la liste des préfixes de factures."
-    description_saisie = "Saisissez toutes les informations concernant le préfixe à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les préfixes de factures sont placés devant les numéros de factures, par exemple pour distinguer plusieurs régies ou plusieurs séries de numérotation (exemple : RC-000123)."
+    description_saisie = "Saisissez le nom et le préfixe puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un préfixe de factures"
     objet_pluriel = "des préfixes de factures"
     boutons_liste = [

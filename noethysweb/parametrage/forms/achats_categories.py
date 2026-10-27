@@ -17,6 +17,10 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = AchatCategorie
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom de la catégorie d'achats. Exemples : Fournitures de bureau, Alimentation, Matériel pédagogique...",
+            "structure": "Sélectionnez la structure associée à cette catégorie. Laissez 'Toutes les structures' pour que cette catégorie soit disponible dans toutes les structures.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

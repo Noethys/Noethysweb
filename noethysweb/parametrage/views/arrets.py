@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "arrets_ajouter"
     url_modifier = "arrets_modifier"
     url_supprimer = "arrets_supprimer"
-    description_liste = "Voici ci-dessous la liste des arrêts."
-    description_saisie = "Saisissez toutes les informations concernant l'arrêt à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les arrêts sont les points de montée et de descente desservis par cette ligne de transport. Ils sont proposés lors de la saisie des transports des individus. Classez-les dans l'ordre de passage."
+    description_saisie = "Saisissez le nom de l'arrêt et sa position dans l'ordre de passage puis cliquez sur le bouton Enregistrer."
 
     def get_context_data(self, **kwargs):
         parametre = utils_transports.CATEGORIES[self.Get_categorie()]["parametrage"]["arrets"]

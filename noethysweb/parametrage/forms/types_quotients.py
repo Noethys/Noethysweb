@@ -17,6 +17,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = TypeQuotient
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom du type. Exemples : Quotient CAF, Quotient MSA, Quotient communal...",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

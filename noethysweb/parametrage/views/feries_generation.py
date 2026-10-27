@@ -22,7 +22,7 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Gestion des jours fériés variables"
         context['box_titre'] = "Génération automatique"
-        context['box_introduction'] = "Sélectionnez un nombre d'années, l'année de début et les fériés souhaités avant de cliquer sur le bouton Générer."
+        context['box_introduction'] = "Générez automatiquement les jours fériés variables (lundi de Pâques, Ascension, lundi de Pentecôte...) sur plusieurs années. Sélectionnez le nombre d'années, l'année de début et les fériés souhaités, puis cliquez sur le bouton Générer."
         context['menu_actif'] = "feries_variables_liste"
         context['form'] = Formulaire
         return context

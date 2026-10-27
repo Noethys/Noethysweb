@@ -35,6 +35,18 @@ class Formulaire(FormulaireBase, ModelForm):
             "adresse_cp": "Code postal. Exemple : 29200.",
             "adresse_ville": "Nom de la ville. Exemple : BREST.",
             "adresse_pays": "Code du pays. Exemple : FR.",
+            "nom": "Saisissez le nom du compte bancaire. Exemples : Compte principal, Régie cantine...",
+            "numero": "Saisissez le numéro de compte (11 caractères du RIB).",
+            "defaut": "Cochez cette case pour que ce compte soit proposé par défaut.",
+            "code_etab": "Saisissez le code établissement (code banque à 5 chiffres du RIB).",
+            "code_guichet": "Saisissez le code guichet (5 chiffres du RIB).",
+            "cle_rib": "Saisissez la clé RIB (2 chiffres).",
+            "cle_iban": "Saisissez la clé IBAN (les 2 chiffres qui suivent 'FR' au début de l'IBAN).",
+            "iban": "Saisissez l'IBAN complet sans espaces. Exemple : FR7630001007941234567890185. Il est indispensable pour les prélèvements.",
+            "bic": "Saisissez le code BIC de la banque. Exemple : BDFEFRPPCCT. Il est indispensable pour les prélèvements.",
+            "dft_titulaire": "Uniquement pour les prélèvements au format 'Secteur public DFT' : saisissez le nom du titulaire du compte de dépôt de fonds au Trésor (DFT). Exemple : Régie cantine Ville de Brest.",
+            "dft_iban": "Uniquement pour les prélèvements au format 'Secteur public DFT' : saisissez l'IBAN du compte de dépôt de fonds au Trésor (DFT).",
+            "structure": "Sélectionnez la structure associée à ce compte. Laissez 'Toutes les structures' pour que ce compte soit disponible dans toutes les structures.",
         }
 
     def __init__(self, *args, **kwargs):

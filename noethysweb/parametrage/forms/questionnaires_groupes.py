@@ -17,6 +17,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = QuestionnaireGroupe
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom du regroupement de questions. Exemples : Santé, Autorisations, Informations complémentaires...",
+        }
 
     def __init__(self, *args, **kwargs):
         categorie = kwargs.pop("categorie")

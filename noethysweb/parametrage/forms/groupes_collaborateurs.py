@@ -24,7 +24,7 @@ class Widget_utilisateur(ModelSelect2MultipleWidget):
 
 class Formulaire(FormulaireBase, ModelForm):
     superviseurs = forms.ModelMultipleChoiceField(label="Superviseurs", widget=Widget_utilisateur({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}),
-                                               queryset=Utilisateur.objects.none(), required=True)
+                                               queryset=Utilisateur.objects.none(), required=True, help_text="Sélectionnez les utilisateurs autorisés à consulter les collaborateurs de ce groupe. Si aucun superviseur n'est sélectionné, le groupe est accessible à tous les utilisateurs.")
 
     class Meta:
         model = GroupeCollaborateurs

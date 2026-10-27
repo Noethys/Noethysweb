@@ -74,8 +74,8 @@ class Page(crud.Page):
     url_modifier = "modeles_documents_modifier"
     url_supprimer = "modeles_documents_supprimer"
     url_dupliquer = "modeles_documents_dupliquer"
-    description_liste = "Voici ci-dessous la liste des modèles de documents pour chaque catégorie de données."
-    description_saisie = "Saisissez toutes les informations concernant le modèle de document à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les modèles de documents définissent la mise en page des documents imprimés : factures, attestations, devis, rappels, reçus, cartes d'adhérents... Sélectionnez une catégorie dans la liste pour consulter les modèles correspondants. Vous pouvez créer plusieurs modèles par catégorie et choisir lequel utiliser par défaut."
+    description_saisie = "Composez la mise en page du document en ajoutant des objets (textes, images, cadres, champs) sur la page puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un modèle de document"
     objet_pluriel = "des modèles de documents"
 
@@ -212,7 +212,7 @@ class Creer(Page, crud.Ajouter):
     def get_context_data(self, **kwargs):
         context = super(Creer, self).get_context_data(**kwargs)
         context['box_titre'] = "Modèles de documents"
-        context['box_introduction'] = "Vous devez saisir le nom du document à créer."
+        context['box_introduction'] = "Saisissez le nom du nouveau modèle de document puis cliquez sur le bouton Enregistrer. Vous accéderez ensuite à l'éditeur de mise en page."
         context['onglet_actif'] = "modeles_documents"
         return context
 

@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "compagnies_ajouter"
     url_modifier = "compagnies_modifier"
     url_supprimer = "compagnies_supprimer"
-    description_liste = "Voici ci-dessous la liste des compagnies."
-    description_saisie = "Saisissez toutes les informations concernant la compagnie à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les compagnies sont les transporteurs utilisés pour cette catégorie de transport. Elles sont proposées lors de la saisie des transports des individus."
+    description_saisie = "Saisissez le nom de la compagnie et, si besoin, ses coordonnées puis cliquez sur le bouton Enregistrer."
 
     def get_context_data(self, **kwargs):
         parametre = utils_transports.CATEGORIES[self.Get_categorie()]["parametrage"]["compagnies"]

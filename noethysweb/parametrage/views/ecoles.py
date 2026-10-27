@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "ecoles_ajouter"
     url_modifier = "ecoles_modifier"
     url_supprimer = "ecoles_supprimer"
-    description_liste = "Voici ci-dessous la liste des écoles."
-    description_saisie = "Saisissez toutes les informations concernant l'école à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les écoles servent à renseigner la scolarité des individus. Créez ensuite les classes de chaque école dans le menu Paramétrage > Scolarité > Classes."
+    description_saisie = "Saisissez le nom et les coordonnées de l'école et, si besoin, les secteurs géographiques rattachés, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une école"
     objet_pluriel = "des écoles"
     boutons_liste = [

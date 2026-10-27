@@ -47,8 +47,8 @@ class Page(crud.Page):
     url_ajouter = "questions_ajouter"
     url_modifier = "questions_modifier"
     url_supprimer = "questions_supprimer"
-    description_liste = "Sélectionnez une catégorie et consultez les questions correspondantes."
-    description_saisie = "Saisissez toutes les informations concernant la question à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les questionnaires permettent d'ajouter vos propres questions dans les fiches familles et individus, les inscriptions, les consommations, les locations, les produits ou les collaborateurs. Certaines questions peuvent aussi être proposées aux familles sur le portail. Sélectionnez une catégorie pour consulter les questions correspondantes."
+    description_saisie = "Saisissez l'intitulé de la question, choisissez le type de réponse attendue et les endroits où elle doit être visible, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une question"
     objet_pluriel = "des questions"
 

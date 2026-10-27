@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "produits_tarifs_ajouter"
     url_modifier = "produits_tarifs_modifier"
     url_supprimer = "produits_tarifs_supprimer"
-    description_liste = "Vous pouvez saisir ici des tarifs avancés pour un produit."
-    description_saisie = "Saisissez toutes les informations concernant le tarif et cliquez sur le bouton Enregistrer."
+    description_liste = "Saisissez ici les tarifs du produit. Comme pour les activités, créez un nouveau tarif à partir de la date d'un changement de prix plutôt que de modifier le tarif existant."
+    description_saisie = "Renseignez la période d'application, la méthode de calcul et le montant du tarif puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un tarif de produit"
     objet_pluriel = "des tarifs d'un produit"
 

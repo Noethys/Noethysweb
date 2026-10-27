@@ -17,6 +17,10 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = ComptaCompteComptable
         fields = "__all__"
+        help_texts = {
+            "numero": "Saisissez le numéro du compte selon votre plan comptable. Exemple : 706.",
+            "nom": "Saisissez le libellé du compte comptable. Exemple : Prestations de services.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

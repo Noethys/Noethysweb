@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "assureurs_ajouter"
     url_modifier = "assureurs_modifier"
     url_supprimer = "assureurs_supprimer"
-    description_liste = "Voici ci-dessous la liste des assureurs."
-    description_saisie = "Saisissez toutes les informations concernant l'assureur à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les assureurs sont proposés lors de la saisie des assurances des individus. Exemples : MAIF, MACIF, AXA..."
+    description_saisie = "Saisissez le nom de l'assureur et, si besoin, ses coordonnées puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un assureur"
     objet_pluriel = "des assureurs"
     boutons_liste = [

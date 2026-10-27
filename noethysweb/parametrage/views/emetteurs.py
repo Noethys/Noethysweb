@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "emetteurs_ajouter"
     url_modifier = "emetteurs_modifier"
     url_supprimer = "emetteurs_supprimer"
-    description_liste = "Voici ci-dessous la liste des émetteurs."
-    description_saisie = "Saisissez toutes les informations concernant l'émetteur à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les émetteurs sont les banques ou organismes à l'origine des règlements (exemples : Crédit Agricole pour un chèque, ANCV pour des chèques vacances). Ils sont proposés lors de la saisie d'un règlement selon le mode de règlement choisi."
+    description_saisie = "Sélectionnez le mode de règlement, saisissez le nom de l'émetteur et ajoutez si besoin son logo, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un émetteur de règlements"
     objet_pluriel = "des émetteurs de règlements"
     boutons_liste = [

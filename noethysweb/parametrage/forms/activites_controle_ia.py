@@ -15,13 +15,13 @@ from core.utils import utils_export_parametrage
 
 
 class Formulaire(FormulaireBase, forms.Form):
-    activite = forms.ModelChoiceField(label="Activité", queryset=Activite.objects.none(), required=True)
+    activite = forms.ModelChoiceField(label="Activité", queryset=Activite.objects.none(), required=True, help_text="Sélectionnez l'activité dont vous souhaitez faire contrôler le paramétrage par une intelligence artificielle.")
     date_debut = forms.DateField(label="Date de début", required=False, widget=DatePickerWidget(),
                                  help_text="Laissez vide pour utiliser les dates de l'activité (ou 1 an avant aujourd'hui si l'activité est illimitée).")
     date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(),
                                help_text="Laissez vide pour utiliser les dates de l'activité (ou 1 an après aujourd'hui si l'activité est illimitée).")
-    tous_les_tarifs = forms.BooleanField(label="Inclure les tarifs terminés avant la période analysée", required=False, initial=False)
-    noms_responsables = forms.BooleanField(label="Inclure les noms des responsables de l'activité", required=False, initial=False)
+    tous_les_tarifs = forms.BooleanField(label="Inclure les tarifs terminés avant la période analysée", required=False, initial=False, help_text="Cochez cette case pour inclure dans le fichier les tarifs dont la validité s'est terminée avant la période analysée. Par défaut, seuls les tarifs utiles à la période sont exportés.")
+    noms_responsables = forms.BooleanField(label="Inclure les noms des responsables de l'activité", required=False, initial=False, help_text="Par défaut, les noms des responsables sont remplacés par 'Responsable 1', 'Responsable 2'... Cochez cette case uniquement si vous acceptez de transmettre leurs noms réels à l'intelligence artificielle.")
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

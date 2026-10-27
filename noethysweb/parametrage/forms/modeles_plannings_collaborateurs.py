@@ -16,13 +16,18 @@ from parametrage.widgets import Ligne_modele_planning
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    lignes = forms.CharField(label="Evènements", required=True, widget=Ligne_modele_planning(attrs={}))
+    lignes = forms.CharField(label="Evènements", required=True, widget=Ligne_modele_planning(attrs={}), help_text="Ajoutez ici les événements (horaires et types d'événements) qui composent ce modèle de planning.")
 
     class Meta:
         model = ModelePlanningCollaborateur
         fields = "__all__"
         widgets = {
             "observations": forms.Textarea(attrs={'rows': 3}),
+        }
+        help_texts = {
+            "nom": "Saisissez le nom du modèle de planning. Exemple : Semaine type animateur.",
+            "observations": "Vous pouvez saisir ici des informations complémentaires sur ce modèle.",
+            "inclure_feries": "Cochez cette case pour que les événements du modèle soient également créés sur les jours fériés.",
         }
 
     def __init__(self, *args, **kwargs):

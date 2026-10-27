@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "menus_categories_ajouter"
     url_modifier = "menus_categories_modifier"
     url_supprimer = "menus_categories_supprimer"
-    description_liste = "Voici ci-dessous la liste des catégories de menus."
-    description_saisie = "Saisissez toutes les informations concernant la catégorie de menu à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les catégories de menus définissent les composantes des repas affichées dans les menus. Exemples : Entrée, Plat principal, Dessert, Goûter..."
+    description_saisie = "Saisissez le nom de la catégorie de plats puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une catégorie de menu"
     objet_pluriel = "des catégories de menus"
     boutons_liste = [

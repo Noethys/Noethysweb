@@ -17,6 +17,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = CategorieInformation
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom de la catégorie d'informations personnelles. Exemples : Allergies, Traitements médicaux, Recommandations...",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

@@ -23,7 +23,11 @@ class Formulaire(FormulaireBase, ModelForm):
             "description": forms.Textarea(attrs={'rows': 3}),
         }
         help_texts = {
-            "fichier": "Sélectionnez un fichier Word (extension docx)."
+            "fichier": "Sélectionnez un fichier Word (extension docx).",
+            "nom": "Saisissez le nom du modèle. Exemple : Convention d'accueil.",
+            "description": "Saisissez si besoin une description pour vous souvenir de l'usage de ce modèle.",
+            "defaut": "Cochez cette case pour que ce modèle soit proposé par défaut. Un seul modèle peut être défini par défaut.",
+            "structure": "Sélectionnez la structure associée à ce modèle. Laissez 'Toutes les structures' pour que ce modèle soit disponible dans toutes les structures.",
         }
 
     def __init__(self, *args, **kwargs):

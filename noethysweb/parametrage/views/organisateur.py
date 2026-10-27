@@ -16,7 +16,7 @@ class Page(crud.Page):
     url_ajouter = "organisateur_ajouter"
     url_modifier = "organisateur_modifier"
     url_supprimer = "feries_fixes_supprimer"
-    description_saisie = "Saisissez ici les informations concernant l'organisateur. Ces données seront utilisées dans les différents documents édités par Noethys."
+    description_saisie = "Saisissez les informations concernant l'organisateur (commune, association...) : nom, coordonnées, numéros d'identification et logo. Ces données sont utilisées dans les documents édités par l'application et sur le portail."
     objet_singulier = "un organisateur"
     objet_pluriel = "de l'organisateur"
     boutons_liste = [

@@ -17,6 +17,10 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Caisse
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom de la caisse. Exemples : CAF du Finistère, MSA d'Armorique...",
+            "regime": "Sélectionnez le régime social auquel appartient cette caisse. Exemples : Régime général, Régime agricole...",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

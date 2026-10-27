@@ -30,8 +30,8 @@ class Page(crud.Page):
     url_modifier = "albums_modifier"
     url_supprimer = "albums_supprimer"
     url_consulter = "albums_consulter"
-    description_liste = "Voici ci-dessous la liste des albums photos."
-    description_saisie = "Saisissez toutes les informations concernant l'album à créer et cliquez sur le bouton Enregistrer."
+    description_liste = "Les albums photos permettent de partager avec les familles les photos des activités. Pour publier un album sur le portail, associez-le à un article (menu Paramétrage > Portail > Articles). Cliquez sur un album pour y ajouter des photos."
+    description_saisie = "Saisissez le titre de l'album et, si besoin, sa structure puis cliquez sur le bouton Enregistrer. Vous pourrez ensuite y ajouter des photos."
     objet_singulier = "un album"
     objet_pluriel = "des albums"
     boutons_liste = [
@@ -105,7 +105,7 @@ class Consulter(Page, crud.Liste):
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Consulter un album"
-        context['box_introduction'] = "Vous pouvez ici ajouter des photos à l'album ou modifier les paramètres de l'album."
+        context['box_introduction'] = "Ajoutez des photos à l'album en les important depuis votre ordinateur, ou modifiez les paramètres de l'album. Pensez à vérifier que les familles ont donné leur accord pour la diffusion des photos de leurs enfants."
         context['onglet_actif'] = "albums_liste"
         context['active_checkbox'] = True
         context["hauteur_table"] = "400px"

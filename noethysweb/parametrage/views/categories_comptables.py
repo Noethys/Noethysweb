@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "categories_comptables_ajouter"
     url_modifier = "categories_comptables_modifier"
     url_supprimer = "categories_comptables_supprimer"
-    description_liste = "Voici ci-dessous la liste des catégories comptables."
-    description_saisie = "Saisissez toutes les informations concernant la catégorie comptable à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les catégories comptables permettent de classer les opérations de la comptabilité en dépenses (débit) ou en recettes (crédit). Exemples : Fournitures, Subventions, Participations des familles..."
+    description_saisie = "Choisissez le type (débit ou crédit), saisissez le nom de la catégorie et associez-la si besoin à un compte comptable, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un catégorie comptable"
     objet_pluriel = "des catégories comptables"
     boutons_liste = [

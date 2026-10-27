@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "niveaux_scolaires_ajouter"
     url_modifier = "niveaux_scolaires_modifier"
     url_supprimer = "niveaux_scolaires_supprimer"
-    description_liste = "Voici ci-dessous la liste des niveaux scolaires."
-    description_saisie = "Saisissez toutes les informations concernant le niveau scolaire à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les niveaux scolaires (PS, MS, GS, CP, CE1...) sont associés aux classes et à la scolarité des individus. Le niveau de chaque élève est renseigné lors de son inscription scolaire."
+    description_saisie = "Saisissez le nom et le nom abrégé du niveau scolaire puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un niveau scolaire"
     objet_pluriel = "des niveaux scolaires"
     boutons_liste = [

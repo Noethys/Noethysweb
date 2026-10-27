@@ -18,8 +18,8 @@ class Page(Onglet):
     url_ajouter = "activites_agrements_ajouter"
     url_modifier = "activites_agrements_modifier"
     url_supprimer = "activites_agrements_supprimer"
-    description_liste = "Vous pouvez saisir ici un numéro d'agrément pour l'activité."
-    description_saisie = "Saisissez toutes les informations concernant le numéro d'agrément à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Saisissez ici les numéros d'agrément de l'activité délivrés par l'administration (service départemental à la jeunesse, à l'engagement et aux sports) avec leur période de validité. Un nouvel agrément est généralement saisi pour chaque nouvelle période."
+    description_saisie = "Saisissez le numéro d'agrément et ses dates de début et de fin de validité, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un responsable de l'activité"
     objet_pluriel = "des responsables de l'activité"
 

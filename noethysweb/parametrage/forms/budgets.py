@@ -67,7 +67,7 @@ FORMSET_CATEGORIES = inlineformset_factory(ComptaBudget, ComptaCategorieBudget, 
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    analytiques = forms.ModelMultipleChoiceField(label="Postes analytiques", widget=Select2MultipleWidget(), queryset=ComptaAnalytique.objects.all(), required=True)
+    analytiques = forms.ModelMultipleChoiceField(label="Postes analytiques", widget=Select2MultipleWidget(), queryset=ComptaAnalytique.objects.all(), required=True, help_text="Sélectionnez les postes analytiques suivis dans ce budget.")
 
     class Meta:
         model = ComptaBudget
@@ -76,6 +76,13 @@ class Formulaire(FormulaireBase, ModelForm):
             "observations": forms.Textarea(attrs={'rows': 3}),
             "date_debut": DatePickerWidget(),
             "date_fin": DatePickerWidget(),
+        }
+        help_texts = {
+            "nom": "Saisissez le nom du budget. Exemple : Budget ALSH 2026.",
+            "observations": "Vous pouvez saisir ici des informations complémentaires sur ce budget.",
+            "date_debut": "Saisissez la date de début de la période couverte par ce budget.",
+            "date_fin": "Saisissez la date de fin de la période couverte par ce budget.",
+            "structure": "Sélectionnez la structure associée à ce budget. Laissez 'Toutes les structures' pour que ce budget soit disponible dans toutes les structures.",
         }
 
     def __init__(self, *args, **kwargs):

@@ -16,6 +16,10 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = ImageFond
         fields = "__all__"
+        help_texts = {
+            "titre": "Saisissez un titre pour retrouver facilement cette image. Exemple : Vue de la mairie.",
+            "image": "Sélectionnez l'image qui pourra être affichée en arrière-plan de la page de connexion du portail.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

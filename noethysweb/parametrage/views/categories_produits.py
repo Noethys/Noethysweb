@@ -17,7 +17,7 @@ class Page(crud.Page):
     url_ajouter = "categories_produits_ajouter"
     url_modifier = "categories_produits_modifier"
     url_supprimer = "categories_produits_supprimer"
-    description_liste = "Voici ci-dessous la liste des catégories de produits."
+    description_liste = "Les catégories de produits permettent de classer les produits proposés à la location. Exemples : Salles, Matériel, Véhicules..."
     description_saisie = "Saisissez au moins un nom puis cliquez sur le bouton Enregistrer. Notez que vous pouvez créer des questionnaires pour les catégories de produits depuis le menu Paramétrage > Questionnaires afin d'obtenir des champs de saisie personnalisés."
     objet_singulier = "une catégorie de produits"
     objet_pluriel = "des catégories de produits"

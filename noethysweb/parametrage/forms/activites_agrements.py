@@ -22,6 +22,11 @@ class Formulaire(FormulaireBase, ModelForm):
             'date_debut': DatePickerWidget(),
             'date_fin': DatePickerWidget(),
         }
+        help_texts = {
+            "agrement": "Saisissez le numéro d'agrément délivré par l'administration (service départemental à la jeunesse, à l'engagement et aux sports). Exemple : 0290123CL000124.",
+            "date_debut": "Saisissez la date de début de validité de cet agrément.",
+            "date_fin": "Saisissez la date de fin de validité de cet agrément.",
+        }
 
     def __init__(self, *args, **kwargs):
         idactivite = kwargs.pop("idactivite")

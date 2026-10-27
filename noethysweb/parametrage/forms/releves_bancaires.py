@@ -22,6 +22,12 @@ class Formulaire(FormulaireBase, ModelForm):
             "date_debut": DatePickerWidget(),
             "date_fin": DatePickerWidget(),
         }
+        help_texts = {
+            "nom": "Saisissez le nom du relevé bancaire. Exemple : Relevé n°12 - Septembre 2025.",
+            "date_debut": "Saisissez la date de début de la période couverte par le relevé.",
+            "date_fin": "Saisissez la date de fin de la période couverte par le relevé.",
+            "compte": "Sélectionnez le compte bancaire concerné par ce relevé.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

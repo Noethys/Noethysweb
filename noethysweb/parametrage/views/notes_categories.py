@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "notes_categories_ajouter"
     url_modifier = "notes_categories_modifier"
     url_supprimer = "notes_categories_supprimer"
-    description_liste = "Voici ci-dessous la liste des catégories de notes."
-    description_saisie = "Saisissez toutes les informations concernant la catégorie de note à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les catégories de notes permettent de classer les notes saisies dans les fiches des familles et des individus. Exemples : Comptabilité, Santé, Transport..."
+    description_saisie = "Saisissez le nom de la catégorie de notes puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une catégorie de note"
     objet_pluriel = "des catégories de notes"
     boutons_liste = [

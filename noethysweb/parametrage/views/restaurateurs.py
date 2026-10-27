@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "restaurateurs_ajouter"
     url_modifier = "restaurateurs_modifier"
     url_supprimer = "restaurateurs_supprimer"
-    description_liste = "Voici ci-dessous la liste des restaurateurs."
-    description_saisie = "Saisissez toutes les informations concernant le restaurateur à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les restaurateurs sont les fournisseurs de repas (cuisine centrale, prestataire...). Ils sont associés aux modèles de commandes de repas, ce qui permet de leur envoyer les commandes par email."
+    description_saisie = "Saisissez le nom et les coordonnées du restaurateur. Renseignez son adresse email pour pouvoir lui envoyer les commandes, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un restaurateur"
     objet_pluriel = "des restaurateurs"
     boutons_liste = [

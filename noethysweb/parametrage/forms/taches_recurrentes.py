@@ -19,46 +19,46 @@ from core.widgets import DatePickerWidget
 class Formulaire(FormulaireBase, ModelForm):
 
     choix_frequence = [("DAILY", "Journalier"), ("WEEKLY", "Hebdomadaire"), ("MONTHLY_DAY", "Mensuel par jour"), ("MONTHLY_DATE", "Mensuel par date"), ("YEARLY_DAY", "Annuel par jour"), ("YEARLY_DATE", "Annuel par date"), ("VACANCES", "Vacances")]
-    frequence = forms.ChoiceField(label="Fréquence", choices=choix_frequence, initial="DAILY", required=True)
+    frequence = forms.ChoiceField(label="Fréquence", choices=choix_frequence, initial="DAILY", required=True, help_text="Sélectionnez la fréquence de répétition de la tâche. Les tâches générées apparaissent dans le widget Tâches de la page d'accueil.")
 
     choix_interval_daily = [(1, "Tous les jours"),] + [(x, "Tous les %d jours" % x) for x in range(2, 31)]
-    interval_daily = forms.ChoiceField(label="Répétition", choices=choix_interval_daily, initial=1, required=False)
+    interval_daily = forms.ChoiceField(label="Répétition", choices=choix_interval_daily, initial=1, required=False, help_text="Sélectionnez l'intervalle entre deux tâches. Exemple : tous les 2 jours.")
 
     choix_interval_weekly = [(1, "Toutes les semaines"),] + [(x, "Toutes les %d semaines" % x) for x in range(2, 25)]
-    interval_weekly = forms.ChoiceField(label="Répétition", choices=choix_interval_weekly, initial=1, required=False)
+    interval_weekly = forms.ChoiceField(label="Répétition", choices=choix_interval_weekly, initial=1, required=False, help_text="Sélectionnez l'intervalle entre deux tâches. Exemple : toutes les 2 semaines.")
 
     choix_interval_monthly = [(1, "Tous les mois"),] + [(x, "Tous les %d mois" % x) for x in range(2, 13)]
-    interval_monthly = forms.ChoiceField(label="Répétition", choices=choix_interval_monthly, initial=1, required=False)
+    interval_monthly = forms.ChoiceField(label="Répétition", choices=choix_interval_monthly, initial=1, required=False, help_text="Sélectionnez l'intervalle entre deux tâches. Exemple : tous les 3 mois pour une tâche trimestrielle.")
 
     choix_interval_yearly = [(1, "Tous les ans"),] + [(x, "Toutes les %d années" % x) for x in range(2, 11)]
-    interval_yearly = forms.ChoiceField(label="Répétition", choices=choix_interval_yearly, initial=1, required=False)
+    interval_yearly = forms.ChoiceField(label="Répétition", choices=choix_interval_yearly, initial=1, required=False, help_text="Sélectionnez l'intervalle entre deux tâches. Exemple : tous les ans.")
 
     choix_interval_vacances = [(0, "Toutes les périodes"),] + LISTE_VACANCES
-    interval_vacances = forms.ChoiceField(label="Répétition", choices=choix_interval_vacances, initial=0, required=False)
+    interval_vacances = forms.ChoiceField(label="Répétition", choices=choix_interval_vacances, initial=0, required=False, help_text="Sélectionnez les périodes de vacances concernées.")
 
     choix_weeklyday = [("MO", "Lundi"), ("TU", "Mardi"), ("WE", "Mercredi"), ("TH", "Jeudi"), ("FR", "Vendredi"), ("SA", "Samedi"), ("SU", "Dimanche")]
-    repeat_weeklyday = forms.MultipleChoiceField(label="Jours", widget=Select2MultipleWidget(), choices=choix_weeklyday, required=False)
+    repeat_weeklyday = forms.MultipleChoiceField(label="Jours", widget=Select2MultipleWidget(), choices=choix_weeklyday, required=False, help_text="Sélectionnez le ou les jours de la semaine où la tâche doit être générée.")
 
-    repeat_yearly_month = forms.ChoiceField(label="Mois", choices=LISTE_MOIS, initial=0, required=False)
+    repeat_yearly_month = forms.ChoiceField(label="Mois", choices=LISTE_MOIS, initial=0, required=False, help_text="Sélectionnez le mois où la tâche doit être générée.")
 
     choix_monthlydate = [(1, "Le 1er jour du mois")] + [(x, "Le %dème jour du mois" % x) for x in range(2, 32)]
-    repeat_monthlydate = forms.MultipleChoiceField(label="Jour", widget=Select2MultipleWidget(), choices=choix_monthlydate, required=False)
+    repeat_monthlydate = forms.MultipleChoiceField(label="Jour", widget=Select2MultipleWidget(), choices=choix_monthlydate, required=False, help_text="Sélectionnez le ou les jours du mois où la tâche doit être générée. Exemple : le 1er jour du mois.")
 
     choix_monthlyday = []
     for num, label_num in [(1, "Premier"), (2, "Deuxième"), (3, "Troisième"), (4, "Quatrième"), (5, "Cinquième"), (-1, "Dernier")]:
         for code_jour, label_jour in choix_weeklyday:
             choix_monthlyday.append(("%d%s" % (num, code_jour), "%s %s" % (label_num, label_jour.lower())))
-    repeat_monthlyday = forms.MultipleChoiceField(label="Jour", widget=Select2MultipleWidget(), choices=choix_monthlyday, required=False)
+    repeat_monthlyday = forms.MultipleChoiceField(label="Jour", widget=Select2MultipleWidget(), choices=choix_monthlyday, required=False, help_text="Sélectionnez le ou les jours concernés. Exemple : premier lundi du mois.")
 
     choix_repeat_vacances = [("FIRST", "Le 1er jour des vacances"), ("LAST", "Le dernier jour des vacances"),
                              ("BEFORE_FIRST", "X jours avant le premier jour des vacances"), ("AFTER_FIRST", "X jours après le premier jour des vacances"),
                              ("BEFORE_LAST", "X jours avant le dernier jour des vacances"), ("AFTER_LAST", "X jours après le dernier jour des vacances"),]
-    repeat_vacances = forms.ChoiceField(label="Jour", choices=choix_repeat_vacances, initial=1, required=False)
+    repeat_vacances = forms.ChoiceField(label="Jour", choices=choix_repeat_vacances, initial=1, required=False, help_text="Sélectionnez le jour de génération de la tâche par rapport aux vacances. Exemple : 7 jours avant le premier jour des vacances.")
 
-    nbre_jours = forms.IntegerField(label="Nbre de jours", initial=0, min_value=0, max_value=300, required=False)
+    nbre_jours = forms.IntegerField(label="Nbre de jours", initial=0, min_value=0, max_value=300, required=False, help_text="Saisissez le nombre de jours à utiliser avec l'option sélectionnée ci-dessus. Exemple : 7.")
 
     choix_periode = [(None, "Toutes les périodes"), ("VACS_IN", "Durant une période de vacances"), ("VACS_OUT", "Durant une période scolaire")]
-    periode = forms.ChoiceField(label="Période", choices=choix_periode, initial=None, required=False)
+    periode = forms.ChoiceField(label="Période", choices=choix_periode, initial=None, required=False, help_text="Sélectionnez si besoin la période concernée : uniquement pendant les vacances ou uniquement pendant les périodes scolaires.")
 
     acces = forms.ChoiceField(label="Utilisateurs associés", initial="automatique", required=True, help_text="Sélectionnez les utilisateurs destinataires de cette tâche.", choices=[
         (None, "-------"), ("moi", "Uniquement moi"),
@@ -74,6 +74,11 @@ class Formulaire(FormulaireBase, ModelForm):
             "titre": forms.Textarea(attrs={"rows": 4}),
             "date_debut": DatePickerWidget(),
             "date_fin": DatePickerWidget(),
+        }
+        help_texts = {
+            "titre": "Saisissez le titre de la tâche qui sera générée automatiquement. Exemple : Envoyer les factures de {MOIS_PRECEDENT}. Cliquez sur un mot-clé ci-dessous pour l'insérer.",
+            "date_debut": "Saisissez la date à partir de laquelle les tâches seront générées.",
+            "date_fin": "Saisissez si besoin la date après laquelle plus aucune tâche ne sera générée. Laissez vide pour une répétition sans fin.",
         }
 
     def __init__(self, *args, **kwargs):

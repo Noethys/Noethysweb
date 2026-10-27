@@ -18,8 +18,8 @@ class Page(Onglet):
     url_ajouter = "activites_unites_conso_ajouter"
     url_modifier = "activites_unites_conso_modifier"
     url_supprimer = "activites_unites_conso_supprimer"
-    description_liste = "Vous pouvez saisir ici des unités de consommation de l'activité. Exemples : Journée, Matin, Repas, Séance, Atelier... Elles sont utilisées principalement si vous souhaitez enregistrer des réservations ou des présences."
-    description_saisie = "Saisissez toutes les informations concernant l'unité de consommation à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les unités de consommation sont les éléments réservés ou pointés pour chaque individu dans la grille des consommations. Exemples : Journée, Matin, Après-midi, Repas, Séance, Atelier... Elles sont nécessaires si vous enregistrez des réservations ou des présences, et servent à déclencher les tarifs."
+    description_saisie = "Saisissez le nom et le nom abrégé de l'unité, choisissez son type (unitaire, horaire, multihoraires, quantité ou événementiel) et ses options, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une unité de consommation"
     objet_pluriel = "des unités de consommation"
 

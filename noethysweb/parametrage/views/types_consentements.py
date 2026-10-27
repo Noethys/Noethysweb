@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "types_consentements_ajouter"
     url_modifier = "types_consentements_modifier"
     url_supprimer = "types_consentements_supprimer"
-    description_liste = "Voici ci-dessous la liste des types de consentements. Ils sont généralement utilisés sur le portail pour faire valider aux usagers les conditions d'utilisation de la structure."
-    description_saisie = "Saisissez toutes les informations concernant le type de consentement à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les types de consentements sont les documents que les usagers doivent accepter, généralement sur le portail : règlement intérieur, conditions d'utilisation, droit à l'image... Les versions successives de chaque document se gèrent dans les unités de consentements."
+    description_saisie = "Saisissez le nom du type de consentement puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un type de consentement"
     objet_pluriel = "des types de consentements"
     boutons_liste = [

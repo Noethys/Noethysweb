@@ -33,6 +33,15 @@ class Formulaire(FormulaireBase, ModelForm):
         help_texts = {
             "montant": "Saisissez un montant pour cette prestation.",
             "tarifs": "Saisissez ici une tranche de qf et son montant associé par ligne de la façon suivante : QFMIN-QFMAX=MONTANT. Exemple : <br>0-499=9.50<br>500-950=10.05<br>951-999999=13.90",
+            "categorie": "Sélectionnez la catégorie des prestations créées avec ce modèle.",
+            "label": "Saisissez le label des prestations créées avec ce modèle. Exemples : Sortie au zoo, Frais de dossier...",
+            "activite": "Sélectionnez si besoin l'activité à laquelle seront rattachées les prestations.",
+            "tarif": "Sélectionnez si besoin le tarif de l'activité auquel seront rattachées les prestations.",
+            "categorie_tarif": "Sélectionnez si besoin la catégorie de tarif à laquelle seront rattachées les prestations.",
+            "tva": "Saisissez si besoin le taux de TVA applicable. Exemple : 20.",
+            "code_compta": "Saisissez si besoin le code comptable des prestations, pour les exports comptables.",
+            "public": "Indiquez si les prestations concernent un individu ou l'ensemble de la famille.",
+            "structure": "Sélectionnez la structure associée à ce modèle. Laissez 'Toutes les structures' pour que ce modèle soit disponible dans toutes les structures.",
         }
 
     def __init__(self, *args, **kwargs):

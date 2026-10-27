@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "lots_factures_ajouter"
     url_modifier = "lots_factures_modifier"
     url_supprimer = "lots_factures_supprimer"
-    description_liste = "Voici ci-dessous la liste des lots de factures."
-    description_saisie = "Saisissez toutes les informations concernant le lot à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les lots de factures permettent de regrouper les factures générées ensemble (exemple : Factures de septembre 2025), pour les retrouver, les imprimer ou les envoyer plus facilement."
+    description_saisie = "Saisissez le nom du lot de factures puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un lot de factures"
     objet_pluriel = "des lots de factures"
     boutons_liste = [

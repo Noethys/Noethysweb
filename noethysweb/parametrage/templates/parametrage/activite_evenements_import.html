@@ -50,6 +50,7 @@
         {% embed 'core/box.html' %}
             {% block box_theme %}card-outline card-lightblue{% endblock %}
             {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
             {% block box_outils %}
                 <a href="{% url 'activites_evenements_liste' idactivite=activite.idactivite %}" class="btn btn-tool" title="Retour à la liste des événements"><i class="fa fa-times"></i></a>
             {% endblock %}

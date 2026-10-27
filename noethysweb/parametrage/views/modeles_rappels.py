@@ -18,8 +18,8 @@ class Page(crud.Page):
     url_modifier = "modeles_rappels_modifier"
     url_supprimer = "modeles_rappels_supprimer"
     url_dupliquer = "modeles_rappels_dupliquer"
-    description_liste = "Voici ci-dessous la liste des modèles de lettres de rappel."
-    description_saisie = "Saisissez toutes les informations concernant le modèle à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les modèles de lettres de rappel contiennent les textes des relances adressées aux familles qui ont des factures impayées. Le modèle proposé dépend du nombre de jours de retard : créez par exemple un premier rappel, puis une relance plus ferme."
+    description_saisie = "Saisissez le nom du modèle, la tranche de jours de retard concernée, le titre et le texte de la lettre, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un modèle de lettre de rappel"
     objet_pluriel = "des modèles de lettres de rappel"
     boutons_liste = [

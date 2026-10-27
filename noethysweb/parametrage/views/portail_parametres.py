@@ -20,7 +20,7 @@ class Modifier(CustomView, TemplateView):
         context = super(Modifier, self).get_context_data(**kwargs)
         context['page_titre'] = "Paramètres du portail"
         context['box_titre'] = "Paramètres"
-        context['box_introduction'] = "Ajustez les paramètres du portail et cliquez sur le bouton Enregistrer."
+        context['box_introduction'] = "Ajustez ici les paramètres généraux du portail famille : affichage des rubriques, textes d'accueil, paiement en ligne, réservations, renseignements... Les modifications sont visibles immédiatement par les familles après avoir cliqué sur le bouton Enregistrer."
         context['form'] = context.get("form", Formulaire)
         return context
 

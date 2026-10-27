@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "lieux_ajouter"
     url_modifier = "lieux_modifier"
     url_supprimer = "lieux_supprimer"
-    description_liste = "Voici ci-dessous la liste des lieux."
-    description_saisie = "Saisissez toutes les informations concernant le lieu à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les lieux sont les points de départ et d'arrivée utilisés pour cette catégorie de transport (gares, aéroports, ports...). Ils sont proposés lors de la saisie des transports des individus."
+    description_saisie = "Saisissez le nom du lieu et sa ville puis cliquez sur le bouton Enregistrer."
 
     def get_context_data(self, **kwargs):
         parametre = utils_transports.CATEGORIES[self.Get_categorie()]["parametrage"]["lieux"]

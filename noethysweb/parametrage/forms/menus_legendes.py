@@ -21,6 +21,10 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             'couleur': ColorPickerWidget(),
         }
+        help_texts = {
+            "nom": "Saisissez le nom de la légende. Exemples : Bio, Produit local, Fait maison...",
+            "couleur": "Sélectionnez la couleur associée à cette légende dans les menus.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

@@ -28,6 +28,20 @@ class Formulaire(FormulaireBase, ModelForm):
             'ville': Ville(attrs={"id_codepostal": "id_cp"}),
             'logo': Selection_image(),
         }
+        help_texts = {
+            "nom": "Saisissez le nom de l'organisateur. Exemples : Mairie de Lannilis, Association Les Petits Loups...",
+            "rue": "Saisissez le numéro et le nom de la voie. Exemple : 12 rue des Lilas.",
+            "cp": "Saisissez le code postal. La ville correspondante vous sera proposée automatiquement.",
+            "ville": "Saisissez le nom de la ville.",
+            "tel": "Saisissez le numéro de téléphone. Exemple : 02 98 12 34 56.",
+            "fax": "Saisissez si besoin le numéro de fax.",
+            "mail": "Saisissez l'adresse email. Exemple : contact@mairie.fr.",
+            "site": "Saisissez l'adresse du site internet. Exemple : www.mairie.fr.",
+            "num_agrement": "Saisissez si besoin le numéro d'agrément de l'organisateur.",
+            "num_siret": "Saisissez le numéro SIRET de l'organisateur (14 chiffres).",
+            "code_ape": "Saisissez le code APE (activité principale exercée). Exemples : 8411Z pour une commune, 9499Z pour une association.",
+            "logo": "Sélectionnez le logo de l'organisateur. Il sera utilisé sur les documents et par défaut pour les activités.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

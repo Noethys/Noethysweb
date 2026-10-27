@@ -18,8 +18,8 @@ class Page(Onglet):
     url_ajouter = "activites_portail_unites_ajouter"
     url_modifier = "activites_portail_unites_modifier"
     url_supprimer = "activites_portail_unites_supprimer"
-    description_liste = "Vous pouvez saisir ici des unités de réservation pour l'activité."
-    description_saisie = "Saisissez toutes les informations concernant l'unité de réservation à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les unités de réservation sont les cases proposées aux familles dans le planning de réservation du portail. Chacune regroupe une ou plusieurs unités de consommation. Exemple : une unité 'Journée avec repas' qui réserve à la fois les unités 'Journée' et 'Repas'."
+    description_saisie = "Saisissez le nom de l'unité de réservation et sélectionnez les unités de consommation associées puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une unité de réservation"
     objet_pluriel = "des unités de réservation"
 

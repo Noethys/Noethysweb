@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "structures_ajouter"
     url_modifier = "structures_modifier"
     url_supprimer = "structures_supprimer"
-    description_liste = "Voici ci-dessous la liste des structures. Les structures ne peuvent être modifiées ou supprimées que par un super-utilisateur ou par un utilisateur habilité."
-    description_saisie = "Saisissez toutes les informations concernant la structure à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les structures permettent de cloisonner les données entre plusieurs services ou établissements (exemples : Service enfance, Ecole de musique). Chaque utilisateur n'accède qu'aux structures qui lui sont attribuées. Les structures ne peuvent être modifiées ou supprimées que par un super-utilisateur ou un utilisateur habilité."
+    description_saisie = "Saisissez le nom et les coordonnées de la structure ainsi que ses options d'affichage sur le portail, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une structure"
     objet_pluriel = "des structures"
     boutons_liste = [

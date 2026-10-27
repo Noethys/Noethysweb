@@ -27,7 +27,7 @@ LISTE_CHOIX_COLONNES = [
 
 class Formulaire(FormulaireBase, ModelForm):
     # Catégorie
-    categorie = forms.ChoiceField(label="Catégorie", choices=LISTE_CHOIX_COLONNES, initial="NUMERIQUE_CONSO", required=True)
+    categorie = forms.ChoiceField(label="Catégorie", choices=LISTE_CHOIX_COLONNES, initial="NUMERIQUE_CONSO", required=True, help_text="Sélectionnez le contenu de la colonne : le nombre de consommations, ce nombre proposé comme suggestion modifiable, une valeur libre, le total d'autres colonnes, un texte libre ou des informations sur les individus (régimes, allergies...).")
 
     # Numérique conso
     unites_conso = forms.MultipleChoiceField(label="Unités de consommation", required=False, widget=Select2MultipleWidget(), choices=[], help_text="Sélectionnez les unités à additionner.")
@@ -37,14 +37,17 @@ class Formulaire(FormulaireBase, ModelForm):
     colonnes = forms.MultipleChoiceField(label="Colonnes", required=False, widget=Select2MultipleWidget(), choices=[], help_text="Sélectionnez les colonnes numériques à additionner.")
 
     # Texte informations
-    type_infos = forms.ChoiceField(label="Informations", choices=[("REGIMES", "Régimes alimentaires"), ("INFOS", "Informations personnelles")], initial="REGIMES", required=False)
+    type_infos = forms.ChoiceField(label="Informations", choices=[("REGIMES", "Régimes alimentaires"), ("INFOS", "Informations personnelles")], initial="REGIMES", required=False, help_text="Sélectionnez le type d'informations à afficher dans la colonne : les régimes alimentaires ou les informations personnelles des individus.")
     groupes = forms.MultipleChoiceField(label="Groupes", required=False, widget=Select2MultipleWidget(), choices=[], help_text="Sélectionnez les groupes concernés.")
     categories_informations = forms.MultipleChoiceField(label="Catégories d'informations", required=False, widget=Select2MultipleWidget(), choices=[], help_text="Sélectionnez les catégories d'information concernées. Laissez vide pour toutes les catégories.")
-    coche_afficher_commande = forms.BooleanField(label="Sélectionner uniquement les informations dont la case 'Afficher sur la commande' est cochée.", required=False, initial=False)
+    coche_afficher_commande = forms.BooleanField(label="Sélectionner uniquement les informations dont la case 'Afficher sur la commande' est cochée.", required=False, initial=False, help_text="Cochez cette case pour n'afficher que les informations personnelles pour lesquelles la case 'Afficher sur la commande des repas' a été cochée dans la fiche de l'individu.")
 
     class Meta:
         model = CommandeModeleColonne
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom de la colonne tel qu'il apparaîtra sur la commande. Exemples : Repas enfants, Repas adultes, Total, Observations...",
+        }
 
     def __init__(self, *args, **kwargs):
         idmodele = kwargs.pop("categorie")

@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "types_qualifications_collaborateurs_ajouter"
     url_modifier = "types_qualifications_collaborateurs_modifier"
     url_supprimer = "types_qualifications_collaborateurs_supprimer"
-    description_liste = "Voici ci-dessous la liste des types de qualifications pour les collaborateurs."
-    description_saisie = "Saisissez toutes les informations concernant le type de qualification à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les types de qualifications sont les diplômes et formations des collaborateurs (BAFA, BAFD, BPJEPS, PSC1...)."
+    description_saisie = "Saisissez le nom de la qualification puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un type de qualification"
     objet_pluriel = "des types de qualifications"
     boutons_liste = [

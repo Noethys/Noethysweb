@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "categories_informations_ajouter"
     url_modifier = "categories_informations_modifier"
     url_supprimer = "categories_informations_supprimer"
-    description_liste = "Voici ci-dessous la liste des catégories d'informations personnelles."
-    description_saisie = "Saisissez toutes les informations concernant la catégorie d'information personnelle à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les catégories d'informations personnelles permettent de classer les informations saisies dans les fiches individuelles. Exemples : Allergies, Traitements médicaux, Recommandations..."
+    description_saisie = "Saisissez le nom de la catégorie d'informations puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une catégorie d'information personnelle"
     objet_pluriel = "des catégories d'informations personnelles"
     boutons_liste = [

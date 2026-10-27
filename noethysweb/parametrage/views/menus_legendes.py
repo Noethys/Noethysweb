@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "menus_legendes_ajouter"
     url_modifier = "menus_legendes_modifier"
     url_supprimer = "menus_legendes_supprimer"
-    description_liste = "Voici ci-dessous la liste des légendes de menus."
-    description_saisie = "Saisissez toutes les informations concernant la légende de menu à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les légendes de menus permettent de signaler une particularité des plats, avec une couleur dédiée. Exemples : Bio, Produit local, Fait maison..."
+    description_saisie = "Saisissez le nom de la légende et choisissez sa couleur, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une légende de menu"
     objet_pluriel = "des légendes de menus"
     boutons_liste = [

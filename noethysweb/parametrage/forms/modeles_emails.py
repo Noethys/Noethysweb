@@ -16,11 +16,18 @@ from core.data import data_modeles_emails
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    html = forms.CharField(label="Texte", widget=SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '300px'}}))
+    html = forms.CharField(label="Texte", widget=SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '300px'}}), help_text="Saisissez le texte de l'email. Cliquez sur un mot-clé ci-dessous pour l'insérer : il sera remplacé par la valeur correspondante lors de l'envoi.")
 
     class Meta:
         model = ModeleEmail
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom du modèle. Exemple : Envoi des factures.",
+            "description": "Saisissez si besoin une description pour vous souvenir de l'usage de ce modèle.",
+            "objet": "Saisissez l'objet de l'email. Vous pouvez y insérer les mots-clés proposés ci-dessous.",
+            "defaut": "Cochez cette case pour que ce modèle soit proposé par défaut. Un seul modèle peut être défini par défaut.",
+            "structure": "Sélectionnez la structure associée à ce modèle. Laissez 'Toutes les structures' pour que ce modèle soit disponible dans toutes les structures.",
+        }
 
     def __init__(self, *args, **kwargs):
         categorie = kwargs.pop("categorie")

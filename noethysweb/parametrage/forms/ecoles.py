@@ -16,7 +16,7 @@ from core.forms.select2 import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    secteurs = forms.ModelMultipleChoiceField(label="Secteurs géographiques associés", widget=Select2MultipleWidget(), queryset=Secteur.objects.all(), required=False)
+    secteurs = forms.ModelMultipleChoiceField(label="Secteurs géographiques associés", widget=Select2MultipleWidget(), queryset=Secteur.objects.all(), required=False, help_text="Sélectionnez les secteurs géographiques rattachés à cette école.")
 
     class Meta:
         model = Ecole
@@ -26,6 +26,15 @@ class Formulaire(FormulaireBase, ModelForm):
             'rue': Rue(attrs={"id_codepostal": "id_cp", "id_ville": "id_ville"}),
             'cp': CodePostal(attrs={"id_ville": "id_ville"}),
             'ville': Ville(attrs={"id_codepostal": "id_cp"}),
+        }
+        help_texts = {
+            "nom": "Saisissez le nom de l'école. Exemple : Ecole primaire Jules Ferry.",
+            "rue": "Saisissez le numéro et le nom de la voie. Exemple : 12 rue des Lilas.",
+            "cp": "Saisissez le code postal. La ville correspondante vous sera proposée automatiquement.",
+            "ville": "Saisissez le nom de la ville.",
+            "tel": "Saisissez le numéro de téléphone. Exemple : 02 98 12 34 56.",
+            "fax": "Saisissez si besoin le numéro de fax.",
+            "mail": "Saisissez l'adresse email. Exemple : contact@mairie.fr.",
         }
 
     def __init__(self, *args, **kwargs):

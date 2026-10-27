@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "postes_analytiques_ajouter"
     url_modifier = "postes_analytiques_modifier"
     url_supprimer = "postes_analytiques_supprimer"
-    description_liste = "Voici ci-dessous la liste des postes analytiques."
-    description_saisie = "Saisissez toutes les informations concernant le poste analytique à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les postes analytiques permettent de ventiler les opérations comptables par secteur d'activité (exemples : ALSH, Périscolaire, Séjours) et de suivre les budgets par poste."
+    description_saisie = "Saisissez le nom et le nom abrégé du poste analytique puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un poste analytique"
     objet_pluriel = "des postes analytiques"
     boutons_liste = [

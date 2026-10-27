@@ -37,7 +37,7 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context["page_titre"] = "Gestion des périodes de vacances"
         context["box_titre"] = "Importer depuis internet"
-        context["box_introduction"] = "Sélectionnez une zone, cochez les périodes souhaitées puis cliquez sur le bouton Importer."
+        context["box_introduction"] = "Importez automatiquement les vacances scolaires depuis le calendrier officiel de l'Education nationale. Sélectionnez votre zone, cochez les périodes souhaitées puis cliquez sur le bouton Importer. Les périodes déjà enregistrées ne sont pas importées en double."
         context["menu_actif"] = "vacances_liste"
 
         # Recherche de la zone de l'organisateur

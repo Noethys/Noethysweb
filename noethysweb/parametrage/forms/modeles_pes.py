@@ -14,7 +14,7 @@ from core.models import PesModele, ModeleDocument, CHOIX_FORMAT_EXPORT_TRESOR
 
 
 class Formulaire_creation(FormulaireBase, forms.Form):
-    format = forms.ChoiceField(label="Format", choices=CHOIX_FORMAT_EXPORT_TRESOR, required=True)
+    format = forms.ChoiceField(label="Format", choices=CHOIX_FORMAT_EXPORT_TRESOR, required=True, help_text="Sélectionnez le format du fichier d'export selon le logiciel ou l'organisme destinataire : PES v2 pour la DGFiP, Magnus pour Berger-Levrault ou Millésime pour JVS.")
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.pop("instance", None)
@@ -43,6 +43,18 @@ class Formulaire(FormulaireBase, ModelForm):
         fields = "__all__"
         widgets = {
             "observations": forms.Textarea(attrs={'rows': 3}),
+        }
+        help_texts = {
+            "nom": "Saisissez le nom du modèle d'export. Exemple : Export cantine vers la trésorerie.",
+            "observations": "Vous pouvez saisir ici des informations complémentaires sur ce modèle.",
+            "format": "Format du fichier d'export, choisi selon le logiciel ou l'organisme destinataire.",
+            "id_poste": "Saisissez le code du poste comptable fourni par votre trésorerie (7 caractères maximum). Il peut être remplacé par le code comptable de l'activité ou de la prestation.",
+            "id_collectivite": "Saisissez l'identifiant de la collectivité, généralement son numéro SIRET (14 chiffres).",
+            "code_collectivite": "Saisissez le code de la collectivité fourni par votre trésorerie.",
+            "code_budget": "Saisissez le code du budget fourni par votre trésorerie. Exemple : 01 pour le budget principal.",
+            "code_prodloc": "Saisissez le code produit local (4 caractères maximum). Il peut être remplacé par le code produit local de l'activité ou de la prestation.",
+            "code_etab": "Saisissez le code établissement fourni par votre trésorerie. Il est utilisé pour composer la référence des titres.",
+            "objet_dette": "Saisissez l'objet de la dette qui figurera sur les titres. Vous pouvez utiliser des mots-clés comme {MOIS_LETTRES} ou {ANNEE}.",
         }
 
     def __init__(self, *args, **kwargs):

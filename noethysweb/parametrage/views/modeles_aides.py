@@ -18,8 +18,8 @@ class Page(crud.Page):
     url_ajouter = "modeles_aides_creer"
     url_modifier = "modeles_aides_modifier"
     url_supprimer = "modeles_aides_supprimer"
-    description_liste = "Voici ci-dessous la liste des modèles d'aides."
-    description_saisie = "Saisissez toutes les informations concernant le modèle à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les modèles d'aides décrivent les aides financières versées pour une activité (aide CAF aux loisirs, bons vacances MSA...) : montants, dates, conditions et plafonds. Une fois attribuées dans la fiche famille, elles sont déduites automatiquement des prestations."
+    description_saisie = "Renseignez le nom de l'aide, sa période, la caisse concernée, ses éventuels plafonds et les montants par unité puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un modèle d'aide"
     objet_pluriel = "des modèles d'aides"
     boutons_liste = [
@@ -105,7 +105,7 @@ class Creer(Page, crud.Ajouter):
 
     def get_context_data(self, **kwargs):
         context = super(Creer, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Vous devez sélectionner une activité."
+        context['box_introduction'] = "Sélectionnez l'activité concernée par le modèle d'aide, puis cliquez sur le bouton Valider."
         return context
 
     def post(self, request, **kwargs):

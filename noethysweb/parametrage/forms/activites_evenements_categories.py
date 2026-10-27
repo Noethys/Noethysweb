@@ -29,7 +29,8 @@ class Formulaire(FormulaireBase, ModelForm):
         }
         help_texts = {
             "image": "Vous pouvez sélectionner une image à appliquer sur l'arrière-plan de la case des événements liés dans la grille des consommations. L'image sera convertie en niveaux de gris à l'affichage.",
-            "limitations": "Cette option permet d'imposer des limitations lors des réservations d'événements par les usagers sur le portail."
+            "limitations": "Cette option permet d'imposer des limitations lors des réservations d'événements par les usagers sur le portail.",
+            "nom": "Saisissez le nom de la catégorie d'événements. Exemples : Sorties, Ateliers, Spectacles, Mini-camps...",
         }
 
     def __init__(self, *args, **kwargs):

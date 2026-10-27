@@ -18,8 +18,8 @@ class Page(crud.Page):
     url_modifier = "signatures_emails_modifier"
     url_supprimer = "signatures_emails_supprimer"
     url_dupliquer = "signatures_emails_dupliquer"
-    description_liste = "Voici la liste des signatures d'emails que vous pouvez intégrer dans les emails."
-    description_saisie = "Saisissez toutes les informations concernant la signature à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les signatures d'emails peuvent être insérées à la fin des emails envoyés depuis l'application : nom, fonction, coordonnées, logo..."
+    description_saisie = "Saisissez le nom et le contenu de la signature puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une signature d'email"
     objet_pluriel = "des signatures d'emails"
     boutons_liste = [

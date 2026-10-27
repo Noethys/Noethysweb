@@ -27,6 +27,19 @@ class Formulaire(FormulaireBase, ModelForm):
             'ville': Ville(attrs={"id_codepostal": "id_cp"}),
             'logo': Selection_image(),
         }
+        help_texts = {
+            "nom": "Saisissez le nom de la structure. Exemples : Service enfance, Accueil de loisirs, Ecole de musique...",
+            "rue": "Saisissez le numéro et le nom de la voie. Exemple : 12 rue des Lilas.",
+            "cp": "Saisissez le code postal. La ville correspondante vous sera proposée automatiquement.",
+            "ville": "Saisissez le nom de la ville.",
+            "tel": "Saisissez le numéro de téléphone. Exemple : 02 98 12 34 56.",
+            "fax": "Saisissez si besoin le numéro de fax.",
+            "mail": "Saisissez l'adresse email. Exemple : contact@mairie.fr.",
+            "site": "Saisissez l'adresse du site internet. Exemple : www.mairie.fr.",
+            "logo": "Sélectionnez si besoin le logo de la structure.",
+            "messagerie_active": "Cochez cette case pour que les familles puissent envoyer des messages à cette structure depuis la rubrique Contact du portail.",
+            "afficher_coords": "Cochez cette case pour afficher l'adresse, le téléphone et l'email de cette structure sur le portail.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

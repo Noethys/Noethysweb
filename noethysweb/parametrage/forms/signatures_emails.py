@@ -15,7 +15,7 @@ from django_summernote.widgets import SummernoteInplaceWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    html = forms.CharField(label="Texte", widget=SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '300px'}}))
+    html = forms.CharField(label="Texte", widget=SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '300px'}}), help_text="Saisissez la signature qui pourra être ajoutée à la fin des emails (nom, fonction, coordonnées, logo...).")
 
     class Meta:
         model = SignatureEmail

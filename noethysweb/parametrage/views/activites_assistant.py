@@ -247,7 +247,7 @@ class Liste(CustomView, TemplateView):
         context = super(Liste, self).get_context_data(**kwargs)
         context['page_titre'] = "Activités"
         context['box_titre'] = "Assistant de paramétrage"
-        context['box_introduction'] = "Cliquez sur un assistant de paramétrage dans la liste ci-dessous."
+        context['box_introduction'] = "Les assistants vous guident pas à pas pour créer rapidement une activité complète (groupes, unités, calendrier, tarifs...) selon un modèle courant. Cliquez sur l'assistant qui correspond le mieux à votre activité. Vous pourrez ensuite ajuster le paramétrage généré."
         context['menu_actif'] = "activites"
         context['liste_assistants'] = [
             {"label": "Une activité culturelle ou sportive annuelle", "url": "activites_assistant_annuelle", "icone": "fa-soccer-ball-o", "description": "Assistant pour créer une activité annuelle: club de gym, danse, couture, etc..."},

@@ -28,6 +28,9 @@ class Formulaire_album(FormulaireBase, ModelForm):
         widgets = {
             "description": SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '200px'}}),
         }
+        help_texts = {
+            "structure": "Sélectionnez la structure associée à ce album. Laissez 'Toutes les structures' pour que ce album soit disponible dans toutes les structures.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire_album, self).__init__(*args, **kwargs)
@@ -60,6 +63,9 @@ class Formulaire_photo(FormulaireBase, ModelForm):
         fields = ["titre", "date_creation", "fichier"]
         widgets = {
             "date_creation": DateTimePickerWidget(),
+        }
+        help_texts = {
+            "fichier": "Sélectionnez le fichier image de la photo (format JPG ou PNG).",
         }
 
     def __init__(self, *args, **kwargs):

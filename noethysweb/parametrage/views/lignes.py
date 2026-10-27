@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "lignes_ajouter"
     url_modifier = "lignes_modifier"
     url_supprimer = "lignes_supprimer"
-    description_liste = "Voici ci-dessous la liste des lignes."
-    description_saisie = "Saisissez toutes les informations concernant la ligne à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les lignes sont les circuits réguliers de cette catégorie de transport (exemples : Ligne 1, Circuit école Nord). Après avoir créé une ligne, saisissez ses arrêts."
+    description_saisie = "Saisissez le nom de la ligne puis cliquez sur le bouton Enregistrer."
 
     def get_context_data(self, **kwargs):
         parametre = utils_transports.CATEGORIES[self.Get_categorie()]["parametrage"]["lignes"]

@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "types_groupes_activites_ajouter"
     url_modifier = "types_groupes_activites_modifier"
     url_supprimer = "types_groupes_activites_supprimer"
-    description_liste = "Voici ci-dessous la liste des groupes d'activités."
-    description_saisie = "Saisissez toutes les informations concernant le groupe d'activités à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les groupes d'activités permettent de sélectionner rapidement un ensemble d'activités (exemples : Périscolaire, Vacances, Sport et culture) dans les états, listes, statistiques et générations de factures. Une activité peut appartenir à plusieurs groupes."
+    description_saisie = "Saisissez le nom du groupe d'activités et sélectionnez les activités qui en font partie, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un groupe d'activités"
     objet_pluriel = "des groupes d'activités"
     boutons_liste = [

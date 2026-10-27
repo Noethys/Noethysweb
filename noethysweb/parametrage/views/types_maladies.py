@@ -18,8 +18,8 @@ class Page(crud.Page):
     url_ajouter = "types_maladies_ajouter"
     url_modifier = "types_maladies_modifier"
     url_supprimer = "types_maladies_supprimer"
-    description_liste = "Voici ci-dessous la liste des types de maladies."
-    description_saisie = "Saisissez toutes les informations concernant la maladie à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les types de maladies sont proposés dans les fiches individuelles pour renseigner les maladies déjà contractées. Ils sont aussi associés aux vaccins."
+    description_saisie = "Saisissez le nom de la maladie puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un type de maladie"
     objet_pluriel = "des types de maladies"
     boutons_liste = [

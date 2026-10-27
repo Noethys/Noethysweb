@@ -28,7 +28,8 @@ class Formulaire(FormulaireBase, ModelForm):
         fields = "__all__"
         help_texts = {
             "nom": "Exemples : 3-6 ans, 6-12 ans, Les séniors, Les bébés, Le groupe du jeudi soir...",
-            "abrege": "Il doit s'agir de quelques caractères en majuscules ou de chiffres. Exemples : 3-6, 6-12, SENIORS, JEUDI..."
+            "abrege": "Il doit s'agir de quelques caractères en majuscules ou de chiffres. Exemples : 3-6, 6-12, SENIORS, JEUDI...",
+            "nbre_inscrits_max": "Saisissez si besoin le nombre maximal d'individus pouvant être inscrits dans ce groupe. Laissez vide pour ne pas limiter.",
         }
 
     def __init__(self, *args, **kwargs):

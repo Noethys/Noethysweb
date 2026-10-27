@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "modeles_commandes_ajouter"
     url_modifier = "modeles_commandes_modifier"
     url_supprimer = "modeles_commandes_supprimer"
-    description_liste = "Voici ci-dessous la liste des modèles de commandes. Après avoir ajouté ici un modèle, allez dans le paramétrage des colonnes des modèles de commandes."
-    description_saisie = "Saisissez toutes les informations concernant le modèle à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les modèles de commandes définissent la présentation des commandes de repas adressées aux restaurateurs. Après avoir créé un modèle, définissez ses colonnes dans le menu Paramétrage > Restauration > Colonnes des modèles de commandes."
+    description_saisie = "Saisissez le nom du modèle et sélectionnez le restaurateur destinataire des commandes, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un modèle de commande"
     objet_pluriel = "des modèles de commandes"
     boutons_liste = [

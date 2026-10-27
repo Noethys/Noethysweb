@@ -19,10 +19,8 @@ class Page(Onglet):
     url_ajouter = "activites_categories_tarifs_ajouter"
     url_modifier = "activites_categories_tarifs_modifier"
     url_supprimer = "activites_categories_tarifs_supprimer"
-    description_liste = """Vous pouvez saisir ici une catégorie de tarif pour l'activité. Exemples : Commune, Hors commune, Tarif réduit, Famille nombreuse... 
-                        Il est obligatoirement de créer au moins une catégorie de tarif. Si vous n'avez qu'une seule catégorie de tarif, créez simplement une
-                        catégorie nommée par exemple 'Catégorie par défaut'."""
-    description_saisie = "Saisissez toutes les informations concernant la catégorie de tarif à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les catégories de tarifs permettent d'appliquer des tarifs différents selon le profil des familles. Exemples : Commune, Hors commune, Tarif réduit, Famille nombreuse... La catégorie de tarif est choisie lors de l'inscription de l'individu à l'activité. Il est obligatoire de créer au moins une catégorie de tarif : si vous n'en avez qu'une, nommez-la par exemple 'Catégorie unique'."
+    description_saisie = "Saisissez le nom de la catégorie de tarif puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une catégorie de tarif"
     objet_pluriel = "des catégories de tarifs"
 

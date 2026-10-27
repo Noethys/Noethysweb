@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "types_sieste_ajouter"
     url_modifier = "types_sieste_modifier"
     url_supprimer = "types_sieste_supprimer"
-    description_liste = "Voici ci-dessous la liste des types de sieste."
-    description_saisie = "Saisissez toutes les informations concernant le type de sieste à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les types de sieste sont renseignés dans les fiches individuelles des jeunes enfants (sieste, temps calme...)."
+    description_saisie = "Saisissez le nom du type de sieste puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un type de sieste"
     objet_pluriel = "des types de sieste"
     boutons_liste = [

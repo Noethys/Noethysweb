@@ -16,7 +16,7 @@ from core.forms.select2 import Select2MultipleWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    niveaux = forms.ModelMultipleChoiceField(label="Niveaux scolaires", widget=Select2MultipleWidget(), queryset=NiveauScolaire.objects.all(), required=False)
+    niveaux = forms.ModelMultipleChoiceField(label="Niveaux scolaires", widget=Select2MultipleWidget(), queryset=NiveauScolaire.objects.all(), required=False, help_text="Sélectionnez le ou les niveaux scolaires présents dans cette classe. Exemple : CE1 et CE2 pour une classe à double niveau.")
 
     class Meta:
         model = Classe
@@ -24,6 +24,12 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             'date_debut': DatePickerWidget(),
             'date_fin': DatePickerWidget(),
+        }
+        help_texts = {
+            "ecole": "Sélectionnez l'école à laquelle appartient cette classe.",
+            "nom": "Saisissez le nom de la classe. Exemples : CP de Mme Martin, CE1-CE2...",
+            "date_debut": "Saisissez la date de début de l'année scolaire de cette classe. Exemple : 01/09/2025.",
+            "date_fin": "Saisissez la date de fin de l'année scolaire de cette classe. Exemple : 04/07/2026.",
         }
 
     def __init__(self, *args, **kwargs):

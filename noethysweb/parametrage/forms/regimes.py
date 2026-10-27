@@ -17,6 +17,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Regime
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom du régime social. Exemples : Régime général, Régime agricole (MSA), Régime spécial SNCF...",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

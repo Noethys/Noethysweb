@@ -17,6 +17,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = ListeDiffusion
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom de la liste de diffusion. Exemples : Lettre d'information, Parents du conseil d'école...",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

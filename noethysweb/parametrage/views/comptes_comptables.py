@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "comptes_comptables_ajouter"
     url_modifier = "comptes_comptables_modifier"
     url_supprimer = "comptes_comptables_supprimer"
-    description_liste = "Voici ci-dessous la liste des comptes comptables."
-    description_saisie = "Saisissez toutes les informations concernant le compte comptable à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les comptes comptables constituent votre plan de comptes. Ils sont associés aux catégories comptables et utilisés dans la comptabilité."
+    description_saisie = "Saisissez le numéro et le libellé du compte selon votre plan comptable, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un compte comptable"
     objet_pluriel = "des comptes comptables"
     boutons_liste = [

@@ -18,12 +18,8 @@ class Page(Onglet):
     url_ajouter = "activites_unites_remplissage_ajouter"
     url_modifier = "activites_unites_remplissage_modifier"
     url_supprimer = "activites_unites_remplissage_supprimer"
-    description_liste = """Vous pouvez saisir ici des unités de remplissage pour l'activité. Exemples : Journée, Matinée, Après-midi, Séance, Atelier... 
-                            A renseigner uniquement si vous utilisez des unités de consommation. Les unités de remplissage ont deux fonctions : Permettre d'additionner
-                            des quantités de consommations pour avoir le total d'individus prévus à un moment (Exemples : en journée, en matinée...), et de définir des
-                            capacités d'accueil maximales par date pour des moments de la journée. Exemples : 10 places en matinée, 15 places en après-midi, 20 places sur 
-                            l'atelier... Notez que vous devrez définir ces valeurs par date dans le calendrier des ouvertures."""
-    description_saisie = "Saisissez toutes les informations concernant l'unité de remplissage à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les unités de remplissage servent à compter les individus prévus et à limiter les places. Exemples : Journée, Matinée, Après-midi, Atelier... Elles additionnent les consommations d'une ou plusieurs unités pour donner le total d'individus prévus à un moment de la journée, et permettent de définir une capacité d'accueil maximale (exemple : 10 places en matinée, 15 l'après-midi). Ces capacités se saisissent ensuite par date dans le calendrier. A renseigner uniquement si vous utilisez des unités de consommation."
+    description_saisie = "Saisissez le nom de l'unité de remplissage et sélectionnez les unités de consommation qu'elle additionne puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une unité de remplissage"
     objet_pluriel = "des unités de remplissage"
 

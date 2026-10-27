@@ -24,8 +24,8 @@ class Page(Onglet):
     url_modifier = "activites_tarifs_modifier"
     url_supprimer = "activites_tarifs_supprimer"
     url_dupliquer = "activites_tarifs_dupliquer"
-    description_liste = "Vous pouvez saisir ici des tarifs pour chaque nom de tarif. Sélectionnez un nom de tarif dans la liste et cliquez sur Ajouter. Important : Lors d'une évolution de tarif, vous devez créer de nouveaux tarifs (Ne modifiez pas le tarif existant). Et si vous modifiez ou ajoutez un tarif pour une période sur laquelle des prestations existent déjà, il vous faudra effectuer un recalcul depuis le menu Facturation > Recalculer des prestations."
-    description_saisie = "Saisissez toutes les informations concernant le tarif et cliquez sur le bouton Enregistrer."
+    description_liste = "Saisissez ici les tarifs de chaque nom de tarif : sélectionnez un nom de tarif dans la liste puis cliquez sur Ajouter. Un tarif précise la période d'application, les catégories de tarifs, les unités qui le déclenchent et la méthode de calcul (montant unique, quotient familial, durée...). <b>Important</b> : lors d'une évolution tarifaire, créez un nouveau tarif à partir de la date de changement au lieu de modifier le tarif existant. Si vous modifiez ou ajoutez un tarif sur une période où des prestations existent déjà, lancez ensuite un recalcul depuis le menu Facturation > Recalculer des prestations."
+    description_saisie = "Renseignez la période d'application, les catégories de tarifs, le type de tarif et la méthode de calcul, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un tarif"
     objet_pluriel = "des tarifs"
 
@@ -48,7 +48,7 @@ class Page(Onglet):
             ]
         else:
             # Si aucun nom de tarif existe
-            context['box_introduction'] = self.description_liste + "<br><b>Vous devez avoir enregistré au moins un nom de tarif avant de pouvoir ajouter des tarifs !</b>"
+            context['box_introduction'] = self.description_liste + "<br><b>Vous devez avoir enregistré au moins un nom de tarif (rubrique Noms de tarifs) avant de pouvoir ajouter des tarifs.</b>"
         return context
 
     def Get_categorie(self):

@@ -19,7 +19,7 @@ class Consulter(Onglet, crud.Modifier):
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Généralités"
-        context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
+        context['box_introduction'] = "Voici les caractéristiques générales de l'activité : nom, période de validité, coordonnées, logo, structure... Cliquez sur le bouton Modifier pour les changer."
         context['onglet_actif'] = "generalites"
         return context
 
@@ -32,7 +32,7 @@ class Modifier(Consulter):
 
     def get_context_data(self, **kwargs):
         context = super(Modifier, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Renseignez les caractéristiques générales de l'activité."
+        context['box_introduction'] = "Renseignez les caractéristiques générales de l'activité. Le nom et le nom abrégé apparaissent dans toute l'application et sur le portail. Laissez les coordonnées et le logo identiques à ceux de l'organisateur, sauf si l'activité dispose des siens."
         return context
 
     def get_success_url(self):

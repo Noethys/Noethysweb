@@ -98,7 +98,7 @@ class Modifier(Onglet, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(Modifier, self).get_context_data(**kwargs)
         context['box_titre'] = "Calendrier"
-        context['box_introduction'] = "Cliquez sur les cases des unités de consommation pour les ouvrir et saisissez la capacité maximale par groupe dans les cases des unités de remplissage."
+        context['box_introduction'] = "Cliquez sur les cases des unités de consommation pour ouvrir ou fermer les dates souhaitées. Saisissez la capacité d'accueil maximale par groupe dans les cases des unités de remplissage : laissez une case vide pour ne pas limiter le nombre de places."
         context['onglet_actif'] = "calendrier"
         context['form'] = Formulaire
         context['form_lot'] = Form_lot

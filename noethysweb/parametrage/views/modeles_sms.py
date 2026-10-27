@@ -20,8 +20,8 @@ class Page(crud.Page):
     url_modifier = "modeles_sms_modifier"
     url_supprimer = "modeles_sms_supprimer"
     url_dupliquer = "modeles_sms_dupliquer"
-    description_liste = "Sélectionnez une catégorie et consultez les modèles correspondants."
-    description_saisie = "Saisissez toutes les informations concernant le modèle à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les modèles de SMS sont les textes types utilisés pour les envois de SMS aux familles. Sélectionnez une catégorie dans la liste pour consulter les modèles correspondants."
+    description_saisie = "Saisissez le nom du modèle et le texte du SMS. Restez bref et insérez si besoin les mots-clés proposés, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un modèle de SMS"
     objet_pluriel = "des modèles de SMS"
 

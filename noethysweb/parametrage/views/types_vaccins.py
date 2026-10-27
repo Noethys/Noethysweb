@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "types_vaccins_ajouter"
     url_modifier = "types_vaccins_modifier"
     url_supprimer = "types_vaccins_supprimer"
-    description_liste = "Voici ci-dessous la liste des types de vaccins."
-    description_saisie = "Saisissez toutes les informations concernant le type de vaccin à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les types de vaccins sont utilisés pour renseigner les vaccinations des individus. Chaque vaccin est associé aux maladies qu'il couvre et peut avoir une durée de validité, afin de signaler les rappels à effectuer."
+    description_saisie = "Saisissez le nom du vaccin, les maladies associées et sa durée de validité, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un type de vaccin"
     objet_pluriel = "des types de vaccins"
     boutons_liste = [

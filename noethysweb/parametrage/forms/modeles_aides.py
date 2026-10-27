@@ -18,7 +18,7 @@ from core.models import Activite, Aide, JOURS_SEMAINE
 
 
 class Formulaire_creation(FormulaireBase, forms.Form):
-    activite = forms.ModelChoiceField(label="Activité", widget=Select_activite(), queryset=Activite.objects.all(), required=True)
+    activite = forms.ModelChoiceField(label="Activité", widget=Select_activite(), queryset=Activite.objects.all(), required=True, help_text="Sélectionnez l'activité concernée par cette aide.")
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.pop("instance", None)
@@ -38,7 +38,7 @@ class Formulaire_creation(FormulaireBase, forms.Form):
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    montant_max = forms.DecimalField(label="Montant plafond", max_digits=6, decimal_places=2, initial=0.0, required=False)
+    montant_max = forms.DecimalField(label="Montant plafond", max_digits=6, decimal_places=2, initial=0.0, required=False, help_text="Saisissez si besoin le montant total maximal que l'aide peut atteindre pour une même famille. Au-delà, l'aide n'est plus appliquée. Laissez vide pour ne pas limiter.")
     jours_scolaires = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("jours_scolaires"))
     jours_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("jours_vacances"))
 
@@ -51,6 +51,14 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             'date_debut': DatePickerWidget(),
             'date_fin': DatePickerWidget(),
+        }
+        help_texts = {
+            "activite": "Sélectionnez l'activité concernée par cette aide.",
+            "nom": "Saisissez le nom de l'aide. Exemples : Aide CAF aux loisirs, Bons vacances MSA...",
+            "date_debut": "Saisissez la date de début de validité de cette aide.",
+            "date_fin": "Saisissez la date de fin de validité de cette aide.",
+            "caisse": "Sélectionnez la caisse qui verse cette aide. Exemple : CAF du Finistère.",
+            "nbre_dates_max": "Saisissez si besoin le nombre maximal de dates sur lesquelles l'aide peut s'appliquer pour une même famille. Laissez vide pour ne pas limiter.",
         }
 
     def __init__(self, *args, **kwargs):

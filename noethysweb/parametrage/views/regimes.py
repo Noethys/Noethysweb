@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "regimes_ajouter"
     url_modifier = "regimes_modifier"
     url_supprimer = "regimes_supprimer"
-    description_liste = "Voici ci-dessous la liste des régimes."
-    description_saisie = "Saisissez toutes les informations concernant le régime à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les régimes sociaux regroupent les caisses d'allocations familiales (exemples : Régime général, Régime agricole). Le régime est associé à chaque caisse."
+    description_saisie = "Saisissez le nom du régime social puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un régime social"
     objet_pluriel = "des régimes sociaux"
     boutons_liste = [

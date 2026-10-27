@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "comptes_bancaires_ajouter"
     url_modifier = "comptes_bancaires_modifier"
     url_supprimer = "comptes_bancaires_supprimer"
-    description_liste = "Voici ci-dessous la liste des comptes bancaires."
-    description_saisie = "Saisissez toutes les informations concernant le compte bancaire à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les comptes bancaires sont les comptes sur lesquels sont déposés les règlements. Ils sont utilisés pour les dépôts, les prélèvements SEPA, le paiement en ligne et la comptabilité."
+    description_saisie = "Saisissez le nom et les coordonnées bancaires du compte puis cliquez sur le bouton Enregistrer. Pour les prélèvements, renseignez obligatoirement l'IBAN, le BIC et l'identification du créancier (ICS)."
     objet_singulier = "un compte bancaire"
     objet_pluriel = "des comptes bancaires"
     boutons_liste = [

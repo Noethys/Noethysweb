@@ -40,8 +40,8 @@ class Page(crud.Page):
     url_ajouter = "adresses_mail_ajouter"
     url_modifier = "adresses_mail_modifier"
     url_supprimer = "adresses_mail_supprimer"
-    description_liste = "Voici ci-dessous la liste des adresses d'expédition d'emails."
-    description_saisie = "Saisissez toutes les informations concernant l'adresse d'expédition à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les adresses d'expédition sont les comptes de messagerie utilisés par l'application pour envoyer des emails (factures, confirmations du portail, notifications...). Vous pouvez configurer plusieurs adresses, par exemple une par structure ou par service."
+    description_saisie = "Saisissez l'adresse d'envoi, choisissez le moteur d'expédition (SMTP, Mailjet, Brevo) et renseignez les paramètres de connexion fournis par votre messagerie, puis cliquez sur le bouton Enregistrer. Pensez à envoyer un email de test pour vérifier la configuration."
     objet_singulier = "une adresse d'expédition"
     objet_pluriel = "des adresses d'expédition"
     boutons_liste = [

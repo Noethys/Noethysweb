@@ -17,6 +17,12 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = CommandeModele
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom du modèle de commande. Exemple : Commande hebdomadaire des repas.",
+            "restaurateur": "Sélectionnez le restaurateur à qui sont destinées les commandes. Son adresse email sera utilisée pour l'envoi des commandes.",
+            "defaut": "Cochez cette case pour que ce modèle soit proposé par défaut. Un seul modèle peut être défini par défaut.",
+            "structure": "Sélectionnez la structure associée à ce modèle. Laissez 'Toutes les structures' pour que ce modèle soit disponible dans toutes les structures.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

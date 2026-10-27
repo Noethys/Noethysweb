@@ -17,8 +17,8 @@ from core.widgets import DateTimePickerWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    portail_inscriptions_date_debut = forms.DateTimeField(label="Date de début*", required=False, widget=DateTimePickerWidget())
-    portail_inscriptions_date_fin = forms.DateTimeField(label="Date de fin*", required=False, widget=DateTimePickerWidget())
+    portail_inscriptions_date_debut = forms.DateTimeField(label="Date de début*", required=False, widget=DateTimePickerWidget(), help_text="Saisissez la date et l'heure à partir desquelles les usagers peuvent demander une inscription depuis le portail.")
+    portail_inscriptions_date_fin = forms.DateTimeField(label="Date de fin*", required=False, widget=DateTimePickerWidget(), help_text="Saisissez la date et l'heure jusqu'auxquelles les usagers peuvent demander une inscription depuis le portail.")
 
     # Limite de modification
     liste_choix = [(None, "Aucun"),]
@@ -37,23 +37,23 @@ class Formulaire(FormulaireBase, ModelForm):
     liste_choix.extend([(4000 + x, "%d du mois précédent" % x) for x in range(1, 31)])
 
     limite_delai_ajout = forms.TypedChoiceField(label="Délai d'ajout", choices=liste_choix, initial=None, required=False, help_text="Une réservation peut être ajoutée jusqu'à...")
-    limite_heure_ajout = forms.TimeField(label="Heure limite", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-    exclure_weekends_ajout = forms.BooleanField(label="Exclure les weeks-ends", required=False, initial=False)
-    exclure_feries_ajout = forms.BooleanField(label="Exclure les jours fériés", required=False, initial=False)
+    limite_heure_ajout = forms.TimeField(label="Heure limite", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Saisissez l'heure limite du jour sélectionné ci-dessus. Exemple : avec 'Jour J-2' et 09:30, une réservation pour un jeudi pourra être ajoutée jusqu'au mardi à 9h30.")
+    exclure_weekends_ajout = forms.BooleanField(label="Exclure les weeks-ends", required=False, initial=False, help_text="Cochez cette case pour que les samedis et dimanches ne soient pas comptés dans le délai. Uniquement pour les délais de type 'Jour J-x'.")
+    exclure_feries_ajout = forms.BooleanField(label="Exclure les jours fériés", required=False, initial=False, help_text="Cochez cette case pour que les jours fériés ne soient pas comptés dans le délai. Uniquement pour les délais de type 'Jour J-x'.")
     exclure_jours_ajout = forms.MultipleChoiceField(label="Exclure les jours", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("exclure_jours"))
 
     liste_choix_suppr = copy.copy(liste_choix)
     liste_choix_suppr[0] = (None, "Identique au délai d'ajout")
     liste_choix_suppr.insert(1, (-1, "Aucun"))
     limite_delai_suppr = forms.TypedChoiceField(label="Délai de suppression", choices=liste_choix_suppr, initial=None, required=False, help_text="Une réservation peut être supprimée jusqu'à...")
-    limite_heure_suppr = forms.TimeField(label="Heure limite", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-    exclure_weekends_suppr = forms.BooleanField(label="Exclure les weeks-ends", required=False, initial=False)
-    exclure_feries_suppr = forms.BooleanField(label="Exclure les jours fériés", required=False, initial=False)
+    limite_heure_suppr = forms.TimeField(label="Heure limite", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Saisissez l'heure limite du jour sélectionné ci-dessus. Exemple : avec 'Jour J-2' et 09:30, une réservation pour un jeudi pourra être supprimée jusqu'au mardi à 9h30.")
+    exclure_weekends_suppr = forms.BooleanField(label="Exclure les weeks-ends", required=False, initial=False, help_text="Cochez cette case pour que les samedis et dimanches ne soient pas comptés dans le délai. Uniquement pour les délais de type 'Jour J-x'.")
+    exclure_feries_suppr = forms.BooleanField(label="Exclure les jours fériés", required=False, initial=False, help_text="Cochez cette case pour que les jours fériés ne soient pas comptés dans le délai. Uniquement pour les délais de type 'Jour J-x'.")
     exclure_jours_suppr = forms.MultipleChoiceField(label="Exclure les jours", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("exclure_jours"))
 
     # Délais spécifiques par jour de la semaine
-    delais_jours_ajout = forms.BooleanField(label="Définir un délai différent selon le jour de la semaine", required=False, initial=False)
-    delais_jours_suppr = forms.BooleanField(label="Définir un délai différent selon le jour de la semaine", required=False, initial=False)
+    delais_jours_ajout = forms.BooleanField(label="Définir un délai différent selon le jour de la semaine", required=False, initial=False, help_text="Cochez cette case si le délai d'ajout dépend du jour réservé. Exemple : réservation des lundis jusqu'au jeudi précédent et des vendredis jusqu'au mardi. Les jours laissés sur 'Identique au délai général' utilisent le délai ci-dessus.")
+    delais_jours_suppr = forms.BooleanField(label="Définir un délai différent selon le jour de la semaine", required=False, initial=False, help_text="Cochez cette case si le délai de suppression dépend du jour réservé. Les jours laissés sur 'Identique au délai général' utilisent le délai ci-dessus.")
     liste_choix_jour = [(None, "Identique au délai général"), (-1, "Aucun délai")] + liste_choix[1:]
 
     class Meta:

@@ -16,7 +16,7 @@ from fiche_individu.widgets import CarteOSM
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    carte = forms.ChoiceField(label="Localisation", widget=CarteOSM(), required=False)
+    carte = forms.ChoiceField(label="Localisation", widget=CarteOSM(), required=False, help_text="La carte situe l'adresse saisie ci-dessus.")
 
     class Meta:
         model = Medecin
@@ -28,6 +28,16 @@ class Formulaire(FormulaireBase, ModelForm):
             'cp_resid': CodePostal(attrs={"id_ville": "id_ville_resid"}),
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
             "memo": forms.Textarea(attrs={'rows': 3}),
+        }
+        help_texts = {
+            "nom": "Saisissez le nom de famille du médecin.",
+            "prenom": "Saisissez le prénom du médecin.",
+            "rue_resid": "Saisissez l'adresse du cabinet. Exemple : 12 rue des Lilas.",
+            "cp_resid": "Saisissez le code postal. La ville correspondante vous sera proposée automatiquement.",
+            "ville_resid": "Saisissez le nom de la ville.",
+            "tel_cabinet": "Saisissez le numéro de téléphone du cabinet.",
+            "tel_mobile": "Saisissez si besoin le numéro de téléphone mobile du médecin.",
+            "memo": "Vous pouvez saisir ici des informations complémentaires sur ce médecin (spécialité, horaires...).",
         }
 
     def __init__(self, *args, **kwargs):

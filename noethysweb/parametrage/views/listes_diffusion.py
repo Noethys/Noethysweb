@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "listes_diffusion_ajouter"
     url_modifier = "listes_diffusion_modifier"
     url_supprimer = "listes_diffusion_supprimer"
-    description_liste = "Voici ci-dessous la liste des listes de diffusion."
-    description_saisie = "Saisissez toutes les informations concernant la liste de diffusion à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les listes de diffusion permettent de regrouper des destinataires pour leur envoyer facilement des emails (exemples : Lettre d'information, Parents élus). Les familles et individus y sont inscrits depuis leur fiche."
+    description_saisie = "Saisissez le nom de la liste de diffusion puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une liste de diffusion"
     objet_pluriel = "des listes de diffusion"
     boutons_liste = [

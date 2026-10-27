@@ -15,13 +15,18 @@ from core.models import TypeEvenementCollaborateur
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    couleur = forms.CharField(label="Couleur", required=True, widget=ColorPickerWidget(), initial="#3c8dbc")
+    couleur = forms.CharField(label="Couleur", required=True, widget=ColorPickerWidget(), initial="#3c8dbc", help_text="Sélectionnez la couleur de ces événements dans le planning des collaborateurs.")
 
     class Meta:
         model = TypeEvenementCollaborateur
         fields = "__all__"
         widgets = {
             "observations": forms.Textarea(attrs={'rows': 3}),
+        }
+        help_texts = {
+            "nom": "Saisissez le nom du type d'événement. Exemples : Animation, Réunion, Congés, Formation, Maladie...",
+            "type": "Indiquez si la durée de ces événements doit être ajoutée au temps de travail du collaborateur (temps comptabilisé), ignorée (temps non comptabilisé) ou déduite (temps soustrait).",
+            "observations": "Vous pouvez saisir ici des informations complémentaires sur ce type d'événement.",
         }
 
     def __init__(self, *args, **kwargs):

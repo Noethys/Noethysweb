@@ -20,7 +20,7 @@ class Modifier(CustomView, TemplateView):
         context = super(Modifier, self).get_context_data(**kwargs)
         context['page_titre'] = "Paramètres des renseignements du portail"
         context['box_titre'] = "Paramètres d'affichage"
-        context['box_introduction'] = "Indiquez le statut des champs pour chaque type de public et cliquez sur le bouton Enregistrer."
+        context['box_introduction'] = "Indiquez pour chaque renseignement et chaque type de public s'il est masqué, affiché, modifiable ou obligatoire pour les familles sur le portail. Cliquez ensuite sur le bouton Enregistrer."
         context['form'] = context.get("form", Formulaire)
         return context
 

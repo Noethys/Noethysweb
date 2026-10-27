@@ -16,6 +16,10 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = PrefixeFacture
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom du préfixe. Exemple : Régie cantine.",
+            "prefixe": "Saisissez le préfixe placé devant le numéro des factures. Exemple : 'RC-' donnera des numéros comme RC-000123.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

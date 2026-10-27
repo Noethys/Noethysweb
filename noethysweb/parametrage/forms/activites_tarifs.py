@@ -146,17 +146,17 @@ class Formulaire(FormulaireBase, ModelForm):
     choix_groupes = [("TOUS", "Tous les groupes"), ("SELECTION", "Uniquement certains groupes")]
     groupes_type = forms.TypedChoiceField(label="Groupes associés", choices=choix_groupes, initial='TOUS', required=False, help_text="""A renseigner uniquement 
                                             si vous souhaitez que ce tarif ne s'applique qu'aux individus inscrits sur un ou plusieurs groupes donnés.""")
-    groupes = forms.ModelMultipleChoiceField(label="Sélection des groupes", widget=Select2MultipleWidget(), queryset=Groupe.objects.none(), required=False)
+    groupes = forms.ModelMultipleChoiceField(label="Sélection des groupes", widget=Select2MultipleWidget(), queryset=Groupe.objects.none(), required=False, help_text="Sélectionnez les groupes dont les individus inscrits bénéficient de ce tarif.")
 
     choix_cotisations = [("TOUS", "Toutes les adhésions"), ("SELECTION", "Uniquement certaines adhésions")]
     cotisations_type = forms.TypedChoiceField(label="Adhésions associées", choices=choix_cotisations, initial='TOUS', required=False, help_text="""A renseigner uniquement 
                                             si vous souhaitez que ce tarif ne s'applique qu'aux individus qui sont à jour d'un ou plusieurs types d'adhésions donnés.""")
-    cotisations = forms.ModelMultipleChoiceField(label="Sélection des adhésions", widget=Select2MultipleWidget(), queryset=TypeCotisation.objects.all(), required=False)
+    cotisations = forms.ModelMultipleChoiceField(label="Sélection des adhésions", widget=Select2MultipleWidget(), queryset=TypeCotisation.objects.all(), required=False, help_text="Sélectionnez les types d'adhésions dont l'individu doit être à jour pour bénéficier de ce tarif.")
 
     choix_caisses = [("TOUS", "Toutes les caisses"), ("SELECTION", "Uniquement certaines caisses")]
     caisses_type = forms.TypedChoiceField(label="Caisses associées", choices=choix_caisses, initial='TOUS', required=False, help_text="""A renseigner uniquement 
                                             si vous souhaitez que ce tarif ne s'applique qu'aux familles associées à une ou plusieurs caisses données.""")
-    caisses = forms.ModelMultipleChoiceField(label="Sélection des caisses", widget=Select2MultipleWidget(), queryset=Caisse.objects.all(), required=False)
+    caisses = forms.ModelMultipleChoiceField(label="Sélection des caisses", widget=Select2MultipleWidget(), queryset=Caisse.objects.all(), required=False, help_text="Sélectionnez les caisses dont la famille doit dépendre pour bénéficier de ce tarif. Exemple : CAF du Finistère.")
 
     choix_periodes = [("TOUS", "Toutes les périodes"), ("SELECTION", "Uniquement certaines périodes")]
     periodes_type = forms.TypedChoiceField(label="Périodes", choices=choix_periodes, initial='TOUS', required=False, help_text="""A renseigner uniquement 
@@ -180,7 +180,7 @@ class Formulaire(FormulaireBase, ModelForm):
                                                     celle du début du forfait, mais vous pouvez choisir un autre type de date dans la liste proposée.""")
 
     # Forfait-crédit : Automatique
-    type_application = forms.TypedChoiceField(label="Application", choices=[("MANUEL", "Manuelle"), ("AUTO", "Automatique")], initial="MANUEL", required=False)
+    type_application = forms.TypedChoiceField(label="Application", choices=[("MANUEL", "Manuelle"), ("AUTO", "Automatique")], initial="MANUEL", required=False, help_text="Avec 'Manuelle', le forfait est saisi par l'utilisateur dans la grille des consommations. Avec 'Automatique', l'application l'associe d'elle-même aux consommations saisies quand les conditions ci-dessous sont réunies (fonction expérimentale).")
     forfait_auto_nbre_conso_min = forms.IntegerField(label="Nbre conso min.", required=False, initial=2, validators=[MinValueValidator(1)], help_text="Ce forfait sera appliqué automatiquement si le nombre de consommations existantes sur la période est supérieur ou égal à X.")
     forfait_auto_debut = forms.TypedChoiceField(label="Début du forfait", initial="PREC_SEMAINE_PREMIER_JOUR", required=False, choices=[
         ("PREC_LUNDI", "Lundi précédent"), ("PREC_MARDI", "Mardi précédent"), ("PREC_MERCREDI", "Mercredi précédent"), ("PREC_JEUDI", "Jeudi précédent"),
@@ -193,7 +193,7 @@ class Formulaire(FormulaireBase, ModelForm):
         ("PREC_MOIS_4", "1er avril précédent"),("PREC_MOIS_5", "1er mai précédent"), ("PREC_MOIS_6", "1er juin précédent"),
         ("PREC_MOIS_7", "1er juillet précédent"),("PREC_MOIS_8", "1er août précédent"), ("PREC_MOIS_9", "1er septembre précédent"),
         ("PREC_MOIS_10", "1er octobre précédent"),("PREC_MOIS_11", "1er novembre précédent"), ("PREC_MOIS_12", "1er décembre précédent"),
-    ])
+    ], help_text="Sélectionnez la date de début du forfait, calculée à partir de la date de la consommation saisie. Exemple : '1er jour de la semaine' pour un forfait hebdomadaire.")
     forfait_auto_fin = forms.TypedChoiceField(label="Fin du forfait", initial="SUIV_SEMAINE_VENDREDI", required=False, choices=[
         ("SUIV_LUNDI", "Lundi suivant"), ("SUIV_MARDI", "Mardi suivant"), ("SUIV_MERCREDI", "Mercredi suivant"), ("SUIV_JEUDI", "Jeudi suivant"),
         ("SUIV_VENDREDI", "Vendredi suivant"), ("SUIV_SAMEDI", "Samedi suivant"), ("SUIV_DIMANCHE", "Dimanche suivant"),
@@ -206,15 +206,15 @@ class Formulaire(FormulaireBase, ModelForm):
         ("SUIV_MOIS_4", "Dernier jour du mois de avril suivant"),("SUIV_MOIS_5", "Dernier jour du mois de mai suivant"), ("SUIV_MOIS_6", "Dernier jour du mois de juin suivant"),
         ("SUIV_MOIS_7", "Dernier jour du mois de juillet suivant"),("SUIV_MOIS_8", "Dernier jour du mois de août suivant"), ("SUIV_MOIS_9", "Dernier jour du mois de septembre suivant"),
         ("SUIV_MOIS_10", "Dernier jour du mois de octobre suivant"),("SUIV_MOIS_11", "Dernier jour du mois de novembre suivant"), ("SUIV_MOIS_12", "Dernier jour du mois de décembre suivant"),
-    ])
+    ], help_text="Sélectionnez la date de fin du forfait, calculée à partir de la date de la consommation saisie. Exemple : 'Vendredi de la semaine' pour un forfait du lundi au vendredi.")
 
     # Forfait-crédit : Durée de validité
     choix_duree_forfait = [("NON", "Sans durée par défaut"), ("OUI", "Avec une durée par défaut")]
     validite_duree_forfait = forms.TypedChoiceField(label="Durée par défaut", choices=choix_duree_forfait, initial='NON', required=False, help_text="""
                                                     Vous pouvez définir ici la durée par défaut du forfait à partir de la date du début. Exemple : 5 jours...""")
-    validite_jours = forms.IntegerField(label="Jours", required=False)
-    validite_mois = forms.IntegerField(label="Mois", required=False)
-    validite_annees = forms.IntegerField(label="Années", required=False)
+    validite_jours = forms.IntegerField(label="Jours", required=False, help_text="Saisissez le nombre de jours de la durée par défaut du forfait. Exemple : 5 pour un forfait de 5 jours.")
+    validite_mois = forms.IntegerField(label="Mois", required=False, help_text="Saisissez le nombre de mois de la durée par défaut du forfait. Exemple : 1 pour un forfait mensuel.")
+    validite_annees = forms.IntegerField(label="Années", required=False, help_text="Saisissez le nombre d'années de la durée par défaut du forfait. Exemple : 1 pour un forfait annuel.")
 
     # Forfait-crédit : Blocage plafond
     blocage_plafond = forms.BooleanField(label="Bloquer si la quantité maximale de consommations est atteinte", required=False, help_text="""
@@ -227,7 +227,7 @@ class Formulaire(FormulaireBase, ModelForm):
     date_facturation_credit_type = forms.TypedChoiceField(label="Date de facturation", choices=choix_date_facturation_credit, initial='DATE_DEBUT_FORFAIT', required=False, help_text="""
                                                         Par défaut, la date de la prestation sera celle du début du forfait, mais vous pouvez sélectionner un autre type
                                                         de date dans la liste proposée.""")
-    date_facturation_credit = forms.DateField(label="Date de facturation", required=False, widget=DatePickerWidget())
+    date_facturation_credit = forms.DateField(label="Date de facturation", required=False, widget=DatePickerWidget(), help_text="Saisissez la date qui sera donnée à la prestation générée par ce forfait.")
 
     # Lignes de tarifs
     tarifs_lignes_data = forms.CharField(required=False)
@@ -239,7 +239,7 @@ class Formulaire(FormulaireBase, ModelForm):
         'id_tarifs_lignes_data': "tarifs_lignes_data",
         'id_form': 'activites_tarifs_form',
     }
-    parametres_tarif = forms.CharField(label="Paramètres", widget=ParametresTarifs(attrs=attrs), required=False)
+    parametres_tarif = forms.CharField(label="Paramètres", widget=ParametresTarifs(attrs=attrs), required=False, help_text="Renseignez ici les montants et les conditions du tarif selon la méthode de calcul sélectionnée ci-dessus.")
 
     class Meta:
         model = Tarif
@@ -264,6 +264,9 @@ class Formulaire(FormulaireBase, ModelForm):
             "date_facturation_forfait": "Par défaut, la date de la prestation sera celle du début du forfait, mais vous pouvez choisir un autre type de date dans la liste.",
             "forfait_beneficiaire": "Sélectionnez 'famille' si le forfait est commun à tous les membres de la famille, sinon sélectionnez 'individu'.",
             "methode": "Sélectionnez une méthode de calcul dans la liste proposée puis renseignez les paramètres ci-dessous.",
+            "jours_scolaires": "Cochez les jours de la semaine pour lesquels ce tarif s'applique pendant les périodes scolaires.",
+            "jours_vacances": "Cochez les jours de la semaine pour lesquels ce tarif s'applique pendant les vacances scolaires.",
+            "label_prestation": "Saisissez le label personnalisé qui sera donné aux prestations générées par ce tarif. Exemple : Repas cantine.",
         }
 
     def __init__(self, *args, **kwargs):

@@ -16,6 +16,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = TypePosteCollaborateur
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom du type. Exemples : Animateur, Directeur, Agent d'entretien, Cuisinier...",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

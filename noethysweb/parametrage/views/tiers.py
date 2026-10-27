@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "tiers_ajouter"
     url_modifier = "tiers_modifier"
     url_supprimer = "tiers_supprimer"
-    description_liste = "Voici ci-dessous la liste des tiers."
-    description_saisie = "Saisissez toutes les informations concernant le tiers à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les tiers sont les organismes et personnes avec lesquels vous réalisez des opérations comptables (fournisseurs, financeurs, partenaires...)."
+    description_saisie = "Saisissez le nom du tiers et, si besoin, des observations puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un tiers"
     objet_pluriel = "des tiers"
     boutons_liste = [

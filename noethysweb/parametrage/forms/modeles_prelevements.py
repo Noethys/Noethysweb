@@ -14,7 +14,7 @@ from core.models import PrelevementsModele, CHOIX_FORMAT_PRELEVEMENTS
 
 
 class Formulaire_creation(FormulaireBase, forms.Form):
-    format = forms.ChoiceField(label="Format", choices=CHOIX_FORMAT_PRELEVEMENTS, required=True)
+    format = forms.ChoiceField(label="Format", choices=CHOIX_FORMAT_PRELEVEMENTS, required=True, help_text="Sélectionnez 'Secteur privé' pour une association ou 'Secteur public DFT' pour une collectivité qui encaisse sur un compte de dépôt de fonds au Trésor.")
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.pop("instance", None)
@@ -42,6 +42,11 @@ class Formulaire(FormulaireBase, ModelForm):
         fields = "__all__"
         widgets = {
             "observations": forms.Textarea(attrs={'rows': 3}),
+        }
+        help_texts = {
+            "nom": "Saisissez le nom du modèle de prélèvement. Exemple : Prélèvement mensuel cantine.",
+            "observations": "Vous pouvez saisir ici des informations complémentaires sur ce modèle.",
+            "format": "Format du fichier de prélèvement SEPA : 'Secteur privé' pour une association ou 'Secteur public DFT' pour une collectivité qui encaisse sur un compte au Trésor.",
         }
 
     def __init__(self, *args, **kwargs):

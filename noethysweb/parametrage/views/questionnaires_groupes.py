@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "questionnaires_groupes_ajouter"
     url_modifier = "questionnaires_groupes_modifier"
     url_supprimer = "questionnaires_groupes_supprimer"
-    description_liste = "Vous pouvez ici créer des regroupements permettant de rassembler les questions de vos questionnaires. Sélectionnez une catégorie de questionnaire et consultez les regroupements de questions correspondants."
-    description_saisie = "Saisissez le nom du regroupement de questions et cliquez sur le bouton Enregistrer."
+    description_liste = "Les regroupements de questions permettent de rassembler les questions de vos questionnaires sous des intertitres (exemples : Santé, Autorisations). Sélectionnez une catégorie de questionnaire pour consulter les regroupements correspondants."
+    description_saisie = "Saisissez le nom du regroupement de questions puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un regroupement de questions"
     objet_pluriel = "des regroupements de questions"
 

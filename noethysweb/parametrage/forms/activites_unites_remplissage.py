@@ -23,8 +23,8 @@ class Formulaire(FormulaireBase, ModelForm):
     validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='ILLIMITEE', required=True, help_text="""Généralement, cette optin sera toujours
                                             définie sur 'Illimitée', sauf si vous souhaitez masquer cette unité de remplissage à partir d'une date donnée dans la grille des consommations
                                             (Si elle est devenue obsolète par exemple).""")
-    validite_date_debut = forms.DateField(label="Date de début*", required=False, widget=DatePickerWidget())
-    validite_date_fin = forms.DateField(label="Date de fin*", required=False, widget=DatePickerWidget())
+    validite_date_debut = forms.DateField(label="Date de début*", required=False, widget=DatePickerWidget(), help_text="Saisissez la date à partir de laquelle cette unité de remplissage est utilisée.")
+    validite_date_fin = forms.DateField(label="Date de fin*", required=False, widget=DatePickerWidget(), help_text="Saisissez la date jusqu'à laquelle cette unité de remplissage est utilisée.")
 
     # Unités
     unites = forms.ModelMultipleChoiceField(label="Unités de consommation associées", widget=Select2MultipleWidget(), queryset=Unite.objects.none(), required=True, help_text="""
@@ -37,7 +37,7 @@ class Formulaire(FormulaireBase, ModelForm):
                                 La plage horaire permet de comptabiliser uniquement les consommations appartenant à la plage horaire renseignée. A utiliser uniquement
                                 si vous utilisez des unités de consommation de type Horaire ou Multihoraires. Vous pouvez ainsi créer par exemple des unités de remplissage
                                 telles que '7h30-8h', '8h-8h30', '8h30-9h' afin d'obtenir le total des individus prévus sur chacun de ces créneaux horaires.""")
-    heure_max = forms.TimeField(label="Heure max", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
+    heure_max = forms.TimeField(label="Heure max", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Saisissez l'heure de fin de la plage horaire. Exemple : 08:30 pour une unité de remplissage '8h-8h30'.")
 
     class Meta:
         model = UniteRemplissage

@@ -17,6 +17,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = TypeConsentement
         fields = "__all__"
+        help_texts = {
+            "structure": "Sélectionnez la structure associée à ce type de consentement. Laissez 'Toutes les structures' pour que ce type de consentement soit disponible dans toutes les structures.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

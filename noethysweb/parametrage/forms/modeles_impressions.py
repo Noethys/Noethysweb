@@ -16,11 +16,18 @@ from core.widgets import FormIntegreWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    options = forms.CharField(label="Options d'impression", required=False, widget=FormIntegreWidget())
+    options = forms.CharField(label="Options d'impression", required=False, widget=FormIntegreWidget(), help_text="Réglez ici les options d'impression qui seront appliquées automatiquement avec ce modèle.")
 
     class Meta:
         model = ModeleImpression
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom du modèle d'impression. Exemple : Factures avec détail des consommations.",
+            "description": "Saisissez si besoin une description pour vous souvenir de l'usage de ce modèle.",
+            "modele_document": "Sélectionnez le modèle de document (mise en page) à utiliser pour cette impression.",
+            "defaut": "Cochez cette case pour que ce modèle soit proposé par défaut. Un seul modèle peut être défini par défaut.",
+            "structure": "Sélectionnez la structure associée à ce modèle. Laissez 'Toutes les structures' pour que ce modèle soit disponible dans toutes les structures.",
+        }
 
     def __init__(self, *args, **kwargs):
         categorie = kwargs.pop("categorie")

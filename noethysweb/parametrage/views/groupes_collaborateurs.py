@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "groupes_collaborateurs_ajouter"
     url_modifier = "groupes_collaborateurs_modifier"
     url_supprimer = "groupes_collaborateurs_supprimer"
-    description_liste = "Voici ci-dessous la liste des groupes de collaborateurs."
-    description_saisie = "Saisissez toutes les informations concernant le groupe à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les groupes de collaborateurs permettent de regrouper les collaborateurs (exemples : Equipe d'animation, Equipe de direction) et de limiter leur consultation à certains utilisateurs, appelés superviseurs."
+    description_saisie = "Saisissez le nom du groupe et, si besoin, les superviseurs autorisés à consulter ses collaborateurs, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un groupe de collaborateurs"
     objet_pluriel = "des groupes de collaborateurs"
     boutons_liste = [

@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "categories_travail_ajouter"
     url_modifier = "categories_travail_modifier"
     url_supprimer = "categories_travail_supprimer"
-    description_liste = "Voici ci-dessous la liste des catégories socio-professionnelles."
-    description_saisie = "Saisissez toutes les informations concernant la catégorie socio-professionnelle à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les catégories socio-professionnelles sont proposées dans les fiches individuelles pour renseigner la situation professionnelle des parents. Elles sont utiles notamment pour les statistiques."
+    description_saisie = "Saisissez le nom de la catégorie socio-professionnelle puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une catégorie socio-professionnelle"
     objet_pluriel = "des catégories socio-professionnelles"
     boutons_liste = [

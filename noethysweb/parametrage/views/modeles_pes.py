@@ -18,8 +18,8 @@ class Page(crud.Page):
     url_ajouter = "modeles_pes_creer"
     url_modifier = "modeles_pes_modifier"
     url_supprimer = "modeles_pes_supprimer"
-    description_liste = "Voici ci-dessous la liste des modèles d'exports vers le Trésor Public."
-    description_saisie = "Saisissez toutes les informations concernant le modèle à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les modèles d'exports définissent les paramètres des fichiers de titres de recettes transmis à la trésorerie (format PES v2) ou aux logiciels de gestion financière (Magnus, Millésime). Ils sont utilisés depuis le menu Facturation pour générer les lots d'exports."
+    description_saisie = "Renseignez les codes fournis par votre trésorerie ou votre logiciel de gestion financière (collectivité, budget, poste comptable...) ainsi que les libellés, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un modèle d'export"
     objet_pluriel = "des modèles d'exports"
     boutons_liste = [
@@ -61,7 +61,7 @@ class Creer(Page, crud.Ajouter):
 
     def get_context_data(self, **kwargs):
         context = super(Creer, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Vous devez sélectionner un format d'export."
+        context['box_introduction'] = "Sélectionnez le format d'export adapté au destinataire de vos fichiers, puis cliquez sur le bouton Valider."
         return context
 
     def post(self, request, **kwargs):

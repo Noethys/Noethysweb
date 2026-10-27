@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "feries_fixes_ajouter"
     url_modifier = "feries_fixes_modifier"
     url_supprimer = "feries_fixes_supprimer"
-    description_liste = "Voici ci-dessous la liste des jours fériés fixes."
-    description_saisie = "Saisissez toutes les informations concernant le jour férié fixe et cliquez sur le bouton Enregistrer."
+    description_liste = "Les jours fériés fixes reviennent chaque année à la même date (exemples : 1er janvier, 14 juillet, 25 décembre). Ils sont notamment pris en compte dans le calcul des délais de réservation du portail."
+    description_saisie = "Saisissez le nom du jour férié, le jour et le mois puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un jour férié fixe"
     objet_pluriel = "des jours fériés fixes"
     boutons_liste = [

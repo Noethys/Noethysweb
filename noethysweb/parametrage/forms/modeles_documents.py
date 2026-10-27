@@ -83,6 +83,10 @@ class Formulaire_creation(FormulaireBase, ModelForm):
     class Meta:
         model = ModeleDocument
         fields = ["nom", "categorie", "structure"]
+        help_texts = {
+            "nom": "Saisissez le nom du modèle de document. Exemple : Facture avec logo.",
+            "structure": "Sélectionnez la structure associée à ce modèle. Laissez 'Toutes les structures' pour que ce modèle soit disponible dans toutes les structures.",
+        }
 
     def __init__(self, *args, **kwargs):
         nom = kwargs.pop("nom", "")

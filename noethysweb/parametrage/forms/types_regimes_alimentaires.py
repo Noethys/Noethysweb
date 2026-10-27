@@ -16,6 +16,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = RegimeAlimentaire
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom du régime alimentaire. Exemples : Sans porc, Végétarien, Sans gluten...",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

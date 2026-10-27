@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "types_cotisations_ajouter"
     url_modifier = "types_cotisations_modifier"
     url_supprimer = "types_cotisations_supprimer"
-    description_liste = "Voici ci-dessous la liste des types d'adhésion."
-    description_saisie = "Saisissez toutes les informations concernant le type d'adhésion à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les types d'adhésions sont les adhésions proposées aux familles ou aux individus (adhésion annuelle, carte famille, licence...). Pour chaque type, créez ensuite une ou plusieurs unités d'adhésion (périodes et tarifs)."
+    description_saisie = "Saisissez le nom du type d'adhésion, indiquez s'il est familial ou individuel et s'il donne lieu à une carte d'adhérent, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un type d'adhésion"
     objet_pluriel = "des types d'adhésions"
     boutons_liste = [

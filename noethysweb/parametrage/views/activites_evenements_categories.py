@@ -18,8 +18,8 @@ class Page(Onglet):
     url_ajouter = "activites_evenements_categories_ajouter"
     url_modifier = "activites_evenements_categories_modifier"
     url_supprimer = "activites_evenements_categories_supprimer"
-    description_liste = "Vous pouvez saisir ici des catégories d'événements liées à l'activité. Ces catégories pourront ensuite être associées aux événements souhaités."
-    description_saisie = "Saisissez toutes les informations concernant la catégorie et cliquez sur le bouton Enregistrer."
+    description_liste = "Les catégories d'événements permettent de regrouper des événements qui partagent les mêmes caractéristiques (exemples : Sorties, Ateliers, Spectacles). Un événement associé à une catégorie hérite de ses caractéristiques, ce qui évite de les ressaisir pour chaque événement."
+    description_saisie = "Saisissez le nom de la catégorie et ses caractéristiques par défaut puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une catégorie d'événement"
     objet_pluriel = "des catégories d'événements"
 

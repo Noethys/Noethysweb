@@ -18,7 +18,7 @@ class Consulter(Onglet, crud.Modifier):
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Renseignements"
-        context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
+        context['box_introduction'] = "Voici les renseignements et les pièces exigés des individus inscrits à cette activité. Les éléments manquants sont signalés dans les fiches et dans les alertes. Cliquez sur le bouton Modifier pour les changer."
         context['onglet_actif'] = "renseignements"
         return context
 
@@ -31,7 +31,7 @@ class Modifier(Consulter):
 
     def get_context_data(self, **kwargs):
         context = super(Modifier, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Sélectionnez les renseignements et pièces qu'un individu inscrit doit fournir."
+        context['box_introduction'] = "Sélectionnez les pièces, adhésions, vaccinations, assurances et consentements qu'un individu inscrit à cette activité doit fournir. Les éléments manquants seront signalés dans les fiches et dans les alertes."
         return context
 
     def get_success_url(self):

@@ -26,8 +26,8 @@ class Page(Onglet):
     url_modifier_plusieurs = "activites_evenements_modifier_plusieurs"
     url_supprimer = "activites_evenements_supprimer"
     url_supprimer_plusieurs = "activites_evenements_supprimer_plusieurs"
-    description_liste = "Vous pouvez saisir ici des événements pour l'activité. Vous devez avoir au préalable créé au moins une unité de consommation de type 'Evénementiel'."
-    description_saisie = "Saisissez toutes les informations concernant l'événement à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les événements sont des animations ponctuelles proposées sur une date donnée : sortie, spectacle, atelier, mini-camp... Chacun peut avoir sa propre capacité d'accueil et son propre tarif. Vous devez avoir créé au préalable au moins une unité de consommation de type 'Evénementiel'. Pour en créer plusieurs à la fois, utilisez le bouton d'importation depuis un fichier Excel."
+    description_saisie = "Renseignez le nom, la ou les dates, l'unité et le groupe de l'événement, puis si besoin sa capacité d'accueil et sa tarification, et cliquez sur le bouton Enregistrer."
     objet_singulier = "un événement"
     objet_pluriel = "des événements"
 
@@ -222,7 +222,7 @@ class Modifier_plusieurs(Page, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(Modifier_plusieurs, self).get_context_data(**kwargs)
         context['box_titre'] = "Modifier un lot d'événéments"
-        context['box_introduction'] = "Cochez les éléments à modifier puis renseignez les nouvelles valeurs avant de cliquer sur le bouton Enregistrer."
+        context['box_introduction'] = "Vous allez modifier en une seule fois tous les événements sélectionnés. Cochez uniquement les éléments à modifier, renseignez les nouvelles valeurs puis cliquez sur le bouton Enregistrer. Les éléments non cochés restent inchangés."
         context['onglet_actif'] = "evenements"
         context['form'] = Formulaire_modifier_plusieurs(idactivite=kwargs.get("idactivite"))
         return context

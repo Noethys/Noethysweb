@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "categories_compte_internet_ajouter"
     url_modifier = "categories_compte_internet_modifier"
     url_supprimer = "categories_compte_internet_supprimer"
-    description_liste = "Voici ci-dessous la liste des catégories de compte internet."
-    description_saisie = "Saisissez toutes les informations concernant la catégorie à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les catégories de compte internet permettent de distinguer des groupes de familles sur le portail. Elles servent par exemple à réserver certaines périodes de réservation à une catégorie de familles (familles de la commune, personnel communal...). La catégorie est attribuée dans la fiche famille."
+    description_saisie = "Saisissez le nom de la catégorie de compte internet puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une catégorie de compte internet"
     objet_pluriel = "des catégories de compte internet"
     boutons_liste = [

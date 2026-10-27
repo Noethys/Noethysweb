@@ -111,8 +111,8 @@ class Page(crud.Page):
     url_modifier = "sondages_modifier"
     url_supprimer = "sondages_supprimer"
     url_consulter = "sondages_consulter"
-    description_liste = "Voici ci-dessous la liste des formulaires. Vous pouvez créer ici des sondages, enquêtes ou questionnaires qui apparaîtront sur le portail. Une fois le formulaire créé, vous devrez paramétrer un article (Menu Paramétrage > Portail > Articles) auquel vous associerez le formulaire afin de le faire apparaître sur le portail."
-    description_saisie = "Saisissez toutes les informations concernant le formulaire à créer et cliquez sur le bouton Enregistrer."
+    description_liste = "Les formulaires permettent de proposer aux familles des sondages, enquêtes ou inscriptions à remplir sur le portail. Une fois le formulaire créé, associez-le à un article (menu Paramétrage > Portail > Articles) pour le faire apparaître sur le portail. Les réponses sont consultables dans le menu Individus > Questionnaires et formulaires > Réponses."
+    description_saisie = "Saisissez le titre du formulaire et ses paramètres puis cliquez sur le bouton Enregistrer. Vous pourrez ensuite ajouter les questions."
     objet_singulier = "un formulaire"
     objet_pluriel = "des formulaires"
     boutons_liste = [

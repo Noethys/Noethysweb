@@ -18,8 +18,8 @@ class Page(crud.Page):
     url_ajouter = "modeles_word_ajouter"
     url_modifier = "modeles_word_modifier"
     url_supprimer = "modeles_word_supprimer"
-    description_liste = "Sélectionnez une catégorie et consultez les modèles correspondants."
-    description_saisie = "Saisissez toutes les informations concernant le modèle à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les modèles de documents Word sont utilisés pour le publipostage : l'application remplit automatiquement les champs du document avec les données des familles ou des individus. Sélectionnez une catégorie dans la liste pour consulter les modèles correspondants."
+    description_saisie = "Saisissez le nom du modèle et importez le fichier Word contenant les champs de fusion, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un modèle de document Word"
     objet_pluriel = "des modèles de documents Word"
 

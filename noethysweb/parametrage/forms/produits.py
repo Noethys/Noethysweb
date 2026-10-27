@@ -19,7 +19,7 @@ from parametrage.forms import questionnaires
 
 class Formulaire(FormulaireBase, ModelForm):
     cropper_data = forms.CharField(widget=forms.HiddenInput(), required=False)
-    couleur = forms.CharField(label="Couleur", required=True, widget=ColorPickerWidget(), initial="#3c8dbc")
+    couleur = forms.CharField(label="Couleur", required=True, widget=ColorPickerWidget(), initial="#3c8dbc", help_text="Sélectionnez la couleur de ce produit dans le planning des locations.")
 
     # Tarification
     choix_tarification = [
@@ -36,6 +36,14 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             "image": Crop_image(attrs={"largeur_min": 200, "hauteur_min": 200, "ratio": "1/1"}),
             "observations": forms.Textarea(attrs={'rows': 3}),
+        }
+        help_texts = {
+            "categorie": "Sélectionnez la catégorie à laquelle appartient ce produit.",
+            "nom": "Saisissez le nom du produit. Exemples : Salle polyvalente, Vidéoprojecteur, Minibus...",
+            "observations": "Vous pouvez saisir ici des informations complémentaires sur ce produit.",
+            "image": "Sélectionnez si besoin une image pour illustrer ce produit.",
+            "quantite": "Saisissez la quantité disponible à la location. Exemple : 3 si vous disposez de 3 vidéoprojecteurs identiques.",
+            "montant": "Saisissez si besoin le montant proposé par défaut lors de la saisie d'une location de ce produit.",
         }
 
 

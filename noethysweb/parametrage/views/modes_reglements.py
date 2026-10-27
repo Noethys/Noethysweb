@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "modes_reglements_ajouter"
     url_modifier = "modes_reglements_modifier"
     url_supprimer = "modes_reglements_supprimer"
-    description_liste = "Voici ci-dessous la liste des modes de règlements."
-    description_saisie = "Saisissez toutes les informations concernant le mode de règlement à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les modes de règlements sont les moyens de paiement acceptés (chèque, espèces, virement, carte bancaire, chèques vacances...). Ils sont proposés lors de la saisie des règlements et utilisés dans les dépôts et les exports comptables."
+    description_saisie = "Saisissez le nom du mode de règlement et précisez si un numéro de pièce doit être saisi, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un mode de règlement"
     objet_pluriel = "des modes de règlements"
     boutons_liste = [

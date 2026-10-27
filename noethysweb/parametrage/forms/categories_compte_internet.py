@@ -17,6 +17,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = CategorieCompteInternet
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom de la catégorie de compte internet. Exemples : Familles de la commune, Familles hors commune... Les catégories permettent par exemple de réserver une période de réservation du portail à certaines familles.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

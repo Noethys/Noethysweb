@@ -18,15 +18,15 @@ from core.utils import utils_preferences
 class Formulaire(FormulaireBase, ModelForm):
     # Label de la prestation
     choix_label = [("DEFAUT", "Label par défaut (Type d'adhésion suivi de l'unité)"), ("PERSO", "Label personnalisé")]
-    label_type = forms.TypedChoiceField(label="Label de la prestation", choices=choix_label, initial='DEFAUT', required=True)
+    label_type = forms.TypedChoiceField(label="Label de la prestation", choices=choix_label, initial='DEFAUT', required=True, help_text="Indiquez le label des prestations générées : par défaut le type d'adhésion suivi de l'unité (exemple : Adhésion annuelle - 2025-26), ou un label personnalisé.")
     label_perso = forms.CharField(label="Label personnalisé*", required=False, help_text="Saisissez le label de prestation souhaité. Exemple : Adhésion annuelle.")
 
     # Durée de validité
     choix_validite = [("PERIODE", "Une période"), ("DUREE", "Une durée")]
-    validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='PERIODE', required=True)
-    validite_jours = forms.IntegerField(label="Jours", required=False)
-    validite_mois = forms.IntegerField(label="Mois", required=False)
-    validite_annees = forms.IntegerField(label="Années", required=False)
+    validite_type = forms.TypedChoiceField(label="Type de validité", choices=choix_validite, initial='PERIODE', required=True, help_text="Indiquez si les adhésions sont valables sur une période fixe (dates de début et de fin) ou pendant une durée à partir de leur date de saisie (exemple : 1 an).")
+    validite_jours = forms.IntegerField(label="Jours", required=False, help_text="Saisissez le nombre de jours de la durée de validité. Exemple : 15.")
+    validite_mois = forms.IntegerField(label="Mois", required=False, help_text="Saisissez le nombre de mois de la durée de validité. Exemple : 6.")
+    validite_annees = forms.IntegerField(label="Années", required=False, help_text="Saisissez le nombre d'années de la durée de validité. Exemple : 1.")
 
     # Tarif
     type_tarif = forms.ChoiceField(label="Type de tarif", choices=[("GRATUIT", "Gratuit"), ("MONTANT", "Montant unique"), ("QF", "Montant selon le quotient familial")], initial="MONTANT", required=False, help_text="Sélectionnez un type de tarif à appliquer : montant unique ou selon le quotient familial.")
@@ -42,6 +42,10 @@ class Formulaire(FormulaireBase, ModelForm):
         help_texts = {
             "montant": "Saisissez un montant pour cette unité d'adhésion.",
             "tarifs": "Saisissez ici une tranche de qf et son montant associé par ligne de la façon suivante : QFMIN-QFMAX=MONTANT. Exemple : <br>0-499=9.50<br>500-950=10.05<br>951-999999=13.90",
+            "nom": "Saisissez le nom de l'unité d'adhésion. Exemples : 2025-26, Année 2026, Trimestre 1...",
+            "date_debut": "Saisissez la date de début de validité des adhésions de cette unité. Exemple : 01/09/2025.",
+            "date_fin": "Saisissez la date de fin de validité des adhésions de cette unité. Exemple : 31/08/2026.",
+            "defaut": "Cochez cette case pour que cette unité soit proposée par défaut lors de la saisie d'une adhésion.",
         }
 
     def __init__(self, *args, **kwargs):

@@ -26,6 +26,10 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             "image": Crop_image(attrs={"largeur_min": 200, "hauteur_min": 200, "ratio": "1/1"}),
         }
+        help_texts = {
+            "nom": "Saisissez le nom de la catégorie de produits. Exemples : Salles, Matériel, Véhicules...",
+            "image": "Sélectionnez si besoin une image pour illustrer cette catégorie de produits.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

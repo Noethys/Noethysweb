@@ -23,7 +23,7 @@ from core.forms.select2 import Select2MultipleWidget, Select2Widget
 
 class Formulaire(FormulaireBase, ModelForm):
     cropper_data = forms.CharField(widget=forms.HiddenInput(), required=False)
-    type_image = forms.ChoiceField(label="Image", choices=[("aucune", "Aucune image"), ("importer", "Importation d'une image"), ("banque_images", "Sélection dans la banque d'images")], initial="aucune", required=False)
+    type_image = forms.ChoiceField(label="Image", choices=[("aucune", "Aucune image"), ("importer", "Importation d'une image"), ("banque_images", "Sélection dans la banque d'images")], initial="aucune", required=False, help_text="Indiquez si l'article doit être illustré par une image importée depuis votre ordinateur ou choisie dans la banque d'images.")
     periode = forms.CharField(label="Période", required=False, widget=DateRangePickerWidget(), help_text="Renseignez une période de présence.")
 
     class Meta:
@@ -44,6 +44,13 @@ class Formulaire(FormulaireBase, ModelForm):
         labels = {
             "image": "Image à importer",
             "image_article": "Sélection de l'image",
+        }
+        help_texts = {
+            "titre": "Saisissez le titre de l'article qui sera affiché sur le portail. Exemple : Inscriptions pour les vacances d'été.",
+            "texte": "Saisissez le contenu de l'article. Vous pouvez mettre en forme le texte avec la barre d'outils.",
+            "image": "Sélectionnez l'image à importer pour illustrer cet article.",
+            "image_article": "Sélectionnez une image dans la banque d'images. Vous pouvez enrichir cette banque depuis le menu Paramétrage > Banque d'images des articles.",
+            "structure": "Sélectionnez la structure associée à ce article. Laissez 'Toutes les structures' pour que ce article soit disponible dans toutes les structures.",
         }
 
     def __init__(self, *args, **kwargs):

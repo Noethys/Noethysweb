@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "messages_factures_ajouter"
     url_modifier = "messages_factures_modifier"
     url_supprimer = "messages_factures_supprimer"
-    description_liste = "Voici ci-dessous la liste des messages de factures."
-    description_saisie = "Saisissez toutes les informations concernant le message à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les messages de factures sont imprimés en bas de toutes les factures lorsque l'option 'Afficher les messages' est cochée lors de l'impression. Utilisez-les pour transmettre une information à toutes les familles (changement de tarif, fermeture exceptionnelle...)."
+    description_saisie = "Saisissez le titre et le texte du message puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un message de facture"
     objet_pluriel = "des messages de factures"
     boutons_liste = [

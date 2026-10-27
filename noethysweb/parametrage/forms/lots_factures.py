@@ -16,6 +16,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = LotFactures
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom du lot de factures. Exemple : Factures de septembre 2025. Les lots permettent de regrouper des factures générées ensemble.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

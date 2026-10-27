@@ -20,8 +20,8 @@ class Page(crud.Page):
     url_modifier = "modeles_emails_modifier"
     url_supprimer = "modeles_emails_supprimer"
     url_dupliquer = "modeles_emails_dupliquer"
-    description_liste = "Sélectionnez une catégorie et consultez les modèles correspondants."
-    description_saisie = "Saisissez toutes les informations concernant le modèle à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les modèles d'emails sont les textes types utilisés pour les envois d'emails : factures, rappels, confirmations du portail, notifications... Sélectionnez une catégorie dans la liste pour consulter les modèles correspondants. Le modèle par défaut de chaque catégorie est proposé automatiquement."
+    description_saisie = "Saisissez le nom, l'objet et le texte de l'email. Insérez les mots-clés proposés pour personnaliser automatiquement chaque email (nom de la famille, montant...), puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un modèle d'email"
     objet_pluriel = "des modèles d'emails"
 

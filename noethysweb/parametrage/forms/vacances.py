@@ -22,6 +22,12 @@ class Formulaire(FormulaireBase, ModelForm):
             'date_debut': DatePickerWidget(),
             'date_fin': DatePickerWidget(),
         }
+        help_texts = {
+            "nom": "Sélectionnez la période de vacances scolaires.",
+            "annee": "Saisissez l'année de début de la période. Exemple : 2025 pour les vacances de Noël du 20/12/2025 au 05/01/2026.",
+            "date_debut": "Saisissez le premier jour des vacances (premier jour sans classe).",
+            "date_fin": "Saisissez le dernier jour des vacances (veille de la reprise des cours).",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

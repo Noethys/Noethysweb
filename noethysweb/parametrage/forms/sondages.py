@@ -26,6 +26,10 @@ class Formulaire_sondage(FormulaireBase, ModelForm):
             "conclusion": SummernoteInplaceWidget(attrs={'summernote': {'width': '100%', 'height': '200px'}}),
             "categories_rattachements": Select2MultipleWidget(),
         }
+        help_texts = {
+            "titre": "Saisissez le titre du formulaire tel qu'il apparaîtra sur le portail. Exemple : Enquête de satisfaction ALSH.",
+            "structure": "Sélectionnez la structure associée à ce formulaire. Laissez 'Toutes les structures' pour que ce formulaire soit disponible dans toutes les structures.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire_sondage, self).__init__(*args, **kwargs)

@@ -23,6 +23,14 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             "texte": Texte_SMS(),
         }
+        help_texts = {
+            "nom": "Saisissez le nom du modèle. Exemple : Rappel de réservation.",
+            "description": "Saisissez si besoin une description pour vous souvenir de l'usage de ce modèle.",
+            "objet": "Saisissez un objet pour identifier ce SMS dans l'historique. L'objet n'est pas envoyé au destinataire.",
+            "texte": "Saisissez le texte du SMS. Restez bref : un SMS compte 160 caractères. Cliquez sur un mot-clé ci-dessous pour l'insérer.",
+            "defaut": "Cochez cette case pour que ce modèle soit proposé par défaut. Un seul modèle peut être défini par défaut.",
+            "structure": "Sélectionnez la structure associée à ce modèle. Laissez 'Toutes les structures' pour que ce modèle soit disponible dans toutes les structures.",
+        }
 
     def __init__(self, *args, **kwargs):
         categorie = kwargs.pop("categorie")

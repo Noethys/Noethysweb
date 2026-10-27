@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "releves_bancaires_ajouter"
     url_modifier = "releves_bancaires_modifier"
     url_supprimer = "releves_bancaires_supprimer"
-    description_liste = "Voici ci-dessous la liste des relevés bancaires."
-    description_saisie = "Saisissez toutes les informations concernant le relevé à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les relevés bancaires servent au rapprochement bancaire : ils permettent de pointer les opérations de la comptabilité qui figurent sur chaque relevé de votre banque."
+    description_saisie = "Saisissez le nom du relevé, sa période et le compte bancaire concerné, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un relevé bancaire"
     objet_pluriel = "des relevés bancaires"
     boutons_liste = [

@@ -18,8 +18,8 @@ class Page(Onglet):
     url_ajouter = "activites_noms_tarifs_ajouter"
     url_modifier = "activites_noms_tarifs_modifier"
     url_supprimer = "activites_noms_tarifs_supprimer"
-    description_liste = "Vous pouvez saisir ici un nom de tarif pour l'activité. Exemples : Journée avec repas, Repas, Matin, Atelier, Séjour à la neige - Février 2026, Yoga - Saison 2024-25... Vous devez obligatoirement créer au moins un nom de tarif avant de créer des tarifs."
-    description_saisie = "Saisissez toutes les informations concernant le nom de tarif à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les noms de tarifs désignent les prestations facturées pour l'activité. Exemples : Journée avec repas, Repas, Matin, Atelier, Séjour à la neige - Février 2026, Yoga - Saison 2025-26... Chaque nom de tarif regroupe ensuite un ou plusieurs tarifs (par période, par catégorie...). Vous devez créer au moins un nom de tarif avant de pouvoir saisir des tarifs."
+    description_saisie = "Saisissez le nom de tarif tel qu'il doit apparaître sur les prestations et les factures, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un nom de tarif"
     objet_pluriel = "des noms de tarifs"
 

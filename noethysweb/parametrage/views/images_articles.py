@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "images_articles_ajouter"
     url_modifier = "images_articles_modifier"
     url_supprimer = "images_articles_supprimer"
-    description_liste = "Voici ci-dessous la liste des images à intégrer dans des articles du portail."
-    description_saisie = "Saisissez un titre et une image puis cliquez sur le bouton Enregistrer."
+    description_liste = "La banque d'images regroupe les images que vous pouvez réutiliser pour illustrer les articles du portail, sans avoir à les importer à chaque fois."
+    description_saisie = "Saisissez un titre et sélectionnez l'image à ajouter à la banque puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une image"
     objet_pluriel = "des images"
     boutons_liste = [

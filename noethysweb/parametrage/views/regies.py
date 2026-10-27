@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "regies_ajouter"
     url_modifier = "regies_modifier"
     url_supprimer = "regies_supprimer"
-    description_liste = "Voici ci-dessous la liste des régies."
-    description_saisie = "Saisissez toutes les informations concernant la régie à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les régies de facturation sont utilisées par les structures publiques. Chaque activité peut être rattachée à une régie, qui détermine notamment le compte bancaire d'encaissement et le paiement en ligne PayFiP des factures."
+    description_saisie = "Saisissez le nom de la régie, son numéro client PayFiP éventuel et le compte bancaire associé, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une régie"
     objet_pluriel = "des régies"
     boutons_liste = [

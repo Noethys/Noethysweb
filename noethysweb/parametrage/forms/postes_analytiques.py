@@ -17,6 +17,11 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = ComptaAnalytique
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom du poste analytique. Exemples : ALSH, Périscolaire, Séjours...",
+            "abrege": "Saisissez si besoin un nom abrégé (quelques caractères). Exemples : ALSH, PERI...",
+            "structure": "Sélectionnez la structure associée à ce poste. Laissez 'Toutes les structures' pour que ce poste soit disponible dans toutes les structures.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

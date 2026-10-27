@@ -23,8 +23,8 @@ class Page(crud.Page):
     url_modifier = "activites_resume"
     url_supprimer = "activites_supprimer"
     url_dupliquer = "activites_dupliquer"
-    description_liste = "Voici ci-dessous la liste des activités."
-    description_saisie = "Saisissez toutes les informations concernant l'activité à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les activités sont au cœur de l'application : accueil de loisirs, cantine, périscolaire, club, séjour, stage... Cliquez sur le nom d'une activité pour accéder à son paramétrage complet (groupes, unités, calendrier, tarifs, portail...). Pour créer une nouvelle activité, vous pouvez aussi utiliser les assistants de paramétrage, plus rapides pour les cas courants."
+    description_saisie = "Saisissez les informations principales de la nouvelle activité puis cliquez sur le bouton Enregistrer. Vous pourrez ensuite compléter son paramétrage rubrique par rubrique : groupes, catégories de tarifs, unités de consommation, calendrier et tarifs."
     objet_singulier = "une activité"
     objet_pluriel = "des activités"
     boutons_liste = [
@@ -141,7 +141,7 @@ class Resume(Onglet, DetailView):
     def get_context_data(self, **kwargs):
         context = super(Resume, self).get_context_data(**kwargs)
         context['box_titre'] = self.object.nom
-        context['box_introduction'] = "Ici résumé de l'activité..."
+        context['box_introduction'] = "Voici le résumé du paramétrage de cette activité. Cliquez sur une rubrique dans le menu de gauche pour consulter ou modifier le paramétrage correspondant."
         context['onglet_actif'] = "resume"
         context['stats_inscrits'] = Inscription.objects.filter(activite_id=self.kwargs['idactivite']).count()
         context['stats_inscriptions'] = Inscription.objects.filter(activite_id=self.kwargs['idactivite']).values_list('date_debut__year', 'date_debut__month').annotate(nbre=Count('pk')).order_by('date_debut__year', 'date_debut__month')

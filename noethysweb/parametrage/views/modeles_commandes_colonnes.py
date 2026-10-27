@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "modeles_commandes_colonnes_ajouter"
     url_modifier = "modeles_commandes_colonnes_modifier"
     url_supprimer = "modeles_commandes_colonnes_supprimer"
-    description_liste = "Voici la liste des colonnes du modèle de commande sélectionné ci-dessous."
-    description_saisie = "Saisissez toutes les informations concernant la colonne à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les colonnes définissent le contenu des commandes de repas : nombre de repas par groupe, valeurs à saisir, totaux, régimes alimentaires ou allergies... Sélectionnez un modèle de commande ci-dessous pour consulter ses colonnes."
+    description_saisie = "Saisissez le nom de la colonne, choisissez son contenu et ses paramètres, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une colonne"
     objet_pluriel = "des colonnes"
 
@@ -35,7 +35,7 @@ class Page(crud.Page):
             ]
         else:
             # Si aucun type de cotisation n'existe
-            context['box_introduction'] = "Vous pouvez saisir ici des colonnes pour chaque modèle de commande.<br><b>Vous devez avoir enregistré au moins un modèle avant de pouvoir ajouter des colonnes !</b>"
+            context['box_introduction'] = "Les colonnes définissent le contenu des commandes de repas.<br><b>Vous devez d'abord créer au moins un modèle de commande (menu Paramétrage > Restauration > Modèles de commandes) avant de pouvoir ajouter des colonnes.</b>"
         return context
 
     def Get_categorie(self):

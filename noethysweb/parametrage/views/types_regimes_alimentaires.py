@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "types_regimes_alimentaires_ajouter"
     url_modifier = "types_regimes_alimentaires_modifier"
     url_supprimer = "types_regimes_alimentaires_supprimer"
-    description_liste = "Voici ci-dessous la liste des types de régimes alimentaires."
-    description_saisie = "Saisissez toutes les informations concernant le type de régime alimentaire à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les régimes alimentaires sont renseignés dans les fiches individuelles (sans porc, végétarien, sans gluten...). Ils apparaissent dans la liste des repas et peuvent figurer dans les commandes de repas."
+    description_saisie = "Saisissez le nom du régime alimentaire puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un type de régime alimentaire"
     objet_pluriel = "des types de régimes alimentaires"
     boutons_liste = [

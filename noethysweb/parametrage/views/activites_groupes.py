@@ -18,10 +18,8 @@ class Page(Onglet):
     url_ajouter = "activites_groupes_ajouter"
     url_modifier = "activites_groupes_modifier"
     url_supprimer = "activites_groupes_supprimer"
-    description_liste = """Vous pouvez saisir ici un groupe pour l'activité. Il peut s'agir d'un groupe d'âge (Exemples : 3-6 ans, Séniors, Les colibris...) 
-                            ou d'un groupe qui symbolise une séance (Exemples : Groupe du jeudi soir, Groupe 3ème âge du samedi matin...). Si cette activité 
-                            ne comporte aucun groupe spécifique, vous devez tout de même en créer un que vous nommerez par exemple 'Groupe unique'."""
-    description_saisie = "Saisissez toutes les informations concernant le groupe à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les groupes permettent de répartir les individus inscrits à l'activité. Il peut s'agir d'un groupe d'âge (exemples : 3-6 ans, Séniors, Les colibris...) ou d'un groupe qui correspond à une séance (exemples : Groupe du jeudi soir, Groupe du samedi matin...). Le groupe est choisi lors de l'inscription. Si l'activité ne comporte aucun groupe particulier, créez tout de même un groupe nommé par exemple 'Groupe unique'."
+    description_saisie = "Saisissez le nom du groupe et, si besoin, son nombre maximal d'inscrits puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un groupe"
     objet_pluriel = "des groupe"
 

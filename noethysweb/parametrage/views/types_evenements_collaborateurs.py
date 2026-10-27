@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "types_evenements_collaborateurs_ajouter"
     url_modifier = "types_evenements_collaborateurs_modifier"
     url_supprimer = "types_evenements_collaborateurs_supprimer"
-    description_liste = "Voici ci-dessous la liste des catégories d'évènements pour les collaborateurs."
-    description_saisie = "Saisissez toutes les informations concernant la catégorie à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les catégories d'évènements sont utilisées dans le planning des collaborateurs (exemples : Animation, Réunion, Congés, Formation). Chacune indique si sa durée est comptabilisée dans le temps de travail."
+    description_saisie = "Saisissez le nom de la catégorie, son mode de comptabilisation du temps et sa couleur, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une catégorie d'évènements"
     objet_pluriel = "des catégories d'évènements"
     boutons_liste = [

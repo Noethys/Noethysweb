@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "perceptions_ajouter"
     url_modifier = "perceptions_modifier"
     url_supprimer = "perceptions_supprimer"
-    description_liste = "Voici ci-dessous la liste des perceptions."
-    description_saisie = "Saisissez toutes les informations concernant la perception à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les perceptions sont les trésoreries publiques (centres des finances publiques) qui encaissent les recettes de la collectivité. Elles sont utilisées notamment dans les prélèvements au format 'Secteur public DFT'."
+    description_saisie = "Saisissez le nom et l'adresse de la perception puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une perception"
     objet_pluriel = "des perceptions"
     boutons_liste = [

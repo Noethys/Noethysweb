@@ -59,11 +59,20 @@ def Get_controle(question=None, attrs={}):
     return (nom_controle, ctrl)
 
 class Formulaire(FormulaireBase, ModelForm):
-    liste_choix = forms.CharField(label="Liste de choix", required=False, widget=Choix_questionnaire())
+    liste_choix = forms.CharField(label="Liste de choix", required=False, widget=Choix_questionnaire(), help_text="Ajoutez ici les choix proposés dans la liste déroulante.")
 
     class Meta:
         model = QuestionnaireQuestion
         fields = "__all__"
+        help_texts = {
+            "visible": "Cochez cette case pour que la question apparaisse dans les fiches consultées par les utilisateurs.",
+            "label": "Saisissez l'intitulé de la question. Exemples : Votre enfant sait-il nager ?, Nom de l'employeur...",
+            "controle": "Sélectionnez le type de réponse attendue : texte, nombre, montant, date, case à cocher, liste de choix...",
+            "visible_portail": "Cochez cette case pour que les familles puissent consulter et renseigner cette question depuis le portail.",
+            "visible_fiche_renseignement": "Cochez cette case pour que la question figure sur les fiches de renseignements imprimées.",
+            "structure": "Sélectionnez la structure associée à cette question. Laissez 'Toutes les structures' pour que cette question soit disponible dans toutes les structures.",
+            "obligatoire": "Cochez cette case pour rendre la réponse obligatoire.",
+        }
 
     def __init__(self, *args, **kwargs):
         categorie = kwargs.pop("categorie")

@@ -15,13 +15,16 @@ import datetime
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    jour = forms.IntegerField(min_value=1, max_value=31)
-    mois = forms.ChoiceField(choices=LISTE_MOIS)
-    annee = forms.IntegerField(label="Année", initial=datetime.date.today().year)
+    jour = forms.IntegerField(min_value=1, max_value=31, help_text="Saisissez le jour du mois (de 1 à 31).")
+    mois = forms.ChoiceField(choices=LISTE_MOIS, help_text="Sélectionnez le mois.")
+    annee = forms.IntegerField(label="Année", initial=datetime.date.today().year, help_text="Saisissez l'année concernée. Un jour férié variable doit être saisi pour chaque année.")
 
     class Meta:
         model = Ferie
         fields = ['type', 'nom', 'annee', 'jour', 'mois']
+        help_texts = {
+            "nom": "Saisissez le nom du jour férié. Exemples : Lundi de Pâques, Ascension, Lundi de Pentecôte...",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

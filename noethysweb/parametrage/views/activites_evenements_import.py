@@ -94,6 +94,7 @@ class View(Onglet, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context["box_titre"] = "Importer des événements depuis un fichier Excel"
+        context["box_introduction"] = "Créez en une seule fois de nombreux événements à partir d'un fichier Excel : sélectionnez le fichier, indiquez à quelle information correspond chaque colonne, vérifiez l'aperçu puis lancez l'importation. Téléchargez le fichier d'exemple pour connaître la présentation attendue."
         context["onglet_actif"] = "evenements"
         context["box_conclusion"] = True  # Affiche le pied du cadre, qui contient la barre des boutons de l'assistant
         referentiel = moteur.Referentiel(context["activite"])

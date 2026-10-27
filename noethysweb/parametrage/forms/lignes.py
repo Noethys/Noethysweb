@@ -18,6 +18,9 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = TransportLigne
         fields = "__all__"
+        help_texts = {
+            "nom": "Saisissez le nom de la ligne. Exemples : Ligne 1, Circuit école Nord...",
+        }
 
     def __init__(self, *args, **kwargs):
         categorie = kwargs.pop("categorie", None)

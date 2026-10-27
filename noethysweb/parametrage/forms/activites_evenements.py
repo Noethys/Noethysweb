@@ -34,15 +34,15 @@ class Formulaire(FormulaireBase, ModelForm):
     multidates_saisie = forms.CharField(label="Dates", required=False, help_text="Saisissez les dates souhaitées séparées par des virgules ou des points-virgules. Exemple : 15/12/2023;16/12/2023;17/12/2023")
     multidates_calendrier = forms.CharField(label="Dates", required=False, widget=DatePickerWidget(attrs={"multidate": True, "affichage_inline": True}), help_text="Cochez les dates souhaitées dans le calendrier.")
     multidates_planning = forms.CharField(label="Dates", required=False)
-    multidates_planning_date_debut = forms.DateField(label="Date de début", required=False, widget=DatePickerWidget())
-    multidates_planning_date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget())
-    multidates_planning_inclure_feries = forms.BooleanField(label="Inclure les fériés", required=False)
+    multidates_planning_date_debut = forms.DateField(label="Date de début", required=False, widget=DatePickerWidget(), help_text="Saisissez la date de début de la période sur laquelle les événements doivent être créés.")
+    multidates_planning_date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(), help_text="Saisissez la date de fin de la période sur laquelle les événements doivent être créés.")
+    multidates_planning_inclure_feries = forms.BooleanField(label="Inclure les fériés", required=False, help_text="Cochez cette case pour créer également des événements sur les jours fériés de la période.")
     multidates_planning_jours_scolaires = forms.MultipleChoiceField(label="Jours scolaires", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("multidates_planning_jours_scolaires"))
     multidates_planning_jours_vacances = forms.MultipleChoiceField(label="Jours de vacances", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("multidates_planning_jours_vacances"))
     choix_frequence = [(1, "Toutes les semaines"), (2, "Une semaine sur deux"),
                         (3, "Une semaine sur trois"), (4, "Une semaine sur quatre"),
                         (5, "Les semaines paires"), (6, "Les semaines impaires")]
-    multidates_planning_frequence_type = forms.TypedChoiceField(label="Fréquence", choices=choix_frequence, initial=1, required=False)
+    multidates_planning_frequence_type = forms.TypedChoiceField(label="Fréquence", choices=choix_frequence, initial=1, required=False, help_text="Sélectionnez la fréquence de création des événements. Exemple : une semaine sur deux pour un atelier organisé tous les quinze jours.")
 
     # Généralités
     unite = forms.ModelChoiceField(label="Unité", queryset=Unite.objects.none(), required=True, help_text="Sélectionnez obligatoirement l'unité de consommation de type 'Evénementiel' associée à cet événement.")
@@ -59,7 +59,7 @@ class Formulaire(FormulaireBase, ModelForm):
     choix_nbre_places = [("NON", "Sans limitation du nombre de places"), ("OUI", "Avec limitation du nombre de places")]
     type_nbre_places = forms.TypedChoiceField(label="Places", choices=choix_nbre_places, initial="NON", required=False, help_text="""Il est possible de définir ici une
                                                 capacité d'accueil maximale uniquement pour cet événement.""")
-    capacite_max = forms.IntegerField(label="Nombre de places*", initial=0, min_value=0, required=False)
+    capacite_max = forms.IntegerField(label="Nombre de places*", initial=0, min_value=0, required=False, help_text="Saisissez le nombre maximal de places disponibles pour cet événement.")
 
     # Tarification
     choix_tarification = [
@@ -70,7 +70,7 @@ class Formulaire(FormulaireBase, ModelForm):
     ]
     texte_aide = "Pour créer, modifier ou supprimer des tarifs avancés, sélectionnez 'Tarification avancée', cliquez sur Enregistrer puis cliquez sur le bouton <i class='fa fa-gear'></i> sur la ligne de l'événement dans la liste des événements."
     type_tarification = forms.TypedChoiceField(label="Tarification", choices=choix_tarification, initial="GRATUIT", required=False, help_text=texte_aide)
-    copie_evenement = forms.ModelChoiceField(label="Evénement", widget=Widget_copie_tarif_evenement({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=Evenement.objects.none(), required=False)
+    copie_evenement = forms.ModelChoiceField(label="Evénement", widget=Widget_copie_tarif_evenement({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=Evenement.objects.none(), required=False, help_text="Sélectionnez l'événement existant dont les tarifs doivent être copiés sur ce nouvel événement.")
 
     # Image
     cropper_data = forms.CharField(widget=forms.HiddenInput(), required=False)
@@ -88,6 +88,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "image": "Vous pouvez sélectionner une image à appliquer sur l'arrière-plan de la case de l'évènement dans la grille des consommations. L'image sera convertie en niveaux de gris à l'affichage.",
             "categorie": "Vous pouvez associer ici une catégorie d'événements afin que cet événement hérite de ses caractéristiques.",
             "visible_portail": "Décochez cette case si vous souhaitez que les usagers ne puissent pas voir cet événement sur le planning des réservations du portail.",
+            "montant": "Saisissez le montant de la prestation qui sera facturée pour cet événement.",
         }
 
     def __init__(self, *args, **kwargs):
