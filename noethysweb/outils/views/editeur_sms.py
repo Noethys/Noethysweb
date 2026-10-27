@@ -30,6 +30,7 @@ class Page(crud.Page):
     def get_context_data(self, **kwargs):
         context = super(Page, self).get_context_data(**kwargs)
         context['page_titre'] = "Editeur de SMS"
+        context['box_introduction'] = "Rédigez et envoyez des SMS aux familles. Ajoutez les destinataires dans le cadre de gauche, choisissez si besoin un modèle de SMS puis rédigez un texte court. Un service d'envoi de SMS doit avoir été configuré au préalable (menu Paramétrage > Communication > Configurations SMS)."
         context['afficher_menu_brothers'] = True
         context['categories'] = {} if not self.Get_idsms() else {item["categorie"]: item["nbre"] for item in DestinataireSMS.objects.values('categorie').filter(sms=self.Get_idsms()).annotate(nbre=Count("pk"))}
         sms = SMS.objects.get(pk=self.Get_idsms()) if self.Get_idsms() else None
@@ -140,6 +141,7 @@ class Page_destinataires(crud.Page):
     def get_context_data(self, **kwargs):
         context = super(Page_destinataires, self).get_context_data(**kwargs)
         context['page_titre'] = "Editeur de SMS"
+        context['box_introduction'] = "Rédigez et envoyez des SMS aux familles. Ajoutez les destinataires dans le cadre de gauche, choisissez si besoin un modèle de SMS puis rédigez un texte court. Un service d'envoi de SMS doit avoir été configuré au préalable (menu Paramétrage > Communication > Configurations SMS)."
         context['idsms'] = self.kwargs.get("idsms")
         context['categorie'] = self.categorie
         return context

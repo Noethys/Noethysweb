@@ -13,7 +13,7 @@ class Page(crud.Page):
     model = Consommation
     url_liste = "liste_conso_sans_presta"
     menu_code = "liste_conso_sans_presta"
-    description_liste = "Voici ci-dessous la liste des consommations sans prestations associées."
+    description_liste = "Retrouvez ici les consommations qui ne sont associées à aucune prestation, et ne sont donc pas facturées. Cela arrive notamment lorsqu'aucun tarif ne correspond à la consommation (tarif manquant ou mal paramétré). Vérifiez le paramétrage des tarifs puis recalculez les prestations, ou supprimez les consommations inutiles."
     objet_singulier = "une consommation"
     objet_pluriel = "des consommations sans prestations associées"
     url_supprimer_plusieurs = "liste_conso_sans_presta_supprimer_plusieurs"

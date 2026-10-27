@@ -79,6 +79,7 @@ class Page(crud.Page):
     def get_context_data(self, **kwargs):
         context = super(Page, self).get_context_data(**kwargs)
         context['page_titre'] = "Editeur d'emails"
+        context['box_introduction'] = "Rédigez et envoyez des emails à des familles, des individus, des collaborateurs ou des contacts. Ajoutez les destinataires dans le cadre de gauche, choisissez si besoin un modèle d'email, rédigez l'objet et le texte en insérant des mots-clés pour personnaliser chaque message, puis envoyez. Les emails sont enregistrés et restent consultables dans la liste des emails."
         context['afficher_menu_brothers'] = True
         context['categories'] = {} if not self.Get_idmail() else {item["categorie"]: item["nbre"] for item in Destinataire.objects.values('categorie').filter(mail=self.Get_idmail()).annotate(nbre=Count("pk"))}
         mail = Mail.objects.get(pk=self.Get_idmail()) if self.Get_idmail() else None
@@ -209,6 +210,7 @@ class Page_destinataires(crud.Page):
     def get_context_data(self, **kwargs):
         context = super(Page_destinataires, self).get_context_data(**kwargs)
         context['page_titre'] = "Editeur d'emails"
+        context['box_introduction'] = "Rédigez et envoyez des emails à des familles, des individus, des collaborateurs ou des contacts. Ajoutez les destinataires dans le cadre de gauche, choisissez si besoin un modèle d'email, rédigez l'objet et le texte en insérant des mots-clés pour personnaliser chaque message, puis envoyez. Les emails sont enregistrés et restent consultables dans la liste des emails."
         context['idmail'] = self.kwargs.get("idmail")
         context['categorie'] = self.categorie
         return context

@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "notes_ajouter"
     url_modifier = "notes_modifier"
     url_supprimer = "notes_supprimer"
-    description_liste = "Voici ci-dessous la liste des notes."
-    description_saisie = "Saisissez toutes les informations concernant la note à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les notes sont des messages internes destinés aux utilisateurs : informations sur une famille, consignes, rappels... Selon leurs options, elles s'affichent sur la page d'accueil, dans la liste des consommations ou sur la commande des repas, à partir de leur date de parution."
+    description_saisie = "Rédigez le texte de la note, choisissez sa date de parution, les utilisateurs concernés et les endroits où elle doit s'afficher, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une note"
     objet_pluriel = "des notes"
     boutons_liste = [

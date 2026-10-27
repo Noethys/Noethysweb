@@ -16,7 +16,7 @@ class Page(crud.Page):
     url_modifier = "editeur_sms"
     url_supprimer = "sms_supprimer"
     url_supprimer_plusieurs = "sms_supprimer_plusieurs"
-    description_liste = "Voici ci-dessous la liste des SMS enregistrés."
+    description_liste = "Retrouvez ici tous les SMS rédigés dans l'éditeur de SMS, envoyés ou non. Utilisez le bouton Modifier d'une ligne pour rouvrir le SMS dans l'éditeur."
     objet_singulier = "un SMS"
     objet_pluriel = "des SMS"
     boutons_liste = [

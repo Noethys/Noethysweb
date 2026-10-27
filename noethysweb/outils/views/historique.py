@@ -13,7 +13,7 @@ from core.utils import utils_parametres
 
 
 class Page(crud.Page):
-    description_liste = "Vous pouvez consulter ici la liste des actions effectuées dans le logiciel."
+    description_liste = "Consultez ici les actions effectuées dans l'application par les utilisateurs et par les familles sur le portail : créations, modifications, suppressions, envois... Par défaut, seules les actions des 7 derniers jours sont affichées : décochez l'option en haut de la liste pour tout afficher, et utilisez les filtres pour retrouver une action par utilisateur, famille ou individu."
     if settings.PURGE_HISTORIQUE_JOURS:
         description_liste += " Les actions sont mémorisées uniquement jusqu'à %d jours." % settings.PURGE_HISTORIQUE_JOURS
     menu_code = "historique"

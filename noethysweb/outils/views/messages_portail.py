@@ -14,7 +14,7 @@ class Page(crud.Page):
     model = PortailMessage
     url_liste = "messages_portail_liste"
     url_supprimer = "messages_portail_supprimer"
-    description_liste = "Voici ci-dessous la liste des messages du portail."
+    description_liste = "Retrouvez ici l'ensemble des messages échangés avec les familles via la rubrique Contact du portail, lus ou non lus. Pour traiter uniquement les nouveaux messages, utilisez la commande Messages non lus à traiter."
     objet_singulier = "un message"
     objet_pluriel = "des messages"
 

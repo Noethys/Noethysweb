@@ -17,7 +17,7 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Notes de versions"
         context['box_titre'] = ""
-        context['box_introduction'] = "Voici les dernières modifications de Noethysweb :"
+        context['box_introduction'] = "Découvrez ci-dessous les nouveautés, améliorations et corrections apportées à chaque version de Noethysweb :"
         context['changelog'] = self.GetChangelog()
         return context
 

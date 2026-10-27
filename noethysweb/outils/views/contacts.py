@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "contacts_ajouter"
     url_modifier = "contacts_modifier"
     url_supprimer = "contacts_supprimer"
-    description_liste = "Voici ci-dessous la liste des contacts."
-    description_saisie = "Saisissez toutes les informations concernant le contact à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Le carnet d'adresses regroupe les contacts extérieurs aux familles : partenaires, fournisseurs, élus, associations... Ils peuvent être sélectionnés comme destinataires dans l'éditeur d'emails."
+    description_saisie = "Saisissez le nom et les coordonnées du contact puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un contact"
     objet_pluriel = "des contacts"
     boutons_liste = [

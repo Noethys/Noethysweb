@@ -119,7 +119,7 @@ def Get_labels():
 class Page(crud.Page):
     model = PortailRenseignement
     url_liste = "demandes_portail_liste"
-    description_liste = "Voici ci-dessous la liste des modifications effectuées sur le portail à lire ou à valider."
+    description_liste = "Retrouvez ici les renseignements modifiés par les familles depuis le portail (identité, coordonnées, caisse, régimes alimentaires...), avec l'ancienne et la nouvelle valeur. Les modifications qui ne sont pas validées automatiquement doivent être validées par un utilisateur avant d'être enregistrées dans les fiches."
     objet_singulier = "un renseignement à valider"
     objet_pluriel = "des renseignements à valider"
 

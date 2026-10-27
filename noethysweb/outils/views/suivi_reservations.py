@@ -114,5 +114,6 @@ class View(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Suivi des réservations"
+        context['box_introduction'] = "Suivez les ajouts et les suppressions de réservations effectués par les familles sur le portail, du plus récent au plus ancien. Utilisez les boutons de l'en-tête pour choisir les activités et la période affichées, et cliquez sur le bouton d'une ligne pour ouvrir la fiche de la famille."
         context['suivi_reservations_parametres'] = Get_parametres(request=self.request)
         return context

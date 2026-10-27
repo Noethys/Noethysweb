@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "taches_ajouter"
     url_modifier = "taches_modifier"
     url_supprimer = "taches_supprimer"
-    description_liste = "Voici ci-dessous la liste des tâches."
-    description_saisie = "Saisissez toutes les informations concernant la tâche à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Les tâches sont des rappels à effectuer à une date donnée. Elles apparaissent dans le widget Tâches de la page d'accueil des utilisateurs concernés, jusqu'à ce qu'elles soient marquées comme effectuées. Les tâches qui reviennent régulièrement peuvent être générées automatiquement grâce aux tâches récurrentes."
+    description_saisie = "Saisissez le titre et la date de la tâche ainsi que les utilisateurs concernés, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une tâche"
     objet_pluriel = "des tâches"
     boutons_liste = [

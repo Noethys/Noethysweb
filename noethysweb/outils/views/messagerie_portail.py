@@ -32,6 +32,7 @@ class Page(crud.Page):
     def get_context_data(self, **kwargs):
         context = super(Page, self).get_context_data(**kwargs)
         context['page_titre'] = "Messagerie"
+        context['box_introduction'] = "Retrouvez ici les messages envoyés par les familles depuis la rubrique Contact du portail et qui n'ont pas encore été lus. Cliquez sur un message pour afficher la conversation, y répondre ou le marquer comme lu."
         liste_messages_discussion = PortailMessage.objects.select_related("famille", "structure", "utilisateur").filter(famille_id=self.get_idfamille(), structure_id=self.get_idstructure()).order_by("date_creation")
         context['liste_messages_discussion'] = list(liste_messages_discussion)
         messages_non_lus = PortailMessage.objects.select_related("famille", "structure").filter(utilisateur__isnull=True, date_lecture__isnull=True).order_by("date_creation")

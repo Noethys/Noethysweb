@@ -140,7 +140,7 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Correcteur d'anomalies"
         context['box_titre'] = ""
-        context['box_introduction'] = "Voici la liste des anomalies détectées dans les données dans les %d derniers jours." % settings.CORRECTEUR_JOURS_RETROACTION
+        context['box_introduction'] = "Le correcteur recherche les anomalies apparues dans les données au cours des %d derniers jours (consommations ou prestations en double, consommations non facturées, prestations sans consommation). Cochez les anomalies que l'application peut corriger automatiquement et cliquez sur le bouton Corriger les anomalies cochées. Les autres doivent être corrigées manuellement." % settings.CORRECTEUR_JOURS_RETROACTION
         context['form'] = Formulaire(request=self.request, anomalies=Get_anomalies())
         return context
 

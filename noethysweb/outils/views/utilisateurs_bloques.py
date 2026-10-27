@@ -14,7 +14,7 @@ class Page(crud.Page):
     url_liste = "utilisateurs_bloques_liste"
     url_supprimer = "utilisateurs_bloques_supprimer"
     url_supprimer_plusieurs = "utilisateurs_bloques_supprimer_plusieurs"
-    description_liste = "Voici ci-dessous la liste des dernières tentatives de connexion échouées par des utilisateurs. Après un trop grand nombre d'échecs de connexion, Noethysweb bloque l'utilisateur durant 24h. Il est toutefois possible de supprimer ci-dessous l'historique des tentatives de connexion afin de permettre à l'utilisateur de se connecter à nouveau."
+    description_liste = "Retrouvez ici les dernières tentatives de connexion échouées. Par sécurité, après plusieurs échecs consécutifs, l'application bloque l'utilisateur pendant 24 heures. Pour débloquer un utilisateur avant ce délai, supprimez ses tentatives de connexion dans la liste ci-dessous : il pourra alors se connecter de nouveau."
     objet_singulier = "un utilisateur bloqué"
     objet_pluriel = "des utilisateurs bloqués"
 

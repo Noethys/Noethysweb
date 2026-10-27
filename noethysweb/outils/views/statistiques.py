@@ -130,6 +130,7 @@ class View(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Statistiques"
+        context['box_introduction'] = "Obtenez des statistiques détaillées sur les individus, les familles, les consommations, les prestations, les adhésions, la facturation, les règlements, les rappels et l'utilisation de l'application et du portail. Sélectionnez une ou plusieurs rubriques et une période dans les paramètres pour afficher les tableaux et graphiques correspondants."
         if "form_parametres" not in kwargs:
             context['form_parametres'] = Formulaire(request=self.request)
         return context

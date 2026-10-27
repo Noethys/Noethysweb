@@ -16,7 +16,7 @@ class Page(crud.Page):
     url_modifier = "editeur_emails"
     url_supprimer = "emails_supprimer"
     url_supprimer_plusieurs = "emails_supprimer_plusieurs"
-    description_liste = "Voici ci-dessous la liste des Emails enregistrés."
+    description_liste = "Retrouvez ici tous les emails rédigés dans l'éditeur d'emails, envoyés ou non, avec leur nombre de destinataires et leur auteur. Utilisez le bouton Modifier d'une ligne pour rouvrir l'email dans l'éditeur."
     objet_singulier = "un Email"
     objet_pluriel = "des Emails"
     boutons_liste = [

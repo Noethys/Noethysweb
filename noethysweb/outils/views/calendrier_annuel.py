@@ -63,7 +63,7 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Calendrier annuel"
         context['box_titre'] = ""
-        context['box_introduction'] = "Ce calendrier annuel vous permet notamment de vérifier si les périodes de vacances et les jours fériés ont bien été paramétrés."
+        context['box_introduction'] = "Visualisez l'année entière avec les périodes de vacances scolaires et les jours fériés. Ce calendrier permet notamment de vérifier qu'ils ont bien été paramétrés, ce qui est indispensable pour les tarifs, le calendrier des ouvertures et les délais du portail."
         annee_scolaire = Get_annee_scolaire_courante()
         context['annees_impression'] = list(range(annee_scolaire - 2, annee_scolaire + 4))
         context['annee_scolaire_courante'] = annee_scolaire
