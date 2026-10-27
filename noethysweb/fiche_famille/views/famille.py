@@ -6,7 +6,8 @@
 import datetime
 from decimal import Decimal
 from django.urls import reverse_lazy, reverse
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Min, Max, F, OuterRef, Subquery, DecimalField, ExpressionWrapper
+from django.db.models.functions import Coalesce
 from django.http import JsonResponse
 from django.contrib import messages
 from django.views.generic.detail import DetailView
@@ -14,7 +15,7 @@ from django.core.cache import cache
 from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Note, Rattachement, CATEGORIES_RATTACHEMENT, Prestation, Reglement, PortailMessage, Inscription, Facture
+from core.models import Famille, Note, Rattachement, CATEGORIES_RATTACHEMENT, Prestation, Reglement, PortailMessage, Inscription, Facture, Ventilation
 from individus.utils import utils_pieces_manquantes, utils_informations_manquantes, utils_vaccinations, utils_assurances
 from fiche_individu.forms.individu import Formulaire
 from fiche_famille.utils.utils_famille import LISTE_ONGLETS
@@ -268,9 +269,44 @@ class Resume(Onglet, DetailView):
         total_regle = total_reglements["total"] if total_reglements["total"] else Decimal(0)
         context["solde_global"] = total_regle - total_du
 
+        # Détail du solde global par activité (les règlements sont rattachés aux activités via la ventilation)
+        # Les prestations sans activité sont regroupées par catégorie : adhésions, locations et autres prestations
+        complements = {"cotisation": "Adhésions", "location": "Locations"}
+        def Get_ligne(idactivite, nom_activite, categorie):
+            if idactivite:
+                return dict_soldes.setdefault(idactivite, {"nom": nom_activite, "solde": Decimal(0)})
+            nom = complements.get(categorie, "Autres prestations")
+            return dict_soldes.setdefault(nom, {"nom": nom, "solde": Decimal(0), "complement": True})
+
+        dict_soldes = {}
+        for ligne in Prestation.objects.filter(famille_id=idfamille).values("activite_id", "activite__nom", "categorie").annotate(total=Sum("montant")).order_by():
+            Get_ligne(ligne["activite_id"], ligne["activite__nom"], ligne["categorie"])["solde"] -= ligne["total"] or Decimal(0)
+        total_ventile = Decimal(0)
+        for ligne in Ventilation.objects.filter(famille_id=idfamille).values("prestation__activite_id", "prestation__activite__nom", "prestation__categorie").annotate(total=Sum("montant")).order_by():
+            Get_ligne(ligne["prestation__activite_id"], ligne["prestation__activite__nom"], ligne["prestation__categorie"])["solde"] += ligne["total"] or Decimal(0)
+            total_ventile += ligne["total"] or Decimal(0)
+
+        # Période concernée : dates de la première et de la dernière prestation non soldée
+        ventilation_prestation = Ventilation.objects.filter(prestation=OuterRef("pk")).values("prestation").annotate(total=Sum("montant")).values("total")
+        prestations_non_soldees = Prestation.objects.filter(famille_id=idfamille).annotate(
+            ecart=ExpressionWrapper(F("montant") - Coalesce(Subquery(ventilation_prestation, output_field=DecimalField()), Decimal(0), output_field=DecimalField()), output_field=DecimalField()))
+        prestations_non_soldees = prestations_non_soldees.filter(Q(ecart__gt=Decimal("0.005")) | Q(ecart__lt=Decimal("-0.005")))  # Tolérance pour les bases qui somment en virgule flottante
+        for ligne in prestations_non_soldees.values("activite_id", "activite__nom", "categorie").annotate(date_min=Min("date"), date_max=Max("date")).order_by():
+            valeurs = Get_ligne(ligne["activite_id"], ligne["activite__nom"], ligne["categorie"])
+            valeurs["periode_debut"] = min(valeurs.get("periode_debut", ligne["date_min"]), ligne["date_min"])
+            valeurs["periode_fin"] = max(valeurs.get("periode_fin", ligne["date_max"]), ligne["date_max"])
+
+        lignes = [valeurs for valeurs in dict_soldes.values() if valeurs["solde"]]
+        soldes_activites = sorted([valeurs for valeurs in lignes if not valeurs.get("complement")], key=lambda x: x["nom"])
+        soldes_activites += [valeurs for nom in ("Adhésions", "Locations", "Autres prestations") for valeurs in lignes if valeurs.get("complement") and valeurs["nom"] == nom]
+        if total_regle - total_ventile:
+            soldes_activites.append({"nom": "Règlements non ventilés", "solde": total_regle - total_ventile, "complement": True})
+        context["soldes_activites"] = soldes_activites
+
         # Calcul du solde facturé
-        solde_facture = Facture.objects.filter(famille_id=idfamille, etat__isnull=True).aggregate(solde=-Sum("solde_actuel"))
-        context["solde_facture"] = solde_facture["solde"] if solde_facture["solde"] else Decimal(0)
+        factures_impayees = Facture.objects.select_related("prefixe").filter(famille_id=idfamille, etat__isnull=True).exclude(solde_actuel=0).order_by("date_edition", "numero")
+        context["factures_impayees"] = factures_impayees
+        context["solde_facture"] = -sum([facture.solde_actuel for facture in factures_impayees], Decimal(0))
 
         # Inscriptions actuelles
         conditions = Q(famille_id=idfamille) & Q(date_debut__lte=datetime.date.today()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))

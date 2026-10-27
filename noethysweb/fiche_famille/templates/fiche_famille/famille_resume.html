@@ -7,6 +7,11 @@
 {% block styles %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'css/alerte.css' %}">
+    <style>
+        .solde-detail { line-height: 1; }
+        .solde-detail .dropdown-menu { min-width: 380px; max-width: 520px; max-height: 300px; overflow-y: auto; }
+        .solde-detail .table td, .solde-detail .table th { padding: 0.15rem 0.3rem; }
+    </style>
 {% endblock styles %}
 
 
@@ -38,6 +43,27 @@
                     <div class="info-box-content">
                         <span class="info-box-text">Solde global</span>
                         <span class="info-box-number {% if solde_global < 0 %}text-red{% endif %}{% if solde_global > 0 %}text-blue{% endif %}">{% if solde_global > 0 %}+{% endif %}{{ solde_global|montant }}</span>
+                        {% if soldes_activites %}
+                            <div class="dropdown solde-detail">
+                                <a href="#" class="small" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Afficher le détail du solde par activité">Détail <i class="fa fa-caret-down"></i></a>
+                                <div class="dropdown-menu p-2">
+                                    <table class="table table-sm table-borderless small mb-0">
+                                        <tr class="text-muted"><td>Activité</td><td>Période</td><td class="text-right">Solde</td></tr>
+                                        {% for ligne in soldes_activites %}
+                                            <tr>
+                                                <td class="{% if ligne.complement %}text-muted{% endif %}">{{ ligne.nom }}</td>
+                                                <td class="text-nowrap text-muted">{% if ligne.periode_debut %}{{ ligne.periode_debut|date:"m/Y" }}{% if ligne.periode_debut|date:"m/Y" != ligne.periode_fin|date:"m/Y" %} - {{ ligne.periode_fin|date:"m/Y" }}{% endif %}{% endif %}</td>
+                                                <td class="text-right text-nowrap {% if ligne.solde < 0 %}text-red{% else %}text-blue{% endif %}">{% if ligne.solde > 0 %}+{% endif %}{{ ligne.solde|montant }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        <tr class="border-top">
+                                            <th colspan="2">Total</th>
+                                            <th class="text-right text-nowrap {% if solde_global < 0 %}text-red{% endif %}{% if solde_global > 0 %}text-blue{% endif %}">{% if solde_global > 0 %}+{% endif %}{{ solde_global|montant }}</th>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -48,6 +74,24 @@
                     <div class="info-box-content">
                         <span class="info-box-text">Solde facturé</span>
                         <span class="info-box-number {% if solde_facture < 0 %}text-red{% endif %}">{{ solde_facture|montant }}</span>
+                        {% if factures_impayees %}
+                            <div class="dropdown solde-detail">
+                                <a href="#" class="small" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Afficher les factures non soldées">{{ factures_impayees|length }} facture{{ factures_impayees|length|pluralize }} <i class="fa fa-caret-down"></i></a>
+                                <div class="dropdown-menu p-2">
+                                    <table class="table table-sm table-borderless small mb-0">
+                                        <tr class="text-muted"><td>N°</td><td>Date</td><td>Période</td><td class="text-right">Reste dû</td></tr>
+                                        {% for facture in factures_impayees %}
+                                            <tr>
+                                                <td class="text-nowrap"><a href="{% url 'famille_factures_modifier' idfamille=idfamille pk=facture.pk %}" class="text-primary" title="Ouvrir la facture">{{ facture.prefixe.prefixe|default:"" }}{{ facture.numero }}</a></td>
+                                                <td class="text-nowrap">{{ facture.date_edition|date:"d/m/Y" }}</td>
+                                                <td class="text-nowrap text-muted">{{ facture.date_debut|date:"m/Y" }}{% if facture.date_debut|date:"m/Y" != facture.date_fin|date:"m/Y" %} - {{ facture.date_fin|date:"m/Y" }}{% endif %}</td>
+                                                <td class="text-right text-nowrap {% if facture.solde_actuel > 0 %}text-red{% else %}text-blue{% endif %}">{{ facture.solde_actuel|montant }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
