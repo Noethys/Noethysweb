@@ -1,3 +1,19 @@
+Version 1.3.5.9 (27/10/2026) :
+
+Nouveautés
+- Paramétrage des activités > Evènements : ajout de l'import d'évènements depuis un fichier Excel
+- Paramétrage des activités > Portail : ajout d'un délai de réservation spécifique selon le jour de la semaine
+- Fiche famille > Résumé : ajout du détail du solde par activité et de la liste des factures impayées
+- Menus : ajout d'un troisième mode d'affichage en liste
+Améliorations
+- Saisie d'une activité : ajout de la sélection des groupes d'activités
+- Menu Paramétrage > Groupes d'activités : ajout de la sélection des activités associées
+- Paramétrage des activités > Unités de remplissage : ajout de la colonne des unités de consommation associées
+- Menu Paramétrage : ajout des textes d'aide manquants dans les formulaires
+- Menus Paramétrage, Individus et Outils : amélioration des textes d'introduction des pages
+Corrections
+- Saisie des inscriptions par lot : correction de l'application des forfaits datés
+
 Version 1.3.5.8 (15/10/2026) :
 
 Nouveautés
