@@ -131,7 +131,7 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context["page_titre"] = "Modifier des inscriptions par lot"
         context["box_titre"] = "Sélection des paramètres"
-        context["box_introduction"] = "Sélectionnez l'action à effectuer, renseignez les nouveaux paramètres de l'inscription puis cochez les inscriptions à modifier."
+        context["box_introduction"] = "Modifiez plusieurs inscriptions de cette activité en une seule fois. Sélectionnez l'action à effectuer, renseignez les nouveaux paramètres de l'inscription, cochez les inscriptions concernées puis lancez la modification."
         context["onglet_actif"] = "inscriptions_modifier"
         context["impression_introduction"] = ""
         context["impression_conclusion"] = ""
@@ -167,7 +167,7 @@ class Selection_activite(Page, crud.Ajouter):
 
     def get_context_data(self, **kwargs):
         context = super(Selection_activite, self).get_context_data(**kwargs)
-        context["box_introduction"] = "Vous devez sélectionner une activité."
+        context["box_introduction"] = "Sélectionnez l'activité dont vous souhaitez modifier plusieurs inscriptions en une seule fois, puis cliquez sur le bouton Valider."
         context["page_titre"] = "Modifier des inscriptions par lot"
         context["box_titre"] = "Sélection de l'activité"
         return context

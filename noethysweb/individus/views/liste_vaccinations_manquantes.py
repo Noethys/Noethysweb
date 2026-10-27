@@ -82,7 +82,7 @@ class Liste(Page, crud.CustomListe):
         context = super(Liste, self).get_context_data(**kwargs)
         context["page_titre"] = "Liste des vaccinations manquantes"
         context["box_titre"] = "Liste des vaccinations manquantes"
-        context["box_introduction"] = "Voici ci-dessous la liste des vaccinations manquantes."
+        context["box_introduction"] = "Retrouvez ici les individus inscrits à des activités qui exigent les vaccinations obligatoires et dont un vaccin est manquant ou n'est plus valide. Complétez les vaccinations depuis la fiche individuelle ou relancez les familles concernées."
         context["impression_introduction"] = ""
         context["impression_conclusion"] = ""
         context["hauteur_table"] = "400px"

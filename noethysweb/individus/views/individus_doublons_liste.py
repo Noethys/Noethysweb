@@ -26,7 +26,7 @@ class Liste(Page, crud.CustomListe):
         context = super(Liste, self).get_context_data(**kwargs)
         context['page_titre'] = "Liste des individus en doublon"
         context['box_titre'] = "Liste des individus en doublon"
-        context['box_introduction'] = "Voici ci-dessous la liste des individus en doublon (recherche selon le nom et le prénom). Cette liste vous permet d'identifier des individus qui auraient été saisis en double."
+        context['box_introduction'] = "Cette liste regroupe les individus qui portent le même nom et le même prénom, afin de repérer les fiches saisies en double. Vérifiez qu'il s'agit bien de la même personne (date de naissance, famille...) avant de fusionner les fiches depuis la fiche famille."
         context["datatable"] = self.Get_customdatatable()
         context["hauteur_table"] = "400px"
         return context

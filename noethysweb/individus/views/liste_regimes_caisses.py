@@ -11,7 +11,7 @@ from core.models import Famille
 
 class Page(crud.Page):
     model = Famille
-    description_liste = "Voici ci-dessous la liste des régimes et des caisses des familles."
+    description_liste = "Retrouvez ici le régime social, la caisse d'allocations et le numéro d'allocataire de chaque famille. Cette liste permet de contrôler les informations utiles aux tarifs, aux aides et aux déclarations à la CAF."
     menu_code = "liste_regimes_caisses"
 
 

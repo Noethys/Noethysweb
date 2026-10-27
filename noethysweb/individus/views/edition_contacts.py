@@ -47,7 +47,7 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Edition des contacts"
         context['box_titre'] = "Edition des contacts"
-        context['box_introduction'] = "Renseignez les paramètres et cliquez sur le bouton Générer le PDF. La génération du document peut nécessiter quelques instants d'attente."
+        context['box_introduction'] = "Imprimez les coordonnées des familles et de leurs membres, par exemple pour l'équipe d'animation ou en cas d'urgence. Renseignez les paramètres et cliquez sur le bouton Générer le PDF. La génération peut prendre quelques instants."
         if "form" not in kwargs:
             context['form'] = Formulaire(request=self.request)
         return context

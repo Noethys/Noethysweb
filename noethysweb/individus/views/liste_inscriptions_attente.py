@@ -24,6 +24,7 @@ class View(CustomView, TemplateView):
             context['page_titre'] = "Liste des inscriptions en attente"
         else:
             context['page_titre'] = "Liste des inscriptions refusées"
+        context['box_introduction'] = "Les inscriptions en attente sont des demandes qui n'ont pas encore été acceptées, notamment lorsqu'un groupe est complet. Elles sont classées par activité et par groupe, avec le nombre de places encore disponibles. Cliquez sur le bouton de la colonne Action pour ouvrir la fiche famille et modifier le statut de l'inscription." if self.etat == "attente" else "Retrouvez ici les inscriptions dont la demande a été refusée, classées par activité et par groupe. Cliquez sur le bouton de la colonne Action pour ouvrir la fiche famille de l'individu."
         if "form_parametres" not in kwargs:
             context['form_parametres'] = Formulaire(request=self.request)
             context['resultats'] = json.dumps(self.Get_resultats(parametres={}))

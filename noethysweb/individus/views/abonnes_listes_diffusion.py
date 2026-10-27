@@ -19,8 +19,8 @@ class Page(crud.Page):
     url_ajouter = "abonnes_listes_diffusion_ajouter"
     url_supprimer = "abonnes_listes_diffusion_supprimer"
     url_supprimer_plusieurs = "abonnes_listes_diffusion_supprimer_plusieurs"
-    description_liste = "Sélectionnez une liste de diffusion dans la liste et consultez les abonnés correspondants. Cliquez sur Ajouter pour abonner un ou plusieurs individus."
-    description_saisie = "Cochez les individus à ajouter et cliquez sur le bouton Enregistrer."
+    description_liste = "Sélectionnez une liste de diffusion pour consulter ses abonnés. Cliquez sur Ajouter pour abonner un ou plusieurs individus. Les listes de diffusion se créent dans le menu Paramétrage > Communication > Listes de diffusion."
+    description_saisie = "Cochez les individus à abonner à la liste de diffusion puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un abonné à une liste de diffusion"
     objet_pluriel = "des abonnés à des listes de diffusion"
 

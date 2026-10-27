@@ -21,8 +21,8 @@ class Page(crud.Page):
     url_ajouter = "individu_ajouter"
     url_modifier = "individu_resume"
     url_supprimer = "individu_supprimer"
-    description_liste = "Voici ci-dessous la liste des individus."
-    description_saisie = "Saisissez ou sélectionnez le premier représentant de la famille à créer. Saisissez toutes les informations concernant l'individu à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici tous les individus rattachés à une famille, avec leur famille de rattachement. Cliquez sur un individu pour ouvrir sa fiche. Un individu rattaché à plusieurs familles (enfant de parents séparés par exemple) apparaît une fois par famille."
+    description_saisie = "Pour créer une nouvelle famille, commencez par saisir son premier représentant, ou sélectionnez un individu déjà existant dans la base pour éviter un doublon. Renseignez ses informations puis cliquez sur le bouton Enregistrer. Vous pourrez ensuite ajouter les autres membres depuis la fiche famille."
     objet_singulier = "un individu"
     objet_pluriel = "des individus"
 

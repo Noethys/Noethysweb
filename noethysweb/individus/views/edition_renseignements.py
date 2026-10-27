@@ -72,7 +72,7 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context["page_titre"] = "Edition des fiches de renseignements"
         context["box_titre"] = "Edition des fiches de renseignements"
-        context["box_introduction"] = "Cochez les individus souhaités, précisez si besoin les options et cliquez sur le bouton Générer le PDF. Utilisez le bouton Filtrer pour affiner la liste d'individus. Il est également possible d'exporter le contenu vers Excel (une ligne par individu) afin de créer par exemple des fiches de renseignements personnalisées par publipostage avec un traitement de texte."
+        context["box_introduction"] = "Imprimez les fiches de renseignements des individus (coordonnées, contacts, informations médicales...) pour les faire vérifier par les familles ou les avoir à disposition. Cochez les individus souhaités, précisez si besoin les options et cliquez sur le bouton Générer le PDF. Utilisez le bouton Filtrer pour affiner la liste. Vous pouvez aussi exporter le contenu vers Excel (une ligne par individu), par exemple pour créer des fiches personnalisées par publipostage."
         context["onglet_actif"] = "edition_renseignements"
         context["impression_introduction"] = ""
         context["impression_conclusion"] = ""

@@ -12,6 +12,7 @@ from individus.views import etiquettes
 
 
 class Liste(etiquettes.Page, crud.Liste):
+    description_liste = "Imprimez des étiquettes ou des badges pour les individus (porte-manteaux, badges nominatifs...). Cochez les individus souhaités, choisissez un modèle de document et le format de la page, puis générez le PDF. Les modèles se créent dans le menu Paramétrage > Modèles > Modèles de documents."
     model = Individu
 
     def get_queryset(self):

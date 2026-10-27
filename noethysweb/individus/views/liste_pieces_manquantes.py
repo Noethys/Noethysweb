@@ -80,7 +80,7 @@ class Liste(Page, crud.CustomListe):
         context = super(Liste, self).get_context_data(**kwargs)
         context['page_titre'] = "Liste des pièces manquantes"
         context['box_titre'] = "Liste des pièces manquantes"
-        context['box_introduction'] = "Voici ci-dessous la liste des pièces manquantes."
+        context['box_introduction'] = "Retrouvez ici, pour chaque famille, les pièces exigées par les activités auxquelles ses membres sont inscrits et qui n'ont pas été fournies ou ne sont plus valides. Utilisez cette liste pour relancer les familles concernées."
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
         context["hauteur_table"] = "400px"

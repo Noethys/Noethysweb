@@ -15,8 +15,8 @@ class Page(crud.Page):
     url_liste = "contacts_urgence_liste"
     url_modifier = "contacts_urgence_modifier"
     url_supprimer = "contacts_urgence_supprimer"
-    description_liste = "Voici ci-dessous la liste des contacts d'urgence et de sortie des individus."
-    description_saisie = "Saisissez toutes les informations concernant le contact à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les contacts d'urgence et les personnes autorisées à récupérer les individus, avec leurs coordonnées. Ces informations figurent sur les fiches de renseignements."
+    description_saisie = "Renseignez l'identité et les coordonnées du contact, et précisez s'il doit être prévenu en cas d'urgence ou s'il est autorisé à récupérer l'individu, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un contact d'urgence et de sortie"
     objet_pluriel = "des contacts d'urgence et de sortie"
 

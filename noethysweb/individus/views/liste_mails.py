@@ -11,7 +11,7 @@ from core.models import Rattachement
 class Page(crud.Page):
     model = Rattachement
     url_liste = "mails_liste"
-    description_liste = "Voici ci-dessous la liste des adresses Emails associées à chaque individu. Si l'individu ne possède pas d'adresse, c'est l'adresse favorite de la famille rattachée qui est affichée."
+    description_liste = "Retrouvez ici l'adresse email de chaque individu. Si l'individu n'a pas d'adresse, c'est l'adresse favorite de sa famille qui est affichée. Vous pouvez copier ces adresses ou les exporter pour un envoi groupé."
     objet_singulier = "une adresse Email"
     objet_pluriel = "des adresses Emails"
 

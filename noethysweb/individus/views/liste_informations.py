@@ -34,8 +34,8 @@ class Page(crud.Page):
     url_liste = "informations_liste"
     url_modifier = "informations_modifier"
     url_supprimer = "informations_supprimer"
-    description_liste = "Voici ci-dessous la liste des informations personnelles des individus. La colonne Diffusion indique si l'information est diffusée sur le listing des informations (L), la liste des consommations (C) et la commande des repas (R). Vous pouvez cliquer directement sur L, C ou R pour activer ou désactiver la diffusion."
-    description_saisie = "Saisissez toutes les informations souhaitées et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les informations personnelles et médicales des individus (allergies, traitements, recommandations...). La colonne Diffusion indique si l'information figure sur le listing des informations (L), la liste des consommations (C) et la commande des repas (R) : cliquez directement sur L, C ou R pour activer ou désactiver la diffusion."
+    description_saisie = "Renseignez la catégorie, l'intitulé et la description de l'information, ainsi que ses options de diffusion, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une information personnelle"
     objet_pluriel = "des informations personnelles"
 

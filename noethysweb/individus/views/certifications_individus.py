@@ -10,6 +10,7 @@ from individus.views import certifications
 
 
 class Liste(certifications.Page, crud.Liste):
+    description_liste = "Retrouvez ici la date à laquelle chaque famille a certifié sur le portail l'exactitude des renseignements de ses membres. Cette liste permet de repérer les fiches qui n'ont pas encore été vérifiées par les familles."
     model = Rattachement
 
     def get_queryset(self):

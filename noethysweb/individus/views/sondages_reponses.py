@@ -62,7 +62,7 @@ class Base(CustomView, TemplateView):
         context = super(Base, self).get_context_data(**kwargs)
         context['page_titre'] = "Formulaires"
         context['box_titre'] = "Consulter les réponses d'un formulaire"
-        context['box_introduction'] = "Sélectionnez un formulaire dans la liste déroulante puis choisissez un type d'affichage."
+        context['box_introduction'] = "Consultez les réponses des familles aux formulaires du portail (sondages, enquêtes...). Sélectionnez un formulaire dans la liste déroulante puis choisissez un type d'affichage : tableau, résumé ou détail des réponses."
 
         # Importation des sondages
         context["liste_sondages"] = [(None, "--------")] + [(sondage.pk, sondage.titre) for sondage in Sondage.objects.filter(Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)).order_by("pk")]

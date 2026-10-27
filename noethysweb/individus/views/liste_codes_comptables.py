@@ -11,7 +11,7 @@ from core.models import Famille
 
 class Page(crud.Page):
     model = Famille
-    description_liste = "Voici ci-dessous la liste des codes comptables des familles."
+    description_liste = "Retrouvez ici le code comptable de chaque famille. Il est utilisé dans les exports vers les logiciels de comptabilité. Si aucun code n'est saisi, certains exports utilisent un code généré automatiquement."
 
 
 class Liste(Page, crud.Liste):

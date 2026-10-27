@@ -121,7 +121,7 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context['page_titre'] = "Effacer des familles"
         context['box_titre'] = "Liste des familles"
-        context['box_introduction'] = "Vous pouvez ici effacer des fiches familles. Conformément au RGPD, cette fonctionnalité irréversible ne supprime pas les fiches mais les anonymise afin d'effacer les traces de familles qui ne fréquentent plus la structure. Les données importantes telles que les consommations, prestations ou règlements par exemple sont conservées afin de ne pas corrompre les statistiques."
+        context['box_introduction'] = "Conformément au RGPD, effacez ici les données personnelles des familles qui ne fréquentent plus la structure. Les fiches ne sont pas supprimées mais anonymisées : les consommations, prestations et règlements sont conservés pour ne pas fausser les statistiques et la comptabilité. <b>Attention, cette opération est irréversible.</b>"
         context['onglet_actif'] = "effacer_familles"
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""

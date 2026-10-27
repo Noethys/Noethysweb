@@ -16,8 +16,8 @@ class Page(crud.Page):
     url_ajouter = "scolarites_ajouter"
     url_modifier = "scolarites_modifier"
     url_supprimer = "scolarites_supprimer"
-    description_liste = "Voici ci-dessous la liste des étapes de scolarité."
-    description_saisie = "Saisissez toutes les informations concernant l'étape de scolarité à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici toutes les étapes de scolarité enregistrées : pour chaque individu, l'école, la classe et le niveau sur une période donnée. Ces informations sont utiles notamment pour les listes par école ou par classe."
+    description_saisie = "Renseignez l'école, la classe, le niveau et les dates de l'étape de scolarité puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une étape de scolarité"
     objet_pluriel = "des étapes de scolarité"
     boutons_liste = [

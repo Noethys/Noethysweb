@@ -36,7 +36,7 @@ class Liste(Page, crud.CustomListe):
         context = super(Liste, self).get_context_data(**kwargs)
         context['page_titre'] = "Liste des quotients familiaux/revenus"
         context['box_titre'] = "Liste des quotients familiaux/revenus"
-        context['box_introduction'] = "Voici ci-dessous la liste des quotients familiaux/revenus."
+        context['box_introduction'] = "Retrouvez ici les quotients familiaux et revenus enregistrés pour les familles, avec leur période de validité. Ils sont utilisés pour calculer les tarifs dépendant du quotient familial : vérifiez qu'aucune famille n'a de quotient expiré."
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
         # context["hauteur_table"] = "500px"

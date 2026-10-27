@@ -12,7 +12,7 @@ from core.views import crud, liste_questionnaires_base
 class Page(crud.Page):
     model = QuestionnaireReponse
     url_liste = "questionnaires_individus_liste"
-    description_liste = "Voici ci-dessous la liste des questionnaires individuels. Commencez par sélectionner une question dans la liste déroulante."
+    description_liste = "Consultez les réponses des individus aux questions personnalisées de type Individu. Commencez par sélectionner une question dans la liste déroulante. Les questions se créent dans le menu Paramétrage > Questionnaires > Questionnaires."
 
 
 class Liste(Page, liste_questionnaires_base.Liste):

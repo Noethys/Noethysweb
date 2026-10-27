@@ -17,8 +17,8 @@ class Page(crud.Page):
     url_ajouter = "mandats_creer"
     url_modifier = "mandats_modifier"
     url_supprimer = "mandats_supprimer"
-    description_liste = "Voici ci-dessous la liste des mandats SEPA des familles."
-    description_saisie = "Saisissez toutes les informations concernant le mandat à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les mandats de prélèvement SEPA signés par les familles. Un mandat actif est nécessaire pour prélever une famille. Pensez à désactiver les mandats des familles qui ont changé de banque ou renoncé au prélèvement."
+    description_saisie = "Renseignez la référence unique du mandat (RUM), la date de signature et les coordonnées bancaires de la famille puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un mandat"
     objet_pluriel = "des mandats"
     boutons_liste = [
@@ -81,7 +81,7 @@ class Creer(Page, crud.Ajouter):
 
     def get_context_data(self, **kwargs):
         context = super(Creer, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Vous devez sélectionner la famille associée au mandat."
+        context['box_introduction'] = "Sélectionnez la famille titulaire du mandat de prélèvement, puis cliquez sur le bouton Valider."
         return context
 
     def post(self, request, **kwargs):

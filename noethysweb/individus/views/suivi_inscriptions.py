@@ -202,5 +202,6 @@ class View(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Suivi des inscriptions"
+        context['box_introduction'] = "Suivez le remplissage de vos activités, par activité et par groupe : nombre d'inscrits, places maximales, places disponibles, inscriptions en attente et refusées. Utilisez les paramètres pour choisir les activités affichées et masquer les activités terminées."
         context['suivi_inscriptions_parametres'] = Get_parametres(request=self.request)
         return context

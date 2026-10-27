@@ -45,7 +45,7 @@ def Modifier_lot(request):
 class Page(crud.Page):
     model = Piece
     url_liste = "liste_pieces_fournies"
-    description_liste = "Voici ci-dessous la liste des pièces fournies. Vous pouvez ici cocher des pièces pour les supprimer ou les modifier par lot."
+    description_liste = "Retrouvez ici les pièces fournies par les familles, avec leur période de validité. Cochez des pièces pour les modifier ou les supprimer par lot, ou utilisez le bouton de purge pour supprimer en une fois les pièces anciennes."
     objet_singulier = "une pièce fournie"
     objet_pluriel = "des pièces fournies"
     url_supprimer_plusieurs = "pieces_supprimer_plusieurs"
@@ -142,7 +142,7 @@ class Purger(Page, TemplateView):
         context = super(Purger, self).get_context_data(**kwargs)
         context['page_titre'] = "Purger les pièces obsolètes"
         context['box_titre'] = "Purger les pièces obsolètes"
-        context['box_introduction'] = "Sélectionnez le ou les critères de purge souhaités et cliquez sur le bouton Purger. Cochez au moins un des deux critères. Si vous cochez les deux, une pièce sera supprimée dès qu'elle correspond à l'un ou l'autre des critères. <b>Attention, cette opération est irréversible.</b> La liste des pièces concernées vous sera présentée pour confirmation avant toute suppression."
+        context['box_introduction'] = "Supprimez en une fois les pièces devenues inutiles. Cochez au moins un des deux critères de purge et cliquez sur le bouton Purger : si vous cochez les deux, une pièce est supprimée dès qu'elle correspond à l'un ou l'autre. La liste des pièces concernées vous sera présentée pour confirmation. <b>Attention, cette opération est irréversible.</b>"
         context['form'] = context.get("form", self.form_class())
         return context
 

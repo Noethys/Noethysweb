@@ -24,7 +24,7 @@ def Generer_tiers_solidaires(request):
 
 class Page(crud.Page):
     model = Famille
-    description_liste = "Voici ci-dessous la liste des titulaires Hélios et des tiers solidaires. Cliquez sur le bouton ci-dessous pour générer les tiers solidaires manquants si besoin."
+    description_liste = "Retrouvez ici les titulaires Hélios et les tiers solidaires des familles, utilisés dans les exports de titres vers la trésorerie (format PES). Cliquez sur le bouton ci-dessous pour générer les tiers solidaires manquants si besoin."
     menu_code = "liste_titulaires_helios"
 
 

@@ -73,7 +73,7 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context["page_titre"] = "Imprimer une liste d'inscrits"
         context["box_titre"] = "Imprimer une liste d'inscrits"
-        context["box_introduction"] = "Sélectionnez une activité, éventuellement un ou plusieurs groupes, et créez les colonnes du document. Il est possible de mémoriser ces paramètres grâce au profil de configuration."
+        context["box_introduction"] = "Composez une liste d'inscrits imprimable sur mesure (liste d'appel, liste des contacts...). Sélectionnez une activité et éventuellement un ou plusieurs groupes, puis créez les colonnes du document. Mémorisez ces réglages dans un profil de configuration pour les réutiliser."
 
         # Copie le request_post pour préparer l'application du profil de configuration
         request_post = self.request.POST.copy()

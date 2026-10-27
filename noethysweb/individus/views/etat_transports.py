@@ -76,7 +76,7 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context["page_titre"] = "Etat récapitulatif des transports"
         context["box_titre"] = "Etat récapitulatif des transports"
-        context["box_introduction"] = "Sélectionnez une date, un type d'état et les modes de transport souhaités, puis cliquez sur le bouton Générer le PDF."
+        context["box_introduction"] = "Imprimez le récapitulatif des transports d'une journée, par exemple pour le chauffeur ou l'équipe d'accueil. Sélectionnez une date, un type d'état et les modes de transport souhaités, puis cliquez sur le bouton Générer le PDF."
         context["descriptions_etats"] = DESCRIPTIONS_ETATS
         if "form" not in kwargs:
             context["form"] = Formulaire(request=self.request)

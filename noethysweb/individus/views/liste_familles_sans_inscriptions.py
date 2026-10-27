@@ -12,7 +12,7 @@ from core.models import Famille
 
 class Page(crud.Page):
     model = Famille
-    description_liste = "Voici ci-dessous la liste des familles dont aucun des membres n'est inscrit à une activité."
+    description_liste = "Retrouvez ici les familles dont aucun membre n'est inscrit à une activité. Cette liste permet par exemple de repérer les fiches incomplètes ou les familles qui ne fréquentent plus la structure, avant de les relancer ou d'effacer leurs données."
 
 
 class Liste(Page, crud.Liste):

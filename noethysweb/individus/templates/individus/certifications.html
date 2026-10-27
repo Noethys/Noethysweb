@@ -42,6 +42,7 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    {% if box_introduction %}<p>{{ box_introduction|safe }}</p>{% endif %}
                     <p>
                         Cette liste détaille les dates de certification des fiches sur le portail famille. Il est possible de réinitialiser la date
                         de certification des fiches cochées si vous souhaitez imposer aux familles de les certifier exactes de nouveau.

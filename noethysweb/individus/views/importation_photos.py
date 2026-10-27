@@ -45,7 +45,7 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Importer des photos individuelles"
         context['box_titre'] = "Sélection des photos"
-        context['box_introduction'] = "Vous pouvez ici importer des photos comportant un ou plusieurs individus. L'application va détecter les visages, les découper et les envoyer vers les fiches individuelles. Commencez par sélectionner la ou les photos à analyser et cliquez sur Envoyer."
+        context['box_introduction'] = "Importez des photos comportant un ou plusieurs individus (photo de groupe par exemple) : l'application détecte les visages, les découpe et vous propose de les associer aux fiches individuelles. Commencez par sélectionner la ou les photos à analyser et cliquez sur Envoyer."
         context['form'] = kwargs.get("form", Formulaire())
         context['form_selection_individu'] = form_selection_individu()
         context['formulaire_upload'] = Formulaire_importation()

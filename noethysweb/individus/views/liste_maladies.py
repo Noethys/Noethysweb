@@ -14,8 +14,8 @@ class Page(crud.Page):
     model = Individu
     url_liste = "maladies_liste"
     url_modifier = "maladies_modifier"
-    description_liste = "Voici ci-dessous la liste des maladies des individus."
-    description_saisie = "Sélectionnez un ou plusieurs maladies dans la liste proposée et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les maladies déjà contractées par les individus, telles que renseignées dans leur fiche."
+    description_saisie = "Sélectionnez une ou plusieurs maladies dans la liste proposée puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une maladie"
     objet_pluriel = "des maladies"
 

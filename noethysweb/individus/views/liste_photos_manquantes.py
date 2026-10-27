@@ -11,7 +11,7 @@ from core.models import Individu
 class Page(crud.Page):
     model = Individu
     url_liste = "liste_photos_manquantes"
-    description_liste = "Voici ci-dessous la liste des photos manquantes. Utilisez la commande Filtrer pour cibler uniquement des inscrits ou présents à une ou plusieurs activités données."
+    description_liste = "Retrouvez ici les individus qui n'ont pas encore de photo dans leur fiche. Utilisez le bouton Filtrer pour cibler les inscrits ou présents de certaines activités. Pour ajouter rapidement de nombreuses photos, utilisez l'importation de photos individuelles."
     objet_singulier = "une photo manquante"
     objet_pluriel = "des photos manquantes"
 

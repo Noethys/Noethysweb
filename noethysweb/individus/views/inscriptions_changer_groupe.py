@@ -91,7 +91,7 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context["page_titre"] = "Changer de groupe par lot"
         context["box_titre"] = "Sélection des paramètres"
-        context["box_introduction"] = "Cette fonctionnalité permet de changer de groupe à des individus par lot. L'inscription sélectionnée sera clôturée puis une nouvelle inscription sera créée. Les éventuelles consommations seront modifiées en conséquence. Attention, à utiliser avec précaution ! Cette fonctionnalité ne vérifie pas s'il reste de la place et ne recalcule pas les prestations associées, elle ne fait que créer de nouvelles inscriptions et modifier le groupe des consommations."
+        context["box_introduction"] = "Changez de groupe plusieurs individus en une seule fois, par exemple lors du passage dans la tranche d'âge supérieure. L'inscription sélectionnée est clôturée, une nouvelle inscription est créée dans le nouveau groupe et les consommations à partir de la date d'application sont rattachées à ce groupe. <b>A utiliser avec précaution</b> : cette fonctionnalité ne vérifie pas s'il reste de la place et ne recalcule pas les prestations."
         context["onglet_actif"] = "inscriptions_changer_groupe"
         context["impression_introduction"] = ""
         context["impression_conclusion"] = ""
@@ -131,7 +131,7 @@ class Selection_activite(Page, crud.Ajouter):
 
     def get_context_data(self, **kwargs):
         context = super(Selection_activite, self).get_context_data(**kwargs)
-        context["box_introduction"] = "Vous devez sélectionner une activité."
+        context["box_introduction"] = "Sélectionnez l'activité concernée par le changement de groupe, puis cliquez sur le bouton Valider."
         context["page_titre"] = "Changer de groupe par lot"
         context["box_titre"] = "Sélection de l'activité"
         return context

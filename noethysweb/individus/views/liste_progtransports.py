@@ -15,8 +15,8 @@ class Page(crud.Page):
     url_liste = "progtransports_liste"
     url_modifier = "progtransports_modifier"
     url_supprimer = "progtransports_supprimer"
-    description_liste = "Voici ci-dessous la liste des programmations de transports."
-    description_saisie = "Saisissez toutes les informations concernant la programmation de transports et cliquez sur le bouton Enregistrer."
+    description_liste = "Les programmations de transports permettent de créer automatiquement les transports réguliers d'un individu (exemple : bus du mercredi midi), selon les jours et les périodes indiquées."
+    description_saisie = "Renseignez le mode de transport, le trajet (départ et arrivée), les horaires, ainsi que les jours et la période de répétition, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une programmation de transports"
     objet_pluriel = "des programmations de transports"
 

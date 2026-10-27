@@ -14,7 +14,7 @@ class Page(crud.Page):
     model = Individu
     url_liste = "individus_detaches_liste"
     url_supprimer = "individus_detaches_supprimer"
-    description_liste = "Voici ci-dessous la liste des individus détachés."
+    description_liste = "Les individus détachés ne sont plus rattachés à aucune famille, par exemple après avoir été détachés d'une fiche famille. Ils restent enregistrés avec leur historique. Vous pouvez les rattacher de nouveau à une famille en les sélectionnant lors de l'ajout d'un membre dans une fiche famille."
     objet_singulier = "un individu détaché"
     objet_pluriel = "des individus détachés"
 

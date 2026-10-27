@@ -68,7 +68,7 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context["page_titre"] = "Saisir un lot d'inscriptions"
         context["box_titre"] = "Sélection des paramètres"
-        context["box_introduction"] = "Cette fonctionnalité de générer des inscriptions pour les individus sélectionnés. Cochez les individus à inscrire puis renseignez les caractéristiques de l'inscription avant de cliquer sur le bouton Générer."
+        context["box_introduction"] = "Cette fonctionnalité permet de générer des inscriptions pour les individus sélectionnés. Cochez les individus à inscrire, renseignez les caractéristiques de l'inscription puis cliquez sur le bouton Générer. Pour de très nombreux individus, préférez l'assistant de saisie d'inscriptions par lot, plus rapide."
         context["onglet_actif"] = "inscriptions_saisir_lot"
         context["impression_introduction"] = ""
         context["impression_conclusion"] = ""
@@ -133,7 +133,7 @@ class Selection_activite(Page, crud.Ajouter):
 
     def get_context_data(self, **kwargs):
         context = super(Selection_activite, self).get_context_data(**kwargs)
-        context["box_introduction"] = "Vous devez sélectionner une activité."
+        context["box_introduction"] = "Sélectionnez l'activité à laquelle vous souhaitez inscrire plusieurs individus, puis cliquez sur le bouton Valider."
         context["page_titre"] = "Saisir un lot d'inscriptions"
         context["box_titre"] = "Sélection de l'activité"
         return context

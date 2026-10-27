@@ -21,7 +21,7 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Recherche avancée d'individus"
         context['box_titre'] = "Effectuer une recherche avancée d'individus"
-        context['box_introduction'] = "Saisissez un ou plusieurs critères de recherche et cliquez sur le bouton Rechercher. Si la recherche textuelle ne suffit pas, essayez la recherche phonétique."
+        context['box_introduction'] = "Recherchez des individus et des familles en combinant plusieurs critères (nom, prénom, adresse, téléphone, email...). Saisissez un ou plusieurs critères et cliquez sur le bouton Rechercher. Si l'orthographe exacte vous échappe, essayez la recherche phonétique, qui retrouve les noms qui se prononcent de la même façon."
         context['form'] = context.get("form", Formulaire)
         return context
 

@@ -58,6 +58,7 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    {% if box_introduction %}<p>{{ box_introduction|safe }}</p>{% endif %}
 
                     {# Boutons de commandes #}
                     <div class="buttonHolder">

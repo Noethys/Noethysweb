@@ -5,6 +5,7 @@
 
 {% block contenu_page %}
     {% block box_contenu %}
+        {% if box_introduction %}<p>{{ box_introduction|safe }}</p>{% endif %}
         {% include "individus/suivi_inscriptions.html" %}
     {% endblock %}
 {% endblock contenu_page %}

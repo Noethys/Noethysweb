@@ -15,8 +15,8 @@ class Page(crud.Page):
     url_liste = "transports_liste"
     url_modifier = "transports_modifier"
     url_supprimer = "transports_supprimer"
-    description_liste = "Voici ci-dessous la liste des transports."
-    description_saisie = "Saisissez toutes les informations concernant le transport à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici tous les transports des individus, ponctuels ou issus d'une programmation : mode de transport, date, trajet et horaires."
+    description_saisie = "Renseignez le mode de transport, la date, le trajet (départ et arrivée) et les horaires puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un transport"
     objet_pluriel = "des transports"
 

@@ -19,8 +19,8 @@ class Page(crud.Page):
     url_modifier = "inscriptions_activite_modifier"
     url_supprimer = "inscriptions_activite_supprimer"
     url_supprimer_plusieurs = "inscriptions_activite_supprimer_plusieurs"
-    description_liste = "Sélectionnez une activité dans la liste déroulante afin d'obtenir la liste des inscrits. Vous ne pouvez accéder qu'aux inscriptions associées à vos structures. Cliquez sur le bouton <i class='fa fa-eye-slash'></i> si vous souhaitez afficher d'autres colonnes disponibles."
-    description_saisie = "Saisissez toutes les informations concernant l'inscription à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Sélectionnez une activité dans la liste déroulante pour obtenir la liste de ses inscrits, avec leur groupe et leur catégorie de tarif. Cliquez sur le bouton <i class='fa fa-eye-slash'></i> pour afficher d'autres colonnes disponibles (âge, coordonnées...). Seules les données associées à vos structures sont affichées."
+    description_saisie = "Renseignez l'activité, le groupe, la catégorie de tarif et les dates de l'inscription puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une inscription"
     objet_pluriel = "des inscriptions"
 

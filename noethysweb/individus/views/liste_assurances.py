@@ -21,7 +21,7 @@ class Page(crud.Page):
     url_liste = "liste_assurances"
     url_supprimer = "assurances_supprimer"
     url_supprimer_plusieurs = "assurances_supprimer_plusieurs"
-    description_liste = "Voici ci-dessous la liste des assurances de tous les individus."
+    description_liste = "Retrouvez ici les assurances de tous les individus, avec leur période de validité. Utilisez le bouton de purge pour supprimer en une fois les assurances anciennes."
     objet_singulier = "une assurance"
     objet_pluriel = "des assurances"
     boutons_liste = [
@@ -122,7 +122,7 @@ class Purger(Page, TemplateView):
         context = super(Purger, self).get_context_data(**kwargs)
         context['page_titre'] = "Purger les assurances obsolètes"
         context['box_titre'] = "Purger les assurances obsolètes"
-        context['box_introduction'] = "Sélectionnez le ou les critères de purge souhaités et cliquez sur le bouton Purger. Cochez au moins un des deux critères. Si vous cochez les deux, une assurance sera supprimée dès qu'elle correspond à l'un ou l'autre des critères. <b>Attention, cette opération est irréversible.</b> La liste des assurances concernées vous sera présentée pour confirmation avant toute suppression."
+        context['box_introduction'] = "Supprimez en une fois les assurances devenues inutiles. Cochez au moins un des deux critères de purge et cliquez sur le bouton Purger : si vous cochez les deux, une assurance est supprimée dès qu'elle correspond à l'un ou l'autre. La liste des assurances concernées vous sera présentée pour confirmation. <b>Attention, cette opération est irréversible.</b>"
         context['form'] = context.get("form", self.form_class())
         return context
 

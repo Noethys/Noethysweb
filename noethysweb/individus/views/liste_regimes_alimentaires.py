@@ -14,8 +14,8 @@ class Page(crud.Page):
     model = Individu
     url_liste = "regimes_alimentaires_liste"
     url_modifier = "regimes_alimentaires_modifier"
-    description_liste = "Voici ci-dessous la liste des régimes alimentaires des individus."
-    description_saisie = "Sélectionnez un ou plusieurs régimes alimentaires dans la liste proposée et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les régimes alimentaires des individus (sans porc, végétarien, sans gluten...). Ils sont repris dans la liste des repas et peuvent figurer sur les commandes de repas."
+    description_saisie = "Sélectionnez un ou plusieurs régimes alimentaires dans la liste proposée puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un régime alimentaire"
     objet_pluriel = "des régimes alimentaires"
 

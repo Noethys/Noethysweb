@@ -185,6 +185,6 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context["page_titre"] = "Importer des quotients"
         context["box_titre"] = "Importer des quotients depuis l'API Particulier"
-        context["box_introduction"] = "Veuillez renseigner les paramètres de sélection des familles et cliquez sur le bouton Rechercher."
+        context["box_introduction"] = "Récupérez automatiquement les quotients familiaux des familles allocataires de la CAF ou de la MSA grâce à l'API Particulier (réservée aux administrations, token à saisir dans le menu Paramétrage). Renseignez les paramètres de sélection des familles et cliquez sur le bouton Rechercher."
         context["form"] = kwargs.get("form", Formulaire(request=self.request))
         return context

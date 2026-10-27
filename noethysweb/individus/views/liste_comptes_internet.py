@@ -193,7 +193,7 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context['page_titre'] = "Comptes internet"
         context['box_titre'] = "Liste des comptes internet"
-        context['box_introduction'] = "Vous pouvez ici consulter la liste des codes internet des familles. Il est également possible d'activer, désactiver, réinitialiser des comptes, ou d'envoyer des codes d'accès par Email. Cochez les comptes souhaités et cliquez sur le bouton d'action souhaité. La colonne Dernière action indique la date de la dernière action trouvée dans l'historique pour la famille. Cela vous permet d'identifier les familles qui ne fréquentent plus la structure."
+        context['box_introduction'] = "Gérez ici les comptes d'accès des familles au portail : cochez des comptes puis cliquez sur le bouton d'action souhaité pour les activer, les désactiver, les réinitialiser ou envoyer les codes d'accès par email. La colonne Dernière action indique la date de la dernière action enregistrée pour la famille, ce qui permet de repérer celles qui ne fréquentent plus la structure."
         context['onglet_actif'] = "liste_comptes_internet"
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""

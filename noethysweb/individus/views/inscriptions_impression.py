@@ -55,7 +55,7 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context['page_titre'] = "Gestion des inscriptions"
         context['box_titre'] = "Imprimer des inscriptions"
-        context['box_introduction'] = "Cochez des inscriptions, sélectionnez si besoin un modèle de document puis cliquez sur le bouton Aperçu."
+        context['box_introduction'] = "Imprimez les confirmations d'inscription à remettre aux familles. Cochez les inscriptions souhaitées, sélectionnez si besoin un modèle de document puis cliquez sur le bouton Aperçu."
         context['onglet_actif'] = "inscriptions_impression"
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""

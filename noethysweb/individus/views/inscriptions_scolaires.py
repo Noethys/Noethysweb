@@ -82,7 +82,7 @@ class Page(crud.Page):
     url_supprimer = "inscriptions_scolaires_supprimer"
     url_supprimer_plusieurs = "inscriptions_scolaires_plusieurs"
     description_liste = "Saisissez ici les étapes de scolarité de l'individu."
-    description_saisie = "Saisissez toutes les informations concernant l'étape de scolarité et cliquez sur le bouton Enregistrer."
+    description_saisie = "Renseignez l'école, la classe, le niveau et les dates de l'étape de scolarité puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une étape de scolarité"
     objet_pluriel = "des inscriptions scolaires"
 
@@ -134,13 +134,13 @@ class Liste(Page, crud.Liste):
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={"idclasse": self.Get_idclasse(), "listepk": "xxx"})
         context["active_checkbox"] = True
         if self.Get_idclasse():
-            context['box_introduction'] = "Vous pouvez ajouter ici un ou plusieurs individus dans la classe sélectionnée."
+            context['box_introduction'] = "Sélectionnez les individus à ajouter dans la classe choisie dans le cadre Paramètres, puis cliquez sur le bouton Enregistrer."
             context['boutons_liste'] = [
                 {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idclasse': self.Get_idclasse()}), "icone": "fa fa-plus"},
                 {"label": "Ajouter plusieurs individus", "classe": "btn btn-default", "href": reverse_lazy(self.url_ajouter_plusieurs, kwargs={'idclasse': self.Get_idclasse()}), "icone": "fa fa-plus"},
             ]
         else:
-            context['box_introduction'] = "Vous devez sélectionner une classe dans le cadre Paramètres pour pouvoir ajouter un ou plusieurs individus."
+            context['box_introduction'] = "Affectez ici les élèves aux écoles et aux classes. Sélectionnez une école, une période et une classe dans le cadre Paramètres pour afficher ses élèves et pouvoir en ajouter."
 
         return context
 

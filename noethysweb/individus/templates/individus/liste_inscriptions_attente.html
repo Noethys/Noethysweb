@@ -35,6 +35,7 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    {% if box_introduction %}<p>{{ box_introduction|safe }}</p>{% endif %}
 
                     <script>
                         var contenu_table = JSON.parse('{{ resultats|escapejs }}');
