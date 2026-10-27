@@ -7,7 +7,7 @@ from django.urls import reverse_lazy
 from core.models import Famille
 from django.views.generic.detail import DetailView
 from fiche_famille.views.famille import Onglet
-from core.views import menu_infos
+from core.views import menu_infos, menu_favoris
 from fiche_famille.utils import utils_fusion
 
 
@@ -63,7 +63,7 @@ class View(Onglet, DetailView):
         # Légende : seules les natures utilisées sur la page sont affichées
         natures_utilisees = {item["nature"] for rubrique in context['items_menu'] for item in rubrique["items"]}
         context['natures'] = {code: label for code, label in menu_infos.NATURES.items() if code in natures_utilisees}
-        context['affichage_condense'] = bool(context.get("options_interface", {}).get("menu_affichage_condense", False))
+        context['affichage'] = menu_favoris.Get_mode_affichage(context.get("options_interface", {}))
         return context
 
     def get_object(self):

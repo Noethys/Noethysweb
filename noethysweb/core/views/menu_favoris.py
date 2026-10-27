@@ -34,12 +34,28 @@ def Enregistrer_codes_favoris(utilisateur=None, codes=[]):
     cache.delete("options_interface_user%d" % utilisateur.pk)
 
 
+MODES_AFFICHAGE = ("detaille", "condense", "liste")
+
+
+def Get_mode_affichage(options_interface={}):
+    """ Renvoie le type d'affichage des pages sommaires des menus (détaillé, condensé ou liste) """
+    mode = options_interface.get("menu_affichage", "")
+    if mode in MODES_AFFICHAGE:
+        return mode
+    # Reprise de l'ancien réglage (détaillé ou condensé uniquement)
+    return "condense" if options_interface.get("menu_affichage_condense", False) else "detaille"
+
+
 def Modifier_affichage(request):
-    """ Mémorise le type d'affichage des pages sommaires des menus (détaillé ou condensé) """
-    condense = request.POST.get("condense", "") == "1"
-    utils_parametres.Set(nom="menu_affichage_condense", categorie="options_interface", utilisateur=request.user, valeur=condense)
+    """ Mémorise le type d'affichage des pages sommaires des menus (détaillé, condensé ou liste) """
+    mode = request.POST.get("mode", "")
+    if mode not in MODES_AFFICHAGE:
+        # Compatibilité avec l'ancien paramètre envoyé par les pages déjà ouvertes
+        mode = "condense" if request.POST.get("condense", "") == "1" else "detaille"
+    utils_parametres.Set(nom="menu_affichage", categorie="options_interface", utilisateur=request.user, valeur=mode)
+    utils_parametres.Set(nom="menu_affichage_condense", categorie="options_interface", utilisateur=request.user, valeur=mode == "condense")
     cache.delete("options_interface_user%d" % request.user.pk)
-    return JsonResponse({"condense": condense})
+    return JsonResponse({"mode": mode})
 
 
 def Modifier_favoris(request):

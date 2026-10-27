@@ -29,6 +29,6 @@ class Toc(CustomView, TemplateView):
         context['commandes_favorites'] = menu_favoris.Get_commandes_favorites(menu_principal=menu, codes=codes_favoris) if menu else []
         context['commandes_menu'] = menu.GetCommandes() if menu else []
         context['natures'] = menu_infos.NATURES
-        context['affichage_condense'] = bool(context.get("options_interface", {}).get("menu_affichage_condense", False))
+        context['affichage'] = menu_favoris.Get_mode_affichage(context.get("options_interface", {}))
 
         return context

@@ -134,6 +134,7 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
                 "configuration_accueil": json.dumps(settings.CONFIG_ACCUEIL_DEFAUT),
                 "menu_favoris": "[]",
                 "menu_affichage_condense": False,
+                "menu_affichage": "",
             }
             parametres = utils_parametres.Get_categorie(categorie='options_interface', utilisateur=self.request.user, parametres=defaut)
             context['options_interface'] = parametres
