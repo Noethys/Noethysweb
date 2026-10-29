@@ -7,9 +7,10 @@ import json
 from decimal import Decimal
 from django.views.generic import TemplateView
 from django.db.models import Q, Sum
+from django.db.models.functions import ExtractYear, ExtractMonth
 from core.views.base import CustomView
 from core.utils import utils_dates
-from core.models import Activite, Prestation, Ventilation
+from core.models import Activite, Prestation, Ventilation, Famille
 from facturation.forms.synthese_impayes import Formulaire
 
 
@@ -43,24 +44,38 @@ class View(CustomView, TemplateView):
         date_debut = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[0])
         date_fin = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[1])
         param_activites = json.loads(parametres["activites"])
-        conditions_periode = Q(date__gte=date_debut) & Q(date__lte=date_fin)
 
         if parametres["type_activites"] == "SELECTION":
             if param_activites["type"] == "groupes_activites":
-                condition_activites = (Q(activite__groupes_activites__in=param_activites["ids"]) | Q(activite__isnull=True))
                 liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
-            if param_activites["type"] == "activites":
-                condition_activites = (Q(activite__in=param_activites["ids"]) | Q(activite__isnull=True))
+            else:
                 liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
         else:
-            condition_activites = Q()
             liste_activites = Activite.objects.all()
 
         # Importation des activités
         dictActivites = {activite.pk: {"nom": activite.nom, "abrege": activite.abrege} for activite in liste_activites}
 
-        # Importation des prestations
-        conditions_ventilations = Q(prestation__date__gte=date_debut) & Q(prestation__date__lte=date_fin) & (Q(prestation__activite__in=liste_activites) | Q(prestation__activite__isnull=True))
+        def Get_conditions_prestations(prefixe=""):
+            """ Conditions de sélection des prestations (prefixe = 'prestation__' pour les appliquer aux ventilations) """
+            conditions = Q(**{prefixe + "date__gte": date_debut}) & Q(**{prefixe + "date__lte": date_fin}) & Q(**{prefixe + "categorie__in": parametres["donnees"]})
+            if parametres["type_activites"] == "SELECTION":
+                # Filtre via une sous-requête sur les IDs d'activités : évite la jointure sur les groupes d'activités et donc le DISTINCT
+                conditions &= Q(**{prefixe + "activite__in": liste_activites.values("pk")}) | Q(**{prefixe + "activite__isnull": True})
+            if parametres["uniquement_prestations_facturees"]:
+                conditions &= Q(**{prefixe + "facture__isnull": False}) & ~Q(**{prefixe + "facture__etat": "annulation"})
+            return conditions
+
+        # Les calculs sont regroupés directement par la base de données par famille, activité, catégorie et période
+        mode_mois = parametres["regroupement_colonnes"] == "mois"
+        champs_regroupement = ["famille_id", "activite_id", "categorie", "annee"] + (["mois"] if mode_mois else [])
+
+        # Total des prestations de la période
+        prestations = Prestation.objects.filter(Get_conditions_prestations()).annotate(annee=ExtractYear("date"), mois=ExtractMonth("date"))
+        prestations = prestations.values(*champs_regroupement).annotate(total=Sum("montant")).order_by()
+
+        # Total des ventilations des prestations de la période
+        conditions_ventilations = Get_conditions_prestations(prefixe="prestation__")
 
         if parametres["filtre_reglements_saisis"]:
             date_debut_saisie = utils_dates.ConvertDateENGtoDate(parametres["filtre_reglements_saisis"].split(";")[0])
@@ -72,67 +87,45 @@ class View(CustomView, TemplateView):
             date_fin_depot = utils_dates.ConvertDateENGtoDate(parametres["filtre_reglements_deposes"].split(";")[1])
             conditions_ventilations &= (Q(reglement__depot__date__gte=date_debut_depot) & Q(reglement__depot__date__lte=date_fin_depot))
 
-        # Récupèration de la ventilation des prestations de la période
-        dictVentilation = {}
-        ventilations = Ventilation.objects.select_related('prestation', 'reglement', 'reglement_depot').values('prestation').filter(conditions_ventilations).annotate(total=Sum("montant"))
-        for ventilation in ventilations:
-            dictVentilation[ventilation["prestation"]] = ventilation["total"]
-
-        # Récupération de toutes les prestations de la période
-        conditions_prestations = conditions_periode & condition_activites & Q(categorie__in=parametres["donnees"])
-        if parametres["uniquement_prestations_facturees"]:
-            conditions_prestations &= Q(facture__isnull=False) & ~Q(facture__etat="annulation")
-        prestations = Prestation.objects.select_related('famille').filter(conditions_prestations).distinct()
+        champs_ventilations = ["prestation__famille_id", "prestation__activite_id", "prestation__categorie", "annee"] + (["mois"] if mode_mois else [])
+        ventilations = Ventilation.objects.filter(conditions_ventilations).annotate(annee=ExtractYear("prestation__date"), mois=ExtractMonth("prestation__date"))
+        ventilations = ventilations.values(*champs_ventilations).annotate(total=Sum("montant")).order_by()
+        dictVentilation = {tuple(ventilation[champ] for champ in champs_ventilations): ventilation["total"] or Decimal(0) for ventilation in ventilations}
 
         dictResultats = {"familles": {}, "activites": {}}
         listePeriodes = []
-        dict_noms_familles = {}
-        for prestation in prestations:
-
-            if prestation.famille_id not in dict_noms_familles:
-                dict_noms_familles[prestation.famille_id] = prestation.famille.nom
-
-            if parametres["regroupement_colonnes"] == "mois":
-                periode = (prestation.date.year, prestation.date.month)
-            else:
-                periode = prestation.date.year
+        for ligne_prestations in prestations:
+            IDfamille = ligne_prestations["famille_id"]
+            cle = tuple(ligne_prestations[champ] for champ in champs_regroupement)
+            periode = (ligne_prestations["annee"], ligne_prestations["mois"]) if mode_mois else ligne_prestations["annee"]
 
             if periode not in listePeriodes:
                 listePeriodes.append(periode)
 
-            IDactivite = prestation.activite_id
-            if prestation.categorie == "location":
+            IDactivite = ligne_prestations["activite_id"]
+            if ligne_prestations["categorie"] == "location":
                 IDactivite = 777777
-            if prestation.categorie == "cotisation":
+            if ligne_prestations["categorie"] == "cotisation":
                 IDactivite = 888888
-            if not prestation.activite_id:
+            if not ligne_prestations["activite_id"]:
                 IDactivite = 999999
 
-            solde = prestation.montant - dictVentilation.get(prestation.pk, Decimal(0))
+            solde = (ligne_prestations["total"] or Decimal(0)) - dictVentilation.get(cle, Decimal(0))
 
             # Regroupement par activités
-            if (IDactivite in dictResultats["activites"]) == False:
-                dictResultats["activites"][IDactivite] = {"total": Decimal(0), "periodes": {}}
-            if (periode in dictResultats["activites"][IDactivite]["periodes"]) == False:
-                dictResultats["activites"][IDactivite]["periodes"][periode] = {"total": Decimal(0), "familles": {}}
-            if (prestation.famille_id in dictResultats["activites"][IDactivite]["periodes"][periode]["familles"]) == False:
-                dictResultats["activites"][IDactivite]["periodes"][periode]["familles"][prestation.famille_id] = Decimal(0)
-
+            dict_periode = dictResultats["activites"].setdefault(IDactivite, {"total": Decimal(0), "periodes": {}})["periodes"].setdefault(periode, {"total": Decimal(0), "familles": {}})
             dictResultats["activites"][IDactivite]["total"] += solde
-            dictResultats["activites"][IDactivite]["periodes"][periode]["total"] += solde
-            dictResultats["activites"][IDactivite]["periodes"][periode]["familles"][prestation.famille_id] += solde
+            dict_periode["total"] += solde
+            dict_periode["familles"][IDfamille] = dict_periode["familles"].get(IDfamille, Decimal(0)) + solde
 
             # Regroupement par familles
-            if (prestation.famille_id in dictResultats["familles"]) == False:
-                dictResultats["familles"][prestation.famille_id] = {"total": Decimal(0), "periodes": {}}
-            if (periode in dictResultats["familles"][prestation.famille_id]["periodes"]) == False:
-                dictResultats["familles"][prestation.famille_id]["periodes"][periode] = {"total": Decimal(0), "activites": {}}
-            if (IDactivite in dictResultats["familles"][prestation.famille_id]["periodes"][periode]["activites"]) == False:
-                dictResultats["familles"][prestation.famille_id]["periodes"][periode]["activites"][IDactivite] = Decimal(0)
+            dict_periode = dictResultats["familles"].setdefault(IDfamille, {"total": Decimal(0), "periodes": {}})["periodes"].setdefault(periode, {"total": Decimal(0), "activites": {}})
+            dictResultats["familles"][IDfamille]["total"] += solde
+            dict_periode["total"] += solde
+            dict_periode["activites"][IDactivite] = dict_periode["activites"].get(IDactivite, Decimal(0)) + solde
 
-            dictResultats["familles"][prestation.famille_id]["total"] += solde
-            dictResultats["familles"][prestation.famille_id]["periodes"][periode]["total"] += solde
-            dictResultats["familles"][prestation.famille_id]["periodes"][periode]["activites"][IDactivite] += solde
+        # Importation des noms des familles (values_list évite le déchiffrement des champs cryptés de la famille)
+        dict_noms_familles = dict(Famille.objects.filter(pk__in=dictResultats["familles"].keys()).values_list("pk", "nom"))
 
         # Remplissage
         liste_colonnes = []
@@ -162,7 +155,7 @@ class View(CustomView, TemplateView):
             return "Activité inconnue"
 
         def GetNomFamille(IDfamille=None):
-            return dict_noms_familles[IDfamille]
+            return dict_noms_familles.get(IDfamille) or "Famille inconnue"
 
         def GetLabels(mode="activites"):
             listeLabels = []
@@ -180,7 +173,7 @@ class View(CustomView, TemplateView):
             return listeLabels
 
         # Branches de niveau 1
-        id_regroupement = 10000
+        id_regroupement, id_detail = 10000, 0
         listeLabels1 = GetLabels(parametres["regroupement_lignes"])
         for label1, ID1 in listeLabels1:
             ligne = {"id": id_regroupement, "pid": 0, "col0": label1, "regroupement": True}
@@ -208,26 +201,22 @@ class View(CustomView, TemplateView):
                 else:
                     mode2 = "activites"
 
-                listeLabels2 = []
+                listeLabels2 = set()
                 if parametres["regroupement_lignes"] == "activites":
                     for periode, dictPeriode in dictResultats["activites"][ID1]["periodes"].items():
                         for IDfamille, impayes in dictPeriode["familles"].items():
                             if impayes > Decimal(0):
                                 label = GetNomFamille(IDfamille)
-                                if (label, IDfamille) not in listeLabels2:
-                                    listeLabels2.append((label, IDfamille))
+                                listeLabels2.add((label, IDfamille))
                 else:
                     for periode, dictPeriode in dictResultats["familles"][ID1]["periodes"].items():
                         for IDactivite, impayes in dictPeriode["activites"].items():
                             if impayes > Decimal(0):
                                 label = GetNomActivite(IDactivite)
-                                if (label, IDactivite) not in listeLabels2:
-                                    listeLabels2.append((label, IDactivite))
-                listeLabels2.sort()
-
-                for label2, ID2 in listeLabels2:
-                    id_detail = "detail_%d" % ID1
-                    ligne = {"id": id_detail, "pid": id_regroupement, "col0": label2, "regroupement": False}
+                                listeLabels2.add((label, IDactivite))
+                for label2, ID2 in sorted(listeLabels2):
+                    id_detail += 1
+                    ligne = {"id": "detail_%d" % id_detail, "pid": id_regroupement, "col0": label2, "regroupement": False}
                     if parametres["regroupement_lignes"] == "activites":
                         ligne.update({"type": "famille", "IDfamille": ID2})
 
