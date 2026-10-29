@@ -5,9 +5,10 @@
 
 import json, decimal
 from django.views.generic import TemplateView
+from django.db.models import Q
 from core.views.base import CustomView
 from core.utils import utils_dates
-from core.models import Ventilation, Depot
+from core.models import Ventilation, Depot, Activite
 from reglements.forms.detail_ventilations_depots import Formulaire
 
 
@@ -39,18 +40,40 @@ class View(CustomView, TemplateView):
 
     def Get_resultats(self, parametres={}):
         depots, liste_colonnes, liste_lignes = [], [], []
+        type_prestations = parametres["type_selection"] == "PRESTATIONS"
+        ventilations = Ventilation.objects.select_related("reglement", "reglement__depot", "prestation", "prestation__activite", "prestation__tarif")
 
-        # Récupération des dépôts
+        # Type DEPOTS : Récupération des dépôts puis de leurs ventilations
         if parametres["type_selection"] == "DATE_DEPOT":
-            date_debut = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[0])
-            date_fin = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[1])
-            depots = Depot.objects.filter(date__gte=date_debut, date__lte=date_fin).order_by("date")
+            date_debut, date_fin = utils_dates.ConvertDateRangePicker(parametres["periode"])
+            depots = list(Depot.objects.filter(date__gte=date_debut, date__lte=date_fin).order_by("date"))
 
         if parametres["type_selection"] == "SELECTION":
-            depots = parametres["depots"]
+            depots = list(parametres["depots"])
 
-        # Récupération des ventilations
-        ventilations = Ventilation.objects.select_related("reglement", "reglement__depot", "prestation", "prestation__activite").filter(reglement__depot__in=depots).order_by("prestation__date")
+        if not type_prestations:
+            ventilations = ventilations.filter(reglement__depot__in=depots).order_by("prestation__date")
+
+        # Type PRESTATIONS : Récupération des ventilations des prestations d'une période puis de leurs dépôts
+        nbre_reglements_non_deposes = 0
+        if type_prestations:
+            date_debut, date_fin = utils_dates.ConvertDateRangePicker(parametres["periode"])
+            conditions = Q(prestation__date__gte=date_debut) & Q(prestation__date__lte=date_fin)
+            if parametres["filtre_activites"]:
+                param_activites = json.loads(parametres["activites"])
+                if param_activites["type"] == "groupes_activites":
+                    conditions &= Q(prestation__activite__in=Activite.objects.filter(groupes_activites__in=param_activites["ids"]))
+                elif param_activites["type"] == "activites":
+                    conditions &= Q(prestation__activite__in=param_activites["ids"])
+                else:
+                    conditions &= Q(prestation__activite__isnull=False)
+            ventilations = ventilations.filter(conditions).order_by("prestation__date")
+
+            depots = sorted({ventilation.reglement.depot for ventilation in ventilations if ventilation.reglement.depot}, key=lambda depot: (depot.date, depot.pk))
+            nbre_reglements_non_deposes = len({ventilation.reglement_id for ventilation in ventilations if not ventilation.reglement.depot})
+            if nbre_reglements_non_deposes:
+                depots.insert(0, None)
+
         dict_ventilations_depot = {}
         for ventilation in ventilations:
             dict_ventilations_depot.setdefault(ventilation.reglement.depot, [])
@@ -60,9 +83,16 @@ class View(CustomView, TemplateView):
             return date.strftime("%m/%Y" if parametres["regroupement_colonne"] == "mois" else "%Y")
 
         def Get_nom_prestation(ventilation):
-            if ventilation.prestation.activite and ventilation.prestation.activite.nom != ventilation.prestation.label:
-                return "%s : %s" % (ventilation.prestation.activite.nom, ventilation.prestation.label)
-            return ventilation.prestation.label
+            prestation = ventilation.prestation
+            if prestation.activite and prestation.activite.nom != prestation.label:
+                nom_prestation = "%s : %s" % (prestation.activite.nom, prestation.label)
+            else:
+                nom_prestation = prestation.label
+            if parametres["afficher_code_compta_prestations"]:
+                code_compta = prestation.code_compta or (prestation.tarif.code_compta if prestation.tarif else None) or prestation.Get_code_comptable()
+                if code_compta:
+                    nom_prestation += " - %s" % code_compta
+            return nom_prestation
 
         # Création des colonnes
         dict_colonnes = {}
@@ -73,26 +103,30 @@ class View(CustomView, TemplateView):
                 if nom_colonne not in liste_colonnes:
                     liste_colonnes.append(nom_colonne)
                     dict_colonnes[nom_colonne] = "col%d" % (len(liste_colonnes)-1)
-        liste_colonnes.append("Non ventilé")
-        dict_colonnes["non_ventile"] = "col%d" % (len(liste_colonnes)-1)
+        if not type_prestations:
+            liste_colonnes.append("Non ventilé")
+            dict_colonnes["non_ventile"] = "col%d" % (len(liste_colonnes)-1)
         liste_colonnes.append("Total")
         dict_colonnes["total"] = "col%d" % (len(liste_colonnes)-1)
 
         # Création des lignes
-        id_regroupement = 10000
+        id_regroupement, id_detail = 10000, 1
         for depot in depots:
 
             # Ligne du dépôt
-            nom_depot = depot.nom
-            detail_nom = []
-            if parametres["afficher_date_depot"]:
-                detail_nom.append(depot.date.strftime("%d/%m/%Y"))
-            if parametres["afficher_montant_depot"]:
-                detail_nom.append(str(depot.montant or 0.0))
-            if parametres["afficher_code_compta"] and depot.code_compta:
-                detail_nom.append(depot.code_compta)
-            if detail_nom:
-                nom_depot += " (%s)" % " - ".join(detail_nom)
+            if depot:
+                nom_depot = depot.nom
+                detail_nom = []
+                if parametres["afficher_date_depot"]:
+                    detail_nom.append(depot.date.strftime("%d/%m/%Y"))
+                if parametres["afficher_montant_depot"]:
+                    detail_nom.append(str(depot.montant or 0.0))
+                if parametres["afficher_code_compta"] and depot.code_compta:
+                    detail_nom.append(depot.code_compta)
+                if detail_nom:
+                    nom_depot += " (%s)" % " - ".join(detail_nom)
+            else:
+                nom_depot = "----- %d règlement%s non déposé%s -----" % (nbre_reglements_non_deposes, "s" if nbre_reglements_non_deposes > 1 else "", "s" if nbre_reglements_non_deposes > 1 else "")
             ligne_regroupement = {"id": id_regroupement, "pid": 0, "col0": nom_depot, "regroupement": parametres["afficher_detail"]}
 
             # Colonnes de la ligne
@@ -102,12 +136,17 @@ class View(CustomView, TemplateView):
                 for ventilation in dict_ventilations_depot.get(depot, []):
                     if nom_colonne == Get_nom_colonne(ventilation.prestation.date):
                         montant += ventilation.montant
-                ligne_regroupement[code_colonne] = float(montant)
+                if montant:
+                    ligne_regroupement[code_colonne] = float(montant)
                 total_ligne += montant
 
-            montant_non_ventile = float((depot.montant or decimal.Decimal(0.0)) - total_ligne)
-            ligne_regroupement[dict_colonnes["non_ventile"]] = montant_non_ventile
-            ligne_regroupement[dict_colonnes["total"]] = float(depot.montant or 0.0)
+            montant_non_ventile = 0.0
+            if type_prestations:
+                ligne_regroupement[dict_colonnes["total"]] = float(total_ligne)
+            else:
+                montant_non_ventile = float((depot.montant or decimal.Decimal(0.0)) - total_ligne)
+                ligne_regroupement[dict_colonnes["non_ventile"]] = montant_non_ventile
+                ligne_regroupement[dict_colonnes["total"]] = float(depot.montant or 0.0)
             liste_lignes.append(ligne_regroupement)
 
             if parametres["afficher_detail"]:
@@ -121,8 +160,8 @@ class View(CustomView, TemplateView):
                 liste_prestations.sort()
 
                 for nom_prestation in liste_prestations:
-                    id_detail = "detail_%s" % 0
-                    ligne = {"id": id_detail, "pid": id_regroupement, "col0": nom_prestation, "regroupement": False}
+                    ligne = {"id": "detail_%d" % id_detail, "pid": id_regroupement, "col0": nom_prestation, "regroupement": False}
+                    id_detail += 1
 
                     # Colonnes de la ligne
                     total_ligne = decimal.Decimal(0)
@@ -139,7 +178,8 @@ class View(CustomView, TemplateView):
 
                 # Ajouter une ligne non ventilé
                 if montant_non_ventile:
-                    ligne = {"id": "detail_%s" % 0, "pid": id_regroupement, "col0": "Non ventilé", "regroupement": False, dict_colonnes["non_ventile"]: montant_non_ventile, dict_colonnes["total"]: montant_non_ventile}
+                    ligne = {"id": "detail_%d" % id_detail, "pid": id_regroupement, "col0": "Non ventilé", "regroupement": False, dict_colonnes["non_ventile"]: montant_non_ventile, dict_colonnes["total"]: montant_non_ventile}
+                    id_detail += 1
                     liste_lignes.append(ligne)
 
             id_regroupement += 1
