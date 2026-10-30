@@ -6,56 +6,68 @@
 import logging, decimal
 logger = logging.getLogger(__name__)
 logging.getLogger("PIL").setLevel(logging.WARNING)
-from django.db.models import Q
+from django.db.models import Q, Count
 from reportlab.platypus import Spacer, Paragraph, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
-from core.models import Prestation, Activite
+from core.models import Prestation, Activite, Famille
 from core.utils import utils_impression, utils_texte, utils_polices
 
 
 class Impression(utils_impression.Impression):
     def Draw(self):
+        detail_prix_unitaire = self.dict_donnees["detail_prix_unitaire"]
+
         # Importation des prestations
-        conditions = Q(date__range=self.dict_donnees["periode"])
+        conditions = Q(date__range=self.dict_donnees["periode"], famille__isnull=False)
 
         if self.dict_donnees["activites"]["type"] == "groupes_activites":
-            liste_activites = [activite.pk for activite in Activite.objects.filter(groupes_activites__in=self.dict_donnees["activites"]["ids"])]
+            liste_activites = list(Activite.objects.filter(groupes_activites__in=self.dict_donnees["activites"]["ids"]).values_list("pk", flat=True))
         else:
             liste_activites = self.dict_donnees["activites"]["ids"]
         conditions &= Q(activite_id__in=liste_activites)
 
-        prestations = Prestation.objects.select_related("famille", "activite", "individu", "facture").filter(conditions).order_by("individu__prenom")
+        # Optimisation : pré-regroupement des prestations identiques directement dans la base de données.
+        # Seuls les champs utiles sont lus (aucun champ chiffré n'est chargé, donc aucun déchiffrement ici).
+        prestations = Prestation.objects.filter(conditions).order_by().values(
+            "famille_id", "individu_id", "individu__prenom", "individu__nom", "label", "montant", "quantite"
+        ).annotate(nbre=Count("pk"))
 
-        # Regroupement des prestations par famille et application filtre ville
-        dict_prestations = {}
-        for prestation in prestations:
-            if not self.dict_donnees["filtre_villes"] or (self.dict_donnees["filtre_villes"] == "SELECTION" and prestation.famille.ville_resid and prestation.famille.ville_resid.upper() in self.dict_donnees["villes"]):
-                dict_prestations.setdefault(prestation.famille, [])
-                dict_prestations[prestation.famille].append(prestation)
+        # Chargement des familles concernées : une seule fois par famille et uniquement les champs nécessaires
+        familles = Famille.objects.filter(pk__in=Prestation.objects.filter(conditions).values("famille_id")).only("nom", "rue_resid", "cp_resid", "ville_resid")
+
+        # Application du filtre sur les villes
+        filtre_villes = self.dict_donnees["filtre_villes"]
+        villes = set(self.dict_donnees["villes"] or [])
+        dict_familles = {}
+        for famille in familles:
+            if not filtre_villes or (filtre_villes == "SELECTION" and famille.ville_resid and famille.ville_resid.upper() in villes):
+                dict_familles[famille.pk] = famille
 
         # Préparation du détail
+        dict_temp = {}
+        for prestation in prestations:
+            famille = dict_familles.get(prestation["famille_id"])
+            if not famille:
+                continue
+            quantite = prestation["quantite"] or 0
+            montant = prestation["montant"] or decimal.Decimal(0)
+            prix_unitaire = (montant / quantite) if detail_prix_unitaire else 0
+            if prestation["individu_id"]:
+                libelle = "%s - %s" % (prestation["individu__prenom"] or prestation["individu__nom"], prestation["label"])
+            else:
+                libelle = prestation["label"]
+            dict_prestations_temp = dict_temp.setdefault(famille, {})
+            dict_prestation = dict_prestations_temp.setdefault((libelle, prix_unitaire), {"quantite": 0, "montant": decimal.Decimal(0), "label": prestation["label"], "individus": {}})
+            dict_prestation["quantite"] += quantite * prestation["nbre"]
+            dict_prestation["montant"] += montant * prestation["nbre"]
+            if prestation["individu_id"]:
+                dict_prestation["individus"][prestation["individu_id"]] = True
+
         dict_prestations_famille = {}
-        for famille in dict_prestations.keys():
-            dict_prestations_famille.setdefault(famille, [])
-
-            dict_prestations_temp = {}
-            for prestation in dict_prestations.get(famille, []):
-                prix_unitaire = (prestation.montant / prestation.quantite) if self.dict_donnees["detail_prix_unitaire"] else 0
-                if prestation.individu:
-                    libelle = "%s - %s" % (prestation.individu.prenom or prestation.individu.nom, prestation.label)
-                else:
-                    libelle = prestation.label
-                key = (libelle, prix_unitaire)
-                dict_prestations_temp.setdefault(key, {"quantite": 0, "montant": decimal.Decimal(0), "label": prestation.label, "individus": {}})
-                dict_prestations_temp[key]["quantite"] += prestation.quantite
-                dict_prestations_temp[key]["montant"] += prestation.montant
-                if prestation.individu:
-                    dict_prestations_temp[key]["individus"][prestation.individu] = True
-
-            keys = list(dict_prestations_temp.keys())
-            keys.sort()
-            for key in keys:
+        for famille, dict_prestations_temp in dict_temp.items():
+            dict_prestations_famille[famille] = []
+            for key in sorted(dict_prestations_temp.keys()):
                 dict_prestation = dict_prestations_temp[key]
                 dict_prestation.update({"libelle": key[0], "prix": key[1]})
                 dict_prestations_famille[famille].append(dict_prestation)
@@ -76,7 +88,7 @@ class Impression(utils_impression.Impression):
         if self.dict_donnees["detail_prix_unitaire"]:
             dataTableau[0].insert(4, "Prix")
 
-        keys = sorted(list(dict_prestations_famille.keys()), key=lambda x: x.nom)
+        keys = sorted(dict_prestations_famille.keys(), key=lambda x: (x.nom or "", x.pk))
         for famille in keys:
 
             ligne = []

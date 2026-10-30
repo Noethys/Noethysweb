@@ -32,8 +32,9 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.field_class = 'col-md-10'
 
         # Villes
-        villes = list({famille.ville_resid.upper(): True for famille in Famille.objects.all() if famille.ville_resid}.keys())
-        self.fields["villes"].choices = sorted([(ville, ville) for ville in villes if ville])
+        # Optimisation : lecture du seul champ ville (un seul déchiffrement par famille au lieu de tous les champs chiffrés)
+        villes = {ville.upper() for ville in Famille.objects.exclude(ville_resid__isnull=True).values_list("ville_resid", flat=True).iterator() if ville}
+        self.fields["villes"].choices = sorted([(ville, ville) for ville in villes])
 
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'facturation_toc' %}", enregistrer=False, ajouter=False,

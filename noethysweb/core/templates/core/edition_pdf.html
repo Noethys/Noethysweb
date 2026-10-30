@@ -23,9 +23,25 @@
 
         // Générer le PDF
         function generer_pdf() {
+            // Si la réponse arrive pendant l'animation d'ouverture de la boîte d'attente, Bootstrap ignore
+            // le modal("hide") et la boîte reste bloquée : on attend donc qu'elle soit entièrement affichée
+            // avant de la fermer, puis qu'elle soit fermée avant d'afficher le PDF ou l'erreur.
+            var box_affichee = false;
+            var action_en_attente = null;
+            function fermer_box(action) {
+                action_en_attente = function() {
+                    box.one("hidden.bs.modal", action);
+                    box.modal("hide");
+                };
+                if (box_affichee) {action_en_attente()};
+            };
             var box = bootbox.dialog({
                     message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Génération du PDF en cours</b><br><br>Veuillez patienter...</p>",
-                    closeButton: false
+                    closeButton: false,
+                    onShown: function() {
+                        box_affichee = true;
+                        if (action_en_attente) {action_en_attente()};
+                    }
                 });
             $.ajax({
                 type: "POST",
@@ -33,12 +49,12 @@
                 data: $("#{{ id_form|default:'form_parametres' }}").serialize(),
                 datatype: "json",
                 success: function(data){
-                    box.modal("hide");
-                    charge_pdf(data);
+                    fermer_box(function() {charge_pdf(data)});
                 },
                 error: function(data) {
-                    box.modal("hide");
-                    toastr.error(data.responseJSON.erreur);
+                    fermer_box(function() {
+                        toastr.error(data.responseJSON ? data.responseJSON.erreur : "Erreur lors de la génération du PDF");
+                    });
                 }
             })
         };

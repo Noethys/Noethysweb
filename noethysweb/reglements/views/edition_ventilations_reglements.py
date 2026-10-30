@@ -3,7 +3,6 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import time
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 from core.views.base import CustomView
@@ -12,8 +11,6 @@ from reglements.forms.edition_ventilations_reglements import Formulaire
 
 
 def Generer_pdf(request):
-    time.sleep(1)
-
     # Récupération des options
     form = Formulaire(request.POST, request=request)
     if not form.is_valid():
