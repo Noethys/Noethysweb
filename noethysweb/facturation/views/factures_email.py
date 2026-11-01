@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.db.models import Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
+from facturation.utils import utils_panneau_impression
 from core.utils import utils_preferences
 from core.models import MessageFacture, Mail, DocumentJoint, Facture, Destinataire, ModeleEmail, ModeleImpression, Individu
 from facturation.forms.factures_options_impression import Formulaire as Form_parametres
@@ -132,7 +133,7 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context['page_titre'] = "Gestion des factures"
         context['box_titre'] = "Envoyer des factures par Email"
-        context['box_introduction'] = "Cochez des factures, ajustez si besoin les options d'impression puis cliquez sur le bouton Transférer."
+        context['box_introduction'] = "Cochez les factures à envoyer, vérifiez les réglages dans le panneau Envoi par email puis cliquez sur Transférer pour les préparer dans l'éditeur d'emails."
         context['onglet_actif'] = "factures_email"
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
@@ -143,6 +144,7 @@ class Liste(Page, crud.Liste):
         context['form_parametres'] = Form_parametres(request=self.request)
         context["messages"] = MessageFacture.objects.all().order_by("titre")
         context['afficher_menu_brothers'] = True
+        context['panneau'] = utils_panneau_impression.Get_contexte(titre="Envoi par email", categorie="facture", singulier="facture", pluriel="factures", colonnes_resume=[{"nom": "total", "label": "Total"}, {"nom": "solde", "label": "Solde"}], avec_messages=True, bouton_label="Transférer", bouton_icone="fa-envelope-o", bouton_onclick="on_bouton_valider()", bouton_title="Transférer les factures cochées vers l'éditeur d'emails")
         context['totaux'] = json.dumps(["total", "solde", "solde_actuel"])
         return context
 

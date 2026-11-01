@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.http import JsonResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
+from facturation.utils import utils_panneau_impression
 from core.models import AttestationFiscale, ModeleImpression
 from core.utils import utils_texte
 from facturation.forms.attestations_fiscales_options_impression import Formulaire as Form_parametres
@@ -71,7 +72,7 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context['page_titre'] = "Gestion des attestations fiscales"
         context['box_titre'] = "Imprimer des attestations fiscales"
-        context['box_introduction'] = "Cochez des attestations fiscales, ajustez si besoin les options d'impression puis cliquez sur le bouton Aperçu."
+        context['box_introduction'] = "Cochez les attestations fiscales à imprimer, vérifiez les réglages dans le panneau Impression puis cliquez sur Aperçu PDF."
         context['onglet_actif'] = "attestations_fiscales_impression"
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
@@ -82,6 +83,7 @@ class Liste(Page, crud.Liste):
         context['form_modele_impression'] = Form_modele_impression(categorie="attestation_fiscale")
         context['form_parametres'] = Form_parametres(request=self.request)
         context['afficher_menu_brothers'] = True
+        context['panneau'] = utils_panneau_impression.Get_contexte(categorie="attestation_fiscale", singulier="attestation fiscale", pluriel="attestations fiscales", colonnes_resume=[{"nom": "total", "label": "Total"}], bouton_title="Aperçu PDF des attestations fiscales cochées", annuler_label="Fermer")
         return context
 
     class datatable_class(MyDatatable):

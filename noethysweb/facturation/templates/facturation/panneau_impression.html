@@ -1,0 +1,194 @@
+{% load crispy_forms_tags %}
+{% load static %}
+
+<style>
+        /* Panneau d'impression fixe à gauche de la liste (factures, rappels, attestations fiscales) */
+        .panneau-impression { position: sticky; top: 70px; }
+        .panneau-impression .card-body { max-height: calc(100vh - 140px); overflow-y: auto; padding: 0; }
+        .panneau-impression .resume-selection { padding: 12px 14px; background: #f4f6f9; border-bottom: 1px solid #dee2e6; }
+        .panneau-impression .resume-selection strong { font-size: 1.1rem; }
+        .panneau-impression .bloc-modeles { padding: 4px 14px 2px; }
+        .panneau-impression .bloc-modeles legend { display: none; }
+        .panneau-impression .bloc-modeles .form-group { margin-bottom: 10px; }
+        .panneau-impression .note-modele { margin: 0 14px 12px; padding: 8px 10px; font-size: .9rem; background: #eef5fb; border-left: 3px solid #3c8dbc; }
+        .panneau-impression .section-titre {
+            display: flex; width: 100%; align-items: center; justify-content: space-between; padding: 9px 14px;
+            border: 0; border-top: 1px solid #dee2e6; background: #fff; text-align: left; font-weight: 600; color: #343a40;
+        }
+        .panneau-impression .section-titre:hover, .panneau-impression .section-titre:focus { background: #f4f6f9; outline: none; }
+        .panneau-impression .section-titre .fa-chevron-right { transition: transform .15s; color: #6c757d; }
+        .panneau-impression .section-titre[aria-expanded="true"] .fa-chevron-right { transform: rotate(90deg); }
+        .panneau-impression .section-contenu { padding: 6px 14px 4px; }
+        .panneau-impression fieldset.section-contenu > legend { display: none; }
+        .liste-panneau-impression .dataTables_wrapper { overflow-x: auto; }
+        .panneau-impression .section-contenu .form-group { margin-bottom: 8px; }
+        .panneau-impression .boutons-action { display: flex; gap: 6px; padding: 12px 14px; border-bottom: 1px solid #dee2e6; position: sticky; top: 0; background: #fff; z-index: 2; }
+        .panneau-impression .boutons-action .btn { white-space: nowrap; }
+        .panneau-impression .boutons-action .btn-primary { flex: 1; }
+        .panneau-impression .todo-list > li { padding: 6px 8px; }
+        @media (max-width: 991px) { .panneau-impression { position: static; } .panneau-impression .card-body { max-height: none; } }
+    </style>
+
+<div class="card card-outline card-lightblue panneau-impression" id="panneau_impression">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fa {% if panneau.bouton_icone == 'fa-file-pdf-o' %}fa-print{% else %}fa-envelope-o{% endif %} margin-r-5"></i>{{ panneau.titre }}</h3>
+    </div>
+
+    <div class="card-body">
+
+        {# Boutons d'action #}
+        <div class="boutons-action">
+            <button type="button" class="btn btn-primary" id="bouton_action_panneau" onclick="{{ panneau.bouton_onclick }}" title="{{ panneau.bouton_title }}" disabled>
+                <i class="fa {{ panneau.bouton_icone }} margin-r-5"></i>{{ panneau.bouton_label }}
+            </button>
+            <a class="btn btn-danger" href="{% url 'facturation_toc' %}" title="{{ panneau.annuler_label }}"><i class="fa fa-ban margin-r-5"></i>{{ panneau.annuler_label }}</a>
+        </div>
+
+        {# Résumé de la sélection #}
+        <div class="resume-selection" aria-live="polite">
+            <strong id="resume_nbre">Aucune {{ panneau.singulier }} cochée</strong>
+            <div class="text-muted small" id="resume_montants">Cochez les {{ panneau.pluriel }} dans la liste.</div>
+        </div>
+
+        {# Modèle d'impression et modèle de document #}
+        <div class="bloc-modeles pt-2">
+            {% crispy form_modele_impression %}
+        </div>
+        <div class="note-modele" id="note_modele_impression" style="display: none;">
+            Les réglages enregistrés dans le modèle d'impression seront utilisés<span id="note_modele_document"></span>.
+            <br><a href="#" id="personnaliser_modele_impression">Personnaliser pour cette impression</a>
+        </div>
+        <div class="bloc-modeles" id="bloc_modele_document">
+            {% crispy form_modele_document %}
+        </div>
+
+        {# Options d'impression en sections repliables #}
+        <div id="sections_options">
+            {% crispy form_parametres %}
+        </div>
+
+        {# Messages #}
+        {% if panneau.avec_messages %}
+        <div id="section_messages">
+            <button type="button" class="section-titre" aria-expanded="false" aria-controls="contenu_messages">
+                <span>Messages <span class="badge badge-info">{{ messages|length }}</span></span><i class="fa fa-chevron-right"></i>
+            </button>
+            <div class="section-contenu" id="contenu_messages" style="display: none;">
+                <p class="small mb-2">
+                    {% if messages|length == 0 %}Aucun message ne sera inséré dans les factures.{% endif %}
+                    {% if messages|length == 1 %}Le message suivant sera inséré dans toutes les factures :{% endif %}
+                    {% if messages|length > 1 %}Les {{ messages|length }} messages suivants seront intégrés dans toutes les factures :{% endif %}
+                </p>
+                <ul class="todo-list mb-2">
+                    {% for message in messages %}
+                        <li>
+                            <div class="tools pull-right">
+                                <a class="btn btn-default btn-xs" title="Modifier" href="{% url 'messages_factures_modifier' pk=message.pk %}?next={{ request.path|urlencode }}"><i class="fa fa-pencil"></i></a>
+                                <a class="btn btn-default btn-xs" title="Supprimer" href="{% url 'messages_factures_supprimer' pk=message.pk %}?next={{ request.path|urlencode }}"><i class="fa fa-trash-o"></i></a>
+                            </div>
+                            <span class="text small">{{ message.titre }} : {{ message.texte }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <a class="btn btn-success btn-xs mb-2" title="Ajouter un message" href="{% url 'messages_factures_ajouter' %}?next={{ request.path|urlencode }}"><i class="fa fa-plus"></i> Ajouter un message</a>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+</div>
+
+<script>
+    var modeles_impression = JSON.parse('{{ panneau.modeles_impression_json|escapejs }}');
+    var colonnes_resume = JSON.parse('{{ panneau.colonnes_resume|escapejs }}');
+
+    // Transforme les rubriques du formulaire d'options en sections repliables
+    function panneau_creer_sections() {
+        var formulaire = $("#options_impression_form");
+        formulaire.children("fieldset").each(function(index) {
+            var fieldset = $(this);
+            var titre = $.trim(fieldset.children("legend").text());
+            if (titre === "Mémorisation") {
+                // La mémorisation des paramètres reste visible, en fin de panneau
+                fieldset.addClass("section-contenu pt-2 border-top").appendTo(formulaire);
+                return;
+            }
+            var id_contenu = "section_options_" + index;
+            var bouton = $("<button type='button' class='section-titre' aria-expanded='false'></button>")
+                .attr("aria-controls", id_contenu)
+                .append($("<span>").text(titre))
+                .append("<i class='fa fa-chevron-right'></i>");
+            fieldset.addClass("section-contenu").attr("id", id_contenu).hide().before(bouton);
+        });
+    }
+
+    $(document).on("click", "#panneau_impression .section-titre", function() {
+        var ouvert = $(this).attr("aria-expanded") === "true";
+        $(this).attr("aria-expanded", ouvert ? "false" : "true");
+        $("#" + $(this).attr("aria-controls")).slideToggle(150);
+    });
+
+    // Résumé de la sélection
+    function panneau_maj_resume() {
+        var table = new $.fn.dataTable.Api(".datatable");
+        var lignes = table.rows({selected: true}).data().toArray();
+        var nbre = lignes.length;
+        var symbole = "{{ panneau.symbole_monnaie }}";
+        if (nbre === 0) {
+            $("#resume_nbre").text("Aucune {{ panneau.singulier|escapejs }} cochée");
+            $("#resume_montants").text("Cochez les {{ panneau.pluriel|escapejs }} dans la liste.");
+        } else {
+            $("#resume_nbre").text(nbre + " " + (nbre > 1 ? "{{ panneau.pluriel|escapejs }} cochées" : "{{ panneau.singulier|escapejs }} cochée"));
+            // Montants : colonnes repérées par leur nom (indépendant de l'ordre et de l'affichage des colonnes)
+            var montants = [];
+            $.each(colonnes_resume, function(index, colonne) {
+                var index_colonne = table.column(colonne.nom + ":name").index();
+                if (index_colonne === undefined) { return; }
+                var somme = 0;
+                $.each(lignes, function(i, valeurs) { somme += parseFloat($("<div>").html(valeurs[index_colonne]).text()) || 0; });
+                montants.push(colonne.label + " " + somme.toFixed(2) + " " + symbole);
+            });
+            $("#resume_montants").text(montants.join(" · "));
+        }
+        $("#bouton_action_panneau").prop("disabled", nbre === 0);
+    }
+
+    // Affichage selon le modèle d'impression choisi
+    function panneau_maj_modele_impression() {
+        var idmodele = $("#id_modele_impression").val();
+        var modele = modeles_impression[idmodele];
+        if (idmodele && idmodele !== "0" && modele) {
+            $("#note_modele_document").text(modele.modele_document ? " (modèle de document : " + modele.modele_document + ")" : "");
+            $("#note_modele_impression").show();
+            $("#bloc_modele_document, #sections_options").hide();
+        } else {
+            $("#note_modele_impression").hide();
+            $("#bloc_modele_document, #sections_options").show();
+        }
+    }
+
+    // Reprend les réglages du modèle d'impression pour les ajuster ponctuellement
+    $(document).on("click", "#personnaliser_modele_impression", function(e) {
+        e.preventDefault();
+        var modele = modeles_impression[$("#id_modele_impression").val()];
+        if (!modele) { return; }
+        $.each(modele.options || {}, function(nom, valeur) {
+            var champ = $("#options_impression_form [name='" + nom + "']");
+            if (!champ.length) { return; }
+            if (champ.is(":checkbox")) { champ.prop("checked", !!valeur); }
+            else { champ.val(valeur).trigger("change"); }
+        });
+        if (modele.idmodele_document) { $("#choix_modele_form [name='modele']").val(String(modele.idmodele_document)).trigger("change"); }
+        $("#id_modele_impression").val("0").trigger("change");
+        toastr.info("Les réglages du modèle d'impression ont été repris : vous pouvez les ajuster.");
+    });
+
+    $(function() {
+        panneau_creer_sections();
+        $("#id_modele_impression").on("change", panneau_maj_modele_impression);
+        panneau_maj_modele_impression();
+        $(".datatable").on("select.dt deselect.dt draw.dt", panneau_maj_resume);
+        panneau_maj_resume();
+    });
+</script>

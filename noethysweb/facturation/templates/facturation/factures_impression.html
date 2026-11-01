@@ -1,45 +1,6 @@
-{% extends "core/box_in_page.html" %}
-{% load crispy_forms_tags %}
-{% load static %}
-{% load embed %}
+{% extends "facturation/base_panneau_impression.html" %}
 
-
-{% block scripts %}
-    {{ block.super }}
-    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
-{% endblock scripts %}
-
-{% block contenu_page %}
-    <div class="row">
-
-        <div class="col-md-12 col-sm-12 col-xs-12">
-            {% embed 'core/box.html' %}
-                {% block box_titre %}{{ box_titre }}{% endblock %}
-                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
-                {% block box_contenu %}
-
-                    {# Boutons de commandes #}
-                    <div class="buttonHolder">
-                        <button class="btn btn-primary" onclick="impression_pdf()" title="Aperçu PDF de la facture"><i class='fa fa-file-pdf-o margin-r-5'></i>Aperçu PDF</button>
-                        <a class="btn btn-danger" href="{% url 'facturation_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
-                    </div>
-
-                    {# Liste des factures générées #}
-                    {% embed 'core/crud/liste.html' %}
-                    {% endembed %}
-
-                    {# Options d'impression #}
-                    {% embed 'facturation/options_impression_factures.html' %}
-                    {% endembed %}
-
-                {% endblock box_contenu %}
-                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
-            {% endembed %}
-        </div>
-
-        {# Insertion des modals #}
-        {% include 'core/modal_pdf.html' %}
-
+{% block scripts_page %}
         <script>
 
             // Impression du PDF
@@ -65,8 +26,4 @@
             };
 
         </script>
-
-    </div>
-
-{% endblock contenu_page %}
-
+{% endblock scripts_page %}

@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
+from facturation.utils import utils_panneau_impression
 from core.utils import utils_texte
 from core.models import Mail, DocumentJoint, Rappel, Facture, Destinataire, ModeleEmail, ModeleImpression, ModeleDocument
 from facturation.forms.rappels_options_impression import Formulaire as Form_parametres
@@ -146,7 +147,7 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context['page_titre'] = "Gestion des lettres de rappel"
         context['box_titre'] = "Envoyer des lettres de rappel par Email"
-        context['box_introduction'] = "Cochez des lettres de rappel, ajustez si besoin les options d'impression puis cliquez sur le bouton Transférer."
+        context['box_introduction'] = "Cochez les lettres de rappel à envoyer, vérifiez les réglages dans le panneau Envoi par email puis cliquez sur Transférer pour les préparer dans l'éditeur d'emails."
         context['onglet_actif'] = "rappels_email"
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
@@ -157,6 +158,7 @@ class Liste(Page, crud.Liste):
         context['form_modele_impression'] = Form_modele_impression(categorie="rappel")
         context['form_parametres'] = Form_parametres(request=self.request)
         context['afficher_menu_brothers'] = True
+        context['panneau'] = utils_panneau_impression.Get_contexte(titre="Envoi par email", categorie="rappel", singulier="lettre de rappel", pluriel="lettres de rappel", colonnes_resume=[{"nom": "solde", "label": "Solde"}], bouton_label="Transférer", bouton_icone="fa-envelope-o", bouton_onclick="on_bouton_valider()", bouton_title="Transférer les lettres de rappel cochées vers l'éditeur d'emails")
         return context
 
     class datatable_class(MyDatatable):

@@ -1,0 +1,40 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{# Disposition commune : panneau d'impression à gauche, liste à droite #}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+    <div class="row">
+
+        {# Panneau d'impression (à gauche) #}
+        <div class="col-xl-3 col-lg-4 col-md-12">
+            {% include 'facturation/panneau_impression.html' %}
+        </div>
+
+        {# Liste (à droite) #}
+        <div class="col-xl-9 col-lg-8 col-md-12 liste-panneau-impression">
+            {% embed 'core/box.html' %}
+                {% block box_titre %}{{ box_titre }}{% endblock %}
+                {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+                {% block box_contenu %}
+                    {% embed 'core/crud/liste.html' %}
+                    {% endembed %}
+                {% endblock box_contenu %}
+                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+            {% endembed %}
+        </div>
+
+        {# Insertion des modals #}
+        {% include 'core/modal_pdf.html' %}
+
+        {% block scripts_page %}{% endblock scripts_page %}
+
+    </div>
+{% endblock contenu_page %}

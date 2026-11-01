@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
+from facturation.utils import utils_panneau_impression
 from core.utils import utils_texte
 from core.models import Mail, DocumentJoint, AttestationFiscale, Destinataire, ModeleEmail, ModeleImpression
 from facturation.forms.attestations_fiscales_options_impression import Formulaire as Form_parametres
@@ -93,8 +94,8 @@ def Impression_pdf(request):
 
 class Page(crud.Page):
     model = AttestationFiscale
-    url_liste = "attestations_fiscales_impression"
-    menu_code = "attestations_fiscales_impression"
+    url_liste = "attestations_fiscales_email"
+    menu_code = "attestations_fiscales_email"
 
 
 class Liste(Page, crud.Liste):
@@ -108,7 +109,7 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context['page_titre'] = "Gestion des attestations fiscales"
         context['box_titre'] = "Envoyer des attestations fiscales par Email"
-        context['box_introduction'] = "Cochez des attestations fiscales, ajustez si besoin les options d'impression puis cliquez sur le bouton Transférer."
+        context['box_introduction'] = "Cochez les attestations fiscales à envoyer, vérifiez les réglages dans le panneau Envoi par email puis cliquez sur Transférer pour les préparer dans l'éditeur d'emails."
         context['onglet_actif'] = "attestations_fiscales_email"
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
@@ -119,6 +120,7 @@ class Liste(Page, crud.Liste):
         context['form_modele_impression'] = Form_modele_impression(categorie="attestation_fiscale")
         context['form_parametres'] = Form_parametres(request=self.request)
         context['afficher_menu_brothers'] = True
+        context['panneau'] = utils_panneau_impression.Get_contexte(titre="Envoi par email", categorie="attestation_fiscale", singulier="attestation fiscale", pluriel="attestations fiscales", colonnes_resume=[{"nom": "total", "label": "Total"}], bouton_label="Transférer", bouton_icone="fa-envelope-o", bouton_onclick="on_bouton_valider()", bouton_title="Transférer les attestations fiscales cochées vers l'éditeur d'emails", annuler_label="Fermer")
         return context
 
     class datatable_class(MyDatatable):
