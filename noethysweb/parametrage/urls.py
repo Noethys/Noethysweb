@@ -707,6 +707,7 @@ urlpatterns = [
     path('parametrage/traitement_lot_ouvertures', secure_ajax(activites_ouvertures.Traitement_lot_ouvertures), name='ajax_traitement_lot_ouvertures'),
     path('parametrage/valider_calendrier_ouvertures', secure_ajax(activites_ouvertures.Valider_calendrier_ouvertures), name='ajax_valider_calendrier_ouvertures'),
     path('parametrage/get_fond_modele', secure_ajax(modeles_documents.Get_fond_modele), name='ajax_get_fond_modele'),
+    path('parametrage/modeles_documents/get_apercus', secure_ajax(modeles_documents.Get_apercus), name='ajax_modeles_documents_get_apercus'),
     path('parametrage/export_svg', secure_ajax(modeles_documents.Export_svg), name='ajax_export_svg'),
     path('parametrage/modeles_documents/import_export/executer', secure_ajax(modeles_documents_import_export.Executer), name='ajax_modeles_documents_import_export_executer'),
     path('parametrage/questions/deplacer_lignes', secure_ajax(questionnaires.Deplacer.as_view()), name='ajax_deplacer_lignes_questionnaires'),

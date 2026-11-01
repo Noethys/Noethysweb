@@ -1,0 +1,213 @@
+{% extends "core/crud/liste_avec_categorie.html" %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        /* Miniatures des modèles dans la liste */
+        .apercu-modele {
+            display: block; width: 62px; height: 88px; padding: 0; margin: 0 auto;
+            border: 1px solid #ced4da; background: #f4f6f9; cursor: zoom-in; overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .15);
+        }
+        .apercu-modele:hover, .apercu-modele:focus { border-color: #3c8dbc; box-shadow: 0 0 0 2px rgba(60, 141, 188, .35); outline: none; }
+        .apercu-modele canvas { display: block; }
+        #modal_apercu_modele .zone-apercu { background: #6c757d; padding: 16px; display: flex; justify-content: center; overflow: auto; }
+        #modal_apercu_modele .zone-apercu canvas { box-shadow: 0 2px 10px rgba(0, 0, 0, .4); }
+        #modal_apercu_modele .barre-apercu { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    </style>
+{% endblock styles %}
+
+{% block contenu_page %}
+    {{ block.super }}
+
+    {# Fenêtre d'agrandissement de l'aperçu #}
+    <div class="modal fade" id="modal_apercu_modele" tabindex="-1" role="dialog" aria-labelledby="titre_apercu_modele" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="titre_apercu_modele">Aperçu du modèle</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="barre-apercu p-2 border-bottom">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Affichage des champs">
+                            <button type="button" class="btn btn-primary" data-mode="exemple">Données d'exemple</button>
+                            <button type="button" class="btn btn-default" data-mode="brut">Champs bruts</button>
+                        </div>
+                        <span class="ml-auto"></span>
+                        <button type="button" class="btn btn-default btn-sm" id="apercu_precedent"><i class="fa fa-chevron-left margin-r-5"></i>Précédent</button>
+                        <button type="button" class="btn btn-default btn-sm" id="apercu_suivant">Suivant<i class="fa fa-chevron-right" style="margin-left: 5px;"></i></button>
+                    </div>
+                    <div class="zone-apercu"><canvas id="canvas_apercu_modele"></canvas></div>
+                    <p class="small text-muted px-3 pt-2 mb-0">Les zones jaunes indiquent les emplacements spéciaux (cadre principal, coupon-réponse...) : leur contenu est ajouté au moment de l'impression.</p>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-primary" id="apercu_modifier" href="#"><i class="fa fa-pencil margin-r-5"></i>Modifier ce modèle</a>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static 'lib/fabric/fabric.min.js' %}" type="text/javascript"></script>
+    <script>
+        var apercus_donnees = {modeles: {}, exemples: {}, url_logo: ""};
+        var apercu_courant = null;
+        var apercu_mode = "exemple";
+
+        // Remplace les champs et résout les formules conditionnelles simples avec les valeurs d'exemple
+        function apercu_remplacer_champs(texte, exemples) {
+            texte = texte.replace(/\[\[([\s\S]*?)\]\]/g, function(formule, contenu) {
+                var resultat = /^SI\s*(\{[^}]+\})\s*(<>|=)([\s\S]*?)->([\s\S]*)$/.exec(contenu.trim());
+                if (!resultat) { return ""; }
+                var valeur = exemples[resultat[1]] || "";
+                var condition = resultat[2] === "<>" ? valeur !== resultat[3] : resultat[3].split(" OU ").indexOf(valeur) !== -1;
+                return condition ? resultat[4] : "";
+            });
+            return texte.replace(/\{[A-Za-z0-9_-]+\}/g, function(champ) {
+                return exemples[champ] !== undefined ? exemples[champ] : "";
+            });
+        }
+
+        // Prépare les objets d'un modèle pour l'affichage
+        function apercu_preparer_objets(modele, mode, miniature) {
+            var exemples = apercus_donnees.exemples[modele.categorie] || {};
+            var objets = JSON.parse(JSON.stringify(modele.objets_fond.concat(modele.objets)));
+            var resultat = [];
+            objets.forEach(function(objet) {
+                objet.selectable = false;
+                if (objet.categorie === "logo") {
+                    if (apercus_donnees.url_logo) {
+                        var hauteur = (objet.height || 0) * (objet.scaleY || 1);
+                        objet.hauteur_cible = hauteur;
+                        objet.src = apercus_donnees.url_logo;
+                        // Dimensions naturelles du logo réel (évite le rognage)
+                        delete objet.width;
+                        delete objet.height;
+                        objet.cropX = 0;
+                        objet.cropY = 0;
+                    } else if (!objet.src) {
+                        return;
+                    }
+                }
+                if (objet.categorie && objet.categorie.indexOf("texte") !== -1 && mode === "exemple" && objet.text) {
+                    objet.text = apercu_remplacer_champs(objet.text, exemples);
+                }
+                if (objet.categorie === "special") {
+                    // Zones spéciales : discrètes dans les miniatures, signalées dans l'aperçu agrandi
+                    objet.fill = miniature ? "rgba(255, 230, 80, 0.12)" : "rgba(255, 230, 80, 0.35)";
+                    objet.stroke = miniature ? "rgba(0, 0, 0, 0)" : "rgba(200, 160, 0, 0.9)";
+                    objet.strokeWidth = miniature ? 0 : 0.4;
+                    objet.strokeDashArray = miniature ? null : [2, 2];
+                }
+                resultat.push(objet);
+            });
+            return resultat;
+        }
+
+        // Dessine un modèle dans un canvas à la largeur demandée (en pixels)
+        function apercu_dessiner(element_canvas, modele, largeur_px, mode) {
+            var echelle = largeur_px / modele.largeur;
+            var canvas = new fabric.StaticCanvas(element_canvas, {renderOnAddRemove: false, backgroundColor: "white"});
+            canvas.setDimensions({width: Math.round(modele.largeur * echelle), height: Math.round(modele.hauteur * echelle)});
+            canvas.setZoom(echelle);
+            fabric.util.enlivenObjects(apercu_preparer_objets(modele, mode, largeur_px < 200), function(objets) {
+                objets.forEach(function(objet) {
+                    // Le logo garde la hauteur prévue dans le modèle
+                    if (objet.categorie === "logo" && objet.hauteur_cible && objet.getElement && objet.getElement()) {
+                        var element = objet.getElement();
+                        objet.set({width: element.naturalWidth || element.width, height: element.naturalHeight || element.height});
+                        objet.scaleX = objet.scaleY = objet.hauteur_cible / objet.height;
+                    }
+                    canvas.add(objet);
+                    // Libellé des zones spéciales
+                    if (objet.categorie === "special" && largeur_px > 200) {
+                        canvas.add(new fabric.Text(objet.nom || "", {left: objet.left + 2, top: objet.top + 2, fontSize: 3.5, fontFamily: "Arial", fill: "rgba(122, 100, 0, 1)"}));
+                    }
+                });
+                canvas.renderAll();
+            });
+            return canvas;
+        }
+
+        // Charge et dessine les miniatures qui ne le sont pas encore
+        function apercu_charger_miniatures() {
+            var boutons = $(".apercu-modele:not([data-charge])");
+            if (!boutons.length) { return; }
+            var liste_id = [];
+            boutons.each(function() { $(this).attr("data-charge", "1"); liste_id.push($(this).data("idmodele")); });
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_modeles_documents_get_apercus' %}",
+                data: {liste_id: liste_id.join("-"), csrfmiddlewaretoken: "{{ csrf_token }}"},
+                datatype: "json",
+                success: function(data) {
+                    $.extend(apercus_donnees.modeles, data.modeles);
+                    $.extend(apercus_donnees.exemples, data.exemples);
+                    apercus_donnees.url_logo = data.url_logo;
+                    boutons.each(function() {
+                        var modele = apercus_donnees.modeles[$(this).data("idmodele")];
+                        if (!modele) { return; }
+                        var element_canvas = $("<canvas>").appendTo($(this).empty())[0];
+                        apercu_dessiner(element_canvas, modele, 60, "exemple");
+                    });
+                }
+            });
+        }
+
+        // Ouverture de l'aperçu agrandi
+        function apercu_afficher(idmodele) {
+            var modele = apercus_donnees.modeles[idmodele];
+            if (!modele) { return; }
+            apercu_courant = idmodele;
+            $("#titre_apercu_modele").text("Aperçu : " + modele.nom);
+            $("#apercu_modifier").attr("href", modele.url_modifier);
+            var hauteur_dispo = Math.max(window.innerHeight - 260, 300);
+            var largeur_px = Math.min(720, hauteur_dispo * modele.largeur / modele.hauteur);
+            var ancien = $("#canvas_apercu_modele");
+            ancien.parent().empty().append("<canvas id='canvas_apercu_modele'></canvas>");
+            apercu_dessiner(document.getElementById("canvas_apercu_modele"), modele, largeur_px, apercu_mode);
+            var liste = apercu_liste_ids();
+            var index = liste.indexOf(String(idmodele));
+            $("#apercu_precedent").prop("disabled", index <= 0);
+            $("#apercu_suivant").prop("disabled", index === -1 || index >= liste.length - 1);
+        }
+
+        function apercu_liste_ids() {
+            return $(".apercu-modele").map(function() { return String($(this).data("idmodele")); }).get();
+        }
+
+        $(document).on("click", ".apercu-modele", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            apercu_afficher($(this).data("idmodele"));
+            $("#modal_apercu_modele").modal("show");
+        });
+        $(document).on("click", "#apercu_precedent, #apercu_suivant", function() {
+            var liste = apercu_liste_ids();
+            var index = liste.indexOf(String(apercu_courant)) + (this.id === "apercu_suivant" ? 1 : -1);
+            if (index >= 0 && index < liste.length) { apercu_afficher(liste[index]); }
+        });
+        $(document).on("click", "#modal_apercu_modele [data-mode]", function() {
+            apercu_mode = $(this).data("mode");
+            $("#modal_apercu_modele [data-mode]").removeClass("btn-primary").addClass("btn-default");
+            $(this).removeClass("btn-default").addClass("btn-primary");
+            apercu_afficher(apercu_courant);
+        });
+        $(document).on("keydown", function(e) {
+            if (!$("#modal_apercu_modele").hasClass("show")) { return; }
+            if (e.key === "ArrowLeft") { $("#apercu_precedent:enabled").click(); }
+            if (e.key === "ArrowRight") { $("#apercu_suivant:enabled").click(); }
+        });
+
+        // Dessine les miniatures à chaque affichage de la liste (pagination, recherche, tri)
+        $(function() {
+            new MutationObserver(apercu_charger_miniatures).observe(document.body, {childList: true, subtree: true});
+            apercu_charger_miniatures();
+        });
+    </script>
+{% endblock scripts %}

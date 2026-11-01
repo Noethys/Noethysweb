@@ -6,13 +6,13 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import ModeleDocument, CHOIX_CATEGORIE_MODELE_DOCUMENT
+from core.models import ModeleDocument, Organisateur, CHOIX_CATEGORIE_MODELE_DOCUMENT
 from parametrage.forms.modeles_documents import Formulaire, Formulaire_creation, Formulaire_champs
 from django.http import JsonResponse
 from django.http import HttpResponseRedirect
 from reportlab.pdfgen.canvas import Canvas as CanvasPDF
 from django.conf import settings
-from core.utils import utils_modeles_documents, utils_fichiers
+from core.utils import utils_modeles_documents, utils_fichiers, utils_impression
 import json
 from uuid import uuid4
 from django.urls import reverse as reverse_url
@@ -55,6 +55,34 @@ def Export_svg(request, *args, **kwargs):
     canvas.save()
     return JsonResponse({"nom_fichier": nom_fichier})
 
+
+
+def Get_apercus(request):
+    """ Renvoie les objets des modèles demandés pour dessiner leurs miniatures dans la liste """
+    if not request.user.has_perm("core.modeles_documents_liste"):
+        return JsonResponse({"erreur": "Vous n'avez pas la permission d'accéder aux modèles de documents."}, status=401)
+    liste_id = [int(id) for id in request.POST.get("liste_id", "").split("-") if id.isdigit()][:100]
+    condition_structure = Q(structure__in=request.user.structures.all()) | Q(structure__isnull=True)
+    resultats = {}
+    exemples_categories = {}
+    for modele in ModeleDocument.objects.select_related("fond").filter(condition_structure, pk__in=liste_id):
+        # Valeurs d'exemple des champs de la catégorie
+        if modele.categorie not in exemples_categories:
+            classe = getattr(utils_modeles_documents, modele.categorie.capitalize(), None)
+            champs = classe().champs if classe else []
+            exemples_categories[modele.categorie] = {code: str(exemple) for label, exemple, code in champs}
+            # Coordonnées réelles de l'organisateur à la place des valeurs d'exemple
+            exemples_categories[modele.categorie].update({code: str(valeur) for code, valeur in utils_impression.Get_motscles_defaut(request=request).items() if valeur})
+        resultats[modele.pk] = {
+            "nom": modele.nom, "largeur": modele.largeur, "hauteur": modele.hauteur,
+            "objets": json.loads(modele.objets or "[]"),
+            "objets_fond": json.loads(modele.fond.objets or "[]") if modele.fond else [],
+            "categorie": modele.categorie,
+            "url_modifier": reverse("modeles_documents_modifier", args=[modele.categorie, modele.pk]),
+        }
+    organisateur = Organisateur.objects.filter(pk=1).first()
+    url_logo = organisateur.logo.url if organisateur and organisateur.logo else ""
+    return JsonResponse({"modeles": resultats, "exemples": exemples_categories, "url_logo": url_logo})
 
 
 def Get_fond_modele(request):
@@ -109,7 +137,7 @@ class Page(crud.Page):
 
 class Liste(Page, crud.Liste):
     model = ModeleDocument
-    template_name = "core/crud/liste_avec_categorie.html"
+    template_name = "parametrage/modeles_documents_liste.html"
 
     def get_queryset(self):
         return ModeleDocument.objects.filter(Q(categorie=self.Get_categorie()) & self.Get_filtres("Q"), self.Get_condition_structure())
@@ -132,6 +160,7 @@ class Liste(Page, crud.Liste):
     class datatable_class(MyDatatable):
         filtres = ["idmodele", "nom", 'defaut']
         check = columns.CheckBoxSelectColumn(label="")
+        apercu = columns.TextColumn("Aperçu", sources=None, processor='Get_apercu')
 
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         categorie = columns.TextColumn("Catégorie", sources="categorie", processor='Get_categorie')
@@ -140,11 +169,15 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idmodele", "nom", "categorie", "dimensions", 'defaut']
+            columns = ["check", "idmodele", "apercu", "nom", "categorie", "dimensions", 'defaut']
             ordering = ["nom"]
 
         def Get_categorie(self, instance, **kwargs):
             return instance.get_categorie_display()
+
+        def Get_apercu(self, instance, **kwargs):
+            """ Emplacement de la miniature, dessinée dans le navigateur à partir des objets du modèle """
+            return "<button type='button' class='apercu-modele' data-idmodele='%d' title='Agrandir l&#39;aperçu' aria-label='Agrandir l&#39;aperçu du modèle'></button>" % instance.pk
 
         def Get_dimensions(self, instance, **kwargs):
             return "%d x %d mm" % (instance.largeur, instance.hauteur)
